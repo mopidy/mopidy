@@ -1,129 +1,182 @@
 from __future__ import unicode_literals
 
-import logging
 import json
+import logging
 import os
+import threading
 
-import cherrypy
 import pykka
-from ws4py.messaging import TextMessage
-from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
 
-from mopidy import models, zeroconf
+import tornado.httpserver
+import tornado.ioloop
+import tornado.netutil
+import tornado.web
+import tornado.websocket
+
+from mopidy import exceptions, models, zeroconf
 from mopidy.core import CoreListener
-from . import ws
+from mopidy.http import handlers
+from mopidy.utils import encoding, formatting, network
 
 
 logger = logging.getLogger(__name__)
 
 
 class HttpFrontend(pykka.ThreadingActor, CoreListener):
+    apps = []
+    statics = []
+
     def __init__(self, config, core):
         super(HttpFrontend, self).__init__()
-        self.config = config
-        self.core = core
 
-        self.hostname = config['http']['hostname']
+        self.hostname = network.format_hostname(config['http']['hostname'])
         self.port = config['http']['port']
+        tornado_hostname = config['http']['hostname']
+        if tornado_hostname == '::':
+            tornado_hostname = None
+
+        try:
+            logger.debug('Starting HTTP server')
+            sockets = tornado.netutil.bind_sockets(self.port, tornado_hostname)
+            self.server = HttpServer(
+                config=config, core=core, sockets=sockets,
+                apps=self.apps, statics=self.statics)
+        except IOError as error:
+            raise exceptions.FrontendError(
+                'HTTP server startup failed: %s' %
+                encoding.locale_decode(error))
+
         self.zeroconf_name = config['http']['zeroconf']
-        self.zeroconf_service = None
-
-        self._setup_server()
-        self._setup_websocket_plugin()
-        app = self._create_app()
-        self._setup_logging(app)
-
-    def _setup_server(self):
-        cherrypy.config.update({
-            'engine.autoreload_on': False,
-            'server.socket_host': self.hostname,
-            'server.socket_port': self.port,
-        })
-
-    def _setup_websocket_plugin(self):
-        WebSocketPlugin(cherrypy.engine).subscribe()
-        cherrypy.tools.websocket = WebSocketTool()
-
-    def _create_app(self):
-        root = RootResource()
-        root.mopidy = MopidyResource()
-        root.mopidy.ws = ws.WebSocketResource(self.core)
-
-        if self.config['http']['static_dir']:
-            static_dir = self.config['http']['static_dir']
-        else:
-            static_dir = os.path.join(os.path.dirname(__file__), 'data')
-        logger.debug('HTTP server will serve "%s" at /', static_dir)
-
-        mopidy_dir = os.path.join(os.path.dirname(__file__), 'data')
-        favicon = os.path.join(mopidy_dir, 'favicon.png')
-
-        config = {
-            b'/': {
-                'tools.staticdir.on': True,
-                'tools.staticdir.index': 'index.html',
-                'tools.staticdir.dir': static_dir,
-            },
-            b'/favicon.ico': {
-                'tools.staticfile.on': True,
-                'tools.staticfile.filename': favicon,
-            },
-            b'/mopidy': {
-                'tools.staticdir.on': True,
-                'tools.staticdir.index': 'mopidy.html',
-                'tools.staticdir.dir': mopidy_dir,
-            },
-            b'/mopidy/ws': {
-                'tools.websocket.on': True,
-                'tools.websocket.handler_cls': ws.WebSocketHandler,
-            },
-        }
-
-        return cherrypy.tree.mount(root, '/', config)
-
-    def _setup_logging(self, app):
-        cherrypy.log.access_log.setLevel(logging.NOTSET)
-        cherrypy.log.error_log.setLevel(logging.NOTSET)
-        cherrypy.log.screen = False
-
-        app.log.access_log.setLevel(logging.NOTSET)
-        app.log.error_log.setLevel(logging.NOTSET)
+        self.zeroconf_http = None
+        self.zeroconf_mopidy_http = None
 
     def on_start(self):
-        logger.debug('Starting HTTP server')
-        cherrypy.engine.start()
-        logger.info('HTTP server running at %s', cherrypy.server.base())
+        logger.info(
+            'HTTP server running at [%s]:%s', self.hostname, self.port)
+        self.server.start()
 
         if self.zeroconf_name:
-            self.zeroconf_service = zeroconf.Zeroconf(
+            self.zeroconf_http = zeroconf.Zeroconf(
                 stype='_http._tcp', name=self.zeroconf_name,
                 host=self.hostname, port=self.port)
-
-            if self.zeroconf_service.publish():
-                logger.debug(
-                    'Registered HTTP with Zeroconf as "%s"',
-                    self.zeroconf_service.name)
-            else:
-                logger.debug('Registering HTTP with Zeroconf failed.')
+            self.zeroconf_mopidy_http = zeroconf.Zeroconf(
+                stype='_mopidy-http._tcp', name=self.zeroconf_name,
+                host=self.hostname, port=self.port)
+            self.zeroconf_http.publish()
+            self.zeroconf_mopidy_http.publish()
 
     def on_stop(self):
-        if self.zeroconf_service:
-            self.zeroconf_service.unpublish()
+        if self.zeroconf_http:
+            self.zeroconf_http.unpublish()
+        if self.zeroconf_mopidy_http:
+            self.zeroconf_mopidy_http.unpublish()
 
-        logger.debug('Stopping HTTP server')
-        cherrypy.engine.exit()
-        logger.info('Stopped HTTP server')
+        self.server.stop()
 
     def on_event(self, name, **data):
-        event = data
-        event['event'] = name
-        message = json.dumps(event, cls=models.ModelJSONEncoder)
-        cherrypy.engine.publish('websocket-broadcast', TextMessage(message))
+        on_event(name, **data)
 
 
-class RootResource(object):
-    pass
+def on_event(name, **data):
+    event = data
+    event['event'] = name
+    message = json.dumps(event, cls=models.ModelJSONEncoder)
+    handlers.WebSocketHandler.broadcast(message)
 
 
-class MopidyResource(object):
-    pass
+class HttpServer(threading.Thread):
+    name = 'HttpServer'
+
+    def __init__(self, config, core, sockets, apps, statics):
+        super(HttpServer, self).__init__()
+
+        self.config = config
+        self.core = core
+        self.sockets = sockets
+        self.apps = apps
+        self.statics = statics
+
+        self.app = None
+        self.server = None
+
+    def run(self):
+        self.app = tornado.web.Application(self._get_request_handlers())
+        self.server = tornado.httpserver.HTTPServer(self.app)
+        self.server.add_sockets(self.sockets)
+
+        tornado.ioloop.IOLoop.instance().start()
+
+        logger.debug('Stopped HTTP server')
+
+    def stop(self):
+        logger.debug('Stopping HTTP server')
+        tornado.ioloop.IOLoop.instance().add_callback(
+            tornado.ioloop.IOLoop.instance().stop)
+
+    def _get_request_handlers(self):
+        request_handlers = []
+        request_handlers.extend(self._get_app_request_handlers())
+        request_handlers.extend(self._get_static_request_handlers())
+        request_handlers.extend(self._get_mopidy_request_handlers())
+
+        logger.debug(
+            'HTTP routes from extensions: %s',
+            formatting.indent('\n'.join(
+                '%r: %r' % (r[0], r[1]) for r in request_handlers)))
+
+        return request_handlers
+
+    def _get_app_request_handlers(self):
+        result = []
+        for app in self.apps:
+            result.append((
+                r'/%s' % app['name'],
+                handlers.AddSlashHandler
+            ))
+            request_handlers = app['factory'](self.config, self.core)
+            for handler in request_handlers:
+                handler = list(handler)
+                handler[0] = '/%s%s' % (app['name'], handler[0])
+                result.append(tuple(handler))
+            logger.debug('Loaded HTTP extension: %s', app['name'])
+        return result
+
+    def _get_static_request_handlers(self):
+        result = []
+        for static in self.statics:
+            result.append((
+                r'/%s' % static['name'],
+                handlers.AddSlashHandler
+            ))
+            result.append((
+                r'/%s/(.*)' % static['name'],
+                handlers.StaticFileHandler,
+                {
+                    'path': static['path'],
+                    'default_filename': 'index.html'
+                }
+            ))
+            logger.debug('Loaded static HTTP extension: %s', static['name'])
+        return result
+
+    def _get_mopidy_request_handlers(self):
+        # Either default Mopidy or user defined path to files
+
+        static_dir = self.config['http']['static_dir']
+
+        if static_dir and not os.path.exists(static_dir):
+            logger.warning(
+                'Configured http/static_dir %s does not exist. '
+                'Falling back to default HTTP handler.', static_dir)
+            static_dir = None
+
+        if static_dir:
+            return [(r'/(.*)', handlers.StaticFileHandler, {
+                'path': self.config['http']['static_dir'],
+                'default_filename': 'index.html',
+            })]
+        else:
+            return [(r'/', tornado.web.RedirectHandler, {
+                'url': '/mopidy/',
+                'permanent': False,
+            })]

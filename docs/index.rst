@@ -33,7 +33,6 @@ Usage
     :maxdepth: 2
 
     installation/index
-    installation/raspberrypi
     config
     running
     troubleshooting
@@ -52,7 +51,11 @@ Extensions
     ext/stream
     ext/http
     ext/mpd
-    ext/external
+    ext/softwaremixer
+    ext/mixers
+    ext/backends
+    ext/frontends
+    ext/web
 
 
 Clients
@@ -97,7 +100,7 @@ Reference
     :maxdepth: 2
 
     glossary
-    commands/index
+    command
     api/index
     modules/index
 

@@ -3,9 +3,10 @@
 from __future__ import unicode_literals
 
 import logging
-import mock
 import socket
 import unittest
+
+import mock
 
 from mopidy.config import types
 
@@ -213,6 +214,10 @@ class BooleanTest(unittest.TestCase):
         self.assertEqual(b'false', result)
         self.assertIsInstance(result, bytes)
 
+    def test_deserialize_respects_optional(self):
+        value = types.Boolean(optional=True)
+        self.assertEqual(None, value.deserialize(''))
+
     # TODO: test None or other invalid values into serialize?
 
 
@@ -266,6 +271,12 @@ class ListTest(unittest.TestCase):
         result = value.serialize(('foo', 'bar', 'baz'))
         self.assertIsInstance(result, bytes)
         self.assertRegexpMatches(result, r'foo\n\s*bar\n\s*baz')
+
+    def test_serialize_none(self):
+        value = types.List()
+        result = value.serialize(None)
+        self.assertIsInstance(result, bytes)
+        self.assertEqual(result, '')
 
 
 class LogLevelTest(unittest.TestCase):

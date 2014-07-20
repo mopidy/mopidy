@@ -1,6 +1,8 @@
 *.egg-info
+*.orig
 *.pyc
 *.swp
+*~
 .coverage
 .idea
 .noseids
@@ -11,9 +13,8 @@ cover/
 coverage.xml
 dist/
 docs/_build/
+js/test/lib/
 mopidy.log*
 node_modules/
 nosetests.xml
-*~
-*.orig
-js/test/lib/
+xunit-*.xml

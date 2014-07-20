@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import logging
 
 import gobject
+
 import pykka
 
 logger = logging.getLogger(__name__)

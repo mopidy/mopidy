@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
-from distutils.version import StrictVersion as SV
 import sys
 import warnings
+from distutils.version import StrictVersion as SV
 
 import pykka
 
@@ -21,4 +21,4 @@ if (isinstance(pykka.__version__, basestring)
 warnings.filterwarnings('ignore', 'could not open display')
 
 
-__version__ = '0.18.3'
+__version__ = '0.19.0'

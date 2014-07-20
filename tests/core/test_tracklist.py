@@ -1,7 +1,8 @@
 from __future__ import unicode_literals
 
-import mock
 import unittest
+
+import mock
 
 from mopidy import backend, core
 from mopidy.models import Track
@@ -20,7 +21,7 @@ class TracklistTest(unittest.TestCase):
         self.library = mock.Mock(spec=backend.LibraryProvider)
         self.backend.library = self.library
 
-        self.core = core.Core(audio=None, backends=[self.backend])
+        self.core = core.Core(mixer=None, backends=[self.backend])
         self.tl_tracks = self.core.tracklist.add(self.tracks)
 
     def test_add_by_uri_looks_up_uri_in_library(self):

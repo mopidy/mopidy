@@ -93,27 +93,7 @@ Backend listener
     :members:
 
 
-.. _backend-implementations:
-
 Backend implementations
 =======================
 
-- `Mopidy-Beets <https://github.com/mopidy/mopidy-beets>`_
-
-- `Mopidy-GMusic <https://github.com/hechtus/mopidy-gmusic>`_
-
-- :ref:`ext-local`
-
-- `Mopidy-radio-de <https://github.com/hechtus/mopidy-radio-de>`_
-
-- `Mopidy-SomaFM <https://github.com/AlexandrePTJ/mopidy-somafm>`_
-
-- `Mopidy-SoundCloud <https://github.com/mopidy/mopidy-soundcloud>`_
-
-- `Mopidy-Spotify <https://github.com/mopidy/mopidy-spotify>`_
-
-- :ref:`ext-stream`
-
-- `Mopidy-Subsonic <https://github.com/rattboi/mopidy-subsonic>`_
-
-- `Mopidy-VKontakte <https://github.com/sibuser/mopidy-vkontakte>`_
+See :ref:`ext-backends`.

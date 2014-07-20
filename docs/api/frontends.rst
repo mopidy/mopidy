@@ -29,12 +29,12 @@ The following requirements applies to any frontend implementation:
 - The main actor MUST be able to start and stop the frontend when the main
   actor is started and stopped.
 
-- The frontend MAY require additional settings to be set for it to
-  work.
+- The frontend MAY require additional config values to be set for it to work.
 
-- Such settings MUST be documented.
+- Such config values MUST be documented.
 
-- The main actor MUST stop itself if the defined settings are not adequate for
+- The main actor MUST raise the :exc:`mopidy.exceptions.FrontendError` with a
+  descriptive error message if the defined config values are not adequate for
   the frontend to work properly.
 
 - Any actor which is part of the frontend MAY implement the
@@ -42,17 +42,7 @@ The following requirements applies to any frontend implementation:
   specified events.
 
 
-.. _frontend-implementations:
-
 Frontend implementations
 ========================
 
-- :ref:`ext-http`
-
-- :ref:`ext-mpd`
-
-- `Mopidy-MPRIS <https://github.com/mopidy/mopidy-mpris>`_
-
-- `Mopidy-Notifier <https://github.com/sauberfred/mopidy-notifier>`_
-
-- `Mopidy-Scrobbler <https://github.com/mopidy/mopidy-scrobbler>`_
+See :ref:`ext-frontends`.

@@ -1,27 +1,30 @@
 from __future__ import unicode_literals
 
-import pygst
-pygst.require('0.10')
-import gst
+import logging
+
 import gobject
 
-import logging
+import pygst
+pygst.require('0.10')
+import gst  # noqa
 
 import pykka
 
+from mopidy.audio import playlists, utils
+from mopidy.audio.constants import PlaybackState
+from mopidy.audio.listener import AudioListener
 from mopidy.utils import process
 
-from . import mixers, playlists, utils
-from .constants import PlaybackState
-from .listener import AudioListener
 
 logger = logging.getLogger(__name__)
-
-mixers.register_mixers()
 
 playlists.register_typefinders()
 playlists.register_elements()
 
+_GST_STATE_MAPPING = {
+    gst.STATE_PLAYING: PlaybackState.PLAYING,
+    gst.STATE_PAUSED: PlaybackState.PAUSED,
+    gst.STATE_NULL: PlaybackState.STOPPED}
 
 MB = 1 << 20
 
@@ -50,19 +53,16 @@ class Audio(pykka.ThreadingActor):
     #: The GStreamer state mapped to :class:`mopidy.audio.PlaybackState`
     state = PlaybackState.STOPPED
 
-    def __init__(self, config):
+    def __init__(self, config, mixer):
         super(Audio, self).__init__()
 
         self._config = config
+        self._mixer = mixer
+        self._target_state = gst.STATE_NULL
+        self._buffering = False
 
         self._playbin = None
         self._signal_ids = {}  # {(element, event): signal_id}
-
-        self._mixer = None
-        self._mixer_track = None
-        self._mixer_scale = None
-        self._software_mixing = False
-        self._volume_set = None
 
         self._appsrc = None
         self._appsrc_caps = None
@@ -74,8 +74,8 @@ class Audio(pykka.ThreadingActor):
         try:
             self._setup_playbin()
             self._setup_output()
-            self._setup_visualizer()
             self._setup_mixer()
+            self._setup_visualizer()
             self._setup_message_processor()
         except gobject.GError as ex:
             logger.exception(ex)
@@ -100,8 +100,12 @@ class Audio(pykka.ThreadingActor):
         playbin = gst.element_factory_make('playbin2')
         playbin.set_property('flags', PLAYBIN_FLAGS)
 
+        playbin.set_property('buffer-size', 2*1024*1024)
+        playbin.set_property('buffer-duration', 2*gst.SECOND)
+
         self._connect(playbin, 'about-to-finish', self._on_about_to_finish)
         self._connect(playbin, 'notify::source', self._on_new_source)
+        self._connect(playbin, 'source-setup', self._on_source_setup)
 
         self._playbin = playbin
 
@@ -133,6 +137,22 @@ class Audio(pykka.ThreadingActor):
 
         self._appsrc = source
 
+    def _on_source_setup(self, element, source):
+        scheme = 'http'
+        hostname = self._config['proxy']['hostname']
+        port = 80
+
+        if hasattr(source.props, 'proxy') and hostname:
+            if self._config['proxy']['port']:
+                port = self._config['proxy']['port']
+            if self._config['proxy']['scheme']:
+                scheme = self._config['proxy']['scheme']
+
+            proxy = "%s://%s:%d" % (scheme, hostname, port)
+            source.set_property('proxy', proxy)
+            source.set_property('proxy-id', self._config['proxy']['username'])
+            source.set_property('proxy-pw', self._config['proxy']['password'])
+
     def _appsrc_on_need_data(self, appsrc, gst_length_hint):
         length_hint = utils.clocktime_to_millisecond(gst_length_hint)
         if self._appsrc_need_data_callback is not None:
@@ -153,6 +173,7 @@ class Audio(pykka.ThreadingActor):
     def _teardown_playbin(self):
         self._disconnect(self._playbin, 'about-to-finish')
         self._disconnect(self._playbin, 'notify::source')
+        self._disconnect(self._playbin, 'source-setup')
         self._playbin.set_state(gst.STATE_NULL)
 
     def _setup_output(self):
@@ -166,6 +187,23 @@ class Audio(pykka.ThreadingActor):
             logger.error(
                 'Failed to create audio output "%s": %s', output_desc, ex)
             process.exit_process()
+
+    def _setup_mixer(self):
+        if self._config['audio']['mixer'] != 'software':
+            return
+        self._mixer.audio = self.actor_ref.proxy()
+        self._connect(self._playbin, 'notify::volume', self._on_mixer_change)
+        self._connect(self._playbin, 'notify::mute', self._on_mixer_change)
+
+    def _on_mixer_change(self, element, gparamspec):
+        self._mixer.trigger_events_for_changed_values()
+
+    def _teardown_mixer(self):
+        if self._config['audio']['mixer'] != 'software':
+            return
+        self._disconnect(self._playbin, 'notify::volume')
+        self._disconnect(self._playbin, 'notify::mute')
+        self._mixer.audio = None
 
     def _setup_visualizer(self):
         visualizer_element = self._config['audio']['visualizer']
@@ -181,86 +219,6 @@ class Audio(pykka.ThreadingActor):
                 'Failed to create audio visualizer "%s": %s',
                 visualizer_element, ex)
 
-    def _setup_mixer(self):
-        mixer_desc = self._config['audio']['mixer']
-        track_desc = self._config['audio']['mixer_track']
-        volume = self._config['audio']['mixer_volume']
-
-        if mixer_desc is None:
-            logger.info('Not setting up audio mixer')
-            return
-
-        if mixer_desc == 'software':
-            self._software_mixing = True
-            logger.info('Audio mixer is using software mixing')
-            if volume is not None:
-                self.set_volume(volume)
-                logger.info('Audio mixer volume set to %d', volume)
-            return
-
-        try:
-            mixerbin = gst.parse_bin_from_description(
-                mixer_desc, ghost_unconnected_pads=False)
-        except gobject.GError as ex:
-            logger.warning(
-                'Failed to create audio mixer "%s": %s', mixer_desc, ex)
-            return
-
-        # We assume that the bin will contain a single mixer.
-        mixer = mixerbin.get_by_interface(b'GstMixer')
-        if not mixer:
-            logger.warning(
-                'Did not find any audio mixers in "%s"', mixer_desc)
-            return
-
-        if mixerbin.set_state(gst.STATE_READY) != gst.STATE_CHANGE_SUCCESS:
-            logger.warning(
-                'Setting audio mixer "%s" to READY failed', mixer_desc)
-            return
-
-        track = self._select_mixer_track(mixer, track_desc)
-        if not track:
-            logger.warning('Could not find usable audio mixer track')
-            return
-
-        self._mixer = mixer
-        self._mixer_track = track
-        self._mixer_scale = (
-            self._mixer_track.min_volume, self._mixer_track.max_volume)
-
-        logger.info(
-            'Audio mixer set to "%s" using track "%s"',
-            str(mixer.get_factory().get_name()).decode('utf-8'),
-            str(track.label).decode('utf-8'))
-
-        if volume is not None:
-            self.set_volume(volume)
-            logger.info('Audio mixer volume set to %d', volume)
-
-    def _select_mixer_track(self, mixer, track_label):
-        # Ignore tracks without volumes, then look for track with
-        # label equal to the audio/mixer_track config value, otherwise fallback
-        # to first usable track hoping the mixer gave them to us in a sensible
-        # order.
-
-        usable_tracks = []
-        for track in mixer.list_tracks():
-            if not mixer.get_volume(track):
-                continue
-
-            if track_label and track.label == track_label:
-                return track
-            elif track.flags & (gst.interfaces.MIXER_TRACK_MASTER |
-                                gst.interfaces.MIXER_TRACK_OUTPUT):
-                usable_tracks.append(track)
-
-        if usable_tracks:
-            return usable_tracks[0]
-
-    def _teardown_mixer(self):
-        if self._mixer is not None:
-            self._mixer.set_state(gst.STATE_NULL)
-
     def _setup_message_processor(self):
         bus = self._playbin.get_bus()
         bus.add_signal_watch()
@@ -271,27 +229,17 @@ class Audio(pykka.ThreadingActor):
         self._disconnect(bus, 'message')
         bus.remove_signal_watch()
 
-    def _on_message(self, bus, message):
-        if (message.type == gst.MESSAGE_STATE_CHANGED
-                and message.src == self._playbin):
-            old_state, new_state, pending_state = message.parse_state_changed()
-            self._on_playbin_state_changed(old_state, new_state, pending_state)
-        elif message.type == gst.MESSAGE_BUFFERING:
-            percent = message.parse_buffering()
-            logger.debug('Buffer %d%% full', percent)
-        elif message.type == gst.MESSAGE_EOS:
+    def _on_message(self, bus, msg):
+        if msg.type == gst.MESSAGE_STATE_CHANGED and msg.src == self._playbin:
+            self._on_playbin_state_changed(*msg.parse_state_changed())
+        elif msg.type == gst.MESSAGE_BUFFERING:
+            self._on_buffering(msg.parse_buffering())
+        elif msg.type == gst.MESSAGE_EOS:
             self._on_end_of_stream()
-        elif message.type == gst.MESSAGE_ERROR:
-            error, debug = message.parse_error()
-            logger.error(
-                '%s Debug message: %s',
-                str(error).decode('utf-8'), debug.decode('utf-8') or 'None')
-            self.stop_playback()
-        elif message.type == gst.MESSAGE_WARNING:
-            error, debug = message.parse_warning()
-            logger.warning(
-                '%s Debug message: %s',
-                str(error).decode('utf-8'), debug.decode('utf-8') or 'None')
+        elif msg.type == gst.MESSAGE_ERROR:
+            self._on_error(*msg.parse_error())
+        elif msg.type == gst.MESSAGE_WARNING:
+            self._on_warning(*msg.parse_warning())
 
     def _on_playbin_state_changed(self, old_state, new_state, pending_state):
         if new_state == gst.STATE_READY and pending_state == gst.STATE_NULL:
@@ -307,24 +255,44 @@ class Audio(pykka.ThreadingActor):
         if new_state == gst.STATE_READY:
             return  # Ignore READY state as it's GStreamer specific
 
-        if new_state == gst.STATE_PLAYING:
-            new_state = PlaybackState.PLAYING
-        elif new_state == gst.STATE_PAUSED:
-            new_state = PlaybackState.PAUSED
-        elif new_state == gst.STATE_NULL:
-            new_state = PlaybackState.STOPPED
-
+        new_state = _GST_STATE_MAPPING[new_state]
         old_state, self.state = self.state, new_state
 
+        target_state = _GST_STATE_MAPPING[self._target_state]
+        if target_state == new_state:
+            target_state = None
+
         logger.debug(
-            'Triggering event: state_changed(old_state=%s, new_state=%s)',
-            old_state, new_state)
-        AudioListener.send(
-            'state_changed', old_state=old_state, new_state=new_state)
+            'Triggering event: state_changed(old_state=%s, new_state=%s, '
+            'target_state=%s)', old_state, new_state, target_state)
+        AudioListener.send('state_changed', old_state=old_state,
+                           new_state=new_state, target_state=target_state)
+
+    def _on_buffering(self, percent):
+        if percent < 10 and not self._buffering:
+            self._playbin.set_state(gst.STATE_PAUSED)
+            self._buffering = True
+        if percent == 100:
+            self._buffering = False
+            if self._target_state == gst.STATE_PLAYING:
+                self._playbin.set_state(gst.STATE_PLAYING)
+
+        logger.debug('Buffer %d%% full', percent)
 
     def _on_end_of_stream(self):
         logger.debug('Triggering reached_end_of_stream event')
         AudioListener.send('reached_end_of_stream')
+
+    def _on_error(self, error, debug):
+        logger.error(
+            '%s Debug message: %s',
+            str(error).decode('utf-8'), debug.decode('utf-8') or 'None')
+        self.stop_playback()
+
+    def _on_warning(self, error, debug):
+        logger.warning(
+            '%s Debug message: %s',
+            str(error).decode('utf-8'), debug.decode('utf-8') or 'None')
 
     def set_uri(self, uri):
         """
@@ -447,6 +415,7 @@ class Audio(pykka.ThreadingActor):
 
         :rtype: :class:`True` if successfull, else :class:`False`
         """
+        self._buffering = False
         return self._set_state(gst.STATE_NULL)
 
     def _set_state(self, state):
@@ -470,6 +439,7 @@ class Audio(pykka.ThreadingActor):
         :type state: :class:`gst.State`
         :rtype: :class:`True` if successfull, else :class:`False`
         """
+        self._target_state = state
         result = self._playbin.set_state(state)
         if result == gst.STATE_CHANGE_FAILURE:
             logger.warning(
@@ -486,108 +456,49 @@ class Audio(pykka.ThreadingActor):
 
     def get_volume(self):
         """
-        Get volume level of the installed mixer.
+        Get volume level of the software mixer.
 
         Example values:
 
         0:
-            Muted.
+            Minimum volume.
         100:
-            Max volume for given system.
-        :class:`None`:
-            No mixer present, so the volume is unknown.
+            Maximum volume.
 
-        :rtype: int in range [0..100] or :class:`None`
+        :rtype: int in range [0..100]
         """
-        if self._software_mixing:
-            return int(round(self._playbin.get_property('volume') * 100))
-
-        if self._mixer is None:
-            return None
-
-        volumes = self._mixer.get_volume(self._mixer_track)
-        avg_volume = float(sum(volumes)) / len(volumes)
-
-        internal_scale = (0, 100)
-
-        if self._volume_set is not None:
-            volume_set_on_mixer_scale = self._rescale(
-                self._volume_set, old=internal_scale, new=self._mixer_scale)
-        else:
-            volume_set_on_mixer_scale = None
-
-        if volume_set_on_mixer_scale == avg_volume:
-            return self._volume_set
-        else:
-            return self._rescale(
-                avg_volume, old=self._mixer_scale, new=internal_scale)
+        return int(round(self._playbin.get_property('volume') * 100))
 
     def set_volume(self, volume):
         """
-        Set volume level of the installed mixer.
+        Set volume level of the software mixer.
 
         :param volume: the volume in the range [0..100]
         :type volume: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        if self._software_mixing:
-            self._playbin.set_property('volume', volume / 100.0)
-            return True
-
-        if self._mixer is None:
-            return False
-
-        self._volume_set = volume
-
-        internal_scale = (0, 100)
-
-        volume = self._rescale(
-            volume, old=internal_scale, new=self._mixer_scale)
-
-        volumes = (volume,) * self._mixer_track.num_channels
-        self._mixer.set_volume(self._mixer_track, volumes)
-
-        return self._mixer.get_volume(self._mixer_track) == volumes
-
-    def _rescale(self, value, old=None, new=None):
-        """Convert value between scales."""
-        new_min, new_max = new
-        old_min, old_max = old
-        if old_min == old_max:
-            return old_max
-        scaling = float(new_max - new_min) / (old_max - old_min)
-        return int(round(scaling * (value - old_min) + new_min))
+        self._playbin.set_property('volume', volume / 100.0)
+        return True
 
     def get_mute(self):
         """
-        Get mute status of the installed mixer.
+        Get mute status of the software mixer.
 
         :rtype: :class:`True` if muted, :class:`False` if unmuted,
           :class:`None` if no mixer is installed.
         """
-        if self._software_mixing:
-            return self._playbin.get_property('mute')
-
-        if self._mixer_track is None:
-            return None
-
-        return bool(self._mixer_track.flags & gst.interfaces.MIXER_TRACK_MUTE)
+        return self._playbin.get_property('mute')
 
     def set_mute(self, mute):
         """
-        Mute or unmute of the installed mixer.
+        Mute or unmute of the software mixer.
 
-        :param mute: Wether to mute the mixer or not.
+        :param mute: Whether to mute the mixer or not.
         :type mute: bool
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        if self._software_mixing:
-            return self._playbin.set_property('mute', bool(mute))
-
-        if self._mixer_track is None:
-            return False
-
-        return self._mixer.set_mute(self._mixer_track, bool(mute))
+        self._playbin.set_property('mute', bool(mute))
+        return True
 
     def set_metadata(self, track):
         """

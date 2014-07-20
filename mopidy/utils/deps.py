@@ -6,11 +6,11 @@ import platform
 
 import pygst
 pygst.require('0.10')
-import gst
+import gst  # noqa
 
 import pkg_resources
 
-from . import formatting
+from mopidy.utils import formatting
 
 
 def format_dependency_list(adapters=None):
@@ -155,7 +155,6 @@ def _gstreamer_check_elements():
 
         # MP3 encoding and decoding
         'mp3parse',
-        'mad',
         'id3demux',
         'id3v2mux',
         'lame',

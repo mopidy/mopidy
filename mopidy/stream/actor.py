@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 
+import fnmatch
 import logging
+import re
 import urlparse
 
 import pykka
@@ -17,7 +19,8 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
         super(StreamBackend, self).__init__()
 
         self.library = StreamLibraryProvider(
-            backend=self, timeout=config['stream']['timeout'])
+            backend=self, timeout=config['stream']['timeout'],
+            blacklist=config['stream']['metadata_blacklist'])
         self.playback = backend.PlaybackProvider(audio=audio, backend=self)
         self.playlists = None
 
@@ -26,19 +29,25 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
 
 
 class StreamLibraryProvider(backend.LibraryProvider):
-    def __init__(self, backend, timeout):
+    def __init__(self, backend, timeout, blacklist):
         super(StreamLibraryProvider, self).__init__(backend)
         self._scanner = scan.Scanner(min_duration=None, timeout=timeout)
+        self._blacklist_re = re.compile(
+            r'^(%s)$' % '|'.join(fnmatch.translate(u) for u in blacklist))
 
     def lookup(self, uri):
         if urlparse.urlsplit(uri).scheme not in self.backend.uri_schemes:
             return []
+
+        if self._blacklist_re.match(uri):
+            logger.debug('URI matched metadata lookup blacklist: %s', uri)
+            return [Track(uri=uri)]
 
         try:
             data = self._scanner.scan(uri)
             track = scan.audio_data_to_track(data)
         except exceptions.ScannerError as e:
             logger.warning('Problem looking up %s: %s', uri, e)
-            track = Track(uri=uri, name=uri)
+            track = Track(uri=uri)
 
         return [track]

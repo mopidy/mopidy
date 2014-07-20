@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import unittest
 
 import mock
+
 import pykka
 
 from mopidy import audio, backend, core

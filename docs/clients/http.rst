@@ -15,52 +15,33 @@ created one, please notify us so we can include your client on this page.
 See :ref:`http-api` for details on how to build your own web client.
 
 
-woutervanwijk/Mopidy-Webclient
-==============================
+Mopidy MusicBox Webclient
+=========================
 
-.. image:: woutervanwijk-mopidy-webclient.png
+.. image:: mopidy-musicbox-webclient.png
     :width: 1275
     :height: 600
 
 The first web client for Mopidy, made with jQuery Mobile by Wouter van Wijk.
 Also the web client used for Wouter's popular `Pi Musicbox
-<http://www.woutervanwijk.nl/pimusicbox/>`_ image for Raspberry Pi.
+<http://www.pimusicbox.com/>`_ image for Raspberry Pi.
 
-    With Mopidy Browser Client, you can play your music on your computer (or
-    Rapsberry Pi) and remotely control it from a computer, phone, tablet,
+    With Mopidy MusicBox Webclient, you can play your music on your computer
+    (Raspberry Pi) and remotely control it from a computer, phone, tablet,
     laptop. From your couch.
 
-    -- https://github.com/woutervanwijk/Mopidy-WebClient
+    This is a responsive HTML/JS/CSS client especially written for Mopidy, a
+    music server. Responsive, so it works on desktop and mobile browsers. You
+    can browse, search and play albums, artists, playlists, and it has cover
+    art from Last.fm.
+
+    -- https://github.com/woutervanwijk/Mopidy-MusicBox-Webclient
 
 
-Mopidy Lux
-==========
-
-.. image:: dz0ny-mopidy-lux.png
-    :width: 1275
-    :height: 795
-
-A Mopidy web client made with AngularJS by Janez Troha.
-
-    A shiny new remote web control interface for Mopidy player.
-
-    -- https://github.com/dz0ny/mopidy-lux
+.. include:: /ext/lux.rst
 
 
-Moped
-=====
-
-.. image:: martijnboland-moped.png
-    :width: 720
-    :height: 450
-
-A Mopidy web client made with Durandal and KnockoutJS by Martijn Boland.
-
-    Moped is a responsive web client for the Mopidy music server. It is
-    inspired by Mopidy-Webclient, but built from scratch based on a different
-    technology stack with Durandal and Bootstrap 3.
-
-    -- https://github.com/martijnboland/moped
+.. include:: /ext/moped.rst
 
 
 JukePi
@@ -102,6 +83,23 @@ A Mopidy web client made by Argonaut in SF for their office jukebox.
 -- http://blog.argonautinc.com/post/83027259908/music-is-pretty-important-to-our-culture-and
 
 
+<<<<<<< HEAD
+=======
+Mopify
+======
+
+An in-development web client that clones the Spotify user interface on top of
+Mopidy and the Spotify web APIs.
+
+    A Mopidy web client based on the Spotify webbased interface. If you use
+    Mopidy in combination with local music this client probably won't work.
+    This client uses the Spotify and EchoNest API to speed up searching and
+    artist/album lookup.
+
+    -- https://github.com/dirkgroenen/Mopify
+
+
+>>>>>>> develop
 Other web clients
 =================
 

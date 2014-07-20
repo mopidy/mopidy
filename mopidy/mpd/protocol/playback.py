@@ -1,12 +1,12 @@
 from __future__ import unicode_literals
 
+import warnings
+
 from mopidy.core import PlaybackState
-from mopidy.mpd.protocol import handle_request
-from mopidy.mpd.exceptions import (
-    MpdArgError, MpdNoExistError, MpdNotImplemented)
+from mopidy.mpd import exceptions, protocol
 
 
-@handle_request(r'consume\ ("?)(?P<state>[01])\1$')
+@protocol.commands.add('consume', state=protocol.BOOL)
 def consume(context, state):
     """
     *musicpd.org, playback section:*
@@ -17,13 +17,10 @@ def consume(context, state):
         1. When consume is activated, each song played is removed from
         playlist.
     """
-    if int(state):
-        context.core.tracklist.consume = True
-    else:
-        context.core.tracklist.consume = False
+    context.core.tracklist.consume = state
 
 
-@handle_request(r'crossfade\ "(?P<seconds>\d+)"$')
+@protocol.commands.add('crossfade', seconds=protocol.UINT)
 def crossfade(context, seconds):
     """
     *musicpd.org, playback section:*
@@ -32,11 +29,42 @@ def crossfade(context, seconds):
 
         Sets crossfading between songs.
     """
-    seconds = int(seconds)
-    raise MpdNotImplemented  # TODO
+    raise exceptions.MpdNotImplemented  # TODO
 
 
-@handle_request(r'next$')
+# TODO: add at least reflection tests before adding NotImplemented version
+# @protocol.commands.add('mixrampdb')
+def mixrampdb(context, decibels):
+    """
+    *musicpd.org, playback section:*
+
+        ``mixrampdb {deciBels}``
+
+    Sets the threshold at which songs will be overlapped. Like crossfading but
+    doesn't fade the track volume, just overlaps. The songs need to have
+    MixRamp tags added by an external tool. 0dB is the normalized maximum
+    volume so use negative values, I prefer -17dB. In the absence of mixramp
+    tags crossfading will be used. See http://sourceforge.net/projects/mixramp
+    """
+    pass
+
+
+# TODO: add at least reflection tests before adding NotImplemented version
+# @protocol.commands.add('mixrampdelay', seconds=protocol.UINT)
+def mixrampdelay(context, seconds):
+    """
+    *musicpd.org, playback section:*
+
+        ``mixrampdelay {SECONDS}``
+
+        Additional time subtracted from the overlap calculated by mixrampdb. A
+        value of "nan" disables MixRamp overlapping and falls back to
+        crossfading.
+    """
+    pass
+
+
+@protocol.commands.add('next')
 def next_(context):
     """
     *musicpd.org, playback section:*
@@ -94,8 +122,7 @@ def next_(context):
     return context.core.playback.next().get()
 
 
-@handle_request(r'pause$')
-@handle_request(r'pause\ "(?P<state>[01])"$')
+@protocol.commands.add('pause', state=protocol.BOOL)
 def pause(context, state=None):
     """
     *musicpd.org, playback section:*
@@ -109,60 +136,31 @@ def pause(context, state=None):
     - Calls ``pause`` without any arguments to toogle pause.
     """
     if state is None:
+        warnings.warn(
+            'The use of pause command w/o the PAUSE argument is deprecated.',
+            DeprecationWarning)
+
         if (context.core.playback.state.get() == PlaybackState.PLAYING):
             context.core.playback.pause()
         elif (context.core.playback.state.get() == PlaybackState.PAUSED):
             context.core.playback.resume()
-    elif int(state):
+    elif state:
         context.core.playback.pause()
     else:
         context.core.playback.resume()
 
 
-@handle_request(r'play$')
-def play(context):
-    """
-    The original MPD server resumes from the paused state on ``play``
-    without arguments.
-    """
-    return context.core.playback.play().get()
-
-
-@handle_request(r'playid\ ("?)(?P<tlid>-?\d+)\1$')
-def playid(context, tlid):
-    """
-    *musicpd.org, playback section:*
-
-        ``playid [SONGID]``
-
-        Begins playing the playlist at song ``SONGID``.
-
-    *Clarifications:*
-
-    - ``playid "-1"`` when playing is ignored.
-    - ``playid "-1"`` when paused resumes playback.
-    - ``playid "-1"`` when stopped with a current track starts playback at the
-      current track.
-    - ``playid "-1"`` when stopped without a current track, e.g. after playlist
-      replacement, starts playback at the first track.
-    """
-    tlid = int(tlid)
-    if tlid == -1:
-        return _play_minus_one(context)
-    tl_tracks = context.core.tracklist.filter(tlid=[tlid]).get()
-    if not tl_tracks:
-        raise MpdNoExistError('No such song')
-    return context.core.playback.play(tl_tracks[0]).get()
-
-
-@handle_request(r'play\ ("?)(?P<songpos>-?\d+)\1$')
-def play__pos(context, songpos):
+@protocol.commands.add('play', tlid=protocol.INT)
+def play(context, tlid=None):
     """
     *musicpd.org, playback section:*
 
         ``play [SONGPOS]``
 
         Begins playing the playlist at song number ``SONGPOS``.
+
+    The original MPD server resumes from the paused state on ``play``
+    without arguments.
 
     *Clarifications:*
 
@@ -177,14 +175,16 @@ def play__pos(context, songpos):
 
     - issues ``play 6`` without quotes around the argument.
     """
-    songpos = int(songpos)
-    if songpos == -1:
+    if tlid is None:
+        return context.core.playback.play().get()
+    elif tlid == -1:
         return _play_minus_one(context)
+
     try:
-        tl_track = context.core.tracklist.slice(songpos, songpos + 1).get()[0]
+        tl_track = context.core.tracklist.slice(tlid, tlid + 1).get()[0]
         return context.core.playback.play(tl_track).get()
     except IndexError:
-        raise MpdArgError('Bad song index')
+        raise exceptions.MpdArgError('Bad song index')
 
 
 def _play_minus_one(context):
@@ -202,7 +202,33 @@ def _play_minus_one(context):
         return  # Fail silently
 
 
-@handle_request(r'previous$')
+@protocol.commands.add('playid', tlid=protocol.INT)
+def playid(context, tlid):
+    """
+    *musicpd.org, playback section:*
+
+        ``playid [SONGID]``
+
+        Begins playing the playlist at song ``SONGID``.
+
+    *Clarifications:*
+
+    - ``playid "-1"`` when playing is ignored.
+    - ``playid "-1"`` when paused resumes playback.
+    - ``playid "-1"`` when stopped with a current track starts playback at the
+      current track.
+    - ``playid "-1"`` when stopped without a current track, e.g. after playlist
+      replacement, starts playback at the first track.
+    """
+    if tlid == -1:
+        return _play_minus_one(context)
+    tl_tracks = context.core.tracklist.filter(tlid=[tlid]).get()
+    if not tl_tracks:
+        raise exceptions.MpdNoExistError('No such song')
+    return context.core.playback.play(tl_tracks[0]).get()
+
+
+@protocol.commands.add('previous')
 def previous(context):
     """
     *musicpd.org, playback section:*
@@ -249,7 +275,7 @@ def previous(context):
     return context.core.playback.previous().get()
 
 
-@handle_request(r'random\ ("?)(?P<state>[01])\1$')
+@protocol.commands.add('random', state=protocol.BOOL)
 def random(context, state):
     """
     *musicpd.org, playback section:*
@@ -258,13 +284,10 @@ def random(context, state):
 
         Sets random state to ``STATE``, ``STATE`` should be 0 or 1.
     """
-    if int(state):
-        context.core.tracklist.random = True
-    else:
-        context.core.tracklist.random = False
+    context.core.tracklist.random = state
 
 
-@handle_request(r'repeat\ ("?)(?P<state>[01])\1$')
+@protocol.commands.add('repeat', state=protocol.BOOL)
 def repeat(context, state):
     """
     *musicpd.org, playback section:*
@@ -273,13 +296,10 @@ def repeat(context, state):
 
         Sets repeat state to ``STATE``, ``STATE`` should be 0 or 1.
     """
-    if int(state):
-        context.core.tracklist.repeat = True
-    else:
-        context.core.tracklist.repeat = False
+    context.core.tracklist.repeat = state
 
 
-@handle_request(r'replay_gain_mode\ "(?P<mode>(off|track|album))"$')
+@protocol.commands.add('replay_gain_mode')
 def replay_gain_mode(context, mode):
     """
     *musicpd.org, playback section:*
@@ -293,10 +313,10 @@ def replay_gain_mode(context, mode):
 
         This command triggers the options idle event.
     """
-    raise MpdNotImplemented  # TODO
+    raise exceptions.MpdNotImplemented  # TODO
 
 
-@handle_request(r'replay_gain_status$')
+@protocol.commands.add('replay_gain_status')
 def replay_gain_status(context):
     """
     *musicpd.org, playback section:*
@@ -309,8 +329,8 @@ def replay_gain_status(context):
     return 'off'  # TODO
 
 
-@handle_request(r'seek\ ("?)(?P<songpos>\d+)\1\ ("?)(?P<seconds>\d+)\3$')
-def seek(context, songpos, seconds):
+@protocol.commands.add('seek', tlid=protocol.UINT, seconds=protocol.UINT)
+def seek(context, tlid, seconds):
     """
     *musicpd.org, playback section:*
 
@@ -324,12 +344,12 @@ def seek(context, songpos, seconds):
     - issues ``seek 1 120`` without quotes around the arguments.
     """
     tl_track = context.core.playback.current_tl_track.get()
-    if context.core.tracklist.index(tl_track).get() != int(songpos):
-        play__pos(context, songpos)
-    context.core.playback.seek(int(seconds) * 1000).get()
+    if context.core.tracklist.index(tl_track).get() != tlid:
+        play(context, tlid)
+    context.core.playback.seek(seconds * 1000).get()
 
 
-@handle_request(r'seekid\ "(?P<tlid>\d+)"\ "(?P<seconds>\d+)"$')
+@protocol.commands.add('seekid', tlid=protocol.UINT, seconds=protocol.UINT)
 def seekid(context, tlid, seconds):
     """
     *musicpd.org, playback section:*
@@ -339,14 +359,13 @@ def seekid(context, tlid, seconds):
         Seeks to the position ``TIME`` (in seconds) of song ``SONGID``.
     """
     tl_track = context.core.playback.current_tl_track.get()
-    if not tl_track or tl_track.tlid != int(tlid):
+    if not tl_track or tl_track.tlid != tlid:
         playid(context, tlid)
-    context.core.playback.seek(int(seconds) * 1000).get()
+    context.core.playback.seek(seconds * 1000).get()
 
 
-@handle_request(r'seekcur\ "(?P<position>\d+)"$')
-@handle_request(r'seekcur\ "(?P<diff>[-+]\d+)"$')
-def seekcur(context, position=None, diff=None):
+@protocol.commands.add('seekcur')
+def seekcur(context, time):
     """
     *musicpd.org, playback section:*
 
@@ -355,16 +374,16 @@ def seekcur(context, position=None, diff=None):
         Seeks to the position ``TIME`` within the current song. If prefixed by
         '+' or '-', then the time is relative to the current playing position.
     """
-    if position is not None:
-        position = int(position) * 1000
-        context.core.playback.seek(position).get()
-    elif diff is not None:
+    if time.startswith(('+', '-')):
         position = context.core.playback.time_position.get()
-        position += int(diff) * 1000
+        position += protocol.INT(time) * 1000
+        context.core.playback.seek(position).get()
+    else:
+        position = protocol.UINT(time) * 1000
         context.core.playback.seek(position).get()
 
 
-@handle_request(r'setvol\ ("?)(?P<volume>[-+]*\d+)\1$')
+@protocol.commands.add('setvol', volume=protocol.INT)
 def setvol(context, volume):
     """
     *musicpd.org, playback section:*
@@ -377,15 +396,11 @@ def setvol(context, volume):
 
     - issues ``setvol 50`` without quotes around the argument.
     """
-    volume = int(volume)
-    if volume < 0:
-        volume = 0
-    if volume > 100:
-        volume = 100
-    context.core.playback.volume = volume
+    # NOTE: we use INT as clients can pass in +N etc.
+    context.core.playback.volume = min(max(0, volume), 100)
 
 
-@handle_request(r'single\ ("?)(?P<state>[01])\1$')
+@protocol.commands.add('single', state=protocol.BOOL)
 def single(context, state):
     """
     *musicpd.org, playback section:*
@@ -396,13 +411,10 @@ def single(context, state):
         single is activated, playback is stopped after current song, or
         song is repeated if the ``repeat`` mode is enabled.
     """
-    if int(state):
-        context.core.tracklist.single = True
-    else:
-        context.core.tracklist.single = False
+    context.core.tracklist.single = state
 
 
-@handle_request(r'stop$')
+@protocol.commands.add('stop')
 def stop(context):
     """
     *musicpd.org, playback section:*

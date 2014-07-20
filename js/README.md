@@ -41,20 +41,15 @@ After npm completes, you can import Mopidy.js using ``require()``:
 Using the library
 -----------------
 
-See Mopidy's [HTTP API
-documentation](http://docs.mopidy.com/en/latest/api/http/).
+See the [Mopidy.js documentation](http://docs.mopidy.com/en/latest/api/js/).
 
 
 Building from source
 --------------------
 
-1. Install [Node.js](http://nodejs.org/) and npm. There is a PPA if you're
-   running Ubuntu:
+1. Install [Node.js](http://nodejs.org/) and npm. If you're running Ubuntu:
 
-        sudo apt-get install python-software-properties
-        sudo add-apt-repository ppa:chris-lea/node.js
-        sudo apt-get update
-        sudo apt-get install nodejs
+        sudo apt-get install nodejs-legacy npm
 
 2. Enter the `js/` in Mopidy's Git repo dir and install all dependencies:
 
@@ -84,6 +79,27 @@ To run other [grunt](http://gruntjs.com/) targets which isn't predefined in
 
 Changelog
 ---------
+
+### 0.4.0 (2014-06-24)
+
+- Add support for method calls with by-name arguments. The old calling
+  convention, "by-position-only", is still the default, but this will change in
+  the future. A warning is printed to the console if you don't explicitly
+  select a calling convention. See the docs for details.
+
+### 0.3.0 (2014-06-16)
+
+- Upgrade to when.js 3, which brings great performance improvements and better
+  debugging facilities. If you maintain a Mopidy client, you should review the
+  [differences between when.js 2 and 3](https://github.com/cujojs/when/blob/master/docs/api.md#upgrading-to-30-from-2x)
+  and the
+  [when.js debugging guide](https://github.com/cujojs/when/blob/master/docs/api.md#debugging-promises).
+
+- All promise rejection values are now of the Error type. This ensures that all
+  JavaScript VMs will show a useful stack trace if a rejected promise's value
+  is used to throw an exception. To allow catch clauses to handle different
+  errors differently, server side errors are of the type `Mopidy.ServerError`,
+  and connection related errors are of the type `Mopidy.ConnectionError`.
 
 ### 0.2.0 (2014-01-04)
 

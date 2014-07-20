@@ -1,27 +1,14 @@
-*******************
-External extensions
-*******************
+.. _ext-backends:
+
+******************
+Backend extensions
+******************
 
 Here you can find a list of external packages that extend Mopidy with
-additional functionality. This list is moderated and updated on a regular
-basis. If you want your package to show up here, follow the :ref:`guide on
-creating extensions <extensiondev>`.
+additional music sources by implementing the :ref:`backend-api`.
 
-Mopidy also bundles some extensions:
-
-- :ref:`ext-local`
-- :ref:`ext-stream`
-- :ref:`ext-http`
-- :ref:`ext-mpd`
-
-
-Mopidy-Arcam
-============
-
-https://github.com/TooDizzy/mopidy-arcam
-
-Extension for controlling volume using an external Arcam amplifier. Developed
-and tested with an Arcam AVR-300.
+This list is moderated and updated on a regular basis. If you want your package
+to show up here, follow the :ref:`guide on creating extensions <extensiondev>`.
 
 
 Mopidy-Beets
@@ -60,29 +47,10 @@ Extension for playing music and audio from the `Internet Archive
 <https://archive.org/>`_.
 
 
-Mopidy-MPRIS
+Mopidy-Local
 ============
 
-https://github.com/mopidy/mopidy-mpris
-
-Extension for controlling Mopidy through the `MPRIS <http://www.mpris.org/>`_
-D-Bus interface, for example using the Ubuntu Sound Menu.
-
-
-Mopidy-NAD
-==========
-
-https://github.com/mopidy/mopidy-nad
-
-Extension for controlling volume using an external NAD amplifier.
-
-
-Mopidy-Notifier
-===============
-
-https://github.com/sauberfred/mopidy-notifier
-
-Extension for displaying track info as User Notifications in Mac OS X.
+Bundled with Mopidy. See :ref:`ext-local`.
 
 
 Mopidy-Podcast
@@ -91,6 +59,24 @@ Mopidy-Podcast
 https://github.com/tkem/mopidy-podcast
 
 Extension for browsing RSS feeds of podcasts and stream the episodes.
+
+
+Mopidy-Podcast-gpodder.net
+==========================
+
+https://github.com/tkem/mopidy-podcast-gpodder
+
+Extension for Mopidy-Podcast that lets you search and browse podcasts from the
+`gpodder.net <https://gpodder.net/>`_ web site.
+
+
+Mopidy-Podcast-iTunes
+=====================
+
+https://github.com/tkem/mopidy-podcast-itunes
+
+Extension for Mopidy-Podcast that lets you search and browse podcasts from the
+Apple iTunes Store.
 
 
 Mopidy-Podcast-gpodder.net
@@ -121,14 +107,6 @@ Extension for listening to Internet radio stations and podcasts listed at
 `radio.fr <http://www.radio.fr/>`_, and `radio.at <http://www.radio.at/>`_.
 
 
-Mopidy-Scrobbler
-================
-
-https://github.com/mopidy/mopidy-scrobbler
-
-Extension for scrobbling played tracks to Last.fm.
-
-
 Mopidy-SomaFM
 =============
 
@@ -154,6 +132,22 @@ https://github.com/mopidy/mopidy-spotify
 
 Extension for playing music from the `Spotify <http://www.spotify.com/>`_ music
 streaming service.
+
+
+Mopidy-Spotify-Tunigo
+=====================
+
+https://github.com/trygveaa/mopidy-spotify-tunigo
+
+Extension for providing the browse feature of `Spotify
+<http://www.spotify.com/>`_. This lets you browse playlists, genres and new
+releases.
+
+
+Mopidy-Stream
+=============
+
+Bundled with Mopidy. See :ref:`ext-stream`.
 
 
 Mopidy-Subsonic
@@ -183,17 +177,8 @@ Provides a backend for playing music from the `VKontakte social network
 <http://vk.com/>`_.
 
 
-Mopidy-Yamaha
-=============
-
-https://github.com/knutz3n/mopidy-yamaha
-
-Extension for controlling volume using an external Yamaha network connected
-amplifier.
-
-
 Mopidy-YouTube
-=================
+==============
 
 https://github.com/dz0ny/mopidy-youtube
 

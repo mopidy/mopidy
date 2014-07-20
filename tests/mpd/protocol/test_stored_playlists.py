@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from mopidy.models import Track, Playlist
+from mopidy.models import Playlist, Track
 
 from tests.mpd import protocol
 

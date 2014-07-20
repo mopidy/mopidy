@@ -1,8 +1,9 @@
 from __future__ import unicode_literals
 
 import logging
-import mock
 import unittest
+
+import mock
 
 from mopidy.config import schemas, types
 

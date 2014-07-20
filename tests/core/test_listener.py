@@ -1,7 +1,8 @@
 from __future__ import unicode_literals
 
-import mock
 import unittest
+
+import mock
 
 from mopidy.core import CoreListener, PlaybackState
 from mopidy.models import Playlist, TlTrack
