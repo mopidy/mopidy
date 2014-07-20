@@ -82,6 +82,11 @@ Feature release.
 - Support simpler ASX playlist variant with ``<ENTRY>`` elements without
   children.
 
+- Added ``target_state`` attribute to the audio layer's
+  :meth:`~mopidy.audio.AudioListener.state_changed` event. Currently, it is
+  :class:`None` except when we're paused because of buffering, then the new
+  field exposes our target state after buffering has completed.
+
 **Mixers**
 
 - Added new :class:`mopidy.mixer.Mixer` API which can be implemented by
