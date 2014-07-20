@@ -5,22 +5,29 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
-v0.19.0 (UNRELEASED)
+v0.19.0 (2014-07-21)
 ====================
 
-Feature release.
+The focus of 0.19 have been on improving the MPD implementation, replacing
+GStreamer mixers with our own mixer API, and on making web clients installable
+with ``pip``, like any other Mopidy extension.
+
+Since the release of 0.18, we've closed or merged 53 issues and pull requests
+through about 445 commits by :ref:`12 people <authors>`, including five new
+guys. Thanks to everyone that has contributed!
 
 **Dependencies**
 
 - Mopidy now requires Tornado >= 3.1.
 
-- Mopidy no longer requires CherryPy or ws4py for the HTTP frontend to work.
+- Mopidy no longer requires CherryPy or ws4py. Previously, these were optional
+  dependencies required for the HTTP frontend to work.
 
 **Backend API**
 
-- Imports of the backend API from :mod:`mopidy.backends` no longer works. The
-  new API introuced in v0.18 is now required. Most extensions already use the
-  new API location.
+- *Breaking change:* Imports of the backend API from
+  :mod:`mopidy.backends` no longer works. The new API introuced in v0.18 is now
+  required. Most extensions already use the new API location.
 
 **Commands**
 
@@ -44,24 +51,25 @@ Feature release.
 
 **Extension support**
 
-- Removed the :class:`~mopidy.ext.Extension` methods that were deprecated in
-  0.18: :meth:`~mopidy.ext.Extension.get_backend_classes`,
+- *Breaking change:* Removed the :class:`~mopidy.ext.Extension` methods that
+  were deprecated in 0.18: :meth:`~mopidy.ext.Extension.get_backend_classes`,
   :meth:`~mopidy.ext.Extension.get_frontend_classes`, and
   :meth:`~mopidy.ext.Extension.register_gstreamer_elements`. Use
   :meth:`mopidy.ext.Extension.setup` instead, as most extensions already do.
 
 **Audio**
 
-- Removed support for GStreamer mixers. GStreamer 1.x does not support volume
-  control, so we changed to use software mixing by default in v0.17.0. Now,
-  we're removing support for all other GStreamer mixers and are reintroducing
-  mixers as something extensions can provide independently of GStreamer.
-  (Fixes: :issue:`665`, PR: :issue:`760`)
+- *Breaking change:* Removed support for GStreamer mixers. GStreamer 1.x does
+  not support volume control, so we changed to use software mixing by default
+  in v0.17.0. Now, we're removing support for all other GStreamer mixers and
+  are reintroducing mixers as something extensions can provide independently of
+  GStreamer. (Fixes: :issue:`665`, PR: :issue:`760`)
 
-- Changed the :confval:`audio/mixer` config value to refer to Mopidy mixer
-  extensions instead of GStreamer mixers. The default value, ``software``,
-  still has the same behavior. All other values will either no longer work or
-  will at the very least require you to install an additional extension.
+- *Breaking change:* Changed the :confval:`audio/mixer` config value to refer
+  to Mopidy mixer extensions instead of GStreamer mixers. The default value,
+  ``software``, still has the same behavior. All other values will either no
+  longer work or will at the very least require you to install an additional
+  extension.
 
 - Changed the :confval:`audio/mixer_volume` config value behavior from
   affecting GStreamer mixers to affecting Mopidy mixer extensions instead. The
@@ -84,7 +92,7 @@ Feature release.
 
 - Added ``target_state`` attribute to the audio layer's
   :meth:`~mopidy.audio.AudioListener.state_changed` event. Currently, it is
-  :class:`None` except when we're paused because of buffering, then the new
+  :class:`None` except when we're paused because of buffering. Then the new
   field exposes our target state after buffering has completed.
 
 **Mixers**
@@ -94,19 +102,18 @@ Feature release.
 
 - Created a bundled extension, :ref:`ext-softwaremixer`, for controlling volume
   in software in GStreamer's pipeline. This is Mopidy's default mixer. To use
-  this mixer, set :confval:`audio/mixer` to ``software``.
+  this mixer, set the :confval:`audio/mixer` config value to ``software``.
 
 - Created an external extension, `Mopidy-ALSAMixer
   <https://github.com/mopidy/mopidy-alsamixer/>`_, for controlling volume with
-  hardware through ALSA. To use this mixer, install the extension, and set
-  :confval:`audio/mixer` to ``alsamixer``.
+  hardware through ALSA. To use this mixer, install the extension, and set the
+  :confval:`audio/mixer` config value to ``alsamixer``.
 
 **HTTP frontend**
 
 - CherryPy and ws4py have been replaced with Tornado. This will hopefully
   reduce CPU usage on OS X (:issue:`445`) and improve error handling in corner
-  cases, like when returning the computer running Mopidy from suspend
-  (:issue:`718`).
+  cases, like when returning from suspend (:issue:`718`).
 
 - Added support for packaging web clients as Mopidy extensions and installing
   them using pip. See the :ref:`http-server-api` for details. (Fixes:
