@@ -1,3 +1,9 @@
+mopidy (0.19.0-0mopidy1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Mon, 21 Jul 2014 09:58:12 +0200
+
 mopidy (0.18.3-3) unstable; urgency=medium
 
   * Remove redundant dependency on po-debconf, as we use debhelper.
