@@ -23,13 +23,12 @@ Depends:
     debconf,
     lsb-base,
     gstreamer0.10-plugins-good,
-    python-gst0.10
+    python-gst0.10,
+    python-tornado
 Recommends:
     gstreamer0.10-alsa,
     gstreamer0.10-plugins-ugly,
-    gstreamer0.10-tools,
-    python-cherrypy3,
-    python-ws4py
+    gstreamer0.10-tools
 Suggests:
     mopidy-doc
 Description: music server with support for MPD/HTTP clients
