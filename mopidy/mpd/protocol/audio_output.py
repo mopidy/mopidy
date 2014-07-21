@@ -1,10 +1,9 @@
 from __future__ import unicode_literals
 
-from mopidy.mpd.exceptions import MpdNoExistError
-from mopidy.mpd.protocol import handle_request
+from mopidy.mpd import exceptions, protocol
 
 
-@handle_request(r'disableoutput\ "(?P<outputid>\d+)"$')
+@protocol.commands.add('disableoutput', outputid=protocol.UINT)
 def disableoutput(context, outputid):
     """
     *musicpd.org, audio output section:*
@@ -13,13 +12,13 @@ def disableoutput(context, outputid):
 
         Turns an output off.
     """
-    if int(outputid) == 0:
+    if outputid == 0:
         context.core.playback.set_mute(False)
     else:
-        raise MpdNoExistError('No such audio output')
+        raise exceptions.MpdNoExistError('No such audio output')
 
 
-@handle_request(r'enableoutput\ "(?P<outputid>\d+)"$')
+@protocol.commands.add('enableoutput', outputid=protocol.UINT)
 def enableoutput(context, outputid):
     """
     *musicpd.org, audio output section:*
@@ -28,13 +27,26 @@ def enableoutput(context, outputid):
 
         Turns an output on.
     """
-    if int(outputid) == 0:
+    if outputid == 0:
         context.core.playback.set_mute(True)
     else:
-        raise MpdNoExistError('No such audio output')
+        raise exceptions.MpdNoExistError('No such audio output')
 
 
-@handle_request(r'outputs$')
+# TODO: implement and test
+# @protocol.commands.add('toggleoutput', outputid=protocol.UINT)
+def toggleoutput(context, outputid):
+    """
+    *musicpd.org, audio output section:*
+
+        ``toggleoutput {ID}``
+
+        Turns an output on or off, depending on the current state.
+    """
+    pass
+
+
+@protocol.commands.add('outputs')
 def outputs(context):
     """
     *musicpd.org, audio output section:*

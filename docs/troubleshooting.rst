@@ -7,7 +7,7 @@ Troubleshooting
 If you run into problems with Mopidy, we usually hang around at ``#mopidy`` at
 `irc.freenode.net <http://freenode.net/>`_ and also have a `mailing list at
 Google Groups <https://groups.google.com/forum/?fromgroups=#!forum/mopidy>`_.
-If you stumble into a bug or got a feature request, please create an issue in
+If you stumble into a bug or have a feature request, please create an issue in
 the `issue tracker <https://github.com/mopidy/mopidy/issues>`_.
 
 When you're debugging yourself or asking for help, there are some tools built
@@ -64,7 +64,7 @@ docs for the :confval:`loglevels/*` config section.
 Debugging deadlocks
 ===================
 
-If Mopidy hangs without and obvious explanation, you can send the ``SIGUSR1``
+If Mopidy hangs without an obvious explanation, you can send the ``SIGUSR1``
 signal to the Mopidy process. If Mopidy's main thread is still responsive, it
 will log a traceback for each running thread, showing what the threads are
 currently doing. This is a very useful tool for understanding exactly how the

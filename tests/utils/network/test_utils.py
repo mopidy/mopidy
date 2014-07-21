@@ -1,8 +1,9 @@
 from __future__ import unicode_literals
 
-from mock import patch, Mock
 import socket
 import unittest
+
+from mock import Mock, patch
 
 from mopidy.utils import network
 

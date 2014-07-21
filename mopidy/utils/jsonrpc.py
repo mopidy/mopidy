@@ -155,13 +155,13 @@ class JsonRpcWrapper(object):
         if not isinstance(request, dict):
             raise JsonRpcInvalidRequestError(
                 data='Request must be an object')
-        if not 'jsonrpc' in request:
+        if 'jsonrpc' not in request:
             raise JsonRpcInvalidRequestError(
                 data='"jsonrpc" member must be included')
         if request['jsonrpc'] != '2.0':
             raise JsonRpcInvalidRequestError(
                 data='"jsonrpc" value must be "2.0"')
-        if not 'method' in request:
+        if 'method' not in request:
             raise JsonRpcInvalidRequestError(
                 data='"method" member must be included')
         if not isinstance(request['method'], unicode):
@@ -169,7 +169,7 @@ class JsonRpcWrapper(object):
                 data='"method" must be a string')
 
     def _get_params(self, request):
-        if not 'params' in request:
+        if 'params' not in request:
             return [], {}
         params = request['params']
         if isinstance(params, list):

@@ -1,12 +1,13 @@
 from __future__ import unicode_literals
 
 import errno
-import gobject
 import logging
 import re
 import socket
 import sys
 import threading
+
+import gobject
 
 import pykka
 
@@ -267,7 +268,8 @@ class Connection(object):
             return True
 
         if not data:
-            self.stop('Client most likely disconnected.')
+            self.actor_ref.tell({'close': True})
+            self.disable_recv()
             return True
 
         try:
@@ -348,6 +350,10 @@ class LineProtocol(pykka.ThreadingActor):
 
     def on_receive(self, message):
         """Handle messages with new data from server."""
+        if 'close' in message:
+            self.connection.stop('Client most likely disconnected.')
+            return
+
         if 'received' not in message:
             return
 

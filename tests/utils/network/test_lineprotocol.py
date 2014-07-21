@@ -2,11 +2,14 @@
 
 from __future__ import unicode_literals
 
-from mock import sentinel, Mock
 import re
 import unittest
 
+from mock import Mock, sentinel
+
 from mopidy.utils import network
+
+from tests import any_unicode
 
 
 class LineProtocolTest(unittest.TestCase):
@@ -32,6 +35,14 @@ class LineProtocolTest(unittest.TestCase):
 
         network.LineProtocol.__init__(self.mock, sentinel.connection)
         self.assertEqual(delimiter, self.mock.delimiter)
+
+    def test_on_receive_close_calls_stop(self):
+        self.mock.connection = Mock(spec=network.Connection)
+        self.mock.recv_buffer = ''
+        self.mock.parse_lines.return_value = []
+
+        network.LineProtocol.on_receive(self.mock, {'close': True})
+        self.mock.connection.stop.assert_called_once_with(any_unicode)
 
     def test_on_receive_no_new_lines_adds_to_recv_buffer(self):
         self.mock.connection = Mock(spec=network.Connection)

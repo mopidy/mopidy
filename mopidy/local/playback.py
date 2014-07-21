@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 import logging
 
 from mopidy import backend
+from mopidy.local import translator
 
-from . import translator
 
 logger = logging.getLogger(__name__)
 

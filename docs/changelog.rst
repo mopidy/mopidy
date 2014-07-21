@@ -5,6 +5,225 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v0.19.0 (2014-07-21)
+====================
+
+The focus of 0.19 have been on improving the MPD implementation, replacing
+GStreamer mixers with our own mixer API, and on making web clients installable
+with ``pip``, like any other Mopidy extension.
+
+Since the release of 0.18, we've closed or merged 53 issues and pull requests
+through about 445 commits by :ref:`12 people <authors>`, including five new
+guys. Thanks to everyone that has contributed!
+
+**Dependencies**
+
+- Mopidy now requires Tornado >= 3.1.
+
+- Mopidy no longer requires CherryPy or ws4py. Previously, these were optional
+  dependencies required for the HTTP frontend to work.
+
+**Backend API**
+
+- *Breaking change:* Imports of the backend API from
+  :mod:`mopidy.backends` no longer works. The new API introuced in v0.18 is now
+  required. Most extensions already use the new API location.
+
+**Commands**
+
+- The ``mopidy-convert-config`` tool for migrating the ``setings.py``
+  configuration file used by Mopidy up until 0.14 to the new config file format
+  has been removed after over a year of trusty service. If you still need to
+  convert your old ``settings.py`` configuration file, do so using and older
+  release, like Mopidy 0.18, or migrate the configuration to the new format by
+  hand.
+
+**Configuration**
+
+- Add ``optional=True`` support to :class:`mopidy.config.Boolean`.
+
+**Logging**
+
+- Fix proper decoding of exception messages that depends on the user's locale.
+
+- Colorize logs depending on log level. This can be turned off with the new
+  :confval:`logging/color` configuration. (Fixes: :issue:`772`)
+
+**Extension support**
+
+- *Breaking change:* Removed the :class:`~mopidy.ext.Extension` methods that
+  were deprecated in 0.18: :meth:`~mopidy.ext.Extension.get_backend_classes`,
+  :meth:`~mopidy.ext.Extension.get_frontend_classes`, and
+  :meth:`~mopidy.ext.Extension.register_gstreamer_elements`. Use
+  :meth:`mopidy.ext.Extension.setup` instead, as most extensions already do.
+
+**Audio**
+
+- *Breaking change:* Removed support for GStreamer mixers. GStreamer 1.x does
+  not support volume control, so we changed to use software mixing by default
+  in v0.17.0. Now, we're removing support for all other GStreamer mixers and
+  are reintroducing mixers as something extensions can provide independently of
+  GStreamer. (Fixes: :issue:`665`, PR: :issue:`760`)
+
+- *Breaking change:* Changed the :confval:`audio/mixer` config value to refer
+  to Mopidy mixer extensions instead of GStreamer mixers. The default value,
+  ``software``, still has the same behavior. All other values will either no
+  longer work or will at the very least require you to install an additional
+  extension.
+
+- Changed the :confval:`audio/mixer_volume` config value behavior from
+  affecting GStreamer mixers to affecting Mopidy mixer extensions instead. The
+  end result should be the same without any changes to this config value.
+
+- Deprecated the :confval:`audio/mixer_track` config value. This config value
+  is no longer in use. Mixer extensions that need additional configuration
+  handle this themselves.
+
+- Use :ref:`proxy-config` when streaming media from the Internet. (Partly
+  fixing :issue:`390`)
+
+- Fix proper decoding of exception messages that depends on the user's locale.
+
+- Fix recognition of ASX and XSPF playlists with tags in all caps or with
+  carriage return line endings. (Fixes: :issue:`687`)
+
+- Support simpler ASX playlist variant with ``<ENTRY>`` elements without
+  children.
+
+- Added ``target_state`` attribute to the audio layer's
+  :meth:`~mopidy.audio.AudioListener.state_changed` event. Currently, it is
+  :class:`None` except when we're paused because of buffering. Then the new
+  field exposes our target state after buffering has completed.
+
+**Mixers**
+
+- Added new :class:`mopidy.mixer.Mixer` API which can be implemented by
+  extensions.
+
+- Created a bundled extension, :ref:`ext-softwaremixer`, for controlling volume
+  in software in GStreamer's pipeline. This is Mopidy's default mixer. To use
+  this mixer, set the :confval:`audio/mixer` config value to ``software``.
+
+- Created an external extension, `Mopidy-ALSAMixer
+  <https://github.com/mopidy/mopidy-alsamixer/>`_, for controlling volume with
+  hardware through ALSA. To use this mixer, install the extension, and set the
+  :confval:`audio/mixer` config value to ``alsamixer``.
+
+**HTTP frontend**
+
+- CherryPy and ws4py have been replaced with Tornado. This will hopefully
+  reduce CPU usage on OS X (:issue:`445`) and improve error handling in corner
+  cases, like when returning from suspend (:issue:`718`).
+
+- Added support for packaging web clients as Mopidy extensions and installing
+  them using pip. See the :ref:`http-server-api` for details. (Fixes:
+  :issue:`440`)
+
+- Added web page at ``/mopidy/`` which lists all web clients installed as
+  Mopidy extensions. (Fixes: :issue:`440`)
+
+- Added support for extending the HTTP frontend with additional server side
+  functionality. See :ref:`http-server-api` for details.
+
+- Exposed the core API using HTTP POST requests with JSON-RPC payloads at
+  ``/mopidy/rpc``. This is the same JSON-RPC interface as is exposed over the
+  WebSocket at ``/mopidy/ws``, so you can run any core API command.
+
+  The HTTP POST interfaces does not give you access to events from Mopidy, like
+  the WebSocket does. The WebSocket interface is still recommended for web
+  clients. The HTTP POST interface may be easier to use for simpler programs,
+  that just needs to query the currently playing track or similar. See
+  :ref:`http-post-api` for details.
+
+- If Zeroconf is enabled, we now announce the ``_mopidy-http._tcp`` service in
+  addition to ``_http._tcp``. This is to make it easier to automatically find
+  Mopidy's HTTP server among other Zeroconf-published HTTP servers on the
+  local network.
+
+**Mopidy.js client library**
+
+This version has been released to npm as Mopidy.js v0.4.0.
+
+- Update Mopidy.js to use when.js 3. If you maintain a Mopidy client, you
+  should review the `differences between when.js 2 and 3
+  <https://github.com/cujojs/when/blob/master/docs/api.md#upgrading-to-30-from-2x>`_
+  and the `when.js debugging guide
+  <https://github.com/cujojs/when/blob/master/docs/api.md#debugging-promises>`_.
+
+- All of Mopidy.js' promise rejection values are now of the Error type. This
+  ensures that all JavaScript VMs will show a useful stack trace if a rejected
+  promise's value is used to throw an exception. To allow catch clauses to
+  handle different errors differently, server side errors are of the type
+  ``Mopidy.ServerError``, and connection related errors are of the type
+  ``Mopidy.ConnectionError``.
+
+- Add support for method calls with by-name arguments. The old calling
+  convention, ``by-position-only``, is still the default, but this will
+  change in the future. A warning is logged to the console if you don't
+  explicitly select a calling convention. See the :ref:`mopidy-js` docs for
+  details.
+
+**MPD frontend**
+
+- Proper command tokenization for MPD requests. This replaces the old regex
+  based system with an MPD protocol specific tokenizer responsible for breaking
+  requests into pieces before the handlers have at them.
+  (Fixes: :issue:`591` and :issue:`592`)
+
+- Updated command handler system. As part of the tokenizer cleanup we've
+  updated how commands are registered and making it simpler to create new
+  handlers.
+
+- Simplified a bunch of handlers. All the "browse" type commands now use a
+  common browse helper under the hood for less repetition. Likewise the query
+  handling of "search" commands has been somewhat simplified.
+
+- Adds placeholders for missing MPD commands, preparing the way for bumping the
+  protocol version once they have been added.
+
+- Respond to all pending requests before closing connection. (PR: :issue:`722`)
+
+- Stop incorrectly catching `LookupError` in command handling.
+  (Fixes: :issue:`741`)
+
+- Browse support for playlists and albums has been added. (PR: :issue:`749`,
+  :issue:`754`)
+
+- The ``lsinfo`` command now returns browse results before local playlists.
+  This is helpful as not all clients sort the returned items. (PR:
+  :issue:`755`)
+
+- Browse now supports different entries with identical names. (PR:
+  :issue:`762`)
+
+- Search terms that are empty or consists of only whitespace are no longer
+  included in the search query sent to backends. (PR: :issue:`758`)
+
+**Local backend**
+
+- The JSON local library backend now logs a friendly message telling you about
+  ``mopidy local scan`` if you don't have a local library cache. (Fixes:
+  :issue:`711`)
+
+- The ``local scan`` command now use multiple threads to walk the file system
+  and check files' modification time. This speeds up scanning, escpecially
+  when scanning remote file systems over e.g. NFS.
+
+- the ``local scan`` command now creates necessary folders if they don't
+  already exist. Previously, this was only done by the Mopidy server, so doing
+  a ``local scan`` before running the server the first time resulted in a
+  crash. (Fixes: :issue:`703`)
+
+- Fix proper decoding of exception messages that depends on the user's locale.
+
+**Stream backend**
+
+- Add config value :confval:`stream/metadata_blacklist` to blacklist certain
+  URIs we should not open to read metadata from before they are opened for
+  playback. This is typically needed for services that invalidate URIs after a
+  single use. (Fixes: :issue:`660`)
+
+
 v0.18.3 (2014-02-16)
 ====================
 
@@ -649,7 +868,7 @@ one new.
   To ease migration we've made a tool named :option:`mopidy-convert-config` for
   automatically converting the old ``settings.py`` to a new ``mopidy.conf``
   file. This tool takes care of all the renamed config values as well. See
-  :ref:`mopidy-convert-config` for details on how to use it.
+  ``mopidy-convert-config`` for details on how to use it.
 
 - A long wanted feature: You can now enable or disable specific frontends or
   backends without having to redefine :attr:`~mopidy.settings.FRONTENDS` or

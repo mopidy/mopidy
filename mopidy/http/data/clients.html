@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mopidy</title>
+    <link rel="stylesheet" type="text/css" href="mopidy.css">
+  </head>
+  <body>
+    <div class="box focus">
+      <h1>Mopidy</h1>
+
+      <p>This web server is a part of the Mopidy music server. To learn more
+      about Mopidy, please visit
+      <a href="http://www.mopidy.com/">www.mopidy.com</a>.</p>
+    </div>
+
+    <div class="box">
+      <h2>Web clients</h2>
+
+      <ul>
+        {% for app in apps %}
+          <li><a href="/{{ url_escape(app) }}/">{{ escape(app) }}</a></li>
+        {% end %}
+      </ul>
+
+      <p>Web clients which are installed as Mopidy extensions will
+      automatically appear here.</p>
+    </div>
+  </body>
+</html>

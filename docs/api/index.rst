@@ -21,9 +21,12 @@ API reference
     backends
     core
     audio
+    mixer
     frontends
     commands
     ext
     config
     zeroconf
+    http-server
     http
+    js

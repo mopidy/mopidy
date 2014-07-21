@@ -6,7 +6,7 @@ Mopidy-HTTP
 
 Mopidy-HTTP is an extension that lets you control Mopidy through HTTP and
 WebSockets, for example from a web client. It is bundled with Mopidy and
-enabled by default if all dependencies are available.
+enabled by default.
 
 When it is enabled it starts a web server at the port specified by the
 :confval:`http/port` config value.
@@ -47,24 +47,24 @@ you're looking for a web based client for Mopidy, go check out
 :ref:`http-clients`.
 
 
-Dependencies
-============
+Extending the server's functionality
+====================================
 
-In addition to Mopidy's dependencies, Mopidy-HTTP requires the following:
+If you wish to extend the server with additional server side functionality you
+must create class that implements the :class:`mopidy.http.Router` interface and
+install it in the extension registry under the ``http:router`` name.
 
-- cherrypy >= 3.2.2. Available as python-cherrypy3 in Debian/Ubuntu.
+The default implementation of :class:`mopidy.http.Router` already supports
+serving static files. If you just want to serve static files you only need to
+define the class variables :attr:`mopidy.http.Router.name` and
+:attr:`mopidy.http.Router.path`. For example::
 
-- ws4py >= 0.2.3. Available as python-ws4py in newer Debian/Ubuntu and from
-  `apt.mopidy.com <http://apt.mopidy.com/>`__ for older releases of
-  Debian/Ubuntu.
+    class MyWebClient(http.Router):
+        name = 'mywebclient'
+        path = os.path.join(os.path.dirname(__file__), 'public_html')
 
-If you're installing Mopidy with pip, you can run the following command to
-install Mopidy with the extra dependencies for required for Mopidy-HTTP::
-
-    pip install --upgrade Mopidy[http]
-
-If you're installing Mopidy from APT, the additional dependencies needed for
-Mopidy-HTTP are always included.
+If you wish to extend server with custom methods you can override the method
+:meth:`mopidy.http.Router.setup_routes` and define custom routes.
 
 
 Configuration
@@ -107,5 +107,8 @@ See :ref:`config` for general help on configuring Mopidy.
 
     Name of the HTTP service when published through Zeroconf. The variables
     ``$hostname`` and ``$port`` can be used in the name.
+
+    If set, the Zeroconf services ``_http._tcp`` and ``_mopidy-http._tcp`` will
+    be published.
 
     Set to an empty string to disable Zeroconf for HTTP.

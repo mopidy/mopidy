@@ -1,8 +1,8 @@
 .. _raspberrypi-installation:
 
-****************************
-Installation on Raspberry Pi
-****************************
+*************************************
+Raspberry Pi: Mopidy on a credit card
+*************************************
 
 Mopidy runs nicely on a `Raspberry Pi <http://www.raspberrypi.org/>`_. As of
 January 2013, Mopidy will run with Spotify support on both the armel
@@ -21,7 +21,7 @@ How to for Raspbian "wheezy" and Debian "wheezy"
 
 This guide applies for both:
 
-- Raspian "wheezy" for armhf (hard-float), and
+- Raspbian "wheezy" for armhf (hard-float), and
 - Debian "wheezy" for armel (soft-float)
 
 If you don't know which one to select, go for the armhf variant, as it'll give
@@ -71,11 +71,12 @@ you a lot better performance.
    command to e.g. ``/etc/rc.local``, which will be executed when the system is
    booting.
 
-#. Install Mopidy and its dependencies from `apt.mopidy.com
-   <http://apt.mopidy.com/>`_, as described in :ref:`installation`.
+#. Install Mopidy and its dependencies as described in :ref:`debian-install`.
 
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
-   then you're ready to :doc:`run Mopidy </running>`.
+   then you're ready to :doc:`run Mopidy </running>`. Alternatively you may 
+   want to have Mopidy run as a :doc:`system service </debian>`, automatically
+   starting at boot.
 
 
 Appendix: Fixing audio quality issues
@@ -109,13 +110,16 @@ card.
    Note that if you have an ``~/.asoundrc`` it will overide any global
    settings from ``/etc/asound.conf``.
 
-#. Update your ``~/.config/mopidy/mopidy.conf`` to contain::
+#. For Mopidy to output audio directly to ALSA, instead of Jack which
+   GStreamer usually defaults to on Raspberry Pi, install the
+   ``gstreamer0.10-alsa`` package::
+
+       sudo apt-get install gstreamer0.10-alsa
+
+   Then update your ``~/.config/mopidy/mopidy.conf`` to contain::
 
        [audio]
        output = alsasink
-
-   This is to tell GStreamer not to pick Jack which it seems to like picking on
-   Raspberry Pis for some reason.
 
 Following these steps you should be able to get crackle free sound on either
 HDMI or analog. Note that you might need to ensure that PulseAudio is no longer

@@ -4,8 +4,8 @@ import logging
 import re
 import socket
 
-from mopidy.utils import path
 from mopidy.config import validators
+from mopidy.utils import path
 
 
 def decode(value):
@@ -151,7 +151,13 @@ class Boolean(ConfigValue):
     true_values = ('1', 'yes', 'true', 'on')
     false_values = ('0', 'no', 'false', 'off')
 
+    def __init__(self, optional=False):
+        self._required = not optional
+
     def deserialize(self, value):
+        validators.validate_required(value, self._required)
+        if not value:
+            return None
         if value.lower() in self.true_values:
             return True
         elif value.lower() in self.false_values:
@@ -185,6 +191,8 @@ class List(ConfigValue):
         return tuple(values)
 
     def serialize(self, value, display=False):
+        if not value:
+            return b''
         return b'\n  ' + b'\n  '.join(encode(v) for v in value if v)
 
 

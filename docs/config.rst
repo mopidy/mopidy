@@ -26,26 +26,23 @@ will create an empty config file for you and print what config values must be
 set to successfully start Mopidy.
 
 When you have created the configuration file, open it in a text editor, and add
-the config values you want to change. If you want to keep the default for a
-config value, you **should not** add it to
-:file:`~/.config/mopidy/mopidy.conf`.
+the config values you want to change.  If you want to keep the default for a
+config value, you **should not** add it to the config file, but leave it out so
+that when we change the default value in a future version, you won't have to
+change your configuration accordingly.
 
 To see what's the effective configuration for your Mopidy installation, you can
-run ``mopidy config``. It will print your full effective config with passwords
-masked out so that you safely can share the output with others for debugging.
+run::
+
+    mopidy config
+
+This will print your full effective config with passwords masked out so that
+you safely can share the output with others for debugging.
 
 You can find a description of all config values belonging to Mopidy's core
 below, together with their default values. In addition, all :ref:`extensions
 <ext>` got additional config values. The extension's config values and config
 defaults are documented on the :ref:`extension pages <ext>`.
-
-
-Migrating from pre 0.14
-=======================
-
-For those users upgrading from versions prior to 0.14 we made
-the :option:`mopidy-convert-config` tool, to ease the process of migrating
-settings to the new config format.
 
 
 Default core configuration
@@ -58,13 +55,14 @@ Default core configuration
 Core configuration values
 =========================
 
+Mopidy's core has the following configuration values that you can change.
+
+Audio configuration
+-------------------
+
 .. confval:: audio/mixer
 
     Audio mixer to use.
-
-    Expects a GStreamer mixer to use, typical values are: ``software``,
-    ``autoaudiomixer``, ``alsamixer``, ``pulsemixer``, ``ossmixer``, and
-    ``oss4mixer``.
 
     The default is ``software``, which does volume control inside Mopidy before
     the audio is sent to the audio output. This mixer does not affect the
@@ -72,13 +70,9 @@ Core configuration values
     will affect the audio volume if you're streaming the audio from Mopidy
     through Shoutcast.
 
-    If you want to use a hardware mixer, try ``autoaudiomixer``. It attempts to
-    select a sane hardware mixer for you automatically. When Mopidy is started,
-    it will log what mixer ``autoaudiomixer`` selected, for example::
-
-        INFO     Audio mixer set to "alsamixer" using track "Master"
-
-    Setting the config value to blank turns off volume control.
+    If you want to use a hardware mixer, you need to install a Mopidy extension
+    which integrates with your sound subsystem. E.g. for ALSA, install
+    `Mopidy-ALSAMixer <https://github.com/mopidy/mopidy-alsamixer>`_.
 
 .. confval:: audio/mixer_volume
 
@@ -88,14 +82,6 @@ Core configuration values
 
     Setting the config value to blank leaves the audio mixer volume unchanged.
     For the software mixer blank means 100.
-
-.. confval:: audio/mixer_track
-
-    Audio mixer track to use.
-
-    Name of the mixer track to use. If this is not set we will try to find the
-    master output track. As an example, using ``alsamixer`` you would typically
-    set this to ``Master`` or ``PCM``.
 
 .. confval:: audio/output
 
@@ -116,6 +102,15 @@ Core configuration values
     ``goom2k1`` or one of the `libvisual`_ visualizers.
 
 .. _libvisual: http://gstreamer.freedesktop.org/data/doc/gstreamer/head/gst-plugins-base-plugins/html/gst-plugins-base-plugins-plugin-libvisual.html
+
+
+Logging configuration
+---------------------
+
+.. confval:: logging/color
+
+    Whether or not to colorize the console log based on log level. Defaults to
+    ``true``.
 
 .. confval:: logging/console_format
 
@@ -147,11 +142,33 @@ Core configuration values
     level to use for that logger, one of ``debug``, ``info``, ``warning``,
     ``error``, or ``critical``.
 
+.. _the Python logging docs: http://docs.python.org/2/library/logging.config.html
+
+
+.. _proxy-config:
+
+Proxy configuration
+-------------------
+
+Not all parts of Mopidy or all Mopidy extensions respect the proxy
+server configuration when connecting to the Internt. Currently, this is at
+least used when Mopidy's audio subsystem reads media directly from the network,
+like when listening to Internet radio streams, and by the Mopidy-Spotify
+extension. With time, we hope that more of the Mopidy ecosystem will respect
+these configurations to help users on locked down networks.
+
+.. confval:: proxy/scheme
+
+    URI scheme for the proxy server. Typically ``http``, ``https``, ``socks4``,
+    or ``socks5``.
+
 .. confval:: proxy/hostname
 
-    Proxy server to use for communication with the Internet.
+    Hostname of the proxy server.
 
-    Currently only used by the Spotify extension.
+.. confval:: proxy/port
+
+    Port number of the proxy server.
 
 .. confval:: proxy/username
 
@@ -160,8 +177,6 @@ Core configuration values
 .. confval:: proxy/password
 
     Password for the proxy server, if needed.
-
-.. _the Python logging docs: http://docs.python.org/2/library/logging.config.html
 
 
 Extension configuration
@@ -246,13 +261,21 @@ server simultaneously. To use the SHOUTcast output, do the following:
 
 #. You might also need to change the ``shout2send`` default settings, run
    ``gst-inspect-0.10 shout2send`` to see the available settings. Most likely
-   you want to change ``ip``, ``username``, ``password``, and ``mount``. For
-   example:
+   you want to change ``ip``, ``username``, ``password``, and ``mount``.
+   
+   Example for MP3 streaming:
 
    .. code-block:: ini
 
        [audio]
-       output = lame ! shout2send username="alice" password="secret" mount="mopidy"
+       output = lame ! shout2send mount=mopidy ip=127.0.0.1 port=8000 password=hackme
+
+   Example for Ogg Vorbis streaming:
+   
+   .. code-block:: ini
+
+       [audio]
+       output = audioresample ! audioconvert ! vorbisenc ! oggmux ! shout2send mount=mopidy ip=127.0.0.1 port=8000 password=hackme
 
 Other advanced setups are also possible for outputs. Basically, anything you
 can use with the ``gst-launch-0.10`` command can be plugged into

@@ -4,8 +4,8 @@ import json
 import unittest
 
 from mopidy.models import (
-    Ref, Artist, Album, TlTrack, Track, Playlist, SearchResult,
-    ModelJSONEncoder, model_json_decoder)
+    Album, Artist, ModelJSONEncoder, Playlist, Ref, SearchResult, TlTrack,
+    Track, model_json_decoder)
 
 
 class GenericCopyTest(unittest.TestCase):

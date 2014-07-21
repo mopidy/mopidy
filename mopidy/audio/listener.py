@@ -27,17 +27,31 @@ class AudioListener(listener.Listener):
         """
         pass
 
-    def state_changed(self, old_state, new_state):
+    def state_changed(self, old_state, new_state, target_state):
         """
         Called after the playback state have changed.
 
         Will be called for both immediate and async state changes in GStreamer.
+
+        Target state is used to when we should be in the target state, but
+        temporarily need to switch to an other state. A typical example of this
+        is buffering. When this happens an event with
+        `old=PLAYING, new=PAUSED, target=PLAYING` will be emitted. Once we have
+        caught up a `old=PAUSED, new=PLAYING, target=None` event will be
+        be generated.
+
+        Regular state changes will not have target state set as they are final
+        states which should be stable.
 
         *MAY* be implemented by actor.
 
         :param old_state: the state before the change
         :type old_state: string from :class:`mopidy.core.PlaybackState` field
         :param new_state: the state after the change
+        :type new_state: A :class:`mopidy.core.PlaybackState` field
         :type new_state: string from :class:`mopidy.core.PlaybackState` field
+        :param target_state: the intended state
+        :type target_state: string from :class:`mopidy.core.PlaybackState`
+            field or :class:`None` if this is a final state.
         """
         pass
