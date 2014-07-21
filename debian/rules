@@ -17,7 +17,6 @@ override_dh_auto_install:
 	python setup.py install --root=debian/tmp --install-layout=deb --install-lib=/usr/share/mopidy --install-scripts=/usr/share/mopidy/bin
 	# Fix name collision between `mopidy` package and `mopidy` command
 	mv debian/tmp/usr/share/mopidy/bin/mopidy debian/tmp/usr/share/mopidy/mopidy-cmd
-	mv debian/tmp/usr/share/mopidy/bin/* debian/tmp/usr/share/mopidy/
 	rm -r debian/tmp/usr/share/mopidy/bin/
 
 override_dh_installchangelogs:

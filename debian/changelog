@@ -3,6 +3,7 @@ mopidy (0.19.0-0mopidy1) unstable; urgency=medium
   * New upstream release.
   * Remove python-cherrypy3 and python-ws4py from Recommends.
   * Add python-tornado to Depends.
+  * Remove /usr/bin/mopidy-convert-config command.
 
  -- Stein Magnus Jodal <stein.magnus@jodal.no>  Mon, 21 Jul 2014 09:58:12 +0200
 
