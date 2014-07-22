@@ -81,7 +81,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             # New in Tornado 3.1
             self.set_nodelay(True)
         else:
-            self.handler.connection.socket.setsockopt(
+            self.stream.socket.setsockopt(
                 socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         self.clients.add(self)
         logger.debug(
