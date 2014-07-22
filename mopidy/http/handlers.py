@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import logging
 import os
+import socket
 
 import tornado.escape
 import tornado.web
@@ -76,7 +77,12 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         self.jsonrpc = make_jsonrpc_wrapper(core)
 
     def open(self):
-        self.set_nodelay(True)
+        if hasattr(self, 'set_nodelay'):
+            # New in Tornado 3.1
+            self.set_nodelay(True)
+        else:
+            self.handler.connection.socket.setsockopt(
+                socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         self.clients.add(self)
         logger.debug(
             'New WebSocket connection from %s', self.request.remote_ip)

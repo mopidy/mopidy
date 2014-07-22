@@ -26,7 +26,7 @@ setup(
     install_requires=[
         'setuptools',
         'Pykka >= 1.1',
-        'tornado >= 3.1',
+        'tornado >= 2.3',
     ],
     extras_require={'http': []},
     test_suite='nose.collector',

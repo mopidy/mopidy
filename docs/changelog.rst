@@ -4,6 +4,15 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+v0.19.1 (UNRELEASED)
+====================
+
+**Dependencies**
+
+- Mopidy now requires Tornado >= 2.3, instead of >= 3.1. This should make
+  Mopidy continue to work on Debian/Raspbian stable, where Tornado 2.3 is the
+  newest version available.
+
 
 v0.19.0 (2014-07-21)
 ====================
