@@ -1,19 +1,24 @@
 from __future__ import unicode_literals
 
-from subprocess import PIPE, Popen
+import os
+import subprocess
 
-from mopidy import __version__
+import mopidy
 
 
 def get_version():
     try:
         return get_git_version()
     except EnvironmentError:
-        return __version__
+        return mopidy.__version__
 
 
 def get_git_version():
-    process = Popen(['git', 'describe'], stdout=PIPE, stderr=PIPE)
+    project_dir = os.path.abspath(
+        os.path.join(os.path.dirname(mopidy.__file__), '..'))
+    process = subprocess.Popen(
+        ['git', 'describe'],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=project_dir)
     if process.wait() != 0:
         raise EnvironmentError('Execution of "git describe" failed')
     version = process.stdout.read().strip()

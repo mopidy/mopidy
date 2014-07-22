@@ -13,6 +13,12 @@ v0.19.1 (UNRELEASED)
   Mopidy continue to work on Debian/Raspbian stable, where Tornado 2.3 is the
   newest version available.
 
+**Development**
+
+- ``mopidy --version`` and :meth:`mopidy.core.Core.get_version` now returns the
+  correct version when Mopidy is run from a Git repo other than Mopidy's own.
+  (Related to :issue:`706`)
+
 
 v0.19.0 (2014-07-21)
 ====================
