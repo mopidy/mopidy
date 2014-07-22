@@ -4,8 +4,7 @@ import logging
 import urlparse
 
 from mopidy.audio import PlaybackState
-
-from . import listener
+from mopidy.core import listener
 
 
 logger = logging.getLogger(__name__)
@@ -15,8 +14,8 @@ logger = logging.getLogger(__name__)
 class PlaybackController(object):
     pykka_traversable = True
 
-    def __init__(self, audio, backends, core):
-        self.audio = audio
+    def __init__(self, mixer, backends, core):
+        self.mixer = mixer
         self.backends = backends
         self.core = core
 
@@ -32,7 +31,7 @@ class PlaybackController(object):
         uri_scheme = urlparse.urlparse(uri).scheme
         return self.backends.with_playback.get(uri_scheme, None)
 
-    ### Properties
+    # Properties
 
     def get_current_tl_track(self):
         return self.current_tl_track
@@ -91,45 +90,43 @@ class PlaybackController(object):
     """Time position in milliseconds."""
 
     def get_volume(self):
-        if self.audio:
-            return self.audio.get_volume().get()
+        if self.mixer:
+            return self.mixer.get_volume().get()
         else:
             # For testing
             return self._volume
 
     def set_volume(self, volume):
-        if self.audio:
-            self.audio.set_volume(volume)
+        if self.mixer:
+            self.mixer.set_volume(volume)
         else:
             # For testing
             self._volume = volume
 
-        self._trigger_volume_changed(volume)
-
     volume = property(get_volume, set_volume)
-    """Volume as int in range [0..100] or :class:`None`"""
+    """Volume as int in range [0..100] or :class:`None` if unknown. The volume
+    scale is linear.
+    """
 
     def get_mute(self):
-        if self.audio:
-            return self.audio.get_mute().get()
+        if self.mixer:
+            return self.mixer.get_mute().get()
         else:
             # For testing
             return self._mute
 
     def set_mute(self, value):
         value = bool(value)
-        if self.audio:
-            self.audio.set_mute(value)
+        if self.mixer:
+            self.mixer.set_mute(value)
         else:
             # For testing
             self._mute = value
 
-        self._trigger_mute_changed(value)
-
     mute = property(get_mute, set_mute)
     """Mute state as a :class:`True` if muted, :class:`False` otherwise"""
 
-    ### Methods
+    # Methods
 
     # TODO: remove this.
     def change_track(self, tl_track, on_error_step=1):
@@ -328,9 +325,10 @@ class PlaybackController(object):
         """
         if self.state != PlaybackState.STOPPED:
             backend = self._get_backend()
+            time_position_before_stop = self.time_position
             if not backend or backend.playback.stop().get():
                 self.state = PlaybackState.STOPPED
-                self._trigger_track_playback_ended()
+                self._trigger_track_playback_ended(time_position_before_stop)
         if clear_current_track:
             self.current_tl_track = None
 
@@ -358,27 +356,20 @@ class PlaybackController(object):
             'track_playback_started',
             tl_track=self.current_tl_track)
 
-    def _trigger_track_playback_ended(self):
+    def _trigger_track_playback_ended(self, time_position_before_stop):
         logger.debug('Triggering track playback ended event')
         if self.current_tl_track is None:
             return
         listener.CoreListener.send(
             'track_playback_ended',
-            tl_track=self.current_tl_track, time_position=self.time_position)
+            tl_track=self.current_tl_track,
+            time_position=time_position_before_stop)
 
     def _trigger_playback_state_changed(self, old_state, new_state):
         logger.debug('Triggering playback state change event')
         listener.CoreListener.send(
             'playback_state_changed',
             old_state=old_state, new_state=new_state)
-
-    def _trigger_volume_changed(self, volume):
-        logger.debug('Triggering volume changed event')
-        listener.CoreListener.send('volume_changed', volume=volume)
-
-    def _trigger_mute_changed(self, mute):
-        logger.debug('Triggering mute changed event')
-        listener.CoreListener.send('mute_changed', mute=mute)
 
     def _trigger_seeked(self, time_position):
         logger.debug('Triggering seeked event')

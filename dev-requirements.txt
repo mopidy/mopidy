@@ -1,0 +1,28 @@
+# Automate tasks
+fabric
+
+# Build documentation
+sphinx
+
+# Check code style, errors, etc
+flake8
+flake8-import-order
+
+# Mock dependencies in tests
+mock
+
+# Test runners
+nose
+tox
+
+# Measure test's code coverage
+coverage
+
+# Check that MANIFEST.in matches Git repo contents before making a release
+check-manifest
+
+# To make wheel packages
+wheel
+
+# Securely upload packages to PyPI
+twine

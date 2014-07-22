@@ -1,36 +1,60 @@
 {
   "name": "mopidy",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "description": "Client lib for controlling a Mopidy music server over a WebSocket",
+  "keywords": [
+    "mopidy",
+    "music",
+    "client",
+    "websocket",
+    "json-rpc"
+  ],
   "homepage": "http://www.mopidy.com/",
+  "bugs": "https://github.com/mopidy/mopidy/issues",
+  "license": "Apache-2.0",
   "author": {
     "name": "Stein Magnus Jodal",
     "email": "stein.magnus@jodal.no",
     "url": "http://www.jodal.no"
   },
+  "contributors": [
+    {
+      "name": "Stein Magnus Jodal",
+      "email": "stein.magnus@jodal.no",
+      "url": "http://www.jodal.no"
+    },
+    {
+      "name": "Paul Connolley",
+      "email": "paul.connolley@gmail.com"
+    }
+  ],
+  "main": "src/mopidy.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/mopidy/mopidy.git"
-  },
-  "main": "src/mopidy.js",
-  "dependencies": {
-    "bane": "~1.1.0",
-    "faye-websocket": "~0.7.2",
-    "when": "~2.7.1"
-  },
-  "devDependencies": {
-    "buster": "~0.7.8",
-    "grunt": "~0.4.2",
-    "grunt-buster": "~0.3.1",
-    "grunt-browserify": "~1.3.0",
-    "grunt-contrib-jshint": "~0.8.0",
-    "grunt-contrib-uglify": "~0.2.7",
-    "grunt-contrib-watch": "~0.5.3",
-    "phantomjs": "~1.9.2-6"
   },
   "scripts": {
     "test": "grunt test",
     "build": "grunt build",
     "start": "grunt watch"
+  },
+  "dependencies": {
+    "bane": "~1.1.0",
+    "faye-websocket": "~0.7.2",
+    "when": "~3.2.3"
+  },
+  "devDependencies": {
+    "buster": "~0.7.13",
+    "browserify": "~3",
+    "grunt": "~0.4.5",
+    "grunt-buster": "~0.3.1",
+    "grunt-browserify": "~1.3.2",
+    "grunt-contrib-jshint": "~0.10.0",
+    "grunt-contrib-uglify": "~0.5.0",
+    "grunt-contrib-watch": "~0.6.1",
+    "phantomjs": "~1.9.7-8"
+  },
+  "engines": {
+    "node": "*"
   }
 }

@@ -12,18 +12,29 @@ import time
 
 import mopidy
 from mopidy import local, models
-from mopidy.local import search, translator
+from mopidy.local import search, storage, translator
+from mopidy.utils import encoding
 
 logger = logging.getLogger(__name__)
 
 
 # TODO: move to load and dump in models?
 def load_library(json_file):
+    if not os.path.isfile(json_file):
+        logger.info(
+            'No local library metadata cache found at %s. Please run '
+            '`mopidy local scan` to index your local music library. '
+            'If you do not have a local music collection, you can disable the '
+            'local backend to hide this message.',
+            json_file)
+        return {}
     try:
         with gzip.open(json_file, 'rb') as fp:
             return json.load(fp, object_hook=models.model_json_decoder)
-    except (IOError, ValueError) as e:
-        logger.warning('Loading JSON local library failed: %s', e)
+    except (IOError, ValueError) as error:
+        logger.warning(
+            'Loading JSON local library failed: %s',
+            encoding.locale_decode(error))
         return {}
 
 
@@ -120,6 +131,8 @@ class JsonLibrary(local.Library):
         self._media_dir = config['local']['media_dir']
         self._json_file = os.path.join(
             config['local']['data_dir'], b'library.json.gz')
+
+        storage.check_dirs_and_files(config)
 
     def browse(self, uri):
         if not self._browse_cache:

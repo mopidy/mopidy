@@ -33,7 +33,10 @@ buster.testCase("Mopidy", {
             close: this.stub(),
             send: this.stub()
         };
-        this.mopidy = new Mopidy({webSocket: this.webSocket});
+        this.mopidy = new Mopidy({
+            callingConvention: "by-position-or-by-name",
+            webSocket: this.webSocket
+        });
     },
 
     tearDown: function () {
@@ -42,31 +45,86 @@ buster.testCase("Mopidy", {
 
     "constructor": {
         "connects when autoConnect is true": function () {
-            new Mopidy({autoConnect: true});
+            new Mopidy({
+                autoConnect: true,
+                callingConvention: "by-position-or-by-name"
+            });
 
             var currentHost = typeof document !== "undefined" &&
                 document.location.host || "localhost";
 
             assert.calledOnceWith(this.webSocketConstructorStub,
-                "ws://" + currentHost + "/mopidy/ws/");
+                "ws://" + currentHost + "/mopidy/ws");
         },
 
         "does not connect when autoConnect is false": function () {
-            new Mopidy({autoConnect: false});
+            new Mopidy({
+                autoConnect: false,
+                callingConvention: "by-position-or-by-name"
+            });
 
             refute.called(this.webSocketConstructorStub);
         },
 
         "does not connect when passed a WebSocket": function () {
-            new Mopidy({webSocket: {}});
+            new Mopidy({
+                callingConvention: "by-position-or-by-name",
+                webSocket: {}
+            });
 
             refute.called(this.webSocketConstructorStub);
+        },
+
+        "defaults to by-position-only calling convention": function () {
+            var console = {
+                warn: function () {}
+            };
+            var mopidy = new Mopidy({
+                console: console,
+                webSocket: this.webSocket,
+            });
+
+            assert.equals(
+                mopidy._settings.callingConvention,
+                "by-position-only");
+        },
+
+        "warns if no calling convention explicitly selected": function () {
+            var console = {
+                warn: function () {}
+            };
+            var stub = this.stub(console, "warn");
+
+            new Mopidy({console: console});
+
+            assert.calledOnceWith(
+                stub,
+                "Mopidy.js is using the default calling convention. The " +
+                "default will change in the future. You should explicitly " +
+                "specify which calling convention you use.");
+        },
+
+        "does not warn if calling convention chosen explicitly": function () {
+            var console = {
+                warn: function () {}
+            };
+            var stub = this.stub(console, "warn");
+
+            new Mopidy({
+                callingConvention: "by-position-or-by-name",
+                console: console
+            });
+
+            refute.called(stub);
         },
 
         "works without 'new' keyword": function () {
             var mopidyConstructor = Mopidy; // To trick jshint into submission
 
-            var mopidy = mopidyConstructor({webSocket: {}});
+            var mopidy = mopidyConstructor({
+                callingConvention: "by-position-or-by-name",
+                webSocket: {}
+            });
 
             assert.isObject(mopidy);
             assert(mopidy instanceof Mopidy);
@@ -75,7 +133,10 @@ buster.testCase("Mopidy", {
 
     ".connect": {
         "connects when autoConnect is false": function () {
-            var mopidy = new Mopidy({autoConnect: false});
+            var mopidy = new Mopidy({
+                autoConnect: false,
+                callingConvention: "by-position-or-by-name"
+            });
             refute.called(this.webSocketConstructorStub);
 
             mopidy.connect();
@@ -84,12 +145,15 @@ buster.testCase("Mopidy", {
                 document.location.host || "localhost";
 
             assert.calledOnceWith(this.webSocketConstructorStub,
-                "ws://" + currentHost + "/mopidy/ws/");
+                "ws://" + currentHost + "/mopidy/ws");
         },
 
         "does nothing when the WebSocket is open": function () {
             this.webSocket.readyState = Mopidy.WebSocket.OPEN;
-            var mopidy = new Mopidy({webSocket: this.webSocket});
+            var mopidy = new Mopidy({
+                callingConvention: "by-position-or-by-name",
+                webSocket: this.webSocket
+            });
 
             mopidy.connect();
 
@@ -169,12 +233,18 @@ buster.testCase("Mopidy", {
             this.mopidy._cleanup(closeEvent);
 
             assert.equals(Object.keys(this.mopidy._pendingRequests).length, 0);
-            when.join(promise1, promise2).then(done(function () {
-                assert(false, "Promises should be rejected");
-            }), done(function (error) {
-                assert.equals(error.message, "WebSocket closed");
-                assert.same(error.closeEvent, closeEvent);
-            }));
+            when.settle([promise1, promise2]).done(
+                done(function (descriptors) {
+                    assert.equals(descriptors.length, 2);
+                    descriptors.forEach(function (d) {
+                        assert.equals(d.state, "rejected");
+                        assert(d.reason instanceof Error);
+                        assert(d.reason instanceof Mopidy.ConnectionError);
+                        assert.equals(d.reason.message, "WebSocket closed");
+                        assert.same(d.reason.closeEvent, closeEvent);
+                    });
+                })
+            );
         },
 
         "emits 'state:offline' event when done": function () {
@@ -388,12 +458,17 @@ buster.testCase("Mopidy", {
             var promise = this.mopidy._send({method: "foo"});
 
             refute.called(this.mopidy._webSocket.send);
-            promise.then(done(function () {
-                assert(false);
-            }), done(function (error) {
-                assert.equals(
-                    error.message, "WebSocket is still connecting");
-            }));
+            promise.done(
+                done(function () {
+                    assert(false);
+                }),
+                done(function (error) {
+                    assert(error instanceof Error);
+                    assert(error instanceof Mopidy.ConnectionError);
+                    assert.equals(
+                        error.message, "WebSocket is still connecting");
+                })
+            );
         },
 
         "immediately rejects request if CLOSING": function (done) {
@@ -402,12 +477,16 @@ buster.testCase("Mopidy", {
             var promise = this.mopidy._send({method: "foo"});
 
             refute.called(this.mopidy._webSocket.send);
-            promise.then(done(function () {
-                assert(false);
-            }), done(function (error) {
-                assert.equals(
-                    error.message, "WebSocket is closing");
-            }));
+            promise.done(
+                done(function () {
+                    assert(false);
+                }),
+                done(function (error) {
+                    assert(error instanceof Error);
+                    assert(error instanceof Mopidy.ConnectionError);
+                    assert.equals(error.message, "WebSocket is closing");
+                })
+            );
         },
 
         "immediately rejects request if CLOSED": function (done) {
@@ -416,12 +495,16 @@ buster.testCase("Mopidy", {
             var promise = this.mopidy._send({method: "foo"});
 
             refute.called(this.mopidy._webSocket.send);
-            promise.then(done(function () {
-                assert(false);
-            }), done(function (error) {
-                assert.equals(
-                    error.message, "WebSocket is closed");
-            }));
+            promise.done(
+                done(function () {
+                    assert(false);
+                }),
+                done(function (error) {
+                    assert(error instanceof Error);
+                    assert(error instanceof Mopidy.ConnectionError);
+                    assert.equals(error.message, "WebSocket is closed");
+                })
+            );
         }
     },
 
@@ -544,7 +627,11 @@ buster.testCase("Mopidy", {
         "rejects and logs requests which get errors back": function (done) {
             var stub = this.stub(this.mopidy._console, "warn");
             var promise = this.mopidy._send({method: "bar"});
-            var responseError = {message: "Error", data: {}};
+            var responseError = {
+                code: -32601,
+                message: "Method not found",
+                data: {}
+            };
             var responseMessage = {
                 jsonrpc: "2.0",
                 id: Object.keys(this.mopidy._pendingRequests)[0],
@@ -555,11 +642,49 @@ buster.testCase("Mopidy", {
 
             assert.calledOnceWith(stub,
                 "Server returned error:", responseError);
-            promise.then(done(function () {
-                assert(false);
-            }), done(function (error) {
-                assert.equals(error, responseError);
-            }));
+            promise.done(
+                done(function () {
+                    assert(false);
+                }),
+                done(function (error) {
+                    assert(error instanceof Error);
+                    assert.equals(error.code, responseError.code);
+                    assert.equals(error.message, responseError.message);
+                    assert.equals(error.data, responseError.data);
+                })
+            );
+        },
+
+        "rejects and logs requests which get errors without data": function (done) {
+            var stub = this.stub(this.mopidy._console, "warn");
+            var promise = this.mopidy._send({method: "bar"});
+            var responseError = {
+                code: -32601,
+                message: "Method not found"
+                // 'data' key intentionally missing
+            };
+            var responseMessage = {
+                jsonrpc: "2.0",
+                id: Object.keys(this.mopidy._pendingRequests)[0],
+                error: responseError
+            };
+
+            this.mopidy._handleResponse(responseMessage);
+
+            assert.calledOnceWith(stub,
+                "Server returned error:", responseError);
+            promise.done(
+                done(function () {
+                    assert(false);
+                }),
+                done(function (error) {
+                    assert(error instanceof Error);
+                    assert(error instanceof Mopidy.ServerError);
+                    assert.equals(error.code, responseError.code);
+                    assert.equals(error.message, responseError.message);
+                    refute.defined(error.data);
+                })
+            );
         },
 
         "rejects and logs responses without result or error": function (done) {
@@ -575,14 +700,18 @@ buster.testCase("Mopidy", {
             assert.calledOnceWith(stub,
                 "Response without 'result' or 'error' received. Message was:",
                 responseMessage);
-            promise.then(done(function () {
-                assert(false);
-            }), done(function (error) {
-                assert.equals(
-                    error.message,
-                    "Response without 'result' or 'error' received");
-                assert.equals(error.data.response, responseMessage);
-            }));
+            promise.done(
+                done(function () {
+                    assert(false);
+                }),
+                done(function (error) {
+                    assert(error instanceof Error);
+                    assert.equals(
+                        error.message,
+                        "Response without 'result' or 'error' received");
+                    assert.equals(error.data.response, responseMessage);
+                })
+            );
         }
     },
 
@@ -699,6 +828,137 @@ buster.testCase("Mopidy", {
             this.mopidy._createApi({});
 
             assert.calledOnceWith(spy);
+        },
+
+        "by-position-only calling convention": {
+            setUp: function () {
+                this.mopidy = new Mopidy({
+                    webSocket: this.webSocket,
+                    callingConvention: "by-position-only"
+                });
+                this.mopidy._createApi({
+                    foo: {
+                        params: ["bar", "baz"]
+                    }
+                });
+                this.sendStub = this.stub(this.mopidy, "_send");
+
+            },
+
+            "sends no params if no arguments passed to function": function () {
+                this.mopidy.foo();
+
+                assert.calledOnceWith(this.sendStub, {method: "foo"});
+            },
+
+            "sends messages with function arguments unchanged": function () {
+                this.mopidy.foo(31, 97);
+
+                assert.calledOnceWith(this.sendStub, {
+                    method: "foo",
+                    params: [31, 97]
+                });
+            },
+        },
+
+        "by-position-or-by-name calling convention": {
+            setUp: function () {
+                this.mopidy = new Mopidy({
+                    webSocket: this.webSocket,
+                    callingConvention: "by-position-or-by-name"
+                });
+                this.mopidy._createApi({
+                    foo: {
+                        params: ["bar", "baz"]
+                    }
+                });
+                this.sendStub = this.stub(this.mopidy, "_send");
+            },
+
+            "must be turned on manually": function () {
+                assert.equals(
+                    this.mopidy._settings.callingConvention,
+                    "by-position-or-by-name");
+            },
+
+            "sends no params if no arguments passed to function": function () {
+                this.mopidy.foo();
+
+                assert.calledOnceWith(this.sendStub, {method: "foo"});
+            },
+
+            "sends by-position if argument is a list": function () {
+                this.mopidy.foo([31, 97]);
+
+                assert.calledOnceWith(this.sendStub, {
+                    method: "foo",
+                    params: [31, 97]
+                });
+            },
+
+            "sends by-name if argument is an object": function () {
+                this.mopidy.foo({bar: 31, baz: 97});
+
+                assert.calledOnceWith(this.sendStub, {
+                    method: "foo",
+                    params: {bar: 31, baz: 97}
+                });
+            },
+
+            "rejects with error if more than one argument": function (done) {
+                var promise = this.mopidy.foo([1, 2], {c: 3, d: 4});
+
+                refute.called(this.sendStub);
+
+                promise.done(
+                    done(function () {
+                        assert(false);
+                    }),
+                    done(function (error) {
+                        assert(error instanceof Error);
+                        assert.equals(
+                            error.message,
+                            "Expected zero arguments, a single array, " +
+                            "or a single object.");
+                    })
+                );
+            },
+
+            "rejects with error if string": function (done) {
+                var promise = this.mopidy.foo("hello");
+
+                refute.called(this.sendStub);
+
+                promise.done(
+                    done(function () {
+                        assert(false);
+                    }),
+                    done(function (error) {
+                        assert(error instanceof Error);
+                        assert(error instanceof TypeError);
+                        assert.equals(
+                            error.message, "Expected an array or an object.");
+                    })
+                );
+            },
+
+            "rejects with error if number": function (done) {
+                var promise = this.mopidy.foo(1337);
+
+                refute.called(this.sendStub);
+
+                promise.done(
+                    done(function () {
+                        assert(false);
+                    }),
+                    done(function (error) {
+                        assert(error instanceof Error);
+                        assert(error instanceof TypeError);
+                        assert.equals(
+                            error.message, "Expected an array or an object.");
+                    })
+                );
+            }
         }
     }
 });

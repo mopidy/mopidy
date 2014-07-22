@@ -1,11 +1,12 @@
 from __future__ import unicode_literals
 
 import errno
-from mock import patch, sentinel, Mock
 import socket
 import unittest
 
 import gobject
+
+from mock import Mock, patch, sentinel
 
 from mopidy.utils import network
 

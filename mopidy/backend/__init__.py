@@ -6,6 +6,19 @@ from mopidy import listener
 
 
 class Backend(object):
+    """Backend API
+
+    If the backend has problems during initialization it should raise
+    :exc:`mopidy.exceptions.BackendError` with a descriptive error message.
+    This will make Mopidy print the error message and exit so that the user can
+    fix the issue.
+
+    :param config: the entire Mopidy configuration
+    :type config: dict
+    :param audio: actor proxy for the audio subsystem
+    :type audio: :class:`pykka.ActorProxy` for :class:`mopidy.audio.Audio`
+    """
+
     #: Actor proxy to an instance of :class:`mopidy.audio.Audio`.
     #:
     #: Should be passed to the backend constructor as the kwarg ``audio``,

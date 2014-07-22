@@ -25,9 +25,8 @@ mopidy_args = sys.argv[1:]
 sys.argv[1:] = []
 
 
-from mopidy import commands, ext
-from mopidy import config as config_lib
-from mopidy.utils import log, path, process, versioning
+from mopidy import commands, config as config_lib, ext
+from mopidy.utils import encoding, log, path, process, versioning
 
 logger = logging.getLogger(__name__)
 
@@ -74,20 +73,28 @@ def main():
 
         log.setup_logging(config, verbosity_level, args.save_debug_log)
 
-        enabled_extensions = []
+        extensions = {
+            'validate': [], 'config': [], 'disabled': [], 'enabled': []}
         for extension in installed_extensions:
             if not ext.validate_extension(extension):
                 config[extension.ext_name] = {'enabled': False}
                 config_errors[extension.ext_name] = {
                     'enabled': 'extension disabled by self check.'}
+                extensions['validate'].append(extension)
             elif not config[extension.ext_name]['enabled']:
                 config[extension.ext_name] = {'enabled': False}
                 config_errors[extension.ext_name] = {
                     'enabled': 'extension disabled by user config.'}
+                extensions['disabled'].append(extension)
+            elif config_errors.get(extension.ext_name):
+                config[extension.ext_name]['enabled'] = False
+                config_errors[extension.ext_name]['enabled'] = (
+                    'extension disabled due to config errors.')
+                extensions['config'].append(extension)
             else:
-                enabled_extensions.append(extension)
+                extensions['enabled'].append(extension)
 
-        log_extension_info(installed_extensions, enabled_extensions)
+        log_extension_info(installed_extensions, extensions['enabled'])
 
         # Config and deps commands are simply special cased for now.
         if args.command == config_cmd:
@@ -96,22 +103,22 @@ def main():
         elif args.command == deps_cmd:
             return args.command.run()
 
-        # Remove errors for extensions that are not enabled:
-        for extension in installed_extensions:
-            if extension not in enabled_extensions:
-                config_errors.pop(extension.ext_name, None)
-        check_config_errors(config_errors)
+        check_config_errors(config, config_errors, extensions)
+
+        if not extensions['enabled']:
+            logger.error('No extension enabled, exiting...')
+            sys.exit(1)
 
         # Read-only config from here on, please.
         proxied_config = config_lib.Proxy(config)
 
-        if args.extension and args.extension not in enabled_extensions:
+        if args.extension and args.extension not in extensions['enabled']:
             logger.error(
                 'Unable to run command provided by disabled extension %s',
                 args.extension.ext_name)
             return 1
 
-        for extension in enabled_extensions:
+        for extension in extensions['enabled']:
             extension.setup(registry)
 
         # Anything that wants to exit after this point must use
@@ -142,9 +149,10 @@ def create_file_structures_and_config(args, extensions):
         default = config_lib.format_initial(extensions)
         path.get_or_create_file(config_file, mkdir=False, content=default)
         logger.info('Initialized %s with default config', config_file)
-    except IOError as e:
-        logger.warning('Unable to initialize %s with default config: %s',
-                       config_file, e)
+    except IOError as error:
+        logger.warning(
+            'Unable to initialize %s with default config: %s',
+            config_file, encoding.locale_decode(error))
 
 
 def check_old_locations():
@@ -173,13 +181,39 @@ def log_extension_info(all_extensions, enabled_extensions):
         'Disabled extensions: %s', ', '.join(disabled_names) or 'none')
 
 
-def check_config_errors(errors):
-    if not errors:
-        return
-    for section in errors:
-        for key, msg in errors[section].items():
-            logger.error('Config value %s/%s %s', section, key, msg)
-    sys.exit(1)
+def check_config_errors(config, errors, extensions):
+    fatal_errors = []
+    extension_names = {}
+    all_extension_names = set()
+
+    for state in extensions:
+        extension_names[state] = set(e.ext_name for e in extensions[state])
+        all_extension_names.update(extension_names[state])
+
+    for section in sorted(errors):
+        if not errors[section]:
+            continue
+
+        if section not in all_extension_names:
+            logger.warning('Found fatal %s configuration errors:', section)
+            fatal_errors.append(section)
+        elif section in extension_names['config']:
+            del errors[section]['enabled']
+            logger.warning('Found %s configuration errors, the extension '
+                           'has been automatically disabled:', section)
+        else:
+            continue
+
+        for field, msg in errors[section].items():
+            logger.warning('  %s/%s %s', section, field, msg)
+
+    if extensions['config']:
+        logger.warning('Please fix the extension configuration errors or '
+                       'disable the extensions to silence these messages.')
+
+    if fatal_errors:
+        logger.error('Please fix fatal configuration errors, exiting...')
+        sys.exit(1)
 
 
 if __name__ == '__main__':

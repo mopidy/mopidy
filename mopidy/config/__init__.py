@@ -15,6 +15,7 @@ from mopidy.utils import path, versioning
 logger = logging.getLogger(__name__)
 
 _logging_schema = ConfigSchema('logging')
+_logging_schema['color'] = Boolean()
 _logging_schema['console_format'] = String()
 _logging_schema['debug_format'] = String()
 _logging_schema['debug_file'] = Path()
@@ -24,7 +25,7 @@ _loglevels_schema = LogLevelConfigSchema('loglevels')
 
 _audio_schema = ConfigSchema('audio')
 _audio_schema['mixer'] = String()
-_audio_schema['mixer_track'] = String(optional=True)
+_audio_schema['mixer_track'] = Deprecated()
 _audio_schema['mixer_volume'] = Integer(optional=True, minimum=0, maximum=100)
 _audio_schema['output'] = String()
 _audio_schema['visualizer'] = String(optional=True)
@@ -38,7 +39,7 @@ _proxy_schema['username'] = String(optional=True)
 _proxy_schema['password'] = Secret(optional=True)
 
 # NOTE: if multiple outputs ever comes something like LogLevelConfigSchema
-#_outputs_schema = config.AudioOutputConfigSchema()
+# _outputs_schema = config.AudioOutputConfigSchema()
 
 _schemas = [_logging_schema, _loglevels_schema, _audio_schema, _proxy_schema]
 

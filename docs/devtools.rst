@@ -54,7 +54,7 @@ Creating releases
 #. Update changelog and commit it.
 
 #. Bump the version number in ``mopidy/__init__.py``. Remember to update the
-   test case in ``tests/version_test.py``.
+   test case in ``tests/test_version.py``.
 
 #. Merge the release branch (``develop`` in the example) into master::
 
@@ -118,6 +118,11 @@ packages is maintained.
 
        sudo apt-get install build-essential git-buildpackage
 
+#. Create a Wheezy pbuilder env if running on Ubuntu and this the first time.
+   See :issue:`561` for details about why this is needed::
+
+       DIST=wheezy sudo git-pbuilder update --mirror=http://mirror.rackspace.com/debian/ --debootstrapopts --keyring=/usr/share/keyrings/debian-archive-keyring.gpg
+
 #. Check out the ``debian`` branch of the repo::
 
        git checkout -t origin/debian
@@ -142,14 +147,26 @@ packages is maintained.
 
        git buildpackage -uc -us
 
+   If you are using the pbuilder make sure this command is::
+
+       sudo git buildpackage -uc -us --git-ignore-new --git-pbuilder --git-dist=wheezy --git-no-pbuilder-autoconf
+
 #. Install and test newly built package::
 
        sudo debi
+
+   Again for pbuilder use::
+
+       sudo debi --debs-dir /var/cache/pbuilder/result/
 
 #. If everything is OK, build the package a final time to tag the package
    version::
 
        git buildpackage -uc -us --git-tag
+
+   Pbuilder::
+
+       sudo git buildpackage -uc -us --git-ignore-new --git-pbuilder --git-dist=wheezy --git-no-pbuilder-autoconf --git-tag
 
 #. Push the changes you've done to the ``debian`` branch and the new tag::
 
@@ -160,6 +177,8 @@ packages is maintained.
    branch on the other builders and run::
 
        git buildpackage -uc -us
+
+   Modify as above to use the pbuilder as needed.
 
 #. Copy files to the APT server. Make sure to select the correct part of the
    repo, e.g. main, contrib, or non-free::

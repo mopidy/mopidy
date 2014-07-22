@@ -1,8 +1,9 @@
 from __future__ import unicode_literals
 
 import argparse
-import mock
 import unittest
+
+import mock
 
 from mopidy import commands
 

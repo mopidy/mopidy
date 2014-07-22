@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import re
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 
 def get_version(filename):
@@ -26,10 +26,9 @@ setup(
     install_requires=[
         'setuptools',
         'Pykka >= 1.1',
+        'tornado >= 2.3',
     ],
-    extras_require={
-        'http': ['CherryPy >= 3.2.2', 'ws4py >= 0.2.3'],
-    },
+    extras_require={'http': []},
     test_suite='nose.collector',
     tests_require=[
         'nose',
@@ -38,12 +37,12 @@ setup(
     entry_points={
         'console_scripts': [
             'mopidy = mopidy.__main__:main',
-            'mopidy-convert-config = mopidy.config.convert:main',
         ],
         'mopidy.ext': [
-            'http = mopidy.http:Extension [http]',
+            'http = mopidy.http:Extension',
             'local = mopidy.local:Extension',
             'mpd = mopidy.mpd:Extension',
+            'softwaremixer = mopidy.softwaremixer:Extension',
             'stream = mopidy.stream:Extension',
         ],
     },

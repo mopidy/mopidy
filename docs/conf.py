@@ -35,8 +35,6 @@ class Mock(object):
             # glib.get_user_config_dir()
             return str
         elif (name[0] == name[0].upper()
-                # gst.interfaces.MIXER_TRACK_*
-                and not name.startswith('MIXER_TRACK_')
                 # gst.PadTemplate
                 and not name.startswith('PadTemplate')
                 # dbus.String()
@@ -89,6 +87,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.extlinks',
     'sphinx.ext.graphviz',
+    'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
 ]
 
@@ -141,16 +140,9 @@ latex_documents = [
 
 man_pages = [
     (
-        'commands/mopidy',
+        'command',
         'mopidy',
         'music server',
-        '',
-        '1'
-    ),
-    (
-        'commands/mopidy-convert-config',
-        'mopidy-convert-config',
-        'migrate config files from mopidy pre-0.14',
         '',
         '1'
     ),
@@ -164,4 +156,13 @@ extlinks = {
     'commit': ('https://github.com/mopidy/mopidy/commit/%s', 'commit '),
     'mpris': (
         'https://github.com/mopidy/mopidy-mpris/issues/%s', 'mopidy-mpris#'),
+}
+
+
+# -- Options for intersphinx extension ----------------------------------------
+
+intersphinx_mapping = {
+    'python': ('http://docs.python.org/2', None),
+    'pykka': ('http://www.pykka.org/en/latest/', None),
+    'tornado': ('http://www.tornadoweb.org/en/stable/', None),
 }

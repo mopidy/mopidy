@@ -8,7 +8,7 @@ gobject.threads_init()
 
 from mopidy import exceptions
 from mopidy.audio import scan
-from mopidy.models import Track, Artist, Album
+from mopidy.models import Album, Artist, Track
 from mopidy.utils import path as path_lib
 
 from tests import path_to_data_dir
@@ -283,7 +283,7 @@ class ScannerTest(unittest.TestCase):
 
     def find(self, path):
         media_dir = path_to_data_dir(path)
-        for path in path_lib.find_files(media_dir):
+        for path in path_lib.find_mtimes(media_dir):
             yield os.path.join(media_dir, path)
 
     def scan(self, paths):

@@ -4,9 +4,8 @@ import collections
 import logging
 import random
 
+from mopidy.core import listener
 from mopidy.models import TlTrack
-
-from . import listener
 
 
 logger = logging.getLogger(__name__)
@@ -23,7 +22,7 @@ class TracklistController(object):
 
         self._shuffled = []
 
-    ### Properties
+    # Properties
 
     def get_tl_tracks(self):
         return self._tl_tracks[:]
@@ -136,7 +135,7 @@ class TracklistController(object):
         Playback continues after current song.
     """
 
-    ### Methods
+    # Methods
 
     def index(self, tl_track):
         """

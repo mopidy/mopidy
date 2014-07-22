@@ -2,106 +2,48 @@ from __future__ import unicode_literals
 
 import functools
 import itertools
-import re
 
-from mopidy.models import Ref, Track
-from mopidy.mpd import translator
-from mopidy.mpd.exceptions import MpdArgError, MpdNoExistError
-from mopidy.mpd.protocol import handle_request, stored_playlists
+from mopidy.models import Track
+from mopidy.mpd import exceptions, protocol, translator
 
+_SEARCH_MAPPING = {
+    'album': 'album',
+    'albumartist': 'albumartist',
+    'any': 'any',
+    'artist': 'artist',
+    'comment': 'comment',
+    'composer': 'composer',
+    'date': 'date',
+    'file': 'uri',
+    'filename': 'uri',
+    'genre': 'genre',
+    'performer': 'performer',
+    'title': 'track_name',
+    'track': 'track_no'}
 
-LIST_QUERY = r"""
-  ("?)                  # Optional quote around the field type
-  (?P<field>(           # Field to list in the response
-      [Aa]lbum
-    | [Aa]lbumartist
-    | [Aa]rtist
-    | [Cc]omposer
-    | [Dd]ate
-    | [Gg]enre
-    | [Pp]erformer
-  ))
-  \1                    # End of optional quote around the field type
-  (?:                   # Non-capturing group for optional search query
-    \                   # A single space
-    (?P<mpd_query>.*)
-  )?
-  $
-"""
-
-SEARCH_FIELDS = r"""
-    [Aa]lbum
-  | [Aa]lbumartist
-  | [Aa]ny
-  | [Aa]rtist
-  | [Cc]omment
-  | [Cc]omposer
-  | [Dd]ate
-  | [Ff]ile
-  | [Ff]ilename
-  | [Gg]enre
-  | [Pp]erformer
-  | [Tt]itle
-  | [Tt]rack
-"""
-
-# TODO Would be nice to get ("?)...\1 working for the quotes here
-SEARCH_QUERY = r"""
-  (?P<mpd_query>
-    (?:                 # Non-capturing group for repeating query pairs
-      "?                # Optional quote around the field type
-      (?:
-""" + SEARCH_FIELDS + r"""
-      )
-      "?                # End of optional quote around the field type
-      \                 # A single space
-      "[^"]*"           # Matching a quoted search string
-      \s?
-    )+
-  )
-  $
-"""
-
-SEARCH_PAIR_WITH_GROUPS = r"""
-  ("?)                # Optional quote around the field type
-  \b                  # Only begin matching at word bundaries
-  (                   # A capturing group for the field type
-""" + SEARCH_FIELDS + """
-  )
-  \\1                 # End of optional quote around the field type
-  \                   # A single space
-  "([^"]+)"           # Capturing a quoted search string
-"""
-SEARCH_PAIR_WITH_GROUPS_RE = re.compile(
-    SEARCH_PAIR_WITH_GROUPS, flags=(re.UNICODE | re.VERBOSE))
+_LIST_MAPPING = {
+    'album': 'album',
+    'albumartist': 'albumartist',
+    'artist': 'artist',
+    'composer': 'composer',
+    'date': 'date',
+    'genre': 'genre',
+    'performer': 'performer'}
 
 
-def _query_from_mpd_search_format(mpd_query):
-    """
-    Parses an MPD ``search`` or ``find`` query and converts it to the Mopidy
-    query format.
-
-    :param mpd_query: the MPD search query
-    :type mpd_query: string
-    """
-    matches = SEARCH_PAIR_WITH_GROUPS_RE.findall(mpd_query)
+def _query_from_mpd_search_parameters(parameters, mapping):
     query = {}
-    # discard first field, which just captures optional quote
-    for _, field, what in matches:
-        field = field.lower()
-        if field == 'title':
-            field = 'track_name'
-        elif field == 'track':
-            field = 'track_no'
-        elif field in ('file', 'filename'):
-            field = 'uri'
-
-        if not what:
+    parameters = list(parameters)
+    while parameters:
+        # TODO: does it matter that this is now case insensitive
+        field = mapping.get(parameters.pop(0).lower())
+        if not field:
+            raise exceptions.MpdArgError('incorrect arguments')
+        if not parameters:
             raise ValueError
-        if field in query:
-            query[field].append(what)
-        else:
-            query[field] = [what]
+        value = parameters.pop(0)
+        if value.strip():
+            query.setdefault(field, []).append(value)
     return query
 
 
@@ -130,8 +72,8 @@ def _artist_as_track(artist):
         artists=[artist])
 
 
-@handle_request(r'count\ ' + SEARCH_QUERY)
-def count(context, mpd_query):
+@protocol.commands.add('count')
+def count(context, *args):
     """
     *musicpd.org, music database section:*
 
@@ -146,9 +88,9 @@ def count(context, mpd_query):
     - use multiple tag-needle pairs to make more specific searches.
     """
     try:
-        query = _query_from_mpd_search_format(mpd_query)
+        query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
-        raise MpdArgError('incorrect arguments')
+        raise exceptions.MpdArgError('incorrect arguments')
     results = context.core.library.find_exact(**query).get()
     result_tracks = _get_tracks(results)
     return [
@@ -157,8 +99,8 @@ def count(context, mpd_query):
     ]
 
 
-@handle_request(r'find\ ' + SEARCH_QUERY)
-def find(context, mpd_query):
+@protocol.commands.add('find')
+def find(context, *args):
     """
     *musicpd.org, music database section:*
 
@@ -186,9 +128,10 @@ def find(context, mpd_query):
     - uses "file" instead of "filename".
     """
     try:
-        query = _query_from_mpd_search_format(mpd_query)
+        query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return
+
     results = context.core.library.find_exact(**query).get()
     result_tracks = []
     if ('artist' not in query and
@@ -202,8 +145,8 @@ def find(context, mpd_query):
     return translator.tracks_to_mpd_format(result_tracks)
 
 
-@handle_request(r'findadd\ ' + SEARCH_QUERY)
-def findadd(context, mpd_query):
+@protocol.commands.add('findadd')
+def findadd(context, *args):
     """
     *musicpd.org, music database section:*
 
@@ -213,15 +156,15 @@ def findadd(context, mpd_query):
         current playlist. Parameters have the same meaning as for ``find``.
     """
     try:
-        query = _query_from_mpd_search_format(mpd_query)
+        query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return
     results = context.core.library.find_exact(**query).get()
     context.core.tracklist.add(_get_tracks(results))
 
 
-@handle_request(r'list\ ' + LIST_QUERY)
-def list_(context, field, mpd_query=None):
+@protocol.commands.add('list')
+def list_(context, *args):
     """
     *musicpd.org, music database section:*
 
@@ -303,11 +246,27 @@ def list_(context, field, mpd_query=None):
     - does not add quotes around the field argument.
     - capitalizes the field argument.
     """
-    field = field.lower()
+    parameters = list(args)
+    if not parameters:
+        raise exceptions.MpdArgError('incorrect arguments')
+    field = parameters.pop(0).lower()
+
+    if field not in _LIST_MAPPING:
+        raise exceptions.MpdArgError('incorrect arguments')
+
+    if len(parameters) == 1:
+        if field != 'album':
+            raise exceptions.MpdArgError('should be "Album" for 3 arguments')
+        return _list_artist(context, {'artist': parameters})
+
     try:
-        query = translator.query_from_mpd_list_format(field, mpd_query)
+        query = _query_from_mpd_search_parameters(parameters, _LIST_MAPPING)
+    except exceptions.MpdArgError as e:
+        e.message = 'not able to parse args'
+        raise
     except ValueError:
         return
+
     if field == 'artist':
         return _list_artist(context, query)
     if field == 'albumartist':
@@ -392,8 +351,7 @@ def _list_genre(context, query):
     return genres
 
 
-@handle_request(r'listall$')
-@handle_request(r'listall\ "(?P<uri>[^"]+)"$')
+@protocol.commands.add('listall')
 def listall(context, uri=None):
     """
     *musicpd.org, music database section:*
@@ -403,36 +361,18 @@ def listall(context, uri=None):
         Lists all songs and directories in ``URI``.
     """
     result = []
-    root_path = translator.normalize_path(uri)
-    # TODO: doesn't the dispatcher._call_handler have enough info to catch
-    # the error this can produce, set the command and then 'raise'?
-    try:
-        uri = context.directory_path_to_uri(root_path)
-    except MpdNoExistError as e:
-        e.command = 'listall'
-        e.message = 'Not found'
-        raise
-    browse_futures = [(root_path, context.core.library.browse(uri))]
-
-    while browse_futures:
-        base_path, future = browse_futures.pop()
-        for ref in future.get():
-            if ref.type == Ref.DIRECTORY:
-                path = '/'.join([base_path, ref.name.replace('/', '')])
-                result.append(('directory', path))
-                browse_futures.append(
-                    (path, context.core.library.browse(ref.uri)))
-            elif ref.type == Ref.TRACK:
-                result.append(('file', ref.uri))
+    for path, track_ref in context.browse(uri, lookup=False):
+        if not track_ref:
+            result.append(('directory', path))
+        else:
+            result.append(('file', track_ref.uri))
 
     if not result:
-        raise MpdNoExistError('Not found')
+        raise exceptions.MpdNoExistError('Not found')
+    return result
 
-    return [('directory', root_path)] + result
 
-
-@handle_request(r'listallinfo$')
-@handle_request(r'listallinfo\ "(?P<uri>[^"]+)"$')
+@protocol.commands.add('listallinfo')
 def listallinfo(context, uri=None):
     """
     *musicpd.org, music database section:*
@@ -442,45 +382,17 @@ def listallinfo(context, uri=None):
         Same as ``listall``, except it also returns metadata info in the
         same format as ``lsinfo``.
     """
-    dirs_and_futures = []
     result = []
-    root_path = translator.normalize_path(uri)
-    try:
-        uri = context.directory_path_to_uri(root_path)
-    except MpdNoExistError as e:
-        e.command = 'listallinfo'
-        e.message = 'Not found'
-        raise
-    browse_futures = [(root_path, context.core.library.browse(uri))]
-
-    while browse_futures:
-        base_path, future = browse_futures.pop()
-        for ref in future.get():
-            if ref.type == Ref.DIRECTORY:
-                path = '/'.join([base_path, ref.name.replace('/', '')])
-                future = context.core.library.browse(ref.uri)
-                browse_futures.append((path, future))
-                dirs_and_futures.append(('directory', path))
-            elif ref.type == Ref.TRACK:
-                # TODO Lookup tracks in batch for better performance
-                dirs_and_futures.append(context.core.library.lookup(ref.uri))
-
-    result = []
-    for obj in dirs_and_futures:
-        if hasattr(obj, 'get'):
-            for track in obj.get():
-                result.extend(translator.track_to_mpd_format(track))
+    for path, lookup_future in context.browse(uri):
+        if not lookup_future:
+            result.append(('directory', path))
         else:
-            result.append(obj)
-
-    if not result:
-        raise MpdNoExistError('Not found')
-
-    return [('directory', root_path)] + result
+            for track in lookup_future.get():
+                result.extend(translator.track_to_mpd_format(track))
+    return result
 
 
-@handle_request(r'lsinfo$')
-@handle_request(r'lsinfo\ "(?P<uri>[^"]*)"$')
+@protocol.commands.add('lsinfo')
 def lsinfo(context, uri=None):
     """
     *musicpd.org, music database section:*
@@ -498,31 +410,23 @@ def lsinfo(context, uri=None):
     ""``, and ``lsinfo "/"``.
     """
     result = []
-    root_path = translator.normalize_path(uri, relative=True)
-    try:
-        uri = context.directory_path_to_uri(root_path)
-    except MpdNoExistError as e:
-        e.command = 'lsinfo'
-        e.message = 'Not found'
-        raise
-
-    if uri is None:
-        result.extend(stored_playlists.listplaylists(context))
-
-    for ref in context.core.library.browse(uri).get():
-        if ref.type == Ref.DIRECTORY:
-            path = '/'.join([root_path, ref.name.replace('/', '')])
+    for path, lookup_future in context.browse(uri, recursive=False):
+        if not lookup_future:
             result.append(('directory', path.lstrip('/')))
-        elif ref.type == Ref.TRACK:
-            # TODO Lookup tracks in batch for better performance
-            tracks = context.core.library.lookup(ref.uri).get()
+        else:
+            tracks = lookup_future.get()
             if tracks:
                 result.extend(translator.track_to_mpd_format(tracks[0]))
+
+    if uri in (None, '', '/'):
+        result.extend(protocol.stored_playlists.listplaylists(context))
+
+    if not result:
+        raise exceptions.MpdNoExistError('Not found')
     return result
 
 
-@handle_request(r'rescan$')
-@handle_request(r'rescan\ "(?P<uri>[^"]+)"$')
+@protocol.commands.add('rescan')
 def rescan(context, uri=None):
     """
     *musicpd.org, music database section:*
@@ -531,11 +435,11 @@ def rescan(context, uri=None):
 
         Same as ``update``, but also rescans unmodified files.
     """
-    return update(context, uri, rescan_unmodified_files=True)
+    return {'updating_db': 0}  # TODO
 
 
-@handle_request(r'search\ ' + SEARCH_QUERY)
-def search(context, mpd_query):
+@protocol.commands.add('search')
+def search(context, *args):
     """
     *musicpd.org, music database section:*
 
@@ -563,7 +467,7 @@ def search(context, mpd_query):
     - uses "file" instead of "filename".
     """
     try:
-        query = _query_from_mpd_search_format(mpd_query)
+        query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return
     results = context.core.library.search(**query).get()
@@ -573,8 +477,8 @@ def search(context, mpd_query):
     return translator.tracks_to_mpd_format(artists + albums + tracks)
 
 
-@handle_request(r'searchadd\ ' + SEARCH_QUERY)
-def searchadd(context, mpd_query):
+@protocol.commands.add('searchadd')
+def searchadd(context, *args):
     """
     *musicpd.org, music database section:*
 
@@ -587,15 +491,15 @@ def searchadd(context, mpd_query):
         not case sensitive.
     """
     try:
-        query = _query_from_mpd_search_format(mpd_query)
+        query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return
     results = context.core.library.search(**query).get()
     context.core.tracklist.add(_get_tracks(results))
 
 
-@handle_request(r'searchaddpl\ "(?P<playlist_name>[^"]+)"\ ' + SEARCH_QUERY)
-def searchaddpl(context, playlist_name, mpd_query):
+@protocol.commands.add('searchaddpl')
+def searchaddpl(context, *args):
     """
     *musicpd.org, music database section:*
 
@@ -609,8 +513,12 @@ def searchaddpl(context, playlist_name, mpd_query):
         Parameters have the same meaning as for ``find``, except that search is
         not case sensitive.
     """
+    parameters = list(args)
+    if not parameters:
+        raise exceptions.MpdArgError('incorrect arguments')
+    playlist_name = parameters.pop(0)
     try:
-        query = _query_from_mpd_search_format(mpd_query)
+        query = _query_from_mpd_search_parameters(parameters, _SEARCH_MAPPING)
     except ValueError:
         return
     results = context.core.library.search(**query).get()
@@ -623,9 +531,8 @@ def searchaddpl(context, playlist_name, mpd_query):
     context.core.playlists.save(playlist)
 
 
-@handle_request(r'update$')
-@handle_request(r'update\ "(?P<uri>[^"]+)"$')
-def update(context, uri=None, rescan_unmodified_files=False):
+@protocol.commands.add('update')
+def update(context, uri=None):
     """
     *musicpd.org, music database section:*
 
@@ -642,3 +549,27 @@ def update(context, uri=None, rescan_unmodified_files=False):
         ``status`` response.
     """
     return {'updating_db': 0}  # TODO
+
+
+# TODO: add at least reflection tests before adding NotImplemented version
+# @protocol.commands.add('readcomments')
+def readcomments(context, uri):
+    """
+    *musicpd.org, music database section:*
+
+        ``readcomments [URI]``
+
+        Read "comments" (i.e. key-value pairs) from the file specified by
+        "URI". This "URI" can be a path relative to the music directory or a
+        URL in the form "file:///foo/bar.ogg".
+
+        This command may be used to list metadata of remote files (e.g. URI
+        beginning with "http://" or "smb://").
+
+        The response consists of lines in the form "KEY: VALUE". Comments with
+        suspicious characters (e.g. newlines) are ignored silently.
+
+        The meaning of these depends on the codec, and not all decoder plugins
+        support it. For example, on Ogg files, this lists the Vorbis comments.
+    """
+    pass

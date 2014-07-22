@@ -285,7 +285,7 @@ This is ``mopidy_soundspot/__init__.py``::
         version = __version__
 
         def get_default_config(self):
-            conf_file = os.path.join(os.path.dirname(__file__, 'ext.conf'))
+            conf_file = os.path.join(os.path.dirname(__file__), 'ext.conf')
             return config.read(conf_file)
 
         def get_config_schema(self):
@@ -413,6 +413,15 @@ more details.
            return 0
 
 
+Example web application
+=======================
+
+As of Mopidy 0.19, extensions can use Mopidy's builtin web server to host
+static web clients as well as Tornado and WSGI web applications. For several
+examples, see the :ref:`http-server-api` docs or explore with
+:ref:`http-explore-extension` extension.
+
+
 Example GStreamer element
 =========================
 
@@ -422,9 +431,6 @@ elements, you'll need to register them in GStreamer before they can be used.
 Basically, you just implement your GStreamer element in Python and then make
 your :meth:`~mopidy.ext.Extension.setup` method register all your custom
 GStreamer elements.
-
-For examples of custom GStreamer elements implemented in Python, see
-:mod:`mopidy.audio.mixers`.
 
 
 Python conventions

@@ -1,10 +1,9 @@
 from __future__ import unicode_literals
 
-from mopidy.mpd.protocol import handle_request
-from mopidy.mpd.exceptions import MpdUnknownCommand
+from mopidy.mpd import exceptions, protocol
 
 
-@handle_request(r'command_list_begin$')
+@protocol.commands.add('command_list_begin', list_command=False)
 def command_list_begin(context):
     """
     *musicpd.org, command list section:*
@@ -26,11 +25,12 @@ def command_list_begin(context):
     context.dispatcher.command_list = []
 
 
-@handle_request(r'command_list_end$')
+@protocol.commands.add('command_list_end', list_command=False)
 def command_list_end(context):
     """See :meth:`command_list_begin()`."""
+    # TODO: batch consecutive add commands
     if not context.dispatcher.command_list_receiving:
-        raise MpdUnknownCommand(command='command_list_end')
+        raise exceptions.MpdUnknownCommand(command='command_list_end')
     context.dispatcher.command_list_receiving = False
     (command_list, context.dispatcher.command_list) = (
         context.dispatcher.command_list, [])
@@ -49,7 +49,7 @@ def command_list_end(context):
     return command_list_response
 
 
-@handle_request(r'command_list_ok_begin$')
+@protocol.commands.add('command_list_ok_begin', list_command=False)
 def command_list_ok_begin(context):
     """See :meth:`command_list_begin()`."""
     context.dispatcher.command_list_receiving = True

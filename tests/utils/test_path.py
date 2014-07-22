@@ -11,7 +11,7 @@ import glib
 
 from mopidy.utils import path
 
-from tests import path_to_data_dir
+from tests import any_int, path_to_data_dir
 
 
 class GetOrCreateDirTest(unittest.TestCase):
@@ -210,23 +210,28 @@ class ExpandPathTest(unittest.TestCase):
             path.expand_path(b'/tmp/$XDG_INVALID_DIR/foo'))
 
 
-class FindFilesTest(unittest.TestCase):
+class FindMTimesTest(unittest.TestCase):
+    maxDiff = None
+
     def find(self, value):
-        return list(path.find_files(path_to_data_dir(value)))
+        return path.find_mtimes(path_to_data_dir(value))
 
     def test_basic_dir(self):
         self.assert_(self.find(''))
 
     def test_nonexistant_dir(self):
-        self.assertEqual(self.find('does-not-exist'), [])
+        self.assertEqual(self.find('does-not-exist'), {})
 
     def test_file(self):
-        self.assertEqual([], self.find('blank.mp3'))
+        self.assertEqual({path_to_data_dir('blank.mp3'): any_int},
+                         self.find('blank.mp3'))
 
     def test_files(self):
-        files = self.find('find')
-        expected = [b'foo/bar/file', b'foo/file', b'baz/file']
-        self.assertItemsEqual(expected, files)
+        mtimes = self.find('find')
+        expected_files = [
+            b'find/foo/bar/file', b'find/foo/file', b'find/baz/file']
+        expected = {path_to_data_dir(p): any_int for p in expected_files}
+        self.assertEqual(expected, mtimes)
 
     def test_names_are_bytestrings(self):
         is_bytes = lambda f: isinstance(f, bytes)

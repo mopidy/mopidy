@@ -1,12 +1,13 @@
 from __future__ import unicode_literals
 
-import pygst
-pygst.require('0.10')
-import gst
-import gobject
-
 import ConfigParser as configparser
 import io
+
+import gobject
+
+import pygst
+pygst.require('0.10')
+import gst  # noqa
 
 try:
     import xml.etree.cElementTree as elementtree
@@ -17,16 +18,16 @@ except ImportError:
 # TODO: make detect_FOO_header reusable in general mopidy code.
 # i.e. give it just a "peek" like function.
 def detect_m3u_header(typefind):
-    return typefind.peek(0, 8) == b'#EXTM3U\n'
+    return typefind.peek(0, 7).upper() == b'#EXTM3U'
 
 
 def detect_pls_header(typefind):
-    return typefind.peek(0, 11).lower() == b'[playlist]\n'
+    return typefind.peek(0, 10).lower() == b'[playlist]'
 
 
 def detect_xspf_header(typefind):
     data = typefind.peek(0, 150)
-    if b'xspf' not in data:
+    if b'xspf' not in data.lower():
         return False
 
     try:
@@ -40,7 +41,7 @@ def detect_xspf_header(typefind):
 
 def detect_asx_header(typefind):
     data = typefind.peek(0, 50)
-    if b'asx' not in data:
+    if b'asx' not in data.lower():
         return False
 
     try:
@@ -81,6 +82,7 @@ def parse_pls(data):
 
 def parse_xspf(data):
     try:
+        # Last element will be root.
         for event, element in elementtree.iterparse(data):
             element.tag = element.tag.lower()  # normalize
     except elementtree.ParseError:
@@ -93,13 +95,17 @@ def parse_xspf(data):
 
 def parse_asx(data):
     try:
+        # Last element will be root.
         for event, element in elementtree.iterparse(data):
             element.tag = element.tag.lower()  # normalize
     except elementtree.ParseError:
         return
 
-    for ref in element.findall('entry/ref'):
+    for ref in element.findall('entry/ref[@href]'):
         yield ref.get('href', '').strip()
+
+    for entry in element.findall('entry[@href]'):
+        yield entry.get('href', '').strip()
 
 
 def parse_urilist(data):

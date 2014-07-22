@@ -17,7 +17,10 @@ _AVAHI_PUBLISHFLAGS_NONE = 0
 
 
 def _is_loopback_address(host):
-    return host.startswith('127.') or host == '::1'
+    return (
+        host.startswith('127.') or
+        host.startswith('::ffff:127.') or
+        host == '::1')
 
 
 def _convert_text_to_dbus_bytes(text):
@@ -56,6 +59,10 @@ class Zeroconf(object):
         self.name = template.safe_substitute(
             hostname=self.host or socket.getfqdn(), port=self.port)
 
+    def __str__(self):
+        return 'Zeroconf service %s at [%s]:%d' % (
+            self.stype, self.host, self.port)
+
     def publish(self):
         """Publish the service.
 
@@ -63,12 +70,12 @@ class Zeroconf(object):
         """
 
         if _is_loopback_address(self.host):
-            logger.info(
-                'Zeroconf publish on loopback interface is not supported.')
+            logger.debug(
+                '%s: Publish on loopback interface is not supported.', self)
             return False
 
         if not dbus:
-            logger.debug('Zeroconf publish failed: dbus not installed.')
+            logger.debug('%s: dbus not installed; publish failed.', self)
             return False
 
         try:
@@ -76,7 +83,7 @@ class Zeroconf(object):
 
             if not bus.name_has_owner('org.freedesktop.Avahi'):
                 logger.debug(
-                    'Zeroconf publish failed: Avahi service not running.')
+                    '%s: Avahi service not running; publish failed.', self)
                 return False
 
             server = dbus.Interface(
@@ -95,9 +102,10 @@ class Zeroconf(object):
                 self.domain, self.host, dbus.UInt16(self.port), text)
 
             self.group.Commit()
+            logger.debug('%s: Published', self)
             return True
         except dbus.exceptions.DBusException as e:
-            logger.debug('Zeroconf publish failed: %s', e)
+            logger.debug('%s: Publish failed: %s', self, e)
             return False
 
     def unpublish(self):
@@ -109,7 +117,8 @@ class Zeroconf(object):
         if self.group:
             try:
                 self.group.Reset()
+                logger.debug('%s: Unpublished', self)
             except dbus.exceptions.DBusException as e:
-                logger.debug('Zeroconf unpublish failed: %s', e)
+                logger.debug('%s: Unpublish failed: %s', self, e)
             finally:
                 self.group = None

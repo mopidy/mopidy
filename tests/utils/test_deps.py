@@ -1,12 +1,13 @@
 from __future__ import unicode_literals
 
 import platform
-import mock
 import unittest
+
+import mock
 
 import pygst
 pygst.require('0.10')
-import gst
+import gst  # noqa
 
 import pkg_resources
 

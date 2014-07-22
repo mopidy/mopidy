@@ -3,12 +3,13 @@ from __future__ import unicode_literals
 import logging
 import os
 import re
-import urlparse
 import urllib
+import urlparse
 
 from mopidy.models import Track
 from mopidy.utils.encoding import locale_decode
 from mopidy.utils.path import path_to_uri, uri_to_path
+
 
 M3U_EXTINF_RE = re.compile(r'#EXTINF:(-1|\d+),(.*)')
 

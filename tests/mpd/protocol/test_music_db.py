@@ -1,20 +1,29 @@
 from __future__ import unicode_literals
 
-import datetime
 import unittest
 
-from mopidy.mpd.protocol import music_db
 from mopidy.models import Album, Artist, Playlist, Ref, SearchResult, Track
+from mopidy.mpd.protocol import music_db
 
 from tests.mpd import protocol
 
 
 class QueryFromMpdSearchFormatTest(unittest.TestCase):
     def test_dates_are_extracted(self):
-        result = music_db._query_from_mpd_search_format(
-            'Date "1974-01-02" "Date" "1975"')
+        result = music_db._query_from_mpd_search_parameters(
+            ['Date', '1974-01-02', 'Date', '1975'], music_db._SEARCH_MAPPING)
         self.assertEqual(result['date'][0], '1974-01-02')
         self.assertEqual(result['date'][1], '1975')
+
+    def test_empty_value_is_ignored(self):
+        result = music_db._query_from_mpd_search_parameters(
+            ['Date', ''], music_db._SEARCH_MAPPING)
+        self.assertEqual(result, {})
+
+    def test_whitespace_value_is_ignored(self):
+        result = music_db._query_from_mpd_search_parameters(
+            ['Date', '  '], music_db._SEARCH_MAPPING)
+        self.assertEqual(result, {})
 
     # TODO Test more mappings
 
@@ -128,13 +137,17 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.backend.library.dummy_library = tracks
         self.backend.library.dummy_browse_result = {
             'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
-                        Ref.directory(uri='dummy:/foo', name='foo')],
+                        Ref.directory(uri='dummy:/foo', name='foo'),
+                        Ref.album(uri='dummy:/album', name='album'),
+                        Ref.playlist(uri='dummy:/pl', name='pl')],
             'dummy:/foo': [Ref.track(uri='dummy:/foo/b', name='b')]}
 
         self.sendRequest('listall')
 
         self.assertInResponse('file: dummy:/a')
         self.assertInResponse('directory: /dummy/foo')
+        self.assertInResponse('directory: /dummy/album')
+        self.assertInResponse('directory: /dummy/pl')
         self.assertInResponse('file: dummy:/foo/b')
         self.assertInResponse('OK')
 
@@ -177,13 +190,24 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         response2 = self.sendRequest('listall "dummy/"')
         self.assertEqual(response1, response2)
 
+    def test_listall_duplicate(self):
+        self.backend.library.dummy_browse_result = {
+            'dummy:/': [Ref.directory(uri='dummy:/a1', name='a'),
+                        Ref.directory(uri='dummy:/a2', name='a')]}
+
+        self.sendRequest('listall')
+        self.assertInResponse('directory: /dummy/a')
+        self.assertInResponse('directory: /dummy/a [2]')
+
     def test_listallinfo_without_uri(self):
         tracks = [Track(uri='dummy:/a', name='a'),
                   Track(uri='dummy:/foo/b', name='b')]
         self.backend.library.dummy_library = tracks
         self.backend.library.dummy_browse_result = {
             'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
-                        Ref.directory(uri='dummy:/foo', name='foo')],
+                        Ref.directory(uri='dummy:/foo', name='foo'),
+                        Ref.album(uri='dummy:/album', name='album'),
+                        Ref.playlist(uri='dummy:/pl', name='pl')],
             'dummy:/foo': [Ref.track(uri='dummy:/foo/b', name='b')]}
 
         self.sendRequest('listallinfo')
@@ -191,6 +215,8 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('file: dummy:/a')
         self.assertInResponse('Title: a')
         self.assertInResponse('directory: /dummy/foo')
+        self.assertInResponse('directory: /dummy/album')
+        self.assertInResponse('directory: /dummy/pl')
         self.assertInResponse('file: dummy:/foo/b')
         self.assertInResponse('Title: b')
         self.assertInResponse('OK')
@@ -236,8 +262,17 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         response2 = self.sendRequest('listallinfo "dummy/"')
         self.assertEqual(response1, response2)
 
+    def test_listallinfo_duplicate(self):
+        self.backend.library.dummy_browse_result = {
+            'dummy:/': [Ref.directory(uri='dummy:/a1', name='a'),
+                        Ref.directory(uri='dummy:/a2', name='a')]}
+
+        self.sendRequest('listallinfo')
+        self.assertInResponse('directory: /dummy/a')
+        self.assertInResponse('directory: /dummy/a [2]')
+
     def test_lsinfo_without_path_returns_same_as_for_root(self):
-        last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
+        last_modified = 1390942873222
         self.backend.playlists.playlists = [
             Playlist(name='a', uri='dummy:/a', last_modified=last_modified)]
 
@@ -246,7 +281,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertEqual(response1, response2)
 
     def test_lsinfo_with_empty_path_returns_same_as_for_root(self):
-        last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
+        last_modified = 1390942873222
         self.backend.playlists.playlists = [
             Playlist(name='a', uri='dummy:/a', last_modified=last_modified)]
 
@@ -255,14 +290,14 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertEqual(response1, response2)
 
     def test_lsinfo_for_root_includes_playlists(self):
-        last_modified = datetime.datetime(2001, 3, 17, 13, 41, 17, 12345)
+        last_modified = 1390942873222
         self.backend.playlists.playlists = [
             Playlist(name='a', uri='dummy:/a', last_modified=last_modified)]
 
         self.sendRequest('lsinfo "/"')
         self.assertInResponse('playlist: a')
-        # Date without microseconds and with time zone information
-        self.assertInResponse('Last-Modified: 2001-03-17T13:41:17Z')
+        # Date without milliseconds and with time zone information
+        self.assertInResponse('Last-Modified: 2014-01-28T21:01:13Z')
         self.assertInResponse('OK')
 
     def test_lsinfo_for_root_includes_dirs_for_each_lib_with_content(self):
@@ -306,11 +341,53 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
     def test_lsinfo_for_dir_includes_subdirs(self):
         self.backend.library.dummy_browse_result = {
-            'dummy:/': [Ref.directory(uri='/foo', name='foo')]}
+            'dummy:/': [Ref.directory(uri='dummy:/foo', name='foo')]}
 
         self.sendRequest('lsinfo "/dummy"')
         self.assertInResponse('directory: dummy/foo')
         self.assertInResponse('OK')
+
+    def test_lsinfo_for_dir_does_not_recurse(self):
+        self.backend.library.dummy_library = [
+            Track(uri='dummy:/a', name='a'),
+        ]
+        self.backend.library.dummy_browse_result = {
+            'dummy:/': [Ref.directory(uri='dummy:/foo', name='foo')],
+            'dummy:/foo': [Ref.track(uri='dummy:/a', name='a')]}
+
+        self.sendRequest('lsinfo "/dummy"')
+        self.assertNotInResponse('file: dummy:/a')
+        self.assertInResponse('OK')
+
+    def test_lsinfo_for_dir_does_not_include_self(self):
+        self.backend.library.dummy_browse_result = {
+            'dummy:/': [Ref.directory(uri='dummy:/foo', name='foo')],
+            'dummy:/foo': [Ref.track(uri='dummy:/a', name='a')]}
+
+        self.sendRequest('lsinfo "/dummy"')
+        self.assertNotInResponse('directory: dummy')
+        self.assertInResponse('OK')
+
+    def test_lsinfo_for_root_returns_browse_result_before_playlists(self):
+        last_modified = 1390942873222
+        self.backend.library.dummy_browse_result = {
+            'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
+                        Ref.directory(uri='dummy:/foo', name='foo')]}
+        self.backend.playlists.playlists = [
+            Playlist(name='a', uri='dummy:/a', last_modified=last_modified)]
+
+        response = self.sendRequest('lsinfo "/"')
+        self.assertLess(response.index('directory: dummy'),
+                        response.index('playlist: a'))
+
+    def test_lsinfo_duplicate(self):
+        self.backend.library.dummy_browse_result = {
+            'dummy:/': [Ref.directory(uri='dummy:/a1', name='a'),
+                        Ref.directory(uri='dummy:/a2', name='a')]}
+
+        self.sendRequest('lsinfo "/dummy"')
+        self.assertInResponse('directory: dummy/a')
+        self.assertInResponse('directory: dummy/a [2]')
 
     def test_update_without_uri(self):
         self.sendRequest('update')
@@ -539,7 +616,7 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.sendRequest('list "foo"')
         self.assertEqualResponse('ACK [2@0] {list} incorrect arguments')
 
-    ### Artist
+    # Artist
 
     def test_list_artist_with_quotes(self):
         self.sendRequest('list "artist"')
@@ -599,7 +676,7 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.assertNotInResponse('Artist: ')
         self.assertInResponse('OK')
 
-    ### Albumartist
+    # Albumartist
 
     def test_list_albumartist_with_quotes(self):
         self.sendRequest('list "albumartist"')
@@ -662,7 +739,7 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.assertNotInResponse('Performer: ')
         self.assertInResponse('OK')
 
-    ### Composer
+    # Composer
 
     def test_list_composer_with_quotes(self):
         self.sendRequest('list "composer"')
@@ -725,7 +802,7 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.assertNotInResponse('Performer: ')
         self.assertInResponse('OK')
 
-    ### Performer
+    # Performer
 
     def test_list_performer_with_quotes(self):
         self.sendRequest('list "performer"')
@@ -788,7 +865,7 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.assertNotInResponse('Performer: ')
         self.assertInResponse('OK')
 
-    ### Album
+    # Album
 
     def test_list_album_with_quotes(self):
         self.sendRequest('list "album"')
@@ -859,7 +936,7 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.assertNotInResponse('Album: ')
         self.assertInResponse('OK')
 
-    ### Date
+    # Date
 
     def test_list_date_with_quotes(self):
         self.sendRequest('list "date"')
@@ -914,7 +991,7 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.assertNotInResponse('Date: ')
         self.assertInResponse('OK')
 
-    ### Genre
+    # Genre
 
     def test_list_genre_with_quotes(self):
         self.sendRequest('list "genre"')

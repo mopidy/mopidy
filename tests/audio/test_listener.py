@@ -1,7 +1,8 @@
 from __future__ import unicode_literals
 
-import mock
 import unittest
+
+import mock
 
 from mopidy import audio
 
@@ -14,16 +15,17 @@ class AudioListenerTest(unittest.TestCase):
         self.listener.state_changed = mock.Mock()
 
         self.listener.on_event(
-            'state_changed', old_state='stopped', new_state='playing')
+            'state_changed', old_state='stopped', new_state='playing',
+            target_state=None)
 
         self.listener.state_changed.assert_called_with(
-            old_state='stopped', new_state='playing')
+            old_state='stopped', new_state='playing', target_state=None)
 
     def test_listener_has_default_impl_for_reached_end_of_stream(self):
         self.listener.reached_end_of_stream()
 
     def test_listener_has_default_impl_for_state_changed(self):
-        self.listener.state_changed(None, None)
+        self.listener.state_changed(None, None, None)
 
     def test_listener_has_default_impl_for_stream_changed(self):
         self.listener.stream_changed(None)

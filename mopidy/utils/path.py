@@ -1,8 +1,11 @@
 from __future__ import unicode_literals
 
+import Queue as queue
 import logging
 import os
+import stat
 import string
+import threading
 import urllib
 import urlparse
 
@@ -107,32 +110,81 @@ def expand_path(path):
     return path
 
 
-def find_files(path):
+def _find_worker(relative, hidden, done, work, results, errors):
+    """Worker thread for collecting stat() results.
+
+    :param str relative: directory to make results relative to
+    :param bool hidden: whether to include files and dirs starting with '.'
+    :param threading.Event done: event indicating that all work has been done
+    :param queue.Queue work: queue of paths to process
+    :param dict results: shared dictionary for storing all the stat() results
+    :param dict errors: shared dictionary for storing any per path errors
     """
-    Finds all files within a path.
+    while not done.is_set():
+        try:
+            entry = work.get(block=False)
+        except queue.Empty:
+            continue
 
-    Directories and files with names starting with ``.`` is ignored.
+        if relative:
+            path = os.path.relpath(entry, relative)
+        else:
+            path = entry
 
-    :returns: yields the full path to files as bytestrings
+        try:
+            st = os.lstat(entry)
+            if stat.S_ISDIR(st.st_mode):
+                for e in os.listdir(entry):
+                    if hidden or not e.startswith(b'.'):
+                        work.put(os.path.join(entry, e))
+            elif stat.S_ISREG(st.st_mode):
+                results[path] = st
+            else:
+                errors[path] = 'Not a file or directory'
+        except os.error as e:
+            errors[path] = str(e)
+        finally:
+            work.task_done()
+
+
+def _find(root, thread_count=10, hidden=True, relative=False):
+    """Threaded find implementation that provides stat results for files.
+
+    Note that we do _not_ handle loops from bad sym/hardlinks in any way.
+
+    :param str root: root directory to search from, may not be a file
+    :param int thread_count: number of workers to use, mainly useful to
+        mitigate network lag when scanning on NFS etc.
+    :param bool hidden: whether to include files and dirs starting with '.'
+    :param bool relative: if results should be relative to root or absolute
     """
-    if isinstance(path, unicode):
-        path = path.encode('utf-8')
+    threads = []
+    results = {}
+    errors = {}
+    done = threading.Event()
+    work = queue.Queue()
+    work.put(os.path.abspath(root))
 
-    if os.path.isfile(path):
-        return
+    if not relative:
+        root = None
 
-    for dirpath, dirnames, filenames in os.walk(path, followlinks=True):
-        for dirname in dirnames:
-            if dirname.startswith(b'.'):
-                # Skip hidden dirs by modifying dirnames inplace
-                dirnames.remove(dirname)
+    for i in range(thread_count):
+        t = threading.Thread(target=_find_worker,
+                             args=(root, hidden, done, work, results, errors))
+        t.daemon = True
+        t.start()
+        threads.append(t)
 
-        for filename in filenames:
-            if filename.startswith(b'.'):
-                # Skip hidden files
-                continue
+    work.join()
+    done.set()
+    for t in threads:
+        t.join()
+    return results, errors
 
-            yield os.path.relpath(os.path.join(dirpath, filename), path)
+
+def find_mtimes(root):
+    results, errors = _find(root, hidden=False, relative=False)
+    return dict((f, int(st.st_mtime)) for f, st in results.iteritems())
 
 
 def check_file_path_is_inside_base_dir(file_path, base_path):

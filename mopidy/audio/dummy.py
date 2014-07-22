@@ -13,7 +13,7 @@ from .listener import AudioListener
 
 
 class DummyAudio(pykka.ThreadingActor):
-    def __init__(self, config=None):
+    def __init__(self, config=None, mixer=None):
         super(DummyAudio, self).__init__()
         self.state = PlaybackState.STOPPED
         self._volume = 0
@@ -88,8 +88,8 @@ class DummyAudio(pykka.ThreadingActor):
             AudioListener.send('stream_changed', uri=self._uri)
 
         old_state, self.state = self.state, new_state
-        AudioListener.send(
-            'state_changed', old_state=old_state, new_state=new_state)
+        AudioListener.send('state_changed', old_state=old_state,
+                           new_state=new_state, target_state=None)
 
         return self._state_change_result
 

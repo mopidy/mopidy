@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 import unittest
 
 from mopidy.mpd.exceptions import (
-    MpdAckError, MpdPermissionError, MpdUnknownCommand, MpdNoCommand,
-    MpdSystemError, MpdNotImplemented)
+    MpdAckError, MpdNoCommand, MpdNotImplemented, MpdPermissionError,
+    MpdSystemError, MpdUnknownCommand)
 
 
 class MpdExceptionsTest(unittest.TestCase):

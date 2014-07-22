@@ -3,9 +3,7 @@ from __future__ import unicode_literals
 import pykka
 
 from mopidy.core import PlaybackState
-from mopidy.mpd.exceptions import MpdNotImplemented
-from mopidy.mpd.protocol import handle_request
-from mopidy.mpd.translator import track_to_mpd_format
+from mopidy.mpd import exceptions, protocol, translator
 
 #: Subsystems that can be registered with idle command.
 SUBSYSTEMS = [
@@ -13,7 +11,7 @@ SUBSYSTEMS = [
     'stored_playlist', 'update']
 
 
-@handle_request(r'clearerror$')
+@protocol.commands.add('clearerror')
 def clearerror(context):
     """
     *musicpd.org, status section:*
@@ -23,10 +21,10 @@ def clearerror(context):
         Clears the current error message in status (this is also
         accomplished by any command that starts playback).
     """
-    raise MpdNotImplemented  # TODO
+    raise exceptions.MpdNotImplemented  # TODO
 
 
-@handle_request(r'currentsong$')
+@protocol.commands.add('currentsong')
 def currentsong(context):
     """
     *musicpd.org, status section:*
@@ -39,12 +37,11 @@ def currentsong(context):
     tl_track = context.core.playback.current_tl_track.get()
     if tl_track is not None:
         position = context.core.tracklist.index(tl_track).get()
-        return track_to_mpd_format(tl_track, position=position)
+        return translator.track_to_mpd_format(tl_track, position=position)
 
 
-@handle_request(r'idle$')
-@handle_request(r'idle\ (?P<subsystems>.+)$')
-def idle(context, subsystems=None):
+@protocol.commands.add('idle', list_command=False)
+def idle(context, *subsystems):
     """
     *musicpd.org, status section:*
 
@@ -77,10 +74,9 @@ def idle(context, subsystems=None):
         notifications when something changed in one of the specified
         subsystems.
     """
+    # TODO: test against valid subsystems
 
-    if subsystems:
-        subsystems = subsystems.split()
-    else:
+    if not subsystems:
         subsystems = SUBSYSTEMS
 
     for subsystem in subsystems:
@@ -100,7 +96,7 @@ def idle(context, subsystems=None):
     return response
 
 
-@handle_request(r'noidle$')
+@protocol.commands.add('noidle', list_command=False)
 def noidle(context):
     """See :meth:`_status_idle`."""
     if not context.subscriptions:
@@ -110,7 +106,7 @@ def noidle(context):
     context.session.prevent_timeout = False
 
 
-@handle_request(r'stats$')
+@protocol.commands.add('stats')
 def stats(context):
     """
     *musicpd.org, status section:*
@@ -137,7 +133,7 @@ def stats(context):
     }
 
 
-@handle_request(r'status$')
+@protocol.commands.add('status')
 def status(context):
     """
     *musicpd.org, status section:*
