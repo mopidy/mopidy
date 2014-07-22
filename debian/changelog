@@ -1,4 +1,4 @@
-mopidy (0.19.0-0mopidy1.1) UNRELEASED; urgency=medium
+mopidy (0.19.0-0mopidy1.1) unstable; urgency=medium
 
   * Non-maintainer upload.
   * Re-build with correct Python requirements not locked to Ubuntu.
