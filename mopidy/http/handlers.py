@@ -144,7 +144,7 @@ class JsonRpcHandler(tornado.web.RequestHandler):
                     'Sent RPC message to %s: %r',
                     self.request.remote_ip, response)
         except Exception as e:
-            logger.error('HTTP JSON-RPC request error:', e)
+            logger.error('HTTP JSON-RPC request error: %s', e)
             self.write_error(500)
 
     def set_extra_headers(self):

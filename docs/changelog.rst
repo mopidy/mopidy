@@ -13,6 +13,10 @@ v0.19.1 (UNRELEASED)
   Mopidy continue to work on Debian/Raspbian stable, where Tornado 2.3 is the
   newest version available.
 
+**HTTP**
+
+- Add missing string interpolation placeholder.
+
 **Development**
 
 - ``mopidy --version`` and :meth:`mopidy.core.Core.get_version` now returns the
