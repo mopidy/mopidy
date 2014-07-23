@@ -83,8 +83,6 @@ A Mopidy web client made by Argonaut in SF for their office jukebox.
 -- http://blog.argonautinc.com/post/83027259908/music-is-pretty-important-to-our-culture-and
 
 
-<<<<<<< HEAD
-=======
 Mopify
 ======
 
@@ -99,7 +97,6 @@ Mopidy and the Spotify web APIs.
     -- https://github.com/dirkgroenen/Mopify
 
 
->>>>>>> develop
 Other web clients
 =================
 
