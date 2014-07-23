@@ -4,6 +4,27 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+v0.19.1 (2014-07-23)
+====================
+
+Bug fix release.
+
+**Dependencies**
+
+- Mopidy now requires Tornado >= 2.3, instead of >= 3.1. This should make
+  Mopidy continue to work on Debian/Raspbian stable, where Tornado 2.3 is the
+  newest version available.
+
+**HTTP**
+
+- Add missing string interpolation placeholder.
+
+**Development**
+
+- ``mopidy --version`` and :meth:`mopidy.core.Core.get_version` now returns the
+  correct version when Mopidy is run from a Git repo other than Mopidy's own.
+  (Related to :issue:`706`)
+
 
 v0.19.0 (2014-07-21)
 ====================
