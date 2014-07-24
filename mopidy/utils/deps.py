@@ -143,14 +143,10 @@ def _gstreamer_check_elements():
         # Spotify
         'appsrc',
 
-        # Mixers and sinks
-        'alsamixer',
+        # Audio sinks
         'alsasink',
-        'ossmixer',
         'osssink',
-        'oss4mixer',
         'oss4sink',
-        'pulsemixer',
         'pulsesink',
 
         # MP3 encoding and decoding
