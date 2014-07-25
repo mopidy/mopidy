@@ -10,6 +10,11 @@ v0.19.2 (UNRELEASED)
 
 Bug fix release.
 
+**Audio**
+
+- Make :confval:`audio/mixer_volume` work on the software mixer again. This
+  was broken with the mixer changes in 0.19.0. (Fixes: :issue:`791`)
+
 **HTTP**
 
 - When using Tornado 4.0, allow WebSocket requests from other hosts. (Fixes:
