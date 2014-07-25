@@ -138,7 +138,13 @@ class Commands(object):
             def validate(*args, **kwargs):
                 if varargs:
                     return func(*args, **kwargs)
-                callargs = inspect.getcallargs(func, *args, **kwargs)
+
+                try:
+                    callargs = inspect.getcallargs(func, *args, **kwargs)
+                except TypeError:
+                    raise exceptions.MpdArgError(
+                        'wrong number of arguments for "%s"' % name)
+
                 for key, value in callargs.items():
                     default = defaults.get(key, object())
                     if key in validators and value != default:
@@ -146,6 +152,7 @@ class Commands(object):
                             callargs[key] = validators[key](value)
                         except ValueError:
                             raise exceptions.MpdArgError('incorrect arguments')
+
                 return func(**callargs)
 
             validate.auth_required = auth_required

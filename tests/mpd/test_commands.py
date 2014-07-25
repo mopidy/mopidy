@@ -169,15 +169,15 @@ class TestCommands(unittest.TestCase):
 
     def test_call_incorrect_args(self):
         self.commands.add('foo')(lambda context: context)
-        with self.assertRaises(TypeError):
+        with self.assertRaises(exceptions.MpdArgError):
             self.commands.call(['foo', 'bar'])
 
         self.commands.add('bar')(lambda context, required: context)
-        with self.assertRaises(TypeError):
+        with self.assertRaises(exceptions.MpdArgError):
             self.commands.call(['bar', 'bar', 'baz'])
 
         self.commands.add('baz')(lambda context, optional=None: context)
-        with self.assertRaises(TypeError):
+        with self.assertRaises(exceptions.MpdArgError):
             self.commands.call(['baz', 'bar', 'baz'])
 
     def test_validator_gets_applied_to_required_arg(self):
