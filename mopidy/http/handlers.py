@@ -112,6 +112,11 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             logger.error('WebSocket request error: %s', e)
             self.close()
 
+    def check_origin(self, origin):
+        # Allow cross-origin WebSocket connections, like Tornado before 4.0
+        # defaulted to.
+        return True
+
 
 def set_mopidy_headers(request_handler):
     request_handler.set_header('Cache-Control', 'no-cache')

@@ -4,6 +4,18 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+
+v0.19.2 (UNRELEASED)
+====================
+
+Bug fix release.
+
+**HTTP**
+
+- When using Tornado 4.0, allow WebSocket requests from other hosts. (Fixes:
+  :issue:`788`)
+
+
 v0.19.1 (2014-07-23)
 ====================
 
