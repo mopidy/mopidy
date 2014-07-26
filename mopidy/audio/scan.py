@@ -186,7 +186,7 @@ def audio_data_to_track(data):
 
     track_kwargs['date'] = _date(tags)
     track_kwargs['last_modified'] = int(data.get('mtime') or 0)
-    track_kwargs['length'] = (data.get(gst.TAG_DURATION) or 0) // gst.MSECOND
+    track_kwargs['length'] = max(0, (data.get(gst.TAG_DURATION) or 0)) // gst.MSECOND
 
     # Clear out any empty values we found
     track_kwargs = {k: v for k, v in track_kwargs.items() if v}
