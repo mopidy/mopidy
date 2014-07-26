@@ -5,9 +5,9 @@ Extension development
 *********************
 
 Mopidy started as simply an MPD server that could play music from Spotify.
-Early on Mopidy got multiple "frontends" to expose Mopidy to more than just MPD
-clients: for example the scrobbler frontend what scrobbles what you've listened
-to to your Last.fm account, the MPRIS frontend that integrates Mopidy into the
+Early on, Mopidy got multiple "frontends" to expose Mopidy to more than just MPD
+clients: for example the scrobbler frontend that scrobbles your listening 
+history to your Last.fm account, the MPRIS frontend that integrates Mopidy into the
 Ubuntu Sound Menu, and the HTTP server and JavaScript player API making web
 based Mopidy clients possible. In Mopidy 0.9 we added support for multiple
 music sources without stopping and reconfiguring Mopidy: for example the local
@@ -27,7 +27,7 @@ Anatomy of an extension
 
 Extensions are located in a Python package called ``mopidy_something`` where
 "something" is the name of the application, library or web service you want to
-integrated with Mopidy. So for example if you plan to add support for a service
+integrate with Mopidy. So, for example, if you plan to add support for a service
 named Soundspot to Mopidy, you would name your extension's Python package
 ``mopidy_soundspot``.
 
@@ -36,10 +36,6 @@ The extension must be shipped with a ``setup.py`` file and be registered on
 be something like "Mopidy-Soundspot". Make sure to include the name "Mopidy"
 somewhere in that name and that you check the capitalization. This is the name
 users will use when they install your extension from PyPI.
-
-Also make sure the development version link in your package details work so
-that people can easily install the development version into their virtualenv
-simply by running e.g. ``pip install Mopidy-Soundspot==dev``.
 
 Mopidy extensions must be licensed under an Apache 2.0 (like Mopidy itself),
 BSD, MIT or more liberal license to be able to be enlisted in the Mopidy
@@ -79,11 +75,11 @@ the readme of `cookiecutter-mopidy-ext
 Example README.rst
 ==================
 
-The README file should quickly tell what the extension does, how to install it,
-and how to configure it. The README should contain a development snapshot link
-to a tarball of the latest development version of the extension. It's important
-that the development snapshot link ends with ``#egg=Mopidy-Something-dev`` for
-installation using ``pip install Mopidy-Something==dev`` to work.
+The README file should quickly explain what the extension does, how to install 
+it, and how to configure it. It should also contain a link to a tarball of the 
+latest development version of the extension. It's important that this link ends 
+with ``#egg=Mopidy-Something-dev`` for installation using 
+``pip install Mopidy-Something==dev`` to work.
 
 .. code-block:: rst
 
@@ -124,7 +120,7 @@ installation using ``pip install Mopidy-Something==dev`` to work.
 
     - `Source code <https://github.com/mopidy/mopidy-soundspot>`_
     - `Issue tracker <https://github.com/mopidy/mopidy-soundspot/issues>`_
-    - `Download development snapshot <https://github.com/mopidy/mopidy-soundspot/tarball/master#egg=Mopidy-Soundspot-dev>`_
+    - `Development branch tarball <https://github.com/mopidy/mopidy-soundspot/tarball/master#egg=Mopidy-Soundspot-dev>`_
 
 
     Changelog
@@ -239,9 +235,9 @@ The root of your Python package should have an ``__version__`` attribute with a
 class named ``Extension`` which inherits from Mopidy's extension base class,
 :class:`mopidy.ext.Extension`. This is the class referred to in the
 ``entry_points`` part of ``setup.py``. Any imports of other files in your
-extension should be kept inside methods. This ensures that this file can be
-imported without raising :exc:`ImportError` exceptions for missing
-dependencies, etc.
+extension, outside of Mopidy and it's core requirements, should be kept inside 
+methods. This ensures that this file can be imported without raising 
+:exc:`ImportError` exceptions for missing dependencies, etc.
 
 The default configuration for the extension is defined by the
 ``get_default_config()`` method in the ``Extension`` class which returns a
@@ -252,10 +248,10 @@ an ``enabled`` config which normally should default to ``true``. Provide good
 defaults for all config values so that as few users as possible will need to
 change them. The exception is if the config value has security implications; in
 that case you should default to the most secure configuration. Leave any
-configurations that doesn't have meaningful defaults blank, like ``username``
+configurations that don't have meaningful defaults blank, like ``username``
 and ``password``. In the example below, we've chosen to maintain the default
-config as a separate file named ``ext.conf``. This makes it easy to e.g.
-include the default config in documentation without duplicating it.
+config as a separate file named ``ext.conf``. This makes it easy to include the 
+default config in documentation without duplicating it.
 
 This is ``mopidy_soundspot/__init__.py``::
 
@@ -321,6 +317,9 @@ This is ``mopidy_soundspot/__init__.py``::
             gobject.type_register(SoundspotMixer)
             gst.element_register(
                 SoundspotMixer, 'soundspotmixer', gst.RANK_MARGINAL)
+            
+            # Or nothing to register e.g. command extension
+            pass
 
 And this is ``mopidy_soundspot/ext.conf``:
 
@@ -393,7 +392,7 @@ such as scanning for media, adding a command is the way to go. Your top level
 command name will always match your extension name, but you are free to add
 sub-commands with names of your choosing.
 
-The skeleton of a commands would look like this. See :ref:`commands-api` for
+The skeleton of a command would look like this. See :ref:`commands-api` for
 more details.
 
 ::
@@ -409,14 +408,14 @@ more details.
             self.add_argument('--foo')
 
         def run(self, args, config, extensions):
-           # Your backend implementation
+           # Your command implementation
            return 0
 
 
 Example web application
 =======================
 
-As of Mopidy 0.19, extensions can use Mopidy's builtin web server to host
+As of Mopidy 0.19, extensions can use Mopidy's built-in web server to host
 static web clients as well as Tornado and WSGI web applications. For several
 examples, see the :ref:`http-server-api` docs or explore with
 :ref:`http-explore-extension` extension.
@@ -433,6 +432,17 @@ your :meth:`~mopidy.ext.Extension.setup` method register all your custom
 GStreamer elements.
 
 
+Running an extension
+====================
+
+Once your extension is ready to go, to see it in action you'll need to register 
+it with Mopidy. Typically this is done by running ``python setup.py install`` 
+from your extension's Git repo root directory. While developing your extension 
+and to avoid doing this every time you make a change, you can instead run 
+``python setup.py develop`` to effectively link Mopidy directly with your 
+development files.
+
+
 Python conventions
 ==================
 
@@ -447,13 +457,13 @@ Use of Mopidy APIs
 
 When writing an extension, you should only use APIs documented at
 :ref:`api-ref`. Other parts of Mopidy, like :mod:`mopidy.utils`, may change at
-any time, and is not something extensions should use.
+any time and are not something extensions should use.
 
 
 Logging in extensions
 =====================
 
-When making servers like Mopidy, logging is essential for understanding what's
+For servers like Mopidy, logging is essential for understanding what's
 going on. We use the :mod:`logging` module from Python's standard library. When
 creating a logger, always namespace the logger using your Python package name
 as this will be visible in Mopidy's debug log::
