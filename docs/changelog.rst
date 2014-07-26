@@ -5,6 +5,13 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v0.19.3 (UNRELEASED)
+====================
+
+- Fix Zeroconf discovery by adding ``.local`` to the announced hostname. (PR:
+  :issue:`795`)
+
+
 v0.19.2 (2014-07-26)
 ====================
 
