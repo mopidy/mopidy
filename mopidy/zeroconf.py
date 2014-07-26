@@ -43,21 +43,17 @@ class Zeroconf(object):
     :type text: list of str
     """
 
-    def __init__(self, name, port, stype=None, domain=None,
-                 host=None, text=None):
+    def __init__(self, name, port, stype=None, domain=None, text=None):
         self.group = None
         self.stype = stype or '_http._tcp'
         self.domain = domain or ''
         self.port = port
         self.text = text or []
-        if host in ('::', '0.0.0.0'):
-            self.host = ''
-        else:
-            self.host = host
 
         template = string.Template(name)
         self.name = template.safe_substitute(
-            hostname=self.host or socket.getfqdn(), port=self.port)
+            hostname=socket.getfqdn(), port=self.port)
+        self.host = '%s.local' % socket.getfqdn()
 
     def __str__(self):
         return 'Zeroconf service %s at [%s]:%d' % (
