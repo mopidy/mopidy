@@ -15,7 +15,7 @@ If you are running OS X, you can install everything needed with Homebrew.
 #. Install `Homebrew <https://github.com/Homebrew/homebrew>`_.
 
 #. If you are already using Homebrew, make sure your installation is up to
-   date before you continue::
+   date before you continue. Notice that this can update other pieces of software, as well::
 
        brew update
        brew upgrade
@@ -32,9 +32,10 @@ If you are running OS X, you can install everything needed with Homebrew.
        dependencies and will crash.
 
        You can either amend your ``PYTHONPATH`` permanently, by adding the
-       following statement to your shell's init file, e.g. ``~/.bashrc``::
+       following statement to your shell's init file, e.g. ``~/.bashrc``, and reload it::
 
            export PYTHONPATH=$(brew --prefix)/lib/python2.7/site-packages:$PYTHONPATH
+           source ~/.bashrc
 
        Or, you can prefix the Mopidy command every time you run it::
 
