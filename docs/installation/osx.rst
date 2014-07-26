@@ -20,6 +20,9 @@ If you are running OS X, you can install everything needed with Homebrew.
        brew update
        brew upgrade
 
+   Notice that this will upgrade all software on your system that have been
+   installed with Homebrew.
+
 #. Mopidy works out of box if you have installed Python from Homebrew::
 
        brew install python
@@ -35,6 +38,10 @@ If you are running OS X, you can install everything needed with Homebrew.
        following statement to your shell's init file, e.g. ``~/.bashrc``::
 
            export PYTHONPATH=$(brew --prefix)/lib/python2.7/site-packages:$PYTHONPATH
+
+       And then reload the shell's init file or restart your terminal::
+
+           source ~/.bashrc
 
        Or, you can prefix the Mopidy command every time you run it::
 

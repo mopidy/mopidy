@@ -19,6 +19,12 @@ class AuthenticationActiveTest(protocol.BaseTestCase):
         self.assertFalse(self.dispatcher.authenticated)
         self.assertEqualResponse('ACK [3@0] {password} incorrect password')
 
+    def test_authentication_without_password_fails(self):
+        self.sendRequest('password')
+        self.assertFalse(self.dispatcher.authenticated)
+        self.assertEqualResponse(
+            'ACK [2@0] {password} wrong number of arguments for "password"')
+
     def test_anything_when_not_authenticated_should_fail(self):
         self.sendRequest('any request at all')
         self.assertFalse(self.dispatcher.authenticated)

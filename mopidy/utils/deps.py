@@ -143,21 +143,23 @@ def _gstreamer_check_elements():
         # Spotify
         'appsrc',
 
-        # Mixers and sinks
-        'alsamixer',
+        # Audio sinks
         'alsasink',
-        'ossmixer',
         'osssink',
-        'oss4mixer',
         'oss4sink',
-        'pulsemixer',
         'pulsesink',
 
         # MP3 encoding and decoding
-        'mp3parse',
+        #
+        # One of flump3dec, mad, and mpg123audiodec is required for MP3
+        # playback.
+        'flump3dec',
         'id3demux',
         'id3v2mux',
         'lame',
+        'mad',
+        'mp3parse',
+        # 'mpg123audiodec',  # Only available in GStreamer 1.x
 
         # Ogg Vorbis encoding and decoding
         'vorbisdec',
