@@ -5,10 +5,11 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
-v0.19.2 (UNRELEASED)
+v0.19.2 (2014-07-26)
 ====================
 
-Bug fix release.
+Bug fix release, directly from the Mopidy development sprint at EuroPython 2014
+in Berlin.
 
 **Audio**
 
