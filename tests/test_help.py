@@ -14,7 +14,10 @@ class HelpTest(unittest.TestCase):
         args = [sys.executable, mopidy_dir, '--help']
         process = subprocess.Popen(
             args,
-            env={'PYTHONPATH': os.path.join(mopidy_dir, '..')},
+            env={'PYTHONPATH': ':'.join([
+                os.path.join(mopidy_dir, '..'),
+                os.environ.get('PYTHONPATH', '')
+            ])},
             stdout=subprocess.PIPE)
         output = process.communicate()[0]
         self.assertIn('--version', output)

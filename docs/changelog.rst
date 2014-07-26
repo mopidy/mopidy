@@ -4,6 +4,29 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+
+v0.19.2 (2014-07-26)
+====================
+
+Bug fix release, directly from the Mopidy development sprint at EuroPython 2014
+in Berlin.
+
+**Audio**
+
+- Make :confval:`audio/mixer_volume` work on the software mixer again. This
+  was broken with the mixer changes in 0.19.0. (Fixes: :issue:`791`)
+
+**HTTP frontend**
+
+- When using Tornado 4.0, allow WebSocket requests from other hosts. (Fixes:
+  :issue:`788`)
+
+**MPD frontend**
+
+- Fix crash when MPD commands are called with the wrong number of arguments.
+  This was broken with the MPD command changes in 0.19.0. (Fixes: :issue:`789`)
+
+
 v0.19.1 (2014-07-23)
 ====================
 
@@ -15,7 +38,7 @@ Bug fix release.
   Mopidy continue to work on Debian/Raspbian stable, where Tornado 2.3 is the
   newest version available.
 
-**HTTP**
+**HTTP frontend**
 
 - Add missing string interpolation placeholder.
 
