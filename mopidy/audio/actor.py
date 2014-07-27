@@ -99,7 +99,8 @@ class Audio(pykka.ThreadingActor):
 
     def _setup_preferences(self):
         registry = gst.registry_get_default()
-        jacksink = registry.find_feature('jackaudiosink', gst.TYPE_ELEMENT_FACTORY)
+        jacksink = registry.find_feature(
+            'jackaudiosink', gst.TYPE_ELEMENT_FACTORY)
         if jacksink:
             jacksink.set_rank(gst.RANK_SECONDARY)
 
