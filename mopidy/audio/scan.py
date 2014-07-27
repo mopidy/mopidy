@@ -151,7 +151,7 @@ def _date(tags):
 
 
 def add_musicbrainz_cover_art(track):
-    if track.album is not None and track.album.musicbrainz_id is not None:
+    if track.album and track.album.musicbrainz_id:
         base = "http://coverartarchive.org/release"
         images = frozenset(
             ["{}/{}/front".format(
