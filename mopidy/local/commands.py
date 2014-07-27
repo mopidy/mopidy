@@ -118,7 +118,8 @@ class ScanCommand(commands.Command):
                 relpath = translator.local_track_uri_to_path(uri, media_dir)
                 file_uri = path.path_to_uri(os.path.join(media_dir, relpath))
                 data = scanner.scan(file_uri)
-                track = scan.audio_data_to_track(data).copy(uri=uri)
+                track = scan.add_musicbrainz_cover_art(
+                    scan.audio_data_to_track(data).copy(uri=uri)).copy(uri=uri)
                 library.add(track)
                 logger.debug('Added %s', track.uri)
             except exceptions.ScannerError as error:
