@@ -248,6 +248,7 @@ class PlaybackController(object):
         if success:
             self.core.tracklist.mark_playing(tl_track)
             # TODO: replace with stream-changed
+            self.core.history.add_track(tl_track.track)
             self._trigger_track_playback_started()
         else:
             self.core.tracklist.mark_unplayable(tl_track)
