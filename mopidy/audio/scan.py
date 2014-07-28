@@ -150,6 +150,18 @@ def _date(tags):
         return None
 
 
+def add_musicbrainz_cover_art(track):
+    if track.album and track.album.musicbrainz_id:
+        base = "http://coverartarchive.org/release"
+        images = frozenset(
+            ["{}/{}/front".format(
+                base,
+                track.album.musicbrainz_id)])
+        album = track.album.copy(images=images)
+        track = track.copy(album=album)
+    return track
+
+
 def audio_data_to_track(data):
     """Convert taglist data + our extras to a track."""
     tags = data['tags']
