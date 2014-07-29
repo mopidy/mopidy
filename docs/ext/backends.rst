@@ -20,6 +20,15 @@ Provides a backend for playing music from the `Banshee <http://banshee.fm/>`_
 music player's music library.
 
 
+Mopidy-Bassdrive
+================
+
+https://github.com/felixb/mopidy-Bassdrive
+
+Provides a backend for playing radio streams from `BassDrive
+<http://bassdrive.com/>`_.
+
+
 Mopidy-Beets
 ============
 
