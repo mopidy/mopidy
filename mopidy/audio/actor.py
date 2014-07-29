@@ -98,6 +98,7 @@ class Audio(pykka.ThreadingActor):
             element.disconnect(signal_id)
 
     def _setup_preferences(self):
+        # Fix for https://github.com/mopidy/mopidy/issues/604
         registry = gst.registry_get_default()
         jacksink = registry.find_feature(
             'jackaudiosink', gst.TYPE_ELEMENT_FACTORY)
