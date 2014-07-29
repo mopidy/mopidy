@@ -5,6 +5,18 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v0.20.0 (UNRELEASED)
+====================
+
+**Local backend**
+
+- Add cover URL to all scanned files with MusicBrainz album IDs. (Fixes:
+  :issue:`697`, PR: :issue:`802`)
+  
+**Audio**
+
+- Tell GStreamer to not pick jack sink on raspis (Fixes: :issue:`604`)
+
 v0.19.3 (UNRELEASED)
 ====================
 
