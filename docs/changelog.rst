@@ -13,6 +13,8 @@ Bug fix release.
 - Audio: Fix negative track length for radio streams. (Fixes: :issue:`662`,
   PR: :issue:`796`)
 
+- Audio: Tell GStreamer to not pick Jack sink. (Fixes: :issue:`604`)
+
 - Zeroconf: Fix discovery by adding ``.local`` to the announced hostname. (PR:
   :issue:`795`)
 
