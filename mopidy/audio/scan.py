@@ -150,6 +150,18 @@ def _date(tags):
         return None
 
 
+def add_musicbrainz_cover_art(track):
+    if track.album and track.album.musicbrainz_id:
+        base = "http://coverartarchive.org/release"
+        images = frozenset(
+            ["{}/{}/front".format(
+                base,
+                track.album.musicbrainz_id)])
+        album = track.album.copy(images=images)
+        track = track.copy(album=album)
+    return track
+
+
 def audio_data_to_track(data):
     """Convert taglist data + our extras to a track."""
     tags = data['tags']
@@ -186,7 +198,8 @@ def audio_data_to_track(data):
 
     track_kwargs['date'] = _date(tags)
     track_kwargs['last_modified'] = int(data.get('mtime') or 0)
-    track_kwargs['length'] = (data.get(gst.TAG_DURATION) or 0) // gst.MSECOND
+    track_kwargs['length'] = max(
+        0, (data.get(gst.TAG_DURATION) or 0)) // gst.MSECOND
 
     # Clear out any empty values we found
     track_kwargs = {k: v for k, v in track_kwargs.items() if v}

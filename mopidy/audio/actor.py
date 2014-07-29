@@ -221,6 +221,14 @@ class Audio(pykka.ThreadingActor):
         self._connect(self._playbin, 'notify::volume', self._on_mixer_change)
         self._connect(self._playbin, 'notify::mute', self._on_mixer_change)
 
+        # The Mopidy startup procedure will set the initial volume of a mixer,
+        # but this happens before the audio actor is injected into the software
+        # mixer and has no effect. Thus, we need to set the initial volume
+        # again.
+        initial_volume = self._config['audio']['mixer_volume']
+        if initial_volume is not None:
+            self._mixer.set_volume(initial_volume)
+
     def _on_mixer_change(self, element, gparamspec):
         self._mixer.trigger_events_for_changed_values()
 

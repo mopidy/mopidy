@@ -112,6 +112,11 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             logger.error('WebSocket request error: %s', e)
             self.close()
 
+    def check_origin(self, origin):
+        # Allow cross-origin WebSocket connections, like Tornado before 4.0
+        # defaulted to.
+        return True
+
 
 def set_mopidy_headers(request_handler):
     request_handler.set_header('Cache-Control', 'no-cache')
@@ -144,7 +149,7 @@ class JsonRpcHandler(tornado.web.RequestHandler):
                     'Sent RPC message to %s: %r',
                     self.request.remote_ip, response)
         except Exception as e:
-            logger.error('HTTP JSON-RPC request error:', e)
+            logger.error('HTTP JSON-RPC request error: %s', e)
             self.write_error(500)
 
     def set_extra_headers(self):

@@ -71,6 +71,11 @@ class TranslatorTest(unittest.TestCase):
         actual = scan.audio_data_to_track(self.data)
         self.assertEqual(expected, actual)
 
+    def check_local(self, expected):
+        actual = scan.add_musicbrainz_cover_art(
+            scan.audio_data_to_track(self.data))
+        self.assertEqual(expected, actual)
+
     def test_track(self):
         self.check(self.track)
 
@@ -197,12 +202,19 @@ class TranslatorTest(unittest.TestCase):
 
     def test_missing_album_musicbrainz_id(self):
         del self.data['tags']['musicbrainz-albumid']
-        album = self.track.album.copy(musicbrainz_id=None)
+        album = self.track.album.copy(musicbrainz_id=None,
+                                      images=[])
         self.check(self.track.copy(album=album))
 
     def test_multiple_album_musicbrainz_id(self):
         self.data['tags']['musicbrainz-albumid'].append('id')
         self.check(self.track)
+
+    def test_album_musicbrainz_id_cover(self):
+        album = self.track.album.copy(
+            images=frozenset(
+                ['http://coverartarchive.org/release/albumid/front']))
+        self.check_local(self.track.copy(album=album))
 
     def test_missing_album_num_tracks(self):
         del self.data['tags']['track-count']
