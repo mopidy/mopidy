@@ -11,6 +11,15 @@ This list is moderated and updated on a regular basis. If you want your package
 to show up here, follow the :ref:`guide on creating extensions <extensiondev>`.
 
 
+Mopidy-Banshee
+==============
+
+https://github.com/tamland/mopidy-banshee
+
+Provides a backend for playing music from the `Banshee <http://banshee.fm/>`_
+music player's music library.
+
+
 Mopidy-Beets
 ============
 
