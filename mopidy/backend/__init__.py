@@ -222,6 +222,10 @@ class PlaybackProvider(object):
 
 class PlaylistsProvider(object):
     """
+    A playlist provider exposes a collection of playlists, methods to
+    create/change/delete playlists in this collection, and lookup of any
+    playlist the backend knows about.
+
     :param backend: backend the controller is a part of
     :type backend: :class:`mopidy.backend.Backend` instance
     """
@@ -231,6 +235,11 @@ class PlaylistsProvider(object):
     def __init__(self, backend):
         self.backend = backend
         self._playlists = []
+
+    # TODO Replace playlists property with a get_playlists() method which
+    # returns playlist Ref's instead of the gigantic data structures we
+    # currently make available. lookup() should be used for getting full
+    # playlists with all details.
 
     @property
     def playlists(self):
@@ -247,31 +256,47 @@ class PlaylistsProvider(object):
 
     def create(self, name):
         """
-        See :meth:`mopidy.core.PlaylistsController.create`.
+        Create a new empty playlist with the given name.
+
+        Returns a new playlist with the given name and an URI.
 
         *MUST be implemented by subclass.*
+
+        :param name: name of the new playlist
+        :type name: string
+        :rtype: :class:`mopidy.models.Playlist`
         """
         raise NotImplementedError
 
     def delete(self, uri):
         """
-        See :meth:`mopidy.core.PlaylistsController.delete`.
+        Delete playlist identified by the URI.
 
         *MUST be implemented by subclass.*
+
+        :param uri: URI of the playlist to delete
+        :type uri: string
         """
         raise NotImplementedError
 
     def lookup(self, uri):
         """
-        See :meth:`mopidy.core.PlaylistsController.lookup`.
+        Lookup playlist with given URI in both the set of playlists and in any
+        other playlist source.
+
+        Returns the playlists or :class:`None` if not found.
 
         *MUST be implemented by subclass.*
+
+        :param uri: playlist URI
+        :type uri: string
+        :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
         raise NotImplementedError
 
     def refresh(self):
         """
-        See :meth:`mopidy.core.PlaylistsController.refresh`.
+        Refresh the playlists in :attr:`playlists`.
 
         *MUST be implemented by subclass.*
         """
@@ -279,9 +304,18 @@ class PlaylistsProvider(object):
 
     def save(self, playlist):
         """
-        See :meth:`mopidy.core.PlaylistsController.save`.
+        Save the given playlist.
+
+        The playlist must have an ``uri`` attribute set. To create a new
+        playlist with an URI, use :meth:`create`.
+
+        Returns the saved playlist or :class:`None` on failure.
 
         *MUST be implemented by subclass.*
+
+        :param playlist: the playlist to save
+        :type playlist: :class:`mopidy.models.Playlist`
+        :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
         raise NotImplementedError
 
