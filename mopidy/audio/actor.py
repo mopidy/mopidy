@@ -45,6 +45,20 @@ PLAYBIN_FLAGS = (1 << 1) | (1 << 4) | (1 << 7)
 PLAYBIN_VIS_FLAGS = PLAYBIN_FLAGS | (1 << 3)
 
 
+class _Signals(object):
+    def __init__(self):
+        self._ids = {}
+
+    def connect(self, element, event, *args):
+        assert (element, event) not in self._ids
+        self._ids[(element, event)] = element.connect(event, *args)
+
+    def disconnect(self, element, event):
+        signal_id = self._ids.pop((element, event), None)
+        if signal_id is not None:
+            element.disconnect(signal_id)
+
+
 # TODO: split out mixer as these are too intertwined right now
 class Audio(pykka.ThreadingActor):
     """
@@ -63,7 +77,7 @@ class Audio(pykka.ThreadingActor):
         self._buffering = False
 
         self._playbin = None
-        self._signal_ids = {}  # {(element, event): signal_id}
+        self._signals = _Signals()
         self._about_to_finish_callback = None
 
         self._appsrc = None
@@ -89,17 +103,6 @@ class Audio(pykka.ThreadingActor):
         self._teardown_mixer()
         self._teardown_playbin()
 
-    # TODO: split out signal tracking helper class.
-    def _connect(self, element, event, *args):
-        """Helper to keep track of signal ids based on element+event"""
-        self._signal_ids[(element, event)] = element.connect(event, *args)
-
-    def _disconnect(self, element, event):
-        """Helper to disconnect signals created with _connect helper."""
-        signal_id = self._signal_ids.pop((element, event), None)
-        if signal_id is not None:
-            element.disconnect(signal_id)
-
     def _setup_preferences(self):
         # Fix for https://github.com/mopidy/mopidy/issues/604
         registry = gst.registry_get_default()
@@ -115,9 +118,11 @@ class Audio(pykka.ThreadingActor):
         playbin.set_property('buffer-size', 2*1024*1024)
         playbin.set_property('buffer-duration', 2*gst.SECOND)
 
-        self._connect(playbin, 'about-to-finish', self._on_about_to_finish)
-        self._connect(playbin, 'notify::source', self._on_new_source)
-        self._connect(playbin, 'source-setup', self._on_source_setup)
+        # TODO: on new source and source setup are dupes...
+        self._signals.connect(playbin, 'notify::source', self._on_new_source)
+        self._signals.connect(playbin, 'source-setup', self._on_source_setup)
+        self._signals.connect(
+            playbin, 'about-to-finish', self._on_about_to_finish)
 
         self._playbin = playbin
 
@@ -125,9 +130,9 @@ class Audio(pykka.ThreadingActor):
         source, self._appsrc = self._appsrc, None
         if source is not None:
             self._appsrc_caps = None
-            self._disconnect(source, 'need-data')
-            self._disconnect(source, 'enough-data')
-            self._disconnect(source, 'seek-data')
+            self._signals.disconnect(source, 'need-data')
+            self._signals.disconnect(source, 'enough-data')
+            self._signals.disconnect(source, 'seek-data')
 
         if self._about_to_finish_callback:
             logger.debug('Calling about to finish callback.')
@@ -145,9 +150,10 @@ class Audio(pykka.ThreadingActor):
         source.set_property('max-bytes', 1 * MB)
         source.set_property('min-percent', 50)
 
-        self._connect(source, 'need-data', self._appsrc_on_need_data)
-        self._connect(source, 'enough-data', self._appsrc_on_enough_data)
-        self._connect(source, 'seek-data', self._appsrc_on_seek_data)
+        self._signals.connect(source, 'need-data', self._appsrc_on_need_data)
+        self._signals.connect(source, 'seek-data', self._appsrc_on_seek_data)
+        self._signals.connect(
+            source, 'enough-data', self._appsrc_on_enough_data)
 
         self._appsrc = source
 
@@ -185,9 +191,9 @@ class Audio(pykka.ThreadingActor):
         return True
 
     def _teardown_playbin(self):
-        self._disconnect(self._playbin, 'about-to-finish')
-        self._disconnect(self._playbin, 'notify::source')
-        self._disconnect(self._playbin, 'source-setup')
+        self._signals.disconnect(self._playbin, 'about-to-finish')
+        self._signals.disconnect(self._playbin, 'notify::source')
+        self._signals.disconnect(self._playbin, 'source-setup')
         self._playbin.set_state(gst.STATE_NULL)
 
     def _setup_output(self):
@@ -228,8 +234,10 @@ class Audio(pykka.ThreadingActor):
         if self._config['audio']['mixer'] != 'software':
             return
         self._mixer.audio = self.actor_ref.proxy()
-        self._connect(self._playbin, 'notify::volume', self._on_mixer_change)
-        self._connect(self._playbin, 'notify::mute', self._on_mixer_change)
+        self._signals.connect(
+            self._playbin, 'notify::volume', self._on_mixer_change)
+        self._signals.connect(
+            self._playbin, 'notify::mute', self._on_mixer_change)
 
         # The Mopidy startup procedure will set the initial volume of a mixer,
         # but this happens before the audio actor is injected into the software
@@ -245,8 +253,8 @@ class Audio(pykka.ThreadingActor):
     def _teardown_mixer(self):
         if self._config['audio']['mixer'] != 'software':
             return
-        self._disconnect(self._playbin, 'notify::volume')
-        self._disconnect(self._playbin, 'notify::mute')
+        self._signals.disconnect(self._playbin, 'notify::volume')
+        self._signals.disconnect(self._playbin, 'notify::mute')
         self._mixer.audio = None
 
     def _setup_visualizer(self):
@@ -266,11 +274,11 @@ class Audio(pykka.ThreadingActor):
     def _setup_message_processor(self):
         bus = self._playbin.get_bus()
         bus.add_signal_watch()
-        self._connect(bus, 'message', self._on_message)
+        self._signals.connect(bus, 'message', self._on_message)
 
     def _teardown_message_processor(self):
         bus = self._playbin.get_bus()
-        self._disconnect(bus, 'message')
+        self._signals.disconnect(bus, 'message')
         bus.remove_signal_watch()
 
     def _on_pad_event(self, pad, event):
