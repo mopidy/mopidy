@@ -141,7 +141,7 @@ class AudioEventTest(BaseTest):
         super(AudioEventTest, self).setUp()
         self.audio.enable_sync_handler().get()
 
-    # TODO: test wihtout uri set, with bad uri and gapless...
+    # TODO: test without uri set, with bad uri and gapless...
     # TODO: playing->playing triggered by seek should be removed
     # TODO: codify expected state after EOS
     # TODO: consider returning a future or a threading event?

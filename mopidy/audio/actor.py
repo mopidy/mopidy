@@ -45,7 +45,7 @@ PLAYBIN_FLAGS = (1 << 1) | (1 << 4) | (1 << 7)
 PLAYBIN_VIS_FLAGS = PLAYBIN_FLAGS | (1 << 3)
 
 
-# TODO: split out mixer as these are to intertwined right now
+# TODO: split out mixer as these are too intertwined right now
 class Audio(pykka.ThreadingActor):
     """
     Audio output through `GStreamer <http://gstreamer.freedesktop.org/>`_.
@@ -89,6 +89,7 @@ class Audio(pykka.ThreadingActor):
         self._teardown_mixer()
         self._teardown_playbin()
 
+    # TODO: split out signal tracking helper class.
     def _connect(self, element, event, *args):
         """Helper to keep track of signal ids based on element+event"""
         self._signal_ids[(element, event)] = element.connect(event, *args)
@@ -201,7 +202,7 @@ class Audio(pykka.ThreadingActor):
 
         output = gst.Bin('output')
 
-        # Queue element to buy use time between the about to finish event and
+        # Queue element to buy us time between the about to finish event and
         # the actual switch, i.e. about to switch can block for longer thanks
         # to this queue.
         # TODO: make the min-max values a setting?
@@ -337,7 +338,7 @@ class Audio(pykka.ThreadingActor):
         logger.debug('Buffer %d%% full', percent)
 
     def _on_end_of_stream(self):
-        logger.debug('Triggering event: reached_end_of_stream event')
+        logger.debug('Audio event: reached_end_of_stream')
         AudioListener.send('reached_end_of_stream')
 
     def _on_error(self, error, debug):
@@ -421,7 +422,7 @@ class Audio(pykka.ThreadingActor):
 
     def set_about_to_finish_callback(self, callback):
         """
-        Configure audio to use an about to finish callback.
+        Configure audio to use an about-to-finish callback.
 
         This should be used to achieve gapless playback. For this to work the
         callback *MUST* call :meth:`set_uri` with the new URI to play and

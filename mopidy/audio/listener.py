@@ -29,7 +29,7 @@ class AudioListener(listener.Listener):
 
     def stream_changed(self, uri):
         """
-        Called whenever the end of the audio stream changes.
+        Called whenever the audio stream changes.
 
         *MAY* be implemented by actor.
 
