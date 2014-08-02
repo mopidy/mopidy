@@ -45,6 +45,7 @@ PLAYBIN_FLAGS = (1 << 1) | (1 << 4) | (1 << 7)
 PLAYBIN_VIS_FLAGS = PLAYBIN_FLAGS | (1 << 3)
 
 
+# TODO: split out mixer as these are too intertwined right now
 class Audio(pykka.ThreadingActor):
     """
     Audio output through `GStreamer <http://gstreamer.freedesktop.org/>`_.
@@ -63,6 +64,7 @@ class Audio(pykka.ThreadingActor):
 
         self._playbin = None
         self._signal_ids = {}  # {(element, event): signal_id}
+        self._about_to_finish_callback = None
 
         self._appsrc = None
         self._appsrc_caps = None
@@ -87,6 +89,7 @@ class Audio(pykka.ThreadingActor):
         self._teardown_mixer()
         self._teardown_playbin()
 
+    # TODO: split out signal tracking helper class.
     def _connect(self, element, event, *args):
         """Helper to keep track of signal ids based on element+event"""
         self._signal_ids[(element, event)] = element.connect(event, *args)
@@ -120,13 +123,15 @@ class Audio(pykka.ThreadingActor):
 
     def _on_about_to_finish(self, element):
         source, self._appsrc = self._appsrc, None
-        if source is None:
-            return
-        self._appsrc_caps = None
+        if source is not None:
+            self._appsrc_caps = None
+            self._disconnect(source, 'need-data')
+            self._disconnect(source, 'enough-data')
+            self._disconnect(source, 'seek-data')
 
-        self._disconnect(source, 'need-data')
-        self._disconnect(source, 'enough-data')
-        self._disconnect(source, 'seek-data')
+        if self._about_to_finish_callback:
+            logger.debug('Calling about to finish callback.')
+            self._about_to_finish_callback()
 
     def _on_new_source(self, element, pad):
         uri = element.get_property('uri')
@@ -188,14 +193,36 @@ class Audio(pykka.ThreadingActor):
     def _setup_output(self):
         output_desc = self._config['audio']['output']
         try:
-            output = gst.parse_bin_from_description(
+            user_output = gst.parse_bin_from_description(
                 output_desc, ghost_unconnected_pads=True)
-            self._playbin.set_property('audio-sink', output)
-            logger.info('Audio output set to "%s"', output_desc)
         except gobject.GError as ex:
             logger.error(
                 'Failed to create audio output "%s": %s', output_desc, ex)
             process.exit_process()
+
+        output = gst.Bin('output')
+
+        # Queue element to buy us time between the about to finish event and
+        # the actual switch, i.e. about to switch can block for longer thanks
+        # to this queue.
+        # TODO: make the min-max values a setting?
+        queue = gst.element_factory_make('queue')
+        queue.set_property('max-size-buffers', 0)
+        queue.set_property('max-size-bytes', 0)
+        queue.set_property('max-size-time', 5 * gst.SECOND)
+        queue.set_property('min-threshold-time', 3 * gst.SECOND)
+
+        queue.get_pad('src').add_event_probe(self._on_pad_event)
+
+        output.add(user_output)
+        output.add(queue)
+
+        queue.link(user_output)
+        ghost_pad = gst.GhostPad('sink', queue.get_pad('sink'))
+        output.add_pad(ghost_pad)
+
+        logger.info('Audio output set to "%s"', output_desc)
+        self._playbin.set_property('audio-sink', output)
 
     def _setup_mixer(self):
         if self._config['audio']['mixer'] != 'software':
@@ -246,6 +273,15 @@ class Audio(pykka.ThreadingActor):
         self._disconnect(bus, 'message')
         bus.remove_signal_watch()
 
+    def _on_pad_event(self, pad, event):
+        if event.type == gst.EVENT_NEWSEGMENT:
+            # update, rate, format, start, stop, position
+            position = event.parse_new_segment()[5] // gst.MSECOND
+            logger.debug('Triggering event: position_changed(position=%s)',
+                         position)
+            AudioListener.send('position_changed', position=position)
+        return True
+
     def _on_message(self, bus, msg):
         if msg.type == gst.MESSAGE_STATE_CHANGED and msg.src == self._playbin:
             self._on_playbin_state_changed(*msg.parse_state_changed())
@@ -257,6 +293,9 @@ class Audio(pykka.ThreadingActor):
             self._on_error(*msg.parse_error())
         elif msg.type == gst.MESSAGE_WARNING:
             self._on_warning(*msg.parse_warning())
+        elif msg.type == gst.MESSAGE_ELEMENT:
+            if msg.structure.has_name('playbin2-stream-changed'):
+                self._on_stream_changed(msg.structure['uri'])
 
     def _on_playbin_state_changed(self, old_state, new_state, pending_state):
         if new_state == gst.STATE_READY and pending_state == gst.STATE_NULL:
@@ -284,6 +323,8 @@ class Audio(pykka.ThreadingActor):
             'target_state=%s)', old_state, new_state, target_state)
         AudioListener.send('state_changed', old_state=old_state,
                            new_state=new_state, target_state=target_state)
+        if new_state == PlaybackState.STOPPED:
+            AudioListener.send('stream_changed', uri=None)
 
     def _on_buffering(self, percent):
         if percent < 10 and not self._buffering:
@@ -297,7 +338,7 @@ class Audio(pykka.ThreadingActor):
         logger.debug('Buffer %d%% full', percent)
 
     def _on_end_of_stream(self):
-        logger.debug('Triggering reached_end_of_stream event')
+        logger.debug('Audio event: reached_end_of_stream')
         AudioListener.send('reached_end_of_stream')
 
     def _on_error(self, error, debug):
@@ -310,6 +351,10 @@ class Audio(pykka.ThreadingActor):
         logger.warning(
             '%s Debug message: %s',
             str(error).decode('utf-8'), debug.decode('utf-8') or 'None')
+
+    def _on_stream_changed(self, uri):
+        logger.debug('Triggering event: stream_changed(uri=%s)', uri)
+        AudioListener.send('stream_changed', uri=uri)
 
     def set_uri(self, uri):
         """
@@ -372,7 +417,21 @@ class Audio(pykka.ThreadingActor):
         We will get a GStreamer message when the stream playback reaches the
         token, and can then do any end-of-stream related tasks.
         """
+        # TODO: replace this with emit_data(None)?
         self._playbin.get_property('source').emit('end-of-stream')
+
+    def set_about_to_finish_callback(self, callback):
+        """
+        Configure audio to use an about-to-finish callback.
+
+        This should be used to achieve gapless playback. For this to work the
+        callback *MUST* call :meth:`set_uri` with the new URI to play and
+        block until this call has been made. :meth:`prepare_change` is not
+        needed before :meth:`set_uri` in this one special case.
+
+        :param callable callback: Callback to run when we need the next URI.
+        """
+        self._about_to_finish_callback = callback
 
     def get_position(self):
         """
@@ -434,6 +493,25 @@ class Audio(pykka.ThreadingActor):
         """
         self._buffering = False
         return self._set_state(gst.STATE_NULL)
+
+    def wait_for_state_change(self):
+        """Block until any pending state changes are complete.
+
+        Should only be used by tests.
+        """
+        self._playbin.get_state()
+
+    def enable_sync_handler(self):
+        """Enable manual processing of messages from bus.
+
+        Should only be used by tests.
+        """
+        def sync_handler(bus, message):
+            self._on_message(bus, message)
+            return gst.BUS_DROP
+
+        bus = self._playbin.get_bus()
+        bus.set_sync_handler(sync_handler)
 
     def _set_state(self, state):
         """

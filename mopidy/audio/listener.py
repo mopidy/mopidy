@@ -27,6 +27,26 @@ class AudioListener(listener.Listener):
         """
         pass
 
+    def stream_changed(self, uri):
+        """
+        Called whenever the audio stream changes.
+
+        *MAY* be implemented by actor.
+
+        :param string uri: URI the stream has started playing.
+        """
+        pass
+
+    def position_changed(self, position_changed):
+        """
+        Called whenever the position of the stream changes.
+
+        *MAY* be implemented by actor.
+
+        :param int position: Position in milliseconds.
+        """
+        pass
+
     def state_changed(self, old_state, new_state, target_state):
         """
         Called after the playback state have changed.
