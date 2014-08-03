@@ -34,3 +34,7 @@ class MixerError(MopidyException):
 
 class ScannerError(MopidyException):
     pass
+
+
+class AudioException(MopidyException):
+    pass

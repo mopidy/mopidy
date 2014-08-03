@@ -31,3 +31,7 @@ class ExceptionsTest(unittest.TestCase):
     def test_scanner_error_is_a_mopidy_exception(self):
         self.assert_(issubclass(
             exceptions.ScannerError, exceptions.MopidyException))
+
+    def test_audio_error_is_a_mopidy_exception(self):
+        self.assert_(issubclass(
+            exceptions.AudioException, exceptions.MopidyException))
