@@ -192,6 +192,20 @@ class _Outputs(gst.Bin):
         self._tee.link(queue)
 
 
+def setup_proxy(element, config):
+    # TODO: reuse in scanner code
+    if not config.get('hostname'):
+        return
+
+    proxy = "%s://%s:%d" % (config.get('scheme', 'http'),
+                            config.get('hostname'),
+                            config.get('port', 80))
+
+    element.set_property('proxy', proxy)
+    element.set_property('proxy-id', config.get('username'))
+    element.set_property('proxy-pw', config.get('password'))
+
+
 # TODO: create a player class which replaces the actors internals
 class Audio(pykka.ThreadingActor):
     """
@@ -267,20 +281,8 @@ class Audio(pykka.ThreadingActor):
         else:
             self._appsrc.reset()
 
-        scheme = 'http'
-        hostname = self._config['proxy']['hostname']
-        port = 80
-
-        if hasattr(source.props, 'proxy') and hostname:
-            if self._config['proxy']['port']:
-                port = self._config['proxy']['port']
-            if self._config['proxy']['scheme']:
-                scheme = self._config['proxy']['scheme']
-
-            proxy = "%s://%s:%d" % (scheme, hostname, port)
-            source.set_property('proxy', proxy)
-            source.set_property('proxy-id', self._config['proxy']['username'])
-            source.set_property('proxy-pw', self._config['proxy']['password'])
+        if hasattr(source.props, 'proxy'):
+            setup_proxy(source, self._config['proxy'])
 
     def _teardown_playbin(self):
         self._signals.disconnect(self._playbin, 'about-to-finish')
