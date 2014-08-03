@@ -72,6 +72,7 @@ class Audio(pykka.ThreadingActor):
 
     def on_start(self):
         try:
+            self._setup_preferences()
             self._setup_playbin()
             self._setup_output()
             self._setup_mixer()
@@ -95,6 +96,14 @@ class Audio(pykka.ThreadingActor):
         signal_id = self._signal_ids.pop((element, event), None)
         if signal_id is not None:
             element.disconnect(signal_id)
+
+    def _setup_preferences(self):
+        # Fix for https://github.com/mopidy/mopidy/issues/604
+        registry = gst.registry_get_default()
+        jacksink = registry.find_feature(
+            'jackaudiosink', gst.TYPE_ELEMENT_FACTORY)
+        if jacksink:
+            jacksink.set_rank(gst.RANK_SECONDARY)
 
     def _setup_playbin(self):
         playbin = gst.element_factory_make('playbin2')

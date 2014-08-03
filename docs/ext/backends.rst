@@ -11,6 +11,24 @@ This list is moderated and updated on a regular basis. If you want your package
 to show up here, follow the :ref:`guide on creating extensions <extensiondev>`.
 
 
+Mopidy-Banshee
+==============
+
+https://github.com/tamland/mopidy-banshee
+
+Provides a backend for playing music from the `Banshee <http://banshee.fm/>`_
+music player's music library.
+
+
+Mopidy-Bassdrive
+================
+
+https://github.com/felixb/mopidy-Bassdrive
+
+Provides a backend for playing radio streams from `BassDrive
+<http://bassdrive.com/>`_.
+
+
 Mopidy-Beets
 ============
 
@@ -45,6 +63,15 @@ https://github.com/tkem/mopidy-internetarchive
 
 Extension for playing music and audio from the `Internet Archive
 <https://archive.org/>`_.
+
+
+Mopidy-LeftAsRain
+=================
+
+https://github.com/naglis/mopidy-leftasrain
+
+Extension for playing music from the `leftasrain.com
+<http://leftasrain.com/>`_ music blog.
 
 
 Mopidy-Local

@@ -47,3 +47,12 @@ Mopidy-Scrobbler
 https://github.com/mopidy/mopidy-scrobbler
 
 Extension for scrobbling played tracks to Last.fm.
+
+
+Mopidy-Touchscreen
+==================
+
+https://github.com/9and3r/mopidy-touchscreen
+
+Extension for displaying track info and controlling Mopidy from a touch screen
+using `PyGame <http://www.pygame.org/>`_/SDL.

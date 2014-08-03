@@ -23,8 +23,11 @@ def _is_loopback_address(host):
         host == '::1')
 
 
-def _convert_text_to_dbus_bytes(text):
-    return [dbus.Byte(ord(c)) for c in text]
+def _convert_text_list_to_dbus_format(text_list):
+    array = dbus.Array(signature='ay')
+    for text in text_list:
+        array.append([dbus.Byte(ord(c)) for c in text])
+    return array
 
 
 class Zeroconf(object):
@@ -43,21 +46,17 @@ class Zeroconf(object):
     :type text: list of str
     """
 
-    def __init__(self, name, port, stype=None, domain=None,
-                 host=None, text=None):
+    def __init__(self, name, port, stype=None, domain=None, text=None):
         self.group = None
         self.stype = stype or '_http._tcp'
         self.domain = domain or ''
         self.port = port
         self.text = text or []
-        if host in ('::', '0.0.0.0'):
-            self.host = ''
-        else:
-            self.host = host
 
         template = string.Template(name)
         self.name = template.safe_substitute(
-            hostname=self.host or socket.getfqdn(), port=self.port)
+            hostname=socket.getfqdn(), port=self.port)
+        self.host = '%s.local' % socket.getfqdn()
 
     def __str__(self):
         return 'Zeroconf service %s at [%s]:%d' % (
@@ -95,11 +94,11 @@ class Zeroconf(object):
                     'org.freedesktop.Avahi', server.EntryGroupNew()),
                 'org.freedesktop.Avahi.EntryGroup')
 
-            text = [_convert_text_to_dbus_bytes(t) for t in self.text]
             self.group.AddService(
                 _AVAHI_IF_UNSPEC, _AVAHI_PROTO_UNSPEC,
                 dbus.UInt32(_AVAHI_PUBLISHFLAGS_NONE), self.name, self.stype,
-                self.domain, self.host, dbus.UInt16(self.port), text)
+                self.domain, self.host, dbus.UInt16(self.port),
+                _convert_text_list_to_dbus_format(self.text))
 
             self.group.Commit()
             logger.debug('%s: Published', self)

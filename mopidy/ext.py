@@ -99,7 +99,7 @@ class Extension(object):
         :param registry: the extension registry
         :type registry: :class:`Registry`
         """
-        pass
+        raise NotImplementedError
 
 
 class Registry(collections.Mapping):

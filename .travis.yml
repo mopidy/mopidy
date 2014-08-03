@@ -5,6 +5,8 @@ python:
 
 env:
   - TOX_ENV=py27
+  - TOX_ENV=py27-tornado23
+  - TOX_ENV=py27-tornado31
   - TOX_ENV=docs
   - TOX_ENV=flake8
 

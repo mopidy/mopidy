@@ -43,7 +43,7 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
         if self.zeroconf_name:
             self.zeroconf_service = zeroconf.Zeroconf(
                 stype='_mpd._tcp', name=self.zeroconf_name,
-                host=self.hostname, port=self.port)
+                port=self.port)
             self.zeroconf_service.publish()
 
     def on_stop(self):
