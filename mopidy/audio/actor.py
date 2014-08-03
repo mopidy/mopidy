@@ -11,6 +11,7 @@ import gst.pbutils
 
 import pykka
 
+from mopidy import exceptions
 from mopidy.audio import playlists, utils
 from mopidy.audio.constants import PlaybackState
 from mopidy.audio.listener import AudioListener
@@ -141,6 +142,56 @@ class _Appsrc(object):
         return True
 
 
+class _Outputs(gst.Bin):
+    def __init__(self):
+        gst.Bin.__init__(self)
+
+        self._tee = gst.element_factory_make('tee')
+        self.add(self._tee)
+
+        # Queue element to buy us time between the about to finish event and
+        # the actual switch, i.e. about to switch can block for longer thanks
+        # to this queue.
+        # TODO: make the min-max values a setting?
+        # TODO: move out of this class?
+        queue = gst.element_factory_make('queue')
+        queue.set_property('max-size-buffers', 0)
+        queue.set_property('max-size-bytes', 0)
+        queue.set_property('max-size-time', 5 * gst.SECOND)
+        queue.set_property('min-threshold-time', 3 * gst.SECOND)
+        self.add(queue)
+
+        queue.link(self._tee)
+
+        ghost_pad = gst.GhostPad('sink', queue.get_pad('sink'))
+        self.add_pad(ghost_pad)
+
+        # Add an always connected fakesink so the tee doesn't fail.
+        # XXX disabled for now as we get one stream changed per sink...
+        # self._add(gst.element_factory_make('fakesink'))
+
+    def add_output(self, description):
+        # XXX This only works for pipelines not in use until #790 gets done.
+        try:
+            output = gst.parse_bin_from_description(
+                description, ghost_unconnected_pads=True)
+        except gobject.GError as ex:
+            logger.error(
+                'Failed to create audio output "%s": %s', description, ex)
+            raise exceptions.AudioException(bytes(ex))
+
+        self._add(output)
+        logger.info('Audio output set to "%s"', description)
+
+    def _add(self, element):
+        # All tee branches need a queue in front of them.
+        queue = gst.element_factory_make('queue')
+        self.add(element)
+        self.add(queue)
+        queue.link(element)
+        self._tee.link(queue)
+
+
 # TODO: create a player class which replaces the actors internals
 class Audio(pykka.ThreadingActor):
     """
@@ -159,6 +210,7 @@ class Audio(pykka.ThreadingActor):
         self._buffering = False
 
         self._playbin = None
+        self._outputs = None
         self._about_to_finish_callback = None
 
         self._appsrc = _Appsrc()
@@ -241,38 +293,13 @@ class Audio(pykka.ThreadingActor):
         self._playbin.set_state(gst.STATE_NULL)
 
     def _setup_output(self):
-        output_desc = self._config['audio']['output']
+        self._outputs = _Outputs()
+        self._outputs.get_pad('sink').add_event_probe(self._on_pad_event)
         try:
-            user_output = gst.parse_bin_from_description(
-                output_desc, ghost_unconnected_pads=True)
-        except gobject.GError as ex:
-            logger.error(
-                'Failed to create audio output "%s": %s', output_desc, ex)
-            process.exit_process()
-
-        output = gst.Bin('output')
-
-        # Queue element to buy us time between the about to finish event and
-        # the actual switch, i.e. about to switch can block for longer thanks
-        # to this queue.
-        # TODO: make the min-max values a setting?
-        queue = gst.element_factory_make('queue')
-        queue.set_property('max-size-buffers', 0)
-        queue.set_property('max-size-bytes', 0)
-        queue.set_property('max-size-time', 5 * gst.SECOND)
-        queue.set_property('min-threshold-time', 3 * gst.SECOND)
-
-        queue.get_pad('src').add_event_probe(self._on_pad_event)
-
-        output.add(user_output)
-        output.add(queue)
-
-        queue.link(user_output)
-        ghost_pad = gst.GhostPad('sink', queue.get_pad('sink'))
-        output.add_pad(ghost_pad)
-
-        logger.info('Audio output set to "%s"', output_desc)
-        self._playbin.set_property('audio-sink', output)
+            self._outputs.add_output(self._config['audio']['output'])
+        except exceptions.AudioException:
+            process.exit_process()  # TODO: move this up the chain
+        self._playbin.set_property('audio-sink', self._outputs)
 
     def _setup_mixer(self):
         if self._config['audio']['mixer'] != 'software':
