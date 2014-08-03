@@ -7,6 +7,7 @@ import gobject
 import pygst
 pygst.require('0.10')
 import gst  # noqa
+import gst.pbutils
 
 import pykka
 
@@ -341,6 +342,8 @@ class Audio(pykka.ThreadingActor):
         elif msg.type == gst.MESSAGE_ELEMENT:
             if msg.structure.has_name('playbin2-stream-changed'):
                 self._on_stream_changed(msg.structure['uri'])
+            elif gst.pbutils.is_missing_plugin_message(msg):
+                self._on_missing_plugin(msg)
 
     def _on_playbin_state_changed(self, old_state, new_state, pending_state):
         if new_state == gst.STATE_READY and pending_state == gst.STATE_NULL:
@@ -400,6 +403,17 @@ class Audio(pykka.ThreadingActor):
     def _on_stream_changed(self, uri):
         logger.debug('Triggering event: stream_changed(uri=%s)', uri)
         AudioListener.send('stream_changed', uri=uri)
+
+    def _on_missing_plugin(self, msg):
+        desc = gst.pbutils.missing_plugin_message_get_description(msg)
+        debug = gst.pbutils.missing_plugin_message_get_installer_detail(msg)
+        logger.warning('Could not find a %s to handle media.', desc)
+        if gst.pbutils.install_plugins_supported():
+            logger.info('You might be able to fix this by running: '
+                        'gst-installer "%s"', debug)
+        # TODO: store the missing plugins installer info in a file so we can
+        # can provide a 'mopidy install-missing-plugins' if the system has the
+        # required helper installed?
 
     def set_uri(self, uri):
         """
