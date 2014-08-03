@@ -19,7 +19,8 @@ class ExtensionTest(unittest.TestCase):
         self.assertIsNone(self.ext.version)
 
     def test_get_default_config_raises_not_implemented(self):
-        self.assertRaises(NotImplementedError, self.ext.get_default_config)
+        with self.assertRaises(NotImplementedError):
+            self.ext.get_default_config()
 
     def test_get_config_schema_returns_extension_schema(self):
         schema = self.ext.get_config_schema()
@@ -27,3 +28,7 @@ class ExtensionTest(unittest.TestCase):
 
     def test_validate_environment_does_nothing_by_default(self):
         self.assertIsNone(self.ext.validate_environment())
+
+    def test_setup_raises_not_implemented(self):
+        with self.assertRaises(NotImplementedError):
+            self.ext.setup(None)

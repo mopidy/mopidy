@@ -219,7 +219,7 @@ class Command(object):
     def run(self, *args, **kwargs):
         """Run the command.
 
-        Must be implemented by sub-classes that are not simply and intermediate
+        Must be implemented by sub-classes that are not simply an intermediate
         in the command namespace.
         """
         raise NotImplementedError

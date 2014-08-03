@@ -5,26 +5,41 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v0.19.3 (2014-08-03)
+====================
+
+Bug fix release.
+
+- Audio: Fix negative track length for radio streams. (Fixes: :issue:`662`,
+  PR: :issue:`796`)
+
+- Audio: Tell GStreamer to not pick Jack sink. (Fixes: :issue:`604`)
+
+- Zeroconf: Fix discovery by adding ``.local`` to the announced hostname. (PR:
+  :issue:`795`)
+
+- Zeroconf: Fix intermittent DBus/Avahi exception.
+
+- Extensions: Fail early if trying to setup an extension which doesn't
+  implement the :meth:`mopidy.ext.Extension.setup` method. (Fixes:
+  :issue:`813`)
+
+
 v0.19.2 (2014-07-26)
 ====================
 
 Bug fix release, directly from the Mopidy development sprint at EuroPython 2014
 in Berlin.
 
-**Audio**
-
-- Make :confval:`audio/mixer_volume` work on the software mixer again. This
+- Audio: Make :confval:`audio/mixer_volume` work on the software mixer again. This
   was broken with the mixer changes in 0.19.0. (Fixes: :issue:`791`)
 
-**HTTP frontend**
+- HTTP frontend: When using Tornado 4.0, allow WebSocket requests from other
+  hosts. (Fixes: :issue:`788`)
 
-- When using Tornado 4.0, allow WebSocket requests from other hosts. (Fixes:
-  :issue:`788`)
-
-**MPD frontend**
-
-- Fix crash when MPD commands are called with the wrong number of arguments.
-  This was broken with the MPD command changes in 0.19.0. (Fixes: :issue:`789`)
+- MPD frontend: Fix crash when MPD commands are called with the wrong number of
+  arguments.  This was broken with the MPD command changes in 0.19.0. (Fixes:
+  :issue:`789`)
 
 
 v0.19.1 (2014-07-23)
@@ -32,21 +47,15 @@ v0.19.1 (2014-07-23)
 
 Bug fix release.
 
-**Dependencies**
+- Dependencies: Mopidy now requires Tornado >= 2.3, instead of >= 3.1. This
+  should make Mopidy continue to work on Debian/Raspbian stable, where Tornado
+  2.3 is the newest version available.
 
-- Mopidy now requires Tornado >= 2.3, instead of >= 3.1. This should make
-  Mopidy continue to work on Debian/Raspbian stable, where Tornado 2.3 is the
-  newest version available.
+- HTTP frontend: Add missing string interpolation placeholder.
 
-**HTTP frontend**
-
-- Add missing string interpolation placeholder.
-
-**Development**
-
-- ``mopidy --version`` and :meth:`mopidy.core.Core.get_version` now returns the
-  correct version when Mopidy is run from a Git repo other than Mopidy's own.
-  (Related to :issue:`706`)
+- Development: ``mopidy --version`` and :meth:`mopidy.core.Core.get_version`
+  now returns the correct version when Mopidy is run from a Git repo other than
+  Mopidy's own. (Related to :issue:`706`)
 
 
 v0.19.0 (2014-07-21)
