@@ -80,6 +80,7 @@ class _Signals(object):
             element.disconnect(self._ids.pop((element, event)))
 
 
+# TODO: expose this as a property on audio?
 class _Appsrc(object):
     """Helper class for dealing with appsrc based playback."""
     def __init__(self):
@@ -142,6 +143,7 @@ class _Appsrc(object):
         return True
 
 
+# TODO: expose this as a property on audio when #790 gets further along.
 class _Outputs(gst.Bin):
     def __init__(self):
         gst.Bin.__init__(self)
@@ -300,6 +302,7 @@ class Audio(pykka.ThreadingActor):
         self._teardown_playbin()
 
     def _setup_preferences(self):
+        # TODO: move out of audio actor?
         # Fix for https://github.com/mopidy/mopidy/issues/604
         registry = gst.registry_get_default()
         jacksink = registry.find_feature(
@@ -311,6 +314,7 @@ class Audio(pykka.ThreadingActor):
         playbin = gst.element_factory_make('playbin2')
         playbin.set_property('flags', PLAYBIN_FLAGS)
 
+        # TODO: turn into config values...
         playbin.set_property('buffer-size', 2*1024*1024)
         playbin.set_property('buffer-duration', 2*gst.SECOND)
 
@@ -359,6 +363,7 @@ class Audio(pykka.ThreadingActor):
             self.mixer.teardown()
 
     def _setup_visualizer(self):
+        # TODO: kill
         visualizer_element = self._config['audio']['visualizer']
         if not visualizer_element:
             return
@@ -394,6 +399,7 @@ class Audio(pykka.ThreadingActor):
 
         return True
 
+    # TODO: consider splitting this out while we are at it.
     def _on_message(self, bus, msg):
         if msg.type == gst.MESSAGE_STATE_CHANGED and msg.src == self._playbin:
             self._on_playbin_state_changed(*msg.parse_state_changed())
@@ -573,6 +579,8 @@ class Audio(pykka.ThreadingActor):
             gst_position = self._playbin.query_position(gst.FORMAT_TIME)[0]
             return utils.clocktime_to_millisecond(gst_position)
         except gst.QueryError:
+            # TODO: take state into account for this and possibly also return
+            # None as the unknown value instead of zero?
             logger.debug('Position query failed')
             return 0
 
@@ -584,6 +592,7 @@ class Audio(pykka.ThreadingActor):
         :type position: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
+        # TODO: double check seek flags in use.
         gst_position = utils.millisecond_to_clocktime(position)
         result = self._playbin.seek_simple(
             gst.Format(gst.FORMAT_TIME), gst.SEEK_FLAG_FLUSH, gst_position)
