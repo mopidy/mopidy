@@ -14,7 +14,7 @@ v0.20.0 (UNRELEASED)
   :issue:`697`, PR: :issue:`802`)
 
 
-v0.19.3 (UNRELEASED)
+v0.19.3 (2014-08-03)
 ====================
 
 Bug fix release.
