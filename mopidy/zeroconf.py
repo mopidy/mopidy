@@ -23,8 +23,11 @@ def _is_loopback_address(host):
         host == '::1')
 
 
-def _convert_text_to_dbus_bytes(text):
-    return [dbus.Byte(ord(c)) for c in text]
+def _convert_text_list_to_dbus_format(text_list):
+    array = dbus.Array(signature='ay')
+    for text in text_list:
+        array.append([dbus.Byte(ord(c)) for c in text])
+    return array
 
 
 class Zeroconf(object):
@@ -91,11 +94,11 @@ class Zeroconf(object):
                     'org.freedesktop.Avahi', server.EntryGroupNew()),
                 'org.freedesktop.Avahi.EntryGroup')
 
-            text = [_convert_text_to_dbus_bytes(t) for t in self.text]
             self.group.AddService(
                 _AVAHI_IF_UNSPEC, _AVAHI_PROTO_UNSPEC,
                 dbus.UInt32(_AVAHI_PUBLISHFLAGS_NONE), self.name, self.stype,
-                self.domain, self.host, dbus.UInt16(self.port), text)
+                self.domain, self.host, dbus.UInt16(self.port),
+                _convert_text_list_to_dbus_format(self.text))
 
             self.group.Commit()
             logger.debug('%s: Published', self)
