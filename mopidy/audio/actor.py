@@ -19,6 +19,11 @@ from mopidy.utils import process
 
 logger = logging.getLogger(__name__)
 
+# This logger is only meant for debug logging of low level gstreamer info such
+# as callbacks, event, messages and direct interaction with GStreamer such as
+# set_state on a pipeline.
+gst_logger = logging.getLogger('mopidy.audio.gst')
+
 playlists.register_typefinders()
 playlists.register_elements()
 
@@ -200,12 +205,13 @@ class Audio(pykka.ThreadingActor):
         self._playbin = playbin
 
     def _on_about_to_finish(self, element):
+        gst_logger.debug('Got about-to-finish event.')
         if self._about_to_finish_callback:
-            logger.debug('Calling about to finish callback.')
             self._about_to_finish_callback()
 
     def _on_new_source(self, element, pad):
         source = element.get_property('source')
+        gst_logger.debug('Got notify::source event: element=%s', source)
 
         if source.get_factory().get_name() == 'appsrc':
             self._appsrc.configure(source)
@@ -321,11 +327,14 @@ class Audio(pykka.ThreadingActor):
 
     def _on_pad_event(self, pad, event):
         if event.type == gst.EVENT_NEWSEGMENT:
-            # update, rate, format, start, stop, position
-            position = event.parse_new_segment()[5] // gst.MSECOND
-            logger.debug('Triggering event: position_changed(position=%s)',
-                         position)
-            AudioListener.send('position_changed', position=position)
+            update, rate, format_, start, stop, pos = event.parse_new_segment()
+            gst_logger.debug('Got new-segment event: update=%s rate=%s '
+                             'format=%s start=%s stop=%s position=%s', update,
+                             rate, format_.value_name, start, stop, pos)
+            pos_ms = pos // gst.MSECOND
+            logger.debug('Triggering: position_changed(position=%s)', pos_ms)
+            AudioListener.send('position_changed', position=pos_ms)
+
         return True
 
     def _on_message(self, bus, msg):
@@ -339,6 +348,8 @@ class Audio(pykka.ThreadingActor):
             self._on_error(*msg.parse_error())
         elif msg.type == gst.MESSAGE_WARNING:
             self._on_warning(*msg.parse_warning())
+        elif msg.type == gst.MESSAGE_ASYNC_DONE:
+            gst_logger.debug('Got async-done message.')
         elif msg.type == gst.MESSAGE_ELEMENT:
             if msg.structure.has_name('playbin2-stream-changed'):
                 self._on_stream_changed(msg.structure['uri'])
@@ -346,6 +357,10 @@ class Audio(pykka.ThreadingActor):
                 self._on_missing_plugin(msg)
 
     def _on_playbin_state_changed(self, old_state, new_state, pending_state):
+        gst_logger.debug('Got state-changed message: old=%s new=%s pending=%s',
+                         old_state.value_name, new_state.value_name,
+                         pending_state.value_name)
+
         if new_state == gst.STATE_READY and pending_state == gst.STATE_NULL:
             # XXX: We're not called on the last state change when going down to
             # NULL, so we rewrite the second to last call to get the expected
@@ -366,15 +381,17 @@ class Audio(pykka.ThreadingActor):
         if target_state == new_state:
             target_state = None
 
-        logger.debug(
-            'Triggering event: state_changed(old_state=%s, new_state=%s, '
-            'target_state=%s)', old_state, new_state, target_state)
+        logger.debug('Triggering: state_changed(old_state=%s, new_state=%s, '
+                     'target_state=%s)', old_state, new_state, target_state)
         AudioListener.send('state_changed', old_state=old_state,
                            new_state=new_state, target_state=target_state)
         if new_state == PlaybackState.STOPPED:
+            logger.debug('Triggering: stream_changed(uri=None)')
             AudioListener.send('stream_changed', uri=None)
 
     def _on_buffering(self, percent):
+        gst_logger.debug('Got buffering message: percent=%d%%', percent)
+
         if percent < 10 and not self._buffering:
             self._playbin.set_state(gst.STATE_PAUSED)
             self._buffering = True
@@ -383,30 +400,33 @@ class Audio(pykka.ThreadingActor):
             if self._target_state == gst.STATE_PLAYING:
                 self._playbin.set_state(gst.STATE_PLAYING)
 
-        logger.debug('Buffer %d%% full', percent)
-
     def _on_end_of_stream(self):
-        logger.debug('Audio event: reached_end_of_stream')
+        gst_logger.debug('Got end-of-stream message.')
+        logger.debug('Triggering: reached_end_of_stream()')
         AudioListener.send('reached_end_of_stream')
 
     def _on_error(self, error, debug):
-        logger.error(
-            '%s Debug message: %s',
-            str(error).decode('utf-8'), debug.decode('utf-8') or 'None')
+        gst_logger.error(str(error).decode('utf-8'))
+        if debug:
+            gst_logger.debug(debug.decode('utf-8'))
+        # TODO: is this needed?
         self.stop_playback()
 
     def _on_warning(self, error, debug):
-        logger.warning(
-            '%s Debug message: %s',
-            str(error).decode('utf-8'), debug.decode('utf-8') or 'None')
+        gst_logger.warning(str(error).decode('utf-8'))
+        if debug:
+            gst_logger.debug(debug.decode('utf-8'))
 
     def _on_stream_changed(self, uri):
-        logger.debug('Triggering event: stream_changed(uri=%s)', uri)
+        gst_logger.debug('Got stream-changed message: uri:%s', uri)
+        logger.debug('Triggering: stream_changed(uri=%s)', uri)
         AudioListener.send('stream_changed', uri=uri)
 
     def _on_missing_plugin(self, msg):
         desc = gst.pbutils.missing_plugin_message_get_description(msg)
         debug = gst.pbutils.missing_plugin_message_get_installer_detail(msg)
+
+        gst_logger.debug('Got missing-plugin message: description:%s', desc)
         logger.warning('Could not find a %s to handle media.', desc)
         if gst.pbutils.install_plugins_supported():
             logger.info('You might be able to fix this by running: '
@@ -470,7 +490,8 @@ class Audio(pykka.ThreadingActor):
         We will get a GStreamer message when the stream playback reaches the
         token, and can then do any end-of-stream related tasks.
         """
-        return self._appsrc.end_of_stream()
+        self._appsrc.end_of_stream()
+        gst_logger.debug('Sent appsrc end-of-stream event.')
 
     def set_about_to_finish_callback(self, callback):
         """
@@ -507,8 +528,10 @@ class Audio(pykka.ThreadingActor):
         :rtype: :class:`True` if successful, else :class:`False`
         """
         gst_position = utils.millisecond_to_clocktime(position)
-        return self._playbin.seek_simple(
+        result = self._playbin.seek_simple(
             gst.Format(gst.FORMAT_TIME), gst.SEEK_FLAG_FLUSH, gst_position)
+        gst_logger.debug('Sent flushing seek: position=%s', gst_position)
+        return result
 
     def start_playback(self):
         """
@@ -588,18 +611,16 @@ class Audio(pykka.ThreadingActor):
         """
         self._target_state = state
         result = self._playbin.set_state(state)
+        gst_logger.debug('State change to %s: result=%s', state.value_name,
+                         result.value_name)
+
         if result == gst.STATE_CHANGE_FAILURE:
             logger.warning(
                 'Setting GStreamer state to %s failed', state.value_name)
             return False
-        elif result == gst.STATE_CHANGE_ASYNC:
-            logger.debug(
-                'Setting GStreamer state to %s is async', state.value_name)
-            return True
-        else:
-            logger.debug(
-                'Setting GStreamer state to %s is OK', state.value_name)
-            return True
+        # TODO: at this point we could already emit stopped event instead
+        # of faking it in the message handling when result=OK
+        return True
 
     def get_volume(self):
         """
@@ -678,3 +699,4 @@ class Audio(pykka.ThreadingActor):
 
         event = gst.event_new_tag(taglist)
         self._playbin.send_event(event)
+        gst_logger.debug('Sent tag event: track=%s', track.uri)
