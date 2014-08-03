@@ -320,6 +320,11 @@ class Audio(pykka.ThreadingActor):
 
         self._playbin = playbin
 
+    def _teardown_playbin(self):
+        self._signals.disconnect(self._playbin, 'about-to-finish')
+        self._signals.disconnect(self._playbin, 'source-setup')
+        self._playbin.set_state(gst.STATE_NULL)
+
     def _on_about_to_finish(self, element):
         gst_logger.debug('Got about-to-finish event.')
         if self._about_to_finish_callback:
@@ -335,12 +340,6 @@ class Audio(pykka.ThreadingActor):
 
         if hasattr(source.props, 'proxy'):
             setup_proxy(source, self._config['proxy'])
-
-    def _teardown_playbin(self):
-        self._signals.disconnect(self._playbin, 'about-to-finish')
-        self._signals.disconnect(self._playbin, 'notify::source')
-        self._signals.disconnect(self._playbin, 'source-setup')
-        self._playbin.set_state(gst.STATE_NULL)
 
     def _setup_output(self):
         self._outputs = _Outputs()
