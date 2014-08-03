@@ -73,6 +73,68 @@ class _Signals(object):
             element.disconnect(self._ids.pop((element, event)))
 
 
+class _Appsrc(object):
+    """Helper class for dealing with appsrc based playback."""
+    def __init__(self):
+        self._signals = _Signals()
+        self.reset()
+
+    def reset(self):
+        """Reset the helper.
+
+        Should be called whenever the source changes and we are not setting up
+        a new appsrc.
+        """
+        self.prepare(None, None, None, None)
+
+    def prepare(self, caps, need_data, enough_data, seek_data):
+        """Store info we will need when the appsrc element gets installed."""
+        self._signals.clear()
+        self._source = None
+        self._caps = caps
+        self._need_data_callback = need_data
+        self._seek_data_callback = seek_data
+        self._enough_data_callback = enough_data
+
+    def configure(self, source):
+        """Configure the supplied source for use.
+
+        Should be called whenever we get a new appsrc.
+        """
+        source.set_property('caps', self._caps)
+        source.set_property('format', b'time')
+        source.set_property('stream-type', b'seekable')
+        source.set_property('max-bytes', 1 * MB)
+        source.set_property('min-percent', 50)
+
+        if self._need_data_callback:
+            self._signals.connect(source, 'need-data', self._on_signal,
+                                  self._need_data_callback)
+        if self._seek_data_callback:
+            self._signals.connect(source, 'seek-data', self._on_signal,
+                                  self._seek_data_callback)
+        if self._enough_data_callback:
+            self._signals.connect(source, 'enough-data', self._on_signal, None,
+                                  self._enough_data_callback)
+
+        self._source = source
+
+    def push(self, buffer_):
+        return self._source.emit('push-buffer', buffer_) == gst.FLOW_OK
+
+    def end_of_stream(self):
+        self._source.emit('end-of-stream')
+
+    def _on_signal(self, element, clocktime, func):
+        # This shim is used to ensure we always return true, and also handles
+        # that not all the callbacks have a time argument.
+        if clocktime is None:
+            func()
+        else:
+            func(utils.clocktime_to_millisecond(clocktime))
+        return True
+
+
 # TODO: create a player class which replaces the actors internals
 class Audio(pykka.ThreadingActor):
     """
@@ -91,14 +153,10 @@ class Audio(pykka.ThreadingActor):
         self._buffering = False
 
         self._playbin = None
-        self._signals = _Signals()
         self._about_to_finish_callback = None
 
-        self._appsrc = None
-        self._appsrc_caps = None
-        self._appsrc_need_data_callback = None
-        self._appsrc_enough_data_callback = None
-        self._appsrc_seek_data_callback = None
+        self._appsrc = _Appsrc()
+        self._signals = _Signals()
 
     def on_start(self):
         try:
@@ -141,35 +199,17 @@ class Audio(pykka.ThreadingActor):
         self._playbin = playbin
 
     def _on_about_to_finish(self, element):
-        source, self._appsrc = self._appsrc, None
-        if source is not None:
-            self._appsrc_caps = None
-            self._signals.disconnect(source, 'need-data')
-            self._signals.disconnect(source, 'enough-data')
-            self._signals.disconnect(source, 'seek-data')
-
         if self._about_to_finish_callback:
             logger.debug('Calling about to finish callback.')
             self._about_to_finish_callback()
 
     def _on_new_source(self, element, pad):
-        uri = element.get_property('uri')
-        if not uri or not uri.startswith('appsrc://'):
-            return
-
         source = element.get_property('source')
-        source.set_property('caps', self._appsrc_caps)
-        source.set_property('format', b'time')
-        source.set_property('stream-type', b'seekable')
-        source.set_property('max-bytes', 1 * MB)
-        source.set_property('min-percent', 50)
 
-        self._signals.connect(source, 'need-data', self._appsrc_on_need_data)
-        self._signals.connect(source, 'seek-data', self._appsrc_on_seek_data)
-        self._signals.connect(
-            source, 'enough-data', self._appsrc_on_enough_data)
-
-        self._appsrc = source
+        if source.get_factory().get_name() == 'appsrc':
+            self._appsrc.configure(source)
+        else:
+            self._appsrc.reset()
 
     def _on_source_setup(self, element, source):
         scheme = 'http'
@@ -186,23 +226,6 @@ class Audio(pykka.ThreadingActor):
             source.set_property('proxy', proxy)
             source.set_property('proxy-id', self._config['proxy']['username'])
             source.set_property('proxy-pw', self._config['proxy']['password'])
-
-    def _appsrc_on_need_data(self, appsrc, gst_length_hint):
-        length_hint = utils.clocktime_to_millisecond(gst_length_hint)
-        if self._appsrc_need_data_callback is not None:
-            self._appsrc_need_data_callback(length_hint)
-        return True
-
-    def _appsrc_on_enough_data(self, appsrc):
-        if self._appsrc_enough_data_callback is not None:
-            self._appsrc_enough_data_callback()
-        return True
-
-    def _appsrc_on_seek_data(self, appsrc, gst_position):
-        position = utils.clocktime_to_millisecond(gst_position)
-        if self._appsrc_seek_data_callback is not None:
-            self._appsrc_seek_data_callback(position)
-        return True
 
     def _teardown_playbin(self):
         self._signals.disconnect(self._playbin, 'about-to-finish')
@@ -407,12 +430,8 @@ class Audio(pykka.ThreadingActor):
             to continue playback
         :type seek_data: callable which takes time position in ms
         """
-        if isinstance(caps, unicode):
-            caps = caps.encode('utf-8')
-        self._appsrc_caps = gst.Caps(caps)
-        self._appsrc_need_data_callback = need_data
-        self._appsrc_enough_data_callback = enough_data
-        self._appsrc_seek_data_callback = seek_data
+        self._appsrc.prepare(
+            gst.Caps(bytes(caps)), need_data, enough_data, seek_data)
         self._playbin.set_property('uri', 'appsrc://')
 
     def emit_data(self, buffer_):
@@ -427,9 +446,7 @@ class Audio(pykka.ThreadingActor):
         :type buffer_: :class:`gst.Buffer`
         :rtype: boolean
         """
-        if not self._appsrc:
-            return False
-        return self._appsrc.emit('push-buffer', buffer_) == gst.FLOW_OK
+        return self._appsrc.push(buffer_)
 
     def emit_end_of_stream(self):
         """
@@ -439,8 +456,7 @@ class Audio(pykka.ThreadingActor):
         We will get a GStreamer message when the stream playback reaches the
         token, and can then do any end-of-stream related tasks.
         """
-        # TODO: replace this with emit_data(None)?
-        self._playbin.get_property('source').emit('end-of-stream')
+        return self._appsrc.end_of_stream()
 
     def set_about_to_finish_callback(self, callback):
         """
