@@ -7,7 +7,7 @@ import pykka
 
 from mopidy import audio, backend, mixer
 from mopidy.audio import PlaybackState
-from mopidy.core.history import TrackHistory
+from mopidy.core.history import History
 from mopidy.core.library import LibraryController
 from mopidy.core.listener import CoreListener
 from mopidy.core.playback import PlaybackController
@@ -47,7 +47,7 @@ class Core(
 
         self.library = LibraryController(backends=self.backends, core=self)
 
-        self.history = TrackHistory()
+        self.history = History()
 
         self.playback = PlaybackController(
             mixer=mixer, backends=self.backends, core=self)
