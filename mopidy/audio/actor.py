@@ -248,8 +248,6 @@ class Audio(pykka.ThreadingActor):
         playbin.set_property('buffer-size', 2*1024*1024)
         playbin.set_property('buffer-duration', 2*gst.SECOND)
 
-        # TODO: on new source and source setup are dupes...
-        self._signals.connect(playbin, 'notify::source', self._on_new_source)
         self._signals.connect(playbin, 'source-setup', self._on_source_setup)
         self._signals.connect(
             playbin, 'about-to-finish', self._on_about_to_finish)
@@ -261,16 +259,14 @@ class Audio(pykka.ThreadingActor):
         if self._about_to_finish_callback:
             self._about_to_finish_callback()
 
-    def _on_new_source(self, element, pad):
-        source = element.get_property('source')
-        gst_logger.debug('Got notify::source event: element=%s', source)
+    def _on_source_setup(self, element, source):
+        gst_logger.debug('Got source-setup: element=%s', source)
 
         if source.get_factory().get_name() == 'appsrc':
             self._appsrc.configure(source)
         else:
             self._appsrc.reset()
 
-    def _on_source_setup(self, element, source):
         scheme = 'http'
         hostname = self._config['proxy']['hostname']
         port = 80
