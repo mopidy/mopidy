@@ -27,6 +27,8 @@ Bug fix release.
 - Zeroconf: Fix discovery by adding ``.local`` to the announced hostname. (PR:
   :issue:`795`)
 
+- Zeroconf: Fix intermittent DBus/Avahi exception.
+
 
 v0.19.2 (2014-07-26)
 ====================
