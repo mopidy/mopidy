@@ -17,40 +17,48 @@ class SoftwareMixer(pykka.ThreadingActor, mixer.Mixer):
     def __init__(self, config):
         super(SoftwareMixer, self).__init__(config)
 
-        self.audio = None
-        self._last_volume = None
-        self._last_mute = None
+        self._audio_mixer = None
+        self._initial_volume = None
+        self._initial_mute = None
 
+        # TODO: shouldn't this be logged by thing that choose us?
         logger.info('Mixing using GStreamer software mixing')
 
+    def setup(self, mixer_ref):
+        self._audio_mixer = mixer_ref
+
+        # The Mopidy startup procedure will set the initial volume of a
+        # mixer, but this happens before the audio actor is injected into the
+        # software mixer and has no effect. Thus, we need to set the initial
+        # volume again.
+        if self._initial_volume is not None:
+            self.set_volume(self._initial_volume)
+        if self._initial_mute is not None:
+            self.set_mute(self._initial_mute)
+
+    def teardown(self):
+        self._audio_mixer = None
+
     def get_volume(self):
-        if self.audio is None:
+        if self._audio_mixer is None:
             return None
-        return self.audio.get_volume().get()
+        return self._audio_mixer.get_volume().get()
 
     def set_volume(self, volume):
-        if self.audio is None:
+        if self._audio_mixer is None:
+            self._initial_volume = volume
             return False
-        self.audio.set_volume(volume)
+        self._audio_mixer.set_volume(volume)
         return True
 
     def get_mute(self):
-        if self.audio is None:
+        if self._audio_mixer is None:
             return None
-        return self.audio.get_mute().get()
+        return self._audio_mixer.get_mute().get()
 
     def set_mute(self, mute):
-        if self.audio is None:
+        if self._audio_mixer is None:
+            self._initial_mute = mute
             return False
-        self.audio.set_mute(mute)
+        self._audio_mixer.set_mute(mute)
         return True
-
-    def trigger_events_for_changed_values(self):
-        old_volume, self._last_volume = self._last_volume, self.get_volume()
-        old_mute, self._last_mute = self._last_mute, self.get_mute()
-
-        if old_volume != self._last_volume:
-            self.trigger_volume_changed(self._last_volume)
-
-        if old_mute != self._last_mute:
-            self.trigger_mute_changed(self._last_mute)

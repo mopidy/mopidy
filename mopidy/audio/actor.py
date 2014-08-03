@@ -192,6 +192,53 @@ class _Outputs(gst.Bin):
         self._tee.link(queue)
 
 
+class SoftwareMixer(object):
+    pykka_traversable = True
+
+    def __init__(self, mixer):
+        self._mixer = mixer
+        self._element = None
+        self._last_volume = None
+        self._last_mute = None
+        self._signals = _Signals()
+
+    def setup(self, element, mixer_ref):
+        self._element = element
+
+        self._signals.connect(element, 'notify::volume', self._volume_changed)
+        self._signals.connect(element, 'notify::mute', self._mute_changed)
+
+        self._mixer.setup(mixer_ref)
+
+    def teardown(self):
+        self._signals.clear()
+        self._mixer.teardown()
+
+    def get_volume(self):
+        return int(round(self._element.get_property('volume') * 100))
+
+    def set_volume(self, volume):
+        self._element.set_property('volume', volume / 100.0)
+
+    def get_mute(self):
+        return self._element.get_property('mute')
+
+    def set_mute(self, mute):
+        return self._element.set_property('mute', bool(mute))
+
+    def _volume_changed(self, element, property_):
+        old_volume, self._last_volume = self._last_volume, self.get_volume()
+        if old_volume != self._last_volume:
+            gst_logger.debug('Notify volume: %s', self._last_volume / 100.0)
+            self._mixer.trigger_volume_changed(self._last_volume)
+
+    def _mute_changed(self, element, property_):
+        old_mute, self._last_mute = self._last_mute, self.get_mute()
+        if old_mute != self._last_mute:
+            gst_logger.debug('Notify mute: %s', self._last_mute)
+            self._mixer.trigger_mute_changed(self._last_mute)
+
+
 def setup_proxy(element, config):
     # TODO: reuse in scanner code
     if not config.get('hostname'):
@@ -215,11 +262,13 @@ class Audio(pykka.ThreadingActor):
     #: The GStreamer state mapped to :class:`mopidy.audio.PlaybackState`
     state = PlaybackState.STOPPED
 
+    #: The software mixing interface :class:`mopidy.audio.actor.SoftwareMixer`
+    mixer = None
+
     def __init__(self, config, mixer):
         super(Audio, self).__init__()
 
         self._config = config
-        self._mixer = mixer
         self._target_state = gst.STATE_NULL
         self._buffering = False
 
@@ -229,6 +278,9 @@ class Audio(pykka.ThreadingActor):
 
         self._appsrc = _Appsrc()
         self._signals = _Signals()
+
+        if mixer and self._config['audio']['mixer'] == 'software':
+            self.mixer = SoftwareMixer(mixer)
 
     def on_start(self):
         try:
@@ -300,31 +352,12 @@ class Audio(pykka.ThreadingActor):
         self._playbin.set_property('audio-sink', self._outputs)
 
     def _setup_mixer(self):
-        if self._config['audio']['mixer'] != 'software':
-            return
-        self._mixer.audio = self.actor_ref.proxy()
-        self._signals.connect(
-            self._playbin, 'notify::volume', self._on_mixer_change)
-        self._signals.connect(
-            self._playbin, 'notify::mute', self._on_mixer_change)
-
-        # The Mopidy startup procedure will set the initial volume of a mixer,
-        # but this happens before the audio actor is injected into the software
-        # mixer and has no effect. Thus, we need to set the initial volume
-        # again.
-        initial_volume = self._config['audio']['mixer_volume']
-        if initial_volume is not None:
-            self._mixer.set_volume(initial_volume)
-
-    def _on_mixer_change(self, element, gparamspec):
-        self._mixer.trigger_events_for_changed_values()
+        if self.mixer:
+            self.mixer.setup(self._playbin, self.actor_ref.proxy().mixer)
 
     def _teardown_mixer(self):
-        if self._config['audio']['mixer'] != 'software':
-            return
-        self._signals.disconnect(self._playbin, 'notify::volume')
-        self._signals.disconnect(self._playbin, 'notify::mute')
-        self._mixer.audio = None
+        if self.mixer:
+            self.mixer.teardown()
 
     def _setup_visualizer(self):
         visualizer_element = self._config['audio']['visualizer']
@@ -645,52 +678,6 @@ class Audio(pykka.ThreadingActor):
             return False
         # TODO: at this point we could already emit stopped event instead
         # of faking it in the message handling when result=OK
-        return True
-
-    def get_volume(self):
-        """
-        Get volume level of the software mixer.
-
-        Example values:
-
-        0:
-            Minimum volume.
-        100:
-            Maximum volume.
-
-        :rtype: int in range [0..100]
-        """
-        return int(round(self._playbin.get_property('volume') * 100))
-
-    def set_volume(self, volume):
-        """
-        Set volume level of the software mixer.
-
-        :param volume: the volume in the range [0..100]
-        :type volume: int
-        :rtype: :class:`True` if successful, else :class:`False`
-        """
-        self._playbin.set_property('volume', volume / 100.0)
-        return True
-
-    def get_mute(self):
-        """
-        Get mute status of the software mixer.
-
-        :rtype: :class:`True` if muted, :class:`False` if unmuted,
-          :class:`None` if no mixer is installed.
-        """
-        return self._playbin.get_property('mute')
-
-    def set_mute(self, mute):
-        """
-        Mute or unmute of the software mixer.
-
-        :param mute: Whether to mute the mixer or not.
-        :type mute: bool
-        :rtype: :class:`True` if successful, else :class:`False`
-        """
-        self._playbin.set_property('mute', bool(mute))
         return True
 
     def set_metadata(self, track):
