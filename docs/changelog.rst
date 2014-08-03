@@ -20,6 +20,10 @@ Bug fix release.
 
 - Zeroconf: Fix intermittent DBus/Avahi exception.
 
+- Extensions: Fail early if trying to setup an extension which doesn't
+  implement the :meth:`mopidy.ext.Extension.setup` method. (Fixes:
+  :issue:`813`)
+
 
 v0.19.2 (2014-07-26)
 ====================
