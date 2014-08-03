@@ -1,17 +1,19 @@
 from __future__ import unicode_literals
 
+import copy
+import datetime
 import logging
 
-from mopidy.models import Track
+from mopidy.models import Ref, Track
 
 
 logger = logging.getLogger(__name__)
 
 
-class TrackHistory():
+class History(object):
     track_list = []
 
-    def add_track(self, track):
+    def add(self, track):
         """
         :param track: track to change to
         :type track: :class:`mopidy.models.Track`
@@ -20,12 +22,21 @@ class TrackHistory():
             logger.warning('Cannot add non-Track type object to TrackHistory')
             return
 
-        # Reorder the track history if the track is already present.
-        if track in self.track_list:
-            self.track_list.remove(track)
-        self.track_list.insert(0, track)
+        timestamp = int(datetime.datetime.now().strftime("%s")) * 1000
+        name_parts = []
+        if track.name is not None:
+            name_parts.append(track.name)
+        if track.artists:
+            name_parts.append(
+                ', '.join([artist.name for artist in track.artists])
+            )
+        ref_name = ' - '.join(name_parts)
+        track_ref = Ref.track(uri=track.uri, name=ref_name)
 
-    def get_history_size(self):
+        self.track_list.insert(0, (timestamp, track_ref))
+
+    @property
+    def size(self):
         """
         Returns the number of tracks in the history.
         :returns: The number of tracks in the history.
@@ -39,4 +50,4 @@ class TrackHistory():
         :returns: The history as a list of `mopidy.models.Track`
         :rtype: L{`mopidy.models.Track`}
         """
-        return self.track_list
+        return copy.copy(self.track_list)
