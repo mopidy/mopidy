@@ -21,7 +21,8 @@ be easily added.
 Mopidy is a Python application that runs in a terminal or in the background on
 Linux computers or Macs that have network connectivity and audio output. Out of
 the box, Mopidy is an :ref:`MPD <ext-mpd>` and :ref:`HTTP <ext-http>` server.
-Additional frontends for controlling Mopidy can be installed from extensions.
+:ref:`Additional frontends <ext-frontends>` for controlling Mopidy can be
+installed from extensions.
 
 **Everybody use their favorite client**
 
@@ -33,20 +34,21 @@ the music from any phone, tablet, or computer.
 
 **Mopidy on Raspberry Pi**
 
-The Raspberry Pi is a popular device to run Mopidy on, either using Raspbian or
-Arch Linux. It is quite slow, but it is very affordable. In fact, the
-Kickstarter funded Gramofon: Modern Cloud Jukebox project used Mopidy on a
-Raspberry Pi to prototype the Gramofon device. Mopidy is also a major building
-block in the Pi Musicbox integrated audio jukebox system for Raspberry Pi.
+The :ref:`Raspberry Pi <raspberrypi-installation>` is a popular device to run
+Mopidy on, either using Raspbian or Arch Linux. It is quite slow, but it is
+very affordable. In fact, the Kickstarter funded Gramofon: Modern Cloud Jukebox
+project used Mopidy on a Raspberry Pi to prototype the Gramofon device. Mopidy
+is also a major building block in the Pi Musicbox integrated audio jukebox
+system for Raspberry Pi.
 
 **Mopidy is hackable**
 
-Mopidy's extension support and Python, JSON-RPC, and JavaScript APIs makes
-Mopidy perfect for building your own hacks. In one project, a Raspberry Pi was
-embedded in an old cassette player. The buttons and volume control are wired up
-with GPIO on the Raspberry Pi, and is used to control playback through a custom
-Mopidy extension. The cassettes have NFC tags used to select playlists from
-Spotify.
+Mopidy's extension support and :ref:`Python <api-ref>`, :ref:`JSON-RPC
+<http-api>`, and :ref:`JavaScript APIs <mopidy-js>` makes Mopidy perfect for
+building your own hacks. In one project, a Raspberry Pi was embedded in an old
+cassette player. The buttons and volume control are wired up with GPIO on the
+Raspberry Pi, and is used to control playback through a custom Mopidy
+extension. The cassettes have NFC tags used to select playlists from Spotify.
 
 **Getting started**
 
