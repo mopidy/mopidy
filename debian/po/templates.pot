@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: mopidy\n"
 "Report-Msgid-Bugs-To: mopidy@packages.debian.org\n"
-"POT-Creation-Date: 2014-05-25 09:05+0200\n"
+"POT-Creation-Date: 2014-08-04 10:00+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,23 +19,23 @@ msgstr ""
 
 #. Type: boolean
 #. Description
-#: ../mopidy.templates:1001
-msgid "Should the Mopidy server be started at boot?"
+#: ../mopidy.templates:2001
+msgid "Start the Mopidy server at boot?"
 msgstr ""
 
 #. Type: boolean
 #. Description
-#: ../mopidy.templates:1001
+#: ../mopidy.templates:2001
 msgid ""
 "The Mopidy server can be run as a system service, automatically starting at "
-"boot. It will be listening to MPD connections at port 6600 and HTTP "
-"connections at port 6680. By default, it will only accept connections from "
-"localhost."
+"boot. It will be listening to MPD connections on port 6600 and HTTP "
+"connections on port 6680. By default, it will only accept connections from "
+"the local machine."
 msgstr ""
 
 #. Type: boolean
 #. Description
-#: ../mopidy.templates:1001
+#: ../mopidy.templates:2001
 msgid ""
 "You have the option of starting the Mopidy server automatically on system "
 "boot. If in doubt, it is suggested to not start it automatically on boot."
@@ -43,7 +43,7 @@ msgstr ""
 
 #. Type: boolean
 #. Description
-#: ../mopidy.templates:1001
+#: ../mopidy.templates:2001
 msgid ""
-"This setting can be modified later by running 'dpkg-reconfigure mopidy'."
+"This setting can be modified later by running \"dpkg-reconfigure mopidy\"."
 msgstr ""
