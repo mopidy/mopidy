@@ -9,6 +9,7 @@
 override_dh_clean:
 	rm -rf build/
 	make -C docs/ clean
+	debconf-updatepo
 	dh_clean
 
 override_dh_auto_build:
