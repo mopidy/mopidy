@@ -1,3 +1,10 @@
+mopidy (0.19.3-1) unstable; urgency=medium
+
+  * Updated package description and Debconf template from #754526.
+  * Upload to unstable.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Mon, 04 Aug 2014 09:13:18 +0200
+
 mopidy (0.19.3-0mopidy1) unstable; urgency=medium
 
   * New upstream release.

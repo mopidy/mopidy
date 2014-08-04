@@ -32,10 +32,11 @@ Recommends:
 Suggests:
     mopidy-doc
 Description: music server with support for MPD/HTTP clients
- Mopidy is a music server which can play music both from multiple sources, like
- your local hard drive, radio streams, and from Spotify and SoundCloud.
- Searches combines results from all music sources, and you can mix tracks from
- all sources in your play queue. Your playlists from Spotify or SoundCloud are
+ Mopidy is an extensible music server which can play music from local
+ files, radio streams, and cloud services such as Spotify and SoundCloud.
+ .
+ Searches combine results from all music sources, and tracks can be mixed from
+ all sources in the play queue. Spotify or SoundCloud playlists are
  also available for use.
 
 Package: mopidy-doc
@@ -47,7 +48,7 @@ Depends:
 Recommends: mopidy
 Replaces: mopidy (<< 0.7.3-2)
 Description: music server with support for MPD/HTTP clients - documentation
- Mopidy is a music server which can play music both from multiple sources, like
- your local hard drive, radio streams, and from Spotify and SoundCloud.
+ Mopidy is an extensible music server which can play music from local
+ files, radio streams, and cloud services such as Spotify and SoundCloud.
  .
- The packages includes documentation for Mopidy.
+ This package provides the documentation for Mopidy.
