@@ -155,7 +155,7 @@ class _Outputs(gst.Bin):
         # the actual switch, i.e. about to switch can block for longer thanks
         # to this queue.
         # TODO: make the min-max values a setting?
-        # TODO: move out of this class?
+        # TODO: this does not belong in this class.
         queue = gst.element_factory_make('queue')
         queue.set_property('max-size-buffers', 0)
         queue.set_property('max-size-bytes', 0)
@@ -168,9 +168,11 @@ class _Outputs(gst.Bin):
         ghost_pad = gst.GhostPad('sink', queue.get_pad('sink'))
         self.add_pad(ghost_pad)
 
-        # Add an always connected fakesink so the tee doesn't fail.
-        # XXX disabled for now as we get one stream changed per sink...
-        # self._add(gst.element_factory_make('fakesink'))
+        # Add an always connected fakesink which respects the clock so the tee
+        # doesn't fail even if we don't have any outputs.
+        fakesink = gst.element_factory_make('fakesink')
+        fakesink.set_property('sync', True)
+        self._add(fakesink)
 
     def add_output(self, description):
         # XXX This only works for pipelines not in use until #790 gets done.
@@ -346,12 +348,18 @@ class Audio(pykka.ThreadingActor):
             setup_proxy(source, self._config['proxy'])
 
     def _setup_output(self):
-        self._outputs = _Outputs()
+        # We don't want to test outputs for regular testing, so just instal
+        # an unsynced fakesink when someone asks for a testouput.
+        if self._config['audio']['output'] == 'testoutput':
+            self._outputs = gst.element_factory_make('fakesink')
+        else:
+            self._outputs = _Outputs()
+            try:
+                self._outputs.add_output(self._config['audio']['output'])
+            except exceptions.AudioException:
+                process.exit_process()  # TODO: move this up the chain
+
         self._outputs.get_pad('sink').add_event_probe(self._on_pad_event)
-        try:
-            self._outputs.add_output(self._config['audio']['output'])
-        except exceptions.AudioException:
-            process.exit_process()  # TODO: move this up the chain
         self._playbin.set_property('audio-sink', self._outputs)
 
     def _setup_mixer(self):
@@ -396,7 +404,12 @@ class Audio(pykka.ThreadingActor):
             pos_ms = pos // gst.MSECOND
             logger.debug('Triggering: position_changed(position=%s)', pos_ms)
             AudioListener.send('position_changed', position=pos_ms)
-
+        elif event.type == gst.EVENT_SINK_MESSAGE:
+            # Handle stream changed messages when they reach our output bin.
+            # If we listen for it on the bus we get one per tee branch.
+            msg = event.parse_sink_message()
+            if msg.structure.has_name('playbin2-stream-changed'):
+                self._on_stream_changed(msg.structure['uri'])
         return True
 
     # TODO: consider splitting this out while we are at it.
@@ -414,9 +427,7 @@ class Audio(pykka.ThreadingActor):
         elif msg.type == gst.MESSAGE_ASYNC_DONE:
             gst_logger.debug('Got async-done message.')
         elif msg.type == gst.MESSAGE_ELEMENT:
-            if msg.structure.has_name('playbin2-stream-changed'):
-                self._on_stream_changed(msg.structure['uri'])
-            elif gst.pbutils.is_missing_plugin_message(msg):
+            if gst.pbutils.is_missing_plugin_message(msg):
                 self._on_missing_plugin(msg)
 
     def _on_playbin_state_changed(self, old_state, new_state, pending_state):

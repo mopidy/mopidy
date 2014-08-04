@@ -21,11 +21,9 @@ from mopidy.utils.path import path_to_uri
 
 from tests import path_to_data_dir
 
-"""
-We want to make sure both our real audio class and the fake one behave
-correctly. So each test is first run against the real class, then repeated
-against our dummy.
-"""
+# We want to make sure both our real audio class and the fake one behave
+# correctly. So each test is first run against the real class, then repeated
+# against our dummy.
 
 
 class BaseTest(unittest.TestCase):
@@ -34,7 +32,7 @@ class BaseTest(unittest.TestCase):
             'mixer': 'fakemixer track_max_volume=65536',
             'mixer_track': None,
             'mixer_volume': None,
-            'output': 'fakesink',
+            'output': 'testoutput',
             'visualizer': None,
         }
     }
@@ -49,7 +47,7 @@ class BaseTest(unittest.TestCase):
             'audio': {
                 'mixer': 'foomixer',
                 'mixer_volume': None,
-                'output': 'fakesink',
+                'output': 'testoutput',
                 'visualizer': None,
             },
             'proxy': {
