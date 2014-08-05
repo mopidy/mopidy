@@ -19,9 +19,9 @@ v0.19.4 (UNRELEASED)
 
 Bug fix release.
 
- - MPD frontend: Make the ``list`` command return albums when sending 3
-   arguments. This was incorrectly returning artists after the MPD command
-   changes in 0.19.0. (Fixes: :issue:`817`)
+- MPD frontend: Make the ``list`` command return albums when sending 3
+  arguments. This was incorrectly returning artists after the MPD command
+  changes in 0.19.0. (Fixes: :issue:`817`)
 
 
 v0.19.3 (2014-08-03)
