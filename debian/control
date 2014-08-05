@@ -25,7 +25,7 @@ Depends:
     lsb-base,
     gstreamer0.10-plugins-good,
     python-gst0.10,
-    python-tornado
+    python-tornado (>= 2.3)
 Recommends:
     gstreamer0.10-alsa,
     gstreamer0.10-plugins-ugly,

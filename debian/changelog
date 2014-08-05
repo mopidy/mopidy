@@ -1,3 +1,9 @@
+mopidy (0.19.3-2) UNRELEASED; urgency=medium
+
+  * Add >= 2.3 version requirement to python-tornado.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Wed, 06 Aug 2014 00:05:00 +0200
+
 mopidy (0.19.3-1) unstable; urgency=medium
 
   * Updated package description and Debconf template from #754526.
