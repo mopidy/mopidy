@@ -14,6 +14,22 @@ instructions should work for you as well. If you're setting up a Raspberry Pi
 from scratch, we have a guide for installing Debian/Raspbian and Mopidy. See
 :ref:`raspberrypi-installation`.
 
+.. note::
+
+   The packages should work with:
+
+   - Debian stable and testing,
+   - Raspbian stable and testing,
+   - Ubuntu 14.04 LTS and later.
+
+   Some of the packages, including the core "mopidy" packages, does *not* work
+   on Ubuntu 12.04 LTS.
+
+   This is just what we currently support, not a promise to continue to
+   support the same in the future. We *will* drop support for older
+   distributions when supporting those stops us from moving forward with the
+   project.
+
 #. Add the archive's GPG key::
 
        wget -q -O - https://apt.mopidy.com/mopidy.gpg | sudo apt-key add -
