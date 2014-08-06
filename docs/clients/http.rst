@@ -38,9 +38,6 @@ Also the web client used for Wouter's popular `Pi Musicbox
     -- https://github.com/woutervanwijk/Mopidy-MusicBox-Webclient
 
 
-.. include:: /ext/lux.rst
-
-
 .. include:: /ext/moped.rst
 
 
