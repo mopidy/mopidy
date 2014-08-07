@@ -104,20 +104,24 @@ def format_initial(extensions):
 def _load(files, defaults, overrides):
     parser = configparser.RawConfigParser()
 
-    files = [path.expand_path(f) for f in files]
-    sources = ['builtin defaults'] + files + ['command line options']
-    logger.info('Loading config from: %s', ', '.join(sources))
-
     # TODO: simply return path to config file for defaults so we can load it
     # all in the same way?
+    logger.info('Loading config from builtin defaults')
     for default in defaults:
         if isinstance(default, unicode):
             default = default.encode('utf-8')
         parser.readfp(io.BytesIO(default))
 
     # Load config from a series of config files
+    files = [path.expand_path(f) for f in files]
     for filename in files:
+        if not os.path.exists(filename):
+            logger.debug(
+                'Loading config from %s failed; it does not exist', filename)
+            continue
+
         try:
+            logger.info('Loading config from %s', filename)
             with io.open(filename, 'rb') as filehandle:
                 parser.readfp(filehandle)
         except configparser.MissingSectionHeaderError as e:
@@ -140,6 +144,7 @@ def _load(files, defaults, overrides):
     for section in parser.sections():
         raw_config[section] = dict(parser.items(section))
 
+    logger.info('Loading config from command line options')
     for section, key, value in overrides:
         raw_config.setdefault(section, {})[key] = value
 
