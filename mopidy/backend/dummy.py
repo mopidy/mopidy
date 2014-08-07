@@ -86,6 +86,22 @@ class DummyPlaylistsProvider(backend.PlaylistsProvider):
         self._playlists.append(playlist)
         return playlist
 
+    def create_stored(self, name, tracks):
+        self.rm_stored(name)
+        playlist = Playlist(name=name,
+                            uri='dummy:stored:%s' % name,
+                            tracks=tracks)
+        self._playlists.append(playlist)
+        return playlist
+
+    def rm_stored(self, name):
+        new_playlists = filter(lambda p: p.name != name, self._playlists)
+        if len(new_playlists) < len(self._playlists):
+            self._playlists = new_playlists
+            return True
+        else:
+            return False
+
     def delete(self, uri):
         playlist = self.lookup(uri)
         if playlist:

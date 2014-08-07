@@ -56,6 +56,18 @@ def write_library(json_file, data):
             os.remove(tmp.name)
 
 
+def create_stored_playlist(file_path, data):
+    playlist_json = json.dumps(data, cls=models.ModelJSONEncoder,
+                               indent=2, separators=(',', ': '))
+    with open(file_path, 'w') as fp:
+        fp.write(playlist_json)
+
+
+def load_stored_playlist(file_path):
+    with open(file_path, 'r') as fp:
+        return json.load(fp, object_hook=models.model_json_decoder)
+
+
 class _BrowseCache(object):
     encoding = sys.getfilesystemencoding()
     splitpath_re = re.compile(r'([^/]+)')

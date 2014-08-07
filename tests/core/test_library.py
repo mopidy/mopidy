@@ -13,6 +13,7 @@ class CoreLibraryTest(unittest.TestCase):
         dummy1_root = Ref.directory(uri='dummy1:directory', name='dummy1')
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
+        self.backend1.actor_ref.actor_class.__name__ = 'dummy1'
         self.library1 = mock.Mock(spec=backend.LibraryProvider)
         self.library1.root_directory.get.return_value = dummy1_root
         self.backend1.library = self.library1
@@ -20,6 +21,7 @@ class CoreLibraryTest(unittest.TestCase):
         dummy2_root = Ref.directory(uri='dummy2:directory', name='dummy2')
         self.backend2 = mock.Mock()
         self.backend2.uri_schemes.get.return_value = ['dummy2', 'du2']
+        self.backend2.actor_ref.actor_class.__name__ = 'dummy2'
         self.library2 = mock.Mock(spec=backend.LibraryProvider)
         self.library2.root_directory.get.return_value = dummy2_root
         self.backend2.library = self.library2
@@ -27,6 +29,7 @@ class CoreLibraryTest(unittest.TestCase):
         # A backend without the optional library provider
         self.backend3 = mock.Mock()
         self.backend3.uri_schemes.get.return_value = ['dummy3']
+        self.backend3.actor_ref.actor_class.__name__ = 'dummy3'
         self.backend3.has_library().get.return_value = False
         self.backend3.has_library_browse().get.return_value = False
 

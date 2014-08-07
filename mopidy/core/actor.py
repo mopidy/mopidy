@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 import collections
 import itertools
 
+import logging
+
 import pykka
 
 from mopidy import audio, backend, mixer
@@ -13,6 +15,8 @@ from mopidy.core.playback import PlaybackController
 from mopidy.core.playlists import PlaylistsController
 from mopidy.core.tracklist import TracklistController
 from mopidy.utils import versioning
+
+logger = logging.getLogger(__name__)
 
 
 class Core(
@@ -104,6 +108,7 @@ class Backends(list):
         self.with_library_browse = collections.OrderedDict()
         self.with_playback = collections.OrderedDict()
         self.with_playlists = collections.OrderedDict()
+        self.stored_playlists = None
 
         backends_by_scheme = {}
         name = lambda b: b.actor_ref.actor_class.__name__
@@ -113,6 +118,13 @@ class Backends(list):
             has_library_browse = b.has_library_browse().get()
             has_playback = b.has_playback().get()
             has_playlists = b.has_playlists().get()
+            if b.has_stored_playlists().get():
+                if self.stored_playlists is None:
+                    self.stored_playlists = b
+                else:
+                    logger.warn(
+                        "Ignoring playlist storage for backend %s",
+                        name(b))
 
             for scheme in b.uri_schemes.get():
                 assert scheme not in backends_by_scheme, (

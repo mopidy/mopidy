@@ -5,6 +5,8 @@ import logging
 import os
 import shutil
 
+from json import create_stored_playlist, load_stored_playlist
+
 from mopidy import backend
 from mopidy.models import Playlist
 from mopidy.utils import formatting, path
@@ -17,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 class LocalPlaylistsProvider(backend.PlaylistsProvider):
     def __init__(self, *args, **kwargs):
+        kwargs['provides_store'] = True
         super(LocalPlaylistsProvider, self).__init__(*args, **kwargs)
         self._media_dir = self.backend.config['local']['media_dir']
         self._playlists_dir = self.backend.config['local']['playlists_dir']
@@ -27,6 +30,29 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
         uri = 'local:playlist:%s.m3u' % name
         playlist = Playlist(uri=uri, name=name)
         return self.save(playlist)
+
+    def create_stored(self, name, tracks):
+        name = formatting.slugify(name)
+        uri = 'local:stored:%s.json' % name
+        playlist = Playlist(uri=uri, name=name, tracks=tracks)
+        self._playlists = filter(lambda p: p.name != name, self._playlists)
+        self._playlists.append(playlist)
+        file_path = os.path.join(self._playlists_dir, name + '.json')
+        create_stored_playlist(file_path, playlist)
+        return playlist
+
+    def rm_stored(self, name):
+        candidate = next((p for p in self._playlists if p.name == name), None)
+        if candidate and candidate.uri.startswith('local:stored'):
+            self._playlists.remove(candidate)
+            file_path = os.path.join(self._playlists_dir, name + '.json')
+            try:
+                os.unlink(file_path)
+            except OSError:
+                pass
+            return True
+        else:
+            return False
 
     def delete(self, uri):
         playlist = self.lookup(uri)
@@ -55,6 +81,9 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
 
             playlist = Playlist(uri=uri, name=name, tracks=tracks)
             playlists.append(playlist)
+
+        for stored in glob.glob(os.path.join(self._playlists_dir, '*.json')):
+            playlists.append(load_stored_playlist(stored))
 
         self.playlists = playlists
         # TODO: send what scheme we loaded them for?

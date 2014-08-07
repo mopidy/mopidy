@@ -206,7 +206,8 @@ def rm(context, name):
 
         Removes the playlist ``NAME.m3u`` from the playlist directory.
     """
-    raise exceptions.MpdNotImplemented  # TODO
+    if not context.core.playlists.rm_stored(name).get():
+        raise exceptions.MpdNotImplemented
 
 
 @protocol.commands.add('save')
@@ -219,4 +220,5 @@ def save(context, name):
         Saves the current playlist to ``NAME.m3u`` in the playlist
         directory.
     """
-    raise exceptions.MpdNotImplemented  # TODO
+    if not context.core.playlists.create_stored(name).get():
+        raise exceptions.MpdNotImplemented
