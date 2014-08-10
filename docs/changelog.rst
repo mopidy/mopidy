@@ -14,6 +14,9 @@ Bug fix release.
   arguments. This was incorrectly returning artists after the MPD command
   changes in 0.19.0. (Fixes: :issue:`817`)
 
+- Logging: Fix that some loggers would be disabled if logging/config_file was
+  set.
+
 
 v0.19.3 (2014-08-03)
 ====================

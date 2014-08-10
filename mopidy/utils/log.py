@@ -47,7 +47,8 @@ def setup_logging(config, verbosity_level, save_debug_log):
     if config['logging']['config_file']:
         # Logging config from file must be read before other handlers are
         # added. If not, the other handlers will have no effect.
-        logging.config.fileConfig(config['logging']['config_file'])
+        logging.config.fileConfig(config['logging']['config_file'],
+                                  disable_existing_loggers=False)
 
     setup_console_logging(config, verbosity_level)
     if save_debug_log:
