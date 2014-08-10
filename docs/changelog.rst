@@ -13,6 +13,10 @@ v0.20.0 (UNRELEASED)
 - Add cover URL to all scanned files with MusicBrainz album IDs. (Fixes:
   :issue:`697`, PR: :issue:`802`)
 
+**Logging**
+
+- Fix that some loggers would be disabled if logging/config_file was set.
+
 
 v0.19.4 (UNRELEASED)
 ====================
