@@ -61,8 +61,14 @@ class LoadConfigTest(unittest.TestCase):
         self.assertEqual(expected, result)
 
     def test_load_directory(self):
-        directory = path_to_data_dir('conf.d')
+        directory = path_to_data_dir('conf1.d')
         expected = {'foo': {'bar': 'baz'}, 'foo2': {'bar': 'baz'}}
+        result = config._load([directory], [], [])
+        self.assertEqual(expected, result)
+
+    def test_load_directory_only_conf_files(self):
+        directory = path_to_data_dir('conf2.d')
+        expected = {'foo': {'bar': 'baz'}}
         result = config._load([directory], [], [])
         self.assertEqual(expected, result)
 

@@ -120,7 +120,7 @@ def _load(files, defaults, overrides):
         if os.path.isdir(name):
             for filename in os.listdir(name):
                 filename = os.path.join(name, filename)
-                if os.path.isfile(filename):
+                if os.path.isfile(filename) and filename.endswith('.conf'):
                     _load_file(parser, filename)
         else:
             _load_file(parser, name)
