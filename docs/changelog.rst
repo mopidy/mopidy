@@ -13,11 +13,6 @@ v0.20.0 (UNRELEASED)
 - Add cover URL to all scanned files with MusicBrainz album IDs. (Fixes:
   :issue:`697`, PR: :issue:`802`)
 
-**Logging**
-
-- Fix that some loggers would be disabled if :confval:`logging/config_file` was
-  set. (Fixes: :issue:`740`)
-
 
 v0.19.4 (UNRELEASED)
 ====================
@@ -27,6 +22,9 @@ Bug fix release.
 - MPD frontend: Make the ``list`` command return albums when sending 3
   arguments. This was incorrectly returning artists after the MPD command
   changes in 0.19.0. (Fixes: :issue:`817`)
+
+- Logging: Fix that some loggers would be disabled if
+  :confval:`logging/config_file` was set. (Fixes: :issue:`740`)
 
 
 v0.19.3 (2014-08-03)
