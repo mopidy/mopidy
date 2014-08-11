@@ -15,7 +15,8 @@ v0.20.0 (UNRELEASED)
 
 **Logging**
 
-- Fix that some loggers would be disabled if logging/config_file was set.
+- Fix that some loggers would be disabled if :confval:`logging/config_file` was
+  set. (Fixes: :issue:`740`)
 
 
 v0.19.4 (UNRELEASED)
