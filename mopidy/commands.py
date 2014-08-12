@@ -276,8 +276,10 @@ class RootCommand(Command):
                 exceptions.FrontendError,
                 exceptions.MixerError):
             logger.info('Initialization error. Exiting...')
+            exit_status_code = 1
         except KeyboardInterrupt:
             logger.info('Interrupted. Exiting...')
+            exit_status_code = 0
         finally:
             loop.quit()
             self.stop_frontends(frontend_classes)
@@ -286,6 +288,7 @@ class RootCommand(Command):
             self.stop_audio()
             self.stop_mixer(mixer_class)
             process.stop_remaining_actors()
+            return exit_status_code
 
     def get_mixer_class(self, config, mixer_classes):
         logger.debug(

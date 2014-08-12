@@ -26,6 +26,10 @@ Bug fix release.
 - Logging: Fix that some loggers would be disabled if
   :confval:`logging/config_file` was set. (Fixes: :issue:`740`)
 
+- Core: Return exit status 1 when exiting because of initialization error.
+
+- Configuration: :option:`mopidy --config` now supports directories.
+
 
 v0.19.3 (2014-08-03)
 ====================
