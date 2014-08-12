@@ -265,6 +265,7 @@ class RootCommand(Command):
         backend_classes = args.registry['backend']
         frontend_classes = args.registry['frontend']
 
+        exit_status_code = 0
         try:
             mixer = self.start_mixer(config, mixer_class)
             audio = self.start_audio(config, mixer)
@@ -279,7 +280,6 @@ class RootCommand(Command):
             exit_status_code = 1
         except KeyboardInterrupt:
             logger.info('Interrupted. Exiting...')
-            exit_status_code = 0
         finally:
             loop.quit()
             self.stop_frontends(frontend_classes)
