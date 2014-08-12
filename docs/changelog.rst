@@ -19,6 +19,8 @@ Bug fix release.
 
 - Core: Return exit status 1 when exiting because of initialization error.
 
+- Configuration: :option:`mopidy --config` now supports directories.
+
 
 v0.19.3 (2014-08-03)
 ====================

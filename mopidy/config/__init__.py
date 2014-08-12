@@ -116,21 +116,14 @@ def _load(files, defaults, overrides):
         parser.readfp(io.BytesIO(default))
 
     # Load config from a series of config files
-    for filename in files:
-        try:
-            with io.open(filename, 'rb') as filehandle:
-                parser.readfp(filehandle)
-        except configparser.MissingSectionHeaderError as e:
-            logger.warning('%s does not have a config section, not loaded.',
-                           filename)
-        except configparser.ParsingError as e:
-            linenos = ', '.join(str(lineno) for lineno, line in e.errors)
-            logger.warning(
-                '%s has errors, line %s has been ignored.', filename, linenos)
-        except IOError:
-            # TODO: if this is the initial load of logging config we might not
-            # have a logger at this point, we might want to handle this better.
-            logger.debug('Config file %s not found; skipping', filename)
+    for name in files:
+        if os.path.isdir(name):
+            for filename in os.listdir(name):
+                filename = os.path.join(name, filename)
+                if os.path.isfile(filename) and filename.endswith('.conf'):
+                    _load_file(parser, filename)
+        else:
+            _load_file(parser, name)
 
     # If there have been parse errors there is a python bug that causes the
     # values to be lists, this little trick coerces these into strings.
@@ -144,6 +137,23 @@ def _load(files, defaults, overrides):
         raw_config.setdefault(section, {})[key] = value
 
     return raw_config
+
+
+def _load_file(parser, filename):
+    try:
+        with io.open(filename, 'rb') as filehandle:
+            parser.readfp(filehandle)
+    except configparser.MissingSectionHeaderError as e:
+        logger.warning('%s does not have a config section, not loaded.',
+                       filename)
+    except configparser.ParsingError as e:
+        linenos = ', '.join(str(lineno) for lineno, line in e.errors)
+        logger.warning(
+            '%s has errors, line %s has been ignored.', filename, linenos)
+    except IOError:
+        # TODO: if this is the initial load of logging config we might not
+        # have a logger at this point, we might want to handle this better.
+        logger.debug('Config file %s not found; skipping', filename)
 
 
 def _validate(raw_config, schemas):
