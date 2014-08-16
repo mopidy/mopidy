@@ -280,6 +280,8 @@ class RootCommand(Command):
             exit_status_code = 1
         except KeyboardInterrupt:
             logger.info('Interrupted. Exiting...')
+        except Exception:
+            logger.exception('Uncaught exception')
         finally:
             loop.quit()
             self.stop_frontends(frontend_classes)
