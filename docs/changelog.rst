@@ -13,6 +13,11 @@ v0.20.0 (UNRELEASED)
 - Add cover URL to all scanned files with MusicBrainz album IDs. (Fixes:
   :issue:`697`, PR: :issue:`802`)
 
+**MPD frontend**
+
+- In stored playlist names, replace "/", which are illegal, with "|" instead of
+  a whitespace. Pipes are more similar to forward slash.
+
 
 v0.19.4 (UNRELEASED)
 ====================

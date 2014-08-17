@@ -269,7 +269,7 @@ class MpdContext(object):
                 if not playlist.name:
                     continue
                 # TODO: add scheme to name perhaps 'foo (spotify)' etc.
-                name = self._invalid_playlist_chars.sub(' ', playlist.name)
+                name = self._invalid_playlist_chars.sub('|', playlist.name)
                 self.insert_name_uri_mapping(name, playlist.uri)
 
     def lookup_playlist_from_name(self, name):

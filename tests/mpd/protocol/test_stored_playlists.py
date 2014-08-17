@@ -121,12 +121,12 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertNotInResponse('playlist: a\r')
         self.assertInResponse('OK')
 
-    def test_listplaylists_replaces_forward_slash_with_space(self):
+    def test_listplaylists_replaces_forward_slash_with_pipe(self):
         self.backend.playlists.playlists = [
-            Playlist(name='a/', uri='dummy:')]
+            Playlist(name='a/b', uri='dummy:')]
         self.sendRequest('listplaylists')
-        self.assertInResponse('playlist: a ')
-        self.assertNotInResponse('playlist: a/')
+        self.assertInResponse('playlist: a|b')
+        self.assertNotInResponse('playlist: a/b')
         self.assertInResponse('OK')
 
     def test_load_appends_to_tracklist(self):
