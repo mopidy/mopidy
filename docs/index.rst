@@ -118,6 +118,7 @@ About
     :maxdepth: 1
 
     authors
+    sponsors
     changelog
     versioning
 
