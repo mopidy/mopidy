@@ -24,12 +24,12 @@ class History(object):
 
         timestamp = int(datetime.datetime.now().strftime("%s")) * 1000
         name_parts = []
-        if track.name is not None:
-            name_parts.append(track.name)
         if track.artists:
             name_parts.append(
                 ', '.join([artist.name for artist in track.artists])
             )
+        if track.name is not None:
+            name_parts.append(track.name)
         ref_name = ' - '.join(name_parts)
         track_ref = Ref.track(uri=track.uri, name=ref_name)
 
