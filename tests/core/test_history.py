@@ -35,7 +35,7 @@ class PlaybackHistoryTest(unittest.TestCase):
         stored_history = self.history.get_history()
         track_ref = stored_history[0][1]
         self.assertEqual(track_ref.uri, track.uri)
-        self.assertTrue(track.name in track_ref.name)
+        self.assertIn(track.name, track_ref.name)
         if track.artists:
             for artist in track.artists:
-                self.assertTrue(artist.name in track_ref.name)
+                self.assertIn(artist.name, track_ref.name)
