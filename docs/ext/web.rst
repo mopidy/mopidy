@@ -15,7 +15,4 @@ to show up here, follow the :ref:`guide on creating extensions <extensiondev>`.
 .. include:: /ext/api_explorer.rst
 
 
-.. include:: /ext/lux.rst
-
-
 .. include:: /ext/moped.rst
