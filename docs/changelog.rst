@@ -32,6 +32,9 @@ Bug fix release.
   constant for use by implementors of :method:`mopidy.local.Library.browse`.
   (Related to: :issue:`833`)
 
+- HTTP frontend: Guard against double close of WebSocket, which causes an
+  :exc:`AttributeError` on Tornado < 3.2.
+
 
 v0.19.3 (2014-08-03)
 ====================
