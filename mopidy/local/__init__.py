@@ -64,11 +64,11 @@ class Library(object):
     def __init__(self, config):
         self._config = config
 
-    def browse(self, path):
+    def browse(self, uri):
         """
-        Browse directories and tracks at the given path.
+        Browse directories and tracks at the given URI.
 
-        :param string path: path to browse or None for root.
+        :param string path: URI to browse.
         :rtype: List of :class:`~mopidy.models.Ref` tracks and directories.
         """
         raise NotImplementedError

@@ -18,10 +18,10 @@ class LocalLibraryProvider(backend.LibraryProvider):
         self._library = library
         self.refresh()
 
-    def browse(self, path):
+    def browse(self, uri):
         if not self._library:
             return []
-        return self._library.browse(path)
+        return self._library.browse(uri)
 
     def refresh(self, uri=None):
         if not self._library:
