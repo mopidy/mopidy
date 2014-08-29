@@ -61,7 +61,8 @@ class _BrowseCache(object):
     splitpath_re = re.compile(r'([^/]+)')
 
     def __init__(self, uris):
-        self._cache = {local.ROOT_DIRECTORY_URI: collections.OrderedDict()}
+        self._cache = {
+            local.Library.ROOT_DIRECTORY_URI: collections.OrderedDict()}
 
         for track_uri in uris:
             path = translator.local_track_uri_to_path(track_uri, b'/')
@@ -96,10 +97,11 @@ class _BrowseCache(object):
             else:
                 # Loop completed, so final child needs to be added to root.
                 if child:
-                    self._cache[local.ROOT_DIRECTORY_URI][child.uri] = child
+                    self._cache[
+                        local.Library.ROOT_DIRECTORY_URI][child.uri] = child
                 # If no parent was set we belong in the root.
                 if not parent_uri:
-                    parent_uri = local.ROOT_DIRECTORY_URI
+                    parent_uri = local.Library.ROOT_DIRECTORY_URI
 
             self._cache[parent_uri][track_uri] = track_ref
 
