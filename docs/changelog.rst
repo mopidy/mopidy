@@ -21,6 +21,9 @@ Bug fix release.
 
 - Configuration: :option:`mopidy --config` now supports directories.
 
+- Network: Fix a race condition where two threads could try to free the same
+  data simultaneously. (Fixes: :issue:`781`)
+
 
 v0.19.3 (2014-08-03)
 ====================
