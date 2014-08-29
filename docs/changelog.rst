@@ -35,6 +35,17 @@ Bug fix release.
 
 - Configuration: :option:`mopidy --config` now supports directories.
 
+- Network: Fix a race condition where two threads could try to free the same
+  data simultaneously. (Fixes: :issue:`781`)
+
+- Backend API: Update :meth:`mopidy.backend.LibraryProvider.browse` signature
+  and docs to match how the core use the backend's browse method. (Fixes:
+  :issue:`833`)
+
+- Local library API: Add :attr:`mopidy.local.ROOT_DIRECTORY_URI` constant for
+  use by implementors of :method:`mopidy.local.Library.browse`. (Related to:
+  :issue:`833`)
+
 
 v0.19.3 (2014-08-03)
 ====================

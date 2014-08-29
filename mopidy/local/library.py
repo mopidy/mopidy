@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 import logging
 
-from mopidy import backend, models
+from mopidy import backend, local, models
 
 logger = logging.getLogger(__name__)
 
@@ -10,18 +10,18 @@ logger = logging.getLogger(__name__)
 class LocalLibraryProvider(backend.LibraryProvider):
     """Proxy library that delegates work to our active local library."""
 
-    root_directory = models.Ref.directory(uri=b'local:directory',
-                                          name='Local media')
+    root_directory = models.Ref.directory(
+        uri=local.ROOT_DIRECTORY_URI, name='Local media')
 
     def __init__(self, backend, library):
         super(LocalLibraryProvider, self).__init__(backend)
         self._library = library
         self.refresh()
 
-    def browse(self, path):
+    def browse(self, uri):
         if not self._library:
             return []
-        return self._library.browse(path)
+        return self._library.browse(uri)
 
     def refresh(self, uri=None):
         if not self._library:
