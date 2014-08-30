@@ -4,6 +4,7 @@ import os
 import shutil
 import tempfile
 import unittest
+import mock
 
 import pykka
 
@@ -127,6 +128,26 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
     def test_lookup_unknown_track(self):
         tracks = self.library.lookup('fake uri')
+        self.assertEqual(tracks, [])
+
+    @mock.patch.object(
+        json.JsonLibrary, 'lookup')
+    def test_lookup_multiple_tracks(self, mock_lookup):
+        backend = actor.LocalBackend(config=self.config, audio=None)
+
+        mock_lookup.return_value = self.tracks
+        tracks = backend.library.lookup('fake album uri')
+        mock_lookup.assert_called_with('fake album uri')
+        self.assertEqual(tracks, self.tracks)
+
+        mock_lookup.return_value = [self.tracks[0]]
+        tracks = backend.library.lookup(self.tracks[0].uri)
+        mock_lookup.assert_called_with(self.tracks[0].uri)
+        self.assertEqual(tracks, self.tracks[0:1])
+
+        mock_lookup.return_value = []
+        tracks = backend.library.lookup('fake uri')
+        mock_lookup.assert_called_with('fake uri')
         self.assertEqual(tracks, [])
 
     # TODO: move to search_test module

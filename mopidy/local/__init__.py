@@ -99,11 +99,9 @@ class Library(object):
         """
         Lookup the given URI.
 
-        Unlike the core APIs, local tracks uris can only be resolved to a
-        single track.
-
         :param string uri: track URI
-        :rtype: :class:`~mopidy.models.Track`
+        :rtype: List of :class:`~mopidy.models.Track` or single
+        :class:`~mopidy.models.Track` for backward compatibility
         """
         raise NotImplementedError
 
