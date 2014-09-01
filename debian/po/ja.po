@@ -1,27 +1,26 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# This file is distributed under the same license as the mopidy package.
+# victory <victory.deb@gmail.com>, 2014.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: mopidy\n"
 "Report-Msgid-Bugs-To: mopidy@packages.debian.org\n"
 "POT-Creation-Date: 2014-08-05 07:37+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2014-08-05 14:37+0900\n"
+"Last-Translator: victory <victory.deb@gmail.com>\n"
+"Language-Team: Japanese <debian-japanese@lists.debian.org>\n"
+"Language: ja\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 #. Type: boolean
 #. Description
 #: ../mopidy.templates:2001
 msgid "Start the Mopidy server at boot?"
-msgstr ""
+msgstr "Mopidy サーバをブート時に起動させますか?"
 
 #. Type: boolean
 #. Description
@@ -32,6 +31,9 @@ msgid ""
 "connections on port 6680. By default, it will only accept connections from "
 "the local machine."
 msgstr ""
+"Mopidy サーバは、システムのサービスとしてブート時に自動的に起動させられます。"
+"MPD接続をポート 6600、HTTP 接続をポート 6680 で待ち受けます。デフォルトでは、"
+"ローカルマシンからの接続だけを受け付けます。"
 
 #. Type: boolean
 #. Description
@@ -40,6 +42,8 @@ msgid ""
 "You have the option of starting the Mopidy server automatically on system "
 "boot. If in doubt, it is suggested to not start it automatically on boot."
 msgstr ""
+"システムのブート時に自動的に Mopidy サーバを起動させる選択肢があります。疑問"
+"がある場合はブート時に自動的には起動させないことを勧めます。"
 
 #. Type: boolean
 #. Description
@@ -47,3 +51,4 @@ msgstr ""
 msgid ""
 "This setting can be modified later by running \"dpkg-reconfigure mopidy\"."
 msgstr ""
+"この設定は「dpkg-reconfigure mopidy」を実行することで後から変更できます。"

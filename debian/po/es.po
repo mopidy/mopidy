@@ -1,0 +1,78 @@
+# mopidy po-debconf translation to Spanish
+# Copyright (C) 2014 Software in the Public Interest
+# This file is distributed under the same license as the lava-server package.
+#
+# Changes:
+#   - Initial translation
+#       Matías A. Bellone <matiasbellone+debian@gmail.com>, 2014
+#
+# Traductores, si no conocen el formato PO, merece la pena leer la
+# documentación de gettext, especialmente las secciones dedicadas a este
+# formato, por ejemplo ejecutando:
+#       info -n '(gettext)PO Files'
+#       info -n '(gettext)Header Entry'
+#
+# Equipo de traducción al español, por favor lean antes de traducir
+# los siguientes documentos:
+#
+#   - El proyecto de traducción de Debian al español
+#     http://www.debian.org/intl/spanish/
+#     especialmente las notas y normas de traducción en
+#     http://www.debian.org/intl/spanish/notas
+#
+#   - La guía de traducción de po's de debconf:
+#     /usr/share/doc/po-debconf/README-trans
+#     o http://www.debian.org/intl/l10n/po-debconf/README-trans
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: mopidy\n"
+"Report-Msgid-Bugs-To: mopidy@packages.debian.org\n"
+"POT-Creation-Date: 2014-08-05 07:37+0200\n"
+"PO-Revision-Date: 2014-08-06 19:25-0300\n"
+"Last-Translator: Matías A. Bellone <matiasbellone+debian@gmail.com>\n"
+"Language-Team: Debian l10n Spanish <debian-l10n-spanish@lists.debian.org>\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../mopidy.templates:2001
+msgid "Start the Mopidy server at boot?"
+msgstr "¿Desea iniciar el servidor Mopidy durante el arranque?"
+
+#. Type: boolean
+#. Description
+#: ../mopidy.templates:2001
+msgid ""
+"The Mopidy server can be run as a system service, automatically starting at "
+"boot. It will be listening to MPD connections on port 6600 and HTTP "
+"connections on port 6680. By default, it will only accept connections from "
+"the local machine."
+msgstr ""
+"Puede ejecutar el servidor Mopidy como un servicio del sistema, iniciando "
+"automáticamente durante el arranque. Esperará conexiones MPD en el puerto "
+"6600 y conexiones HTTP en el puerto 6680. De forma predeterminada sólo "
+"aceptará conexiones desde el equipo local."
+
+#. Type: boolean
+#. Description
+#: ../mopidy.templates:2001
+msgid ""
+"You have the option of starting the Mopidy server automatically on system "
+"boot. If in doubt, it is suggested to not start it automatically on boot."
+msgstr ""
+"Tiene la opción de ejecutar el servidor Mopidy automáticamente durante "
+"el arranque del sistema. En caso de dudas, se sugiere no iniciarlo "
+"automáticamente durante el arranque."
+
+#. Type: boolean
+#. Description
+#: ../mopidy.templates:2001
+msgid ""
+"This setting can be modified later by running \"dpkg-reconfigure mopidy\"."
+msgstr ""
+"Puede modificar esta configuración más adelante ejecutando «dpkg-reconfigure "
+"mopidy»."

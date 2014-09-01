@@ -1,0 +1,56 @@
+# Czech PO debconf template translation of mopidy.
+# Copyright (C) 2014 Michal Simunek <michal.simunek@gmail.com>
+# This file is distributed under the same license as the mopidy package.
+# Michal Simunek <michal.simunek@gmail.com>, 2014.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: mopidy 0.18.3-4\n"
+"Report-Msgid-Bugs-To: mopidy@packages.debian.org\n"
+"POT-Creation-Date: 2014-08-05 07:37+0200\n"
+"PO-Revision-Date: 2014-08-13 12:14+0200\n"
+"Last-Translator: Michal Simunek <michal.simunek@gmail.com>\n"
+"Language-Team: Czech <debian-l10n-czech@lists.debian.org>\n"
+"Language: cs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: boolean
+#. Description
+#: ../mopidy.templates:2001
+msgid "Start the Mopidy server at boot?"
+msgstr "Spouštět Mopidy server při zavádění?"
+
+#. Type: boolean
+#. Description
+#: ../mopidy.templates:2001
+msgid ""
+"The Mopidy server can be run as a system service, automatically starting at "
+"boot. It will be listening to MPD connections on port 6600 and HTTP "
+"connections on port 6680. By default, it will only accept connections from "
+"the local machine."
+msgstr ""
+"Mopidy server lze spustit jako systémovou službu, automaticky spouštěnou při "
+"zavádění. Bude naslouchat MPD spojením na portu 6600 a HTTP spojením na "
+"portu 6680. Ve výchozím nastavení bude přijímat pouze spojení z místního "
+"počítače."
+
+#. Type: boolean
+#. Description
+#: ../mopidy.templates:2001
+msgid ""
+"You have the option of starting the Mopidy server automatically on system "
+"boot. If in doubt, it is suggested to not start it automatically on boot."
+msgstr ""
+"Máte možnost volby spuštění Mopidy serveru automaticky při zavádění systému. "
+"Pokud si nejste jisti, doporučuje se jej automaticky při zavádění nespouštět."
+
+#. Type: boolean
+#. Description
+#: ../mopidy.templates:2001
+msgid ""
+"This setting can be modified later by running \"dpkg-reconfigure mopidy\"."
+msgstr ""
+"Toto nastavení lze později upravit spuštěním příkazu \"dpkg-reconfigure "
+"mopidy\"."

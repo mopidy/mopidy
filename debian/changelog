@@ -1,7 +1,25 @@
 mopidy (0.19.4-1) unstable; urgency=medium
 
   * New upstream release.
+
+  [ Stein Magnus Jodal ]
   * Add >= 2.3 version requirement to python-tornado.
+
+  [ Christian Perrier ]
+  * Debconf templates and debian/control reviewed by the debian-l10n-
+    english team as part of the Smith review project. Closes: #754526
+  * [Debconf translation updates]
+  * Danish (Joe Hansen).  Closes: #757262
+  * Brazilian Portuguese (Adriano Rafael Gomes).  Closes: #757730
+  * German (Chris Leick).  Closes: #757846
+  * Russian (Yuri Kozlov).  Closes: #757950
+  * Czech (Michal Simunek).  Closes: #758019
+  * French (Jean-Pierre Giraud).  Closes: #758273
+  * Spanish (Matías A. Bellone).  Closes: #758479
+  * Portuguese (Paulo Tomé).  Closes: #758486
+  * Japanese (victory).  Closes: #758583
+  * Polish (Michał Kułach).  Closes: #758659
+  * Italian (Beatrice Torracca).  Closes: #758717
 
  -- Stein Magnus Jodal <stein.magnus@jodal.no>  Mon, 01 Sep 2014 23:24:51 +0200
 
