@@ -110,7 +110,10 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                     self.request.remote_ip, response)
         except Exception as e:
             logger.error('WebSocket request error: %s', e)
-            self.close()
+            if self.ws_connection:
+                # Tornado 3.2+ checks if self.ws_connection is None before
+                # using it, but not older versions.
+                self.close()
 
     def check_origin(self, origin):
         # Allow cross-origin WebSocket connections, like Tornado before 4.0

@@ -58,17 +58,28 @@ class Library(object):
     :param config: Config dictionary
     """
 
+    ROOT_DIRECTORY_URI = 'local:directory'
+    """
+    URI of the local backend's root directory.
+
+    This constant should be used by libraries implementing the
+    :meth:`Library.browse` method.
+    """
+
     #: Name of the local library implementation, must be overriden.
     name = None
 
     def __init__(self, config):
         self._config = config
 
-    def browse(self, path):
+    def browse(self, uri):
         """
-        Browse directories and tracks at the given path.
+        Browse directories and tracks at the given URI.
 
-        :param string path: path to browse or None for root.
+        The URI for the root directory is a constant available at
+        :attr:`Library.ROOT_DIRECTORY_URI`.
+
+        :param string path: URI to browse.
         :rtype: List of :class:`~mopidy.models.Ref` tracks and directories.
         """
         raise NotImplementedError
