@@ -880,7 +880,11 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_list_album_with_artist_name(self):
+        self.backend.library.dummy_find_exact_result = SearchResult(
+            tracks=[Track(album=Album(name='foo'))])
+
         self.sendRequest('list "album" "anartist"')
+        self.assertInResponse('Album: foo')
         self.assertInResponse('OK')
 
     def test_list_album_with_artist_name_without_filter_value(self):

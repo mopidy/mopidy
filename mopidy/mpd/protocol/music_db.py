@@ -257,7 +257,7 @@ def list_(context, *args):
     if len(parameters) == 1:
         if field != 'album':
             raise exceptions.MpdArgError('should be "Album" for 3 arguments')
-        return _list_artist(context, {'artist': parameters})
+        return _list_album(context, {'artist': parameters})
 
     try:
         query = _query_from_mpd_search_parameters(parameters, _LIST_MAPPING)

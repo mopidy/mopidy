@@ -5,6 +5,38 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v0.19.4 (2014-09-01)
+====================
+
+Bug fix release.
+
+- Configuration: :option:`mopidy --config` now supports directories.
+
+- Logging: Fix that some loggers would be disabled if
+  :confval:`logging/config_file` was set. (Fixes: :issue:`740`)
+
+- Quit process with exit code 1 when stopping because of a backend, frontend,
+  or mixer initialization error.
+
+- Backend API: Update :meth:`mopidy.backend.LibraryProvider.browse` signature
+  and docs to match how the core use the backend's browse method. (Fixes:
+  :issue:`833`)
+
+- Local library API: Add :attr:`mopidy.local.Library.ROOT_DIRECTORY_URI`
+  constant for use by implementors of :method:`mopidy.local.Library.browse`.
+  (Related to: :issue:`833`)
+
+- HTTP frontend: Guard against double close of WebSocket, which causes an
+  :exc:`AttributeError` on Tornado < 3.2.
+
+- MPD frontend: Make the ``list`` command return albums when sending 3
+  arguments. This was incorrectly returning artists after the MPD command
+  changes in 0.19.0. (Fixes: :issue:`817`)
+
+- MPD frontend: Fix a race condition where two threads could try to free the
+  same data simultaneously. (Fixes: :issue:`781`)
+
+
 v0.19.3 (2014-08-03)
 ====================
 
