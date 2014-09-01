@@ -4,6 +4,7 @@ mopidy (0.19.4-1) unstable; urgency=medium
 
   [ Stein Magnus Jodal ]
   * Add >= 2.3 version requirement to python-tornado.
+  * Simplify config file detection in init script.
 
   [ Christian Perrier ]
   * Debconf templates and debian/control reviewed by the debian-l10n-
