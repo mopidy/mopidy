@@ -37,7 +37,7 @@ Bug fix release.
   :issue:`833`)
 
 - Local library API: Add :attr:`mopidy.local.Library.ROOT_DIRECTORY_URI`
-  constant for use by implementors of :method:`mopidy.local.Library.browse`.
+  constant for use by implementors of :meth:`mopidy.local.Library.browse`.
   (Related to: :issue:`833`)
 
 - HTTP frontend: Guard against double close of WebSocket, which causes an
