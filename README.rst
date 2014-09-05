@@ -50,6 +50,7 @@ To get started with Mopidy, check out
 `the installation docs <http://docs.mopidy.com/en/latest/installation/>`_.
 
 - `Documentation <http://docs.mopidy.com/>`_
+- `Discuss <https://discuss.mopidy.com/>`_
 - `Source code <https://github.com/mopidy/mopidy>`_
 - `Issue tracker <https://github.com/mopidy/mopidy/issues>`_
 - `Development branch tarball <https://github.com/mopidy/mopidy/archive/develop.tar.gz#egg=mopidy-dev>`_
