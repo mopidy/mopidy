@@ -151,9 +151,9 @@ class JsonLibrary(local.Library):
 
     def lookup(self, uri):
         try:
-            return self._tracks[uri]
+            return [self._tracks[uri]]
         except KeyError:
-            return None
+            return []
 
     def search(self, query=None, limit=100, offset=0, uris=None, exact=False):
         tracks = self._tracks.values()
