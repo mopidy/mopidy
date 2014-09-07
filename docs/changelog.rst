@@ -18,6 +18,14 @@ v0.20.0 (UNRELEASED)
 - In stored playlist names, replace "/", which are illegal, with "|" instead of
   a whitespace. Pipes are more similar to forward slash.
 
+**Audio**
+
+- Internal code cleanup within audio sub-system:
+  - Started splitting audio code into smaller better defined pieces.
+  - Improved GStreamer related debug logging.
+  - Provide better error messages for missing plugins.
+  - Add foundation for trying to re-add multiple output support.
+
 
 v0.19.4 (2014-09-01)
 ====================
