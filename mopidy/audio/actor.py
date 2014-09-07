@@ -342,12 +342,12 @@ class _Handler(object):
         if target_state == new_state:
             target_state = None
 
-        logger.debug('Triggering: state_changed(old_state=%s, new_state=%s, '
+        logger.debug('Audio event: state_changed(old_state=%s, new_state=%s, '
                      'target_state=%s)', old_state, new_state, target_state)
         AudioListener.send('state_changed', old_state=old_state,
                            new_state=new_state, target_state=target_state)
         if new_state == PlaybackState.STOPPED:
-            logger.debug('Triggering: stream_changed(uri=None)')
+            logger.debug('Audio event: stream_changed(uri=None)')
             AudioListener.send('stream_changed', uri=None)
 
     def on_buffering(self, percent):
@@ -363,7 +363,7 @@ class _Handler(object):
 
     def on_end_of_stream(self):
         gst_logger.debug('Got end-of-stream message.')
-        logger.debug('Triggering: reached_end_of_stream()')
+        logger.debug('Audio event: reached_end_of_stream()')
         AudioListener.send('reached_end_of_stream')
 
     def on_error(self, error, debug):
@@ -399,12 +399,12 @@ class _Handler(object):
                          'start=%s stop=%s position=%s', update, rate,
                          format_.value_name, start, stop, position)
         position_ms = position // gst.MSECOND
-        logger.debug('Triggering: position_changed(position=%s)', position_ms)
+        logger.debug('Audio event: position_changed(position=%s)', position_ms)
         AudioListener.send('position_changed', position=position_ms)
 
     def on_stream_changed(self, uri):
         gst_logger.debug('Got stream-changed message: uri:%s', uri)
-        logger.debug('Triggering: stream_changed(uri=%s)', uri)
+        logger.debug('Audio event: stream_changed(uri=%s)', uri)
         AudioListener.send('stream_changed', uri=uri)
 
 
