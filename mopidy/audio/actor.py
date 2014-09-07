@@ -279,13 +279,14 @@ class _Handler(object):
         self._pad = pad
         self._event_handler_id = pad.add_event_probe(self.on_event)
 
-    def teardown(self):
+    def teardown_message_handling(self):
         bus = self._element.get_bus()
         bus.remove_signal_watch()
         bus.disconnect(self._message_handler_id)
-        self._pad.remove_event_probe(self._event_handler_id)
-
         self._message_handler_id = None
+
+    def teardown_event_handling(self):
+        self._pad.remove_event_probe(self._event_handler_id)
         self._event_handler_id = None
 
     def on_message(self, bus, msg):
@@ -478,7 +479,8 @@ class Audio(pykka.ThreadingActor):
         self._handler.setup_message_handling(playbin)
 
     def _teardown_playbin(self):
-        self._handler.teardown()
+        self._handler.teardown_message_handling()
+        self._handler.teardown_event_handling()
         self._signals.disconnect(self._playbin, 'about-to-finish')
         self._signals.disconnect(self._playbin, 'source-setup')
         self._playbin.set_state(gst.STATE_NULL)
