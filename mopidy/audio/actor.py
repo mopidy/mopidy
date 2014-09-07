@@ -403,7 +403,7 @@ class _Handler(object):
         AudioListener.send('position_changed', position=position_ms)
 
     def on_stream_changed(self, uri):
-        gst_logger.debug('Got stream-changed message: uri:%s', uri)
+        gst_logger.debug('Got stream-changed message: uri=%s', uri)
         logger.debug('Audio event: stream_changed(uri=%s)', uri)
         AudioListener.send('stream_changed', uri=uri)
 
@@ -484,8 +484,8 @@ class Audio(pykka.ThreadingActor):
         self._playbin.set_state(gst.STATE_NULL)
 
     def _setup_output(self):
-        # We don't want to test outputs for regular testing, so just instal
-        # an unsynced fakesink when someone asks for a testouput.
+        # We don't want to use outputs for regular testing, so just install
+        # an unsynced fakesink when someone asks for a 'testoutput'.
         if self._config['audio']['output'] == 'testoutput':
             self._outputs = gst.element_factory_make('fakesink')
         else:
