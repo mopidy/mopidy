@@ -49,7 +49,6 @@ MB = 1 << 20
 
 # Default flags to use for playbin: AUDIO, SOFT_VOLUME, DOWNLOAD
 PLAYBIN_FLAGS = (1 << 1) | (1 << 4) | (1 << 7)
-PLAYBIN_VIS_FLAGS = PLAYBIN_FLAGS | (1 << 3)
 
 # These are just to long to wrap nicely, so rename them locally.
 _get_missing_description = gst.pbutils.missing_plugin_message_get_description
@@ -445,7 +444,6 @@ class Audio(pykka.ThreadingActor):
             self._setup_playbin()
             self._setup_output()
             self._setup_mixer()
-            self._setup_visualizer()
         except gobject.GError as ex:
             logger.exception(ex)
             process.exit_process()
@@ -507,21 +505,6 @@ class Audio(pykka.ThreadingActor):
     def _teardown_mixer(self):
         if self.mixer:
             self.mixer.teardown()
-
-    def _setup_visualizer(self):
-        # TODO: kill
-        visualizer_element = self._config['audio']['visualizer']
-        if not visualizer_element:
-            return
-        try:
-            visualizer = gst.element_factory_make(visualizer_element)
-            self._playbin.set_property('vis-plugin', visualizer)
-            self._playbin.set_property('flags', PLAYBIN_VIS_FLAGS)
-            logger.info('Audio visualizer set to "%s"', visualizer_element)
-        except gobject.GError as ex:
-            logger.error(
-                'Failed to create audio visualizer "%s": %s',
-                visualizer_element, ex)
 
     def _on_about_to_finish(self, element):
         gst_logger.debug('Got about-to-finish event.')

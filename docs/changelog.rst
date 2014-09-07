@@ -25,6 +25,11 @@ v0.20.0 (UNRELEASED)
   - Improved GStreamer related debug logging.
   - Provide better error messages for missing plugins.
   - Add foundation for trying to re-add multiple output support.
+- Kill support for visualizers. Feature was originally added as a workaround for
+  all the people asking for ncmpcpp visualizer support. And since we could get
+  it almost for free thanks to GStreamer. But this feature didn't really ever
+  make sense for a server such as Mopidy. Currently the only way to find out if
+  it is in use and will be missed is to go ahead and remove it.
 
 
 v0.19.4 (2014-09-01)
