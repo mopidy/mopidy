@@ -52,6 +52,7 @@ MOCK_MODULES = [
     'glib',
     'gobject',
     'gst',
+    'gst.pbutils',
     'pygst',
     'pykka',
     'pykka.actor',

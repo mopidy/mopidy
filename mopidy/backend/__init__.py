@@ -81,12 +81,12 @@ class LibraryProvider(object):
     def __init__(self, backend):
         self.backend = backend
 
-    def browse(self, path):
+    def browse(self, uri):
         """
         See :meth:`mopidy.core.LibraryController.browse`.
 
         If you implement this method, make sure to also set
-        :attr:`root_directory_name`.
+        :attr:`root_directory`.
 
         *MAY be implemented by subclass.*
         """

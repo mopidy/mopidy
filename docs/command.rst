@@ -50,11 +50,12 @@ Options
     Save debug log to the file specified in the :confval:`logging/debug_file`
     config value, typically ``./mopidy.log``.
 
-.. cmdoption:: --config <file>
+.. cmdoption:: --config <file|directory>
 
-    Specify config file to use. To use multiple config files, separate them
-    with a colon. The later files override the earlier ones if there's a
-    conflict.
+    Specify config files and directories to use. To use multiple config files
+    or directories, separate them with a colon. The later files override the
+    earlier ones if there's a conflict. When specifying a directory, all files
+    ending in .conf in the directory are used.
 
 .. cmdoption:: --option <option>, -o <option>
 

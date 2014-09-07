@@ -268,8 +268,8 @@ class Connection(object):
             return True
 
         if not data:
-            self.actor_ref.tell({'close': True})
             self.disable_recv()
+            self.actor_ref.tell({'close': True})
             return True
 
         try:
