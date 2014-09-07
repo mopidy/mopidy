@@ -21,11 +21,9 @@ from mopidy.utils.path import path_to_uri
 
 from tests import path_to_data_dir
 
-"""
-We want to make sure both our real audio class and the fake one behave
-correctly. So each test is first run against the real class, then repeated
-against our dummy.
-"""
+# We want to make sure both our real audio class and the fake one behave
+# correctly. So each test is first run against the real class, then repeated
+# against our dummy.
 
 
 class BaseTest(unittest.TestCase):
@@ -34,7 +32,7 @@ class BaseTest(unittest.TestCase):
             'mixer': 'fakemixer track_max_volume=65536',
             'mixer_track': None,
             'mixer_volume': None,
-            'output': 'fakesink',
+            'output': 'testoutput',
             'visualizer': None,
         }
     }
@@ -49,7 +47,7 @@ class BaseTest(unittest.TestCase):
             'audio': {
                 'mixer': 'foomixer',
                 'mixer_volume': None,
-                'output': 'fakesink',
+                'output': 'testoutput',
                 'visualizer': None,
             },
             'proxy': {
@@ -359,6 +357,7 @@ class AudioEventTest(BaseTest):
         self.audio.wait_for_state_change().get()
 
         self.possibly_trigger_fake_about_to_finish()
+        self.audio.wait_for_state_change().get()
         if not done.wait(timeout=1.0):
             self.fail('EOS not received')
 
@@ -407,17 +406,17 @@ class AudioStateTest(unittest.TestCase):
         self.assertEqual(audio.PlaybackState.STOPPED, self.audio.state)
 
     def test_state_does_not_change_when_in_gst_ready_state(self):
-        self.audio._on_playbin_state_changed(
+        self.audio._handler.on_playbin_state_changed(
             gst.STATE_NULL, gst.STATE_READY, gst.STATE_VOID_PENDING)
 
         self.assertEqual(audio.PlaybackState.STOPPED, self.audio.state)
 
     def test_state_changes_from_stopped_to_playing_on_play(self):
-        self.audio._on_playbin_state_changed(
+        self.audio._handler.on_playbin_state_changed(
             gst.STATE_NULL, gst.STATE_READY, gst.STATE_PLAYING)
-        self.audio._on_playbin_state_changed(
+        self.audio._handler.on_playbin_state_changed(
             gst.STATE_READY, gst.STATE_PAUSED, gst.STATE_PLAYING)
-        self.audio._on_playbin_state_changed(
+        self.audio._handler.on_playbin_state_changed(
             gst.STATE_PAUSED, gst.STATE_PLAYING, gst.STATE_VOID_PENDING)
 
         self.assertEqual(audio.PlaybackState.PLAYING, self.audio.state)
@@ -425,7 +424,7 @@ class AudioStateTest(unittest.TestCase):
     def test_state_changes_from_playing_to_paused_on_pause(self):
         self.audio.state = audio.PlaybackState.PLAYING
 
-        self.audio._on_playbin_state_changed(
+        self.audio._handler.on_playbin_state_changed(
             gst.STATE_PLAYING, gst.STATE_PAUSED, gst.STATE_VOID_PENDING)
 
         self.assertEqual(audio.PlaybackState.PAUSED, self.audio.state)
@@ -433,12 +432,12 @@ class AudioStateTest(unittest.TestCase):
     def test_state_changes_from_playing_to_stopped_on_stop(self):
         self.audio.state = audio.PlaybackState.PLAYING
 
-        self.audio._on_playbin_state_changed(
+        self.audio._handler.on_playbin_state_changed(
             gst.STATE_PLAYING, gst.STATE_PAUSED, gst.STATE_NULL)
-        self.audio._on_playbin_state_changed(
+        self.audio._handler.on_playbin_state_changed(
             gst.STATE_PAUSED, gst.STATE_READY, gst.STATE_NULL)
         # We never get the following call, so the logic must work without it
-        # self.audio._on_playbin_state_changed(
+        # self.audio._handler.on_playbin_state_changed(
         #     gst.STATE_READY, gst.STATE_NULL, gst.STATE_VOID_PENDING)
 
         self.assertEqual(audio.PlaybackState.STOPPED, self.audio.state)
@@ -455,7 +454,7 @@ class AudioBufferingTest(unittest.TestCase):
         playbin.set_state.assert_called_with(gst.STATE_PLAYING)
         playbin.set_state.reset_mock()
 
-        self.audio._on_buffering(0)
+        self.audio._handler.on_buffering(0)
         playbin.set_state.assert_called_with(gst.STATE_PAUSED)
         self.assertTrue(self.audio._buffering)
 
@@ -465,7 +464,7 @@ class AudioBufferingTest(unittest.TestCase):
         playbin.set_state.assert_called_with(gst.STATE_PAUSED)
         playbin.set_state.reset_mock()
 
-        self.audio._on_buffering(100)
+        self.audio._handler.on_buffering(100)
         self.assertEqual(playbin.set_state.call_count, 0)
         self.assertFalse(self.audio._buffering)
 
@@ -475,12 +474,12 @@ class AudioBufferingTest(unittest.TestCase):
         playbin.set_state.assert_called_with(gst.STATE_PLAYING)
         playbin.set_state.reset_mock()
 
-        self.audio._on_buffering(0)
+        self.audio._handler.on_buffering(0)
         playbin.set_state.assert_called_with(gst.STATE_PAUSED)
         self.audio.pause_playback()
         playbin.set_state.reset_mock()
 
-        self.audio._on_buffering(100)
+        self.audio._handler.on_buffering(100)
         self.assertEqual(playbin.set_state.call_count, 0)
         self.assertFalse(self.audio._buffering)
 
@@ -490,7 +489,7 @@ class AudioBufferingTest(unittest.TestCase):
         playbin.set_state.assert_called_with(gst.STATE_PLAYING)
         playbin.set_state.reset_mock()
 
-        self.audio._on_buffering(0)
+        self.audio._handler.on_buffering(0)
         playbin.set_state.assert_called_with(gst.STATE_PAUSED)
         playbin.set_state.reset_mock()
 
