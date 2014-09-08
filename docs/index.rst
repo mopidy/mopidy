@@ -63,7 +63,7 @@ channel at `irc.freenode.net <http://freenode.net/>`_. The IRC channel has
 
 If you stumble into a bug or have a feature request, please create an issue in
 the `issue tracker <https://github.com/mopidy/mopidy/issues>`_. If you're
-unsure if its a bug or not, ask for help in the forum or at IRC first. The
+unsure if it's a bug or not, ask for help in the forum or at IRC first. The
 `source code <https://github.com/mopidy/mopidy>`_ may also be of help.
 
 If you want to stay up to date on Mopidy developments, you can follow `@mopidy
