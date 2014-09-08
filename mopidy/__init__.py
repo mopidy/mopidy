@@ -18,7 +18,7 @@ if (isinstance(pykka.__version__, basestring)
         'Mopidy requires Pykka >= 1.1, < 2, but found %s' % pykka.__version__)
 
 
-warnings.filterwarnings('ignore', 'could not open display')
+warnings.filterwarnings('ignore', 'could not open display', 'without X11 $DISPLAY')
 
 
 __version__ = '0.19.4'
