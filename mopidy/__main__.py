@@ -4,9 +4,23 @@ import logging
 import os
 import signal
 import sys
+import textwrap
 
-import gobject
-gobject.threads_init()
+try:
+    import gobject
+    gobject.threads_init()
+except ImportError:
+    print(textwrap.dedent("""
+        ERROR: The gobject Python package was not found.
+
+        Mopidy requires GStreamer (and GObject) to work. These are C libraries
+        with a number of dependencies themselves, and cannot be installed with
+        the regular Python tools like pip.
+
+        Please see http://docs.mopidy.com/en/latest/installation/ for
+        instructions on how to install the required dependencies.
+    """))
+    raise
 
 try:
     # Make GObject's mainloop the event loop for python-dbus

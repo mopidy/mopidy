@@ -8,6 +8,11 @@ This changelog is used to track all major changes to Mopidy.
 v0.20.0 (UNRELEASED)
 ====================
 
+**Commands**
+
+- Make the ``mopidy`` command print a friendly error message if the
+  :mod:`gobject` Python module cannot be imported. (Fixes: :issue:`836`)
+
 **Local backend**
 
 - Add cover URL to all scanned files with MusicBrainz album IDs. (Fixes:
