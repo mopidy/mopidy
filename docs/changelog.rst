@@ -20,11 +20,16 @@ v0.20.0 (UNRELEASED)
 
 **Audio**
 
-- Internal code cleanup within audio sub-system:
+- Internal code cleanup within audio subsystem:
+
   - Started splitting audio code into smaller better defined pieces.
+
   - Improved GStreamer related debug logging.
+
   - Provide better error messages for missing plugins.
+
   - Add foundation for trying to re-add multiple output support.
+
 - Kill support for visualizers. Feature was originally added as a workaround for
   all the people asking for ncmpcpp visualizer support. And since we could get
   it almost for free thanks to GStreamer. But this feature didn't really ever
