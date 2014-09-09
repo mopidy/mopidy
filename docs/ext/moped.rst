@@ -3,7 +3,7 @@ Moped
 
 https://github.com/martijnboland/moped
 
-A Mopidy web client made with AnbularJS by Martijn Boland.
+A Mopidy web client made with AngularJS by Martijn Boland.
 
 .. image:: /ext/moped.png
     :width: 720
