@@ -1,5 +1,5 @@
 # Automate tasks
-fabric
+invoke
 
 # Build documentation
 sphinx
