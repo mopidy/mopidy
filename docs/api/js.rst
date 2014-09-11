@@ -66,9 +66,10 @@ After npm completes, you can import Mopidy.js using ``require()``:
 Getting the library for development on the library
 ==================================================
 
-If you want to work on the Mopidy.js library itself, you'll find a complete
-development setup in the ``js/`` dir in our repo. The instructions in
-``js/README.md`` will guide you on your way.
+If you want to work on the Mopidy.js library itself, you'll find the source
+code and a complete development setup in the `Mopidy.js Git repo
+<https://github.com/mopidy/mopidy.js>`_. The instructions in ``README.md`` will
+guide you on your way.
 
 
 Creating an instance
