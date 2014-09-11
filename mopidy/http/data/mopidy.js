@@ -1,4 +1,4 @@
-/*! Mopidy.js v0.4.0 - built 2014-06-24
+/*! Mopidy.js v0.4.1 - built 2014-09-11
  * http://www.mopidy.com/
  * Copyright (c) 2014 Stein Magnus Jodal and contributors
  * Licensed under the Apache License, Version 2.0 */
