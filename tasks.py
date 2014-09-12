@@ -13,7 +13,7 @@ def docs(watch=False, warn=False):
 @task
 def test(path=None, coverage=False, watch=False, warn=False):
     if watch:
-        return watcher(test)
+        return watcher(test, path=path, coverage=coverage)
     path = path or 'tests/'
     cmd = 'nosetests'
     if coverage:
