@@ -2,7 +2,10 @@ from __future__ import unicode_literals
 
 import logging
 import signal
-import thread
+try:
+    import _thread as thread  # Python 3
+except ImportError:
+    import thread  # Python 2
 import threading
 
 from pykka import ActorDeadError
