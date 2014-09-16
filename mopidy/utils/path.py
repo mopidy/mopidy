@@ -36,7 +36,7 @@ def get_or_create_dir(dir_path):
             '"%s", already exists.' % dir_path)
     elif not os.path.isdir(dir_path):
         logger.info('Creating dir %s', dir_path)
-        os.makedirs(dir_path, 0755)
+        os.makedirs(dir_path, 0o755)
     return dir_path
 
 
