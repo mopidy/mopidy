@@ -16,3 +16,6 @@ to show up here, follow the :ref:`guide on creating extensions <extensiondev>`.
 
 
 .. include:: /ext/moped.rst
+
+
+.. include:: /ext/musicbox_webclient.rst
