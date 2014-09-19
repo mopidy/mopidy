@@ -21,6 +21,9 @@ See :ref:`http-api` for details on how to build your own web client.
 .. include:: /ext/moped.rst
 
 
+.. include:: /ext/kuechenradio.rst
+
+
 JukePi
 ======
 
