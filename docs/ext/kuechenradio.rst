@@ -9,7 +9,3 @@ Mobile by Thomas Kemmer.
 To install, run::
 
     pip install Mopidy-HTTP-Kuechenradio
-
-.. image:: /ext/kuechenradio.png
-    :width: 1275
-    :height: 600
