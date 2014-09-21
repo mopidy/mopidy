@@ -31,7 +31,7 @@ example the HTML, CSS, JavaScript, and images needed for a web based Mopidy
 client. See :ref:`http-server-api` for how to make static files or server-side
 functionality from a Mopidy extension available through Mopidy's web server.
 
-If you're making a web based client and wants to do server side development
+If you're making a web based client and want to do server side development
 using some other technology than Tornado, you are of course free to run your
 own web server and just use Mopidy's web server to host the API endpoints.
 But, for clients implemented purely in JavaScript, letting Mopidy host the
