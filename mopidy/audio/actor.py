@@ -131,10 +131,11 @@ class _Appsrc(object):
         self._source = source
 
     def push(self, buffer_):
-        return self._source.emit('push-buffer', buffer_) == gst.FLOW_OK
-
-    def end_of_stream(self):
-        self._source.emit('end-of-stream')
+        if buffer_ is None:
+            gst_logger.debug('Sending appsrc end-of-stream event.')
+            return self._source.emit('end-of-stream') == gst.FLOW_OK
+        else:
+            return self._source.emit('push-buffer', buffer_) == gst.FLOW_OK
 
     def _on_signal(self, element, clocktime, func):
         # This shim is used to ensure we always return true, and also handles
@@ -560,12 +561,16 @@ class Audio(pykka.ThreadingActor):
         """
         Call this to deliver raw audio data to be played.
 
-        Note that the uri must be set to ``appsrc://`` for this to work.
+        If the buffer is :class:`None`, the end-of-stream token is put on the
+        playbin. We will get a GStreamer message when the stream playback
+        reaches the token, and can then do any end-of-stream related tasks.
 
-        Returns true if data was delivered.
+        Note that the URI must be set to ``appsrc://`` for this to work.
+
+        Returns :class:`True` if data was delivered.
 
         :param buffer_: buffer to pass to appsrc
-        :type buffer_: :class:`gst.Buffer`
+        :type buffer_: :class:`gst.Buffer` or :class:`None`
         :rtype: boolean
         """
         return self._appsrc.push(buffer_)
@@ -577,9 +582,11 @@ class Audio(pykka.ThreadingActor):
 
         We will get a GStreamer message when the stream playback reaches the
         token, and can then do any end-of-stream related tasks.
+
+        .. deprecated:: 0.20
+            Use :meth:`emit_data` with a :class:`None` buffer instead.
         """
-        self._appsrc.end_of_stream()
-        gst_logger.debug('Sent appsrc end-of-stream event.')
+        self._appsrc.push(None)
 
     def set_about_to_finish_callback(self, callback):
         """
