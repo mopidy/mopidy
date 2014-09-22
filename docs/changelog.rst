@@ -16,6 +16,10 @@ v0.19.5 (UNRELEASED)
   and in the other case explicitly set to the default value, but with otherwise
   equal fields. (Fixes: :issue:`837`)
 
+- Changed the default value of :attr:`mopidy.models.Album.num_tracks`,
+  :attr:`mopidy.models.Track.track_no`, and
+  :attr:`mopidy.models.Track.last_modified` from ``0`` to :class:`None`.
+
 
 v0.19.4 (2014-09-01)
 ====================
