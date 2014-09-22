@@ -29,6 +29,8 @@ class ImmutableObject(object):
         kwarg_pairs = []
         for (key, value) in sorted(self.__dict__.items()):
             if isinstance(value, (frozenset, tuple)):
+                if not value:
+                    continue
                 value = list(value)
             kwarg_pairs.append('%s=%s' % (key, repr(value)))
         return '%(classname)s(%(kwargs)s)' % {
