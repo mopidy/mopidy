@@ -741,12 +741,6 @@ class TrackTest(unittest.TestCase):
         self.assertEqual(track1, track2)
         self.assertEqual(hash(track1), hash(track2))
 
-    def test_ignores_values_with_default_value_zero(self):
-        track1 = Track(name='name1')
-        track2 = Track(name='name1', track_no=0)
-        self.assertEqual(track1, track2)
-        self.assertEqual(hash(track1), hash(track2))
-
     def test_copy_can_reset_to_default_value(self):
         track1 = Track(name='name1')
         track2 = Track(name='name1', album=Album()).copy(album=None)

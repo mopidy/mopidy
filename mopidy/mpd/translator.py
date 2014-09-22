@@ -44,11 +44,11 @@ def track_to_mpd_format(track, position=None):
     if track.date:
         result.append(('Date', track.date))
 
-    if track.album is not None and track.album.num_tracks != 0:
+    if track.album is not None and track.album.num_tracks is not None:
         result.append(('Track', '%d/%d' % (
-            track.track_no, track.album.num_tracks)))
+            track.track_no or 0, track.album.num_tracks)))
     else:
-        result.append(('Track', track.track_no))
+        result.append(('Track', track.track_no or 0))
     if position is not None and tlid is not None:
         result.append(('Pos', position))
         result.append(('Id', tlid))
