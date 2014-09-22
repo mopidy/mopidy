@@ -25,6 +25,9 @@ v0.20.0 (UNRELEASED)
 
 **Audio**
 
+- Deprecated :meth:`mopidy.audio.Audio.emit_end_of_stream`. Pass a
+  :class:`None` buffer to :meth:`mopidy.audio.Audio.emit_data` end the stream.
+
 - Internal code cleanup within audio subsystem:
 
   - Started splitting audio code into smaller better defined pieces.
