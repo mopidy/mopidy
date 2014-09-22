@@ -171,8 +171,8 @@ class ArtistTest(unittest.TestCase):
 
     def test_serialize_falsy_values(self):
         self.assertDictEqual(
-            {'__model__': 'Artist', 'uri': '', 'name': None},
-            Artist(uri='', name=None).serialize())
+            {'__model__': 'Artist', 'uri': '', 'name': ''},
+            Artist(uri='', name='').serialize())
 
     def test_to_json_and_back(self):
         artist1 = Artist(uri='uri', name='name')
@@ -318,13 +318,12 @@ class AlbumTest(unittest.TestCase):
 
     def test_repr_without_artists(self):
         self.assertEquals(
-            "Album(artists=[], images=[], name=u'name', uri=u'uri')",
+            "Album(name=u'name', uri=u'uri')",
             repr(Album(uri='uri', name='name')))
 
     def test_repr_with_artists(self):
         self.assertEquals(
-            "Album(artists=[Artist(name=u'foo')], images=[], name=u'name', "
-            "uri=u'uri')",
+            "Album(artists=[Artist(name=u'foo')], name=u'name', uri=u'uri')",
             repr(Album(uri='uri', name='name', artists=[Artist(name='foo')])))
 
     def test_serialize_without_artists(self):
@@ -551,14 +550,12 @@ class TrackTest(unittest.TestCase):
 
     def test_repr_without_artists(self):
         self.assertEquals(
-            "Track(artists=[], composers=[], name=u'name', "
-            "performers=[], uri=u'uri')",
+            "Track(name=u'name', uri=u'uri')",
             repr(Track(uri='uri', name='name')))
 
     def test_repr_with_artists(self):
         self.assertEquals(
-            "Track(artists=[Artist(name=u'foo')], composers=[], name=u'name', "
-            "performers=[], uri=u'uri')",
+            "Track(artists=[Artist(name=u'foo')], name=u'name', uri=u'uri')",
             repr(Track(uri='uri', name='name', artists=[Artist(name='foo')])))
 
     def test_serialize_without_artists(self):
@@ -738,6 +735,18 @@ class TrackTest(unittest.TestCase):
         self.assertNotEqual(track1, track2)
         self.assertNotEqual(hash(track1), hash(track2))
 
+    def test_ignores_values_with_default_value_none(self):
+        track1 = Track(name='name1')
+        track2 = Track(name='name1', album=None)
+        self.assertEqual(track1, track2)
+        self.assertEqual(hash(track1), hash(track2))
+
+    def test_copy_can_reset_to_default_value(self):
+        track1 = Track(name='name1')
+        track2 = Track(name='name1', album=Album()).copy(album=None)
+        self.assertEqual(track1, track2)
+        self.assertEqual(hash(track1), hash(track2))
+
 
 class TlTrackTest(unittest.TestCase):
     def test_tlid(self):
@@ -773,8 +782,7 @@ class TlTrackTest(unittest.TestCase):
 
     def test_repr(self):
         self.assertEquals(
-            "TlTrack(tlid=123, track=Track(artists=[], composers=[], "
-            "performers=[], uri=u'uri'))",
+            "TlTrack(tlid=123, track=Track(uri=u'uri'))",
             repr(TlTrack(tlid=123, track=Track(uri='uri'))))
 
     def test_serialize(self):
@@ -903,13 +911,12 @@ class PlaylistTest(unittest.TestCase):
 
     def test_repr_without_tracks(self):
         self.assertEquals(
-            "Playlist(name=u'name', tracks=[], uri=u'uri')",
+            "Playlist(name=u'name', uri=u'uri')",
             repr(Playlist(uri='uri', name='name')))
 
     def test_repr_with_tracks(self):
         self.assertEquals(
-            "Playlist(name=u'name', tracks=[Track(artists=[], composers=[], "
-            "name=u'foo', performers=[])], uri=u'uri')",
+            "Playlist(name=u'name', tracks=[Track(name=u'foo')], uri=u'uri')",
             repr(Playlist(uri='uri', name='name', tracks=[Track(name='foo')])))
 
     def test_serialize_without_tracks(self):
@@ -1036,7 +1043,7 @@ class SearchResultTest(unittest.TestCase):
 
     def test_repr_without_results(self):
         self.assertEquals(
-            "SearchResult(albums=[], artists=[], tracks=[], uri=u'uri')",
+            "SearchResult(uri=u'uri')",
             repr(SearchResult(uri='uri')))
 
     def test_serialize_without_results(self):
