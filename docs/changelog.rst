@@ -10,6 +10,12 @@ v0.19.5 (UNRELEASED)
 
 - Models: Hide empty collections from :func:`repr()` representations.
 
+- Field values are no longer stored on the model instance when the value
+  matches the default value for the field. This makes two models equal when
+  they have a field which in one case is implicitly set to the default value
+  and in the other case explicitly set to the default value, but with otherwise
+  equal fields. (Fixes: :issue:`837`)
+
 
 v0.19.4 (2014-09-01)
 ====================

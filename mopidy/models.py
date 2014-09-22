@@ -18,6 +18,8 @@ class ImmutableObject(object):
                 raise TypeError(
                     '__init__() got an unexpected keyword argument "%s"' %
                     key)
+            if value == getattr(self, key):
+                continue  # Don't explicitly set default values
             self.__dict__[key] = value
 
     def __setattr__(self, name, value):
@@ -72,13 +74,11 @@ class ImmutableObject(object):
         for key in self.__dict__.keys():
             public_key = key.lstrip('_')
             value = values.pop(public_key, self.__dict__[key])
-            if value is not None:
-                data[public_key] = value
+            data[public_key] = value
         for key in values.keys():
             if hasattr(self, key):
                 value = values.pop(key)
-                if value is not None:
-                    data[key] = value
+                data[key] = value
         if values:
             raise TypeError(
                 'copy() got an unexpected keyword argument "%s"' % key)
