@@ -171,8 +171,8 @@ class ArtistTest(unittest.TestCase):
 
     def test_serialize_falsy_values(self):
         self.assertDictEqual(
-            {'__model__': 'Artist', 'uri': '', 'name': None},
-            Artist(uri='', name=None).serialize())
+            {'__model__': 'Artist', 'uri': '', 'name': ''},
+            Artist(uri='', name='').serialize())
 
     def test_to_json_and_back(self):
         artist1 = Artist(uri='uri', name='name')
@@ -734,6 +734,24 @@ class TrackTest(unittest.TestCase):
             length=200, bitrate=200, musicbrainz_id='id2')
         self.assertNotEqual(track1, track2)
         self.assertNotEqual(hash(track1), hash(track2))
+
+    def test_ignores_values_with_default_value_none(self):
+        track1 = Track(name='name1')
+        track2 = Track(name='name1', album=None)
+        self.assertEqual(track1, track2)
+        self.assertEqual(hash(track1), hash(track2))
+
+    def test_ignores_values_with_default_value_zero(self):
+        track1 = Track(name='name1')
+        track2 = Track(name='name1', track_no=0)
+        self.assertEqual(track1, track2)
+        self.assertEqual(hash(track1), hash(track2))
+
+    def test_copy_can_reset_to_default_value(self):
+        track1 = Track(name='name1')
+        track2 = Track(name='name1', album=Album()).copy(album=None)
+        self.assertEqual(track1, track2)
+        self.assertEqual(hash(track1), hash(track2))
 
 
 class TlTrackTest(unittest.TestCase):
