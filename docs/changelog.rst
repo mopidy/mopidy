@@ -8,6 +8,12 @@ This changelog is used to track all major changes to Mopidy.
 v0.20.0 (UNRELEASED)
 ====================
 
+**Core API**
+
+- Removed ``clear_current_track`` keyword argument to
+  :meth:`mopidy.core.Playback.stop`. It was a leaky internal abstraction,
+  which was never intended to be used externally.
+
 **Commands**
 
 - Make the ``mopidy`` command print a friendly error message if the
