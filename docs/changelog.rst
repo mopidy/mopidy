@@ -5,6 +5,12 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v0.19.5 (UNRELEASED)
+====================
+
+- Models: Hide empty collections from :func:`repr()` representations.
+
+
 v0.19.4 (2014-09-01)
 ====================
 
