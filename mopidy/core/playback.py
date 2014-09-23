@@ -163,7 +163,8 @@ class PlaybackController(object):
         if next_tl_track:
             self.change_track(next_tl_track)
         else:
-            self.stop(clear_current_track=True)
+            self.stop()
+            self.current_tl_track = None
 
         self.core.tracklist.mark_played(original_tl_track)
 
@@ -174,7 +175,8 @@ class PlaybackController(object):
         Used by :class:`mopidy.core.TracklistController`.
         """
         if self.current_tl_track not in self.core.tracklist.tl_tracks:
-            self.stop(clear_current_track=True)
+            self.stop()
+            self.current_tl_track = None
 
     def next(self):
         """
@@ -190,7 +192,8 @@ class PlaybackController(object):
             # wait for state change?
             self.change_track(tl_track)
         else:
-            self.stop(clear_current_track=True)
+            self.stop()
+            self.current_tl_track = None
 
     def pause(self):
         """Pause playback."""
@@ -315,22 +318,14 @@ class PlaybackController(object):
             self._trigger_seeked(time_position)
         return success
 
-    def stop(self, clear_current_track=False):
-        """
-        Stop playing.
-
-        :param clear_current_track: whether to clear the current track _after_
-            stopping
-        :type clear_current_track: boolean
-        """
+    def stop(self):
+        """Stop playing."""
         if self.state != PlaybackState.STOPPED:
             backend = self._get_backend()
             time_position_before_stop = self.time_position
             if not backend or backend.playback.stop().get():
                 self.state = PlaybackState.STOPPED
                 self._trigger_track_playback_ended(time_position_before_stop)
-        if clear_current_track:
-            self.current_tl_track = None
 
     def _trigger_track_playback_paused(self):
         logger.debug('Triggering track playback paused event')
