@@ -15,10 +15,11 @@ override_dh_clean:
 override_dh_auto_build:
 
 override_dh_auto_install:
-	python setup.py install --root=debian/tmp --install-layout=deb --install-lib=/usr/share/mopidy --install-scripts=/usr/share/mopidy/bin
-	# Fix name collision between `mopidy` package and `mopidy` command
-	mv debian/tmp/usr/share/mopidy/bin/mopidy debian/tmp/usr/share/mopidy/mopidy-cmd
-	rm -r debian/tmp/usr/share/mopidy/bin/
+	dh_auto_install
+	# Move mopidy command into private module dir so it gets Mopidy
+	# extensions on its PYTHONPATH
+	mkdir -p debian/tmp/usr/share/mopidy
+	mv debian/tmp/usr/bin/mopidy debian/tmp/usr/share/mopidy/mopidy-cmd
 
 override_dh_installchangelogs:
 	dh_installchangelogs docs/changelog.rst
