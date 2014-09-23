@@ -100,8 +100,8 @@ class Library(object):
         Lookup the given URI.
 
         :param string uri: track URI
-        :rtype: List of :class:`~mopidy.models.Track` or single
-        :class:`~mopidy.models.Track` for backward compatibility
+        :rtype: list of :class:`~mopidy.models.Track` (or single
+            :class:`~mopidy.models.Track` for backward compatibility)
         """
         raise NotImplementedError
 
