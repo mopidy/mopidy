@@ -23,12 +23,11 @@ class PlaybackHistoryTest(unittest.TestCase):
         self.history.add(self.tracks[2])
         self.assertEqual(self.history.size, 3)
 
-    def test_unsuitable_add(self):
-        size = self.history.size
-        self.history.add(self.tracks[0])
-        self.history.add(object())
-        self.history.add(self.tracks[1])
-        self.assertEqual(self.history.size, size + 2)
+    def test_non_tracks_are_rejected(self):
+        with self.assertRaises(TypeError):
+            self.history.add(object())
+
+        self.assertEqual(self.history.size, 0)
 
     def test_history_sanity(self):
         track = self.tracks[0]

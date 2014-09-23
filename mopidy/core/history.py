@@ -20,9 +20,8 @@ class HistoryController(object):
         :param track: track to change to
         :type track: :class:`mopidy.models.Track`
         """
-        if type(track) is not models.Track:
-            logger.warning('Cannot add non-Track type object to TrackHistory')
-            return
+        if not isinstance(track, models.Track):
+            raise TypeError('Only Track objects can be added to the history')
 
         timestamp = int(time.time() * 1000)
 
