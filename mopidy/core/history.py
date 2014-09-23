@@ -1,8 +1,8 @@
 from __future__ import unicode_literals
 
 import copy
-import datetime
 import logging
+import time
 
 from mopidy.models import Ref, Track
 
@@ -22,7 +22,8 @@ class HistoryController(object):
             logger.warning('Cannot add non-Track type object to TrackHistory')
             return
 
-        timestamp = int(datetime.datetime.now().strftime("%s")) * 1000
+        timestamp = int(time.time() * 1000)
+
         name_parts = []
         if track.artists:
             name_parts.append(
