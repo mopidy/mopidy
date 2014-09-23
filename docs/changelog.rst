@@ -8,6 +8,11 @@ This changelog is used to track all major changes to Mopidy.
 v0.20.0 (UNRELEASED)
 ====================
 
+**Core API**
+
+- Added :class:`mopidy.core.HistoryController` which keeps track of what
+  tracks have been played. (Fixes: :issue:`423`, PR: :issue:`803`)
+
 **Commands**
 
 - Make the ``mopidy`` command print a friendly error message if the
