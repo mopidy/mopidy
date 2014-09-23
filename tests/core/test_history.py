@@ -29,13 +29,15 @@ class PlaybackHistoryTest(unittest.TestCase):
 
         self.assertEqual(self.history.size, 0)
 
-    def test_history_sanity(self):
+    def test_history_entry_contents(self):
         track = self.tracks[0]
         self.history.add(track)
-        stored_history = self.history.get_history()
-        track_ref = stored_history[0][1]
-        self.assertEqual(track_ref.uri, track.uri)
-        self.assertIn(track.name, track_ref.name)
-        if track.artists:
-            for artist in track.artists:
-                self.assertIn(artist.name, track_ref.name)
+
+        result = self.history.get_history()
+        (timestamp, ref) = result[0]
+
+        self.assertIsInstance(timestamp, int)
+        self.assertEqual(track.uri, ref.uri)
+        self.assertIn(track.name, ref.name)
+        for artist in track.artists:
+            self.assertIn(artist.name, ref.name)
