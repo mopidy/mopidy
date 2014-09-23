@@ -2,11 +2,12 @@ from __future__ import unicode_literals
 
 import unittest
 
-from mopidy.core import History
+from mopidy.core import HistoryController
 from mopidy.models import Artist, Track
 
 
 class PlaybackHistoryTest(unittest.TestCase):
+
     def setUp(self):
         self.tracks = [
             Track(uri='dummy1:a', name='foo',
@@ -14,7 +15,7 @@ class PlaybackHistoryTest(unittest.TestCase):
             Track(uri='dummy2:a', name='foo'),
             Track(uri='dummy3:a', name='bar')
         ]
-        self.history = History()
+        self.history = HistoryController()
 
     def test_add_track(self):
         self.history.add(self.tracks[0])

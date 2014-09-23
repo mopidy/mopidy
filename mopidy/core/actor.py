@@ -7,7 +7,7 @@ import pykka
 
 from mopidy import audio, backend, mixer
 from mopidy.audio import PlaybackState
-from mopidy.core.history import History
+from mopidy.core.history import HistoryController
 from mopidy.core.library import LibraryController
 from mopidy.core.listener import CoreListener
 from mopidy.core.playback import PlaybackController
@@ -25,8 +25,8 @@ class Core(
     :class:`mopidy.core.LibraryController`."""
 
     history = None
-    """The playback history. An instance of
-    :class:`mopidy.core.TrackHistory`"""
+    """The playback history controller. An instance of
+    :class:`mopidy.core.HistoryController`."""
 
     playback = None
     """The playback controller. An instance of
@@ -47,7 +47,7 @@ class Core(
 
         self.library = LibraryController(backends=self.backends, core=self)
 
-        self.history = History()
+        self.history = HistoryController()
 
         self.playback = PlaybackController(
             mixer=mixer, backends=self.backends, core=self)

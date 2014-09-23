@@ -10,7 +10,7 @@ from mopidy.models import Ref, Track
 logger = logging.getLogger(__name__)
 
 
-class History(object):
+class HistoryController(object):
     track_list = []
 
     def add(self, track):
