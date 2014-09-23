@@ -11,7 +11,9 @@ logger = logging.getLogger(__name__)
 
 
 class HistoryController(object):
-    track_list = []
+
+    def __init__(self):
+        self._history = []
 
     def add(self, track):
         """
@@ -34,7 +36,7 @@ class HistoryController(object):
         ref_name = ' - '.join(name_parts)
         track_ref = models.Ref.track(uri=track.uri, name=ref_name)
 
-        self.track_list.insert(0, (timestamp, track_ref))
+        self._history.insert(0, (timestamp, track_ref))
 
     @property
     def size(self):
@@ -43,7 +45,7 @@ class HistoryController(object):
         :returns: The number of tracks in the history.
         :rtype :int
         """
-        return len(self.track_list)
+        return len(self._history)
 
     def get_history(self):
         """
@@ -51,4 +53,4 @@ class HistoryController(object):
         :returns: The history as a list of `mopidy.models.Track`
         :rtype: L{`mopidy.models.Track`}
         """
-        return copy.copy(self.track_list)
+        return copy.copy(self._history)
