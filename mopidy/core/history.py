@@ -29,14 +29,13 @@ class HistoryController(object):
         name_parts = []
         if track.artists:
             name_parts.append(
-                ', '.join([artist.name for artist in track.artists])
-            )
+                ', '.join([artist.name for artist in track.artists]))
         if track.name is not None:
             name_parts.append(track.name)
-        ref_name = ' - '.join(name_parts)
-        track_ref = models.Ref.track(uri=track.uri, name=ref_name)
+        name = ' - '.join(name_parts)
+        ref = models.Ref.track(uri=track.uri, name=name)
 
-        self._history.insert(0, (timestamp, track_ref))
+        self._history.insert(0, (timestamp, ref))
 
     @property
     def size(self):
