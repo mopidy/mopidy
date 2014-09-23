@@ -4,7 +4,7 @@ import copy
 import logging
 import time
 
-from mopidy.models import Ref, Track
+from mopidy import models
 
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ class HistoryController(object):
         :param track: track to change to
         :type track: :class:`mopidy.models.Track`
         """
-        if type(track) is not Track:
+        if type(track) is not models.Track:
             logger.warning('Cannot add non-Track type object to TrackHistory')
             return
 
@@ -32,7 +32,7 @@ class HistoryController(object):
         if track.name is not None:
             name_parts.append(track.name)
         ref_name = ' - '.join(name_parts)
-        track_ref = Ref.track(uri=track.uri, name=ref_name)
+        track_ref = models.Ref.track(uri=track.uri, name=ref_name)
 
         self.track_list.insert(0, (timestamp, track_ref))
 
