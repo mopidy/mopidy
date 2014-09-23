@@ -33,11 +33,13 @@ class LocalLibraryProvider(backend.LibraryProvider):
     def lookup(self, uri):
         if not self._library:
             return []
-        track = self._library.lookup(uri)
-        if track is None:
+        tracks = self._library.lookup(uri)
+        if tracks is None:
             logger.debug('Failed to lookup %r', uri)
             return []
-        return [track]
+        if isinstance(tracks, models.Track):
+            tracks = [tracks]
+        return tracks
 
     def find_exact(self, query=None, uris=None):
         if not self._library:
