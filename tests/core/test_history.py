@@ -19,15 +19,19 @@ class PlaybackHistoryTest(unittest.TestCase):
 
     def test_add_track(self):
         self.history.add(self.tracks[0])
+        self.assertEqual(self.history.get_length(), 1)
+
         self.history.add(self.tracks[1])
+        self.assertEqual(self.history.get_length(), 2)
+
         self.history.add(self.tracks[2])
-        self.assertEqual(self.history.size, 3)
+        self.assertEqual(self.history.get_length(), 3)
 
     def test_non_tracks_are_rejected(self):
         with self.assertRaises(TypeError):
             self.history.add(object())
 
-        self.assertEqual(self.history.size, 0)
+        self.assertEqual(self.history.get_length(), 0)
 
     def test_history_entry_contents(self):
         track = self.tracks[0]

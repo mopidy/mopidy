@@ -37,8 +37,7 @@ class HistoryController(object):
 
         self._history.insert(0, (timestamp, ref))
 
-    @property
-    def size(self):
+    def get_length(self):
         """Get the number of tracks in the history.
 
         :returns: the history length
