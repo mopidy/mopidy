@@ -41,6 +41,7 @@ def make_jsonrpc_wrapper(core_actor):
         objects={
             'core.get_uri_schemes': core.Core.get_uri_schemes,
             'core.get_version': core.Core.get_version,
+            'core.history': core.HistoryController,
             'core.library': core.LibraryController,
             'core.playback': core.PlaybackController,
             'core.playlists': core.PlaylistsController,
@@ -51,6 +52,7 @@ def make_jsonrpc_wrapper(core_actor):
             'core.describe': inspector.describe,
             'core.get_uri_schemes': core_actor.get_uri_schemes,
             'core.get_version': core_actor.get_version,
+            'core.history': core_actor.history,
             'core.library': core_actor.library,
             'core.playback': core_actor.playback,
             'core.playlists': core_actor.playlists,

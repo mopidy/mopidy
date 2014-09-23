@@ -250,6 +250,7 @@ class PlaybackController(object):
 
         if success:
             self.core.tracklist.mark_playing(tl_track)
+            self.core.history.add(tl_track.track)
             # TODO: replace with stream-changed
             self._trigger_track_playback_started()
         else:

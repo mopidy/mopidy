@@ -10,6 +10,9 @@ v0.20.0 (UNRELEASED)
 
 **Core API**
 
+- Added :class:`mopidy.core.HistoryController` which keeps track of what
+  tracks have been played. (Fixes: :issue:`423`, PR: :issue:`803`)
+
 - Removed ``clear_current_track`` keyword argument to
   :meth:`mopidy.core.Playback.stop`. It was a leaky internal abstraction,
   which was never intended to be used externally.

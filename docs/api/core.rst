@@ -37,6 +37,15 @@ Manages everything related to the tracks we are currently playing.
     :members:
 
 
+History controller
+==================
+
+Keeps record of what tracks have been played.
+
+.. autoclass:: mopidy.core.HistoryController
+    :members:
+
+
 Playlists controller
 ====================
 
