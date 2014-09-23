@@ -2,8 +2,9 @@ mopidy (0.19.4-2) unstable; urgency=medium
 
   * Install "mopidy" Python module in /usr/lib/python2.7, so it can be found
     and used by pip-installed Mopidy extensions.
+  * Add README.Debian.  Closes: #762617
 
- -- Stein Magnus Jodal <stein.magnus@jodal.no>  Tue, 23 Sep 2014 21:17:48 +0200
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Tue, 23 Sep 2014 21:57:01 +0200
 
 mopidy (0.19.4-1) unstable; urgency=medium
 
