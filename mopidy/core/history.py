@@ -48,7 +48,9 @@ class HistoryController(object):
     def get_history(self):
         """Get the track history.
 
+        The timestamps are milliseconds since epoch.
+
         :returns: the track history
-        :rtype: list of (timestamp, mopidy.models.Ref) tuples
+        :rtype: list of (timestamp, :class:`mopidy.models.Ref`) tuples
         """
         return copy.copy(self._history)
