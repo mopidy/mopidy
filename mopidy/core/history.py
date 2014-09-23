@@ -16,8 +16,9 @@ class HistoryController(object):
         self._history = []
 
     def add(self, track):
-        """
-        :param track: track to change to
+        """Add track to the playback history.
+
+        :param track: track to add
         :type track: :class:`mopidy.models.Track`
         """
         if not isinstance(track, models.Track):
@@ -39,17 +40,17 @@ class HistoryController(object):
 
     @property
     def size(self):
-        """
-        Returns the number of tracks in the history.
-        :returns: The number of tracks in the history.
-        :rtype :int
+        """Get the number of tracks in the history.
+
+        :returns: the history length
+        :rtype: int
         """
         return len(self._history)
 
     def get_history(self):
-        """
-        Returns the history.
-        :returns: The history as a list of `mopidy.models.Track`
-        :rtype: L{`mopidy.models.Track`}
+        """Get the track history.
+
+        :returns: the track history
+        :rtype: list of (timestamp, mopidy.models.Ref) tuples
         """
         return copy.copy(self._history)
