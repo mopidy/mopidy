@@ -35,15 +35,12 @@ class ConfigOverrideTypeTest(unittest.TestCase):
             expected, commands.config_override_type(b'section/key=  '))
 
     def test_invalid_override(self):
-        self.assertRaises(
-            argparse.ArgumentTypeError,
-            commands.config_override_type, b'section/key')
-        self.assertRaises(
-            argparse.ArgumentTypeError,
-            commands.config_override_type, b'section=')
-        self.assertRaises(
-            argparse.ArgumentTypeError,
-            commands.config_override_type, b'section')
+        with self.assertRaises(argparse.ArgumentTypeError):
+            commands.config_override_type(b'section/key')
+        with self.assertRaises(argparse.ArgumentTypeError):
+            commands.config_override_type(b'section=')
+        with self.assertRaises(argparse.ArgumentTypeError):
+            commands.config_override_type(b'section')
 
 
 class CommandParsingTest(unittest.TestCase):

@@ -1069,8 +1069,8 @@ class SearchResultTest(unittest.TestCase):
             result.albums = None
 
     def test_invalid_kwarg(self):
-        test = lambda: SearchResult(foo='baz')
-        self.assertRaises(TypeError, test)
+        with self.assertRaises(TypeError):
+            SearchResult(foo='baz')
 
     def test_repr_without_results(self):
         self.assertEquals(

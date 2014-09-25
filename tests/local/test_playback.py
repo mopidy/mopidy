@@ -1081,5 +1081,5 @@ class LocalPlaybackProviderTest(unittest.TestCase):
 
     @populate_tracklist
     def test_playing_track_that_isnt_in_playlist(self):
-        test = lambda: self.playback.play((17, Track()))
-        self.assertRaises(AssertionError, test)
+        with self.assertRaises(AssertionError):
+            self.playback.play((17, Track()))

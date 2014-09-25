@@ -198,25 +198,25 @@ class LocalTracklistProviderTest(unittest.TestCase):
     @populate_tracklist
     def test_moving_track_outside_of_playlist(self):
         tracks = len(self.controller.tracks)
-        test = lambda: self.controller.move(0, 0, tracks + 5)
-        self.assertRaises(AssertionError, test)
+        with self.assertRaises(AssertionError):
+            self.controller.move(0, 0, tracks + 5)
 
     @populate_tracklist
     def test_move_group_outside_of_playlist(self):
         tracks = len(self.controller.tracks)
-        test = lambda: self.controller.move(0, 2, tracks + 5)
-        self.assertRaises(AssertionError, test)
+        with self.assertRaises(AssertionError):
+            self.controller.move(0, 2, tracks + 5)
 
     @populate_tracklist
     def test_move_group_out_of_range(self):
         tracks = len(self.controller.tracks)
-        test = lambda: self.controller.move(tracks + 2, tracks + 3, 0)
-        self.assertRaises(AssertionError, test)
+        with self.assertRaises(AssertionError):
+            self.controller.move(tracks + 2, tracks + 3, 0)
 
     @populate_tracklist
     def test_move_group_invalid_group(self):
-        test = lambda: self.controller.move(2, 1, 0)
-        self.assertRaises(AssertionError, test)
+        with self.assertRaises(AssertionError):
+            self.controller.move(2, 1, 0)
 
     def test_tracks_attribute_is_immutable(self):
         tracks1 = self.controller.tracks
@@ -275,14 +275,14 @@ class LocalTracklistProviderTest(unittest.TestCase):
 
     @populate_tracklist
     def test_shuffle_invalid_subset(self):
-        test = lambda: self.controller.shuffle(3, 1)
-        self.assertRaises(AssertionError, test)
+        with self.assertRaises(AssertionError):
+            self.controller.shuffle(3, 1)
 
     @populate_tracklist
     def test_shuffle_superset(self):
         tracks = len(self.controller.tracks)
-        test = lambda: self.controller.shuffle(1, tracks + 5)
-        self.assertRaises(AssertionError, test)
+        with self.assertRaises(AssertionError):
+            self.controller.shuffle(1, tracks + 5)
 
     @populate_tracklist
     def test_shuffle_open_subset(self):

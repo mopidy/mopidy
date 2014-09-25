@@ -52,7 +52,8 @@ class GetOrCreateDirTest(unittest.TestCase):
         conflicting_file = os.path.join(self.parent, b'test')
         open(conflicting_file, 'w').close()
         dir_path = os.path.join(self.parent, b'test')
-        self.assertRaises(OSError, path.get_or_create_dir, dir_path)
+        with self.assertRaises(OSError):
+            path.get_or_create_dir(dir_path)
 
     def test_create_dir_with_unicode(self):
         with self.assertRaises(ValueError):

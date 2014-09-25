@@ -62,8 +62,8 @@ class JsonRpcTestBase(unittest.TestCase):
 
 class JsonRpcSetupTest(JsonRpcTestBase):
     def test_empty_object_mounts_is_not_allowed(self):
-        test = lambda: jsonrpc.JsonRpcWrapper(objects={'': Calculator()})
-        self.assertRaises(AttributeError, test)
+        with self.assertRaises(AttributeError):
+            jsonrpc.JsonRpcWrapper(objects={'': Calculator()})
 
 
 class JsonRpcSerializationTest(JsonRpcTestBase):
@@ -556,8 +556,8 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
 
 class JsonRpcInspectorTest(JsonRpcTestBase):
     def test_empty_object_mounts_is_not_allowed(self):
-        test = lambda: jsonrpc.JsonRpcInspector(objects={'': Calculator})
-        self.assertRaises(AttributeError, test)
+        with self.assertRaises(AttributeError):
+            jsonrpc.JsonRpcInspector(objects={'': Calculator})
 
     def test_can_describe_method_on_root(self):
         inspector = jsonrpc.JsonRpcInspector({

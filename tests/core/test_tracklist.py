@@ -67,9 +67,11 @@ class TracklistTest(unittest.TestCase):
         self.assertListEqual(self.tl_tracks[:2], tl_tracks)
 
     def test_filter_fails_if_values_isnt_iterable(self):
-        self.assertRaises(ValueError, self.core.tracklist.filter, tlid=3)
+        with self.assertRaises(ValueError):
+            self.core.tracklist.filter(tlid=3)
 
     def test_filter_fails_if_values_is_a_string(self):
-        self.assertRaises(ValueError, self.core.tracklist.filter, uri='a')
+        with self.assertRaises(ValueError):
+            self.core.tracklist.filter(uri='a')
 
     # TODO Extract tracklist tests from the local backend tests
