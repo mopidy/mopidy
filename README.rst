@@ -56,7 +56,7 @@ To get started with Mopidy, check out
 - `Development branch tarball <https://github.com/mopidy/mopidy/archive/develop.tar.gz#egg=mopidy-dev>`_
 
 - IRC: ``#mopidy`` at `irc.freenode.net <http://freenode.net/>`_
-- Mailing list: `mopidy@googlegroups.com <https://groups.google.com/forum/?fromgroups=#!forum/mopidy>`_
+- Announcement list: `mopidy@googlegroups.com <https://groups.google.com/forum/?fromgroups=#!forum/mopidy>`_
 - Twitter: `@mopidy <https://twitter.com/mopidy/>`_
 
 .. image:: https://img.shields.io/pypi/v/Mopidy.svg?style=flat
