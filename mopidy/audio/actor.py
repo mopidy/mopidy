@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import logging
+import os
 
 import gobject
 
@@ -350,6 +351,10 @@ class _Handler(object):
         if new_state == PlaybackState.STOPPED:
             logger.debug('Audio event: stream_changed(uri=None)')
             AudioListener.send('stream_changed', uri=None)
+
+        if 'GST_DEBUG_DUMP_DOT_DIR' in os.environ:
+            gst.DEBUG_BIN_TO_DOT_FILE(
+                self._audio._playbin, gst.DEBUG_GRAPH_SHOW_ALL, 'mopidy')
 
     def on_buffering(self, percent):
         gst_logger.debug('Got buffering message: percent=%d%%', percent)

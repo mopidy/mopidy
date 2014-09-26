@@ -89,4 +89,12 @@ level 3, you can run::
     GST_DEBUG=3 mopidy -v
 
 This will produce a lot of output, but given some GStreamer knowledge this is
-very useful for debugging GStreamer pipeline issues.
+very useful for debugging GStreamer pipeline issues. Additionally
+:envvar:`GST_DEBUG_FILE=gstreamer.log` can be used to redirect the debug
+logging to a file instead of standard out.
+
+Lastly :envvar:`GST_DEBUG_DUMP_DOT_DIR` can be used to get descriptions of the
+current pipeline in dot format. Currently we trigger a dump of the pipeline on
+every completed state change::
+
+    GST_DEBUG_DUMP_DOT_DIR=. mopidy
