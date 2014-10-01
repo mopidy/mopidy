@@ -1,3 +1,11 @@
+mopidy (0.19.4-3) UNRELEASED; urgency=medium
+
+  * Make sysvinit script start after $named (for service lookups), dbus for
+    (Mopidy-MPRIS), and avahi (for Zeroconf publishing), if those facilities
+    are available.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Wed, 01 Oct 2014 09:11:34 +0200
+
 mopidy (0.19.4-2) unstable; urgency=medium
 
   * Install "mopidy" Python module in /usr/lib/python2.7, so it can be found

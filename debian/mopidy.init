@@ -4,8 +4,8 @@
 # Provides:          mopidy
 # Required-Start:    $network $remote_fs
 # Required-Stop:     $network $remote_fs
-# Should-Start:      alsa-utils pulseaudio
-# Should-Stop:       alsa-utils pulseaudio
+# Should-Start:      $named alsa-utils avahi dbus pulseaudio
+# Should-Stop:       $named alsa-utils avahi dbus pulseaudio
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: Mopidy music server
