@@ -2,8 +2,8 @@
 
 ### BEGIN INIT INFO
 # Provides:          mopidy
-# Required-Start:    $network $local_fs $remote_fs
-# Required-Stop:     $network $local_fs $remote_fs
+# Required-Start:    $network $remote_fs
+# Required-Stop:     $network $remote_fs
 # Should-Start:      alsa-utils pulseaudio
 # Should-Stop:       alsa-utils pulseaudio
 # Default-Start:     2 3 4 5
