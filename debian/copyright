@@ -9,7 +9,7 @@ License: Apache-2.0
 
 Files: js/lib/bane-*.js
 Copyright: 2010-2013 Christian Johansen and Stein Magnus Jodal
-License: BSD
+License: BSD-2-clause
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
  .

@@ -4,6 +4,8 @@ mopidy (0.19.4-3) UNRELEASED; urgency=medium
     (Mopidy-MPRIS), and avahi (for Zeroconf publishing), if those facilities
     are available.
 
+  * Use proper short name for BSD-2-clause license in debian/copyright.
+
  -- Stein Magnus Jodal <stein.magnus@jodal.no>  Wed, 01 Oct 2014 09:11:34 +0200
 
 mopidy (0.19.4-2) unstable; urgency=medium
