@@ -295,7 +295,8 @@ class ScannerTest(unittest.TestCase):
 
     def find(self, path):
         media_dir = path_to_data_dir(path)
-        for path in path_lib.find_mtimes(media_dir):
+        result, errors = path_lib.find_mtimes(media_dir)
+        for path in result:
             yield os.path.join(media_dir, path)
 
     def scan(self, paths):

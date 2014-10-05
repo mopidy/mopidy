@@ -215,7 +215,8 @@ class FindMTimesTest(unittest.TestCase):
     maxDiff = None
 
     def find(self, value):
-        return path.find_mtimes(path_to_data_dir(value))
+        result, errors = path.find_mtimes(path_to_data_dir(value))
+        return result
 
     def test_basic_dir(self):
         self.assert_(self.find(''))

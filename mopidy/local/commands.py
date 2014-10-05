@@ -74,8 +74,10 @@ class ScanCommand(commands.Command):
         uris_to_update = set()
         uris_to_remove = set()
 
-        file_mtimes = path.find_mtimes(media_dir)
+        file_mtimes, file_errors = path.find_mtimes(media_dir)
         logger.info('Found %d files in media_dir.', len(file_mtimes))
+
+        # TODO: log file errors
 
         num_tracks = library.load()
         logger.info('Checking %d tracks from library.', num_tracks)

@@ -184,7 +184,8 @@ def _find(root, thread_count=10, hidden=True, relative=False):
 
 def find_mtimes(root):
     results, errors = _find(root, hidden=False, relative=False)
-    return dict((f, int(st.st_mtime)) for f, st in results.iteritems())
+    mtimes = dict((f, int(st.st_mtime)) for f, st in results.iteritems())
+    return mtimes, errors
 
 
 def check_file_path_is_inside_base_dir(file_path, base_path):
