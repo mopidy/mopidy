@@ -71,7 +71,7 @@ How to for Raspbian "wheezy" and Debian "wheezy"
 Fixing audio quality issues
 ===========================
 
-The early versions of Rasbian containedf a buggy Alsa-driver. This caused bad sound 
+The early versions of Rasbian contained a buggy Alsa-driver. This caused bad sound 
 quality, especiallyon the analog port. This does not apply anymore to newer distributions.
 
 As of about April 2013 the following steps should resolve any audio
