@@ -1,15 +1,12 @@
 .. _raspberrypi-installation:
 
-*************************************
-Raspberry Pi: Mopidy on a credit card
-*************************************
+****************************
+Installation on Raspberry Pi
+****************************
 
-Mopidy runs nicely on a `Raspberry Pi <http://www.raspberrypi.org/>`_. As of
-January 2013, Mopidy will run with Spotify support on both the armel
-(soft-float) and armhf (hard-float) architectures, which includes the Raspbian
-distribution.
+Mopidy runs nicely on a `Raspberry Pi <http://www.raspberrypi.org/>`_. 
 
-.. image:: raspberry-pi-by-jwrodgers.jpg
+.. image:: /_static/raspberry-pi-by-jwrodgers.jpg
     :width: 640
     :height: 427
 
@@ -19,17 +16,8 @@ distribution.
 How to for Raspbian "wheezy" and Debian "wheezy"
 ================================================
 
-This guide applies for both:
-
-- Raspbian "wheezy" for armhf (hard-float), and
-- Debian "wheezy" for armel (soft-float)
-
-If you don't know which one to select, go for the armhf variant, as it'll give
-you a lot better performance.
-
 #. Download the latest "wheezy" disk image from
-   http://www.raspberrypi.org/downloads/. This was last tested with the images
-   from 2013-05-25 for armhf and 2013-05-29 for armel.
+   http://www.raspberrypi.org/downloads/. 
 
 #. Flash the OS image to your SD card. See
    http://elinux.org/RPi_Easy_SD_Card_Setup for help.
@@ -54,6 +42,14 @@ you a lot better performance.
 
          echo ipv6 | sudo tee -a /etc/modules
 
+#. Installing Mopidy and its dependencies from `apt.mopidy.com
+   <http://apt.mopidy.com/>`_, as described in :ref:`installation`. In short::
+
+       wget -q -O - http://apt.mopidy.com/mopidy.gpg | sudo apt-key add -
+       sudo wget -q -O /etc/apt/sources.list.d/mopidy.list http://apt.mopidy.com/mopidy.list
+       sudo apt-get update
+       sudo apt-get install mopidy
+
 #. Since I have a HDMI cable connected, but want the sound on the analog sound
    connector, I have to run::
 
@@ -71,29 +67,20 @@ you a lot better performance.
    command to e.g. ``/etc/rc.local``, which will be executed when the system is
    booting.
 
-#. Install Mopidy and its dependencies as described in :ref:`debian-install`.
 
-#. Finally, you need to set a couple of :doc:`config values </config>`, and
-   then you're ready to :doc:`run Mopidy </running>`. Alternatively you may 
-   want to have Mopidy run as a :doc:`system service </debian>`, automatically
-   starting at boot.
+Fixing audio quality issues
+===========================
 
-
-Appendix: Fixing audio quality issues
-=====================================
+The early versions of Rasbian containedf a buggy Alsa-driver. This caused bad sound 
+quality, especiallyon the analog port. This does not apply anymore to newer distributions.
 
 As of about April 2013 the following steps should resolve any audio
-issues for HDMI and analog without the use of an external USB sound
-card.
+issues for HDMI and analog without the use of an external USB sound card.
 
 #. Ensure your system is up to date. On Debian based systems run::
 
       sudo apt-get update
       sudo apt-get dist-upgrade
-
-#. Ensure you have a new enough firmware. On Debian based systems
-   `rpi-update <https://github.com/Hexxeh/rpi-update>`_
-   can be used.
 
 #. Update either ``~/.asoundrc`` or ``/etc/asound.conf`` to the
    following::
@@ -110,16 +97,13 @@ card.
    Note that if you have an ``~/.asoundrc`` it will overide any global
    settings from ``/etc/asound.conf``.
 
-#. For Mopidy to output audio directly to ALSA, instead of Jack which
-   GStreamer usually defaults to on Raspberry Pi, install the
-   ``gstreamer0.10-alsa`` package::
-
-       sudo apt-get install gstreamer0.10-alsa
-
-   Then update your ``~/.config/mopidy/mopidy.conf`` to contain::
+#. Update your ``~/.config/mopidy/mopidy.conf`` to contain::
 
        [audio]
        output = alsasink
+
+   This is to tell GStreamer not to pick Jack which it seems to like picking on
+   Raspberry Pis for some reason.
 
 Following these steps you should be able to get crackle free sound on either
 HDMI or analog. Note that you might need to ensure that PulseAudio is no longer

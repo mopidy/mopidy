@@ -30,13 +30,39 @@ DLNA Digital Media Renderer (DMR) / UPnP AV MediaRenderer:
     MediaRenderer with the help of Rygel, as you can read more about below.
 
 
-.. _rygel:
-
 How to make Mopidy available as an UPnP MediaRenderer
 =====================================================
 
-With the help of `the Rygel project <https://live.gnome.org/Rygel>`_ Mopidy can
-be made available as an UPnP MediaRenderer. Rygel will interface with the MPRIS
+There are two ways Mopidy can be made available as an UPnP MediaRenderer. One using rygel, 
+the other using upmpcli. Upmpcli is recommended, since it is easier to setup, and 
+offers `OpenHome <http://www.openhome.org>`_ compatibility.
+
+.. _upmpdcli:
+Upmpdcli:
+
+1. Install upmpdcli using this command (if you run Raspbian/Debian/Ubuntu)
+
+      apt-get install upmpdcli
+
+   or use the instructions from `the website <http://www.lesbonscomptes.com/upmpdcli/>`_. 
+
+2. The default settings of upmpdcli will work with the default settings of Mopidy. Edit /etc/upmpdcli.conf 
+   if you want to use different ports, hosts, or other settings.
+
+3. Start it using the command 
+
+      upmpdcli
+
+   or, as a service
+
+      /etc/init.d/upmpdcli start
+
+4. An upnp renderer should be available now!
+
+.. _rygel:
+Rygel:
+
+With the help of `the Rygel project <https://live.gnome.org/Rygel>`_  Rygel will interface with the MPRIS
 interface provided by the `Mopidy-MPRIS extension
 <https://github.com/mopidy/mopidy-mpris>`_, and make Mopidy available as a
 MediaRenderer on the local network. Since this depends on the MPRIS frontend,
