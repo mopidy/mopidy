@@ -18,7 +18,6 @@ DAEMON=/usr/bin/mopidy
 DAEMON_USER=mopidy
 DAEMON_GROUP=audio
 CONFIG_FILES="/etc/mopidy/extensions.d:/etc/mopidy/mopidy.conf"
-DAEMON_ARGS="--quiet --config $CONFIG_FILES"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
@@ -41,7 +40,7 @@ do_start()
         || return 1
     start-stop-daemon --start --quiet --name $NAME --pidfile $PIDFILE \
         --chuid $DAEMON_USER:$DAEMON_GROUP --background --make-pidfile \
-        --startas $DAEMON -- $DAEMON_ARGS \
+        --startas $DAEMON -- --quiet --config $CONFIG_FILES \
         || return 2
 }
 
@@ -104,16 +103,9 @@ case "$action" in
         esac
         ;;
     run)
-        if [ "$1" = "" ]; then
-            echo "Usage: $SCRIPTNAME run [options-or-subcommands]"
-            echo "Examples:"
-            echo "  $SCRIPTNAME run --help"
-            echo "  $SCRIPTNAME run config"
-            echo "  $SCRIPTNAME run local scan"
-            exit 3
-        fi
-        CMD="$DAEMON $DAEMON_ARGS $@"
-        su -s /bin/sh -c "$CMD" -- $DAEMON_USER
+        echo -n "\"service mopidy run\" is deprecated. " 1>&2
+        echo "Use \"mopidyctl\" instead." 1>&2
+        /usr/sbin/mopidyctl $@
         ;;
     *)
         echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload|run}" >&2

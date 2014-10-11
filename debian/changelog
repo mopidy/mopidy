@@ -8,6 +8,9 @@ mopidy (0.19.4-3) UNRELEASED; urgency=medium
     start the service depends on a debconf question.
   * Fix config script so the service's current status is properly detected
     and used as the default option in the debconf question.
+  * Replace `sudo service mopidy run ...` commands with the new `mopidyctl`
+    command. `mopidyctl` runs Mopidy with the same config and user as the
+    Mopidy system service.
 
  -- Stein Magnus Jodal <stein.magnus@jodal.no>  Wed, 01 Oct 2014 09:11:34 +0200
 
