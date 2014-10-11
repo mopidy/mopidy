@@ -1,7 +1,7 @@
 mopidy (0.19.4-3) UNRELEASED; urgency=medium
 
-  * Make sysvinit script start after $named (for service lookups), dbus for
-    (Mopidy-MPRIS), and avahi (for Zeroconf publishing), if those facilities
+  * Make sysvinit script start after $named (for service lookups), dbus (for
+    Mopidy-MPRIS), and avahi (for Zeroconf publishing), if those facilities
     are available.
 
   * Use proper short name for BSD-2-clause license in debian/copyright.
