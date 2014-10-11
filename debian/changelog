@@ -12,6 +12,7 @@ mopidy (0.19.4-3) UNRELEASED; urgency=medium
     command. `mopidyctl` runs Mopidy with the same config and user as the
     Mopidy system service.
   * Add mopidy.service file for systemd.
+  * Add logrotate config for /var/log/mopidy/*.log.
 
  -- Stein Magnus Jodal <stein.magnus@jodal.no>  Wed, 01 Oct 2014 09:11:34 +0200
 
