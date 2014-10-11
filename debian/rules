@@ -21,6 +21,9 @@ override_dh_auto_install:
 	mkdir -p debian/tmp/usr/share/mopidy
 	mv debian/tmp/usr/bin/mopidy debian/tmp/usr/share/mopidy/mopidy-cmd
 
+override_dh_installinit:
+	dh_installinit --no-start
+
 override_dh_installchangelogs:
 	dh_installchangelogs docs/changelog.rst
 
