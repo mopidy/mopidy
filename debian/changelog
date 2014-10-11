@@ -6,6 +6,8 @@ mopidy (0.19.4-3) UNRELEASED; urgency=medium
   * Use proper short name for BSD-2-clause license in debian/copyright.
   * Make dh_installinit not start service in postinst, as whether or not to
     start the service depends on a debconf question.
+  * Fix config script so the service's current status is properly detected
+    and used as the default option in the debconf question.
 
  -- Stein Magnus Jodal <stein.magnus@jodal.no>  Wed, 01 Oct 2014 09:11:34 +0200
 
