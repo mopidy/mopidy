@@ -317,7 +317,7 @@ This is ``mopidy_soundspot/__init__.py``::
             gobject.type_register(SoundspotMixer)
             gst.element_register(
                 SoundspotMixer, 'soundspotmixer', gst.RANK_MARGINAL)
-            
+
             # Or nothing to register e.g. command extension
             pass
 
