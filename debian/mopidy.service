@@ -10,7 +10,7 @@ After=sound.target
 
 [Service]
 User=mopidy
-ExecStart=/usr/bin/mopidy --config /etc/mopidy/extensions.d:/etc/mopidy/mopidy.conf
+ExecStart=/usr/bin/mopidy --config /usr/share/mopidy/config.d:/etc/mopidy/extensions.d:/etc/mopidy/mopidy.conf
 
 [Install]
 WantedBy=multi-user.target

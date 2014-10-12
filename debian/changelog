@@ -13,6 +13,8 @@ mopidy (0.19.4-3) UNRELEASED; urgency=medium
     Mopidy system service.
   * Add mopidy.service file for systemd.
   * Add logrotate config for /var/log/mopidy/*.log.
+  * Add /usr/share/mopidy/config.d for Mopidy extensions to install default
+    configuration into. This deprecates /etc/mopidy/extensions.d.
 
  -- Stein Magnus Jodal <stein.magnus@jodal.no>  Wed, 01 Oct 2014 09:11:34 +0200
 

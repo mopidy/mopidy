@@ -3,7 +3,7 @@
 SELF=$(basename $0)
 DAEMON="/usr/bin/mopidy"
 DAEMON_USER="mopidy"
-CONFIG_FILES="/etc/mopidy/extensions.d:/etc/mopidy/mopidy.conf"
+CONFIG_FILES="/usr/share/mopidy/config.d:/etc/mopidy/extensions.d:/etc/mopidy/mopidy.conf"
 CMD="$DAEMON --config $CONFIG_FILES $@"
 
 if [ $# -eq 0 ]; then
