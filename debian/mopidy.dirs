@@ -1,6 +1,5 @@
 etc/mopidy
-etc/mopidy/extensions.d
-usr/share/mopidy/config.d
+usr/share/mopidy/conf.d
 var/cache/mopidy
 var/lib/mopidy
 var/lib/mopidy/local

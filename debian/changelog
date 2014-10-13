@@ -1,4 +1,4 @@
-mopidy (0.19.4-3) UNRELEASED; urgency=medium
+mopidy (0.19.4-3) unstable; urgency=medium
 
   * Make sysvinit script start after $named (for service lookups), dbus (for
     Mopidy-MPRIS), and avahi (for Zeroconf publishing), if those facilities
@@ -13,10 +13,10 @@ mopidy (0.19.4-3) UNRELEASED; urgency=medium
     Mopidy system service.
   * Add mopidy.service file for systemd.
   * Add logrotate config for /var/log/mopidy/*.log.
-  * Add /usr/share/mopidy/config.d for Mopidy extensions to install default
-    configuration into. This deprecates /etc/mopidy/extensions.d.
+  * Add /usr/share/mopidy/conf.d for Mopidy extensions to install default
+    configuration into. This replaces /etc/mopidy/extensions.d.
 
- -- Stein Magnus Jodal <stein.magnus@jodal.no>  Wed, 01 Oct 2014 09:11:34 +0200
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Mon, 13 Oct 2014 18:55:50 +0200
 
 mopidy (0.19.4-2) unstable; urgency=medium
 
