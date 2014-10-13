@@ -55,10 +55,17 @@ from a regular Mopidy setup you'll want to know about.
   You can do all your changes in this file.
 
 - Mopidy extensions installed from Debian packages will sometimes install
-  additional configuration files in :file:`/etc/mopidy/extensions.d/`. These
+  additional configuration files in :file:`/usr/share/mopidy/conf.d/`. These
   files just provide different defaults for the extension when run as a system
-  service. You can override anything from :file:`/etc/mopidy/extensions.d/` in
+  service. You can override anything from :file:`/usr/share/mopidy/conf.d/` in
   the :file:`/etc/mopidy/mopidy.conf` configuration file.
+
+  Previously, the extension's default config was installed in
+  :file:`/etc/mopidy/extensions.d/`. This was removed with the Debian
+  package mopidy 0.19.4-3. If you have modified any files in
+  :file:`/etc/mopidy/extensions.d/`, you should redo your modifications in
+  :file:`/etc/mopidy/mopidy.conf` and delete the
+  :etc:`/etc/mopidy/extensions.d/` directory.
 
 - The init script runs Mopidy as the ``mopidy`` user. The ``mopidy`` user will
   need read access to any local music you want Mopidy to play.
