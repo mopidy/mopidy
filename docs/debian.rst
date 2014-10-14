@@ -65,7 +65,7 @@ from a regular Mopidy setup you'll want to know about.
   package mopidy 0.19.4-3. If you have modified any files in
   :file:`/etc/mopidy/extensions.d/`, you should redo your modifications in
   :file:`/etc/mopidy/mopidy.conf` and delete the
-  :etc:`/etc/mopidy/extensions.d/` directory.
+  :file:`/etc/mopidy/extensions.d/` directory.
 
 - The init script runs Mopidy as the ``mopidy`` user. The ``mopidy`` user will
   need read access to any local music you want Mopidy to play.
