@@ -214,73 +214,132 @@ class ExpandPathTest(unittest.TestCase):
 class FindMTimesTest(unittest.TestCase):
     maxDiff = None
 
-    # TODO: Consider if more of these directory structures should be created by
-    # the test. This would make it more obvious what our expected result is.
+    def setUp(self):
+        self.tmpdir = tempfile.mkdtemp(b'.mopidy-tests')
 
-    DOES_NOT_EXIST = tests.path_to_data_dir('does-no-exist')
-    SINGLE_FILE = tests.path_to_data_dir('blank.mp3')
-    SINGLE_SYMLINK = tests.path_to_data_dir('find2/bar')
-    DATA_DIR = tests.path_to_data_dir('')
-    FIND_DIR = tests.path_to_data_dir('find')
-    FIND2_DIR = tests.path_to_data_dir('find2')
-    NO_PERMISSION_DIR = tests.path_to_data_dir('no-permission')
-    SYMLINK_LOOP = tests.path_to_data_dir('symlink-loop')
+    def tearDown(self):
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
 
-    def test_basic_dir(self):
-        result, errors = path.find_mtimes(self.FIND_DIR)
-        self.assert_(result)
-        self.assertEqual(errors, {})
+    def mkdir(self, *args):
+        name = os.path.join(self.tmpdir, *args)
+        os.mkdir(name)
+        return name
 
-    def test_nonexistant_dir(self):
-        result, errors = path.find_mtimes(self.DOES_NOT_EXIST)
-        self.assertEqual(result, {})
-        self.assertEqual(errors, {self.DOES_NOT_EXIST: tests.IsA(OSError)})
-
-    def test_file(self):
-        result, errors = path.find_mtimes(self.SINGLE_FILE)
-        self.assertEqual(result, {self.SINGLE_FILE: tests.any_int})
-        self.assertEqual(errors, {})
-
-    def test_files(self):
-        result, errors = path.find_mtimes(self.FIND_DIR)
-        expected = {
-            tests.path_to_data_dir(b'find/foo/bar/file'): tests.any_int,
-            tests.path_to_data_dir(b'find/foo/file'): tests.any_int,
-            tests.path_to_data_dir(b'find/baz/file'): tests.any_int}
-        self.assertEqual(expected, result)
-        self.assertEqual(errors, {})
+    def touch(self, *args):
+        name = os.path.join(self.tmpdir, *args)
+        open(name, 'w').close()
+        return name
 
     def test_names_are_bytestrings(self):
-        for name in path.find_mtimes(self.DATA_DIR)[0]:
+        """We shouldn't be mixing in unicode for paths."""
+        result, errors = path.find_mtimes(tests.path_to_data_dir(''))
+        for name in result.keys() + errors.keys():
             self.assertEqual(name, tests.IsA(bytes))
 
-    def test_symlinks_are_ignored(self):
-        result, errors = path.find_mtimes(self.SINGLE_SYMLINK)
-        self.assertEqual({}, result)
-        self.assertEqual({self.SINGLE_SYMLINK: tests.IsA(Exception)}, errors)
+    def test_nonexistent_dir(self):
+        """Non existent search roots are an error"""
+        missing = os.path.join(self.tmpdir, 'does-not-exist')
+        result, errors = path.find_mtimes(missing)
+        self.assertEqual(result, {})
+        self.assertEqual(errors, {missing: tests.IsA(OSError)})
+
+    def test_empty_dir(self):
+        """Empty directories should not show up in results"""
+        self.mkdir('empty')
+
+        result, errors = path.find_mtimes(self.tmpdir)
+        self.assertEqual(result, {})
+        self.assertEqual(errors, {})
+
+    def test_file_as_the_root(self):
+        """Specifying a file as the root should just return the file"""
+        single = self.touch('single')
+
+        result, errors = path.find_mtimes(single)
+        self.assertEqual(result, {single: tests.any_int})
+        self.assertEqual(errors, {})
+
+    def test_hidden_directories_are_skipped(self):
+        pass
+
+    def test_hidden_files_are_skipped(self):
+        pass
+
+    def test_nested_directories(self):
+        """Searching nested directories should find all files"""
+
+        # Setup foo/bar and baz directories
+        self.mkdir('foo')
+        self.mkdir('foo', 'bar')
+        self.mkdir('baz')
+
+        # Touch foo/file foo/bar/file and baz/file
+        foo_file = self.touch('foo', 'file')
+        foo_bar_file = self.touch('foo', 'bar', 'file')
+        baz_file = self.touch('baz', 'file')
+
+        result, errors = path.find_mtimes(self.tmpdir)
+        self.assertEqual(result, {foo_file: tests.any_int,
+                                  foo_bar_file: tests.any_int,
+                                  baz_file: tests.any_int})
+        self.assertEqual(errors, {})
 
     def test_missing_permission_to_file(self):
-        # Note that we cannot know if we have access, but the stat will succeed
-        with tempfile.NamedTemporaryFile() as tmp:
-            os.chmod(tmp.name, 0)
-            result, errors = path.find_mtimes(tmp.name)
-            self.assertEqual({tmp.name: tests.any_int}, result)
-            self.assertEqual({}, errors)
+        """Missing permissions to a file is not a search error"""
+        target = self.touch('no-permission')
+        os.chmod(target, 0)
 
-    def test_missing_permission_to_directory(self):
-        result, errors = path.find_mtimes(self.NO_PERMISSION_DIR)
-        self.assertEqual({}, result)
-        self.assertEqual({self.NO_PERMISSION_DIR: tests.IsA(OSError)}, errors)
-
-    def test_basic_symlink(self):
-        result, errors = path.find_mtimes(self.SINGLE_SYMLINK, follow=True)
-        self.assertEqual({self.SINGLE_SYMLINK: tests.any_int}, result)
+        result, errors = path.find_mtimes(self.tmpdir)
+        self.assertEqual({target: tests.any_int}, result)
         self.assertEqual({}, errors)
 
-    def test_direct_symlink_loop(self):
-        result, errors = path.find_mtimes(self.SYMLINK_LOOP, follow=True)
+    def test_missing_permission_to_directory(self):
+        """Missing permissions to a directory is an error"""
+        directory = self.mkdir('no-permission')
+        os.chmod(directory, 0)
+
+        result, errors = path.find_mtimes(self.tmpdir)
         self.assertEqual({}, result)
-        self.assertEqual({self.SYMLINK_LOOP: tests.IsA(OSError)}, errors)
+        self.assertEqual({directory: tests.IsA(OSError)}, errors)
+
+    def test_symlinks_are_ignored(self):
+        """By default symlinks should be treated as an error"""
+        target = self.touch('target')
+        link = os.path.join(self.tmpdir, 'link')
+        os.symlink(target, link)
+
+        result, errors = path.find_mtimes(self.tmpdir)
+        self.assertEqual(result, {target: tests.any_int})
+        self.assertEqual(errors, {link: tests.IsA(Exception)})
+
+    def test_symlink_to_file_as_root_is_followed(self):
+        """Passing a symlink as the root should be followed when follow=True"""
+        target = self.touch('target')
+        link = os.path.join(self.tmpdir, 'link')
+        os.symlink(target, link)
+
+        result, errors = path.find_mtimes(link, follow=True)
+        self.assertEqual({link: tests.any_int}, result)
+        self.assertEqual({}, errors)
+
+    def test_symlink_to_directory_is_followed(self):
+        pass
+
+    def test_symlink_pointing_at_itself_fails(self):
+        link = os.path.join(self.tmpdir, 'link')
+        os.symlink(link, link)
+
+        result, errors = path.find_mtimes(link, follow=True)
+        self.assertEqual({}, result)
+        self.assertEqual({link: tests.IsA(OSError)}, errors)
+
+    def test_symlink_pointing_at_parent_fails(self):
+        os.symlink(self.tmpdir, os.path.join(self.tmpdir, 'link'))
+
+        result, errors = path.find_mtimes(self.tmpdir, follow=True)
+        self.assertEqual({}, result)
+        self.assertEqual(1, len(errors))
+        self.assertEqual(tests.IsA(OSError), errors.values()[0])
 
 
 # TODO: kill this in favour of just os.path.getmtime + mocks
