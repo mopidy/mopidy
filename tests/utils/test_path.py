@@ -220,6 +220,7 @@ class FindMTimesTest(unittest.TestCase):
     DATA_DIR = tests.path_to_data_dir('')
     FIND_DIR = tests.path_to_data_dir('find')
     FIND2_DIR = tests.path_to_data_dir('find2')
+    NO_PERMISSION_DIR = tests.path_to_data_dir('no-permission')
 
     def test_basic_dir(self):
         result, errors = path.find_mtimes(self.FIND_DIR)
@@ -253,6 +254,11 @@ class FindMTimesTest(unittest.TestCase):
         result, errors = path.find_mtimes(self.SINGLE_SYMLINK)
         self.assertEqual({}, result)
         self.assertEqual({self.SINGLE_SYMLINK: tests.IsA(Exception)}, errors)
+
+    def test_missing_permission_to_directory(self):
+        result, errors = path.find_mtimes(self.NO_PERMISSION_DIR)
+        self.assertEqual({}, result)
+        self.assertEqual({self.NO_PERMISSION_DIR: tests.IsA(OSError)}, errors)
 
 
 # TODO: kill this in favour of just os.path.getmtime + mocks
