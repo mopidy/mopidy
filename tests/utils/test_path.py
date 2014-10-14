@@ -267,6 +267,11 @@ class FindMTimesTest(unittest.TestCase):
         self.assertEqual({}, result)
         self.assertEqual({self.NO_PERMISSION_DIR: tests.IsA(OSError)}, errors)
 
+    def test_basic_symlink(self):
+        result, errors = path.find_mtimes(self.SINGLE_SYMLINK, follow=True)
+        self.assertEqual({self.SINGLE_SYMLINK: tests.any_int}, result)
+        self.assertEqual({}, errors)
+
 
 # TODO: kill this in favour of just os.path.getmtime + mocks
 class MtimeTest(unittest.TestCase):
