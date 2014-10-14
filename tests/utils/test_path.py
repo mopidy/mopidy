@@ -11,7 +11,7 @@ import glib
 
 from mopidy.utils import path
 
-from tests import any_int, path_to_data_dir
+import tests
 
 
 class GetOrCreateDirTest(unittest.TestCase):
@@ -214,32 +214,35 @@ class ExpandPathTest(unittest.TestCase):
 class FindMTimesTest(unittest.TestCase):
     maxDiff = None
 
-    def find(self, value):
-        result, errors = path.find_mtimes(path_to_data_dir(value))
-        return result
+    DOES_NOT_EXIST = tests.path_to_data_dir('does-no-exist')
+    SINGLE_FILE = tests.path_to_data_dir('blank.mp3')
+    DATA_DIR = tests.path_to_data_dir('')
+    FIND_DIR = tests.path_to_data_dir('find')
 
     def test_basic_dir(self):
-        self.assert_(self.find(''))
+        result, errors = path.find_mtimes(self.DATA_DIR)
+        self.assert_(result)
 
     def test_nonexistant_dir(self):
-        self.assertEqual(self.find('does-not-exist'), {})
+        result, errors = path.find_mtimes(self.DOES_NOT_EXIST)
+        self.assertEqual(result, {})
+        self.assertEqual(errors, {self.DOES_NOT_EXIST: tests.IsA(OSError)})
 
     def test_file(self):
-        self.assertEqual({path_to_data_dir('blank.mp3'): any_int},
-                         self.find('blank.mp3'))
+        result, errors = path.find_mtimes(self.SINGLE_FILE)
+        self.assertEqual({self.SINGLE_FILE: tests.any_int}, result)
 
     def test_files(self):
-        mtimes = self.find('find')
-        expected_files = [
-            b'find/foo/bar/file', b'find/foo/file', b'find/baz/file']
-        expected = {path_to_data_dir(p): any_int for p in expected_files}
-        self.assertEqual(expected, mtimes)
+        result, errors = path.find_mtimes(self.FIND_DIR)
+        expected = {
+            tests.path_to_data_dir(b'find/foo/bar/file'): tests.any_int,
+            tests.path_to_data_dir(b'find/foo/file'): tests.any_int,
+            tests.path_to_data_dir(b'find/baz/file'): tests.any_int}
+        self.assertEqual(expected, result)
 
     def test_names_are_bytestrings(self):
-        is_bytes = lambda f: isinstance(f, bytes)
-        for name in self.find(''):
-            self.assert_(
-                is_bytes(name), '%s is not bytes object' % repr(name))
+        for name in path.find_mtimes(self.DATA_DIR)[0]:
+            self.assertEqual(name, tests.IsA(bytes))
 
 
 # TODO: kill this in favour of just os.path.getmtime + mocks
