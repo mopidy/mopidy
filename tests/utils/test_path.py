@@ -216,11 +216,13 @@ class FindMTimesTest(unittest.TestCase):
 
     DOES_NOT_EXIST = tests.path_to_data_dir('does-no-exist')
     SINGLE_FILE = tests.path_to_data_dir('blank.mp3')
+    SINGLE_SYMLINK = tests.path_to_data_dir('find2/bar')
     DATA_DIR = tests.path_to_data_dir('')
     FIND_DIR = tests.path_to_data_dir('find')
+    FIND2_DIR = tests.path_to_data_dir('find2')
 
     def test_basic_dir(self):
-        result, errors = path.find_mtimes(self.DATA_DIR)
+        result, errors = path.find_mtimes(self.FIND_DIR)
         self.assert_(result)
         self.assertEqual(errors, {})
 
@@ -246,6 +248,11 @@ class FindMTimesTest(unittest.TestCase):
     def test_names_are_bytestrings(self):
         for name in path.find_mtimes(self.DATA_DIR)[0]:
             self.assertEqual(name, tests.IsA(bytes))
+
+    def test_symlinks_are_ignored(self):
+        result, errors = path.find_mtimes(self.SINGLE_SYMLINK)
+        self.assertEqual({}, result)
+        self.assertEqual({self.SINGLE_SYMLINK: tests.IsA(Exception)}, errors)
 
 
 # TODO: kill this in favour of just os.path.getmtime + mocks

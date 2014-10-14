@@ -140,7 +140,7 @@ def _find_worker(relative, hidden, done, work, results, errors):
             elif stat.S_ISREG(st.st_mode):
                 results[path] = st
             else:
-                errors[path] = 'Not a file or directory'
+                errors[path] = Exception('Not a file or directory')
         except os.error as e:
             errors[path] = e
         finally:
