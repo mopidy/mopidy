@@ -216,6 +216,7 @@ class FindMTimesTest(unittest.TestCase):
 
     DOES_NOT_EXIST = tests.path_to_data_dir('does-no-exist')
     SINGLE_FILE = tests.path_to_data_dir('blank.mp3')
+    NO_PERMISSION_FILE = tests.path_to_data_dir('no-permission-file')
     SINGLE_SYMLINK = tests.path_to_data_dir('find2/bar')
     DATA_DIR = tests.path_to_data_dir('')
     FIND_DIR = tests.path_to_data_dir('find')
@@ -254,6 +255,12 @@ class FindMTimesTest(unittest.TestCase):
         result, errors = path.find_mtimes(self.SINGLE_SYMLINK)
         self.assertEqual({}, result)
         self.assertEqual({self.SINGLE_SYMLINK: tests.IsA(Exception)}, errors)
+
+    def test_missing_permission_to_file(self):
+        # Note that we cannot know if we have access, but the stat will succeed
+        result, errors = path.find_mtimes(self.NO_PERMISSION_FILE)
+        self.assertEqual({self.NO_PERMISSION_FILE: tests.any_int}, result)
+        self.assertEqual({}, errors)
 
     def test_missing_permission_to_directory(self):
         result, errors = path.find_mtimes(self.NO_PERMISSION_DIR)
