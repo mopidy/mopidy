@@ -222,6 +222,7 @@ class FindMTimesTest(unittest.TestCase):
     def test_basic_dir(self):
         result, errors = path.find_mtimes(self.DATA_DIR)
         self.assert_(result)
+        self.assertEqual(errors, {})
 
     def test_nonexistant_dir(self):
         result, errors = path.find_mtimes(self.DOES_NOT_EXIST)
@@ -230,7 +231,8 @@ class FindMTimesTest(unittest.TestCase):
 
     def test_file(self):
         result, errors = path.find_mtimes(self.SINGLE_FILE)
-        self.assertEqual({self.SINGLE_FILE: tests.any_int}, result)
+        self.assertEqual(result, {self.SINGLE_FILE: tests.any_int})
+        self.assertEqual(errors, {})
 
     def test_files(self):
         result, errors = path.find_mtimes(self.FIND_DIR)
@@ -239,6 +241,7 @@ class FindMTimesTest(unittest.TestCase):
             tests.path_to_data_dir(b'find/foo/file'): tests.any_int,
             tests.path_to_data_dir(b'find/baz/file'): tests.any_int}
         self.assertEqual(expected, result)
+        self.assertEqual(errors, {})
 
     def test_names_are_bytestrings(self):
         for name in path.find_mtimes(self.DATA_DIR)[0]:
