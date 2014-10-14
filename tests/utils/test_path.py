@@ -214,9 +214,11 @@ class ExpandPathTest(unittest.TestCase):
 class FindMTimesTest(unittest.TestCase):
     maxDiff = None
 
+    # TODO: Consider if more of these directory structures should be created by
+    # the test. This would make it more obvious what our expected result is.
+
     DOES_NOT_EXIST = tests.path_to_data_dir('does-no-exist')
     SINGLE_FILE = tests.path_to_data_dir('blank.mp3')
-    NO_PERMISSION_FILE = tests.path_to_data_dir('no-permission-file')
     SINGLE_SYMLINK = tests.path_to_data_dir('find2/bar')
     DATA_DIR = tests.path_to_data_dir('')
     FIND_DIR = tests.path_to_data_dir('find')
@@ -259,9 +261,11 @@ class FindMTimesTest(unittest.TestCase):
 
     def test_missing_permission_to_file(self):
         # Note that we cannot know if we have access, but the stat will succeed
-        result, errors = path.find_mtimes(self.NO_PERMISSION_FILE)
-        self.assertEqual({self.NO_PERMISSION_FILE: tests.any_int}, result)
-        self.assertEqual({}, errors)
+        with tempfile.NamedTemporaryFile() as tmp:
+            os.chmod(tmp.name, 0)
+            result, errors = path.find_mtimes(tmp.name)
+            self.assertEqual({tmp.name: tests.any_int}, result)
+            self.assertEqual({}, errors)
 
     def test_missing_permission_to_directory(self):
         result, errors = path.find_mtimes(self.NO_PERMISSION_DIR)
