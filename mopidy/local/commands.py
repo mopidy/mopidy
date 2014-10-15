@@ -85,7 +85,11 @@ class ScanCommand(commands.Command):
 
         logger.info('Found %d files in media_dir.', len(file_mtimes))
 
-        # TODO: log file errors
+        if file_errors:
+            logger.warning('Encountered %d errors while scanning media_dir.',
+                           len(file_errors))
+        for name in file_errors:
+            logger.debug('Scan error %r for %r', file_errors[name], name)
 
         num_tracks = library.load()
         logger.info('Checking %d tracks from library.', num_tracks)
