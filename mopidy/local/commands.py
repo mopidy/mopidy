@@ -77,8 +77,10 @@ class ScanCommand(commands.Command):
         file_mtimes, file_errors = path.find_mtimes(media_dir)
 
         # TODO: Not sure if we want to keep this, but for now lets filter these
+        # Could be replaced with passing in a predicate to the find function?
         for name in file_mtimes.keys():
-            if name.startswith('.'):
+            if b'/.' in name:
+                logger.debug('Skipping hidden file/directory: %r', name)
                 del file_mtimes[name]
 
         logger.info('Found %d files in media_dir.', len(file_mtimes))
