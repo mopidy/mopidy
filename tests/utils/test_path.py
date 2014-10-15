@@ -221,12 +221,12 @@ class FindMTimesTest(unittest.TestCase):
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def mkdir(self, *args):
-        name = os.path.join(self.tmpdir, *args)
+        name = os.path.join(self.tmpdir, *[bytes(a) for a in args])
         os.mkdir(name)
         return name
 
     def touch(self, *args):
-        name = os.path.join(self.tmpdir, *args)
+        name = os.path.join(self.tmpdir, *[bytes(a) for a in args])
         open(name, 'w').close()
         return name
 
@@ -320,6 +320,7 @@ class FindMTimesTest(unittest.TestCase):
         pass
 
     def test_symlink_pointing_at_itself_fails(self):
+        """Symlink pointing at itself should give as an OS error"""
         link = os.path.join(self.tmpdir, 'link')
         os.symlink(link, link)
 
@@ -328,12 +329,44 @@ class FindMTimesTest(unittest.TestCase):
         self.assertEqual({link: tests.IsA(OSError)}, errors)
 
     def test_symlink_pointing_at_parent_fails(self):
+        """We should detect a loop via the parent and give up on the branch"""
         os.symlink(self.tmpdir, os.path.join(self.tmpdir, 'link'))
 
         result, errors = path.find_mtimes(self.tmpdir, follow=True)
         self.assertEqual({}, result)
         self.assertEqual(1, len(errors))
-        self.assertEqual(tests.IsA(OSError), errors.values()[0])
+        self.assertEqual(tests.IsA(Exception), errors.values()[0])
+
+    def test_indirect_symlink_loop(self):
+        """More indirect loops should also be detected"""
+        # Setup tmpdir/directory/loop where loop points to tmpdir
+        directory = os.path.join(self.tmpdir, b'directory')
+        loop = os.path.join(directory, b'loop')
+
+        os.mkdir(directory)
+        os.symlink(self.tmpdir, loop)
+
+        result, errors = path.find_mtimes(self.tmpdir, follow=True)
+        self.assertEqual({}, result)
+        self.assertEqual({loop: tests.IsA(Exception)}, errors)
+
+    def test_symlink_branches_are_not_excluded(self):
+        """Using symlinks to make a file show up multiple times should work"""
+        self.mkdir('directory')
+        target = self.touch('directory', 'target')
+        link1 = os.path.join(self.tmpdir, b'link1')
+        link2 = os.path.join(self.tmpdir, b'link2')
+
+        os.symlink(target, link1)
+        os.symlink(target, link2)
+
+        expected = {target: tests.any_int,
+                    link1: tests.any_int,
+                    link2: tests.any_int}
+
+        result, errors = path.find_mtimes(self.tmpdir, follow=True)
+        self.assertEqual(expected, result)
+        self.assertEqual({}, errors)
 
 
 # TODO: kill this in favour of just os.path.getmtime + mocks

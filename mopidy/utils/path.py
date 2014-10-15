@@ -122,7 +122,7 @@ def _find_worker(relative, follow, done, work, results, errors):
     """
     while not done.is_set():
         try:
-            entry = work.get(block=False)
+            entry, parents = work.get(block=False)
         except queue.Empty:
             continue
 
@@ -137,13 +137,19 @@ def _find_worker(relative, follow, done, work, results, errors):
             else:
                 st = os.lstat(entry)
 
+            if (st.st_dev, st.st_ino) in parents:
+                errors[path] = Exception('Sym/hardlink loop found.')
+                continue
+
+            parents = parents + [(st.st_dev, st.st_ino)]
             if stat.S_ISDIR(st.st_mode):
                 for e in os.listdir(entry):
-                    work.put(os.path.join(entry, e))
+                    work.put((os.path.join(entry, e), parents))
             elif stat.S_ISREG(st.st_mode):
                 results[path] = st
             else:
                 errors[path] = Exception('Not a file or directory')
+
         except os.error as e:
             errors[path] = e
         finally:
@@ -153,7 +159,8 @@ def _find_worker(relative, follow, done, work, results, errors):
 def _find(root, thread_count=10, relative=False, follow=False):
     """Threaded find implementation that provides stat results for files.
 
-    Note that we do _not_ handle loops from bad sym/hardlinks in any way.
+    Tries to protect against sym/hardlink loops by keeping an eye on parent
+    (st_dev, st_ino) pairs.
 
     :param str root: root directory to search from, may not be a file
     :param int thread_count: number of workers to use, mainly useful to
@@ -166,7 +173,7 @@ def _find(root, thread_count=10, relative=False, follow=False):
     errors = {}
     done = threading.Event()
     work = queue.Queue()
-    work.put(os.path.abspath(root))
+    work.put((os.path.abspath(root), []))
 
     if not relative:
         root = None
