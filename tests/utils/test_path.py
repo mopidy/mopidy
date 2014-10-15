@@ -259,12 +259,6 @@ class FindMTimesTest(unittest.TestCase):
         self.assertEqual(result, {single: tests.any_int})
         self.assertEqual(errors, {})
 
-    def test_hidden_directories_are_skipped(self):
-        pass
-
-    def test_hidden_files_are_skipped(self):
-        pass
-
     def test_nested_directories(self):
         """Searching nested directories should find all files"""
 

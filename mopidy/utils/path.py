@@ -110,11 +110,10 @@ def expand_path(path):
     return path
 
 
-def _find_worker(relative, hidden, follow, done, work, results, errors):
+def _find_worker(relative, follow, done, work, results, errors):
     """Worker thread for collecting stat() results.
 
     :param str relative: directory to make results relative to
-    :param bool hidden: whether to include files and dirs starting with '.'
     :param bool follow: if symlinks should be followed
     :param threading.Event done: event indicating that all work has been done
     :param queue.Queue work: queue of paths to process
@@ -140,8 +139,7 @@ def _find_worker(relative, hidden, follow, done, work, results, errors):
 
             if stat.S_ISDIR(st.st_mode):
                 for e in os.listdir(entry):
-                    if hidden or not e.startswith(b'.'):
-                        work.put(os.path.join(entry, e))
+                    work.put(os.path.join(entry, e))
             elif stat.S_ISREG(st.st_mode):
                 results[path] = st
             else:
@@ -152,7 +150,7 @@ def _find_worker(relative, hidden, follow, done, work, results, errors):
             work.task_done()
 
 
-def _find(root, thread_count=10, hidden=True, relative=False, follow=False):
+def _find(root, thread_count=10, relative=False, follow=False):
     """Threaded find implementation that provides stat results for files.
 
     Note that we do _not_ handle loops from bad sym/hardlinks in any way.
@@ -160,7 +158,6 @@ def _find(root, thread_count=10, hidden=True, relative=False, follow=False):
     :param str root: root directory to search from, may not be a file
     :param int thread_count: number of workers to use, mainly useful to
         mitigate network lag when scanning on NFS etc.
-    :param bool hidden: whether to include files and dirs starting with '.'
     :param bool relative: if results should be relative to root or absolute
     :param bool follow: if symlinks should be followed
     """
@@ -174,7 +171,7 @@ def _find(root, thread_count=10, hidden=True, relative=False, follow=False):
     if not relative:
         root = None
 
-    args = (root, hidden, follow, done, work, results, errors)
+    args = (root, follow, done, work, results, errors)
     for i in range(thread_count):
         t = threading.Thread(target=_find_worker, args=args)
         t.daemon = True
@@ -189,7 +186,7 @@ def _find(root, thread_count=10, hidden=True, relative=False, follow=False):
 
 
 def find_mtimes(root, follow=False):
-    results, errors = _find(root, hidden=False, relative=False, follow=follow)
+    results, errors = _find(root, relative=False, follow=follow)
     mtimes = dict((f, int(st.st_mtime)) for f, st in results.iteritems())
     return mtimes, errors
 

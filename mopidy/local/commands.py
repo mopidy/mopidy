@@ -75,6 +75,12 @@ class ScanCommand(commands.Command):
         uris_to_remove = set()
 
         file_mtimes, file_errors = path.find_mtimes(media_dir)
+
+        # TODO: Not sure if we want to keep this, but for now lets filter these
+        for name in file_mtimes.keys():
+            if name.startswith('.'):
+                del file_mtimes[name]
+
         logger.info('Found %d files in media_dir.', len(file_mtimes))
 
         # TODO: log file errors
