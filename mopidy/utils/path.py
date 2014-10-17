@@ -150,7 +150,7 @@ def _find_worker(relative, follow, done, work, results, errors):
             else:
                 errors[path] = Exception('Not a file or directory')
 
-        except os.error as e:
+        except OSError as e:
             errors[path] = e
         finally:
             work.task_done()
