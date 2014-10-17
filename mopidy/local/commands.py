@@ -74,7 +74,8 @@ class ScanCommand(commands.Command):
         uris_to_update = set()
         uris_to_remove = set()
 
-        file_mtimes, file_errors = path.find_mtimes(media_dir)
+        file_mtimes, file_errors = path.find_mtimes(
+            media_dir, follow=config['local']['scan_follow_symlinks'])
 
         logger.info('Found %d files in media_dir.', len(file_mtimes))
 
