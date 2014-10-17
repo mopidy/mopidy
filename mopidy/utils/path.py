@@ -147,8 +147,10 @@ def _find_worker(relative, follow, done, work, results, errors):
                     work.put((os.path.join(entry, e), parents))
             elif stat.S_ISREG(st.st_mode):
                 results[path] = st
+            elif stat.S_ISLNK(st.st_mode):
+                errors[path] = Exception('Not following symlinks.')
             else:
-                errors[path] = Exception('Not a file or directory')
+                errors[path] = Exception('Not a file or directory.')
 
         except OSError as e:
             errors[path] = e
