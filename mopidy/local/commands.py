@@ -74,8 +74,16 @@ class ScanCommand(commands.Command):
         uris_to_update = set()
         uris_to_remove = set()
 
-        file_mtimes = path.find_mtimes(media_dir)
+        file_mtimes, file_errors = path.find_mtimes(
+            media_dir, follow=config['local']['scan_follow_symlinks'])
+
         logger.info('Found %d files in media_dir.', len(file_mtimes))
+
+        if file_errors:
+            logger.warning('Encountered %d errors while scanning media_dir.',
+                           len(file_errors))
+        for name in file_errors:
+            logger.debug('Scan error %r for %r', file_errors[name], name)
 
         num_tracks = library.load()
         logger.info('Checking %d tracks from library.', num_tracks)
@@ -97,11 +105,13 @@ class ScanCommand(commands.Command):
             relpath = os.path.relpath(abspath, media_dir)
             uri = translator.path_to_local_track_uri(relpath)
 
-            if relpath.lower().endswith(excluded_file_extensions):
+            # TODO: move these to a "predicate" check in the finder?
+            if b'/.' in relpath:
+                logger.debug('Skipped %s: Hidden directory/file.', uri)
+            elif relpath.lower().endswith(excluded_file_extensions):
                 logger.debug('Skipped %s: File extension excluded.', uri)
-                continue
-
-            uris_to_update.add(uri)
+            else:
+                uris_to_update.add(uri)
 
         logger.info(
             'Found %d tracks which need to be updated.', len(uris_to_update))
