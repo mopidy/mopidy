@@ -196,10 +196,9 @@ class MpdDispatcher(object):
 
     def _format_lines(self, line):
         if isinstance(line, dict):
-            result = []
-            for (key, value) in line.items():
-                result.append(self._escape_newlines('%s: %s' % (key, value)))
-            return result
+            return [self._escape_newlines('%s: %s' % (key, value))
+                    for (key, value)
+                    in line.items()]
         if isinstance(line, tuple):
             (key, value) = line
             return [self._escape_newlines('%s: %s' % (key, value))]
