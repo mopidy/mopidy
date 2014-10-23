@@ -198,8 +198,8 @@ class MpdDispatcher(object):
         if isinstance(line, dict):
             result = []
             for (key, value) in line.items():
-                result.extend(self._escape_newlines('%s: %s' % (key, value)))
-            return [result]
+                result.append(self._escape_newlines('%s: %s' % (key, value)))
+            return result
         if isinstance(line, tuple):
             (key, value) = line
             return [self._escape_newlines('%s: %s' % (key, value))]
