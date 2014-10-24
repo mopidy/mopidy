@@ -299,8 +299,7 @@ class MpdContext(object):
             uri = None
             for part in path_parts:
                 for ref in self.core.library.browse(uri).get():
-                    if (ref.type in (ref.DIRECTORY, ref.ALBUM, ref.PLAYLIST)
-                            and ref.name == part):
+                    if ref.type != ref.TRACK and ref.name == part:
                         uri = ref.uri
                         break
                 else:
@@ -320,13 +319,13 @@ class MpdContext(object):
                 path = '/'.join([base_path, ref.name.replace('/', '')])
                 path = self.insert_name_uri_mapping(path, ref.uri)
 
-                if ref.type in (ref.DIRECTORY, ref.ALBUM, ref.PLAYLIST):
-                    yield (path, None)
-                    if recursive:
-                        path_and_futures.append(
-                            (path, self.core.library.browse(ref.uri)))
-                elif ref.type == ref.TRACK:
+                if ref.type == ref.TRACK:
                     if lookup:
                         yield (path, self.core.library.lookup(ref.uri))
                     else:
                         yield (path, ref)
+                else:
+                    yield (path, None)
+                    if recursive:
+                        path_and_futures.append(
+                            (path, self.core.library.browse(ref.uri)))
