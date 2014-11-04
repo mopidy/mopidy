@@ -8,15 +8,17 @@ This changelog is used to track all major changes to Mopidy.
 v0.19.5 (UNRELEASED)
 ====================
 
+Bug fix release.
+
 - Models: Hide empty collections from :func:`repr()` representations.
 
-- Field values are no longer stored on the model instance when the value
-  matches the default value for the field. This makes two models equal when
-  they have a field which in one case is implicitly set to the default value
-  and in the other case explicitly set to the default value, but with otherwise
-  equal fields. (Fixes: :issue:`837`)
+- Models: Field values are no longer stored on the model instance when the
+  value matches the default value for the field. This makes two models equal
+  when they have a field which in one case is implicitly set to the default
+  value and in the other case explicitly set to the default value, but with
+  otherwise equal fields. (Fixes: :issue:`837`)
 
-- Changed the default value of :attr:`mopidy.models.Album.num_tracks`,
+- Models: Changed the default value of :attr:`mopidy.models.Album.num_tracks`,
   :attr:`mopidy.models.Track.track_no`, and
   :attr:`mopidy.models.Track.last_modified` from ``0`` to :class:`None`.
 
