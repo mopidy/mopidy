@@ -37,6 +37,9 @@ v0.20.0 (UNRELEASED)
 - In stored playlist names, replace "/", which are illegal, with "|" instead of
   a whitespace. Pipes are more similar to forward slash.
 
+- Enable browsing of artist references, in addition to albums and playlists.
+  (PR: :issue:`884`)
+
 **Audio**
 
 - Deprecated :meth:`mopidy.audio.Audio.emit_end_of_stream`. Pass a
