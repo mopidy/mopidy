@@ -1,6 +1,10 @@
 mopidy (0.19.4-4) unstable; urgency=medium
 
   * Bump Standards-Version to 3.9.6. No changes needed.
+  * Add Dutch translation of Debconf templates. (Frans Spiesschaert)
+    Closes: #766401
+  * Add Swedish translation of Debconf templates. (Martin Bagge)
+    Closes: #768453
 
  -- Stein Magnus Jodal <stein.magnus@jodal.no>  Sun, 09 Nov 2014 14:37:28 +0100
 
