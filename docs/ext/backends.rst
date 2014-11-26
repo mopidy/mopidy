@@ -11,6 +11,16 @@ This list is moderated and updated on a regular basis. If you want your package
 to show up here, follow the :ref:`guide on creating extensions <extensiondev>`.
 
 
+Mopidy-AudioAddict
+==================
+
+https://github.com/nilicule/mopidy-audioaddict
+
+Provides a backend for playing music from the AudioAddict network of sites,
+including Digitally Imported, RadioTunes, RockRadio, JazzRadio, and
+FrescaRadio.
+
+
 Mopidy-Banshee
 ==============
 
