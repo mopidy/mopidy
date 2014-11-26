@@ -59,6 +59,23 @@ To install, run::
     pip install Mopidy-Moped
 
 
+Mopidy-Mopify
+=============
+
+https://github.com/dirkgroenen/mopidy-mopify
+
+An web client that mainly targets using Spotify through Mopidy. Made by Dirk
+Groenen.
+
+.. image:: /ext/mopify.png
+    :width: 720
+    :height: 424
+
+To install, run::
+
+    pip install Mopidy-Mopify
+
+
 Mopidy-MusicBox-Webclient
 =========================
 
