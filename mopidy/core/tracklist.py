@@ -77,9 +77,9 @@ class TracklistController(object):
     consume = property(get_consume, set_consume)
     """
     :class:`True`
-        Tracks are removed from the playlist when they have been played.
+        Tracks are removed from the tracklist when they have been played.
     :class:`False`
-        Tracks are not removed from the playlist.
+        Tracks are not removed from the tracklist.
     """
 
     def get_random(self):
@@ -96,9 +96,9 @@ class TracklistController(object):
     random = property(get_random, set_random)
     """
     :class:`True`
-        Tracks are selected at random from the playlist.
+        Tracks are selected at random from the tracklist.
     :class:`False`
-        Tracks are played in the order of the playlist.
+        Tracks are played in the order of the tracklist.
     """
 
     def get_repeat(self):
@@ -112,10 +112,10 @@ class TracklistController(object):
     repeat = property(get_repeat, set_repeat)
     """
     :class:`True`
-        The current playlist is played repeatedly. To repeat a single track,
-        select both :attr:`repeat` and :attr:`single`.
+        The tracklist is played repeatedly. To repeat a single track, select
+        both :attr:`repeat` and :attr:`single`.
     :class:`False`
-        The current playlist is played once.
+        The tracklist is played once.
     """
 
     def get_single(self):
@@ -175,10 +175,10 @@ class TracklistController(object):
         The track that will be played if calling
         :meth:`mopidy.core.PlaybackController.next()`.
 
-        For normal playback this is the next track in the playlist. If repeat
-        is enabled the next track can loop around the playlist. When random is
+        For normal playback this is the next track in the tracklist. If repeat
+        is enabled the next track can loop around the tracklist. When random is
         enabled this should be a random track, all tracks should be played once
-        before the list repeats.
+        before the tracklist repeats.
 
         :param tl_track: the reference track
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
@@ -217,7 +217,7 @@ class TracklistController(object):
         Returns the track that will be played if calling
         :meth:`mopidy.core.PlaybackController.previous()`.
 
-        For normal playback this is the previous track in the playlist. If
+        For normal playback this is the previous track in the tracklist. If
         random and/or consume is enabled it should return the current track
         instead.
 
