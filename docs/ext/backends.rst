@@ -11,6 +11,16 @@ This list is moderated and updated on a regular basis. If you want your package
 to show up here, follow the :ref:`guide on creating extensions <extensiondev>`.
 
 
+Mopidy-AudioAddict
+==================
+
+https://github.com/nilicule/mopidy-audioaddict
+
+Provides a backend for playing music from the AudioAddict network of sites,
+including Digitally Imported, RadioTunes, RockRadio, JazzRadio, and
+FrescaRadio.
+
+
 Mopidy-Banshee
 ==============
 
@@ -78,6 +88,28 @@ Mopidy-Local
 ============
 
 Bundled with Mopidy. See :ref:`ext-local`.
+
+
+Mopidy-Local-SQLite
+===================
+
+https://github.com/tkem/mopidy-local-sqlite
+
+Extension which plugs into Mopidy-Local to use an SQLite database to keep
+track of your local media. This extension lets you browse your music collection
+by album, artist, composer and performer, and provides full-text search
+capabilities based on SQLite's FTS modules. It also notices updates via
+``mopidy local scan`` while Mopidy is running, so you can scan your media
+library periodically from a cron job, for example.
+
+
+Mopidy-OE1
+==========
+
+https://github.com/tischlda/mopidy-oe1
+
+Extension for playing the live stream and browsing the 7-day archive of the
+Austrian radio station OE1.
 
 
 Mopidy-Podcast
