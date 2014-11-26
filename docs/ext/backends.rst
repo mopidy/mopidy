@@ -103,6 +103,15 @@ capabilities based on SQLite's FTS modules. It also notices updates via
 library periodically from a cron job, for example.
 
 
+Mopidy-OE1
+==========
+
+https://github.com/tischlda/mopidy-oe1
+
+Extension for playing the live stream and browsing the 7-day archive of the
+Austrian radio station OE1.
+
+
 Mopidy-Podcast
 ==============
 
