@@ -12,6 +12,14 @@ This list is moderated and updated on a regular basis. If you want your package
 to show up here, follow the :ref:`guide on creating extensions <extensiondev>`.
 
 
+Mopidy-EvtDev
+=============
+
+https://github.com/liamw9534/mopidy-evtdev
+
+Extension for controll Mopidy from virtual input devices.
+
+
 Mopidy-HTTP
 ===========
 
