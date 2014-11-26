@@ -111,6 +111,15 @@ To install, run::
     pip install Mopidy-Simple-Webclient
 
 
+Mopidy-WebSettings
+==================
+
+https://github.com/woutervanwijk/mopidy-websettings
+
+A web extension for changing settings. Used by the Pi MusicBox distribution
+for Raspberry Pi, but also usable for other projects.
+
+
 Other web clients
 =================
 
