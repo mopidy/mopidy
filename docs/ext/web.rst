@@ -94,6 +94,23 @@ To install, run::
     pip install Mopidy-MusicBox-Webclient
 
 
+Mopidy-Simple-Webclient
+=======================
+
+https://github.com/xolox/mopidy-simple-webclient
+
+A minimalistic web client targeted for mobile devices. Made with jQuery and
+Bootstrap by Peter Odding.
+
+.. image:: /ext/simple_webclient.png
+    :width: 473
+    :height: 373
+
+To install, run::
+
+    pip install Mopidy-Simple-Webclient
+
+
 Other web clients
 =================
 
