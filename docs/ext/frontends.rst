@@ -73,3 +73,12 @@ https://github.com/9and3r/mopidy-ttsgpio
 
 Extension for controlling Mopidy without a display by using e.g. buttons
 connected to GPIO and text-to-speech for track information.
+
+
+Mopidy-Webhooks
+===============
+
+https://github.com/paddycarey/mopidy-webhooks
+
+Extension for sending HTTP POST requests with JSON payloads to a remote server
+on when Mopidy core triggers an event and on regular intervals.
