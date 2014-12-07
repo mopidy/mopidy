@@ -59,7 +59,7 @@ def fetch():
 
     result = []
     secrets = service.GetSecrets(items, session, byte_arrays=True)
-    for item_path, values in secrets.iteritems():
+    for item_path, values in secrets.items():
         session_path, parameters, value, content_type = values
         attrs = _item_attributes(bus, item_path)
         result.append((attrs['section'], attrs['key'], bytes(value)))
@@ -163,7 +163,7 @@ def _prompt(bus, path):
 def _item_attributes(bus, path):
     item = _interface(bus, path, 'org.freedesktop.DBus.Properties')
     result = item.Get('org.freedesktop.Secret.Item', 'Attributes')
-    return dict((bytes(k), bytes(v)) for k, v in result.iteritems())
+    return dict((bytes(k), bytes(v)) for k, v in result.items())
 
 
 def _interface(bus, path, interface):

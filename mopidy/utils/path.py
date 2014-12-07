@@ -198,7 +198,7 @@ def _find(root, thread_count=10, relative=False, follow=False):
 
 def find_mtimes(root, follow=False):
     results, errors = _find(root, relative=False, follow=follow)
-    mtimes = dict((f, int(st.st_mtime)) for f, st in results.iteritems())
+    mtimes = dict((f, int(st.st_mtime)) for f, st in results.items())
     return mtimes, errors
 
 

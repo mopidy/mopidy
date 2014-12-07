@@ -164,7 +164,7 @@ class JsonLibrary(local.Library):
             return search.search(tracks, query=query, uris=uris)
 
     def begin(self):
-        return self._tracks.itervalues()
+        return self._tracks.values()
 
     def add(self, track):
         self._tracks[track.uri] = track

@@ -53,7 +53,7 @@ class PlaylistsController(object):
             backend = self.backends.with_playlists[uri_scheme]
         else:
             # TODO: this fallback looks suspicious
-            backend = self.backends.with_playlists.values()[0]
+            backend = list(self.backends.with_playlists.values())[0]
         playlist = backend.playlists.create(name).get()
         listener.CoreListener.send('playlist_changed', playlist=playlist)
         return playlist

@@ -328,7 +328,7 @@ class TracklistController(object):
         """
         criteria = criteria or kwargs
         matches = self._tl_tracks
-        for (key, values) in criteria.iteritems():
+        for (key, values) in criteria.items():
             if (not isinstance(values, collections.Iterable)
                     or isinstance(values, compat.string_types)):
                 # Fail hard if anyone is using the <0.17 calling style

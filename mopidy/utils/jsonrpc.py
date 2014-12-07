@@ -322,12 +322,12 @@ class JsonRpcInspector(object):
         available properties and methods.
         """
         methods = {}
-        for mount, obj in self.objects.iteritems():
+        for mount, obj in self.objects.items():
             if inspect.isroutine(obj):
                 methods[mount] = self._describe_method(obj)
             else:
                 obj_methods = self._get_methods(obj)
-                for name, description in obj_methods.iteritems():
+                for name, description in obj_methods.items():
                     if mount:
                         name = '%s.%s' % (mount, name)
                     methods[name] = description
