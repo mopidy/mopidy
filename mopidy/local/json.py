@@ -11,7 +11,7 @@ import tempfile
 import time
 
 import mopidy
-from mopidy import local, models
+from mopidy import compat, local, models
 from mopidy.local import search, storage, translator
 from mopidy.utils import encoding
 
@@ -164,7 +164,7 @@ class JsonLibrary(local.Library):
             return search.search(tracks, query=query, uris=uris)
 
     def begin(self):
-        return self._tracks.values()
+        return compat.itervalues(self._tracks)
 
     def add(self, track):
         self._tracks[track.uri] = track

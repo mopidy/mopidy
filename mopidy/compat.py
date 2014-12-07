@@ -13,6 +13,9 @@ if PY2:
 
     input = raw_input
 
+    def itervalues(dct, **kwargs):
+        return iter(dct.itervalues(**kwargs))
+
 else:
     import configparser  # noqa
     import queue  # noqa
@@ -22,3 +25,6 @@ else:
     text_type = str
 
     input = input
+
+    def itervalues(dct, **kwargs):
+        return iter(dct.values(**kwargs))
