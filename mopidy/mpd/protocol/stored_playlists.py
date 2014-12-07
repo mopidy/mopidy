@@ -1,4 +1,4 @@
-from __future__ import division, unicode_literals
+from __future__ import division, absolute_import, unicode_literals
 
 import datetime
 

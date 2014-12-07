@@ -10,7 +10,7 @@ implement our own MPD server which is compatible with the numerous existing
 `MPD clients <http://mpd.wikia.com/wiki/Clients>`_.
 """
 
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import inspect
 

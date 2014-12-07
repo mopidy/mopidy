@@ -159,7 +159,7 @@ class that will connect the rest of the dots.
 
 ::
 
-    from __future__ import unicode_literals
+    from __future__ import absolute_import, unicode_literals
 
     import re
     from setuptools import setup, find_packages
@@ -255,7 +255,7 @@ default config in documentation without duplicating it.
 
 This is ``mopidy_soundspot/__init__.py``::
 
-    from __future__ import unicode_literals
+    from __future__ import absolute_import, unicode_literals
 
     import logging
     import os
@@ -449,7 +449,7 @@ Python conventions
 In general, it would be nice if Mopidy extensions followed the same
 :ref:`codestyle` as Mopidy itself, as they're part of the same ecosystem. Among
 other things, the code style guide explains why all the above examples start
-with ``from __future__ import unicode_literals``.
+with ``from __future__ import absolute_import, unicode_literals``.
 
 
 Use of Mopidy APIs
