@@ -2,9 +2,11 @@ from __future__ import absolute_import, unicode_literals
 
 import locale
 
+from mopidy.utils import compat
+
 
 def locale_decode(bytestr):
     try:
-        return unicode(bytestr)
+        return compat.text_type(bytestr)
     except UnicodeError:
-        return str(bytestr).decode(locale.getpreferredencoding())
+        return bytes(bytestr).decode(locale.getpreferredencoding())

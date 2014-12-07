@@ -10,7 +10,7 @@ import re
 from mopidy.config import keyring
 from mopidy.config.schemas import *  # noqa
 from mopidy.config.types import *  # noqa
-from mopidy.utils import path, versioning
+from mopidy.utils import compat, path, versioning
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +108,7 @@ def _load(files, defaults, overrides):
     # all in the same way?
     logger.info('Loading config from builtin defaults')
     for default in defaults:
-        if isinstance(default, unicode):
+        if isinstance(default, compat.text_type):
             default = default.encode('utf-8')
         parser.readfp(io.BytesIO(default))
 

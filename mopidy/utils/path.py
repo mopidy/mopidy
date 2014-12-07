@@ -11,6 +11,8 @@ import urlparse
 
 import glib
 
+from mopidy.utils import compat
+
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +66,7 @@ def path_to_uri(path):
 
     Returns a file:// URI as an unicode string.
     """
-    if isinstance(path, unicode):
+    if isinstance(path, compat.text_type):
         path = path.encode('utf-8')
     path = urllib.quote(path)
     return urlparse.urlunsplit((b'file', b'', path, b'', b''))
@@ -81,7 +83,7 @@ def uri_to_path(uri):
     look up the matching dir or file on your file system because the exact path
     would be lost by ignoring its encoding.
     """
-    if isinstance(uri, unicode):
+    if isinstance(uri, compat.text_type):
         uri = uri.encode('utf-8')
     return urllib.unquote(urlparse.urlsplit(uri).path)
 

@@ -4,6 +4,8 @@ import pygst
 pygst.require('0.10')
 import gst  # noqa
 
+from mopidy.utils import compat
+
 
 def calculate_duration(num_samples, sample_rate):
     """Determine duration of samples using GStreamer helper for precise
@@ -18,7 +20,7 @@ def create_buffer(data, capabilites=None, timestamp=None, duration=None):
     """
     buffer_ = gst.Buffer(data)
     if capabilites:
-        if isinstance(capabilites, basestring):
+        if isinstance(capabilites, compat.string_types):
             capabilites = gst.caps_from_string(capabilites)
         buffer_.set_caps(capabilites)
     if timestamp:

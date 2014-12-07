@@ -9,7 +9,7 @@ import unittest
 
 import glib
 
-from mopidy.utils import path
+from mopidy.utils import compat, path
 
 import tests
 
@@ -57,7 +57,7 @@ class GetOrCreateDirTest(unittest.TestCase):
 
     def test_create_dir_with_unicode(self):
         with self.assertRaises(ValueError):
-            dir_path = unicode(os.path.join(self.parent, b'test'))
+            dir_path = compat.text_type(os.path.join(self.parent, b'test'))
             path.get_or_create_dir(dir_path)
 
     def test_create_dir_with_none(self):
@@ -108,7 +108,7 @@ class GetOrCreateFileTest(unittest.TestCase):
 
     def test_create_dir_with_unicode(self):
         with self.assertRaises(ValueError):
-            file_path = unicode(os.path.join(self.parent, b'test'))
+            file_path = compat.text_type(os.path.join(self.parent, b'test'))
             path.get_or_create_file(file_path)
 
     def test_create_file_with_none(self):

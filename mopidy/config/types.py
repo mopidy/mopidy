@@ -5,18 +5,18 @@ import re
 import socket
 
 from mopidy.config import validators
-from mopidy.utils import path
+from mopidy.utils import compat, path
 
 
 def decode(value):
-    if isinstance(value, unicode):
+    if isinstance(value, compat.text_type):
         return value
     # TODO: only unescape \n \t and \\?
     return value.decode('string-escape').decode('utf-8')
 
 
 def encode(value):
-    if not isinstance(value, unicode):
+    if not isinstance(value, compat.text_type):
         return value
     for char in ('\\', '\n', '\t'):  # TODO: more escapes?
         value = value.replace(char, char.encode('unicode-escape'))
@@ -278,7 +278,7 @@ class Path(ConfigValue):
         return ExpandedPath(value, expanded)
 
     def serialize(self, value, display=False):
-        if isinstance(value, unicode):
+        if isinstance(value, compat.text_type):
             raise ValueError('paths should always be bytes')
         if isinstance(value, ExpandedPath):
             return value.original

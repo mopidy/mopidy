@@ -6,6 +6,7 @@ import random
 
 from mopidy.core import listener
 from mopidy.models import TlTrack
+from mopidy.utils import compat
 
 
 logger = logging.getLogger(__name__)
@@ -329,7 +330,7 @@ class TracklistController(object):
         matches = self._tl_tracks
         for (key, values) in criteria.iteritems():
             if (not isinstance(values, collections.Iterable)
-                    or isinstance(values, basestring)):
+                    or isinstance(values, compat.string_types)):
                 # Fail hard if anyone is using the <0.17 calling style
                 raise ValueError('Filter values must be iterable: %r' % values)
             if key == 'tlid':

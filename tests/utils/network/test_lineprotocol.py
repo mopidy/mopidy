@@ -7,7 +7,7 @@ import unittest
 
 from mock import Mock, sentinel
 
-from mopidy.utils import network
+from mopidy.utils import compat, network
 
 from tests import any_unicode
 
@@ -259,13 +259,13 @@ class LineProtocolTest(unittest.TestCase):
     def test_decode_plain_ascii(self):
         result = network.LineProtocol.decode(self.mock, 'abc')
         self.assertEqual('abc', result)
-        self.assertEqual(unicode, type(result))
+        self.assertEqual(compat.text_type, type(result))
 
     def test_decode_utf8(self):
         result = network.LineProtocol.decode(
             self.mock, 'æøå'.encode('utf-8'))
         self.assertEqual('æøå', result)
-        self.assertEqual(unicode, type(result))
+        self.assertEqual(compat.text_type, type(result))
 
     def test_decode_invalid_data(self):
         string = Mock()

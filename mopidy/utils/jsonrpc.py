@@ -6,6 +6,8 @@ import traceback
 
 import pykka
 
+from mopidy.utils import compat
+
 
 class JsonRpcWrapper(object):
     """
@@ -137,13 +139,13 @@ class JsonRpcWrapper(object):
             except TypeError as error:
                 raise JsonRpcInvalidParamsError(data={
                     'type': error.__class__.__name__,
-                    'message': unicode(error),
+                    'message': compat.text_type(error),
                     'traceback': traceback.format_exc(),
                 })
             except Exception as error:
                 raise JsonRpcApplicationError(data={
                     'type': error.__class__.__name__,
-                    'message': unicode(error),
+                    'message': compat.text_type(error),
                     'traceback': traceback.format_exc(),
                 })
         except JsonRpcError as error:
@@ -164,7 +166,7 @@ class JsonRpcWrapper(object):
         if 'method' not in request:
             raise JsonRpcInvalidRequestError(
                 data='"method" member must be included')
-        if not isinstance(request['method'], unicode):
+        if not isinstance(request['method'], compat.text_type):
             raise JsonRpcInvalidRequestError(
                 data='"method" must be a string')
 

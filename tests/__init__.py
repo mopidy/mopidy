@@ -2,6 +2,8 @@ from __future__ import absolute_import, unicode_literals
 
 import os
 
+from mopidy.utils import compat
+
 
 def path_to_data_dir(name):
     if not isinstance(name, bytes):
@@ -31,4 +33,4 @@ class IsA(object):
 
 any_int = IsA(int)
 any_str = IsA(str)
-any_unicode = IsA(unicode)
+any_unicode = IsA(compat.text_type)
