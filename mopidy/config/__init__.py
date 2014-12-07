@@ -6,11 +6,12 @@ import logging
 import os.path
 import re
 
+from mopidy import compat
+from mopidy.compat import configparser
 from mopidy.config import keyring
 from mopidy.config.schemas import *  # noqa
 from mopidy.config.types import *  # noqa
-from mopidy.utils import compat, path, versioning
-from mopidy.utils.compat import configparser
+from mopidy.utils import path, versioning
 
 logger = logging.getLogger(__name__)
 

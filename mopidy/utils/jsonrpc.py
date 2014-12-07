@@ -6,7 +6,7 @@ import traceback
 
 import pykka
 
-from mopidy.utils import compat
+from mopidy import compat
 
 
 class JsonRpcWrapper(object):

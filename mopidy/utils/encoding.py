@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import locale
 
-from mopidy.utils import compat
+from mopidy import compat
 
 
 def locale_decode(bytestr):

@@ -5,10 +5,10 @@ import logging
 import os
 import time
 
-from mopidy import commands, exceptions
+from mopidy import commands, compat, exceptions
 from mopidy.audio import scan
 from mopidy.local import translator
-from mopidy.utils import compat, path
+from mopidy.utils import path
 
 
 logger = logging.getLogger(__name__)

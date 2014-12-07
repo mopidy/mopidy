@@ -8,8 +8,8 @@ import unittest
 
 import mock
 
+from mopidy import compat
 from mopidy.config import types
-from mopidy.utils import compat
 
 # TODO: DecodeTest and EncodeTest
 

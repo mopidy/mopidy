@@ -6,8 +6,8 @@ import re
 import urllib
 import urlparse
 
+from mopidy import compat
 from mopidy.models import Track
-from mopidy.utils import compat
 from mopidy.utils.encoding import locale_decode
 from mopidy.utils.path import path_to_uri, uri_to_path
 

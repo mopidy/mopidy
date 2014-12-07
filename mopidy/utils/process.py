@@ -7,7 +7,7 @@ import threading
 from pykka import ActorDeadError
 from pykka.registry import ActorRegistry
 
-from mopidy.utils.compat import thread
+from mopidy.compat import thread
 
 
 logger = logging.getLogger(__name__)

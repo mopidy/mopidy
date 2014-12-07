@@ -9,7 +9,7 @@ try:
 except ImportError:
     dbus = None
 
-from mopidy.utils import compat
+from mopidy import compat
 
 
 # XXX: Hack to workaround introspection bug caused by gnome-keyring, should be

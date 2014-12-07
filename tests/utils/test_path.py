@@ -9,7 +9,8 @@ import unittest
 
 import glib
 
-from mopidy.utils import compat, path
+from mopidy import compat
+from mopidy.utils import path
 
 import tests
 

@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import os
 
-from mopidy.utils import compat
+from mopidy import compat
 
 
 def path_to_data_dir(name):

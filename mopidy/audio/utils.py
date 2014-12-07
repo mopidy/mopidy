@@ -4,7 +4,7 @@ import pygst
 pygst.require('0.10')
 import gst  # noqa
 
-from mopidy.utils import compat
+from mopidy import compat
 
 
 def calculate_duration(num_samples, sample_rate):

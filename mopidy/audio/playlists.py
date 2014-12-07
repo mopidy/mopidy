@@ -8,7 +8,7 @@ import pygst
 pygst.require('0.10')
 import gst  # noqa
 
-from mopidy.utils.compat import configparser
+from mopidy.compat import configparser
 
 try:
     import xml.etree.cElementTree as elementtree

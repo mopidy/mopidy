@@ -7,7 +7,8 @@ import unittest
 
 from mock import Mock, sentinel
 
-from mopidy.utils import compat, network
+from mopidy import compat
+from mopidy.utils import network
 
 from tests import any_unicode
 
