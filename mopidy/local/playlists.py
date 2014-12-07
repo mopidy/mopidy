@@ -1,4 +1,4 @@
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import, division, unicode_literals
 
 import glob
 import logging
@@ -92,7 +92,7 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
 
     def _write_m3u_extinf(self, file_handle, track):
         title = track.name.encode('latin-1', 'replace')
-        runtime = track.length / 1000 if track.length else -1
+        runtime = track.length // 1000 if track.length else -1
         file_handle.write('#EXTINF:' + str(runtime) + ',' + title + '\n')
 
     def _save_m3u(self, playlist):

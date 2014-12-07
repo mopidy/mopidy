@@ -1,4 +1,5 @@
-from __future__ import absolute_import, print_function, unicode_literals
+from __future__ import (
+    absolute_import, division, print_function, unicode_literals)
 
 import logging
 import os
@@ -163,6 +164,6 @@ class _Progress(object):
             logger.info('Scanned %d of %d files in %ds.',
                         self.count, self.total, duration)
         else:
-            remainder = duration / self.count * (self.total - self.count)
+            remainder = duration // self.count * (self.total - self.count)
             logger.info('Scanned %d of %d files in %ds, ~%ds left.',
                         self.count, self.total, duration, remainder)

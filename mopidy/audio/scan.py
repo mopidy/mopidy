@@ -1,4 +1,4 @@
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import, division, unicode_literals
 
 import datetime
 import os
@@ -81,7 +81,7 @@ class Scanner(object):
     def _collect(self):
         """Polls for messages to collect data."""
         start = time.time()
-        timeout_s = self._timeout_ms / float(1000)
+        timeout_s = self._timeout_ms / 1000.
         tags = {}
 
         while time.time() - start < timeout_s:
