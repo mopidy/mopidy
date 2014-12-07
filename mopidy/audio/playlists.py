@@ -1,6 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import ConfigParser as configparser
 import io
 
 import gobject
@@ -8,6 +7,8 @@ import gobject
 import pygst
 pygst.require('0.10')
 import gst  # noqa
+
+from mopidy.utils.compat import configparser
 
 try:
     import xml.etree.cElementTree as elementtree

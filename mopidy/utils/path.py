@@ -1,6 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import Queue as queue
 import logging
 import os
 import stat
@@ -12,6 +11,7 @@ import urlparse
 import glib
 
 from mopidy.utils import compat
+from mopidy.utils.compat import queue
 
 
 logger = logging.getLogger(__name__)

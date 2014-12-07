@@ -1,6 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import ConfigParser as configparser
 import io
 import itertools
 import logging
@@ -11,6 +10,7 @@ from mopidy.config import keyring
 from mopidy.config.schemas import *  # noqa
 from mopidy.config.types import *  # noqa
 from mopidy.utils import compat, path, versioning
+from mopidy.utils.compat import configparser
 
 logger = logging.getLogger(__name__)
 

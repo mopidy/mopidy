@@ -2,14 +2,13 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 import signal
-try:
-    import _thread as thread  # Python 3
-except ImportError:
-    import thread  # Python 2
 import threading
 
 from pykka import ActorDeadError
 from pykka.registry import ActorRegistry
+
+from mopidy.utils.compat import thread
+
 
 logger = logging.getLogger(__name__)
 
