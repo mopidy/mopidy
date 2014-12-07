@@ -334,10 +334,10 @@ class TracklistController(object):
                 # Fail hard if anyone is using the <0.17 calling style
                 raise ValueError('Filter values must be iterable: %r' % values)
             if key == 'tlid':
-                matches = filter(lambda ct: ct.tlid in values, matches)
+                matches = [ct for ct in matches if ct.tlid in values]
             else:
-                matches = filter(
-                    lambda ct: getattr(ct.track, key) in values, matches)
+                matches = [
+                    ct for ct in matches if getattr(ct.track, key) in values]
         return matches
 
     def move(self, start, end, to_position):

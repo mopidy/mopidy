@@ -44,7 +44,7 @@ class DummyLibraryProvider(backend.LibraryProvider):
         return self.dummy_find_exact_result
 
     def lookup(self, uri):
-        return filter(lambda t: uri == t.uri, self.dummy_library)
+        return [t for t in self.dummy_library if uri == t.uri]
 
     def refresh(self, uri=None):
         pass
