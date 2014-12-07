@@ -7,7 +7,7 @@ import time
 from mopidy import commands, exceptions
 from mopidy.audio import scan
 from mopidy.local import translator
-from mopidy.utils import path
+from mopidy.utils import compat, path
 
 
 logger = logging.getLogger(__name__)
@@ -39,7 +39,7 @@ class ClearCommand(commands.Command):
         library = _get_library(args, config)
         prompt = '\nAre you sure you want to clear the library? [y/N] '
 
-        if raw_input(prompt).lower() != 'y':
+        if compat.input(prompt).lower() != 'y':
             print('Clearing library aborted.')
             return 0
 
