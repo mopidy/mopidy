@@ -43,7 +43,7 @@ available at http://localhost:6680/mywebclient/foo.html.
 
 ::
 
-    from __future__ import unicode_literals
+    from __future__ import absolute_import, unicode_literals
 
     import os
 
@@ -95,7 +95,7 @@ Mopidy $version``.
 
 ::
 
-    from __future__ import unicode_literals
+    from __future__ import absolute_import, unicode_literals
 
     import os
 
@@ -149,7 +149,7 @@ http://localhost:6680/mywebclient/.
 
 ::
 
-    from __future__ import unicode_literals
+    from __future__ import absolute_import, unicode_literals
 
     import os
 

@@ -4,7 +4,7 @@ This backend implements the backend API in the simplest way possible.  It is
 used in tests of the frontends.
 """
 
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import pykka
 
@@ -44,7 +44,7 @@ class DummyLibraryProvider(backend.LibraryProvider):
         return self.dummy_find_exact_result
 
     def lookup(self, uri):
-        return filter(lambda t: uri == t.uri, self.dummy_library)
+        return [t for t in self.dummy_library if uri == t.uri]
 
     def refresh(self, uri=None):
         pass

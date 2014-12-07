@@ -1,12 +1,13 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
-import ConfigParser as configparser
 import io
 import itertools
 import logging
 import os.path
 import re
 
+from mopidy import compat
+from mopidy.compat import configparser
 from mopidy.config import keyring
 from mopidy.config.schemas import *  # noqa
 from mopidy.config.types import *  # noqa
@@ -108,7 +109,7 @@ def _load(files, defaults, overrides):
     # all in the same way?
     logger.info('Loading config from builtin defaults')
     for default in defaults:
-        if isinstance(default, unicode):
+        if isinstance(default, compat.text_type):
             default = default.encode('utf-8')
         parser.readfp(io.BytesIO(default))
 

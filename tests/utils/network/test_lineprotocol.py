@@ -1,12 +1,13 @@
 # encoding: utf-8
 
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import re
 import unittest
 
 from mock import Mock, sentinel
 
+from mopidy import compat
 from mopidy.utils import network
 
 from tests import any_unicode
@@ -259,13 +260,13 @@ class LineProtocolTest(unittest.TestCase):
     def test_decode_plain_ascii(self):
         result = network.LineProtocol.decode(self.mock, 'abc')
         self.assertEqual('abc', result)
-        self.assertEqual(unicode, type(result))
+        self.assertEqual(compat.text_type, type(result))
 
     def test_decode_utf8(self):
         result = network.LineProtocol.decode(
             self.mock, 'æøå'.encode('utf-8'))
         self.assertEqual('æøå', result)
-        self.assertEqual(unicode, type(result))
+        self.assertEqual(compat.text_type, type(result))
 
     def test_decode_invalid_data(self):
         string = Mock()

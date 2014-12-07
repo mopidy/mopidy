@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 from mopidy.models import Album, SearchResult
 
@@ -11,7 +11,7 @@ def find_exact(tracks, query=None, uris=None):
 
     _validate_query(query)
 
-    for (field, values) in query.iteritems():
+    for (field, values) in query.items():
         if not hasattr(values, '__iter__'):
             values = [values]
         # FIXME this is bound to be slow for large libraries
@@ -91,7 +91,7 @@ def search(tracks, query=None, uris=None):
 
     _validate_query(query)
 
-    for (field, values) in query.iteritems():
+    for (field, values) in query.items():
         if not hasattr(values, '__iter__'):
             values = [values]
         # FIXME this is bound to be slow for large libraries
@@ -165,7 +165,7 @@ def search(tracks, query=None, uris=None):
 
 
 def _validate_query(query):
-    for (_, values) in query.iteritems():
+    for (_, values) in query.items():
         if not values:
             raise LookupError('Missing query')
         for value in values:

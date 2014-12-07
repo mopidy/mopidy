@@ -1,9 +1,10 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import collections
 import logging
 import random
 
+from mopidy import compat
 from mopidy.core import listener
 from mopidy.models import TlTrack
 
@@ -327,16 +328,16 @@ class TracklistController(object):
         """
         criteria = criteria or kwargs
         matches = self._tl_tracks
-        for (key, values) in criteria.iteritems():
+        for (key, values) in criteria.items():
             if (not isinstance(values, collections.Iterable)
-                    or isinstance(values, basestring)):
+                    or isinstance(values, compat.string_types)):
                 # Fail hard if anyone is using the <0.17 calling style
                 raise ValueError('Filter values must be iterable: %r' % values)
             if key == 'tlid':
-                matches = filter(lambda ct: ct.tlid in values, matches)
+                matches = [ct for ct in matches if ct.tlid in values]
             else:
-                matches = filter(
-                    lambda ct: getattr(ct.track, key) in values, matches)
+                matches = [
+                    ct for ct in matches if getattr(ct.track, key) in values]
         return matches
 
     def move(self, start, end, to_position):

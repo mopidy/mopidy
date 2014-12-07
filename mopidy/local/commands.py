@@ -1,10 +1,11 @@
-from __future__ import print_function, unicode_literals
+from __future__ import (
+    absolute_import, division, print_function, unicode_literals)
 
 import logging
 import os
 import time
 
-from mopidy import commands, exceptions
+from mopidy import commands, compat, exceptions
 from mopidy.audio import scan
 from mopidy.local import translator
 from mopidy.utils import path
@@ -39,7 +40,7 @@ class ClearCommand(commands.Command):
         library = _get_library(args, config)
         prompt = '\nAre you sure you want to clear the library? [y/N] '
 
-        if raw_input(prompt).lower() != 'y':
+        if compat.input(prompt).lower() != 'y':
             print('Clearing library aborted.')
             return 0
 
@@ -163,6 +164,6 @@ class _Progress(object):
             logger.info('Scanned %d of %d files in %ds.',
                         self.count, self.total, duration)
         else:
-            remainder = duration / self.count * (self.total - self.count)
+            remainder = duration // self.count * (self.total - self.count)
             logger.info('Scanned %d of %d files in %ds, ~%ds left.',
                         self.count, self.total, duration, remainder)

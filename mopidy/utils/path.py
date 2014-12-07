@@ -1,6 +1,5 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
-import Queue as queue
 import logging
 import os
 import stat
@@ -10,6 +9,9 @@ import urllib
 import urlparse
 
 import glib
+
+from mopidy import compat
+from mopidy.compat import queue
 
 
 logger = logging.getLogger(__name__)
@@ -64,7 +66,7 @@ def path_to_uri(path):
 
     Returns a file:// URI as an unicode string.
     """
-    if isinstance(path, unicode):
+    if isinstance(path, compat.text_type):
         path = path.encode('utf-8')
     path = urllib.quote(path)
     return urlparse.urlunsplit((b'file', b'', path, b'', b''))
@@ -81,7 +83,7 @@ def uri_to_path(uri):
     look up the matching dir or file on your file system because the exact path
     would be lost by ignoring its encoding.
     """
-    if isinstance(uri, unicode):
+    if isinstance(uri, compat.text_type):
         uri = uri.encode('utf-8')
     return urllib.unquote(urlparse.urlsplit(uri).path)
 
@@ -196,7 +198,7 @@ def _find(root, thread_count=10, relative=False, follow=False):
 
 def find_mtimes(root, follow=False):
     results, errors = _find(root, relative=False, follow=follow)
-    mtimes = dict((f, int(st.st_mtime)) for f, st in results.iteritems())
+    mtimes = dict((f, int(st.st_mtime)) for f, st in results.items())
     return mtimes, errors
 
 

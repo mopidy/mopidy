@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import logging
 import socket
@@ -8,6 +8,7 @@ import unittest
 
 import mock
 
+from mopidy import compat
 from mopidy.config import types
 
 # TODO: DecodeTest and EncodeTest
@@ -48,7 +49,7 @@ class StringTest(unittest.TestCase):
     def test_deserialize_conversion_success(self):
         value = types.String()
         self.assertEqual('foo', value.deserialize(b' foo '))
-        self.assertIsInstance(value.deserialize(b'foo'), unicode)
+        self.assertIsInstance(value.deserialize(b'foo'), compat.text_type)
 
     def test_deserialize_decodes_utf8(self):
         value = types.String()
@@ -119,7 +120,7 @@ class SecretTest(unittest.TestCase):
     def test_deserialize_decodes_utf8(self):
         value = types.Secret()
         result = value.deserialize('æøå'.encode('utf-8'))
-        self.assertIsInstance(result, unicode)
+        self.assertIsInstance(result, compat.text_type)
         self.assertEqual('æøå', result)
 
     def test_deserialize_enforces_required(self):

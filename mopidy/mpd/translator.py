@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import re
 
@@ -59,13 +59,13 @@ def track_to_mpd_format(track, position=None):
     if track.album is not None and track.album.artists:
         artists = artists_to_mpd_format(track.album.artists)
         result.append(('AlbumArtist', artists))
-        artists = filter(
-            lambda a: a.musicbrainz_id is not None, track.album.artists)
+        artists = [
+            a for a in track.album.artists if a.musicbrainz_id is not None]
         if artists:
             result.append(
                 ('MUSICBRAINZ_ALBUMARTISTID', artists[0].musicbrainz_id))
     if track.artists:
-        artists = filter(lambda a: a.musicbrainz_id is not None, track.artists)
+        artists = [a for a in track.artists if a.musicbrainz_id is not None]
         if artists:
             result.append(('MUSICBRAINZ_ARTISTID', artists[0].musicbrainz_id))
 

@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import unittest
 
@@ -13,7 +13,7 @@ class MpdExceptionsTest(unittest.TestCase):
             try:
                 raise KeyError('Track X not found')
             except KeyError as e:
-                raise MpdAckError(e[0])
+                raise MpdAckError(e.message)
         except MpdAckError as e:
             self.assertEqual(e.message, 'Track X not found')
 
