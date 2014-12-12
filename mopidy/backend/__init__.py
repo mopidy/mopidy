@@ -70,12 +70,12 @@ class LibraryProvider(object):
 
     root_directory = None
     """
-    :class:`models.Ref.directory` instance with a URI and name set
+    :class:`mopidy.models.Ref.directory` instance with a URI and name set
     representing the root of this library's browse tree. URIs must
     use one of the schemes supported by the backend, and name should
     be set to a human friendly value.
 
-    *MUST be set by any class that implements :meth:`LibraryProvider.browse`.*
+    *MUST be set by any class that implements* :meth:`LibraryProvider.browse`.
     """
 
     def __init__(self, backend):
