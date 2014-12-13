@@ -292,6 +292,24 @@ class MpdContext(object):
         return self._name_from_uri[uri]
 
     def browse(self, path, recursive=True, lookup=True):
+        """
+        Browse the contents of a given directory path.
+
+        Returns a sequence of two-tuples ``(path, data)``.
+
+        If ``recursive`` is true, it returns results for all entries in the
+        given path.
+
+        If ``lookup`` is true and the ``path`` is to a track, the returned
+        ``data`` is a future which will contain the
+        :class:`mopidy.models.Track` model. If ``lookup`` is false and the
+        ``path`` is to a track, the returned ``data`` will be a
+        :class:`mopidy.models.Ref` for the track.
+
+        For all entries that are not tracks, the returned ``data`` will be
+        :class:`None`.
+        """
+
         path_parts = re.findall(r'[^/]+', path or '')
         root_path = '/'.join([''] + path_parts)
 
