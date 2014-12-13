@@ -421,8 +421,6 @@ def lsinfo(context, uri=None):
     if uri in (None, '', '/'):
         result.extend(protocol.stored_playlists.listplaylists(context))
 
-    if not result:
-        raise exceptions.MpdNoExistError('Not found')
     return result
 
 
