@@ -32,6 +32,15 @@ v0.20.0 (UNRELEASED)
   just like the other ``lookup()`` methods in Mopidy. For now, returning a
   single track will continue to work. (PR: :issue:`840`)
 
+**File scanner**
+
+- Improve error logging for scan code (Fixes: :issue:`856`, PR: :issue:`874`)
+
+- Add symlink support with loop protection to file finder (Fixes: :issue:`858`,
+  PR: :isusue:`874`)
+
+- Fix scanning of modified files. (PR: :issue:`904`)
+
 **MPD frontend**
 
 - In stored playlist names, replace "/", which are illegal, with "|" instead of
@@ -39,6 +48,11 @@ v0.20.0 (UNRELEASED)
 
 - Enable browsing of artist references, in addition to albums and playlists.
   (PR: :issue:`884`)
+
+- Re-enable browsing of empty directories. (PR: :issue:`906`)
+
+- Quick workaround for :issue:`881`, which allows for newlines in comments.
+  (PR: :issue:`882`)
 
 **Audio**
 
