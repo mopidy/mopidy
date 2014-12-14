@@ -133,19 +133,6 @@ def _artists(tags, artist_name, artist_id=None):
     return [Artist(name=name) for name in tags[artist_name]]
 
 
-# TODO: this doesn't belong in audio, if anything it should be moved to local.
-def add_musicbrainz_cover_art(track):
-    if track.album and track.album.musicbrainz_id:
-        base = "http://coverartarchive.org/release"
-        images = frozenset(
-            ["{}/{}/front".format(
-                base,
-                track.album.musicbrainz_id)])
-        album = track.album.copy(images=images)
-        track = track.copy(album=album)
-    return track
-
-
 def audio_data_to_track(data):
     """Convert taglist data + our extras to a track."""
     tags = data['tags']
