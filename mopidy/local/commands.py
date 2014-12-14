@@ -71,7 +71,6 @@ class ScanCommand(commands.Command):
 
         library = _get_library(args, config)
 
-        uris_in_library = set()
         uris_to_update = set()
         uris_to_remove = set()
 
@@ -96,7 +95,7 @@ class ScanCommand(commands.Command):
                 logger.debug('Missing file %s', track.uri)
                 uris_to_remove.add(track.uri)
             elif mtime > track.last_modified:
-                uris_in_library.add(track.uri)
+                uris_to_update.add(track.uri)
 
         logger.info('Removing %d missing tracks.', len(uris_to_remove))
         for uri in uris_to_remove:
