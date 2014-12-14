@@ -1,6 +1,5 @@
 from __future__ import absolute_import, division, unicode_literals
 
-import datetime
 import os
 import time
 
@@ -9,6 +8,7 @@ pygst.require('0.10')
 import gst  # noqa
 
 from mopidy import exceptions
+from mopidy.audio import utils
 from mopidy.models import Album, Artist, Track
 from mopidy.utils import encoding, path
 
@@ -98,16 +98,9 @@ class Scanner(object):
                 if message.src == self._pipe:
                     return tags
             elif message.type == gst.MESSAGE_TAG:
-                # Taglists are not really dicts, hence the lack of .items() and
-                # explicit .keys. We only keep the last tag for each key, as we
-                # assume this is the best, some formats will produce multiple
-                # taglists. Lastly we force everything to lists for conformity.
                 taglist = message.parse_tag()
-                for key in taglist.keys():
-                    value = taglist[key]
-                    if not isinstance(value, list):
-                        value = [value]
-                    tags[key] = value
+                # Note that this will only keep the last tag.
+                tags.update(utils.convert_taglist(taglist))
 
         raise exceptions.ScannerError('Timeout after %dms' % self._timeout_ms)
 
@@ -140,16 +133,7 @@ def _artists(tags, artist_name, artist_id=None):
     return [Artist(name=name) for name in tags[artist_name]]
 
 
-def _date(tags):
-    if not tags.get(gst.TAG_DATE):
-        return None
-    try:
-        date = tags[gst.TAG_DATE][0]
-        return datetime.date(date.year, date.month, date.day).isoformat()
-    except ValueError:
-        return None
-
-
+# TODO: this doesn't belong in audio, if anything it should be moved to local.
 def add_musicbrainz_cover_art(track):
     if track.album and track.album.musicbrainz_id:
         base = "http://coverartarchive.org/release"
@@ -196,7 +180,9 @@ def audio_data_to_track(data):
     album_kwargs['num_discs'] = tags.get(gst.TAG_ALBUM_VOLUME_COUNT, [None])[0]
     album_kwargs['musicbrainz_id'] = tags.get('musicbrainz-albumid', [None])[0]
 
-    track_kwargs['date'] = _date(tags)
+    if tags.get(gst.TAG_DATE) and tags.get(gst.TAG_DATE)[0]:
+        track_kwargs['date'] = tags[gst.TAG_DATE][0].isoformat()
+
     track_kwargs['last_modified'] = int(data.get('mtime') or 0)
     track_kwargs['length'] = max(
         0, (data.get(gst.TAG_DURATION) or 0)) // gst.MSECOND

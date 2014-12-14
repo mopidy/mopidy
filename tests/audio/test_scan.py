@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+import datetime
 import os
 import unittest
 
@@ -12,13 +13,6 @@ from mopidy.models import Album, Artist, Track
 from mopidy.utils import path as path_lib
 
 from tests import path_to_data_dir
-
-
-class FakeGstDate(object):
-    def __init__(self, year, month, day):
-        self.year = year
-        self.month = month
-        self.day = day
 
 
 # TODO: keep ids without name?
@@ -39,7 +33,7 @@ class TranslatorTest(unittest.TestCase):
                 'track-count': [2],
                 'album-disc-number': [2],
                 'album-disc-count': [3],
-                'date': [FakeGstDate(2006, 1, 1,)],
+                'date': [datetime.date(2006, 1, 1,)],
                 'container-format': ['ID3 tag'],
                 'genre': ['genre'],
                 'comment': ['comment'],
@@ -140,12 +134,8 @@ class TranslatorTest(unittest.TestCase):
         self.check(self.track.copy(date=None))
 
     def test_multiple_track_date(self):
-        self.data['tags']['date'].append(FakeGstDate(2030, 1, 1))
+        self.data['tags']['date'].append(datetime.date(2030, 1, 1))
         self.check(self.track)
-
-    def test_invalid_track_date(self):
-        self.data['tags']['date'] = [FakeGstDate(65535, 1, 1)]
-        self.check(self.track.copy(date=None))
 
     def test_missing_track_comment(self):
         del self.data['tags']['comment']
