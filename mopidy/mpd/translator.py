@@ -81,9 +81,6 @@ def track_to_mpd_format(track, position=None):
     if track.disc_no:
         result.append(('Disc', track.disc_no))
 
-    if track.comment:
-        result.append(('Comment', track.comment))
-
     if track.musicbrainz_id is not None:
         result.append(('MUSICBRAINZ_TRACKID', track.musicbrainz_id))
     return result
