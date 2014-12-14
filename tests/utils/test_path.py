@@ -9,7 +9,7 @@ import unittest
 
 import glib
 
-from mopidy import compat
+from mopidy import compat, exceptions
 from mopidy.utils import path
 
 import tests
@@ -242,7 +242,7 @@ class FindMTimesTest(unittest.TestCase):
         missing = os.path.join(self.tmpdir, 'does-not-exist')
         result, errors = path.find_mtimes(missing)
         self.assertEqual(result, {})
-        self.assertEqual(errors, {missing: tests.IsA(OSError)})
+        self.assertEqual(errors, {missing: tests.IsA(exceptions.FindError)})
 
     def test_empty_dir(self):
         """Empty directories should not show up in results"""
@@ -295,7 +295,7 @@ class FindMTimesTest(unittest.TestCase):
 
         result, errors = path.find_mtimes(self.tmpdir)
         self.assertEqual({}, result)
-        self.assertEqual({directory: tests.IsA(OSError)}, errors)
+        self.assertEqual({directory: tests.IsA(exceptions.FindError)}, errors)
 
     def test_symlinks_are_ignored(self):
         """By default symlinks should be treated as an error"""
@@ -305,7 +305,7 @@ class FindMTimesTest(unittest.TestCase):
 
         result, errors = path.find_mtimes(self.tmpdir)
         self.assertEqual(result, {target: tests.any_int})
-        self.assertEqual(errors, {link: tests.IsA(Exception)})
+        self.assertEqual(errors, {link: tests.IsA(exceptions.FindError)})
 
     def test_symlink_to_file_as_root_is_followed(self):
         """Passing a symlink as the root should be followed when follow=True"""
@@ -327,7 +327,7 @@ class FindMTimesTest(unittest.TestCase):
 
         result, errors = path.find_mtimes(link, follow=True)
         self.assertEqual({}, result)
-        self.assertEqual({link: tests.IsA(OSError)}, errors)
+        self.assertEqual({link: tests.IsA(exceptions.FindError)}, errors)
 
     def test_symlink_pointing_at_parent_fails(self):
         """We should detect a loop via the parent and give up on the branch"""

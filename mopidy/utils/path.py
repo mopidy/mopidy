@@ -10,7 +10,7 @@ import urlparse
 
 import glib
 
-from mopidy import compat
+from mopidy import compat, exceptions
 from mopidy.compat import queue
 
 
@@ -140,7 +140,7 @@ def _find_worker(relative, follow, done, work, results, errors):
                 st = os.lstat(entry)
 
             if (st.st_dev, st.st_ino) in parents:
-                errors[path] = Exception('Sym/hardlink loop found.')
+                errors[path] = exceptions.FindError('Sym/hardlink loop found.')
                 continue
 
             parents = parents + [(st.st_dev, st.st_ino)]
@@ -150,12 +150,12 @@ def _find_worker(relative, follow, done, work, results, errors):
             elif stat.S_ISREG(st.st_mode):
                 results[path] = st
             elif stat.S_ISLNK(st.st_mode):
-                errors[path] = Exception('Not following symlinks.')
+                errors[path] = exceptions.FindError('Not following symlinks.')
             else:
-                errors[path] = Exception('Not a file or directory.')
+                errors[path] = exceptions.FindError('Not a file or directory.')
 
         except OSError as e:
-            errors[path] = e
+            errors[path] = exceptions.FindError(e.strerror, e.errno)
         finally:
             work.task_done()
 
