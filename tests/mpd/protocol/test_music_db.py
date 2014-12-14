@@ -351,6 +351,13 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('directory: dummy/foo')
         self.assertInResponse('OK')
 
+    def test_lsinfo_for_empty_dir_returns_nothing(self):
+        self.backend.library.dummy_browse_result = {
+            'dummy:/': []}
+
+        self.sendRequest('lsinfo "/dummy"')
+        self.assertInResponse('OK')
+
     def test_lsinfo_for_dir_does_not_recurse(self):
         self.backend.library.dummy_library = [
             Track(uri='dummy:/a', name='a'),
