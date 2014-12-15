@@ -17,7 +17,7 @@ from tests import path_to_data_dir
 
 # TODO: keep ids without name?
 class TranslatorTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa
         self.data = {
             'uri': 'uri',
             'duration': 4531000000,
@@ -268,7 +268,7 @@ class TranslatorTest(unittest.TestCase):
 
 
 class ScannerTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa
         self.errors = {}
         self.data = {}
 
@@ -284,7 +284,9 @@ class ScannerTest(unittest.TestCase):
             uri = path_lib.path_to_uri(path)
             key = uri[len('file://'):]
             try:
-                self.data[key] = scanner.scan(uri)
+                tags, duration = scanner.scan(uri)
+                self.data[key] = {
+                    'uri': uri, 'tags': tags, 'duration': duration}
             except exceptions.ScannerError as error:
                 self.errors[key] = error
 

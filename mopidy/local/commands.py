@@ -127,9 +127,14 @@ class ScanCommand(commands.Command):
             try:
                 relpath = translator.local_track_uri_to_path(uri, media_dir)
                 file_uri = path.path_to_uri(os.path.join(media_dir, relpath))
-                data = scanner.scan(file_uri)
-                track = translator.add_musicbrainz_coverart_to_track(
-                    scan.audio_data_to_track(data).copy(uri=uri)).copy(uri=uri)
+                tags, duration = scanner.scan(file_uri)
+                # TODO: reuse mtime from above...
+                mtime = os.path.getmtime(os.path.join(media_dir, relpath))
+                track = scan.audio_data_to_track({'uri': uri,
+                                                  'tags': tags,
+                                                  'duration': duration,
+                                                  'mtime': mtime})
+                track = translator.add_musicbrainz_coverart_to_track(track)
                 library.add(track)
                 logger.debug('Added %s', track.uri)
             except exceptions.ScannerError as error:

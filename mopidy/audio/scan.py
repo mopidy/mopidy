@@ -1,6 +1,5 @@
 from __future__ import absolute_import, division, unicode_literals
 
-import os
 import time
 
 import pygst
@@ -10,7 +9,7 @@ import gst  # noqa
 from mopidy import exceptions
 from mopidy.audio import utils
 from mopidy.models import Album, Artist, Track
-from mopidy.utils import encoding, path
+from mopidy.utils import encoding
 
 
 class Scanner(object):
@@ -49,21 +48,21 @@ class Scanner(object):
 
         :param uri: URI of the resource to scan.
         :type event: string
-        :return: Dictionary of tags, duration, mtime and uri information.
+        :return: (tags, duration) pair. tags is a dictionary of lists for all
+            the tags we found and duration is the length of the URI in
+            nanoseconds. No duration is indicated by -1 as in GStreamer.
         """
         try:
             self._setup(uri)
             tags = self._collect()  # Ensure collect before queries.
-            data = {'uri': uri, 'tags': tags,
-                    'mtime': self._query_mtime(uri),
-                    'duration': self._query_duration()}
+            duration = self._query_duration()
         finally:
             self._reset()
 
         if self._min_duration_ms is None:
-            return data
-        elif data['duration'] >= self._min_duration_ms * gst.MSECOND:
-            return data
+            return tags, duration
+        elif duration >= self._min_duration_ms * gst.MSECOND:
+            return tags, duration
 
         raise exceptions.ScannerError('Rejecting file with less than %dms '
                                       'audio data.' % self._min_duration_ms)
@@ -114,11 +113,6 @@ class Scanner(object):
             return self._pipe.query_duration(gst.FORMAT_TIME, None)[0]
         except gst.QueryError:
             return None
-
-    def _query_mtime(self, uri):
-        if not uri.startswith('file:'):
-            return None
-        return os.path.getmtime(path.uri_to_path(uri))
 
 
 def _artists(tags, artist_name, artist_id=None):
