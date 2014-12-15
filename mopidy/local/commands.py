@@ -130,10 +130,8 @@ class ScanCommand(commands.Command):
                 tags, duration = scanner.scan(file_uri)
                 # TODO: reuse mtime from above...
                 mtime = os.path.getmtime(os.path.join(media_dir, relpath))
-                track = scan.audio_data_to_track({'uri': uri,
-                                                  'tags': tags,
-                                                  'duration': duration,
-                                                  'mtime': mtime})
+                track = scan.tags_to_track(tags).copy(
+                    uri=uri, length=duration, last_modified=mtime)
                 track = translator.add_musicbrainz_coverart_to_track(track)
                 library.add(track)
                 logger.debug('Added %s', track.uri)

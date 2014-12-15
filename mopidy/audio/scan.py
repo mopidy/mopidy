@@ -132,9 +132,7 @@ def _artists(tags, artist_name, artist_id=None):
     return [Artist(name=name) for name in tags[artist_name]]
 
 
-def audio_data_to_track(data):
-    """Convert taglist data + our extras to a track."""
-    tags = data['tags']
+def tags_to_track(tags):
     album_kwargs = {}
     track_kwargs = {}
 
@@ -169,13 +167,9 @@ def audio_data_to_track(data):
     if tags.get(gst.TAG_DATE) and tags.get(gst.TAG_DATE)[0]:
         track_kwargs['date'] = tags[gst.TAG_DATE][0].isoformat()
 
-    track_kwargs['last_modified'] = int(data.get('mtime') or 0)
-    track_kwargs['length'] = data.get('duration')
-
     # Clear out any empty values we found
     track_kwargs = {k: v for k, v in track_kwargs.items() if v}
     album_kwargs = {k: v for k, v in album_kwargs.items() if v}
 
-    track_kwargs['uri'] = data['uri']
     track_kwargs['album'] = Album(**album_kwargs)
     return Track(**track_kwargs)
