@@ -50,7 +50,7 @@ class Scanner(object):
         :type event: string
         :return: (tags, duration) pair. tags is a dictionary of lists for all
             the tags we found and duration is the length of the URI in
-            nanoseconds. No duration is indicated by -1 as in GStreamer.
+            milliseconds, or :class:`None` if the URI has no duration.
         """
         try:
             self._setup(uri)
@@ -61,7 +61,7 @@ class Scanner(object):
 
         if self._min_duration_ms is None:
             return tags, duration
-        elif duration >= self._min_duration_ms * gst.MSECOND:
+        elif duration >= self._min_duration_ms:
             return tags, duration
 
         raise exceptions.ScannerError('Rejecting file with less than %dms '
@@ -110,9 +110,14 @@ class Scanner(object):
 
     def _query_duration(self):
         try:
-            return self._pipe.query_duration(gst.FORMAT_TIME, None)[0]
+            duration = self._pipe.query_duration(gst.FORMAT_TIME, None)[0]
         except gst.QueryError:
             return None
+
+        if duration < 0:
+            return None
+        else:
+            return duration // gst.MSECOND
 
 
 def _artists(tags, artist_name, artist_id=None):
@@ -165,8 +170,7 @@ def audio_data_to_track(data):
         track_kwargs['date'] = tags[gst.TAG_DATE][0].isoformat()
 
     track_kwargs['last_modified'] = int(data.get('mtime') or 0)
-    track_kwargs['length'] = max(
-        0, (data.get(gst.TAG_DURATION) or 0)) // gst.MSECOND
+    track_kwargs['length'] = data.get('duration')
 
     # Clear out any empty values we found
     track_kwargs = {k: v for k, v in track_kwargs.items() if v}

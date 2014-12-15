@@ -20,7 +20,7 @@ class TranslatorTest(unittest.TestCase):
     def setUp(self):  # noqa
         self.data = {
             'uri': 'uri',
-            'duration': 4531000000,
+            'duration': 4531,
             'mtime': 1234,
             'tags': {
                 'album': ['album'],
@@ -317,8 +317,8 @@ class ScannerTest(unittest.TestCase):
 
     def test_duration_is_set(self):
         self.scan(self.find('scanner/simple'))
-        self.check('scanner/simple/song1.mp3', 'duration', 4680000000)
-        self.check('scanner/simple/song1.ogg', 'duration', 4680000000)
+        self.check('scanner/simple/song1.mp3', 'duration', 4680)
+        self.check('scanner/simple/song1.ogg', 'duration', 4680)
 
     def test_artist_is_set(self):
         self.scan(self.find('scanner/simple'))
