@@ -80,7 +80,7 @@ you a lot better performance.
 
 
 Appendix A: Fixing audio quality issues
-=====================================
+=======================================
 
 As of about April 2013 the following steps should resolve any audio
 issues for HDMI and analog without the use of an external USB sound
@@ -143,30 +143,33 @@ this is likely due to gapless playback not being implemented and is being
 worked on irrespective of Raspberry Pi related work.
 
 
-Appendix B: XBMC not booting?
-=============================
+Appendix B: Raspbmc not booting
+===============================
 
-A very important note for Raspbmc users. Due to a dependency version problem
-you might have to make some minor configurations for XBMC to start
-properly (this depends on your system’s version).
+Due to a dependency version problem where XBMC uses another version of libtag
+than what Debian originally ships with, you might have to make some minor
+changes for Raspbmc to start properly after installing Mopidy.
 
 If you notice that XBMC is not starting but gets stuck in a loop,
-you need to make the following changes.
-In short, what you have to do is the following::
+you need to make the following changes::
 
     sudo ln -sf /home/pi/.xbmc-current/xbmc-bin/lib/xbmc/system/libtag.so.1 \
         /usr/lib/arm-linux-gnueabihf/libtag.so.1
 
-However, this will not persist the changes.
-To persist the changes edit :file:`/etc/ld.so.conf.d/arm-linux-gnueabihf.conf`
-and add the following at the top::
+However, this will not persist the changes.  To persist the changes edit
+:file:`/etc/ld.so.conf.d/arm-linux-gnueabihf.conf` and add the following at the
+top::
 
     /home/pi/.xbmc-current/xbmc-bin/lib/xbmc/system
 
-It's very important to add it at the top of the file as this indicates the priority of the folder
-in which to look for shared libraries. XBMC doesn't play nicely with the system wide installed
-version of libtag (that got installed with Mopidy) but rather vendors in it's own version.
-Hopefully this will fix the issue for you if you're running Raspbmc.
-More info about this issue can be found in this `post <http://geeks.noeit.com/xbmc-library-dependency-error/>` _ as well.
-Please note that if you're running Xbian or any other distribution that the instructions might vary.
+It's very important to add it at the top of the file as this indicates the
+priority of the folder in which to look for shared libraries.
 
+XBMC doesn't play nicely with the system wide installed version of libtag that
+got installed together with Mopidy, but rather vendors in its own version.
+
+More info about this issue can be found in `this post
+<http://geeks.noeit.com/xbmc-library-dependency-error/>`_.
+
+Please note that if you're running Xbian or another XBMC distribution these
+instructions might vary for your system.
