@@ -277,13 +277,9 @@ class ScannerTest(unittest.TestCase):
             except exceptions.ScannerError as error:
                 self.errors[key] = error
 
-    def check_tag(self, name, key, value):
+    def check(self, name, key, value):
         name = path_to_data_dir(name)
         self.assertEqual(self.tags[name][key], value)
-
-    def check_duration(self, name, value):
-        name = path_to_data_dir(name)
-        self.assertEqual(self.durations[name], value)
 
     def test_tags_is_set(self):
         self.scan(self.find('scanner/simple'))
@@ -295,23 +291,26 @@ class ScannerTest(unittest.TestCase):
 
     def test_duration_is_set(self):
         self.scan(self.find('scanner/simple'))
-        self.check_duration('scanner/simple/song1.mp3', 4680)
-        self.check_duration('scanner/simple/song1.ogg', 4680)
+
+        self.assertEqual(
+            self.durations[path_to_data_dir('scanner/simple/song1.mp3')], 4680)
+        self.assertEqual(
+            self.durations[path_to_data_dir('scanner/simple/song1.ogg')], 4680)
 
     def test_artist_is_set(self):
         self.scan(self.find('scanner/simple'))
-        self.check_tag('scanner/simple/song1.mp3', 'artist', ['name'])
-        self.check_tag('scanner/simple/song1.ogg', 'artist', ['name'])
+        self.check('scanner/simple/song1.mp3', 'artist', ['name'])
+        self.check('scanner/simple/song1.ogg', 'artist', ['name'])
 
     def test_album_is_set(self):
         self.scan(self.find('scanner/simple'))
-        self.check_tag('scanner/simple/song1.mp3', 'album', ['albumname'])
-        self.check_tag('scanner/simple/song1.ogg', 'album', ['albumname'])
+        self.check('scanner/simple/song1.mp3', 'album', ['albumname'])
+        self.check('scanner/simple/song1.ogg', 'album', ['albumname'])
 
     def test_track_is_set(self):
         self.scan(self.find('scanner/simple'))
-        self.check_tag('scanner/simple/song1.mp3', 'title', ['trackname'])
-        self.check_tag('scanner/simple/song1.ogg', 'title', ['trackname'])
+        self.check('scanner/simple/song1.mp3', 'title', ['trackname'])
+        self.check('scanner/simple/song1.ogg', 'title', ['trackname'])
 
     def test_nonexistant_dir_does_not_fail(self):
         self.scan(self.find('scanner/does-not-exist'))
@@ -323,11 +322,13 @@ class ScannerTest(unittest.TestCase):
 
     def test_log_file_that_gst_thinks_is_mpeg_1_is_ignored(self):
         self.scan([path_to_data_dir('scanner/example.log')])
-        self.assert_(self.errors)
+        self.assertLess(
+            self.durations[path_to_data_dir('scanner/example.log')], 100)
 
-    def test_empty_wav_file_is_ignored(self):
+    def test_empty_wav_file(self):
         self.scan([path_to_data_dir('scanner/empty.wav')])
-        self.assert_(self.errors)
+        self.assertEqual(
+            self.durations[path_to_data_dir('scanner/empty.wav')], 0)
 
     @unittest.SkipTest
     def test_song_without_time_is_handeled(self):

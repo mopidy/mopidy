@@ -18,13 +18,10 @@ class Scanner(object):
 
     :param timeout: timeout for scanning a URI in ms
     :type event: int
-    :param min_duration: minimum duration of scanned URI in ms, -1 for all.
-    :type event: int
     """
 
-    def __init__(self, timeout=1000, min_duration=100):
+    def __init__(self, timeout=1000):
         self._timeout_ms = timeout
-        self._min_duration_ms = min_duration
 
         sink = gst.element_factory_make('fakesink')
 
@@ -52,20 +49,15 @@ class Scanner(object):
             the tags we found and duration is the length of the URI in
             milliseconds, or :class:`None` if the URI has no duration.
         """
+        tags, duration = None, None
         try:
             self._setup(uri)
-            tags = self._collect()  # Ensure collect before queries.
+            tags = self._collect()
             duration = self._query_duration()
         finally:
             self._reset()
 
-        if self._min_duration_ms is None:
-            return tags, duration
-        elif duration >= self._min_duration_ms:
-            return tags, duration
-
-        raise exceptions.ScannerError('Rejecting file with less than %dms '
-                                      'audio data.' % self._min_duration_ms)
+        return tags, duration
 
     def _setup(self, uri):
         """Primes the pipeline for collection."""
@@ -80,7 +72,7 @@ class Scanner(object):
     def _collect(self):
         """Polls for messages to collect data."""
         start = time.time()
-        timeout_s = self._timeout_ms / 1000.
+        timeout_s = self._timeout_ms / 1000.0
         tags = {}
 
         while time.time() - start < timeout_s:

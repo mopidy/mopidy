@@ -31,7 +31,7 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
 class StreamLibraryProvider(backend.LibraryProvider):
     def __init__(self, backend, timeout, blacklist):
         super(StreamLibraryProvider, self).__init__(backend)
-        self._scanner = scan.Scanner(min_duration=None, timeout=timeout)
+        self._scanner = scan.Scanner(timeout=timeout)
         self._blacklist_re = re.compile(
             r'^(%s)$' % '|'.join(fnmatch.translate(u) for u in blacklist))
 

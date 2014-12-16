@@ -13,6 +13,8 @@ from mopidy.utils import path
 
 logger = logging.getLogger(__name__)
 
+MIN_DURATION_MS = 100  # Shortest length of track to include.
+
 
 def _get_library(args, config):
     libraries = dict((l.name, l) for l in args.registry['local:library'])
@@ -128,13 +130,16 @@ class ScanCommand(commands.Command):
                 relpath = translator.local_track_uri_to_path(uri, media_dir)
                 file_uri = path.path_to_uri(os.path.join(media_dir, relpath))
                 tags, duration = scanner.scan(file_uri)
-                # TODO: reuse mtime from above...
-                mtime = os.path.getmtime(os.path.join(media_dir, relpath))
-                track = scan.tags_to_track(tags).copy(
-                    uri=uri, length=duration, last_modified=mtime)
-                track = translator.add_musicbrainz_coverart_to_track(track)
-                library.add(track)
-                logger.debug('Added %s', track.uri)
+                if duration < MIN_DURATION_MS:
+                    logger.warning('Failed %s: Track shorter than 100ms', uri)
+                else:
+                    # TODO: reuse mtime from above...
+                    mtime = os.path.getmtime(os.path.join(media_dir, relpath))
+                    track = scan.tags_to_track(tags).copy(
+                        uri=uri, length=duration, last_modified=mtime)
+                    track = translator.add_musicbrainz_coverart_to_track(track)
+                    library.add(track)
+                    logger.debug('Added %s', track.uri)
             except exceptions.ScannerError as error:
                 logger.warning('Failed %s: %s', uri, error)
 
