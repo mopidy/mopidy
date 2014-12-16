@@ -22,6 +22,13 @@ Bug fix release.
   :attr:`mopidy.models.Track.track_no`, and
   :attr:`mopidy.models.Track.last_modified` from ``0`` to :class:`None`.
 
+- Local: Fix scanning of modified files. (PR: :issue:`904`)
+
+- MPD: Re-enable browsing of empty directories. (PR: :issue:`906`)
+
+- MPD: Remove track comments from responses. They are not included by the
+  original MPD server, and this works around :issue:`881`. (PR: :issue:`882`)
+
 
 v0.19.4 (2014-09-01)
 ====================
