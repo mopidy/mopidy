@@ -74,13 +74,13 @@ you a lot better performance.
 #. Install Mopidy and its dependencies as described in :ref:`debian-install`.
 
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
-   then you're ready to :doc:`run Mopidy </running>`. Alternatively you may 
+   then you're ready to :doc:`run Mopidy </running>`. Alternatively you may
    want to have Mopidy run as a :doc:`system service </debian>`, automatically
    starting at boot.
 
 
-Appendix: Fixing audio quality issues
-=====================================
+Appendix A: Fixing audio quality issues
+=======================================
 
 As of about April 2013 the following steps should resolve any audio
 issues for HDMI and analog without the use of an external USB sound
@@ -141,3 +141,35 @@ not determined the exact revision that fixed this::
 The only remaining known issue is a slight gap in playback at track changes
 this is likely due to gapless playback not being implemented and is being
 worked on irrespective of Raspberry Pi related work.
+
+
+Appendix B: Raspbmc not booting
+===============================
+
+Due to a dependency version problem where XBMC uses another version of libtag
+than what Debian originally ships with, you might have to make some minor
+changes for Raspbmc to start properly after installing Mopidy.
+
+If you notice that XBMC is not starting but gets stuck in a loop,
+you need to make the following changes::
+
+    sudo ln -sf /home/pi/.xbmc-current/xbmc-bin/lib/xbmc/system/libtag.so.1 \
+        /usr/lib/arm-linux-gnueabihf/libtag.so.1
+
+However, this will not persist the changes.  To persist the changes edit
+:file:`/etc/ld.so.conf.d/arm-linux-gnueabihf.conf` and add the following at the
+top::
+
+    /home/pi/.xbmc-current/xbmc-bin/lib/xbmc/system
+
+It's very important to add it at the top of the file as this indicates the
+priority of the folder in which to look for shared libraries.
+
+XBMC doesn't play nicely with the system wide installed version of libtag that
+got installed together with Mopidy, but rather vendors in its own version.
+
+More info about this issue can be found in `this post
+<http://geeks.noeit.com/xbmc-library-dependency-error/>`_.
+
+Please note that if you're running Xbian or another XBMC distribution these
+instructions might vary for your system.
