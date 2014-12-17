@@ -303,6 +303,8 @@ class _Handler(object):
             self.on_warning(*msg.parse_warning())
         elif msg.type == gst.MESSAGE_ASYNC_DONE:
             self.on_async_done()
+        elif msg.type == gst.MESSAGE_TAG:
+            self.on_tag(msg.parse_tag())
         elif msg.type == gst.MESSAGE_ELEMENT:
             if gst.pbutils.is_missing_plugin_message(msg):
                 self.on_missing_plugin(_get_missing_description(msg),
@@ -386,6 +388,12 @@ class _Handler(object):
 
     def on_async_done(self):
         gst_logger.debug('Got async-done.')
+
+    def on_tag(self, taglist):
+        # TODO: store current tags and reset on stream changes.
+        tags = taglist.keys()
+        logger.debug('Audio event: tags_changed(tags=%r)', tags)
+        AudioListener.send('tags_changed', tags=tags)
 
     def on_missing_plugin(self, msg):
         desc = gst.pbutils.missing_plugin_message_get_description(msg)

@@ -91,6 +91,9 @@ class DummyAudio(pykka.ThreadingActor):
         AudioListener.send('state_changed', old_state=old_state,
                            new_state=new_state, target_state=None)
 
+        if new_state == PlaybackState.PLAYING:
+            AudioListener.send('tags_changed', tags=[])
+
         return self._state_change_result
 
     def trigger_fake_playback_failure(self):
