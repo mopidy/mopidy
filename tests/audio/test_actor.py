@@ -338,7 +338,7 @@ class AudioEventTest(BaseTest):
         if not event.wait(timeout=1.0):
             self.fail('End of stream not reached within deadline')
 
-    # Make sure that gapless really works:
+        self.assertFalse(self.audio.get_current_tags().get())
 
     def test_gapless(self, send_mock):
         uris = self.uris[1:]
@@ -379,6 +379,60 @@ class AudioEventTest(BaseTest):
         self.assertEqual(2, keys.count('position_changed'))
         self.assertEqual(1, keys.count('state_changed'))
         self.assertEqual(1, keys.count('reached_end_of_stream'))
+
+        # TODO: test tag states within gaples
+
+    def test_current_tags_are_blank_to_begin_with(self, send_mock):
+        self.assertFalse(self.audio.get_current_tags().get())
+
+    def test_current_tags_blank_after_end_of_stream(self, send_mock):
+        done = threading.Event()
+
+        def send(name, **kwargs):
+            if name == 'reached_end_of_stream':
+                done.set()
+
+        send_mock.side_effect = send
+
+        self.audio.prepare_change()
+        self.audio.set_uri(self.uris[0])
+        self.audio.start_playback()
+
+        self.possibly_trigger_fake_about_to_finish()
+        self.audio.wait_for_state_change().get()
+
+        if not done.wait(timeout=1.0):
+            self.fail('EOS not received')
+
+        self.assertFalse(self.audio.get_current_tags().get())
+
+    def test_current_tags_stored(self, send_mock):
+        done = threading.Event()
+        tags = []
+
+        def callback():
+            tags.append(self.audio.get_current_tags().get())
+
+        def send(name, **kwargs):
+            if name == 'reached_end_of_stream':
+                done.set()
+
+        send_mock.side_effect = send
+        self.audio.set_about_to_finish_callback(callback).get()
+
+        self.audio.prepare_change()
+        self.audio.set_uri(self.uris[0])
+        self.audio.start_playback()
+
+        self.possibly_trigger_fake_about_to_finish()
+        self.audio.wait_for_state_change().get()
+
+        if not done.wait(timeout=1.0):
+            self.fail('EOS not received')
+
+        self.assertTrue(tags[0])
+
+    # TODO: test that we reset when we expect between songs
 
 
 class AudioDummyEventTest(DummyMixin, AudioEventTest):
