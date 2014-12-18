@@ -409,7 +409,7 @@ class _Handler(object):
         # required helper installed?
 
     def on_new_segment(self, update, rate, format_, start, stop, position):
-        gst_logger.debug('Got new-segment event: update=%s rate=%s format=%s'
+        gst_logger.debug('Got new-segment event: update=%s rate=%s format=%s '
                          'start=%s stop=%s position=%s', update, rate,
                          format_.value_name, start, stop, position)
         position_ms = position // gst.MSECOND
