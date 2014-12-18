@@ -9,6 +9,7 @@ pygst.require('0.10')
 import gst  # noqa
 
 from mopidy import compat
+from mopidy.models import Album, Artist, Track
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +63,68 @@ def supported_uri_schemes(uri_schemes):
                 supported_schemes.add(uri)
 
     return supported_schemes
+
+
+def _artists(tags, artist_name, artist_id=None):
+    # Name missing, don't set artist
+    if not tags.get(artist_name):
+        return None
+    # One artist name and id, provide artist with id.
+    if len(tags[artist_name]) == 1 and artist_id in tags:
+        return [Artist(name=tags[artist_name][0],
+                       musicbrainz_id=tags[artist_id][0])]
+    # Multiple artist, provide artists without id.
+    return [Artist(name=name) for name in tags[artist_name]]
+
+
+# TODO: split based on "stream" and "track" based conversion? i.e. handle data
+# from radios in it's own helper instead?
+def convert_tags_to_track(tags):
+    """Convert our normalized tags to a track.
+
+    :param :class:`dict` tags: dictionary of tag keys with a list of values
+    :rtype: :class:`mopidy.models.Track`
+    """
+    album_kwargs = {}
+    track_kwargs = {}
+
+    track_kwargs['composers'] = _artists(tags, gst.TAG_COMPOSER)
+    track_kwargs['performers'] = _artists(tags, gst.TAG_PERFORMER)
+    track_kwargs['artists'] = _artists(
+        tags, gst.TAG_ARTIST, 'musicbrainz-artistid')
+    album_kwargs['artists'] = _artists(
+        tags, gst.TAG_ALBUM_ARTIST, 'musicbrainz-albumartistid')
+
+    track_kwargs['genre'] = '; '.join(tags.get(gst.TAG_GENRE, []))
+    track_kwargs['name'] = '; '.join(tags.get(gst.TAG_TITLE, []))
+    if not track_kwargs['name']:
+        track_kwargs['name'] = '; '.join(tags.get(gst.TAG_ORGANIZATION, []))
+
+    track_kwargs['comment'] = '; '.join(tags.get('comment', []))
+    if not track_kwargs['comment']:
+        track_kwargs['comment'] = '; '.join(tags.get(gst.TAG_LOCATION, []))
+    if not track_kwargs['comment']:
+        track_kwargs['comment'] = '; '.join(tags.get(gst.TAG_COPYRIGHT, []))
+
+    track_kwargs['track_no'] = tags.get(gst.TAG_TRACK_NUMBER, [None])[0]
+    track_kwargs['disc_no'] = tags.get(gst.TAG_ALBUM_VOLUME_NUMBER, [None])[0]
+    track_kwargs['bitrate'] = tags.get(gst.TAG_BITRATE, [None])[0]
+    track_kwargs['musicbrainz_id'] = tags.get('musicbrainz-trackid', [None])[0]
+
+    album_kwargs['name'] = tags.get(gst.TAG_ALBUM, [None])[0]
+    album_kwargs['num_tracks'] = tags.get(gst.TAG_TRACK_COUNT, [None])[0]
+    album_kwargs['num_discs'] = tags.get(gst.TAG_ALBUM_VOLUME_COUNT, [None])[0]
+    album_kwargs['musicbrainz_id'] = tags.get('musicbrainz-albumid', [None])[0]
+
+    if tags.get(gst.TAG_DATE) and tags.get(gst.TAG_DATE)[0]:
+        track_kwargs['date'] = tags[gst.TAG_DATE][0].isoformat()
+
+    # Clear out any empty values we found
+    track_kwargs = {k: v for k, v in track_kwargs.items() if v}
+    album_kwargs = {k: v for k, v in album_kwargs.items() if v}
+
+    track_kwargs['album'] = Album(**album_kwargs)
+    return Track(**track_kwargs)
 
 
 def convert_taglist(taglist):

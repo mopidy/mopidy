@@ -6,7 +6,7 @@ import os
 import time
 
 from mopidy import commands, compat, exceptions
-from mopidy.audio import scan
+from mopidy.audio import scan, utils
 from mopidy.local import translator
 from mopidy.utils import path
 
@@ -135,7 +135,7 @@ class ScanCommand(commands.Command):
                 else:
                     # TODO: reuse mtime from above...
                     mtime = os.path.getmtime(os.path.join(media_dir, relpath))
-                    track = scan.tags_to_track(tags).copy(
+                    track = utils.convert_tags_to_track(tags).copy(
                         uri=uri, length=duration, last_modified=mtime)
                     track = translator.add_musicbrainz_coverart_to_track(track)
                     library.add(track)

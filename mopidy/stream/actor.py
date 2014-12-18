@@ -8,7 +8,7 @@ import urlparse
 import pykka
 
 from mopidy import audio as audio_lib, backend, exceptions
-from mopidy.audio import scan
+from mopidy.audio import scan, utils
 from mopidy.models import Track
 
 logger = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ class StreamLibraryProvider(backend.LibraryProvider):
 
         try:
             tags, duration = self._scanner.scan(uri)
-            track = scan.tags_to_track(tags).copy(uri=uri, length=duration)
+            track = utils.tags_to_track(tags).copy(uri=uri, length=duration)
         except exceptions.ScannerError as e:
             logger.warning('Problem looking up %s: %s', uri, e)
             track = Track(uri=uri)
