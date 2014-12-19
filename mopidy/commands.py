@@ -2,9 +2,11 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import argparse
 import collections
+import contextlib
 import logging
 import os
 import sys
+import time
 
 import glib
 
@@ -61,6 +63,13 @@ class _HelpAction(argparse.Action):
 
     def __call__(self, parser, namespace, values, option_string=None):
         raise _HelpError()
+
+
+@contextlib.contextmanager
+def _startup_timer(name):
+    start = time.time()
+    yield
+    logger.debug('%s startup took %dms', name, (time.time() - start) * 1000)
 
 
 class Command(object):
@@ -339,8 +348,9 @@ class RootCommand(Command):
         backends = []
         for backend_class in backend_classes:
             try:
-                backend = backend_class.start(
-                    config=config, audio=audio).proxy()
+                with _startup_timer(backend_class.__name__):
+                    backend = backend_class.start(
+                        config=config, audio=audio).proxy()
                 backends.append(backend)
             except exceptions.BackendError as exc:
                 logger.error(
@@ -361,7 +371,8 @@ class RootCommand(Command):
 
         for frontend_class in frontend_classes:
             try:
-                frontend_class.start(config=config, core=core)
+                with _startup_timer(frontend_class.__name__):
+                    frontend_class.start(config=config, core=core)
             except exceptions.FrontendError as exc:
                 logger.error(
                     'Frontend (%s) initialization error: %s',
