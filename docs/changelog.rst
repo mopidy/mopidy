@@ -29,6 +29,9 @@ Bug fix release.
 - MPD: Remove track comments from responses. They are not included by the
   original MPD server, and this works around :issue:`881`. (PR: :issue:`882`)
 
+- HTTP: Errors while starting HTTP apps are logged instead of crashing the HTTP
+  server. (Fixes: :issue:`875`)
+
 
 v0.19.4 (2014-09-01)
 ====================
