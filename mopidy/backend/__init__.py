@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import copy
 
 from mopidy import listener
+from mopidy import models
 
 
 class Backend(object):
@@ -80,6 +81,7 @@ class LibraryProvider(object):
 
     def __init__(self, backend):
         self.backend = backend
+        print "Made library"
 
     def browse(self, uri):
         """
@@ -124,6 +126,29 @@ class LibraryProvider(object):
         *MAY be implemented by subclass.*
         """
         pass
+        
+    def advanced_search(self,query=None,uris=None,exact=False,returnType=None,**kwargs):
+        """
+        See :meth: mopidy.core.LibraryController.advanced_search
+        
+        *MAY be implemented by subclass, otherwise calls through to
+        old find_exact & search methods
+        """
+#        print "In as",query,uris,exact
+        if exact:
+          retVals=self.find_exact(query,uris)
+        else:
+          retVals=self.search(query,uris)
+        if returnType!=None and retVals!=None:
+          # force return type to a particular type
+          # track (just return found tracks),artist (return the artists from all searchresults),album
+          if returnType==models.Track:
+            retVals=models.SearchResult(tracks=retVals.tracks)
+          elif returnType==models.Artist:
+            retVals=models.SearchResult(retVals.artists)
+          elif returnType==models.Album:
+            retVals=models.SearchResult(retVals.albums)
+        return retVals
 
 
 class PlaybackProvider(object):

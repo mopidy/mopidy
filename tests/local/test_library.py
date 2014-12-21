@@ -541,8 +541,8 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
         # Matches on URI
         result = self.library.search(any=['TH1'])
-        self.assertEqual(list(result[0].tracks), self.tracks[:1])
-
+        self.assertEqual(list(result[0].tracks), self.tracks[:1])    
+        
     def test_search_wrong_type(self):
         with self.assertRaises(LookupError):
             self.library.search(wrong=['test'])
@@ -580,3 +580,16 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
         with self.assertRaises(LookupError):
             self.library.search(any=[''])
+
+    def test_search_returntype(self):
+        result = self.library.advanced_search(query={'any':'Tist1'},exact=False,returnType=Track)
+        self.assertEqual(list(result[0].tracks), self.tracks[:1])
+
+        # Matches on track composer
+        result = self.library.advanced_search(query={'any':'Tist3'},exact=False,returnType=Artist)
+        self.assertEqual(list(result[0].artists), self.tracks[2].artists)
+
+        # Matches on track performer
+        result = self.library.advanced_search(query={'any':'Tist6'},exact=False,returnType=Album)
+        self.assertEqual(list(result[0].albums), [self.tracks[5].album])
+

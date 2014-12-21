@@ -50,3 +50,6 @@ class LocalLibraryProvider(backend.LibraryProvider):
         if not self._library:
             return None
         return self._library.search(query=query, uris=uris, exact=False)
+        
+    def advanced_search(self,query=None,uris=None,exact=False,returnType=models.Track,**kwargs):
+        return self._library.advanced_search(query=query,uris=uris,exact=exact,returnType=returnType,*kwargs)

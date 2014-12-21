@@ -128,6 +128,8 @@ class JsonLibrary(local.Library):
 
     def __init__(self, config):
         self._tracks = {}
+        self._albums={}
+        self._artists={}
         self._browse_cache = None
         self._media_dir = config['local']['media_dir']
         self._json_file = os.path.join(
@@ -145,8 +147,16 @@ class JsonLibrary(local.Library):
         with DebugTimer('Loading tracks'):
             library = load_library(self._json_file)
             self._tracks = dict((t.uri, t) for t in library.get('tracks', []))
+            self._albums = dict((t.album,t.album) for t in self._tracks.values())
+            self._artists={}
+            for t in self._tracks.values():
+              for a in t.artists:
+                self._artists[a.name]=a
+                print a
+            print self._artists,self._albums
         with DebugTimer('Building browse cache'):
             self._browse_cache = _BrowseCache(sorted(self._tracks.keys()))
+            
         return len(self._tracks)
 
     def lookup(self, uri):
@@ -162,6 +172,13 @@ class JsonLibrary(local.Library):
             return search.find_exact(tracks, query=query, uris=uris)
         else:
             return search.search(tracks, query=query, uris=uris)
+            
+    def advanced_search(self,query=None,uris=None,exact=False,returnType=None,**kwargs):
+        tracks = self._tracks.values()
+        artists=self._artists.values()
+        albums=self._albums.values()
+        return search.advanced_search(tracks,artists,albums,query,uris,exact,returnType)
+            
 
     def begin(self):
         return compat.itervalues(self._tracks)

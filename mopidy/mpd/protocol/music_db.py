@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import functools
 import itertools
 
-from mopidy.models import Track
+from mopidy.models import Track,Artist,Album
 from mopidy.mpd import exceptions, protocol, translator
 
 _SEARCH_MAPPING = {
@@ -247,6 +247,8 @@ def list_(context, *args):
     - capitalizes the field argument.
     """
     parameters = list(args)
+    #print parameters
+
     if not parameters:
         raise exceptions.MpdArgError('incorrect arguments')
     field = parameters.pop(0).lower()
@@ -285,31 +287,30 @@ def list_(context, *args):
 
 def _list_artist(context, query):
     artists = set()
-    results = context.core.library.find_exact(**query).get()
-    for track in _get_tracks(results):
-        for artist in track.artists:
-            if artist.name:
-                artists.add(('Artist', artist.name))
+    results = context.core.library.advanced_search(query,exact=True,returnType=Artist).get()
+    for result in results:
+      for val in result.artists:
+        artists.add(('Artist',val.name))
     return artists
 
 
 def _list_albumartist(context, query):
     albumartists = set()
-    results = context.core.library.find_exact(**query).get()
-    for track in _get_tracks(results):
-        if track.album:
-            for artist in track.album.artists:
-                if artist.name:
-                    albumartists.add(('AlbumArtist', artist.name))
+    results = context.core.library.find_exact(query=query,returnType=Album).get()
+    for album in _get_tracks(albums):
+        for artist in album.artists:
+            if artist.name:
+                albumartists.add(('AlbumArtist', artist.name))
     return albumartists
 
 
 def _list_album(context, query):
     albums = set()
-    results = context.core.library.find_exact(**query).get()
-    for track in _get_tracks(results):
-        if track.album and track.album.name:
-            albums.add(('Album', track.album.name))
+    #print query
+    results = context.core.library.advanced_search(query,exact=True,returnType=Album).get()
+    for result in results:
+      for val in result.albums:
+        albums.add(('Album',val.name))
     return albums
 
 
@@ -467,7 +468,7 @@ def search(context, *args):
     try:
         query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
-        return
+        return        
     results = context.core.library.search(**query).get()
     artists = [_artist_as_track(a) for a in _get_artists(results)]
     albums = [_album_as_track(a) for a in _get_albums(results)]

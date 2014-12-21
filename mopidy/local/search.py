@@ -1,6 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
-from mopidy.models import Album, SearchResult
+from mopidy.models import Album, SearchResult,Track,Artist,Album
 
 
 def find_exact(tracks, query=None, uris=None):
@@ -163,6 +163,87 @@ def search(tracks, query=None, uris=None):
     # TODO: add local:search:<query>
     return SearchResult(uri='local:search', tracks=tracks)
 
+def advanced_search(tracks,artists,albums,query=None,uris=None,exact=False,returnType=None):
+# if returntype = none, search for all things that match (tracks, artists, albums)
+# for specific return types, either:
+#    if an artist search has either trackname or trackno searches, then first filter tracks, and use that 
+#    to get a set of artists
+#    if artist search has album search then filter albums to get set of artists
+#    use intersection of these to filter out the right thing
+# 
+#    if album search has trackname/trackno, filter tracks, use that to get list of possible albums then apply 
+#    any album filters
+
+    # we only do a full track scan if we really need to, otherwise we just scan artists/albums
+    # we need a full track query if we are:
+    # 1)Returning a list of tracks (or everything, returntype==None)
+    # 2)Returning artists or albums, but the query includes trackname or similar
+    # otherwise we can skip the track query
+
+    if query==None or len(query)==0:
+      #if we have an empty query then only pass out what is needed, and do it straight away
+        if returnType==Artist:
+            return SearchResult(artists=artists)
+        elif returnType==Track:
+            return SearchResult(tracks=tracks)
+        elif returnType==Album:
+            return SearchResult(albums=albums)       
+        elif returnType==None:
+            return SearchResult(artists=artists,tracks=tracks,albums=albums)
+    # when we have just 'query album, artist = blah', do this quickly, rather than searching all tracks
+    if returnType==Album and query.keys()==['artist'] or query.keys()==['albumartist']:
+        nameQuery=query.values()[0]
+        if exact:
+            albumResults=albums
+            for q in nameQuery:
+                q=q.lower().strip()
+                albumartist_filter = lambda al: any([
+                    ar.name and q==ar.name.lower()
+                    for ar in al.artists])
+                albumResults=filter(albumartist_filter,albumResults)
+        else:
+            albumResults=albums
+            for q in nameQuery:
+                q=q.lower().strip()
+                albumartist_filter = lambda al: any([
+                    ar.name and q in ar.name.lower()
+                    for ar in al.artists])
+                albumResults=filter(albumartist_filter,albumResults)
+        
+    if not exact:
+        trackResults=search(tracks,query,uris).tracks
+    else:
+        trackResults=find_exact(tracks,query,uris).tracks    
+
+    artistResults=None
+    albumResults=None
+    if returnType==None or returnType==Artist:
+      # get list of artists from these tracks
+      # we need to filter it down in the case that our query is on
+      # artist name, so that if an artist is on a track with another
+      # the other one doesn't get returned
+      artistResults={}
+      for track in trackResults:
+          for artist in track.artists:
+            artistResults[artist.uri]=artist
+      artistResults=artistResults.values()
+    if returnType==None or returnType==Album:
+        albumResults={}
+        for track in trackResults:
+            albumResults[track.album.uri]=track.album
+        albumResults=albumResults.values()
+    #only return the type of results that were asked for, even if we had to do a track search to find them
+    if returnType==Album:
+        trackResults=None
+        artistResults=None
+    elif returnType==Artist:
+        trackResults=None
+        albumResults=None
+    elif returnType==Track:
+        artistResults=None
+        albumResults=None        
+    return SearchResult(tracks=trackResults,artists=artistResults,albums=albumResults)
+    
 
 def _validate_query(query):
     for (_, values) in query.items():
