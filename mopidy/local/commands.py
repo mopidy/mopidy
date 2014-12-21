@@ -131,13 +131,15 @@ class ScanCommand(commands.Command):
                 file_uri = path.path_to_uri(os.path.join(media_dir, relpath))
                 tags, duration = scanner.scan(file_uri)
                 if duration < MIN_DURATION_MS:
-                    logger.warning('Failed %s: Track shorter than 100ms', uri)
+                    logger.warning('Failed %s: Track shorter than %dms',
+                                   uri, MIN_DURATION_MS)
                 else:
                     # TODO: reuse mtime from above...
                     mtime = os.path.getmtime(os.path.join(media_dir, relpath))
                     track = utils.convert_tags_to_track(tags).copy(
                         uri=uri, length=duration, last_modified=mtime)
                     track = translator.add_musicbrainz_coverart_to_track(track)
+                    # TODO: add tags to call if library supports it.
                     library.add(track)
                     logger.debug('Added %s', track.uri)
             except exceptions.ScannerError as error:
