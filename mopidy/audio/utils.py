@@ -128,7 +128,7 @@ def convert_tags_to_track(tags):
 
 
 def convert_taglist(taglist):
-    """Convert a :class:`gst.Taglist` to plain python types.
+    """Convert a :class:`gst.Taglist` to plain Python types.
 
     Knows how to convert:
      - Dates
