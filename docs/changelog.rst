@@ -69,11 +69,6 @@ v0.20.0 (UNRELEASED)
   make sense for a server such as Mopidy. Currently the only way to find out if
   it is in use and will be missed is to go ahead and remove it.
 
-**HTTP**
-
-- Log error while starting HTTP apps instead letting the HTTP server thread
-  die. (Fixes: :issue:`875`)
-
 
 v0.19.5 (UNRELEASED)
 ====================
@@ -98,6 +93,9 @@ Bug fix release.
 
 - MPD: Remove track comments from responses. They are not included by the
   original MPD server, and this works around :issue:`881`. (PR: :issue:`882`)
+
+- HTTP: Errors while starting HTTP apps are logged instead of crashing the HTTP
+  server. (Fixes: :issue:`875`)
 
 
 v0.19.4 (2014-09-01)
