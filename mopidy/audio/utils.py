@@ -131,11 +131,12 @@ def convert_taglist(taglist):
     """Convert a :class:`gst.Taglist` to plain Python types.
 
     Knows how to convert:
-     - Dates
-     - Buffers
-     - Numbers
-     - Strings
-     - Booleans
+
+    - Dates
+    - Buffers
+    - Numbers
+    - Strings
+    - Booleans
 
     Unknown types will be ignored and debug logged. Tag keys are all strings
     defined by GStreamer.
