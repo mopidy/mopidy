@@ -8,6 +8,8 @@ from mopidy.models import Album, Artist, Track
 
 
 # TODO: keep ids without name?
+# TODO: current test is trying to test everything at once with a complete tags
+# set, instead we might want to try with a minimal one making testing easier.
 class TagsToTrackTest(unittest.TestCase):
     def setUp(self):  # noqa
         self.tags = {
@@ -156,8 +158,7 @@ class TagsToTrackTest(unittest.TestCase):
 
     def test_missing_album_name(self):
         del self.tags['album']
-        album = self.track.album.copy(name=None)
-        self.check(self.track.copy(album=album))
+        self.check(self.track.copy(album=None))
 
     def test_multiple_album_name(self):
         self.tags['album'].append('album2')

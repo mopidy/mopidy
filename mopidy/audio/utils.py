@@ -123,7 +123,10 @@ def convert_tags_to_track(tags):
     track_kwargs = {k: v for k, v in track_kwargs.items() if v}
     album_kwargs = {k: v for k, v in album_kwargs.items() if v}
 
-    track_kwargs['album'] = Album(**album_kwargs)
+    # Only bother with album if we have a name to show.
+    if album_kwargs.get('name'):
+        track_kwargs['album'] = Album(**album_kwargs)
+
     return Track(**track_kwargs)
 
 

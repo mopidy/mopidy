@@ -11,7 +11,7 @@ import gst  # noqa: pygst magic is needed to import correct gst
 
 import mock
 
-from mopidy.models import Album, Track
+from mopidy.models import Track
 from mopidy.stream import actor
 from mopidy.utils.path import path_to_uri
 
@@ -39,5 +39,5 @@ class LibraryProviderTest(unittest.TestCase):
 
     def test_lookup_converts_uri_metadata_to_track(self):
         library = actor.StreamLibraryProvider(self.backend, 100, [])
-        self.assertEqual([Track(length=4406, uri=self.uri, album=Album())],
+        self.assertEqual([Track(length=4406, uri=self.uri)],
                          library.lookup(self.uri))
