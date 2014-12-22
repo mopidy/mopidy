@@ -10,11 +10,13 @@ import sys
 import tempfile
 import time
 
+import sqlite3
+
 import mopidy
 from mopidy import compat, local, models
 from mopidy.local import search, storage, translator
 from mopidy.utils import encoding
-
+from urllib import unquote_plus
 logger = logging.getLogger(__name__)
 
 
@@ -127,6 +129,15 @@ class JsonLibrary(local.Library):
     name = 'json'
 
     def __init__(self, config):
+        self._trackdb=sqlite3.connect(":memory:",check_same_thread=False)
+        self._trackdb.row_factory = sqlite3.Row
+        cur=self._trackdb.cursor()
+        cur.execute("create table tracks (uri text COLLATE NOCASE,name text COLLATE NOCASE,album_name text COLLATE NOCASE,artist_name text COLLATE NOCASE,date text,genre text COLLATE NOCASE, last_modified integer,length integer,track_no integer,num_tracks integer,composer text COLLATE NOCASE,performer text COLLATE NOCASE,album_artist text COLLATE NOCASE,comment text COLLATE NOCASE)")
+        #cur.execute("create virtual table tracks_fts using fts3(uri text,name text,album_name text,artist_name text,date text,genre text, last_modified integer,length integer,track_no integer,num_tracks integer,composer,performer,album_artist)")
+        cur.execute("create index tracks_album_name on tracks(album_name)")
+        cur.execute("create index tracks_artist_name on tracks(artist_name)")
+        cur.execute("create index tracks_album_name_artist_name_date on tracks(artist_name,album_name)")
+        self._trackdb.commit()
         self._tracks = {}
         self._albums={}
         self._artists={}
@@ -147,38 +158,64 @@ class JsonLibrary(local.Library):
         with DebugTimer('Loading tracks'):
             library = load_library(self._json_file)
             self._tracks = dict((t.uri, t) for t in library.get('tracks', []))
-            self._albums = dict((t.album,t.album) for t in self._tracks.values())
-            self._artists={}
-            for t in self._tracks.values():
-              for a in t.artists:
-                self._artists[a.name]=a
-                print a
-            print self._artists,self._albums
+            cur=self._trackdb.cursor()
+            for track in self._tracks.values():
+                if len(track.artists):
+                    track_artist=list(track.artists)[0].name
+                else:
+                    track_artist=None
+                if len(track.album.artists)>0:
+                    album_artist=list(track.album.artists)[0].name
+                elif len(track.artists):
+                    album_artist=list(track.artists)[0].name
+                elif len(track.composers):
+                    album_artist=list(track.composers)[0].name
+                elif len(track.performers):
+                    album_artist=list(track.performers)[0].name
+                else:
+                    album_artist=None                    
+                if len(track.composers)>0:
+                    composer=list(track.composers)[0].name
+                else:
+                    composer=None
+                if len(track.performers)>0:
+                    performer=list(track.performers)[0].name
+                else:
+                    performer=None
+                cur.execute("insert into tracks(uri,name,album_name,artist_name,date,genre, last_modified,length,track_no,num_tracks,composer,performer,album_artist,comment) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",(track.uri,track.name,track.album.name,track_artist,track.date,track.genre,track.last_modified,track.length,track.track_no,track.album.num_tracks,composer,performer,album_artist,track.comment))
+                #cur.execute("insert into tracks_fts(uri,name,album_name,artist_name,date,genre, last_modified,length,track_no,num_tracks,composer,performer,album_artist,comment) values(?,?,?,?,?,?,?,?,?,?,?,?,?)",(track.uri,track.name,track.album.name,track_artist,track.date,track.genre,track.last_modified,track.length,track.track_no,track.album.num_tracks,composer,performer,album_artist,tracks.comment))                
+            self._trackdb.commit()
         with DebugTimer('Building browse cache'):
             self._browse_cache = _BrowseCache(sorted(self._tracks.keys()))
-            
         return len(self._tracks)
 
+    def splitURI(self,uri,testURI):
+        if uri.startswith(testURI):
+            returnVal=uri[len(testURI):]
+            returnVal=unquote_plus(returnVal)
+            return returnVal
+        else:
+            return None
+        
     def lookup(self, uri):
+        artistName=self.splitURI(uri,u"local:directory:type=artist/")
+        if artistName!=None:
+            if artistName.find("/")!=-1:
+                (artistName, albumName)=artistName.split("/")[0:2]
+                tracks=self.advanced_search({"artist":[artistName],"album":[albumName]},exact=True,returnType=models.Track).tracks
+            else:
+                tracks=self.advanced_search({"artist":[artistName]},exact=True,returnType=models.Track).tracks
+            return tracks
         try:
             return [self._tracks[uri]]
         except KeyError:
             return []
 
     def search(self, query=None, limit=100, offset=0, uris=None, exact=False):
-        tracks = self._tracks.values()
-        # TODO: pass limit and offset into search helpers
-        if exact:
-            return search.find_exact(tracks, query=query, uris=uris)
-        else:
-            return search.search(tracks, query=query, uris=uris)
+        return search.advanced_search_sql(self._trackdb,query=query,uris=uris,exact=exact,returnType=models.Track,limit=limit,offset=offset)
             
-    def advanced_search(self,query=None,uris=None,exact=False,returnType=None,**kwargs):
-        tracks = self._tracks.values()
-        artists=self._artists.values()
-        albums=self._albums.values()
-        return search.advanced_search(tracks,artists,albums,query,uris,exact,returnType)
-            
+    def advanced_search(self,query=None,uris=None,exact=False,returnType=models.Track,limit=0,offset=0,**kwargs):
+        return search.advanced_search_sql(self._trackdb,query,uris,exact,returnType,limit,offset)
 
     def begin(self):
         return compat.itervalues(self._tracks)

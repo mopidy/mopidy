@@ -614,6 +614,7 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
 class MusicDatabaseListTest(protocol.BaseTestCase):
     def test_list(self):
         self.backend.library.dummy_find_exact_result = SearchResult(
+            artists=[Artist(name='A Artist')],
             tracks=[
                 Track(uri='dummy:a', name='A', artists=[
                     Artist(name='A Artist')])])
@@ -892,7 +893,7 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
 
     def test_list_album_with_artist_name(self):
         self.backend.library.dummy_find_exact_result = SearchResult(
-            tracks=[Track(album=Album(name='foo'))])
+            albums=[Album(name='foo')])
 
         self.sendRequest('list "album" "anartist"')
         self.assertInResponse('Album: foo')
@@ -945,7 +946,7 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
 
     def test_list_album_should_not_return_albums_without_names(self):
         self.backend.library.dummy_find_exact_result = SearchResult(
-            tracks=[Track(album=Album(name=''))])
+            albums=[Album(name='')])
 
         self.sendRequest('list "album"')
         self.assertNotInResponse('Album: ')

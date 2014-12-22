@@ -51,8 +51,7 @@ class DummyLibraryProvider(backend.LibraryProvider):
 
     def search(self, **query):
         return self.dummy_search_result
-
-
+        
 class DummyPlaybackProvider(backend.PlaybackProvider):
     def __init__(self, *args, **kwargs):
         super(DummyPlaybackProvider, self).__init__(*args, **kwargs)

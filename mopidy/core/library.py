@@ -111,12 +111,7 @@ class LibraryController(object):
         :rtype: list of :class:`mopidy.models.SearchResult`
         """
         query = query or kwargs
-        return self.advanced_search(query,uris,exact=True,returnType=models.Track)
-#        futures = [
-#            backend.library.find_exact(query=query, uris=backend_uris)
-#            for (backend, backend_uris)
-#            in self._get_backends_to_uris(uris).items()]
-#        return [result for result in pykka.get_all(futures) if result]
+        return self.advanced_search(query,uris,exact=True,returnType=None)
 
     def lookup(self, uri):
         """
@@ -189,14 +184,9 @@ class LibraryController(object):
         :rtype: list of :class:`mopidy.models.SearchResult`
         """
         query = query or kwargs
-        return self.advanced_search(query,uris,exact=False,returnType=models.Track)
-#        futures = [
-#            backend.library.search(query=query, uris=backend_uris)
-#            for (backend, backend_uris)
-#            in self._get_backends_to_uris(uris).items()]
-#        return [result for result in pykka.get_all(futures) if result]
+        return self.advanced_search(query,uris=uris,exact=False,returnType=None)
 
-    def advanced_search(self,query=None,uris=None,exact=False,returnType=models.Track,**kwargs):
+    def advanced_search(self,query=None,uris=None,exact=False,returnType=None,limit=0,offset=0,**kwargs):
         """
         Search the library for tracks where ``field`` contains ``values``.
 
@@ -238,7 +228,7 @@ class LibraryController(object):
         """
         query = query or kwargs
         futures = [
-            backend.library.advanced_search(query=query, uris=backend_uris,exact=exact,returnType=returnType,*kwargs)
+            backend.library.advanced_search(query=query, uris=backend_uris,exact=exact,returnType=returnType,limit=limit,offset=offset,*kwargs)
             for (backend, backend_uris)
             in self._get_backends_to_uris(uris).items()]
         return [result for result in pykka.get_all(futures) if result]

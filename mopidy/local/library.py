@@ -51,5 +51,12 @@ class LocalLibraryProvider(backend.LibraryProvider):
             return None
         return self._library.search(query=query, uris=uris, exact=False)
         
-    def advanced_search(self,query=None,uris=None,exact=False,returnType=models.Track,**kwargs):
-        return self._library.advanced_search(query=query,uris=uris,exact=exact,returnType=returnType,*kwargs)
+    def advanced_search(self,query=None,uris=None,exact=False,returnType=None,limit=0,offset=0,**kwargs):
+        try:
+            # check we have the new advanced search
+            getattr(self._library,"advanced_search")
+        except AttributeError:
+            print "Drop back to old search"
+            return self._library.search(query=query,uris=uris,exact=exact,limit=limit,offset=offset)
+        # this could be inside the try, but then exceptions get suppressed
+        return self._library.advanced_search(query=query,uris=uris,exact=exact,returnType=returnType,limit=limit,offset=offset,*kwargs)

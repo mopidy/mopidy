@@ -296,8 +296,9 @@ def _list_artist(context, query):
 
 def _list_albumartist(context, query):
     albumartists = set()
-    results = context.core.library.find_exact(query=query,returnType=Album).get()
-    for album in _get_tracks(albums):
+    results = context.core.library.advanced_search(query=query,returnType=Album).get()
+    for result in results:
+      for album in result.albums:
         for artist in album.artists:
             if artist.name:
                 albumartists.add(('AlbumArtist', artist.name))
@@ -310,7 +311,8 @@ def _list_album(context, query):
     results = context.core.library.advanced_search(query,exact=True,returnType=Album).get()
     for result in results:
       for val in result.albums:
-        albums.add(('Album',val.name))
+        if val.name:
+            albums.add(('Album',val.name))
     return albums
 
 
@@ -336,10 +338,11 @@ def _list_performer(context, query):
 
 def _list_date(context, query):
     dates = set()
-    results = context.core.library.find_exact(**query).get()
-    for track in _get_tracks(results):
-        if track.date:
-            dates.add(('Date', track.date))
+    results = context.core.library.advanced_search(query,exact=True,returnType=Album).get()
+    for result in results:
+        for val in result.albums:
+            if val.date:
+                dates.add(('Date', val.date))    
     return dates
 
 
@@ -469,7 +472,7 @@ def search(context, *args):
         query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return        
-    results = context.core.library.search(**query).get()
+    results = context.core.library.advanced_search(query,exact=False,returnType=None).get()
     artists = [_artist_as_track(a) for a in _get_artists(results)]
     albums = [_album_as_track(a) for a in _get_albums(results)]
     tracks = _get_tracks(results)
