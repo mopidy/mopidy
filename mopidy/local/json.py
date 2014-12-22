@@ -6,17 +6,18 @@ import json
 import logging
 import os
 import re
+import sqlite3
 import sys
 import tempfile
 import time
+from urllib import unquote_plus
 
-import sqlite3
 
 import mopidy
 from mopidy import compat, local, models
 from mopidy.local import search, storage, translator
 from mopidy.utils import encoding
-from urllib import unquote_plus
+
 logger = logging.getLogger(__name__)
 
 
@@ -32,7 +33,8 @@ def load_library(json_file):
         return {}
     try:
         with gzip.open(json_file, 'rb') as fp:
-            return json.load(fp, object_hook=models.model_json_decoder)
+            return json.load(
+                fp, object_hook=models.model_json_decoder)
     except (IOError, ValueError) as error:
         logger.warning(
             'Loading JSON local library failed: %s',
@@ -70,15 +72,18 @@ class _BrowseCache(object):
             path = translator.local_track_uri_to_path(track_uri, b'/')
             parts = self.splitpath_re.findall(
                 path.decode(self.encoding, 'replace'))
-            track_ref = models.Ref.track(uri=track_uri, name=parts.pop())
+            track_ref = models.Ref.track(
+                uri=track_uri,
+                name=parts.pop())
 
             # Look for our parents backwards as this is faster than having to
             # do a complete search for each add.
             parent_uri = None
             child = None
             for i in reversed(range(len(parts))):
-                directory = '/'.join(parts[:i+1])
-                uri = translator.path_to_local_directory_uri(directory)
+                directory = '/'.join(parts[:i + 1])
+                uri = translator.path_to_local_directory_uri(
+                    directory)
 
                 # First dir we process is our parent
                 if not parent_uri:
@@ -97,7 +102,8 @@ class _BrowseCache(object):
                     self._cache[uri][child.uri] = child
                 child = models.Ref.directory(uri=uri, name=parts[i])
             else:
-                # Loop completed, so final child needs to be added to root.
+                # Loop completed, so final child needs to be added to
+                # root.
                 if child:
                     self._cache[
                         local.Library.ROOT_DIRECTORY_URI][child.uri] = child
@@ -113,6 +119,7 @@ class _BrowseCache(object):
 
 # TODO: make this available to other code?
 class DebugTimer(object):
+
     def __init__(self, msg):
         self.msg = msg
         self.start = None
@@ -129,18 +136,38 @@ class JsonLibrary(local.Library):
     name = 'json'
 
     def __init__(self, config):
-        self._trackdb=sqlite3.connect(":memory:",check_same_thread=False)
+        self._trackdb = sqlite3.connect(
+            ":memory:",
+            check_same_thread=False)
         self._trackdb.row_factory = sqlite3.Row
-        cur=self._trackdb.cursor()
-        cur.execute("create table tracks (uri text COLLATE NOCASE,name text COLLATE NOCASE,album_name text COLLATE NOCASE,artist_name text COLLATE NOCASE,date text,genre text COLLATE NOCASE, last_modified integer,length integer,track_no integer,num_tracks integer,composer text COLLATE NOCASE,performer text COLLATE NOCASE,album_artist text COLLATE NOCASE,comment text COLLATE NOCASE)")
-        #cur.execute("create virtual table tracks_fts using fts3(uri text,name text,album_name text,artist_name text,date text,genre text, last_modified integer,length integer,track_no integer,num_tracks integer,composer,performer,album_artist)")
-        cur.execute("create index tracks_album_name on tracks(album_name)")
-        cur.execute("create index tracks_artist_name on tracks(artist_name)")
-        cur.execute("create index tracks_album_name_artist_name_date on tracks(artist_name,album_name)")
+        cur = self._trackdb.cursor()
+        cur.execute(
+            "create table tracks "
+            "(uri text COLLATE NOCASE,"
+            " name text COLLATE NOCASE,"
+            " album_name text COLLATE NOCASE,"
+            " artist_name text COLLATE NOCASE,"
+            " date text,"
+            " genre text COLLATE NOCASE,"
+            " last_modified integer,"
+            " length integer,"
+            " track_no integer,"
+            " num_tracks integer,"
+            " composer text COLLATE NOCASE,"
+            " performer text COLLATE NOCASE,"
+            " album_artist text COLLATE NOCASE,"
+            " comment text COLLATE NOCASE)")
+        cur.execute(
+            "create index tracks_album_name on tracks(album_name)")
+        cur.execute(
+            "create index tracks_artist_name on tracks(artist_name)")
+        cur.execute(
+            "create index tracks_album_name_artist_name_date "
+            "on tracks(artist_name,album_name)")
         self._trackdb.commit()
         self._tracks = {}
-        self._albums={}
-        self._artists={}
+        self._albums = {}
+        self._artists = {}
         self._browse_cache = None
         self._media_dir = config['local']['media_dir']
         self._json_file = os.path.join(
@@ -157,65 +184,92 @@ class JsonLibrary(local.Library):
         logger.debug('Loading library: %s', self._json_file)
         with DebugTimer('Loading tracks'):
             library = load_library(self._json_file)
-            self._tracks = dict((t.uri, t) for t in library.get('tracks', []))
-            cur=self._trackdb.cursor()
+            self._tracks = dict(
+                (t.uri,
+                 t) for t in library.get(
+                    'tracks',
+                    []))
+            cur = self._trackdb.cursor()
             for track in self._tracks.values():
                 if len(track.artists):
-                    track_artist=list(track.artists)[0].name
+                    track_artist = list(track.artists)[0].name
                 else:
-                    track_artist=None
-                if len(track.album.artists)>0:
-                    album_artist=list(track.album.artists)[0].name
+                    track_artist = None
+                if len(track.album.artists) > 0:
+                    album_artist = list(track.album.artists)[0].name
                 elif len(track.artists):
-                    album_artist=list(track.artists)[0].name
+                    album_artist = list(track.artists)[0].name
                 elif len(track.composers):
-                    album_artist=list(track.composers)[0].name
+                    album_artist = list(track.composers)[0].name
                 elif len(track.performers):
-                    album_artist=list(track.performers)[0].name
+                    album_artist = list(track.performers)[0].name
                 else:
-                    album_artist=None                    
-                if len(track.composers)>0:
-                    composer=list(track.composers)[0].name
+                    album_artist = None
+                if len(track.composers) > 0:
+                    composer = list(track.composers)[0].name
                 else:
-                    composer=None
-                if len(track.performers)>0:
-                    performer=list(track.performers)[0].name
+                    composer = None
+                if len(track.performers) > 0:
+                    performer = list(track.performers)[0].name
                 else:
-                    performer=None
-                cur.execute("insert into tracks(uri,name,album_name,artist_name,date,genre, last_modified,length,track_no,num_tracks,composer,performer,album_artist,comment) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",(track.uri,track.name,track.album.name,track_artist,track.date,track.genre,track.last_modified,track.length,track.track_no,track.album.num_tracks,composer,performer,album_artist,track.comment))
-                #cur.execute("insert into tracks_fts(uri,name,album_name,artist_name,date,genre, last_modified,length,track_no,num_tracks,composer,performer,album_artist,comment) values(?,?,?,?,?,?,?,?,?,?,?,?,?)",(track.uri,track.name,track.album.name,track_artist,track.date,track.genre,track.last_modified,track.length,track.track_no,track.album.num_tracks,composer,performer,album_artist,tracks.comment))                
+                    performer = None
+                cur.execute("insert into tracks("
+                            "uri,name,album_name,artist_name,date,genre, "
+                            "last_modified,length,track_no,num_tracks, "
+                            "composer,performer,album_artist,comment) "
+                            "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (
+                                track.uri, track.name, track.album.name,
+                                track_artist, track.date, track.genre,
+                                track.last_modified, track.length,
+                                track.track_no, track.album.num_tracks,
+                                composer, performer, album_artist,
+                                track.comment))
             self._trackdb.commit()
         with DebugTimer('Building browse cache'):
-            self._browse_cache = _BrowseCache(sorted(self._tracks.keys()))
+            self._browse_cache = _BrowseCache(
+                sorted(
+                    self._tracks.keys()))
         return len(self._tracks)
 
-    def splitURI(self,uri,testURI):
+    def splitURI(self, uri, testURI):
         if uri.startswith(testURI):
-            returnVal=uri[len(testURI):]
-            returnVal=unquote_plus(returnVal)
+            returnVal = uri[len(testURI):]
+            returnVal = unquote_plus(returnVal)
             return returnVal
         else:
             return None
-        
+
     def lookup(self, uri):
-        artistName=self.splitURI(uri,u"local:directory:type=artist/")
-        if artistName!=None:
-            if artistName.find("/")!=-1:
-                (artistName, albumName)=artistName.split("/")[0:2]
-                tracks=self.advanced_search({"artist":[artistName],"album":[albumName]},exact=True,returnType=models.Track).tracks
+        artistName = self.splitURI(
+            uri,
+            u"local:directory:type=artist/")
+        if artistName is not None:
+            if artistName.find("/") != -1:
+                (artistName, albumName) = artistName.split("/")[0:2]
+                tracks = self.advanced_search(
+                    {"artist": [artistName], "album": [albumName]},
+                    exact=True, returnType=models.Track).tracks
             else:
-                tracks=self.advanced_search({"artist":[artistName]},exact=True,returnType=models.Track).tracks
+                tracks = self.advanced_search(
+                    {"artist": [artistName]},
+                    exact=True, returnType=models.Track).tracks
             return tracks
         try:
             return [self._tracks[uri]]
         except KeyError:
             return []
 
-    def search(self, query=None, limit=100, offset=0, uris=None, exact=False):
-        return search.advanced_search_sql(self._trackdb,query=query,uris=uris,exact=exact,returnType=models.Track,limit=limit,offset=offset)
-            
-    def advanced_search(self,query=None,uris=None,exact=False,returnType=models.Track,limit=0,offset=0,**kwargs):
-        return search.advanced_search_sql(self._trackdb,query,uris,exact,returnType,limit,offset)
+    def search(
+            self, query=None, limit=100, offset=0, uris=None, exact=False):
+        return search.advanced_search_sql(
+            self._trackdb, query=query, uris=uris,
+            exact=exact, returnType=models.Track,
+            limit=limit, offset=offset)
+
+    def advanced_search(self, query=None, uris=None, exact=False,
+                        returnType=models.Track, limit=0, offset=0, **kwargs):
+        return search.advanced_search_sql(
+            self._trackdb, query, uris, exact, returnType, limit, offset)
 
     def begin(self):
         return compat.itervalues(self._tracks)
@@ -227,7 +281,9 @@ class JsonLibrary(local.Library):
         self._tracks.pop(uri, None)
 
     def close(self):
-        write_library(self._json_file, {'tracks': self._tracks.values()})
+        write_library(
+            self._json_file, {
+                'tracks': self._tracks.values()})
 
     def clear(self):
         try:

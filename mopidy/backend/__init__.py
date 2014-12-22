@@ -3,10 +3,10 @@ from __future__ import absolute_import, unicode_literals
 import copy
 
 from mopidy import listener
-from mopidy import models
 
 
 class Backend(object):
+
     """Backend API
 
     If the backend has problems during initialization it should raise
@@ -52,7 +52,8 @@ class Backend(object):
         return self.library is not None
 
     def has_library_browse(self):
-        return self.has_library() and self.library.root_directory is not None
+        return self.has_library(
+        ) and self.library.root_directory is not None
 
     def has_playback(self):
         return self.playback is not None
@@ -62,6 +63,7 @@ class Backend(object):
 
 
 class LibraryProvider(object):
+
     """
     :param backend: backend the controller is a part of
     :type backend: :class:`mopidy.backend.Backend`
@@ -125,22 +127,25 @@ class LibraryProvider(object):
         *MAY be implemented by subclass.*
         """
         pass
-        
-    def advanced_search(self,query=None,uris=None,exact=False,returnType=None,**kwargs):
+
+    def advanced_search(
+            self, query=None, uris=None, exact=False,
+            returnType=None, **kwargs):
         """
         See :meth: mopidy.core.LibraryController.advanced_search
-        
+
         *MAY be implemented by subclass, otherwise calls through to
         old find_exact & search methods
         """
         if exact:
-          retVals=self.find_exact(query=query,uris=uris)
+            retVals = self.find_exact(query=query, uris=uris)
         else:
-          retVals=self.search(query=query,uris=uris)
+            retVals = self.search(query=query, uris=uris)
         return retVals
 
 
 class PlaybackProvider(object):
+
     """
     :param audio: the audio actor
     :type audio: actor proxy to an instance of :class:`mopidy.audio.Audio`
@@ -235,6 +240,7 @@ class PlaybackProvider(object):
 
 
 class PlaylistsProvider(object):
+
     """
     A playlist provider exposes a collection of playlists, methods to
     create/change/delete playlists in this collection, and lookup of any
@@ -335,6 +341,7 @@ class PlaylistsProvider(object):
 
 
 class BackendListener(listener.Listener):
+
     """
     Marker interface for recipients of events sent by the backend actors.
 
