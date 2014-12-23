@@ -157,6 +157,7 @@ extlinks = {
     'commit': ('https://github.com/mopidy/mopidy/commit/%s', 'commit '),
     'mpris': (
         'https://github.com/mopidy/mopidy-mpris/issues/%s', 'mopidy-mpris#'),
+    'discuss': ('https://discuss.mopidy.com/t/%s', 'discuss.mopidy.com/t/'),
 }
 
 
