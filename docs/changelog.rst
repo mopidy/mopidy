@@ -70,15 +70,16 @@ v0.20.0 (UNRELEASED)
   it is in use and will be missed is to go ahead and remove it.
 
 
-v0.19.5 (UNRELEASED)
+v0.19.5 (2014-12-23)
 ====================
 
-Bug fix release.
+Today is Mopidy's five year anniversary. We're celebrating with a bugfix
+release and are looking forward to the next five years!
 
-- Config: Support UTF-8 in default config. If an extension with non-ASCII
-  characters in its default config was installed, and Mopidy didn't already
-  have a config file, Mopidy would crashed when trying to create the initial
-  config file based on the default config of all available extensions.
+- Config: Support UTF-8 in extension's default config. If an extension with
+  non-ASCII characters in its default config was installed, and Mopidy didn't
+  already have a config file, Mopidy would crashed when trying to create the
+  initial config file based on the default config of all available extensions.
   (Fixes: :discuss:`428`)
 
 - Extensions: Fix crash when unpacking data from
