@@ -32,6 +32,10 @@ Bug fix release.
   :attr:`mopidy.models.Track.track_no`, and
   :attr:`mopidy.models.Track.last_modified` from ``0`` to :class:`None`.
 
+- Core: When skipping to the next track in consume mode, remove the skipped
+  track from the tracklist. This is consistent with the original MPD server's
+  behavior. (Fixes: :issue:`902`)
+
 - Local: Fix scanning of modified files. (PR: :issue:`904`)
 
 - MPD: Re-enable browsing of empty directories. (PR: :issue:`906`)

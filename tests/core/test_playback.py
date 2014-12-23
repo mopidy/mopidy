@@ -239,6 +239,23 @@ class CorePlaybackTest(unittest.TestCase):
 
     # TODO Test next() more
 
+    def test_next_keeps_finished_track_in_tracklist(self):
+        tl_track = self.tl_tracks[0]
+        self.core.playback.play(tl_track)
+
+        self.core.playback.next()
+
+        self.assertIn(tl_track, self.core.tracklist.tl_tracks)
+
+    def test_next_in_consume_mode_removes_finished_track(self):
+        tl_track = self.tl_tracks[0]
+        self.core.playback.play(tl_track)
+        self.core.tracklist.consume = True
+
+        self.core.playback.next()
+
+        self.assertNotIn(tl_track, self.core.tracklist.tl_tracks)
+
     @mock.patch(
         'mopidy.core.playback.listener.CoreListener', spec=core.CoreListener)
     def test_next_emits_events(self, listener_mock):
@@ -265,6 +282,23 @@ class CorePlaybackTest(unittest.TestCase):
 
     # TODO Test previous() more
 
+    def test_previous_keeps_finished_track_in_tracklist(self):
+        tl_track = self.tl_tracks[1]
+        self.core.playback.play(tl_track)
+
+        self.core.playback.previous()
+
+        self.assertIn(tl_track, self.core.tracklist.tl_tracks)
+
+    def test_previous_keeps_finished_track_even_in_consume_mode(self):
+        tl_track = self.tl_tracks[1]
+        self.core.playback.play(tl_track)
+        self.core.tracklist.consume = True
+
+        self.core.playback.previous()
+
+        self.assertIn(tl_track, self.core.tracklist.tl_tracks)
+
     @mock.patch(
         'mopidy.core.playback.listener.CoreListener', spec=core.CoreListener)
     def test_previous_emits_events(self, listener_mock):
@@ -290,6 +324,23 @@ class CorePlaybackTest(unittest.TestCase):
             ])
 
     # TODO Test on_end_of_track() more
+
+    def test_on_end_of_track_keeps_finished_track_in_tracklist(self):
+        tl_track = self.tl_tracks[0]
+        self.core.playback.play(tl_track)
+
+        self.core.playback.on_end_of_track()
+
+        self.assertIn(tl_track, self.core.tracklist.tl_tracks)
+
+    def test_on_end_of_track_in_consume_mode_removes_finished_track(self):
+        tl_track = self.tl_tracks[0]
+        self.core.playback.play(tl_track)
+        self.core.tracklist.consume = True
+
+        self.core.playback.on_end_of_track()
+
+        self.assertNotIn(tl_track, self.core.tracklist.tl_tracks)
 
     @mock.patch(
         'mopidy.core.playback.listener.CoreListener', spec=core.CoreListener)
