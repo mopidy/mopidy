@@ -179,11 +179,15 @@ class PlaybackController(object):
         The current playback state will be kept. If it was playing, playing
         will continue. If it was paused, it will still be paused, etc.
         """
-        tl_track = self.core.tracklist.next_track(self.current_tl_track)
-        if tl_track:
-            self.change_track(tl_track)
+        original_tl_track = self.current_tl_track
+        next_tl_track = self.core.tracklist.next_track(original_tl_track)
+
+        if next_tl_track:
+            self.change_track(next_tl_track)
         else:
             self.stop(clear_current_track=True)
+
+        self.core.tracklist.mark_played(original_tl_track)
 
     def pause(self):
         """Pause playback."""

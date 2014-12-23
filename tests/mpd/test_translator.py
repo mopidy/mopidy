@@ -73,10 +73,10 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assertIn(('Track', '7/13'), result)
         self.assertIn(('Date', datetime.date(1977, 1, 1)), result)
         self.assertIn(('Disc', '1'), result)
-        self.assertIn(('Comment', 'a comment'), result)
         self.assertIn(('Pos', 9), result)
         self.assertIn(('Id', 122), result)
-        self.assertEqual(len(result), 15)
+        self.assertNotIn(('Comment', 'a comment'), result)
+        self.assertEqual(len(result), 14)
 
     def test_track_to_mpd_format_musicbrainz_trackid(self):
         track = self.track.copy(musicbrainz_id='foo')

@@ -188,10 +188,13 @@ def validate_extension(extension):
             extension.ext_name, ex)
         return False
     except pkg_resources.VersionConflict as ex:
-        found, required = ex.args
-        logger.info(
-            'Disabled extension %s: %s required, but found %s at %s',
-            extension.ext_name, required, found, found.location)
+        if len(ex.args) == 2:
+            found, required = ex.args
+            logger.info(
+                'Disabled extension %s: %s required, but found %s at %s',
+                extension.ext_name, required, found, found.location)
+        else:
+            logger.info('Disabled extension %s: %s', extension.ext_name, ex)
         return False
 
     try:

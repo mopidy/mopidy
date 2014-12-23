@@ -44,12 +44,14 @@ def get_or_create_file(file_path, mkdir=True, content=None):
     if not isinstance(file_path, bytes):
         raise ValueError('Path is not a bytestring.')
     file_path = expand_path(file_path)
+    if isinstance(content, unicode):
+        content = content.encode('utf-8')
     if mkdir:
         get_or_create_dir(os.path.dirname(file_path))
     if not os.path.isfile(file_path):
         logger.info('Creating file %s', file_path)
-        with open(file_path, 'w') as fh:
-            if content:
+        with open(file_path, 'wb') as fh:
+            if content is not None:
                 fh.write(content)
     return file_path
 

@@ -5,6 +5,49 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v0.19.5 (2014-12-23)
+====================
+
+Today is Mopidy's five year anniversary. We're celebrating with a bugfix
+release and are looking forward to the next five years!
+
+- Config: Support UTF-8 in extension's default config. If an extension with
+  non-ASCII characters in its default config was installed, and Mopidy didn't
+  already have a config file, Mopidy would crashed when trying to create the
+  initial config file based on the default config of all available extensions.
+  (Fixes: :discuss:`428`)
+
+- Extensions: Fix crash when unpacking data from
+  :exc:`pkg_resources.VersionConflict` created with a single argument. (Fixes:
+  :issue:`911`)
+
+- Models: Hide empty collections from :func:`repr()` representations.
+
+- Models: Field values are no longer stored on the model instance when the
+  value matches the default value for the field. This makes two models equal
+  when they have a field which in one case is implicitly set to the default
+  value and in the other case explicitly set to the default value, but with
+  otherwise equal fields. (Fixes: :issue:`837`)
+
+- Models: Changed the default value of :attr:`mopidy.models.Album.num_tracks`,
+  :attr:`mopidy.models.Track.track_no`, and
+  :attr:`mopidy.models.Track.last_modified` from ``0`` to :class:`None`.
+
+- Core: When skipping to the next track in consume mode, remove the skipped
+  track from the tracklist. This is consistent with the original MPD server's
+  behavior. (Fixes: :issue:`902`)
+
+- Local: Fix scanning of modified files. (PR: :issue:`904`)
+
+- MPD: Re-enable browsing of empty directories. (PR: :issue:`906`)
+
+- MPD: Remove track comments from responses. They are not included by the
+  original MPD server, and this works around :issue:`881`. (PR: :issue:`882`)
+
+- HTTP: Errors while starting HTTP apps are logged instead of crashing the HTTP
+  server. (Fixes: :issue:`875`)
+
+
 v0.19.4 (2014-09-01)
 ====================
 
