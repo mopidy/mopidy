@@ -1,3 +1,9 @@
+mopidy (0.19.5-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Wed, 24 Dec 2014 00:47:41 +0100
+
 mopidy (0.19.4-4) unstable; urgency=medium
 
   * Bump Standards-Version to 3.9.6. No changes needed.
