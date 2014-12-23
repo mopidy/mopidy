@@ -129,11 +129,16 @@ class HttpServer(threading.Thread):
     def _get_app_request_handlers(self):
         result = []
         for app in self.apps:
+            try:
+                request_handlers = app['factory'](self.config, self.core)
+            except Exception:
+                logger.exception('Loading %s failed.', app['name'])
+                continue
+
             result.append((
                 r'/%s' % app['name'],
                 handlers.AddSlashHandler
             ))
-            request_handlers = app['factory'](self.config, self.core)
             for handler in request_handlers:
                 handler = list(handler)
                 handler[0] = '/%s%s' % (app['name'], handler[0])

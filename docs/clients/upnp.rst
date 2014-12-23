@@ -18,7 +18,7 @@ DLNA Digital Media Server (DMS) / UPnP AV MediaServer:
     A MediaServer provides a library of media and is capable of streaming that
     media to a MediaRenderer. If Mopidy was a MediaServer, you could browse and
     play Mopidy's music on a TV, smartphone, or tablet supporting UPnP. Mopidy
-    does not currently support this, but we may in the future.  :issue:`52` is
+    does not currently support this, but we may in the future. :issue:`52` is
     the relevant wishlist issue.
 
 DLNA Digital Media Renderer (DMR) / UPnP AV MediaRenderer:
@@ -27,13 +27,51 @@ DLNA Digital Media Renderer (DMR) / UPnP AV MediaRenderer:
     given media, typically served by a MediaServer. If Mopidy was a
     MediaRenderer, you could use e.g. your smartphone or tablet to make Mopidy
     play media. Mopidy *does already* have experimental support for being a
-    MediaRenderer with the help of Rygel, as you can read more about below.
+    MediaRenderer, as you can read more about below.
+
+
+Mopidy as an UPnP MediaRenderer
+===============================
+
+There are two ways Mopidy can be made available as an UPnP MediaRenderer:
+Using Mopidy-MPRIS and Rygel, or using Mopidy-MPD and upmpdcli.
+
+
+.. _upmpdcli:
+
+upmpdcli
+--------
+
+`upmpdcli <http://www.lesbonscomptes.com/upmpdcli/>`_ is recommended, since it
+is easier to setup, and offers `OpenHome <http://www.openhome.org> ohMedia`_
+compatibility. upmpdcli exposes a UPnP MediaRenderer to the network, while
+using the MPD protocol to control Mopidy.
+
+1. Install upmpdcli. On Debian/Ubuntu::
+
+       apt-get install upmpdcli
+
+   Alternatively, follow the instructions from the upmpdcli website.
+
+2. The default settings of upmpdcli will work with the default settings of
+   :ref:`ext-mpd`. Edit :file:`/etc/upmpdcli.conf` if you want to use different
+   ports, hosts, or other settings.
+
+3. Start upmpdcli using the command::
+
+       upmpdcli
+
+   Or, run it in the background as a service::
+
+       sudo service upmpdcli start
+
+4. A UPnP renderer should be available now.
 
 
 .. _rygel:
 
-How to make Mopidy available as an UPnP MediaRenderer
-=====================================================
+Rygel
+-----
 
 With the help of `the Rygel project <https://live.gnome.org/Rygel>`_ Mopidy can
 be made available as an UPnP MediaRenderer. Rygel will interface with the MPRIS
@@ -41,15 +79,15 @@ interface provided by the `Mopidy-MPRIS extension
 <https://github.com/mopidy/mopidy-mpris>`_, and make Mopidy available as a
 MediaRenderer on the local network. Since this depends on the MPRIS frontend,
 which again depends on D-Bus being available, this will only work on Linux, and
-not OS X.  MPRIS/D-Bus is only available to other applications on the same
+not OS X. MPRIS/D-Bus is only available to other applications on the same
 host, so Rygel must be running on the same machine as Mopidy.
 
-1. Start Mopidy and make sure the MPRIS frontend is working.  It is activated
+1. Start Mopidy and make sure the MPRIS frontend is working. It is activated
    by default when the Mopidy-MPRIS extension is installed, but you may miss
    dependencies or be using OS X, in which case it will not work. Check the
    console output when Mopidy is started for any errors related to the MPRIS
    frontend. If you're unsure it is working, there are instructions for how to
-   test it on in the `Mopidy-MPRIS readme
+   test it in the `Mopidy-MPRIS readme
    <https://github.com/mopidy/mopidy-mpris>`_.
 
 2. Install Rygel. On Debian/Ubuntu::

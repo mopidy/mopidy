@@ -97,8 +97,12 @@ def format_initial(extensions):
     versions = ['Mopidy %s' % versioning.get_version()]
     for extension in sorted(extensions, key=lambda ext: ext.dist_name):
         versions.append('%s %s' % (extension.dist_name, extension.version))
-    description = _INITIAL_HELP.strip() % {'versions': '\n#   '.join(versions)}
-    return description + '\n\n' + _format(config, {}, schemas, False, True)
+
+    header = _INITIAL_HELP.strip() % {'versions': '\n#   '.join(versions)}
+    formatted_config = _format(
+        config=config, comments={}, schemas=schemas,
+        display=False, disable=True).decode('utf-8')
+    return header + '\n\n' + formatted_config
 
 
 def _load(files, defaults, overrides):

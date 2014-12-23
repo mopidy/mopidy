@@ -347,7 +347,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.tracklist.consume = True
         self.playback.play()
         self.playback.next()
-        self.assertIn(self.tracks[0], self.tracklist.tracks)
+        self.assertNotIn(self.tracks[0], self.tracklist.tracks)
 
     @populate_tracklist
     def test_next_with_single_and_repeat(self):

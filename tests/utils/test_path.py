@@ -105,12 +105,12 @@ class GetOrCreateFileTest(unittest.TestCase):
         with self.assertRaises(IOError):
             path.get_or_create_file(conflicting_dir)
 
-    def test_create_dir_with_unicode(self):
+    def test_create_dir_with_unicode_filename_throws_value_error(self):
         with self.assertRaises(ValueError):
             file_path = unicode(os.path.join(self.parent, b'test'))
             path.get_or_create_file(file_path)
 
-    def test_create_file_with_none(self):
+    def test_create_file_with_none_filename_throws_value_error(self):
         with self.assertRaises(ValueError):
             path.get_or_create_file(None)
 
@@ -119,11 +119,17 @@ class GetOrCreateFileTest(unittest.TestCase):
         with self.assertRaises(IOError):
             path.get_or_create_file(file_path, mkdir=False)
 
-    def test_create_dir_with_default_content(self):
+    def test_create_dir_with_bytes_content(self):
         file_path = os.path.join(self.parent, b'test')
         created = path.get_or_create_file(file_path, content=b'foobar')
         with open(created) as fh:
             self.assertEqual(fh.read(), b'foobar')
+
+    def test_create_dir_with_unicode_content(self):
+        file_path = os.path.join(self.parent, b'test')
+        created = path.get_or_create_file(file_path, content='foobaræøå')
+        with open(created) as fh:
+            self.assertEqual(fh.read(), b'foobaræøå')
 
 
 class PathToFileURITest(unittest.TestCase):

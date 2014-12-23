@@ -18,6 +18,8 @@ class ImmutableObject(object):
                 raise TypeError(
                     '__init__() got an unexpected keyword argument "%s"' %
                     key)
+            if value == getattr(self, key):
+                continue  # Don't explicitly set default values
             self.__dict__[key] = value
 
     def __setattr__(self, name, value):
@@ -29,6 +31,8 @@ class ImmutableObject(object):
         kwarg_pairs = []
         for (key, value) in sorted(self.__dict__.items()):
             if isinstance(value, (frozenset, tuple)):
+                if not value:
+                    continue
                 value = list(value)
             kwarg_pairs.append('%s=%s' % (key, repr(value)))
         return '%(classname)s(%(kwargs)s)' % {
@@ -70,13 +74,11 @@ class ImmutableObject(object):
         for key in self.__dict__.keys():
             public_key = key.lstrip('_')
             value = values.pop(public_key, self.__dict__[key])
-            if value is not None:
-                data[public_key] = value
+            data[public_key] = value
         for key in values.keys():
             if hasattr(self, key):
                 value = values.pop(key)
-                if value is not None:
-                    data[key] = value
+                data[key] = value
         if values:
             raise TypeError(
                 'copy() got an unexpected keyword argument "%s"' % key)
@@ -239,7 +241,7 @@ class Album(ImmutableObject):
     :param artists: album artists
     :type artists: list of :class:`Artist`
     :param num_tracks: number of tracks in album
-    :type num_tracks: integer
+    :type num_tracks: integer or :class:`None` if unknown
     :param num_discs: number of discs in album
     :type num_discs: integer or :class:`None` if unknown
     :param date: album release date (YYYY or YYYY-MM-DD)
@@ -260,7 +262,7 @@ class Album(ImmutableObject):
     artists = frozenset()
 
     #: The number of tracks in the album. Read-only.
-    num_tracks = 0
+    num_tracks = None
 
     #: The number of discs in the album. Read-only.
     num_discs = None
@@ -300,7 +302,7 @@ class Track(ImmutableObject):
     :param genre: track genre
     :type genre: string
     :param track_no: track number in album
-    :type track_no: integer
+    :type track_no: integer or :class:`None` if unknown
     :param disc_no: disc number in album
     :type disc_no: integer or :class:`None` if unknown
     :param date: track release date (YYYY or YYYY-MM-DD)
@@ -314,7 +316,7 @@ class Track(ImmutableObject):
     :param musicbrainz_id: MusicBrainz ID
     :type musicbrainz_id: string
     :param last_modified: Represents last modification time
-    :type last_modified: integer
+    :type last_modified: integer or :class:`None` if unknown
     """
 
     #: The track URI. Read-only.
@@ -339,7 +341,7 @@ class Track(ImmutableObject):
     genre = None
 
     #: The track number in the album. Read-only.
-    track_no = 0
+    track_no = None
 
     #: The disc number in the album. Read-only.
     disc_no = None
@@ -362,7 +364,7 @@ class Track(ImmutableObject):
     #: Integer representing when the track was last modified, exact meaning
     #: depends on source of track. For local files this is the mtime, for other
     #: backends it could be a timestamp or simply a version counter.
-    last_modified = 0
+    last_modified = None
 
     def __init__(self, *args, **kwargs):
         get = lambda key: frozenset(kwargs.pop(key, None) or [])

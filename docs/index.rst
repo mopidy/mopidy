@@ -56,15 +56,20 @@ To get started with Mopidy, start by reading :ref:`installation`.
 
 **Getting help**
 
-If you get stuck, we usually hang around at ``#mopidy`` at `irc.freenode.net
-<http://freenode.net/>`_ (with `searchable logs
-<https://botbot.me/freenode/mopidy/>`_) and also have a `mailing list at Google
-Groups <https://groups.google.com/forum/?fromgroups=#!forum/mopidy>`_. If you
-stumble into a bug or got a feature request, please create an issue in the
-`issue tracker <https://github.com/mopidy/mopidy/issues>`_. The `source code
-<https://github.com/mopidy/mopidy>`_ may also be of help. If you want to stay
-up to date on Mopidy developments, you can follow `@mopidy
-<https://twitter.com/mopidy/>`_ on Twitter.
+If you get stuck, you can get help at the `Mopidy discussion forum
+<https://discuss.mopidy.com/>`_. We also hang around at IRC on the ``#mopidy``
+channel at `irc.freenode.net <http://freenode.net/>`_. The IRC channel has
+`public searchable logs <https://botbot.me/freenode/mopidy/>`_.
+
+If you stumble into a bug or have a feature request, please create an issue in
+the `issue tracker <https://github.com/mopidy/mopidy/issues>`_. If you're
+unsure if it's a bug or not, ask for help in the forum or at IRC first. The
+`source code <https://github.com/mopidy/mopidy>`_ may also be of help.
+
+If you want to stay up to date on Mopidy developments, you can follow `@mopidy
+<https://twitter.com/mopidy/>`_ on Twitter. There's also a `mailing list
+<https://groups.google.com/forum/?fromgroups=#!forum/mopidy>`_ used for
+announcements related to Mopidy and Mopidy extensions.
 
 
 Usage

@@ -23,48 +23,23 @@ When it is enabled it starts a web server at the port specified by the
     takes care or user authentication. You have been warned.
 
 
-Using a web based Mopidy client
-===============================
+Hosting web clients
+===================
 
-Mopidy-HTTP's web server can also host any static files, for example the HTML,
-CSS, JavaScript, and images needed for a web based Mopidy client. To host
-static files, change the :confval:`http/static_dir` config value to point to
-the root directory of your web client, for example::
+Mopidy-HTTP's web server can also host Tornado apps or any static files, for
+example the HTML, CSS, JavaScript, and images needed for a web based Mopidy
+client. See :ref:`http-server-api` for how to make static files or server-side
+functionality from a Mopidy extension available through Mopidy's web server.
 
-    [http]
-    static_dir = /home/alice/dev/the-client
-
-If the directory includes a file named ``index.html``, it will be served on the
-root of Mopidy's web server.
-
-If you're making a web based client and wants to do server side development as
-well, you are of course free to run your own web server and just use Mopidy's
-web server to host the API end points. But, for clients implemented purely in
-JavaScript, letting Mopidy host the files is a simpler solution.
+If you're making a web based client and want to do server side development
+using some other technology than Tornado, you are of course free to run your
+own web server and just use Mopidy's web server to host the API endpoints.
+But, for clients implemented purely in JavaScript, letting Mopidy host the
+files is a simpler solution.
 
 See :ref:`http-api` for details on how to integrate with Mopidy over HTTP. If
 you're looking for a web based client for Mopidy, go check out
 :ref:`http-clients`.
-
-
-Extending the server's functionality
-====================================
-
-If you wish to extend the server with additional server side functionality you
-must create class that implements the :class:`mopidy.http.Router` interface and
-install it in the extension registry under the ``http:router`` name.
-
-The default implementation of :class:`mopidy.http.Router` already supports
-serving static files. If you just want to serve static files you only need to
-define the class variables :attr:`mopidy.http.Router.name` and
-:attr:`mopidy.http.Router.path`. For example::
-
-    class MyWebClient(http.Router):
-        name = 'mywebclient'
-        path = os.path.join(os.path.dirname(__file__), 'public_html')
-
-If you wish to extend server with custom methods you can override the method
-:meth:`mopidy.http.Router.setup_routes` and define custom routes.
 
 
 Configuration
@@ -102,6 +77,13 @@ See :ref:`config` for general help on configuring Mopidy.
 
     Change this to have Mopidy serve e.g. files for your JavaScript client.
     "/mopidy" will continue to work as usual even if you change this setting.
+
+    This config value isn't deprecated yet, but you're strongly encouraged to
+    make Mopidy extensions which use the the :ref:`http-server-api` to host
+    static files on Mopidy's web server instead of using
+    :confval:`http/static_dir`. That way, installation of your web client will
+    be a lot easier for your end users, and multiple web clients can easily
+    share the same web server.
 
 .. confval:: http/zeroconf
 

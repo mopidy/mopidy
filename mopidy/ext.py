@@ -52,7 +52,7 @@ class Extension(object):
         return schema
 
     def get_command(self):
-        """Command to expose to command line users running mopidy.
+        """Command to expose to command line users running ``mopidy``.
 
         :returns:
           Instance of a :class:`~mopidy.commands.Command` class.
@@ -60,12 +60,13 @@ class Extension(object):
         pass
 
     def validate_environment(self):
-        """Checks if the extension can run in the current environment
+        """Checks if the extension can run in the current environment.
 
-        For example, this method can be used to check if all dependencies that
-        are needed are installed. If a problem is found, raise
-        :exc:`~mopidy.exceptions.ExtensionError` with a message explaining the
-        issue.
+        Dependencies described by :file:`setup.py` are checked by Mopidy, so
+        you should not check their presence here.
+
+        If a problem is found, raise :exc:`~mopidy.exceptions.ExtensionError`
+        with a message explaining the issue.
 
         :raises: :exc:`~mopidy.exceptions.ExtensionError`
         :returns: :class:`None`
@@ -187,10 +188,13 @@ def validate_extension(extension):
             extension.ext_name, ex)
         return False
     except pkg_resources.VersionConflict as ex:
-        found, required = ex.args
-        logger.info(
-            'Disabled extension %s: %s required, but found %s at %s',
-            extension.ext_name, required, found, found.location)
+        if len(ex.args) == 2:
+            found, required = ex.args
+            logger.info(
+                'Disabled extension %s: %s required, but found %s at %s',
+                extension.ext_name, required, found, found.location)
+        else:
+            logger.info('Disabled extension %s: %s', extension.ext_name, ex)
         return False
 
     try:

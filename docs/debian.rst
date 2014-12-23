@@ -55,24 +55,31 @@ from a regular Mopidy setup you'll want to know about.
   You can do all your changes in this file.
 
 - Mopidy extensions installed from Debian packages will sometimes install
-  additional configuration files in :file:`/etc/mopidy/extensions.d/`. These
+  additional configuration files in :file:`/usr/share/mopidy/conf.d/`. These
   files just provide different defaults for the extension when run as a system
-  service. You can override anything from :file:`/etc/mopidy/extensions.d/` in
+  service. You can override anything from :file:`/usr/share/mopidy/conf.d/` in
   the :file:`/etc/mopidy/mopidy.conf` configuration file.
+
+  Previously, the extension's default config was installed in
+  :file:`/etc/mopidy/extensions.d/`. This was removed with the Debian
+  package mopidy 0.19.4-3. If you have modified any files in
+  :file:`/etc/mopidy/extensions.d/`, you should redo your modifications in
+  :file:`/etc/mopidy/mopidy.conf` and delete the
+  :file:`/etc/mopidy/extensions.d/` directory.
 
 - The init script runs Mopidy as the ``mopidy`` user. The ``mopidy`` user will
   need read access to any local music you want Mopidy to play.
 
-- To run Mopidy subcommands with the same arguments, and thus the same
-  configuration files, as the init script uses, you can use ``sudo service
-  mopidy run <subcommand>``. In other words, where you'll usually run::
+- To run Mopidy subcommands with the same user and config files as the init
+  script uses, you can use ``sudo mopidyctl <subcommand>``. In other words,
+  where you'll usually run::
 
       mopidy config
 
   You should instead run the following to inspect the system service's
   configuration::
 
-      sudo service mopidy run config
+      sudo mopidyctl config
 
   The same applies to scanning your local music collection. Where you'll
   normally run::
@@ -81,7 +88,12 @@ from a regular Mopidy setup you'll want to know about.
 
   You should instead run::
 
-      sudo service mopidy run local scan
+      sudo mopidyctl local scan
+
+  Previously, you used ``sudo service mopidy run <subcommand>`` instead of
+  ``mopidyctl``. This was deprecated in Debian package version 0.19.4-3 in
+  favor of ``mopidyctl``, which also work for systems using systemd instead of
+  sysvinit and traditional init scripts.
 
 - Mopidy is started, stopped, and restarted just like any other system
   service::
