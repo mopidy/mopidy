@@ -10,6 +10,12 @@ v0.19.5 (UNRELEASED)
 
 Bug fix release.
 
+- config: Support UTF-8 in default config. If an extension with non-ASCII
+  characters in its default config was installed, and Mopidy didn't already
+  have a config file, Mopidy would crashed when trying to create the initial
+  config file based on the default config of all available extensions.
+  (Fixes: :discuss:`428`)
+
 - Models: Hide empty collections from :func:`repr()` representations.
 
 - Models: Field values are no longer stored on the model instance when the
