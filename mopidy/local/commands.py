@@ -73,9 +73,6 @@ class ScanCommand(commands.Command):
 
         library = _get_library(args, config)
 
-        uris_to_update = set()
-        uris_to_remove = set()
-
         file_mtimes, file_errors = path.find_mtimes(
             media_dir, follow=config['local']['scan_follow_symlinks'])
 
@@ -90,14 +87,19 @@ class ScanCommand(commands.Command):
         num_tracks = library.load()
         logger.info('Checking %d tracks from library.', num_tracks)
 
+        uris_to_update = set()
+        uris_to_remove = set()
+        uris_in_library = set()
+
         for track in library.begin():
             abspath = translator.local_track_uri_to_path(track.uri, media_dir)
-            mtime = file_mtimes.pop(abspath, None)
+            mtime = file_mtimes.get(abspath)
             if mtime is None:
                 logger.debug('Missing file %s', track.uri)
                 uris_to_remove.add(track.uri)
             elif mtime > track.last_modified:
                 uris_to_update.add(track.uri)
+            uris_in_library.add(track.uri)
 
         logger.info('Removing %d missing tracks.', len(uris_to_remove))
         for uri in uris_to_remove:
@@ -107,12 +109,11 @@ class ScanCommand(commands.Command):
             relpath = os.path.relpath(abspath, media_dir)
             uri = translator.path_to_local_track_uri(relpath)
 
-            # TODO: move these to a "predicate" check in the finder?
             if b'/.' in relpath:
                 logger.debug('Skipped %s: Hidden directory/file.', uri)
             elif relpath.lower().endswith(excluded_file_extensions):
                 logger.debug('Skipped %s: File extension excluded.', uri)
-            else:
+            elif uri not in uris_in_library:
                 uris_to_update.add(uri)
 
         logger.info(
@@ -134,8 +135,7 @@ class ScanCommand(commands.Command):
                     logger.warning('Failed %s: Track shorter than %dms',
                                    uri, MIN_DURATION_MS)
                 else:
-                    # TODO: reuse mtime from above...
-                    mtime = os.path.getmtime(os.path.join(media_dir, relpath))
+                    mtime = file_mtimes.get(os.path.join(media_dir, relpath))
                     track = utils.convert_tags_to_track(tags).copy(
                         uri=uri, length=duration, last_modified=mtime)
                     track = translator.add_musicbrainz_coverart_to_track(track)
