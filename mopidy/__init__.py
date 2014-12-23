@@ -21,4 +21,4 @@ if (isinstance(pykka.__version__, basestring)
 warnings.filterwarnings('ignore', 'could not open display')
 
 
-__version__ = '0.19.4'
+__version__ = '0.19.5'
