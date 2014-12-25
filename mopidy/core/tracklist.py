@@ -437,18 +437,18 @@ class TracklistController(object):
         return self._tl_tracks[start:end]
 
     def mark_playing(self, tl_track):
-        """Private method used by :class:`mopidy.core.PlaybackController`."""
+        """Method for :class:`mopidy.core.PlaybackController`. **INTERNAL**"""
         if self.random and tl_track in self._shuffled:
             self._shuffled.remove(tl_track)
 
     def mark_unplayable(self, tl_track):
-        """Private method used by :class:`mopidy.core.PlaybackController`."""
+        """Method for :class:`mopidy.core.PlaybackController`. **INTERNAL**"""
         logger.warning('Track is not playable: %s', tl_track.track.uri)
         if self.random and tl_track in self._shuffled:
             self._shuffled.remove(tl_track)
 
     def mark_played(self, tl_track):
-        """Private method used by :class:`mopidy.core.PlaybackController`."""
+        """Method for :class:`mopidy.core.PlaybackController`. **INTERNAL**"""
         if self.consume and tl_track is not None:
             self.remove(tlid=[tl_track.tlid])
             return True

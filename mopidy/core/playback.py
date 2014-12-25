@@ -136,7 +136,7 @@ class PlaybackController(object):
         :param tl_track: track to change to
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :param on_error_step: direction to step at play error, 1 for next
-            track (default), -1 for previous track
+            track (default), -1 for previous track. **INTERNAL**
         :type on_error_step: int, -1 or 1
         """
         old_state = self.state
@@ -217,7 +217,7 @@ class PlaybackController(object):
         :param tl_track: track to play
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :param on_error_step: direction to step at play error, 1 for next
-            track (default), -1 for previous track
+            track (default), -1 for previous track. **INTERNAL**
         :type on_error_step: int, -1 or 1
         """
 
