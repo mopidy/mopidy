@@ -449,10 +449,10 @@ class TracklistController(object):
 
     def mark_played(self, tl_track):
         """Private method used by :class:`mopidy.core.PlaybackController`."""
-        if not self.consume:
-            return False
-        self.remove(tlid=[tl_track.tlid])
-        return True
+        if self.consume and tl_track is not None:
+            self.remove(tlid=[tl_track.tlid])
+            return True
+        return False
 
     def _trigger_tracklist_changed(self):
         if self.random:

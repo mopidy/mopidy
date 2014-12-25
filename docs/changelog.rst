@@ -39,8 +39,6 @@ v0.20.0 (UNRELEASED)
 - Add symlink support with loop protection to file finder (Fixes: :issue:`858`,
   PR: :isusue:`874`)
 
-- Fix scanning of modified files. (PR: :issue:`904`)
-
 **MPD frontend**
 
 - In stored playlist names, replace "/", which are illegal, with "|" instead of
@@ -49,15 +47,11 @@ v0.20.0 (UNRELEASED)
 - Enable browsing of artist references, in addition to albums and playlists.
   (PR: :issue:`884`)
 
-- Re-enable browsing of empty directories. (PR: :issue:`906`)
-
-- Quick workaround for :issue:`881`, which allows for newlines in comments.
-  (PR: :issue:`882`)
-
 **Audio**
 
 - Deprecated :meth:`mopidy.audio.Audio.emit_end_of_stream`. Pass a
-  :class:`None` buffer to :meth:`mopidy.audio.Audio.emit_data` end the stream.
+  :class:`None` buffer to :meth:`mopidy.audio.Audio.emit_data` to end the
+  stream.
 
 - Internal code cleanup within audio subsystem:
 
@@ -94,16 +88,26 @@ v0.20.0 (UNRELEASED)
   make sense for a server such as Mopidy. Currently the only way to find out if
   it is in use and will be missed is to go ahead and remove it.
 
-
 **Stream backend**
 
 - Add basic tests for the stream library provider.
 
 
-v0.19.5 (UNRELEASED)
+v0.19.5 (2014-12-23)
 ====================
 
-Bug fix release.
+Today is Mopidy's five year anniversary. We're celebrating with a bugfix
+release and are looking forward to the next five years!
+
+- Config: Support UTF-8 in extension's default config. If an extension with
+  non-ASCII characters in its default config was installed, and Mopidy didn't
+  already have a config file, Mopidy would crashed when trying to create the
+  initial config file based on the default config of all available extensions.
+  (Fixes: :discuss:`428`)
+
+- Extensions: Fix crash when unpacking data from
+  :exc:`pkg_resources.VersionConflict` created with a single argument. (Fixes:
+  :issue:`911`)
 
 - Models: Hide empty collections from :func:`repr()` representations.
 
@@ -116,6 +120,20 @@ Bug fix release.
 - Models: Changed the default value of :attr:`mopidy.models.Album.num_tracks`,
   :attr:`mopidy.models.Track.track_no`, and
   :attr:`mopidy.models.Track.last_modified` from ``0`` to :class:`None`.
+
+- Core: When skipping to the next track in consume mode, remove the skipped
+  track from the tracklist. This is consistent with the original MPD server's
+  behavior. (Fixes: :issue:`902`)
+
+- Local: Fix scanning of modified files. (PR: :issue:`904`)
+
+- MPD: Re-enable browsing of empty directories. (PR: :issue:`906`)
+
+- MPD: Remove track comments from responses. They are not included by the
+  original MPD server, and this works around :issue:`881`. (PR: :issue:`882`)
+
+- HTTP: Errors while starting HTTP apps are logged instead of crashing the HTTP
+  server. (Fixes: :issue:`875`)
 
 
 v0.19.4 (2014-09-01)
