@@ -142,9 +142,11 @@ def convert_taglist(taglist):
     - Booleans
 
     Unknown types will be ignored and debug logged. Tag keys are all strings
-    defined by GStreamer.
+    defined as part GStreamer under GstTagList_.
 
-    :param :class:`gst.Taglist` taglist: A GStreamer taglist to be converted.
+    .. _GstTagList: http://gstreamer.freedesktop.org/data/doc/gstreamer/0.10.36/gstreamer/html/gstreamer-GstTagList.html
+
+    :param gst.Taglist taglist: A GStreamer taglist to be converted.
     :rtype: dictionary of tag keys with a list of values.
     """
     result = {}
