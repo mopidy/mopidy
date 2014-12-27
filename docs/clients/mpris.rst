@@ -30,11 +30,11 @@ menu, including the official Spotify player and Mopidy.
 
 If you install Mopidy from apt.mopidy.com, the sound menu should work out of
 the box. If you install Mopidy in any other way, you need to make sure that the
-file located at ``data/mopidy.desktop`` in the Mopidy git repo is installed as
-``/usr/share/applications/mopidy.desktop``, and that the properties ``TryExec``
-and ``Exec`` in the file points to an existing executable file, preferably your
-Mopidy executable. If this isn't in place, the sound menu will not detect that
-Mopidy is running.
+file located at ``extra/desktop/mopidy.desktop`` in the Mopidy git repo is
+installed as ``/usr/share/applications/mopidy.desktop``, and that the
+properties ``TryExec`` and ``Exec`` in the file points to an existing
+executable file, preferably your Mopidy executable. If this isn't in place, the
+sound menu will not detect that Mopidy is running.
 
 Next, Mopidy's MPRIS frontend must be running for the sound menu to be able to
 control Mopidy. The frontend is enabled by default, so as long as you have all
