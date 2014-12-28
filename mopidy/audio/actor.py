@@ -303,6 +303,8 @@ class _Handler(object):
             self.on_warning(*msg.parse_warning())
         elif msg.type == gst.MESSAGE_ASYNC_DONE:
             self.on_async_done()
+        elif msg.type == gst.MESSAGE_TAG:
+            self.on_tag(msg.parse_tag())
         elif msg.type == gst.MESSAGE_ELEMENT:
             if gst.pbutils.is_missing_plugin_message(msg):
                 self.on_missing_plugin(_get_missing_description(msg),
@@ -370,6 +372,7 @@ class _Handler(object):
     def on_end_of_stream(self):
         gst_logger.debug('Got end-of-stream message.')
         logger.debug('Audio event: reached_end_of_stream()')
+        self._audio._tags = {}
         AudioListener.send('reached_end_of_stream')
 
     def on_error(self, error, debug):
@@ -387,6 +390,12 @@ class _Handler(object):
     def on_async_done(self):
         gst_logger.debug('Got async-done.')
 
+    def on_tag(self, taglist):
+        tags = utils.convert_taglist(taglist)
+        self._audio._tags.update(tags)
+        logger.debug('Audio event: tags_changed(tags=%r)', tags.keys())
+        AudioListener.send('tags_changed', tags=tags.keys())
+
     def on_missing_plugin(self, msg):
         desc = gst.pbutils.missing_plugin_message_get_description(msg)
         debug = gst.pbutils.missing_plugin_message_get_installer_detail(msg)
@@ -401,7 +410,7 @@ class _Handler(object):
         # required helper installed?
 
     def on_new_segment(self, update, rate, format_, start, stop, position):
-        gst_logger.debug('Got new-segment event: update=%s rate=%s format=%s'
+        gst_logger.debug('Got new-segment event: update=%s rate=%s format=%s '
                          'start=%s stop=%s position=%s', update, rate,
                          format_.value_name, start, stop, position)
         position_ms = position // gst.MSECOND
@@ -432,6 +441,7 @@ class Audio(pykka.ThreadingActor):
         self._config = config
         self._target_state = gst.STATE_NULL
         self._buffering = False
+        self._tags = {}
 
         self._playbin = None
         self._outputs = None
@@ -538,6 +548,7 @@ class Audio(pykka.ThreadingActor):
         :param uri: the URI to play
         :type uri: string
         """
+        self._tags = {}  # TODO: add test for this somehow
         self._playbin.set_property('uri', uri)
 
     def set_appsrc(
@@ -725,6 +736,7 @@ class Audio(pykka.ThreadingActor):
         # of faking it in the message handling when result=OK
         return True
 
+    # TODO: bake this into setup appsrc perhaps?
     def set_metadata(self, track):
         """
         Set track metadata for currently playing song.
@@ -755,5 +767,22 @@ class Audio(pykka.ThreadingActor):
             taglist[gst.TAG_ALBUM] = track.album.name
 
         event = gst.event_new_tag(taglist)
+        # TODO: check if we get this back on our own bus?
         self._playbin.send_event(event)
         gst_logger.debug('Sent tag event: track=%s', track.uri)
+
+    def get_current_tags(self):
+        """
+        Get the currently playing media's tags.
+
+        If no tags have been found, or nothing is playing this returns an empty
+        dictionary. For each set of tags we collect a tags_changed event is
+        emitted with the keys of the changes tags. After such calls users may
+        call this function to get the updated values.
+
+        :rtype: {key: [values]} dict for the current media.
+        """
+        # TODO: should this be a (deep) copy? most likely yes
+        # TODO: should we return None when stopped?
+        # TODO: support only fetching keys we care about?
+        return self._tags

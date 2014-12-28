@@ -42,7 +42,7 @@ class BaseTest(unittest.TestCase):
 
     audio_class = audio.Audio
 
-    def setUp(self):
+    def setUp(self):  # noqa
         config = {
             'audio': {
                 'mixer': 'foomixer',
@@ -57,7 +57,7 @@ class BaseTest(unittest.TestCase):
         self.song_uri = path_to_uri(path_to_data_dir('song1.wav'))
         self.audio = self.audio_class.start(config=config, mixer=None).proxy()
 
-    def tearDown(self):
+    def tearDown(self):  # noqa
         pykka.ActorRegistry.stop_all()
 
     def possibly_trigger_fake_playback_error(self):
@@ -135,7 +135,7 @@ class AudioDummyTest(DummyMixin, AudioTest):
 
 @mock.patch.object(audio.AudioListener, 'send')
 class AudioEventTest(BaseTest):
-    def setUp(self):
+    def setUp(self):  # noqa
         super(AudioEventTest, self).setUp()
         self.audio.enable_sync_handler().get()
 
@@ -292,6 +292,14 @@ class AudioEventTest(BaseTest):
         call = mock.call('position_changed', position=2000)
         self.assertIn(call, send_mock.call_args_list)
 
+    def test_tags_changed_on_playback(self, send_mock):
+        self.audio.prepare_change()
+        self.audio.set_uri(self.uris[0])
+        self.audio.start_playback()
+        self.audio.wait_for_state_change().get()
+
+        send_mock.assert_any_call('tags_changed', tags=mock.ANY)
+
     # Unlike the other events, having the state changed done is not
     # enough to ensure our event is called. So we setup a threading
     # event that we can wait for with a timeout while the track playback
@@ -330,7 +338,7 @@ class AudioEventTest(BaseTest):
         if not event.wait(timeout=1.0):
             self.fail('End of stream not reached within deadline')
 
-    # Make sure that gapless really works:
+        self.assertFalse(self.audio.get_current_tags().get())
 
     def test_gapless(self, send_mock):
         uris = self.uris[1:]
@@ -361,20 +369,74 @@ class AudioEventTest(BaseTest):
         if not done.wait(timeout=1.0):
             self.fail('EOS not received')
 
-        excepted = [
-            ('position_changed', {'position': 0}),
-            ('stream_changed', {'uri': self.uris[0]}),
-            ('state_changed', {'old_state': PlaybackState.STOPPED,
-                               'new_state': PlaybackState.PLAYING,
-                               'target_state': None}),
-            ('position_changed', {'position': 0}),
-            ('stream_changed', {'uri': self.uris[1]}),
-            ('reached_end_of_stream', {})]
-        self.assertEqual(excepted, events)
+        # Check that both uris got played
+        self.assertIn(('stream_changed', {'uri': self.uris[0]}), events)
+        self.assertIn(('stream_changed', {'uri': self.uris[1]}), events)
+
+        # Check that events counts check out.
+        keys = [k for k, v in events]
+        self.assertEqual(2, keys.count('stream_changed'))
+        self.assertEqual(2, keys.count('position_changed'))
+        self.assertEqual(1, keys.count('state_changed'))
+        self.assertEqual(1, keys.count('reached_end_of_stream'))
+
+        # TODO: test tag states within gaples
+
+    def test_current_tags_are_blank_to_begin_with(self, send_mock):
+        self.assertFalse(self.audio.get_current_tags().get())
+
+    def test_current_tags_blank_after_end_of_stream(self, send_mock):
+        done = threading.Event()
+
+        def send(name, **kwargs):
+            if name == 'reached_end_of_stream':
+                done.set()
+
+        send_mock.side_effect = send
+
+        self.audio.prepare_change()
+        self.audio.set_uri(self.uris[0])
+        self.audio.start_playback()
+
+        self.possibly_trigger_fake_about_to_finish()
+        self.audio.wait_for_state_change().get()
+
+        if not done.wait(timeout=1.0):
+            self.fail('EOS not received')
+
+        self.assertFalse(self.audio.get_current_tags().get())
+
+    def test_current_tags_stored(self, send_mock):
+        done = threading.Event()
+        tags = []
+
+        def callback():
+            tags.append(self.audio.get_current_tags().get())
+
+        def send(name, **kwargs):
+            if name == 'reached_end_of_stream':
+                done.set()
+
+        send_mock.side_effect = send
+        self.audio.set_about_to_finish_callback(callback).get()
+
+        self.audio.prepare_change()
+        self.audio.set_uri(self.uris[0])
+        self.audio.start_playback()
+
+        self.possibly_trigger_fake_about_to_finish()
+        self.audio.wait_for_state_change().get()
+
+        if not done.wait(timeout=1.0):
+            self.fail('EOS not received')
+
+        self.assertTrue(tags[0])
+
+    # TODO: test that we reset when we expect between songs
 
 
 class AudioDummyEventTest(DummyMixin, AudioEventTest):
-    pass
+    """Exercise the AudioEventTest against our mock audio classes."""
 
 
 # TODO: move to mixer tests...
@@ -399,7 +461,7 @@ class MixerTest(BaseTest):
 
 
 class AudioStateTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa
         self.audio = audio.Audio(config=None, mixer=None)
 
     def test_state_starts_as_stopped(self):
@@ -444,7 +506,7 @@ class AudioStateTest(unittest.TestCase):
 
 
 class AudioBufferingTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa
         self.audio = audio.Audio(config=None, mixer=None)
         self.audio._playbin = mock.Mock(spec=['set_state'])
 

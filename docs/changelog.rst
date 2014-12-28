@@ -63,11 +63,34 @@ v0.20.0 (UNRELEASED)
 
   - Add foundation for trying to re-add multiple output support.
 
+  - Add internal helper for converting GStreamer data types to Python.
+
+  - Move MusicBrainz coverart code out of audio and into local.
+
+  - Reduce scope of audio scanner to just tags + duration. Mtime, uri and min
+    length handling are now outside of this class.
+
+  - Update scanner to operate with milliseconds for duration.
+
+- Add :meth:`mopidy.audio.AudioListener.tags_changed`. Notifies core when new tags
+  are found.
+
+- Add :meth:`mopidy.audio.Audio.get_current_tags` for looking up the current
+  tags of the playing media.
+
+- Move and rename helper for converting tags to tracks.
+
+  - Helper now ignores albums without a name.
+
 - Kill support for visualizers. Feature was originally added as a workaround for
   all the people asking for ncmpcpp visualizer support. And since we could get
   it almost for free thanks to GStreamer. But this feature didn't really ever
   make sense for a server such as Mopidy. Currently the only way to find out if
   it is in use and will be missed is to go ahead and remove it.
+
+**Stream backend**
+
+- Add basic tests for the stream library provider.
 
 
 v0.19.5 (2014-12-23)

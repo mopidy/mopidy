@@ -21,9 +21,11 @@ class DummyAudio(pykka.ThreadingActor):
         self._callback = None
         self._uri = None
         self._state_change_result = True
+        self._tags = {}
 
     def set_uri(self, uri):
         assert self._uri is None, 'prepare change not called before set'
+        self._tags = {}
         self._uri = uri
 
     def set_appsrc(self, *args, **kwargs):
@@ -66,6 +68,9 @@ class DummyAudio(pykka.ThreadingActor):
     def set_metadata(self, track):
         pass
 
+    def get_current_tags(self):
+        return self._tags
+
     def set_about_to_finish_callback(self, callback):
         self._callback = callback
 
@@ -91,6 +96,10 @@ class DummyAudio(pykka.ThreadingActor):
         AudioListener.send('state_changed', old_state=old_state,
                            new_state=new_state, target_state=None)
 
+        if new_state == PlaybackState.PLAYING:
+            self._tags['audio-codec'] = [u'fake info...']
+            AudioListener.send('tags_changed', tags=['audio-codec'])
+
         return self._state_change_result
 
     def trigger_fake_playback_failure(self):
@@ -104,6 +113,7 @@ class DummyAudio(pykka.ThreadingActor):
                 self._callback()
 
             if not self._uri or not self._callback:
+                self._tags = {}
                 AudioListener.send('reached_end_of_stream')
             else:
                 AudioListener.send('position_changed', position=0)

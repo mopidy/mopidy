@@ -75,3 +75,21 @@ class AudioListener(listener.Listener):
             field or :class:`None` if this is a final state.
         """
         pass
+
+    def tags_changed(self, tags):
+        """
+        Called whenever the current audio stream's tags change.
+
+        This event signals that some track metadata has been updated. This can
+        be metadata such as artists, titles, organization, or details about the
+        actual audio such as bit-rates, numbers of channels etc.
+
+        For the available tag keys please refer to GStreamer documentation for
+        tags.
+
+        *MAY* be implemented by actor.
+
+        :param tags: The tags that have just been updated.
+        :type tags: :class:`set` of strings
+        """
+        pass
