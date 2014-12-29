@@ -14,7 +14,7 @@ from tests import path_to_data_dir
 
 
 class ScannerTest(unittest.TestCase):
-    def setUp(self):  # noqa
+    def setUp(self):  # noqa: N802
         self.errors = {}
         self.tags = {}
         self.durations = {}

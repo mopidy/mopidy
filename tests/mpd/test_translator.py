@@ -26,11 +26,11 @@ class TrackMpdFormatTest(unittest.TestCase):
         length=137000,
     )
 
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.media_dir = '/dir/subdir'
         mtime.set_fake_time(1234567)
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         mtime.undo_fake()
 
     def test_track_to_mpd_format_for_empty_track(self):

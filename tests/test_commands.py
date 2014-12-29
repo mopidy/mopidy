@@ -44,12 +44,12 @@ class ConfigOverrideTypeTest(unittest.TestCase):
 
 
 class CommandParsingTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.exit_patcher = mock.patch.object(commands.Command, 'exit')
         self.exit_mock = self.exit_patcher.start()
         self.exit_mock.side_effect = SystemExit
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         self.exit_patcher.stop()
 
     def test_command_parsing_returns_namespace(self):

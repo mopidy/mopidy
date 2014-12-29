@@ -84,7 +84,7 @@ class LoadConfigTest(unittest.TestCase):
 
 
 class ValidateTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.schema = config.ConfigSchema('foo')
         self.schema['bar'] = config.ConfigValue()
 

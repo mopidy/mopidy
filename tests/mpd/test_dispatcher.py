@@ -11,7 +11,7 @@ from mopidy.mpd.exceptions import MpdAckError
 
 
 class MpdDispatcherTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         config = {
             'mpd': {
                 'password': None,
@@ -21,7 +21,7 @@ class MpdDispatcherTest(unittest.TestCase):
         self.core = core.Core.start(backends=[self.backend]).proxy()
         self.dispatcher = MpdDispatcher(config=config)
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
 
     def test_call_handler_for_unknown_command_raises_exception(self):

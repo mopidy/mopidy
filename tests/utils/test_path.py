@@ -16,10 +16,10 @@ import tests
 
 
 class GetOrCreateDirTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.parent = tempfile.mkdtemp()
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         if os.path.isdir(self.parent):
             shutil.rmtree(self.parent)
 
@@ -67,10 +67,10 @@ class GetOrCreateDirTest(unittest.TestCase):
 
 
 class GetOrCreateFileTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.parent = tempfile.mkdtemp()
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         if os.path.isdir(self.parent):
             shutil.rmtree(self.parent)
 
@@ -221,10 +221,10 @@ class ExpandPathTest(unittest.TestCase):
 class FindMTimesTest(unittest.TestCase):
     maxDiff = None
 
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.tmpdir = tempfile.mkdtemp(b'.mopidy-tests')
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def mkdir(self, *args):
@@ -378,7 +378,7 @@ class FindMTimesTest(unittest.TestCase):
 
 # TODO: kill this in favour of just os.path.getmtime + mocks
 class MtimeTest(unittest.TestCase):
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         path.mtime.undo_fake()
 
     def test_mtime_of_current_dir(self):

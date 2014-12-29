@@ -42,7 +42,7 @@ class BaseTest(unittest.TestCase):
 
     audio_class = audio.Audio
 
-    def setUp(self):  # noqa
+    def setUp(self):  # noqa: N802
         config = {
             'audio': {
                 'mixer': 'foomixer',
@@ -135,7 +135,7 @@ class AudioDummyTest(DummyMixin, AudioTest):
 
 @mock.patch.object(audio.AudioListener, 'send')
 class AudioEventTest(BaseTest):
-    def setUp(self):  # noqa
+    def setUp(self):  # noqa: N802
         super(AudioEventTest, self).setUp()
         self.audio.enable_sync_handler().get()
 
@@ -461,7 +461,7 @@ class MixerTest(BaseTest):
 
 
 class AudioStateTest(unittest.TestCase):
-    def setUp(self):  # noqa
+    def setUp(self):  # noqa: N802
         self.audio = audio.Audio(config=None, mixer=None)
 
     def test_state_starts_as_stopped(self):
@@ -506,7 +506,7 @@ class AudioStateTest(unittest.TestCase):
 
 
 class AudioBufferingTest(unittest.TestCase):
-    def setUp(self):  # noqa
+    def setUp(self):  # noqa: N802
         self.audio = audio.Audio(config=None, mixer=None)
         self.audio._playbin = mock.Mock(spec=['set_state'])
 

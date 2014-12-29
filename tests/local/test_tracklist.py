@@ -26,7 +26,7 @@ class LocalTracklistProviderTest(unittest.TestCase):
     tracks = [
         Track(uri=generate_song(i), length=4464) for i in range(1, 4)]
 
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.audio = audio.DummyAudio.start().proxy()
         self.backend = actor.LocalBackend.start(
             config=self.config, audio=self.audio).proxy()
@@ -36,7 +36,7 @@ class LocalTracklistProviderTest(unittest.TestCase):
 
         assert len(self.tracks) == 3, 'Need three tracks to run tests.'
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
 
     def test_length(self):

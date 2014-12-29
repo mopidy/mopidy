@@ -13,11 +13,11 @@ from mopidy.models import Track
 
 @mock.patch.object(core.CoreListener, 'send')
 class BackendEventsTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.backend = dummy.create_dummy_backend_proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
 
     def test_forwards_backend_playlists_loaded_event_to_frontends(self, send):

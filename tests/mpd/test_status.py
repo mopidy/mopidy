@@ -20,13 +20,13 @@ STOPPED = PlaybackState.STOPPED
 
 
 class StatusHandlerTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.backend = dummy.create_dummy_backend_proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
         self.dispatcher = dispatcher.MpdDispatcher(core=self.core)
         self.context = self.dispatcher.context
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
 
     def test_stats_method(self):

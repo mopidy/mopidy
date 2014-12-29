@@ -9,7 +9,7 @@ from mopidy.models import Track
 
 
 class TracklistTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.tracks = [
             Track(uri='dummy1:a', name='foo'),
             Track(uri='dummy1:b', name='foo'),

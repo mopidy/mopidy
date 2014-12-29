@@ -23,13 +23,13 @@ class LocalBackendEventsTest(unittest.TestCase):
         }
     }
 
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.audio = audio.DummyAudio.start().proxy()
         self.backend = actor.LocalBackend.start(
             config=self.config, audio=self.audio).proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
 
     def test_playlists_refresh_sends_playlists_loaded_event(self, send):

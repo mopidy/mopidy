@@ -9,7 +9,7 @@ from mopidy.models import Track
 
 
 class CorePlaybackTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
         self.playback1 = mock.Mock(spec=backend.PlaybackProvider)

@@ -8,7 +8,7 @@ from mopidy import audio
 
 
 class AudioListenerTest(unittest.TestCase):
-    def setUp(self):  # noqa
+    def setUp(self):  # noqa: N802
         self.listener = audio.AudioListener()
 
     def test_on_event_forwards_to_specific_handler(self):

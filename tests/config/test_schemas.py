@@ -11,7 +11,7 @@ from tests import any_unicode
 
 
 class ConfigSchemaTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.schema = schemas.ConfigSchema('test')
         self.schema['foo'] = mock.Mock()
         self.schema['bar'] = mock.Mock()

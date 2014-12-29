@@ -8,7 +8,7 @@ from mopidy.models import Artist, Track
 
 class PlaybackHistoryTest(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.tracks = [
             Track(uri='dummy1:a', name='foo',
                   artists=[Artist(name='foober'), Artist(name='barber')]),

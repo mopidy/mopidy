@@ -55,7 +55,7 @@ class TestConverts(unittest.TestCase):
 
 
 class TestCommands(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.commands = protocol.Commands()
 
     def test_add_as_a_decorator(self):

@@ -31,7 +31,7 @@ class BaseTestCase(unittest.TestCase):
             }
         }
 
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.backend = dummy.create_dummy_backend_proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
 
@@ -41,7 +41,7 @@ class BaseTestCase(unittest.TestCase):
         self.dispatcher = self.session.dispatcher
         self.context = self.dispatcher.context
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
 
     def sendRequest(self, request):

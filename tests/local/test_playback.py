@@ -39,7 +39,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         track = Track(uri=uri, length=4464)
         self.tracklist.add([track])
 
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.audio = audio.DummyAudio.start().proxy()
         self.backend = actor.LocalBackend.start(
             config=self.config, audio=self.audio).proxy()
@@ -52,7 +52,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         assert self.tracks[0].length >= 2000, \
             'First song needs to be at least 2000 miliseconds'
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
 
     def test_uri_scheme(self):

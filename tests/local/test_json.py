@@ -9,7 +9,7 @@ from mopidy.models import Ref
 class BrowseCacheTest(unittest.TestCase):
     maxDiff = None
 
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.uris = ['local:track:foo/bar/song1',
                      'local:track:foo/bar/song2',
                      'local:track:foo/baz/song3',

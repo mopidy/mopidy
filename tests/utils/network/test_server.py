@@ -14,7 +14,7 @@ from tests import any_int
 
 
 class ServerTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.mock = Mock(spec=network.Server)
 
     def test_init_calls_create_server_socket(self):

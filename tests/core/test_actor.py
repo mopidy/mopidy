@@ -11,7 +11,7 @@ from mopidy.utils import versioning
 
 
 class CoreActorTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
         self.backend1.actor_ref.actor_class.__name__ = b'B1'
@@ -22,7 +22,7 @@ class CoreActorTest(unittest.TestCase):
 
         self.core = Core(mixer=None, backends=[self.backend1, self.backend2])
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
 
     def test_uri_schemes_has_uris_from_all_backends(self):

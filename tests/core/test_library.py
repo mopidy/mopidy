@@ -9,7 +9,7 @@ from mopidy.models import Ref, SearchResult, Track
 
 
 class CoreLibraryTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         dummy1_root = Ref.directory(uri='dummy1:directory', name='dummy1')
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']

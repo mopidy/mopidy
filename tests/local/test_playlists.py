@@ -25,7 +25,7 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
         }
     }
 
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.config['local']['playlists_dir'] = tempfile.mkdtemp()
         self.playlists_dir = self.config['local']['playlists_dir']
 
@@ -34,7 +34,7 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
             config=self.config, audio=self.audio).proxy()
         self.core = core.Core(backends=[self.backend])
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
 
         if os.path.exists(self.playlists_dir):

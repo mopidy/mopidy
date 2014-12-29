@@ -9,7 +9,7 @@ from mopidy.models import Playlist, Track
 
 
 class PlaylistsTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
         self.sp1 = mock.Mock(spec=backend.PlaylistsProvider)

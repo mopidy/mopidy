@@ -73,14 +73,14 @@ class LocalLibraryProviderTest(unittest.TestCase):
         },
     }
 
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         actor.LocalBackend.libraries = [json.JsonLibrary]
         self.backend = actor.LocalBackend.start(
             config=self.config, audio=None).proxy()
         self.core = core.Core(backends=[self.backend])
         self.library = self.core.library
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
         actor.LocalBackend.libraries = []
 
