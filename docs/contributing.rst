@@ -101,7 +101,9 @@ Mopidy to come with tests.
 
        flake8
 
-   If successful, the command will not print anything at all.
+   If successful, the command will not print anything at all. Ignore the rare
+   cases you need to ignore a check use `# noqa: <code>` so we can lookup what
+   you are ignoring.
 
 #. Finally, there is the ultimate but a bit slower command. To run both tests,
    docs build, and flake8 linting, run::
