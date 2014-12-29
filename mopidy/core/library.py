@@ -63,8 +63,10 @@ class LibraryController(object):
         """
         if uri is None:
             backends = self.backends.with_library_browse.values()
-            unique_dirs = {b.library.root_directory.get() for b in backends}
-            return sorted(unique_dirs, key=operator.attrgetter('name'))
+            unique_dirs = {b.library.root_directory.get()
+                           for b in backends}
+            return sorted(
+                unique_dirs, key=operator.attrgetter('name'))
 
         scheme = urlparse.urlparse(uri).scheme
         backend = self.backends.with_library_browse.get(scheme)
@@ -111,11 +113,8 @@ class LibraryController(object):
         :rtype: list of :class:`mopidy.models.SearchResult`
         """
         query = query or kwargs
-        futures = [
-            backend.library.find_exact(query=query, uris=backend_uris)
-            for (backend, backend_uris)
-            in self._get_backends_to_uris(uris).items()]
-        return [result for result in pykka.get_all(futures) if result]
+        return self.advanced_search(
+            query, uris, exact=True, returnType=None)
 
     def lookup(self, uri):
         """
@@ -188,8 +187,57 @@ class LibraryController(object):
         :rtype: list of :class:`mopidy.models.SearchResult`
         """
         query = query or kwargs
+        return self.advanced_search(
+            query, uris=uris, exact=False, returnType=None)
+
+    def advanced_search(self, query=None, uris=None, exact=False,
+                        returnType=None, limit=0, offset=0, **kwargs):
+        """
+        Search the library for tracks where ``field`` contains ``values``.
+
+        If the query is empty, and the backend can support it,
+        all available tracks are returned.
+
+        If ``uris`` is given, the search is limited to results from
+        within the URI roots. For example passing ``uris=['file:']``
+        will limit the search to the local backend.
+
+        If exact is true, then only exact results are returned.
+
+        If returnType is set (to models.Track, models.Album,
+        models.Artist) then only results of that type are returned.
+
+        Examples::
+
+            # Returns results matching 'a' in any backend
+            advanced_search({'any': ['a']})
+
+            # Returns results matching artist 'xyz' in any backend
+            advanced_search({'artist': ['xyz']})
+
+            # Returns results matching 'a' and 'b' and artist 'xyz' in any
+            # backend
+            advanced_search({'any': ['a', 'b'], 'artist': ['xyz']})
+
+            # Returns results matching 'a' if within the given URI roots
+            # "file:///media/music" and "spotify:"
+            advanced_search({'any': ['a']}, uris=['file:///media/music',
+                            'spotify:'])
+
+        :param query: one or more queries to search for
+        :type query: dict
+        :param uris: zero or more URI roots to limit the search to
+        :type uris: list of strings or :class:`None`
+        :param returnType: type of object being searched for
+        :type returnType: models.Track, models.Album or models.Artist
+        :rtype: list of :class:`mopidy.models.SearchResult`
+        """
+        query = query or kwargs
         futures = [
-            backend.library.search(query=query, uris=backend_uris)
+            backend.library.advanced_search(
+                query=query, uris=backend_uris,
+                exact=exact, returnType=returnType,
+                limit=limit, offset=offset, *kwargs)
             for (backend, backend_uris)
             in self._get_backends_to_uris(uris).items()]
         return [result for result in pykka.get_all(futures) if result]

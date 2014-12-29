@@ -1,6 +1,8 @@
 from __future__ import absolute_import, unicode_literals
 
-from mopidy.models import Album, SearchResult
+from urllib import quote_plus
+
+from mopidy.models import Album, Artist, SearchResult, Track
 
 
 def find_exact(tracks, query=None, uris=None):
@@ -23,7 +25,10 @@ def find_exact(tracks, query=None, uris=None):
 
             uri_filter = lambda t: q == t.uri
             track_name_filter = lambda t: q == t.name
-            album_filter = lambda t: q == getattr(t, 'album', Album()).name
+            album_filter = lambda t: q == getattr(
+                t,
+                'album',
+                Album()).name
             artist_filter = lambda t: filter(
                 lambda a: q == a.name, t.artists)
             albumartist_filter = lambda t: any([
@@ -102,7 +107,8 @@ def search(tracks, query=None, uris=None):
                 q = value.strip().lower()
 
             uri_filter = lambda t: bool(t.uri and q in t.uri.lower())
-            track_name_filter = lambda t: bool(t.name and q in t.name.lower())
+            track_name_filter = lambda t: bool(
+                t.name and q in t.name.lower())
             album_filter = lambda t: bool(
                 t.album and t.album.name and q in t.album.name.lower())
             artist_filter = lambda t: bool(filter(
@@ -117,8 +123,10 @@ def search(tracks, query=None, uris=None):
                 a.name and q in a.name.lower()
                 for a in getattr(t, 'performers', [])])
             track_no_filter = lambda t: q == t.track_no
-            genre_filter = lambda t: bool(t.genre and q in t.genre.lower())
-            date_filter = lambda t: bool(t.date and t.date.startswith(q))
+            genre_filter = lambda t: bool(
+                t.genre and q in t.genre.lower())
+            date_filter = lambda t: bool(
+                t.date and t.date.startswith(q))
             comment_filter = lambda t: bool(
                 t.comment and q in t.comment.lower())
             any_filter = lambda t: (
@@ -162,6 +170,208 @@ def search(tracks, query=None, uris=None):
                 raise LookupError('Invalid lookup field: %s' % field)
     # TODO: add local:search:<query>
     return SearchResult(uri='local:search', tracks=tracks)
+
+
+def make_safe(unicodeString):
+    if unicodeString is None:
+        unicodeString = ""
+    return quote_plus(unicodeString.encode("utf-8"))
+
+
+def makeSQL(variables, table, query, exact, search_keys,
+            distinct, limit, offset, orderby=None):
+    allfields = search_keys.values()
+    allfields.remove("any")
+    queryVars = []
+    if exact:
+        sql = "select "
+        if distinct:
+            sql += "distinct "
+        sql += ','.join(variables)
+        sql += " from tracks "
+        for key, values in query.items():
+            if not isinstance(values, type([])):
+                values = [values]
+            if key in search_keys:
+                searchkey = search_keys[key]
+                for value in values:
+                    if len(queryVars) != 0:
+                        sql += "and "
+                    else:
+                        sql += "where "
+                    if searchkey == "any":
+                        sql += "? in (" + ",".join(allfields) + ") "
+                    else:
+                        sql += searchkey + "=? "
+                    queryVars.append(value)
+    else:
+        #        sql=""
+        #        for key,values in query.items():
+        #            if search_keys.has_key(key):
+        #                searchkey=search_keys[key]
+        #                if type(values)!=type([]):
+        #                    values=[values]
+        #                for value in values:
+        #                    if len(queryVars)!=0:
+        #                        sql+="intersect "
+        #                    sql+="select "
+        #                    if distinct:
+        #                        sql+="distinct "
+        #                    sql+=','.join(variables)
+        #                    sql+=" from tracks_fts where "
+        #                    if searchkey=="any":
+        #                        sql+="tracks_fts match ? "
+        #                    else:
+        #                        sql+="%s match ? "%searchkey
+        #                    queryVars.append(value)
+        sql = "select "
+        if distinct:
+            sql += "distinct "
+        sql += ','.join(variables)
+        sql += " from tracks "
+        for key, values in query.items():
+            if not isinstance(values, type([])):
+                values = [values]
+            if key in search_keys:
+                searchkey = search_keys[key]
+                for value in values:
+                    if len(queryVars) != 0:
+                        sql += "and "
+                    else:
+                        sql += "where "
+                    if searchkey == "any":
+                        sql += "("
+                        for af in allfields:
+                            sql += af + " like ? or "
+                            queryVars.append("%" + value + "%")
+                        sql = sql[:-3]
+                        sql += ")"
+                    else:
+                        sql += searchkey + " like ? "
+                        queryVars.append("%" + value + "%")
+
+    if orderby is not None:
+        sql += orderby + " "
+    if limit != 0:
+        sql += " limit %d offset %d" % (limit, offset)
+    return sql, queryVars
+
+
+def make_artist_list(name):
+    if name is None:
+        return None
+    else:
+        return [
+            Artist(name=name, uri="local:directory:type=artist/"
+                   + make_safe(name))]
+
+
+def make_album_result(row):
+    albumURIArtist = row[b"album_artist"]
+    if albumURIArtist and len(albumURIArtist) > 0:
+        albumArtist = make_artist_list(albumURIArtist)
+    else:
+        albumArtist = None
+        albumURIArtist = row[b'artist_name']
+    # make album
+    return Album(
+        uri="local:directory:type=artist/" +
+            make_safe(albumURIArtist) + "/" +
+        make_safe(row[b"album_name"]),
+        name=row[b'album_name'],
+        artists=albumArtist,
+        date=row[b'date'],
+        num_tracks=row[b'num_tracks'])
+
+
+def make_track_result(row):
+    album = make_album_result(row)
+    # make track
+    return Track(
+        uri=row[b'uri'],
+        album=album,
+        name=row[b'name'],
+        artists=make_artist_list(row[b'artist_name']),
+        last_modified=row[b'last_modified'],
+        track_no=row[b'track_no'],
+        genre=row[b'genre'],
+        date=row[b'date'],
+        length=row[b'length'],
+        performers=make_artist_list(row[b'performer']),
+        composers=make_artist_list(row[b'composer']),
+        comment=row[b'comment'])
+
+
+def advanced_search_sql(
+        db, query, uris, exact, returnType, limit, offset):
+    search_keys = {
+        "uri": "uri",
+        "artist": "artist_name",
+        "date": "date",
+        "track_name": "name",
+        "track_no": "track_no",
+        "num_tracks": "num_tracks",
+        "genre": "genre",
+        "album": "album_name",
+        "albumartist": "album_artist",
+        "performer": "performer",
+        "composer": "composer",
+        "comment": "comment",
+        "any": "any"}
+
+    for key, values in query.items():
+        if key not in search_keys:
+            raise LookupError('Invalid lookup field: %s' % key)
+        if len(values) == 0:
+            raise LookupError('Empty lookup field: %s' % key)
+        for val in values:
+            if len(val) == 0:
+                raise LookupError('Empty lookup field: %s' % key)
+
+    trackResults = None
+    artistResults = None
+    albumResults = None
+    whereArgs = []
+    if exact:
+        table = "tracks"
+    else:
+        table = "tracks_fts"
+
+    if returnType == Album:
+        sqlquery, whereArgs = makeSQL(
+            ["album_name", "artist_name", "num_tracks",
+             "date", "album_artist"],
+            table, query, exact, search_keys, True, limit, offset)
+        albumResults = []
+        for row in db.execute(sqlquery, whereArgs):
+            albumResults.append(make_album_result(row))
+    if returnType == Artist:
+        sqlquery, whereArgs = makeSQL(
+            ["artist_name"],
+            table, query, exact, search_keys, True, limit, offset)
+        artistResults = []
+        for row in db.execute(sqlquery, whereArgs):
+            artistResults.append(
+                Artist(name=row[0], uri="local:directory:type=artist/"
+                       + make_safe(row[0])))
+    if returnType == Track or returnType is None:
+        if returnType is None:
+            artistResults = set()
+            albumResults = set()
+        trackResults = []
+        sqlquery, whereArgs = makeSQL(
+            ["*"], table, query, exact, search_keys,
+            True, limit, offset,
+            "order by artist_name,album_name,track_no asc")
+        for row in db.execute(sqlquery, whereArgs):
+            track = make_track_result(row)
+            trackResults.append(track)
+            if returnType is None:
+                albumResults.add(track.album)
+                artistResults |= track.artists
+
+    return SearchResult(
+        tracks=trackResults, artists=artistResults, albums=albumResults)
 
 
 def _validate_query(query):

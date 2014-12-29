@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class LocalLibraryProvider(backend.LibraryProvider):
+
     """Proxy library that delegates work to our active local library."""
 
     root_directory = models.Ref.directory(
@@ -44,9 +45,29 @@ class LocalLibraryProvider(backend.LibraryProvider):
     def find_exact(self, query=None, uris=None):
         if not self._library:
             return None
-        return self._library.search(query=query, uris=uris, exact=True)
+        return self._library.search(
+            query=query, uris=uris, exact=True)
 
     def search(self, query=None, uris=None):
         if not self._library:
             return None
-        return self._library.search(query=query, uris=uris, exact=False)
+        return self._library.search(
+            query=query, uris=uris, exact=False)
+
+    def advanced_search(self, query=None, uris=None,
+                        exact=False, returnType=None,
+                        limit=0, offset=0, **kwargs):
+        try:
+            # check we have the new advanced search
+            getattr(self._library, "advanced_search")
+        except AttributeError:
+            print "Drop back to old search"
+            return self._library.search(
+                query=query, uris=uris, exact=exact,
+                limit=limit, offset=offset)
+        # this could be inside the try, but then exceptions
+        # thrown inside it get suppressed
+        return self._library.advanced_search(
+            query=query, uris=uris, exact=exact,
+            returnType=returnType, limit=limit,
+            offset=offset, *kwargs)
