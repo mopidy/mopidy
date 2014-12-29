@@ -50,28 +50,28 @@ class BaseTestCase(unittest.TestCase):
         self.session.on_receive({'received': request})
         return self.connection.response
 
-    def assertNoResponse(self):
+    def assertNoResponse(self):  # noqa: N802
         self.assertEqual([], self.connection.response)
 
-    def assertInResponse(self, value):
+    def assertInResponse(self, value):  # noqa: N802
         self.assertIn(
             value, self.connection.response,
             'Did not find %s in %s' % (
                 repr(value), repr(self.connection.response)))
 
-    def assertOnceInResponse(self, value):
+    def assertOnceInResponse(self, value):  # noqa: N802
         matched = len([r for r in self.connection.response if r == value])
         self.assertEqual(
             1, matched,
             'Expected to find %s once in %s' % (
                 repr(value), repr(self.connection.response)))
 
-    def assertNotInResponse(self, value):
+    def assertNotInResponse(self, value):  # noqa: N802
         self.assertNotIn(
             value, self.connection.response,
             'Found %s in %s' % (
                 repr(value), repr(self.connection.response)))
 
-    def assertEqualResponse(self, value):
+    def assertEqualResponse(self, value):  # noqa: N802
         self.assertEqual(1, len(self.connection.response))
         self.assertEqual(value, self.connection.response[0])
