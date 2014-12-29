@@ -34,19 +34,19 @@ class QueryFromMpdListFormatTest(unittest.TestCase):
 
 class MusicDatabaseHandlerTest(protocol.BaseTestCase):
     def test_count(self):
-        self.sendRequest('count "artist" "needle"')
+        self.send_request('count "artist" "needle"')
         self.assertInResponse('songs: 0')
         self.assertInResponse('playtime: 0')
         self.assertInResponse('OK')
 
     def test_count_without_quotes(self):
-        self.sendRequest('count artist "needle"')
+        self.send_request('count artist "needle"')
         self.assertInResponse('songs: 0')
         self.assertInResponse('playtime: 0')
         self.assertInResponse('OK')
 
     def test_count_with_multiple_pairs(self):
-        self.sendRequest('count "artist" "foo" "album" "bar"')
+        self.send_request('count "artist" "foo" "album" "bar"')
         self.assertInResponse('songs: 0')
         self.assertInResponse('playtime: 0')
         self.assertInResponse('OK')
@@ -57,7 +57,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
             tracks=[
                 Track(uri='dummy:a', name="foo", date="2001", length=4000),
             ])
-        self.sendRequest('count "title" "foo"')
+        self.send_request('count "title" "foo"')
         self.assertInResponse('songs: 1')
         self.assertInResponse('playtime: 4')
         self.assertInResponse('OK')
@@ -68,7 +68,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
                 Track(uri='dummy:b', date="2001", length=50000),
                 Track(uri='dummy:c', date="2001", length=600000),
             ])
-        self.sendRequest('count "date" "2001"')
+        self.send_request('count "date" "2001"')
         self.assertInResponse('songs: 2')
         self.assertInResponse('playtime: 650')
         self.assertInResponse('OK')
@@ -78,7 +78,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
             tracks=[Track(uri='dummy:a', name='A')])
         self.assertEqual(self.core.tracklist.length.get(), 0)
 
-        self.sendRequest('findadd "title" "A"')
+        self.send_request('findadd "title" "A"')
 
         self.assertEqual(self.core.tracklist.length.get(), 1)
         self.assertEqual(self.core.tracklist.tracks.get()[0].uri, 'dummy:a')
@@ -89,7 +89,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
             tracks=[Track(uri='dummy:a', name='A')])
         self.assertEqual(self.core.tracklist.length.get(), 0)
 
-        self.sendRequest('searchadd "title" "a"')
+        self.send_request('searchadd "title" "a"')
 
         self.assertEqual(self.core.tracklist.length.get(), 1)
         self.assertEqual(self.core.tracklist.tracks.get()[0].uri, 'dummy:a')
@@ -108,7 +108,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertEqual(len(playlists), 1)
         self.assertEqual(len(playlists[0].tracks), 2)
 
-        self.sendRequest('searchaddpl "my favs" "title" "a"')
+        self.send_request('searchaddpl "my favs" "title" "a"')
 
         playlists = self.core.playlists.filter(name='my favs').get()
         self.assertEqual(len(playlists), 1)
@@ -124,7 +124,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertEqual(
             len(self.core.playlists.filter(name='my favs').get()), 0)
 
-        self.sendRequest('searchaddpl "my favs" "title" "a"')
+        self.send_request('searchaddpl "my favs" "title" "a"')
 
         playlists = self.core.playlists.filter(name='my favs').get()
         self.assertEqual(len(playlists), 1)
@@ -143,7 +143,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
                         Ref.playlist(uri='dummy:/pl', name='pl')],
             'dummy:/foo': [Ref.track(uri='dummy:/foo/b', name='b')]}
 
-        self.sendRequest('listall')
+        self.send_request('listall')
 
         self.assertInResponse('file: dummy:/a')
         self.assertInResponse('directory: /dummy/foo')
@@ -162,7 +162,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
                         Ref.directory(uri='dummy:/foo', name='foo')],
             'dummy:/foo': [Ref.track(uri='dummy:/foo/b', name='b')]}
 
-        self.sendRequest('listall "/dummy/foo"')
+        self.send_request('listall "/dummy/foo"')
 
         self.assertNotInResponse('file: dummy:/a')
         self.assertInResponse('directory: /dummy/foo')
@@ -170,7 +170,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_listall_with_unknown_uri(self):
-        self.sendRequest('listall "/unknown"')
+        self.send_request('listall "/unknown"')
 
         self.assertEqualResponse('ACK [50@0] {listall} Not found')
 
@@ -179,8 +179,8 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
             'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
                         Ref.directory(uri='dummy:/foo', name='foo')]}
 
-        response1 = self.sendRequest('listall "dummy"')
-        response2 = self.sendRequest('listall "/dummy"')
+        response1 = self.send_request('listall "dummy"')
+        response2 = self.send_request('listall "/dummy"')
         self.assertEqual(response1, response2)
 
     def test_listall_for_dir_with_and_without_trailing_slash_is_the_same(self):
@@ -188,8 +188,8 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
             'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
                         Ref.directory(uri='dummy:/foo', name='foo')]}
 
-        response1 = self.sendRequest('listall "dummy"')
-        response2 = self.sendRequest('listall "dummy/"')
+        response1 = self.send_request('listall "dummy"')
+        response2 = self.send_request('listall "dummy/"')
         self.assertEqual(response1, response2)
 
     def test_listall_duplicate(self):
@@ -197,7 +197,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
             'dummy:/': [Ref.directory(uri='dummy:/a1', name='a'),
                         Ref.directory(uri='dummy:/a2', name='a')]}
 
-        self.sendRequest('listall')
+        self.send_request('listall')
         self.assertInResponse('directory: /dummy/a')
         self.assertInResponse('directory: /dummy/a [2]')
 
@@ -213,7 +213,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
                         Ref.playlist(uri='dummy:/pl', name='pl')],
             'dummy:/foo': [Ref.track(uri='dummy:/foo/b', name='b')]}
 
-        self.sendRequest('listallinfo')
+        self.send_request('listallinfo')
 
         self.assertInResponse('file: dummy:/a')
         self.assertInResponse('Title: a')
@@ -234,7 +234,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
                         Ref.directory(uri='dummy:/foo', name='foo')],
             'dummy:/foo': [Ref.track(uri='dummy:/foo/b', name='b')]}
 
-        self.sendRequest('listallinfo "/dummy/foo"')
+        self.send_request('listallinfo "/dummy/foo"')
 
         self.assertNotInResponse('file: dummy:/a')
         self.assertNotInResponse('Title: a')
@@ -244,7 +244,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_listallinfo_with_unknown_uri(self):
-        self.sendRequest('listallinfo "/unknown"')
+        self.send_request('listallinfo "/unknown"')
 
         self.assertEqualResponse('ACK [50@0] {listallinfo} Not found')
 
@@ -253,8 +253,8 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
             'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
                         Ref.directory(uri='dummy:/foo', name='foo')]}
 
-        response1 = self.sendRequest('listallinfo "dummy"')
-        response2 = self.sendRequest('listallinfo "/dummy"')
+        response1 = self.send_request('listallinfo "dummy"')
+        response2 = self.send_request('listallinfo "/dummy"')
         self.assertEqual(response1, response2)
 
     def test_listallinfo_for_dir_with_and_without_trailing_slash_is_same(self):
@@ -262,8 +262,8 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
             'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
                         Ref.directory(uri='dummy:/foo', name='foo')]}
 
-        response1 = self.sendRequest('listallinfo "dummy"')
-        response2 = self.sendRequest('listallinfo "dummy/"')
+        response1 = self.send_request('listallinfo "dummy"')
+        response2 = self.send_request('listallinfo "dummy/"')
         self.assertEqual(response1, response2)
 
     def test_listallinfo_duplicate(self):
@@ -271,7 +271,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
             'dummy:/': [Ref.directory(uri='dummy:/a1', name='a'),
                         Ref.directory(uri='dummy:/a2', name='a')]}
 
-        self.sendRequest('listallinfo')
+        self.send_request('listallinfo')
         self.assertInResponse('directory: /dummy/a')
         self.assertInResponse('directory: /dummy/a [2]')
 
@@ -280,8 +280,8 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.backend.playlists.playlists = [
             Playlist(name='a', uri='dummy:/a', last_modified=last_modified)]
 
-        response1 = self.sendRequest('lsinfo')
-        response2 = self.sendRequest('lsinfo "/"')
+        response1 = self.send_request('lsinfo')
+        response2 = self.send_request('lsinfo "/"')
         self.assertEqual(response1, response2)
 
     def test_lsinfo_with_empty_path_returns_same_as_for_root(self):
@@ -289,8 +289,8 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.backend.playlists.playlists = [
             Playlist(name='a', uri='dummy:/a', last_modified=last_modified)]
 
-        response1 = self.sendRequest('lsinfo ""')
-        response2 = self.sendRequest('lsinfo "/"')
+        response1 = self.send_request('lsinfo ""')
+        response2 = self.send_request('lsinfo "/"')
         self.assertEqual(response1, response2)
 
     def test_lsinfo_for_root_includes_playlists(self):
@@ -298,7 +298,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.backend.playlists.playlists = [
             Playlist(name='a', uri='dummy:/a', last_modified=last_modified)]
 
-        self.sendRequest('lsinfo "/"')
+        self.send_request('lsinfo "/"')
         self.assertInResponse('playlist: a')
         # Date without milliseconds and with time zone information
         self.assertInResponse('Last-Modified: 2014-01-28T21:01:13Z')
@@ -309,7 +309,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
             'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
                         Ref.directory(uri='dummy:/foo', name='foo')]}
 
-        self.sendRequest('lsinfo "/"')
+        self.send_request('lsinfo "/"')
         self.assertInResponse('directory: dummy')
         self.assertInResponse('OK')
 
@@ -318,8 +318,8 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
             'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
                         Ref.directory(uri='dummy:/foo', name='foo')]}
 
-        response1 = self.sendRequest('lsinfo "dummy"')
-        response2 = self.sendRequest('lsinfo "/dummy"')
+        response1 = self.send_request('lsinfo "dummy"')
+        response2 = self.send_request('lsinfo "/dummy"')
         self.assertEqual(response1, response2)
 
     def test_lsinfo_for_dir_with_and_without_trailing_slash_is_the_same(self):
@@ -327,8 +327,8 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
             'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
                         Ref.directory(uri='dummy:/foo', name='foo')]}
 
-        response1 = self.sendRequest('lsinfo "dummy"')
-        response2 = self.sendRequest('lsinfo "dummy/"')
+        response1 = self.send_request('lsinfo "dummy"')
+        response2 = self.send_request('lsinfo "dummy/"')
         self.assertEqual(response1, response2)
 
     def test_lsinfo_for_dir_includes_tracks(self):
@@ -338,7 +338,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.backend.library.dummy_browse_result = {
             'dummy:/': [Ref.track(uri='dummy:/a', name='a')]}
 
-        self.sendRequest('lsinfo "/dummy"')
+        self.send_request('lsinfo "/dummy"')
         self.assertInResponse('file: dummy:/a')
         self.assertInResponse('Title: a')
         self.assertInResponse('OK')
@@ -347,7 +347,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.backend.library.dummy_browse_result = {
             'dummy:/': [Ref.directory(uri='dummy:/foo', name='foo')]}
 
-        self.sendRequest('lsinfo "/dummy"')
+        self.send_request('lsinfo "/dummy"')
         self.assertInResponse('directory: dummy/foo')
         self.assertInResponse('OK')
 
@@ -355,7 +355,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.backend.library.dummy_browse_result = {
             'dummy:/': []}
 
-        self.sendRequest('lsinfo "/dummy"')
+        self.send_request('lsinfo "/dummy"')
         self.assertInResponse('OK')
 
     def test_lsinfo_for_dir_does_not_recurse(self):
@@ -366,7 +366,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
             'dummy:/': [Ref.directory(uri='dummy:/foo', name='foo')],
             'dummy:/foo': [Ref.track(uri='dummy:/a', name='a')]}
 
-        self.sendRequest('lsinfo "/dummy"')
+        self.send_request('lsinfo "/dummy"')
         self.assertNotInResponse('file: dummy:/a')
         self.assertInResponse('OK')
 
@@ -375,7 +375,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
             'dummy:/': [Ref.directory(uri='dummy:/foo', name='foo')],
             'dummy:/foo': [Ref.track(uri='dummy:/a', name='a')]}
 
-        self.sendRequest('lsinfo "/dummy"')
+        self.send_request('lsinfo "/dummy"')
         self.assertNotInResponse('directory: dummy')
         self.assertInResponse('OK')
 
@@ -387,7 +387,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.backend.playlists.playlists = [
             Playlist(name='a', uri='dummy:/a', last_modified=last_modified)]
 
-        response = self.sendRequest('lsinfo "/"')
+        response = self.send_request('lsinfo "/"')
         self.assertLess(response.index('directory: dummy'),
                         response.index('playlist: a'))
 
@@ -396,27 +396,27 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
             'dummy:/': [Ref.directory(uri='dummy:/a1', name='a'),
                         Ref.directory(uri='dummy:/a2', name='a')]}
 
-        self.sendRequest('lsinfo "/dummy"')
+        self.send_request('lsinfo "/dummy"')
         self.assertInResponse('directory: dummy/a')
         self.assertInResponse('directory: dummy/a [2]')
 
     def test_update_without_uri(self):
-        self.sendRequest('update')
+        self.send_request('update')
         self.assertInResponse('updating_db: 0')
         self.assertInResponse('OK')
 
     def test_update_with_uri(self):
-        self.sendRequest('update "file:///dev/urandom"')
+        self.send_request('update "file:///dev/urandom"')
         self.assertInResponse('updating_db: 0')
         self.assertInResponse('OK')
 
     def test_rescan_without_uri(self):
-        self.sendRequest('rescan')
+        self.send_request('rescan')
         self.assertInResponse('updating_db: 0')
         self.assertInResponse('OK')
 
     def test_rescan_with_uri(self):
-        self.sendRequest('rescan "file:///dev/urandom"')
+        self.send_request('rescan "file:///dev/urandom"')
         self.assertInResponse('updating_db: 0')
         self.assertInResponse('OK')
 
@@ -428,7 +428,7 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
             artists=[Artist(uri='dummy:artist:b', name='B')],
             tracks=[Track(uri='dummy:track:c', name='C')])
 
-        self.sendRequest('find "any" "foo"')
+        self.send_request('find "any" "foo"')
 
         self.assertInResponse('file: dummy:artist:b')
         self.assertInResponse('Title: Artist: B')
@@ -448,7 +448,7 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
             artists=[Artist(uri='dummy:artist:b', name='B')],
             tracks=[Track(uri='dummy:track:c', name='C')])
 
-        self.sendRequest('find "artist" "foo"')
+        self.send_request('find "artist" "foo"')
 
         self.assertNotInResponse('file: dummy:artist:b')
         self.assertNotInResponse('Title: Artist: B')
@@ -468,7 +468,7 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
             artists=[Artist(uri='dummy:artist:b', name='B')],
             tracks=[Track(uri='dummy:track:c', name='C')])
 
-        self.sendRequest('find "albumartist" "foo"')
+        self.send_request('find "albumartist" "foo"')
 
         self.assertNotInResponse('file: dummy:artist:b')
         self.assertNotInResponse('Title: Artist: B')
@@ -488,7 +488,7 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
             artists=[Artist(uri='dummy:artist:b', name='B')],
             tracks=[Track(uri='dummy:track:c', name='C')])
 
-        self.sendRequest('find "artist" "foo" "album" "bar"')
+        self.send_request('find "artist" "foo" "album" "bar"')
 
         self.assertNotInResponse('file: dummy:artist:b')
         self.assertNotInResponse('Title: Artist: B')
@@ -503,111 +503,111 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_find_album(self):
-        self.sendRequest('find "album" "what"')
+        self.send_request('find "album" "what"')
         self.assertInResponse('OK')
 
     def test_find_album_without_quotes(self):
-        self.sendRequest('find album "what"')
+        self.send_request('find album "what"')
         self.assertInResponse('OK')
 
     def test_find_artist(self):
-        self.sendRequest('find "artist" "what"')
+        self.send_request('find "artist" "what"')
         self.assertInResponse('OK')
 
     def test_find_artist_without_quotes(self):
-        self.sendRequest('find artist "what"')
+        self.send_request('find artist "what"')
         self.assertInResponse('OK')
 
     def test_find_albumartist(self):
-        self.sendRequest('find "albumartist" "what"')
+        self.send_request('find "albumartist" "what"')
         self.assertInResponse('OK')
 
     def test_find_albumartist_without_quotes(self):
-        self.sendRequest('find albumartist "what"')
+        self.send_request('find albumartist "what"')
         self.assertInResponse('OK')
 
     def test_find_composer(self):
-        self.sendRequest('find "composer" "what"')
+        self.send_request('find "composer" "what"')
         self.assertInResponse('OK')
 
     def test_find_composer_without_quotes(self):
-        self.sendRequest('find composer "what"')
+        self.send_request('find composer "what"')
         self.assertInResponse('OK')
 
     def test_find_performer(self):
-        self.sendRequest('find "performer" "what"')
+        self.send_request('find "performer" "what"')
         self.assertInResponse('OK')
 
     def test_find_performer_without_quotes(self):
-        self.sendRequest('find performer "what"')
+        self.send_request('find performer "what"')
         self.assertInResponse('OK')
 
     def test_find_filename(self):
-        self.sendRequest('find "filename" "afilename"')
+        self.send_request('find "filename" "afilename"')
         self.assertInResponse('OK')
 
     def test_find_filename_without_quotes(self):
-        self.sendRequest('find filename "afilename"')
+        self.send_request('find filename "afilename"')
         self.assertInResponse('OK')
 
     def test_find_file(self):
-        self.sendRequest('find "file" "afilename"')
+        self.send_request('find "file" "afilename"')
         self.assertInResponse('OK')
 
     def test_find_file_without_quotes(self):
-        self.sendRequest('find file "afilename"')
+        self.send_request('find file "afilename"')
         self.assertInResponse('OK')
 
     def test_find_title(self):
-        self.sendRequest('find "title" "what"')
+        self.send_request('find "title" "what"')
         self.assertInResponse('OK')
 
     def test_find_title_without_quotes(self):
-        self.sendRequest('find title "what"')
+        self.send_request('find title "what"')
         self.assertInResponse('OK')
 
     def test_find_track_no(self):
-        self.sendRequest('find "track" "10"')
+        self.send_request('find "track" "10"')
         self.assertInResponse('OK')
 
     def test_find_track_no_without_quotes(self):
-        self.sendRequest('find track "10"')
+        self.send_request('find track "10"')
         self.assertInResponse('OK')
 
     def test_find_track_no_without_filter_value(self):
-        self.sendRequest('find "track" ""')
+        self.send_request('find "track" ""')
         self.assertInResponse('OK')
 
     def test_find_genre(self):
-        self.sendRequest('find "genre" "what"')
+        self.send_request('find "genre" "what"')
         self.assertInResponse('OK')
 
     def test_find_genre_without_quotes(self):
-        self.sendRequest('find genre "what"')
+        self.send_request('find genre "what"')
         self.assertInResponse('OK')
 
     def test_find_date(self):
-        self.sendRequest('find "date" "2002-01-01"')
+        self.send_request('find "date" "2002-01-01"')
         self.assertInResponse('OK')
 
     def test_find_date_without_quotes(self):
-        self.sendRequest('find date "2002-01-01"')
+        self.send_request('find date "2002-01-01"')
         self.assertInResponse('OK')
 
     def test_find_date_with_capital_d_and_incomplete_date(self):
-        self.sendRequest('find Date "2005"')
+        self.send_request('find Date "2005"')
         self.assertInResponse('OK')
 
     def test_find_else_should_fail(self):
-        self.sendRequest('find "somethingelse" "what"')
+        self.send_request('find "somethingelse" "what"')
         self.assertEqualResponse('ACK [2@0] {find} incorrect arguments')
 
     def test_find_album_and_artist(self):
-        self.sendRequest('find album "album_what" artist "artist_what"')
+        self.send_request('find album "album_what" artist "artist_what"')
         self.assertInResponse('OK')
 
     def test_find_without_filter_value(self):
-        self.sendRequest('find "album" ""')
+        self.send_request('find "album" ""')
         self.assertInResponse('OK')
 
 
@@ -618,132 +618,132 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
                 Track(uri='dummy:a', name='A', artists=[
                     Artist(name='A Artist')])])
 
-        self.sendRequest('list "artist" "artist" "foo"')
+        self.send_request('list "artist" "artist" "foo"')
 
         self.assertInResponse('Artist: A Artist')
         self.assertInResponse('OK')
 
     def test_list_foo_returns_ack(self):
-        self.sendRequest('list "foo"')
+        self.send_request('list "foo"')
         self.assertEqualResponse('ACK [2@0] {list} incorrect arguments')
 
     # Artist
 
     def test_list_artist_with_quotes(self):
-        self.sendRequest('list "artist"')
+        self.send_request('list "artist"')
         self.assertInResponse('OK')
 
     def test_list_artist_without_quotes(self):
-        self.sendRequest('list artist')
+        self.send_request('list artist')
         self.assertInResponse('OK')
 
     def test_list_artist_without_quotes_and_capitalized(self):
-        self.sendRequest('list Artist')
+        self.send_request('list Artist')
         self.assertInResponse('OK')
 
     def test_list_artist_with_query_of_one_token(self):
-        self.sendRequest('list "artist" "anartist"')
+        self.send_request('list "artist" "anartist"')
         self.assertEqualResponse(
             'ACK [2@0] {list} should be "Album" for 3 arguments')
 
     def test_list_artist_with_unknown_field_in_query_returns_ack(self):
-        self.sendRequest('list "artist" "foo" "bar"')
+        self.send_request('list "artist" "foo" "bar"')
         self.assertEqualResponse('ACK [2@0] {list} not able to parse args')
 
     def test_list_artist_by_artist(self):
-        self.sendRequest('list "artist" "artist" "anartist"')
+        self.send_request('list "artist" "artist" "anartist"')
         self.assertInResponse('OK')
 
     def test_list_artist_by_album(self):
-        self.sendRequest('list "artist" "album" "analbum"')
+        self.send_request('list "artist" "album" "analbum"')
         self.assertInResponse('OK')
 
     def test_list_artist_by_full_date(self):
-        self.sendRequest('list "artist" "date" "2001-01-01"')
+        self.send_request('list "artist" "date" "2001-01-01"')
         self.assertInResponse('OK')
 
     def test_list_artist_by_year(self):
-        self.sendRequest('list "artist" "date" "2001"')
+        self.send_request('list "artist" "date" "2001"')
         self.assertInResponse('OK')
 
     def test_list_artist_by_genre(self):
-        self.sendRequest('list "artist" "genre" "agenre"')
+        self.send_request('list "artist" "genre" "agenre"')
         self.assertInResponse('OK')
 
     def test_list_artist_by_artist_and_album(self):
-        self.sendRequest(
+        self.send_request(
             'list "artist" "artist" "anartist" "album" "analbum"')
         self.assertInResponse('OK')
 
     def test_list_artist_without_filter_value(self):
-        self.sendRequest('list "artist" "artist" ""')
+        self.send_request('list "artist" "artist" ""')
         self.assertInResponse('OK')
 
     def test_list_artist_should_not_return_artists_without_names(self):
         self.backend.library.dummy_find_exact_result = SearchResult(
             tracks=[Track(artists=[Artist(name='')])])
 
-        self.sendRequest('list "artist"')
+        self.send_request('list "artist"')
         self.assertNotInResponse('Artist: ')
         self.assertInResponse('OK')
 
     # Albumartist
 
     def test_list_albumartist_with_quotes(self):
-        self.sendRequest('list "albumartist"')
+        self.send_request('list "albumartist"')
         self.assertInResponse('OK')
 
     def test_list_albumartist_without_quotes(self):
-        self.sendRequest('list albumartist')
+        self.send_request('list albumartist')
         self.assertInResponse('OK')
 
     def test_list_albumartist_without_quotes_and_capitalized(self):
-        self.sendRequest('list Albumartist')
+        self.send_request('list Albumartist')
         self.assertInResponse('OK')
 
     def test_list_albumartist_with_query_of_one_token(self):
-        self.sendRequest('list "albumartist" "anartist"')
+        self.send_request('list "albumartist" "anartist"')
         self.assertEqualResponse(
             'ACK [2@0] {list} should be "Album" for 3 arguments')
 
     def test_list_albumartist_with_unknown_field_in_query_returns_ack(self):
-        self.sendRequest('list "albumartist" "foo" "bar"')
+        self.send_request('list "albumartist" "foo" "bar"')
         self.assertEqualResponse('ACK [2@0] {list} not able to parse args')
 
     def test_list_albumartist_by_artist(self):
-        self.sendRequest('list "albumartist" "artist" "anartist"')
+        self.send_request('list "albumartist" "artist" "anartist"')
         self.assertInResponse('OK')
 
     def test_list_albumartist_by_album(self):
-        self.sendRequest('list "albumartist" "album" "analbum"')
+        self.send_request('list "albumartist" "album" "analbum"')
         self.assertInResponse('OK')
 
     def test_list_albumartist_by_full_date(self):
-        self.sendRequest('list "albumartist" "date" "2001-01-01"')
+        self.send_request('list "albumartist" "date" "2001-01-01"')
         self.assertInResponse('OK')
 
     def test_list_albumartist_by_year(self):
-        self.sendRequest('list "albumartist" "date" "2001"')
+        self.send_request('list "albumartist" "date" "2001"')
         self.assertInResponse('OK')
 
     def test_list_albumartist_by_genre(self):
-        self.sendRequest('list "albumartist" "genre" "agenre"')
+        self.send_request('list "albumartist" "genre" "agenre"')
         self.assertInResponse('OK')
 
     def test_list_albumartist_by_artist_and_album(self):
-        self.sendRequest(
+        self.send_request(
             'list "albumartist" "artist" "anartist" "album" "analbum"')
         self.assertInResponse('OK')
 
     def test_list_albumartist_without_filter_value(self):
-        self.sendRequest('list "albumartist" "artist" ""')
+        self.send_request('list "albumartist" "artist" ""')
         self.assertInResponse('OK')
 
     def test_list_albumartist_should_not_return_artists_without_names(self):
         self.backend.library.dummy_find_exact_result = SearchResult(
             tracks=[Track(album=Album(artists=[Artist(name='')]))])
 
-        self.sendRequest('list "albumartist"')
+        self.send_request('list "albumartist"')
         self.assertNotInResponse('Artist: ')
         self.assertNotInResponse('Albumartist: ')
         self.assertNotInResponse('Composer: ')
@@ -753,60 +753,60 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
     # Composer
 
     def test_list_composer_with_quotes(self):
-        self.sendRequest('list "composer"')
+        self.send_request('list "composer"')
         self.assertInResponse('OK')
 
     def test_list_composer_without_quotes(self):
-        self.sendRequest('list composer')
+        self.send_request('list composer')
         self.assertInResponse('OK')
 
     def test_list_composer_without_quotes_and_capitalized(self):
-        self.sendRequest('list Composer')
+        self.send_request('list Composer')
         self.assertInResponse('OK')
 
     def test_list_composer_with_query_of_one_token(self):
-        self.sendRequest('list "composer" "anartist"')
+        self.send_request('list "composer" "anartist"')
         self.assertEqualResponse(
             'ACK [2@0] {list} should be "Album" for 3 arguments')
 
     def test_list_composer_with_unknown_field_in_query_returns_ack(self):
-        self.sendRequest('list "composer" "foo" "bar"')
+        self.send_request('list "composer" "foo" "bar"')
         self.assertEqualResponse('ACK [2@0] {list} not able to parse args')
 
     def test_list_composer_by_artist(self):
-        self.sendRequest('list "composer" "artist" "anartist"')
+        self.send_request('list "composer" "artist" "anartist"')
         self.assertInResponse('OK')
 
     def test_list_composer_by_album(self):
-        self.sendRequest('list "composer" "album" "analbum"')
+        self.send_request('list "composer" "album" "analbum"')
         self.assertInResponse('OK')
 
     def test_list_composer_by_full_date(self):
-        self.sendRequest('list "composer" "date" "2001-01-01"')
+        self.send_request('list "composer" "date" "2001-01-01"')
         self.assertInResponse('OK')
 
     def test_list_composer_by_year(self):
-        self.sendRequest('list "composer" "date" "2001"')
+        self.send_request('list "composer" "date" "2001"')
         self.assertInResponse('OK')
 
     def test_list_composer_by_genre(self):
-        self.sendRequest('list "composer" "genre" "agenre"')
+        self.send_request('list "composer" "genre" "agenre"')
         self.assertInResponse('OK')
 
     def test_list_composer_by_artist_and_album(self):
-        self.sendRequest(
+        self.send_request(
             'list "composer" "artist" "anartist" "album" "analbum"')
         self.assertInResponse('OK')
 
     def test_list_composer_without_filter_value(self):
-        self.sendRequest('list "composer" "artist" ""')
+        self.send_request('list "composer" "artist" ""')
         self.assertInResponse('OK')
 
     def test_list_composer_should_not_return_artists_without_names(self):
         self.backend.library.dummy_find_exact_result = SearchResult(
             tracks=[Track(composers=[Artist(name='')])])
 
-        self.sendRequest('list "composer"')
+        self.send_request('list "composer"')
         self.assertNotInResponse('Artist: ')
         self.assertNotInResponse('Albumartist: ')
         self.assertNotInResponse('Composer: ')
@@ -816,60 +816,60 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
     # Performer
 
     def test_list_performer_with_quotes(self):
-        self.sendRequest('list "performer"')
+        self.send_request('list "performer"')
         self.assertInResponse('OK')
 
     def test_list_performer_without_quotes(self):
-        self.sendRequest('list performer')
+        self.send_request('list performer')
         self.assertInResponse('OK')
 
     def test_list_performer_without_quotes_and_capitalized(self):
-        self.sendRequest('list Albumartist')
+        self.send_request('list Albumartist')
         self.assertInResponse('OK')
 
     def test_list_performer_with_query_of_one_token(self):
-        self.sendRequest('list "performer" "anartist"')
+        self.send_request('list "performer" "anartist"')
         self.assertEqualResponse(
             'ACK [2@0] {list} should be "Album" for 3 arguments')
 
     def test_list_performer_with_unknown_field_in_query_returns_ack(self):
-        self.sendRequest('list "performer" "foo" "bar"')
+        self.send_request('list "performer" "foo" "bar"')
         self.assertEqualResponse('ACK [2@0] {list} not able to parse args')
 
     def test_list_performer_by_artist(self):
-        self.sendRequest('list "performer" "artist" "anartist"')
+        self.send_request('list "performer" "artist" "anartist"')
         self.assertInResponse('OK')
 
     def test_list_performer_by_album(self):
-        self.sendRequest('list "performer" "album" "analbum"')
+        self.send_request('list "performer" "album" "analbum"')
         self.assertInResponse('OK')
 
     def test_list_performer_by_full_date(self):
-        self.sendRequest('list "performer" "date" "2001-01-01"')
+        self.send_request('list "performer" "date" "2001-01-01"')
         self.assertInResponse('OK')
 
     def test_list_performer_by_year(self):
-        self.sendRequest('list "performer" "date" "2001"')
+        self.send_request('list "performer" "date" "2001"')
         self.assertInResponse('OK')
 
     def test_list_performer_by_genre(self):
-        self.sendRequest('list "performer" "genre" "agenre"')
+        self.send_request('list "performer" "genre" "agenre"')
         self.assertInResponse('OK')
 
     def test_list_performer_by_artist_and_album(self):
-        self.sendRequest(
+        self.send_request(
             'list "performer" "artist" "anartist" "album" "analbum"')
         self.assertInResponse('OK')
 
     def test_list_performer_without_filter_value(self):
-        self.sendRequest('list "performer" "artist" ""')
+        self.send_request('list "performer" "artist" ""')
         self.assertInResponse('OK')
 
     def test_list_performer_should_not_return_artists_without_names(self):
         self.backend.library.dummy_find_exact_result = SearchResult(
             tracks=[Track(performers=[Artist(name='')])])
 
-        self.sendRequest('list "performer"')
+        self.send_request('list "performer"')
         self.assertNotInResponse('Artist: ')
         self.assertNotInResponse('Albumartist: ')
         self.assertNotInResponse('Composer: ')
@@ -879,179 +879,179 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
     # Album
 
     def test_list_album_with_quotes(self):
-        self.sendRequest('list "album"')
+        self.send_request('list "album"')
         self.assertInResponse('OK')
 
     def test_list_album_without_quotes(self):
-        self.sendRequest('list album')
+        self.send_request('list album')
         self.assertInResponse('OK')
 
     def test_list_album_without_quotes_and_capitalized(self):
-        self.sendRequest('list Album')
+        self.send_request('list Album')
         self.assertInResponse('OK')
 
     def test_list_album_with_artist_name(self):
         self.backend.library.dummy_find_exact_result = SearchResult(
             tracks=[Track(album=Album(name='foo'))])
 
-        self.sendRequest('list "album" "anartist"')
+        self.send_request('list "album" "anartist"')
         self.assertInResponse('Album: foo')
         self.assertInResponse('OK')
 
     def test_list_album_with_artist_name_without_filter_value(self):
-        self.sendRequest('list "album" ""')
+        self.send_request('list "album" ""')
         self.assertInResponse('OK')
 
     def test_list_album_by_artist(self):
-        self.sendRequest('list "album" "artist" "anartist"')
+        self.send_request('list "album" "artist" "anartist"')
         self.assertInResponse('OK')
 
     def test_list_album_by_album(self):
-        self.sendRequest('list "album" "album" "analbum"')
+        self.send_request('list "album" "album" "analbum"')
         self.assertInResponse('OK')
 
     def test_list_album_by_albumartist(self):
-        self.sendRequest('list "album" "albumartist" "anartist"')
+        self.send_request('list "album" "albumartist" "anartist"')
         self.assertInResponse('OK')
 
     def test_list_album_by_composer(self):
-        self.sendRequest('list "album" "composer" "anartist"')
+        self.send_request('list "album" "composer" "anartist"')
         self.assertInResponse('OK')
 
     def test_list_album_by_performer(self):
-        self.sendRequest('list "album" "performer" "anartist"')
+        self.send_request('list "album" "performer" "anartist"')
         self.assertInResponse('OK')
 
     def test_list_album_by_full_date(self):
-        self.sendRequest('list "album" "date" "2001-01-01"')
+        self.send_request('list "album" "date" "2001-01-01"')
         self.assertInResponse('OK')
 
     def test_list_album_by_year(self):
-        self.sendRequest('list "album" "date" "2001"')
+        self.send_request('list "album" "date" "2001"')
         self.assertInResponse('OK')
 
     def test_list_album_by_genre(self):
-        self.sendRequest('list "album" "genre" "agenre"')
+        self.send_request('list "album" "genre" "agenre"')
         self.assertInResponse('OK')
 
     def test_list_album_by_artist_and_album(self):
-        self.sendRequest(
+        self.send_request(
             'list "album" "artist" "anartist" "album" "analbum"')
         self.assertInResponse('OK')
 
     def test_list_album_without_filter_value(self):
-        self.sendRequest('list "album" "artist" ""')
+        self.send_request('list "album" "artist" ""')
         self.assertInResponse('OK')
 
     def test_list_album_should_not_return_albums_without_names(self):
         self.backend.library.dummy_find_exact_result = SearchResult(
             tracks=[Track(album=Album(name=''))])
 
-        self.sendRequest('list "album"')
+        self.send_request('list "album"')
         self.assertNotInResponse('Album: ')
         self.assertInResponse('OK')
 
     # Date
 
     def test_list_date_with_quotes(self):
-        self.sendRequest('list "date"')
+        self.send_request('list "date"')
         self.assertInResponse('OK')
 
     def test_list_date_without_quotes(self):
-        self.sendRequest('list date')
+        self.send_request('list date')
         self.assertInResponse('OK')
 
     def test_list_date_without_quotes_and_capitalized(self):
-        self.sendRequest('list Date')
+        self.send_request('list Date')
         self.assertInResponse('OK')
 
     def test_list_date_with_query_of_one_token(self):
-        self.sendRequest('list "date" "anartist"')
+        self.send_request('list "date" "anartist"')
         self.assertEqualResponse(
             'ACK [2@0] {list} should be "Album" for 3 arguments')
 
     def test_list_date_by_artist(self):
-        self.sendRequest('list "date" "artist" "anartist"')
+        self.send_request('list "date" "artist" "anartist"')
         self.assertInResponse('OK')
 
     def test_list_date_by_album(self):
-        self.sendRequest('list "date" "album" "analbum"')
+        self.send_request('list "date" "album" "analbum"')
         self.assertInResponse('OK')
 
     def test_list_date_by_full_date(self):
-        self.sendRequest('list "date" "date" "2001-01-01"')
+        self.send_request('list "date" "date" "2001-01-01"')
         self.assertInResponse('OK')
 
     def test_list_date_by_year(self):
-        self.sendRequest('list "date" "date" "2001"')
+        self.send_request('list "date" "date" "2001"')
         self.assertInResponse('OK')
 
     def test_list_date_by_genre(self):
-        self.sendRequest('list "date" "genre" "agenre"')
+        self.send_request('list "date" "genre" "agenre"')
         self.assertInResponse('OK')
 
     def test_list_date_by_artist_and_album(self):
-        self.sendRequest('list "date" "artist" "anartist" "album" "analbum"')
+        self.send_request('list "date" "artist" "anartist" "album" "analbum"')
         self.assertInResponse('OK')
 
     def test_list_date_without_filter_value(self):
-        self.sendRequest('list "date" "artist" ""')
+        self.send_request('list "date" "artist" ""')
         self.assertInResponse('OK')
 
     def test_list_date_should_not_return_blank_dates(self):
         self.backend.library.dummy_find_exact_result = SearchResult(
             tracks=[Track(date='')])
 
-        self.sendRequest('list "date"')
+        self.send_request('list "date"')
         self.assertNotInResponse('Date: ')
         self.assertInResponse('OK')
 
     # Genre
 
     def test_list_genre_with_quotes(self):
-        self.sendRequest('list "genre"')
+        self.send_request('list "genre"')
         self.assertInResponse('OK')
 
     def test_list_genre_without_quotes(self):
-        self.sendRequest('list genre')
+        self.send_request('list genre')
         self.assertInResponse('OK')
 
     def test_list_genre_without_quotes_and_capitalized(self):
-        self.sendRequest('list Genre')
+        self.send_request('list Genre')
         self.assertInResponse('OK')
 
     def test_list_genre_with_query_of_one_token(self):
-        self.sendRequest('list "genre" "anartist"')
+        self.send_request('list "genre" "anartist"')
         self.assertEqualResponse(
             'ACK [2@0] {list} should be "Album" for 3 arguments')
 
     def test_list_genre_by_artist(self):
-        self.sendRequest('list "genre" "artist" "anartist"')
+        self.send_request('list "genre" "artist" "anartist"')
         self.assertInResponse('OK')
 
     def test_list_genre_by_album(self):
-        self.sendRequest('list "genre" "album" "analbum"')
+        self.send_request('list "genre" "album" "analbum"')
         self.assertInResponse('OK')
 
     def test_list_genre_by_full_date(self):
-        self.sendRequest('list "genre" "date" "2001-01-01"')
+        self.send_request('list "genre" "date" "2001-01-01"')
         self.assertInResponse('OK')
 
     def test_list_genre_by_year(self):
-        self.sendRequest('list "genre" "date" "2001"')
+        self.send_request('list "genre" "date" "2001"')
         self.assertInResponse('OK')
 
     def test_list_genre_by_genre(self):
-        self.sendRequest('list "genre" "genre" "agenre"')
+        self.send_request('list "genre" "genre" "agenre"')
         self.assertInResponse('OK')
 
     def test_list_genre_by_artist_and_album(self):
-        self.sendRequest(
+        self.send_request(
             'list "genre" "artist" "anartist" "album" "analbum"')
         self.assertInResponse('OK')
 
     def test_list_genre_without_filter_value(self):
-        self.sendRequest('list "genre" "artist" ""')
+        self.send_request('list "genre" "artist" ""')
         self.assertInResponse('OK')
 
 
@@ -1062,7 +1062,7 @@ class MusicDatabaseSearchTest(protocol.BaseTestCase):
             artists=[Artist(uri='dummy:artist:b', name='B')],
             tracks=[Track(uri='dummy:track:c', name='C')])
 
-        self.sendRequest('search "any" "foo"')
+        self.send_request('search "any" "foo"')
 
         self.assertInResponse('file: dummy:album:a')
         self.assertInResponse('Title: Album: A')
@@ -1074,165 +1074,165 @@ class MusicDatabaseSearchTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_search_album(self):
-        self.sendRequest('search "album" "analbum"')
+        self.send_request('search "album" "analbum"')
         self.assertInResponse('OK')
 
     def test_search_album_without_quotes(self):
-        self.sendRequest('search album "analbum"')
+        self.send_request('search album "analbum"')
         self.assertInResponse('OK')
 
     def test_search_album_without_filter_value(self):
-        self.sendRequest('search "album" ""')
+        self.send_request('search "album" ""')
         self.assertInResponse('OK')
 
     def test_search_artist(self):
-        self.sendRequest('search "artist" "anartist"')
+        self.send_request('search "artist" "anartist"')
         self.assertInResponse('OK')
 
     def test_search_artist_without_quotes(self):
-        self.sendRequest('search artist "anartist"')
+        self.send_request('search artist "anartist"')
         self.assertInResponse('OK')
 
     def test_search_artist_without_filter_value(self):
-        self.sendRequest('search "artist" ""')
+        self.send_request('search "artist" ""')
         self.assertInResponse('OK')
 
     def test_search_albumartist(self):
-        self.sendRequest('search "albumartist" "analbumartist"')
+        self.send_request('search "albumartist" "analbumartist"')
         self.assertInResponse('OK')
 
     def test_search_albumartist_without_quotes(self):
-        self.sendRequest('search albumartist "analbumartist"')
+        self.send_request('search albumartist "analbumartist"')
         self.assertInResponse('OK')
 
     def test_search_albumartist_without_filter_value(self):
-        self.sendRequest('search "albumartist" ""')
+        self.send_request('search "albumartist" ""')
         self.assertInResponse('OK')
 
     def test_search_composer(self):
-        self.sendRequest('search "composer" "acomposer"')
+        self.send_request('search "composer" "acomposer"')
         self.assertInResponse('OK')
 
     def test_search_composer_without_quotes(self):
-        self.sendRequest('search composer "acomposer"')
+        self.send_request('search composer "acomposer"')
         self.assertInResponse('OK')
 
     def test_search_composer_without_filter_value(self):
-        self.sendRequest('search "composer" ""')
+        self.send_request('search "composer" ""')
         self.assertInResponse('OK')
 
     def test_search_performer(self):
-        self.sendRequest('search "performer" "aperformer"')
+        self.send_request('search "performer" "aperformer"')
         self.assertInResponse('OK')
 
     def test_search_performer_without_quotes(self):
-        self.sendRequest('search performer "aperformer"')
+        self.send_request('search performer "aperformer"')
         self.assertInResponse('OK')
 
     def test_search_performer_without_filter_value(self):
-        self.sendRequest('search "performer" ""')
+        self.send_request('search "performer" ""')
         self.assertInResponse('OK')
 
     def test_search_filename(self):
-        self.sendRequest('search "filename" "afilename"')
+        self.send_request('search "filename" "afilename"')
         self.assertInResponse('OK')
 
     def test_search_filename_without_quotes(self):
-        self.sendRequest('search filename "afilename"')
+        self.send_request('search filename "afilename"')
         self.assertInResponse('OK')
 
     def test_search_filename_without_filter_value(self):
-        self.sendRequest('search "filename" ""')
+        self.send_request('search "filename" ""')
         self.assertInResponse('OK')
 
     def test_search_file(self):
-        self.sendRequest('search "file" "afilename"')
+        self.send_request('search "file" "afilename"')
         self.assertInResponse('OK')
 
     def test_search_file_without_quotes(self):
-        self.sendRequest('search file "afilename"')
+        self.send_request('search file "afilename"')
         self.assertInResponse('OK')
 
     def test_search_file_without_filter_value(self):
-        self.sendRequest('search "file" ""')
+        self.send_request('search "file" ""')
         self.assertInResponse('OK')
 
     def test_search_title(self):
-        self.sendRequest('search "title" "atitle"')
+        self.send_request('search "title" "atitle"')
         self.assertInResponse('OK')
 
     def test_search_title_without_quotes(self):
-        self.sendRequest('search title "atitle"')
+        self.send_request('search title "atitle"')
         self.assertInResponse('OK')
 
     def test_search_title_without_filter_value(self):
-        self.sendRequest('search "title" ""')
+        self.send_request('search "title" ""')
         self.assertInResponse('OK')
 
     def test_search_any(self):
-        self.sendRequest('search "any" "anything"')
+        self.send_request('search "any" "anything"')
         self.assertInResponse('OK')
 
     def test_search_any_without_quotes(self):
-        self.sendRequest('search any "anything"')
+        self.send_request('search any "anything"')
         self.assertInResponse('OK')
 
     def test_search_any_without_filter_value(self):
-        self.sendRequest('search "any" ""')
+        self.send_request('search "any" ""')
         self.assertInResponse('OK')
 
     def test_search_track_no(self):
-        self.sendRequest('search "track" "10"')
+        self.send_request('search "track" "10"')
         self.assertInResponse('OK')
 
     def test_search_track_no_without_quotes(self):
-        self.sendRequest('search track "10"')
+        self.send_request('search track "10"')
         self.assertInResponse('OK')
 
     def test_search_track_no_without_filter_value(self):
-        self.sendRequest('search "track" ""')
+        self.send_request('search "track" ""')
         self.assertInResponse('OK')
 
     def test_search_genre(self):
-        self.sendRequest('search "genre" "agenre"')
+        self.send_request('search "genre" "agenre"')
         self.assertInResponse('OK')
 
     def test_search_genre_without_quotes(self):
-        self.sendRequest('search genre "agenre"')
+        self.send_request('search genre "agenre"')
         self.assertInResponse('OK')
 
     def test_search_genre_without_filter_value(self):
-        self.sendRequest('search "genre" ""')
+        self.send_request('search "genre" ""')
         self.assertInResponse('OK')
 
     def test_search_date(self):
-        self.sendRequest('search "date" "2002-01-01"')
+        self.send_request('search "date" "2002-01-01"')
         self.assertInResponse('OK')
 
     def test_search_date_without_quotes(self):
-        self.sendRequest('search date "2002-01-01"')
+        self.send_request('search date "2002-01-01"')
         self.assertInResponse('OK')
 
     def test_search_date_with_capital_d_and_incomplete_date(self):
-        self.sendRequest('search Date "2005"')
+        self.send_request('search Date "2005"')
         self.assertInResponse('OK')
 
     def test_search_date_without_filter_value(self):
-        self.sendRequest('search "date" ""')
+        self.send_request('search "date" ""')
         self.assertInResponse('OK')
 
     def test_search_comment(self):
-        self.sendRequest('search "comment" "acomment"')
+        self.send_request('search "comment" "acomment"')
         self.assertInResponse('OK')
 
     def test_search_comment_without_quotes(self):
-        self.sendRequest('search comment "acomment"')
+        self.send_request('search comment "acomment"')
         self.assertInResponse('OK')
 
     def test_search_comment_without_filter_value(self):
-        self.sendRequest('search "comment" ""')
+        self.send_request('search "comment" ""')
         self.assertInResponse('OK')
 
     def test_search_else_should_fail(self):
-        self.sendRequest('search "sometype" "something"')
+        self.send_request('search "sometype" "something"')
         self.assertEqualResponse('ACK [2@0] {search} incorrect arguments')

@@ -44,7 +44,7 @@ class BaseTestCase(unittest.TestCase):
     def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
 
-    def sendRequest(self, request):
+    def send_request(self, request):
         self.connection.response = []
         request = '%s\n' % request.encode('utf-8')
         self.session.on_receive({'received': request})
