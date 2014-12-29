@@ -97,7 +97,7 @@ class LogLevelConfigSchemaTest(unittest.TestCase):
 
 
 class DidYouMeanTest(unittest.TestCase):
-    def testSuggestoins(self):
+    def test_suggestions(self):
         choices = ('enabled', 'username', 'password', 'bitrate', 'timeout')
 
         suggestion = schemas._did_you_mean('bitrate', choices)

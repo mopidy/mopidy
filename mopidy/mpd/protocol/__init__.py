@@ -36,7 +36,7 @@ def load_protocol_modules():
         music_db, playback, reflection, status, stickers, stored_playlists)
 
 
-def INT(value):
+def INT(value):  # noqa: N802
     """Converts a value that matches [+-]?\d+ into and integer."""
     if value is None:
         raise ValueError('None is not a valid integer')
@@ -44,7 +44,7 @@ def INT(value):
     return int(value)
 
 
-def UINT(value):
+def UINT(value):  # noqa: N802
     """Converts a value that matches \d+ into an integer."""
     if value is None:
         raise ValueError('None is not a valid integer')
@@ -53,14 +53,14 @@ def UINT(value):
     return int(value)
 
 
-def BOOL(value):
+def BOOL(value):  # noqa: N802
     """Convert the values 0 and 1 into booleans."""
     if value in ('1', '0'):
         return bool(int(value))
     raise ValueError('%r is not 0 or 1' % value)
 
 
-def RANGE(value):
+def RANGE(value):  # noqa: N802
     """Convert a single integer or range spec into a slice
 
     ``n`` should become ``slice(n, n+1)``

@@ -25,8 +25,8 @@ def encode(value):
 
 
 class ExpandedPath(bytes):
-    def __new__(self, original, expanded):
-        return super(ExpandedPath, self).__new__(self, expanded)
+    def __new__(cls, original, expanded):
+        return super(ExpandedPath, cls).__new__(cls, expanded)
 
     def __init__(self, original, expanded):
         self.original = original
