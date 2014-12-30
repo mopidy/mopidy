@@ -51,10 +51,6 @@ MB = 1 << 20
 # Default flags to use for playbin: AUDIO, SOFT_VOLUME, DOWNLOAD
 PLAYBIN_FLAGS = (1 << 1) | (1 << 4) | (1 << 7)
 
-# These are just to long to wrap nicely, so rename them locally.
-_get_missing_description = gst.pbutils.missing_plugin_message_get_description
-_get_missing_detail = gst.pbutils.missing_plugin_message_get_installer_detail
-
 
 class _Signals(object):
     """Helper for tracking gobject signal registrations"""
@@ -307,8 +303,7 @@ class _Handler(object):
             self.on_tag(msg.parse_tag())
         elif msg.type == gst.MESSAGE_ELEMENT:
             if gst.pbutils.is_missing_plugin_message(msg):
-                self.on_missing_plugin(_get_missing_description(msg),
-                                       _get_missing_detail(msg))
+                self.on_missing_plugin(msg)
 
     def on_event(self, pad, event):
         if event.type == gst.EVENT_NEWSEGMENT:
