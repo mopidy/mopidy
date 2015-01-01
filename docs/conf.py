@@ -96,7 +96,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 project = 'Mopidy'
-copyright = '2009-2014, Stein Magnus Jodal and contributors'
+copyright = '2009-2015, Stein Magnus Jodal and contributors'
 
 from mopidy.utils.versioning import get_version
 release = get_version()
