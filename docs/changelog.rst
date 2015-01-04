@@ -5,6 +5,14 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v0.19.6 (UNRELEASED)
+====================
+
+Bug fix release.
+
+- Audio: Support UTF-8 in M3U playlists. (Fixes: :issue:`853`)
+
+
 v0.19.5 (2014-12-23)
 ====================
 
