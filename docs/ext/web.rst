@@ -50,7 +50,7 @@ https://github.com/martijnboland/moped
 
 A Mopidy web client made with AngularJS by Martijn Boland.
 
-.. image:: /ext/moped.png
+.. image:: /ext/moped.jpg
     :width: 720
     :height: 450
 
