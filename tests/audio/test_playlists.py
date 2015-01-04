@@ -13,7 +13,7 @@ BAD = b'foobarbaz'
 M3U = b"""#EXTM3U
 #EXTINF:123, Sample artist - Sample title
 file:///tmp/foo
-#EXTINF:321,Example Artist - Example title
+#EXTINF:321,Example Artist - Example \xc5\xa7\xc5\x95
 file:///tmp/bar
 #EXTINF:213,Some Artist - Other title
 file:///tmp/baz
@@ -25,7 +25,7 @@ File1=file:///tmp/foo
 Title1=Sample Title
 Length1=123
 File2=file:///tmp/bar
-Title2=Example title
+Title2=Example \xc5\xa7\xc5\x95
 Length2=321
 File3=file:///tmp/baz
 Title3=Other title
@@ -40,7 +40,7 @@ ASX = b"""<ASX version="3.0">
     <REF href="file:///tmp/foo" />
   </ENTRY>
   <ENTRY>
-    <TITLE>Example title</TITLE>
+    <TITLE>Example \xc5\xa7\xc5\x95</TITLE>
     <REF href="file:///tmp/bar" />
   </ENTRY>
   <ENTRY>
@@ -65,7 +65,7 @@ XSPF = b"""<?xml version="1.0" encoding="UTF-8"?>
       <location>file:///tmp/foo</location>
     </track>
     <track>
-      <title>Example title</title>
+      <title>Example \xc5\xa7\xc5\x95</title>
       <location>file:///tmp/bar</location>
     </track>
     <track>
