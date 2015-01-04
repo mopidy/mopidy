@@ -93,6 +93,14 @@ v0.20.0 (UNRELEASED)
 - Add basic tests for the stream library provider.
 
 
+v0.19.6 (UNRELEASED)
+====================
+
+**Audio**
+
+- Support UTF-8 in M3U playlists. (Fixes: :issue:`853`)
+
+
 v0.19.5 (2014-12-23)
 ====================
 
