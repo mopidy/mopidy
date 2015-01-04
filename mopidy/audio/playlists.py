@@ -58,11 +58,11 @@ def parse_m3u(data):
     # TODO: convert non URIs to file URIs.
     found_header = False
     for line in data.readlines():
-        if found_header or line.startswith('#EXTM3U'):
+        if found_header or line.startswith(b'#EXTM3U'):
             found_header = True
         else:
             continue
-        if not line.startswith('#') and line.strip():
+        if not line.startswith(b'#') and line.strip():
             yield line.strip()
 
 
