@@ -96,9 +96,9 @@ v0.20.0 (UNRELEASED)
 v0.19.6 (UNRELEASED)
 ====================
 
-**Audio**
+Bug fix release.
 
-- Support UTF-8 in M3U playlists. (Fixes: :issue:`853`)
+- Audio: Support UTF-8 in M3U playlists. (Fixes: :issue:`853`)
 
 
 v0.19.5 (2014-12-23)
