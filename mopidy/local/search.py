@@ -1,6 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
-from mopidy.models import Album, SearchResult
+from mopidy.models import SearchResult
 
 
 def find_exact(tracks, query=None, uris=None):
@@ -23,7 +23,8 @@ def find_exact(tracks, query=None, uris=None):
 
             uri_filter = lambda t: q == t.uri
             track_name_filter = lambda t: q == t.name
-            album_filter = lambda t: q == getattr(t, 'album', Album()).name
+            album_filter = lambda t: q == getattr(
+                getattr(t, 'album', None), 'name', None)
             artist_filter = lambda t: filter(
                 lambda a: q == a.name, t.artists)
             albumartist_filter = lambda t: any([
