@@ -102,6 +102,26 @@ class Core(
         # Forward event from mixer to frontends
         CoreListener.send('mute_changed', mute=mute)
 
+    def tags_changed(self, tags):
+        # Should return only one audio instance
+        audios = pykka.ActorRegistry.get_by_class(audio.Audio)
+
+        if audios and len(audios) == 1:
+            audio_proxy = audios[0].proxy()
+
+            # Gets metadata
+            future = audio_proxy.get_current_tags()
+            tags_data = future.get()
+            if not tags_data or not isinstance(tags_data, dict):
+                return
+
+            # Convert to track and set playback
+            track = audio.utils.convert_tags_to_track(tags_data)
+            self.playback.current_track = track
+
+            # Send event to frontends
+            CoreListener.send('track_metadata_changed', track_metadata=track)
+
 
 class Backends(list):
     def __init__(self, backends):
