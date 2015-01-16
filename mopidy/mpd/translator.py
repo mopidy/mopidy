@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import re
 
-from mopidy.models import TlTrack
+from mopidy.models import TlTrack, Track
 
 # TODO: special handling of local:// uri scheme
 normalize_path_re = re.compile(r'[^/]+')
@@ -87,25 +87,24 @@ def track_to_mpd_format(track, position=None):
 
 
 def metadata_track_to_mpd_format(track, metadata):
-    # TODO: replace track data with metadata
-    result = []
-    if track:
-        if isinstance(track, TlTrack):
-            (tlid, track) = track
-        else:
-            (tlid, track) = (None, track)
-        result = [
-            ('file', track.uri or ''),
-            ('Time', track.length and (track.length // 1000) or 0),
-            ('Artist', artists_to_mpd_format(track.artists)),
-            ('Album', track.album and track.album.name or ''),
-        ]
-        if metadata and 'title' in metadata:
-            result.append(('Title', metadata['title']))
-        else:
-            result.append(('Title', track.name or ''))
+    """
+    Create new Track with a mix of track and metadata
+    and convert it to mpd format
+    """
+    # Sanity check
+    if track is None or metadata is None:
+        return None
 
-    return result
+    #
+    if isinstance(track, TlTrack):
+        (tlid, track) = track
+
+    track_kwargs = {k: v for k, v in track.__dict__.items() if v}
+    for k, v in metadata.__dict__.items():
+        if v:
+            track_kwargs[k] = v
+    result_track = Track(**track_kwargs)
+    return track_to_mpd_format(result_track)
 
 
 def artists_to_mpd_format(artists):

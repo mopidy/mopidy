@@ -7,6 +7,7 @@ import pykka
 
 from mopidy import audio, backend, mixer
 from mopidy.audio import PlaybackState
+from mopidy.audio.utils import convert_tags_to_track
 from mopidy.core.history import HistoryController
 from mopidy.core.library import LibraryController
 from mopidy.core.listener import CoreListener
@@ -111,7 +112,8 @@ class Core(
 
             # Request available metadata and put in playback
             future = audio_proxy.get_current_tags()
-            self.playback.current_metadata = future.get()
+            mtdata = future.get()
+            self.playback.current_md_track = convert_tags_to_track(mtdata)
 
             # Send event to frontends
             CoreListener.send('current_metadata_changed')
