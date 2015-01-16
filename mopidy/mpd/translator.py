@@ -86,6 +86,28 @@ def track_to_mpd_format(track, position=None):
     return result
 
 
+def metadata_track_to_mpd_format(track, metadata):
+    # TODO: replace track data with metadata
+    result = []
+    if track:
+        if isinstance(track, TlTrack):
+            (tlid, track) = track
+        else:
+            (tlid, track) = (None, track)
+        result = [
+            ('file', track.uri or ''),
+            ('Time', track.length and (track.length // 1000) or 0),
+            ('Artist', artists_to_mpd_format(track.artists)),
+            ('Album', track.album and track.album.name or ''),
+        ]
+        if metadata and 'title' in metadata:
+            result.append(('Title', metadata['title']))
+        else:
+            result.append(('Title', track.name or ''))
+
+    return result
+
+
 def artists_to_mpd_format(artists):
     """
     Format track artists for output to MPD client.

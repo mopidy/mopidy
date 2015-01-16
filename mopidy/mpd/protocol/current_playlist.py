@@ -278,6 +278,10 @@ def plchanges(context, version):
     if int(version) < context.core.tracklist.version.get():
         return translator.tracks_to_mpd_format(
             context.core.tracklist.tl_tracks.get())
+    elif int(version) == context.core.tracklist.version.get():
+        return translator.metadata_track_to_mpd_format(
+            context.core.playback.current_tl_track.get(),
+            context.core.playback.current_metadata.get())
 
 
 @protocol.commands.add('plchangesposid', version=protocol.INT)

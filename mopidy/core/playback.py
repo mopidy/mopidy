@@ -126,6 +126,14 @@ class PlaybackController(object):
     mute = property(get_mute, set_mute)
     """Mute state as a :class:`True` if muted, :class:`False` otherwise"""
 
+    def get_current_metadata(self):
+        return self.current_metadata
+
+    current_metadata = None
+    """
+    The currently playing metadata :class:`dict`, or :class:`None`.
+    """
+
     # Methods
 
     # TODO: remove this.

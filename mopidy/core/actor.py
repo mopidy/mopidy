@@ -109,18 +109,12 @@ class Core(
         if audios and len(audios) == 1:
             audio_proxy = audios[0].proxy()
 
-            # Gets metadata
+            # Request available metadata and put in playback
             future = audio_proxy.get_current_tags()
-            tags_data = future.get()
-            if not tags_data or not isinstance(tags_data, dict):
-                return
-
-            # Convert to track and set playback
-            track = audio.utils.convert_tags_to_track(tags_data)
-            self.playback.current_track = track
+            self.playback.current_metadata = future.get()
 
             # Send event to frontends
-            CoreListener.send('track_metadata_changed', track_metadata=track)
+            CoreListener.send('current_metadata_changed')
 
 
 class Backends(list):

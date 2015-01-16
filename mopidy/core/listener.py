@@ -164,13 +164,10 @@ class CoreListener(listener.Listener):
         """
         pass
 
-    def track_metadata_changed(self, track_metadata):
+    def current_metadata_changed(self):
         """
         Called whenever current track's metadata changed
 
         *MAY* be implemented by actor.
-
-        :param track_metadata: the track with metadata
-        :type track_metadata: :class:`mopidy.models.Track`
         """
         pass
