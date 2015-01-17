@@ -275,13 +275,26 @@ def plchanges(context, version):
     - Calls ``plchanges "-1"`` two times per second to get the entire playlist.
     """
     # XXX Naive implementation that returns all tracks as changed
-    if int(version) < context.core.tracklist.version.get():
+    tracklist_version = context.core.tracklist.version.get()
+    iversion = int(version)
+    if iversion < tracklist_version:
         return translator.tracks_to_mpd_format(
             context.core.tracklist.tl_tracks.get())
-    else:
-        return translator.metadata_track_to_mpd_format(
-            context.core.playback.current_tl_track.get(),
-            context.core.playback.current_md_track.get())
+    elif iversion == tracklist_version:
+        # If version are equals, it is just a metadata update
+        # So we replace the updated track in playlist
+        current_md_track = context.core.playback.current_md_track.get()
+        if current_md_track is None:
+            return None
+
+        ntl_tracks = []
+        tl_tracks = context.core.tracklist.tl_tracks.get()
+        for tl_track in tl_tracks:
+            if tl_track.tlid == current_md_track.tlid:
+                ntl_tracks.append(current_md_track)
+            else:
+                ntl_tracks.append(tl_track)
+        return translator.tracks_to_mpd_format(ntl_tracks)
 
 
 @protocol.commands.add('plchangesposid', version=protocol.INT)

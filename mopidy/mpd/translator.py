@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import re
 
-from mopidy.models import TlTrack, Track
+from mopidy.models import TlTrack
 
 # TODO: special handling of local:// uri scheme
 normalize_path_re = re.compile(r'[^/]+')
@@ -84,27 +84,6 @@ def track_to_mpd_format(track, position=None):
     if track.musicbrainz_id is not None:
         result.append(('MUSICBRAINZ_TRACKID', track.musicbrainz_id))
     return result
-
-
-def metadata_track_to_mpd_format(track, metadata):
-    """
-    Create new Track with a mix of track and metadata
-    and convert it to mpd format
-    """
-    # Sanity check
-    if track is None or metadata is None:
-        return None
-
-    #
-    if isinstance(track, TlTrack):
-        (tlid, track) = track
-
-    track_kwargs = {k: v for k, v in track.__dict__.items() if v}
-    for k, v in metadata.__dict__.items():
-        if v:
-            track_kwargs[k] = v
-    result_track = Track(**track_kwargs)
-    return track_to_mpd_format(result_track)
 
 
 def artists_to_mpd_format(artists):

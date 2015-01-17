@@ -14,6 +14,7 @@ from mopidy.core.listener import CoreListener
 from mopidy.core.playback import PlaybackController
 from mopidy.core.playlists import PlaylistsController
 from mopidy.core.tracklist import TracklistController
+from mopidy.models import TlTrack, Track
 from mopidy.utils import versioning
 
 
@@ -107,16 +108,31 @@ class Core(
         # Should return only one audio instance
         audios = pykka.ActorRegistry.get_by_class(audio.Audio)
 
-        if audios and len(audios) == 1:
-            audio_proxy = audios[0].proxy()
+        # Validity checks
+        if audios is None or len(audios) != 1:
+            return
+        if self.playback.current_tl_track is None:
+            return
 
-            # Request available metadata and put in playback
-            future = audio_proxy.get_current_tags()
-            mtdata = future.get()
-            self.playback.current_md_track = convert_tags_to_track(mtdata)
+        audio_proxy = audios[0].proxy()
 
-            # Send event to frontends
-            CoreListener.send('current_metadata_changed')
+        # Request available metadata and set a track
+        future = audio_proxy.get_current_tags()
+        mt_track = convert_tags_to_track(future.get())
+
+        # Merge current_tl_track with metadata in current_md_track
+        c_track = self.playback.current_tl_track.track
+        track_kwargs = {k: v for k, v in c_track.__dict__.items() if v}
+        for k, v in mt_track.__dict__.items():
+            if v:
+                track_kwargs[k] = v
+
+        self.playback.current_md_track = TlTrack(**{
+            'tlid': self.playback.current_tl_track.tlid,
+            'track': Track(**track_kwargs)})
+
+        # Send event to frontends
+        CoreListener.send('current_metadata_changed')
 
 
 class Backends(list):
