@@ -120,14 +120,14 @@ class Core(
         # Request available metadata and set a track
         mt_track = convert_tags_to_track(tags)
 
-        # Merge current_tl_track with metadata in current_md_track
+        # Merge current_tl_track with metadata in current_metadata_track
         c_track = self.playback.current_tl_track.track
         track_kwargs = {k: v for k, v in c_track.__dict__.items() if v}
         for k, v in mt_track.__dict__.items():
             if v:
                 track_kwargs[k] = v
 
-        self.playback.current_md_track = TlTrack(**{
+        self.playback.current_metadata_track = TlTrack(**{
             'tlid': self.playback.current_tl_track.tlid,
             'track': Track(**track_kwargs)})
 

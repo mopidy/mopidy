@@ -283,7 +283,7 @@ def plchanges(context, version):
     elif iversion == tracklist_version:
         # If version are equals, it is just a metadata update
         # So we replace the updated track in playlist
-        current_md_track = context.core.playback.current_md_track.get()
+        current_md_track = context.core.playback.current_metadata_track.get()
         if current_md_track is None:
             return None
 
