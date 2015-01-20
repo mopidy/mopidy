@@ -42,7 +42,7 @@ class Core(
     """The tracklist controller. An instance of
     :class:`mopidy.core.TracklistController`."""
 
-    def __init__(self, mixer=None, backends=None):
+    def __init__(self, mixer=None, backends=None, audio=None):
         super(Core, self).__init__()
 
         self.backends = Backends(backends)
@@ -58,6 +58,8 @@ class Core(
             backends=self.backends, core=self)
 
         self.tracklist = TracklistController(core=self)
+
+        self.audio = audio
 
     def get_uri_schemes(self):
         futures = [b.uri_schemes for b in self.backends]
@@ -105,20 +107,18 @@ class Core(
         CoreListener.send('mute_changed', mute=mute)
 
     def tags_changed(self, tags):
-        # Should return only one audio instance
-        audios = pykka.ActorRegistry.get_by_class(audio.Audio)
-
         # Validity checks
-        if audios is None or len(audios) != 1:
+        if not self.audio:
             return
         if self.playback.current_tl_track is None:
             return
 
-        audio_proxy = audios[0].proxy()
+        tags = self.audio.get_current_tags().get()
+        if not tags:
+            return
 
         # Request available metadata and set a track
-        future = audio_proxy.get_current_tags()
-        mt_track = convert_tags_to_track(future.get())
+        mt_track = convert_tags_to_track(tags)
 
         # Merge current_tl_track with metadata in current_md_track
         c_track = self.playback.current_tl_track.track

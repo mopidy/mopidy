@@ -279,7 +279,7 @@ class RootCommand(Command):
             mixer = self.start_mixer(config, mixer_class)
             audio = self.start_audio(config, mixer)
             backends = self.start_backends(config, backend_classes, audio)
-            core = self.start_core(mixer, backends)
+            core = self.start_core(mixer, backends, audio)
             self.start_frontends(config, frontend_classes, core)
             loop.run()
         except (exceptions.BackendError,
@@ -360,9 +360,9 @@ class RootCommand(Command):
 
         return backends
 
-    def start_core(self, mixer, backends):
+    def start_core(self, mixer, backends, audio):
         logger.info('Starting Mopidy core')
-        return Core.start(mixer=mixer, backends=backends).proxy()
+        return Core.start(mixer=mixer, backends=backends, audio=audio).proxy()
 
     def start_frontends(self, config, frontend_classes, core):
         logger.info(
