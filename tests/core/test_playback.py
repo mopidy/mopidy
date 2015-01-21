@@ -331,22 +331,20 @@ class CorePlaybackTest(unittest.TestCase):
                     'track_playback_started', tl_track=self.tl_tracks[0]),
             ])
 
-    # TODO Test on_end_of_track() more
-
-    def test_on_end_of_track_keeps_finished_track_in_tracklist(self):
+    def test_on_about_to_finish_keeps_finished_track_in_tracklist(self):
         tl_track = self.tl_tracks[0]
         self.core.playback.play(tl_track)
 
-        self.core.playback.on_end_of_track()
+        self.core.playback.on_about_to_finish()
 
         self.assertIn(tl_track, self.core.tracklist.tl_tracks)
 
-    def test_on_end_of_track_in_consume_mode_removes_finished_track(self):
+    def test_on_about_to_finish_in_consume_mode_removes_finished_track(self):
         tl_track = self.tl_tracks[0]
         self.core.playback.play(tl_track)
         self.core.tracklist.consume = True
 
-        self.core.playback.on_end_of_track()
+        self.core.playback.on_about_to_finish()
 
         self.assertNotIn(tl_track, self.core.tracklist.tl_tracks)
 

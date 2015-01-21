@@ -26,30 +26,13 @@ class PlaybackController(object):
         self._mute = False
 
         if self._audio:
-            self._audio.set_about_to_finish_callback(self._on_about_to_finish)
+            self._audio.set_about_to_finish_callback(self.on_about_to_finish)
 
     def _get_backend(self, tl_track):
         if tl_track is None:
             return None
         uri_scheme = urlparse.urlparse(tl_track.track.uri).scheme
         return self.backends.with_playback.get(uri_scheme, None)
-
-    def _on_about_to_finish(self):
-        original_tl_track = self.current_tl_track
-
-        next_tl_track = self.core.tracklist.eot_track(self.current_tl_track)
-        # TODO: this should be self.pending_tl_track and stream changed should
-        # make it current.
-        self.current_tl_track = next_tl_track
-
-        backend = self._get_backend(next_tl_track)
-
-        if backend:
-            backend.playback.change_track(next_tl_track.track).get()
-            # TODO: this _really_ needs to be stream changed...
-            self._trigger_track_playback_started()
-
-        self.core.tracklist.mark_played(original_tl_track)
 
     # Properties
 
@@ -148,38 +131,24 @@ class PlaybackController(object):
 
     # Methods
 
-    # TODO: this is not really end of track, this is on_need_next_track
-    def on_end_of_track(self):
-        """
-        Tell the playback controller that end of track is reached.
+    def on_end_of_stream(self):
+        self.state = PlaybackState.STOPPED
+        # TODO: self._trigger_track_playback_ended?
 
-        Used by event handler in :class:`mopidy.core.Core`.
-        """
-        if self.state == PlaybackState.STOPPED:
-            return
-
+    def on_about_to_finish(self):
         original_tl_track = self.current_tl_track
-        next_tl_track = self.core.tracklist.eot_track(original_tl_track)
 
-        backend = self._get_backend(next_tl_track)
+        next_tl_track = self.core.tracklist.eot_track(self.current_tl_track)
+        # TODO: this should be self.pending_tl_track and stream changed should
+        # make it current.
         self.current_tl_track = next_tl_track
 
-        if backend:
-            backend.playback.prepare_change()
-            backend.playback.change_track(next_tl_track.track)
-            result = backend.playback.play().get()
+        backend = self._get_backend(next_tl_track)
 
-            if result:
-                self.core.tracklist.mark_playing(next_tl_track)
-                self.core.history.add(next_tl_track.track)
-                # TODO: replace with stream-changed
-                self._trigger_track_playback_started()
-            else:
-                self.core.tracklist.mark_unplayable(next_tl_track)
-                # TODO: can cause an endless loop for single track repeat.
-                self.next()
-        else:
-            self.stop()
+        if backend:
+            backend.playback.change_track(next_tl_track.track).get()
+            # TODO: this _really_ needs to be stream changed...
+            self._trigger_track_playback_started()
 
         self.core.tracklist.mark_played(original_tl_track)
 
