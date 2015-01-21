@@ -153,7 +153,7 @@ class Ref(ImmutableObject):
     :param name: object name
     :type name: string
     :param type: object type
-    :type name: string
+    :type type: string
     """
 
     #: The object URI. Read-only.
