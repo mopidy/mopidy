@@ -158,11 +158,25 @@ class PlaybackController(object):
         original_tl_track = self.current_tl_track
         next_tl_track = self.core.tracklist.eot_track(original_tl_track)
 
-        if next_tl_track:
-            self.change_track(next_tl_track)
+        backend = self._get_backend(next_tl_track)
+        self.current_tl_track = next_tl_track
+
+        if backend:
+            backend.playback.prepare_change()
+            backend.playback.change_track(next_tl_track.track)
+            result = backend.playback.play().get()
+
+            if result:
+                self.core.tracklist.mark_playing(next_tl_track)
+                self.core.history.add(next_tl_track.track)
+                # TODO: replace with stream-changed
+                self._trigger_track_playback_started()
+            else:
+                self.core.tracklist.mark_unplayable(next_tl_track)
+                # TODO: can cause an endless loop for single track repeat.
+                self.next()
         else:
             self.stop()
-            self.current_tl_track = None
 
         self.core.tracklist.mark_played(original_tl_track)
 
