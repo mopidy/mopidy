@@ -25,11 +25,31 @@ class PlaybackController(object):
         self._volume = None
         self._mute = False
 
+        if self._audio:
+            self._audio.set_about_to_finish_callback(self._on_about_to_finish)
+
     def _get_backend(self, tl_track):
         if tl_track is None:
             return None
         uri_scheme = urlparse.urlparse(tl_track.track.uri).scheme
         return self.backends.with_playback.get(uri_scheme, None)
+
+    def _on_about_to_finish(self):
+        original_tl_track = self.current_tl_track
+
+        next_tl_track = self.core.tracklist.eot_track(self.current_tl_track)
+        # TODO: this should be self.pending_tl_track and stream changed should
+        # make it current.
+        self.current_tl_track = next_tl_track
+
+        backend = self._get_backend(next_tl_track)
+
+        if backend:
+            backend.playback.change_track(next_tl_track.track).get()
+            # TODO: this _really_ needs to be stream changed...
+            self._trigger_track_playback_started()
+
+        self.core.tracklist.mark_played(original_tl_track)
 
     # Properties
 
@@ -326,6 +346,7 @@ class PlaybackController(object):
         :type time_position: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
+        # TODO: seek needs to take pending tracks into account :(
         if not self.core.tracklist.tracks:
             return False
 
