@@ -196,9 +196,6 @@ class PlaybackController(object):
                 result = True
 
             if result and self.state != PlaybackState.PAUSED:
-                self.core.tracklist.mark_playing(next_tl_track)
-                self.core.history.add(next_tl_track.track)
-                # TODO: replace with stream-changed
                 self._trigger_track_playback_started()
             elif not result:
                 self.core.tracklist.mark_unplayable(next_tl_track)
@@ -268,9 +265,6 @@ class PlaybackController(object):
             success = backend.playback.play().get()
 
         if success:
-            self.core.tracklist.mark_playing(tl_track)
-            self.core.history.add(tl_track.track)
-            # TODO: replace with stream-changed
             self._trigger_track_playback_started()
         else:
             self.core.tracklist.mark_unplayable(tl_track)
@@ -304,9 +298,6 @@ class PlaybackController(object):
                 result = True
 
             if result and self.state != PlaybackState.PAUSED:
-                self.core.tracklist.mark_playing(prev_tl_track)
-                self.core.history.add(prev_tl_track.track)
-                # TODO: replace with stream-changed
                 self._trigger_track_playback_started()
             elif not result:
                 self.core.tracklist.mark_unplayable(prev_tl_track)
@@ -382,9 +373,13 @@ class PlaybackController(object):
             tl_track=self.current_tl_track, time_position=self.time_position)
 
     def _trigger_track_playback_started(self):
+        # TODO: replace with stream-changed
         logger.debug('Triggering track playback started event')
         if self.current_tl_track is None:
             return
+
+        self.core.tracklist.mark_playing(self.current_tl_track)
+        self.core.history.add(self.current_tl_track.track)
         listener.CoreListener.send(
             'track_playback_started',
             tl_track=self.current_tl_track)
