@@ -234,6 +234,7 @@ class Command(object):
         raise NotImplementedError
 
 
+# TODO: move out of this file
 class RootCommand(Command):
     def __init__(self):
         super(RootCommand, self).__init__()
@@ -279,7 +280,7 @@ class RootCommand(Command):
             mixer = self.start_mixer(config, mixer_class)
             audio = self.start_audio(config, mixer)
             backends = self.start_backends(config, backend_classes, audio)
-            core = self.start_core(mixer, backends)
+            core = self.start_core(audio, mixer, backends)
             self.start_frontends(config, frontend_classes, core)
             loop.run()
         except (exceptions.BackendError,
@@ -360,9 +361,9 @@ class RootCommand(Command):
 
         return backends
 
-    def start_core(self, mixer, backends):
+    def start_core(self, audio, mixer, backends):
         logger.info('Starting Mopidy core')
-        return Core.start(mixer=mixer, backends=backends).proxy()
+        return Core.start(audio=audio, mixer=mixer, backends=backends).proxy()
 
     def start_frontends(self, config, frontend_classes, core):
         logger.info(

@@ -14,11 +14,13 @@ logger = logging.getLogger(__name__)
 class PlaybackController(object):
     pykka_traversable = True
 
-    def __init__(self, mixer, backends, core):
+    def __init__(self, audio, mixer, backends, core):
+        # TODO: these should be internal
         self.mixer = mixer
         self.backends = backends
         self.core = core
 
+        self._audio = audio
         self._state = PlaybackState.STOPPED
         self._volume = None
         self._mute = False

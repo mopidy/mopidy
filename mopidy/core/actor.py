@@ -40,7 +40,7 @@ class Core(
     """The tracklist controller. An instance of
     :class:`mopidy.core.TracklistController`."""
 
-    def __init__(self, mixer=None, backends=None):
+    def __init__(self, audio=None, mixer=None, backends=None):
         super(Core, self).__init__()
 
         self.backends = Backends(backends)
@@ -50,7 +50,7 @@ class Core(
         self.history = HistoryController()
 
         self.playback = PlaybackController(
-            mixer=mixer, backends=self.backends, core=self)
+            audio=audio, mixer=mixer, backends=self.backends, core=self)
 
         self.playlists = PlaylistsController(
             backends=self.backends, core=self)
