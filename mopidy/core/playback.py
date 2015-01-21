@@ -23,12 +23,10 @@ class PlaybackController(object):
         self._volume = None
         self._mute = False
 
-    def _get_backend(self):
-        # TODO: take in track instead
-        if self.current_tl_track is None:
+    def _get_backend(self, tl_track):
+        if tl_track is None:
             return None
-        uri = self.current_tl_track.track.uri
-        uri_scheme = urlparse.urlparse(uri).scheme
+        uri_scheme = urlparse.urlparse(tl_track.track.uri).scheme
         return self.backends.with_playback.get(uri_scheme, None)
 
     # Properties
@@ -80,7 +78,7 @@ class PlaybackController(object):
     """
 
     def get_time_position(self):
-        backend = self._get_backend()
+        backend = self._get_backend(self.current_tl_track)
         if backend:
             return backend.playback.get_time_position().get()
         else:
@@ -201,7 +199,7 @@ class PlaybackController(object):
 
     def pause(self):
         """Pause playback."""
-        backend = self._get_backend()
+        backend = self._get_backend(self.current_tl_track)
         if not backend or backend.playback.pause().get():
             # TODO: switch to:
             # backend.track(pause)
@@ -249,7 +247,7 @@ class PlaybackController(object):
 
         self.current_tl_track = tl_track
         self.state = PlaybackState.PLAYING
-        backend = self._get_backend()
+        backend = self._get_backend(self.current_tl_track)
         success = backend and backend.playback.play(tl_track.track).get()
 
         if success:
@@ -283,7 +281,7 @@ class PlaybackController(object):
         """If paused, resume playing the current track."""
         if self.state != PlaybackState.PAUSED:
             return
-        backend = self._get_backend()
+        backend = self._get_backend(self.current_tl_track)
         if backend and backend.playback.resume().get():
             self.state = PlaybackState.PLAYING
             # TODO: trigger via gst messages
@@ -314,7 +312,7 @@ class PlaybackController(object):
             self.next()
             return True
 
-        backend = self._get_backend()
+        backend = self._get_backend(self.current_tl_track)
         if not backend:
             return False
 
@@ -326,7 +324,7 @@ class PlaybackController(object):
     def stop(self):
         """Stop playing."""
         if self.state != PlaybackState.STOPPED:
-            backend = self._get_backend()
+            backend = self._get_backend(self.current_tl_track)
             time_position_before_stop = self.time_position
             if not backend or backend.playback.stop().get():
                 self.state = PlaybackState.STOPPED
