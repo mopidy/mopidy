@@ -186,14 +186,31 @@ class PlaybackController(object):
         original_tl_track = self.current_tl_track
         next_tl_track = self.core.tracklist.next_track(original_tl_track)
 
-        if next_tl_track:
-            # TODO: switch to:
-            # backend.play(track)
-            # wait for state change?
-            self.change_track(next_tl_track)
+        backend = self._get_backend(next_tl_track)
+        self.current_tl_track = next_tl_track
+
+        if backend:
+            backend.playback.prepare_change()
+            backend.playback.change_track(next_tl_track.track)
+
+            if self.state == PlaybackState.PLAYING:
+                result = backend.playback.play().get()
+            elif self.state == PlaybackState.PAUSED:
+                result = backend.playback.pause().get()
+            else:
+                result = True
+
+            if result and self.state != PlaybackState.PAUSED:
+                self.core.tracklist.mark_playing(next_tl_track)
+                self.core.history.add(next_tl_track.track)
+                # TODO: replace with stream-changed
+                self._trigger_track_playback_started()
+            elif not result:
+                self.core.tracklist.mark_unplayable(next_tl_track)
+                # TODO: can cause an endless loop for single track repeat.
+                self.next()
         else:
             self.stop()
-            self.current_tl_track = None
 
         self.core.tracklist.mark_played(original_tl_track)
 
