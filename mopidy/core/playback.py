@@ -126,25 +126,6 @@ class PlaybackController(object):
 
     # Methods
 
-    # TODO: remove this.
-    def change_track(self, tl_track, on_error_step=1):
-        """
-        Change to the given track, keeping the current playback state.
-
-        :param tl_track: track to change to
-        :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
-        :param on_error_step: direction to step at play error, 1 for next
-            track (default), -1 for previous track. **INTERNAL**
-        :type on_error_step: int, -1 or 1
-        """
-        old_state = self.state
-        self.stop()
-        self.current_tl_track = tl_track
-        if old_state == PlaybackState.PLAYING:
-            self.play(on_error_step=on_error_step)
-        elif old_state == PlaybackState.PAUSED:
-            self.pause()
-
     # TODO: this is not really end of track, this is on_need_next_track
     def on_end_of_track(self):
         """
