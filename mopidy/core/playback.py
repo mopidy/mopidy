@@ -292,12 +292,30 @@ class PlaybackController(object):
         The current playback state will be kept. If it was playing, playing
         will continue. If it was paused, it will still be paused, etc.
         """
-        tl_track = self.current_tl_track
-        # TODO: switch to:
-        # self.play(....)
-        # wait for state change?
-        self.change_track(
-            self.core.tracklist.previous_track(tl_track), on_error_step=-1)
+        original_tl_track = self.current_tl_track
+        prev_tl_track = self.core.tracklist.previous_track(original_tl_track)
+
+        backend = self._get_backend(prev_tl_track)
+        self.current_tl_track = prev_tl_track
+
+        if backend:
+            backend.playback.prepare_change()
+            backend.playback.change_track(prev_tl_track.track)
+            if self.state == PlaybackState.PLAYING:
+                result = backend.playback.play().get()
+            elif self.state == PlaybackState.PAUSED:
+                result = backend.playback.pause().get()
+            else:
+                result = True
+
+            if result and self.state != PlaybackState.PAUSED:
+                self.core.tracklist.mark_playing(prev_tl_track)
+                self.core.history.add(prev_tl_track.track)
+                # TODO: replace with stream-changed
+                self._trigger_track_playback_started()
+            elif not result:
+                self.core.tracklist.mark_unplayable(prev_tl_track)
+                self.previous()
 
     def resume(self):
         """If paused, resume playing the current track."""
