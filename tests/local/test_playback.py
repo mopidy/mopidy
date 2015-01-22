@@ -42,6 +42,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     def trigger_about_to_finish(self):
         self.audio.prepare_change().get()
         self.playback.on_about_to_finish()
+        self.playback.on_stream_changed(None)
 
     def trigger_end_of_stream(self):
         self.playback.on_end_of_stream()

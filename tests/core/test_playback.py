@@ -4,8 +4,80 @@ import unittest
 
 import mock
 
-from mopidy import backend, core
+import pykka
+
+from mopidy import audio, backend, core
 from mopidy.models import Track
+
+
+class TestBackend(pykka.ThreadingActor, backend.Backend):
+    uri_schemes = ['dummy']
+
+    def __init__(self, config, audio):
+        super(TestBackend, self).__init__()
+        self.playback = backend.PlaybackProvider(audio=audio, backend=self)
+
+
+class TestCurrentAndPendingTlTrack(unittest.TestCase):
+    def setUp(self):  # noqa: N802
+        self.audio = audio.DummyAudio.start().proxy()
+        self.backend = TestBackend.start(config={}, audio=self.audio).proxy()
+        self.core = core.Core(audio=self.audio, backends=[self.backend])
+        self.playback = self.core.playback
+
+        self.tracks = [Track(uri='dummy:a', length=1234),
+                       Track(uri='dummy:b', length=1234)]
+
+        self.core.tracklist.add(self.tracks)
+
+    def tearDown(self):  # noqa: N802
+        pykka.ActorRegistry.stop_all()
+
+    def trigger_about_to_finish(self):
+        self.audio.prepare_change()
+        # TODO: trigger via dummy audio?
+        self.playback.on_about_to_finish()
+
+    def trigger_stream_changed(self):
+        # TODO: trigger via dummy audio?
+        self.playback.on_stream_changed(None)
+
+    def trigger_end_of_stream(self):
+        # TODO: trigger via dummy audio?
+        self.playback.on_end_of_stream()
+
+    def test_pending_tl_track_is_none(self):
+        self.core.playback.play()
+        self.assertEqual(self.playback._pending_tl_track, None)
+
+    def test_pending_tl_track_after_about_to_finish(self):
+        self.core.playback.play()
+        self.trigger_about_to_finish()
+        self.assertEqual(self.playback._pending_tl_track.track.uri, 'dummy:b')
+
+    def test_pending_tl_track_after_stream_changed(self):
+        self.trigger_about_to_finish()
+        self.trigger_stream_changed()
+        self.assertEqual(self.playback._pending_tl_track, None)
+
+    def test_current_tl_track_after_about_to_finish(self):
+        self.core.playback.play()
+        self.trigger_about_to_finish()
+        self.assertEqual(self.playback.current_tl_track.track.uri, 'dummy:a')
+
+    def test_current_tl_track_after_stream_changed(self):
+        self.core.playback.play()
+        self.trigger_about_to_finish()
+        self.trigger_stream_changed()
+        self.assertEqual(self.playback.current_tl_track.track.uri, 'dummy:b')
+
+    def test_current_tl_track_after_end_of_stream(self):
+        self.core.playback.play()
+        self.trigger_about_to_finish()
+        self.trigger_stream_changed()
+        self.trigger_about_to_finish()
+        self.trigger_end_of_stream()
+        self.assertEqual(self.playback.current_tl_track, None)
 
 
 class CorePlaybackTest(unittest.TestCase):

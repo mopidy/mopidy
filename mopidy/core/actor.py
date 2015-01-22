@@ -75,6 +75,9 @@ class Core(
     def reached_end_of_stream(self):
         self.playback.on_end_of_stream()
 
+    def stream_changed(self, uri):
+        self.playback.on_stream_changed(uri)
+
     def state_changed(self, old_state, new_state, target_state):
         # XXX: This is a temporary fix for issue #232 while we wait for a more
         # permanent solution with the implementation of issue #234. When the

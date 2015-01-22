@@ -24,6 +24,7 @@ class PlaybackController(object):
         self._state = PlaybackState.STOPPED
         self._volume = None
         self._mute = False
+        self._pending_tl_track = None
 
         if self._audio:
             self._audio.set_about_to_finish_callback(self.on_about_to_finish)
@@ -133,22 +134,26 @@ class PlaybackController(object):
 
     def on_end_of_stream(self):
         self.state = PlaybackState.STOPPED
+        self.current_tl_track = None
+        # TODO: self._trigger_track_playback_ended?
+
+    def on_stream_changed(self, uri):
+        self.current_tl_track = self._pending_tl_track
+        self._pending_tl_track = None
+        self._trigger_track_playback_started()
         # TODO: self._trigger_track_playback_ended?
 
     def on_about_to_finish(self):
+        # TODO: check that we always have a current track
+
         original_tl_track = self.current_tl_track
+        next_tl_track = self.core.tracklist.eot_track(original_tl_track)
 
-        next_tl_track = self.core.tracklist.eot_track(self.current_tl_track)
-        # TODO: this should be self.pending_tl_track and stream changed should
-        # make it current.
-        self.current_tl_track = next_tl_track
-
+        self._pending_tl_track = next_tl_track
         backend = self._get_backend(next_tl_track)
 
         if backend:
             backend.playback.change_track(next_tl_track.track).get()
-            # TODO: this _really_ needs to be stream changed...
-            self._trigger_track_playback_started()
 
         self.core.tracklist.mark_played(original_tl_track)
 
