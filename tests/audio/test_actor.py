@@ -14,7 +14,7 @@ import mock
 
 import pykka
 
-from mopidy import audio
+from mopidy import audio, listener
 from mopidy.audio import dummy as dummy_audio
 from mopidy.audio.constants import PlaybackState
 from mopidy.utils.path import path_to_uri
@@ -133,185 +133,210 @@ class AudioDummyTest(DummyMixin, AudioTest):
     pass
 
 
-@mock.patch.object(audio.AudioListener, 'send')
+class DummyAudioListener(pykka.ThreadingActor, audio.AudioListener):
+    def __init__(self):
+        super(DummyAudioListener, self).__init__()
+        self.events = []
+        self.waiters = {}
+
+    def on_event(self, event, **kwargs):
+        self.events.append((event, kwargs))
+        if event in self.waiters:
+            self.waiters[event].set()
+
+    def wait(self, event):
+        self.waiters[event] = threading.Event()
+        return self.waiters[event]
+
+    def get_events(self):
+        return self.events
+
+    def clear_events(self):
+        self.events = []
+
+
 class AudioEventTest(BaseTest):
     def setUp(self):  # noqa: N802
         super(AudioEventTest, self).setUp()
         self.audio.enable_sync_handler().get()
+        self.listener = DummyAudioListener.start().proxy()
+
+        self.original_send_async = listener.send_async
+        listener.send_async = listener.send
+
+    def tearDown(self):  # noqa: N802
+        super(AudioEventTest, self).setUp()
+        listener.send_async = self.original_send_async
+
+    def assertEvent(self, event, **kwargs):  # noqa: N802
+        self.assertIn((event, kwargs), self.listener.get_events().get())
+
+    def assertNotEvent(self, event, **kwargs):  # noqa: N802
+        self.assertNotIn((event, kwargs), self.listener.get_events().get())
 
     # TODO: test without uri set, with bad uri and gapless...
     # TODO: playing->playing triggered by seek should be removed
     # TODO: codify expected state after EOS
     # TODO: consider returning a future or a threading event?
 
-    def test_state_change_stopped_to_playing_event(self, send_mock):
+    def test_state_change_stopped_to_playing_event(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.start_playback()
 
         self.audio.wait_for_state_change().get()
-        call = mock.call('state_changed', old_state=PlaybackState.STOPPED,
+        self.assertEvent('state_changed', old_state=PlaybackState.STOPPED,
                          new_state=PlaybackState.PLAYING, target_state=None)
-        self.assertIn(call, send_mock.call_args_list)
 
-    def test_state_change_stopped_to_paused_event(self, send_mock):
+    def test_state_change_stopped_to_paused_event(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.pause_playback()
 
         self.audio.wait_for_state_change().get()
-        call = mock.call('state_changed', old_state=PlaybackState.STOPPED,
+        self.assertEvent('state_changed', old_state=PlaybackState.STOPPED,
                          new_state=PlaybackState.PAUSED, target_state=None)
-        self.assertIn(call, send_mock.call_args_list)
 
-    def test_state_change_paused_to_playing_event(self, send_mock):
+    def test_state_change_paused_to_playing_event(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.pause_playback()
+
         self.audio.wait_for_state_change()
+        self.listener.clear_events()
         self.audio.start_playback()
 
         self.audio.wait_for_state_change().get()
-        call = mock.call('state_changed', old_state=PlaybackState.PAUSED,
+        self.assertEvent('state_changed', old_state=PlaybackState.PAUSED,
                          new_state=PlaybackState.PLAYING, target_state=None)
-        self.assertIn(call, send_mock.call_args_list)
 
-    def test_state_change_paused_to_stopped_event(self, send_mock):
+    def test_state_change_paused_to_stopped_event(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.pause_playback()
+
         self.audio.wait_for_state_change()
+        self.listener.clear_events()
         self.audio.stop_playback()
 
         self.audio.wait_for_state_change().get()
-        call = mock.call('state_changed', old_state=PlaybackState.PAUSED,
+        self.assertEvent('state_changed', old_state=PlaybackState.PAUSED,
                          new_state=PlaybackState.STOPPED, target_state=None)
-        self.assertIn(call, send_mock.call_args_list)
 
-    def test_state_change_playing_to_paused_event(self, send_mock):
+    def test_state_change_playing_to_paused_event(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.start_playback()
+
         self.audio.wait_for_state_change()
+        self.listener.clear_events()
         self.audio.pause_playback()
 
         self.audio.wait_for_state_change().get()
-        call = mock.call('state_changed', old_state=PlaybackState.PLAYING,
+        self.assertEvent('state_changed', old_state=PlaybackState.PLAYING,
                          new_state=PlaybackState.PAUSED, target_state=None)
-        self.assertIn(call, send_mock.call_args_list)
 
-    def test_state_change_playing_to_stopped_event(self, send_mock):
+    def test_state_change_playing_to_stopped_event(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.start_playback()
+
         self.audio.wait_for_state_change()
+        self.listener.clear_events()
         self.audio.stop_playback()
 
         self.audio.wait_for_state_change().get()
-        call = mock.call('state_changed', old_state=PlaybackState.PLAYING,
+        self.assertEvent('state_changed', old_state=PlaybackState.PLAYING,
                          new_state=PlaybackState.STOPPED, target_state=None)
-        self.assertIn(call, send_mock.call_args_list)
 
-    def test_stream_changed_event_on_playing(self, send_mock):
+    def test_stream_changed_event_on_playing(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
+        self.listener.clear_events()
         self.audio.start_playback()
 
         # Since we are going from stopped to playing, the state change is
         # enough to ensure the stream changed.
         self.audio.wait_for_state_change().get()
+        self.assertEvent('stream_changed', uri=self.uris[0])
 
-        call = mock.call('stream_changed', uri=self.uris[0])
-        self.assertIn(call, send_mock.call_args_list)
-
-    def test_stream_changed_event_on_paused_to_stopped(self, send_mock):
+    def test_stream_changed_event_on_paused_to_stopped(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.pause_playback()
+
         self.audio.wait_for_state_change()
+        self.listener.clear_events()
         self.audio.stop_playback()
 
         self.audio.wait_for_state_change().get()
+        self.assertEvent('stream_changed', uri=None)
 
-        call = mock.call('stream_changed', uri=None)
-        self.assertIn(call, send_mock.call_args_list)
-
-    def test_position_changed_on_pause(self, send_mock):
+    def test_position_changed_on_pause(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.pause_playback()
         self.audio.wait_for_state_change()
 
         self.audio.wait_for_state_change().get()
+        self.assertEvent('position_changed', position=0)
 
-        call = mock.call('position_changed', position=0)
-        self.assertIn(call, send_mock.call_args_list)
-
-    def test_position_changed_on_play(self, send_mock):
+    def test_position_changed_on_play(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.start_playback()
         self.audio.wait_for_state_change()
 
         self.audio.wait_for_state_change().get()
+        self.assertEvent('position_changed', position=0)
 
-        call = mock.call('position_changed', position=0)
-        self.assertIn(call, send_mock.call_args_list)
-
-    def test_position_changed_on_seek(self, send_mock):
+    def test_position_changed_on_seek_while_stopped(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.set_position(2000)
 
         self.audio.wait_for_state_change().get()
+        self.assertNotEvent('position_changed', position=0)
 
-        call = mock.call('position_changed', position=0)
-        self.assertNotIn(call, send_mock.call_args_list)
-
-    def test_position_changed_on_seek_after_play(self, send_mock):
+    def test_position_changed_on_seek_after_play(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.start_playback()
+
         self.audio.wait_for_state_change()
+        self.listener.clear_events()
         self.audio.set_position(2000)
 
         self.audio.wait_for_state_change().get()
+        self.assertEvent('position_changed', position=2000)
 
-        call = mock.call('position_changed', position=2000)
-        self.assertIn(call, send_mock.call_args_list)
-
-    def test_position_changed_on_seek_after_pause(self, send_mock):
+    def test_position_changed_on_seek_after_pause(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.pause_playback()
+
         self.audio.wait_for_state_change()
+        self.listener.clear_events()
         self.audio.set_position(2000)
 
         self.audio.wait_for_state_change().get()
+        self.assertEvent('position_changed', position=2000)
 
-        call = mock.call('position_changed', position=2000)
-        self.assertIn(call, send_mock.call_args_list)
-
-    def test_tags_changed_on_playback(self, send_mock):
+    def test_tags_changed_on_playback(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.start_playback()
         self.audio.wait_for_state_change().get()
 
-        send_mock.assert_any_call('tags_changed', tags=mock.ANY)
+        self.assertEvent('tags_changed', tags=mock.ANY)
 
     # Unlike the other events, having the state changed done is not
     # enough to ensure our event is called. So we setup a threading
     # event that we can wait for with a timeout while the track playback
     # completes.
 
-    def test_stream_changed_event_on_paused(self, send_mock):
-        event = threading.Event()
-
-        def send(name, **kwargs):
-            if name == 'stream_changed':
-                event.set()
-        send_mock.side_effect = send
+    def test_stream_changed_event_on_paused(self):
+        event = self.listener.wait('stream_changed').get()
 
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
@@ -321,13 +346,8 @@ class AudioEventTest(BaseTest):
         if not event.wait(timeout=1.0):
             self.fail('Stream changed not reached within deadline')
 
-    def test_reached_end_of_stream_event(self, send_mock):
-        event = threading.Event()
-
-        def send(name, **kwargs):
-            if name == 'reached_end_of_stream':
-                event.set()
-        send_mock.side_effect = send
+    def test_reached_end_of_stream_event(self):
+        event = self.listener.wait('reached_end_of_stream').get()
 
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
@@ -340,21 +360,14 @@ class AudioEventTest(BaseTest):
 
         self.assertFalse(self.audio.get_current_tags().get())
 
-    def test_gapless(self, send_mock):
+    def test_gapless(self):
         uris = self.uris[1:]
-        events = []
-        done = threading.Event()
+        event = self.listener.wait('reached_end_of_stream').get()
 
         def callback():
             if uris:
                 self.audio.set_uri(uris.pop()).get()
 
-        def send(name, **kwargs):
-            events.append((name, kwargs))
-            if name == 'reached_end_of_stream':
-                done.set()
-
-        send_mock.side_effect = send
         self.audio.set_about_to_finish_callback(callback).get()
 
         self.audio.prepare_change()
@@ -366,15 +379,15 @@ class AudioEventTest(BaseTest):
 
         self.possibly_trigger_fake_about_to_finish()
         self.audio.wait_for_state_change().get()
-        if not done.wait(timeout=1.0):
+        if not event.wait(timeout=1.0):
             self.fail('EOS not received')
 
         # Check that both uris got played
-        self.assertIn(('stream_changed', {'uri': self.uris[0]}), events)
-        self.assertIn(('stream_changed', {'uri': self.uris[1]}), events)
+        self.assertEvent('stream_changed', uri=self.uris[0])
+        self.assertEvent('stream_changed', uri=self.uris[1])
 
         # Check that events counts check out.
-        keys = [k for k, v in events]
+        keys = [k for k, v in self.listener.get_events().get()]
         self.assertEqual(2, keys.count('stream_changed'))
         self.assertEqual(2, keys.count('position_changed'))
         self.assertEqual(1, keys.count('state_changed'))
@@ -382,17 +395,12 @@ class AudioEventTest(BaseTest):
 
         # TODO: test tag states within gaples
 
-    def test_current_tags_are_blank_to_begin_with(self, send_mock):
+    # TODO: this does not belong in this testcase
+    def test_current_tags_are_blank_to_begin_with(self):
         self.assertFalse(self.audio.get_current_tags().get())
 
-    def test_current_tags_blank_after_end_of_stream(self, send_mock):
-        done = threading.Event()
-
-        def send(name, **kwargs):
-            if name == 'reached_end_of_stream':
-                done.set()
-
-        send_mock.side_effect = send
+    def test_current_tags_blank_after_end_of_stream(self):
+        event = self.listener.wait('reached_end_of_stream').get()
 
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
@@ -401,23 +409,18 @@ class AudioEventTest(BaseTest):
         self.possibly_trigger_fake_about_to_finish()
         self.audio.wait_for_state_change().get()
 
-        if not done.wait(timeout=1.0):
+        if not event.wait(timeout=1.0):
             self.fail('EOS not received')
 
         self.assertFalse(self.audio.get_current_tags().get())
 
-    def test_current_tags_stored(self, send_mock):
-        done = threading.Event()
+    def test_current_tags_stored(self):
+        event = self.listener.wait('reached_end_of_stream').get()
         tags = []
 
         def callback():
             tags.append(self.audio.get_current_tags().get())
 
-        def send(name, **kwargs):
-            if name == 'reached_end_of_stream':
-                done.set()
-
-        send_mock.side_effect = send
         self.audio.set_about_to_finish_callback(callback).get()
 
         self.audio.prepare_change()
@@ -427,7 +430,7 @@ class AudioEventTest(BaseTest):
         self.possibly_trigger_fake_about_to_finish()
         self.audio.wait_for_state_change().get()
 
-        if not done.wait(timeout=1.0):
+        if not event.wait(timeout=1.0):
             self.fail('EOS not received')
 
         self.assertTrue(tags[0])
