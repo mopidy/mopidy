@@ -3,7 +3,18 @@ from __future__ import absolute_import, unicode_literals
 from mopidy.models import SearchResult
 
 
-def find_exact(tracks, query=None, uris=None):
+def find_exact(tracks, query=None, limit=100, offset=0, uris=None):
+    """
+    Filter a list of tracks where ``field`` is ``values``.
+
+    :param list tracks: a list of :class:`~mopidy.models.Track`
+    :param dict query: one or more queries to search for
+    :param int limit: maximum number of results to return
+    :param int offset: offset into result set to use.
+    :param uris: zero or more URI roots to limit the search to
+    :type uris: list of strings or :class:`None`
+    :rtype: :class:`~mopidy.models.SearchResult`
+    """
     # TODO Only return results within URI roots given by ``uris``
 
     if query is None:
@@ -96,10 +107,22 @@ def find_exact(tracks, query=None, uris=None):
                 raise LookupError('Invalid lookup field: %s' % field)
 
     # TODO: add local:search:<query>
-    return SearchResult(uri='local:search', tracks=tracks)
+    return SearchResult(
+        uri='local:search', tracks=tracks[offset:offset+limit])
 
 
-def search(tracks, query=None, uris=None):
+def search(tracks, query=None, limit=100, offset=0, uris=None):
+    """
+    Filter a list of tracks where ``field`` is like ``values``.
+
+    :param list tracks: a list of :class:`~mopidy.models.Track`
+    :param dict query: one or more queries to search for
+    :param int limit: maximum number of results to return
+    :param int offset: offset into result set to use.
+    :param uris: zero or more URI roots to limit the search to
+    :type uris: list of strings or :class:`None`
+    :rtype: :class:`~mopidy.models.SearchResult`
+    """
     # TODO Only return results within URI roots given by ``uris``
 
     if query is None:
@@ -195,7 +218,7 @@ def search(tracks, query=None, uris=None):
             else:
                 raise LookupError('Invalid lookup field: %s' % field)
     # TODO: add local:search:<query>
-    return SearchResult(uri='local:search', tracks=tracks)
+    return SearchResult(uri='local:search', tracks=tracks[offset:offset+limit])
 
 
 def _validate_query(query):
