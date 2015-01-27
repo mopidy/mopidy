@@ -2385,8 +2385,10 @@ Mopidy.prototype._getConsole = function (settings) {
 Mopidy.prototype._configure = function (settings) {
     var currentHost = (typeof document !== "undefined" &&
         document.location.host) || "localhost";
+    var protocol = (typeof document !== "undefined" &&
+        document.location.protocol === "https:") ? "wss://" : "ws://";
     settings.webSocketUrl = settings.webSocketUrl ||
-        "ws://" + currentHost + "/mopidy/ws";
+        protocol + currentHost + "/mopidy/ws";
 
     if (settings.autoConnect !== false) {
         settings.autoConnect = true;
