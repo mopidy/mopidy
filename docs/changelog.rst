@@ -92,6 +92,19 @@ v0.20.0 (UNRELEASED)
 
 - Add basic tests for the stream library provider.
 
+**Mopidy.js client library**
+
+This version has been released to npm as Mopidy.js v0.5.0.
+
+- Reexport When.js library as ``Mopidy.when``, to make it easily available to
+  users of Mopidy.js. (Fixes: :js:`1`)
+
+- Default to ``wss://`` as the WebSocket protocol if the page is hosted on
+  ``https://``. This has no effect if the ``webSocketUrl`` setting is
+  specified. (Pull request: :js:`2`)
+
+- Upgrade dependencies.
+
 
 v0.19.6 (UNRELEASED)
 ====================

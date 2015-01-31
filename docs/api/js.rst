@@ -289,9 +289,10 @@ unhandled errors. In general, unhandled errors will not go silently missing.
 
 The promise objects returned by Mopidy.js adheres to the `CommonJS Promises/A
 <http://wiki.commonjs.org/wiki/Promises/A>`_ standard. We use the
-implementation known as `when.js <https://github.com/cujojs/when>`_. Please
-refer to when.js' documentation or the standard for further details on how to
-work with promise objects.
+implementation known as `when.js <https://github.com/cujojs/when>`_, and
+reexport it as ``Mopidy.when`` so you don't have to duplicate the dependency.
+Please refer to when.js' documentation or the standard for further details on
+how to work with promise objects.
 
 
 Cleaning up
