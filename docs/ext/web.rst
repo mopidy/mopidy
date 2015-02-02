@@ -64,12 +64,11 @@ Mopidy-Mopify
 
 https://github.com/dirkgroenen/mopidy-mopify
 
-An web client that mainly targets using Spotify through Mopidy. Made by Dirk
-Groenen.
+A web client that uses external services to provide additional features and a more 'complete' Spotify music experience. It's currently targeted at people using Spotify through Mopidy. Made by Dirk Groenen.
 
-.. image:: /ext/mopify.png
+.. image:: /ext/mopify.jpg
     :width: 720
-    :height: 424
+    :height: 374
 
 To install, run::
 
