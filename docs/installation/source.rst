@@ -52,8 +52,8 @@ from source by hand.
 
    If you use Fedora you can install GStreamer like this::
 
-       sudo yum install -y python-gst0.10 gstreamer0.10-plugins-good \
-           gstreamer0.10-plugins-ugly gstreamer0.10-tools
+       sudo yum install -y python-gstreamer1 gstreamer-plugins-good \
+           gstreamer-plugins-ugly gstreamer-tools
 
    If you use Gentoo you need to be careful because GStreamer 0.10 is in a
    different lower slot than 1.0, the default. Your emerge commands will need
