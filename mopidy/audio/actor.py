@@ -320,7 +320,9 @@ class Audio(pykka.ThreadingActor):
         :param uri: the URI to play
         :type uri: string
         """
+        current_volume = self.get_volume()
         self._playbin.set_property('uri', uri)
+        self.set_volume(current_volume)
 
     def set_appsrc(
             self, caps, need_data=None, enough_data=None, seek_data=None):
