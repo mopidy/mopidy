@@ -320,6 +320,9 @@ class Audio(pykka.ThreadingActor):
         :param uri: the URI to play
         :type uri: string
         """
+        # Note: Hack to workaround issue on Mac OS X where volume level
+        # does not persist between track changes.
+        # https://github.com/mopidy/mopidy/issues/886
         current_volume = self.get_volume()
         self._playbin.set_property('uri', uri)
         self.set_volume(current_volume)
