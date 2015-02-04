@@ -13,9 +13,8 @@ Getting started
 
 #. Make sure you have a `GitHub account <https://github.com/signup/free>`_.
 
-#. `Submit <https://github.com/mopidy/mopidy/issues/new>`_ a ticket for your
-   issue, assuming one does not already exist. Clearly describe the issue
-   including steps to reproduce when it is a bug.
+#. If a ticket does not already exist `Submit <https://github.com/mopidy/mopidy/issues/new>`_ a ticket for your
+   issue. Make sure to clearly describe the issue and if it is a bug: include steps to reproduce.
 
 #. Fork the repository on GitHub.
 
