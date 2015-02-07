@@ -20,7 +20,7 @@ class IsA(object):
         try:
             return isinstance(rhs, self.klass)
         except TypeError:
-            return type(rhs) == type(self.klass)
+            return type(rhs) == type(self.klass)  # flake8: noqa
 
     def __ne__(self, rhs):
         return not self.__eq__(rhs)
