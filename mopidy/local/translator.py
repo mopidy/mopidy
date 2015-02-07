@@ -59,7 +59,7 @@ def m3u_extinf_to_track(line):
         return Track()
     (runtime, title) = m.groups()
     if int(runtime) > 0:
-        return Track(name=title, length=1000*int(runtime))
+        return Track(name=title, length=1000 * int(runtime))
     else:
         return Track(name=title)
 

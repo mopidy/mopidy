@@ -78,7 +78,7 @@ def parse_pls(data):
         if section.lower() != 'playlist':
             continue
         for i in range(cp.getint(section, 'numberofentries')):
-            yield cp.get(section, 'file%d' % (i+1))
+            yield cp.get(section, 'file%d' % (i + 1))
 
 
 def parse_xspf(data):

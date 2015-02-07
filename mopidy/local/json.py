@@ -75,7 +75,7 @@ class _BrowseCache(object):
             parent_uri = None
             child = None
             for i in reversed(range(len(parts))):
-                directory = '/'.join(parts[:i+1])
+                directory = '/'.join(parts[:i + 1])
                 uri = translator.path_to_local_directory_uri(directory)
 
                 # First dir we process is our parent

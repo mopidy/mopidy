@@ -477,8 +477,8 @@ class Audio(pykka.ThreadingActor):
         playbin.set_property('flags', PLAYBIN_FLAGS)
 
         # TODO: turn into config values...
-        playbin.set_property('buffer-size', 2*1024*1024)
-        playbin.set_property('buffer-duration', 2*gst.SECOND)
+        playbin.set_property('buffer-size', 2 * 1024 * 1024)
+        playbin.set_property('buffer-duration', 2 * gst.SECOND)
 
         self._signals.connect(playbin, 'source-setup', self._on_source_setup)
         self._signals.connect(playbin, 'about-to-finish',
