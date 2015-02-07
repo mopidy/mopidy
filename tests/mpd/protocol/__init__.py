@@ -25,6 +25,8 @@ class MockConnection(mock.Mock):
 
 
 class BaseTestCase(unittest.TestCase):
+    enable_mixer = True
+
     def get_config(self):
         return {
             'mpd': {
@@ -33,7 +35,10 @@ class BaseTestCase(unittest.TestCase):
         }
 
     def setUp(self):  # noqa: N802
-        self.mixer = dummy_mixer.create_proxy()
+        if self.enable_mixer:
+            self.mixer = dummy_mixer.create_proxy()
+        else:
+            self.mixer = None
         self.backend = dummy_backend.create_proxy()
         self.core = core.Core.start(
             mixer=self.mixer, backends=[self.backend]).proxy()

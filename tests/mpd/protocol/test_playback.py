@@ -150,6 +150,14 @@ class PlaybackOptionsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
         self.assertInResponse('off')
 
+    def test_mixrampdb(self):
+        self.send_request('mixrampdb "10"')
+        self.assertInResponse('ACK [0@0] {mixrampdb} Not implemented')
+
+    def test_mixrampdelay(self):
+        self.send_request('mixrampdelay "10"')
+        self.assertInResponse('ACK [0@0] {mixrampdelay} Not implemented')
+
     @unittest.SkipTest
     def test_replay_gain_status_off(self):
         pass
@@ -463,3 +471,11 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.send_request('stop')
         self.assertEqual(STOPPED, self.core.playback.state.get())
         self.assertInResponse('OK')
+
+
+class PlaybackOptionsHandlerNoneMixerTest(protocol.BaseTestCase):
+    enable_mixer = False
+
+    def test_setvol_max_error(self):
+        self.send_request('setvol "100"')
+        self.assertInResponse('ACK [52@0] {setvol} problems setting volume')

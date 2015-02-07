@@ -57,6 +57,9 @@ v0.20.0 (UNRELEASED)
 
 - Add debug logging of unknown sections. (Fixes: :issue:`694`, PR: :issue:`1002`)
 
+- Add support for configuring :confval:`audio/mixer` to ``none``. (Fixes:
+  :issue:`936`)
+
 **Logging**
 
 - Add custom log level ``TRACE`` (numerical level 5), which can be used by
@@ -113,6 +116,10 @@ v0.20.0 (UNRELEASED)
 
 - Switch the ``list`` command over to using
   :meth:`mopidy.core.LibraryController.get_distinct`. (Fixes: :issue:`913`)
+
+- Add support for ``toggleoutput`` command. The ``mixrampdb`` and
+  ``mixrampdelay`` commands are now supported but throw a NotImplemented
+  exception.
 
 **HTTP frontend**
 
