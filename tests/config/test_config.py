@@ -15,6 +15,18 @@ class LoadConfigTest(unittest.TestCase):
     def test_load_nothing(self):
         self.assertEqual({}, config._load([], [], []))
 
+    def test_load_missing_file(self):
+        file0 = path_to_data_dir('file0.conf')
+        result = config._load([file0], [], [])
+        self.assertEqual({}, result)
+
+    @mock.patch('os.access')
+    def test_load_nonreadable_file(self, access_mock):
+        access_mock.return_value = False
+        file1 = path_to_data_dir('file1.conf')
+        result = config._load([file1], [], [])
+        self.assertEqual({}, result)
+
     def test_load_single_default(self):
         default = b'[foo]\nbar = baz'
         expected = {'foo': {'bar': 'baz'}}

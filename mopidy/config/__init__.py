@@ -148,6 +148,11 @@ def _load_file(parser, filename):
         logger.debug(
             'Loading config from %s failed; it does not exist', filename)
         return
+    if not os.access(filename, os.R_OK):
+        logger.warning(
+            'Loading config from %s failed; read permission missing',
+            filename)
+        return
 
     try:
         logger.info('Loading config from %s', filename)
