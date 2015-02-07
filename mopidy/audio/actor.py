@@ -109,8 +109,8 @@ class Audio(pykka.ThreadingActor):
         playbin = gst.element_factory_make('playbin2')
         playbin.set_property('flags', PLAYBIN_FLAGS)
 
-        playbin.set_property('buffer-size', 2*1024*1024)
-        playbin.set_property('buffer-duration', 2*gst.SECOND)
+        playbin.set_property('buffer-size', 2 * 1024 * 1024)
+        playbin.set_property('buffer-duration', 2 * gst.SECOND)
 
         self._connect(playbin, 'about-to-finish', self._on_about_to_finish)
         self._connect(playbin, 'notify::source', self._on_new_source)
