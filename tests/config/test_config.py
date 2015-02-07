@@ -6,6 +6,8 @@ import unittest
 
 import mock
 
+from mock import patch
+
 from mopidy import config
 
 from tests import path_to_data_dir
@@ -14,6 +16,21 @@ from tests import path_to_data_dir
 class LoadConfigTest(unittest.TestCase):
     def test_load_nothing(self):
         self.assertEqual({}, config._load([], [], []))
+
+    def test_load_missing_file(self):
+        file0 = path_to_data_dir('file0.conf')
+        result = config._load([file0], [], [])
+        self.assertEqual({}, result)
+
+    def test_load_nonreadable_file(self):
+        @patch('os.access')
+        def test_nonreadable_file_access(self, access_mock):
+            access_mock.side_effect = OSError('Some error was thrown')
+            with self.assertRaises(OSError):
+                False
+            file0 = path_to_data_dir('file1.conf')
+            result = config._load([file0], [], [])
+            self.assertEqual({}, result)
 
     def test_load_single_default(self):
         default = b'[foo]\nbar = baz'
