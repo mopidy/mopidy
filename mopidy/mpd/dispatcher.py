@@ -21,7 +21,7 @@ class MpdDispatcher(object):
 
     _noidle = re.compile(r'^noidle$')
 
-    def __init__(self, session=None, config=None, core=None):
+    def __init__(self, session=None, config=None, core=None, uri_map=None):
         self.config = config
         self.authenticated = False
         self.command_list_receiving = False
@@ -29,7 +29,7 @@ class MpdDispatcher(object):
         self.command_list = []
         self.command_list_index = None
         self.context = MpdContext(
-            self, session=session, config=config, core=core)
+            self, session=session, config=config, core=core, uri_map=uri_map)
 
     def handle_request(self, request, current_command_list_index=None):
         """Dispatch incoming requests to the correct handler."""
@@ -227,9 +227,10 @@ class MpdContext(object):
     #: The subsytems that we want to be notified about in idle mode.
     subscriptions = None
 
-    _mapping = None
+    _uri_map = None
 
-    def __init__(self, dispatcher, session=None, config=None, core=None):
+    def __init__(self, dispatcher, session=None, config=None, core=None,
+                 uri_map=None):
         self.dispatcher = dispatcher
         self.session = session
         if config is not None:
@@ -237,19 +238,19 @@ class MpdContext(object):
         self.core = core
         self.events = set()
         self.subscriptions = set()
-        self._mapping = MpdUriMapper(core)
+        self._uri_map = uri_map
 
     def lookup_playlist_from_name(self, name):
         """
         Helper function to retrieve a playlist from its unique MPD name.
         """
-        return self._mapping.playlist_from_name(name)
+        return self._uri_map.playlist_from_name(name)
 
     def lookup_playlist_name_from_uri(self, uri):
         """
         Helper function to retrieve the unique MPD playlist name from its uri.
         """
-        return self._mapping.playlist_name_from_uri(uri)
+        return self._uri_map.playlist_name_from_uri(uri)
 
     def browse(self, path, recursive=True, lookup=True):
         """
@@ -273,7 +274,7 @@ class MpdContext(object):
         path_parts = re.findall(r'[^/]+', path or '')
         root_path = '/'.join([''] + path_parts)
 
-        uri = self._mapping.uri_from_name(root_path)
+        uri = self._uri_map.uri_from_name(root_path)
         if uri is None:
             for part in path_parts:
                 for ref in self.core.library.browse(uri).get():
@@ -282,7 +283,7 @@ class MpdContext(object):
                         break
                 else:
                     raise exceptions.MpdNoExistError('Not found')
-            root_path = self._mapping.insert(root_path, uri)
+            root_path = self._uri_map.insert(root_path, uri)
 
         if recursive:
             yield (root_path, None)
@@ -292,7 +293,7 @@ class MpdContext(object):
             base_path, future = path_and_futures.pop()
             for ref in future.get():
                 path = '/'.join([base_path, ref.name.replace('/', '')])
-                path = self._mapping.insert(path, ref.uri)
+                path = self._uri_map.insert(path, ref.uri)
 
                 if ref.type == ref.TRACK:
                     if lookup:
@@ -304,6 +305,7 @@ class MpdContext(object):
                     if recursive:
                         path_and_futures.append(
                             (path, self.core.library.browse(ref.uri)))
+
 
 class MpdUriMapper(object):
     """
