@@ -322,7 +322,6 @@ class MpdUriMapper(object):
         self.core = core
         self._uri_from_name = {}
         self._name_from_uri = {}
-        self.refresh_playlists_mapping()
 
     def _create_unique_name(self, name, uri):
         stripped_name = self._invalid_browse_chars.sub(' ', name)
