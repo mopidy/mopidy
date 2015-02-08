@@ -25,7 +25,9 @@ class Scanner(object):
         sink = gst.element_factory_make('fakesink')
 
         audio_caps = gst.Caps(b'audio/x-raw-int; audio/x-raw-float')
-        pad_added = lambda src, pad: pad.link(sink.get_pad('sink'))
+
+        def pad_added(src, pad):
+            return pad.link(sink.get_pad('sink'))
 
         self._uribin = gst.element_factory_make('uridecodebin')
         self._uribin.set_property('caps', audio_caps)

@@ -367,7 +367,9 @@ class Track(ImmutableObject):
     last_modified = None
 
     def __init__(self, *args, **kwargs):
-        get = lambda key: frozenset(kwargs.pop(key, None) or [])
+        def get(key):
+            return frozenset(kwargs.pop(key, None) or [])
+
         self.__dict__['artists'] = get('artists')
         self.__dict__['composers'] = get('composers')
         self.__dict__['performers'] = get('performers')
