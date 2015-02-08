@@ -227,8 +227,7 @@ class MpdContext(object):
     #: The subsytems that we want to be notified about in idle mode.
     subscriptions = None
 
-    _invalid_browse_chars = re.compile(r'[\n\r]')
-    _invalid_playlist_chars = re.compile(r'[/]')
+    _mapping = None
 
     def __init__(self, dispatcher, session=None, config=None, core=None):
         self.dispatcher = dispatcher
@@ -238,58 +237,19 @@ class MpdContext(object):
         self.core = core
         self.events = set()
         self.subscriptions = set()
-        self._uri_from_name = {}
-        self._name_from_uri = {}
-        self.refresh_playlists_mapping()
-
-    def create_unique_name(self, name, uri):
-        stripped_name = self._invalid_browse_chars.sub(' ', name)
-        name = stripped_name
-        i = 2
-        while name in self._uri_from_name:
-            if self._uri_from_name[name] == uri:
-                return name
-            name = '%s [%d]' % (stripped_name, i)
-            i += 1
-        return name
-
-    def insert_name_uri_mapping(self, name, uri):
-        name = self.create_unique_name(name, uri)
-        self._uri_from_name[name] = uri
-        self._name_from_uri[uri] = name
-        return name
-
-    def refresh_playlists_mapping(self):
-        """
-        Maintain map between playlists and unique playlist names to be used by
-        MPD
-        """
-        if self.core is not None:
-            for playlist in self.core.playlists.playlists.get():
-                if not playlist.name:
-                    continue
-                # TODO: add scheme to name perhaps 'foo (spotify)' etc.
-                name = self._invalid_playlist_chars.sub('|', playlist.name)
-                self.insert_name_uri_mapping(name, playlist.uri)
+        self._mapping = MpdUriMapper(core)
 
     def lookup_playlist_from_name(self, name):
         """
         Helper function to retrieve a playlist from its unique MPD name.
         """
-        if not self._uri_from_name:
-            self.refresh_playlists_mapping()
-        if name not in self._uri_from_name:
-            return None
-        uri = self._uri_from_name[name]
-        return self.core.playlists.lookup(uri).get()
+        return self._mapping.playlist_from_name(name)
 
     def lookup_playlist_name_from_uri(self, uri):
         """
         Helper function to retrieve the unique MPD playlist name from its uri.
         """
-        if uri not in self._name_from_uri:
-            self.refresh_playlists_mapping()
-        return self._name_from_uri[uri]
+        return self._mapping.playlist_name_from_uri(uri)
 
     def browse(self, path, recursive=True, lookup=True):
         """
@@ -313,8 +273,8 @@ class MpdContext(object):
         path_parts = re.findall(r'[^/]+', path or '')
         root_path = '/'.join([''] + path_parts)
 
-        if root_path not in self._uri_from_name:
-            uri = None
+        uri = self._mapping.uri_from_name(root_path)
+        if uri is None:
             for part in path_parts:
                 for ref in self.core.library.browse(uri).get():
                     if ref.type != ref.TRACK and ref.name == part:
@@ -322,10 +282,7 @@ class MpdContext(object):
                         break
                 else:
                     raise exceptions.MpdNoExistError('Not found')
-            root_path = self.insert_name_uri_mapping(root_path, uri)
-
-        else:
-            uri = self._uri_from_name[root_path]
+            root_path = self._mapping.insert(root_path, uri)
 
         if recursive:
             yield (root_path, None)
@@ -335,7 +292,7 @@ class MpdContext(object):
             base_path, future = path_and_futures.pop()
             for ref in future.get():
                 path = '/'.join([base_path, ref.name.replace('/', '')])
-                path = self.insert_name_uri_mapping(path, ref.uri)
+                path = self._mapping.insert(path, ref.uri)
 
                 if ref.type == ref.TRACK:
                     if lookup:
@@ -347,3 +304,79 @@ class MpdContext(object):
                     if recursive:
                         path_and_futures.append(
                             (path, self.core.library.browse(ref.uri)))
+
+class MpdUriMapper(object):
+    """
+    Maintains the mappings between uniquified MPD names and URIs.
+    """
+
+    #: The Mopidy core API. An instance of :class:`mopidy.core.Core`.
+    core = None
+
+    _invalid_browse_chars = re.compile(r'[\n\r]')
+    _invalid_playlist_chars = re.compile(r'[/]')
+
+    def __init__(self, core=None):
+        self.core = core
+        self._uri_from_name = {}
+        self._name_from_uri = {}
+        self.refresh_playlists_mapping()
+
+    def _create_unique_name(self, name, uri):
+        stripped_name = self._invalid_browse_chars.sub(' ', name)
+        name = stripped_name
+        i = 2
+        while name in self._uri_from_name:
+            if self._uri_from_name[name] == uri:
+                return name
+            name = '%s [%d]' % (stripped_name, i)
+            i += 1
+        return name
+
+    def insert(self, name, uri):
+        """
+        Create a unique and MPD compatible name that maps to the given uri.
+        """
+        name = self._create_unique_name(name, uri)
+        self._uri_from_name[name] = uri
+        self._name_from_uri[uri] = name
+        return name
+
+    def uri_from_name(self, name):
+        """
+        Return the uri for the given MPD name.
+        """
+        if name in self._uri_from_name:
+            return self._uri_from_name[name]
+
+    def refresh_playlists_mapping(self):
+        """
+        Maintain map between playlists and unique playlist names to be used by
+        MPD
+        """
+        if self.core is not None:
+            for playlist in self.core.playlists.playlists.get():
+                if not playlist.name:
+                    continue
+                # TODO: add scheme to name perhaps 'foo (spotify)' etc.
+                name = self._invalid_playlist_chars.sub('|', playlist.name)
+                self.insert(name, playlist.uri)
+
+    def playlist_from_name(self, name):
+        """
+        Helper function to retrieve a playlist from its unique MPD name.
+        """
+        if not self._uri_from_name:
+            self.refresh_playlists_mapping()
+        if name not in self._uri_from_name:
+            return None
+        uri = self._uri_from_name[name]
+        return self.core.playlists.lookup(uri).get()
+
+    def playlist_name_from_uri(self, uri):
+        """
+        Helper function to retrieve the unique MPD playlist name from its uri.
+        """
+        if uri not in self._name_from_uri:
+            self.refresh_playlists_mapping()
+        return self._name_from_uri[uri]
