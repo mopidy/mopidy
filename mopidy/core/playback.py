@@ -27,9 +27,10 @@ class PlaybackController(object):
 
     def _get_backend(self):
         # TODO: take in track instead
-        if self.current_tl_track is None:
+        track = self.get_current_track()
+        if track is None:
             return None
-        uri = self.current_tl_track.track.uri
+        uri = track.uri
         uri_scheme = urlparse.urlparse(uri).scheme
         return self.backends.with_playback.get(uri_scheme, None)
 
@@ -110,7 +111,7 @@ class PlaybackController(object):
             "PAUSED" -> "PLAYING" [ label="resume" ]
             "PAUSED" -> "STOPPED" [ label="stop" ]
         """
-        (old_state, self._state) = (self.state, new_state)
+        (old_state, self._state) = (self.get_state(), new_state)
         logger.debug('Changing state: %s -> %s', old_state, new_state)
 
         self._trigger_playback_state_changed(old_state, new_state)
@@ -209,9 +210,9 @@ class PlaybackController(object):
             track (default), -1 for previous track. **INTERNAL**
         :type on_error_step: int, -1 or 1
         """
-        old_state = self.state
+        old_state = self.get_state()
         self.stop()
-        self.current_tl_track = tl_track
+        self.set_current_tl_track(tl_track)
         if old_state == PlaybackState.PLAYING:
             self.play(on_error_step=on_error_step)
         elif old_state == PlaybackState.PAUSED:
@@ -224,17 +225,17 @@ class PlaybackController(object):
 
         Used by event handler in :class:`mopidy.core.Core`.
         """
-        if self.state == PlaybackState.STOPPED:
+        if self.get_state() == PlaybackState.STOPPED:
             return
 
-        original_tl_track = self.current_tl_track
+        original_tl_track = self.get_current_tl_track()
         next_tl_track = self.core.tracklist.eot_track(original_tl_track)
 
         if next_tl_track:
             self.change_track(next_tl_track)
         else:
             self.stop()
-            self.current_tl_track = None
+            self.set_current_tl_track(None)
 
         self.core.tracklist.mark_played(original_tl_track)
 
@@ -244,9 +245,10 @@ class PlaybackController(object):
 
         Used by :class:`mopidy.core.TracklistController`.
         """
-        if self.current_tl_track not in self.core.tracklist.tl_tracks:
+        tracklist = self.core.tracklist.get_tl_tracks()
+        if self.get_current_tl_track() not in tracklist:
             self.stop()
-            self.current_tl_track = None
+            self.set_current_tl_track(None)
 
     def next(self):
         """
@@ -255,7 +257,7 @@ class PlaybackController(object):
         The current playback state will be kept. If it was playing, playing
         will continue. If it was paused, it will still be paused, etc.
         """
-        original_tl_track = self.current_tl_track
+        original_tl_track = self.get_current_tl_track()
         next_tl_track = self.core.tracklist.next_track(original_tl_track)
 
         if next_tl_track:
@@ -265,7 +267,7 @@ class PlaybackController(object):
             self.change_track(next_tl_track)
         else:
             self.stop()
-            self.current_tl_track = None
+            self.set_current_tl_track(None)
 
         self.core.tracklist.mark_played(original_tl_track)
 
@@ -276,7 +278,7 @@ class PlaybackController(object):
             # TODO: switch to:
             # backend.track(pause)
             # wait for state change?
-            self.state = PlaybackState.PAUSED
+            self.set_state(PlaybackState.PAUSED)
             self._trigger_track_playback_paused()
 
     def play(self, tl_track=None, on_error_step=1):
@@ -294,11 +296,11 @@ class PlaybackController(object):
         assert on_error_step in (-1, 1)
 
         if tl_track is None:
-            if self.state == PlaybackState.PAUSED:
+            if self.get_state() == PlaybackState.PAUSED:
                 return self.resume()
 
-            if self.current_tl_track is not None:
-                tl_track = self.current_tl_track
+            if self.get_current_tl_track() is not None:
+                tl_track = self.get_current_tl_track()
             else:
                 if on_error_step == 1:
                     tl_track = self.core.tracklist.next_track(tl_track)
@@ -308,17 +310,17 @@ class PlaybackController(object):
             if tl_track is None:
                 return
 
-        assert tl_track in self.core.tracklist.tl_tracks
+        assert tl_track in self.core.tracklist.get_tl_tracks()
 
         # TODO: switch to:
         # backend.play(track)
         # wait for state change?
 
-        if self.state == PlaybackState.PLAYING:
+        if self.get_state() == PlaybackState.PLAYING:
             self.stop()
 
-        self.current_tl_track = tl_track
-        self.state = PlaybackState.PLAYING
+        self.set_current_tl_track(tl_track)
+        self.set_state(PlaybackState.PLAYING)
         backend = self._get_backend()
         success = backend and backend.playback.play(tl_track.track).get()
 
@@ -342,7 +344,7 @@ class PlaybackController(object):
         The current playback state will be kept. If it was playing, playing
         will continue. If it was paused, it will still be paused, etc.
         """
-        tl_track = self.current_tl_track
+        tl_track = self.get_current_tl_track()
         # TODO: switch to:
         # self.play(....)
         # wait for state change?
@@ -351,11 +353,11 @@ class PlaybackController(object):
 
     def resume(self):
         """If paused, resume playing the current track."""
-        if self.state != PlaybackState.PAUSED:
+        if self.get_state() != PlaybackState.PAUSED:
             return
         backend = self._get_backend()
         if backend and backend.playback.resume().get():
-            self.state = PlaybackState.PLAYING
+            self.set_state(PlaybackState.PLAYING)
             # TODO: trigger via gst messages
             self._trigger_track_playback_resumed()
         # TODO: switch to:
@@ -373,9 +375,9 @@ class PlaybackController(object):
         if not self.core.tracklist.tracks:
             return False
 
-        if self.state == PlaybackState.STOPPED:
+        if self.get_state() == PlaybackState.STOPPED:
             self.play()
-        elif self.state == PlaybackState.PAUSED:
+        elif self.get_state() == PlaybackState.PAUSED:
             self.resume()
 
         if time_position < 0:
@@ -395,11 +397,11 @@ class PlaybackController(object):
 
     def stop(self):
         """Stop playing."""
-        if self.state != PlaybackState.STOPPED:
+        if self.get_state() != PlaybackState.STOPPED:
             backend = self._get_backend()
-            time_position_before_stop = self.time_position
+            time_position_before_stop = self.get_time_position()
             if not backend or backend.playback.stop().get():
-                self.state = PlaybackState.STOPPED
+                self.set_state(PlaybackState.STOPPED)
                 self._trigger_track_playback_ended(time_position_before_stop)
 
     def _trigger_track_playback_paused(self):
@@ -408,7 +410,8 @@ class PlaybackController(object):
             return
         listener.CoreListener.send(
             'track_playback_paused',
-            tl_track=self.current_tl_track, time_position=self.time_position)
+            tl_track=self.get_current_tl_track(),
+            time_position=self.get_time_position())
 
     def _trigger_track_playback_resumed(self):
         logger.debug('Triggering track playback resumed event')
@@ -416,23 +419,24 @@ class PlaybackController(object):
             return
         listener.CoreListener.send(
             'track_playback_resumed',
-            tl_track=self.current_tl_track, time_position=self.time_position)
+            tl_track=self.get_current_tl_track(),
+            time_position=self.get_time_position())
 
     def _trigger_track_playback_started(self):
         logger.debug('Triggering track playback started event')
-        if self.current_tl_track is None:
+        if self.get_current_tl_track() is None:
             return
         listener.CoreListener.send(
             'track_playback_started',
-            tl_track=self.current_tl_track)
+            tl_track=self.get_current_tl_track())
 
     def _trigger_track_playback_ended(self, time_position_before_stop):
         logger.debug('Triggering track playback ended event')
-        if self.current_tl_track is None:
+        if self.get_current_tl_track() is None:
             return
         listener.CoreListener.send(
             'track_playback_ended',
-            tl_track=self.current_tl_track,
+            tl_track=self.get_current_tl_track(),
             time_position=time_position_before_stop)
 
     def _trigger_playback_state_changed(self, old_state, new_state):

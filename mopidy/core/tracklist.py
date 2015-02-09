@@ -125,7 +125,7 @@ class TracklistController(object):
         if self.get_random() != value:
             self._trigger_options_changed()
         if value:
-            self._shuffled = self.tl_tracks
+            self._shuffled = self.get_tl_tracks()
             random.shuffle(self._shuffled)
         return setattr(self, '_random', value)
 
@@ -223,9 +223,9 @@ class TracklistController(object):
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
-        if self.single and self.repeat:
+        if self.get_single() and self.get_repeat():
             return tl_track
-        elif self.single:
+        elif self.get_single():
             return None
 
         # Current difference between next and EOT handling is that EOT needs to
@@ -248,30 +248,30 @@ class TracklistController(object):
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
 
-        if not self.tl_tracks:
+        if not self.get_tl_tracks():
             return None
 
-        if self.random and not self._shuffled:
-            if self.repeat or not tl_track:
+        if self.get_random() and not self._shuffled:
+            if self.get_repeat() or not tl_track:
                 logger.debug('Shuffling tracks')
-                self._shuffled = self.tl_tracks
+                self._shuffled = self.get_tl_tracks()
                 random.shuffle(self._shuffled)
 
-        if self.random:
+        if self.get_random():
             try:
                 return self._shuffled[0]
             except IndexError:
                 return None
 
         if tl_track is None:
-            return self.tl_tracks[0]
+            return self.get_tl_tracks()[0]
 
         next_index = self.index(tl_track) + 1
-        if self.repeat:
-            next_index %= len(self.tl_tracks)
+        if self.get_repeat():
+            next_index %= len(self.get_tl_tracks())
 
         try:
-            return self.tl_tracks[next_index]
+            return self.get_tl_tracks()[next_index]
         except IndexError:
             return None
 
@@ -288,7 +288,7 @@ class TracklistController(object):
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
-        if self.repeat or self.consume or self.random:
+        if self.get_repeat() or self.get_consume() or self.get_random():
             return tl_track
 
         position = self.index(tl_track)
@@ -296,7 +296,7 @@ class TracklistController(object):
         if position in (None, 0):
             return None
 
-        return self.tl_tracks[position - 1]
+        return self.get_tl_tracks()[position - 1]
 
     def add(self, tracks=None, at_position=None, uri=None):
         """
@@ -500,13 +500,13 @@ class TracklistController(object):
 
     def mark_playing(self, tl_track):
         """Method for :class:`mopidy.core.PlaybackController`. **INTERNAL**"""
-        if self.random and tl_track in self._shuffled:
+        if self.get_random() and tl_track in self._shuffled:
             self._shuffled.remove(tl_track)
 
     def mark_unplayable(self, tl_track):
         """Method for :class:`mopidy.core.PlaybackController`. **INTERNAL**"""
         logger.warning('Track is not playable: %s', tl_track.track.uri)
-        if self.random and tl_track in self._shuffled:
+        if self.get_random() and tl_track in self._shuffled:
             self._shuffled.remove(tl_track)
 
     def mark_played(self, tl_track):
@@ -517,8 +517,8 @@ class TracklistController(object):
         return False
 
     def _trigger_tracklist_changed(self):
-        if self.random:
-            self._shuffled = self.tl_tracks
+        if self.get_random():
+            self._shuffled = self.get_tl_tracks()
             random.shuffle(self._shuffled)
         else:
             self._shuffled = []

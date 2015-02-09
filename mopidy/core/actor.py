@@ -118,7 +118,7 @@ class Core(
         if not self.audio:
             return
 
-        current_tl_track = self.playback.current_tl_track
+        current_tl_track = self.playback.get_current_tl_track()
         if current_tl_track is None:
             return
 
@@ -133,7 +133,7 @@ class Core(
         track_kwargs.update(
             {k: v for k, v in tags_track.__dict__.items() if v})
 
-        self.playback.current_metadata_track = TlTrack(**{
+        self.playback._current_metadata_track = TlTrack(**{
             'tlid': current_tl_track.tlid,
             'track': Track(**track_kwargs)})
 
