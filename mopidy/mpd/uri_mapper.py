@@ -32,7 +32,7 @@ class MpdUriMapper(object):
 
     def insert(self, name, uri):
         """
-        Create a unique and MPD compatible name that maps to the given uri.
+        Create a unique and MPD compatible name that maps to the given URI.
         """
         name = self._create_unique_name(name, uri)
         self._uri_from_name[name] = uri
@@ -49,7 +49,7 @@ class MpdUriMapper(object):
     def refresh_playlists_mapping(self):
         """
         Maintain map between playlists and unique playlist names to be used by
-        MPD
+        MPD.
         """
         if self.core is not None:
             for playlist in self.core.playlists.playlists.get():
@@ -72,7 +72,7 @@ class MpdUriMapper(object):
 
     def playlist_name_from_uri(self, uri):
         """
-        Helper function to retrieve the unique MPD playlist name from its uri.
+        Helper function to retrieve the unique MPD playlist name from its URI.
         """
         if uri not in self._name_from_uri:
             self.refresh_playlists_mapping()
