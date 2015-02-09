@@ -46,6 +46,9 @@ v0.20.0 (UNRELEASED)
 
 - Enable browsing of artist references, in addition to albums and playlists.
   (PR: :issue:`884`)
+  
+- Share a single mapping between names and URIs across all MPD sessions. (Fixes:
+  :issue:`934`, PR: :issue:`968`)
 
 **Audio**
 
