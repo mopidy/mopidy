@@ -8,7 +8,7 @@ import pykka
 
 from mopidy import core
 from mopidy.backend import dummy
-from mopidy.mpd import session
+from mopidy.mpd import session, uri_mapper
 
 
 class MockConnection(mock.Mock):
@@ -35,9 +35,11 @@ class BaseTestCase(unittest.TestCase):
         self.backend = dummy.create_dummy_backend_proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
 
+        self.uri_map = uri_mapper.MpdUriMapper(self.core)
         self.connection = MockConnection()
         self.session = session.MpdSession(
-            self.connection, config=self.get_config(), core=self.core)
+            self.connection, config=self.get_config(), core=self.core,
+            uri_map=self.uri_map)
         self.dispatcher = self.session.dispatcher
         self.context = self.dispatcher.context
 
