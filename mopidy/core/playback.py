@@ -19,6 +19,8 @@ class PlaybackController(object):
         self.backends = backends
         self.core = core
 
+        self._current_tl_track = None
+        self._current_metadata_track = None
         self._state = PlaybackState.STOPPED
         self._volume = None
         self._mute = False
@@ -34,39 +36,80 @@ class PlaybackController(object):
     # Properties
 
     def get_current_tl_track(self):
-        return self.current_tl_track
+        """Get the currently playing or selected track.
 
-    current_tl_track = None
+        Returns a :class:`mopidy.models.TlTrack` or :class:`None`.
+        """
+        return self._current_tl_track
+
+    def set_current_tl_track(self, value):
+        """Set the currently playing or selected track.
+
+        *Internal:* This is only for use by Mopidy's test suite.
+        """
+        self._current_tl_track = value
+
+    current_tl_track = property(get_current_tl_track, set_current_tl_track)
     """
-    The currently playing or selected :class:`mopidy.models.TlTrack`, or
-    :class:`None`.
+    .. deprecated:: 0.20
+        Use :meth:`get_current_tl_track` instead.
     """
 
     def get_current_track(self):
-        return self.current_tl_track and self.current_tl_track.track
+        """
+        Get the currently playing or selected track.
+
+        Extracted from :meth:`get_current_tl_track` for convenience.
+
+        Returns a :class:`mopidy.models.Track` or :class:`None`.
+        """
+        tl_track = self.get_current_tl_track()
+        if tl_track is not None:
+            return tl_track.track
 
     current_track = property(get_current_track)
     """
-    The currently playing or selected :class:`mopidy.models.Track`.
-
-    Read-only. Extracted from :attr:`current_tl_track` for convenience.
+    .. deprecated:: 0.20
+        Use :meth:`get_current_track` instead.
     """
 
     def get_current_metadata_track(self):
-        return self.current_metadata_track
+        """
+        Get a :class:`mopidy.models.TlTrack` with updated metadata for the
+        currently playing track.
 
-    current_metadata_track = None
+        Returns :class:`None` if no track is currently playing.
+        """
+        return self._current_metadata_track
+
+    current_metadata_track = property(get_current_metadata_track)
     """
-    A :class:`mopidy.models.TlTrack` with updated metadata for the currently
-    playing track.
-
-    :class:`None` if no track is currently playing.
+    .. deprecated:: 0.20
+        Use :meth:`get_current_metadata_track` instead.
     """
 
     def get_state(self):
+        """Get The playback state."""
+
         return self._state
 
     def set_state(self, new_state):
+        """Set the playback state.
+
+        Must be :attr:`PLAYING`, :attr:`PAUSED`, or :attr:`STOPPED`.
+
+        Possible states and transitions:
+
+        .. digraph:: state_transitions
+
+            "STOPPED" -> "PLAYING" [ label="play" ]
+            "STOPPED" -> "PAUSED" [ label="pause" ]
+            "PLAYING" -> "STOPPED" [ label="stop" ]
+            "PLAYING" -> "PAUSED" [ label="pause" ]
+            "PLAYING" -> "PLAYING" [ label="play" ]
+            "PAUSED" -> "PLAYING" [ label="resume" ]
+            "PAUSED" -> "STOPPED" [ label="stop" ]
+        """
         (old_state, self._state) = (self.state, new_state)
         logger.debug('Changing state: %s -> %s', old_state, new_state)
 
@@ -74,23 +117,12 @@ class PlaybackController(object):
 
     state = property(get_state, set_state)
     """
-    The playback state. Must be :attr:`PLAYING`, :attr:`PAUSED`, or
-    :attr:`STOPPED`.
-
-    Possible states and transitions:
-
-    .. digraph:: state_transitions
-
-        "STOPPED" -> "PLAYING" [ label="play" ]
-        "STOPPED" -> "PAUSED" [ label="pause" ]
-        "PLAYING" -> "STOPPED" [ label="stop" ]
-        "PLAYING" -> "PAUSED" [ label="pause" ]
-        "PLAYING" -> "PLAYING" [ label="play" ]
-        "PAUSED" -> "PLAYING" [ label="resume" ]
-        "PAUSED" -> "STOPPED" [ label="stop" ]
+    .. deprecated:: 0.20
+        Use :meth:`get_state` and :meth:`set_state` instead.
     """
 
     def get_time_position(self):
+        """Get time position in milliseconds."""
         backend = self._get_backend()
         if backend:
             return backend.playback.get_time_position().get()
@@ -98,9 +130,18 @@ class PlaybackController(object):
             return 0
 
     time_position = property(get_time_position)
-    """Time position in milliseconds."""
+    """
+    .. deprecated:: 0.20
+        Use :meth:`get_time_position` instead.
+    """
 
     def get_volume(self):
+        """Get the volume.
+
+        Integer in range [0..100] or :class:`None` if unknown.
+
+        The volume scale is linear.
+        """
         if self.mixer:
             return self.mixer.get_volume().get()
         else:
@@ -108,6 +149,12 @@ class PlaybackController(object):
             return self._volume
 
     def set_volume(self, volume):
+        """Set the volume.
+
+        The volume is defined as an integer in range [0..100].
+
+        The volume scale is linear.
+        """
         if self.mixer:
             self.mixer.set_volume(volume)
         else:
@@ -115,11 +162,16 @@ class PlaybackController(object):
             self._volume = volume
 
     volume = property(get_volume, set_volume)
-    """Volume as int in range [0..100] or :class:`None` if unknown. The volume
-    scale is linear.
+    """
+    .. deprecated:: 0.20
+        Use :meth:`get_volume` and :meth:`set_volume` instead.
     """
 
     def get_mute(self):
+        """Get mute state.
+
+        :class:`True` if muted, :class:`False` otherwise.
+        """
         if self.mixer:
             return self.mixer.get_mute().get()
         else:
@@ -127,6 +179,10 @@ class PlaybackController(object):
             return self._mute
 
     def set_mute(self, value):
+        """Set mute state.
+
+        :class:`True` to mute, :class:`False` to unmute.
+        """
         value = bool(value)
         if self.mixer:
             self.mixer.set_mute(value)
@@ -135,7 +191,10 @@ class PlaybackController(object):
             self._mute = value
 
     mute = property(get_mute, set_mute)
-    """Mute state as a :class:`True` if muted, :class:`False` otherwise"""
+    """
+    .. deprecated:: 0.20
+        Use :meth:`get_mute` and :meth:`set_mute` instead.
+    """
 
     # Methods
 

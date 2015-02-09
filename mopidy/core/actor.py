@@ -62,19 +62,27 @@ class Core(
         self.audio = audio
 
     def get_uri_schemes(self):
+        """Get list of URI schemes we can handle"""
         futures = [b.uri_schemes for b in self.backends]
         results = pykka.get_all(futures)
         uri_schemes = itertools.chain(*results)
         return sorted(uri_schemes)
 
     uri_schemes = property(get_uri_schemes)
-    """List of URI schemes we can handle"""
+    """
+    .. deprecated:: 0.20
+        Use :meth:`get_uri_schemes` instead.
+    """
 
     def get_version(self):
+        """Get version of the Mopidy core API"""
         return versioning.get_version()
 
     version = property(get_version)
-    """Version of the Mopidy core API"""
+    """
+    .. deprecated:: 0.20
+        Use :meth:`get_version` instead.
+    """
 
     def reached_end_of_stream(self):
         self.playback.on_end_of_track()

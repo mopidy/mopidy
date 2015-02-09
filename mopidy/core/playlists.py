@@ -15,6 +15,11 @@ class PlaylistsController(object):
         self.backends = backends
         self.core = core
 
+    """
+    Get the available playlists.
+
+    Returns a list of :class:`mopidy.models.Playlist`.
+    """
     def get_playlists(self, include_tracks=True):
         futures = [b.playlists.playlists
                    for b in self.backends.with_playlists.values()]
@@ -26,9 +31,8 @@ class PlaylistsController(object):
 
     playlists = property(get_playlists)
     """
-    The available playlists.
-
-    Read-only. List of :class:`mopidy.models.Playlist`.
+    .. deprecated:: 0.20
+        Use :meth:`get_playlists` instead.
     """
 
     def create(self, name, uri_scheme=None):

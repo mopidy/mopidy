@@ -10,6 +10,10 @@ v0.20.0 (UNRELEASED)
 
 **Core API**
 
+- Deprecate all properties in the core API. The previously undocumented getter
+  and setter methods are now the official API. This aligns the Python API with
+  the WebSocket/JavaScript API. (Fixes: :issue:`952`)
+
 - Added :class:`mopidy.core.HistoryController` which keeps track of what
   tracks have been played. (Fixes: :issue:`423`, PR: :issue:`803`)
 

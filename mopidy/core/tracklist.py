@@ -26,32 +26,42 @@ class TracklistController(object):
     # Properties
 
     def get_tl_tracks(self):
+        """Get tracklist as list of :class:`mopidy.models.TlTrack`."""
         return self._tl_tracks[:]
 
     tl_tracks = property(get_tl_tracks)
     """
-    List of :class:`mopidy.models.TlTrack`.
-
-    Read-only.
+    .. deprecated:: 0.20
+        Use :meth:`get_tl_tracks` instead.
     """
 
     def get_tracks(self):
+        """Get tracklist as list of :class:`mopidy.models.Track`."""
         return [tl_track.track for tl_track in self._tl_tracks]
 
     tracks = property(get_tracks)
     """
-    List of :class:`mopidy.models.Track` in the tracklist.
-
-    Read-only.
+    .. deprecated:: 0.20
+        Use :meth:`get_tracks` instead.
     """
 
     def get_length(self):
+        """Get length of the tracklist."""
         return len(self._tl_tracks)
 
     length = property(get_length)
-    """Length of the tracklist."""
+    """
+    .. deprecated:: 0.20
+        Use :meth:`get_length` instead.
+    """
 
     def get_version(self):
+        """
+        Get the tracklist version.
+
+        Integer which is increased every time the tracklist is changed. Is not
+        reset before Mopidy is restarted.
+        """
         return self._version
 
     def _increase_version(self):
@@ -61,32 +71,57 @@ class TracklistController(object):
 
     version = property(get_version)
     """
-    The tracklist version.
-
-    Read-only. Integer which is increased every time the tracklist is changed.
-    Is not reset before Mopidy is restarted.
+    .. deprecated:: 0.20
+        Use :meth:`get_version` instead.
     """
 
     def get_consume(self):
+        """Get consume mode.
+
+        :class:`True`
+            Tracks are removed from the tracklist when they have been played.
+        :class:`False`
+            Tracks are not removed from the tracklist.
+        """
         return getattr(self, '_consume', False)
 
     def set_consume(self, value):
+        """Set consume mode.
+
+        :class:`True`
+            Tracks are removed from the tracklist when they have been played.
+        :class:`False`
+            Tracks are not removed from the tracklist.
+        """
         if self.get_consume() != value:
             self._trigger_options_changed()
         return setattr(self, '_consume', value)
 
     consume = property(get_consume, set_consume)
     """
-    :class:`True`
-        Tracks are removed from the tracklist when they have been played.
-    :class:`False`
-        Tracks are not removed from the tracklist.
+    .. deprecated:: 0.20
+        Use :meth:`get_consume` and :meth:`set_consume` instead.
     """
 
     def get_random(self):
+        """Get random mode.
+
+        :class:`True`
+            Tracks are selected at random from the tracklist.
+        :class:`False`
+            Tracks are played in the order of the tracklist.
+        """
         return getattr(self, '_random', False)
 
     def set_random(self, value):
+        """Set random mode.
+
+        :class:`True`
+            Tracks are selected at random from the tracklist.
+        :class:`False`
+            Tracks are played in the order of the tracklist.
+        """
+
         if self.get_random() != value:
             self._trigger_options_changed()
         if value:
@@ -96,44 +131,71 @@ class TracklistController(object):
 
     random = property(get_random, set_random)
     """
-    :class:`True`
-        Tracks are selected at random from the tracklist.
-    :class:`False`
-        Tracks are played in the order of the tracklist.
+    .. deprecated:: 0.20
+        Use :meth:`get_random` and :meth:`set_random` instead.
     """
 
     def get_repeat(self):
+        """
+        Get repeat mode.
+
+        :class:`True`
+            The tracklist is played repeatedly.
+        :class:`False`
+            The tracklist is played once.
+        """
         return getattr(self, '_repeat', False)
 
     def set_repeat(self, value):
+        """
+        Set repeat mode.
+
+        To repeat a single track, set both ``repeat`` and ``single``.
+
+        :class:`True`
+            The tracklist is played repeatedly.
+        :class:`False`
+            The tracklist is played once.
+        """
+
         if self.get_repeat() != value:
             self._trigger_options_changed()
         return setattr(self, '_repeat', value)
 
     repeat = property(get_repeat, set_repeat)
     """
-    :class:`True`
-        The tracklist is played repeatedly. To repeat a single track, select
-        both :attr:`repeat` and :attr:`single`.
-    :class:`False`
-        The tracklist is played once.
+    .. deprecated:: 0.20
+        Use :meth:`get_repeat` and :meth:`set_repeat` instead.
     """
 
     def get_single(self):
+        """
+        Get single mode.
+
+        :class:`True`
+            Playback is stopped after current song, unless in ``repeat`` mode.
+        :class:`False`
+            Playback continues after current song.
+        """
         return getattr(self, '_single', False)
 
     def set_single(self, value):
+        """
+        Set single mode.
+
+        :class:`True`
+            Playback is stopped after current song, unless in ``repeat`` mode.
+        :class:`False`
+            Playback continues after current song.
+        """
         if self.get_single() != value:
             self._trigger_options_changed()
         return setattr(self, '_single', value)
 
     single = property(get_single, set_single)
     """
-    :class:`True`
-        Playback is stopped after current song, unless in :attr:`repeat`
-        mode.
-    :class:`False`
-        Playback continues after current song.
+    .. deprecated:: 0.20
+        Use :meth:`get_single` and :meth:`set_single` instead.
     """
 
     # Methods
