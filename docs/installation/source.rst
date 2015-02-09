@@ -5,10 +5,11 @@ Install from source
 *******************
 
 If you are on Linux, but can't install :ref:`from the APT archive
-<debian-install>` or :ref:`from AUR <arch-install>`, you can install Mopidy using the python package installer.
+<debian-install>` or :ref:`from AUR <arch-install>`, you can install Mopidy
+from PyPI using the ``pip`` installer.
 
-If you are looking to contribute or wish to install from source using ``git`` please follow the directions 
-:ref:`here <contributing>`.
+If you are looking to contribute or wish to install from source using ``git``
+please follow the directions :ref:`here <contributing>`.
 
 #. First of all, you need Python 2.7. Check if you have Python and what
    version by running::
@@ -71,8 +72,9 @@ If you are looking to contribute or wish to install from source using ``git`` pl
 
        sudo pip install -U mopidy
 
-   This will use pip to install the source files for the latest stable release. 
-   To upgrade Mopidy to future releases, just rerun this command.
+   This will use ``pip`` to install the latest release of `Mopidy from PyPI
+   <https://pypi.python.org/pypi/Mopidy>`_. To upgrade Mopidy to future
+   releases, just rerun this command.
 
    Alternatively, if you want to track Mopidy development closer, you may
    install a snapshot of Mopidy's ``develop`` Git branch using pip::
