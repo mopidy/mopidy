@@ -81,39 +81,9 @@ please follow the directions :ref:`here <contributing>`.
 
        sudo pip install --allow-unverified=mopidy mopidy==dev
 
-#. Optional: If you want Spotify support in Mopidy, you'll need to install
-   libspotify and the Mopidy-Spotify extension.
-
-   #. Download and install the latest version of libspotify for your OS and CPU
-      architecture from `Spotify
-      <https://developer.spotify.com/technologies/libspotify/>`_.
-
-      For libspotify 12.1.51 for 64-bit Linux the process is as follows::
-
-          wget https://developer.spotify.com/download/libspotify/libspotify-12.1.51-Linux-x86_64-release.tar.gz
-          tar zxfv libspotify-12.1.51-Linux-x86_64-release.tar.gz
-          cd libspotify-12.1.51-Linux-x86_64-release/
-          sudo make install prefix=/usr/local
-
-      Remember to adjust the above example for the latest libspotify version
-      supported by pyspotify, your OS, and your CPU architecture.
-
-   #. If you're on Fedora, you must add a configuration file so libspotify.so
-      can be found::
-
-          echo /usr/local/lib | sudo tee /etc/ld.so.conf.d/libspotify.conf
-          sudo ldconfig
-
-   #. Then install the latest release of Mopidy-Spotify using pip::
-
-          sudo pip install -U mopidy-spotify
-
-#. Optional: If you want to scrobble your played tracks to Last.fm, you need
-   to install Mopidy-Scrobbler::
-
-      sudo pip install -U mopidy-scrobbler
-
-#. For a full list of available Mopidy extensions, see :ref:`ext`.
+#. Optional: For Spotify support, Last.fm scrobbling, or many other extra
+   features, install the required Mopidy extensions. For a full list of
+   available Mopidy extensions, see :ref:`ext`.
 
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
    then you're ready to :doc:`run Mopidy </running>`.
