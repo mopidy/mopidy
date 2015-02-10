@@ -107,31 +107,29 @@ class Core(
         CoreListener.send('mute_changed', mute=mute)
 
     def tags_changed(self, tags):
-        # Validity checks
         if not self.audio:
             return
-        if self.playback.current_tl_track is None:
+
+        current_tl_track = self.playback.current_tl_track
+        if current_tl_track is None:
             return
 
         tags = self.audio.get_current_tags().get()
         if not tags:
             return
 
-        # Request available metadata and set a track
-        mt_track = convert_tags_to_track(tags)
+        current_track = current_tl_track.track
+        tags_track = convert_tags_to_track(tags)
 
-        # Merge current_tl_track with metadata in current_metadata_track
-        c_track = self.playback.current_tl_track.track
-        track_kwargs = {k: v for k, v in c_track.__dict__.items() if v}
-        for k, v in mt_track.__dict__.items():
-            if v:
-                track_kwargs[k] = v
+        track_kwargs = {k: v for k, v in current_track.__dict__.items() if v}
+        track_kwargs.update(
+            {k: v for k, v in tags_track.__dict__.items() if v})
 
         self.playback.current_metadata_track = TlTrack(**{
-            'tlid': self.playback.current_tl_track.tlid,
+            'tlid': current_tl_track.tlid,
             'track': Track(**track_kwargs)})
 
-        # Send event to frontends
+        # TODO Move this into playback.current_metadata_track setter?
         CoreListener.send('current_metadata_changed')
 
 
