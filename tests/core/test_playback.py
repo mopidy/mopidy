@@ -426,21 +426,3 @@ class CorePlaybackTest(unittest.TestCase):
         self.assertFalse(self.playback2.get_time_position.called)
 
     # TODO Test on_tracklist_change
-
-    def test_volume(self):
-        self.assertEqual(self.core.playback.volume, None)
-
-        self.core.playback.volume = 30
-
-        self.assertEqual(self.core.playback.volume, 30)
-
-        self.core.playback.volume = 70
-
-        self.assertEqual(self.core.playback.volume, 70)
-
-    def test_mute(self):
-        self.assertEqual(self.core.playback.mute, False)
-
-        self.core.playback.mute = True
-
-        self.assertEqual(self.core.playback.mute, True)

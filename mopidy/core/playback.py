@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 import urlparse
+import warnings
 
 from mopidy.audio import PlaybackState
 from mopidy.core import listener
@@ -11,20 +12,16 @@ from mopidy.utils.deprecation import deprecated_property
 logger = logging.getLogger(__name__)
 
 
-# TODO: split mixing out from playback?
 class PlaybackController(object):
     pykka_traversable = True
 
-    def __init__(self, mixer, backends, core):
-        self.mixer = mixer
+    def __init__(self, backends, core):
         self.backends = backends
         self.core = core
 
         self._current_tl_track = None
         self._current_metadata_track = None
         self._state = PlaybackState.STOPPED
-        self._volume = None
-        self._mute = False
 
     def _get_backend(self):
         # TODO: take in track instead
@@ -139,64 +136,59 @@ class PlaybackController(object):
     """
 
     def get_volume(self):
-        """Get the volume.
-
-        Integer in range [0..100] or :class:`None` if unknown.
-
-        The volume scale is linear.
         """
-        if self.mixer:
-            return self.mixer.get_volume().get()
-        else:
-            # For testing
-            return self._volume
+        ... deprecated:: 0.20
+            Use :meth:`core.mixer.get_volume()
+            <mopidy.core.MixerController.get_volume>` instead.
+        """
+        warnings.warn(
+            'playback.get_volume() is deprecated', DeprecationWarning)
+        return self.core.mixer.get_volume()
 
     def set_volume(self, volume):
-        """Set the volume.
-
-        The volume is defined as an integer in range [0..100].
-
-        The volume scale is linear.
         """
-        if self.mixer:
-            self.mixer.set_volume(volume)
-        else:
-            # For testing
-            self._volume = volume
+        ... deprecated:: 0.20
+            Use :meth:`core.mixer.set_volume()
+            <mopidy.core.MixerController.set_volume>` instead.
+        """
+        warnings.warn(
+            'playback.set_volume() is deprecated', DeprecationWarning)
+        return self.core.mixer.set_volume(volume)
 
     volume = deprecated_property(get_volume, set_volume)
     """
     .. deprecated:: 0.20
-        Use :meth:`get_volume` and :meth:`set_volume` instead.
+        Use :meth:`core.mixer.get_volume()
+        <mopidy.core.MixerController.get_volume>` and
+        :meth:`core.mixer.set_volume()
+        <mopidy.core.MixerController.set_volume>` instead.
     """
 
     def get_mute(self):
-        """Get mute state.
-
-        :class:`True` if muted, :class:`False` otherwise.
         """
-        if self.mixer:
-            return self.mixer.get_mute().get()
-        else:
-            # For testing
-            return self._mute
-
-    def set_mute(self, value):
-        """Set mute state.
-
-        :class:`True` to mute, :class:`False` to unmute.
+        ... deprecated:: 0.20
+            Use :meth:`core.mixer.get_mute()
+            <mopidy.core.MixerController.get_mute>` instead.
         """
-        value = bool(value)
-        if self.mixer:
-            self.mixer.set_mute(value)
-        else:
-            # For testing
-            self._mute = value
+        warnings.warn('playback.get_mute() is deprecated', DeprecationWarning)
+        return self.core.mixer.get_mute()
+
+    def set_mute(self, mute):
+        """
+        ... deprecated:: 0.20
+            Use :meth:`core.mixer.set_mute()
+            <mopidy.core.MixerController.set_mute>` instead.
+        """
+        warnings.warn('playback.set_mute() is deprecated', DeprecationWarning)
+        return self.core.mixer.set_mute(mute)
 
     mute = deprecated_property(get_mute, set_mute)
     """
     .. deprecated:: 0.20
-        Use :meth:`get_mute` and :meth:`set_mute` instead.
+        Use :meth:`core.mixer.get_mute()
+        <mopidy.core.MixerController.get_mute>` and
+        :meth:`core.mixer.set_mute()
+        <mopidy.core.MixerController.set_mute>` instead.
     """
 
     # Methods
