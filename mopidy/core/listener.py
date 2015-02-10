@@ -163,3 +163,11 @@ class CoreListener(listener.Listener):
         :type time_position: int
         """
         pass
+
+    def current_metadata_changed(self):
+        """
+        Called whenever current track's metadata changed
+
+        *MAY* be implemented by actor.
+        """
+        pass

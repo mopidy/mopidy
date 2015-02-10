@@ -7,12 +7,14 @@ import pykka
 
 from mopidy import audio, backend, mixer
 from mopidy.audio import PlaybackState
+from mopidy.audio.utils import convert_tags_to_track
 from mopidy.core.history import HistoryController
 from mopidy.core.library import LibraryController
 from mopidy.core.listener import CoreListener
 from mopidy.core.playback import PlaybackController
 from mopidy.core.playlists import PlaylistsController
 from mopidy.core.tracklist import TracklistController
+from mopidy.models import TlTrack, Track
 from mopidy.utils import versioning
 
 
@@ -40,7 +42,7 @@ class Core(
     """The tracklist controller. An instance of
     :class:`mopidy.core.TracklistController`."""
 
-    def __init__(self, mixer=None, backends=None):
+    def __init__(self, mixer=None, backends=None, audio=None):
         super(Core, self).__init__()
 
         self.backends = Backends(backends)
@@ -56,6 +58,8 @@ class Core(
             backends=self.backends, core=self)
 
         self.tracklist = TracklistController(core=self)
+
+        self.audio = audio
 
     def get_uri_schemes(self):
         futures = [b.uri_schemes for b in self.backends]
@@ -101,6 +105,34 @@ class Core(
     def mute_changed(self, mute):
         # Forward event from mixer to frontends
         CoreListener.send('mute_changed', mute=mute)
+
+    def tags_changed(self, tags):
+        # Validity checks
+        if not self.audio:
+            return
+        if self.playback.current_tl_track is None:
+            return
+
+        tags = self.audio.get_current_tags().get()
+        if not tags:
+            return
+
+        # Request available metadata and set a track
+        mt_track = convert_tags_to_track(tags)
+
+        # Merge current_tl_track with metadata in current_metadata_track
+        c_track = self.playback.current_tl_track.track
+        track_kwargs = {k: v for k, v in c_track.__dict__.items() if v}
+        for k, v in mt_track.__dict__.items():
+            if v:
+                track_kwargs[k] = v
+
+        self.playback.current_metadata_track = TlTrack(**{
+            'tlid': self.playback.current_tl_track.tlid,
+            'track': Track(**track_kwargs)})
+
+        # Send event to frontends
+        CoreListener.send('current_metadata_changed')
 
 
 class Backends(list):

@@ -126,6 +126,15 @@ class PlaybackController(object):
     mute = property(get_mute, set_mute)
     """Mute state as a :class:`True` if muted, :class:`False` otherwise"""
 
+    def get_current_metadata_track(self):
+        return self.current_metadata_track
+
+    current_metadata_track = None
+    """
+    The currently playing metadata :class:`mopidy.models.Track`,
+        or :class:`None`.
+    """
+
     # Methods
 
     # TODO: remove this.
