@@ -49,7 +49,7 @@ class JsonRpcTestBase(unittest.TestCase):
                 'hello': lambda: 'Hello, world!',
                 'calc': Calculator(),
                 'core': self.core,
-                'core.playback': self.core.playback,
+                'core.mixer': self.core.mixer,
                 'core.tracklist': self.core.tracklist,
                 'get_uri_schemes': self.core.get_uri_schemes,
             },
@@ -188,7 +188,7 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
     def test_call_method_on_actor_member(self):
         request = {
             'jsonrpc': '2.0',
-            'method': 'core.playback.get_volume',
+            'method': 'core.mixer.get_volume',
             'id': 1,
         }
         response = self.jrw.handle_data(request)
@@ -215,26 +215,26 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
     def test_call_method_with_positional_params(self):
         request = {
             'jsonrpc': '2.0',
-            'method': 'core.playback.set_volume',
+            'method': 'core.mixer.set_volume',
             'params': [37],
             'id': 1,
         }
         response = self.jrw.handle_data(request)
 
         self.assertEqual(response['result'], None)
-        self.assertEqual(self.core.playback.get_volume().get(), 37)
+        self.assertEqual(self.core.mixer.get_volume().get(), 37)
 
     def test_call_methods_with_named_params(self):
         request = {
             'jsonrpc': '2.0',
-            'method': 'core.playback.set_volume',
+            'method': 'core.mixer.set_volume',
             'params': {'volume': 37},
             'id': 1,
         }
         response = self.jrw.handle_data(request)
 
         self.assertEqual(response['result'], None)
-        self.assertEqual(self.core.playback.get_volume().get(), 37)
+        self.assertEqual(self.core.mixer.get_volume().get(), 37)
 
 
 class JsonRpcSingleNotificationTest(JsonRpcTestBase):
@@ -248,17 +248,17 @@ class JsonRpcSingleNotificationTest(JsonRpcTestBase):
         self.assertIsNone(response)
 
     def test_notification_makes_an_observable_change(self):
-        self.assertEqual(self.core.playback.get_volume().get(), None)
+        self.assertEqual(self.core.mixer.get_volume().get(), None)
 
         request = {
             'jsonrpc': '2.0',
-            'method': 'core.playback.set_volume',
+            'method': 'core.mixer.set_volume',
             'params': [37],
         }
         response = self.jrw.handle_data(request)
 
         self.assertIsNone(response)
-        self.assertEqual(self.core.playback.get_volume().get(), 37)
+        self.assertEqual(self.core.mixer.get_volume().get(), 37)
 
     def test_notification_unknown_method_returns_nothing(self):
         request = {
@@ -526,7 +526,7 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
     def test_batch_of_both_successfull_and_failing_requests(self):
         request = [
             # Call with positional params
-            {'jsonrpc': '2.0', 'method': 'core.playback.set_volume',
+            {'jsonrpc': '2.0', 'method': 'core.mixer.set_volume',
                 'params': [47], 'id': '1'},
             # Notification
             {'jsonrpc': '2.0', 'method': 'core.tracklist.set_consume',
