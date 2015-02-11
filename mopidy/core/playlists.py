@@ -5,7 +5,8 @@ import urlparse
 
 import pykka
 
-from . import listener
+from mopidy.core import listener
+from mopidy.utils.deprecation import deprecated_property
 
 
 class PlaylistsController(object):
@@ -29,7 +30,7 @@ class PlaylistsController(object):
             playlists = [p.copy(tracks=[]) for p in playlists]
         return playlists
 
-    playlists = property(get_playlists)
+    playlists = deprecated_property(get_playlists)
     """
     .. deprecated:: 0.20
         Use :meth:`get_playlists` instead.

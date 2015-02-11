@@ -16,6 +16,7 @@ from mopidy.core.playlists import PlaylistsController
 from mopidy.core.tracklist import TracklistController
 from mopidy.models import TlTrack, Track
 from mopidy.utils import versioning
+from mopidy.utils.deprecation import deprecated_property
 
 
 class Core(
@@ -68,7 +69,7 @@ class Core(
         uri_schemes = itertools.chain(*results)
         return sorted(uri_schemes)
 
-    uri_schemes = property(get_uri_schemes)
+    uri_schemes = deprecated_property(get_uri_schemes)
     """
     .. deprecated:: 0.20
         Use :meth:`get_uri_schemes` instead.
@@ -78,7 +79,7 @@ class Core(
         """Get version of the Mopidy core API"""
         return versioning.get_version()
 
-    version = property(get_version)
+    version = deprecated_property(get_version)
     """
     .. deprecated:: 0.20
         Use :meth:`get_version` instead.

@@ -5,6 +5,7 @@ import urlparse
 
 from mopidy.audio import PlaybackState
 from mopidy.core import listener
+from mopidy.utils.deprecation import deprecated_property
 
 
 logger = logging.getLogger(__name__)
@@ -50,7 +51,8 @@ class PlaybackController(object):
         """
         self._current_tl_track = value
 
-    current_tl_track = property(get_current_tl_track, set_current_tl_track)
+    current_tl_track = deprecated_property(
+        get_current_tl_track, set_current_tl_track)
     """
     .. deprecated:: 0.20
         Use :meth:`get_current_tl_track` instead.
@@ -68,7 +70,7 @@ class PlaybackController(object):
         if tl_track is not None:
             return tl_track.track
 
-    current_track = property(get_current_track)
+    current_track = deprecated_property(get_current_track)
     """
     .. deprecated:: 0.20
         Use :meth:`get_current_track` instead.
@@ -83,7 +85,7 @@ class PlaybackController(object):
         """
         return self._current_metadata_track
 
-    current_metadata_track = property(get_current_metadata_track)
+    current_metadata_track = deprecated_property(get_current_metadata_track)
     """
     .. deprecated:: 0.20
         Use :meth:`get_current_metadata_track` instead.
@@ -116,7 +118,7 @@ class PlaybackController(object):
 
         self._trigger_playback_state_changed(old_state, new_state)
 
-    state = property(get_state, set_state)
+    state = deprecated_property(get_state, set_state)
     """
     .. deprecated:: 0.20
         Use :meth:`get_state` and :meth:`set_state` instead.
@@ -130,7 +132,7 @@ class PlaybackController(object):
         else:
             return 0
 
-    time_position = property(get_time_position)
+    time_position = deprecated_property(get_time_position)
     """
     .. deprecated:: 0.20
         Use :meth:`get_time_position` instead.
@@ -162,7 +164,7 @@ class PlaybackController(object):
             # For testing
             self._volume = volume
 
-    volume = property(get_volume, set_volume)
+    volume = deprecated_property(get_volume, set_volume)
     """
     .. deprecated:: 0.20
         Use :meth:`get_volume` and :meth:`set_volume` instead.
@@ -191,7 +193,7 @@ class PlaybackController(object):
             # For testing
             self._mute = value
 
-    mute = property(get_mute, set_mute)
+    mute = deprecated_property(get_mute, set_mute)
     """
     .. deprecated:: 0.20
         Use :meth:`get_mute` and :meth:`set_mute` instead.
