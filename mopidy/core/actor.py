@@ -152,7 +152,9 @@ class Backends(list):
         self.with_playlists = collections.OrderedDict()
 
         backends_by_scheme = {}
-        name = lambda b: b.actor_ref.actor_class.__name__
+
+        def name(b):
+            return b.actor_ref.actor_class.__name__
 
         for b in backends:
             has_library = b.has_library().get()
