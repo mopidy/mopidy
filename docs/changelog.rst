@@ -8,6 +8,11 @@ This changelog is used to track all major changes to Mopidy.
 v0.20.0 (UNRELEASED)
 ====================
 
+**Models**
+
+- Add :class:`mopidy.models.Image` model to be returned by
+  :meth:`mopidy.core.LibraryController.get_images`. (Part of :issue:`973`)
+
 **Core API**
 
 - Deprecate all properties in the core API. The previously undocumented getter
