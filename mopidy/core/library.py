@@ -82,18 +82,19 @@ class LibraryController(object):
         Unknown URIs or URIs the corresponding backend couldn't find anything
         for will simply return an empty list for that URI.
 
-        :param list uris: list of URIsto find images for
-        :rtype: {uri: [:class:`mopidy.models.Image`]}
+        :param list uris: list of URIs to find images for
+        :rtype: {uri: tuple of :class:`mopidy.models.Image`}
         """
         futures = [
             backend.library.get_images(backend_uris)
             for (backend, backend_uris)
             in self._get_backends_to_uris(uris).items() if backend_uris]
 
-        images = {}
-        for result in pykka.get_all(futures):
-            images.update(result)
-        return images
+        results = {uri: tuple() for uri in uris}
+        for r in pykka.get_all(futures):
+            for uri, images in r.items():
+                results[uri] += tuple(images)
+        return results
 
     def find_exact(self, query=None, uris=None, **kwargs):
         """

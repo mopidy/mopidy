@@ -40,11 +40,13 @@ class CoreLibraryTest(unittest.TestCase):
     def test_get_images_returns_empty_dict_for_no_uris(self):
         self.assertEqual({}, self.core.library.get_images([]))
 
-    def test_get_images_returns_empty_dict_for_unknown_uri(self):
-        self.assertEqual({}, self.core.library.get_images(['dummy4:bar']))
+    def test_get_images_returns_empty_result_for_unknown_uri(self):
+        result = self.core.library.get_images(['dummy4:track'])
+        self.assertEqual({'dummy4:track': tuple()}, result)
 
-    def test_get_images_returns_empty_dict_for_library_less_uri(self):
-        self.assertEqual({}, self.core.library.get_images(['dummy3:foo']))
+    def test_get_images_returns_empty_result_for_library_less_uri(self):
+        result = self.core.library.get_images(['dummy3:track'])
+        self.assertEqual({'dummy3:track': tuple()}, result)
 
     def test_get_images_maps_uri_to_backend(self):
         self.core.library.get_images(['dummy1:track'])
@@ -62,7 +64,7 @@ class CoreLibraryTest(unittest.TestCase):
         self.library1.get_images.reset_mock()
 
         result = self.core.library.get_images(['dummy1:track'])
-        self.assertEqual({'dummy1:track': [Image(uri='uri')]}, result)
+        self.assertEqual({'dummy1:track': (Image(uri='uri'),)}, result)
 
     def test_get_images_merges_results(self):
         self.library1.get_images().get.return_value = {
@@ -72,9 +74,11 @@ class CoreLibraryTest(unittest.TestCase):
             'dummy2:track': [Image(uri='uri2')]}
         self.library2.get_images.reset_mock()
 
-        result = self.core.library.get_images(['dummy1:track', 'dummy2:track'])
-        expected = {'dummy1:track': [Image(uri='uri1')],
-                    'dummy2:track': [Image(uri='uri2')]}
+        result = self.core.library.get_images(
+            ['dummy1:track', 'dummy2:track', 'dummy3:track', 'dummy4:track'])
+        expected = {'dummy1:track': (Image(uri='uri1'),),
+                    'dummy2:track': (Image(uri='uri2'),),
+                    'dummy3:track': tuple(), 'dummy4:track': tuple()}
         self.assertEqual(expected, result)
 
     def test_browse_root_returns_dir_ref_for_each_lib_with_root_dir_name(self):
