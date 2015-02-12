@@ -139,8 +139,10 @@ class ScanCommand(commands.Command):
                     track = utils.convert_tags_to_track(tags).copy(
                         uri=uri, length=duration, last_modified=mtime)
                     track = translator.add_musicbrainz_coverart_to_track(track)
-                    # TODO: add tags to call if library supports it.
-                    library.add(track)
+                    if library.add_supports_tags_and_duration:
+                        library.add(track, tags=tags, duration=duration)
+                    else:
+                        library.add(track)
                     logger.debug('Added %s', track.uri)
             except exceptions.ScannerError as error:
                 logger.warning('Failed %s: %s', uri, error)

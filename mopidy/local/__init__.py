@@ -70,6 +70,10 @@ class Library(object):
     #: Name of the local library implementation, must be overriden.
     name = None
 
+    #: Feature marker to indicate that you want :meth:`add()` calls to be
+    #: called with optional arguments tags and duration.
+    add_supports_tags_and_duration = False
+
     def __init__(self, config):
         self._config = config
 
@@ -135,12 +139,19 @@ class Library(object):
         """
         raise NotImplementedError
 
-    def add(self, track):
+    def add(self, track, tags=None, duration=None):
         """
-        Add the given track to library.
+        Add the given track to library. Optional args will only be added if
+        :attr:`add_supports_tags_and_duration` has been set.
 
         :param track: Track to add to the library
         :type track: :class:`~mopidy.models.Track`
+        :param tags: All the tags the scanner found for the media. See
+            :module:`mopidy.audio.utils` for details about the tags.
+        :type tags: dictionary of tag keys with a list of values.
+        :param duration: Duration of media in milliseconds or :class:`None` if
+            unknown
+        :type duration: :class:`int` or :class:`None`
         """
         raise NotImplementedError
 

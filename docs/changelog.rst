@@ -51,6 +51,9 @@ v0.20.0 (UNRELEASED)
   just like the other ``lookup()`` methods in Mopidy. For now, returning a
   single track will continue to work. (PR: :issue:`840`)
 
+- Add support for giving local libraries direct access to tags and duration.
+  (Fixes: :issue:`967`)
+
 **File scanner**
 
 - Improve error logging for scan code (Fixes: :issue:`856`, PR: :issue:`874`)
