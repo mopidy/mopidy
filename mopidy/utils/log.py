@@ -12,7 +12,11 @@ LOG_LEVELS = {
     1: dict(root=logging.WARNING, mopidy=logging.DEBUG),
     2: dict(root=logging.INFO, mopidy=logging.DEBUG),
     3: dict(root=logging.DEBUG, mopidy=logging.DEBUG),
+    4: dict(root=logging.NOTSET, mopidy=logging.NOTSET),
 }
+
+# Custom log level which has even lower priority than DEBUG
+TRACE_LOG_LEVEL = 5
 
 
 class DelayedHandler(logging.Handler):
@@ -42,6 +46,8 @@ def bootstrap_delayed_logging():
 
 
 def setup_logging(config, verbosity_level, save_debug_log):
+    logging.addLevelName(TRACE_LOG_LEVEL, 'TRACE')
+
     logging.captureWarnings(True)
 
     if config['logging']['config_file']:
@@ -137,6 +143,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
 
     # Map logging levels to (background, foreground, bold/intense)
     level_map = {
+        TRACE_LOG_LEVEL: (None, 'blue', False),
         logging.DEBUG: (None, 'blue', False),
         logging.INFO: (None, 'white', False),
         logging.WARNING: (None, 'yellow', False),

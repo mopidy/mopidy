@@ -26,6 +26,21 @@ v0.20.0 (UNRELEASED)
 - Make the ``mopidy`` command print a friendly error message if the
   :mod:`gobject` Python module cannot be imported. (Fixes: :issue:`836`)
 
+- Add support for repeating the :cmdoption:`-v <mopidy -v>` argument four times
+  to set the log level for all loggers to the lowest possible value, including
+  log records at levels lover than ``DEBUG`` too.
+
+**Configuration**
+
+- Add support for the log level value ``all`` to the loglevels configurations.
+  This can be used to show absolutely all log records, including those at
+  custom levels below ``DEBUG``.
+
+**Logging**
+
+- Add custom log level ``TRACE`` (numerical level 5), which can be used by
+  Mopidy and extensions to log at an even more detailed level than ``DEBUG``.
+
 **Local backend**
 
 - Add cover URL to all scanned files with MusicBrainz album IDs. (Fixes:
@@ -50,7 +65,7 @@ v0.20.0 (UNRELEASED)
 
 - Enable browsing of artist references, in addition to albums and playlists.
   (PR: :issue:`884`)
-  
+
 - Share a single mapping between names and URIs across all MPD sessions. (Fixes:
   :issue:`934`, PR: :issue:`968`)
 
