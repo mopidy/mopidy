@@ -21,6 +21,9 @@ v0.20.0 (UNRELEASED)
   :meth:`mopidy.core.Playback.stop`. It was a leaky internal abstraction,
   which was never intended to be used externally.
 
+- Add :meth:`mopidy.core.LibraryController.get_images` for looking up images
+  for any URI backends know about. (Fixes :issue:`973`)
+
 **Commands**
 
 - Make the ``mopidy`` command print a friendly error message if the
