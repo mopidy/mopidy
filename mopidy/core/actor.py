@@ -11,6 +11,7 @@ from mopidy.audio.utils import convert_tags_to_track
 from mopidy.core.history import HistoryController
 from mopidy.core.library import LibraryController
 from mopidy.core.listener import CoreListener
+from mopidy.core.mixer import MixerController
 from mopidy.core.playback import PlaybackController
 from mopidy.core.playlists import PlaylistsController
 from mopidy.core.tracklist import TracklistController
@@ -31,6 +32,10 @@ class Core(
     """The playback history controller. An instance of
     :class:`mopidy.core.HistoryController`."""
 
+    mixer = None
+    """The mixer controller. An instance of
+    :class:`mopidy.core.MixerController`."""
+
     playback = None
     """The playback controller. An instance of
     :class:`mopidy.core.PlaybackController`."""
@@ -49,15 +54,10 @@ class Core(
         self.backends = Backends(backends)
 
         self.library = LibraryController(backends=self.backends, core=self)
-
         self.history = HistoryController()
-
-        self.playback = PlaybackController(
-            mixer=mixer, backends=self.backends, core=self)
-
-        self.playlists = PlaylistsController(
-            backends=self.backends, core=self)
-
+        self.mixer = MixerController(mixer=mixer)
+        self.playback = PlaybackController(backends=self.backends, core=self)
+        self.playlists = PlaylistsController(backends=self.backends, core=self)
         self.tracklist = TracklistController(core=self)
 
         self.audio = audio

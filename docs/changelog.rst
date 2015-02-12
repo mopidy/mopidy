@@ -17,6 +17,10 @@ v0.20.0 (UNRELEASED)
 - Added :class:`mopidy.core.HistoryController` which keeps track of what
   tracks have been played. (Fixes: :issue:`423`, PR: :issue:`803`)
 
+- Added :class:`mopidy.core.MixerController` which keeps track of volume and
+  mute. The old methods on :class:`mopidy.core.PlaybackController` for volume
+  and mute management has been deprecated. (Fixes: :issue:`962`)
+
 - Removed ``clear_current_track`` keyword argument to
   :meth:`mopidy.core.Playback.stop`. It was a leaky internal abstraction,
   which was never intended to be used externally.

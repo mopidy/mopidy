@@ -5,12 +5,12 @@ from tests.mpd import protocol
 
 class AudioOutputHandlerTest(protocol.BaseTestCase):
     def test_enableoutput(self):
-        self.core.playback.mute = False
+        self.core.mixer.set_mute(False)
 
         self.send_request('enableoutput "0"')
 
         self.assertInResponse('OK')
-        self.assertEqual(self.core.playback.mute.get(), True)
+        self.assertEqual(self.core.mixer.get_mute().get(), True)
 
     def test_enableoutput_unknown_outputid(self):
         self.send_request('enableoutput "7"')
@@ -18,12 +18,12 @@ class AudioOutputHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('ACK [50@0] {enableoutput} No such audio output')
 
     def test_disableoutput(self):
-        self.core.playback.mute = True
+        self.core.mixer.set_mute(True)
 
         self.send_request('disableoutput "0"')
 
         self.assertInResponse('OK')
-        self.assertEqual(self.core.playback.mute.get(), False)
+        self.assertEqual(self.core.mixer.get_mute().get(), False)
 
     def test_disableoutput_unknown_outputid(self):
         self.send_request('disableoutput "7"')
@@ -32,7 +32,7 @@ class AudioOutputHandlerTest(protocol.BaseTestCase):
             'ACK [50@0] {disableoutput} No such audio output')
 
     def test_outputs_when_unmuted(self):
-        self.core.playback.mute = False
+        self.core.mixer.set_mute(False)
 
         self.send_request('outputs')
 
@@ -42,7 +42,7 @@ class AudioOutputHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_outputs_when_muted(self):
-        self.core.playback.mute = True
+        self.core.mixer.set_mute(True)
 
         self.send_request('outputs')
 
