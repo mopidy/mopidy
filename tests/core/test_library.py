@@ -58,23 +58,23 @@ class CoreLibraryTest(unittest.TestCase):
 
     def test_get_images_returns_images(self):
         self.library1.get_images().get.return_value = {
-            'dummy1:track': Image(uri='uri')}
+            'dummy1:track': [Image(uri='uri')]}
         self.library1.get_images.reset_mock()
 
         result = self.core.library.get_images(['dummy1:track'])
-        self.assertEqual({'dummy1:track': Image(uri='uri')}, result)
+        self.assertEqual({'dummy1:track': [Image(uri='uri')]}, result)
 
     def test_get_images_merges_results(self):
         self.library1.get_images().get.return_value = {
-            'dummy1:track': Image(uri='uri1')}
+            'dummy1:track': [Image(uri='uri1')]}
         self.library1.get_images.reset_mock()
         self.library2.get_images().get.return_value = {
-            'dummy2:track': Image(uri='uri2')}
+            'dummy2:track': [Image(uri='uri2')]}
         self.library2.get_images.reset_mock()
 
         result = self.core.library.get_images(['dummy1:track', 'dummy2:track'])
-        expected = {'dummy1:track': Image(uri='uri1'),
-                    'dummy2:track': Image(uri='uri2')}
+        expected = {'dummy1:track': [Image(uri='uri1')],
+                    'dummy2:track': [Image(uri='uri2')]}
         self.assertEqual(expected, result)
 
     def test_browse_root_returns_dir_ref_for_each_lib_with_root_dir_name(self):
