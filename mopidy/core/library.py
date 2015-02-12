@@ -72,6 +72,22 @@ class LibraryController(object):
             return []
         return backend.library.browse(uri).get()
 
+    def get_images(self, uris):
+        """Lookup the images for the given URIs
+
+        :param list uris: list of uris to find images for
+        :rtype: dict mapping uris to :class:`mopidy.models.Image` instances
+        """
+        futures = [
+            backend.library.get_images(backend_uris)
+            for (backend, backend_uris)
+            in self._get_backends_to_uris(uris).items() if backend_uris]
+
+        images = {}
+        for result in pykka.get_all(futures):
+            images.update(result)
+        return images
+
     def find_exact(self, query=None, uris=None, **kwargs):
         """
         Search the library for tracks where ``field`` is ``values``.

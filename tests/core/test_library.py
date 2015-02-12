@@ -5,7 +5,7 @@ import unittest
 import mock
 
 from mopidy import backend, core
-from mopidy.models import Ref, SearchResult, Track
+from mopidy.models import Image, Ref, SearchResult, Track
 
 
 class CoreLibraryTest(unittest.TestCase):
@@ -14,6 +14,8 @@ class CoreLibraryTest(unittest.TestCase):
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
         self.library1 = mock.Mock(spec=backend.LibraryProvider)
+        self.library1.get_images().get.return_value = {}
+        self.library1.get_images.reset_mock()
         self.library1.root_directory.get.return_value = dummy1_root
         self.backend1.library = self.library1
 
@@ -21,6 +23,8 @@ class CoreLibraryTest(unittest.TestCase):
         self.backend2 = mock.Mock()
         self.backend2.uri_schemes.get.return_value = ['dummy2', 'du2']
         self.library2 = mock.Mock(spec=backend.LibraryProvider)
+        self.library2.get_images().get.return_value = {}
+        self.library2.get_images.reset_mock()
         self.library2.root_directory.get.return_value = dummy2_root
         self.backend2.library = self.library2
 
@@ -32,6 +36,46 @@ class CoreLibraryTest(unittest.TestCase):
 
         self.core = core.Core(mixer=None, backends=[
             self.backend1, self.backend2, self.backend3])
+
+    def test_get_images_returns_empty_dict_for_no_uris(self):
+        self.assertEqual({}, self.core.library.get_images([]))
+
+    def test_get_images_returns_empty_dict_for_unknown_uri(self):
+        self.assertEqual({}, self.core.library.get_images(['dummy4:bar']))
+
+    def test_get_images_returns_empty_dict_for_library_less_uri(self):
+        self.assertEqual({}, self.core.library.get_images(['dummy3:foo']))
+
+    def test_get_images_maps_uri_to_backend(self):
+        self.core.library.get_images(['dummy1:track'])
+        self.library1.get_images.assert_called_once_with(['dummy1:track'])
+        self.library2.get_images.assert_not_called()
+
+    def test_get_images_maps_uri_to_backends(self):
+        self.core.library.get_images(['dummy1:track', 'dummy2:track'])
+        self.library1.get_images.assert_called_once_with(['dummy1:track'])
+        self.library2.get_images.assert_called_once_with(['dummy2:track'])
+
+    def test_get_images_returns_images(self):
+        self.library1.get_images().get.return_value = {
+            'dummy1:track': Image(uri='uri')}
+        self.library1.get_images.reset_mock()
+
+        result = self.core.library.get_images(['dummy1:track'])
+        self.assertEqual({'dummy1:track': Image(uri='uri')}, result)
+
+    def test_get_images_merges_results(self):
+        self.library1.get_images().get.return_value = {
+            'dummy1:track': Image(uri='uri1')}
+        self.library1.get_images.reset_mock()
+        self.library2.get_images().get.return_value = {
+            'dummy2:track': Image(uri='uri2')}
+        self.library2.get_images.reset_mock()
+
+        result = self.core.library.get_images(['dummy1:track', 'dummy2:track'])
+        expected = {'dummy1:track': Image(uri='uri1'),
+                    'dummy2:track': Image(uri='uri2')}
+        self.assertEqual(expected, result)
 
     def test_browse_root_returns_dir_ref_for_each_lib_with_root_dir_name(self):
         result = self.core.library.browse(None)

@@ -92,6 +92,14 @@ class LibraryProvider(object):
         """
         return []
 
+    def get_images(self, uris):
+        """
+        See :meth:`mopidy.core.LibraryController.get_images`.
+
+        *MAY be implemented by subclass.*
+        """
+        return {}
+
     # TODO: replace with search(query, exact=True, ...)
     def find_exact(self, query=None, uris=None):
         """
