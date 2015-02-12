@@ -138,6 +138,8 @@ Bug fix release.
 
 - Audio: Support UTF-8 in M3U playlists. (Fixes: :issue:`853`)
 
+- Events: Speed up event emitting.
+
 
 v0.19.5 (2014-12-23)
 ====================
