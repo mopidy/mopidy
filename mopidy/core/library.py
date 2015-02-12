@@ -75,8 +75,15 @@ class LibraryController(object):
     def get_images(self, uris):
         """Lookup the images for the given URIs
 
-        :param list uris: list of uris to find images for
-        :rtype: dict mapping uris to :class:`mopidy.models.Image` instances
+        Backends can use this to return image URIs for any URI they know about
+        be it tracks, albums, playlists... The lookup result is a dictionary
+        mapping the provided URIs to lists of images.
+
+        Unknown URIs or URIs the corresponding backend couldn't find anything
+        for will simply return an empty list for that URI.
+
+        :param list uris: list of URIsto find images for
+        :rtype: {uri: [:class:`mopidy.models.Image`]}
         """
         futures = [
             backend.library.get_images(backend_uris)
