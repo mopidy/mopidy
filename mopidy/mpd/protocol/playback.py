@@ -397,7 +397,7 @@ def setvol(context, volume):
     - issues ``setvol 50`` without quotes around the argument.
     """
     # NOTE: we use INT as clients can pass in +N etc.
-    context.core.playback.volume = min(max(0, volume), 100)
+    context.core.mixer.set_volume(min(max(0, volume), 100))
 
 
 @protocol.commands.add('single', state=protocol.BOOL)

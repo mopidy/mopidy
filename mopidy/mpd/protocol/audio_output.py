@@ -13,7 +13,7 @@ def disableoutput(context, outputid):
         Turns an output off.
     """
     if outputid == 0:
-        context.core.playback.set_mute(False)
+        context.core.mixer.set_mute(False)
     else:
         raise exceptions.MpdNoExistError('No such audio output')
 
@@ -28,7 +28,7 @@ def enableoutput(context, outputid):
         Turns an output on.
     """
     if outputid == 0:
-        context.core.playback.set_mute(True)
+        context.core.mixer.set_mute(True)
     else:
         raise exceptions.MpdNoExistError('No such audio output')
 
@@ -55,7 +55,7 @@ def outputs(context):
 
         Shows information about all outputs.
     """
-    muted = 1 if context.core.playback.get_mute().get() else 0
+    muted = 1 if context.core.mixer.get_mute().get() else 0
     return [
         ('outputid', 0),
         ('outputname', 'Mute'),

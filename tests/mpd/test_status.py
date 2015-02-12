@@ -52,7 +52,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(int(result['volume']), -1)
 
     def test_status_method_contains_volume(self):
-        self.core.playback.volume = 17
+        self.core.mixer.set_volume(17)
         result = dict(status.status(self.context))
         self.assertIn('volume', result)
         self.assertEqual(int(result['volume']), 17)
