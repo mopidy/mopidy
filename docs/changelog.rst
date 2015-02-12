@@ -32,6 +32,11 @@ v0.20.0 (UNRELEASED)
   This can be used to show absolutely all log records, including those at
   custom levels below ``DEBUG``.
 
+**Logging**
+
+- Add custom log level ``TRACE`` (numerical level 5), which can be used by
+  Mopidy and extensions to log at an even more detailed level than ``DEBUG``.
+
 **Local backend**
 
 - Add cover URL to all scanned files with MusicBrainz album IDs. (Fixes:
