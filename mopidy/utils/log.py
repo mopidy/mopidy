@@ -12,6 +12,7 @@ LOG_LEVELS = {
     1: dict(root=logging.WARNING, mopidy=logging.DEBUG),
     2: dict(root=logging.INFO, mopidy=logging.DEBUG),
     3: dict(root=logging.DEBUG, mopidy=logging.DEBUG),
+    4: dict(root=logging.NOTSET, mopidy=logging.NOTSET),
 }
 
 # Custom log level which has even lower priority than DEBUG

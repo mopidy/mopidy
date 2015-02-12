@@ -26,6 +26,10 @@ v0.20.0 (UNRELEASED)
 - Make the ``mopidy`` command print a friendly error message if the
   :mod:`gobject` Python module cannot be imported. (Fixes: :issue:`836`)
 
+- Add support for repeating the :cmdoption:`-v <mopidy -v>` argument four times
+  to set the log level for all loggers to the lowest possible value, including
+  log records at levels lover than ``DEBUG`` too.
+
 **Configuration**
 
 - Add support for the log level value ``all`` to the loglevels configurations.
