@@ -281,11 +281,14 @@ class ListTest(unittest.TestCase):
 
 
 class LogLevelTest(unittest.TestCase):
-    levels = {'critical': logging.CRITICAL,
-              'error': logging.ERROR,
-              'warning': logging.WARNING,
-              'info': logging.INFO,
-              'debug': logging.DEBUG}
+    levels = {
+        'critical': logging.CRITICAL,
+        'error': logging.ERROR,
+        'warning': logging.WARNING,
+        'info': logging.INFO,
+        'debug': logging.DEBUG,
+        'all': logging.NOTSET,
+    }
 
     def test_deserialize_conversion_success(self):
         value = types.LogLevel()

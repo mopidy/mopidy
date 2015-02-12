@@ -200,8 +200,8 @@ class List(ConfigValue):
 class LogLevel(ConfigValue):
     """Log level value.
 
-    Expects one of ``critical``, ``error``, ``warning``, ``info``, ``debug``
-    with any casing.
+    Expects one of ``critical``, ``error``, ``warning``, ``info``, ``debug``,
+    or ``all``, with any casing.
     """
     levels = {
         b'critical': logging.CRITICAL,
@@ -209,6 +209,7 @@ class LogLevel(ConfigValue):
         b'warning': logging.WARNING,
         b'info': logging.INFO,
         b'debug': logging.DEBUG,
+        b'all': logging.NOTSET,
     }
 
     def deserialize(self, value):
