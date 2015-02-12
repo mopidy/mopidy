@@ -110,6 +110,9 @@ v0.20.0 (UNRELEASED)
   make sense for a server such as Mopidy. Currently the only way to find out if
   it is in use and will be missed is to go ahead and remove it.
 
+- Add workaround for volume not persisting across tracks on OS X.
+  (Issue: :issue:`886`, PR: :issue:`958`)
+
 **Stream backend**
 
 - Add basic tests for the stream library provider.
