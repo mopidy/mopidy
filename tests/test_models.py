@@ -123,6 +123,12 @@ class RefTest(unittest.TestCase):
         self.assertEqual(ref.name, 'bar')
         self.assertEqual(ref.type, Ref.PLAYLIST)
 
+    def test_track_constructor(self):
+        ref = Ref.track(uri='foo', name='bar')
+        self.assertEqual(ref.uri, 'foo')
+        self.assertEqual(ref.name, 'bar')
+        self.assertEqual(ref.type, Ref.TRACK)
+
 
 class ImageTest(unittest.TestCase):
     def test_uri(self):
