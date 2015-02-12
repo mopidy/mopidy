@@ -21,9 +21,6 @@ class SoftwareMixer(pykka.ThreadingActor, mixer.Mixer):
         self._initial_volume = None
         self._initial_mute = None
 
-        # TODO: shouldn't this be logged by thing that choose us?
-        logger.info('Mixing using GStreamer software mixing')
-
     def setup(self, mixer_ref):
         self._audio_mixer = mixer_ref
 
