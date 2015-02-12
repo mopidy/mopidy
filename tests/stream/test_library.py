@@ -25,19 +25,19 @@ class LibraryProviderTest(unittest.TestCase):
         self.uri = path_to_uri(path_to_data_dir('song1.wav'))
 
     def test_lookup_ignores_unknown_scheme(self):
-        library = actor.StreamLibraryProvider(self.backend, 1000, [])
+        library = actor.StreamLibraryProvider(self.backend, 1000, [], {})
         self.assertFalse(library.lookup('http://example.com'))
 
     def test_lookup_respects_blacklist(self):
-        library = actor.StreamLibraryProvider(self.backend, 100, [self.uri])
+        library = actor.StreamLibraryProvider(self.backend, 10, [self.uri], {})
         self.assertEqual([Track(uri=self.uri)], library.lookup(self.uri))
 
     def test_lookup_respects_blacklist_globbing(self):
         blacklist = [path_to_uri(path_to_data_dir('')) + '*']
-        library = actor.StreamLibraryProvider(self.backend, 100, blacklist)
+        library = actor.StreamLibraryProvider(self.backend, 100, blacklist, {})
         self.assertEqual([Track(uri=self.uri)], library.lookup(self.uri))
 
     def test_lookup_converts_uri_metadata_to_track(self):
-        library = actor.StreamLibraryProvider(self.backend, 100, [])
+        library = actor.StreamLibraryProvider(self.backend, 100, [], {})
         self.assertEqual([Track(length=4406, uri=self.uri)],
                          library.lookup(self.uri))

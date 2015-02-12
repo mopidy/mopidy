@@ -124,6 +124,9 @@ v0.20.0 (UNRELEASED)
 
 - Add basic tests for the stream library provider.
 
+- Add support for proxies when doing initial metadata lookup for stream.
+  (Fixes :issue:`390`)
+
 **Mopidy.js client library**
 
 This version has been released to npm as Mopidy.js v0.5.0.
