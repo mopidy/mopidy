@@ -212,6 +212,23 @@ class Ref(ImmutableObject):
         return cls(**kwargs)
 
 
+class Image(ImmutableObject):
+    """
+    :param string uri: URI of the image
+    :param int width: Optional width of image or :class:`None`
+    :param int height: Optional height of image or :class:`None`
+    """
+
+    #: The image URI. Read-only.
+    uri = None
+
+    #: Optional width of the image or :class:`None`. Read-only.
+    width = None
+
+    #: Optional height of the image or :class:`None`. Read-only.
+    height = None
+
+
 class Artist(ImmutableObject):
     """
     :param uri: artist URI

@@ -72,6 +72,30 @@ class LibraryController(object):
             return []
         return backend.library.browse(uri).get()
 
+    def get_images(self, uris):
+        """Lookup the images for the given URIs
+
+        Backends can use this to return image URIs for any URI they know about
+        be it tracks, albums, playlists... The lookup result is a dictionary
+        mapping the provided URIs to lists of images.
+
+        Unknown URIs or URIs the corresponding backend couldn't find anything
+        for will simply return an empty list for that URI.
+
+        :param list uris: list of URIs to find images for
+        :rtype: {uri: tuple of :class:`mopidy.models.Image`}
+        """
+        futures = [
+            backend.library.get_images(backend_uris)
+            for (backend, backend_uris)
+            in self._get_backends_to_uris(uris).items() if backend_uris]
+
+        results = {uri: tuple() for uri in uris}
+        for r in pykka.get_all(futures):
+            for uri, images in r.items():
+                results[uri] += tuple(images)
+        return results
+
     def find_exact(self, query=None, uris=None, **kwargs):
         """
         Search the library for tracks where ``field`` is ``values``.

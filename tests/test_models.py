@@ -4,8 +4,8 @@ import json
 import unittest
 
 from mopidy.models import (
-    Album, Artist, ModelJSONEncoder, Playlist, Ref, SearchResult, TlTrack,
-    Track, model_json_decoder)
+    Album, Artist, Image, ModelJSONEncoder, Playlist, Ref, SearchResult,
+    TlTrack, Track, model_json_decoder)
 
 
 class GenericCopyTest(unittest.TestCase):
@@ -74,7 +74,7 @@ class RefTest(unittest.TestCase):
 
     def test_invalid_kwarg(self):
         with self.assertRaises(TypeError):
-            SearchResult(foo='baz')
+            Ref(foo='baz')
 
     def test_repr_without_results(self):
         self.assertEquals(
@@ -128,6 +128,31 @@ class RefTest(unittest.TestCase):
         self.assertEqual(ref.uri, 'foo')
         self.assertEqual(ref.name, 'bar')
         self.assertEqual(ref.type, Ref.TRACK)
+
+
+class ImageTest(unittest.TestCase):
+    def test_uri(self):
+        uri = 'an_uri'
+        image = Image(uri=uri)
+        self.assertEqual(image.uri, uri)
+        with self.assertRaises(AttributeError):
+            image.uri = None
+
+    def test_width(self):
+        image = Image(width=100)
+        self.assertEqual(image.width, 100)
+        with self.assertRaises(AttributeError):
+            image.width = None
+
+    def test_height(self):
+        image = Image(height=100)
+        self.assertEqual(image.height, 100)
+        with self.assertRaises(AttributeError):
+            image.height = None
+
+    def test_invalid_kwarg(self):
+        with self.assertRaises(TypeError):
+            Image(foo='baz')
 
 
 class ArtistTest(unittest.TestCase):
