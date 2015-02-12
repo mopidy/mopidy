@@ -82,7 +82,8 @@ def _artists(tags, artist_name, artist_id=None):
 def convert_tags_to_track(tags):
     """Convert our normalized tags to a track.
 
-    :param :class:`dict` tags: dictionary of tag keys with a list of values
+    :param  tags: dictionary of tag keys with a list of values
+    :type tags: :class:`dict`
     :rtype: :class:`mopidy.models.Track`
     """
     album_kwargs = {}
@@ -130,6 +131,26 @@ def convert_tags_to_track(tags):
     return Track(**track_kwargs)
 
 
+def setup_proxy(element, config):
+    """Configure a GStreamer element with proxy settings.
+
+    :param element: element to setup proxy in.
+    :type element: :class:`gst.GstElement`
+    :param config: proxy settings to use.
+    :type config: :class:`dict`
+    """
+    if not hasattr(element.props, 'proxy') or not config.get('hostname'):
+        return
+
+    proxy = "%s://%s:%d" % (config.get('scheme', 'http'),
+                            config.get('hostname'),
+                            config.get('port', 80))
+
+    element.set_property('proxy', proxy)
+    element.set_property('proxy-id', config.get('username'))
+    element.set_property('proxy-pw', config.get('password'))
+
+
 def convert_taglist(taglist):
     """Convert a :class:`gst.Taglist` to plain Python types.
 
@@ -147,7 +168,8 @@ def convert_taglist(taglist):
     .. _GstTagList: http://gstreamer.freedesktop.org/data/doc/gstreamer/\
 0.10.36/gstreamer/html/gstreamer-GstTagList.html
 
-    :param gst.Taglist taglist: A GStreamer taglist to be converted.
+    :param taglist: A GStreamer taglist to be converted.
+    :type taglist: :class:`gst.Taglist`
     :rtype: dictionary of tag keys with a list of values.
     """
     result = {}

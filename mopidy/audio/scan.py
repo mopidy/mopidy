@@ -16,10 +16,11 @@ class Scanner(object):
     Helper to get tags and other relevant info from URIs.
 
     :param timeout: timeout for scanning a URI in ms
+    :param proxy_config: dictionary containing proxy config strings.
     :type event: int
     """
 
-    def __init__(self, timeout=1000):
+    def __init__(self, timeout=1000, proxy_config=None):
         self._timeout_ms = timeout
 
         sink = gst.element_factory_make('fakesink')
@@ -29,9 +30,13 @@ class Scanner(object):
         def pad_added(src, pad):
             return pad.link(sink.get_pad('sink'))
 
+        def source_setup(element, source):
+            utils.setup_proxy(source, proxy_config or {})
+
         self._uribin = gst.element_factory_make('uridecodebin')
         self._uribin.set_property('caps', audio_caps)
         self._uribin.connect('pad-added', pad_added)
+        self._uribin.connect('source-setup', source_setup)
 
         self._pipe = gst.element_factory_make('pipeline')
         self._pipe.add(self._uribin)
