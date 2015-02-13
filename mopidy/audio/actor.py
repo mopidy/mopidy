@@ -128,6 +128,9 @@ class _Appsrc(object):
         self._source = source
 
     def push(self, buffer_):
+        if self._source is None:
+            return False
+
         if buffer_ is None:
             gst_logger.debug('Sending appsrc end-of-stream event.')
             return self._source.emit('end-of-stream') == gst.FLOW_OK
