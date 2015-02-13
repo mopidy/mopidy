@@ -7,8 +7,9 @@ import mock
 import pykka
 
 from mopidy import core, mixer
-from mopidy.backend import dummy
 from mopidy.mpd import session, uri_mapper
+
+from tests import dummy_backend
 
 
 class MockConnection(mock.Mock):
@@ -33,7 +34,7 @@ class BaseTestCase(unittest.TestCase):
 
     def setUp(self):  # noqa: N802
         self.mixer = mixer.DummyMixer.start().proxy()
-        self.backend = dummy.create_dummy_backend_proxy()
+        self.backend = dummy_backend.create_proxy()
         self.core = core.Core.start(
             mixer=self.mixer, backends=[self.backend]).proxy()
 

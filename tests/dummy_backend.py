@@ -12,7 +12,7 @@ from mopidy import backend
 from mopidy.models import Playlist, Ref, SearchResult
 
 
-def create_dummy_backend_proxy(config=None, audio=None):
+def create_proxy(config=None, audio=None):
     return DummyBackend.start(config=config, audio=audio).proxy()
 
 
