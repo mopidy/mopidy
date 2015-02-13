@@ -21,11 +21,8 @@ class MixerController(object):
 
         The volume scale is linear.
         """
-        if self._mixer:
+        if self._mixer is not None:
             return self._mixer.get_volume().get()
-        else:
-            # For testing
-            return self._volume
 
     def set_volume(self, volume):
         """Set the volume.
@@ -34,31 +31,22 @@ class MixerController(object):
 
         The volume scale is linear.
         """
-        if self._mixer:
+        if self._mixer is not None:
             self._mixer.set_volume(volume)
-        else:
-            # For testing
-            self._volume = volume
 
     def get_mute(self):
         """Get mute state.
 
-        :class:`True` if muted, :class:`False` otherwise.
+        :class:`True` if muted, :class:`False` unmuted, :class:`None` if
+        unknown.
         """
-        if self._mixer:
+        if self._mixer is not None:
             return self._mixer.get_mute().get()
-        else:
-            # For testing
-            return self._mute
 
     def set_mute(self, mute):
         """Set mute state.
 
         :class:`True` to mute, :class:`False` to unmute.
         """
-        mute = bool(mute)
-        if self._mixer:
-            self._mixer.set_mute(mute)
-        else:
-            # For testing
-            self._mute = mute
+        if self._mixer is not None:
+            self._mixer.set_mute(bool(mute))

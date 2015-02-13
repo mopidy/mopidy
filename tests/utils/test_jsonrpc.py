@@ -13,6 +13,9 @@ from mopidy.utils import jsonrpc
 
 
 class Calculator(object):
+    def __init__(self):
+        self._mem = None
+
     def model(self):
         return 'TI83'
 
@@ -22,6 +25,12 @@ class Calculator(object):
 
     def sub(self, a, b):
         return a - b
+
+    def set_mem(self, value):
+        self._mem = value
+
+    def get_mem(self):
+        return self._mem
 
     def describe(self):
         return {
@@ -43,13 +52,14 @@ class JsonRpcTestBase(unittest.TestCase):
     def setUp(self):  # noqa: N802
         self.backend = dummy.create_dummy_backend_proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
+        self.calc = Calculator()
 
         self.jrw = jsonrpc.JsonRpcWrapper(
             objects={
                 'hello': lambda: 'Hello, world!',
-                'calc': Calculator(),
+                'calc': self.calc,
                 'core': self.core,
-                'core.mixer': self.core.mixer,
+                'core.playback': self.core.playback,
                 'core.tracklist': self.core.tracklist,
                 'get_uri_schemes': self.core.get_uri_schemes,
             },
@@ -188,12 +198,12 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
     def test_call_method_on_actor_member(self):
         request = {
             'jsonrpc': '2.0',
-            'method': 'core.mixer.get_volume',
+            'method': 'core.playback.get_time_position',
             'id': 1,
         }
         response = self.jrw.handle_data(request)
 
-        self.assertEqual(response['result'], None)
+        self.assertEqual(response['result'], 0)
 
     def test_call_method_which_is_a_directly_mounted_actor_member(self):
         # 'get_uri_schemes' isn't a regular callable, but a Pykka
@@ -215,26 +225,24 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
     def test_call_method_with_positional_params(self):
         request = {
             'jsonrpc': '2.0',
-            'method': 'core.mixer.set_volume',
-            'params': [37],
+            'method': 'calc.add',
+            'params': [3, 4],
             'id': 1,
         }
         response = self.jrw.handle_data(request)
 
-        self.assertEqual(response['result'], None)
-        self.assertEqual(self.core.mixer.get_volume().get(), 37)
+        self.assertEqual(response['result'], 7)
 
     def test_call_methods_with_named_params(self):
         request = {
             'jsonrpc': '2.0',
-            'method': 'core.mixer.set_volume',
-            'params': {'volume': 37},
+            'method': 'calc.add',
+            'params': {'a': 3, 'b': 4},
             'id': 1,
         }
         response = self.jrw.handle_data(request)
 
-        self.assertEqual(response['result'], None)
-        self.assertEqual(self.core.mixer.get_volume().get(), 37)
+        self.assertEqual(response['result'], 7)
 
 
 class JsonRpcSingleNotificationTest(JsonRpcTestBase):
@@ -248,17 +256,17 @@ class JsonRpcSingleNotificationTest(JsonRpcTestBase):
         self.assertIsNone(response)
 
     def test_notification_makes_an_observable_change(self):
-        self.assertEqual(self.core.mixer.get_volume().get(), None)
+        self.assertEqual(self.calc.get_mem(), None)
 
         request = {
             'jsonrpc': '2.0',
-            'method': 'core.mixer.set_volume',
+            'method': 'calc.set_mem',
             'params': [37],
         }
         response = self.jrw.handle_data(request)
 
         self.assertIsNone(response)
-        self.assertEqual(self.core.mixer.get_volume().get(), 37)
+        self.assertEqual(self.calc.get_mem(), 37)
 
     def test_notification_unknown_method_returns_nothing(self):
         request = {
@@ -526,7 +534,7 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
     def test_batch_of_both_successfull_and_failing_requests(self):
         request = [
             # Call with positional params
-            {'jsonrpc': '2.0', 'method': 'core.mixer.set_volume',
+            {'jsonrpc': '2.0', 'method': 'core.playback.seek',
                 'params': [47], 'id': '1'},
             # Notification
             {'jsonrpc': '2.0', 'method': 'core.tracklist.set_consume',
@@ -547,7 +555,7 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
 
         self.assertEqual(len(response), 5)
         response = dict((row['id'], row) for row in response)
-        self.assertEqual(response['1']['result'], None)
+        self.assertEqual(response['1']['result'], False)
         self.assertEqual(response['2']['result'], None)
         self.assertEqual(response[None]['error']['code'], -32600)
         self.assertEqual(response['5']['error']['code'], -32601)
