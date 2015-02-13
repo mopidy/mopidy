@@ -2,8 +2,6 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
-import pykka
-
 from mopidy import listener
 
 
@@ -149,23 +147,3 @@ class MixerListener(listener.Listener):
         :type mute: bool
         """
         pass
-
-
-class DummyMixer(pykka.ThreadingActor, Mixer):
-
-    def __init__(self):
-        super(DummyMixer, self).__init__()
-        self._volume = None
-        self._mute = None
-
-    def get_volume(self):
-        return self._volume
-
-    def set_volume(self, volume):
-        self._volume = volume
-
-    def get_mute(self):
-        return self._mute
-
-    def set_mute(self, mute):
-        self._mute = mute

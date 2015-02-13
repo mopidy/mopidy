@@ -8,8 +8,9 @@ import mock
 import pykka
 
 from mopidy import core, models
-from mopidy.backend import dummy
 from mopidy.utils import jsonrpc
+
+from tests import dummy_backend
 
 
 class Calculator(object):
@@ -50,7 +51,7 @@ class Calculator(object):
 
 class JsonRpcTestBase(unittest.TestCase):
     def setUp(self):  # noqa: N802
-        self.backend = dummy.create_dummy_backend_proxy()
+        self.backend = dummy_backend.create_proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
         self.calc = Calculator()
 

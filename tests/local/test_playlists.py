@@ -7,11 +7,11 @@ import unittest
 
 import pykka
 
-from mopidy import audio, core
+from mopidy import core
 from mopidy.local import actor
 from mopidy.models import Playlist, Track
 
-from tests import path_to_data_dir
+from tests import dummy_audio, path_to_data_dir
 from tests.local import generate_song
 
 
@@ -29,7 +29,7 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
         self.config['local']['playlists_dir'] = tempfile.mkdtemp()
         self.playlists_dir = self.config['local']['playlists_dir']
 
-        self.audio = audio.DummyAudio.start().proxy()
+        self.audio = dummy_audio.create_proxy()
         self.backend = actor.LocalBackend.start(
             config=self.config, audio=self.audio).proxy()
         self.core = core.Core(backends=[self.backend])
