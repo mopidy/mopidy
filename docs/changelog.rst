@@ -19,16 +19,16 @@ v0.20.0 (UNRELEASED)
   and setter methods are now the official API. This aligns the Python API with
   the WebSocket/JavaScript API. (Fixes: :issue:`952`)
 
-- Added :class:`mopidy.core.HistoryController` which keeps track of what
-  tracks have been played. (Fixes: :issue:`423`, PR: :issue:`803`)
+- Add :class:`mopidy.core.HistoryController` which keeps track of what tracks
+  have been played. (Fixes: :issue:`423`, PR: :issue:`803`)
 
-- Added :class:`mopidy.core.MixerController` which keeps track of volume and
+- Add :class:`mopidy.core.MixerController` which keeps track of volume and
   mute. The old methods on :class:`mopidy.core.PlaybackController` for volume
   and mute management has been deprecated. (Fixes: :issue:`962`)
 
-- Removed ``clear_current_track`` keyword argument to
-  :meth:`mopidy.core.Playback.stop`. It was a leaky internal abstraction,
-  which was never intended to be used externally.
+- Remove ``clear_current_track`` keyword argument to
+  :meth:`mopidy.core.PlaybackController.stop`. It was a leaky internal
+  abstraction, which was never intended to be used externally.
 
 - Add :meth:`mopidy.core.LibraryController.get_images` for looking up images
   for any URI backends know about. (Fixes :issue:`973`)
@@ -38,7 +38,7 @@ v0.20.0 (UNRELEASED)
 - Make the ``mopidy`` command print a friendly error message if the
   :mod:`gobject` Python module cannot be imported. (Fixes: :issue:`836`)
 
-- Add support for repeating the :cmdoption:`-v <mopidy -v>` argument four times
+- Add support for repeating the :option:`-v <mopidy -v>` argument four times
   to set the log level for all loggers to the lowest possible value, including
   log records at levels lover than ``DEBUG`` too.
 
@@ -71,7 +71,7 @@ v0.20.0 (UNRELEASED)
 - Improve error logging for scan code (Fixes: :issue:`856`, PR: :issue:`874`)
 
 - Add symlink support with loop protection to file finder (Fixes: :issue:`858`,
-  PR: :isusue:`874`)
+  PR: :issue:`874`)
 
 **MPD frontend**
 
