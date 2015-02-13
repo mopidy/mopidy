@@ -5,12 +5,12 @@ import unittest
 
 import pykka
 
-from mopidy import audio, core
+from mopidy import core
 from mopidy.core import PlaybackState
 from mopidy.local import actor
 from mopidy.models import Playlist, TlTrack, Track
 
-from tests import path_to_data_dir
+from tests import dummy_audio, path_to_data_dir
 from tests.local import generate_song, populate_tracklist
 
 
@@ -27,7 +27,7 @@ class LocalTracklistProviderTest(unittest.TestCase):
         Track(uri=generate_song(i), length=4464) for i in range(1, 4)]
 
     def setUp(self):  # noqa: N802
-        self.audio = audio.DummyAudio.start().proxy()
+        self.audio = dummy_audio.create_proxy()
         self.backend = actor.LocalBackend.start(
             config=self.config, audio=self.audio).proxy()
         self.core = core.Core(mixer=None, backends=[self.backend])

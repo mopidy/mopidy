@@ -15,11 +15,10 @@ import mock
 import pykka
 
 from mopidy import audio
-from mopidy.audio import dummy as dummy_audio
 from mopidy.audio.constants import PlaybackState
 from mopidy.utils.path import path_to_uri
 
-from tests import path_to_data_dir
+from tests import dummy_audio, path_to_data_dir
 
 # We want to make sure both our real audio class and the fake one behave
 # correctly. So each test is first run against the real class, then repeated

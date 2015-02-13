@@ -6,10 +6,10 @@ import mock
 
 import pykka
 
-from mopidy import audio, backend, core
+from mopidy import backend, core
 from mopidy.local import actor
 
-from tests import path_to_data_dir
+from tests import dummy_audio, path_to_data_dir
 
 
 @mock.patch.object(backend.BackendListener, 'send')
@@ -24,7 +24,7 @@ class LocalBackendEventsTest(unittest.TestCase):
     }
 
     def setUp(self):  # noqa: N802
-        self.audio = audio.DummyAudio.start().proxy()
+        self.audio = dummy_audio.create_proxy()
         self.backend = actor.LocalBackend.start(
             config=self.config, audio=self.audio).proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
