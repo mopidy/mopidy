@@ -244,20 +244,6 @@ class SoftwareMixer(object):
             self._mixer.trigger_mute_changed(self._last_mute)
 
 
-def setup_proxy(element, config):
-    # TODO: reuse in scanner code
-    if not config.get('hostname'):
-        return
-
-    proxy = "%s://%s:%d" % (config.get('scheme', 'http'),
-                            config.get('hostname'),
-                            config.get('port', 80))
-
-    element.set_property('proxy', proxy)
-    element.set_property('proxy-id', config.get('username'))
-    element.set_property('proxy-pw', config.get('password'))
-
-
 class _Handler(object):
     def __init__(self, audio):
         self._audio = audio
@@ -531,8 +517,7 @@ class Audio(pykka.ThreadingActor):
         else:
             self._appsrc.reset()
 
-        if hasattr(source.props, 'proxy'):
-            setup_proxy(source, self._config['proxy'])
+        utils.setup_proxy(source, self._config['proxy'])
 
     def set_uri(self, uri):
         """
