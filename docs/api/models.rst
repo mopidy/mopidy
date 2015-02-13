@@ -37,6 +37,8 @@ Data model relations
     SearchResult -> Album [ label="has 0..n" ]
     SearchResult -> Track [ label="has 0..n" ]
 
+    Image
+
 
 Data model API
 ==============
