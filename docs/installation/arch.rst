@@ -14,7 +14,7 @@ If you are running Arch Linux, you can install Mopidy using the
 
    To upgrade Mopidy to future releases, just upgrade your system using::
 
-       yaourt -Syua
+       yaourt -Syu
 
 #. Optional: If you want to use any Mopidy extensions, like Spotify support or
    Last.fm scrobbling, AUR also has `packages for several Mopidy extensions
