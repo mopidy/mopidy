@@ -59,7 +59,7 @@ class JsonLibraryTest(unittest.TestCase):
         self.library = json.JsonLibrary(self.config)
 
     def _create_tracks(self, count):
-        for i in xrange(count):
+        for i in range(count):
             self.library.add(Track(uri='local:track:%d' % i))
 
     def test_search_should_default_limit_results(self):

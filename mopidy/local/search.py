@@ -8,7 +8,7 @@ def find_exact(tracks, query=None, limit=100, offset=0, uris=None):
     Filter a list of tracks where ``field`` is ``values``.
 
     :param list tracks: a list of :class:`~mopidy.models.Track`
-    :param dict query: one or more queries to search for
+    :param dict query: one or more field/value pairs to search for
     :param int limit: maximum number of results to return
     :param int offset: offset into result set to use.
     :param uris: zero or more URI roots to limit the search to
@@ -108,7 +108,7 @@ def find_exact(tracks, query=None, limit=100, offset=0, uris=None):
 
     # TODO: add local:search:<query>
     return SearchResult(
-        uri='local:search', tracks=tracks[offset:offset+limit])
+        uri='local:search', tracks=tracks[offset:offset + limit])
 
 
 def search(tracks, query=None, limit=100, offset=0, uris=None):
@@ -116,7 +116,7 @@ def search(tracks, query=None, limit=100, offset=0, uris=None):
     Filter a list of tracks where ``field`` is like ``values``.
 
     :param list tracks: a list of :class:`~mopidy.models.Track`
-    :param dict query: one or more queries to search for
+    :param dict query: one or more field/value pairs to search for
     :param int limit: maximum number of results to return
     :param int offset: offset into result set to use.
     :param uris: zero or more URI roots to limit the search to
@@ -218,7 +218,8 @@ def search(tracks, query=None, limit=100, offset=0, uris=None):
             else:
                 raise LookupError('Invalid lookup field: %s' % field)
     # TODO: add local:search:<query>
-    return SearchResult(uri='local:search', tracks=tracks[offset:offset+limit])
+    return SearchResult(uri='local:search',
+                        tracks=tracks[offset:offset + limit])
 
 
 def _validate_query(query):
