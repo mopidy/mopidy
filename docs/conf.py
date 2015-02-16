@@ -34,11 +34,11 @@ class Mock(object):
         elif name == 'get_user_config_dir':
             # glib.get_user_config_dir()
             return str
-        elif (name[0] == name[0].upper()
+        elif (name[0] == name[0].upper() and
                 # gst.PadTemplate
-                and not name.startswith('PadTemplate')
+                not name.startswith('PadTemplate') and
                 # dbus.String()
-                and not name == 'String'):
+                not name == 'String'):
             return type(name, (), {})
         else:
             return Mock()
