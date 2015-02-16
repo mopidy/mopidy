@@ -124,8 +124,8 @@ def search(tracks, query=None, uris=None):
                 return bool(t.name and q in t.name.lower())
 
             def album_filter(t):
-                return bool(t.album and t.album.name
-                            and q in t.album.name.lower())
+                return bool(t.album and t.album.name and
+                            q in t.album.name.lower())
 
             def artist_filter(t):
                 return bool(filter(lambda a:

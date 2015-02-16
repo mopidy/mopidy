@@ -392,8 +392,8 @@ class TracklistController(object):
         criteria = criteria or kwargs
         matches = self._tl_tracks
         for (key, values) in criteria.items():
-            if (not isinstance(values, collections.Iterable)
-                    or isinstance(values, compat.string_types)):
+            if (not isinstance(values, collections.Iterable) or
+                    isinstance(values, compat.string_types)):
                 # Fail hard if anyone is using the <0.17 calling style
                 raise ValueError('Filter values must be iterable: %r' % values)
             if key == 'tlid':
