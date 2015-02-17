@@ -5,6 +5,7 @@ import warnings
 
 
 def _is_pykka_proxy_creation():
+    return False
     stack = inspect.stack()
     try:
         calling_frame = stack[3]

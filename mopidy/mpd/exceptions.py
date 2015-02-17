@@ -87,3 +87,12 @@ class MpdNotImplemented(MpdAckError):
     def __init__(self, *args, **kwargs):
         super(MpdNotImplemented, self).__init__(*args, **kwargs)
         self.message = 'Not implemented'
+
+
+class MpdDisabled(MpdAckError):
+    error_code = 0
+
+    def __init__(self, *args, **kwargs):
+        super(MpdDisabled, self).__init__(*args, **kwargs)
+        assert self.command is not None, 'command must be given explicitly'
+        self.message = '"%s" has been disabled in the server' % self.command

@@ -84,6 +84,11 @@ v0.20.0 (UNRELEASED)
 - Share a single mapping between names and URIs across all MPD sessions. (Fixes:
   :issue:`934`, PR: :issue:`968`)
 
+- Add support for blacklisting MPD commands. This is used to prevent clients
+  from using `listall` and `listallinfo` which recursively lookup the entire
+  "database". If you insist on using a client that needs these commands change
+  :confval:`mpd/command_blacklist`.
+
 **Audio**
 
 - Deprecated :meth:`mopidy.audio.Audio.emit_end_of_stream`. Pass a
