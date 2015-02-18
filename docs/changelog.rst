@@ -85,7 +85,7 @@ v0.20.0 (UNRELEASED)
   :issue:`934`, PR: :issue:`968`)
 
 - Add support for blacklisting MPD commands. This is used to prevent clients
-  from using `listall` and `listallinfo` which recursively lookup the entire
+  from using ``listall`` and ``listallinfo`` which recursively lookup the entire
   "database". If you insist on using a client that needs these commands change
   :confval:`mpd/command_blacklist`.
 

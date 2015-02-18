@@ -103,6 +103,6 @@ See :ref:`config` for general help on configuring Mopidy.
 .. confval:: mpd/command_blacklist
 
     List of MPD commands which are disabled by the server. By default this
-    setting blacklists `listall` and `listallinfo`. These commands don't fit
-    well with many of Mopidy's backends and are better left disabled unless
+    setting blacklists ``listall`` and ``listallinfo``. These commands don't
+    fit well with many of Mopidy's backends and are better left disabled unless
     you know what you are doing.

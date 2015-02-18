@@ -90,6 +90,7 @@ class MpdNotImplemented(MpdAckError):
 
 
 class MpdDisabled(MpdAckError):
+    # NOTE: this is a custom error for mopidy that does not exists in MPD.
     error_code = 0
 
     def __init__(self, *args, **kwargs):
