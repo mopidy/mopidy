@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import copy
 
-from mopidy import listener
+from mopidy import listener, models
 
 
 class Backend(object):
@@ -97,8 +97,19 @@ class LibraryProvider(object):
         See :meth:`mopidy.core.LibraryController.get_images`.
 
         *MAY be implemented by subclass.*
+
+        Default implementation will simply call lookup and try and use the
+        album art for any tracks returned. Most extensions should replace this
+        with something smarter or simply return an empty dictionary.
         """
-        return {}
+        result = {}
+        for uri in uris:
+            for track in self.lookup(uri):
+                if track.album and track.album.images:
+                    for image_uri in track.album.images:
+                        image = models.Image(uri=image_uri)
+                        result.setdefault(uri, []).append(image)
+        return result
 
     # TODO: replace with search(query, exact=True, ...)
     def find_exact(self, query=None, uris=None):
