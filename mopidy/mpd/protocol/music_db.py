@@ -359,6 +359,13 @@ def listall(context, uri=None):
         ``listall [URI]``
 
         Lists all songs and directories in ``URI``.
+
+        Do not use this command. Do not manage a client-side copy of MPD's
+        database. That is fragile and adds huge overhead. It will break with
+        large databases. Instead, query MPD whenever you need something.
+
+
+    .. warning:: This command is disabled by default in Mopidy installs.
     """
     result = []
     for path, track_ref in context.browse(uri, lookup=False):
@@ -381,6 +388,13 @@ def listallinfo(context, uri=None):
 
         Same as ``listall``, except it also returns metadata info in the
         same format as ``lsinfo``.
+
+        Do not use this command. Do not manage a client-side copy of MPD's
+        database. That is fragile and adds huge overhead. It will break with
+        large databases. Instead, query MPD whenever you need something.
+
+
+    .. warning:: This command is disabled by default in Mopidy installs.
     """
     result = []
     for path, lookup_future in context.browse(uri):
