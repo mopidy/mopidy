@@ -9,7 +9,7 @@ from mopidy import backend
 from mopidy.models import Playlist
 
 from .translator import parse_m3u
-from .translator import path_to_local_playlist_uri, local_playlist_uri_to_path
+from .translator import local_playlist_uri_to_path, path_to_local_playlist_uri
 
 logger = logging.getLogger(__name__)
 
