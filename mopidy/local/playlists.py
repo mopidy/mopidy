@@ -3,14 +3,13 @@ from __future__ import absolute_import, division, unicode_literals
 import glob
 import logging
 import os
-import shutil
+import sys
 
 from mopidy import backend
 from mopidy.models import Playlist
-from mopidy.utils import formatting, path
 
+from .translator import local_playlist_uri_to_path, path_to_local_playlist_uri
 from .translator import parse_m3u
-
 
 logger = logging.getLogger(__name__)
 
@@ -23,18 +22,27 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
         self.refresh()
 
     def create(self, name):
-        name = formatting.slugify(name)
-        uri = 'local:playlist:%s.m3u' % name
-        playlist = Playlist(uri=uri, name=name)
-        return self.save(playlist)
+        playlist = self._save_m3u(Playlist(name=name))
+        old_playlist = self.lookup(playlist.uri)
+        if old_playlist is not None:
+            index = self._playlists.index(old_playlist)
+            self._playlists[index] = playlist
+        else:
+            self._playlists.append(playlist)
+        logger.info('Created playlist %s', playlist.uri)
+        return playlist
 
     def delete(self, uri):
         playlist = self.lookup(uri)
         if not playlist:
+            logger.warn('Trying to delete unknown playlist %s', uri)
             return
-
+        path = local_playlist_uri_to_path(uri, self._playlists_dir)
+        if os.path.exists(path):
+            os.remove(path)
+        else:
+            logger.warn('Trying to delete missing playlist file %s', path)
         self._playlists.remove(playlist)
-        self._delete_m3u(playlist.uri)
 
     def lookup(self, uri):
         # TODO: store as {uri: playlist}?
@@ -45,12 +53,14 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
     def refresh(self):
         playlists = []
 
-        for m3u in glob.glob(os.path.join(self._playlists_dir, '*.m3u')):
-            name = os.path.splitext(os.path.basename(m3u))[0]
-            uri = 'local:playlist:%s' % name
+        encoding = sys.getfilesystemencoding()
+        for path in glob.glob(os.path.join(self._playlists_dir, b'*.m3u')):
+            relpath = os.path.basename(path)
+            name = os.path.splitext(relpath)[0].decode(encoding)
+            uri = path_to_local_playlist_uri(relpath)
 
             tracks = []
-            for track in parse_m3u(m3u, self._media_dir):
+            for track in parse_m3u(path, self._media_dir):
                 tracks.append(track)
 
             playlist = Playlist(uri=uri, name=name, tracks=tracks)
@@ -67,38 +77,53 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
     def save(self, playlist):
         assert playlist.uri, 'Cannot save playlist without URI'
 
-        old_playlist = self.lookup(playlist.uri)
+        uri = playlist.uri
+        # TODO: require existing (created) playlist - currently, this
+        # is a *should* in https://docs.mopidy.com/en/latest/api/core/
+        try:
+            index = self._playlists.index(self.lookup(uri))
+        except ValueError:
+            logger.warn('Saving playlist with new URI %s', uri)
+            index = -1
 
-        if old_playlist and playlist.name != old_playlist.name:
-            playlist = playlist.copy(name=formatting.slugify(playlist.name))
-            playlist = self._rename_m3u(playlist)
-
-        self._save_m3u(playlist)
-
-        if old_playlist is not None:
-            index = self._playlists.index(old_playlist)
+        playlist = self._save_m3u(playlist)
+        if index >= 0 and uri != playlist.uri:
+            path = local_playlist_uri_to_path(uri, self._playlists_dir)
+            if os.path.exists(path):
+                os.remove(path)
+            else:
+                logger.warn('Trying to delete missing playlist file %s', path)
+        if index >= 0:
             self._playlists[index] = playlist
         else:
             self._playlists.append(playlist)
-
         return playlist
-
-    def _m3u_uri_to_path(self, uri):
-        # TODO: create uri handling helpers for local uri types.
-        file_path = path.uri_to_path(uri).split(':', 1)[1]
-        file_path = os.path.join(self._playlists_dir, file_path)
-        path.check_file_path_is_inside_base_dir(file_path, self._playlists_dir)
-        return file_path
 
     def _write_m3u_extinf(self, file_handle, track):
         title = track.name.encode('latin-1', 'replace')
         runtime = track.length // 1000 if track.length else -1
         file_handle.write('#EXTINF:' + str(runtime) + ',' + title + '\n')
 
-    def _save_m3u(self, playlist):
-        file_path = self._m3u_uri_to_path(playlist.uri)
+    def _sanitize_m3u_name(self, name, encoding=sys.getfilesystemencoding()):
+        name = name.encode(encoding, errors='replace')
+        name = os.path.basename(name)
+        name = name.decode(encoding)
+        return name
+
+    def _save_m3u(self, playlist, encoding=sys.getfilesystemencoding()):
+        if playlist.name:
+            name = self._sanitize_m3u_name(playlist.name, encoding)
+            uri = path_to_local_playlist_uri(name.encode(encoding) + b'.m3u')
+            path = local_playlist_uri_to_path(uri, self._playlists_dir)
+        elif playlist.uri:
+            uri = playlist.uri
+            path = local_playlist_uri_to_path(uri, self._playlists_dir)
+            name, _ = os.path.splitext(os.path.basename(path).decode(encoding))
+        else:
+            raise ValueError('M3U playlist needs name or URI')
         extended = any(track.name for track in playlist.tracks)
-        with open(file_path, 'w') as file_handle:
+
+        with open(path, 'w') as file_handle:
             if extended:
                 file_handle.write('#EXTM3U\n')
             for track in playlist.tracks:
@@ -106,17 +131,5 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
                     self._write_m3u_extinf(file_handle, track)
                 file_handle.write(track.uri + '\n')
 
-    def _delete_m3u(self, uri):
-        file_path = self._m3u_uri_to_path(uri)
-        if os.path.exists(file_path):
-            os.remove(file_path)
-
-    def _rename_m3u(self, playlist):
-        dst_name = formatting.slugify(playlist.name)
-        dst_uri = 'local:playlist:%s.m3u' % dst_name
-
-        src_file_path = self._m3u_uri_to_path(playlist.uri)
-        dst_file_path = self._m3u_uri_to_path(dst_uri)
-
-        shutil.move(src_file_path, dst_file_path)
-        return playlist.copy(uri=dst_uri)
+        # assert playlist name matches file name/uri
+        return playlist.copy(uri=uri, name=name)
