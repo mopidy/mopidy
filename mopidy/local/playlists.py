@@ -43,6 +43,8 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
         except OSError as e:
             logger.error('Error deleting playlist %s: %s', uri, e)
         self._playlists.remove(playlist)
+        # TODO: handle in PlaylistsController, playlist_changed?
+        backend.BackendListener.send('playlists_loaded')
 
     def lookup(self, uri):
         # TODO: store as {uri: playlist}?
