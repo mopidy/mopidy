@@ -201,9 +201,13 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
 
         self.assertEqual(original_playlist, looked_up_playlist)
 
-    @unittest.SkipTest
     def test_refresh(self):
-        pass
+        playlist = self.core.playlists.create('test')
+        self.assertIn(playlist, self.core.playlists.playlists)
+
+        self.core.playlists.refresh()
+
+        self.assertIn(playlist, self.core.playlists.playlists)
 
     def test_save_replaces_existing_playlist_with_updated_playlist(self):
         playlist1 = self.core.playlists.create('test1')
