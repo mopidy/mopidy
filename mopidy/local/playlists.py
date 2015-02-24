@@ -53,9 +53,10 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
     def refresh(self):
         playlists = []
 
-        for path in glob.glob(os.path.join(self._playlists_dir, '*.m3u')):
+        encoding = sys.getfilesystemencoding()
+        for path in glob.glob(os.path.join(self._playlists_dir, b'*.m3u')):
             relpath = os.path.basename(path)
-            name, _ = os.path.splitext(relpath)
+            name = os.path.splitext(relpath)[0].decode(encoding)
             uri = path_to_local_playlist_uri(relpath)
 
             tracks = []
