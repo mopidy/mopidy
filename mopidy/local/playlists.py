@@ -8,8 +8,8 @@ import sys
 from mopidy import backend
 from mopidy.models import Playlist
 
-from .translator import parse_m3u
 from .translator import local_playlist_uri_to_path, path_to_local_playlist_uri
+from .translator import parse_m3u
 
 logger = logging.getLogger(__name__)
 
