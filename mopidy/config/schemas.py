@@ -95,7 +95,7 @@ class ConfigSchema(collections.OrderedDict):
 
 
 class MapConfigSchema(object):
-    """Special cased schema for handling mulitple keys with the same type.
+    """Schema for handling multiple unknown keys with the same type.
 
     Does not sub-class :class:`ConfigSchema`, but implements the same
     serialize/deserialize interface.
