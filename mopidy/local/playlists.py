@@ -38,10 +38,10 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
             logger.warn('Trying to delete unknown playlist %s', uri)
             return
         path = local_playlist_uri_to_path(uri, self._playlists_dir)
-        try:
+        if os.path.exists(path):
             os.remove(path)
-        except OSError as e:
-            logger.error('Error deleting playlist %s: %s', uri, e)
+        else:
+            logger.warn('Trying to delete missing playlist file %s', path)
         self._playlists.remove(playlist)
 
     def lookup(self, uri):
@@ -89,10 +89,10 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
         playlist = self._save_m3u(playlist)
         if index >= 0 and uri != playlist.uri:
             path = local_playlist_uri_to_path(uri, self._playlists_dir)
-            try:
+            if os.path.exists(path):
                 os.remove(path)
-            except OSError as e:
-                logger.error('Error deleting playlist %s: %s', uri, e)
+            else:
+                logger.warn('Trying to delete missing playlist file %s', path)
         if index >= 0:
             self._playlists[index] = playlist
         else:
