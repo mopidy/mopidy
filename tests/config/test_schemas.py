@@ -86,9 +86,9 @@ class ConfigSchemaTest(unittest.TestCase):
         self.assertNotIn('foo', errors)
 
 
-class LogLevelConfigSchemaTest(unittest.TestCase):
+class MapConfigSchemaTest(unittest.TestCase):
     def test_conversion(self):
-        schema = schemas.LogLevelConfigSchema('test')
+        schema = schemas.MapConfigSchema('test', types.LogLevel())
         result, errors = schema.deserialize(
             {'foo.bar': 'DEBUG', 'baz': 'INFO'})
 

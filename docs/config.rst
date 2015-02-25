@@ -131,6 +131,14 @@ Logging configuration
     level to use for that logger, one of ``debug``, ``info``, ``warning``,
     ``error``, or ``critical``.
 
+.. confval:: logcolors/*
+
+    The ``logcolors`` config section can be used to change the log color for
+    specific parts of Mopidy during development or debugging. Each key in the
+    config section should match the name of a logger. The value is the color
+    to use for that logger, one of ``black``, ``red``, ``green``, ``yellow``,
+    ``blue``, ``magenta``, ``cyan`` or ``white``.
+
 .. _the Python logging docs: http://docs.python.org/2/library/logging.config.html
 
 
