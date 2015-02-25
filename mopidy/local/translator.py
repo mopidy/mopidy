@@ -37,8 +37,15 @@ def local_track_uri_to_path(uri, media_dir):
     return os.path.join(media_dir, file_path)
 
 
+def local_playlist_uri_to_path(uri, playlists_dir):
+    if not uri.startswith('local:playlist:'):
+        raise ValueError('Invalid URI %s' % uri)
+    file_path = uri_to_path(uri).split(b':', 1)[1]
+    return os.path.join(playlists_dir, file_path)
+
+
 def path_to_local_track_uri(relpath):
-    """Convert path releative to media_dir to local track URI."""
+    """Convert path relative to media_dir to local track URI."""
     if isinstance(relpath, compat.text_type):
         relpath = relpath.encode('utf-8')
     return b'local:track:%s' % urllib.quote(relpath)
@@ -49,6 +56,13 @@ def path_to_local_directory_uri(relpath):
     if isinstance(relpath, compat.text_type):
         relpath = relpath.encode('utf-8')
     return b'local:directory:%s' % urllib.quote(relpath)
+
+
+def path_to_local_playlist_uri(relpath):
+    """Convert path relative to playlists_dir to local playlist URI."""
+    if isinstance(relpath, compat.text_type):
+        relpath = relpath.encode('utf-8')
+    return b'local:playlist:%s' % urllib.quote(relpath)
 
 
 def m3u_extinf_to_track(line):
