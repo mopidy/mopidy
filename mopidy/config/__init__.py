@@ -22,7 +22,7 @@ _logging_schema['debug_format'] = String()
 _logging_schema['debug_file'] = Path()
 _logging_schema['config_file'] = Path(optional=True)
 
-_loglevels_schema = LogLevelConfigSchema('loglevels')
+_loglevels_schema = MapConfigSchema('loglevels', LogLevel())
 
 _audio_schema = ConfigSchema('audio')
 _audio_schema['mixer'] = String()
