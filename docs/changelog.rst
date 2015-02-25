@@ -48,6 +48,8 @@ v0.20.0 (UNRELEASED)
   This can be used to show absolutely all log records, including those at
   custom levels below ``DEBUG``.
 
+- Add debug logging of unknown sections. (Fixes: :issue:`694`)
+
 **Logging**
 
 - Add custom log level ``TRACE`` (numerical level 5), which can be used by
