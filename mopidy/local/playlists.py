@@ -67,8 +67,6 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
             playlists.append(playlist)
 
         self.playlists = playlists
-        # TODO: send what scheme we loaded them for?
-        backend.BackendListener.send('playlists_loaded')
 
         logger.info(
             'Loaded %d local playlists from %s',
