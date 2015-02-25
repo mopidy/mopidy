@@ -6,7 +6,7 @@ import socket
 
 from mopidy import compat
 from mopidy.config import validators
-from mopidy.utils import path
+from mopidy.utils import log, path
 
 
 def decode(value):
@@ -195,6 +195,17 @@ class List(ConfigValue):
         if not value:
             return b''
         return b'\n  ' + b'\n  '.join(encode(v) for v in value if v)
+
+
+class LogColor(ConfigValue):
+    def deserialize(self, value):
+        validators.validate_choice(value.lower(), log.COLORS)
+        return value.lower()
+
+    def serialize(self, value, display=False):
+        if value.lower() in log.COLORS:
+            return value.lower()
+        return b''
 
 
 class LogLevel(ConfigValue):

@@ -128,6 +128,14 @@ Logging configuration
     The ``loglevels`` config section can be used to change the log level for
     specific parts of Mopidy during development or debugging. Each key in the
     config section should match the name of a logger. The value is the log
+    level to use for that logger, one of ``black``, ``red``, ``green``,
+    ``yellow``, ``blue``, ``magenta``, ``cyan`` or ``white``.
+
+.. confval:: logcolors/*
+
+    The ``logcolors`` config section can be used to change the log color for
+    specific parts of Mopidy during development or debugging. Each key in the
+    config section should match the name of a logger. The value is the log
     level to use for that logger, one of ``debug``, ``info``, ``warning``,
     ``error``, or ``critical``.
 

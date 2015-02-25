@@ -53,6 +53,8 @@ v0.20.0 (UNRELEASED)
 - Add custom log level ``TRACE`` (numerical level 5), which can be used by
   Mopidy and extensions to log at an even more detailed level than ``DEBUG``.
 
+- Add support for per logger color overrides. (Fixes: :issue:`808`)
+
 **Local backend**
 
 - Add cover URL to all scanned files with MusicBrainz album IDs. (Fixes:

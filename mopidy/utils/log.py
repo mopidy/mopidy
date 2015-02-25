@@ -82,7 +82,7 @@ def setup_console_logging(config, verbosity_level):
     formatter = logging.Formatter(log_format)
 
     if config['logging']['color']:
-        handler = ColorizingStreamHandler()
+        handler = ColorizingStreamHandler(config.get('logcolors', {}))
     else:
         handler = logging.StreamHandler()
     handler.addFilter(verbosity_filter)
@@ -117,6 +117,11 @@ class VerbosityFilter(logging.Filter):
         return record.levelno >= required_log_level
 
 
+#: Available log colors.
+COLORS = [b'black', b'red', b'green', b'yellow', b'blue', b'magenta', b'cyan',
+          b'white']
+
+
 class ColorizingStreamHandler(logging.StreamHandler):
     """
     Stream handler which colorizes the log using ANSI escape sequences.
@@ -130,17 +135,6 @@ class ColorizingStreamHandler(logging.StreamHandler):
         Licensed under the new BSD license.
     """
 
-    color_map = {
-        'black': 0,
-        'red': 1,
-        'green': 2,
-        'yellow': 3,
-        'blue': 4,
-        'magenta': 5,
-        'cyan': 6,
-        'white': 7,
-    }
-
     # Map logging levels to (background, foreground, bold/intense)
     level_map = {
         TRACE_LOG_LEVEL: (None, 'blue', False),
@@ -150,10 +144,17 @@ class ColorizingStreamHandler(logging.StreamHandler):
         logging.ERROR: (None, 'red', False),
         logging.CRITICAL: ('red', 'white', True),
     }
+    # Map logger name to foreground colors
+    logger_map = {}
+
     csi = '\x1b['
     reset = '\x1b[0m'
 
     is_windows = platform.system() == 'Windows'
+
+    def __init__(self, logger_colors):
+        super(ColorizingStreamHandler, self).__init__()
+        self.logger_map = logger_colors
 
     @property
     def is_tty(self):
@@ -173,19 +174,23 @@ class ColorizingStreamHandler(logging.StreamHandler):
         message = logging.StreamHandler.format(self, record)
         if not self.is_tty or self.is_windows:
             return message
-        return self.colorize(message, record)
-
-    def colorize(self, message, record):
+        for name, color in self.logger_map.iteritems():
+            if record.name.startswith(name):
+                return self.colorize(message, fg=color)
         if record.levelno in self.level_map:
             bg, fg, bold = self.level_map[record.levelno]
-            params = []
-            if bg in self.color_map:
-                params.append(str(self.color_map[bg] + 40))
-            if fg in self.color_map:
-                params.append(str(self.color_map[fg] + 30))
-            if bold:
-                params.append('1')
-            if params:
-                message = ''.join((
-                    self.csi, ';'.join(params), 'm', message, self.reset))
+            return self.colorize(message, bg=bg, fg=fg, bold=bold)
+        return message
+
+    def colorize(self, message, bg=None, fg=None, bold=False):
+        params = []
+        if bg in COLORS:
+            params.append(str(COLORS.index(bg) + 40))
+        if fg in COLORS:
+            params.append(str(COLORS.index(fg) + 30))
+        if bold:
+            params.append('1')
+        if params:
+            message = ''.join((
+                self.csi, ';'.join(params), 'm', message, self.reset))
         return message

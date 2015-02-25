@@ -23,6 +23,7 @@ _logging_schema['debug_file'] = Path()
 _logging_schema['config_file'] = Path(optional=True)
 
 _loglevels_schema = MapConfigSchema('loglevels', LogLevel())
+_logcolors_schema = MapConfigSchema('logcolors', LogColor())
 
 _audio_schema = ConfigSchema('audio')
 _audio_schema['mixer'] = String()
@@ -42,7 +43,8 @@ _proxy_schema['password'] = Secret(optional=True)
 # NOTE: if multiple outputs ever comes something like LogLevelConfigSchema
 # _outputs_schema = config.AudioOutputConfigSchema()
 
-_schemas = [_logging_schema, _loglevels_schema, _audio_schema, _proxy_schema]
+_schemas = [_logging_schema, _loglevels_schema, _logcolors_schema,
+            _audio_schema, _proxy_schema]
 
 _INITIAL_HELP = """
 # For further information about options in this file see:
