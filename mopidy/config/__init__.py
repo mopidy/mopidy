@@ -177,14 +177,13 @@ def _validate(raw_config, schemas):
     errors = {}
     sections = set(raw_config)
     for schema in schemas:
+        sections.discard(schema.name)
         values = raw_config.get(schema.name, {})
         result, error = schema.deserialize(values)
         if error:
             errors[schema.name] = error
         if result:
             config[schema.name] = result
-        if schema.name in sections:
-            sections.remove(schema.name)
 
     for section in sections:
         logger.debug('Ignoring unknown config section: %s', section)
