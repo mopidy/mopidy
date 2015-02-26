@@ -61,8 +61,7 @@ class ScanCommand(commands.Command):
         super(ScanCommand, self).__init__()
         self.add_argument('--limit',
                           action='store', type=int, dest='limit', default=None,
-                          help='Maxmimum number of tracks to scan')
-
+                          help='Maximum number of tracks to scan')
     def run(self, args, config):
         media_dir = config['local']['media_dir']
         scan_timeout = config['local']['scan_timeout']
@@ -121,7 +120,9 @@ class ScanCommand(commands.Command):
         logger.info('Scanning...')
 
         uris_to_update = sorted(uris_to_update, key=lambda v: v.lower())
+        print("Before: ", uris_to_update)
         uris_to_update = uris_to_update[:args.limit]
+        print("After: ", uris_to_update)
 
         scanner = scan.Scanner(scan_timeout)
         progress = _Progress(flush_threshold, len(uris_to_update))
