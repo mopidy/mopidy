@@ -61,6 +61,7 @@ class ScanCommand(commands.Command):
         super(ScanCommand, self).__init__()
         self.add_argument('--limit',
                           action='store', type=int, dest='limit', default=None,
+                          help='Maximum number of tracks to scan')
     def run(self, args, config):
         media_dir = config['local']['media_dir']
         scan_timeout = config['local']['scan_timeout']
