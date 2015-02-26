@@ -61,7 +61,6 @@ class ScanCommand(commands.Command):
         super(ScanCommand, self).__init__()
         self.add_argument('--limit',
                           action='store', type=int, dest='limit', default=None,
-                          help='Maximum number of tracks to scan')
     def run(self, args, config):
         media_dir = config['local']['media_dir']
         scan_timeout = config['local']['scan_timeout']
@@ -96,7 +95,7 @@ class ScanCommand(commands.Command):
             if mtime is None:
                 logger.debug('Missing file %s', track.uri)
                 uris_to_remove.add(track.uri)
-            elif mtime > track.last_modified:
+            elif (mtime > track.last_modified) or :
                 uris_to_update.add(track.uri)
             uris_in_library.add(track.uri)
 
@@ -120,9 +119,7 @@ class ScanCommand(commands.Command):
         logger.info('Scanning...')
 
         uris_to_update = sorted(uris_to_update, key=lambda v: v.lower())
-        print("Before: ", uris_to_update)
         uris_to_update = uris_to_update[:args.limit]
-        print("After: ", uris_to_update)
 
         scanner = scan.Scanner(scan_timeout)
         progress = _Progress(flush_threshold, len(uris_to_update))
