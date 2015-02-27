@@ -108,7 +108,7 @@ class LibraryProvider(object):
             for track in self.lookup(uri):
                 if track.album and track.album.images:
                     image_uris.update(track.album.images)
-            result[uri] = list(map(lambda u: models.Image(uri=u), image_uris))
+            result[uri] = [models.Image(uri=u) for u in image_uris]
         return result
 
     # TODO: replace with search(query, exact=True, ...)
