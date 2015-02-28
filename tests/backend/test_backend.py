@@ -17,3 +17,14 @@ class LibraryTest(unittest.TestCase):
 
         expected = {'trackuri': [models.Image(uri='imageuri')]}
         self.assertEqual(library.get_images(['trackuri']), expected)
+
+    def test_default_get_images_impl_no_album_image(self):
+        # default implementation now returns an empty list if no
+        # images are found, though it's not required to
+        track = models.Track(uri='trackuri')
+
+        library = dummy_backend.DummyLibraryProvider(backend=None)
+        library.dummy_library.append(track)
+
+        expected = {'trackuri': []}
+        self.assertEqual(library.get_images(['trackuri']), expected)
