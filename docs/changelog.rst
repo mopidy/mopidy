@@ -101,6 +101,9 @@ v0.20.0 (UNRELEASED)
   "database". If you insist on using a client that needs these commands change
   :confval:`mpd/command_blacklist`.
 
+- Switch the ``list`` command over to using
+  :meth:`mopidy.core.LibraryController.list_distinct`. (Fixes: :issue:`913`)
+
 **HTTP frontend**
 
 - Prevent race condition in webservice broadcast from breaking the server.

@@ -55,7 +55,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         # Count the lone track
         self.backend.library.dummy_find_exact_result = SearchResult(
             tracks=[
-                Track(uri='dummy:a', name="foo", date="2001", length=4000),
+                Track(uri='dummy:a', name='foo', date='2001', length=4000),
             ])
         self.send_request('count "title" "foo"')
         self.assertInResponse('songs: 1')
@@ -613,11 +613,8 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
 
 class MusicDatabaseListTest(protocol.BaseTestCase):
     def test_list(self):
-        self.backend.library.dummy_find_exact_result = SearchResult(
-            tracks=[
-                Track(uri='dummy:a', name='A', artists=[
-                    Artist(name='A Artist')])])
-
+        self.backend.library.dummy_list_distinct_result = {
+            'artist': set(['A Artist'])}
         self.send_request('list "artist" "artist" "foo"')
 
         self.assertInResponse('Artist: A Artist')
@@ -891,8 +888,8 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_list_album_with_artist_name(self):
-        self.backend.library.dummy_find_exact_result = SearchResult(
-            tracks=[Track(album=Album(name='foo'))])
+        self.backend.library.dummy_list_distinct_result = {
+            'album': set(['foo'])}
 
         self.send_request('list "album" "anartist"')
         self.assertInResponse('Album: foo')
