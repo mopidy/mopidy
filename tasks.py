@@ -28,7 +28,7 @@ def test(path=None, coverage=False, watch=False, warn=False):
 def lint(watch=False, warn=False):
     if watch:
         return watcher(lint)
-    run('flake8', warn=warn)
+    run('flake8 mopidy tests', warn=warn)
 
 
 @task
