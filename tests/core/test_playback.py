@@ -43,9 +43,51 @@ class CorePlaybackTest(unittest.TestCase):
         self.tl_tracks = self.core.tracklist.tl_tracks
         self.unplayable_tl_track = self.tl_tracks[2]
 
-    # TODO Test get_current_tl_track
+    def test_get_current_tl_track_none(self):
+        self.core.playback.set_current_tl_track(None)
 
-    # TODO Test get_current_track
+        self.assertEqual(
+            self.core.playback.get_current_tl_track(), None)
+
+    def test_get_current_tl_track_play(self):
+        self.core.playback.play(self.tl_tracks[0])
+
+        self.assertEqual(
+            self.core.playback.get_current_tl_track(), self.tl_tracks[0])
+
+    def test_get_current_tl_track_next(self):
+        self.core.playback.play(self.tl_tracks[0])
+        self.core.playback.next()
+
+        self.assertEqual(
+            self.core.playback.get_current_tl_track(), self.tl_tracks[1])
+
+    def test_get_current_tl_track_prev(self):
+        self.core.playback.play(self.tl_tracks[1])
+        self.core.playback.previous()
+
+        self.assertEqual(
+            self.core.playback.get_current_tl_track(), self.tl_tracks[0])
+
+    def test_get_current_track_play(self):
+        self.core.playback.play(self.tl_tracks[0])
+
+        self.assertEqual(
+            self.core.playback.get_current_track(), self.tracks[0])
+
+    def test_get_current_track_next(self):
+        self.core.playback.play(self.tl_tracks[0])
+        self.core.playback.next()
+
+        self.assertEqual(
+            self.core.playback.get_current_track(), self.tracks[1])
+
+    def test_get_current_track_prev(self):
+        self.core.playback.play(self.tl_tracks[1])
+        self.core.playback.previous()
+
+        self.assertEqual(
+            self.core.playback.get_current_track(), self.tracks[0])
 
     # TODO Test state
 
@@ -368,6 +410,30 @@ class CorePlaybackTest(unittest.TestCase):
         listener_mock.reset_mock()
 
         self.core.playback.on_end_of_track()
+
+        self.assertListEqual(
+            listener_mock.send.mock_calls,
+            [
+                mock.call(
+                    'playback_state_changed',
+                    old_state='playing', new_state='stopped'),
+                mock.call(
+                    'track_playback_ended',
+                    tl_track=self.tl_tracks[0], time_position=mock.ANY),
+                mock.call(
+                    'playback_state_changed',
+                    old_state='stopped', new_state='playing'),
+                mock.call(
+                    'track_playback_started', tl_track=self.tl_tracks[1]),
+            ])
+
+    @mock.patch(
+        'mopidy.core.playback.listener.CoreListener', spec=core.CoreListener)
+    def test_seek_past_end_of_track_emits_events(self, listener_mock):
+        self.core.playback.play(self.tl_tracks[0])
+        listener_mock.reset_mock()
+
+        self.core.playback.seek(self.tracks[0].length * 5)
 
         self.assertListEqual(
             listener_mock.send.mock_calls,
