@@ -171,3 +171,26 @@ class CoreListener(listener.Listener):
         *MAY* be implemented by actor.
         """
         pass
+
+    def system_suspend(self, suspend):
+        """
+        Called whenever system is about to suspend or resume
+
+        *MAY* be implemented by actor.
+
+        :param suspend: true if system is about to suspend, false if resuming
+        :type time_position: boolean
+        """
+        pass
+
+    def system_shutdown(self, shutdown):
+        """
+        Called whenever system is about to shutdown or has powered on
+
+        *MAY* be implemented by actor.
+
+        :param shutdown: true if system is about to shutdown, false if powered
+        on
+        :type time_position: boolean
+        """
+        pass
