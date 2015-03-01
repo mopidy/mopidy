@@ -23,6 +23,11 @@ class LocalLibraryProvider(backend.LibraryProvider):
             return []
         return self._library.browse(uri)
 
+    def list_distinct(self, field, query=None):
+        if not self._library:
+            return set()
+        return self._library.list_distinct(field, query)
+
     def refresh(self, uri=None):
         if not self._library:
             return 0
