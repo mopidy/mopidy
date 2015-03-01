@@ -798,6 +798,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.playback.pause()
         result = self.playback.seek(self.tracks[0].length - 1000)
         self.assert_(result, 'Seek return value was %s' % result)
+        self.assertEqual(self.playback.state, PlaybackState.PAUSED)
 
     @populate_tracklist
     def test_seek_when_paused_updates_position(self):
@@ -807,13 +808,6 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.playback.seek(length - 1000)
         position = self.playback.time_position
         self.assertGreaterEqual(position, length - 1010)
-
-    @populate_tracklist
-    def test_seek_when_paused_triggers_play(self):
-        self.playback.play()
-        self.playback.pause()
-        self.playback.seek(0)
-        self.assertEqual(self.playback.state, PlaybackState.PLAYING)
 
     @unittest.SkipTest
     @populate_tracklist
