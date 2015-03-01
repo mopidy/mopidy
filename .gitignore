@@ -16,3 +16,4 @@ docs/_build/
 mopidy.log*
 nosetests.xml
 xunit-*.xml
+tmp/
