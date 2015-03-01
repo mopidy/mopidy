@@ -70,6 +70,8 @@ v0.20.0 (UNRELEASED)
 - Add support for giving local libraries direct access to tags and duration.
   (Fixes: :issue:`967`)
 
+- Add "--force" option for local scan (Fixes: :issue:'910') (PR: :issue:'1010')
+
 **File scanner**
 
 - Improve error logging for scan code (Fixes: :issue:`856`, PR: :issue:`874`)
