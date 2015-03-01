@@ -87,6 +87,25 @@ class CorePlaybackTest(unittest.TestCase):
 
     @mock.patch(
         'mopidy.core.playback.listener.CoreListener', spec=core.CoreListener)
+    def test_play_when_paused_emits_events(self, listener_mock):
+        self.core.playback.play(self.tl_tracks[0])
+        self.core.playback.pause()
+        listener_mock.reset_mock()
+
+        self.core.playback.play(self.tl_tracks[1])
+
+        self.assertListEqual(
+            listener_mock.send.mock_calls,
+            [
+                mock.call(
+                    'playback_state_changed',
+                    old_state='paused', new_state='playing'),
+                mock.call(
+                    'track_playback_started', tl_track=self.tl_tracks[1]),
+            ])
+
+    @mock.patch(
+        'mopidy.core.playback.listener.CoreListener', spec=core.CoreListener)
     def test_play_when_playing_emits_events(self, listener_mock):
         self.core.playback.play(self.tl_tracks[0])
         listener_mock.reset_mock()
@@ -388,6 +407,20 @@ class CorePlaybackTest(unittest.TestCase):
         self.assertFalse(success)
         self.assertFalse(self.playback1.seek.called)
         self.assertFalse(self.playback2.seek.called)
+
+    def test_seek_play_stay_playing(self):
+        self.core.playback.play(self.tl_tracks[0])
+        self.core.playback.state = core.PlaybackState.PLAYING
+        self.core.playback.seek(1000)
+
+        self.assertEqual(self.core.playback.state, core.PlaybackState.PLAYING)
+
+    def test_seek_paused_stay_paused(self):
+        self.core.playback.play(self.tl_tracks[0])
+        self.core.playback.state = core.PlaybackState.PAUSED
+        self.core.playback.seek(1000)
+
+        self.assertEqual(self.core.playback.state, core.PlaybackState.PAUSED)
 
     @mock.patch(
         'mopidy.core.playback.listener.CoreListener', spec=core.CoreListener)

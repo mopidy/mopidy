@@ -371,8 +371,6 @@ class PlaybackController(object):
 
         if self.get_state() == PlaybackState.STOPPED:
             self.play()
-        elif self.get_state() == PlaybackState.PAUSED:
-            self.resume()
 
         if time_position < 0:
             time_position = 0

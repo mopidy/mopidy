@@ -33,6 +33,9 @@ v0.20.0 (UNRELEASED)
 - Add :meth:`mopidy.core.LibraryController.get_images` for looking up images
   for any URI backends know about. (Fixes :issue:`973`)
 
+- When seeking in paused state, do not change to playing state. (Fixed
+  :issue:`939`)
+
 **Commands**
 
 - Make the ``mopidy`` command print a friendly error message if the
