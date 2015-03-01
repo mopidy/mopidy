@@ -98,6 +98,10 @@ v0.20.0 (UNRELEASED)
   "database". If you insist on using a client that needs these commands change
   :confval:`mpd/command_blacklist`.
 
+**HTTP frontend**
+
+- Prevent race condition in webservice broadcast from breaking the server.
+
 **Audio**
 
 - Deprecated :meth:`mopidy.audio.Audio.emit_end_of_stream`. Pass a

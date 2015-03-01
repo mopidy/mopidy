@@ -10,7 +10,7 @@ import tornado.websocket
 
 import mopidy
 from mopidy import core, models
-from mopidy.utils import jsonrpc
+from mopidy.utils import encoding, jsonrpc
 
 
 logger = logging.getLogger(__name__)
@@ -75,7 +75,16 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     @classmethod
     def broadcast(cls, msg):
         for client in cls.clients:
-            client.write_message(msg)
+            # We could check for client.ws_connection, but we don't really
+            # care why the broadcast failed, we just want the rest of them
+            # to succeed, so catch everything.
+            try:
+                client.write_message(msg)
+            except Exception as e:
+                error_msg = encoding.locale_decode(e)
+                logger.debug('Broadcast of WebSocket message to %s failed: %s',
+                             client.request.remote_ip, error_msg)
+                # TODO: should this do the same cleanup as the on_message code?
 
     def initialize(self, core):
         self.jsonrpc = make_jsonrpc_wrapper(core)
@@ -113,7 +122,8 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                     'Sent WebSocket message to %s: %r',
                     self.request.remote_ip, response)
         except Exception as e:
-            logger.error('WebSocket request error: %s', e)
+            error_msg = encoding.locale_decode(e)
+            logger.error('WebSocket request error: %s', error_msg)
             if self.ws_connection:
                 # Tornado 3.2+ checks if self.ws_connection is None before
                 # using it, but not older versions.
