@@ -72,6 +72,27 @@ class LibraryController(object):
             return []
         return backend.library.browse(uri).get()
 
+    def list_distinct(self, field, query=None):
+        """
+        List distinct values for a given field from the library.
+
+        This has mainly been added to support the list commands the MPD
+        protocol supports in a more sane fashion. Other frontends are not
+        recommended to use this method.
+
+        :param string field: One of ``artist``, ``albumartist``, ``album``,
+            ``composer``, ``performer``, ``date``or ``genre``.
+        :param dict query: Query to use for limiting results, see
+            :method:`search` for details about the query format.
+        :rtype: set of values corresponding to the requested field type.
+        """
+        futures = [b.library.list_distinct(field, query)
+                   for b in self.backends.with_library.values()]
+        result = set()
+        for r in pykka.get_all(futures):
+            result.update(r)
+        return result
+
     def get_images(self, uris):
         """Lookup the images for the given URIs
 

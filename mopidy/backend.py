@@ -92,6 +92,16 @@ class LibraryProvider(object):
         """
         return []
 
+    def list_distinct(self, field, query=None):
+        """
+        See :meth:`mopidy.core.LibraryController.list_distinct`.
+
+        *MAY be implemented by subclass.*
+
+        Default implementation will simply return an empty set.
+        """
+        return set()
+
     def get_images(self, uris):
         """
         See :meth:`mopidy.core.LibraryController.get_images`.

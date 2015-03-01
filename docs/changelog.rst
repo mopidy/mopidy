@@ -36,6 +36,9 @@ v0.20.0 (UNRELEASED)
 - When seeking in paused state, do not change to playing state. (Fixed
   :issue:`939`)
 
+- Add :meth:`mopidy.core.LibraryController.list_distinct` for getting unique
+  values for a given field. (Fixes: :issue:`913`)
+
 **Commands**
 
 - Make the ``mopidy`` command print a friendly error message if the
