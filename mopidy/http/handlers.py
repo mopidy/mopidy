@@ -75,7 +75,15 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     @classmethod
     def broadcast(cls, msg):
         for client in cls.clients:
-            client.write_message(msg)
+            # We could check for client.ws_connection, but we don't really
+            # care why the broadcast failed, we just want the rest of them
+            # to succeed, so catch everything.
+            try:
+                client.write_message(msg)
+            except Exception as e:
+                logger.debug('Broadcast of WebSocket message to %s failed: %s',
+                             client.request.remote_ip, e)
+                # TODO: should this do the same cleanup as the on_message code?
 
     def initialize(self, core):
         self.jsonrpc = make_jsonrpc_wrapper(core)
