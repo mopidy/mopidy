@@ -15,6 +15,7 @@ from mopidy.core.mixer import MixerController
 from mopidy.core.playback import PlaybackController
 from mopidy.core.playlists import PlaylistsController
 from mopidy.core.tracklist import TracklistController
+from mopidy.dbus_listener import DbusListener
 from mopidy.models import TlTrack, Track
 from mopidy.utils import versioning
 from mopidy.utils.deprecation import deprecated_property
@@ -48,6 +49,10 @@ class Core(
     """The tracklist controller. An instance of
     :class:`mopidy.core.TracklistController`."""
 
+    dbus_listener = None
+    """The DBus listener. An instance of
+    :class:`mopidy.DbusListener`."""
+
     def __init__(self, mixer=None, backends=None, audio=None):
         super(Core, self).__init__()
 
@@ -59,6 +64,7 @@ class Core(
         self.playback = PlaybackController(backends=self.backends, core=self)
         self.playlists = PlaylistsController(backends=self.backends, core=self)
         self.tracklist = TracklistController(core=self)
+        self.dbus_listener = DbusListener()
 
         self.audio = audio
 
