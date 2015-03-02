@@ -78,6 +78,9 @@ v0.20.0 (UNRELEASED)
 
 - Add "--force" option for local scan (Fixes: :issue:'910') (PR: :issue:'1010')
 
+- Stop ignoring ``offset`` and ``limit`` in searches. (Fixes: :issue:`917`,
+  PR: :issue:`949`)
+
 **File scanner**
 
 - Improve error logging for scan code (Fixes: :issue:`856`, PR: :issue:`874`)
