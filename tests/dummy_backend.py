@@ -33,12 +33,16 @@ class DummyLibraryProvider(backend.LibraryProvider):
     def __init__(self, *args, **kwargs):
         super(DummyLibraryProvider, self).__init__(*args, **kwargs)
         self.dummy_library = []
+        self.dummy_get_distinct_result = {}
         self.dummy_browse_result = {}
         self.dummy_find_exact_result = SearchResult()
         self.dummy_search_result = SearchResult()
 
     def browse(self, path):
         return self.dummy_browse_result.get(path, [])
+
+    def get_distinct(self, field, query=None):
+        return self.dummy_get_distinct_result.get(field, set())
 
     def find_exact(self, **query):
         return self.dummy_find_exact_result

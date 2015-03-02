@@ -155,6 +155,38 @@ class JsonLibrary(local.Library):
         except KeyError:
             return []
 
+    def get_distinct(self, field, query=None):
+        if field == 'artist':
+            def distinct(track):
+                return {a.name for a in track.artists}
+        elif field == 'albumartist':
+            def distinct(track):
+                album = track.album or models.Album()
+                return {a.name for a in album.artists}
+        elif field == 'album':
+            def distinct(track):
+                album = track.album or models.Album()
+                return {album.name}
+        elif field == 'composer':
+            def distinct(track):
+                return {a.name for a in track.composers}
+        elif field == 'performer':
+            def distinct(track):
+                return {a.name for a in track.performers}
+        elif field == 'date':
+            def distinct(track):
+                return {track.date}
+        elif field == 'genre':
+            def distinct(track):
+                return {track.genre}
+        else:
+            return set()
+
+        result = set()
+        for track in search.search(self._tracks.values(), query).tracks:
+            result.update(distinct(track))
+        return result
+
     def search(self, query=None, limit=100, offset=0, uris=None, exact=False):
         tracks = self._tracks.values()
         # TODO: pass limit and offset into search helpers

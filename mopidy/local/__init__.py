@@ -89,6 +89,18 @@ class Library(object):
         """
         raise NotImplementedError
 
+    def get_distinct(self, field, query=None):
+        """
+        List distinct values for a given field from the library.
+
+        :param string field: One of ``artist``, ``albumartist``, ``album``,
+            ``composer``, ``performer``, ``date``or ``genre``.
+        :param dict query: Query to use for limiting results, see
+            :method:`search` for details about the query format.
+        :rtype: set of values corresponding to the requested field type.
+        """
+        return set()
+
     def load(self):
         """
         (Re)load any tracks stored in memory, if any, otherwise just return
