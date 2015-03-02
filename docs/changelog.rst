@@ -31,13 +31,14 @@ v0.20.0 (UNRELEASED)
   abstraction, which was never intended to be used externally.
 
 - Add :meth:`mopidy.core.LibraryController.get_images` for looking up images
-  for any URI backends know about. (Fixes :issue:`973`)
+  for any URI backends know about. (Fixes :issue:`973`, PR: :issue:`981`,
+  :issue:`992` and :issue:`1013`)
 
-- When seeking in paused state, do not change to playing state. (Fixed
-  :issue:`939`)
+- When seeking in paused state, do not change to playing state. (Fixes:
+  :issue:`939`, PR: :issue:`1018`)
 
 - Add :meth:`mopidy.core.LibraryController.get_distinct` for getting unique
-  values for a given field. (Fixes: :issue:`913`)
+  values for a given field. (Fixes: :issue:`913`, PR: :issue:`1022`)
 
 **Commands**
 
@@ -54,7 +55,7 @@ v0.20.0 (UNRELEASED)
   This can be used to show absolutely all log records, including those at
   custom levels below ``DEBUG``.
 
-- Add debug logging of unknown sections. (Fixes: :issue:`694`)
+- Add debug logging of unknown sections. (Fixes: :issue:`694`, PR: :issue:`1002`)
 
 **Logging**
 
@@ -76,10 +77,18 @@ v0.20.0 (UNRELEASED)
 - Add support for giving local libraries direct access to tags and duration.
   (Fixes: :issue:`967`)
 
-- Add "--force" option for local scan (Fixes: :issue:'910') (PR: :issue:'1010')
+- Add "--force" option for local scan (Fixes: :issue:'910', PR: :issue:'1010')
 
 - Stop ignoring ``offset`` and ``limit`` in searches. (Fixes: :issue:`917`,
   PR: :issue:`949`)
+
+- Removed double triggering of ``playlists_loaded`` event.
+  (Fixes: :issue:`998`, PR: :issue:`999`)
+
+- Cleanup and refactoring of local playlist code. Preserves playlist names
+  better and fixes bug in deletion of playlists. (Fixes: :issue:`937`, 
+  PR: :issue:`995` and rebased into :issue:`1000`)
+
 
 **File scanner**
 
@@ -110,6 +119,7 @@ v0.20.0 (UNRELEASED)
 **HTTP frontend**
 
 - Prevent race condition in webservice broadcast from breaking the server.
+  (PR: :issue:`1020`)
 
 **Audio**
 
@@ -160,7 +170,7 @@ v0.20.0 (UNRELEASED)
 - Add basic tests for the stream library provider.
 
 - Add support for proxies when doing initial metadata lookup for stream.
-  (Fixes :issue:`390`)
+  (Fixes :issue:`390`, PR: :issue:`982`)
 
 **Mopidy.js client library**
 
@@ -656,6 +666,7 @@ guys. Thanks to everyone that has contributed!
 
 - The dummy backend used for testing many frontends have moved from
   :mod:`mopidy.backends.dummy` to :mod:`mopidy.backend.dummy`.
+  (PR: :issue:`984`)
 
 **Commands**
 
