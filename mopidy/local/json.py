@@ -189,11 +189,12 @@ class JsonLibrary(local.Library):
 
     def search(self, query=None, limit=100, offset=0, uris=None, exact=False):
         tracks = self._tracks.values()
-        # TODO: pass limit and offset into search helpers
         if exact:
-            return search.find_exact(tracks, query=query, uris=uris)
+            return search.find_exact(
+                tracks, query=query, limit=limit, offset=offset, uris=uris)
         else:
-            return search.search(tracks, query=query, uris=uris)
+            return search.search(
+                tracks, query=query, limit=limit, offset=offset, uris=uris)
 
     def begin(self):
         return compat.itervalues(self._tracks)
