@@ -182,10 +182,11 @@ class JsonLibrary(local.Library):
         else:
             return set()
 
-        result = set()
-        for track in search.search(self._tracks.values(), query).tracks:
-            result.update(distinct(track))
-        return result
+        distinct_result = set()
+        search_result = search.search(self._tracks.values(), query, limit=None)
+        for track in search_result.tracks:
+            distinct_result.update(distinct(track))
+        return distinct_result
 
     def search(self, query=None, limit=100, offset=0, uris=None, exact=False):
         tracks = self._tracks.values()

@@ -1,11 +1,9 @@
 from __future__ import absolute_import, unicode_literals
 
-
 import unittest
 
 from mopidy.local import json
 from mopidy.models import Ref, Track
-
 
 from tests import path_to_data_dir
 

@@ -106,9 +106,12 @@ def find_exact(tracks, query=None, limit=100, offset=0, uris=None):
             else:
                 raise LookupError('Invalid lookup field: %s' % field)
 
+    if limit is None:
+        tracks = tracks[offset:]
+    else:
+        tracks = tracks[offset:offset + limit]
     # TODO: add local:search:<query>
-    return SearchResult(
-        uri='local:search', tracks=tracks[offset:offset + limit])
+    return SearchResult(uri='local:search', tracks=tracks)
 
 
 def search(tracks, query=None, limit=100, offset=0, uris=None):
@@ -217,9 +220,13 @@ def search(tracks, query=None, limit=100, offset=0, uris=None):
                 tracks = filter(any_filter, tracks)
             else:
                 raise LookupError('Invalid lookup field: %s' % field)
+
+    if limit is None:
+        tracks = tracks[offset:]
+    else:
+        tracks = tracks[offset:offset + limit]
     # TODO: add local:search:<query>
-    return SearchResult(uri='local:search',
-                        tracks=tracks[offset:offset + limit])
+    return SearchResult(uri='local:search', tracks=tracks)
 
 
 def _validate_query(query):
