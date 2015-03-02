@@ -43,9 +43,9 @@ upmpdcli
 --------
 
 `upmpdcli <http://www.lesbonscomptes.com/upmpdcli/>`_ is recommended, since it
-is easier to setup, and offers `OpenHome <http://www.openhome.org> ohMedia`_
-compatibility. upmpdcli exposes a UPnP MediaRenderer to the network, while
-using the MPD protocol to control Mopidy.
+is easier to setup, and offers `OpenHome 
+<http://www.openhome.org/wiki/OhMedia>`_ compatibility. upmpdcli exposes a UPnP
+MediaRenderer to the network, while using the MPD protocol to control Mopidy.
 
 1. Install upmpdcli. On Debian/Ubuntu::
 
