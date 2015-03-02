@@ -613,7 +613,7 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
 
 class MusicDatabaseListTest(protocol.BaseTestCase):
     def test_list(self):
-        self.backend.library.dummy_list_distinct_result = {
+        self.backend.library.dummy_get_distinct_result = {
             'artist': set(['A Artist'])}
         self.send_request('list "artist" "artist" "foo"')
 
@@ -888,7 +888,7 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_list_album_with_artist_name(self):
-        self.backend.library.dummy_list_distinct_result = {
+        self.backend.library.dummy_get_distinct_result = {
             'album': set(['foo'])}
 
         self.send_request('list "album" "anartist"')

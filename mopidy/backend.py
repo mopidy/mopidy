@@ -92,9 +92,9 @@ class LibraryProvider(object):
         """
         return []
 
-    def list_distinct(self, field, query=None):
+    def get_distinct(self, field, query=None):
         """
-        See :meth:`mopidy.core.LibraryController.list_distinct`.
+        See :meth:`mopidy.core.LibraryController.get_distinct`.
 
         *MAY be implemented by subclass.*
 

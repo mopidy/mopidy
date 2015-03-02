@@ -155,7 +155,7 @@ class JsonLibrary(local.Library):
         except KeyError:
             return []
 
-    def list_distinct(self, field, query=None):
+    def get_distinct(self, field, query=None):
         if field == 'artist':
             def distinct(track):
                 return {a.name for a in track.artists}

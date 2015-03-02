@@ -277,7 +277,7 @@ def list_(context, *args):
             return
 
     name = _LIST_NAME_MAPPING[field]
-    result = context.core.library.list_distinct(field, query)
+    result = context.core.library.get_distinct(field, query)
     return [(name, value) for value in result.get()]
 
 

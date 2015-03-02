@@ -72,7 +72,7 @@ class LibraryController(object):
             return []
         return backend.library.browse(uri).get()
 
-    def list_distinct(self, field, query=None):
+    def get_distinct(self, field, query=None):
         """
         List distinct values for a given field from the library.
 
@@ -86,7 +86,7 @@ class LibraryController(object):
             :method:`search` for details about the query format.
         :rtype: set of values corresponding to the requested field type.
         """
-        futures = [b.library.list_distinct(field, query)
+        futures = [b.library.get_distinct(field, query)
                    for b in self.backends.with_library.values()]
         result = set()
         for r in pykka.get_all(futures):

@@ -36,7 +36,7 @@ v0.20.0 (UNRELEASED)
 - When seeking in paused state, do not change to playing state. (Fixed
   :issue:`939`)
 
-- Add :meth:`mopidy.core.LibraryController.list_distinct` for getting unique
+- Add :meth:`mopidy.core.LibraryController.get_distinct` for getting unique
   values for a given field. (Fixes: :issue:`913`)
 
 **Commands**
@@ -102,7 +102,7 @@ v0.20.0 (UNRELEASED)
   :confval:`mpd/command_blacklist`.
 
 - Switch the ``list`` command over to using
-  :meth:`mopidy.core.LibraryController.list_distinct`. (Fixes: :issue:`913`)
+  :meth:`mopidy.core.LibraryController.get_distinct`. (Fixes: :issue:`913`)
 
 **HTTP frontend**
 

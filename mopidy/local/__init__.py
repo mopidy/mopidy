@@ -89,7 +89,7 @@ class Library(object):
         """
         raise NotImplementedError
 
-    def list_distinct(self, field, query=None):
+    def get_distinct(self, field, query=None):
         """
         List distinct values for a given field from the library.
 
