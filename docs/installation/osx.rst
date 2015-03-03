@@ -57,16 +57,30 @@ If you are running OS X, you can install everything needed with Homebrew.
 
        brew install mopidy
 
-#. Optional: If you want to use any Mopidy extensions, like Spotify support or
-   Last.fm scrobbling, the Homebrew tap has formulas for several Mopidy
-   extensions as well.
-
-   To list all the extensions available from our tap, you can run::
-
-       brew search mopidy
-
-   For a full list of available Mopidy extensions, including those not
-   installable from Homebrew, see :ref:`ext`.
-
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
    then you're ready to :doc:`run Mopidy </running>`.
+
+
+Installing extensions
+=====================
+
+If you want to use any Mopidy extensions, like Spotify support or Last.fm
+scrobbling, the Homebrew tap has formulas for several Mopidy extensions as
+well. Extensions installed from Homebrew will come complete with all
+dependencies, both Python and non-Python ones.
+
+To list all the extensions available from our tap, you can run::
+
+    brew search mopidy
+
+You can also install any Mopidy extension directly from PyPI with ``pip``, just
+like on Linux. To list all the extensions available from PyPI, run::
+
+    pip search mopidy
+
+Note that extensions installed from PyPI will only automatically install Python
+dependencies. Please refer to the extension's documentation for information
+about any other requirements needed for the extension to work properly.
+
+For a full list of available Mopidy extensions, including those not installable
+from Homebrew, see :ref:`ext`.
