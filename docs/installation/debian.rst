@@ -100,9 +100,9 @@ If you've installed a Mopidy extension with pip, restarted Mopidy, and Mopidy
 doesn't find the extension, there's probably a simple explanation and solution.
 
 Mopidy installed with APT can detect and use Mopidy extensions installed with
-either APT and pip. APT installs Mopidy as :file:`/usr/bin/mopidy`.
+both APT and pip. APT installs Mopidy as :file:`/usr/bin/mopidy`.
 
-Mopidy installed with pip can only detect Mopidy extensions installed from pip.
+Mopidy installed with pip can only detect Mopidy extensions installed with pip.
 pip usually installs Mopidy as :file:`/usr/local/bin/mopidy`.
 
 If you have Mopidy installed from both APT and pip, then the pip-installed
