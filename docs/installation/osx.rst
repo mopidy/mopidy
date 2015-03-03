@@ -84,3 +84,50 @@ about any other requirements needed for the extension to work properly.
 
 For a full list of available Mopidy extensions, including those not installable
 from Homebrew, see :ref:`ext`.
+
+
+Running Mopidy automatically on login
+=====================================
+
+On OS X, you can use launchd to start Mopidy automatically at login.
+
+If you installed Mopidy from Homebrew, simply run ``brew info mopidy`` and
+follow the instructions in the "Caveats" section::
+
+    $ brew info mopidy
+    ...
+    ==> Caveats
+    To have launchd start mopidy at login:
+        ln -sfv /usr/local/opt/mopidy/*.plist ~/Library/LaunchAgents
+    Then to load mopidy now:
+        launchctl load ~/Library/LaunchAgents/homebrew.mopidy.mopidy.plist
+    Or, if you don't want/need launchctl, you can just run:
+        mopidy
+
+If you happen to be on OS X, but didn't install Mopidy with Homebrew, you can
+get the same effect by adding the file
+:file:`~/Library/LaunchAgents/mopidy.plist` with the following contents::
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+      <key>Label</key>
+      <string>mopidy</string>
+      <key>ProgramArguments</key>
+      <array>
+        <string>/usr/local/bin/mopidy</string>
+      </array>
+      <key>RunAtLoad</key>
+      <true/>
+      <key>KeepAlive</key>
+      <true/>
+    </dict>
+    </plist>
+
+You might need to adjust the path to the ``mopidy`` executable,
+``/usr/local/bin/mopidy``, to match your system.
+
+Then, to start Mopidy with launchd right away::
+
+    launchctl load ~/Library/LaunchAgents/mopidy.plist
