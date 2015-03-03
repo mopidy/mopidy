@@ -81,9 +81,23 @@ please follow the directions :ref:`here <contributing>`.
 
        sudo pip install --allow-unverified=mopidy mopidy==dev
 
-#. Optional: For Spotify support, Last.fm scrobbling, or many other extra
-   features, install the required Mopidy extensions. For a full list of
-   available Mopidy extensions, see :ref:`ext`.
-
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
    then you're ready to :doc:`run Mopidy </running>`.
+
+
+Installing extensions
+=====================
+
+If you want to use any Mopidy extensions, like Spotify support or Last.fm
+scrobbling, you need to install additional Mopidy extensions.
+
+You can install any Mopidy extension directly from PyPI with ``pip``. To list
+all the extensions available from PyPI, run::
+
+    pip search mopidy
+
+Note that extensions installed from PyPI will only automatically install Python
+dependencies. Please refer to the extension's documentation for information
+about any other requirements needed for the extension to work properly.
+
+For a full list of available Mopidy extensions see :ref:`ext`.
