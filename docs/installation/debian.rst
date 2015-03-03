@@ -52,20 +52,6 @@ from scratch, we have a guide for installing Debian/Raspbian and Mopidy. See
        sudo apt-get update
        sudo apt-get install mopidy
 
-#. Optional: If you want to use any Mopidy extensions, like Spotify support or
-   Last.fm scrobbling, you need to install additional packages.
-
-   To list all the extensions available from apt.mopidy.com, you can run::
-
-       apt-cache search mopidy
-
-   To install one of the listed packages, e.g. ``mopidy-spotify``, simply run::
-
-       sudo apt-get install mopidy-spotify
-
-   For a full list of available Mopidy extensions, including those not
-   installable from apt.mopidy.com, see :ref:`ext`.
-
 #. Before continuing, make sure you've read the :ref:`debian` section to learn
    about the differences between running Mopidy as a system service and
    manually as your own system user.
@@ -78,3 +64,30 @@ figure it out for itself, run the following to upgrade right away::
 
     sudo apt-get update
     sudo apt-get dist-upgrade
+
+
+Installing extensions
+=====================
+
+If you want to use any Mopidy extensions, like Spotify support or Last.fm
+scrobbling, you need to install additional packages.
+
+To list all the extensions available from apt.mopidy.com, you can run::
+
+    apt-cache search mopidy
+
+To install one of the listed packages, e.g. ``mopidy-spotify``, simply run::
+
+   sudo apt-get install mopidy-spotify
+
+You can also install any Mopidy extension directly from PyPI with ``pip``. To
+list all the extensions available from PyPI, run::
+
+    pip search mopidy
+
+Note that extensions installed from PyPI will only automatically install Python
+dependencies. Please refer to the extension's documentation for information
+about any other requirements needed for the extension to work properly.
+
+For a full list of available Mopidy extensions, including those not
+installable from apt.mopidy.com, see :ref:`ext`.
