@@ -189,11 +189,6 @@ class that will connect the rest of the dots.
             'Pykka >= 1.1',
             'pysoundspot',
         ],
-        test_suite='nose.collector',
-        tests_require=[
-            'nose',
-            'mock >= 1.0',
-        ],
         entry_points={
             'mopidy.ext': [
                 'soundspot = mopidy_soundspot:Extension',

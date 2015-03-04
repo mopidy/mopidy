@@ -29,11 +29,6 @@ setup(
         'tornado >= 2.3',
     ],
     extras_require={'http': []},
-    test_suite='nose.collector',
-    tests_require=[
-        'nose',
-        'mock >= 1.0',
-    ],
     entry_points={
         'console_scripts': [
             'mopidy = mopidy.__main__:main',

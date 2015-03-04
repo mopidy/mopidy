@@ -89,11 +89,11 @@ Mopidy to come with tests.
 
 #. To run all tests, go to the project directory and run::
 
-       nosetests
+       py.test
 
    To run tests with test coverage statistics::
 
-       nosetests --with-coverage
+       py.test --cov=mopidy --cov-report=term-missing
 
    Test coverage statistics can also be viewed online at
    `coveralls.io <https://coveralls.io/r/mopidy/mopidy>`_.
