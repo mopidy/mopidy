@@ -1,34 +1,15 @@
 from __future__ import unicode_literals
 
-import inspect
-import warnings
-
-
-def _is_pykka_proxy_creation():
-    stack = inspect.stack()
-    try:
-        calling_frame = stack[3]
-    except IndexError:
-        return False
-    else:
-        filename = calling_frame[1]
-        funcname = calling_frame[3]
-        return 'pykka' in filename and funcname == '_get_attributes'
-
 
 def deprecated_property(
         getter=None, setter=None, message='Property is deprecated'):
 
-    def deprecated_getter(*args):
-        if not _is_pykka_proxy_creation():
-            warnings.warn(message, DeprecationWarning, stacklevel=2)
-        return getter(*args)
+    # During development, this is a convenient place to add logging, emit
+    # warnings, or ``assert False`` to ensure you are not using any of the
+    # deprecated properties.
+    #
+    # Using inspect to find the call sites to emit proper warnings makes
+    # parallel execution of our test suite slower than serial execution. Thus,
+    # we don't want to add any extra overhead here by default.
 
-    def deprecated_setter(*args):
-        if not _is_pykka_proxy_creation():
-            warnings.warn(message, DeprecationWarning, stacklevel=2)
-        return setter(*args)
-
-    new_getter = getter and deprecated_getter
-    new_setter = setter and deprecated_setter
-    return property(new_getter, new_setter)
+    return property(getter, setter)
