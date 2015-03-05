@@ -185,6 +185,10 @@ This version has been released to npm as Mopidy.js v0.5.0.
 
 - Upgrade dependencies.
 
+**Development**
+
+- Changed test runner from nose to py.test. (PR: :issue:`1024`)
+
 
 v0.19.6 (UNRELEASED)
 ====================
