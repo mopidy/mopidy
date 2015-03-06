@@ -13,17 +13,8 @@ from mopidy.utils.path import path_to_uri, uri_to_path
 
 
 M3U_EXTINF_RE = re.compile(r'#EXTINF:(-1|\d+),(.*)')
-COVERART_BASE = 'http://coverartarchive.org/release/%s/front'
 
 logger = logging.getLogger(__name__)
-
-
-def add_musicbrainz_coverart_to_track(track):
-    if track.album and track.album.musicbrainz_id:
-        images = [COVERART_BASE % track.album.musicbrainz_id]
-        album = track.album.copy(images=images)
-        track = track.copy(album=album)
-    return track
 
 
 def local_track_uri_to_file_uri(uri, media_dir):

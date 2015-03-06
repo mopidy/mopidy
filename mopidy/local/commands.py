@@ -141,7 +141,6 @@ class ScanCommand(commands.Command):
                     mtime = file_mtimes.get(os.path.join(media_dir, relpath))
                     track = utils.convert_tags_to_track(tags).copy(
                         uri=uri, length=duration, last_modified=mtime)
-                    track = translator.add_musicbrainz_coverart_to_track(track)
                     if library.add_supports_tags_and_duration:
                         library.add(track, tags=tags, duration=duration)
                     else:
