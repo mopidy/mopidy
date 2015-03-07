@@ -66,9 +66,6 @@ v0.20.0 (UNRELEASED)
 
 **Local backend**
 
-- Add cover URL to all scanned files with MusicBrainz album IDs. (Fixes:
-  :issue:`697`, PR: :issue:`802`)
-
 - Local library API: Implementors of :meth:`mopidy.local.Library.lookup` should
   now return a list of :class:`~mopidy.models.Track` instead of a single track,
   just like the other ``lookup()`` methods in Mopidy. For now, returning a
