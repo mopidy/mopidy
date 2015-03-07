@@ -267,3 +267,27 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
             playlist.name, backend.playlists.playlists[0].name)
         self.assertEqual(
             track.uri, backend.playlists.playlists[0].tracks[0].uri)
+
+    def test_playlist_sort_order(self):
+        def check_order(playlists, names):
+            self.assertEqual(names, [playlist.name for playlist in playlists])
+
+        self.core.playlists.create('c')
+        self.core.playlists.create('a')
+        self.core.playlists.create('b')
+
+        check_order(self.core.playlists.playlists, ['a', 'b', 'c'])
+
+        self.core.playlists.refresh()
+
+        check_order(self.core.playlists.playlists, ['a', 'b', 'c'])
+
+        playlist = self.core.playlists.lookup('local:playlist:a.m3u')
+        playlist = playlist.copy(name='d')
+        playlist = self.core.playlists.save(playlist)
+
+        check_order(self.core.playlists.playlists, ['b', 'c', 'd'])
+
+        self.core.playlists.delete('local:playlist:c.m3u')
+
+        check_order(self.core.playlists.playlists, ['b', 'd'])
