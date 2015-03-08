@@ -86,6 +86,7 @@ v0.20.0 (UNRELEASED)
   better and fixes bug in deletion of playlists. (Fixes: :issue:`937`, 
   PR: :issue:`995` and rebased into :issue:`1000`)
 
+- Sort local playlists by name. (Fixes: :issue:`1026`, PR: :issue:`1028`)
 
 **File scanner**
 

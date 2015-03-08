@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, unicode_literals
 
 import glob
 import logging
+import operator
 import os
 import sys
 
@@ -29,6 +30,7 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
             self._playlists[index] = playlist
         else:
             self._playlists.append(playlist)
+        self._playlists.sort(key=operator.attrgetter('name'))
         logger.info('Created playlist %s', playlist.uri)
         return playlist
 
@@ -45,7 +47,8 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
         self._playlists.remove(playlist)
 
     def lookup(self, uri):
-        # TODO: store as {uri: playlist}?
+        # TODO: store as {uri: playlist} when get_playlists() gets
+        # implemented
         for playlist in self._playlists:
             if playlist.uri == uri:
                 return playlist
@@ -66,7 +69,7 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
             playlist = Playlist(uri=uri, name=name, tracks=tracks)
             playlists.append(playlist)
 
-        self.playlists = playlists
+        self.playlists = sorted(playlists, key=operator.attrgetter('name'))
 
         logger.info(
             'Loaded %d local playlists from %s',
@@ -95,6 +98,7 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
             self._playlists[index] = playlist
         else:
             self._playlists.append(playlist)
+        self._playlists.sort(key=operator.attrgetter('name'))
         return playlist
 
     def _write_m3u_extinf(self, file_handle, track):
