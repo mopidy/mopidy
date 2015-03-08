@@ -83,7 +83,7 @@ class LibraryController(object):
         :param string field: One of ``artist``, ``albumartist``, ``album``,
             ``composer``, ``performer``, ``date``or ``genre``.
         :param dict query: Query to use for limiting results, see
-            :method:`search` for details about the query format.
+            :meth:`search` for details about the query format.
         :rtype: set of values corresponding to the requested field type.
         """
         futures = [b.library.get_distinct(field, query)

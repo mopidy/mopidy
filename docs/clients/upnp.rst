@@ -37,8 +37,6 @@ There are two ways Mopidy can be made available as an UPnP MediaRenderer:
 Using Mopidy-MPRIS and Rygel, or using Mopidy-MPD and upmpdcli.
 
 
-.. _upmpdcli:
-
 upmpdcli
 --------
 
@@ -67,8 +65,6 @@ MediaRenderer to the network, while using the MPD protocol to control Mopidy.
 
 4. A UPnP renderer should be available now.
 
-
-.. _rygel:
 
 Rygel
 -----

@@ -96,7 +96,7 @@ class Library(object):
         :param string field: One of ``artist``, ``albumartist``, ``album``,
             ``composer``, ``performer``, ``date``or ``genre``.
         :param dict query: Query to use for limiting results, see
-            :method:`search` for details about the query format.
+            :meth:`search` for details about the query format.
         :rtype: set of values corresponding to the requested field type.
         """
         return set()
@@ -159,7 +159,7 @@ class Library(object):
         :param track: Track to add to the library
         :type track: :class:`~mopidy.models.Track`
         :param tags: All the tags the scanner found for the media. See
-            :module:`mopidy.audio.utils` for details about the tags.
+            :mod:`mopidy.audio.utils` for details about the tags.
         :type tags: dictionary of tag keys with a list of values.
         :param duration: Duration of media in milliseconds or :class:`None` if
             unknown
