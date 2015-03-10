@@ -74,7 +74,7 @@ v0.20.0 (UNRELEASED)
 - Add support for giving local libraries direct access to tags and duration.
   (Fixes: :issue:`967`)
 
-- Add "--force" option for local scan (Fixes: :issue:'910', PR: :issue:'1010')
+- Add "--force" option for local scan (Fixes: :issue:`910`, PR: :issue:`1010`)
 
 - Stop ignoring ``offset`` and ``limit`` in searches. (Fixes: :issue:`917`,
   PR: :issue:`949`)
