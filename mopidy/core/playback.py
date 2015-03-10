@@ -20,7 +20,7 @@ class PlaybackController(object):
         self.core = core
 
         self._current_tl_track = None
-        self._current_metadata_track = None
+        self._stream_ref = None
         self._state = PlaybackState.STOPPED
 
     def _get_backend(self):
@@ -73,20 +73,23 @@ class PlaybackController(object):
         Use :meth:`get_current_track` instead.
     """
 
-    def get_current_metadata_track(self):
+    def get_stream_reference(self):
         """
-        Get a :class:`mopidy.models.TlTrack` with updated metadata for the
-        currently playing track.
+        Get additional information about the current stream.
 
-        Returns :class:`None` if no track is currently playing.
+        For most cases this value won't be set, but for radio streams it will
+        contain a reference with the name of the currently playing track or
+        program. Clients should show this when available.
+
+        The :class:`mopidy.models.Ref` instance may or may not have an URI set.
+        If present you can call ``lookup`` on it to get the full metadata for
+        the URI.
+
+        Returns a :class:`mopidy.models.Ref` instance representing the current
+        stream. If nothing is playing, or no stream info is available this will
+        return :class:`None`.
         """
-        return self._current_metadata_track
-
-    current_metadata_track = deprecated_property(get_current_metadata_track)
-    """
-    .. deprecated:: 0.20
-        Use :meth:`get_current_metadata_track` instead.
-    """
+        return self._stream_ref
 
     def get_state(self):
         """Get The playback state."""
@@ -243,6 +246,9 @@ class PlaybackController(object):
         if self.get_current_tl_track() not in tracklist:
             self.stop()
             self.set_current_tl_track(None)
+
+    def on_stream_changed(self, uri):
+        self._stream_ref = None
 
     def next(self):
         """

@@ -164,9 +164,9 @@ class CoreListener(listener.Listener):
         """
         pass
 
-    def current_metadata_changed(self):
+    def stream_changed(self):
         """
-        Called whenever current track's metadata changed
+        Called whenever the currently playing stream changes.
 
         *MAY* be implemented by actor.
         """

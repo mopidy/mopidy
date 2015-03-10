@@ -15,7 +15,7 @@ def normalize_path(path, relative=False):
     return '/'.join(parts)
 
 
-def track_to_mpd_format(track, position=None):
+def track_to_mpd_format(track, position=None, stream=None):
     """
     Format track for output to MPD client.
 
@@ -33,6 +33,7 @@ def track_to_mpd_format(track, position=None):
         (tlid, track) = track
     else:
         (tlid, track) = (None, track)
+
     result = [
         ('file', track.uri or ''),
         ('Time', track.length and (track.length // 1000) or 0),
@@ -40,6 +41,9 @@ def track_to_mpd_format(track, position=None):
         ('Title', track.name or ''),
         ('Album', track.album and track.album.name or ''),
     ]
+
+    if stream and stream.name != track.name:
+        result.append(('Name', stream.name))
 
     if track.date:
         result.append(('Date', track.date))

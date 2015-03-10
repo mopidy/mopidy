@@ -4,8 +4,12 @@ import unittest
 
 import mock
 
+import pykka
+
 from mopidy import backend, core
-from mopidy.models import Track
+from mopidy.models import Ref, Track
+
+from tests import dummy_audio as audio
 
 
 class CorePlaybackTest(unittest.TestCase):
@@ -525,3 +529,87 @@ class CorePlaybackTest(unittest.TestCase):
         self.assertFalse(self.playback2.get_time_position.called)
 
     # TODO Test on_tracklist_change
+
+
+# Since we rely on our DummyAudio to actually emit events we need a "real"
+# backend and not a mock so the right calls make it through to audio.
+class TestBackend(pykka.ThreadingActor, backend.Backend):
+    uri_schemes = ['dummy']
+
+    def __init__(self, config, audio):
+        super(TestBackend, self).__init__()
+        self.playback = backend.PlaybackProvider(audio=audio, backend=self)
+
+
+class TestStream(unittest.TestCase):
+    def setUp(self):  # noqa: N802
+        self.audio = audio.DummyAudio.start().proxy()
+        self.backend = TestBackend.start(config={}, audio=self.audio).proxy()
+        self.core = core.Core(audio=self.audio, backends=[self.backend])
+        self.playback = self.core.playback
+
+        self.tracks = [Track(uri='dummy:a', length=1234),
+                       Track(uri='dummy:b', length=1234)]
+
+        self.core.tracklist.add(self.tracks)
+
+        self.events = []
+        self.patcher = mock.patch('mopidy.audio.listener.AudioListener.send')
+        self.send_mock = self.patcher.start()
+
+        def send(event, **kwargs):
+            self.events.append((event, kwargs))
+
+        self.send_mock.side_effect = send
+
+    def tearDown(self):  # noqa: N802
+        pykka.ActorRegistry.stop_all()
+        self.patcher.stop()
+
+    def replay_audio_events(self):
+        while self.events:
+            event, kwargs = self.events.pop(0)
+            self.core.on_event(event, **kwargs)
+
+    def test_get_stream_reference_before_playback(self):
+        self.assertEqual(self.playback.get_stream_reference(), None)
+
+    def test_get_stream_reference_during_playback(self):
+        self.core.playback.play()
+
+        self.replay_audio_events()
+        self.assertEqual(self.playback.get_stream_reference(), None)
+
+    def test_get_stream_reference_during_playback_with_tags_change(self):
+        self.core.playback.play()
+        self.audio.trigger_fake_tags_changed({'title': ['foobar']}).get()
+
+        self.replay_audio_events()
+        expected = Ref.track(name='foobar')
+        self.assertEqual(self.playback.get_stream_reference(), expected)
+
+    def test_get_stream_reference_after_next(self):
+        self.core.playback.play()
+        self.audio.trigger_fake_tags_changed({'title': ['foobar']}).get()
+        self.core.playback.next()
+
+        self.replay_audio_events()
+        self.assertEqual(self.playback.get_stream_reference(), None)
+
+    def test_get_stream_reference_after_next_with_tags_change(self):
+        self.core.playback.play()
+        self.audio.trigger_fake_tags_changed({'title': ['foo']}).get()
+        self.core.playback.next()
+        self.audio.trigger_fake_tags_changed({'title': ['bar']}).get()
+
+        self.replay_audio_events()
+        expected = Ref.track(name='bar')
+        self.assertEqual(self.playback.get_stream_reference(), expected)
+
+    def test_get_stream_reference_after_stop(self):
+        self.core.playback.play()
+        self.audio.trigger_fake_tags_changed({'title': ['foobar']}).get()
+        self.core.playback.stop()
+
+        self.replay_audio_events()
+        self.assertEqual(self.playback.get_stream_reference(), None)
