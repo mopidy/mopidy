@@ -47,7 +47,6 @@ class Scanner(object):
         self._pipe.add(sink)
 
         self._bus = self._pipe.get_bus()
-        self._bus.set_flushing(True)
 
     def scan(self, uri):
         """
@@ -82,8 +81,6 @@ class Scanner(object):
         self._pipe.add(self._src)
         self._src.sync_state_with_parent()
         self._src.link(self._decodebin)
-
-        self._bus.set_flushing(False)
 
         result = self._pipe.set_state(gst.STATE_PAUSED)
         if result == gst.STATE_CHANGE_NO_PREROLL:
@@ -121,8 +118,7 @@ class Scanner(object):
         raise exceptions.ScannerError('Timeout after %dms' % self._timeout_ms)
 
     def _reset(self):
-        """Ensures we cleanup child elements and flush the bus."""
-        self._bus.set_flushing(True)
+        """Ensures we cleanup child elements."""
         self._pipe.set_state(gst.STATE_NULL)
         self._src.unlink(self._decodebin)
         self._pipe.remove(self._src)
