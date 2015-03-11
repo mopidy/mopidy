@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, unicode_literals
 
+import collections
 import time
 
 import pygst
@@ -12,6 +13,9 @@ from mopidy.audio import utils
 from mopidy.utils import encoding
 
 _missing_plugin_desc = gst.pbutils.missing_plugin_message_get_description
+
+Result = collections.namedtuple(
+    'Result', ('uri', 'tags', 'duration', 'seekable'))
 
 
 class Scanner(object):
@@ -54,19 +58,22 @@ class Scanner(object):
 
         :param uri: URI of the resource to scan.
         :type event: string
-        :return: (tags, duration) pair. tags is a dictionary of lists for all
-            the tags we found and duration is the length of the URI in
-            milliseconds, or :class:`None` if the URI has no duration.
+        :return: A named tuple containing ``(uri, tags, duration, seekable)``.
+            ``tags`` is a dictionary of lists for all the tags we found.
+            ``duration`` is the length of the URI in milliseconds, or
+            :class:`None` if the URI has no duration. ``seekable`` is boolean
+            indicating if a seek would succeed.
         """
-        tags, duration = None, None
+        tags, duration, seekable = None, None, None
         try:
             self._setup(uri)
             tags = self._collect()
             duration = self._query_duration()
+            seekable = self._query_seekable()
         finally:
             self._reset()
 
-        return tags, duration
+        return Result(uri, tags, duration, seekable)
 
     def _setup(self, uri):
         """Primes the pipeline for collection."""
@@ -123,3 +130,8 @@ class Scanner(object):
             return None
         else:
             return duration // gst.MSECOND
+
+    def _query_seekable(self):
+        query = gst.query_new_seeking(gst.FORMAT_TIME)
+        self._pipe.query(query)
+        return query.parse_seeking()[1]

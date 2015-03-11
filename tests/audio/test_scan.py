@@ -31,9 +31,9 @@ class ScannerTest(unittest.TestCase):
             uri = path_lib.path_to_uri(path)
             key = uri[len('file://'):]
             try:
-                tags, duration = scanner.scan(uri)
-                self.tags[key] = tags
-                self.durations[key] = duration
+                result = scanner.scan(uri)
+                self.tags[key] = result.tags
+                self.durations[key] = result.duration
             except exceptions.ScannerError as error:
                 self.errors[key] = error
 
