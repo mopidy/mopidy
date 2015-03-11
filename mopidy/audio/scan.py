@@ -5,10 +5,13 @@ import time
 import pygst
 pygst.require('0.10')
 import gst  # noqa
+import gst.pbutils
 
 from mopidy import exceptions
 from mopidy.audio import utils
 from mopidy.utils import encoding
+
+_missing_plugin_desc = gst.pbutils.missing_plugin_message_get_description
 
 
 class Scanner(object):
@@ -86,7 +89,11 @@ class Scanner(object):
                 continue
             message = self._bus.pop()
 
-            if message.type == gst.MESSAGE_ERROR:
+            if message.type == gst.MESSAGE_ELEMENT:
+                if gst.pbutils.is_missing_plugin_message(message):
+                    description = _missing_plugin_desc(message)
+                    raise exceptions.ScannerError(description)
+            elif message.type == gst.MESSAGE_ERROR:
                 raise exceptions.ScannerError(
                     encoding.locale_decode(message.parse_error()[0]))
             elif message.type == gst.MESSAGE_EOS:
