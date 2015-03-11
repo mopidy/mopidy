@@ -73,11 +73,8 @@ class Scanner(object):
 
     def _setup(self, uri):
         """Primes the pipeline for collection."""
-        self._pipe.set_state(gst.STATE_READY)
-
         self._src = gst.element_make_from_uri(gst.URI_SRC, uri)
         utils.setup_proxy(self._src, self._proxy_config)
-
         self._pipe.add(self._src)
         self._src.sync_state_with_parent()
         self._src.link(self._decodebin)
