@@ -29,24 +29,21 @@ class Scanner(object):
 
     def __init__(self, timeout=1000, proxy_config=None):
         self._timeout_ms = timeout
+        self._proxy_config = proxy_config or {}
 
         sink = gst.element_factory_make('fakesink')
-
-        audio_caps = gst.Caps(b'audio/x-raw-int; audio/x-raw-float')
+        self._src = None
 
         def pad_added(src, pad):
             return pad.link(sink.get_pad('sink'))
 
-        def source_setup(element, source):
-            utils.setup_proxy(source, proxy_config or {})
-
-        self._uribin = gst.element_factory_make('uridecodebin')
-        self._uribin.set_property('caps', audio_caps)
-        self._uribin.connect('pad-added', pad_added)
-        self._uribin.connect('source-setup', source_setup)
+        audio_caps = gst.Caps(b'audio/x-raw-int; audio/x-raw-float')
+        self._decodebin = gst.element_factory_make('decodebin2')
+        self._decodebin.set_property('caps', audio_caps)
+        self._decodebin.connect('pad-added', pad_added)
 
         self._pipe = gst.element_factory_make('pipeline')
-        self._pipe.add(self._uribin)
+        self._pipe.add(self._decodebin)
         self._pipe.add(sink)
 
         self._bus = self._pipe.get_bus()
@@ -78,8 +75,16 @@ class Scanner(object):
     def _setup(self, uri):
         """Primes the pipeline for collection."""
         self._pipe.set_state(gst.STATE_READY)
-        self._uribin.set_property(b'uri', uri)
+
+        self._src = gst.element_make_from_uri(gst.URI_SRC, uri)
+        utils.setup_proxy(self._src, self._proxy_config)
+
+        self._pipe.add(self._src)
+        self._src.sync_state_with_parent()
+        self._src.link(self._decodebin)
+
         self._bus.set_flushing(False)
+
         result = self._pipe.set_state(gst.STATE_PAUSED)
         if result == gst.STATE_CHANGE_NO_PREROLL:
             # Live sources don't pre-roll, so set to playing to get data.
@@ -119,6 +124,9 @@ class Scanner(object):
         """Ensures we cleanup child elements and flush the bus."""
         self._bus.set_flushing(True)
         self._pipe.set_state(gst.STATE_NULL)
+        self._src.unlink(self._decodebin)
+        self._pipe.remove(self._src)
+        self._src = None
 
     def _query_duration(self):
         try:
