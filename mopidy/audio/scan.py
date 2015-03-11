@@ -73,11 +73,21 @@ class Scanner(object):
 
     def _setup(self, uri):
         """Primes the pipeline for collection."""
-        self._src = gst.element_make_from_uri(gst.URI_SRC, uri)
-        utils.setup_proxy(self._src, self._proxy_config)
-        self._pipe.add(self._src)
-        self._src.sync_state_with_parent()
-        self._src.link(self._decodebin)
+        protocol = gst.uri_get_protocol(uri)
+        if self._src and protocol not in self._src.get_protocols():
+            self._src.unlink(self._decodebin)
+            self._pipe.remove(self._src)
+            self._src = None
+
+        if not self._src:
+            self._src = gst.element_make_from_uri(gst.URI_SRC, uri)
+            utils.setup_proxy(self._src, self._proxy_config)
+            self._pipe.add(self._src)
+            self._src.sync_state_with_parent()
+            self._src.link(self._decodebin)
+
+        self._pipe.set_state(gst.STATE_READY)
+        self._src.set_uri(uri)
 
         result = self._pipe.set_state(gst.STATE_PAUSED)
         if result == gst.STATE_CHANGE_NO_PREROLL:
@@ -115,11 +125,7 @@ class Scanner(object):
         raise exceptions.ScannerError('Timeout after %dms' % self._timeout_ms)
 
     def _reset(self):
-        """Ensures we cleanup child elements."""
         self._pipe.set_state(gst.STATE_NULL)
-        self._src.unlink(self._decodebin)
-        self._pipe.remove(self._src)
-        self._src = None
 
     def _query_duration(self):
         try:
