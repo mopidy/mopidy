@@ -108,7 +108,7 @@ class Scanner(object):
         """Polls for messages to collect data."""
         start = time.time()
         timeout_s = self._timeout_ms / 1000.0
-        tags, mime = {}, None
+        tags, mime, missing_description = {}, None, None
 
         while time.time() - start < timeout_s:
             if not self._bus.have_pending():
@@ -117,15 +117,17 @@ class Scanner(object):
 
             if message.type == gst.MESSAGE_ELEMENT:
                 if gst.pbutils.is_missing_plugin_message(message):
-                    description = _missing_plugin_desc(message)
-                    raise exceptions.ScannerError(description)
+                    missing_description = encoding.locale_decode(
+                        _missing_plugin_desc(message))
             elif message.type == gst.MESSAGE_APPLICATION:
                 mime = message.structure.get_name()
                 if mime.startswith('text/') or mime == 'application/xml':
                     return tags, mime
             elif message.type == gst.MESSAGE_ERROR:
-                raise exceptions.ScannerError(
-                    encoding.locale_decode(message.parse_error()[0]))
+                error = encoding.locale_decode(message.parse_error()[0])
+                if missing_description:
+                    error = '%s (%s)' % (missing_description, error)
+                raise exceptions.ScannerError(error)
             elif message.type == gst.MESSAGE_EOS:
                 return tags, mime
             elif message.type == gst.MESSAGE_ASYNC_DONE:
