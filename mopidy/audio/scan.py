@@ -92,6 +92,9 @@ class Scanner(object):
 
         if not self._src:
             self._src = gst.element_make_from_uri(gst.URI_SRC, uri)
+            if not self._src:
+                raise exceptions.ScannerError('Could not find any elements to '
+                                              'handle %s URI.' % protocol)
             utils.setup_proxy(self._src, self._proxy_config)
             self._pipe.add(self._src)
             self._src.link(self._typefinder)
