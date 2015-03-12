@@ -15,7 +15,7 @@ from mopidy.utils import encoding
 _missing_plugin_desc = gst.pbutils.missing_plugin_message_get_description
 
 Result = collections.namedtuple(
-    'Result', ('uri', 'tags', 'duration', 'seekable'))
+    'Result', ('uri', 'tags', 'duration', 'seekable', 'mime'))
 
 
 class Scanner(object):
@@ -37,14 +37,24 @@ class Scanner(object):
         def pad_added(src, pad):
             return pad.link(sink.get_pad('sink'))
 
+        def have_type(finder, probability, caps):
+            msg = gst.message_new_application(finder, caps.get_structure(0))
+            finder.get_bus().post(msg)
+
+        self._typefinder = gst.element_factory_make('typefind')
+        self._typefinder.connect('have-type', have_type)
+
         audio_caps = gst.Caps(b'audio/x-raw-int; audio/x-raw-float')
         self._decodebin = gst.element_factory_make('decodebin2')
         self._decodebin.set_property('caps', audio_caps)
         self._decodebin.connect('pad-added', pad_added)
 
         self._pipe = gst.element_factory_make('pipeline')
+        self._pipe.add(self._typefinder)
         self._pipe.add(self._decodebin)
         self._pipe.add(sink)
+
+        self._typefinder.link(self._decodebin)
 
         self._bus = self._pipe.get_bus()
 
@@ -54,28 +64,29 @@ class Scanner(object):
 
         :param uri: URI of the resource to scan.
         :type event: string
-        :return: A named tuple containing ``(uri, tags, duration, seekable)``.
+        :return: A named tuple containing
+            ``(uri, tags, duration, seekable, mime)``.
             ``tags`` is a dictionary of lists for all the tags we found.
             ``duration`` is the length of the URI in milliseconds, or
-            :class:`None` if the URI has no duration. ``seekable`` is boolean
+            :class:`None` if the URI has no duration. ``seekable`` is boolean.
             indicating if a seek would succeed.
         """
-        tags, duration, seekable = None, None, None
+        tags, duration, seekable, mime = None, None, None, None
         try:
             self._setup(uri)
-            tags = self._collect()
+            tags, mime = self._collect()
             duration = self._query_duration()
             seekable = self._query_seekable()
         finally:
             self._reset()
 
-        return Result(uri, tags, duration, seekable)
+        return Result(uri, tags, duration, seekable, mime)
 
     def _setup(self, uri):
         """Primes the pipeline for collection."""
         protocol = gst.uri_get_protocol(uri)
         if self._src and protocol not in self._src.get_protocols():
-            self._src.unlink(self._decodebin)
+            self._src.unlink(self._typefinder)
             self._pipe.remove(self._src)
             self._src = None
 
@@ -83,8 +94,7 @@ class Scanner(object):
             self._src = gst.element_make_from_uri(gst.URI_SRC, uri)
             utils.setup_proxy(self._src, self._proxy_config)
             self._pipe.add(self._src)
-            self._src.sync_state_with_parent()
-            self._src.link(self._decodebin)
+            self._src.link(self._typefinder)
 
         self._pipe.set_state(gst.STATE_READY)
         self._src.set_uri(uri)
@@ -98,7 +108,7 @@ class Scanner(object):
         """Polls for messages to collect data."""
         start = time.time()
         timeout_s = self._timeout_ms / 1000.0
-        tags = {}
+        tags, mime = {}, None
 
         while time.time() - start < timeout_s:
             if not self._bus.have_pending():
@@ -109,14 +119,18 @@ class Scanner(object):
                 if gst.pbutils.is_missing_plugin_message(message):
                     description = _missing_plugin_desc(message)
                     raise exceptions.ScannerError(description)
+            elif message.type == gst.MESSAGE_APPLICATION:
+                mime = message.structure.get_name()
+                if mime.startswith('text/') or mime == 'application/xml':
+                    return tags, mime
             elif message.type == gst.MESSAGE_ERROR:
                 raise exceptions.ScannerError(
                     encoding.locale_decode(message.parse_error()[0]))
             elif message.type == gst.MESSAGE_EOS:
-                return tags
+                return tags, mime
             elif message.type == gst.MESSAGE_ASYNC_DONE:
                 if message.src == self._pipe:
-                    return tags
+                    return tags, mime
             elif message.type == gst.MESSAGE_TAG:
                 taglist = message.parse_tag()
                 # Note that this will only keep the last tag.
