@@ -133,7 +133,8 @@ class ScanCommand(commands.Command):
             try:
                 relpath = translator.local_track_uri_to_path(uri, media_dir)
                 file_uri = path.path_to_uri(os.path.join(media_dir, relpath))
-                tags, duration = scanner.scan(file_uri)
+                result = scanner.scan(file_uri)
+                tags, duration = result.tags, result.duration
                 if duration < MIN_DURATION_MS:
                     logger.warning('Failed %s: Track shorter than %dms',
                                    uri, MIN_DURATION_MS)

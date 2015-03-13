@@ -154,6 +154,13 @@ v0.20.0 (UNRELEASED)
 
   - Update scanner to operate with milliseconds for duration.
 
+  - Update scanner to use a custom src, typefind and decodebin. This allows us
+    to catch playlists before we try to decode them.
+
+  - Refactored scanner to create a new pipeline per song, this is needed as
+    reseting decodebin is much slower than tearing it down and making a fresh
+    one.
+
 - Add :meth:`mopidy.audio.AudioListener.tags_changed`. Notifies core when new tags
   are found.
 
@@ -172,6 +179,12 @@ v0.20.0 (UNRELEASED)
 
 - Add workaround for volume not persisting across tracks on OS X.
   (Issue: :issue:`886`, PR: :issue:`958`)
+
+- Improved missing plugin error reporting in scanner.
+
+- Introduced a new return type for the scanner, a named tuple with ``uri``,
+  ``tags``, ``duration``, ``seekable`` and ``mime``. Also added support for
+  checking seekable, and the initial MIME type guess.
 
 **Stream backend**
 
