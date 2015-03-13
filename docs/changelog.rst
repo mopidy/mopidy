@@ -40,6 +40,10 @@ v0.20.0 (UNRELEASED)
 - Add :meth:`mopidy.core.LibraryController.get_distinct` for getting unique
   values for a given field. (Fixes: :issue:`913`, PR: :issue:`1022`)
 
+- Add :meth:`mopidy.core.Listener.stream_title_changed` and
+  :meth:`mopidy.core.PlaybackController.get_stream_title` for letting clients
+  know about the current song in streams.
+
 **Commands**
 
 - Make the ``mopidy`` command print a friendly error message if the
@@ -113,6 +117,9 @@ v0.20.0 (UNRELEASED)
 
 - Switch the ``list`` command over to using
   :meth:`mopidy.core.LibraryController.get_distinct`. (Fixes: :issue:`913`)
+
+- Start setting the ``Name`` field which is used for radio streams.
+  (Fixes: :issue:`944`)
 
 **HTTP frontend**
 
