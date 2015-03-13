@@ -109,6 +109,10 @@ class DummyAudio(pykka.ThreadingActor):
     def trigger_fake_playback_failure(self):
         self._state_change_result = False
 
+    def trigger_fake_tags_changed(self, tags):
+        self._tags = tags
+        audio.AudioListener.send('tags_changed', tags=self._tags.keys())
+
     def get_about_to_finish_callback(self):
         # This needs to be called from outside the actor or we lock up.
         def wrapper():

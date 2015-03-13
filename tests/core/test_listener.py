@@ -58,5 +58,5 @@ class CoreListenerTest(unittest.TestCase):
     def test_listener_has_default_impl_for_seeked(self):
         self.listener.seeked(0)
 
-    def test_listener_has_default_impl_for_current_metadata_changed(self):
-        self.listener.current_metadata_changed()
+    def test_listener_has_default_impl_for_stream_title_changed(self):
+        self.listener.stream_title_changed('foobar')

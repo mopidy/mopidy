@@ -20,7 +20,7 @@ class PlaybackController(object):
         self.core = core
 
         self._current_tl_track = None
-        self._current_metadata_track = None
+        self._stream_title = None
         self._state = PlaybackState.STOPPED
 
     def _get_backend(self):
@@ -73,20 +73,9 @@ class PlaybackController(object):
         Use :meth:`get_current_track` instead.
     """
 
-    def get_current_metadata_track(self):
-        """
-        Get a :class:`mopidy.models.TlTrack` with updated metadata for the
-        currently playing track.
-
-        Returns :class:`None` if no track is currently playing.
-        """
-        return self._current_metadata_track
-
-    current_metadata_track = deprecated_property(get_current_metadata_track)
-    """
-    .. deprecated:: 0.20
-        Use :meth:`get_current_metadata_track` instead.
-    """
+    def get_stream_title(self):
+        """Get the current stream title or :class:`None`."""
+        return self._stream_title
 
     def get_state(self):
         """Get The playback state."""
@@ -243,6 +232,9 @@ class PlaybackController(object):
         if self.get_current_tl_track() not in tracklist:
             self.stop()
             self.set_current_tl_track(None)
+
+    def on_stream_changed(self, uri):
+        self._stream_title = None
 
     def next(self):
         """

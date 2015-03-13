@@ -74,5 +74,5 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
     def mute_changed(self, mute):
         self.send_idle('output')
 
-    def current_metadata_changed(self):
+    def stream_title_changed(self, title):
         self.send_idle('playlist')

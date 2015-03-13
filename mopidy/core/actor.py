@@ -7,7 +7,6 @@ import pykka
 
 from mopidy import audio, backend, mixer
 from mopidy.audio import PlaybackState
-from mopidy.audio.utils import convert_tags_to_track
 from mopidy.core.history import HistoryController
 from mopidy.core.library import LibraryController
 from mopidy.core.listener import CoreListener
@@ -15,7 +14,6 @@ from mopidy.core.mixer import MixerController
 from mopidy.core.playback import PlaybackController
 from mopidy.core.playlists import PlaylistsController
 from mopidy.core.tracklist import TracklistController
-from mopidy.models import TlTrack, Track
 from mopidy.utils import versioning
 from mopidy.utils.deprecation import deprecated_property
 
@@ -88,6 +86,9 @@ class Core(
     def reached_end_of_stream(self):
         self.playback.on_end_of_track()
 
+    def stream_changed(self, uri):
+        self.playback.on_stream_changed(uri)
+
     def state_changed(self, old_state, new_state, target_state):
         # XXX: This is a temporary fix for issue #232 while we wait for a more
         # permanent solution with the implementation of issue #234. When the
@@ -116,30 +117,16 @@ class Core(
         CoreListener.send('mute_changed', mute=mute)
 
     def tags_changed(self, tags):
-        if not self.audio:
-            return
-
-        current_tl_track = self.playback.get_current_tl_track()
-        if current_tl_track is None:
+        if not self.audio or 'title' not in tags:
             return
 
         tags = self.audio.get_current_tags().get()
-        if not tags:
+        if not tags or 'title' not in tags or not tags['title']:
             return
 
-        current_track = current_tl_track.track
-        tags_track = convert_tags_to_track(tags)
-
-        track_kwargs = {k: v for k, v in current_track.__dict__.items() if v}
-        track_kwargs.update(
-            {k: v for k, v in tags_track.__dict__.items() if v})
-
-        self.playback._current_metadata_track = TlTrack(**{
-            'tlid': current_tl_track.tlid,
-            'track': Track(**track_kwargs)})
-
-        # TODO Move this into playback.current_metadata_track setter?
-        CoreListener.send('current_metadata_changed')
+        title = tags['title'][0]
+        self.playback._stream_title = title
+        CoreListener.send('stream_title_changed', title=title)
 
 
 class Backends(list):
