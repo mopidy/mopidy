@@ -125,9 +125,12 @@ def _process(pipeline, timeout_ms):
     timeout = timeout_ms * gst.MSECOND
     tags, mime, missing_description = {}, None, None
 
+    types = (gst.MESSAGE_ELEMENT | gst.MESSAGE_APPLICATION | gst.MESSAGE_ERROR
+             | gst.MESSAGE_EOS | gst.MESSAGE_ASYNC_DONE | gst.MESSAGE_TAG)
+
     start = clock.get_time()
     while timeout > 0:
-        message = bus.timed_pop(timeout)
+        message = bus.timed_pop_filtered(timeout, types)
 
         if message is None:
             break
