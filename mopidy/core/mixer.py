@@ -11,8 +11,6 @@ class MixerController(object):
 
     def __init__(self, mixer):
         self._mixer = mixer
-        self._volume = None
-        self._mute = False
 
     def get_volume(self):
         """Get the volume.
@@ -27,12 +25,15 @@ class MixerController(object):
     def set_volume(self, volume):
         """Set the volume.
 
-        The volume is defined as an integer in range [0..100].
+        The volume is defined as an integer in range [0..100] or :class:`None`
+        if the mixer is disabled.
 
         The volume scale is linear.
         """
-        if self._mixer is not None:
-            self._mixer.set_volume(volume)
+        if self._mixer is None:
+            return False
+        else:
+            return self._mixer.set_volume(volume).get()
 
     def get_mute(self):
         """Get mute state.
@@ -40,13 +41,19 @@ class MixerController(object):
         :class:`True` if muted, :class:`False` unmuted, :class:`None` if
         unknown.
         """
-        if self._mixer is not None:
+        if self._mixer is None:
+            return False
+        else:
             return self._mixer.get_mute().get()
 
     def set_mute(self, mute):
         """Set mute state.
 
         :class:`True` to mute, :class:`False` to unmute.
+
+        Returns :class:`True` if call is successful, otherwise :class:`False`.
         """
-        if self._mixer is not None:
-            self._mixer.set_mute(bool(mute))
+        if self._mixer is None:
+            return False
+        else:
+            return self._mixer.set_mute(bool(mute)).get()
