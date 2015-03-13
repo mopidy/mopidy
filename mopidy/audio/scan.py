@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division, unicode_literals
 
 import collections
-import time
 
 import pygst
 pygst.require('0.10')
@@ -31,7 +30,7 @@ class Scanner(object):
     """
 
     def __init__(self, timeout=1000, proxy_config=None):
-        self._timeout_ms = timeout
+        self._timeout_ms = int(timeout)
         self._proxy_config = proxy_config or {}
 
     def scan(self, uri):
@@ -52,7 +51,7 @@ class Scanner(object):
 
         try:
             _start_pipeline(pipeline)
-            tags, mime = _process(pipeline, self._timeout_ms / 1000.0)
+            tags, mime = _process(pipeline, self._timeout_ms)
             duration = _query_duration(pipeline)
             seekable = _query_seekable(pipeline)
         finally:
@@ -120,17 +119,19 @@ def _query_seekable(pipeline):
     return query.parse_seeking()[1]
 
 
-def _process(pipeline, timeout):
-    start = time.time()
-    tags, mime, missing_description = {}, None, None
+def _process(pipeline, timeout_ms):
+    clock = pipeline.get_clock()
     bus = pipeline.get_bus()
+    timeout = timeout_ms * gst.MSECOND
+    tags, mime, missing_description = {}, None, None
 
-    while time.time() - start < timeout:
-        if not bus.have_pending():
-            continue
-        message = bus.pop()
+    start = clock.get_time()
+    while timeout > 0:
+        message = bus.timed_pop(timeout)
 
-        if message.type == gst.MESSAGE_ELEMENT:
+        if message is None:
+            break
+        elif message.type == gst.MESSAGE_ELEMENT:
             if gst.pbutils.is_missing_plugin_message(message):
                 missing_description = encoding.locale_decode(
                     _missing_plugin_desc(message))
@@ -153,4 +154,6 @@ def _process(pipeline, timeout):
             # Note that this will only keep the last tag.
             tags.update(utils.convert_taglist(taglist))
 
-    raise exceptions.ScannerError('Timeout after %dms' % (timeout * 1000))
+        timeout -= clock.get_time() - start
+
+    raise exceptions.ScannerError('Timeout after %dms' % timeout_ms)
