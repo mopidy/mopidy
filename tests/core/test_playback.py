@@ -7,7 +7,7 @@ import mock
 import pykka
 
 from mopidy import backend, core
-from mopidy.models import Ref, Track
+from mopidy.models import Track
 
 from tests import dummy_audio as audio
 
