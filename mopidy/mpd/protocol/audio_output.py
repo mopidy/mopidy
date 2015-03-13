@@ -14,7 +14,7 @@ def disableoutput(context, outputid):
     """
     if outputid == 0:
         success = context.core.mixer.set_mute(False).get()
-        if success is False:
+        if not success:
             raise exceptions.MpdSystemError('problems disabling output')
     else:
         raise exceptions.MpdNoExistError('No such audio output')
@@ -31,7 +31,7 @@ def enableoutput(context, outputid):
     """
     if outputid == 0:
         success = context.core.mixer.set_mute(True).get()
-        if success is False:
+        if not success:
             raise exceptions.MpdSystemError('problems enabling output')
     else:
         raise exceptions.MpdNoExistError('No such audio output')
@@ -49,7 +49,7 @@ def toggleoutput(context, outputid):
     if outputid == 0:
         mute_status = context.core.mixer.get_mute().get()
         success = context.core.mixer.set_mute(not mute_status)
-        if success is False:
+        if not success:
             raise exceptions.MpdSystemError('problems toggling output')
     else:
         raise exceptions.MpdNoExistError('No such audio output')

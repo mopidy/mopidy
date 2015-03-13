@@ -397,7 +397,7 @@ def setvol(context, volume):
     # NOTE: we use INT as clients can pass in +N etc.
     value = min(max(0, volume), 100)
     success = context.core.mixer.set_volume(value).get()
-    if success is False:
+    if not success:
         raise exceptions.MpdSystemError('problems setting volume')
 
 
