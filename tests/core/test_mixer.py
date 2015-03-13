@@ -42,17 +42,17 @@ class CoreNoneMixerTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
         self.core = core.Core(mixer=None, backends=[])
 
-    def test_get_volume_return_none(self):
+    def test_get_volume_return_none_because_it_is_unknown(self):
         self.assertEqual(self.core.mixer.get_volume(), None)
 
-    def test_set_volume_return_false(self):
+    def test_set_volume_return_false_because_it_failed(self):
         self.assertEqual(self.core.mixer.set_volume(30), False)
 
-    def test_get_set_mute_return_proper_state(self):
-        self.assertEqual(self.core.mixer.set_mute(False), False)
-        self.assertEqual(self.core.mixer.get_mute(), False)
+    def test_get_mute_return_none_because_it_is_unknown(self):
+        self.assertEqual(self.core.mixer.get_mute(), None)
+
+    def test_set_mute_return_false_because_it_failed(self):
         self.assertEqual(self.core.mixer.set_mute(True), False)
-        self.assertEqual(self.core.mixer.get_mute(), False)
 
 
 @mock.patch.object(mixer.MixerListener, 'send')

@@ -42,9 +42,7 @@ class MixerController(object):
         :class:`True` if muted, :class:`False` unmuted, :class:`None` if
         unknown.
         """
-        if self._mixer is None:
-            return False
-        else:
+        if self._mixer is not None:
             return self._mixer.get_mute().get()
 
     def set_mute(self, mute):
