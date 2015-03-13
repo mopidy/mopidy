@@ -5,7 +5,7 @@ import itertools
 
 import pykka
 
-from mopidy import audio, backend, mixer, models
+from mopidy import audio, backend, mixer
 from mopidy.audio import PlaybackState
 from mopidy.core.history import HistoryController
 from mopidy.core.library import LibraryController
@@ -124,8 +124,9 @@ class Core(
         if not tags or 'title' not in tags or not tags['title']:
             return
 
-        self.playback._stream_ref = models.Ref.track(name=tags['title'][0])
-        CoreListener.send('stream_changed')
+        title = tags['title'][0]
+        self.playback._stream_title = title
+        CoreListener.send('stream_title_changed', title=title)
 
 
 class Backends(list):

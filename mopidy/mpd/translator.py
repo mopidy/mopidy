@@ -15,7 +15,7 @@ def normalize_path(path, relative=False):
     return '/'.join(parts)
 
 
-def track_to_mpd_format(track, position=None, stream=None):
+def track_to_mpd_format(track, position=None, stream_title=None):
     """
     Format track for output to MPD client.
 
@@ -23,10 +23,8 @@ def track_to_mpd_format(track, position=None, stream=None):
     :type track: :class:`mopidy.models.Track` or :class:`mopidy.models.TlTrack`
     :param position: track's position in playlist
     :type position: integer
-    :param key: if we should set key
-    :type key: boolean
-    :param mtime: if we should set mtime
-    :type mtime: boolean
+    :param stream_title: The current streams title.
+    :type position: string
     :rtype: list of two-tuples
     """
     if isinstance(track, TlTrack):
@@ -42,8 +40,8 @@ def track_to_mpd_format(track, position=None, stream=None):
         ('Album', track.album and track.album.name or ''),
     ]
 
-    if stream and stream.name != track.name:
-        result.append(('Name', stream.name))
+    if stream_title:
+        result.append(('Name', stream_title))
 
     if track.date:
         result.append(('Date', track.date))

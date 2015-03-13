@@ -282,14 +282,14 @@ def plchanges(context, version):
     elif version == tracklist_version:
         # A version match could indicate this is just a metadata update, so
         # check for a stream ref and let the client know about the change.
-        stream_ref = context.core.playback.get_stream_reference().get()
-        if stream_ref is None:
+        stream_title = context.core.playback.get_stream_title().get()
+        if stream_title is None:
             return None
 
         tl_track = context.core.playback.current_tl_track.get()
         position = context.core.tracklist.index(tl_track).get()
         return translator.track_to_mpd_format(
-            tl_track, position=position, stream=stream_ref)
+            tl_track, position=position, stream_title=stream_title)
 
 
 @protocol.commands.add('plchangesposid', version=protocol.INT)

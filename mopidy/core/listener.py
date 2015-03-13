@@ -164,9 +164,9 @@ class CoreListener(listener.Listener):
         """
         pass
 
-    def stream_changed(self):
+    def stream_title_changed(self, title):
         """
-        Called whenever the currently playing stream changes.
+        Called whenever the currently playing stream title changes.
 
         *MAY* be implemented by actor.
         """

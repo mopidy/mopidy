@@ -571,45 +571,43 @@ class TestStream(unittest.TestCase):
             event, kwargs = self.events.pop(0)
             self.core.on_event(event, **kwargs)
 
-    def test_get_stream_reference_before_playback(self):
-        self.assertEqual(self.playback.get_stream_reference(), None)
+    def test_get_stream_title_before_playback(self):
+        self.assertEqual(self.playback.get_stream_title(), None)
 
-    def test_get_stream_reference_during_playback(self):
+    def test_get_stream_title_during_playback(self):
         self.core.playback.play()
 
         self.replay_audio_events()
-        self.assertEqual(self.playback.get_stream_reference(), None)
+        self.assertEqual(self.playback.get_stream_title(), None)
 
-    def test_get_stream_reference_during_playback_with_tags_change(self):
+    def test_get_stream_title_during_playback_with_tags_change(self):
         self.core.playback.play()
         self.audio.trigger_fake_tags_changed({'title': ['foobar']}).get()
 
         self.replay_audio_events()
-        expected = Ref.track(name='foobar')
-        self.assertEqual(self.playback.get_stream_reference(), expected)
+        self.assertEqual(self.playback.get_stream_title(), 'foobar')
 
-    def test_get_stream_reference_after_next(self):
+    def test_get_stream_title_after_next(self):
         self.core.playback.play()
         self.audio.trigger_fake_tags_changed({'title': ['foobar']}).get()
         self.core.playback.next()
 
         self.replay_audio_events()
-        self.assertEqual(self.playback.get_stream_reference(), None)
+        self.assertEqual(self.playback.get_stream_title(), None)
 
-    def test_get_stream_reference_after_next_with_tags_change(self):
+    def test_get_stream_title_after_next_with_tags_change(self):
         self.core.playback.play()
         self.audio.trigger_fake_tags_changed({'title': ['foo']}).get()
         self.core.playback.next()
         self.audio.trigger_fake_tags_changed({'title': ['bar']}).get()
 
         self.replay_audio_events()
-        expected = Ref.track(name='bar')
-        self.assertEqual(self.playback.get_stream_reference(), expected)
+        self.assertEqual(self.playback.get_stream_title(), 'bar')
 
-    def test_get_stream_reference_after_stop(self):
+    def test_get_stream_title_after_stop(self):
         self.core.playback.play()
         self.audio.trigger_fake_tags_changed({'title': ['foobar']}).get()
         self.core.playback.stop()
 
         self.replay_audio_events()
-        self.assertEqual(self.playback.get_stream_reference(), None)
+        self.assertEqual(self.playback.get_stream_title(), None)
