@@ -13,7 +13,9 @@ def disableoutput(context, outputid):
         Turns an output off.
     """
     if outputid == 0:
-        context.core.mixer.set_mute(False)
+        success = context.core.mixer.set_mute(False).get()
+        if not success:
+            raise exceptions.MpdSystemError('problems disabling output')
     else:
         raise exceptions.MpdNoExistError('No such audio output')
 
@@ -28,13 +30,14 @@ def enableoutput(context, outputid):
         Turns an output on.
     """
     if outputid == 0:
-        context.core.mixer.set_mute(True)
+        success = context.core.mixer.set_mute(True).get()
+        if not success:
+            raise exceptions.MpdSystemError('problems enabling output')
     else:
         raise exceptions.MpdNoExistError('No such audio output')
 
 
-# TODO: implement and test
-# @protocol.commands.add('toggleoutput', outputid=protocol.UINT)
+@protocol.commands.add('toggleoutput', outputid=protocol.UINT)
 def toggleoutput(context, outputid):
     """
     *musicpd.org, audio output section:*
@@ -43,7 +46,13 @@ def toggleoutput(context, outputid):
 
         Turns an output on or off, depending on the current state.
     """
-    pass
+    if outputid == 0:
+        mute_status = context.core.mixer.get_mute().get()
+        success = context.core.mixer.set_mute(not mute_status)
+        if not success:
+            raise exceptions.MpdSystemError('problems toggling output')
+    else:
+        raise exceptions.MpdNoExistError('No such audio output')
 
 
 @protocol.commands.add('outputs')

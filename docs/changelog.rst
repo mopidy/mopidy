@@ -61,6 +61,9 @@ v0.20.0 (UNRELEASED)
 
 - Add debug logging of unknown sections. (Fixes: :issue:`694`, PR: :issue:`1002`)
 
+- Add support for configuring :confval:`audio/mixer` to ``none``. (Fixes:
+  :issue:`936`)
+
 **Logging**
 
 - Add custom log level ``TRACE`` (numerical level 5), which can be used by
@@ -78,7 +81,7 @@ v0.20.0 (UNRELEASED)
 - Add support for giving local libraries direct access to tags and duration.
   (Fixes: :issue:`967`)
 
-- Add "--force" option for local scan (Fixes: :issue:'910', PR: :issue:'1010')
+- Add "--force" option for local scan (Fixes: :issue:`910`, PR: :issue:`1010`)
 
 - Stop ignoring ``offset`` and ``limit`` in searches. (Fixes: :issue:`917`,
   PR: :issue:`949`)
@@ -91,6 +94,9 @@ v0.20.0 (UNRELEASED)
   PR: :issue:`995` and rebased into :issue:`1000`)
 
 - Sort local playlists by name. (Fixes: :issue:`1026`, PR: :issue:`1028`)
+
+- Add :meth:`mopidy.local.Library.get_images` for looking up images
+  for local URIs. (Fixes: :issue:`1031`, PR: :issue:`1032`)
 
 **File scanner**
 
@@ -117,6 +123,10 @@ v0.20.0 (UNRELEASED)
 
 - Switch the ``list`` command over to using
   :meth:`mopidy.core.LibraryController.get_distinct`. (Fixes: :issue:`913`)
+
+- Add support for ``toggleoutput`` command. The ``mixrampdb`` and
+  ``mixrampdelay`` commands are now supported but throw a NotImplemented
+  exception.
 
 - Start setting the ``Name`` field which is used for radio streams.
   (Fixes: :issue:`944`)
@@ -151,6 +161,13 @@ v0.20.0 (UNRELEASED)
 
   - Update scanner to operate with milliseconds for duration.
 
+  - Update scanner to use a custom src, typefind and decodebin. This allows us
+    to catch playlists before we try to decode them.
+
+  - Refactored scanner to create a new pipeline per song, this is needed as
+    reseting decodebin is much slower than tearing it down and making a fresh
+    one.
+
 - Add :meth:`mopidy.audio.AudioListener.tags_changed`. Notifies core when new tags
   are found.
 
@@ -169,6 +186,12 @@ v0.20.0 (UNRELEASED)
 
 - Add workaround for volume not persisting across tracks on OS X.
   (Issue: :issue:`886`, PR: :issue:`958`)
+
+- Improved missing plugin error reporting in scanner.
+
+- Introduced a new return type for the scanner, a named tuple with ``uri``,
+  ``tags``, ``duration``, ``seekable`` and ``mime``. Also added support for
+  checking seekable, and the initial MIME type guess.
 
 **Stream backend**
 

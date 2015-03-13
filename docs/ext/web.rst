@@ -30,17 +30,21 @@ To install, run::
     pip install Mopidy-API-Explorer
 
 
-Mopidy-HTTP-Kuechenradio
-=========================
+Mopidy-Mobile
+=============
 
-https://github.com/tkem/mopidy-http-kuechenradio
+https://github.com/tkem/mopidy-mobile
 
-A deliberately simple Mopidy Web client for mobile devices. Made with jQuery
-Mobile by Thomas Kemmer.
+A Mopidy Web client extension and hybrid mobile app, made with Ionic,
+AngularJS and Apache Cordova by Thomas Kemmer.
+
+.. image:: /ext/mobile.png
+    :width: 1024
+    :height: 606
 
 To install, run::
 
-    pip install Mopidy-HTTP-Kuechenradio
+    pip install Mopidy-Mobile
 
 
 Mopidy-Moped

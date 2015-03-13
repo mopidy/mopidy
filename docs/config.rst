@@ -70,6 +70,8 @@ Audio configuration
     will affect the audio volume if you're streaming the audio from Mopidy
     through Shoutcast.
 
+    If you want to disable audio mixing set the value to ``none``.
+
     If you want to use a hardware mixer, you need to install a Mopidy extension
     which integrates with your sound subsystem. E.g. for ALSA, install
     `Mopidy-ALSAMixer <https://github.com/mopidy/mopidy-alsamixer>`_.
