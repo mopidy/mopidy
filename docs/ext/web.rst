@@ -31,7 +31,7 @@ To install, run::
 
 
 Mopidy-Mobile
-=========================
+=============
 
 https://github.com/tkem/mopidy-mobile
 
