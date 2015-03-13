@@ -11,7 +11,7 @@ import pykka
 
 from mopidy import core
 from mopidy.local import actor, json
-from mopidy.models import Album, Artist, Track
+from mopidy.models import Album, Artist, Image, Track
 
 from tests import path_to_data_dir
 
@@ -580,3 +580,30 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
         with self.assertRaises(LookupError):
             self.library.search(any=[''])
+
+    def test_default_get_images_impl_no_images(self):
+        result = self.library.get_images([track.uri for track in self.tracks])
+        self.assertEqual(result, {track.uri: tuple() for track in self.tracks})
+
+    @mock.patch.object(json.JsonLibrary, 'lookup')
+    def test_default_get_images_impl_album_images(self, mock_lookup):
+        library = actor.LocalBackend(config=self.config, audio=None).library
+
+        image = Image(uri='imageuri')
+        album = Album(images=[image.uri])
+        track = Track(uri='trackuri', album=album)
+        mock_lookup.return_value = [track]
+
+        result = library.get_images([track.uri])
+        self.assertEqual(result, {track.uri: [image]})
+
+    @mock.patch.object(json.JsonLibrary, 'get_images')
+    def test_local_library_get_images(self, mock_get_images):
+        library = actor.LocalBackend(config=self.config, audio=None).library
+
+        image = Image(uri='imageuri')
+        track = Track(uri='trackuri')
+        mock_get_images.return_value = {track.uri: [image]}
+
+        result = library.get_images([track.uri])
+        self.assertEqual(result, {track.uri: [image]})

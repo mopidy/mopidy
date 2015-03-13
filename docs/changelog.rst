@@ -88,6 +88,9 @@ v0.20.0 (UNRELEASED)
 
 - Sort local playlists by name. (Fixes: :issue:`1026`, PR: :issue:`1028`)
 
+- Add :meth:`mopidy.local.Library.get_images` for looking up images
+  for local URIs. (Fixes: :issue:`1031`, PR: :issue:`1032`)
+
 **File scanner**
 
 - Improve error logging for scan code (Fixes: :issue:`856`, PR: :issue:`874`)

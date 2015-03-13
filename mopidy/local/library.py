@@ -28,6 +28,11 @@ class LocalLibraryProvider(backend.LibraryProvider):
             return set()
         return self._library.get_distinct(field, query)
 
+    def get_images(self, uris):
+        if not self._library:
+            return {}
+        return self._library.get_images(uris)
+
     def refresh(self, uri=None):
         if not self._library:
             return 0

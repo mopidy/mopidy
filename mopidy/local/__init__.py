@@ -4,7 +4,7 @@ import logging
 import os
 
 import mopidy
-from mopidy import config, ext
+from mopidy import config, ext, models
 
 logger = logging.getLogger(__name__)
 
@@ -100,6 +100,27 @@ class Library(object):
         :rtype: set of values corresponding to the requested field type.
         """
         return set()
+
+    def get_images(self, uris):
+        """
+        Lookup the images for the given URIs.
+
+        The default implementation will simply call :meth:`lookup` and
+        try and use the album art for any tracks returned. Most local
+        libraries should replace this with something smarter or simply
+        return an empty dictionary.
+
+        :param list uris: list of URIs to find images for
+        :rtype: {uri: tuple of :class:`mopidy.models.Image`}
+        """
+        result = {}
+        for uri in uris:
+            image_uris = set()
+            for track in self.lookup(uri):
+                if track.album and track.album.images:
+                    image_uris.update(track.album.images)
+            result[uri] = [models.Image(uri=u) for u in image_uris]
+        return result
 
     def load(self):
         """
