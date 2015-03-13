@@ -378,9 +378,10 @@ class Track(ImmutableObject):
     #: The MusicBrainz ID of the track. Read-only.
     musicbrainz_id = None
 
-    #: Integer representing when the track was last modified, exact meaning
-    #: depends on source of track. For local files this is the mtime, for other
-    #: backends it could be a timestamp or simply a version counter.
+    #: Integer representing when the track was last modified. Exact meaning
+    #: depends on source of track. For local files this is the modification
+    #: time in milliseconds since Unix epoch. For other backends it could be an
+    #: equivalent timestamp or simply a version counter.
     last_modified = None
 
     def __init__(self, *args, **kwargs):
