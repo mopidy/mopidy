@@ -25,10 +25,11 @@ class MixerController(object):
     def set_volume(self, volume):
         """Set the volume.
 
-        The volume is defined as an integer in range [0..100] or :class:`None`
-        if the mixer is disabled.
+        The volume is defined as an integer in range [0..100].
 
         The volume scale is linear.
+
+        Returns :class:`True` if call is successful, otherwise :class:`False`.
         """
         if self._mixer is None:
             return False
