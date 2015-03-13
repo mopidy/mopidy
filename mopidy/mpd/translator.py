@@ -23,7 +23,7 @@ def track_to_mpd_format(track, position=None, stream_title=None):
     :type track: :class:`mopidy.models.Track` or :class:`mopidy.models.TlTrack`
     :param position: track's position in playlist
     :type position: integer
-    :param stream_title: The current streams title.
+    :param stream_title: the current streams title
     :type position: string
     :rtype: list of two-tuples
     """
