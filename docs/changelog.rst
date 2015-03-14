@@ -30,7 +30,7 @@ v0.20.0 (UNRELEASED)
 
 - Add :class:`mopidy.core.MixerController` which keeps track of volume and
   mute. The old methods on :class:`mopidy.core.PlaybackController` for volume
-  and mute management has been deprecated. (Fixes: :issue:`962`)
+  and mute management have been deprecated. (Fixes: :issue:`962`)
 
 - Remove ``clear_current_track`` keyword argument to
   :meth:`mopidy.core.PlaybackController.stop`. It was a leaky internal
@@ -48,7 +48,7 @@ v0.20.0 (UNRELEASED)
 
 - Add :meth:`mopidy.core.Listener.stream_title_changed` and
   :meth:`mopidy.core.PlaybackController.get_stream_title` for letting clients
-  know about the current song in streams.
+  know about the current song in streams. (PR: :issue:`938`, :issue:`1030`)
 
 **Commands**
 
@@ -67,49 +67,48 @@ v0.20.0 (UNRELEASED)
 
 - Add debug logging of unknown sections. (Fixes: :issue:`694`, PR: :issue:`1002`)
 
-- Add support for configuring :confval:`audio/mixer` to ``none``. (Fixes:
-  :issue:`936`)
-
 **Logging**
 
 - Add custom log level ``TRACE`` (numerical level 5), which can be used by
   Mopidy and extensions to log at an even more detailed level than ``DEBUG``.
 
-- Add support for per logger color overrides. (Fixes: :issue:`808`)
+- Add support for per logger color overrides. (Fixes: :issue:`808`, PR:
+  :issue:`1005`)
 
 **Local backend**
 
-- Local library API: Implementors of :meth:`mopidy.local.Library.lookup` should
-  now return a list of :class:`~mopidy.models.Track` instead of a single track,
-  just like the other ``lookup()`` methods in Mopidy. For now, returning a
-  single track will continue to work. (PR: :issue:`840`)
+- Improve error logging for scanner. (Fixes: :issue:`856`, PR: :issue:`874`)
 
-- Add support for giving local libraries direct access to tags and duration.
-  (Fixes: :issue:`967`)
+- Add symlink support with loop protection to file finder. (Fixes:
+  :issue:`858`, PR: :issue:`874`)
 
-- Add "--force" option for local scan (Fixes: :issue:`910`, PR: :issue:`1010`)
+- Add ``--force`` option for ``mopidy local scan`` for forcing a full rescan of
+  the library. (Fixes: :issue:`910`, PR: :issue:`1010`)
 
-- Stop ignoring ``offset`` and ``limit`` in searches. (Fixes: :issue:`917`,
-  PR: :issue:`949`)
+- Stop ignoring ``offset`` and ``limit`` in searches when using the default
+  JSON backed local library. (Fixes: :issue:`917`, PR: :issue:`949`)
 
 - Removed double triggering of ``playlists_loaded`` event.
   (Fixes: :issue:`998`, PR: :issue:`999`)
 
 - Cleanup and refactoring of local playlist code. Preserves playlist names
-  better and fixes bug in deletion of playlists. (Fixes: :issue:`937`, 
+  better and fixes bug in deletion of playlists. (Fixes: :issue:`937`,
   PR: :issue:`995` and rebased into :issue:`1000`)
 
 - Sort local playlists by name. (Fixes: :issue:`1026`, PR: :issue:`1028`)
 
+**Local library API**
+
+- Implementors of :meth:`mopidy.local.Library.lookup` should now return a list
+  of :class:`~mopidy.models.Track` instead of a single track, just like the
+  other ``lookup()`` methods in Mopidy. For now, returning a single track will
+  continue to work. (PR: :issue:`840`)
+
+- Add support for giving local libraries direct access to tags and duration.
+  (Fixes: :issue:`967`)
+
 - Add :meth:`mopidy.local.Library.get_images` for looking up images
   for local URIs. (Fixes: :issue:`1031`, PR: :issue:`1032`)
-
-**File scanner**
-
-- Improve error logging for scan code (Fixes: :issue:`856`, PR: :issue:`874`)
-
-- Add symlink support with loop protection to file finder (Fixes: :issue:`858`,
-  PR: :issue:`874`)
 
 **MPD frontend**
 
@@ -128,25 +127,39 @@ v0.20.0 (UNRELEASED)
   :confval:`mpd/command_blacklist`.
 
 - Switch the ``list`` command over to using
-  :meth:`mopidy.core.LibraryController.get_distinct`. (Fixes: :issue:`913`)
+  :meth:`mopidy.core.LibraryController.get_distinct` for increased performance.
+  (Fixes: :issue:`913`)
 
-- Add support for ``toggleoutput`` command. The ``mixrampdb`` and
-  ``mixrampdelay`` commands are now supported but throw a NotImplemented
-  exception.
+- Add support for ``toggleoutput`` command. (PR: :issue:`1015`)
 
-- Start setting the ``Name`` field which is used for radio streams.
-  (Fixes: :issue:`944`)
+- The ``mixrampdb`` and ``mixrampdelay`` commands are now known to Mopidy, but
+  are not implemented. (PR: :issue:`1015`)
+
+- Start setting the ``Name`` field with the stream title when listening to
+  radio streams. (Fixes: :issue:`944`, PR: :issue:`1030`)
 
 **HTTP frontend**
 
-- Prevent race condition in webservice broadcast from breaking the server.
+- Prevent race condition in WebSocket broadcast from breaking the web server.
   (PR: :issue:`1020`)
+
+**Mixer**
+
+- Add support for disabling volume control in Mopidy entirely by setting the
+  configuration :confval:`audio/mixer` to ``none``. (Fixes: :issue:`936`, PR:
+  :issue:`1015`, :issue:`1035`)
 
 **Audio**
 
 - Deprecated :meth:`mopidy.audio.Audio.emit_end_of_stream`. Pass a
   :class:`None` buffer to :meth:`mopidy.audio.Audio.emit_data` to end the
   stream.
+
+- Kill support for visualizers. Feature was originally added as a workaround for
+  all the people asking for ncmpcpp visualizer support. And since we could get
+  it almost for free thanks to GStreamer. But this feature didn't really ever
+  make sense for a server such as Mopidy. Currently the only way to find out if
+  it is in use and will be missed is to go ahead and remove it.
 
 - Internal code cleanup within audio subsystem:
 
@@ -182,22 +195,20 @@ v0.20.0 (UNRELEASED)
 
 - Move and rename helper for converting tags to tracks.
 
-  - Helper now ignores albums without a name.
+- Ignore albums without a name when converting tags to tracks.
 
-- Kill support for visualizers. Feature was originally added as a workaround for
-  all the people asking for ncmpcpp visualizer support. And since we could get
-  it almost for free thanks to GStreamer. But this feature didn't really ever
-  make sense for a server such as Mopidy. Currently the only way to find out if
-  it is in use and will be missed is to go ahead and remove it.
+- Support UTF-8 in M3U playlists. (Fixes: :issue:`853`)
 
 - Add workaround for volume not persisting across tracks on OS X.
   (Issue: :issue:`886`, PR: :issue:`958`)
 
-- Improved missing plugin error reporting in scanner.
+- Improved missing plugin error reporting in scanner. (PR: :issue:`1033`)
 
 - Introduced a new return type for the scanner, a named tuple with ``uri``,
-  ``tags``, ``duration``, ``seekable`` and ``mime``. Also added support for
-  checking seekable, and the initial MIME type guess.
+  ``tags``, ``duration``, ``seekable`` and ``mime``. (PR: :issue:`1033`)
+
+- Added support for checking if the media is seekable, and getting the initial
+  MIME type guess. (PR: :issue:`1033`)
 
 **Stream backend**
 
@@ -221,17 +232,9 @@ This version has been released to npm as Mopidy.js v0.5.0.
 
 **Development**
 
+- Speed up event emitting.
+
 - Changed test runner from nose to py.test. (PR: :issue:`1024`)
-
-
-v0.19.6 (UNRELEASED)
-====================
-
-Bug fix release.
-
-- Audio: Support UTF-8 in M3U playlists. (Fixes: :issue:`853`)
-
-- Events: Speed up event emitting.
 
 
 v0.19.5 (2014-12-23)
