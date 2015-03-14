@@ -116,7 +116,11 @@ class Library(object):
         result = {}
         for uri in uris:
             image_uris = set()
-            for track in self.lookup(uri):
+            tracks = self.lookup(uri)
+            # local libraries may return single track
+            if isinstance(tracks, models.Track):
+                tracks = [tracks]
+            for track in tracks:
                 if track.album and track.album.images:
                     image_uris.update(track.album.images)
             result[uri] = [models.Image(uri=u) for u in image_uris]
