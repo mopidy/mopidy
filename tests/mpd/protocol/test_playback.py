@@ -273,7 +273,7 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.core.playback.seek(30000)
         self.assertGreaterEqual(
             self.core.playback.time_position.get(), 30000)
-        self.assertEquals(PLAYING, self.core.playback.state.get())
+        self.assertEqual(PLAYING, self.core.playback.state.get())
 
         self.send_request('play "-1"')
         self.assertEqual(PLAYING, self.core.playback.state.get())
@@ -286,9 +286,9 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.core.playback.seek(30000)
         self.assertGreaterEqual(
             self.core.playback.time_position.get(), 30000)
-        self.assertEquals(PLAYING, self.core.playback.state.get())
+        self.assertEqual(PLAYING, self.core.playback.state.get())
         self.core.playback.pause()
-        self.assertEquals(PAUSED, self.core.playback.state.get())
+        self.assertEqual(PAUSED, self.core.playback.state.get())
 
         self.send_request('play "-1"')
         self.assertEqual(PLAYING, self.core.playback.state.get())
@@ -347,7 +347,7 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.core.playback.seek(30000)
         self.assertGreaterEqual(
             self.core.playback.time_position.get(), 30000)
-        self.assertEquals(PLAYING, self.core.playback.state.get())
+        self.assertEqual(PLAYING, self.core.playback.state.get())
 
         self.send_request('playid "-1"')
         self.assertEqual(PLAYING, self.core.playback.state.get())
@@ -360,9 +360,9 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.core.playback.seek(30000)
         self.assertGreaterEqual(
             self.core.playback.time_position.get(), 30000)
-        self.assertEquals(PLAYING, self.core.playback.state.get())
+        self.assertEqual(PLAYING, self.core.playback.state.get())
         self.core.playback.pause()
-        self.assertEquals(PAUSED, self.core.playback.state.get())
+        self.assertEqual(PAUSED, self.core.playback.state.get())
 
         self.send_request('playid "-1"')
         self.assertEqual(PLAYING, self.core.playback.state.get())

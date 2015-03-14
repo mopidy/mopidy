@@ -6,7 +6,7 @@ from tests.mpd import protocol
 class CommandListsTest(protocol.BaseTestCase):
     def test_command_list_begin(self):
         response = self.send_request('command_list_begin')
-        self.assertEquals([], response)
+        self.assertEqual([], response)
 
     def test_command_list_end(self):
         self.send_request('command_list_begin')
@@ -42,7 +42,7 @@ class CommandListsTest(protocol.BaseTestCase):
 
     def test_command_list_ok_begin(self):
         response = self.send_request('command_list_ok_begin')
-        self.assertEquals([], response)
+        self.assertEqual([], response)
 
     def test_command_list_ok_with_ping(self):
         self.send_request('command_list_ok_begin')

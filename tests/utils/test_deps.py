@@ -49,13 +49,13 @@ class DepsTest(unittest.TestCase):
     def test_platform_info(self):
         result = deps.platform_info()
 
-        self.assertEquals('Platform', result['name'])
+        self.assertEqual('Platform', result['name'])
         self.assertIn(platform.platform(), result['version'])
 
     def test_python_info(self):
         result = deps.python_info()
 
-        self.assertEquals('Python', result['name'])
+        self.assertEqual('Python', result['name'])
         self.assertIn(platform.python_implementation(), result['version'])
         self.assertIn(platform.python_version(), result['version'])
         self.assertIn('python', result['path'])
@@ -64,8 +64,8 @@ class DepsTest(unittest.TestCase):
     def test_gstreamer_info(self):
         result = deps.gstreamer_info()
 
-        self.assertEquals('GStreamer', result['name'])
-        self.assertEquals(
+        self.assertEqual('GStreamer', result['name'])
+        self.assertEqual(
             '.'.join(map(str, gst.get_gst_version())), result['version'])
         self.assertIn('gst', result['path'])
         self.assertNotIn('__init__.py', result['path'])
@@ -99,17 +99,17 @@ class DepsTest(unittest.TestCase):
 
         result = deps.pkg_info()
 
-        self.assertEquals('Mopidy', result['name'])
-        self.assertEquals('0.13', result['version'])
+        self.assertEqual('Mopidy', result['name'])
+        self.assertEqual('0.13', result['version'])
         self.assertIn('mopidy', result['path'])
 
         dep_info_pykka = result['dependencies'][0]
-        self.assertEquals('Pykka', dep_info_pykka['name'])
-        self.assertEquals('1.1', dep_info_pykka['version'])
+        self.assertEqual('Pykka', dep_info_pykka['name'])
+        self.assertEqual('1.1', dep_info_pykka['version'])
 
         dep_info_setuptools = dep_info_pykka['dependencies'][0]
-        self.assertEquals('setuptools', dep_info_setuptools['name'])
-        self.assertEquals('0.6', dep_info_setuptools['version'])
+        self.assertEqual('setuptools', dep_info_setuptools['name'])
+        self.assertEqual('0.6', dep_info_setuptools['version'])
 
     @mock.patch('pkg_resources.get_distribution')
     def test_pkg_info_for_missing_dist(self, get_distribution_mock):
@@ -117,7 +117,7 @@ class DepsTest(unittest.TestCase):
 
         result = deps.pkg_info()
 
-        self.assertEquals('Mopidy', result['name'])
+        self.assertEqual('Mopidy', result['name'])
         self.assertNotIn('version', result)
         self.assertNotIn('path', result)
 
@@ -127,6 +127,6 @@ class DepsTest(unittest.TestCase):
 
         result = deps.pkg_info()
 
-        self.assertEquals('Mopidy', result['name'])
+        self.assertEqual('Mopidy', result['name'])
         self.assertNotIn('version', result)
         self.assertNotIn('path', result)

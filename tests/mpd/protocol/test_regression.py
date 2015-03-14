@@ -29,21 +29,21 @@ class IssueGH17RegressionTest(protocol.BaseTestCase):
         random.seed(1)  # Playlist order: abcfde
 
         self.send_request('play')
-        self.assertEquals(
+        self.assertEqual(
             'dummy:a', self.core.playback.current_track.get().uri)
         self.send_request('random "1"')
         self.send_request('next')
-        self.assertEquals(
+        self.assertEqual(
             'dummy:b', self.core.playback.current_track.get().uri)
         self.send_request('next')
         # Should now be at track 'c', but playback fails and it skips ahead
-        self.assertEquals(
+        self.assertEqual(
             'dummy:f', self.core.playback.current_track.get().uri)
         self.send_request('next')
-        self.assertEquals(
+        self.assertEqual(
             'dummy:d', self.core.playback.current_track.get().uri)
         self.send_request('next')
-        self.assertEquals(
+        self.assertEqual(
             'dummy:e', self.core.playback.current_track.get().uri)
 
 

@@ -310,7 +310,7 @@ class LocalTracklistProviderTest(unittest.TestCase):
     def test_version_does_not_change_when_adding_nothing(self):
         version = self.controller.version
         self.controller.add([])
-        self.assertEquals(version, self.controller.version)
+        self.assertEqual(version, self.controller.version)
 
     def test_version_increases_when_adding_something(self):
         version = self.controller.version

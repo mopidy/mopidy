@@ -629,23 +629,23 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
         methods = inspector.describe()
 
         self.assertIn('core.get_uri_schemes', methods)
-        self.assertEquals(len(methods['core.get_uri_schemes']['params']), 0)
+        self.assertEqual(len(methods['core.get_uri_schemes']['params']), 0)
 
         self.assertIn('core.library.lookup', methods.keys())
-        self.assertEquals(
+        self.assertEqual(
             methods['core.library.lookup']['params'][0]['name'], 'uri')
 
         self.assertIn('core.playback.next', methods)
-        self.assertEquals(len(methods['core.playback.next']['params']), 0)
+        self.assertEqual(len(methods['core.playback.next']['params']), 0)
 
         self.assertIn('core.playlists.get_playlists', methods)
-        self.assertEquals(
+        self.assertEqual(
             len(methods['core.playlists.get_playlists']['params']), 1)
 
         self.assertIn('core.tracklist.filter', methods.keys())
-        self.assertEquals(
+        self.assertEqual(
             methods['core.tracklist.filter']['params'][0]['name'], 'criteria')
-        self.assertEquals(
+        self.assertEqual(
             methods['core.tracklist.filter']['params'][1]['name'], 'kwargs')
-        self.assertEquals(
+        self.assertEqual(
             methods['core.tracklist.filter']['params'][1]['kwargs'], True)
