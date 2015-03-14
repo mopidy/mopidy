@@ -13,6 +13,12 @@ v0.20.0 (UNRELEASED)
 - Add :class:`mopidy.models.Image` model to be returned by
   :meth:`mopidy.core.LibraryController.get_images`. (Part of :issue:`973`)
 
+- Change the semantics of :attr:`mopidy.models.Track.last_modified` to be
+  milliseconds instead of seconds since Unix epoch, or a simple counter,
+  depending on the source of the track. This makes it match the semantics of
+  :attr:`mopidy.models.Playlist.last_modified`. (Fixes: :issue:`678`, PR:
+  :issue:`1036`)
+
 **Core API**
 
 - Deprecate all properties in the core API. The previously undocumented getter
