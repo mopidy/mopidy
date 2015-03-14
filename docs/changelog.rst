@@ -108,7 +108,7 @@ v0.20.0 (UNRELEASED)
   (Fixes: :issue:`967`)
 
 - Add :meth:`mopidy.local.Library.get_images` for looking up images
-  for local URIs. (Fixes: :issue:`1031`, PR: :issue:`1032`)
+  for local URIs. (Fixes: :issue:`1031`, PR: :issue:`1032` and :issue:`1037`)
 
 **MPD frontend**
 
