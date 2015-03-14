@@ -21,16 +21,18 @@ v0.20.0 (UNRELEASED)
 
 **Core API**
 
-- Deprecate all properties in the core API. The previously undocumented getter
-  and setter methods are now the official API. This aligns the Python API with
-  the WebSocket/JavaScript API. (Fixes: :issue:`952`)
+- **Deprecated:** Deprecate all properties in the core API. The previously
+  undocumented getter and setter methods are now the official API. This aligns
+  the Python API with the WebSocket/JavaScript API. (Fixes: :issue:`952`)
 
 - Add :class:`mopidy.core.HistoryController` which keeps track of what tracks
   have been played. (Fixes: :issue:`423`, PR: :issue:`803`)
 
 - Add :class:`mopidy.core.MixerController` which keeps track of volume and
-  mute. The old methods on :class:`mopidy.core.PlaybackController` for volume
-  and mute management have been deprecated. (Fixes: :issue:`962`)
+  mute. (Fixes: :issue:`962`)
+
+- **Deprecated:** The old methods on :class:`mopidy.core.PlaybackController` for
+  volume and mute management have been deprecated. (Fixes: :issue:`962`)
 
 - Remove ``clear_current_track`` keyword argument to
   :meth:`mopidy.core.PlaybackController.stop`. It was a leaky internal
@@ -155,9 +157,9 @@ v0.20.0 (UNRELEASED)
 
 **Audio**
 
-- Deprecated :meth:`mopidy.audio.Audio.emit_end_of_stream`. Pass a
-  :class:`None` buffer to :meth:`mopidy.audio.Audio.emit_data` to end the
-  stream.
+- **Deprecated:** Deprecated :meth:`mopidy.audio.Audio.emit_end_of_stream`.
+  Pass a :class:`None` buffer to :meth:`mopidy.audio.Audio.emit_data` to end
+  the stream.
 
 - Kill support for visualizers. Feature was originally added as a workaround for
   all the people asking for ncmpcpp visualizer support. And since we could get
