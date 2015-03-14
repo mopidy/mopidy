@@ -140,6 +140,10 @@ v0.20.0 (UNRELEASED)
 
 **HTTP frontend**
 
+- **Deprecated:** Deprecated the :confval:`http/static_dir` config. Please make
+  your web clients pip-installable Mopidy extensions to make it easier to
+  install for end users.
+
 - Prevent race condition in WebSocket broadcast from breaking the web server.
   (PR: :issue:`1020`)
 
