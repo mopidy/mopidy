@@ -61,6 +61,10 @@ v0.20.0 (UNRELEASED)
   to set the log level for all loggers to the lowest possible value, including
   log records at levels lover than ``DEBUG`` too.
 
+- Add path to the current ``mopidy`` executable to the output of ``mopidy
+  deps``. This make it easier to see that a user is using pip-installed Mopidy
+  instead of APT-installed Mopidy without asking for ``which mopidy`` output.
+
 **Configuration**
 
 - Add support for the log level value ``all`` to the loglevels configurations.

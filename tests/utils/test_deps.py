@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import platform
+import sys
 import unittest
 
 import mock
@@ -45,6 +46,12 @@ class DepsTest(unittest.TestCase):
         self.assertIn('Mopidy: 0.13', result)
         self.assertIn('  pylast: 0.5', result)
         self.assertIn('    setuptools: 0.6', result)
+
+    def test_executable_info(self):
+        result = deps.executable_info()
+
+        self.assertEqual('Executable', result['name'])
+        self.assertIn(sys.argv[0], result['version'])
 
     def test_platform_info(self):
         result = deps.platform_info()

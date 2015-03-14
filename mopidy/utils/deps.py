@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import functools
 import os
 import platform
+import sys
 
 import pygst
 pygst.require('0.10')
@@ -24,6 +25,7 @@ def format_dependency_list(adapters=None):
             for dist_name in dist_names]
 
         adapters = [
+            executable_info,
             platform_info,
             python_info,
             functools.partial(pkg_info, 'Mopidy', True)
@@ -61,6 +63,13 @@ def _format_dependency(dep_info):
                 formatting.indent(sub_dep_lines, places=2, singles=True))
 
     return '\n'.join(lines)
+
+
+def executable_info():
+    return {
+        'name': 'Executable',
+        'version': sys.argv[0],
+    }
 
 
 def platform_info():
