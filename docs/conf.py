@@ -35,6 +35,8 @@ class Mock(object):
             # glib.get_user_config_dir()
             return str
         elif (name[0] == name[0].upper() and
+                # gst.Caps
+                not name.startswith('Caps') and
                 # gst.PadTemplate
                 not name.startswith('PadTemplate') and
                 # dbus.String()
