@@ -38,6 +38,7 @@ class CorePlaybackTest(unittest.TestCase):
             Track(uri='dummy2:a', length=40000),
             Track(uri='dummy3:a', length=40000),  # Unplayable
             Track(uri='dummy1:b', length=40000),
+            Track(uri='dummy1:c', length=None),   # No duration
         ]
 
         self.core = core.Core(mixer=None, backends=[
@@ -46,6 +47,7 @@ class CorePlaybackTest(unittest.TestCase):
 
         self.tl_tracks = self.core.tracklist.tl_tracks
         self.unplayable_tl_track = self.tl_tracks[2]
+        self.duration_less_tl_track = self.tl_tracks[4]
 
     def test_get_current_tl_track_none(self):
         self.core.playback.set_current_tl_track(None)
@@ -471,6 +473,15 @@ class CorePlaybackTest(unittest.TestCase):
 
     def test_seek_fails_for_unplayable_track(self):
         self.core.playback.current_tl_track = self.unplayable_tl_track
+        self.core.playback.state = core.PlaybackState.PLAYING
+        success = self.core.playback.seek(1000)
+
+        self.assertFalse(success)
+        self.assertFalse(self.playback1.seek.called)
+        self.assertFalse(self.playback2.seek.called)
+
+    def test_seek_fails_for_track_without_duration(self):
+        self.core.playback.current_tl_track = self.duration_less_tl_track
         self.core.playback.state = core.PlaybackState.PLAYING
         success = self.core.playback.seek(1000)
 

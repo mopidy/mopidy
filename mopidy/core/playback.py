@@ -361,6 +361,9 @@ class PlaybackController(object):
         if not self.core.tracklist.tracks:
             return False
 
+        if self.current_track and self.current_track.length is None:
+            return False
+
         if self.get_state() == PlaybackState.STOPPED:
             self.play()
 
