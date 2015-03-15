@@ -325,7 +325,7 @@ class Track(ImmutableObject):
     :param date: track release date (YYYY or YYYY-MM-DD)
     :type date: string
     :param length: track length in milliseconds
-    :type length: integer
+    :type length: integer or :class:`None` if there is no duration
     :param bitrate: bitrate in kbit/s
     :type bitrate: integer
     :param comment: track comment

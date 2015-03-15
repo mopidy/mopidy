@@ -34,6 +34,8 @@ def track_to_mpd_format(track, position=None, stream_title=None):
 
     result = [
         ('file', track.uri or ''),
+        # TODO: only show length if not none, see:
+        # https://github.com/mopidy/mopidy/issues/923#issuecomment-79584110
         ('Time', track.length and (track.length // 1000) or 0),
         ('Artist', artists_to_mpd_format(track.artists)),
         ('Title', track.name or ''),
