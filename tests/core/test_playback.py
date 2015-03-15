@@ -582,6 +582,7 @@ class TestStream(unittest.TestCase):
 
     def test_get_stream_title_during_playback_with_tags_change(self):
         self.core.playback.play()
+        self.audio.trigger_fake_tags_changed({'organization': ['baz']})
         self.audio.trigger_fake_tags_changed({'title': ['foobar']}).get()
 
         self.replay_audio_events()
@@ -589,6 +590,7 @@ class TestStream(unittest.TestCase):
 
     def test_get_stream_title_after_next(self):
         self.core.playback.play()
+        self.audio.trigger_fake_tags_changed({'organization': ['baz']})
         self.audio.trigger_fake_tags_changed({'title': ['foobar']}).get()
         self.core.playback.next()
 
@@ -597,8 +599,10 @@ class TestStream(unittest.TestCase):
 
     def test_get_stream_title_after_next_with_tags_change(self):
         self.core.playback.play()
+        self.audio.trigger_fake_tags_changed({'organization': ['baz']})
         self.audio.trigger_fake_tags_changed({'title': ['foo']}).get()
         self.core.playback.next()
+        self.audio.trigger_fake_tags_changed({'organization': ['baz']})
         self.audio.trigger_fake_tags_changed({'title': ['bar']}).get()
 
         self.replay_audio_events()
@@ -606,6 +610,7 @@ class TestStream(unittest.TestCase):
 
     def test_get_stream_title_after_stop(self):
         self.core.playback.play()
+        self.audio.trigger_fake_tags_changed({'organization': ['baz']})
         self.audio.trigger_fake_tags_changed({'title': ['foobar']}).get()
         self.core.playback.stop()
 
