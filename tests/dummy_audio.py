@@ -110,7 +110,7 @@ class DummyAudio(pykka.ThreadingActor):
         self._state_change_result = False
 
     def trigger_fake_tags_changed(self, tags):
-        self._tags = tags
+        self._tags.update(tags)
         audio.AudioListener.send('tags_changed', tags=self._tags.keys())
 
     def get_about_to_finish_callback(self):

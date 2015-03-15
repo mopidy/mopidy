@@ -121,12 +121,16 @@ class Core(
             return
 
         tags = self.audio.get_current_tags().get()
-        if not tags or 'title' not in tags or not tags['title']:
+        if not tags:
             return
 
-        title = tags['title'][0]
-        self.playback._stream_title = title
-        CoreListener.send('stream_title_changed', title=title)
+        # TODO: this limits us to only streams that set organization, this is
+        # a hack to make sure we don't emit stream title changes for plain
+        # tracks. We need a better way to decide if something is a stream.
+        if 'title' in tags and tags['title'] and 'organization' in tags:
+            title = tags['title'][0]
+            self.playback._stream_title = title
+            CoreListener.send('stream_title_changed', title=title)
 
 
 class Backends(list):
