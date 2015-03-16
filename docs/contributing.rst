@@ -4,44 +4,81 @@
 Contributing
 ************
 
-If you are thinking about making Mopidy better, or you just want to hack on it,
-that’s great. Here are some tips to get you started.
+If you want to contribute to Mopidy, here are some tips to get you started.
 
 
-Getting started
-===============
+.. _asking-questions:
 
-#. Make sure you have a `GitHub account <https://github.com/signup/free>`_.
+Asking questions
+================
 
-#. If a ticket does not already exist `submit a ticket
-   <https://github.com/mopidy/mopidy/issues/new>`_ for your issue.
-   Make sure to clearly describe the issue, and if it is a bug: include steps
-   to reproduce.
+Please use one of these channels for requesting help with Mopidy and its
+extensions:
 
-#. Fork the repository on GitHub.
+- Our discussion forum: `discuss.mopidy.com <https://discuss.mopidy.com>`_.
+  Just sign in and fire away.
+
+- Our IRC channel: ``#mopidy`` on `irc.freenode.net <http://freenode.net>`_,
+  with public `searchable logs <https://botbot.me/freenode/mopidy/>`_. Be
+  prepared to hang around for a while, as we're not always around to answer
+  straight away.
+
+Before asking for help, it might be worth your time to read the
+:ref:`troubleshooting` page, both so you might find a solution to your problem
+but also to be able to provide useful details when asking for help.
 
 
-Making changes
-==============
+Helping users
+=============
 
-#. Clone your fork on GitHub to your computer.
+If you want to contribute to Mopidy, a great place to start is by helping other
+users on IRC and in the discussion forum. This is a contribution we value
+highly. As more people help with user support, new users get faster and better
+help. For your own benefit, you'll quickly learn what users find confusing,
+difficult or lacking, giving you some ideas for where you may contribute
+improvements, either to code or documentation. Lastly, this may also free up
+time for other contributors to spend more time on fixing bugs or implementing
+new features.
 
-#. Consider making a Python `virtualenv <http://www.virtualenv.org/>`_ for
-   Mopidy development to wall of Mopidy and it's dependencies from the rest of
-   your system. If you do so, create the virtualenv with the
-   ``--system-site-packages`` flag so that Mopidy can use globally installed
-   dependencies like GStreamer. If you don't use a virtualenv, you may need to
-   run the following ``pip`` and ``python setup.py`` commands with ``sudo`` to
-   install stuff globally on your computer.
 
-#. Install dependencies as described in the :ref:`installation` section.
+.. _issue-guidelines:
 
-#. Install additional development dependencies::
+Issue guidelines
+================
 
-       pip install -r dev-requirements.txt
+#. If you need help, see :ref:`asking-questions` above. The GitHub issue
+   tracker is not a support forum.
 
-#. Checkout a new branch (usually based on ``develop``) and name it accordingly
-   to what you intend to do.
+#. If you are not sure if is what you're experiencing is a bug or not, post in
+   the `discussion forum <https://discuss.mopidy.com>`__ first to verify that
+   its a bug.
+
+#. If you are sure that you've found a bug or have a feature request, check if
+   there's already an issue in the `issue tracker
+   <https://github.com/mopidy/mopidy/issues>`_. If there is, see if there is
+   anything you can add to help reproduce or fix the issue.
+
+#. If there is no exising issue matching your bug or feature request, create a
+   `new issue <https://github.com/mopidy/mopidy/issues/new>`_. Please include
+   as much relevant information as possible. If its a bug, including how to
+   reproduce the bug and any relevant logs or error messages.
+
+
+Pull request guidelines
+=======================
+
+#. Before spending any time on making a pull request:
+
+   - If its a bug, :ref:`file an issue <issue-guidelines>`.
+
+   - If its an enhancement, discuss it with other Mopidy developers first,
+     either in a GitHub issue, on the discussion forum, or on IRC. Making sure
+     your ideas and solutions are aligned with other contributors greatly
+     increase the odds of your pull request being quickly accepted.
+
+#. Create a new branch, based on the ``develop`` branch, for every feature or
+   bug fix. Keep branches small and on topic, as that makes them far easier to
+   review. We often use the following naming convention for branches:
 
    - Features get the prefix ``feature/``
 
@@ -49,105 +86,28 @@ Making changes
 
    - Improvements to the documentation get the prefix ``docs/``
 
+#. Follow the :ref:`code style <codestyle>`, especially make sure the
+   ``flake8`` linter does not complain about anything. Travis CI will check
+   that your pull request is "flake8 clean". See :ref:`code-linting`.
 
-.. _run-from-git:
+#. Include tests for any new feature or substantial bug fix. See
+   :ref:`running-tests`.
 
-Running Mopidy from Git
-=======================
+#. Include documentation for any new feature. See :ref:`writing-docs`.
 
-If you want to hack on Mopidy, you should run Mopidy directly from the Git
-repo.
+#. Feel free to include a changelog entry in your pull request. The changelog
+   is in :file:`docs/changelog.rst`.
 
-#. Go to the Git repo root::
+#. Write good commit messages. Here's three blog posts on how to do it right:
 
-       cd mopidy/
+   - `Writing Git commit messages
+     <http://365git.tumblr.com/post/3308646748/writing-git-commit-messages>`_
 
-#. To get a ``mopidy`` executable and register all bundled extensions with
-   setuptools, run::
+   - `A Note About Git Commit Messages
+     <http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html>`_
 
-      python setup.py develop
+   - `On commit messages
+     <http://who-t.blogspot.ch/2009/12/on-commit-messages.html>`_
 
-   It still works to run ``python mopidy`` directly on the ``mopidy`` Python
-   package directory, but if you have never run ``python setup.py develop`` the
-   extensions bundled with Mopidy isn't registered with setuptools, so Mopidy
-   will start without any frontends or backends, making it quite useless.
-
-#. Now you can run the Mopidy command, and it will run using the code
-   in the Git repo::
-
-      mopidy
-
-   If you do any changes to the code, you'll just need to restart ``mopidy``
-   to see the changes take effect.
-
-
-Testing
-=======
-
-Mopidy has quite good test coverage, and we would like all new code going into
-Mopidy to come with tests.
-
-#. To run all tests, go to the project directory and run::
-
-       py.test
-
-   To run tests with test coverage statistics::
-
-       py.test --cov=mopidy --cov-report=term-missing
-
-   Test coverage statistics can also be viewed online at
-   `coveralls.io <https://coveralls.io/r/mopidy/mopidy>`_.
-
-#. Always check the code for errors and style issues using flake8::
-
-       flake8
-
-   If successful, the command will not print anything at all. Ignore the rare
-   cases you need to ignore a check use `# noqa: <code>` so we can lookup what
-   you are ignoring.
-
-#. Finally, there is the ultimate but a bit slower command. To run both tests,
-   docs build, and flake8 linting, run::
-
-       tox
-
-   This will run exactly the same tests as `Travis CI
-   <https://travis-ci.org/mopidy/mopidy>`_ runs for all our branches and pull
-   requests. If this command turns green, you can be quite confident that your
-   pull request will get the green flag from Travis as well, which is a
-   requirement for it to be merged.
-
-
-Submitting changes
-==================
-
-- One branch per feature or fix. Keep branches small and on topic.
-
-- Follow the :ref:`code style <codestyle>`, especially make sure ``flake8``
-  does not complain about anything.
-
-- Write good commit messages. Here's three blog posts on how to do it right:
-
-  - `Writing Git commit messages
-    <http://365git.tumblr.com/post/3308646748/writing-git-commit-messages>`_
-
-  - `A Note About Git Commit Messages
-    <http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html>`_
-
-  - `On commit messages
-    <http://who-t.blogspot.ch/2009/12/on-commit-messages.html>`_
-
-- Send a pull request to the ``develop`` branch. See the `GitHub pull request
-  docs <https://help.github.com/articles/using-pull-requests>`_ for help.
-
-
-Additional resources
-====================
-
-- IRC channel: ``#mopidy`` at `irc.freenode.net <http://freenode.net/>`_
-
-- `Issue tracker <https://github.com/mopidy/mopidy/issues>`_
-
-- `Mailing List <https://groups.google.com/forum/?fromgroups=#!forum/mopidy>`_
-
-- `GitHub documentation <https://help.github.com/>`_
+#. Send a pull request to the ``develop`` branch. See the `GitHub pull request
+   docs <https://help.github.com/articles/using-pull-requests>`_ for help.
