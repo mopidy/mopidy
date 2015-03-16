@@ -37,7 +37,7 @@ class AudioListener(listener.Listener):
         """
         pass
 
-    def position_changed(self, position_changed):
+    def position_changed(self, position):
         """
         Called whenever the position of the stream changes.
 
