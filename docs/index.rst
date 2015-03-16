@@ -135,6 +135,7 @@ Development
     :maxdepth: 1
 
     contributing
+    devenv
     devtools
     codestyle
     extensiondev

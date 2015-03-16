@@ -5,49 +5,6 @@ Development tools
 Here you'll find description of the development tools we use.
 
 
-Continuous integration
-======================
-
-Mopidy uses the free service `Travis CI <https://travis-ci.org/mopidy/mopidy>`_
-for automatically running the test suite when code is pushed to GitHub. This
-works both for the main Mopidy repo, but also for any forks. This way, any
-contributions to Mopidy through GitHub will automatically be tested by Travis
-CI, and the build status will be visible in the GitHub pull request interface,
-making it easier to evaluate the quality of pull requests.
-
-In addition, we run a Jenkins CI server at http://ci.mopidy.com/ that runs all
-test on multiple platforms (Ubuntu, OS X, x86, arm) for every commit we push to
-the ``develop`` branch in the main Mopidy repo on GitHub. Thus, new code isn't
-tested by Jenkins before it is merged into the ``develop`` branch, which is a
-bit late, but good enough to get broad testing before new code is released.
-
-In addition to running tests, the Jenkins CI server also gathers coverage
-statistics and uses flake8 to check for errors and possible improvements in our
-code. So, if you're out of work, the code coverage and flake8 data at the CI
-server should give you a place to start.
-
-
-Documentation writing
-=====================
-
-To write documentation, we use `Sphinx <http://sphinx-doc.org/>`_. See their
-site for lots of documentation on how to use Sphinx. To generate HTML from the
-documentation files, you need some additional dependencies.
-
-You can install them through Debian/Ubuntu package management::
-
-    sudo apt-get install python-sphinx python-pygraphviz graphviz
-
-Then, to generate docs::
-
-    cd docs/
-    make        # For help on available targets
-    make html   # To generate HTML docs
-
-The documentation at http://docs.mopidy.com/ is automatically updated when a
-documentation update is pushed to ``mopidy/mopidy`` at GitHub.
-
-
 Creating releases
 =================
 
