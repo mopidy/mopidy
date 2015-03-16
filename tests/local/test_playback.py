@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+import logging
 import time
 import unittest
 
@@ -15,6 +16,7 @@ from mopidy.models import Track
 from tests import path_to_data_dir
 from tests.local import generate_song, populate_tracklist
 
+logger = logging.getLogger(__name__)
 
 # TODO Test 'playlist repeat', e.g. repeat=1,single=0
 
@@ -40,18 +42,19 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.tracklist.add([track])
 
     def trigger_about_to_finish(self):
-        self.audio.prepare_change().get()
-        self.playback.on_about_to_finish()
-        self.playback.on_stream_changed(None)
+        callback = self.audio.get_about_to_finish_callback().get()
+        callback()
 
-    def trigger_end_of_stream(self):
-        self.playback.on_end_of_stream()
+        while self.events:
+            event, kwargs = self.events.pop(0)
+            logger.debug('Replaying: %s %s', event, kwargs)
+            self.core.on_event(event, **kwargs)
 
     def setUp(self):  # noqa: N802
         self.audio = audio.DummyAudio.start().proxy()
         self.backend = actor.LocalBackend.start(
             config=self.config, audio=self.audio).proxy()
-        self.core = core.Core(backends=[self.backend])
+        self.core = core.Core(backends=[self.backend], audio=self.audio)
         self.playback = self.core.playback
         self.tracklist = self.core.tracklist
 
@@ -60,8 +63,18 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         assert self.tracks[0].length >= 2000, \
             'First song needs to be at least 2000 miliseconds'
 
+        self.events = []
+        self.patcher = mock.patch('mopidy.audio.listener.AudioListener.send')
+        self.send_mock = self.patcher.start()
+
+        def send(event, **kwargs):
+            self.events.append((event, kwargs))
+
+        self.send_mock.side_effect = send
+
     def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
+        self.patcher.stop()
 
     def test_uri_scheme(self):
         self.assertNotIn('file', self.core.uri_schemes)
@@ -172,7 +185,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     def test_current_track_after_completed_playlist(self):
         self.playback.play(self.tracklist.tl_tracks[-1])
         self.trigger_about_to_finish()
-        self.trigger_end_of_stream()
+        # EOS should have triggered
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)
         self.assertEqual(self.playback.current_track, None)
 
@@ -435,7 +448,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
             self.assertEqual(self.tracklist.index(tl_track), i)
 
             self.trigger_about_to_finish()
-        self.trigger_end_of_stream()
+        # EOS should have triggered
 
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)
 
@@ -444,7 +457,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.playback.play()
         for _ in self.tracks:
             self.trigger_about_to_finish()
-        self.trigger_end_of_stream()
+        # EOS should have triggered
 
         self.assertEqual(self.playback.current_track, None)
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)
@@ -517,7 +530,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
             self.tracklist.next_track(tl_track), self.tl_tracks[0])
 
     @populate_tracklist
-    def test_on_about_to_finis_with_consume(self):
+    def test_on_about_to_finish_with_consume(self):
         self.tracklist.consume = True
         self.playback.play()
         self.trigger_about_to_finish()
@@ -651,7 +664,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     def test_tracklist_position_at_end_of_playlist(self):
         self.playback.play(self.tracklist.tl_tracks[-1])
         self.trigger_about_to_finish()
-        self.trigger_end_of_stream()
+        # EOS should have triggered
         tl_track = self.playback.current_tl_track
         self.assertEqual(self.tracklist.index(tl_track), None)
 
@@ -919,9 +932,10 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     def test_playlist_is_empty_after_all_tracks_are_played_with_consume(self):
         self.tracklist.consume = True
         self.playback.play()
-        for _ in self.tracks:
+
+        for t in self.tracks:
             self.trigger_about_to_finish()
-        self.trigger_end_of_stream()
+        # EOS should have trigger
 
         self.assertEqual(len(self.tracklist.tracks), 0)
 
@@ -978,7 +992,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.assertEqual(self.playback.current_track, self.tracks[0])
         self.trigger_about_to_finish()
         self.assertEqual(self.playback.current_track, None)
-        self.trigger_end_of_stream()
+        # EOS should have triggered
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)
 
     @populate_tracklist
@@ -988,14 +1002,14 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.playback.play()
         self.trigger_about_to_finish()
         self.assertEqual(self.playback.current_track, None)
-        self.trigger_end_of_stream()
+        # EOS should have triggered
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)
 
     @populate_tracklist
     def test_end_of_playlist_stops(self):
         self.playback.play(self.tracklist.tl_tracks[-1])
         self.trigger_about_to_finish()
-        self.trigger_end_of_stream()
+        # EOS should have triggered
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)
 
     def test_repeat_off_by_default(self):
@@ -1043,9 +1057,10 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     def test_random_with_eot_until_end_of_playlist_and_play_from_start(self):
         self.tracklist.random = True
         self.playback.play()
+
         for _ in self.tracks:
             self.trigger_about_to_finish()
-        self.trigger_end_of_stream()
+        # EOS should have triggered
 
         tl_track = self.playback.current_tl_track
         self.assertNotEqual(self.tracklist.eot_track(tl_track), None)

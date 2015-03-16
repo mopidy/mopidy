@@ -138,10 +138,10 @@ class PlaybackController(object):
         # TODO: self._trigger_track_playback_ended?
 
     def on_stream_changed(self, uri):
-        self.current_tl_track = self._pending_tl_track
-        self._pending_tl_track = None
-        self._trigger_track_playback_started()
-        # TODO: self._trigger_track_playback_ended?
+        if self._pending_tl_track:
+            self.current_tl_track = self._pending_tl_track
+            self._pending_tl_track = None
+            self._trigger_track_playback_started()
 
     def on_about_to_finish(self):
         # TODO: check that we always have a current track
@@ -163,8 +163,11 @@ class PlaybackController(object):
 
         Used by :class:`mopidy.core.TracklistController`.
         """
-        if self.current_tl_track not in self.core.tracklist.tl_tracks:
+
+        if not self.core.tracklist.tl_tracks:
             self.stop()
+            self.current_tl_track = None
+        elif self.current_tl_track not in self.core.tracklist.tl_tracks:
             self.current_tl_track = None
 
     def next(self):

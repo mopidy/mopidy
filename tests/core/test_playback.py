@@ -30,21 +30,28 @@ class TestCurrentAndPendingTlTrack(unittest.TestCase):
 
         self.core.tracklist.add(self.tracks)
 
+        self.events = []
+        self.patcher = mock.patch('mopidy.audio.listener.AudioListener.send')
+        self.send_mock = self.patcher.start()
+
+        def send(event, **kwargs):
+            self.events.append((event, kwargs))
+
+        self.send_mock.side_effect = send
+
     def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
+        self.patcher.stop()
 
-    def trigger_about_to_finish(self):
-        self.audio.prepare_change()
-        # TODO: trigger via dummy audio?
-        self.playback.on_about_to_finish()
+    def trigger_about_to_finish(self, block_stream_changed=False):
+        callback = self.audio.get_about_to_finish_callback().get()
+        callback()
 
-    def trigger_stream_changed(self):
-        # TODO: trigger via dummy audio?
-        self.playback.on_stream_changed(None)
-
-    def trigger_end_of_stream(self):
-        # TODO: trigger via dummy audio?
-        self.playback.on_end_of_stream()
+        while self.events:
+            event, kwargs = self.events.pop(0)
+            if event == 'stream_changed' and block_stream_changed:
+                continue
+            self.core.on_event(event, **kwargs)
 
     def test_pending_tl_track_is_none(self):
         self.core.playback.play()
@@ -52,31 +59,28 @@ class TestCurrentAndPendingTlTrack(unittest.TestCase):
 
     def test_pending_tl_track_after_about_to_finish(self):
         self.core.playback.play()
-        self.trigger_about_to_finish()
+        self.trigger_about_to_finish(block_stream_changed=True)
+
         self.assertEqual(self.playback._pending_tl_track.track.uri, 'dummy:b')
 
     def test_pending_tl_track_after_stream_changed(self):
         self.trigger_about_to_finish()
-        self.trigger_stream_changed()
         self.assertEqual(self.playback._pending_tl_track, None)
 
     def test_current_tl_track_after_about_to_finish(self):
         self.core.playback.play()
-        self.trigger_about_to_finish()
+        self.trigger_about_to_finish(block_stream_changed=True)
         self.assertEqual(self.playback.current_tl_track.track.uri, 'dummy:a')
 
     def test_current_tl_track_after_stream_changed(self):
         self.core.playback.play()
         self.trigger_about_to_finish()
-        self.trigger_stream_changed()
         self.assertEqual(self.playback.current_tl_track.track.uri, 'dummy:b')
 
     def test_current_tl_track_after_end_of_stream(self):
         self.core.playback.play()
         self.trigger_about_to_finish()
-        self.trigger_stream_changed()
-        self.trigger_about_to_finish()
-        self.trigger_end_of_stream()
+        self.trigger_about_to_finish()  # EOS
         self.assertEqual(self.playback.current_tl_track, None)
 
 
