@@ -12,6 +12,7 @@ import glib
 
 from mopidy import compat, exceptions
 from mopidy.compat import queue
+from mopidy.utils import encoding
 
 
 logger = logging.getLogger(__name__)
@@ -157,7 +158,8 @@ def _find_worker(relative, follow, done, work, results, errors):
                 errors[path] = exceptions.FindError('Not a file or directory.')
 
         except OSError as e:
-            errors[path] = exceptions.FindError(e.strerror, e.errno)
+            errors[path] = exceptions.FindError(
+                encoding.locale_decode(e.strerror), e.errno)
         finally:
             work.task_done()
 
