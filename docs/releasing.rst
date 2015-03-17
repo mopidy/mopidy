@@ -1,8 +1,10 @@
-*****************
-Development tools
-*****************
+******************
+Release procedures
+******************
 
-Here you'll find description of the development tools we use.
+Here we try to keep an up to date record of how Mopidy releases are made. This
+documentation serves both as a checklist, to reduce the project's dependency on
+key individuals, and as a stepping stone to more automation.
 
 
 Creating releases

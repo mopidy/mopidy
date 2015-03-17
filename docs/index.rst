@@ -136,7 +136,7 @@ Development
 
     contributing
     devenv
-    devtools
+    releasing
     codestyle
     extensiondev
 
