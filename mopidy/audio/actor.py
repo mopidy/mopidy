@@ -279,7 +279,7 @@ class _Handler(object):
         if msg.type == gst.MESSAGE_STATE_CHANGED and msg.src == self._element:
             self.on_playbin_state_changed(*msg.parse_state_changed())
         elif msg.type == gst.MESSAGE_BUFFERING:
-            self.on_buffering(msg.parse_buffering())
+            self.on_buffering(msg.parse_buffering(), msg.structure)
         elif msg.type == gst.MESSAGE_EOS:
             self.on_end_of_stream()
         elif msg.type == gst.MESSAGE_ERROR:
@@ -342,7 +342,11 @@ class _Handler(object):
             gst.DEBUG_BIN_TO_DOT_FILE(
                 self._audio._playbin, gst.DEBUG_GRAPH_SHOW_ALL, 'mopidy')
 
-    def on_buffering(self, percent):
+    def on_buffering(self, percent, structure=None):
+        if structure and structure.has_field('buffering-mode'):
+            if structure['buffering-mode'] == gst.BUFFERING_LIVE:
+                return  # Live sources stall in paused.
+
         level = logging.getLevelName('TRACE')
         if percent < 10 and not self._audio._buffering:
             self._audio._playbin.set_state(gst.STATE_PAUSED)
