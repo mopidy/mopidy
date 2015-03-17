@@ -12,13 +12,14 @@ If you want to contribute to Mopidy, here are some tips to get you started.
 Asking questions
 ================
 
-Please use one of these channels for requesting help with Mopidy and its
-extensions:
+Please get in touch with us in one of these ways when requesting help with
+Mopidy and its extensions:
 
 - Our discussion forum: `discuss.mopidy.com <https://discuss.mopidy.com>`_.
   Just sign in and fire away.
 
-- Our IRC channel: ``#mopidy`` on `irc.freenode.net <http://freenode.net>`_,
+- Our IRC channel: `#mopidy <https://webchat.freenode.net/?channels=#mopidy>`_
+  on `irc.freenode.net <http://freenode.net>`_,
   with public `searchable logs <https://botbot.me/freenode/mopidy/>`_. Be
   prepared to hang around for a while, as we're not always around to answer
   straight away.
@@ -80,11 +81,13 @@ Pull request guidelines
    bug fix. Keep branches small and on topic, as that makes them far easier to
    review. We often use the following naming convention for branches:
 
-   - Features get the prefix ``feature/``
+   - Features get the prefix ``feature/``, e.g.
+     ``feature/track-last-modified-as-ms``.
 
-   - Bug fixes get the prefix ``fix/``
+   - Bug fixes get the prefix ``fix/``, e.g. ``fix/902-consume-track-on-next``.
 
-   - Improvements to the documentation get the prefix ``docs/``
+   - Improvements to the documentation get the prefix ``docs/``, e.g.
+     ``docs/add-ext-mopidy-spotify-tunigo``.
 
 #. Follow the :ref:`code style <codestyle>`, especially make sure the
    ``flake8`` linter does not complain about anything. Travis CI will check
@@ -110,7 +113,7 @@ Pull request guidelines
 
    - Write in the imperative, present tense: "add" not "added".
 
-   For more inspiration, read these blog posts:
+   For more inspiration, feel free to read these blog posts:
 
    - `Writing Git commit messages
      <http://365git.tumblr.com/post/3308646748/writing-git-commit-messages>`_
