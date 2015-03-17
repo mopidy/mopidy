@@ -58,6 +58,12 @@ v0.20.0 (UNRELEASED)
   :attr:`mopidy.backend.PlaylistsProvider.playlists`. This is potentially
   backwards incompatible. (PR: :issue:`1046`)
 
+- Add :meth:`mopidy.backend.PlaylistProvider.get_playlists()`. (PR:
+  :issue:`1048`)
+
+- **Deprecated:** :attr:`mopidy.backend.PlaylistsProvider.playlists`. (PR:
+  :issue:`1048`)
+
 **Commands**
 
 - Make the ``mopidy`` command print a friendly error message if the

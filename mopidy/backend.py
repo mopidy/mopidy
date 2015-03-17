@@ -267,12 +267,28 @@ class PlaylistsProvider(object):
     # currently make available. lookup() should be used for getting full
     # playlists with all details.
 
+    def get_playlists(self):
+        """
+        Get available playlists.
+
+        :rtype: list of :class:`mopidy.models.Playlist`
+
+        .. versionadded:: 0.20
+        """
+        return self.playlists
+
     @property
     def playlists(self):
         """
         Currently available playlists.
 
         Read/write. List of :class:`mopidy.models.Playlist`.
+
+        .. deprecated:: 0.20
+            If your backend requires Mopidy >= 0.20, implement
+            :meth:`get_playlists` instead of this property. If you must stay
+            compatible with Mopidy < 0.20, you're free to implement
+            :meth:`get_playlists` in addition to this property.
         """
         return []
 
