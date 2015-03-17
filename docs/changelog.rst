@@ -52,6 +52,12 @@ v0.20.0 (UNRELEASED)
   :meth:`mopidy.core.PlaybackController.get_stream_title` for letting clients
   know about the current song in streams. (PR: :issue:`938`, :issue:`1030`)
 
+**Backend API**
+
+- Remove default implementation of
+  :attr:`mopidy.backend.PlaylistsProvider.playlists`. This is potentially
+  backwards incompatible. (PR: :issue:`1046`)
+
 **Commands**
 
 - Make the ``mopidy`` command print a friendly error message if the
