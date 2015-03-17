@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, unicode_literals
 
+import copy
 import glob
 import logging
 import operator
@@ -20,7 +21,16 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
         super(LocalPlaylistsProvider, self).__init__(*args, **kwargs)
         self._media_dir = self.backend.config['local']['media_dir']
         self._playlists_dir = self.backend.config['local']['playlists_dir']
+        self._playlists = []
         self.refresh()
+
+    @property
+    def playlists(self):
+        return copy.copy(self._playlists)
+
+    @playlists.setter
+    def playlists(self, playlists):
+        self._playlists = playlists
 
     def create(self, name):
         playlist = self._save_m3u(Playlist(name=name))

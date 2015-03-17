@@ -1,7 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import copy
-
 from mopidy import listener, models
 
 
@@ -263,7 +261,6 @@ class PlaylistsProvider(object):
 
     def __init__(self, backend):
         self.backend = backend
-        self._playlists = []
 
     # TODO Replace playlists property with a get_playlists() method which
     # returns playlist Ref's instead of the gigantic data structures we
@@ -277,11 +274,11 @@ class PlaylistsProvider(object):
 
         Read/write. List of :class:`mopidy.models.Playlist`.
         """
-        return copy.copy(self._playlists)
+        return []
 
     @playlists.setter  # noqa
     def playlists(self, playlists):
-        self._playlists = playlists
+        raise NotImplementedError
 
     def create(self, name):
         """
