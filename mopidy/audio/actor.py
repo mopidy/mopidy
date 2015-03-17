@@ -343,15 +343,18 @@ class _Handler(object):
                 self._audio._playbin, gst.DEBUG_GRAPH_SHOW_ALL, 'mopidy')
 
     def on_buffering(self, percent):
-        gst_logger.debug('Got buffering message: percent=%d%%', percent)
-
+        level = logging.getLevelName('TRACE')
         if percent < 10 and not self._audio._buffering:
             self._audio._playbin.set_state(gst.STATE_PAUSED)
             self._audio._buffering = True
+            level = logging.DEBUG
         if percent == 100:
             self._audio._buffering = False
             if self._audio._target_state == gst.STATE_PLAYING:
                 self._audio._playbin.set_state(gst.STATE_PLAYING)
+            level = logging.DEBUG
+
+        gst_logger.log(level, 'Got buffering message: percent=%d%%', percent)
 
     def on_end_of_stream(self):
         gst_logger.debug('Got end-of-stream message.')
