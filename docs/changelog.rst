@@ -31,6 +31,9 @@ v0.20.0 (UNRELEASED)
 - Add :class:`mopidy.core.MixerController` which keeps track of volume and
   mute. (Fixes: :issue:`962`)
 
+- Add ``uris`` argument to :method:`mopidy.core.LibraryController.lookup`
+  which allows for simpler lookup of multiple URIs. (Fixes: :issue:`1008`)
+
 - **Deprecated:** The old methods on :class:`mopidy.core.PlaybackController` for
   volume and mute management have been deprecated. (Fixes: :issue:`962`)
 
