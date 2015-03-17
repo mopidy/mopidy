@@ -48,8 +48,10 @@ MB = 1 << 20
 # GST_PLAY_FLAG_DEINTERLACE (1<<9)
 # GST_PLAY_FLAG_SOFT_COLORBALANCE (1<<10)
 
-# Default flags to use for playbin: AUDIO, SOFT_VOLUME, DOWNLOAD
-PLAYBIN_FLAGS = (1 << 1) | (1 << 4) | (1 << 7)
+# Default flags to use for playbin: AUDIO, SOFT_VOLUME
+# TODO: consider removing soft volume when we do multi outputs and handling it
+# ourselves.
+PLAYBIN_FLAGS = (1 << 1) | (1 << 4)
 
 
 class _Signals(object):
@@ -279,7 +281,7 @@ class _Handler(object):
         if msg.type == gst.MESSAGE_STATE_CHANGED and msg.src == self._element:
             self.on_playbin_state_changed(*msg.parse_state_changed())
         elif msg.type == gst.MESSAGE_BUFFERING:
-            self.on_buffering(msg.parse_buffering())
+            self.on_buffering(msg.parse_buffering(), msg.structure)
         elif msg.type == gst.MESSAGE_EOS:
             self.on_end_of_stream()
         elif msg.type == gst.MESSAGE_ERROR:
@@ -342,16 +344,23 @@ class _Handler(object):
             gst.DEBUG_BIN_TO_DOT_FILE(
                 self._audio._playbin, gst.DEBUG_GRAPH_SHOW_ALL, 'mopidy')
 
-    def on_buffering(self, percent):
-        gst_logger.debug('Got buffering message: percent=%d%%', percent)
+    def on_buffering(self, percent, structure=None):
+        if structure and structure.has_field('buffering-mode'):
+            if structure['buffering-mode'] == gst.BUFFERING_LIVE:
+                return  # Live sources stall in paused.
 
+        level = logging.getLevelName('TRACE')
         if percent < 10 and not self._audio._buffering:
             self._audio._playbin.set_state(gst.STATE_PAUSED)
             self._audio._buffering = True
+            level = logging.DEBUG
         if percent == 100:
             self._audio._buffering = False
             if self._audio._target_state == gst.STATE_PLAYING:
                 self._audio._playbin.set_state(gst.STATE_PLAYING)
+            level = logging.DEBUG
+
+        gst_logger.log(level, 'Got buffering message: percent=%d%%', percent)
 
     def on_end_of_stream(self):
         gst_logger.debug('Got end-of-stream message.')
