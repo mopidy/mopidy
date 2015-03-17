@@ -49,9 +49,9 @@ Issue guidelines
 #. If you need help, see :ref:`asking-questions` above. The GitHub issue
    tracker is not a support forum.
 
-#. If you are not sure if is what you're experiencing is a bug or not, post in
-   the `discussion forum <https://discuss.mopidy.com>`__ first to verify that
-   its a bug.
+#. If you are not sure if what you're experiencing is a bug or not, post in the
+   `discussion forum <https://discuss.mopidy.com>`__ first to verify that it's
+   a bug.
 
 #. If you are sure that you've found a bug or have a feature request, check if
    there's already an issue in the `issue tracker
@@ -60,7 +60,7 @@ Issue guidelines
 
 #. If there is no exising issue matching your bug or feature request, create a
    `new issue <https://github.com/mopidy/mopidy/issues/new>`_. Please include
-   as much relevant information as possible. If its a bug, including how to
+   as much relevant information as possible. If it's a bug, including how to
    reproduce the bug and any relevant logs or error messages.
 
 
@@ -69,12 +69,12 @@ Pull request guidelines
 
 #. Before spending any time on making a pull request:
 
-   - If its a bug, :ref:`file an issue <issue-guidelines>`.
+   - If it's a bug, :ref:`file an issue <issue-guidelines>`.
 
-   - If its an enhancement, discuss it with other Mopidy developers first,
+   - If it's an enhancement, discuss it with other Mopidy developers first,
      either in a GitHub issue, on the discussion forum, or on IRC. Making sure
      your ideas and solutions are aligned with other contributors greatly
-     increase the odds of your pull request being quickly accepted.
+     increases the odds of your pull request being quickly accepted.
 
 #. Create a new branch, based on the ``develop`` branch, for every feature or
    bug fix. Keep branches small and on topic, as that makes them far easier to

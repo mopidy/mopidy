@@ -47,19 +47,19 @@ Make a virtualenv
 -----------------
 
 Make a Python `virtualenv <https://virtualenv.pypa.io/>`_ for Mopidy
-development. The virtualenv will wall of Mopidy and its dependencies from the
-rest of your system. All development and installation of Python dependencies
-versions of Mopidy and extensions are done inside the virtualenv. This way your
-regular Mopidy install, which you set up in the first step, is unaffected by
-your hacking and will always be working.
+development. The virtualenv will wall off Mopidy and its dependencies from the
+rest of your system. All development and installation of Python dependencies,
+versions of Mopidy, and extensions are done inside the virtualenv. This way
+your regular Mopidy install, which you set up in the first step, is unaffected
+by your hacking and will always be working.
 
 Most of us use the `virtualenvwrapper
 <https://virtualenvwrapper.readthedocs.org/>`_ to ease working with
 virtualenvs, so that's what we'll be using for the examples here. First,
 install and setup virtualenvwrapper as described in their docs.
 
-To create a virtualenv named ``mopidy`` which use Python 2.7, allows access to
-system-wide packages like GStreamer, and use the Mopidy workspace directory as
+To create a virtualenv named ``mopidy`` which uses Python 2.7, allows access to
+system-wide packages like GStreamer, and uses the Mopidy workspace directory as
 the "project path", run::
 
     mkvirtualenv -a ~/mopidy-dev --python `which python2.7` \
@@ -87,7 +87,7 @@ When you've cloned the ``mopidy`` Git repo, ``cd`` into it::
     cd ~/mopidy-dev/mopidy/
 
 With a fresh clone of the Git repo, you should start out on the ``develop``
-branch. This is where all features for the next feature release lands. To
+branch. This is where all features for the next feature release land. To
 confirm that you're on the right branch, run::
 
     git branch
@@ -98,12 +98,11 @@ Install development tools
 
 We use a number of Python development tools. The :file:`dev-requirements.txt`
 file has comments describing what we use each dependency for, so we might just
-as well show include the file verbatim here:
+as well include the file verbatim here:
 
 .. literalinclude:: ../dev-requirements.txt
 
-You probably won't use all of these development tools, but at least a
-majority of them. Install them all into the active virtualenv by running `pip
+Install them all into the active virtualenv by running `pip
 <https://pip.pypa.io/>`_::
 
     pip install --upgrade -r dev-requirements.txt
@@ -115,7 +114,7 @@ Install Mopidy from the Git repo
 --------------------------------
 
 Next up, we'll want to run Mopidy from the Git repo. There's two reasons for
-this: First of all, it lets you easily change the source code, restart Mopidy,
+this: first of all, it lets you easily change the source code, restart Mopidy,
 and see the change take effect. Second, it's a convenient way to keep at the
 bleeding edge, testing the latest developments in Mopidy itself or test some
 extension against the latest Mopidy changes.
@@ -220,7 +219,7 @@ To stop it again, press :kbd:`Ctrl+C`.
 Every time you change code in Mopidy or an extension and want to see it
 live, you must restart Mopidy.
 
-If you wan't to iterate quickly while developing, it may sound a bit tedious to
+If you want to iterate quickly while developing, it may sound a bit tedious to
 restart Mopidy for every minor change. Then it's useful to have tests to
 exercise your code...
 
@@ -282,8 +281,8 @@ We can limit to just tests in a single directory to save time::
 
     py.test tests/http/
 
-With the help of the pytest-xdist plugin, we can run tests with four processes
-in parallel, which usually cuts the test time in half or more::
+With the help of the pytest-xdist plugin, we can run tests with four Python
+processes in parallel, which usually cuts the test time in half or more::
 
     py.test -n 4
 
@@ -294,7 +293,7 @@ tests. This makes for a very quick code-test cycle::
     py.test -f    # or --looponfail
 
 With the help of the pytest-cov plugin, we can get a report on what parts of
-the given module, ``mopidy`` in this example, is covered by the test suite::
+the given module, ``mopidy`` in this example, are covered by the test suite::
 
     py.test --cov=mopidy --cov-report=term-missing
 
@@ -322,15 +321,16 @@ contributions to Mopidy through GitHub will automatically be tested by Travis
 CI, and the build status will be visible in the GitHub pull request interface,
 making it easier to evaluate the quality of pull requests.
 
-For each success build, Travis submits code coverage data to `coveralls.io
+For each successful build, Travis submits code coverage data to `coveralls.io
 <https://coveralls.io/r/mopidy/mopidy>`_. If you're out of work, coveralls might
 help you find areas in the code which could need better test coverage.
 
 In addition, we run a Jenkins CI server at https://ci.mopidy.com/ that runs all
-test on multiple platforms (Ubuntu, OS X, x86, arm) for every commit we push to
-the ``develop`` branch in the main Mopidy repo on GitHub. Thus, new code isn't
-tested by Jenkins before it is merged into the ``develop`` branch, which is a
-bit late, but good enough to get broad testing before new code is released.
+tests on multiple platforms (Ubuntu, OS X, x86, arm) for every commit we push
+to the ``develop`` branch in the main Mopidy repo on GitHub. Thus, new code
+isn't tested by Jenkins before it is merged into the ``develop`` branch, which
+is a bit late, but good enough to get broad testing before new code is
+released.
 
 
 .. _code-linting:
