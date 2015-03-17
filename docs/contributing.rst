@@ -98,7 +98,19 @@ Pull request guidelines
 #. Feel free to include a changelog entry in your pull request. The changelog
    is in :file:`docs/changelog.rst`.
 
-#. Write good commit messages. Here's three blog posts on how to do it right:
+#. Write good commit messages.
+
+   - Follow the template "topic: description" for the first line of the commit
+     message, e.g. "mpd: Switch list command to using list_distinct". See the
+     commit history for inspiration.
+
+   - Use the rest of the commit message to explain anything you feel isn't
+     obvious. It's better to have the details here than in the pull request
+     description, since the commit message will live forever.
+
+   - Write in the imperative, present tense: "add" not "added".
+
+   For more inspiration, read these blog posts:
 
    - `Writing Git commit messages
      <http://365git.tumblr.com/post/3308646748/writing-git-commit-messages>`_
