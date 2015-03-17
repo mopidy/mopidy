@@ -144,6 +144,10 @@ v0.20.0 (UNRELEASED)
 - Start setting the ``Name`` field with the stream title when listening to
   radio streams. (Fixes: :issue:`944`, PR: :issue:`1030`)
 
+- Fix crash on socket error when using a locale causing the exception's error
+  message to contain characters not in ASCII. (Fixes: issue:`971`, PR:
+  :issue:`1044`)
+
 **HTTP frontend**
 
 - **Deprecated:** Deprecated the :confval:`http/static_dir` config. Please make
