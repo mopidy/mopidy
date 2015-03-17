@@ -48,8 +48,10 @@ MB = 1 << 20
 # GST_PLAY_FLAG_DEINTERLACE (1<<9)
 # GST_PLAY_FLAG_SOFT_COLORBALANCE (1<<10)
 
-# Default flags to use for playbin: AUDIO, SOFT_VOLUME, DOWNLOAD
-PLAYBIN_FLAGS = (1 << 1) | (1 << 4) | (1 << 7)
+# Default flags to use for playbin: AUDIO, SOFT_VOLUME
+# TODO: consider removing soft volume when we do multi outputs and handling it
+# ourselves.
+PLAYBIN_FLAGS = (1 << 1) | (1 << 4)
 
 
 class _Signals(object):
