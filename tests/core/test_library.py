@@ -157,6 +157,17 @@ class CoreLibraryTest(unittest.TestCase):
         self.assertFalse(self.library1.lookup.called)
         self.library2.lookup.assert_called_once_with('dummy2:a')
 
+    def test_lookup_fails_with_uri_and_uris_set(self):
+        with self.assertRaises(ValueError):
+            self.core.library.lookup('dummy1:a', ['dummy2:a'])
+
+    def test_lookup_can_handle_uris(self):
+        self.library1.lookup().get.return_value = [1234]
+        self.library2.lookup().get.return_value = [5678]
+
+        result = self.core.library.lookup(uris=['dummy1:a', 'dummy2:a'])
+        self.assertEqual(result, {'dummy2:a': [5678], 'dummy1:a': [1234]})
+
     def test_lookup_returns_nothing_for_dummy3_track(self):
         result = self.core.library.lookup('dummy3:a')
 

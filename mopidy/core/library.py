@@ -162,7 +162,7 @@ class LibraryController(object):
             in self._get_backends_to_uris(uris).items()]
         return [result for result in pykka.get_all(futures) if result]
 
-    def lookup(self, uri):
+    def lookup(self, uri=None, uris=None):
         """
         Lookup the given URI.
 
@@ -170,14 +170,39 @@ class LibraryController(object):
         them all.
 
         :param uri: track URI
-        :type uri: string
-        :rtype: list of :class:`mopidy.models.Track`
+        :type uri: string or :class:`None`
+        :param uris: track URIs
+        :type uris: list of string or :class:`None`
+        :rtype: list of :class:`mopidy.models.Track` if uri was set or
+            a {uri: list of :class:`mopidy.models.Track`} if uris was set.
+
+        .. versionadded:: 1.0
+            The ``uris`` argument.
+
+        .. deprecated:: 1.0
+            The ``uri`` argument. Use ``uris`` instead.
         """
-        backend = self._get_backend(uri)
-        if backend:
-            return backend.library.lookup(uri).get()
-        else:
-            return []
+        none_set = uri is None and uris is None
+        both_set = uri is not None and uris is not None
+
+        if none_set or both_set:
+            raise ValueError("One of 'uri' or 'uris' must be set")
+
+        futures = {}
+        result = {}
+        backends = self._get_backends_to_uris([uri] if uri else uris)
+
+        # TODO: lookup(uris) to backend APIs
+        for backend, backend_uris in backends.items():
+            for u in backend_uris or []:
+                futures[u] = backend.library.lookup(u)
+
+        for u, future in futures.items():
+            result[u] = future.get()
+
+        if uri:
+            return result.get(uri, [])
+        return result
 
     def refresh(self, uri=None):
         """
