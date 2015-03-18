@@ -14,18 +14,6 @@ WebSocket API for use both from browsers and Node.js. The
 :ref:`http-explore-extension` extension, can also be used to get you
 familiarized with HTTP based APIs.
 
-.. warning:: API stability
-
-    Since the HTTP JSON-RPC API exposes our internal core API directly it is to
-    be regarded as **experimental**. We cannot promise to keep any form of
-    backwards compatibility between releases as we will need to change the core
-    API while working out how to support new use cases. Thus, if you use this
-    API, you must expect to do small adjustments to your client for every
-    release of Mopidy.
-
-    From Mopidy 1.0 and onwards, we intend to keep the core API far more
-    stable.
-
 
 .. _http-post-api:
 

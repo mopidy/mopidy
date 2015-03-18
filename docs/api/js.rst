@@ -8,18 +8,6 @@ We've made a JavaScript library, Mopidy.js, which wraps the
 :ref:`websocket-api` and gets you quickly started with working on your client
 instead of figuring out how to communicate with Mopidy.
 
-.. warning:: API stability
-
-    Since the Mopidy.js API exposes our internal core API directly it is to be
-    regarded as **experimental**. We cannot promise to keep any form of
-    backwards compatibility between releases as we will need to change the core
-    API while working out how to support new use cases. Thus, if you use this
-    API, you must expect to do small adjustments to your client for every
-    release of Mopidy.
-
-    From Mopidy 1.0 and onwards, we intend to keep the core API far more
-    stable.
-
 
 Getting the library for browser use
 ===================================
