@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import unittest
 
-from mopidy import models
+from mopidy import backend, models
 
 from tests import dummy_backend
 
@@ -28,3 +28,13 @@ class LibraryTest(unittest.TestCase):
 
         expected = {'trackuri': []}
         self.assertEqual(library.get_images(['trackuri']), expected)
+
+
+class PlaylistsTest(unittest.TestCase):
+    def test_playlists_default_impl(self):
+        playlists = backend.PlaylistsProvider(backend=None)
+
+        self.assertEqual(playlists.playlists, [])
+
+        with self.assertRaises(NotImplementedError):
+            playlists.playlists = []

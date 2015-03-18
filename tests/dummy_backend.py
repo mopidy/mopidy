@@ -6,6 +6,8 @@ used in tests of the frontends.
 
 from __future__ import absolute_import, unicode_literals
 
+import copy
+
 import pykka
 
 from mopidy import backend
@@ -85,6 +87,18 @@ class DummyPlaybackProvider(backend.PlaybackProvider):
 
 
 class DummyPlaylistsProvider(backend.PlaylistsProvider):
+    def __init__(self, backend):
+        super(DummyPlaylistsProvider, self).__init__(backend)
+        self._playlists = []
+
+    @property
+    def playlists(self):
+        return copy.copy(self._playlists)
+
+    @playlists.setter
+    def playlists(self, playlists):
+        self._playlists = playlists
+
     def create(self, name):
         playlist = Playlist(name=name, uri='dummy:%s' % name)
         self._playlists.append(playlist)
