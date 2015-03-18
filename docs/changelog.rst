@@ -52,6 +52,14 @@ v0.20.0 (UNRELEASED)
   :meth:`mopidy.core.PlaybackController.get_stream_title` for letting clients
   know about the current song in streams. (PR: :issue:`938`, :issue:`1030`)
 
+- Add ``ref`` keyword argument to
+  :meth:`mopidy.core.PlaylistsController.get_playlists`. (PR: :issue:`1048`)
+
+- **Deprecated:** The ``include_tracks`` keyword argument to
+  :meth:`mopidy.core.PlaylistsController.get_playlists`. Use the ``ref``
+  keyword argument instead as soon as backends start support it. (PR:
+  :issue:`1048`)
+
 **Backend API**
 
 - Remove default implementation of
