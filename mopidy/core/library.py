@@ -173,12 +173,13 @@ class LibraryController(object):
         :type uri: string or :class:`None`
         :param uris: track URIs
         :type uris: list of string or :class:`None`
-        :rtype: {uri: list of :class:`mopidy.models.Track`}
+        :rtype: list of :class:`mopidy.models.Track` if uri was set or
+            a {uri: list of :class:`mopidy.models.Track`} if uris was set.
 
-        .. versionadded:: 0.20
+        .. versionadded:: 1.0
             The ``uris`` argument.
 
-        .. deprecated:: 0.20
+        .. deprecated:: 1.0
             The ``uri`` argument. Use ``uris`` instead.
         """
         none_set = uri is None and uris is None
