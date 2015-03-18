@@ -22,7 +22,7 @@ class PlaylistsController(object):
     Returns a list of :class:`mopidy.models.Playlist`.
     """
     def get_playlists(self, include_tracks=True):
-        futures = [b.playlists.get_playlists()
+        futures = [b.playlists.get_playlists(ref=False)
                    for b in self.backends.with_playlists.values()]
         results = pykka.get_all(futures)
         playlists = list(itertools.chain(*results))

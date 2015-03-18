@@ -47,8 +47,8 @@ class PlaylistsTest(unittest.TestCase):
         self.assertIn(self.pl2a, result)
         self.assertIn(self.pl2b, result)
 
-        self.sp1.get_playlists.assert_called_once_with()
-        self.sp2.get_playlists.assert_called_once_with()
+        self.sp1.get_playlists.assert_called_once_with(ref=False)
+        self.sp2.get_playlists.assert_called_once_with(ref=False)
 
     def test_get_playlists_includes_tracks_by_default(self):
         result = self.core.playlists.get_playlists()

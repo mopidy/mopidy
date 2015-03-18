@@ -267,15 +267,29 @@ class PlaylistsProvider(object):
     # currently make available. lookup() should be used for getting full
     # playlists with all details.
 
-    def get_playlists(self):
+    def get_playlists(self, ref=True):
         """
         Get available playlists.
 
-        :rtype: list of :class:`mopidy.models.Playlist`
+        If ``ref`` is :class:`False`, a list of :class:`mopidy.models.Playlist`
+        is returned.
+
+        If ``ref`` is :class:`True`, a list of :class:`mopidy.models.Ref`
+        referencing the playlists is returned.
+
+        Implementors should use :class:`True` as the default value for the
+        ``ref`` keyword argument.
 
         .. versionadded:: 0.20
+
+        .. deprecated:: 0.20
+            The ``ref`` keyword argument will be removed in the future together
+            with the behavior associated with ``ref`` being :class:`False`.
         """
-        return self.playlists
+        if ref:
+            return []
+        else:
+            return self.playlists
 
     @property
     def playlists(self):

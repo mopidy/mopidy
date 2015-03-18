@@ -41,7 +41,7 @@ class PlaylistsTest(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             provider.playlists = []
 
-    def test_get_playlists_impl_falls_back_to_playlists_property(self):
+    def test_get_playlists_nonref_impl_falls_back_to_playlists_property(self):
         provider = backend.PlaylistsProvider(backend=None)
 
         with mock.patch(
@@ -49,6 +49,11 @@ class PlaylistsTest(unittest.TestCase):
                 new_callable=mock.PropertyMock) as mock_playlists_prop:
             mock_playlists_prop.return_value = mock.sentinel.playlists_prop
 
-            result = provider.get_playlists()
+            result = provider.get_playlists(ref=False)
 
         self.assertEqual(result, mock.sentinel.playlists_prop)
+
+    def test_get_playlists_ref_default_impl(self):
+        provider = backend.PlaylistsProvider(backend=None)
+
+        self.assertEqual(provider.get_playlists(ref=True), [])
