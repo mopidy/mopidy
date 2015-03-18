@@ -69,7 +69,7 @@ class Core(
 
     uri_schemes = deprecated_property(get_uri_schemes)
     """
-    .. deprecated:: 0.20
+    .. deprecated:: 1.0
         Use :meth:`get_uri_schemes` instead.
     """
 
@@ -79,7 +79,7 @@ class Core(
 
     version = deprecated_property(get_version)
     """
-    .. deprecated:: 0.20
+    .. deprecated:: 1.0
         Use :meth:`get_version` instead.
     """
 

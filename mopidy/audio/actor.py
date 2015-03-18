@@ -602,7 +602,7 @@ class Audio(pykka.ThreadingActor):
         We will get a GStreamer message when the stream playback reaches the
         token, and can then do any end-of-stream related tasks.
 
-        .. deprecated:: 0.20
+        .. deprecated:: 1.0
             Use :meth:`emit_data` with a :class:`None` buffer instead.
         """
         self._appsrc.push(None)

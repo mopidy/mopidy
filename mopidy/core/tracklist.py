@@ -32,7 +32,7 @@ class TracklistController(object):
 
     tl_tracks = deprecated_property(get_tl_tracks)
     """
-    .. deprecated:: 0.20
+    .. deprecated:: 1.0
         Use :meth:`get_tl_tracks` instead.
     """
 
@@ -42,7 +42,7 @@ class TracklistController(object):
 
     tracks = deprecated_property(get_tracks)
     """
-    .. deprecated:: 0.20
+    .. deprecated:: 1.0
         Use :meth:`get_tracks` instead.
     """
 
@@ -52,7 +52,7 @@ class TracklistController(object):
 
     length = deprecated_property(get_length)
     """
-    .. deprecated:: 0.20
+    .. deprecated:: 1.0
         Use :meth:`get_length` instead.
     """
 
@@ -72,7 +72,7 @@ class TracklistController(object):
 
     version = deprecated_property(get_version)
     """
-    .. deprecated:: 0.20
+    .. deprecated:: 1.0
         Use :meth:`get_version` instead.
     """
 
@@ -100,7 +100,7 @@ class TracklistController(object):
 
     consume = deprecated_property(get_consume, set_consume)
     """
-    .. deprecated:: 0.20
+    .. deprecated:: 1.0
         Use :meth:`get_consume` and :meth:`set_consume` instead.
     """
 
@@ -132,7 +132,7 @@ class TracklistController(object):
 
     random = deprecated_property(get_random, set_random)
     """
-    .. deprecated:: 0.20
+    .. deprecated:: 1.0
         Use :meth:`get_random` and :meth:`set_random` instead.
     """
 
@@ -165,7 +165,7 @@ class TracklistController(object):
 
     repeat = deprecated_property(get_repeat, set_repeat)
     """
-    .. deprecated:: 0.20
+    .. deprecated:: 1.0
         Use :meth:`get_repeat` and :meth:`set_repeat` instead.
     """
 
@@ -195,7 +195,7 @@ class TracklistController(object):
 
     single = deprecated_property(get_single, set_single)
     """
-    .. deprecated:: 0.20
+    .. deprecated:: 1.0
         Use :meth:`get_single` and :meth:`set_single` instead.
     """
 

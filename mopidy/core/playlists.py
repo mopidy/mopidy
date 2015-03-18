@@ -32,7 +32,7 @@ class PlaylistsController(object):
 
     playlists = deprecated_property(get_playlists)
     """
-    .. deprecated:: 0.20
+    .. deprecated:: 1.0
         Use :meth:`get_playlists` instead.
     """
 
