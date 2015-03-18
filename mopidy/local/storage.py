@@ -20,11 +20,3 @@ def check_dirs_and_files(config):
         logger.warning(
             'Could not create local data dir: %s',
             encoding.locale_decode(error))
-
-    # TODO: replace with data dir?
-    try:
-        path.get_or_create_dir(config['local']['playlists_dir'])
-    except EnvironmentError as error:
-        logger.warning(
-            'Could not create local playlists dir: %s',
-            encoding.locale_decode(error))

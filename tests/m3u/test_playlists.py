@@ -8,30 +8,28 @@ import unittest
 import pykka
 
 from mopidy import core
-from mopidy.local import actor
-from mopidy.local.translator import local_playlist_uri_to_path
+from mopidy.m3u import actor
+from mopidy.m3u.translator import playlist_uri_to_path
 from mopidy.models import Playlist, Track
 
 from tests import dummy_audio, path_to_data_dir
-from tests.local import generate_song
+from tests.m3u import generate_song
 
 
-class LocalPlaylistsProviderTest(unittest.TestCase):
-    backend_class = actor.LocalBackend
+class M3UPlaylistsProviderTest(unittest.TestCase):
+    backend_class = actor.M3UBackend
     config = {
-        'local': {
-            'media_dir': path_to_data_dir(''),
-            'data_dir': path_to_data_dir(''),
-            'library': 'json',
+        'm3u': {
+            'playlists_dir': path_to_data_dir(''),
         }
     }
 
     def setUp(self):  # noqa: N802
-        self.config['local']['playlists_dir'] = tempfile.mkdtemp()
-        self.playlists_dir = self.config['local']['playlists_dir']
+        self.config['m3u']['playlists_dir'] = tempfile.mkdtemp()
+        self.playlists_dir = self.config['m3u']['playlists_dir']
 
         self.audio = dummy_audio.create_proxy()
-        self.backend = actor.LocalBackend.start(
+        self.backend = actor.M3UBackend.start(
             config=self.config, audio=self.audio).proxy()
         self.core = core.Core(backends=[self.backend])
 
@@ -42,8 +40,8 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
             shutil.rmtree(self.playlists_dir)
 
     def test_created_playlist_is_persisted(self):
-        uri = 'local:playlist:test.m3u'
-        path = local_playlist_uri_to_path(uri, self.playlists_dir)
+        uri = 'm3u:test.m3u'
+        path = playlist_uri_to_path(uri, self.playlists_dir)
         self.assertFalse(os.path.exists(path))
 
         playlist = self.core.playlists.create('test')
@@ -54,16 +52,16 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
     def test_create_sanitizes_playlist_name(self):
         playlist = self.core.playlists.create('../../test FOO baR')
         self.assertEqual('test FOO baR', playlist.name)
-        path = local_playlist_uri_to_path(playlist.uri, self.playlists_dir)
+        path = playlist_uri_to_path(playlist.uri, self.playlists_dir)
         self.assertEqual(self.playlists_dir, os.path.dirname(path))
         self.assertTrue(os.path.exists(path))
 
     def test_saved_playlist_is_persisted(self):
-        uri1 = 'local:playlist:test1.m3u'
-        uri2 = 'local:playlist:test2.m3u'
+        uri1 = 'm3u:test1.m3u'
+        uri2 = 'm3u:test2.m3u'
 
-        path1 = local_playlist_uri_to_path(uri1, self.playlists_dir)
-        path2 = local_playlist_uri_to_path(uri2, self.playlists_dir)
+        path1 = playlist_uri_to_path(uri1, self.playlists_dir)
+        path2 = playlist_uri_to_path(uri2, self.playlists_dir)
 
         playlist = self.core.playlists.create('test1')
         self.assertEqual('test1', playlist.name)
@@ -78,8 +76,8 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
         self.assertTrue(os.path.exists(path2))
 
     def test_deleted_playlist_is_removed(self):
-        uri = 'local:playlist:test.m3u'
-        path = local_playlist_uri_to_path(uri, self.playlists_dir)
+        uri = 'm3u:test.m3u'
+        path = playlist_uri_to_path(uri, self.playlists_dir)
 
         self.assertFalse(os.path.exists(path))
 
@@ -95,7 +93,7 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
         track = Track(uri=generate_song(1))
         playlist = self.core.playlists.create('test')
         playlist = self.core.playlists.save(playlist.copy(tracks=[track]))
-        path = local_playlist_uri_to_path(playlist.uri, self.playlists_dir)
+        path = playlist_uri_to_path(playlist.uri, self.playlists_dir)
 
         with open(path) as f:
             contents = f.read()
@@ -106,7 +104,7 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
         track = Track(uri=generate_song(1), name='Test', length=60000)
         playlist = self.core.playlists.create('test')
         playlist = self.core.playlists.save(playlist.copy(tracks=[track]))
-        path = local_playlist_uri_to_path(playlist.uri, self.playlists_dir)
+        path = playlist_uri_to_path(playlist.uri, self.playlists_dir)
 
         with open(path) as f:
             contents = f.read().splitlines()
@@ -114,7 +112,7 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
         self.assertEqual(contents, ['#EXTM3U', '#EXTINF:60,Test', track.uri])
 
     def test_playlists_are_loaded_at_startup(self):
-        track = Track(uri='local:track:path2')
+        track = Track(uri='dummy:track:path2')
         playlist = self.core.playlists.create('test')
         playlist = playlist.copy(tracks=[track])
         playlist = self.core.playlists.save(playlist)
@@ -134,7 +132,7 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
         pass
 
     @unittest.SkipTest
-    def test_playlist_dir_is_created(self):
+    def test_playlists_dir_is_created(self):
         pass
 
     def test_create_returns_playlist_with_name_set(self):
@@ -154,7 +152,7 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
         self.assert_(not self.core.playlists.playlists)
 
     def test_delete_non_existant_playlist(self):
-        self.core.playlists.delete('local:playlist:unknown')
+        self.core.playlists.delete('m3u:unknown')
 
     def test_delete_playlist_removes_it_from_the_collection(self):
         playlist = self.core.playlists.create('test')
@@ -168,7 +166,7 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
         playlist = self.core.playlists.create('test')
         self.assertIn(playlist, self.core.playlists.playlists)
 
-        path = local_playlist_uri_to_path(playlist.uri, self.playlists_dir)
+        path = playlist_uri_to_path(playlist.uri, self.playlists_dir)
         self.assertTrue(os.path.exists(path))
 
         os.remove(path)
@@ -244,12 +242,12 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
 
     def test_save_playlist_with_new_uri(self):
         # you *should* not do this
-        uri = 'local:playlist:test.m3u'
+        uri = 'm3u:test.m3u'
         playlist = self.core.playlists.save(Playlist(uri=uri))
         self.assertIn(playlist, self.core.playlists.playlists)
         self.assertEqual(uri, playlist.uri)
         self.assertEqual('test', playlist.name)
-        path = local_playlist_uri_to_path(playlist.uri, self.playlists_dir)
+        path = playlist_uri_to_path(playlist.uri, self.playlists_dir)
         self.assertTrue(os.path.exists(path))
 
     def test_playlist_with_unknown_track(self):
@@ -261,8 +259,7 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
         backend = self.backend_class(config=self.config, audio=self.audio)
 
         self.assert_(backend.playlists.playlists)
-        self.assertEqual(
-            'local:playlist:test.m3u', backend.playlists.playlists[0].uri)
+        self.assertEqual('m3u:test.m3u', backend.playlists.playlists[0].uri)
         self.assertEqual(
             playlist.name, backend.playlists.playlists[0].name)
         self.assertEqual(
@@ -282,12 +279,12 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
 
         check_order(self.core.playlists.playlists, ['a', 'b', 'c'])
 
-        playlist = self.core.playlists.lookup('local:playlist:a.m3u')
+        playlist = self.core.playlists.lookup('m3u:a.m3u')
         playlist = playlist.copy(name='d')
         playlist = self.core.playlists.save(playlist)
 
         check_order(self.core.playlists.playlists, ['b', 'c', 'd'])
 
-        self.core.playlists.delete('local:playlist:c.m3u')
+        self.core.playlists.delete('m3u:c.m3u')
 
         check_order(self.core.playlists.playlists, ['b', 'd'])

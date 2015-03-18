@@ -8,19 +8,18 @@ import os
 import sys
 
 from mopidy import backend
+from mopidy.m3u import translator
 from mopidy.models import Playlist
 
-from .translator import local_playlist_uri_to_path, path_to_local_playlist_uri
-from .translator import parse_m3u
 
 logger = logging.getLogger(__name__)
 
 
-class LocalPlaylistsProvider(backend.PlaylistsProvider):
+class M3UPlaylistsProvider(backend.PlaylistsProvider):
     def __init__(self, *args, **kwargs):
-        super(LocalPlaylistsProvider, self).__init__(*args, **kwargs)
-        self._media_dir = self.backend.config['local']['media_dir']
-        self._playlists_dir = self.backend.config['local']['playlists_dir']
+        super(M3UPlaylistsProvider, self).__init__(*args, **kwargs)
+
+        self._playlists_dir = self.backend._config['m3u']['playlists_dir']
         self._playlists = []
         self.refresh()
 
@@ -49,7 +48,7 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
         if not playlist:
             logger.warn('Trying to delete unknown playlist %s', uri)
             return
-        path = local_playlist_uri_to_path(uri, self._playlists_dir)
+        path = translator.playlist_uri_to_path(uri, self._playlists_dir)
         if os.path.exists(path):
             os.remove(path)
         else:
@@ -70,10 +69,10 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
         for path in glob.glob(os.path.join(self._playlists_dir, b'*.m3u')):
             relpath = os.path.basename(path)
             name = os.path.splitext(relpath)[0].decode(encoding)
-            uri = path_to_local_playlist_uri(relpath)
+            uri = translator.path_to_playlist_uri(relpath)
 
             tracks = []
-            for track in parse_m3u(path, self._media_dir):
+            for track in translator.parse_m3u(path):
                 tracks.append(track)
 
             playlist = Playlist(uri=uri, name=name, tracks=tracks)
@@ -82,7 +81,7 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
         self.playlists = sorted(playlists, key=operator.attrgetter('name'))
 
         logger.info(
-            'Loaded %d local playlists from %s',
+            'Loaded %d M3U playlists from %s',
             len(playlists), self._playlists_dir)
 
     def save(self, playlist):
@@ -99,7 +98,7 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
 
         playlist = self._save_m3u(playlist)
         if index >= 0 and uri != playlist.uri:
-            path = local_playlist_uri_to_path(uri, self._playlists_dir)
+            path = translator.playlist_uri_to_path(uri, self._playlists_dir)
             if os.path.exists(path):
                 os.remove(path)
             else:
@@ -125,11 +124,12 @@ class LocalPlaylistsProvider(backend.PlaylistsProvider):
     def _save_m3u(self, playlist, encoding=sys.getfilesystemencoding()):
         if playlist.name:
             name = self._sanitize_m3u_name(playlist.name, encoding)
-            uri = path_to_local_playlist_uri(name.encode(encoding) + b'.m3u')
-            path = local_playlist_uri_to_path(uri, self._playlists_dir)
+            uri = translator.path_to_playlist_uri(
+                name.encode(encoding) + b'.m3u')
+            path = translator.playlist_uri_to_path(uri, self._playlists_dir)
         elif playlist.uri:
             uri = playlist.uri
-            path = local_playlist_uri_to_path(uri, self._playlists_dir)
+            path = translator.playlist_uri_to_path(uri, self._playlists_dir)
             name, _ = os.path.splitext(os.path.basename(path).decode(encoding))
         else:
             raise ValueError('M3U playlist needs name or URI')

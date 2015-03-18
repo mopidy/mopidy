@@ -6,7 +6,7 @@ import os
 import tempfile
 import unittest
 
-from mopidy.local import translator
+from mopidy.m3u import translator
 from mopidy.models import Track
 from mopidy.utils import path
 
