@@ -56,6 +56,13 @@ v1.0.0 (UNRELEASED)
   :meth:`mopidy.core.PlaybackController.get_stream_title` for letting clients
   know about the current song in streams. (PR: :issue:`938`, :issue:`1030`)
 
+- The following methods were documented as internal. They are now fully private
+  and unavailable outside the core actor. (Fixes: :issue:`1058`)
+
+  - :meth:`mopidy.core.TracklistController.mark_played`
+  - :meth:`mopidy.core.TracklistController.mark_playing`
+  - :meth:`mopidy.core.TracklistController.mark_unplayable`
+
 **Backend API**
 
 - Remove default implementation of
