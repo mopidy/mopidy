@@ -36,6 +36,10 @@ v1.0.0 (UNRELEASED)
   which allows for simpler lookup of multiple URIs. (Fixes: :issue:`1008`,
   PR: :issue:`1047`)
 
+- Add ``uris`` argument to :method:`mopidy.core.TracklistController.add`
+  which allows for simpler addition of multiple URIs to the tracklist. (Fixes:
+  :issue:`1060`, PR: :issue:`1065`)
+
 - **Deprecated:** The old methods on :class:`mopidy.core.PlaybackController` for
   volume and mute management have been deprecated. (Fixes: :issue:`962`)
 

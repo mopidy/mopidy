@@ -188,20 +188,26 @@ class LibraryController(object):
         if none_set or both_set:
             raise ValueError("One of 'uri' or 'uris' must be set")
 
+        if uri is not None:
+            uris = [uri]
+
         futures = {}
         result = {}
-        backends = self._get_backends_to_uris([uri] if uri else uris)
+        backends = self._get_backends_to_uris(uris)
 
         # TODO: lookup(uris) to backend APIs
         for backend, backend_uris in backends.items():
             for u in backend_uris or []:
                 futures[u] = backend.library.lookup(u)
 
-        for u, future in futures.items():
-            result[u] = future.get()
+        for u in uris:
+            if u in futures:
+                result[u] = futures[u].get()
+            else:
+                result[u] = []
 
         if uri:
-            return result.get(uri, [])
+            return result[uri]
         return result
 
     def refresh(self, uri=None):

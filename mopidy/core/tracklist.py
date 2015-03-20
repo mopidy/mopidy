@@ -299,12 +299,15 @@ class TracklistController(object):
 
         return self.get_tl_tracks()[position - 1]
 
-    def add(self, tracks=None, at_position=None, uri=None):
+    def add(self, tracks=None, at_position=None, uri=None, uris=None):
         """
         Add the track or list of tracks to the tracklist.
 
         If ``uri`` is given instead of ``tracks``, the URI is looked up in the
         library and the resulting tracks are added to the tracklist.
+
+        If ``uris`` is given instead of ``tracks``, the URIs are looked up in
+        the library and the resulting tracks are added to the tracklist.
 
         If ``at_position`` is given, the tracks placed at the given position in
         the tracklist. If ``at_position`` is not given, the tracks are appended
@@ -319,12 +322,24 @@ class TracklistController(object):
         :param uri: URI for tracks to add
         :type uri: string
         :rtype: list of :class:`mopidy.models.TlTrack`
-        """
-        assert tracks is not None or uri is not None, \
-            'tracks or uri must be provided'
 
-        if tracks is None and uri is not None:
-            tracks = self.core.library.lookup(uri)
+        .. versionadded:: 1.0
+            The ``uris`` argument.
+
+        .. deprecated:: 1.0
+            The ``tracks`` and ``uri`` arguments. Use ``uris``.
+        """
+        assert tracks is not None or uri is not None or uris is not None, \
+            'tracks, uri or uris must be provided'
+
+        if tracks is None:
+            if uri is not None:
+                tracks = self.core.library.lookup(uri=uri)
+            elif uris is not None:
+                tracks = []
+                track_map = self.core.library.lookup(uris=uris)
+                for uri in uris:
+                    tracks.extend(track_map[uri])
 
         tl_tracks = []
 
