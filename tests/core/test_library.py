@@ -168,10 +168,17 @@ class CoreLibraryTest(unittest.TestCase):
         result = self.core.library.lookup(uris=['dummy1:a', 'dummy2:a'])
         self.assertEqual(result, {'dummy2:a': [5678], 'dummy1:a': [1234]})
 
-    def test_lookup_returns_nothing_for_dummy3_track(self):
+    def test_lookup_uri_returns_empty_list_for_dummy3_track(self):
         result = self.core.library.lookup('dummy3:a')
 
         self.assertEqual(result, [])
+        self.assertFalse(self.library1.lookup.called)
+        self.assertFalse(self.library2.lookup.called)
+
+    def test_lookup_uris_returns_empty_list_for_dummy3_track(self):
+        result = self.core.library.lookup(uris=['dummy3:a'])
+
+        self.assertEqual(result, {'dummy3:a': []})
         self.assertFalse(self.library1.lookup.called)
         self.assertFalse(self.library2.lookup.called)
 
