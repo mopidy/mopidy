@@ -2,6 +2,8 @@ from __future__ import absolute_import, unicode_literals
 
 import unittest
 
+import mock
+
 from mopidy import backend, models
 
 from tests import dummy_backend
@@ -32,9 +34,26 @@ class LibraryTest(unittest.TestCase):
 
 class PlaylistsTest(unittest.TestCase):
     def test_playlists_default_impl(self):
-        playlists = backend.PlaylistsProvider(backend=None)
+        provider = backend.PlaylistsProvider(backend=None)
 
-        self.assertEqual(playlists.playlists, [])
+        self.assertEqual(provider.playlists, [])
 
         with self.assertRaises(NotImplementedError):
-            playlists.playlists = []
+            provider.playlists = []
+
+    def test_get_playlists_nonref_impl_falls_back_to_playlists_property(self):
+        provider = backend.PlaylistsProvider(backend=None)
+
+        with mock.patch(
+                'mopidy.backend.PlaylistsProvider.playlists',
+                new_callable=mock.PropertyMock) as mock_playlists_prop:
+            mock_playlists_prop.return_value = mock.sentinel.playlists_prop
+
+            result = provider.get_playlists(ref=False)
+
+        self.assertEqual(result, mock.sentinel.playlists_prop)
+
+    def test_get_playlists_ref_default_impl(self):
+        provider = backend.PlaylistsProvider(backend=None)
+
+        self.assertEqual(provider.get_playlists(ref=True), [])

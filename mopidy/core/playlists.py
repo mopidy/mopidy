@@ -19,14 +19,28 @@ class PlaylistsController(object):
     """
     Get the available playlists.
 
+    If ``include_tracks`` is :class:`False` the tracks will be removed from the
+    playlists to save bandwidth.
+
+    If ``ref`` is :class:`True`, a list of :class:`mopidy.models.Ref` is
+    returned instead of playlists. This will be the default behavior in the
+    future. Note that not all backends supports returning
+    :class:`~mopidy.models.Ref` objects yet.
+
     Returns a list of :class:`mopidy.models.Playlist`.
+
+    .. versionadded:: 0.20
+        Added the ``ref`` keyword argument.
+
+    .. deprecated:: 0.20
+        The ``include_tracks`` keyword argument. Use ``ref`` instead.
     """
-    def get_playlists(self, include_tracks=True):
-        futures = [b.playlists.playlists
+    def get_playlists(self, include_tracks=True, ref=False):
+        futures = [b.playlists.get_playlists(ref=ref)
                    for b in self.backends.with_playlists.values()]
         results = pykka.get_all(futures)
         playlists = list(itertools.chain(*results))
-        if not include_tracks:
+        if not ref and not include_tracks:
             playlists = [p.copy(tracks=[]) for p in playlists]
         return playlists
 

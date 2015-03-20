@@ -28,22 +28,38 @@ class PlaylistsTest(unittest.TestCase):
 
         self.pl1a = Playlist(name='A', tracks=[Track(uri='dummy1:a')])
         self.pl1b = Playlist(name='B', tracks=[Track(uri='dummy1:b')])
-        self.sp1.playlists.get.return_value = [self.pl1a, self.pl1b]
+        self.sp1.get_playlists.return_value.get.return_value = [
+            self.pl1a, self.pl1b]
 
         self.pl2a = Playlist(name='A', tracks=[Track(uri='dummy2:a')])
         self.pl2b = Playlist(name='B', tracks=[Track(uri='dummy2:b')])
-        self.sp2.playlists.get.return_value = [self.pl2a, self.pl2b]
+        self.sp2.get_playlists.return_value.get.return_value = [
+            self.pl2a, self.pl2b]
 
         self.core = core.Core(mixer=None, backends=[
             self.backend3, self.backend1, self.backend2])
 
     def test_get_playlists_combines_result_from_backends(self):
-        result = self.core.playlists.playlists
+        result = self.core.playlists.get_playlists()
 
         self.assertIn(self.pl1a, result)
         self.assertIn(self.pl1b, result)
         self.assertIn(self.pl2a, result)
         self.assertIn(self.pl2b, result)
+
+        self.sp1.get_playlists.assert_called_once_with(ref=False)
+        self.sp2.get_playlists.assert_called_once_with(ref=False)
+
+    def test_get_playlists_refs(self):
+        result = self.core.playlists.get_playlists(ref=True)
+
+        self.assertIn(self.pl1a, result)
+        self.assertIn(self.pl1b, result)
+        self.assertIn(self.pl2a, result)
+        self.assertIn(self.pl2b, result)
+
+        self.sp1.get_playlists.assert_called_once_with(ref=True)
+        self.sp2.get_playlists.assert_called_once_with(ref=True)
 
     def test_get_playlists_includes_tracks_by_default(self):
         result = self.core.playlists.get_playlists()
@@ -53,7 +69,7 @@ class PlaylistsTest(unittest.TestCase):
         self.assertEqual(result[1].name, 'B')
         self.assertEqual(len(result[1].tracks), 1)
 
-    def test_get_playlist_can_strip_tracks_from_returned_playlists(self):
+    def test_get_playlists_can_strip_tracks_from_returned_playlists(self):
         result = self.core.playlists.get_playlists(include_tracks=False)
 
         self.assertEqual(result[0].name, 'A')
