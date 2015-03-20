@@ -30,6 +30,24 @@ To install, run::
     pip install Mopidy-API-Explorer
 
 
+Mopidy-Local-Images
+===================
+
+https://github.com/tkem/mopidy-local-images
+
+Not a full-featured Web client, but rather a local library and Web
+extension which allows other Web clients access to album art embedded
+in local media files.
+
+.. image:: /ext/local_images.jpg
+    :width: 640
+    :height: 480
+
+To install, run::
+
+    pip install Mopidy-Local-Images
+
+
 Mopidy-Mobile
 =============
 
