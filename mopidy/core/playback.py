@@ -220,7 +220,7 @@ class PlaybackController(object):
             self.stop()
             self.set_current_tl_track(None)
 
-        self.core.tracklist.mark_played(original_tl_track)
+        self.core.tracklist._mark_played(original_tl_track)
 
     def on_tracklist_change(self):
         """
@@ -255,7 +255,7 @@ class PlaybackController(object):
             self.stop()
             self.set_current_tl_track(None)
 
-        self.core.tracklist.mark_played(original_tl_track)
+        self.core.tracklist._mark_played(original_tl_track)
 
     def pause(self):
         """Pause playback."""
@@ -311,12 +311,12 @@ class PlaybackController(object):
         success = backend and backend.playback.play(tl_track.track).get()
 
         if success:
-            self.core.tracklist.mark_playing(tl_track)
+            self.core.tracklist._mark_playing(tl_track)
             self.core.history.add(tl_track.track)
             # TODO: replace with stream-changed
             self._trigger_track_playback_started()
         else:
-            self.core.tracklist.mark_unplayable(tl_track)
+            self.core.tracklist._mark_unplayable(tl_track)
             if on_error_step == 1:
                 # TODO: can cause an endless loop for single track repeat.
                 self.next()
