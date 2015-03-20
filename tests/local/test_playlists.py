@@ -10,7 +10,7 @@ import pykka
 from mopidy import core
 from mopidy.local import actor
 from mopidy.local.translator import local_playlist_uri_to_path
-from mopidy.models import Playlist, Track
+from mopidy.models import Playlist, Ref, Track
 
 from tests import dummy_audio, path_to_data_dir
 from tests.local import generate_song
@@ -194,14 +194,6 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
         self.backend.playlists.playlists = [Playlist(name='a'), playlist]
         self.assertEqual([playlist], self.core.playlists.filter(name='b'))
 
-    def test_filter_by_name_returns_multiple_matches(self):
-        playlist = Playlist(name='b')
-        self.backend.playlists.playlists = [
-            playlist, Playlist(name='a'), Playlist(name='b')]
-        playlists = self.core.playlists.filter(name='b')
-        self.assertIn(playlist, playlists)
-        self.assertEqual(2, len(playlists))
-
     def test_filter_by_name_returns_no_matches(self):
         self.backend.playlists.playlists = [
             Playlist(name='a'), Playlist(name='b')]
@@ -291,3 +283,11 @@ class LocalPlaylistsProviderTest(unittest.TestCase):
         self.core.playlists.delete('local:playlist:c.m3u')
 
         check_order(self.core.playlists.playlists, ['b', 'd'])
+
+    def test_backend_get_playlists(self):
+        playlist = self.core.playlists.create('test')
+        ref = Ref.playlist(name=playlist.name, uri=playlist.uri)
+
+        get_playlists = self.backend.playlists.get_playlists
+        self.assertEqual([playlist], get_playlists(ref=False).get())
+        self.assertEqual([ref], get_playlists(ref=True).get())
