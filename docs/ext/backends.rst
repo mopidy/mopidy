@@ -90,6 +90,17 @@ Mopidy-Local
 Bundled with Mopidy. See :ref:`ext-local`.
 
 
+Mopidy-Local-Images
+===================
+
+https://github.com/tkem/mopidy-local-images
+
+Extension which plugs into Mopidy-Local to allow Web clients access to
+album art embedded in local media files.  Not to be used on its own,
+but acting as a proxy between ``mopidy local scan`` and the actual
+local library provider being used.
+
+
 Mopidy-Local-SQLite
 ===================
 
