@@ -15,8 +15,10 @@ class HistoryController(object):
     def __init__(self):
         self._history = []
 
-    def add(self, track):
+    def _add_track(self, track):
         """Add track to the playback history.
+
+        Internal method for :class:`mopidy.core.PlaybackController`.
 
         :param track: track to add
         :type track: :class:`mopidy.models.Track`
