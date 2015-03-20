@@ -177,25 +177,39 @@ class PlaybackProvider(object):
         """
         return self.audio.pause_playback().get()
 
-    def play(self, track):
+    def play(self):
         """
-        Play given track.
+        Start playback.
 
         *MAY be reimplemented by subclass.*
 
-        :param track: the track to play
-        :type track: :class:`mopidy.models.Track`
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        self.audio.prepare_change()
-        self.change_track(track)
         return self.audio.start_playback().get()
+
+    def prepare_change(self):
+        """
+        Indicate that an URI change is about to happen.
+
+        *MAY be reimplemented by subclass.*
+
+        It is extremely unlikely it makes sense for any backends to override
+        this. For most practical purposes it should be considered an internal
+        call between backends and core that backend authors should not touch.
+        """
+        self.audio.prepare_change().get()
 
     def change_track(self, track):
         """
         Swith to provided track.
 
         *MAY be reimplemented by subclass.*
+
+        This is very likely the *only* thing you need to override as a backend
+        author. Typically this is where you convert any mopidy specific URIs
+        to real URIs and then return::
+
+            return super(MyBackend, self).change_track(track.copy(uri=new_uri))
 
         :param track: the track to play
         :type track: :class:`mopidy.models.Track`
@@ -231,6 +245,9 @@ class PlaybackProvider(object):
         Stop playback.
 
         *MAY be reimplemented by subclass.*
+
+        Should not be used for tracking if tracks have been played / when we
+        are done playing them.
 
         :rtype: :class:`True` if successful, else :class:`False`
         """

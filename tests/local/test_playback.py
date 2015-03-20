@@ -154,7 +154,8 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     @populate_tracklist
     def test_play_skips_to_next_track_on_failure(self):
         # If backend's play() returns False, it is a failure.
-        self.backend.playback.play = lambda track: track != self.tracks[0]
+        return_values = [True, False]
+        self.backend.playback.play = lambda: return_values.pop()
         self.playback.play()
         self.assertNotEqual(self.playback.current_track, self.tracks[0])
         self.assertEqual(self.playback.current_track, self.tracks[1])
@@ -214,7 +215,8 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     @populate_tracklist
     def test_previous_skips_to_previous_track_on_failure(self):
         # If backend's play() returns False, it is a failure.
-        self.backend.playback.play = lambda track: track != self.tracks[1]
+        return_values = [True, False, True]
+        self.backend.playback.play = lambda: return_values.pop()
         self.playback.play(self.tracklist.tl_tracks[2])
         self.assertEqual(self.playback.current_track, self.tracks[2])
         self.playback.previous()
@@ -281,7 +283,8 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     @populate_tracklist
     def test_next_skips_to_next_track_on_failure(self):
         # If backend's play() returns False, it is a failure.
-        self.backend.playback.play = lambda track: track != self.tracks[1]
+        return_values = [True, False, True]
+        self.backend.playback.play = lambda: return_values.pop()
         self.playback.play()
         self.assertEqual(self.playback.current_track, self.tracks[0])
         self.playback.next()
@@ -455,7 +458,8 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     @populate_tracklist
     def test_end_of_track_skips_to_next_track_on_failure(self):
         # If backend's play() returns False, it is a failure.
-        self.backend.playback.play = lambda track: track != self.tracks[1]
+        return_values = [True, False, True]
+        self.backend.playback.play = lambda: return_values.pop()
         self.playback.play()
         self.assertEqual(self.playback.current_track, self.tracks[0])
         self.playback.on_end_of_track()
