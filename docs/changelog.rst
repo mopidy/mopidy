@@ -32,12 +32,12 @@ v1.0.0 (UNRELEASED)
 - Add :class:`mopidy.core.MixerController` which keeps track of volume and
   mute. (Fixes: :issue:`962`)
 
-- Add ``uris`` argument to :method:`mopidy.core.LibraryController.lookup`
-  which allows for simpler lookup of multiple URIs. (Fixes: :issue:`1008`,
-  PR: :issue:`1047`)
+- Add ``uris`` argument to :meth:`mopidy.core.LibraryController.lookup` which
+  allows for simpler lookup of multiple URIs. (Fixes: :issue:`1008`, PR:
+  :issue:`1047`)
 
-- Add ``uris`` argument to :method:`mopidy.core.TracklistController.add`
-  which allows for simpler addition of multiple URIs to the tracklist. (Fixes:
+- Add ``uris`` argument to :meth:`mopidy.core.TracklistController.add` which
+  allows for simpler addition of multiple URIs to the tracklist. (Fixes:
   :issue:`1060`, PR: :issue:`1065`)
 
 - **Deprecated:** The old methods on :class:`mopidy.core.PlaybackController` for
