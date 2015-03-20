@@ -26,7 +26,8 @@ v1.0.0 (UNRELEASED)
   the Python API with the WebSocket/JavaScript API. (Fixes: :issue:`952`)
 
 - Add :class:`mopidy.core.HistoryController` which keeps track of what tracks
-  have been played. (Fixes: :issue:`423`, PR: :issue:`803`)
+  have been played. (Fixes: :issue:`423`, :issue:`1056`, PR: :issue:`803`,
+  :issue:`1063`)
 
 - Add :class:`mopidy.core.MixerController` which keeps track of volume and
   mute. (Fixes: :issue:`962`)
