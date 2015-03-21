@@ -204,7 +204,7 @@ class PlaybackProvider(object):
         Convert custom URI scheme to real playable uri.
 
         This is very likely the *only* thing you need to override as a backend
-        author. Typically this is where you convert any mopidy specific URIs
+        author. Typically this is where you convert any Mopidy specific URIs
         to real URIs and then return it.
 
         :param uri: the URI to translate.
@@ -261,7 +261,7 @@ class PlaybackProvider(object):
 
         *MAY be reimplemented by subclass.*
 
-        Should not be used for tracking if tracks have been played / when we
+        Should not be used for tracking if tracks have been played or when we
         are done playing them.
 
         :rtype: :class:`True` if successful, else :class:`False`
