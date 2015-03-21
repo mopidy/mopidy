@@ -199,23 +199,38 @@ class PlaybackProvider(object):
         """
         self.audio.prepare_change().get()
 
+    def translate_uri(self, uri):
+        """
+        Convert custom URI scheme to real playable uri.
+
+        This is very likely the *only* thing you need to override as a backend
+        author. Typically this is where you convert any mopidy specific URIs
+        to real URIs and then return it.
+
+        :param uri: the URI to translate.
+        :type uri: string
+        :rtype: string
+        """
+        return uri
+
     def change_track(self, track):
         """
         Swith to provided track.
 
         *MAY be reimplemented by subclass.*
 
-        This is very likely the *only* thing you need to override as a backend
-        author. Typically this is where you convert any mopidy specific URIs
-        to real URIs and then return::
+        It is unlikely it makes sense for any backends to override
+        this. For most practical purposes it should be considered an internal
+        call between backends and core that backend authors should not touch.
 
-            return super(MyBackend, self).change_track(track.copy(uri=new_uri))
+        The default implementation will call :method:`translate_uri` which
+        is what you want to implement.
 
         :param track: the track to play
         :type track: :class:`mopidy.models.Track`
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        self.audio.set_uri(track.uri).get()
+        self.audio.set_uri(self.translate_uri(track.uri)).get()
         return True
 
     def resume(self):
