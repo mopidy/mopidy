@@ -203,13 +203,16 @@ class PlaybackProvider(object):
         """
         Convert custom URI scheme to real playable uri.
 
+        *MAY be reimplemented by subclass.*
+
         This is very likely the *only* thing you need to override as a backend
-        author. Typically this is where you convert any Mopidy specific URIs
-        to real URIs and then return it.
+        author. Typically this is where you convert any Mopidy specific URI
+        to a real URI and then return it. If you can't convert the URI just
+        return :class:`None`.
 
         :param uri: the URI to translate.
         :type uri: string
-        :rtype: string
+        :rtype: string or :class:`None` if the URI could not be translated.
         """
         return uri
 
@@ -230,7 +233,10 @@ class PlaybackProvider(object):
         :type track: :class:`mopidy.models.Track`
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        self.audio.set_uri(self.translate_uri(track.uri)).get()
+        uri = self.translate_uri(track.uri)
+        if not uri:
+            return False
+        self.audio.set_uri(uri).get()
         return True
 
     def resume(self):
