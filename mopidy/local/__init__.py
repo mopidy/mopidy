@@ -24,7 +24,7 @@ class Extension(ext.Extension):
         schema['library'] = config.String()
         schema['media_dir'] = config.Path()
         schema['data_dir'] = config.Path()
-        schema['playlists_dir'] = config.Path()
+        schema['playlists_dir'] = config.Deprecated()
         schema['tag_cache_file'] = config.Deprecated()
         schema['scan_timeout'] = config.Integer(
             minimum=1000, maximum=1000 * 60 * 60)

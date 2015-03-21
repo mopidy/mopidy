@@ -126,6 +126,11 @@ v1.0.0 (UNRELEASED)
 
 - Sort local playlists by name. (Fixes: :issue:`1026`, PR: :issue:`1028`)
 
+- Moved playlist support out to a new extension, :ref:`ext-m3u`.
+
+- *Deprecated:* The config value :confval:`local/playlists_dir` is no longer in
+  use and can be removed from your config.
+
 **Local library API**
 
 - Implementors of :meth:`mopidy.local.Library.lookup` should now return a list
@@ -138,6 +143,12 @@ v1.0.0 (UNRELEASED)
 
 - Add :meth:`mopidy.local.Library.get_images` for looking up images
   for local URIs. (Fixes: :issue:`1031`, PR: :issue:`1032` and :issue:`1037`)
+
+**M3U backend**
+
+- Split the M3U playlist handling out of the local backend. See
+  :ref:`m3u-migration` for how to migrate your local playlists. (Fixes:
+  :issue:`1054`, PR: :issue:`1066`)
 
 **MPD frontend**
 
