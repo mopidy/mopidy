@@ -73,6 +73,10 @@ v1.0.0 (UNRELEASED)
   :meth:`mopidy.backend.PlaybackProvider.change_track` into account when
   determining success. (PR: :issue:`1071`)
 
+- Updated :meth:`mopidy.core.LibraryController.search` and
+  :meth:`mopidy.core.LibraryController.find_exact` to normalize and warn about
+  bad queries from clients. (Fixes: :issue:`1067`)
+
 **Backend API**
 
 - Remove default implementation of
