@@ -146,8 +146,8 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.assert_(self.core.playlists.playlists)
         self.assertIn(playlist, self.core.playlists.playlists)
 
-    def test_playlists_empty_to_start_with(self):
-        self.assert_(not self.core.playlists.playlists)
+    def test_as_list_empty_to_start_with(self):
+        self.assertEqual(len(self.core.playlists.as_list()), 0)
 
     def test_delete_non_existant_playlist(self):
         self.core.playlists.delete('m3u:unknown')
@@ -249,12 +249,11 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
         backend = self.backend_class(config=self.config, audio=self.audio)
 
-        self.assert_(backend.playlists.playlists)
-        self.assertEqual('m3u:test.m3u', backend.playlists.playlists[0].uri)
-        self.assertEqual(
-            playlist.name, backend.playlists.playlists[0].name)
-        self.assertEqual(
-            track.uri, backend.playlists.playlists[0].tracks[0].uri)
+        self.assertEqual(len(backend.playlists.as_list()), 1)
+        result = backend.playlists.lookup('m3u:test.m3u')
+        self.assertEqual('m3u:test.m3u', result.uri)
+        self.assertEqual(playlist.name, result.name)
+        self.assertEqual(track.uri, result.tracks[0].uri)
 
     def test_playlist_sort_order(self):
         def check_order(playlists, names):
@@ -264,18 +263,18 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.core.playlists.create('a')
         self.core.playlists.create('b')
 
-        check_order(self.core.playlists.playlists, ['a', 'b', 'c'])
+        check_order(self.core.playlists.as_list(), ['a', 'b', 'c'])
 
         self.core.playlists.refresh()
 
-        check_order(self.core.playlists.playlists, ['a', 'b', 'c'])
+        check_order(self.core.playlists.as_list(), ['a', 'b', 'c'])
 
         playlist = self.core.playlists.lookup('m3u:a.m3u')
         playlist = playlist.copy(name='d')
         playlist = self.core.playlists.save(playlist)
 
-        check_order(self.core.playlists.playlists, ['b', 'c', 'd'])
+        check_order(self.core.playlists.as_list(), ['b', 'c', 'd'])
 
         self.core.playlists.delete('m3u:c.m3u')
 
-        check_order(self.core.playlists.playlists, ['b', 'd'])
+        check_order(self.core.playlists.as_list(), ['b', 'd'])

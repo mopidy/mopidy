@@ -8,7 +8,7 @@ import sys
 
 from mopidy import backend
 from mopidy.m3u import translator
-from mopidy.models import Playlist
+from mopidy.models import Playlist, Ref
 
 
 logger = logging.getLogger(__name__)
@@ -21,6 +21,12 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         self._playlists_dir = self.backend._config['m3u']['playlists_dir']
         self._playlists = {}
         self.refresh()
+
+    def as_list(self):
+        refs = [
+            Ref.playlist(uri=pl.uri, name=pl.name)
+            for pl in self._playlists.values()]
+        return sorted(refs, key=operator.attrgetter('name'))
 
     @property
     def playlists(self):
