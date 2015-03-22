@@ -126,8 +126,8 @@ class CorePlaybackTest(unittest.TestCase):
             self.core.playback.current_tl_track, self.tl_tracks[3])
 
     def test_play_skips_to_next_on_unplayable_track(self):
-        """Checks that we handle change track failing."""
-        self.playback2.change_track().get.return_value = False
+        """Checks that we handle backend.change_track failing."""
+        self.playback2.change_track.return_value.get.return_value = False
 
         self.core.tracklist.clear()
         self.core.tracklist.add(self.tracks[:2])
