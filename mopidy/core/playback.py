@@ -202,7 +202,7 @@ class PlaybackController(object):
             self.pause()
 
     # TODO: this is not really end of track, this is on_need_next_track
-    def on_end_of_track(self):
+    def _on_end_of_track(self):
         """
         Tell the playback controller that end of track is reached.
 
@@ -222,7 +222,7 @@ class PlaybackController(object):
 
         self.core.tracklist._mark_played(original_tl_track)
 
-    def on_tracklist_change(self):
+    def _on_tracklist_change(self):
         """
         Tell the playback controller that the current playlist has changed.
 
@@ -233,7 +233,7 @@ class PlaybackController(object):
             self.stop()
             self.set_current_tl_track(None)
 
-    def on_stream_changed(self, uri):
+    def _on_stream_changed(self, uri):
         self._stream_title = None
 
     def next(self):

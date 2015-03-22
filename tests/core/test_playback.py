@@ -50,6 +50,9 @@ class CorePlaybackTest(unittest.TestCase):
         self.unplayable_tl_track = self.tl_tracks[2]
         self.duration_less_tl_track = self.tl_tracks[4]
 
+    def trigger_end_of_track(self):
+        self.core.playback._on_end_of_track()
+
     def test_get_current_tl_track_none(self):
         self.core.playback.set_current_tl_track(None)
 
@@ -419,7 +422,7 @@ class CorePlaybackTest(unittest.TestCase):
         tl_track = self.tl_tracks[0]
         self.core.playback.play(tl_track)
 
-        self.core.playback.on_end_of_track()
+        self.trigger_end_of_track()
 
         self.assertIn(tl_track, self.core.tracklist.tl_tracks)
 
@@ -428,7 +431,7 @@ class CorePlaybackTest(unittest.TestCase):
         self.core.playback.play(tl_track)
         self.core.tracklist.consume = True
 
-        self.core.playback.on_end_of_track()
+        self.trigger_end_of_track()
 
         self.assertNotIn(tl_track, self.core.tracklist.tl_tracks)
 
@@ -438,7 +441,7 @@ class CorePlaybackTest(unittest.TestCase):
         self.core.playback.play(self.tl_tracks[0])
         listener_mock.reset_mock()
 
-        self.core.playback.on_end_of_track()
+        self.trigger_end_of_track()
 
         self.assertListEqual(
             listener_mock.send.mock_calls,
