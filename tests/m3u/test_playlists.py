@@ -192,14 +192,6 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.backend.playlists.playlists = [Playlist(name='a'), playlist]
         self.assertEqual([playlist], self.core.playlists.filter(name='b'))
 
-    def test_filter_by_name_returns_multiple_matches(self):
-        playlist = Playlist(name='b')
-        self.backend.playlists.playlists = [
-            playlist, Playlist(name='a'), Playlist(name='b')]
-        playlists = self.core.playlists.filter(name='b')
-        self.assertIn(playlist, playlists)
-        self.assertEqual(2, len(playlists))
-
     def test_filter_by_name_returns_no_matches(self):
         self.backend.playlists.playlists = [
             Playlist(name='a'), Playlist(name='b')]
@@ -241,14 +233,13 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.assertIn(playlist2, self.core.playlists.playlists)
 
     def test_save_playlist_with_new_uri(self):
-        # you *should* not do this
         uri = 'm3u:test.m3u'
-        playlist = self.core.playlists.save(Playlist(uri=uri))
-        self.assertIn(playlist, self.core.playlists.playlists)
-        self.assertEqual(uri, playlist.uri)
-        self.assertEqual('test', playlist.name)
-        path = playlist_uri_to_path(playlist.uri, self.playlists_dir)
-        self.assertTrue(os.path.exists(path))
+
+        with self.assertRaises(AssertionError):
+            self.core.playlists.save(Playlist(uri=uri))
+
+        path = playlist_uri_to_path(uri, self.playlists_dir)
+        self.assertFalse(os.path.exists(path))
 
     def test_playlist_with_unknown_track(self):
         track = Track(uri='file:///dev/null')
