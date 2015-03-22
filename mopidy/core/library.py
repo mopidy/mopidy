@@ -1,10 +1,13 @@
 from __future__ import absolute_import, unicode_literals
 
 import collections
+import logging
 import operator
 import urlparse
 
 import pykka
+
+logger = logging.getLogger(__name__)
 
 
 class LibraryController(object):
@@ -155,7 +158,7 @@ class LibraryController(object):
         :type uris: list of strings or :class:`None`
         :rtype: list of :class:`mopidy.models.SearchResult`
         """
-        query = query or kwargs
+        query = _normalize_query(query or kwargs)
         futures = [
             backend.library.find_exact(query=query, uris=backend_uris)
             for (backend, backend_uris)
@@ -263,9 +266,22 @@ class LibraryController(object):
         :type uris: list of strings or :class:`None`
         :rtype: list of :class:`mopidy.models.SearchResult`
         """
-        query = query or kwargs
+        query = _normalize_query(query or kwargs)
         futures = [
             backend.library.search(query=query, uris=backend_uris)
             for (backend, backend_uris)
             in self._get_backends_to_uris(uris).items()]
         return [result for result in pykka.get_all(futures) if result]
+
+
+def _normalize_query(query):
+    broken_client = False
+    for (field, values) in query.items():
+        if isinstance(values, basestring):
+            broken_client = True
+            query[field] = [values]
+    if broken_client:
+        logger.warning(
+            'Client sent a broken search query, values must be lists. Please '
+            'check which client sent this query and file a bug against them.')
+    return query

@@ -23,8 +23,6 @@ def find_exact(tracks, query=None, limit=100, offset=0, uris=None):
     _validate_query(query)
 
     for (field, values) in query.items():
-        if not hasattr(values, '__iter__'):
-            values = [values]
         # FIXME this is bound to be slow for large libraries
         for value in values:
             if field == 'track_no':
@@ -134,8 +132,6 @@ def search(tracks, query=None, limit=100, offset=0, uris=None):
     _validate_query(query)
 
     for (field, values) in query.items():
-        if not hasattr(values, '__iter__'):
-            values = [values]
         # FIXME this is bound to be slow for large libraries
         for value in values:
             if field == 'track_no':

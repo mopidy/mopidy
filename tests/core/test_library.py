@@ -355,3 +355,13 @@ class CoreLibraryTest(unittest.TestCase):
             query=dict(any=['a']), uris=None)
         self.library2.search.assert_called_once_with(
             query=dict(any=['a']), uris=None)
+
+    def test_search_normalises_bad_queries(self):
+        self.core.library.search({'any': 'foobar'})
+        self.library1.search.assert_called_once_with(
+            query={'any': ['foobar']}, uris=None)
+
+    def test_find_exact_normalises_bad_queries(self):
+        self.core.library.find_exact({'any': 'foobar'})
+        self.library1.find_exact.assert_called_once_with(
+            query={'any': ['foobar']}, uris=None)
