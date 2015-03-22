@@ -226,7 +226,7 @@ class PlaybackProvider(object):
         this. For most practical purposes it should be considered an internal
         call between backends and core that backend authors should not touch.
 
-        The default implementation will call :method:`translate_uri` which
+        The default implementation will call :meth:`translate_uri` which
         is what you want to implement.
 
         :param track: the track to play
