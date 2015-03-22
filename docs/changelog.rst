@@ -69,6 +69,10 @@ v1.0.0 (UNRELEASED)
   - :meth:`mopidy.core.TracklistController.mark_playing`
   - :meth:`mopidy.core.TracklistController.mark_unplayable`
 
+- Updated :meth:`mopidy.core.PlaybackController.play` to take
+  :meth:`mopidy.backend.PlaybackProvider.change_track` into account when
+  determining success. (PR: :issue:`1071`)
+
 **Backend API**
 
 - Remove default implementation of

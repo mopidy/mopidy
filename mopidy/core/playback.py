@@ -312,8 +312,8 @@ class PlaybackController(object):
 
         if backend:
             backend.playback.prepare_change()
-            backend.playback.change_track(tl_track.track)
-            success = backend.playback.play().get()
+            success = (backend.playback.change_track(tl_track.track).get() and
+                       backend.playback.play().get())
 
         if success:
             self.core.tracklist._mark_playing(tl_track)
