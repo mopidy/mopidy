@@ -16,12 +16,52 @@ class PlaylistsController(object):
         self.backends = backends
         self.core = core
 
-    """
-    Get the available playlists.
+    def as_list(self):
+        """
+        Get a list of the currently available playlists.
 
-    Returns a list of :class:`mopidy.models.Playlist`.
-    """
+        Returns a list of :class:`~mopidy.models.Ref` objects referring to the
+        playlists. In other words, no information about the playlists' content
+        is given.
+
+        :rtype: list of :class:`mopidy.models.Ref`
+
+        .. versionadded:: 1.0
+        """
+        futures = [
+            b.playlists.as_list()
+            for b in self.backends.with_playlists.values()]
+        results = pykka.get_all(futures)
+        return list(itertools.chain(*results))
+
+    def get_items(self, uri):
+        """
+        Get the items in a playlist specified by ``uri``.
+
+        Returns a list of :class:`~mopidy.models.Ref` objects referring to the
+        playlist's items.
+
+        If a playlist with the given ``uri`` doesn't exist, it returns
+        :class:`None`.
+
+        :rtype: list of :class:`mopidy.models.Ref`, or :class:`None`
+
+        .. versionadded:: 1.0
+        """
+        uri_scheme = urlparse.urlparse(uri).scheme
+        backend = self.backends.with_playlists.get(uri_scheme, None)
+        if backend:
+            return backend.playlists.get_items(uri).get()
+
     def get_playlists(self, include_tracks=True):
+        """
+        Get the available playlists.
+
+        :rtype: list of :class:`mopidy.models.Playlist`
+
+        .. deprecated:: 1.0
+            Use :meth:`as_list` and :meth:`get_items` instead.
+        """
         futures = [b.playlists.playlists
                    for b in self.backends.with_playlists.values()]
         results = pykka.get_all(futures)
@@ -33,7 +73,7 @@ class PlaylistsController(object):
     playlists = deprecated_property(get_playlists)
     """
     .. deprecated:: 1.0
-        Use :meth:`get_playlists` instead.
+        Use :meth:`as_list` and :meth:`get_items` instead.
     """
 
     def create(self, name, uri_scheme=None):

@@ -77,6 +77,17 @@ v1.0.0 (UNRELEASED)
   :meth:`mopidy.core.LibraryController.find_exact` to normalize and warn about
   bad queries from clients. (Fixes: :issue:`1067`, PR: :issue:`1073`)
 
+- Add :meth:`mopidy.core.PlaylistsController.as_list`. (Fixes: :issue:`1057`,
+  PR: :issue:`1075`)
+
+- Add :meth:`mopidy.core.PlaylistsController.get_items`. (Fixes: :issue:`1057`,
+  PR: :issue:`1075`)
+
+- **Deprecated:** :meth:`mopidy.core.PlaylistsController.get_playlists`. Use
+  :meth:`~mopidy.core.PlaylistsController.as_list` and
+  :meth:`~mopidy.core.PlaylistsController.get_items` instead. (Fixes:
+  :issue:`1057`, PR: :issue:`1075`)
+
 **Backend API**
 
 - Remove default implementation of
