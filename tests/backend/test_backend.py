@@ -36,12 +36,6 @@ class PlaylistsTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
         self.provider = backend.PlaylistsProvider(backend=None)
 
-    def test_playlists_default_impl(self):
-        self.assertEqual(self.provider.playlists, [])
-
-        with self.assertRaises(NotImplementedError):
-            self.provider.playlists = []
-
     def test_as_list_default_impl(self):
         with self.assertRaises(NotImplementedError):
             self.provider.as_list()
