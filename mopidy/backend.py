@@ -201,7 +201,7 @@ class PlaybackProvider(object):
 
     def translate_uri(self, uri):
         """
-        Convert custom URI scheme to real playable uri.
+        Convert custom URI scheme to real playable URI.
 
         *MAY be reimplemented by subclass.*
 
@@ -210,9 +210,9 @@ class PlaybackProvider(object):
         to a real URI and then return it. If you can't convert the URI just
         return :class:`None`.
 
-        :param uri: the URI to translate.
+        :param uri: the URI to translate
         :type uri: string
-        :rtype: string or :class:`None` if the URI could not be translated.
+        :rtype: string or :class:`None` if the URI could not be translated
         """
         return uri
 
