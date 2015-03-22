@@ -197,7 +197,7 @@ class PlaybackController(object):
         self.stop()
         self.set_current_tl_track(tl_track)
         if old_state == PlaybackState.PLAYING:
-            self.play(on_error_step=on_error_step)
+            self._play(on_error_step=on_error_step)
         elif old_state == PlaybackState.PAUSED:
             self.pause()
 
@@ -267,20 +267,17 @@ class PlaybackController(object):
             self.set_state(PlaybackState.PAUSED)
             self._trigger_track_playback_paused()
 
-    def play(self, tl_track=None, on_error_step=1):
+    def play(self, tl_track=None):
         """
         Play the given track, or if the given track is :class:`None`, play the
         currently active track.
 
         :param tl_track: track to play
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
-        :param on_error_step: direction to step at play error, 1 for next
-            track (default), -1 for previous track. **INTERNAL**
-        :type on_error_step: int, -1 or 1
         """
+        self._play(tl_track, 1)
 
-        assert on_error_step in (-1, 1)
-
+    def _play(self, tl_track=None, on_error_step=1):
         if tl_track is None:
             if self.get_state() == PlaybackState.PAUSED:
                 return self.resume()
