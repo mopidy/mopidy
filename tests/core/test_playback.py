@@ -650,3 +650,15 @@ class TestStream(unittest.TestCase):
 
         self.replay_audio_events()
         self.assertEqual(self.playback.get_stream_title(), None)
+
+
+class CorePlaybackWithOldBackendTest(unittest.TestCase):
+    def test_type_error_from_old_backend_does_not_crash_core(self):
+        b = mock.Mock()
+        b.uri_schemes.get.return_value = ['dummy1']
+        b.playback = mock.Mock(spec=backend.PlaybackProvider)
+        b.playback.play.side_effect = TypeError
+
+        c = core.Core(mixer=None, backends=[b])
+        c.tracklist.add([Track(uri='dummy1:a', length=40000)])
+        c.playback.play()  # No TypeError == test passed.
