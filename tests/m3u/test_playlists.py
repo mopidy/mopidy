@@ -278,3 +278,20 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.core.playlists.delete('m3u:c.m3u')
 
         check_order(self.core.playlists.as_list(), ['b', 'd'])
+
+    def test_get_items_returns_item_refs(self):
+        track = Track(uri='dummy:a', name='A', length=60000)
+        playlist = self.core.playlists.create('test')
+        playlist = self.core.playlists.save(playlist.copy(tracks=[track]))
+
+        item_refs = self.core.playlists.get_items(playlist.uri)
+
+        self.assertEqual(len(item_refs), 1)
+        self.assertEqual(item_refs[0].type, 'track')
+        self.assertEqual(item_refs[0].uri, 'dummy:a')
+        self.assertEqual(item_refs[0].name, 'A')
+
+    def test_get_items_of_unknown_playlist_returns_none(self):
+        item_refs = self.core.playlists.get_items('dummy:unknown')
+
+        self.assertIsNone(item_refs)
