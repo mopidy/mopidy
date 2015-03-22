@@ -12,6 +12,7 @@ from mopidy.models import Track
 from tests import dummy_audio as audio
 
 
+# TODO: split into smaller easier to follow tests. setup is way to complex.
 class CorePlaybackTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
         self.backend1 = mock.Mock()
@@ -113,7 +114,7 @@ class CorePlaybackTest(unittest.TestCase):
         self.playback2.change_track.assert_called_once_with(self.tracks[1])
         self.playback2.play.assert_called_once_with()
 
-    def test_play_skips_to_next_on_unplayable_track(self):
+    def test_play_skips_to_next_on_track_without_playback_backend(self):
         self.core.playback.play(self.unplayable_tl_track)
 
         self.playback1.prepare_change.assert_called_once_with()
@@ -123,6 +124,22 @@ class CorePlaybackTest(unittest.TestCase):
 
         self.assertEqual(
             self.core.playback.current_tl_track, self.tl_tracks[3])
+
+    def test_play_skips_to_next_on_unplayable_track(self):
+        """Checks that we handle change track failing."""
+        self.playback2.change_track().get.return_value = False
+
+        self.core.tracklist.clear()
+        self.core.tracklist.add(self.tracks[:2])
+        tl_tracks = self.core.tracklist.tl_tracks
+
+        self.core.playback.play(tl_tracks[0])
+        self.core.playback.play(tl_tracks[1])
+
+        # TODO: we really want to check that the track was marked unplayable
+        # and that next was called. This is just an indirect way of checking
+        # this :(
+        self.assertEqual(self.core.playback.state, core.PlaybackState.STOPPED)
 
     @mock.patch(
         'mopidy.core.playback.listener.CoreListener', spec=core.CoreListener)
