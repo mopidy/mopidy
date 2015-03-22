@@ -75,7 +75,7 @@ v1.0.0 (UNRELEASED)
 
 - Updated :meth:`mopidy.core.LibraryController.search` and
   :meth:`mopidy.core.LibraryController.find_exact` to normalize and warn about
-  bad queries from clients. (Fixes: :issue:`1067`)
+  bad queries from clients. (Fixes: :issue:`1067`, PR: :issue:`1073`)
 
 **Backend API**
 
