@@ -1,3 +1,9 @@
+mopidy (0.19.5-2) UNRELEASED; urgency=medium
+
+  * Add gstreamer0.10-pulseaudio to Recommends.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Sun, 22 Mar 2015 20:19:50 +0100
+
 mopidy (0.19.5-1) unstable; urgency=medium
 
   * New upstream release.

@@ -30,6 +30,7 @@ Depends:
 Recommends:
     gstreamer0.10-alsa,
     gstreamer0.10-plugins-ugly,
+    gstreamer0.10-pulseaudio,
     gstreamer0.10-tools
 Suggests:
     mopidy-doc
