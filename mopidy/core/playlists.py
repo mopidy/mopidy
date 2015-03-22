@@ -45,7 +45,7 @@ class PlaylistsController(object):
         :class:`None` or doesn't match a current backend, the first backend is
         asked to create the playlist.
 
-        All new playlists should be created by calling this method, and **not**
+        All new playlists must be created by calling this method, and **not**
         by creating new instances of :class:`mopidy.models.Playlist`.
 
         :param name: name of the new playlist
@@ -150,14 +150,14 @@ class PlaylistsController(object):
         Save the playlist.
 
         For a playlist to be saveable, it must have the ``uri`` attribute set.
-        You should not set the ``uri`` atribute yourself, but use playlist
+        You must not set the ``uri`` atribute yourself, but use playlist
         objects returned by :meth:`create` or retrieved from :attr:`playlists`,
         which will always give you saveable playlists.
 
         The method returns the saved playlist. The return playlist may differ
         from the saved playlist. E.g. if the playlist name was changed, the
         returned playlist may have a different URI. The caller of this method
-        should throw away the playlist sent to this method, and use the
+        must throw away the playlist sent to this method, and use the
         returned playlist instead.
 
         If the playlist's URI isn't set or doesn't match the URI scheme of a
