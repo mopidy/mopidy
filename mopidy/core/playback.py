@@ -183,7 +183,7 @@ class PlaybackController(object):
     # Methods
 
     # TODO: remove this.
-    def change_track(self, tl_track, on_error_step=1):
+    def _change_track(self, tl_track, on_error_step=1):
         """
         Change to the given track, keeping the current playback state.
 
@@ -215,7 +215,7 @@ class PlaybackController(object):
         next_tl_track = self.core.tracklist.eot_track(original_tl_track)
 
         if next_tl_track:
-            self.change_track(next_tl_track)
+            self._change_track(next_tl_track)
         else:
             self.stop()
             self.set_current_tl_track(None)
@@ -250,7 +250,7 @@ class PlaybackController(object):
             # TODO: switch to:
             # backend.play(track)
             # wait for state change?
-            self.change_track(next_tl_track)
+            self._change_track(next_tl_track)
         else:
             self.stop()
             self.set_current_tl_track(None)
@@ -344,7 +344,7 @@ class PlaybackController(object):
         # TODO: switch to:
         # self.play(....)
         # wait for state change?
-        self.change_track(
+        self._change_track(
             self.core.tracklist.previous_track(tl_track), on_error_step=-1)
 
     def resume(self):
