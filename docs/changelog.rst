@@ -88,6 +88,9 @@ v1.0.0 (UNRELEASED)
   :meth:`~mopidy.core.PlaylistsController.get_items` instead. (Fixes:
   :issue:`1057`, PR: :issue:`1075`)
 
+- **Deprecated:** :meth:`mopidy.core.PlaylistsController.filter`. Use
+  :meth:`~mopidy.core.PlaylistsController.as_list` and filter yourself.
+
 **Backend API**
 
 - Remove default implementation of

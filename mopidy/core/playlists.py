@@ -141,6 +141,9 @@ class PlaylistsController(object):
         :param criteria: one or more criteria to match by
         :type criteria: dict
         :rtype: list of :class:`mopidy.models.Playlist`
+
+        .. deprecated:: 1.0
+            Use :meth:`as_list` and filter yourself.
         """
         criteria = criteria or kwargs
         matches = self.playlists
