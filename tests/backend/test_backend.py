@@ -8,6 +8,7 @@ from tests import dummy_backend
 
 
 class LibraryTest(unittest.TestCase):
+
     def test_default_get_images_impl_falls_back_to_album_image(self):
         album = models.Album(images=['imageuri'])
         track = models.Track(uri='trackuri', album=album)
@@ -31,10 +32,20 @@ class LibraryTest(unittest.TestCase):
 
 
 class PlaylistsTest(unittest.TestCase):
-    def test_playlists_default_impl(self):
-        playlists = backend.PlaylistsProvider(backend=None)
 
-        self.assertEqual(playlists.playlists, [])
+    def setUp(self):  # noqa: N802
+        self.provider = backend.PlaylistsProvider(backend=None)
+
+    def test_playlists_default_impl(self):
+        self.assertEqual(self.provider.playlists, [])
 
         with self.assertRaises(NotImplementedError):
-            playlists.playlists = []
+            self.provider.playlists = []
+
+    def test_as_list_default_impl(self):
+        with self.assertRaises(NotImplementedError):
+            self.provider.as_list()
+
+    def test_get_items_default_impl(self):
+        with self.assertRaises(NotImplementedError):
+            self.provider.get_items('some uri')

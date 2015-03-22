@@ -318,6 +318,36 @@ class PlaylistsProvider(object):
     def playlists(self, playlists):
         raise NotImplementedError
 
+    def as_list(self):
+        """
+        Get a list of the currently available playlists.
+
+        Returns a list of :class:`~mopidy.models.Ref` objects referring to the
+        playlists. In other words, no information about the playlists' content
+        is given.
+
+        :rtype: list of :class:`mopidy.models.Ref`
+
+        .. versionadded:: 1.0
+        """
+        raise NotImplementedError
+
+    def get_items(self, uri):
+        """
+        Get the items in a playlist specified by ``uri``.
+
+        Returns a list of :class:`~mopidy.models.Ref` objects referring to the
+        playlist's items.
+
+        If a playlist with the given ``uri`` doesn't exist, it returns
+        :class:`None`.
+
+        :rtype: list of :class:`mopidy.models.Ref`, or :class:`None`
+
+        .. versionadded:: 1.0
+        """
+        raise NotImplementedError
+
     def create(self, name):
         """
         Create a new empty playlist with the given name.

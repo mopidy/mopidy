@@ -100,6 +100,17 @@ class DummyPlaylistsProvider(backend.PlaylistsProvider):
         super(DummyPlaylistsProvider, self).__init__(backend)
         self._playlists = []
 
+    def as_list(self):
+        return [
+            Ref.playlist(uri=pl.uri, name=pl.name) for pl in self._playlists]
+
+    def get_items(self, uri):
+        playlist = self._playlists.get(uri)
+        if playlist is None:
+            return
+        return [
+            Ref.track(uri=t.uri, name=t.name) for t in playlist.tracks]
+
     @property
     def playlists(self):
         return copy.copy(self._playlists)
