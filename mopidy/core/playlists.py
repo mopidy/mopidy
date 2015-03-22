@@ -6,6 +6,7 @@ import urlparse
 import pykka
 
 from mopidy.core import listener
+from mopidy.models import Playlist
 from mopidy.utils.deprecation import deprecated_property
 
 
@@ -62,13 +63,14 @@ class PlaylistsController(object):
         .. deprecated:: 1.0
             Use :meth:`as_list` and :meth:`get_items` instead.
         """
-        futures = [b.playlists.playlists
-                   for b in self.backends.with_playlists.values()]
-        results = pykka.get_all(futures)
-        playlists = list(itertools.chain(*results))
-        if not include_tracks:
-            playlists = [p.copy(tracks=[]) for p in playlists]
-        return playlists
+        playlist_refs = self.as_list()
+
+        if include_tracks:
+            playlists = [self.lookup(r.uri) for r in playlist_refs]
+            return [pl for pl in playlists if pl is not None]
+        else:
+            return [
+                Playlist(uri=r.uri, name=r.name) for r in playlist_refs]
 
     playlists = deprecated_property(get_playlists)
     """

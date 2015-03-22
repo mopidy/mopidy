@@ -23,12 +23,12 @@ class PlaylistsTest(unittest.TestCase):
         self.sp1 = mock.Mock(spec=backend.PlaylistsProvider)
         self.sp1.as_list.return_value.get.return_value = [
             self.plr1a, self.plr1b]
-        self.sp1.playlists.get.return_value = [self.pl1a, self.pl1b]
+        self.sp1.lookup.return_value.get.side_effect = [self.pl1a, self.pl1b]
 
         self.sp2 = mock.Mock(spec=backend.PlaylistsProvider)
         self.sp2.as_list.return_value.get.return_value = [
             self.plr2a, self.plr2b]
-        self.sp2.playlists.get.return_value = [self.pl2a, self.pl2b]
+        self.sp2.lookup.return_value.get.side_effect = [self.pl2a, self.pl2b]
 
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
@@ -73,7 +73,7 @@ class PlaylistsTest(unittest.TestCase):
         self.assertFalse(self.sp2.delete.called)
 
     def test_get_playlists_combines_result_from_backends(self):
-        result = self.core.playlists.playlists
+        result = self.core.playlists.get_playlists()
 
         self.assertIn(self.pl1a, result)
         self.assertIn(self.pl1b, result)
