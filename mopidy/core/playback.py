@@ -312,8 +312,13 @@ class PlaybackController(object):
 
         if backend:
             backend.playback.prepare_change()
-            success = (backend.playback.change_track(tl_track.track).get() and
-                       backend.playback.play().get())
+            try:
+                success = (
+                    backend.playback.change_track(tl_track.track).get() and
+                    backend.playback.play().get())
+            except TypeError:
+                logger.error('%s needs to be updated to work with this '
+                             'version of Mopidy.', backend)
 
         if success:
             self.core.tracklist._mark_playing(tl_track)
