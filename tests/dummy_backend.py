@@ -62,15 +62,23 @@ class DummyLibraryProvider(backend.LibraryProvider):
 class DummyPlaybackProvider(backend.PlaybackProvider):
     def __init__(self, *args, **kwargs):
         super(DummyPlaybackProvider, self).__init__(*args, **kwargs)
+        self._uri = None
         self._time_position = 0
 
     def pause(self):
         return True
 
-    def play(self, track):
+    def play(self):
+        return self._uri and self._uri != 'dummy:error'
+
+    def change_track(self, track):
         """Pass a track with URI 'dummy:error' to force failure"""
+        self._uri = track.uri
         self._time_position = 0
-        return track.uri != 'dummy:error'
+        return True
+
+    def prepare_change(self):
+        pass
 
     def resume(self):
         return True
@@ -80,6 +88,7 @@ class DummyPlaybackProvider(backend.PlaybackProvider):
         return True
 
     def stop(self):
+        self._uri = None
         return True
 
     def get_time_position(self):

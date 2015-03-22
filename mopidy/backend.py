@@ -177,19 +177,44 @@ class PlaybackProvider(object):
         """
         return self.audio.pause_playback().get()
 
-    def play(self, track):
+    def play(self):
         """
-        Play given track.
+        Start playback.
 
         *MAY be reimplemented by subclass.*
 
-        :param track: the track to play
-        :type track: :class:`mopidy.models.Track`
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        self.audio.prepare_change()
-        self.change_track(track)
         return self.audio.start_playback().get()
+
+    def prepare_change(self):
+        """
+        Indicate that an URI change is about to happen.
+
+        *MAY be reimplemented by subclass.*
+
+        It is extremely unlikely it makes sense for any backends to override
+        this. For most practical purposes it should be considered an internal
+        call between backends and core that backend authors should not touch.
+        """
+        self.audio.prepare_change().get()
+
+    def translate_uri(self, uri):
+        """
+        Convert custom URI scheme to real playable uri.
+
+        *MAY be reimplemented by subclass.*
+
+        This is very likely the *only* thing you need to override as a backend
+        author. Typically this is where you convert any Mopidy specific URI
+        to a real URI and then return it. If you can't convert the URI just
+        return :class:`None`.
+
+        :param uri: the URI to translate.
+        :type uri: string
+        :rtype: string or :class:`None` if the URI could not be translated.
+        """
+        return uri
 
     def change_track(self, track):
         """
@@ -197,11 +222,21 @@ class PlaybackProvider(object):
 
         *MAY be reimplemented by subclass.*
 
+        It is unlikely it makes sense for any backends to override
+        this. For most practical purposes it should be considered an internal
+        call between backends and core that backend authors should not touch.
+
+        The default implementation will call :method:`translate_uri` which
+        is what you want to implement.
+
         :param track: the track to play
         :type track: :class:`mopidy.models.Track`
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        self.audio.set_uri(track.uri).get()
+        uri = self.translate_uri(track.uri)
+        if not uri:
+            return False
+        self.audio.set_uri(uri).get()
         return True
 
     def resume(self):
@@ -231,6 +266,9 @@ class PlaybackProvider(object):
         Stop playback.
 
         *MAY be reimplemented by subclass.*
+
+        Should not be used for tracking if tracks have been played or when we
+        are done playing them.
 
         :rtype: :class:`True` if successful, else :class:`False`
         """

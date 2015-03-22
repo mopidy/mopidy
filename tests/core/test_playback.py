@@ -100,19 +100,25 @@ class CorePlaybackTest(unittest.TestCase):
     def test_play_selects_dummy1_backend(self):
         self.core.playback.play(self.tl_tracks[0])
 
-        self.playback1.play.assert_called_once_with(self.tracks[0])
+        self.playback1.prepare_change.assert_called_once_with()
+        self.playback1.change_track.assert_called_once_with(self.tracks[0])
+        self.playback1.play.assert_called_once_with()
         self.assertFalse(self.playback2.play.called)
 
     def test_play_selects_dummy2_backend(self):
         self.core.playback.play(self.tl_tracks[1])
 
         self.assertFalse(self.playback1.play.called)
-        self.playback2.play.assert_called_once_with(self.tracks[1])
+        self.playback2.prepare_change.assert_called_once_with()
+        self.playback2.change_track.assert_called_once_with(self.tracks[1])
+        self.playback2.play.assert_called_once_with()
 
     def test_play_skips_to_next_on_unplayable_track(self):
         self.core.playback.play(self.unplayable_tl_track)
 
-        self.playback1.play.assert_called_once_with(self.tracks[3])
+        self.playback1.prepare_change.assert_called_once_with()
+        self.playback1.change_track.assert_called_once_with(self.tracks[3])
+        self.playback1.play.assert_called_once_with()
         self.assertFalse(self.playback2.play.called)
 
         self.assertEqual(

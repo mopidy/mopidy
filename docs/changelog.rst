@@ -75,6 +75,25 @@ v1.0.0 (UNRELEASED)
   :attr:`mopidy.backend.PlaylistsProvider.playlists`. This is potentially
   backwards incompatible. (PR: :issue:`1046`)
 
+- Changed the API for :class:`mopidy.backend.PlaybackProvider`, note that this
+  change is **not** backwards compatible for certain backends. These changes
+  are crucial to adding gapless in one of the upcoming releases.
+  (Fixes: :issue:`1052`, PR: :issue:`1064`)
+
+  - :meth:`mopidy.backend.PlaybackProvider.translate_uri` has been added. It is
+    strongly recommended that all backends migrate to using this API for
+    translating "Mopidy URIs" to real ones for playback.
+
+  - The semantics and signature of :meth:`mopidy.backend.PlaybackProvider.play`
+    has changed. The method is now only used to set the playback state to
+    playing, and no longer takes a track.
+
+    Backends must migrate to
+    :meth:`mopidy.backend.PlaybackProvider.translate_uri` or
+    :meth:`mopidy.backend.PlaybackProvider.change_track` to continue working.
+
+  - :meth:`mopidy.backend.PlaybackProvider.prepare_change` has been added.
+
 **Commands**
 
 - Make the ``mopidy`` command print a friendly error message if the
