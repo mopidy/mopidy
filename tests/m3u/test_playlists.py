@@ -120,12 +120,10 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         backend = self.backend_class(config=self.config, audio=self.audio)
 
         self.assert_(backend.playlists.playlists)
-        self.assertEqual(
-            playlist.uri, backend.playlists.playlists[0].uri)
-        self.assertEqual(
-            playlist.name, backend.playlists.playlists[0].name)
-        self.assertEqual(
-            track.uri, backend.playlists.playlists[0].tracks[0].uri)
+        result = backend.playlists.lookup(playlist.uri)
+        self.assertEqual(playlist.uri, result.uri)
+        self.assertEqual(playlist.name, result.name)
+        self.assertEqual(track.uri, result.tracks[0].uri)
 
     @unittest.SkipTest
     def test_santitising_of_playlist_filenames(self):
@@ -156,15 +154,15 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
     def test_delete_playlist_removes_it_from_the_collection(self):
         playlist = self.core.playlists.create('test')
-        self.assertIn(playlist, self.core.playlists.playlists)
+        self.assertEqual(playlist, self.core.playlists.lookup(playlist.uri))
 
         self.core.playlists.delete(playlist.uri)
 
-        self.assertNotIn(playlist, self.core.playlists.playlists)
+        self.assertIsNone(self.core.playlists.lookup(playlist.uri))
 
     def test_delete_playlist_without_file(self):
         playlist = self.core.playlists.create('test')
-        self.assertIn(playlist, self.core.playlists.playlists)
+        self.assertEqual(playlist, self.core.playlists.lookup(playlist.uri))
 
         path = playlist_uri_to_path(playlist.uri, self.playlists_dir)
         self.assertTrue(os.path.exists(path))
@@ -173,11 +171,11 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.assertFalse(os.path.exists(path))
 
         self.core.playlists.delete(playlist.uri)
-        self.assertNotIn(playlist, self.core.playlists.playlists)
+        self.assertIsNone(self.core.playlists.lookup(playlist.uri))
 
     def test_filter_without_criteria(self):
         self.assertEqual(
-            self.core.playlists.playlists, self.core.playlists.filter())
+            self.core.playlists.get_playlists(), self.core.playlists.filter())
 
     def test_filter_with_wrong_criteria(self):
         self.assertEqual([], self.core.playlists.filter(name='foo'))
@@ -188,13 +186,14 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.assertEqual([playlist], playlists)
 
     def test_filter_by_name_returns_single_match(self):
-        playlist = Playlist(name='b')
-        self.backend.playlists.playlists = [Playlist(name='a'), playlist]
+        playlist = Playlist(uri='m3u:b', name='b')
+        self.backend.playlists.playlists = [
+            Playlist(uri='m3u:a', name='a'), playlist]
         self.assertEqual([playlist], self.core.playlists.filter(name='b'))
 
     def test_filter_by_name_returns_no_matches(self):
         self.backend.playlists.playlists = [
-            Playlist(name='a'), Playlist(name='b')]
+            Playlist(uri='m3u:a', name='a'), Playlist(uri='m3u:b', name='b')]
         self.assertEqual([], self.core.playlists.filter(name='c'))
 
     def test_lookup_finds_playlist_by_uri(self):
@@ -206,31 +205,32 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
     def test_refresh(self):
         playlist = self.core.playlists.create('test')
-        self.assertIn(playlist, self.core.playlists.playlists)
+        self.assertEqual(playlist, self.core.playlists.lookup(playlist.uri))
 
         self.core.playlists.refresh()
 
-        self.assertIn(playlist, self.core.playlists.playlists)
+        self.assertEqual(playlist, self.core.playlists.lookup(playlist.uri))
 
     def test_save_replaces_existing_playlist_with_updated_playlist(self):
         playlist1 = self.core.playlists.create('test1')
-        self.assertIn(playlist1, self.core.playlists.playlists)
+        self.assertEqual(playlist1, self.core.playlists.lookup(playlist1.uri))
 
         playlist2 = playlist1.copy(name='test2')
         playlist2 = self.core.playlists.save(playlist2)
-        self.assertNotIn(playlist1, self.core.playlists.playlists)
-        self.assertIn(playlist2, self.core.playlists.playlists)
+        self.assertIsNone(self.core.playlists.lookup(playlist1.uri))
+        self.assertEqual(playlist2, self.core.playlists.lookup(playlist2.uri))
 
     def test_create_replaces_existing_playlist_with_updated_playlist(self):
         track = Track(uri=generate_song(1))
         playlist1 = self.core.playlists.create('test')
         playlist1 = self.core.playlists.save(playlist1.copy(tracks=[track]))
-        self.assertIn(playlist1, self.core.playlists.playlists)
+        self.assertEqual(playlist1, self.core.playlists.lookup(playlist1.uri))
 
         playlist2 = self.core.playlists.create('test')
         self.assertEqual(playlist1.uri, playlist2.uri)
-        self.assertNotIn(playlist1, self.core.playlists.playlists)
-        self.assertIn(playlist2, self.core.playlists.playlists)
+        self.assertNotEqual(
+            playlist1, self.core.playlists.lookup(playlist1.uri))
+        self.assertEqual(playlist2, self.core.playlists.lookup(playlist1.uri))
 
     def test_save_playlist_with_new_uri(self):
         uri = 'm3u:test.m3u'
