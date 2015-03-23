@@ -119,15 +119,6 @@ class LibraryProvider(object):
             result[uri] = [models.Image(uri=u) for u in image_uris]
         return result
 
-    # TODO: replace with search(query, exact=True, ...)
-    def find_exact(self, query=None, uris=None):
-        """
-        See :meth:`mopidy.core.LibraryController.find_exact`.
-
-        *MAY be implemented by subclass.*
-        """
-        pass
-
     def lookup(self, uri):
         """
         See :meth:`mopidy.core.LibraryController.lookup`.
@@ -144,11 +135,14 @@ class LibraryProvider(object):
         """
         pass
 
-    def search(self, query=None, uris=None):
+    def search(self, query=None, uris=None, exact=False):
         """
         See :meth:`mopidy.core.LibraryController.search`.
 
         *MAY be implemented by subclass.*
+
+        .. versionadded:: 1.0
+            The ``exact`` param which replaces the old ``find_exact``.
         """
         pass
 

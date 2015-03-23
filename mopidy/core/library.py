@@ -160,6 +160,12 @@ class LibraryController(object):
                 {'any': ['a']}, uris=['file:///media/music', 'spotify:'])
             find_exact(any=['a'], uris=['file:///media/music', 'spotify:'])
 
+        .. versionchanged:: 1.0
+            This method now calls
+            :meth:`~mopidy.backend.LibraryProvider.search` on the backends
+            instead of the deprecated ``find_exact``. If the backend still
+            implements ``find_exact`` we will continue to use it for now.
+
         :param query: one or more queries to search for
         :type query: dict
         :param uris: zero or more URI roots to limit the search to
@@ -167,10 +173,15 @@ class LibraryController(object):
         :rtype: list of :class:`mopidy.models.SearchResult`
         """
         query = _normalize_query(query or kwargs)
-        futures = [
-            backend.library.find_exact(query=query, uris=backend_uris)
-            for (backend, backend_uris)
-            in self._get_backends_to_uris(uris).items()]
+        futures = []
+        for backend, backend_uris in self._get_backends_to_uris(uris).items():
+            if hasattr(backend.library, 'find_exact'):
+                futures.append(backend.library.find_exact(
+                    query=query, uris=backend_uris))
+            else:
+                futures.append(backend.library.search(
+                    query=query, uris=backend_uris, exact=True))
+
         return [result for result in pykka.get_all(futures) if result]
 
     def lookup(self, uri=None, uris=None):

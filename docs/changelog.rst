@@ -138,6 +138,11 @@ v1.0.0 (UNRELEASED)
 
   - Remove :attr:`mopidy.backend.PlaylistsProvider.playlists` property.
 
+- Removed ``find_exact`` from :class:`mopidy.backend.LibraryProvider` and
+  added an ``exact`` param to  :meth:`mopidy.backend.LibraryProvider.search`
+  to replace the old code path. Core will continue supporting backends that
+  have not upgraded for now.
+
 **Commands**
 
 - Make the ``mopidy`` command print a friendly error message if the
