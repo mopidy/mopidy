@@ -212,54 +212,50 @@ class CoreLibraryTest(unittest.TestCase):
         result1 = SearchResult(tracks=[track1])
         result2 = SearchResult(tracks=[track2])
 
-        self.library1.find_exact().get.return_value = result1
-        self.library1.find_exact.reset_mock()
-        self.library2.find_exact().get.return_value = result2
-        self.library2.find_exact.reset_mock()
+        self.library1.search.return_value.get.return_value = result1
+        self.library2.search.return_value.get.return_value = result2
 
         result = self.core.library.find_exact(any=['a'])
 
         self.assertIn(result1, result)
         self.assertIn(result2, result)
-        self.library1.find_exact.assert_called_once_with(
-            query=dict(any=['a']), uris=None)
-        self.library2.find_exact.assert_called_once_with(
-            query=dict(any=['a']), uris=None)
+        self.library1.search.assert_called_once_with(
+            query=dict(any=['a']), uris=None, exact=True)
+        self.library2.search.assert_called_once_with(
+            query=dict(any=['a']), uris=None, exact=True)
 
     def test_find_exact_with_uris_selects_dummy1_backend(self):
         self.core.library.find_exact(
             any=['a'], uris=['dummy1:', 'dummy1:foo', 'dummy3:'])
 
-        self.library1.find_exact.assert_called_once_with(
-            query=dict(any=['a']), uris=['dummy1:', 'dummy1:foo'])
-        self.assertFalse(self.library2.find_exact.called)
+        self.library1.search.assert_called_once_with(
+            query=dict(any=['a']), uris=['dummy1:', 'dummy1:foo'], exact=True)
+        self.assertFalse(self.library2.search.called)
 
     def test_find_exact_with_uris_selects_both_backends(self):
         self.core.library.find_exact(
             any=['a'], uris=['dummy1:', 'dummy1:foo', 'dummy2:'])
 
-        self.library1.find_exact.assert_called_once_with(
-            query=dict(any=['a']), uris=['dummy1:', 'dummy1:foo'])
-        self.library2.find_exact.assert_called_once_with(
-            query=dict(any=['a']), uris=['dummy2:'])
+        self.library1.search.assert_called_once_with(
+            query=dict(any=['a']), uris=['dummy1:', 'dummy1:foo'], exact=True)
+        self.library2.search.assert_called_once_with(
+            query=dict(any=['a']), uris=['dummy2:'], exact=True)
 
     def test_find_exact_filters_out_none(self):
         track1 = Track(uri='dummy1:a')
         result1 = SearchResult(tracks=[track1])
 
-        self.library1.find_exact().get.return_value = result1
-        self.library1.find_exact.reset_mock()
-        self.library2.find_exact().get.return_value = None
-        self.library2.find_exact.reset_mock()
+        self.library1.search.return_value.get.return_value = result1
+        self.library2.search.return_value.get.return_value = None
 
         result = self.core.library.find_exact(any=['a'])
 
         self.assertIn(result1, result)
         self.assertNotIn(None, result)
-        self.library1.find_exact.assert_called_once_with(
-            query=dict(any=['a']), uris=None)
-        self.library2.find_exact.assert_called_once_with(
-            query=dict(any=['a']), uris=None)
+        self.library1.search.assert_called_once_with(
+            query=dict(any=['a']), uris=None, exact=True)
+        self.library2.search.assert_called_once_with(
+            query=dict(any=['a']), uris=None, exact=True)
 
     def test_find_accepts_query_dict_instead_of_kwargs(self):
         track1 = Track(uri='dummy1:a')
@@ -267,19 +263,17 @@ class CoreLibraryTest(unittest.TestCase):
         result1 = SearchResult(tracks=[track1])
         result2 = SearchResult(tracks=[track2])
 
-        self.library1.find_exact().get.return_value = result1
-        self.library1.find_exact.reset_mock()
-        self.library2.find_exact().get.return_value = result2
-        self.library2.find_exact.reset_mock()
+        self.library1.search.return_value.get.return_value = result1
+        self.library2.search.return_value.get.return_value = result2
 
         result = self.core.library.find_exact(dict(any=['a']))
 
         self.assertIn(result1, result)
         self.assertIn(result2, result)
-        self.library1.find_exact.assert_called_once_with(
-            query=dict(any=['a']), uris=None)
-        self.library2.find_exact.assert_called_once_with(
-            query=dict(any=['a']), uris=None)
+        self.library1.search.assert_called_once_with(
+            query=dict(any=['a']), uris=None, exact=True)
+        self.library2.search.assert_called_once_with(
+            query=dict(any=['a']), uris=None, exact=True)
 
     def test_search_combines_results_from_all_backends(self):
         track1 = Track(uri='dummy1:a')
@@ -363,5 +357,29 @@ class CoreLibraryTest(unittest.TestCase):
 
     def test_find_exact_normalises_bad_queries(self):
         self.core.library.find_exact({'any': 'foobar'})
-        self.library1.find_exact.assert_called_once_with(
-            query={'any': ['foobar']}, uris=None)
+        self.library1.search.assert_called_once_with(
+            query={'any': ['foobar']}, uris=None, exact=True)
+
+
+class LegacyLibraryProvider(backend.LibraryProvider):
+    def find_exact(self, query=None, uris=None):
+        pass
+
+
+class LegacyCoreLibraryTest(unittest.TestCase):
+    def test_backend_with_find_exact_still_works(self):
+        b1 = mock.Mock()
+        b1.uri_schemes.get.return_value = ['dummy1']
+        b1.library = mock.Mock(spec=LegacyLibraryProvider)
+
+        b2 = mock.Mock()
+        b2.uri_schemes.get.return_value = ['dummy2']
+        b2.library = mock.Mock(spec=backend.LibraryProvider)
+
+        c = core.Core(mixer=None, backends=[b1, b2])
+        c.library.find_exact(query={'any': ['a']})
+
+        b1.library.find_exact.assert_called_once_with(
+            query=dict(any=['a']), uris=None)
+        b2.library.search.assert_called_once_with(
+            query=dict(any=['a']), uris=None, exact=True)
