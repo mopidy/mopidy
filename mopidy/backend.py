@@ -300,22 +300,34 @@ class PlaylistsProvider(object):
     def __init__(self, backend):
         self.backend = backend
 
-    # TODO Replace playlists property with a get_playlists() method which
-    # returns playlist Ref's instead of the gigantic data structures we
-    # currently make available. lookup() should be used for getting full
-    # playlists with all details.
-
-    @property
-    def playlists(self):
+    def as_list(self):
         """
-        Currently available playlists.
+        Get a list of the currently available playlists.
 
-        Read/write. List of :class:`mopidy.models.Playlist`.
+        Returns a list of :class:`~mopidy.models.Ref` objects referring to the
+        playlists. In other words, no information about the playlists' content
+        is given.
+
+        :rtype: list of :class:`mopidy.models.Ref`
+
+        .. versionadded:: 1.0
         """
-        return []
+        raise NotImplementedError
 
-    @playlists.setter  # noqa
-    def playlists(self, playlists):
+    def get_items(self, uri):
+        """
+        Get the items in a playlist specified by ``uri``.
+
+        Returns a list of :class:`~mopidy.models.Ref` objects referring to the
+        playlist's items.
+
+        If a playlist with the given ``uri`` doesn't exist, it returns
+        :class:`None`.
+
+        :rtype: list of :class:`mopidy.models.Ref`, or :class:`None`
+
+        .. versionadded:: 1.0
+        """
         raise NotImplementedError
 
     def create(self, name):

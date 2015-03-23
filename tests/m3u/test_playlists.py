@@ -28,10 +28,10 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.config['m3u']['playlists_dir'] = tempfile.mkdtemp()
         self.playlists_dir = self.config['m3u']['playlists_dir']
 
-        self.audio = dummy_audio.create_proxy()
-        self.backend = actor.M3UBackend.start(
-            config=self.config, audio=self.audio).proxy()
-        self.core = core.Core(backends=[self.backend])
+        audio = dummy_audio.create_proxy()
+        backend = actor.M3UBackend.start(
+            config=self.config, audio=audio).proxy()
+        self.core = core.Core(backends=[backend])
 
     def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
@@ -117,15 +117,11 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         playlist = playlist.copy(tracks=[track])
         playlist = self.core.playlists.save(playlist)
 
-        backend = self.backend_class(config=self.config, audio=self.audio)
-
-        self.assert_(backend.playlists.playlists)
-        self.assertEqual(
-            playlist.uri, backend.playlists.playlists[0].uri)
-        self.assertEqual(
-            playlist.name, backend.playlists.playlists[0].name)
-        self.assertEqual(
-            track.uri, backend.playlists.playlists[0].tracks[0].uri)
+        self.assertEqual(len(self.core.playlists.as_list()), 1)
+        result = self.core.playlists.lookup(playlist.uri)
+        self.assertEqual(playlist.uri, result.uri)
+        self.assertEqual(playlist.name, result.name)
+        self.assertEqual(track.uri, result.tracks[0].uri)
 
     @unittest.SkipTest
     def test_santitising_of_playlist_filenames(self):
@@ -148,23 +144,23 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.assert_(self.core.playlists.playlists)
         self.assertIn(playlist, self.core.playlists.playlists)
 
-    def test_playlists_empty_to_start_with(self):
-        self.assert_(not self.core.playlists.playlists)
+    def test_as_list_empty_to_start_with(self):
+        self.assertEqual(len(self.core.playlists.as_list()), 0)
 
     def test_delete_non_existant_playlist(self):
         self.core.playlists.delete('m3u:unknown')
 
     def test_delete_playlist_removes_it_from_the_collection(self):
         playlist = self.core.playlists.create('test')
-        self.assertIn(playlist, self.core.playlists.playlists)
+        self.assertEqual(playlist, self.core.playlists.lookup(playlist.uri))
 
         self.core.playlists.delete(playlist.uri)
 
-        self.assertNotIn(playlist, self.core.playlists.playlists)
+        self.assertIsNone(self.core.playlists.lookup(playlist.uri))
 
     def test_delete_playlist_without_file(self):
         playlist = self.core.playlists.create('test')
-        self.assertIn(playlist, self.core.playlists.playlists)
+        self.assertEqual(playlist, self.core.playlists.lookup(playlist.uri))
 
         path = playlist_uri_to_path(playlist.uri, self.playlists_dir)
         self.assertTrue(os.path.exists(path))
@@ -173,11 +169,11 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.assertFalse(os.path.exists(path))
 
         self.core.playlists.delete(playlist.uri)
-        self.assertNotIn(playlist, self.core.playlists.playlists)
+        self.assertIsNone(self.core.playlists.lookup(playlist.uri))
 
     def test_filter_without_criteria(self):
         self.assertEqual(
-            self.core.playlists.playlists, self.core.playlists.filter())
+            self.core.playlists.get_playlists(), self.core.playlists.filter())
 
     def test_filter_with_wrong_criteria(self):
         self.assertEqual([], self.core.playlists.filter(name='foo'))
@@ -188,13 +184,15 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.assertEqual([playlist], playlists)
 
     def test_filter_by_name_returns_single_match(self):
-        playlist = Playlist(name='b')
-        self.backend.playlists.playlists = [Playlist(name='a'), playlist]
+        self.core.playlists.create('a')
+        playlist = self.core.playlists.create('b')
+
         self.assertEqual([playlist], self.core.playlists.filter(name='b'))
 
     def test_filter_by_name_returns_no_matches(self):
-        self.backend.playlists.playlists = [
-            Playlist(name='a'), Playlist(name='b')]
+        self.core.playlists.create('a')
+        self.core.playlists.create('b')
+
         self.assertEqual([], self.core.playlists.filter(name='c'))
 
     def test_lookup_finds_playlist_by_uri(self):
@@ -206,31 +204,32 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
     def test_refresh(self):
         playlist = self.core.playlists.create('test')
-        self.assertIn(playlist, self.core.playlists.playlists)
+        self.assertEqual(playlist, self.core.playlists.lookup(playlist.uri))
 
         self.core.playlists.refresh()
 
-        self.assertIn(playlist, self.core.playlists.playlists)
+        self.assertEqual(playlist, self.core.playlists.lookup(playlist.uri))
 
     def test_save_replaces_existing_playlist_with_updated_playlist(self):
         playlist1 = self.core.playlists.create('test1')
-        self.assertIn(playlist1, self.core.playlists.playlists)
+        self.assertEqual(playlist1, self.core.playlists.lookup(playlist1.uri))
 
         playlist2 = playlist1.copy(name='test2')
         playlist2 = self.core.playlists.save(playlist2)
-        self.assertNotIn(playlist1, self.core.playlists.playlists)
-        self.assertIn(playlist2, self.core.playlists.playlists)
+        self.assertIsNone(self.core.playlists.lookup(playlist1.uri))
+        self.assertEqual(playlist2, self.core.playlists.lookup(playlist2.uri))
 
     def test_create_replaces_existing_playlist_with_updated_playlist(self):
         track = Track(uri=generate_song(1))
         playlist1 = self.core.playlists.create('test')
         playlist1 = self.core.playlists.save(playlist1.copy(tracks=[track]))
-        self.assertIn(playlist1, self.core.playlists.playlists)
+        self.assertEqual(playlist1, self.core.playlists.lookup(playlist1.uri))
 
         playlist2 = self.core.playlists.create('test')
         self.assertEqual(playlist1.uri, playlist2.uri)
-        self.assertNotIn(playlist1, self.core.playlists.playlists)
-        self.assertIn(playlist2, self.core.playlists.playlists)
+        self.assertNotEqual(
+            playlist1, self.core.playlists.lookup(playlist1.uri))
+        self.assertEqual(playlist2, self.core.playlists.lookup(playlist1.uri))
 
     def test_save_playlist_with_new_uri(self):
         uri = 'm3u:test.m3u'
@@ -247,14 +246,11 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         playlist = playlist.copy(tracks=[track])
         playlist = self.core.playlists.save(playlist)
 
-        backend = self.backend_class(config=self.config, audio=self.audio)
-
-        self.assert_(backend.playlists.playlists)
-        self.assertEqual('m3u:test.m3u', backend.playlists.playlists[0].uri)
-        self.assertEqual(
-            playlist.name, backend.playlists.playlists[0].name)
-        self.assertEqual(
-            track.uri, backend.playlists.playlists[0].tracks[0].uri)
+        self.assertEqual(len(self.core.playlists.as_list()), 1)
+        result = self.core.playlists.lookup('m3u:test.m3u')
+        self.assertEqual('m3u:test.m3u', result.uri)
+        self.assertEqual(playlist.name, result.name)
+        self.assertEqual(track.uri, result.tracks[0].uri)
 
     def test_playlist_sort_order(self):
         def check_order(playlists, names):
@@ -264,18 +260,35 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.core.playlists.create('a')
         self.core.playlists.create('b')
 
-        check_order(self.core.playlists.playlists, ['a', 'b', 'c'])
+        check_order(self.core.playlists.as_list(), ['a', 'b', 'c'])
 
         self.core.playlists.refresh()
 
-        check_order(self.core.playlists.playlists, ['a', 'b', 'c'])
+        check_order(self.core.playlists.as_list(), ['a', 'b', 'c'])
 
         playlist = self.core.playlists.lookup('m3u:a.m3u')
         playlist = playlist.copy(name='d')
         playlist = self.core.playlists.save(playlist)
 
-        check_order(self.core.playlists.playlists, ['b', 'c', 'd'])
+        check_order(self.core.playlists.as_list(), ['b', 'c', 'd'])
 
         self.core.playlists.delete('m3u:c.m3u')
 
-        check_order(self.core.playlists.playlists, ['b', 'd'])
+        check_order(self.core.playlists.as_list(), ['b', 'd'])
+
+    def test_get_items_returns_item_refs(self):
+        track = Track(uri='dummy:a', name='A', length=60000)
+        playlist = self.core.playlists.create('test')
+        playlist = self.core.playlists.save(playlist.copy(tracks=[track]))
+
+        item_refs = self.core.playlists.get_items(playlist.uri)
+
+        self.assertEqual(len(item_refs), 1)
+        self.assertEqual(item_refs[0].type, 'track')
+        self.assertEqual(item_refs[0].uri, 'dummy:a')
+        self.assertEqual(item_refs[0].name, 'A')
+
+    def test_get_items_of_unknown_playlist_returns_none(self):
+        item_refs = self.core.playlists.get_items('dummy:unknown')
+
+        self.assertIsNone(item_refs)

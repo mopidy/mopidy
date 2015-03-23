@@ -89,13 +89,27 @@ v1.0.0 (UNRELEASED)
 
   - Made ``mopidy.core.PlaybackController.set_current_tl_track`` internal.
 
+- Add :meth:`mopidy.core.PlaylistsController.as_list`. (Fixes: :issue:`1057`,
+  PR: :issue:`1075`)
+
+- Add :meth:`mopidy.core.PlaylistsController.get_items`. (Fixes: :issue:`1057`,
+  PR: :issue:`1075`)
+
+- **Deprecated:** :meth:`mopidy.core.PlaylistsController.get_playlists`. Use
+  :meth:`~mopidy.core.PlaylistsController.as_list` and
+  :meth:`~mopidy.core.PlaylistsController.get_items` instead. (Fixes:
+  :issue:`1057`, PR: :issue:`1075`)
+
+- **Deprecated:** :meth:`mopidy.core.PlaylistsController.filter`. Use
+  :meth:`~mopidy.core.PlaylistsController.as_list` and filter yourself.
+
 **Backend API**
 
 - Remove default implementation of
   :attr:`mopidy.backend.PlaylistsProvider.playlists`. This is potentially
   backwards incompatible. (PR: :issue:`1046`)
 
-- Changed the API for :class:`mopidy.backend.PlaybackProvider`, note that this
+- Changed the API for :class:`mopidy.backend.PlaybackProvider`. Note that this
   change is **not** backwards compatible for certain backends. These changes
   are crucial to adding gapless in one of the upcoming releases.
   (Fixes: :issue:`1052`, PR: :issue:`1064`)
@@ -113,6 +127,16 @@ v1.0.0 (UNRELEASED)
     :meth:`mopidy.backend.PlaybackProvider.change_track` to continue working.
 
   - :meth:`mopidy.backend.PlaybackProvider.prepare_change` has been added.
+
+- Changed the API for :class:`mopidy.backend.PlaylistsProvider`. Note that this
+  change is **not** backwards compatible. These changes are important to reduce
+  the Mopidy startup time. (Fixes: :issue:`1057`, PR: :issue:`1075`)
+
+  - Add :meth:`mopidy.backend.PlaylistsProvider.as_list`.
+
+  - Add :meth:`mopidy.backend.PlaylistsProvider.get_items`.
+
+  - Remove :attr:`mopidy.backend.PlaylistsProvider.playlists` property.
 
 **Commands**
 

@@ -6,6 +6,7 @@ import urlparse
 import pykka
 
 from mopidy.core import listener
+from mopidy.models import Playlist
 from mopidy.utils.deprecation import deprecated_property
 
 
@@ -16,24 +17,70 @@ class PlaylistsController(object):
         self.backends = backends
         self.core = core
 
-    """
-    Get the available playlists.
+    def as_list(self):
+        """
+        Get a list of the currently available playlists.
 
-    Returns a list of :class:`mopidy.models.Playlist`.
-    """
-    def get_playlists(self, include_tracks=True):
-        futures = [b.playlists.playlists
-                   for b in self.backends.with_playlists.values()]
+        Returns a list of :class:`~mopidy.models.Ref` objects referring to the
+        playlists. In other words, no information about the playlists' content
+        is given.
+
+        :rtype: list of :class:`mopidy.models.Ref`
+
+        .. versionadded:: 1.0
+        """
+        futures = [
+            b.playlists.as_list()
+            for b in self.backends.with_playlists.values()]
         results = pykka.get_all(futures)
-        playlists = list(itertools.chain(*results))
-        if not include_tracks:
-            playlists = [p.copy(tracks=[]) for p in playlists]
-        return playlists
+        return list(itertools.chain(*results))
+
+    def get_items(self, uri):
+        """
+        Get the items in a playlist specified by ``uri``.
+
+        Returns a list of :class:`~mopidy.models.Ref` objects referring to the
+        playlist's items.
+
+        If a playlist with the given ``uri`` doesn't exist, it returns
+        :class:`None`.
+
+        :rtype: list of :class:`mopidy.models.Ref`, or :class:`None`
+
+        .. versionadded:: 1.0
+        """
+        uri_scheme = urlparse.urlparse(uri).scheme
+        backend = self.backends.with_playlists.get(uri_scheme, None)
+        if backend:
+            return backend.playlists.get_items(uri).get()
+
+    def get_playlists(self, include_tracks=True):
+        """
+        Get the available playlists.
+
+        :rtype: list of :class:`mopidy.models.Playlist`
+
+        .. versionchanged:: 1.0
+            If you call the method with ``include_tracks=False``, the
+            :attr:`~mopidy.models.Playlist.last_modified` field of the returned
+            playlists is no longer set.
+
+        .. deprecated:: 1.0
+            Use :meth:`as_list` and :meth:`get_items` instead.
+        """
+        playlist_refs = self.as_list()
+
+        if include_tracks:
+            playlists = [self.lookup(r.uri) for r in playlist_refs]
+            return [pl for pl in playlists if pl is not None]
+        else:
+            return [
+                Playlist(uri=r.uri, name=r.name) for r in playlist_refs]
 
     playlists = deprecated_property(get_playlists)
     """
     .. deprecated:: 1.0
-        Use :meth:`get_playlists` instead.
+        Use :meth:`as_list` and :meth:`get_items` instead.
     """
 
     def create(self, name, uri_scheme=None):
@@ -99,6 +146,9 @@ class PlaylistsController(object):
         :param criteria: one or more criteria to match by
         :type criteria: dict
         :rtype: list of :class:`mopidy.models.Playlist`
+
+        .. deprecated:: 1.0
+            Use :meth:`as_list` and filter yourself.
         """
         criteria = criteria or kwargs
         matches = self.playlists
