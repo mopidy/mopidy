@@ -71,8 +71,12 @@ class PlaylistsController(object):
         playlist_refs = self.as_list()
 
         if include_tracks:
-            playlists = [self.lookup(r.uri) for r in playlist_refs]
-            return [pl for pl in playlists if pl is not None]
+            playlists = {r.uri: self.lookup(r.uri) for r in playlist_refs}
+            # Use the playlist name from as_list() because it knows about any
+            # playlist folder hierarchy, which lookup() does not.
+            return [
+                playlists[r.uri].copy(name=r.name)
+                for r in playlist_refs if playlists[r.uri] is not None]
         else:
             return [
                 Playlist(uri=r.uri, name=r.name) for r in playlist_refs]
