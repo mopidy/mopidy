@@ -34,15 +34,6 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             return None
         return [Ref.track(uri=t.uri, name=t.name) for t in playlist.tracks]
 
-    @property
-    def playlists(self):
-        return sorted(
-            self._playlists.values(), key=operator.attrgetter('name'))
-
-    @playlists.setter
-    def playlists(self, playlists):
-        self._playlists = {playlist.uri: playlist for playlist in playlists}
-
     def create(self, name):
         playlist = self._save_m3u(Playlist(name=name))
         self._playlists[playlist.uri] = playlist
