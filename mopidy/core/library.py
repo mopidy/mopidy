@@ -124,8 +124,10 @@ class LibraryController(object):
         """
         Search the library for tracks where ``field`` is ``values``.
 
-        If the query is empty, and the backend can support it, all available
-        tracks are returned.
+        .. deprecated:: 1.0
+            Previously, if the query was empty, and the backend could support
+            it, all available tracks were returned. This has not changed, but
+            it is strongly discouraged. No new code should rely on this
 
         If ``uris`` is given, the search is limited to results from within the
         URI roots. For example passing ``uris=['file:']`` will limit the search
@@ -233,8 +235,11 @@ class LibraryController(object):
         """
         Search the library for tracks where ``field`` contains ``values``.
 
-        If the query is empty, and the backend can support it, all available
-        tracks are returned.
+        .. deprecated:: 1.0
+            Previously, if the query was empty, and the backend could support
+            it, all available tracks were returned. This has not changed, but
+            it is strongly discouraged. No new code should rely on this
+            behavior.
 
         If ``uris`` is given, the search is limited to results from within the
         URI roots. For example passing ``uris=['file:']`` will limit the search
@@ -282,6 +287,12 @@ def _normalize_query(query):
             query[field] = [values]
     if broken_client:
         logger.warning(
-            'Client sent a broken search query, values must be lists. Please '
-            'check which client sent this query and file a bug against them.')
+            'A client or frontend made a broken library search. Values in '
+            'queries must be lists of strings, not a string. Please check what'
+            ' sent this query and file a bug. Query: %s', query)
+    if not query:
+        logger.warning(
+            'A client or frontend made a library search with an empty query. '
+            'This is strongly discouraged. Please check what sent this query '
+            'and file a bug.')
     return query
