@@ -63,6 +63,8 @@ class LibraryController(object):
 
         :param string uri: URI to browse
         :rtype: list of :class:`mopidy.models.Ref`
+
+        .. versionadded:: 0.18
         """
         if uri is None:
             backends = self.backends.with_library_browse.values()
@@ -88,6 +90,8 @@ class LibraryController(object):
         :param dict query: Query to use for limiting results, see
             :meth:`search` for details about the query format.
         :rtype: set of values corresponding to the requested field type.
+
+        .. versionadded:: 1.0
         """
         futures = [b.library.get_distinct(field, query)
                    for b in self.backends.with_library.values()]
@@ -108,6 +112,8 @@ class LibraryController(object):
 
         :param list uris: list of URIs to find images for
         :rtype: {uri: tuple of :class:`mopidy.models.Image`}
+
+        .. versionadded:: 1.0
         """
         futures = [
             backend.library.get_images(backend_uris)
