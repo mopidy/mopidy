@@ -60,6 +60,11 @@ class PlaylistsController(object):
 
         :rtype: list of :class:`mopidy.models.Playlist`
 
+        .. versionchanged:: 1.0
+            If you call the method with ``include_tracks=False``, the
+            :attr:`~mopidy.models.Playlist.last_modified` field of the returned
+            playlists is no longer set.
+
         .. deprecated:: 1.0
             Use :meth:`as_list` and :meth:`get_items` instead.
         """
