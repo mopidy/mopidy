@@ -28,10 +28,10 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.config['m3u']['playlists_dir'] = tempfile.mkdtemp()
         self.playlists_dir = self.config['m3u']['playlists_dir']
 
-        self.audio = dummy_audio.create_proxy()
-        self.backend = actor.M3UBackend.start(
-            config=self.config, audio=self.audio).proxy()
-        self.core = core.Core(backends=[self.backend])
+        audio = dummy_audio.create_proxy()
+        backend = actor.M3UBackend.start(
+            config=self.config, audio=audio).proxy()
+        self.core = core.Core(backends=[backend])
 
     def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
@@ -117,10 +117,8 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         playlist = playlist.copy(tracks=[track])
         playlist = self.core.playlists.save(playlist)
 
-        backend = self.backend_class(config=self.config, audio=self.audio)
-
-        self.assert_(backend.playlists.playlists)
-        result = backend.playlists.lookup(playlist.uri)
+        self.assertEqual(len(self.core.playlists.as_list()), 1)
+        result = self.core.playlists.lookup(playlist.uri)
         self.assertEqual(playlist.uri, result.uri)
         self.assertEqual(playlist.name, result.name)
         self.assertEqual(track.uri, result.tracks[0].uri)
@@ -186,14 +184,15 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.assertEqual([playlist], playlists)
 
     def test_filter_by_name_returns_single_match(self):
-        playlist = Playlist(uri='m3u:b', name='b')
-        self.backend.playlists.playlists = [
-            Playlist(uri='m3u:a', name='a'), playlist]
+        self.core.playlists.create('a')
+        playlist = self.core.playlists.create('b')
+
         self.assertEqual([playlist], self.core.playlists.filter(name='b'))
 
     def test_filter_by_name_returns_no_matches(self):
-        self.backend.playlists.playlists = [
-            Playlist(uri='m3u:a', name='a'), Playlist(uri='m3u:b', name='b')]
+        self.core.playlists.create('a')
+        self.core.playlists.create('b')
+
         self.assertEqual([], self.core.playlists.filter(name='c'))
 
     def test_lookup_finds_playlist_by_uri(self):
@@ -247,10 +246,8 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         playlist = playlist.copy(tracks=[track])
         playlist = self.core.playlists.save(playlist)
 
-        backend = self.backend_class(config=self.config, audio=self.audio)
-
-        self.assertEqual(len(backend.playlists.as_list()), 1)
-        result = backend.playlists.lookup('m3u:test.m3u')
+        self.assertEqual(len(self.core.playlists.as_list()), 1)
+        result = self.core.playlists.lookup('m3u:test.m3u')
         self.assertEqual('m3u:test.m3u', result.uri)
         self.assertEqual(playlist.name, result.name)
         self.assertEqual(track.uri, result.tracks[0].uri)
