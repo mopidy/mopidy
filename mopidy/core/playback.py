@@ -41,15 +41,14 @@ class PlaybackController(object):
         """
         return self._current_tl_track
 
-    def set_current_tl_track(self, value):
+    def _set_current_tl_track(self, value):
         """Set the currently playing or selected track.
 
         *Internal:* This is only for use by Mopidy's test suite.
         """
         self._current_tl_track = value
 
-    current_tl_track = deprecated_property(
-        get_current_tl_track, set_current_tl_track)
+    current_tl_track = deprecated_property(get_current_tl_track)
     """
     .. deprecated:: 1.0
         Use :meth:`get_current_tl_track` instead.
@@ -183,7 +182,7 @@ class PlaybackController(object):
     # Methods
 
     # TODO: remove this.
-    def change_track(self, tl_track, on_error_step=1):
+    def _change_track(self, tl_track, on_error_step=1):
         """
         Change to the given track, keeping the current playback state.
 
@@ -195,14 +194,14 @@ class PlaybackController(object):
         """
         old_state = self.get_state()
         self.stop()
-        self.set_current_tl_track(tl_track)
+        self._set_current_tl_track(tl_track)
         if old_state == PlaybackState.PLAYING:
-            self.play(on_error_step=on_error_step)
+            self._play(on_error_step=on_error_step)
         elif old_state == PlaybackState.PAUSED:
             self.pause()
 
     # TODO: this is not really end of track, this is on_need_next_track
-    def on_end_of_track(self):
+    def _on_end_of_track(self):
         """
         Tell the playback controller that end of track is reached.
 
@@ -215,14 +214,14 @@ class PlaybackController(object):
         next_tl_track = self.core.tracklist.eot_track(original_tl_track)
 
         if next_tl_track:
-            self.change_track(next_tl_track)
+            self._change_track(next_tl_track)
         else:
             self.stop()
-            self.set_current_tl_track(None)
+            self._set_current_tl_track(None)
 
         self.core.tracklist._mark_played(original_tl_track)
 
-    def on_tracklist_change(self):
+    def _on_tracklist_change(self):
         """
         Tell the playback controller that the current playlist has changed.
 
@@ -231,9 +230,9 @@ class PlaybackController(object):
         tracklist = self.core.tracklist.get_tl_tracks()
         if self.get_current_tl_track() not in tracklist:
             self.stop()
-            self.set_current_tl_track(None)
+            self._set_current_tl_track(None)
 
-    def on_stream_changed(self, uri):
+    def _on_stream_changed(self, uri):
         self._stream_title = None
 
     def next(self):
@@ -250,10 +249,10 @@ class PlaybackController(object):
             # TODO: switch to:
             # backend.play(track)
             # wait for state change?
-            self.change_track(next_tl_track)
+            self._change_track(next_tl_track)
         else:
             self.stop()
-            self.set_current_tl_track(None)
+            self._set_current_tl_track(None)
 
         self.core.tracklist._mark_played(original_tl_track)
 
@@ -267,20 +266,17 @@ class PlaybackController(object):
             self.set_state(PlaybackState.PAUSED)
             self._trigger_track_playback_paused()
 
-    def play(self, tl_track=None, on_error_step=1):
+    def play(self, tl_track=None):
         """
         Play the given track, or if the given track is :class:`None`, play the
         currently active track.
 
         :param tl_track: track to play
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
-        :param on_error_step: direction to step at play error, 1 for next
-            track (default), -1 for previous track. **INTERNAL**
-        :type on_error_step: int, -1 or 1
         """
+        self._play(tl_track, on_error_step=1)
 
-        assert on_error_step in (-1, 1)
-
+    def _play(self, tl_track=None, on_error_step=1):
         if tl_track is None:
             if self.get_state() == PlaybackState.PAUSED:
                 return self.resume()
@@ -305,7 +301,7 @@ class PlaybackController(object):
         if self.get_state() == PlaybackState.PLAYING:
             self.stop()
 
-        self.set_current_tl_track(tl_track)
+        self._set_current_tl_track(tl_track)
         self.set_state(PlaybackState.PLAYING)
         backend = self._get_backend()
         success = False
@@ -344,7 +340,7 @@ class PlaybackController(object):
         # TODO: switch to:
         # self.play(....)
         # wait for state change?
-        self.change_track(
+        self._change_track(
             self.core.tracklist.previous_track(tl_track), on_error_step=-1)
 
     def resume(self):

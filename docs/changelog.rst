@@ -77,6 +77,18 @@ v1.0.0 (UNRELEASED)
   :meth:`mopidy.core.LibraryController.find_exact` to normalize and warn about
   bad queries from clients. (Fixes: :issue:`1067`, PR: :issue:`1073`)
 
+- Reduced API surface of core. (Fixes: :issue:`1070`, PR: :issue:`1076`)
+
+  - Made ``mopidy.core.PlaybackController.change_track`` internal.
+  - Removed ``on_error_step`` from :meth:`mopidy.core.PlaybackController.play`
+  - Made the following event triggers internal:
+
+    - ``mopidy.core.PlaybackController.on_end_of_track``
+    - ``mopidy.core.PlaybackController.on_stream_changed``
+    - ``mopidy.core.PlaybackController.on_tracklist_changed``
+
+  - Made ``mopidy.core.PlaybackController.set_current_tl_track`` internal.
+
 - Add :meth:`mopidy.core.PlaylistsController.as_list`. (Fixes: :issue:`1057`,
   PR: :issue:`1075`)
 
