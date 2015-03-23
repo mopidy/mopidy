@@ -67,7 +67,7 @@ class TracklistController(object):
 
     def _increase_version(self):
         self._version += 1
-        self.core.playback.on_tracklist_change()
+        self.core.playback._on_tracklist_change()
         self._trigger_tracklist_changed()
 
     version = deprecated_property(get_version)
