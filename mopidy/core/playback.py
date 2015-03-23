@@ -274,7 +274,7 @@ class PlaybackController(object):
         :param tl_track: track to play
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         """
-        self._play(tl_track, 1)
+        self._play(tl_track, on_error_step=1)
 
     def _play(self, tl_track=None, on_error_step=1):
         if tl_track is None:
