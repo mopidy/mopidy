@@ -8,22 +8,49 @@ This changelog is used to track all major changes to Mopidy.
 v1.0.0 (UNRELEASED)
 ===================
 
-**Models**
+Three months after our fifth anniversary, Mopidy 1.0 is finally here!
 
-- Add :class:`mopidy.models.Image` model to be returned by
-  :meth:`mopidy.core.LibraryController.get_images`. (Part of :issue:`973`)
+Since the release of 0.19, we've closed or merged approximately 140 issues and
+pull requests through more than 600 commits by a record high 19 extraordinary
+people, including seven newcomers. Thanks to everyone that has contributed!
 
-- Change the semantics of :attr:`mopidy.models.Track.last_modified` to be
-  milliseconds instead of seconds since Unix epoch, or a simple counter,
-  depending on the source of the track. This makes it match the semantics of
-  :attr:`mopidy.models.Playlist.last_modified`. (Fixes: :issue:`678`, PR:
-  :issue:`1036`)
+For the longest time, the focus of Mopidy 1.0 was to be another incremental
+improvement, to be numbered 0.20. The result is still very much an incremental
+improvement, with lots of small and larger improvements across Mopidy's
+functionality.
 
-**Core API**
+The major features of Mopidy 1.0 are:
 
-- **Deprecated:** Deprecate all properties in the core API. The previously
-  undocumented getter and setter methods are now the official API. This aligns
-  the Python API with the WebSocket/JavaScript API. (Fixes: :issue:`952`)
+- A promise to follow not break APIs before Mopidy 2.0. A Mopidy extension
+  working with Mopidy 1.0 should continue to work with all Mopidy 1.x releases.
+
+- Preparation work to enable gapless playback in the near future.
+
+TODO: to be continued
+
+Dependencies
+------------
+
+Since the previous release there is no changes to Mopidy's dependencies.
+However, porting from GStreamer 0.10 to 1.x and support for running Mopidy with
+Python 3.4+ is not far off on our roadmap.
+
+Core API
+--------
+
+In the API used by all frontends and web extensions there is lots of methods
+and arguments that are now deprecated in preparation for the next major
+release. With the exception of some internals that leaked out in the playback
+controller, no core APIs have been removed in this release. In other words,
+most clients should continue to work unchanged when upgrading to Mopidy 1.0.
+Though, it is strongly encouraged to review any use of the deprecated parts of
+the API as those parts will be removed in Mopidy 2.0.
+
+- **Deprecated:** Deprecate all Python properties in the core API. The
+  previously undocumented getter and setter methods are now the official API.
+  This aligns the Python API with the WebSocket/JavaScript API. Python
+  frontends needs to be updated. WebSocket/JavaScript API users are not
+  affected. (Fixes: :issue:`952`)
 
 - Add :class:`mopidy.core.HistoryController` which keeps track of what tracks
   have been played. (Fixes: :issue:`423`, :issue:`1056`, PR: :issue:`803`,
@@ -32,68 +59,37 @@ v1.0.0 (UNRELEASED)
 - Add :class:`mopidy.core.MixerController` which keeps track of volume and
   mute. (Fixes: :issue:`962`)
 
-- Add ``uris`` argument to :meth:`mopidy.core.LibraryController.lookup` which
-  allows for simpler lookup of multiple URIs. (Fixes: :issue:`1008`, PR:
+Core library controller
+~~~~~~~~~~~~~~~~~~~~~~~
+
+- **Deprecated:** :meth:`mopidy.core.LibraryController.find_exact`. Use
+  :meth:`mopidy.core.LibraryController.search` with the ``exact`` keyword
+  argument set to :class:`True`.
+
+- **Deprecated:** The ``uri`` argument to
+  :meth:`mopidy.core.LibraryController.lookup`. Use new ``uris`` keyword
+  argument instead.
+
+- Add ``exact`` keyword argument to
+  :meth:`mopidy.core.LibraryController.search`.
+
+- Add ``uris`` keyword argument to :meth:`mopidy.core.LibraryController.lookup`
+  which allows for simpler lookup of multiple URIs. (Fixes: :issue:`1008`, PR:
   :issue:`1047`)
 
-- Add ``uris`` argument to :meth:`mopidy.core.TracklistController.add` which
-  allows for simpler addition of multiple URIs to the tracklist. (Fixes:
-  :issue:`1060`, PR: :issue:`1065`)
-
-- **Deprecated:** The old methods on :class:`mopidy.core.PlaybackController` for
-  volume and mute management have been deprecated. (Fixes: :issue:`962`)
-
-- Remove ``clear_current_track`` keyword argument to
-  :meth:`mopidy.core.PlaybackController.stop`. It was a leaky internal
-  abstraction, which was never intended to be used externally.
-
-- Add :meth:`mopidy.core.LibraryController.get_images` for looking up images
-  for any URI backends know about. (Fixes :issue:`973`, PR: :issue:`981`,
-  :issue:`992` and :issue:`1013`)
-
-- When seeking in paused state, do not change to playing state. (Fixes:
-  :issue:`939`, PR: :issue:`1018`)
+- Updated :meth:`mopidy.core.LibraryController.search` and
+  :meth:`mopidy.core.LibraryController.find_exact` to normalize and warn about
+  malformed queries from clients. (Fixes: :issue:`1067`, PR: :issue:`1073`)
 
 - Add :meth:`mopidy.core.LibraryController.get_distinct` for getting unique
   values for a given field. (Fixes: :issue:`913`, PR: :issue:`1022`)
 
-- Add :meth:`mopidy.core.Listener.stream_title_changed` and
-  :meth:`mopidy.core.PlaybackController.get_stream_title` for letting clients
-  know about the current song in streams. (PR: :issue:`938`, :issue:`1030`)
+- Add :meth:`mopidy.core.LibraryController.get_images` for looking up images
+  for any URI that is known to the backends. (Fixes :issue:`973`, PR:
+  :issue:`981`, :issue:`992` and :issue:`1013`)
 
-- The following methods were documented as internal. They are now fully private
-  and unavailable outside the core actor. (Fixes: :issue:`1058`, PR:
-  :issue:`1062`)
-
-  - :meth:`mopidy.core.TracklistController.mark_played`
-  - :meth:`mopidy.core.TracklistController.mark_playing`
-  - :meth:`mopidy.core.TracklistController.mark_unplayable`
-
-- Updated :meth:`mopidy.core.PlaybackController.play` to take
-  :meth:`mopidy.backend.PlaybackProvider.change_track` into account when
-  determining success. (PR: :issue:`1071`)
-
-- Updated :meth:`mopidy.core.LibraryController.search` and
-  :meth:`mopidy.core.LibraryController.find_exact` to normalize and warn about
-  bad queries from clients. (Fixes: :issue:`1067`, PR: :issue:`1073`)
-
-- Reduced API surface of core. (Fixes: :issue:`1070`, PR: :issue:`1076`)
-
-  - Made ``mopidy.core.PlaybackController.change_track`` internal.
-  - Removed ``on_error_step`` from :meth:`mopidy.core.PlaybackController.play`
-  - Made the following event triggers internal:
-
-    - ``mopidy.core.PlaybackController.on_end_of_track``
-    - ``mopidy.core.PlaybackController.on_stream_changed``
-    - ``mopidy.core.PlaybackController.on_tracklist_changed``
-
-  - Made ``mopidy.core.PlaybackController.set_current_tl_track`` internal.
-
-- Add :meth:`mopidy.core.PlaylistsController.as_list`. (Fixes: :issue:`1057`,
-  PR: :issue:`1075`)
-
-- Add :meth:`mopidy.core.PlaylistsController.get_items`. (Fixes: :issue:`1057`,
-  PR: :issue:`1075`)
+Core playlist controller
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 - **Deprecated:** :meth:`mopidy.core.PlaylistsController.get_playlists`. Use
   :meth:`~mopidy.core.PlaylistsController.as_list` and
@@ -103,16 +99,104 @@ v1.0.0 (UNRELEASED)
 - **Deprecated:** :meth:`mopidy.core.PlaylistsController.filter`. Use
   :meth:`~mopidy.core.PlaylistsController.as_list` and filter yourself.
 
-- Add ``exact`` to :meth:`mopidy.core.LibraryController.search`.
+- Add :meth:`mopidy.core.PlaylistsController.as_list`. (Fixes: :issue:`1057`,
+  PR: :issue:`1075`)
 
-- **Deprecated:** :meth:`mopidy.core.LibraryController.find_exact`. Use
-  :meth:`mopidy.core.LibraryController.search` with ``exact`` set.
+- Add :meth:`mopidy.core.PlaylistsController.get_items`. (Fixes: :issue:`1057`,
+  PR: :issue:`1075`)
 
-**Backend API**
+Core tracklist controller
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- Remove default implementation of
+- **Removed:** The following methods were documented as internal. They are now
+  fully private and unavailable outside the core actor. (Fixes: :issue:`1058`,
+  PR: :issue:`1062`)
+
+  - :meth:`mopidy.core.TracklistController.mark_played`
+  - :meth:`mopidy.core.TracklistController.mark_playing`
+  - :meth:`mopidy.core.TracklistController.mark_unplayable`
+
+- Add ``uris`` argument to :meth:`mopidy.core.TracklistController.add` which
+  allows for simpler addition of multiple URIs to the tracklist. (Fixes:
+  :issue:`1060`, PR: :issue:`1065`)
+
+Core playback controller
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+- **Removed:** Remove several internal parts that was leaking into the public
+  API and was never intended to be used externally. (Fixes: :issue:`1070`, PR:
+  :issue:`1076`)
+
+  - :meth:`mopidy.core.PlaybackController.change_track` is now internal.
+
+  - Removed ``on_error_step`` keyword argument from
+    :meth:`mopidy.core.PlaybackController.play`
+
+  - Removed ``clear_current_track`` keyword argument to
+    :meth:`mopidy.core.PlaybackController.stop`.
+
+  - Made the following event triggers internal:
+
+    - :meth:`mopidy.core.PlaybackController.on_end_of_track`
+    - :meth:`mopidy.core.PlaybackController.on_stream_changed`
+    - :meth:`mopidy.core.PlaybackController.on_tracklist_changed`
+
+  - :meth:`mopidy.core.PlaybackController.set_current_tl_track` is now
+    internal.
+
+- **Deprecated:** The old methods on :class:`mopidy.core.PlaybackController`
+  for volume and mute management have been deprecated. Use
+  :class:`mopidy.core.MixerController` instead. (Fixes: :issue:`962`)
+
+- When seeking while paused, we no longer change to playing. (Fixes:
+  :issue:`939`, PR: :issue:`1018`)
+
+- Changed :meth:`mopidy.core.PlaybackController.play` to take the return value
+  from :meth:`mopidy.backend.PlaybackProvider.change_track` into account when
+  determining the success of the :meth:`~mopidy.core.PlaybackController.play`
+  call. (PR: :issue:`1071`)
+
+- Add :meth:`mopidy.core.Listener.stream_title_changed` and
+  :meth:`mopidy.core.PlaybackController.get_stream_title` for letting clients
+  know about the current title in streams. (PR: :issue:`938`, :issue:`1030`)
+
+Backend API
+-----------
+
+In the API implemented by all backends there have been way fewer but somewhat
+more dramatic changes with some methods removed and new ones being required for
+certain functionality to continue working. Most backends are already updated to
+be compatible with Mopidy 1.0 before the release. New versions of the backends
+will be released shortly after Mopidy itself.
+
+Backend library providers
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- **Removed:** Remove :meth:`mopidy.backend.LibraryProvider.find_exact`.
+
+- Add an ``exact`` keyword argument to
+  :meth:`mopidy.backend.LibraryProvider.search` to replace the old
+  :meth:`~mopidy.backend.LibraryProvider.find_exact` method.
+
+Backend playlist providers
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- **Removed:** Remove default implementation of
   :attr:`mopidy.backend.PlaylistsProvider.playlists`. This is potentially
   backwards incompatible. (PR: :issue:`1046`)
+
+- Changed the API for :class:`mopidy.backend.PlaylistsProvider`. Note that this
+  change is **not** backwards compatible. These changes are important to reduce
+  the Mopidy startup time. (Fixes: :issue:`1057`, PR: :issue:`1075`)
+
+  - Add :meth:`mopidy.backend.PlaylistsProvider.as_list`.
+
+  - Add :meth:`mopidy.backend.PlaylistsProvider.get_items`.
+
+  - Remove :attr:`mopidy.backend.PlaylistsProvider.playlists` property.
+
+Backend playback providers
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Changed the API for :class:`mopidy.backend.PlaybackProvider`. Note that this
   change is **not** backwards compatible for certain backends. These changes
@@ -133,22 +217,20 @@ v1.0.0 (UNRELEASED)
 
   - :meth:`mopidy.backend.PlaybackProvider.prepare_change` has been added.
 
-- Changed the API for :class:`mopidy.backend.PlaylistsProvider`. Note that this
-  change is **not** backwards compatible. These changes are important to reduce
-  the Mopidy startup time. (Fixes: :issue:`1057`, PR: :issue:`1075`)
+Models
+------
 
-  - Add :meth:`mopidy.backend.PlaylistsProvider.as_list`.
+- Add :class:`mopidy.models.Image` model to be returned by
+  :meth:`mopidy.core.LibraryController.get_images`. (Part of :issue:`973`)
 
-  - Add :meth:`mopidy.backend.PlaylistsProvider.get_items`.
+- Change the semantics of :attr:`mopidy.models.Track.last_modified` to be
+  milliseconds instead of seconds since Unix epoch, or a simple counter,
+  depending on the source of the track. This makes it match the semantics of
+  :attr:`mopidy.models.Playlist.last_modified`. (Fixes: :issue:`678`, PR:
+  :issue:`1036`)
 
-  - Remove :attr:`mopidy.backend.PlaylistsProvider.playlists` property.
-
-- Removed ``find_exact`` from :class:`mopidy.backend.LibraryProvider` and
-  added an ``exact`` param to  :meth:`mopidy.backend.LibraryProvider.search`
-  to replace the old code path. Core will continue supporting backends that
-  have not upgraded for now.
-
-**Commands**
+Commands
+--------
 
 - Make the ``mopidy`` command print a friendly error message if the
   :mod:`gobject` Python module cannot be imported. (Fixes: :issue:`836`)
@@ -161,7 +243,8 @@ v1.0.0 (UNRELEASED)
   deps``. This make it easier to see that a user is using pip-installed Mopidy
   instead of APT-installed Mopidy without asking for ``which mopidy`` output.
 
-**Configuration**
+Configuration
+-------------
 
 - Add support for the log level value ``all`` to the loglevels configurations.
   This can be used to show absolutely all log records, including those at
@@ -169,7 +252,8 @@ v1.0.0 (UNRELEASED)
 
 - Add debug logging of unknown sections. (Fixes: :issue:`694`, PR: :issue:`1002`)
 
-**Logging**
+Logging
+-------
 
 - Add custom log level ``TRACE`` (numerical level 5), which can be used by
   Mopidy and extensions to log at an even more detailed level than ``DEBUG``.
@@ -177,7 +261,8 @@ v1.0.0 (UNRELEASED)
 - Add support for per logger color overrides. (Fixes: :issue:`808`, PR:
   :issue:`1005`)
 
-**Local backend**
+Local backend
+-------------
 
 - Improve error logging for scanner. (Fixes: :issue:`856`, PR: :issue:`874`)
 
@@ -204,7 +289,8 @@ v1.0.0 (UNRELEASED)
 - *Deprecated:* The config value :confval:`local/playlists_dir` is no longer in
   use and can be removed from your config.
 
-**Local library API**
+Local library API
+~~~~~~~~~~~~~~~~~
 
 - Implementors of :meth:`mopidy.local.Library.lookup` should now return a list
   of :class:`~mopidy.models.Track` instead of a single track, just like the
@@ -217,70 +303,91 @@ v1.0.0 (UNRELEASED)
 - Add :meth:`mopidy.local.Library.get_images` for looking up images
   for local URIs. (Fixes: :issue:`1031`, PR: :issue:`1032` and :issue:`1037`)
 
-**M3U backend**
+Stream backend
+--------------
 
-- Split the M3U playlist handling out of the local backend. See
-  :ref:`m3u-migration` for how to migrate your local playlists. (Fixes:
+- Add support for HTTP proxies when doing initial metadata lookup for a stream.
+  (Fixes :issue:`390`, PR: :issue:`982`)
+
+- Add basic tests for the stream library provider.
+
+M3U backend
+-----------
+
+- Mopidy-M3U is a new bundled backend. It is the same M3U support as was
+  previously part of the local backend. See :ref:`m3u-migration` for how to
+  migrate your local playlists to work with the M3U backend. (Fixes:
   :issue:`1054`, PR: :issue:`1066`)
 
-**MPD frontend**
-
-- In stored playlist names, replace "/", which are illegal, with "|" instead of
-  a whitespace. Pipes are more similar to forward slash.
-
-- Enable browsing of artist references, in addition to albums and playlists.
-  (PR: :issue:`884`)
-
-- Share a single mapping between names and URIs across all MPD sessions. (Fixes:
-  :issue:`934`, PR: :issue:`968`)
+MPD frontend
+------------
 
 - Add support for blacklisting MPD commands. This is used to prevent clients
   from using ``listall`` and ``listallinfo`` which recursively lookup the entire
   "database". If you insist on using a client that needs these commands change
   :confval:`mpd/command_blacklist`.
 
-- Switch the ``list`` command over to using
+- Start setting the ``Name`` field with the stream title when listening to
+  radio streams. (Fixes: :issue:`944`, PR: :issue:`1030`)
+
+- Enable browsing of artist references, in addition to albums and playlists.
+  (PR: :issue:`884`)
+
+- Switch the ``list`` command over to using the new method
   :meth:`mopidy.core.LibraryController.get_distinct` for increased performance.
   (Fixes: :issue:`913`)
+
+- In stored playlist names, replace "/", which are illegal, with "|" instead of
+  a whitespace. Pipes are more similar to forward slash.
+
+- Share a single mapping between names and URIs across all MPD sessions. (Fixes:
+  :issue:`934`, PR: :issue:`968`)
 
 - Add support for ``toggleoutput`` command. (PR: :issue:`1015`)
 
 - The ``mixrampdb`` and ``mixrampdelay`` commands are now known to Mopidy, but
   are not implemented. (PR: :issue:`1015`)
 
-- Start setting the ``Name`` field with the stream title when listening to
-  radio streams. (Fixes: :issue:`944`, PR: :issue:`1030`)
-
 - Fix crash on socket error when using a locale causing the exception's error
   message to contain characters not in ASCII. (Fixes: issue:`971`, PR:
   :issue:`1044`)
 
-**HTTP frontend**
+HTTP frontend
+-------------
 
 - **Deprecated:** Deprecated the :confval:`http/static_dir` config. Please make
   your web clients pip-installable Mopidy extensions to make it easier to
   install for end users.
 
-- Prevent race condition in WebSocket broadcast from breaking the web server.
-  (PR: :issue:`1020`)
+- Prevent a race condition in WebSocket event broadcasting from crashing the
+  web server. (PR: :issue:`1020`)
 
-**Mixer**
+Mixers
+------
 
 - Add support for disabling volume control in Mopidy entirely by setting the
   configuration :confval:`audio/mixer` to ``none``. (Fixes: :issue:`936`, PR:
   :issue:`1015`, :issue:`1035`)
 
-**Audio**
+Audio
+-----
+
+- **Removed:** Kill support for visualizers and the
+  :confval:`audio/visualizer` config value. The feature was originally added as
+  a workaround for all the people asking for ncmpcpp visualizer support, and
+  since we could get it almost for free thanks to GStreamer. But, this feature
+  did never make sense for a server such as Mopidy. The only way to find out if
+  it is in use and will be missed is to go ahead and remove it.
 
 - **Deprecated:** Deprecated :meth:`mopidy.audio.Audio.emit_end_of_stream`.
   Pass a :class:`None` buffer to :meth:`mopidy.audio.Audio.emit_data` to end
-  the stream.
+  the stream. This should only affect Mopidy-Spotify.
 
-- Kill support for visualizers. Feature was originally added as a workaround for
-  all the people asking for ncmpcpp visualizer support. And since we could get
-  it almost for free thanks to GStreamer. But this feature didn't really ever
-  make sense for a server such as Mopidy. Currently the only way to find out if
-  it is in use and will be missed is to go ahead and remove it.
+- Add :meth:`mopidy.audio.AudioListener.tags_changed`. Notifies core when new
+  tags are found.
+
+- Add :meth:`mopidy.audio.Audio.get_current_tags` for looking up the current
+  tags of the playing media.
 
 - Internal code cleanup within audio subsystem:
 
@@ -294,25 +401,17 @@ v1.0.0 (UNRELEASED)
 
   - Add internal helper for converting GStreamer data types to Python.
 
-  - Move MusicBrainz coverart code out of audio and into local.
-
-  - Reduce scope of audio scanner to just tags + duration. Mtime, uri and min
-    length handling are now outside of this class.
+  - Reduce scope of audio scanner to just find tags and duration. Modification
+    time, URI and minimum length handling are now outside of this class.
 
   - Update scanner to operate with milliseconds for duration.
 
-  - Update scanner to use a custom src, typefind and decodebin. This allows us
-    to catch playlists before we try to decode them.
+  - Update scanner to use a custom source, typefind and decodebin. This allows
+    us to detect playlists before we try to decode them.
 
-  - Refactored scanner to create a new pipeline per song, this is needed as
+  - Refactored scanner to create a new pipeline per track, this is needed as
     reseting decodebin is much slower than tearing it down and making a fresh
     one.
-
-- Add :meth:`mopidy.audio.AudioListener.tags_changed`. Notifies core when new tags
-  are found.
-
-- Add :meth:`mopidy.audio.Audio.get_current_tags` for looking up the current
-  tags of the playing media.
 
 - Move and rename helper for converting tags to tracks.
 
@@ -331,14 +430,8 @@ v1.0.0 (UNRELEASED)
 - Added support for checking if the media is seekable, and getting the initial
   MIME type guess. (PR: :issue:`1033`)
 
-**Stream backend**
-
-- Add basic tests for the stream library provider.
-
-- Add support for proxies when doing initial metadata lookup for stream.
-  (Fixes :issue:`390`, PR: :issue:`982`)
-
-**Mopidy.js client library**
+Mopidy.js client library
+------------------------
 
 This version has been released to npm as Mopidy.js v0.5.0.
 
@@ -351,7 +444,12 @@ This version has been released to npm as Mopidy.js v0.5.0.
 
 - Upgrade dependencies.
 
-**Development**
+Development
+-----------
+
+- Add new :ref:`contribution guidelines <contributing>`.
+
+- Add new :ref:`development guide <devenv>`.
 
 - Speed up event emitting.
 
