@@ -75,7 +75,7 @@ def listplaylists(context):
       ignore playlists without names, which isn't very useful anyway.
     """
     result = []
-    for playlist in context.core.playlists.playlists.get():
+    for playlist in context.core.playlists.get_playlists().get():
         if not playlist.name:
             continue
         name = context.lookup_playlist_name_from_uri(playlist.uri)
