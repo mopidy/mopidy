@@ -17,6 +17,7 @@ LOG_LEVELS = {
 
 # Custom log level which has even lower priority than DEBUG
 TRACE_LOG_LEVEL = 5
+logging.addLevelName(TRACE_LOG_LEVEL, 'TRACE')
 
 
 class DelayedHandler(logging.Handler):
@@ -46,7 +47,6 @@ def bootstrap_delayed_logging():
 
 
 def setup_logging(config, verbosity_level, save_debug_log):
-    logging.addLevelName(TRACE_LOG_LEVEL, 'TRACE')
 
     logging.captureWarnings(True)
 
