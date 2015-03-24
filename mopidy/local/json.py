@@ -8,12 +8,11 @@ import os
 import re
 import sys
 import tempfile
-import time
 
 import mopidy
 from mopidy import compat, local, models
 from mopidy.local import search, storage, translator
-from mopidy.utils import encoding
+from mopidy.utils import encoding, timer
 
 logger = logging.getLogger(__name__)
 
@@ -109,20 +108,6 @@ class _BrowseCache(object):
         return self._cache.get(uri, {}).values()
 
 
-# TODO: make this available to other code?
-class DebugTimer(object):
-    def __init__(self, msg):
-        self.msg = msg
-        self.start = None
-
-    def __enter__(self):
-        self.start = time.time()
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        duration = (time.time() - self.start) * 1000
-        logger.debug('%s: %dms', self.msg, duration)
-
-
 class JsonLibrary(local.Library):
     name = 'json'
 
@@ -142,10 +127,10 @@ class JsonLibrary(local.Library):
 
     def load(self):
         logger.debug('Loading library: %s', self._json_file)
-        with DebugTimer('Loading tracks'):
+        with timer.time_logger('Loading tracks'):
             library = load_library(self._json_file)
             self._tracks = dict((t.uri, t) for t in library.get('tracks', []))
-        with DebugTimer('Building browse cache'):
+        with timer.time_logger('Building browse cache'):
             self._browse_cache = _BrowseCache(sorted(self._tracks.keys()))
         return len(self._tracks)
 
