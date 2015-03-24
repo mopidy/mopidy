@@ -291,16 +291,16 @@ class CoreLibraryTest(unittest.TestCase):
         self.assertIn(result1, result)
         self.assertIn(result2, result)
         self.library1.search.assert_called_once_with(
-            query=dict(any=['a']), uris=None)
+            query=dict(any=['a']), uris=None, exact=False)
         self.library2.search.assert_called_once_with(
-            query=dict(any=['a']), uris=None)
+            query=dict(any=['a']), uris=None, exact=False)
 
     def test_search_with_uris_selects_dummy1_backend(self):
         self.core.library.search(
             query=dict(any=['a']), uris=['dummy1:', 'dummy1:foo', 'dummy3:'])
 
         self.library1.search.assert_called_once_with(
-            query=dict(any=['a']), uris=['dummy1:', 'dummy1:foo'])
+            query=dict(any=['a']), uris=['dummy1:', 'dummy1:foo'], exact=False)
         self.assertFalse(self.library2.search.called)
 
     def test_search_with_uris_selects_both_backends(self):
@@ -308,9 +308,9 @@ class CoreLibraryTest(unittest.TestCase):
             query=dict(any=['a']), uris=['dummy1:', 'dummy1:foo', 'dummy2:'])
 
         self.library1.search.assert_called_once_with(
-            query=dict(any=['a']), uris=['dummy1:', 'dummy1:foo'])
+            query=dict(any=['a']), uris=['dummy1:', 'dummy1:foo'], exact=False)
         self.library2.search.assert_called_once_with(
-            query=dict(any=['a']), uris=['dummy2:'])
+            query=dict(any=['a']), uris=['dummy2:'], exact=False)
 
     def test_search_filters_out_none(self):
         track1 = Track(uri='dummy1:a')
@@ -326,9 +326,9 @@ class CoreLibraryTest(unittest.TestCase):
         self.assertIn(result1, result)
         self.assertNotIn(None, result)
         self.library1.search.assert_called_once_with(
-            query=dict(any=['a']), uris=None)
+            query=dict(any=['a']), uris=None, exact=False)
         self.library2.search.assert_called_once_with(
-            query=dict(any=['a']), uris=None)
+            query=dict(any=['a']), uris=None, exact=False)
 
     def test_search_accepts_query_dict_instead_of_kwargs(self):
         track1 = Track(uri='dummy1:a')
@@ -346,14 +346,14 @@ class CoreLibraryTest(unittest.TestCase):
         self.assertIn(result1, result)
         self.assertIn(result2, result)
         self.library1.search.assert_called_once_with(
-            query=dict(any=['a']), uris=None)
+            query=dict(any=['a']), uris=None, exact=False)
         self.library2.search.assert_called_once_with(
-            query=dict(any=['a']), uris=None)
+            query=dict(any=['a']), uris=None, exact=False)
 
     def test_search_normalises_bad_queries(self):
         self.core.library.search({'any': 'foobar'})
         self.library1.search.assert_called_once_with(
-            query={'any': ['foobar']}, uris=None)
+            query={'any': ['foobar']}, uris=None, exact=False)
 
     def test_find_exact_normalises_bad_queries(self):
         self.core.library.find_exact({'any': 'foobar'})
@@ -367,7 +367,7 @@ class LegacyLibraryProvider(backend.LibraryProvider):
 
 
 class LegacyCoreLibraryTest(unittest.TestCase):
-    def test_backend_with_find_exact_still_works(self):
+    def test_backend_with_find_exact_gets_find_exact_call(self):
         b1 = mock.Mock()
         b1.uri_schemes.get.return_value = ['dummy1']
         b1.library = mock.Mock(spec=LegacyLibraryProvider)
@@ -383,3 +383,20 @@ class LegacyCoreLibraryTest(unittest.TestCase):
             query=dict(any=['a']), uris=None)
         b2.library.search.assert_called_once_with(
             query=dict(any=['a']), uris=None, exact=True)
+
+    def test_backend_with_find_exact_gets_search_without_exact_arg(self):
+        b1 = mock.Mock()
+        b1.uri_schemes.get.return_value = ['dummy1']
+        b1.library = mock.Mock(spec=LegacyLibraryProvider)
+
+        b2 = mock.Mock()
+        b2.uri_schemes.get.return_value = ['dummy2']
+        b2.library = mock.Mock(spec=backend.LibraryProvider)
+
+        c = core.Core(mixer=None, backends=[b1, b2])
+        c.library.search(query={'any': ['a']})
+
+        b1.library.search.assert_called_once_with(
+            query=dict(any=['a']), uris=None)
+        b2.library.search.assert_called_once_with(
+            query=dict(any=['a']), uris=None, exact=False)

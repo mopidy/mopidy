@@ -127,62 +127,12 @@ class LibraryController(object):
         return results
 
     def find_exact(self, query=None, uris=None, **kwargs):
-        """
-        Search the library for tracks where ``field`` is ``values``.
+        """Search the library for tracks where ``field`` is ``values``.
 
         .. deprecated:: 1.0
-            Previously, if the query was empty, and the backend could support
-            it, all available tracks were returned. This has not changed, but
-            it is strongly discouraged. No new code should rely on this
-
-        If ``uris`` is given, the search is limited to results from within the
-        URI roots. For example passing ``uris=['file:']`` will limit the search
-        to the local backend.
-
-        Examples::
-
-            # Returns results matching 'a' from any backend
-            find_exact({'any': ['a']})
-            find_exact(any=['a'])
-
-            # Returns results matching artist 'xyz' from any backend
-            find_exact({'artist': ['xyz']})
-            find_exact(artist=['xyz'])
-
-            # Returns results matching 'a' and 'b' and artist 'xyz' from any
-            # backend
-            find_exact({'any': ['a', 'b'], 'artist': ['xyz']})
-            find_exact(any=['a', 'b'], artist=['xyz'])
-
-            # Returns results matching 'a' if within the given URI roots
-            # "file:///media/music" and "spotify:"
-            find_exact(
-                {'any': ['a']}, uris=['file:///media/music', 'spotify:'])
-            find_exact(any=['a'], uris=['file:///media/music', 'spotify:'])
-
-        .. versionchanged:: 1.0
-            This method now calls
-            :meth:`~mopidy.backend.LibraryProvider.search` on the backends
-            instead of the deprecated ``find_exact``. If the backend still
-            implements ``find_exact`` we will continue to use it for now.
-
-        :param query: one or more queries to search for
-        :type query: dict
-        :param uris: zero or more URI roots to limit the search to
-        :type uris: list of strings or :class:`None`
-        :rtype: list of :class:`mopidy.models.SearchResult`
+            Use :meth:`search` with ``exact`` set.
         """
-        query = _normalize_query(query or kwargs)
-        futures = []
-        for backend, backend_uris in self._get_backends_to_uris(uris).items():
-            if hasattr(backend.library, 'find_exact'):
-                futures.append(backend.library.find_exact(
-                    query=query, uris=backend_uris))
-            else:
-                futures.append(backend.library.search(
-                    query=query, uris=backend_uris, exact=True))
-
-        return [result for result in pykka.get_all(futures) if result]
+        return self.search(query=query, uris=uris, exact=True, **kwargs)
 
     def lookup(self, uri=None, uris=None):
         """
@@ -248,7 +198,7 @@ class LibraryController(object):
                        for b in self.backends.with_library.values()]
             pykka.get_all(futures)
 
-    def search(self, query=None, uris=None, **kwargs):
+    def search(self, query=None, uris=None, exact=False, **kwargs):
         """
         Search the library for tracks where ``field`` contains ``values``.
 
@@ -287,12 +237,29 @@ class LibraryController(object):
         :param uris: zero or more URI roots to limit the search to
         :type uris: list of strings or :class:`None`
         :rtype: list of :class:`mopidy.models.SearchResult`
+
+        .. versionadded:: 1.0
+            The ``exact`` keyword argument, which replaces :meth:`find_exact`.
         """
         query = _normalize_query(query or kwargs)
-        futures = [
-            backend.library.search(query=query, uris=backend_uris)
-            for (backend, backend_uris)
-            in self._get_backends_to_uris(uris).items()]
+        futures = []
+        for backend, backend_uris in self._get_backends_to_uris(uris).items():
+            if hasattr(backend.library, 'find_exact'):
+                # Backends with find_exact probably don't have support for
+                # search with the exact kwarg, so give them the legacy calls.
+                if exact:
+                    futures.append(backend.library.find_exact(
+                        query=query, uris=backend_uris))
+                else:
+                    futures.append(backend.library.search(
+                        query=query, uris=backend_uris))
+            else:
+                # Assume backends without find_exact are up to date. Worst case
+                # the exact gets swallowed by the **kwargs and things hopefully
+                # still work.
+                futures.append(backend.library.search(
+                    query=query, uris=backend_uris, exact=exact))
+
         return [result for result in pykka.get_all(futures) if result]
 
 
