@@ -12,7 +12,8 @@ Three months after our fifth anniversary, Mopidy 1.0 is finally here!
 
 Since the release of 0.19, we've closed or merged approximately 140 issues and
 pull requests through more than 600 commits by a record high 19 extraordinary
-people, including seven newcomers. Thanks to everyone who has contributed!
+people, including seven newcomers. Thanks to :ref:`everyone <authors>` who has
+:ref:`contributed <contributing>`!
 
 For the longest time, the focus of Mopidy 1.0 was to be another incremental
 improvement, to be numbered 0.20. The result is still very much an incremental
@@ -21,9 +22,9 @@ functionality.
 
 The major features of Mopidy 1.0 are:
 
-- Semantical versioning. We promise to not break APIs before Mopidy 2.0. A
-  Mopidy extension working with Mopidy 1.0 should continue to work with all
-  Mopidy 1.x releases.
+- :ref:`Semantic Versioning <versioning>`. We promise to not break APIs before
+  Mopidy 2.0. A Mopidy extension working with Mopidy 1.0 should continue to
+  work with all Mopidy 1.x releases.
 
 - Preparation work to ease migration to a cleaned up and leaner core API in
   Mopidy 2.0, and to give us some of the benefits of the cleaned up core API
