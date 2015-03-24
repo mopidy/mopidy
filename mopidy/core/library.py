@@ -254,7 +254,7 @@ class LibraryController(object):
             except TypeError:
                 backend_name = backend.actor_ref.actor_class.__name__
                 logger.warning(
-                    '%s does not implement library.search() with exact '
+                    '%s does not implement library.search() with "exact" '
                     'support. Please upgrade it.', backend_name)
         return [r for r in results if r]
 
