@@ -12,7 +12,7 @@ Three months after our fifth anniversary, Mopidy 1.0 is finally here!
 
 Since the release of 0.19, we've closed or merged approximately 140 issues and
 pull requests through more than 600 commits by a record high 19 extraordinary
-people, including seven newcomers. Thanks to everyone that has contributed!
+people, including seven newcomers. Thanks to everyone who has contributed!
 
 For the longest time, the focus of Mopidy 1.0 was to be another incremental
 improvement, to be numbered 0.20. The result is still very much an incremental
@@ -21,17 +21,20 @@ functionality.
 
 The major features of Mopidy 1.0 are:
 
-- A promise to follow not break APIs before Mopidy 2.0. A Mopidy extension
-  working with Mopidy 1.0 should continue to work with all Mopidy 1.x releases.
+- Semantical versioning. We promise to not break APIs before Mopidy 2.0. A
+  Mopidy extension working with Mopidy 1.0 should continue to work with all
+  Mopidy 1.x releases.
 
-- Preparation work to enable gapless playback in the near future.
+- Preparation work to ease migration to a cleaned up and leaner core API in
+  Mopidy 2.0, and to give us some of the benefits of the cleaned up core API
+  right away.
 
-TODO: to be continued
+- Preparation work to enable gapless playback in an upcoming 1.x release.
 
 Dependencies
 ------------
 
-Since the previous release there is no changes to Mopidy's dependencies.
+Since the previous release there are no changes to Mopidy's dependencies.
 However, porting from GStreamer 0.10 to 1.x and support for running Mopidy with
 Python 3.4+ is not far off on our roadmap.
 
@@ -123,7 +126,7 @@ Core tracklist controller
 Core playback controller
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-- **Removed:** Remove several internal parts that was leaking into the public
+- **Removed:** Remove several internal parts that were leaking into the public
   API and was never intended to be used externally. (Fixes: :issue:`1070`, PR:
   :issue:`1076`)
 
@@ -164,8 +167,8 @@ Backend API
 -----------
 
 In the API implemented by all backends there have been way fewer but somewhat
-more dramatic changes with some methods removed and new ones being required for
-certain functionality to continue working. Most backends are already updated to
+more drastic changes with some methods removed and new ones being required for
+certain functionality to continue working. Most backends were already updated to
 be compatible with Mopidy 1.0 before the release. New versions of the backends
 will be released shortly after Mopidy itself.
 
@@ -237,7 +240,7 @@ Commands
 
 - Add support for repeating the :option:`-v <mopidy -v>` argument four times
   to set the log level for all loggers to the lowest possible value, including
-  log records at levels lover than ``DEBUG`` too.
+  log records at levels lower than ``DEBUG`` too.
 
 - Add path to the current ``mopidy`` executable to the output of ``mopidy
   deps``. This make it easier to see that a user is using pip-installed Mopidy
@@ -314,7 +317,7 @@ Stream backend
 M3U backend
 -----------
 
-- Mopidy-M3U is a new bundled backend. It is the same M3U support as was
+- Mopidy-M3U is a new bundled backend. It provides the same M3U support as was
   previously part of the local backend. See :ref:`m3u-migration` for how to
   migrate your local playlists to work with the M3U backend. (Fixes:
   :issue:`1054`, PR: :issue:`1066`)
@@ -372,12 +375,11 @@ Mixers
 Audio
 -----
 
-- **Removed:** Kill support for visualizers and the
-  :confval:`audio/visualizer` config value. The feature was originally added as
-  a workaround for all the people asking for ncmpcpp visualizer support, and
-  since we could get it almost for free thanks to GStreamer. But, this feature
-  did never make sense for a server such as Mopidy. The only way to find out if
-  it is in use and will be missed is to go ahead and remove it.
+- **Removed:** Support for visualizers and the :confval:`audio/visualizer`
+  config value. The feature was originally added as a workaround for all the
+  people asking for ncmpcpp visualizer support, and since we could get it
+  almost for free thanks to GStreamer. But, this feature did never make sense
+  for a server such as Mopidy.
 
 - **Deprecated:** Deprecated :meth:`mopidy.audio.Audio.emit_end_of_stream`.
   Pass a :class:`None` buffer to :meth:`mopidy.audio.Audio.emit_data` to end
