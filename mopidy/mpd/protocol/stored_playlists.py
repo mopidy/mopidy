@@ -20,7 +20,8 @@ def listplaylist(context, name):
         file: relative/path/to/file2.ogg
         file: relative/path/to/file3.mp3
     """
-    playlist = context.lookup_playlist_from_name(name)
+    uri = context.lookup_playlist_uri_from_name(name)
+    playlist = uri is not None and context.core.playlists.lookup(uri).get()
     if not playlist:
         raise exceptions.MpdNoExistError('No such playlist')
     return ['file: %s' % t.uri for t in playlist.tracks]
@@ -40,7 +41,8 @@ def listplaylistinfo(context, name):
         Standard track listing, with fields: file, Time, Title, Date,
         Album, Artist, Track
     """
-    playlist = context.lookup_playlist_from_name(name)
+    uri = context.lookup_playlist_uri_from_name(name)
+    playlist = uri is not None and context.core.playlists.lookup(uri).get()
     if not playlist:
         raise exceptions.MpdNoExistError('No such playlist')
     return translator.playlist_to_mpd_format(playlist)
@@ -121,7 +123,8 @@ def load(context, name, playlist_slice=slice(0, None)):
     - MPD 0.17.1 does not fail if the specified range is outside the playlist,
       in either or both ends.
     """
-    playlist = context.lookup_playlist_from_name(name)
+    uri = context.lookup_playlist_uri_from_name(name)
+    playlist = uri is not None and context.core.playlists.lookup(uri).get()
     if not playlist:
         raise exceptions.MpdNoExistError('No such playlist')
     context.core.tracklist.add(playlist.tracks[playlist_slice])

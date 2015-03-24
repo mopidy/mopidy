@@ -59,16 +59,13 @@ class MpdUriMapper(object):
                 name = self._invalid_playlist_chars.sub('|', playlist.name)
                 self.insert(name, playlist.uri)
 
-    def playlist_from_name(self, name):
+    def playlist_uri_from_name(self, name):
         """
-        Helper function to retrieve a playlist from its unique MPD name.
+        Helper function to retrieve a playlist URI from its unique MPD name.
         """
         if not self._uri_from_name:
             self.refresh_playlists_mapping()
-        if name not in self._uri_from_name:
-            return None
-        uri = self._uri_from_name[name]
-        return self.core.playlists.lookup(uri).get()
+        return self._uri_from_name.get(name)
 
     def playlist_name_from_uri(self, uri):
         """

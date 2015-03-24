@@ -465,7 +465,8 @@ def searchaddpl(context, *args):
         return
     results = context.core.library.search(**query).get()
 
-    playlist = context.lookup_playlist_from_name(playlist_name)
+    uri = context.lookup_playlist_uri_from_name(playlist_name)
+    playlist = uri is not None and context.core.playlists.lookup(uri).get()
     if not playlist:
         playlist = context.core.playlists.create(playlist_name).get()
     tracks = list(playlist.tracks) + _get_tracks(results)

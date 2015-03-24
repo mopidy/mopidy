@@ -245,11 +245,11 @@ class MpdContext(object):
         self.subscriptions = set()
         self._uri_map = uri_map
 
-    def lookup_playlist_from_name(self, name):
+    def lookup_playlist_uri_from_name(self, name):
         """
         Helper function to retrieve a playlist from its unique MPD name.
         """
-        return self._uri_map.playlist_from_name(name)
+        return self._uri_map.playlist_uri_from_name(name)
 
     def lookup_playlist_name_from_uri(self, uri):
         """
