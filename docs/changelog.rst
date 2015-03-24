@@ -103,6 +103,11 @@ v1.0.0 (UNRELEASED)
 - **Deprecated:** :meth:`mopidy.core.PlaylistsController.filter`. Use
   :meth:`~mopidy.core.PlaylistsController.as_list` and filter yourself.
 
+- Add ``exact`` to :meth:`mopidy.core.LibraryController.search`.
+
+- **Deprecated:** :meth:`mopidy.core.LibraryController.find_exact`. Use
+  :meth:`mopidy.core.LibraryController.search` with ``exact`` set.
+
 **Backend API**
 
 - Remove default implementation of
