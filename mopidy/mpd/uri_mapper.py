@@ -52,12 +52,11 @@ class MpdUriMapper(object):
         MPD.
         """
         if self.core is not None:
-            for playlist in self.core.playlists.playlists.get():
-                if not playlist.name:
+            for playlist_ref in self.core.playlists.as_list().get():
+                if not playlist_ref.name:
                     continue
-                # TODO: add scheme to name perhaps 'foo (spotify)' etc.
-                name = self._invalid_playlist_chars.sub('|', playlist.name)
-                self.insert(name, playlist.uri)
+                name = self._invalid_playlist_chars.sub('|', playlist_ref.name)
+                self.insert(name, playlist_ref.uri)
 
     def playlist_uri_from_name(self, name):
         """
