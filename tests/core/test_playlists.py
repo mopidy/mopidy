@@ -31,10 +31,12 @@ class PlaylistsTest(unittest.TestCase):
         self.sp2.lookup.return_value.get.side_effect = [self.pl2a, self.pl2b]
 
         self.backend1 = mock.Mock()
+        self.backend1.actor_ref.actor_class.__name__ = 'Backend1'
         self.backend1.uri_schemes.get.return_value = ['dummy1']
         self.backend1.playlists = self.sp1
 
         self.backend2 = mock.Mock()
+        self.backend2.actor_ref.actor_class.__name__ = 'Backend2'
         self.backend2.uri_schemes.get.return_value = ['dummy2']
         self.backend2.playlists = self.sp2
 
@@ -54,6 +56,15 @@ class PlaylistsTest(unittest.TestCase):
         self.assertIn(self.plr1b, result)
         self.assertIn(self.plr2a, result)
         self.assertIn(self.plr2b, result)
+
+    def test_as_list_ignores_backends_that_dont_support_it(self):
+        self.sp2.as_list.return_value.get.side_effect = NotImplementedError
+
+        result = self.core.playlists.as_list()
+
+        self.assertEqual(len(result), 2)
+        self.assertIn(self.plr1a, result)
+        self.assertIn(self.plr1b, result)
 
     def test_get_items_selects_the_matching_backend(self):
         ref = Ref.track()

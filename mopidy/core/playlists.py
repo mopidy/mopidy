@@ -1,6 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
-import itertools
+import logging
 import urlparse
 
 import pykka
@@ -8,6 +8,9 @@ import pykka
 from mopidy.core import listener
 from mopidy.models import Playlist
 from mopidy.utils.deprecation import deprecated_property
+
+
+logger = logging.getLogger(__name__)
 
 
 class PlaylistsController(object):
@@ -29,11 +32,20 @@ class PlaylistsController(object):
 
         .. versionadded:: 1.0
         """
-        futures = [
-            b.playlists.as_list()
-            for b in self.backends.with_playlists.values()]
-        results = pykka.get_all(futures)
-        return list(itertools.chain(*results))
+        futures = {
+            b.actor_ref.actor_class.__name__: b.playlists.as_list()
+            for b in set(self.backends.with_playlists.values())}
+
+        results = []
+        for backend_name, future in futures.items():
+            try:
+                results.extend(future.get())
+            except NotImplementedError:
+                logger.warning(
+                    '%s does not implement playlists.as_list(). '
+                    'Please upgrade it.', backend_name)
+
+        return results
 
     def get_items(self, uri):
         """
