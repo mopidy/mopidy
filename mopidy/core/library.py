@@ -242,25 +242,21 @@ class LibraryController(object):
             The ``exact`` keyword argument, which replaces :meth:`find_exact`.
         """
         query = _normalize_query(query or kwargs)
-        futures = []
+        futures = {}
         for backend, backend_uris in self._get_backends_to_uris(uris).items():
-            if hasattr(backend.library, 'find_exact'):
-                # Backends with find_exact probably don't have support for
-                # search with the exact kwarg, so give them the legacy calls.
-                if exact:
-                    futures.append(backend.library.find_exact(
-                        query=query, uris=backend_uris))
-                else:
-                    futures.append(backend.library.search(
-                        query=query, uris=backend_uris))
-            else:
-                # Assume backends without find_exact are up to date. Worst case
-                # the exact gets swallowed by the **kwargs and things hopefully
-                # still work.
-                futures.append(backend.library.search(
-                    query=query, uris=backend_uris, exact=exact))
+            futures[backend] = backend.library.search(
+                query=query, uris=backend_uris, exact=exact)
 
-        return [result for result in pykka.get_all(futures) if result]
+        results = []
+        for backend, future in futures.items():
+            try:
+                results.append(future.get())
+            except TypeError:
+                backend_name = backend.actor_ref.actor_class.__name__
+                logger.warning(
+                    '%s does not implement library.search() with exact '
+                    'support. Please upgrade it.', backend_name)
+        return [r for r in results if r]
 
 
 def _normalize_query(query):
