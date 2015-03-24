@@ -100,6 +100,10 @@ class DummyPlaylistsProvider(backend.PlaylistsProvider):
         super(DummyPlaylistsProvider, self).__init__(backend)
         self._playlists = []
 
+    def set_playlists(self, playlists):
+        """For tests using the dummy provider through an actor proxy."""
+        self._playlists = playlists
+
     def as_list(self):
         return [
             Ref.playlist(uri=pl.uri, name=pl.name) for pl in self._playlists]
@@ -111,13 +115,13 @@ class DummyPlaylistsProvider(backend.PlaylistsProvider):
         return [
             Ref.track(uri=t.uri, name=t.name) for t in playlist.tracks]
 
-    @property
-    def playlists(self):
-        return copy.copy(self._playlists)
+    def lookup(self, uri):
+        for playlist in self._playlists:
+            if playlist.uri == uri:
+                return playlist
 
-    @playlists.setter
-    def playlists(self, playlists):
-        self._playlists = playlists
+    def refresh(self):
+        pass
 
     def create(self, name):
         playlist = Playlist(name=name, uri='dummy:%s' % name)
@@ -128,14 +132,6 @@ class DummyPlaylistsProvider(backend.PlaylistsProvider):
         playlist = self.lookup(uri)
         if playlist:
             self._playlists.remove(playlist)
-
-    def lookup(self, uri):
-        for playlist in self._playlists:
-            if playlist.uri == uri:
-                return playlist
-
-    def refresh(self):
-        pass
 
     def save(self, playlist):
         old_playlist = self.lookup(playlist.uri)
