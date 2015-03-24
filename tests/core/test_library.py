@@ -361,42 +361,35 @@ class CoreLibraryTest(unittest.TestCase):
             query={'any': ['foobar']}, uris=None, exact=True)
 
 
-class LegacyLibraryProvider(backend.LibraryProvider):
-    def find_exact(self, query=None, uris=None):
-        pass
+class LegacyFindExactToSearchLibraryTest(unittest.TestCase):
+    def setUp(self):  # noqa: N802
+        self.backend = mock.Mock()
+        self.backend.actor_ref.actor_class.__name__ = 'DummyBackend'
+        self.backend.uri_schemes.get.return_value = ['dummy']
+        self.backend.library = mock.Mock(spec=backend.LibraryProvider)
+        self.core = core.Core(mixer=None, backends=[self.backend])
 
-
-class LegacyCoreLibraryTest(unittest.TestCase):
-    def test_backend_with_find_exact_gets_find_exact_call(self):
-        b1 = mock.Mock()
-        b1.uri_schemes.get.return_value = ['dummy1']
-        b1.library = mock.Mock(spec=LegacyLibraryProvider)
-
-        b2 = mock.Mock()
-        b2.uri_schemes.get.return_value = ['dummy2']
-        b2.library = mock.Mock(spec=backend.LibraryProvider)
-
-        c = core.Core(mixer=None, backends=[b1, b2])
-        c.library.find_exact(query={'any': ['a']})
-
-        b1.library.find_exact.assert_called_once_with(
-            query=dict(any=['a']), uris=None)
-        b2.library.search.assert_called_once_with(
+    def test_core_find_exact_calls_backend_search_with_exact(self):
+        self.core.library.find_exact(query={'any': ['a']})
+        self.backend.library.search.assert_called_once_with(
             query=dict(any=['a']), uris=None, exact=True)
 
-    def test_backend_with_find_exact_gets_search_without_exact_arg(self):
-        b1 = mock.Mock()
-        b1.uri_schemes.get.return_value = ['dummy1']
-        b1.library = mock.Mock(spec=LegacyLibraryProvider)
+    def test_core_find_exact_handles_legacy_backend(self):
+        self.backend.library.search.return_value.get.side_effect = TypeError
+        self.core.library.find_exact(query={'any': ['a']})
+        # We are just testing that this doesn't fail.
 
-        b2 = mock.Mock()
-        b2.uri_schemes.get.return_value = ['dummy2']
-        b2.library = mock.Mock(spec=backend.LibraryProvider)
-
-        c = core.Core(mixer=None, backends=[b1, b2])
-        c.library.search(query={'any': ['a']})
-
-        b1.library.search.assert_called_once_with(
-            query=dict(any=['a']), uris=None)
-        b2.library.search.assert_called_once_with(
+    def test_core_search_call_backend_search_with_exact(self):
+        self.core.library.search(query={'any': ['a']})
+        self.backend.library.search.assert_called_once_with(
             query=dict(any=['a']), uris=None, exact=False)
+
+    def test_core_search_with_exact_call_backend_search_with_exact(self):
+        self.core.library.search(query={'any': ['a']}, exact=True)
+        self.backend.library.search.assert_called_once_with(
+            query=dict(any=['a']), uris=None, exact=True)
+
+    def test_core_search_with_handles_legacy_backend(self):
+        self.backend.library.search.return_value.get.side_effect = TypeError
+        self.core.library.search(query={'any': ['a']}, exact=True)
+        # We are just testing that this doesn't fail.

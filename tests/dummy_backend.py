@@ -46,16 +46,15 @@ class DummyLibraryProvider(backend.LibraryProvider):
     def get_distinct(self, field, query=None):
         return self.dummy_get_distinct_result.get(field, set())
 
-    def find_exact(self, **query):
-        return self.dummy_find_exact_result
-
     def lookup(self, uri):
         return [t for t in self.dummy_library if uri == t.uri]
 
     def refresh(self, uri=None):
         pass
 
-    def search(self, **query):
+    def search(self, query=None, uris=None, exact=False):
+        if exact:  # TODO: remove uses of dummy_find_exact_result
+            return self.dummy_find_exact_result
         return self.dummy_search_result
 
 

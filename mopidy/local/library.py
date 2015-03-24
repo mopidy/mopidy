@@ -51,12 +51,7 @@ class LocalLibraryProvider(backend.LibraryProvider):
             tracks = [tracks]
         return tracks
 
-    def find_exact(self, query=None, uris=None):
+    def search(self, query=None, uris=None, exact=False):
         if not self._library:
             return None
-        return self._library.search(query=query, uris=uris, exact=True)
-
-    def search(self, query=None, uris=None):
-        if not self._library:
-            return None
-        return self._library.search(query=query, uris=uris, exact=False)
+        return self._library.search(query=query, uris=uris, exact=exact)
