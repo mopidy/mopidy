@@ -7,7 +7,7 @@ from tests.mpd import protocol
 
 class PlaylistsHandlerTest(protocol.BaseTestCase):
     def test_listplaylist(self):
-        self.backend.playlists.set_playlists([
+        self.backend.playlists.set_dummy_playlists([
             Playlist(
                 name='name', uri='dummy:name', tracks=[Track(uri='dummy:a')])])
 
@@ -16,7 +16,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_listplaylist_without_quotes(self):
-        self.backend.playlists.set_playlists([
+        self.backend.playlists.set_dummy_playlists([
             Playlist(
                 name='name', uri='dummy:name', tracks=[Track(uri='dummy:a')])])
 
@@ -31,14 +31,14 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
     def test_listplaylist_duplicate(self):
         playlist1 = Playlist(name='a', uri='dummy:a1', tracks=[Track(uri='b')])
         playlist2 = Playlist(name='a', uri='dummy:a2', tracks=[Track(uri='c')])
-        self.backend.playlists.set_playlists([playlist1, playlist2])
+        self.backend.playlists.set_dummy_playlists([playlist1, playlist2])
 
         self.send_request('listplaylist "a [2]"')
         self.assertInResponse('file: c')
         self.assertInResponse('OK')
 
     def test_listplaylistinfo(self):
-        self.backend.playlists.set_playlists([
+        self.backend.playlists.set_dummy_playlists([
             Playlist(
                 name='name', uri='dummy:name', tracks=[Track(uri='dummy:a')])])
 
@@ -49,7 +49,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_listplaylistinfo_without_quotes(self):
-        self.backend.playlists.set_playlists([
+        self.backend.playlists.set_dummy_playlists([
             Playlist(
                 name='name', uri='dummy:name', tracks=[Track(uri='dummy:a')])])
 
@@ -67,7 +67,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
     def test_listplaylistinfo_duplicate(self):
         playlist1 = Playlist(name='a', uri='dummy:a1', tracks=[Track(uri='b')])
         playlist2 = Playlist(name='a', uri='dummy:a2', tracks=[Track(uri='c')])
-        self.backend.playlists.set_playlists([playlist1, playlist2])
+        self.backend.playlists.set_dummy_playlists([playlist1, playlist2])
 
         self.send_request('listplaylistinfo "a [2]"')
         self.assertInResponse('file: c')
@@ -77,7 +77,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
     def test_listplaylists(self):
         last_modified = 1390942873222
-        self.backend.playlists.set_playlists([
+        self.backend.playlists.set_dummy_playlists([
             Playlist(name='a', uri='dummy:a', last_modified=last_modified)])
 
         self.send_request('listplaylists')
@@ -89,7 +89,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
     def test_listplaylists_duplicate(self):
         playlist1 = Playlist(name='a', uri='dummy:a1')
         playlist2 = Playlist(name='a', uri='dummy:a2')
-        self.backend.playlists.set_playlists([playlist1, playlist2])
+        self.backend.playlists.set_dummy_playlists([playlist1, playlist2])
 
         self.send_request('listplaylists')
         self.assertInResponse('playlist: a')
@@ -98,7 +98,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
     def test_listplaylists_ignores_playlists_without_name(self):
         last_modified = 1390942873222
-        self.backend.playlists.set_playlists([
+        self.backend.playlists.set_dummy_playlists([
             Playlist(name='', uri='dummy:', last_modified=last_modified)])
 
         self.send_request('listplaylists')
@@ -106,7 +106,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_listplaylists_replaces_newline_with_space(self):
-        self.backend.playlists.set_playlists([
+        self.backend.playlists.set_dummy_playlists([
             Playlist(name='a\n', uri='dummy:')])
         self.send_request('listplaylists')
         self.assertInResponse('playlist: a ')
@@ -114,7 +114,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_listplaylists_replaces_carriage_return_with_space(self):
-        self.backend.playlists.set_playlists([
+        self.backend.playlists.set_dummy_playlists([
             Playlist(name='a\r', uri='dummy:')])
         self.send_request('listplaylists')
         self.assertInResponse('playlist: a ')
@@ -122,7 +122,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_listplaylists_replaces_forward_slash_with_pipe(self):
-        self.backend.playlists.set_playlists([
+        self.backend.playlists.set_dummy_playlists([
             Playlist(name='a/b', uri='dummy:')])
         self.send_request('listplaylists')
         self.assertInResponse('playlist: a|b')
@@ -132,7 +132,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
     def test_load_appends_to_tracklist(self):
         self.core.tracklist.add([Track(uri='a'), Track(uri='b')])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
-        self.backend.playlists.set_playlists([
+        self.backend.playlists.set_dummy_playlists([
             Playlist(name='A-list', uri='dummy:A-list', tracks=[
                 Track(uri='c'), Track(uri='d'), Track(uri='e')])])
 
@@ -150,7 +150,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
     def test_load_with_range_loads_part_of_playlist(self):
         self.core.tracklist.add([Track(uri='a'), Track(uri='b')])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
-        self.backend.playlists.set_playlists([
+        self.backend.playlists.set_dummy_playlists([
             Playlist(name='A-list', uri='dummy:A-list', tracks=[
                 Track(uri='c'), Track(uri='d'), Track(uri='e')])])
 
@@ -166,7 +166,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
     def test_load_with_range_without_end_loads_rest_of_playlist(self):
         self.core.tracklist.add([Track(uri='a'), Track(uri='b')])
         self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
-        self.backend.playlists.set_playlists([
+        self.backend.playlists.set_dummy_playlists([
             Playlist(name='A-list', uri='dummy:A-list', tracks=[
                 Track(uri='c'), Track(uri='d'), Track(uri='e')])])
 

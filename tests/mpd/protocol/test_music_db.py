@@ -277,7 +277,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
     def test_lsinfo_without_path_returns_same_as_for_root(self):
         last_modified = 1390942873222
-        self.backend.playlists.set_playlists([
+        self.backend.playlists.set_dummy_playlists([
             Playlist(name='a', uri='dummy:/a', last_modified=last_modified)])
 
         response1 = self.send_request('lsinfo')
@@ -286,7 +286,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
     def test_lsinfo_with_empty_path_returns_same_as_for_root(self):
         last_modified = 1390942873222
-        self.backend.playlists.set_playlists([
+        self.backend.playlists.set_dummy_playlists([
             Playlist(name='a', uri='dummy:/a', last_modified=last_modified)])
 
         response1 = self.send_request('lsinfo ""')
@@ -295,7 +295,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
     def test_lsinfo_for_root_includes_playlists(self):
         last_modified = 1390942873222
-        self.backend.playlists.set_playlists([
+        self.backend.playlists.set_dummy_playlists([
             Playlist(name='a', uri='dummy:/a', last_modified=last_modified)])
 
         self.send_request('lsinfo "/"')
@@ -384,7 +384,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.backend.library.dummy_browse_result = {
             'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
                         Ref.directory(uri='dummy:/foo', name='foo')]}
-        self.backend.playlists.set_playlists([
+        self.backend.playlists.set_dummy_playlists([
             Playlist(name='a', uri='dummy:/a', last_modified=last_modified)])
 
         response = self.send_request('lsinfo "/"')

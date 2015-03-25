@@ -97,7 +97,7 @@ class DummyPlaylistsProvider(backend.PlaylistsProvider):
         super(DummyPlaylistsProvider, self).__init__(backend)
         self._playlists = []
 
-    def set_playlists(self, playlists):
+    def set_dummy_playlists(self, playlists):
         """For tests using the dummy provider through an actor proxy."""
         self._playlists = playlists
 
