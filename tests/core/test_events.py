@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import unittest
 
@@ -7,17 +7,18 @@ import mock
 import pykka
 
 from mopidy import core
-from mopidy.backend import dummy
 from mopidy.models import Track
+
+from tests import dummy_backend
 
 
 @mock.patch.object(core.CoreListener, 'send')
 class BackendEventsTest(unittest.TestCase):
-    def setUp(self):
-        self.backend = dummy.create_dummy_backend_proxy()
+    def setUp(self):  # noqa: N802
+        self.backend = dummy_backend.create_proxy()
         self.core = core.Core.start(backends=[self.backend]).proxy()
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
 
     def test_forwards_backend_playlists_loaded_event_to_frontends(self, send):

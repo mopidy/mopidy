@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import random
 
@@ -28,22 +28,22 @@ class IssueGH17RegressionTest(protocol.BaseTestCase):
         ])
         random.seed(1)  # Playlist order: abcfde
 
-        self.sendRequest('play')
-        self.assertEquals(
+        self.send_request('play')
+        self.assertEqual(
             'dummy:a', self.core.playback.current_track.get().uri)
-        self.sendRequest('random "1"')
-        self.sendRequest('next')
-        self.assertEquals(
+        self.send_request('random "1"')
+        self.send_request('next')
+        self.assertEqual(
             'dummy:b', self.core.playback.current_track.get().uri)
-        self.sendRequest('next')
+        self.send_request('next')
         # Should now be at track 'c', but playback fails and it skips ahead
-        self.assertEquals(
+        self.assertEqual(
             'dummy:f', self.core.playback.current_track.get().uri)
-        self.sendRequest('next')
-        self.assertEquals(
+        self.send_request('next')
+        self.assertEqual(
             'dummy:d', self.core.playback.current_track.get().uri)
-        self.sendRequest('next')
-        self.assertEquals(
+        self.send_request('next')
+        self.assertEqual(
             'dummy:e', self.core.playback.current_track.get().uri)
 
 
@@ -64,17 +64,17 @@ class IssueGH18RegressionTest(protocol.BaseTestCase):
             Track(uri='dummy:d'), Track(uri='dummy:e'), Track(uri='dummy:f')])
         random.seed(1)
 
-        self.sendRequest('play')
-        self.sendRequest('random "1"')
-        self.sendRequest('next')
-        self.sendRequest('random "0"')
-        self.sendRequest('next')
+        self.send_request('play')
+        self.send_request('random "1"')
+        self.send_request('next')
+        self.send_request('random "0"')
+        self.send_request('next')
 
-        self.sendRequest('next')
+        self.send_request('next')
         tl_track_1 = self.core.playback.current_tl_track.get()
-        self.sendRequest('next')
+        self.send_request('next')
         tl_track_2 = self.core.playback.current_tl_track.get()
-        self.sendRequest('next')
+        self.send_request('next')
         tl_track_3 = self.core.playback.current_tl_track.get()
 
         self.assertNotEqual(tl_track_1, tl_track_2)
@@ -100,15 +100,15 @@ class IssueGH22RegressionTest(protocol.BaseTestCase):
             Track(uri='dummy:d'), Track(uri='dummy:e'), Track(uri='dummy:f')])
         random.seed(1)
 
-        self.sendRequest('play')
-        self.sendRequest('random "1"')
-        self.sendRequest('deleteid "1"')
-        self.sendRequest('deleteid "2"')
-        self.sendRequest('deleteid "3"')
-        self.sendRequest('deleteid "4"')
-        self.sendRequest('deleteid "5"')
-        self.sendRequest('deleteid "6"')
-        self.sendRequest('status')
+        self.send_request('play')
+        self.send_request('random "1"')
+        self.send_request('deleteid "1"')
+        self.send_request('deleteid "2"')
+        self.send_request('deleteid "3"')
+        self.send_request('deleteid "4"')
+        self.send_request('deleteid "5"')
+        self.send_request('deleteid "6"')
+        self.send_request('status')
 
 
 class IssueGH69RegressionTest(protocol.BaseTestCase):
@@ -128,10 +128,10 @@ class IssueGH69RegressionTest(protocol.BaseTestCase):
             Track(uri='dummy:a'), Track(uri='dummy:b'), Track(uri='dummy:c'),
             Track(uri='dummy:d'), Track(uri='dummy:e'), Track(uri='dummy:f')])
 
-        self.sendRequest('play')
-        self.sendRequest('stop')
-        self.sendRequest('clear')
-        self.sendRequest('load "foo"')
+        self.send_request('play')
+        self.send_request('stop')
+        self.send_request('clear')
+        self.send_request('load "foo"')
         self.assertNotInResponse('song: None')
 
 
@@ -151,11 +151,11 @@ class IssueGH113RegressionTest(protocol.BaseTestCase):
         self.core.playlists.create(
             u'all lart spotify:track:\w\{22\} pastes')
 
-        self.sendRequest('lsinfo "/"')
+        self.send_request('lsinfo "/"')
         self.assertInResponse(
             u'playlist: all lart spotify:track:\w\{22\} pastes')
 
-        self.sendRequest(
+        self.send_request(
             r'listplaylistinfo "all lart spotify:track:\\w\\{22\\} pastes"')
         self.assertInResponse('OK')
 
@@ -170,7 +170,7 @@ class IssueGH137RegressionTest(protocol.BaseTestCase):
     """
 
     def test(self):
-        self.sendRequest(
+        self.send_request(
             u'list Date Artist "Anita Ward" '
             u'Album "This Is Remixed Hits - Mashups & Rare 12" Mixes"')
 

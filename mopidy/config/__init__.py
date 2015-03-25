@@ -1,12 +1,13 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
-import ConfigParser as configparser
 import io
 import itertools
 import logging
 import os.path
 import re
 
+from mopidy import compat
+from mopidy.compat import configparser
 from mopidy.config import keyring
 from mopidy.config.schemas import *  # noqa
 from mopidy.config.types import *  # noqa
@@ -21,14 +22,15 @@ _logging_schema['debug_format'] = String()
 _logging_schema['debug_file'] = Path()
 _logging_schema['config_file'] = Path(optional=True)
 
-_loglevels_schema = LogLevelConfigSchema('loglevels')
+_loglevels_schema = MapConfigSchema('loglevels', LogLevel())
+_logcolors_schema = MapConfigSchema('logcolors', LogColor())
 
 _audio_schema = ConfigSchema('audio')
 _audio_schema['mixer'] = String()
 _audio_schema['mixer_track'] = Deprecated()
 _audio_schema['mixer_volume'] = Integer(optional=True, minimum=0, maximum=100)
 _audio_schema['output'] = String()
-_audio_schema['visualizer'] = String(optional=True)
+_audio_schema['visualizer'] = Deprecated()
 
 _proxy_schema = ConfigSchema('proxy')
 _proxy_schema['scheme'] = String(optional=True,
@@ -41,7 +43,8 @@ _proxy_schema['password'] = Secret(optional=True)
 # NOTE: if multiple outputs ever comes something like LogLevelConfigSchema
 # _outputs_schema = config.AudioOutputConfigSchema()
 
-_schemas = [_logging_schema, _loglevels_schema, _audio_schema, _proxy_schema]
+_schemas = [_logging_schema, _loglevels_schema, _logcolors_schema,
+            _audio_schema, _proxy_schema]
 
 _INITIAL_HELP = """
 # For further information about options in this file see:
@@ -108,18 +111,16 @@ def format_initial(extensions):
 def _load(files, defaults, overrides):
     parser = configparser.RawConfigParser()
 
-    files = [path.expand_path(f) for f in files]
-    sources = ['builtin defaults'] + files + ['command line options']
-    logger.info('Loading config from: %s', ', '.join(sources))
-
     # TODO: simply return path to config file for defaults so we can load it
     # all in the same way?
+    logger.info('Loading config from builtin defaults')
     for default in defaults:
-        if isinstance(default, unicode):
+        if isinstance(default, compat.text_type):
             default = default.encode('utf-8')
         parser.readfp(io.BytesIO(default))
 
     # Load config from a series of config files
+    files = [path.expand_path(f) for f in files]
     for name in files:
         if os.path.isdir(name):
             for filename in os.listdir(name):
@@ -137,6 +138,7 @@ def _load(files, defaults, overrides):
     for section in parser.sections():
         raw_config[section] = dict(parser.items(section))
 
+    logger.info('Loading config from command line options')
     for section, key, value in overrides:
         raw_config.setdefault(section, {})[key] = value
 
@@ -144,7 +146,18 @@ def _load(files, defaults, overrides):
 
 
 def _load_file(parser, filename):
+    if not os.path.exists(filename):
+        logger.debug(
+            'Loading config from %s failed; it does not exist', filename)
+        return
+    if not os.access(filename, os.R_OK):
+        logger.warning(
+            'Loading config from %s failed; read permission missing',
+            filename)
+        return
+
     try:
+        logger.info('Loading config from %s', filename)
         with io.open(filename, 'rb') as filehandle:
             parser.readfp(filehandle)
     except configparser.MissingSectionHeaderError as e:
@@ -164,13 +177,19 @@ def _validate(raw_config, schemas):
     # Get validated config
     config = {}
     errors = {}
+    sections = set(raw_config)
     for schema in schemas:
+        sections.discard(schema.name)
         values = raw_config.get(schema.name, {})
         result, error = schema.deserialize(values)
         if error:
             errors[schema.name] = error
         if result:
             config[schema.name] = result
+
+    for section in sections:
+        logger.debug('Ignoring unknown config section: %s', section)
+
     return config, errors
 
 

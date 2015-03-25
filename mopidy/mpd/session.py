@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import logging
 
@@ -18,10 +18,10 @@ class MpdSession(network.LineProtocol):
     encoding = protocol.ENCODING
     delimiter = r'\r?\n'
 
-    def __init__(self, connection, config=None, core=None):
+    def __init__(self, connection, config=None, core=None, uri_map=None):
         super(MpdSession, self).__init__(connection)
         self.dispatcher = dispatcher.MpdDispatcher(
-            session=self, config=config, core=core)
+            session=self, config=config, core=core, uri_map=uri_map)
 
     def on_start(self):
         logger.info('New MPD connection from [%s]:%s', self.host, self.port)

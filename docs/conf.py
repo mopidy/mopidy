@@ -2,7 +2,7 @@
 
 """Mopidy documentation build configuration file"""
 
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import os
 import sys
@@ -34,11 +34,13 @@ class Mock(object):
         elif name == 'get_user_config_dir':
             # glib.get_user_config_dir()
             return str
-        elif (name[0] == name[0].upper()
+        elif (name[0] == name[0].upper() and
+                # gst.Caps
+                not name.startswith('Caps') and
                 # gst.PadTemplate
-                and not name.startswith('PadTemplate')
+                not name.startswith('PadTemplate') and
                 # dbus.String()
-                and not name == 'String'):
+                not name == 'String'):
             return type(name, (), {})
         else:
             return Mock()
@@ -52,6 +54,7 @@ MOCK_MODULES = [
     'glib',
     'gobject',
     'gst',
+    'gst.pbutils',
     'pygst',
     'pykka',
     'pykka.actor',
@@ -111,6 +114,9 @@ modindex_common_prefix = ['mopidy.']
 
 # -- Options for HTML output --------------------------------------------------
 
+# 'sphinx_rtd_theme' is bundled with Sphinx 1.3, which we don't have when
+# building the docs as part of the Debian packages on e.g. Debian wheezy.
+# html_theme = 'sphinx_rtd_theme'
 html_theme = 'default'
 html_theme_path = ['_themes']
 html_static_path = ['_static']
@@ -154,6 +160,7 @@ man_pages = [
 extlinks = {
     'issue': ('https://github.com/mopidy/mopidy/issues/%s', '#'),
     'commit': ('https://github.com/mopidy/mopidy/commit/%s', 'commit '),
+    'js': ('https://github.com/mopidy/mopidy.js/issues/%s', 'mopidy.js#'),
     'mpris': (
         'https://github.com/mopidy/mopidy-mpris/issues/%s', 'mopidy-mpris#'),
     'discuss': ('https://discuss.mopidy.com/t/%s', 'discuss.mopidy.com/t/'),

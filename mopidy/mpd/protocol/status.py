@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import pykka
 
@@ -35,9 +35,11 @@ def currentsong(context):
         identified in status).
     """
     tl_track = context.core.playback.current_tl_track.get()
+    stream_title = context.core.playback.get_stream_title().get()
     if tl_track is not None:
         position = context.core.tracklist.index(tl_track).get()
-        return translator.track_to_mpd_format(tl_track, position=position)
+        return translator.track_to_mpd_format(
+            tl_track, position=position, stream_title=stream_title)
 
 
 @protocol.commands.add('idle', list_command=False)
@@ -173,7 +175,7 @@ def status(context):
     futures = {
         'tracklist.length': context.core.tracklist.length,
         'tracklist.version': context.core.tracklist.version,
-        'playback.volume': context.core.playback.volume,
+        'mixer.volume': context.core.mixer.get_volume(),
         'tracklist.consume': context.core.tracklist.consume,
         'tracklist.random': context.core.tracklist.random,
         'tracklist.repeat': context.core.tracklist.repeat,
@@ -287,7 +289,7 @@ def _status_time_total(futures):
 
 
 def _status_volume(futures):
-    volume = futures['playback.volume'].get()
+    volume = futures['mixer.volume'].get()
     if volume is not None:
         return volume
     else:

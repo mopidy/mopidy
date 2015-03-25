@@ -1,4 +1,4 @@
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import, absolute_import, unicode_literals
 
 import collections
 import gzip
@@ -8,12 +8,11 @@ import os
 import re
 import sys
 import tempfile
-import time
 
 import mopidy
-from mopidy import local, models
+from mopidy import compat, local, models
 from mopidy.local import search, storage, translator
-from mopidy.utils import encoding
+from mopidy.utils import encoding, timer
 
 logger = logging.getLogger(__name__)
 
@@ -109,20 +108,6 @@ class _BrowseCache(object):
         return self._cache.get(uri, {}).values()
 
 
-# TODO: make this available to other code?
-class DebugTimer(object):
-    def __init__(self, msg):
-        self.msg = msg
-        self.start = None
-
-    def __enter__(self):
-        self.start = time.time()
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        duration = (time.time() - self.start) * 1000
-        logger.debug('%s: %dms', self.msg, duration)
-
-
 class JsonLibrary(local.Library):
     name = 'json'
 
@@ -142,29 +127,63 @@ class JsonLibrary(local.Library):
 
     def load(self):
         logger.debug('Loading library: %s', self._json_file)
-        with DebugTimer('Loading tracks'):
+        with timer.time_logger('Loading tracks'):
             library = load_library(self._json_file)
             self._tracks = dict((t.uri, t) for t in library.get('tracks', []))
-        with DebugTimer('Building browse cache'):
+        with timer.time_logger('Building browse cache'):
             self._browse_cache = _BrowseCache(sorted(self._tracks.keys()))
         return len(self._tracks)
 
     def lookup(self, uri):
         try:
-            return self._tracks[uri]
+            return [self._tracks[uri]]
         except KeyError:
-            return None
+            return []
+
+    def get_distinct(self, field, query=None):
+        if field == 'artist':
+            def distinct(track):
+                return {a.name for a in track.artists}
+        elif field == 'albumartist':
+            def distinct(track):
+                album = track.album or models.Album()
+                return {a.name for a in album.artists}
+        elif field == 'album':
+            def distinct(track):
+                album = track.album or models.Album()
+                return {album.name}
+        elif field == 'composer':
+            def distinct(track):
+                return {a.name for a in track.composers}
+        elif field == 'performer':
+            def distinct(track):
+                return {a.name for a in track.performers}
+        elif field == 'date':
+            def distinct(track):
+                return {track.date}
+        elif field == 'genre':
+            def distinct(track):
+                return {track.genre}
+        else:
+            return set()
+
+        distinct_result = set()
+        search_result = search.search(self._tracks.values(), query, limit=None)
+        for track in search_result.tracks:
+            distinct_result.update(distinct(track))
+        return distinct_result
 
     def search(self, query=None, limit=100, offset=0, uris=None, exact=False):
         tracks = self._tracks.values()
-        # TODO: pass limit and offset into search helpers
         if exact:
-            return search.find_exact(tracks, query=query, uris=uris)
+            return search.find_exact(
+                tracks, query=query, limit=limit, offset=offset, uris=uris)
         else:
-            return search.search(tracks, query=query, uris=uris)
+            return search.search(
+                tracks, query=query, limit=limit, offset=offset, uris=uris)
 
     def begin(self):
-        return self._tracks.itervalues()
+        return compat.itervalues(self._tracks)
 
     def add(self, track):
         self._tracks[track.uri] = track

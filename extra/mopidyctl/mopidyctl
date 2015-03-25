@@ -1,0 +1,24 @@
+#!/bin/sh
+
+SELF=$(basename $0)
+DAEMON="/usr/bin/mopidy"
+DAEMON_USER="mopidy"
+CONFIG_FILES="/usr/share/mopidy/conf.d:/etc/mopidy/mopidy.conf"
+CMD="$DAEMON --config $CONFIG_FILES $@"
+
+if [ $# -eq 0 ]; then
+    echo "Usage: $SELF [options]" 1>&2
+    echo "Examples:" 1>&2
+    echo "  $SELF --help" 1>&2
+    echo "  $SELF config" 1>&2
+    echo "  $SELF local scan" 1>&2
+    exit 1
+fi
+
+if [ $(id -u) -ne 0 ]; then
+    echo "$SELF must be run as root" 1>&2
+    exit 2
+fi
+
+echo "Running \"$CMD\" as user $DAEMON_USER" 1>&2
+su -s /bin/sh -c "$CMD" -- $DAEMON_USER

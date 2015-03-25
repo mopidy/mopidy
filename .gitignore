@@ -13,8 +13,7 @@ cover/
 coverage.xml
 dist/
 docs/_build/
-js/test/lib/
 mopidy.log*
-node_modules/
 nosetests.xml
 xunit-*.xml
+tmp/

@@ -30,17 +30,39 @@ To install, run::
     pip install Mopidy-API-Explorer
 
 
-Mopidy-HTTP-Kuechenradio
-=========================
+Mopidy-Local-Images
+===================
 
-https://github.com/tkem/mopidy-http-kuechenradio
+https://github.com/tkem/mopidy-local-images
 
-A deliberately simple Mopidy Web client for mobile devices. Made with jQuery
-Mobile by Thomas Kemmer.
+Not a full-featured Web client, but rather a local library and Web
+extension which allows other Web clients access to album art embedded
+in local media files.
+
+.. image:: /ext/local_images.jpg
+    :width: 640
+    :height: 480
 
 To install, run::
 
-    pip install Mopidy-HTTP-Kuechenradio
+    pip install Mopidy-Local-Images
+
+
+Mopidy-Mobile
+=============
+
+https://github.com/tkem/mopidy-mobile
+
+A Mopidy Web client extension and hybrid mobile app, made with Ionic,
+AngularJS and Apache Cordova by Thomas Kemmer.
+
+.. image:: /ext/mobile.png
+    :width: 1024
+    :height: 606
+
+To install, run::
+
+    pip install Mopidy-Mobile
 
 
 Mopidy-Moped

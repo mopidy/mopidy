@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import unittest
 
@@ -8,7 +8,7 @@ from mopidy import mixer
 
 
 class MixerListenerTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.listener = mixer.MixerListener()
 
     def test_on_event_forwards_to_specific_handler(self):

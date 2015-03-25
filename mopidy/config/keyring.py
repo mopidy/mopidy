@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import logging
 
@@ -8,6 +8,8 @@ try:
     import dbus
 except ImportError:
     dbus = None
+
+from mopidy import compat
 
 
 # XXX: Hack to workaround introspection bug caused by gnome-keyring, should be
@@ -57,7 +59,7 @@ def fetch():
 
     result = []
     secrets = service.GetSecrets(items, session, byte_arrays=True)
-    for item_path, values in secrets.iteritems():
+    for item_path, values in secrets.items():
         session_path, parameters, value, content_type = values
         attrs = _item_attributes(bus, item_path)
         result.append((attrs['section'], attrs['key'], bytes(value)))
@@ -92,7 +94,7 @@ def set(section, key, value):
     if not collection:
         return False
 
-    if isinstance(value, unicode):
+    if isinstance(value, compat.text_type):
         value = value.encode('utf-8')
 
     session = service.OpenSession('plain', EMPTY_STRING)[1]
@@ -161,7 +163,7 @@ def _prompt(bus, path):
 def _item_attributes(bus, path):
     item = _interface(bus, path, 'org.freedesktop.DBus.Properties')
     result = item.Get('org.freedesktop.Secret.Item', 'Attributes')
-    return dict((bytes(k), bytes(v)) for k, v in result.iteritems())
+    return dict((bytes(k), bytes(v)) for k, v in result.items())
 
 
 def _interface(bus, path, interface):

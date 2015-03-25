@@ -1,10 +1,10 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import logging
 import os
 
 import mopidy
-from mopidy import config, ext
+from mopidy import config, ext, models
 
 logger = logging.getLogger(__name__)
 
@@ -24,11 +24,12 @@ class Extension(ext.Extension):
         schema['library'] = config.String()
         schema['media_dir'] = config.Path()
         schema['data_dir'] = config.Path()
-        schema['playlists_dir'] = config.Path()
+        schema['playlists_dir'] = config.Deprecated()
         schema['tag_cache_file'] = config.Deprecated()
         schema['scan_timeout'] = config.Integer(
             minimum=1000, maximum=1000 * 60 * 60)
         schema['scan_flush_threshold'] = config.Integer(minimum=0)
+        schema['scan_follow_symlinks'] = config.Boolean()
         schema['excluded_file_extensions'] = config.List(optional=True)
         return schema
 
@@ -69,6 +70,10 @@ class Library(object):
     #: Name of the local library implementation, must be overriden.
     name = None
 
+    #: Feature marker to indicate that you want :meth:`add()` calls to be
+    #: called with optional arguments tags and duration.
+    add_supports_tags_and_duration = False
+
     def __init__(self, config):
         self._config = config
 
@@ -83,6 +88,43 @@ class Library(object):
         :rtype: List of :class:`~mopidy.models.Ref` tracks and directories.
         """
         raise NotImplementedError
+
+    def get_distinct(self, field, query=None):
+        """
+        List distinct values for a given field from the library.
+
+        :param string field: One of ``artist``, ``albumartist``, ``album``,
+            ``composer``, ``performer``, ``date``or ``genre``.
+        :param dict query: Query to use for limiting results, see
+            :meth:`search` for details about the query format.
+        :rtype: set of values corresponding to the requested field type.
+        """
+        return set()
+
+    def get_images(self, uris):
+        """
+        Lookup the images for the given URIs.
+
+        The default implementation will simply call :meth:`lookup` and
+        try and use the album art for any tracks returned. Most local
+        libraries should replace this with something smarter or simply
+        return an empty dictionary.
+
+        :param list uris: list of URIs to find images for
+        :rtype: {uri: tuple of :class:`mopidy.models.Image`}
+        """
+        result = {}
+        for uri in uris:
+            image_uris = set()
+            tracks = self.lookup(uri)
+            # local libraries may return single track
+            if isinstance(tracks, models.Track):
+                tracks = [tracks]
+            for track in tracks:
+                if track.album and track.album.images:
+                    image_uris.update(track.album.images)
+            result[uri] = [models.Image(uri=u) for u in image_uris]
+        return result
 
     def load(self):
         """
@@ -99,11 +141,9 @@ class Library(object):
         """
         Lookup the given URI.
 
-        Unlike the core APIs, local tracks uris can only be resolved to a
-        single track.
-
         :param string uri: track URI
-        :rtype: :class:`~mopidy.models.Track`
+        :rtype: list of :class:`~mopidy.models.Track` (or single
+            :class:`~mopidy.models.Track` for backward compatibility)
         """
         raise NotImplementedError
 
@@ -136,12 +176,19 @@ class Library(object):
         """
         raise NotImplementedError
 
-    def add(self, track):
+    def add(self, track, tags=None, duration=None):
         """
-        Add the given track to library.
+        Add the given track to library. Optional args will only be added if
+        :attr:`add_supports_tags_and_duration` has been set.
 
         :param track: Track to add to the library
         :type track: :class:`~mopidy.models.Track`
+        :param tags: All the tags the scanner found for the media. See
+            :mod:`mopidy.audio.utils` for details about the tags.
+        :type tags: dictionary of tag keys with a list of values.
+        :param duration: Duration of media in milliseconds or :class:`None` if
+            unknown
+        :type duration: :class:`int` or :class:`None`
         """
         raise NotImplementedError
 

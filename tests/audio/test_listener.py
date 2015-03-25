@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import unittest
 
@@ -8,7 +8,7 @@ from mopidy import audio
 
 
 class AudioListenerTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.listener = audio.AudioListener()
 
     def test_on_event_forwards_to_specific_handler(self):
@@ -26,3 +26,12 @@ class AudioListenerTest(unittest.TestCase):
 
     def test_listener_has_default_impl_for_state_changed(self):
         self.listener.state_changed(None, None, None)
+
+    def test_listener_has_default_impl_for_stream_changed(self):
+        self.listener.stream_changed(None)
+
+    def test_listener_has_default_impl_for_position_changed(self):
+        self.listener.position_changed(None)
+
+    def test_listener_has_default_impl_for_tags_changed(self):
+        self.listener.tags_changed([])

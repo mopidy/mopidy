@@ -1,15 +1,17 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import unittest
 
 from mopidy.local import json
-from mopidy.models import Ref
+from mopidy.models import Ref, Track
+
+from tests import path_to_data_dir
 
 
 class BrowseCacheTest(unittest.TestCase):
     maxDiff = None
 
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.uris = ['local:track:foo/bar/song1',
                      'local:track:foo/bar/song2',
                      'local:track:foo/baz/song3',
@@ -38,3 +40,52 @@ class BrowseCacheTest(unittest.TestCase):
     def test_lookup_foo_baz(self):
         result = self.cache.lookup('local:directory:foo/unknown')
         self.assertEqual([], result)
+
+
+class JsonLibraryTest(unittest.TestCase):
+
+    config = {
+        'local': {
+            'media_dir': path_to_data_dir(''),
+            'data_dir': path_to_data_dir(''),
+            'playlists_dir': b'',
+            'library': 'json',
+        },
+    }
+
+    def setUp(self):  # noqa: N802
+        self.library = json.JsonLibrary(self.config)
+
+    def _create_tracks(self, count):
+        for i in range(count):
+            self.library.add(Track(uri='local:track:%d' % i))
+
+    def test_search_should_default_limit_results(self):
+        self._create_tracks(101)
+
+        result = self.library.search()
+        result_exact = self.library.search(exact=True)
+
+        self.assertEqual(len(result.tracks), 100)
+        self.assertEqual(len(result_exact.tracks), 100)
+
+    def test_search_should_limit_results(self):
+        self._create_tracks(100)
+
+        result = self.library.search(limit=35)
+        result_exact = self.library.search(exact=True, limit=35)
+
+        self.assertEqual(len(result.tracks), 35)
+        self.assertEqual(len(result_exact.tracks), 35)
+
+    def test_search_should_offset_results(self):
+        self._create_tracks(200)
+
+        expected = self.library.search(limit=110).tracks[10:]
+        expected_exact = self.library.search(exact=True, limit=110).tracks[10:]
+
+        result = self.library.search(offset=10).tracks
+        result_exact = self.library.search(offset=10, exact=True).tracks
+
+        self.assertEqual(expected, result)
+        self.assertEqual(expected_exact, result_exact)

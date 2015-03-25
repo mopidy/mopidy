@@ -86,6 +86,10 @@ See :ref:`config` for general help on configuring Mopidy.
     Number of milliseconds before giving up scanning a file and moving on to
     the next file.
 
+.. confval:: local/scan_follow_symlinks
+
+    If we should follow symlinks found in :confval:`local/media_dir`
+
 .. confval:: local/scan_flush_threshold
 
     Number of tracks to wait before telling library it should try and store

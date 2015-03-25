@@ -37,6 +37,15 @@ Manages everything related to the tracks we are currently playing.
     :members:
 
 
+History controller
+==================
+
+Keeps record of what tracks have been played.
+
+.. autoclass:: mopidy.core.HistoryController
+    :members:
+
+
 Playlists controller
 ====================
 
@@ -54,6 +63,14 @@ Manages the music library, e.g. searching for tracks to be added to a playlist.
 .. autoclass:: mopidy.core.LibraryController
     :members:
 
+
+Mixer controller
+================
+
+Manages volume and muting.
+
+.. autoclass:: mopidy.core.MixerController
+    :members:
 
 Core listener
 =============

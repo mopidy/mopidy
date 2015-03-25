@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import errno
 import socket
@@ -14,7 +14,7 @@ from tests import any_int
 
 
 class ServerTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.mock = Mock(spec=network.Server)
 
     def test_init_calls_create_server_socket(self):
@@ -38,9 +38,9 @@ class ServerTest(unittest.TestCase):
         sock.fileno.side_effect = socket.error
         self.mock.create_server_socket.return_value = sock
 
-        self.assertRaises(
-            socket.error, network.Server.__init__, self.mock, sentinel.host,
-            sentinel.port, sentinel.protocol)
+        with self.assertRaises(socket.error):
+            network.Server.__init__(
+                self.mock, sentinel.host, sentinel.port, sentinel.protocol)
 
     def test_init_stores_values_in_attributes(self):
         # This need to be a mock and no a sentinel as fileno() is called on it
@@ -68,27 +68,27 @@ class ServerTest(unittest.TestCase):
     @patch.object(network, 'create_socket', new=Mock())
     def test_create_server_socket_fails(self):
         network.create_socket.side_effect = socket.error
-        self.assertRaises(
-            socket.error, network.Server.create_server_socket, self.mock,
-            sentinel.host, sentinel.port)
+        with self.assertRaises(socket.error):
+            network.Server.create_server_socket(
+                self.mock, sentinel.host, sentinel.port)
 
     @patch.object(network, 'create_socket', new=Mock())
     def test_create_server_bind_fails(self):
         sock = network.create_socket.return_value
         sock.bind.side_effect = socket.error
 
-        self.assertRaises(
-            socket.error, network.Server.create_server_socket, self.mock,
-            sentinel.host, sentinel.port)
+        with self.assertRaises(socket.error):
+            network.Server.create_server_socket(
+                self.mock, sentinel.host, sentinel.port)
 
     @patch.object(network, 'create_socket', new=Mock())
     def test_create_server_listen_fails(self):
         sock = network.create_socket.return_value
         sock.listen.side_effect = socket.error
 
-        self.assertRaises(
-            socket.error, network.Server.create_server_socket, self.mock,
-            sentinel.host, sentinel.port)
+        with self.assertRaises(socket.error):
+            network.Server.create_server_socket(
+                self.mock, sentinel.host, sentinel.port)
 
     @patch.object(gobject, 'io_add_watch', new=Mock())
     def test_register_server_socket_sets_up_io_watch(self):
@@ -137,17 +137,16 @@ class ServerTest(unittest.TestCase):
 
         for error in (errno.EAGAIN, errno.EINTR):
             sock.accept.side_effect = socket.error(error, '')
-            self.assertRaises(
-                network.ShouldRetrySocketCall,
-                network.Server.accept_connection, self.mock)
+            with self.assertRaises(network.ShouldRetrySocketCall):
+                network.Server.accept_connection(self.mock)
 
     # FIXME decide if this should be allowed to propegate
     def test_accept_connection_unrecoverable_error(self):
         sock = Mock(spec=socket.SocketType)
         self.mock.server_socket = sock
         sock.accept.side_effect = socket.error
-        self.assertRaises(
-            socket.error, network.Server.accept_connection, self.mock)
+        with self.assertRaises(socket.error):
+            network.Server.accept_connection(self.mock)
 
     def test_maximum_connections_exceeded(self):
         self.mock.max_connections = 10

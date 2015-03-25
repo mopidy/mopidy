@@ -159,7 +159,7 @@ class that will connect the rest of the dots.
 
 ::
 
-    from __future__ import unicode_literals
+    from __future__ import absolute_import, unicode_literals
 
     import re
     from setuptools import setup, find_packages
@@ -188,11 +188,6 @@ class that will connect the rest of the dots.
             'Mopidy >= 0.14',
             'Pykka >= 1.1',
             'pysoundspot',
-        ],
-        test_suite='nose.collector',
-        tests_require=[
-            'nose',
-            'mock >= 1.0',
         ],
         entry_points={
             'mopidy.ext': [
@@ -255,7 +250,7 @@ default config in documentation without duplicating it.
 
 This is ``mopidy_soundspot/__init__.py``::
 
-    from __future__ import unicode_literals
+    from __future__ import absolute_import, unicode_literals
 
     import logging
     import os
@@ -311,12 +306,6 @@ This is ``mopidy_soundspot/__init__.py``::
             # Register a backend
             from .backend import SoundspotBackend
             registry.add('backend', SoundspotBackend)
-
-            # Register a custom GStreamer element
-            from .mixer import SoundspotMixer
-            gobject.type_register(SoundspotMixer)
-            gst.element_register(
-                SoundspotMixer, 'soundspotmixer', gst.RANK_MARGINAL)
 
             # Or nothing to register e.g. command extension
             pass
@@ -421,17 +410,6 @@ examples, see the :ref:`http-server-api` docs or explore with
 :ref:`http-explore-extension` extension.
 
 
-Example GStreamer element
-=========================
-
-If you want to extend Mopidy's GStreamer pipeline with new custom GStreamer
-elements, you'll need to register them in GStreamer before they can be used.
-
-Basically, you just implement your GStreamer element in Python and then make
-your :meth:`~mopidy.ext.Extension.setup` method register all your custom
-GStreamer elements.
-
-
 Running an extension
 ====================
 
@@ -449,7 +427,7 @@ Python conventions
 In general, it would be nice if Mopidy extensions followed the same
 :ref:`codestyle` as Mopidy itself, as they're part of the same ecosystem. Among
 other things, the code style guide explains why all the above examples start
-with ``from __future__ import unicode_literals``.
+with ``from __future__ import absolute_import, unicode_literals``.
 
 
 Use of Mopidy APIs

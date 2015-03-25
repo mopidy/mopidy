@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import json
 
@@ -153,7 +153,7 @@ class Ref(ImmutableObject):
     :param name: object name
     :type name: string
     :param type: object type
-    :type name: string
+    :type type: string
     """
 
     #: The object URI. Read-only.
@@ -210,6 +210,23 @@ class Ref(ImmutableObject):
         """Create a :class:`Ref` with ``type`` :attr:`TRACK`."""
         kwargs['type'] = Ref.TRACK
         return cls(**kwargs)
+
+
+class Image(ImmutableObject):
+    """
+    :param string uri: URI of the image
+    :param int width: Optional width of image or :class:`None`
+    :param int height: Optional height of image or :class:`None`
+    """
+
+    #: The image URI. Read-only.
+    uri = None
+
+    #: Optional width of the image or :class:`None`. Read-only.
+    width = None
+
+    #: Optional height of the image or :class:`None`. Read-only.
+    height = None
 
 
 class Artist(ImmutableObject):
@@ -308,7 +325,7 @@ class Track(ImmutableObject):
     :param date: track release date (YYYY or YYYY-MM-DD)
     :type date: string
     :param length: track length in milliseconds
-    :type length: integer
+    :type length: integer or :class:`None` if there is no duration
     :param bitrate: bitrate in kbit/s
     :type bitrate: integer
     :param comment: track comment
@@ -361,13 +378,16 @@ class Track(ImmutableObject):
     #: The MusicBrainz ID of the track. Read-only.
     musicbrainz_id = None
 
-    #: Integer representing when the track was last modified, exact meaning
-    #: depends on source of track. For local files this is the mtime, for other
-    #: backends it could be a timestamp or simply a version counter.
+    #: Integer representing when the track was last modified. Exact meaning
+    #: depends on source of track. For local files this is the modification
+    #: time in milliseconds since Unix epoch. For other backends it could be an
+    #: equivalent timestamp or simply a version counter.
     last_modified = None
 
     def __init__(self, *args, **kwargs):
-        get = lambda key: frozenset(kwargs.pop(key, None) or [])
+        def get(key):
+            return frozenset(kwargs.pop(key, None) or [])
+
         self.__dict__['artists'] = get('artists')
         self.__dict__['composers'] = get('composers')
         self.__dict__['performers'] = get('performers')

@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import unittest
 
@@ -14,6 +14,18 @@ from tests import path_to_data_dir
 class LoadConfigTest(unittest.TestCase):
     def test_load_nothing(self):
         self.assertEqual({}, config._load([], [], []))
+
+    def test_load_missing_file(self):
+        file0 = path_to_data_dir('file0.conf')
+        result = config._load([file0], [], [])
+        self.assertEqual({}, result)
+
+    @mock.patch('os.access')
+    def test_load_nonreadable_file(self, access_mock):
+        access_mock.return_value = False
+        file1 = path_to_data_dir('file1.conf')
+        result = config._load([file1], [], [])
+        self.assertEqual({}, result)
 
     def test_load_single_default(self):
         default = b'[foo]\nbar = baz'
@@ -84,7 +96,7 @@ class LoadConfigTest(unittest.TestCase):
 
 
 class ValidateTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.schema = config.ConfigSchema('foo')
         self.schema['bar'] = config.ConfigValue()
 

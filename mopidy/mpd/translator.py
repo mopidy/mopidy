@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import re
 
@@ -15,7 +15,7 @@ def normalize_path(path, relative=False):
     return '/'.join(parts)
 
 
-def track_to_mpd_format(track, position=None):
+def track_to_mpd_format(track, position=None, stream_title=None):
     """
     Format track for output to MPD client.
 
@@ -23,23 +23,27 @@ def track_to_mpd_format(track, position=None):
     :type track: :class:`mopidy.models.Track` or :class:`mopidy.models.TlTrack`
     :param position: track's position in playlist
     :type position: integer
-    :param key: if we should set key
-    :type key: boolean
-    :param mtime: if we should set mtime
-    :type mtime: boolean
+    :param stream_title: the current streams title
+    :type position: string
     :rtype: list of two-tuples
     """
     if isinstance(track, TlTrack):
         (tlid, track) = track
     else:
         (tlid, track) = (None, track)
+
     result = [
         ('file', track.uri or ''),
+        # TODO: only show length if not none, see:
+        # https://github.com/mopidy/mopidy/issues/923#issuecomment-79584110
         ('Time', track.length and (track.length // 1000) or 0),
         ('Artist', artists_to_mpd_format(track.artists)),
         ('Title', track.name or ''),
         ('Album', track.album and track.album.name or ''),
     ]
+
+    if stream_title:
+        result.append(('Name', stream_title))
 
     if track.date:
         result.append(('Date', track.date))
@@ -59,13 +63,13 @@ def track_to_mpd_format(track, position=None):
     if track.album is not None and track.album.artists:
         artists = artists_to_mpd_format(track.album.artists)
         result.append(('AlbumArtist', artists))
-        artists = filter(
-            lambda a: a.musicbrainz_id is not None, track.album.artists)
+        artists = [
+            a for a in track.album.artists if a.musicbrainz_id is not None]
         if artists:
             result.append(
                 ('MUSICBRAINZ_ALBUMARTISTID', artists[0].musicbrainz_id))
     if track.artists:
-        artists = filter(lambda a: a.musicbrainz_id is not None, track.artists)
+        artists = [a for a in track.artists if a.musicbrainz_id is not None]
         if artists:
             result.append(('MUSICBRAINZ_ARTISTID', artists[0].musicbrainz_id))
 
