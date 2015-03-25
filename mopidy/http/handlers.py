@@ -46,6 +46,7 @@ def make_jsonrpc_wrapper(core_actor):
             'core.mixer': core.MixerController,
             'core.playback': core.PlaybackController,
             'core.playlists': core.PlaylistsController,
+            'core.sleeptimer': core.SleepTimerController,
             'core.tracklist': core.TracklistController,
         })
     return jsonrpc.JsonRpcWrapper(
@@ -58,6 +59,7 @@ def make_jsonrpc_wrapper(core_actor):
             'core.mixer': core_actor.mixer,
             'core.playback': core_actor.playback,
             'core.playlists': core_actor.playlists,
+            'core.sleeptimer': core_actor.sleeptimer,
             'core.tracklist': core_actor.tracklist,
         },
         decoders=[models.model_json_decoder],

@@ -8,4 +8,5 @@ from .listener import CoreListener
 from .mixer import MixerController
 from .playback import PlaybackController, PlaybackState
 from .playlists import PlaylistsController
+from .sleeptimer import SleepTimerController
 from .tracklist import TracklistController

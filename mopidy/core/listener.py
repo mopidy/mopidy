@@ -171,3 +171,53 @@ class CoreListener(listener.Listener):
         *MAY* be implemented by actor.
         """
         pass
+
+    def sleeptimer_started(self, was_running, duration, seconds_left):
+        """
+        Called whenever the sleeptimer is started
+
+        *MAY* be implemented by actor.
+
+        :param was_running: indicates if the timer has been restarted while it
+            was already running i.e. the end time has changed
+        :type was_running: boolean
+        :param duration: the length of time in seconds until the sleep timer
+            will expire and stop playback
+        :type duration: int
+        :param seconds_left: the number of seconds left until the
+            the sleep timer expire. may be slightly different to duration
+            because of datetime calc rounding etc
+        :type seconds_left: float
+        """
+        pass
+
+    def sleeptimer_tick(self, seconds_left):
+        """
+        Called roughly every 0.5 seconds when the sleeptimer is active
+
+        *MAY* be implemented by actor.
+
+        :param seconds_left: the number of seconds left until
+            the the sleep timer expires
+        :type seconds_left: float
+        """
+        pass
+
+    def sleeptimer_expired(self):
+        """
+        Called whenever the sleeptimer has reached the end time
+            and stopped playback
+
+        *MAY* be implemented by actor.
+
+        """
+        pass
+
+    def sleeptimer_cancelled(self):
+        """
+        Called whenever the sleeptimer is running and is cancelled
+
+        *MAY* be implemented by actor.
+
+        """
+        pass
