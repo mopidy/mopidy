@@ -4,6 +4,7 @@ import glob
 import logging
 import operator
 import os
+import re
 import sys
 
 from mopidy import backend
@@ -15,6 +16,10 @@ logger = logging.getLogger(__name__)
 
 
 class M3UPlaylistsProvider(backend.PlaylistsProvider):
+
+    # TODO: currently this only handles UNIX file systems
+    _invalid_filename_chars = re.compile(r'[/]')
+
     def __init__(self, *args, **kwargs):
         super(M3UPlaylistsProvider, self).__init__(*args, **kwargs)
 
@@ -89,8 +94,10 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         file_handle.write('#EXTINF:' + str(runtime) + ',' + title + '\n')
 
     def _sanitize_m3u_name(self, name, encoding=sys.getfilesystemencoding()):
+        name = self._invalid_filename_chars.sub('|', name.strip())
+        # make sure we end up with a valid path segment
         name = name.encode(encoding, errors='replace')
-        name = os.path.basename(name)
+        name = os.path.basename(name)  # paranoia?
         name = name.decode(encoding)
         return name
 
