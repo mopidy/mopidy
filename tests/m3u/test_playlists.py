@@ -50,8 +50,8 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.assertTrue(os.path.exists(path))
 
     def test_create_sanitizes_playlist_name(self):
-        playlist = self.core.playlists.create('../../test FOO baR')
-        self.assertEqual('test FOO baR', playlist.name)
+        playlist = self.core.playlists.create('  ../../test FOO baR ')
+        self.assertEqual('..|..|test FOO baR', playlist.name)
         path = playlist_uri_to_path(playlist.uri, self.playlists_dir)
         self.assertEqual(self.playlists_dir, os.path.dirname(path))
         self.assertTrue(os.path.exists(path))
