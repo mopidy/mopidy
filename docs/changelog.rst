@@ -323,6 +323,9 @@ M3U backend
   migrate your local playlists to work with the M3U backend. (Fixes:
   :issue:`1054`, PR: :issue:`1066`)
 
+- In playlist names, replace "/", which are illegal in M3U file names,
+  with "|". (PR: :issue:`1084`)
+
 MPD frontend
 ------------
 
