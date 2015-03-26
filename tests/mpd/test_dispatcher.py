@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import unittest
+import warnings
 
 import pykka
 
@@ -20,8 +21,11 @@ class MpdDispatcherTest(unittest.TestCase):
             }
         }
         self.backend = dummy_backend.create_proxy()
-        self.core = core.Core.start(backends=[self.backend]).proxy()
         self.dispatcher = MpdDispatcher(config=config)
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            self.core = core.Core.start(backends=[self.backend]).proxy()
 
     def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()

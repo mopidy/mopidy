@@ -1,5 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
+import warnings
+
 from mopidy.models import Ref, Track
 
 from tests.mpd import protocol
@@ -247,7 +249,10 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
             'ACK [50@0] {moveid} No such song')
 
     def test_playlist_returns_same_as_playlistinfo(self):
-        playlist_response = self.send_request('playlist')
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', message='.*playlistinfo.*')
+            playlist_response = self.send_request('playlist')
+
         playlistinfo_response = self.send_request('playlistinfo')
         self.assertEqual(playlist_response, playlistinfo_response)
 

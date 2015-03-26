@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import unittest
+import warnings
 
 import mock
 
@@ -40,8 +41,11 @@ class BaseTestCase(unittest.TestCase):
         else:
             self.mixer = None
         self.backend = dummy_backend.create_proxy()
-        self.core = core.Core.start(
-            mixer=self.mixer, backends=[self.backend]).proxy()
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            self.core = core.Core.start(
+                mixer=self.mixer, backends=[self.backend]).proxy()
 
         self.uri_map = uri_mapper.MpdUriMapper(self.core)
         self.connection = MockConnection()

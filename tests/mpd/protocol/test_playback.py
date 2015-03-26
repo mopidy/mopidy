@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import unittest
+import warnings
 
 from mopidy.core import PlaybackState
 from mopidy.models import Track
@@ -200,13 +201,15 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.assertEqual(PLAYING, self.core.playback.state.get())
         self.assertInResponse('OK')
 
-        self.send_request('pause')
-        self.assertEqual(PAUSED, self.core.playback.state.get())
-        self.assertInResponse('OK')
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', message='.*pause command w/o.*')
+            self.send_request('pause')
+            self.assertEqual(PAUSED, self.core.playback.state.get())
+            self.assertInResponse('OK')
 
-        self.send_request('pause')
-        self.assertEqual(PLAYING, self.core.playback.state.get())
-        self.assertInResponse('OK')
+            self.send_request('pause')
+            self.assertEqual(PLAYING, self.core.playback.state.get())
+            self.assertInResponse('OK')
 
     def test_play_without_pos(self):
         self.core.tracklist.add([Track(uri='dummy:a')])

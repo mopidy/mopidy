@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import unittest
+import warnings
 
 import pykka
 
@@ -25,8 +26,12 @@ class StatusHandlerTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
         self.mixer = dummy_mixer.create_proxy()
         self.backend = dummy_backend.create_proxy()
-        self.core = core.Core.start(
-            mixer=self.mixer, backends=[self.backend]).proxy()
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            self.core = core.Core.start(
+                mixer=self.mixer, backends=[self.backend]).proxy()
+
         self.dispatcher = dispatcher.MpdDispatcher(core=self.core)
         self.context = self.dispatcher.context
 
