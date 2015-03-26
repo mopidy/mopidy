@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 import os
+import warnings
 
 import gobject
 
@@ -605,6 +606,8 @@ class Audio(pykka.ThreadingActor):
         .. deprecated:: 1.0
             Use :meth:`emit_data` with a :class:`None` buffer instead.
         """
+        warnings.warn('audio.emit_end_of_stream() is deprecated.',
+                      DeprecationWarning)
         self._appsrc.push(None)
 
     def set_about_to_finish_callback(self, callback):
