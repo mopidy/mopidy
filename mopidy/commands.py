@@ -38,7 +38,8 @@ def config_override_type(value):
 
 
 class _ParserError(Exception):
-    pass
+    def __init__(self, message):
+        self.message = message
 
 
 class _HelpError(Exception):
