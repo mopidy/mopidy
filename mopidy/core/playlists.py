@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 import urlparse
+import warnings
 
 import pykka
 
@@ -80,6 +81,9 @@ class PlaylistsController(object):
         .. deprecated:: 1.0
             Use :meth:`as_list` and :meth:`get_items` instead.
         """
+        warnings.warn(
+            'playlists.get_playlists() is deprecated', DeprecationWarning)
+
         playlist_refs = self.as_list()
 
         if include_tracks:
@@ -166,6 +170,8 @@ class PlaylistsController(object):
         .. deprecated:: 1.0
             Use :meth:`as_list` and filter yourself.
         """
+        warnings.warn('playlists.filter() is deprecated', DeprecationWarning)
+
         criteria = criteria or kwargs
         matches = self.playlists
         for (key, value) in criteria.iteritems():
