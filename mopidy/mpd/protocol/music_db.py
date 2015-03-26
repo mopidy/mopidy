@@ -100,7 +100,7 @@ def count(context, *args):
         query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         raise exceptions.MpdArgError('incorrect arguments')
-    results = context.core.library.find_exact(**query).get()
+    results = context.core.library.search(query=query, exact=True).get()
     result_tracks = _get_tracks(results)
     return [
         ('songs', len(result_tracks)),
@@ -141,7 +141,7 @@ def find(context, *args):
     except ValueError:
         return
 
-    results = context.core.library.find_exact(**query).get()
+    results = context.core.library.search(query=query, exact=True).get()
     result_tracks = []
     if ('artist' not in query and
             'albumartist' not in query and
@@ -168,7 +168,7 @@ def findadd(context, *args):
         query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return
-    results = context.core.library.find_exact(**query).get()
+    results = context.core.library.search(query=query, exact=True).get()
     context.core.tracklist.add(_get_tracks(results))
 
 

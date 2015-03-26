@@ -4,6 +4,7 @@ import collections
 import logging
 import operator
 import urlparse
+import warnings
 
 import pykka
 
@@ -132,6 +133,7 @@ class LibraryController(object):
         .. deprecated:: 1.0
             Use :meth:`search` with ``exact`` set.
         """
+        warnings.warn('library.find_exact() is deprecated', DeprecationWarning)
         return self.search(query=query, uris=uris, exact=True, **kwargs)
 
     def lookup(self, uri=None, uris=None):
