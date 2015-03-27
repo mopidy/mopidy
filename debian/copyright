@@ -7,7 +7,7 @@ Files: *
 Copyright: 2009-2013 Stein Magnus Jodal and contributors
 License: Apache-2.0
 
-Files: js/lib/bane-*.js
+Files: mopidy/http/data/*.js
 Copyright: 2010-2013 Christian Johansen and Stein Magnus Jodal
 License: BSD-2-clause
  Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@ License: BSD-2-clause
  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Files: js/lib/when-*.js
+Files: mopidy/http/data/*.js
 Copyright: 2011 Brian Cavalier
 License: Expat
  Permission is hereby granted, free of charge, to any person obtaining

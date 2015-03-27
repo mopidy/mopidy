@@ -1,6 +1,7 @@
 mopidy (1.0.0-2) unstable; urgency=medium
 
   * Update watch file.
+  * Update paths in copyright file.
 
  -- Stein Magnus Jodal <stein.magnus@jodal.no>  Fri, 27 Mar 2015 13:24:25 +0100
 
