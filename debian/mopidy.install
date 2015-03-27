@@ -3,3 +3,4 @@ debian/etc/mopidy.conf etc/mopidy
 debian/etc/logging.conf etc/mopidy
 extra/desktop/mopidy.desktop usr/share/applications
 extra/mopidyctl/mopidyctl usr/sbin
+extra/systemd/mopidy.service lib/systemd/system
