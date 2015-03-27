@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import os
 
@@ -24,6 +24,7 @@ class Extension(ext.Extension):
         schema['max_connections'] = config.Integer(minimum=1)
         schema['connection_timeout'] = config.Integer(minimum=1)
         schema['zeroconf'] = config.String(optional=True)
+        schema['command_blacklist'] = config.List(optional=True)
         return schema
 
     def validate_environment(self):

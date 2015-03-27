@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import errno
 import logging
@@ -199,7 +199,8 @@ class Connection(object):
         except socket.error as e:
             if e.errno in (errno.EWOULDBLOCK, errno.EINTR):
                 return data
-            self.stop('Unexpected client error: %s' % e)
+            self.stop(
+                'Unexpected client error: %s' % encoding.locale_decode(e))
             return b''
 
     def enable_timeout(self):

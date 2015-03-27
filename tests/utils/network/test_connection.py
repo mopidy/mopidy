@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import errno
 import logging
@@ -17,7 +17,7 @@ from tests import any_int, any_unicode
 
 
 class ConnectionTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.mock = Mock(spec=network.Connection)
 
     def test_init_ensure_nonblocking_io(self):

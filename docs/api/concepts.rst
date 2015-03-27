@@ -6,14 +6,15 @@ Architecture and concepts
 
 The overall architecture of Mopidy is organized around multiple frontends and
 backends. The frontends use the core API. The core actor makes multiple backends
-work as one. The backends connect to various music sources. Both the core actor
-and the backends use the audio actor to play audio and control audio volume.
+work as one. The backends connect to various music sources. The core actor use
+the mixer actor to control volume, while the backends use the audio actor to
+play audio.
 
 .. digraph:: overall_architecture
 
     "Multiple frontends" -> Core
     Core -> "Multiple backends"
-    Core -> Audio
+    Core -> Mixer
     "Multiple backends" -> Audio
 
 
@@ -21,15 +22,16 @@ Frontends
 =========
 
 Frontends expose Mopidy to the external world. They can implement servers for
-protocols like MPD and MPRIS, and they can be used to update other services
-when something happens in Mopidy, like the Last.fm scrobbler frontend does. See
-:ref:`frontend-api` for more details.
+protocols like HTTP, MPD and MPRIS, and they can be used to update other
+services when something happens in Mopidy, like the Last.fm scrobbler frontend
+does. See :ref:`frontend-api` for more details.
 
 .. digraph:: frontend_architecture
 
+    "HTTP\nfrontend" -> Core
     "MPD\nfrontend" -> Core
     "MPRIS\nfrontend" -> Core
-    "Last.fm\nfrontend" -> Core
+    "Scrobbler\nfrontend" -> Core
 
 
 Core
@@ -54,6 +56,7 @@ See :ref:`core-api` for more details.
     Core -> "Library\ncontroller"
     Core -> "Playback\ncontroller"
     Core -> "Playlists\ncontroller"
+    Core -> "History\ncontroller"
 
     "Library\ncontroller" -> "Local backend"
     "Library\ncontroller" -> "Spotify backend"
@@ -93,7 +96,16 @@ Audio
 =====
 
 The audio actor is a thin wrapper around the parts of the GStreamer library we
-use. In addition to playback, it's responsible for volume control through both
-GStreamer's own volume mixers, and mixers we've created ourselves. If you
-implement an advanced backend, you may need to implement your own playback
-provider using the :ref:`audio-api`.
+use. If you implement an advanced backend, you may need to implement your own
+playback provider using the :ref:`audio-api`, but most backends can use the
+default playback provider without any changes.
+
+
+Mixer
+=====
+
+The mixer actor is responsible for volume control and muting. The default
+mixer use the audio actor to control volume in software. The alternative
+implementations are typically independent of the audio actor, but instead use
+some third party Python library or a serial interface to control other forms
+of volume controls.

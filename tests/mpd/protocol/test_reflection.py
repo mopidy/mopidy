@@ -1,16 +1,16 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 from tests.mpd import protocol
 
 
 class ReflectionHandlerTest(protocol.BaseTestCase):
     def test_config_is_not_allowed_across_the_network(self):
-        self.sendRequest('config')
+        self.send_request('config')
         self.assertEqualResponse(
             'ACK [4@0] {config} you don\'t have permission for "config"')
 
     def test_commands_returns_list_of_all_commands(self):
-        self.sendRequest('commands')
+        self.send_request('commands')
         # Check if some random commands are included
         self.assertInResponse('command: commands')
         self.assertInResponse('command: play')
@@ -28,22 +28,22 @@ class ReflectionHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_decoders(self):
-        self.sendRequest('decoders')
+        self.send_request('decoders')
         self.assertInResponse('OK')
 
     def test_notcommands_returns_only_config_and_kill_and_ok(self):
-        response = self.sendRequest('notcommands')
+        response = self.send_request('notcommands')
         self.assertEqual(3, len(response))
         self.assertInResponse('command: config')
         self.assertInResponse('command: kill')
         self.assertInResponse('OK')
 
     def test_tagtypes(self):
-        self.sendRequest('tagtypes')
+        self.send_request('tagtypes')
         self.assertInResponse('OK')
 
     def test_urlhandlers(self):
-        self.sendRequest('urlhandlers')
+        self.send_request('urlhandlers')
         self.assertInResponse('OK')
         self.assertInResponse('handler: dummy')
 
@@ -55,7 +55,7 @@ class ReflectionWhenNotAuthedTest(protocol.BaseTestCase):
         return config
 
     def test_commands_show_less_if_auth_required_and_not_authed(self):
-        self.sendRequest('commands')
+        self.send_request('commands')
         # Not requiring auth
         self.assertInResponse('command: close')
         self.assertInResponse('command: commands')
@@ -67,7 +67,7 @@ class ReflectionWhenNotAuthedTest(protocol.BaseTestCase):
         self.assertNotInResponse('command: status')
 
     def test_notcommands_returns_more_if_auth_required_and_not_authed(self):
-        self.sendRequest('notcommands')
+        self.send_request('notcommands')
         # Not requiring auth
         self.assertNotInResponse('command: close')
         self.assertNotInResponse('command: commands')

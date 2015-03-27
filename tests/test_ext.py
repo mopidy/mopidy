@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import unittest
 
@@ -6,7 +6,7 @@ from mopidy import config, ext
 
 
 class ExtensionTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.ext = ext.Extension()
 
     def test_dist_name_is_none(self):

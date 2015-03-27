@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import os
 import shutil
@@ -9,16 +9,17 @@ import unittest
 
 import glib
 
+from mopidy import compat, exceptions
 from mopidy.utils import path
 
-from tests import any_int, path_to_data_dir
+import tests
 
 
 class GetOrCreateDirTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.parent = tempfile.mkdtemp()
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         if os.path.isdir(self.parent):
             shutil.rmtree(self.parent)
 
@@ -52,11 +53,12 @@ class GetOrCreateDirTest(unittest.TestCase):
         conflicting_file = os.path.join(self.parent, b'test')
         open(conflicting_file, 'w').close()
         dir_path = os.path.join(self.parent, b'test')
-        self.assertRaises(OSError, path.get_or_create_dir, dir_path)
+        with self.assertRaises(OSError):
+            path.get_or_create_dir(dir_path)
 
     def test_create_dir_with_unicode(self):
         with self.assertRaises(ValueError):
-            dir_path = unicode(os.path.join(self.parent, b'test'))
+            dir_path = compat.text_type(os.path.join(self.parent, b'test'))
             path.get_or_create_dir(dir_path)
 
     def test_create_dir_with_none(self):
@@ -65,10 +67,10 @@ class GetOrCreateDirTest(unittest.TestCase):
 
 
 class GetOrCreateFileTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.parent = tempfile.mkdtemp()
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         if os.path.isdir(self.parent):
             shutil.rmtree(self.parent)
 
@@ -107,7 +109,7 @@ class GetOrCreateFileTest(unittest.TestCase):
 
     def test_create_dir_with_unicode_filename_throws_value_error(self):
         with self.assertRaises(ValueError):
-            file_path = unicode(os.path.join(self.parent, b'test'))
+            file_path = compat.text_type(os.path.join(self.parent, b'test'))
             path.get_or_create_file(file_path)
 
     def test_create_file_with_none_filename_throws_value_error(self):
@@ -219,36 +221,164 @@ class ExpandPathTest(unittest.TestCase):
 class FindMTimesTest(unittest.TestCase):
     maxDiff = None
 
-    def find(self, value):
-        return path.find_mtimes(path_to_data_dir(value))
+    def setUp(self):  # noqa: N802
+        self.tmpdir = tempfile.mkdtemp(b'.mopidy-tests')
 
-    def test_basic_dir(self):
-        self.assert_(self.find(''))
+    def tearDown(self):  # noqa: N802
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
 
-    def test_nonexistant_dir(self):
-        self.assertEqual(self.find('does-not-exist'), {})
+    def mkdir(self, *args):
+        name = os.path.join(self.tmpdir, *[bytes(a) for a in args])
+        os.mkdir(name)
+        return name
 
-    def test_file(self):
-        self.assertEqual({path_to_data_dir('blank.mp3'): any_int},
-                         self.find('blank.mp3'))
-
-    def test_files(self):
-        mtimes = self.find('find')
-        expected_files = [
-            b'find/foo/bar/file', b'find/foo/file', b'find/baz/file']
-        expected = {path_to_data_dir(p): any_int for p in expected_files}
-        self.assertEqual(expected, mtimes)
+    def touch(self, *args):
+        name = os.path.join(self.tmpdir, *[bytes(a) for a in args])
+        open(name, 'w').close()
+        return name
 
     def test_names_are_bytestrings(self):
-        is_bytes = lambda f: isinstance(f, bytes)
-        for name in self.find(''):
-            self.assert_(
-                is_bytes(name), '%s is not bytes object' % repr(name))
+        """We shouldn't be mixing in unicode for paths."""
+        result, errors = path.find_mtimes(tests.path_to_data_dir(''))
+        for name in result.keys() + errors.keys():
+            self.assertEqual(name, tests.IsA(bytes))
+
+    def test_nonexistent_dir(self):
+        """Non existent search roots are an error"""
+        missing = os.path.join(self.tmpdir, 'does-not-exist')
+        result, errors = path.find_mtimes(missing)
+        self.assertEqual(result, {})
+        self.assertEqual(errors, {missing: tests.IsA(exceptions.FindError)})
+
+    def test_empty_dir(self):
+        """Empty directories should not show up in results"""
+        self.mkdir('empty')
+
+        result, errors = path.find_mtimes(self.tmpdir)
+        self.assertEqual(result, {})
+        self.assertEqual(errors, {})
+
+    def test_file_as_the_root(self):
+        """Specifying a file as the root should just return the file"""
+        single = self.touch('single')
+
+        result, errors = path.find_mtimes(single)
+        self.assertEqual(result, {single: tests.any_int})
+        self.assertEqual(errors, {})
+
+    def test_nested_directories(self):
+        """Searching nested directories should find all files"""
+
+        # Setup foo/bar and baz directories
+        self.mkdir('foo')
+        self.mkdir('foo', 'bar')
+        self.mkdir('baz')
+
+        # Touch foo/file foo/bar/file and baz/file
+        foo_file = self.touch('foo', 'file')
+        foo_bar_file = self.touch('foo', 'bar', 'file')
+        baz_file = self.touch('baz', 'file')
+
+        result, errors = path.find_mtimes(self.tmpdir)
+        self.assertEqual(result, {foo_file: tests.any_int,
+                                  foo_bar_file: tests.any_int,
+                                  baz_file: tests.any_int})
+        self.assertEqual(errors, {})
+
+    def test_missing_permission_to_file(self):
+        """Missing permissions to a file is not a search error"""
+        target = self.touch('no-permission')
+        os.chmod(target, 0)
+
+        result, errors = path.find_mtimes(self.tmpdir)
+        self.assertEqual({target: tests.any_int}, result)
+        self.assertEqual({}, errors)
+
+    def test_missing_permission_to_directory(self):
+        """Missing permissions to a directory is an error"""
+        directory = self.mkdir('no-permission')
+        os.chmod(directory, 0)
+
+        result, errors = path.find_mtimes(self.tmpdir)
+        self.assertEqual({}, result)
+        self.assertEqual({directory: tests.IsA(exceptions.FindError)}, errors)
+
+    def test_symlinks_are_ignored(self):
+        """By default symlinks should be treated as an error"""
+        target = self.touch('target')
+        link = os.path.join(self.tmpdir, 'link')
+        os.symlink(target, link)
+
+        result, errors = path.find_mtimes(self.tmpdir)
+        self.assertEqual(result, {target: tests.any_int})
+        self.assertEqual(errors, {link: tests.IsA(exceptions.FindError)})
+
+    def test_symlink_to_file_as_root_is_followed(self):
+        """Passing a symlink as the root should be followed when follow=True"""
+        target = self.touch('target')
+        link = os.path.join(self.tmpdir, 'link')
+        os.symlink(target, link)
+
+        result, errors = path.find_mtimes(link, follow=True)
+        self.assertEqual({link: tests.any_int}, result)
+        self.assertEqual({}, errors)
+
+    def test_symlink_to_directory_is_followed(self):
+        pass
+
+    def test_symlink_pointing_at_itself_fails(self):
+        """Symlink pointing at itself should give as an OS error"""
+        link = os.path.join(self.tmpdir, 'link')
+        os.symlink(link, link)
+
+        result, errors = path.find_mtimes(link, follow=True)
+        self.assertEqual({}, result)
+        self.assertEqual({link: tests.IsA(exceptions.FindError)}, errors)
+
+    def test_symlink_pointing_at_parent_fails(self):
+        """We should detect a loop via the parent and give up on the branch"""
+        os.symlink(self.tmpdir, os.path.join(self.tmpdir, 'link'))
+
+        result, errors = path.find_mtimes(self.tmpdir, follow=True)
+        self.assertEqual({}, result)
+        self.assertEqual(1, len(errors))
+        self.assertEqual(tests.IsA(Exception), errors.values()[0])
+
+    def test_indirect_symlink_loop(self):
+        """More indirect loops should also be detected"""
+        # Setup tmpdir/directory/loop where loop points to tmpdir
+        directory = os.path.join(self.tmpdir, b'directory')
+        loop = os.path.join(directory, b'loop')
+
+        os.mkdir(directory)
+        os.symlink(self.tmpdir, loop)
+
+        result, errors = path.find_mtimes(self.tmpdir, follow=True)
+        self.assertEqual({}, result)
+        self.assertEqual({loop: tests.IsA(Exception)}, errors)
+
+    def test_symlink_branches_are_not_excluded(self):
+        """Using symlinks to make a file show up multiple times should work"""
+        self.mkdir('directory')
+        target = self.touch('directory', 'target')
+        link1 = os.path.join(self.tmpdir, b'link1')
+        link2 = os.path.join(self.tmpdir, b'link2')
+
+        os.symlink(target, link1)
+        os.symlink(target, link2)
+
+        expected = {target: tests.any_int,
+                    link1: tests.any_int,
+                    link2: tests.any_int}
+
+        result, errors = path.find_mtimes(self.tmpdir, follow=True)
+        self.assertEqual(expected, result)
+        self.assertEqual({}, errors)
 
 
 # TODO: kill this in favour of just os.path.getmtime + mocks
 class MtimeTest(unittest.TestCase):
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         path.mtime.undo_fake()
 
     def test_mtime_of_current_dir(self):

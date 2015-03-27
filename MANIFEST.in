@@ -9,14 +9,10 @@ include LICENSE
 include MANIFEST.in
 include tox.ini
 
-recursive-include data *
-
 recursive-include docs *
 prune docs/_build
 
-recursive-include js *
-prune js/node_modules
-prune js/test/lib
+recursive-include extra *
 
 recursive-include mopidy *.conf
 recursive-include mopidy/http/data *

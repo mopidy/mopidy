@@ -1,15 +1,17 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import os
 import shutil
 import tempfile
 import unittest
 
+import mock
+
 import pykka
 
 from mopidy import core
 from mopidy.local import actor, json
-from mopidy.models import Album, Artist, Track
+from mopidy.models import Album, Artist, Image, Track
 
 from tests import path_to_data_dir
 
@@ -71,14 +73,14 @@ class LocalLibraryProviderTest(unittest.TestCase):
         },
     }
 
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         actor.LocalBackend.libraries = [json.JsonLibrary]
         self.backend = actor.LocalBackend.start(
             config=self.config, audio=None).proxy()
         self.core = core.Core(backends=[self.backend])
         self.library = self.core.library
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
         actor.LocalBackend.libraries = []
 
@@ -127,6 +129,22 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
     def test_lookup_unknown_track(self):
         tracks = self.library.lookup('fake uri')
+        self.assertEqual(tracks, [])
+
+    # test backward compatibility with local libraries returning a
+    # single Track
+    @mock.patch.object(json.JsonLibrary, 'lookup')
+    def test_lookup_return_single_track(self, mock_lookup):
+        backend = actor.LocalBackend(config=self.config, audio=None)
+
+        mock_lookup.return_value = self.tracks[0]
+        tracks = backend.library.lookup(self.tracks[0].uri)
+        mock_lookup.assert_called_with(self.tracks[0].uri)
+        self.assertEqual(tracks, self.tracks[0:1])
+
+        mock_lookup.return_value = None
+        tracks = backend.library.lookup('fake uri')
+        mock_lookup.assert_called_with('fake uri')
         self.assertEqual(tracks, [])
 
     # TODO: move to search_test module
@@ -317,42 +335,42 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
     def test_find_exact_wrong_type(self):
-        test = lambda: self.library.find_exact(wrong=['test'])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.find_exact(wrong=['test'])
 
     def test_find_exact_with_empty_query(self):
-        test = lambda: self.library.find_exact(artist=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.find_exact(artist=[''])
 
-        test = lambda: self.library.find_exact(albumartist=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.find_exact(albumartist=[''])
 
-        test = lambda: self.library.find_exact(track_name=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.find_exact(track_name=[''])
 
-        test = lambda: self.library.find_exact(composer=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.find_exact(composer=[''])
 
-        test = lambda: self.library.find_exact(performer=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.find_exact(performer=[''])
 
-        test = lambda: self.library.find_exact(album=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.find_exact(album=[''])
 
-        test = lambda: self.library.find_exact(track_no=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.find_exact(track_no=[''])
 
-        test = lambda: self.library.find_exact(genre=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.find_exact(genre=[''])
 
-        test = lambda: self.library.find_exact(date=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.find_exact(date=[''])
 
-        test = lambda: self.library.find_exact(comment=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.find_exact(comment=[''])
 
-        test = lambda: self.library.find_exact(any=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.find_exact(any=[''])
 
     def test_search_no_hits(self):
         result = self.library.search(track_name=['unknown track'])
@@ -526,39 +544,78 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
     def test_search_wrong_type(self):
-        test = lambda: self.library.search(wrong=['test'])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.search(wrong=['test'])
 
     def test_search_with_empty_query(self):
-        test = lambda: self.library.search(artist=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.search(artist=[''])
 
-        test = lambda: self.library.search(albumartist=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.search(albumartist=[''])
 
-        test = lambda: self.library.search(composer=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.search(composer=[''])
 
-        test = lambda: self.library.search(performer=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.search(performer=[''])
 
-        test = lambda: self.library.search(track_name=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.search(track_name=[''])
 
-        test = lambda: self.library.search(album=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.search(album=[''])
 
-        test = lambda: self.library.search(genre=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.search(genre=[''])
 
-        test = lambda: self.library.search(date=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.search(date=[''])
 
-        test = lambda: self.library.search(comment=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.search(comment=[''])
 
-        test = lambda: self.library.search(uri=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.search(uri=[''])
 
-        test = lambda: self.library.search(any=[''])
-        self.assertRaises(LookupError, test)
+        with self.assertRaises(LookupError):
+            self.library.search(any=[''])
+
+    def test_default_get_images_impl_no_images(self):
+        result = self.library.get_images([track.uri for track in self.tracks])
+        self.assertEqual(result, {track.uri: tuple() for track in self.tracks})
+
+    @mock.patch.object(json.JsonLibrary, 'lookup')
+    def test_default_get_images_impl_album_images(self, mock_lookup):
+        library = actor.LocalBackend(config=self.config, audio=None).library
+
+        image = Image(uri='imageuri')
+        album = Album(images=[image.uri])
+        track = Track(uri='trackuri', album=album)
+        mock_lookup.return_value = [track]
+
+        result = library.get_images([track.uri])
+        self.assertEqual(result, {track.uri: [image]})
+
+    @mock.patch.object(json.JsonLibrary, 'lookup')
+    def test_default_get_images_impl_single_track(self, mock_lookup):
+        library = actor.LocalBackend(config=self.config, audio=None).library
+
+        image = Image(uri='imageuri')
+        album = Album(images=[image.uri])
+        track = Track(uri='trackuri', album=album)
+        mock_lookup.return_value = track
+
+        result = library.get_images([track.uri])
+        self.assertEqual(result, {track.uri: [image]})
+
+    @mock.patch.object(json.JsonLibrary, 'get_images')
+    def test_local_library_get_images(self, mock_get_images):
+        library = actor.LocalBackend(config=self.config, audio=None).library
+
+        image = Image(uri='imageuri')
+        track = Track(uri='trackuri')
+        mock_get_images.return_value = {track.uri: [image]}
+
+        result = library.get_images([track.uri])
+        self.assertEqual(result, {track.uri: [image]})

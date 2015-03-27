@@ -43,7 +43,7 @@ Options
 
 .. cmdoption:: --verbose, -v
 
-    Show more output. Repeat up to 3 times for even more.
+    Show more output. Repeat up to four times for even more.
 
 .. cmdoption:: --save-debug-log
 

@@ -1,12 +1,19 @@
 .. _debian:
 
-**************
-Debian package
-**************
+***************
+Debian packages
+***************
 
-The Mopidy Debian package is available from `apt.mopidy.com
+The Mopidy Debian package, ``mopidy``, is available from `apt.mopidy.com
 <http://apt.mopidy.com/>`__ as well as from Debian, Ubuntu and other
 Debian-based Linux distributions.
+
+Some extensions are also available from all of these sources, while others,
+like Mopidy-Spotify and its dependencies, are only available from
+apt.mopidy.com. This may either be temporary until the package is uploaded to
+Debian and with time propagates to the other distributions. It may also be more
+long term, like in the Mopidy-Spotify case where there is uncertainities around
+licensing and distribution of non-free packages.
 
 
 Installation

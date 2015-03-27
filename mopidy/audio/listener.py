@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 from mopidy import listener
 
@@ -24,6 +24,26 @@ class AudioListener(listener.Listener):
         Called whenever the end of the audio stream is reached.
 
         *MAY* be implemented by actor.
+        """
+        pass
+
+    def stream_changed(self, uri):
+        """
+        Called whenever the audio stream changes.
+
+        *MAY* be implemented by actor.
+
+        :param string uri: URI the stream has started playing.
+        """
+        pass
+
+    def position_changed(self, position):
+        """
+        Called whenever the position of the stream changes.
+
+        *MAY* be implemented by actor.
+
+        :param int position: Position in milliseconds.
         """
         pass
 
@@ -53,5 +73,23 @@ class AudioListener(listener.Listener):
         :param target_state: the intended state
         :type target_state: string from :class:`mopidy.core.PlaybackState`
             field or :class:`None` if this is a final state.
+        """
+        pass
+
+    def tags_changed(self, tags):
+        """
+        Called whenever the current audio stream's tags change.
+
+        This event signals that some track metadata has been updated. This can
+        be metadata such as artists, titles, organization, or details about the
+        actual audio such as bit-rates, numbers of channels etc.
+
+        For the available tag keys please refer to GStreamer documentation for
+        tags.
+
+        *MAY* be implemented by actor.
+
+        :param tags: The tags that have just been updated.
+        :type tags: :class:`set` of strings
         """
         pass

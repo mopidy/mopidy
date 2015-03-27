@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import logging
 
@@ -8,7 +8,6 @@ from mopidy import backend
 from mopidy.local import storage
 from mopidy.local.library import LocalLibraryProvider
 from mopidy.local.playback import LocalPlaybackProvider
-from mopidy.local.playlists import LocalPlaylistsProvider
 
 
 logger = logging.getLogger(__name__)
@@ -36,5 +35,4 @@ class LocalBackend(pykka.ThreadingActor, backend.Backend):
             logger.warning('Local library %s not found', library_name)
 
         self.playback = LocalPlaybackProvider(audio=audio, backend=self)
-        self.playlists = LocalPlaylistsProvider(backend=self)
         self.library = LocalLibraryProvider(backend=self, library=library)

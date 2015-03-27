@@ -1,5 +1,5 @@
 # Automate tasks
-fabric
+invoke
 
 # Build documentation
 sphinx
@@ -12,11 +12,10 @@ flake8-import-order
 mock
 
 # Test runners
-nose
+pytest
+pytest-cov
+pytest-xdist
 tox
-
-# Measure test's code coverage
-coverage
 
 # Check that MANIFEST.in matches Git repo contents before making a release
 check-manifest

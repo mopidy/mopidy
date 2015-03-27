@@ -1,16 +1,16 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import random
 import unittest
 
 import pykka
 
-from mopidy import audio, core
+from mopidy import core
 from mopidy.core import PlaybackState
 from mopidy.local import actor
 from mopidy.models import Playlist, TlTrack, Track
 
-from tests import path_to_data_dir
+from tests import dummy_audio, path_to_data_dir
 from tests.local import generate_song, populate_tracklist
 
 
@@ -26,8 +26,8 @@ class LocalTracklistProviderTest(unittest.TestCase):
     tracks = [
         Track(uri=generate_song(i), length=4464) for i in range(1, 4)]
 
-    def setUp(self):
-        self.audio = audio.DummyAudio.start().proxy()
+    def setUp(self):  # noqa: N802
+        self.audio = dummy_audio.create_proxy()
         self.backend = actor.LocalBackend.start(
             config=self.config, audio=self.audio).proxy()
         self.core = core.Core(mixer=None, backends=[self.backend])
@@ -36,7 +36,7 @@ class LocalTracklistProviderTest(unittest.TestCase):
 
         assert len(self.tracks) == 3, 'Need three tracks to run tests.'
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
 
     def test_length(self):
@@ -198,25 +198,25 @@ class LocalTracklistProviderTest(unittest.TestCase):
     @populate_tracklist
     def test_moving_track_outside_of_playlist(self):
         tracks = len(self.controller.tracks)
-        test = lambda: self.controller.move(0, 0, tracks + 5)
-        self.assertRaises(AssertionError, test)
+        with self.assertRaises(AssertionError):
+            self.controller.move(0, 0, tracks + 5)
 
     @populate_tracklist
     def test_move_group_outside_of_playlist(self):
         tracks = len(self.controller.tracks)
-        test = lambda: self.controller.move(0, 2, tracks + 5)
-        self.assertRaises(AssertionError, test)
+        with self.assertRaises(AssertionError):
+            self.controller.move(0, 2, tracks + 5)
 
     @populate_tracklist
     def test_move_group_out_of_range(self):
         tracks = len(self.controller.tracks)
-        test = lambda: self.controller.move(tracks + 2, tracks + 3, 0)
-        self.assertRaises(AssertionError, test)
+        with self.assertRaises(AssertionError):
+            self.controller.move(tracks + 2, tracks + 3, 0)
 
     @populate_tracklist
     def test_move_group_invalid_group(self):
-        test = lambda: self.controller.move(2, 1, 0)
-        self.assertRaises(AssertionError, test)
+        with self.assertRaises(AssertionError):
+            self.controller.move(2, 1, 0)
 
     def test_tracks_attribute_is_immutable(self):
         tracks1 = self.controller.tracks
@@ -275,14 +275,14 @@ class LocalTracklistProviderTest(unittest.TestCase):
 
     @populate_tracklist
     def test_shuffle_invalid_subset(self):
-        test = lambda: self.controller.shuffle(3, 1)
-        self.assertRaises(AssertionError, test)
+        with self.assertRaises(AssertionError):
+            self.controller.shuffle(3, 1)
 
     @populate_tracklist
     def test_shuffle_superset(self):
         tracks = len(self.controller.tracks)
-        test = lambda: self.controller.shuffle(1, tracks + 5)
-        self.assertRaises(AssertionError, test)
+        with self.assertRaises(AssertionError):
+            self.controller.shuffle(1, tracks + 5)
 
     @populate_tracklist
     def test_shuffle_open_subset(self):
@@ -310,7 +310,7 @@ class LocalTracklistProviderTest(unittest.TestCase):
     def test_version_does_not_change_when_adding_nothing(self):
         version = self.controller.version
         self.controller.add([])
-        self.assertEquals(version, self.controller.version)
+        self.assertEqual(version, self.controller.version)
 
     def test_version_increases_when_adding_something(self):
         version = self.controller.version

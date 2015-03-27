@@ -1,22 +1,23 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import logging
 import re
 import socket
 
+from mopidy import compat
 from mopidy.config import validators
-from mopidy.utils import path
+from mopidy.utils import log, path
 
 
 def decode(value):
-    if isinstance(value, unicode):
+    if isinstance(value, compat.text_type):
         return value
     # TODO: only unescape \n \t and \\?
     return value.decode('string-escape').decode('utf-8')
 
 
 def encode(value):
-    if not isinstance(value, unicode):
+    if not isinstance(value, compat.text_type):
         return value
     for char in ('\\', '\n', '\t'):  # TODO: more escapes?
         value = value.replace(char, char.encode('unicode-escape'))
@@ -24,8 +25,8 @@ def encode(value):
 
 
 class ExpandedPath(bytes):
-    def __new__(self, original, expanded):
-        return super(ExpandedPath, self).__new__(self, expanded)
+    def __new__(cls, original, expanded):
+        return super(ExpandedPath, cls).__new__(cls, expanded)
 
     def __init__(self, original, expanded):
         self.original = original
@@ -196,11 +197,22 @@ class List(ConfigValue):
         return b'\n  ' + b'\n  '.join(encode(v) for v in value if v)
 
 
+class LogColor(ConfigValue):
+    def deserialize(self, value):
+        validators.validate_choice(value.lower(), log.COLORS)
+        return value.lower()
+
+    def serialize(self, value, display=False):
+        if value.lower() in log.COLORS:
+            return value.lower()
+        return b''
+
+
 class LogLevel(ConfigValue):
     """Log level value.
 
-    Expects one of ``critical``, ``error``, ``warning``, ``info``, ``debug``
-    with any casing.
+    Expects one of ``critical``, ``error``, ``warning``, ``info``, ``debug``,
+    or ``all``, with any casing.
     """
     levels = {
         b'critical': logging.CRITICAL,
@@ -208,6 +220,7 @@ class LogLevel(ConfigValue):
         b'warning': logging.WARNING,
         b'info': logging.INFO,
         b'debug': logging.DEBUG,
+        b'all': logging.NOTSET,
     }
 
     def deserialize(self, value):
@@ -278,7 +291,7 @@ class Path(ConfigValue):
         return ExpandedPath(value, expanded)
 
     def serialize(self, value, display=False):
-        if isinstance(value, unicode):
+        if isinstance(value, compat.text_type):
             raise ValueError('paths should always be bytes')
         if isinstance(value, ExpandedPath):
             return value.original

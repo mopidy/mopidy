@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import collections
 
@@ -25,10 +25,10 @@ def _levenshtein(a, b):
     if n > m:
         return _levenshtein(b, a)
 
-    current = xrange(n + 1)
-    for i in xrange(1, m + 1):
+    current = range(n + 1)
+    for i in range(1, m + 1):
         previous, current = current, [i] + [0] * n
-        for j in xrange(1, n + 1):
+        for j in range(1, n + 1):
             add, delete = previous[j] + 1, current[j - 1] + 1
             change = previous[j - 1]
             if a[j - 1] != b[i - 1]:
@@ -94,17 +94,16 @@ class ConfigSchema(collections.OrderedDict):
         return result
 
 
-class LogLevelConfigSchema(object):
-    """Special cased schema for handling a config section with loglevels.
+class MapConfigSchema(object):
+    """Schema for handling multiple unknown keys with the same type.
 
-    Expects the config keys to be logger names and the values to be log levels
-    as understood by the :class:`LogLevel` config value. Does not sub-class
-    :class:`ConfigSchema`, but implements the same serialize/deserialize
-    interface.
+    Does not sub-class :class:`ConfigSchema`, but implements the same
+    serialize/deserialize interface.
     """
-    def __init__(self, name):
+
+    def __init__(self, name, value_type):
         self.name = name
-        self._config_value = types.LogLevel()
+        self._value_type = value_type
 
     def deserialize(self, values):
         errors = {}
@@ -112,7 +111,7 @@ class LogLevelConfigSchema(object):
 
         for key, value in values.items():
             try:
-                result[key] = self._config_value.deserialize(value)
+                result[key] = self._value_type.deserialize(value)
             except ValueError as e:  # deserialization failed
                 result[key] = None
                 errors[key] = str(e)
@@ -121,5 +120,5 @@ class LogLevelConfigSchema(object):
     def serialize(self, values, display=False):
         result = collections.OrderedDict()
         for key in sorted(values.keys()):
-            result[key] = self._config_value.serialize(values[key], display)
+            result[key] = self._value_type.serialize(values[key], display)
         return result

@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import argparse
 import unittest
@@ -35,24 +35,21 @@ class ConfigOverrideTypeTest(unittest.TestCase):
             expected, commands.config_override_type(b'section/key=  '))
 
     def test_invalid_override(self):
-        self.assertRaises(
-            argparse.ArgumentTypeError,
-            commands.config_override_type, b'section/key')
-        self.assertRaises(
-            argparse.ArgumentTypeError,
-            commands.config_override_type, b'section=')
-        self.assertRaises(
-            argparse.ArgumentTypeError,
-            commands.config_override_type, b'section')
+        with self.assertRaises(argparse.ArgumentTypeError):
+            commands.config_override_type(b'section/key')
+        with self.assertRaises(argparse.ArgumentTypeError):
+            commands.config_override_type(b'section=')
+        with self.assertRaises(argparse.ArgumentTypeError):
+            commands.config_override_type(b'section')
 
 
 class CommandParsingTest(unittest.TestCase):
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.exit_patcher = mock.patch.object(commands.Command, 'exit')
         self.exit_mock = self.exit_patcher.start()
         self.exit_mock.side_effect = SystemExit
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         self.exit_patcher.stop()
 
     def test_command_parsing_returns_namespace(self):

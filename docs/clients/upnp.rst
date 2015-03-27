@@ -37,15 +37,13 @@ There are two ways Mopidy can be made available as an UPnP MediaRenderer:
 Using Mopidy-MPRIS and Rygel, or using Mopidy-MPD and upmpdcli.
 
 
-.. _upmpdcli:
-
 upmpdcli
 --------
 
 `upmpdcli <http://www.lesbonscomptes.com/upmpdcli/>`_ is recommended, since it
-is easier to setup, and offers `OpenHome <http://www.openhome.org> ohMedia`_
-compatibility. upmpdcli exposes a UPnP MediaRenderer to the network, while
-using the MPD protocol to control Mopidy.
+is easier to setup, and offers `OpenHome 
+<http://www.openhome.org/wiki/OhMedia>`_ compatibility. upmpdcli exposes a UPnP
+MediaRenderer to the network, while using the MPD protocol to control Mopidy.
 
 1. Install upmpdcli. On Debian/Ubuntu::
 
@@ -67,8 +65,6 @@ using the MPD protocol to control Mopidy.
 
 4. A UPnP renderer should be available now.
 
-
-.. _rygel:
 
 Rygel
 -----

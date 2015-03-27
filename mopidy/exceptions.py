@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 
 class MopidyException(Exception):
@@ -24,6 +24,12 @@ class ExtensionError(MopidyException):
     pass
 
 
+class FindError(MopidyException):
+    def __init__(self, message, errno=None):
+        super(FindError, self).__init__(message, errno)
+        self.errno = errno
+
+
 class FrontendError(MopidyException):
     pass
 
@@ -33,4 +39,8 @@ class MixerError(MopidyException):
 
 
 class ScannerError(MopidyException):
+    pass
+
+
+class AudioException(MopidyException):
     pass

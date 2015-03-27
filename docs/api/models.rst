@@ -28,19 +28,54 @@ Data model relations
 
 .. digraph:: model_relations
 
-    Playlist -> Track [ label="has 0..n" ]
-    Track -> Album [ label="has 0..1" ]
-    Track -> Artist [ label="has 0..n" ]
-    Album -> Artist [ label="has 0..n" ]
+    Ref -> Album [ style="dotted", weight=1 ]
+    Ref -> Artist [ style="dotted", weight=1 ]
+    Ref -> Directory [ style="dotted", weight=1 ]
+    Ref -> Playlist [ style="dotted", weight=1 ]
+    Ref -> Track [ style="dotted", weight=1 ]
 
-    SearchResult -> Artist [ label="has 0..n" ]
-    SearchResult -> Album [ label="has 0..n" ]
-    SearchResult -> Track [ label="has 0..n" ]
+    Playlist -> Track [ label="has 0..n", weight=2 ]
+    Track -> Album [ label="has 0..1", weight=10 ]
+    Track -> Artist [ label="has 0..n", weight=10 ]
+    Album -> Artist [ label="has 0..n", weight=10 ]
+
+    Image
+
+    SearchResult -> Artist [ label="has 0..n", weight=1 ]
+    SearchResult -> Album [ label="has 0..n", weight=1 ]
+    SearchResult -> Track [ label="has 0..n", weight=1 ]
+
+    TlTrack -> Track [ label="has 1", weight=20 ]
 
 
 Data model API
 ==============
 
-.. automodule:: mopidy.models
+.. module:: mopidy.models
     :synopsis: Data model API
-    :members:
+
+.. autoclass:: mopidy.models.Ref
+
+.. autoclass:: mopidy.models.Track
+
+.. autoclass:: mopidy.models.Album
+
+.. autoclass:: mopidy.models.Artist
+
+.. autoclass:: mopidy.models.Playlist
+
+.. autoclass:: mopidy.models.Image
+
+.. autoclass:: mopidy.models.TlTrack
+
+.. autoclass:: mopidy.models.SearchResult
+
+
+Data model helpers
+==================
+
+.. autoclass:: mopidy.models.ImmutableObject
+
+.. autoclass:: mopidy.models.ModelJSONEncoder
+
+.. autofunction:: mopidy.models.model_json_decoder

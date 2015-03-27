@@ -1,16 +1,19 @@
-from __future__ import print_function, unicode_literals
+from __future__ import (
+    absolute_import, division, print_function, unicode_literals)
 
 import logging
 import os
 import time
 
-from mopidy import commands, exceptions
-from mopidy.audio import scan
+from mopidy import commands, compat, exceptions
+from mopidy.audio import scan, utils
 from mopidy.local import translator
 from mopidy.utils import path
 
 
 logger = logging.getLogger(__name__)
+
+MIN_DURATION_MS = 100  # Shortest length of track to include.
 
 
 def _get_library(args, config):
@@ -39,7 +42,7 @@ class ClearCommand(commands.Command):
         library = _get_library(args, config)
         prompt = '\nAre you sure you want to clear the library? [y/N] '
 
-        if raw_input(prompt).lower() != 'y':
+        if compat.input(prompt).lower() != 'y':
             print('Clearing library aborted.')
             return 0
 
@@ -58,7 +61,10 @@ class ScanCommand(commands.Command):
         super(ScanCommand, self).__init__()
         self.add_argument('--limit',
                           action='store', type=int, dest='limit', default=None,
-                          help='Maxmimum number of tracks to scan')
+                          help='Maximum number of tracks to scan')
+        self.add_argument('--force',
+                          action='store_true', dest='force', default=False,
+                          help='Force rescan of all media files')
 
     def run(self, args, config):
         media_dir = config['local']['media_dir']
@@ -70,23 +76,33 @@ class ScanCommand(commands.Command):
 
         library = _get_library(args, config)
 
-        uris_to_update = set()
-        uris_to_remove = set()
+        file_mtimes, file_errors = path.find_mtimes(
+            media_dir, follow=config['local']['scan_follow_symlinks'])
 
-        file_mtimes = path.find_mtimes(media_dir)
         logger.info('Found %d files in media_dir.', len(file_mtimes))
+
+        if file_errors:
+            logger.warning('Encountered %d errors while scanning media_dir.',
+                           len(file_errors))
+        for name in file_errors:
+            logger.debug('Scan error %r for %r', file_errors[name], name)
 
         num_tracks = library.load()
         logger.info('Checking %d tracks from library.', num_tracks)
 
+        uris_to_update = set()
+        uris_to_remove = set()
+        uris_in_library = set()
+
         for track in library.begin():
             abspath = translator.local_track_uri_to_path(track.uri, media_dir)
-            mtime = file_mtimes.pop(abspath, None)
+            mtime = file_mtimes.get(abspath)
             if mtime is None:
                 logger.debug('Missing file %s', track.uri)
                 uris_to_remove.add(track.uri)
-            elif mtime > track.last_modified:
+            elif mtime > track.last_modified or args.force:
                 uris_to_update.add(track.uri)
+            uris_in_library.add(track.uri)
 
         logger.info('Removing %d missing tracks.', len(uris_to_remove))
         for uri in uris_to_remove:
@@ -96,11 +112,12 @@ class ScanCommand(commands.Command):
             relpath = os.path.relpath(abspath, media_dir)
             uri = translator.path_to_local_track_uri(relpath)
 
-            if relpath.lower().endswith(excluded_file_extensions):
+            if b'/.' in relpath:
+                logger.debug('Skipped %s: Hidden directory/file.', uri)
+            elif relpath.lower().endswith(excluded_file_extensions):
                 logger.debug('Skipped %s: File extension excluded.', uri)
-                continue
-
-            uris_to_update.add(uri)
+            elif uri not in uris_in_library:
+                uris_to_update.add(uri)
 
         logger.info(
             'Found %d tracks which need to be updated.', len(uris_to_update))
@@ -116,10 +133,20 @@ class ScanCommand(commands.Command):
             try:
                 relpath = translator.local_track_uri_to_path(uri, media_dir)
                 file_uri = path.path_to_uri(os.path.join(media_dir, relpath))
-                data = scanner.scan(file_uri)
-                track = scan.audio_data_to_track(data).copy(uri=uri)
-                library.add(track)
-                logger.debug('Added %s', track.uri)
+                result = scanner.scan(file_uri)
+                tags, duration = result.tags, result.duration
+                if duration < MIN_DURATION_MS:
+                    logger.warning('Failed %s: Track shorter than %dms',
+                                   uri, MIN_DURATION_MS)
+                else:
+                    mtime = file_mtimes.get(os.path.join(media_dir, relpath))
+                    track = utils.convert_tags_to_track(tags).copy(
+                        uri=uri, length=duration, last_modified=mtime)
+                    if library.add_supports_tags_and_duration:
+                        library.add(track, tags=tags, duration=duration)
+                    else:
+                        library.add(track)
+                    logger.debug('Added %s', track.uri)
             except exceptions.ScannerError as error:
                 logger.warning('Failed %s: %s', uri, error)
 

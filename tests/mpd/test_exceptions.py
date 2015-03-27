@@ -1,10 +1,10 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import unittest
 
 from mopidy.mpd.exceptions import (
-    MpdAckError, MpdNoCommand, MpdNotImplemented, MpdPermissionError,
-    MpdSystemError, MpdUnknownCommand)
+    MpdAckError, MpdNoCommand, MpdNoExistError, MpdNotImplemented,
+    MpdPermissionError, MpdSystemError, MpdUnknownCommand)
 
 
 class MpdExceptionsTest(unittest.TestCase):
@@ -13,7 +13,7 @@ class MpdExceptionsTest(unittest.TestCase):
             try:
                 raise KeyError('Track X not found')
             except KeyError as e:
-                raise MpdAckError(e[0])
+                raise MpdAckError(e.message)
         except MpdAckError as e:
             self.assertEqual(e.message, 'Track X not found')
 
@@ -61,3 +61,11 @@ class MpdExceptionsTest(unittest.TestCase):
             self.assertEqual(
                 e.get_mpd_ack(),
                 'ACK [4@0] {foo} you don\'t have permission for "foo"')
+
+    def test_mpd_noexist_error(self):
+        try:
+            raise MpdNoExistError(command='foo')
+        except MpdNoExistError as e:
+            self.assertEqual(
+                e.get_mpd_ack(),
+                'ACK [50@0] {foo} ')

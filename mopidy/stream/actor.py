@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import fnmatch
 import logging
@@ -8,7 +8,7 @@ import urlparse
 import pykka
 
 from mopidy import audio as audio_lib, backend, exceptions
-from mopidy.audio import scan
+from mopidy.audio import scan, utils
 from mopidy.models import Track
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,8 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
 
         self.library = StreamLibraryProvider(
             backend=self, timeout=config['stream']['timeout'],
-            blacklist=config['stream']['metadata_blacklist'])
+            blacklist=config['stream']['metadata_blacklist'],
+            proxy=config['proxy'])
         self.playback = backend.PlaybackProvider(audio=audio, backend=self)
         self.playlists = None
 
@@ -29,9 +30,9 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
 
 
 class StreamLibraryProvider(backend.LibraryProvider):
-    def __init__(self, backend, timeout, blacklist):
+    def __init__(self, backend, timeout, blacklist, proxy):
         super(StreamLibraryProvider, self).__init__(backend)
-        self._scanner = scan.Scanner(min_duration=None, timeout=timeout)
+        self._scanner = scan.Scanner(timeout=timeout, proxy_config=proxy)
         self._blacklist_re = re.compile(
             r'^(%s)$' % '|'.join(fnmatch.translate(u) for u in blacklist))
 
@@ -44,8 +45,9 @@ class StreamLibraryProvider(backend.LibraryProvider):
             return [Track(uri=uri)]
 
         try:
-            data = self._scanner.scan(uri)
-            track = scan.audio_data_to_track(data)
+            result = self._scanner.scan(uri)
+            track = utils.convert_tags_to_track(result.tags).copy(
+                uri=uri, length=result.duration)
         except exceptions.ScannerError as e:
             logger.warning('Problem looking up %s: %s', uri, e)
             track = Track(uri=uri)

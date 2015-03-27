@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import absolute_import, unicode_literals
 
 import datetime
 import unittest
@@ -26,14 +26,16 @@ class TrackMpdFormatTest(unittest.TestCase):
         length=137000,
     )
 
-    def setUp(self):
+    def setUp(self):  # noqa: N802
         self.media_dir = '/dir/subdir'
         mtime.set_fake_time(1234567)
 
-    def tearDown(self):
+    def tearDown(self):  # noqa: N802
         mtime.undo_fake()
 
     def test_track_to_mpd_format_for_empty_track(self):
+        # TODO: this is likely wrong, see:
+        # https://github.com/mopidy/mopidy/issues/923#issuecomment-79584110
         result = translator.track_to_mpd_format(Track())
         self.assertIn(('file', ''), result)
         self.assertIn(('Time', 0), result)
