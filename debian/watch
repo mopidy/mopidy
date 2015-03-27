@@ -1,2 +1,3 @@
 version=3
-https://pypi.python.org/packages/source/M/Mopidy/Mopidy-(.*)\.tar\.gz
+opts=uversionmangle=s/(rc|a|b|c)/~$1/ \
+http://pypi.debian.net/Mopidy/Mopidy-(.+)\.(?:zip|tgz|tbz|txz|(?:tar\.(?:gz|bz2|xz)))

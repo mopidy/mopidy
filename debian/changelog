@@ -1,3 +1,9 @@
+mopidy (1.0.0-2) unstable; urgency=medium
+
+  * Update watch file.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Fri, 27 Mar 2015 13:24:25 +0100
+
 mopidy (1.0.0-1) unstable; urgency=medium
 
   * New upstream release.
