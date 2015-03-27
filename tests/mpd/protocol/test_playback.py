@@ -173,13 +173,19 @@ class PlaybackOptionsHandlerTest(protocol.BaseTestCase):
 
 
 class PlaybackControlHandlerTest(protocol.BaseTestCase):
+    def setUp(self):  # noqa: N802
+        super(PlaybackControlHandlerTest, self).setUp()
+        self.tracks = [Track(uri='dummy:a', length=40000),
+                       Track(uri='dummy:b', length=40000)]
+        self.backend.library.dummy_library = self.tracks
+        self.core.tracklist.add(uris=[t.uri for t in self.tracks]).get()
+
     def test_next(self):
+        self.core.tracklist.clear().get()
         self.send_request('next')
         self.assertInResponse('OK')
 
     def test_pause_off(self):
-        self.core.tracklist.add([Track(uri='dummy:a')])
-
         self.send_request('play "0"')
         self.send_request('pause "1"')
         self.send_request('pause "0"')
@@ -187,16 +193,12 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_pause_on(self):
-        self.core.tracklist.add([Track(uri='dummy:a')])
-
         self.send_request('play "0"')
         self.send_request('pause "1"')
         self.assertEqual(PAUSED, self.core.playback.state.get())
         self.assertInResponse('OK')
 
     def test_pause_toggle(self):
-        self.core.tracklist.add([Track(uri='dummy:a')])
-
         self.send_request('play "0"')
         self.assertEqual(PLAYING, self.core.playback.state.get())
         self.assertInResponse('OK')
@@ -212,36 +214,28 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
             self.assertInResponse('OK')
 
     def test_play_without_pos(self):
-        self.core.tracklist.add([Track(uri='dummy:a')])
-
         self.send_request('play')
         self.assertEqual(PLAYING, self.core.playback.state.get())
         self.assertInResponse('OK')
 
     def test_play_with_pos(self):
-        self.core.tracklist.add([Track(uri='dummy:a')])
-
         self.send_request('play "0"')
         self.assertEqual(PLAYING, self.core.playback.state.get())
         self.assertInResponse('OK')
 
     def test_play_with_pos_without_quotes(self):
-        self.core.tracklist.add([Track(uri='dummy:a')])
-
         self.send_request('play 0')
         self.assertEqual(PLAYING, self.core.playback.state.get())
         self.assertInResponse('OK')
 
     def test_play_with_pos_out_of_bounds(self):
-        self.core.tracklist.add([])
-
+        self.core.tracklist.clear().get()
         self.send_request('play "0"')
         self.assertEqual(STOPPED, self.core.playback.state.get())
         self.assertInResponse('ACK [2@0] {play} Bad song index')
 
     def test_play_minus_one_plays_first_in_playlist_if_no_current_track(self):
         self.assertEqual(self.core.playback.current_track.get(), None)
-        self.core.tracklist.add([Track(uri='dummy:a'), Track(uri='dummy:b')])
 
         self.send_request('play "-1"')
         self.assertEqual(PLAYING, self.core.playback.state.get())
@@ -250,7 +244,6 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_play_minus_one_plays_current_track_if_current_track_is_set(self):
-        self.core.tracklist.add([Track(uri='dummy:a'), Track(uri='dummy:b')])
         self.assertEqual(self.core.playback.current_track.get(), None)
         self.core.playback.play()
         self.core.playback.next()
@@ -272,7 +265,6 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_play_minus_is_ignored_if_playing(self):
-        self.core.tracklist.add([Track(uri='dummy:a', length=40000)])
         self.core.playback.seek(30000)
         self.assertGreaterEqual(
             self.core.playback.time_position.get(), 30000)
@@ -285,7 +277,6 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_play_minus_one_resumes_if_paused(self):
-        self.core.tracklist.add([Track(uri='dummy:a', length=40000)])
         self.core.playback.seek(30000)
         self.assertGreaterEqual(
             self.core.playback.time_position.get(), 30000)
@@ -300,22 +291,17 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_playid(self):
-        self.core.tracklist.add([Track(uri='dummy:a')])
-
         self.send_request('playid "0"')
         self.assertEqual(PLAYING, self.core.playback.state.get())
         self.assertInResponse('OK')
 
     def test_playid_without_quotes(self):
-        self.core.tracklist.add([Track(uri='dummy:a')])
-
         self.send_request('playid 0')
         self.assertEqual(PLAYING, self.core.playback.state.get())
         self.assertInResponse('OK')
 
     def test_playid_minus_1_plays_first_in_playlist_if_no_current_track(self):
         self.assertEqual(self.core.playback.current_track.get(), None)
-        self.core.tracklist.add([Track(uri='dummy:a'), Track(uri='dummy:b')])
 
         self.send_request('playid "-1"')
         self.assertEqual(PLAYING, self.core.playback.state.get())
@@ -324,7 +310,6 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_playid_minus_1_plays_current_track_if_current_track_is_set(self):
-        self.core.tracklist.add([Track(uri='dummy:a'), Track(uri='dummy:b')])
         self.assertEqual(self.core.playback.current_track.get(), None)
         self.core.playback.play()
         self.core.playback.next()
@@ -346,7 +331,6 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_playid_minus_is_ignored_if_playing(self):
-        self.core.tracklist.add([Track(uri='dummy:a', length=40000)])
         self.core.playback.seek(30000)
         self.assertGreaterEqual(
             self.core.playback.time_position.get(), 30000)
@@ -359,7 +343,6 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_playid_minus_one_resumes_if_paused(self):
-        self.core.tracklist.add([Track(uri='dummy:a', length=40000)])
         self.core.playback.seek(30000)
         self.assertGreaterEqual(
             self.core.playback.time_position.get(), 30000)
@@ -374,40 +357,36 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_playid_which_does_not_exist(self):
-        self.core.tracklist.add([Track(uri='dummy:a')])
-
         self.send_request('playid "12345"')
         self.assertInResponse('ACK [50@0] {playid} No such song')
 
     def test_previous(self):
+        self.core.tracklist.clear().get()
         self.send_request('previous')
         self.assertInResponse('OK')
 
     def test_seek_in_current_track(self):
-        seek_track = Track(uri='dummy:a', length=40000)
-        self.core.tracklist.add([seek_track])
         self.core.playback.play()
 
         self.send_request('seek "0" "30"')
 
-        self.assertEqual(self.core.playback.current_track.get(), seek_track)
+        current_track = self.core.playback.current_track.get()
+        self.assertEqual(current_track, self.tracks[0])
         self.assertGreaterEqual(self.core.playback.time_position, 30000)
         self.assertInResponse('OK')
 
     def test_seek_in_another_track(self):
-        seek_track = Track(uri='dummy:b', length=40000)
-        self.core.tracklist.add(
-            [Track(uri='dummy:a', length=40000), seek_track])
         self.core.playback.play()
-        self.assertNotEqual(self.core.playback.current_track.get(), seek_track)
+        current_track = self.core.playback.current_track.get()
+        self.assertNotEqual(current_track, self.tracks[1])
 
         self.send_request('seek "1" "30"')
 
-        self.assertEqual(self.core.playback.current_track.get(), seek_track)
+        current_track = self.core.playback.current_track.get()
+        self.assertEqual(current_track, self.tracks[1])
         self.assertInResponse('OK')
 
     def test_seek_without_quotes(self):
-        self.core.tracklist.add([Track(uri='dummy:a', length=40000)])
         self.core.playback.play()
 
         self.send_request('seek 0 30')
@@ -416,31 +395,27 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_seekid_in_current_track(self):
-        seek_track = Track(uri='dummy:a', length=40000)
-        self.core.tracklist.add([seek_track])
         self.core.playback.play()
 
         self.send_request('seekid "0" "30"')
 
-        self.assertEqual(self.core.playback.current_track.get(), seek_track)
+        current_track = self.core.playback.current_track.get()
+        self.assertEqual(current_track, self.tracks[0])
         self.assertGreaterEqual(
             self.core.playback.time_position.get(), 30000)
         self.assertInResponse('OK')
 
     def test_seekid_in_another_track(self):
-        seek_track = Track(uri='dummy:b', length=40000)
-        self.core.tracklist.add(
-            [Track(uri='dummy:a', length=40000), seek_track])
         self.core.playback.play()
 
         self.send_request('seekid "1" "30"')
 
-        self.assertEqual(1, self.core.playback.current_tl_track.get().tlid)
-        self.assertEqual(seek_track, self.core.playback.current_track.get())
+        current_tl_track = self.core.playback.current_tl_track.get()
+        self.assertEqual(current_tl_track.tlid, 1)
+        self.assertEqual(current_tl_track.track, self.tracks[1])
         self.assertInResponse('OK')
 
     def test_seekcur_absolute_value(self):
-        self.core.tracklist.add([Track(uri='dummy:a', length=40000)])
         self.core.playback.play()
 
         self.send_request('seekcur "30"')
@@ -449,7 +424,6 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_seekcur_positive_diff(self):
-        self.core.tracklist.add([Track(uri='dummy:a', length=40000)])
         self.core.playback.play()
         self.core.playback.seek(10000)
         self.assertGreaterEqual(self.core.playback.time_position.get(), 10000)
@@ -460,7 +434,6 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_seekcur_negative_diff(self):
-        self.core.tracklist.add([Track(uri='dummy:a', length=40000)])
         self.core.playback.play()
         self.core.playback.seek(30000)
         self.assertGreaterEqual(self.core.playback.time_position.get(), 30000)
@@ -471,6 +444,7 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_stop(self):
+        self.core.tracklist.clear().get()
         self.send_request('stop')
         self.assertEqual(STOPPED, self.core.playback.state.get())
         self.assertInResponse('OK')
