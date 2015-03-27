@@ -248,6 +248,12 @@ class LibraryController(object):
             The ``exact`` keyword argument, which replaces :meth:`find_exact`.
         """
         query = _normalize_query(query or kwargs)
+
+        if kwargs:
+            warnings.warn(
+                'library.search() with keyword argument query is deprecated',
+                DeprecationWarning)
+
         futures = {}
         for backend, backend_uris in self._get_backends_to_uris(uris).items():
             futures[backend] = backend.library.search(

@@ -413,7 +413,7 @@ def search(context, *args):
         query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return
-    results = context.core.library.search(**query).get()
+    results = context.core.library.search(query).get()
     artists = [_artist_as_track(a) for a in _get_artists(results)]
     albums = [_album_as_track(a) for a in _get_albums(results)]
     tracks = _get_tracks(results)
@@ -437,7 +437,7 @@ def searchadd(context, *args):
         query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return
-    results = context.core.library.search(**query).get()
+    results = context.core.library.search(query).get()
     context.core.tracklist.add(_get_tracks(results))
 
 
@@ -464,7 +464,7 @@ def searchaddpl(context, *args):
         query = _query_from_mpd_search_parameters(parameters, _SEARCH_MAPPING)
     except ValueError:
         return
-    results = context.core.library.search(**query).get()
+    results = context.core.library.search(query).get()
 
     uri = context.lookup_playlist_uri_from_name(playlist_name)
     playlist = uri is not None and context.core.playlists.lookup(uri).get()
