@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import collections
 import logging
 import random
+import warnings
 
 from mopidy import compat
 from mopidy.core import listener
@@ -331,6 +332,10 @@ class TracklistController(object):
         """
         assert tracks is not None or uri is not None or uris is not None, \
             'tracks, uri or uris must be provided'
+
+        if uri:
+            warnings.warn('tracklist.add() "uri" argument is deprecated.',
+                          DeprecationWarning)
 
         if tracks is None:
             if uri is not None:

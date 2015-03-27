@@ -22,7 +22,7 @@ def add(context, uri):
     if not uri.strip('/'):
         return
 
-    if context.core.tracklist.add(uri=uri).get():
+    if context.core.tracklist.add(uris=[uri]).get():
         return
 
     try:
@@ -63,7 +63,8 @@ def addid(context, uri, songpos=None):
         raise exceptions.MpdNoExistError('No such song')
     if songpos is not None and songpos > context.core.tracklist.length.get():
         raise exceptions.MpdArgError('Bad song index')
-    tl_tracks = context.core.tracklist.add(uri=uri, at_position=songpos).get()
+    tl_tracks = context.core.tracklist.add(
+        uris=[uri], at_position=songpos).get()
     if not tl_tracks:
         raise exceptions.MpdNoExistError('No such song')
     return ('Id', tl_tracks[0].tlid)

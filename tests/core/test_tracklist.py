@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import unittest
+import warnings
 
 import mock
 
@@ -28,7 +29,9 @@ class TracklistTest(unittest.TestCase):
         track = Track(uri='dummy1:x', name='x')
         self.library.lookup.return_value.get.return_value = [track]
 
-        tl_tracks = self.core.tracklist.add(uri='dummy1:x')
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', r'tracklist.add.*"uri".*')
+            tl_tracks = self.core.tracklist.add(uri='dummy1:x')
 
         self.library.lookup.assert_called_once_with('dummy1:x')
         self.assertEqual(1, len(tl_tracks))
