@@ -4,7 +4,7 @@ Upstream-Contact: Stein Magnus Jodal <stein.magnus@jodal.no>
 Source: https://github.com/mopidy/mopidy
 
 Files: *
-Copyright: 2009-2013 Stein Magnus Jodal and contributors
+Copyright: 2009-2014 Stein Magnus Jodal and contributors
 License: Apache-2.0
 
 Files: mopidy/http/data/*.js
@@ -32,7 +32,7 @@ License: BSD-2-clause
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Files: mopidy/http/data/*.js
-Copyright: 2011 Brian Cavalier
+Copyright: 2010-2014 Brian Cavalier
 License: Expat
  Permission is hereby granted, free of charge, to any person obtaining
  a copy of this software and associated documentation files (the
@@ -54,7 +54,7 @@ License: Expat
  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Files: debian/*
-Copyright: 2010-2013 Stein Magnus Jodal <stein.magnus@jodal.no>
+Copyright: 2010-2014 Stein Magnus Jodal <stein.magnus@jodal.no>
 License: Apache-2.0
 
 License: Apache-2.0
