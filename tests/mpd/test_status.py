@@ -38,6 +38,10 @@ class StatusHandlerTest(unittest.TestCase):
     def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
 
+    def set_tracklist(self, track):
+        self.backend.library.dummy_library = [track]
+        self.core.tracklist.add(uris=[track.uri]).get()
+
     def test_stats_method(self):
         result = status.stats(self.context)
         self.assertIn('artists', result)
@@ -140,21 +144,22 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(result['state'], 'pause')
 
     def test_status_method_when_playlist_loaded_contains_song(self):
-        self.core.tracklist.add([Track(uri='dummy:a')])
+        self.set_tracklist(Track(uri='dummy:/a'))
+
         self.core.playback.play()
         result = dict(status.status(self.context))
         self.assertIn('song', result)
         self.assertGreaterEqual(int(result['song']), 0)
 
     def test_status_method_when_playlist_loaded_contains_tlid_as_songid(self):
-        self.core.tracklist.add([Track(uri='dummy:a')])
+        self.set_tracklist(Track(uri='dummy:/a'))
         self.core.playback.play()
         result = dict(status.status(self.context))
         self.assertIn('songid', result)
         self.assertEqual(int(result['songid']), 0)
 
     def test_status_method_when_playing_contains_time_with_no_length(self):
-        self.core.tracklist.add([Track(uri='dummy:a', length=None)])
+        self.set_tracklist(Track(uri='dummy:/a', length=None))
         self.core.playback.play()
         result = dict(status.status(self.context))
         self.assertIn('time', result)
@@ -164,7 +169,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertLessEqual(position, total)
 
     def test_status_method_when_playing_contains_time_with_length(self):
-        self.core.tracklist.add([Track(uri='dummy:a', length=10000)])
+        self.set_tracklist(Track(uri='dummy:/a', length=10000))
         self.core.playback.play()
         result = dict(status.status(self.context))
         self.assertIn('time', result)
@@ -174,7 +179,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertLessEqual(position, total)
 
     def test_status_method_when_playing_contains_elapsed(self):
-        self.core.tracklist.add([Track(uri='dummy:a', length=60000)])
+        self.set_tracklist(Track(uri='dummy:/a', length=60000))
         self.core.playback.play()
         self.core.playback.pause()
         self.core.playback.seek(59123)
@@ -183,7 +188,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(result['elapsed'], '59.123')
 
     def test_status_method_when_starting_playing_contains_elapsed_zero(self):
-        self.core.tracklist.add([Track(uri='dummy:a', length=10000)])
+        self.set_tracklist(Track(uri='dummy:/a', length=10000))
         self.core.playback.play()
         self.core.playback.pause()
         result = dict(status.status(self.context))
@@ -191,8 +196,8 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(result['elapsed'], '0.000')
 
     def test_status_method_when_playing_contains_bitrate(self):
-        self.core.tracklist.add([Track(uri='dummy:a', bitrate=320)])
+        self.set_tracklist(Track(uri='dummy:/a', bitrate=3200))
         self.core.playback.play()
         result = dict(status.status(self.context))
         self.assertIn('bitrate', result)
-        self.assertEqual(int(result['bitrate']), 320)
+        self.assertEqual(int(result['bitrate']), 3200)
