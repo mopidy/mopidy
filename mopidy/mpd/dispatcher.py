@@ -267,10 +267,10 @@ class MpdContext(object):
         given path.
 
         If ``lookup`` is true and the ``path`` is to a track, the returned
-        ``data`` is a future which will contain the
-        :class:`mopidy.models.Track` model. If ``lookup`` is false and the
-        ``path`` is to a track, the returned ``data`` will be a
-        :class:`mopidy.models.Ref` for the track.
+        ``data`` is a future which will contain the results from looking up
+        the URI with :meth:`mopidy.core.LibraryController.lookup` If ``lookup``
+        is false and the ``path`` is to a track, the returned ``data`` will be
+        a :class:`mopidy.models.Ref` for the track.
 
         For all entries that are not tracks, the returned ``data`` will be
         :class:`None`.
@@ -302,7 +302,8 @@ class MpdContext(object):
 
                 if ref.type == ref.TRACK:
                     if lookup:
-                        yield (path, self.core.library.lookup(ref.uri))
+                        # TODO: can we lookup all the refs at once now?
+                        yield (path, self.core.library.lookup(uris=[ref.uri]))
                     else:
                         yield (path, ref)
                 else:

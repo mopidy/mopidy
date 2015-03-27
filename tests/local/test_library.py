@@ -128,12 +128,13 @@ class LocalLibraryProviderTest(unittest.TestCase):
         pass  # TODO
 
     def test_lookup(self):
-        tracks = self.library.lookup(self.tracks[0].uri)
-        self.assertEqual(tracks, self.tracks[0:1])
+        uri = self.tracks[0].uri
+        result = self.library.lookup(uris=[uri])
+        self.assertEqual(result[uri], self.tracks[0:1])
 
     def test_lookup_unknown_track(self):
-        tracks = self.library.lookup('fake uri')
-        self.assertEqual(tracks, [])
+        tracks = self.library.lookup(uris=['fake uri'])
+        self.assertEqual(tracks, {'fake uri': []})
 
     # test backward compatibility with local libraries returning a
     # single Track

@@ -162,6 +162,10 @@ class LibraryController(object):
         if none_set or both_set:
             raise ValueError("One of 'uri' or 'uris' must be set")
 
+        if uri:
+            warnings.warn('library.lookup() "uri" argument is deprecated.',
+                          DeprecationWarning)
+
         if uri is not None:
             uris = [uri]
 

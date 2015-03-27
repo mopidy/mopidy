@@ -334,12 +334,12 @@ class TracklistController(object):
 
         if tracks is None:
             if uri is not None:
-                tracks = self.core.library.lookup(uri=uri)
-            elif uris is not None:
-                tracks = []
-                track_map = self.core.library.lookup(uris=uris)
-                for uri in uris:
-                    tracks.extend(track_map[uri])
+                uris = [uri]
+
+            tracks = []
+            track_map = self.core.library.lookup(uris=uris)
+            for uri in uris:
+                tracks.extend(track_map[uri])
 
         tl_tracks = []
 

@@ -149,18 +149,6 @@ class CoreLibraryTest(BaseCoreLibraryTest):
             Ref.track(uri='dummy1:track:/foo/baz.mp3', name='Baz'),
         ])
 
-    def test_lookup_selects_dummy1_backend(self):
-        self.core.library.lookup('dummy1:a')
-
-        self.library1.lookup.assert_called_once_with('dummy1:a')
-        self.assertFalse(self.library2.lookup.called)
-
-    def test_lookup_selects_dummy2_backend(self):
-        self.core.library.lookup('dummy2:a')
-
-        self.assertFalse(self.library1.lookup.called)
-        self.library2.lookup.assert_called_once_with('dummy2:a')
-
     def test_lookup_fails_with_uri_and_uris_set(self):
         with self.assertRaises(ValueError):
             self.core.library.lookup('dummy1:a', ['dummy2:a'])
@@ -171,13 +159,6 @@ class CoreLibraryTest(BaseCoreLibraryTest):
 
         result = self.core.library.lookup(uris=['dummy1:a', 'dummy2:a'])
         self.assertEqual(result, {'dummy2:a': [5678], 'dummy1:a': [1234]})
-
-    def test_lookup_uri_returns_empty_list_for_dummy3_track(self):
-        result = self.core.library.lookup('dummy3:a')
-
-        self.assertEqual(result, [])
-        self.assertFalse(self.library1.lookup.called)
-        self.assertFalse(self.library2.lookup.called)
 
     def test_lookup_uris_returns_empty_list_for_dummy3_track(self):
         result = self.core.library.lookup(uris=['dummy3:a'])
@@ -376,6 +357,37 @@ class DeprecatedFindExactCoreLibraryTest(BaseCoreLibraryTest):
 
         self.library1.search.assert_called_once_with(
             query={'any': ['foobar']}, uris=None, exact=True)
+
+
+class DeprecatedLookupCoreLibraryTest(BaseCoreLibraryTest):
+    def setUp(self):  # noqa: N802
+        super(DeprecatedLookupCoreLibraryTest, self).setUp()
+        self._warnings_filters = warnings.filters
+        warnings.filters = warnings.filters[:]
+        warnings.filterwarnings('ignore', 'library.lookup.*"uri" argument.*')
+
+    def tearDown(self):  # noqa: N802
+        super(DeprecatedLookupCoreLibraryTest, self).tearDown()
+        warnings.filters = self._warnings_filters
+
+    def test_lookup_selects_dummy1_backend(self):
+        self.core.library.lookup('dummy1:a')
+
+        self.library1.lookup.assert_called_once_with('dummy1:a')
+        self.assertFalse(self.library2.lookup.called)
+
+    def test_lookup_selects_dummy2_backend(self):
+        self.core.library.lookup('dummy2:a')
+
+        self.assertFalse(self.library1.lookup.called)
+        self.library2.lookup.assert_called_once_with('dummy2:a')
+
+    def test_lookup_uri_returns_empty_list_for_dummy3_track(self):
+        result = self.core.library.lookup('dummy3:a')
+
+        self.assertEqual(result, [])
+        self.assertFalse(self.library1.lookup.called)
+        self.assertFalse(self.library2.lookup.called)
 
 
 class LegacyFindExactToSearchLibraryTest(unittest.TestCase):

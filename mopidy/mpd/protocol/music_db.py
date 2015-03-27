@@ -331,8 +331,9 @@ def listallinfo(context, uri=None):
         if not lookup_future:
             result.append(('directory', path))
         else:
-            for track in lookup_future.get():
-                result.extend(translator.track_to_mpd_format(track))
+            for uri, tracks in lookup_future.get().items():
+                for track in tracks:
+                    result.extend(translator.track_to_mpd_format(track))
     return result
 
 
@@ -358,9 +359,9 @@ def lsinfo(context, uri=None):
         if not lookup_future:
             result.append(('directory', path.lstrip('/')))
         else:
-            tracks = lookup_future.get()
-            if tracks:
-                result.extend(translator.track_to_mpd_format(tracks[0]))
+            for uri, tracks in lookup_future.get().items():
+                if tracks:
+                    result.extend(translator.track_to_mpd_format(tracks[0]))
 
     if uri in (None, '', '/'):
         result.extend(protocol.stored_playlists.listplaylists(context))

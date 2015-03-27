@@ -29,7 +29,8 @@ def add(context, uri):
         tracks = []
         for path, lookup_future in context.browse(uri):
             if lookup_future:
-                tracks.extend(lookup_future.get())
+                for result in lookup_future.get().values():
+                    tracks.extend(result)
     except exceptions.MpdNoExistError as e:
         e.message = 'directory or file not found'
         raise
