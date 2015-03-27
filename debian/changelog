@@ -2,6 +2,7 @@ mopidy (1.0.0-1) unstable; urgency=medium
 
   * New upstream release.
   * Add gstreamer0.10-pulseaudio to Recommends.
+  * Use mopidyctl helper from upstream.
 
  -- Stein Magnus Jodal <stein.magnus@jodal.no>  Fri, 27 Mar 2015 10:58:32 +0100
 

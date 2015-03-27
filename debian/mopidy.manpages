@@ -1,2 +1,2 @@
-debian/mopidyctl.8
+extra/mopidyctl/mopidyctl.8
 docs/_build/man/*
