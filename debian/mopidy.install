@@ -1,5 +1,5 @@
 /usr/
-data/mopidy.desktop usr/share/applications
 debian/etc/mopidy.conf etc/mopidy
 debian/etc/logging.conf etc/mopidy
 debian/mopidyctl usr/sbin
+extra/desktop/mopidy.desktop usr/share/applications
