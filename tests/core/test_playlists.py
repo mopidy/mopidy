@@ -9,7 +9,7 @@ from mopidy import backend, core
 from mopidy.models import Playlist, Ref, Track
 
 
-class PlaylistsTest(unittest.TestCase):
+class BasePlaylistsTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
         self.plr1a = Ref.playlist(name='A', uri='dummy1:pl:a')
         self.plr1b = Ref.playlist(name='B', uri='dummy1:pl:b')
@@ -50,6 +50,8 @@ class PlaylistsTest(unittest.TestCase):
         self.core = core.Core(mixer=None, backends=[
             self.backend3, self.backend1, self.backend2])
 
+
+class PlaylistTest(BasePlaylistsTest):
     def test_as_list_combines_result_from_backends(self):
         result = self.core.playlists.as_list()
 

@@ -9,7 +9,7 @@ from mopidy import backend, core
 from mopidy.models import Image, Ref, SearchResult, Track
 
 
-class CoreLibraryTest(unittest.TestCase):
+class BaseCoreLibraryTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
         dummy1_root = Ref.directory(uri='dummy1:directory', name='dummy1')
         self.backend1 = mock.Mock()
@@ -38,6 +38,9 @@ class CoreLibraryTest(unittest.TestCase):
         self.core = core.Core(mixer=None, backends=[
             self.backend1, self.backend2, self.backend3])
 
+
+# TODO: split by method
+class CoreLibraryTest(BaseCoreLibraryTest):
     def test_get_images_returns_empty_dict_for_no_uris(self):
         self.assertEqual({}, self.core.library.get_images([]))
 
@@ -288,15 +291,15 @@ class CoreLibraryTest(unittest.TestCase):
             query={'any': ['foobar']}, uris=None, exact=False)
 
 
-class DeprecatedCoreLibraryTest(CoreLibraryTest):
+class DeprecatedFindExactCoreLibraryTest(BaseCoreLibraryTest):
     def setUp(self):  # noqa: N802
-        super(DeprecatedCoreLibraryTest, self).setUp()
+        super(DeprecatedFindExactCoreLibraryTest, self).setUp()
         self._warnings_filters = warnings.filters
         warnings.filters = warnings.filters[:]
         warnings.filterwarnings('ignore', '.*library.find_exact.*')
 
     def tearDown(self):  # noqa: N802
-        super(DeprecatedCoreLibraryTest, self).tearDown()
+        super(DeprecatedFindExactCoreLibraryTest, self).tearDown()
         warnings.filters = self._warnings_filters
 
     def test_find_exact_combines_results_from_all_backends(self):
