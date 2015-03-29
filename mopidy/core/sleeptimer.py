@@ -55,7 +55,7 @@ class SleepTimerController(object):
             listener.CoreListener.send(
                 'sleeptimer_cancelled')
 
-    def start(self, duration, send_tick_events=True):
+    def start(self, duration):
         old_state = self._state.running
         logger.debug('Start - state = %s, duration = %d', old_state, duration)
 
@@ -101,11 +101,6 @@ class SleepTimerController(object):
 
             return False
         else:
-            if self._state.send_tick_events:
-                listener.CoreListener.send(
-                    'sleeptimer_tick',
-                    seconds_left=self._get_seconds_left())
-
             return True
 
 
@@ -117,22 +112,19 @@ class SleeptimerState(object):
         self.timerStartTime = None
         self.timerEndTime = None
         self.duration = 0
-        self.send_tick_events = True
 
     def clear(self):
         self.running = False
         self.timerStartTime = None
         self.timerEndTime = None
         self.duration = 0
-        self.send_tick_events = True
 
-    def start(self, duration, send_tick_events=True):
+    def start(self, duration):
         self.running = True
         self.timerStartTime = datetime.datetime.now()
         self.timerEndTime = \
             self.timerStartTime + datetime.timedelta(seconds=duration)
         self.duration = duration
-        self.send_tick_events = send_tick_events
 
         logger.debug('SleepTimerState.start: running = %s, end time = %s',
                      self.running, self.timerEndTime)

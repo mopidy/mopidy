@@ -191,18 +191,6 @@ class CoreListener(listener.Listener):
         """
         pass
 
-    def sleeptimer_tick(self, seconds_left):
-        """
-        Called roughly every 0.5 seconds when the sleeptimer is active
-
-        *MAY* be implemented by actor.
-
-        :param seconds_left: the number of seconds left until
-            the the sleep timer expires
-        :type seconds_left: float
-        """
-        pass
-
     def sleeptimer_expired(self):
         """
         Called whenever the sleeptimer has reached the end time

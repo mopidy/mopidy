@@ -81,7 +81,7 @@ class SleeptimerTest(unittest.TestCase):
 
         listener_mock.reset_mock()
 
-        self.core.sleeptimer.start(1, False)
+        self.core.sleeptimer.start(1)
 
         self.assertTrue(len(listener_mock.send.mock_calls) > 0)
 
@@ -134,7 +134,6 @@ class SleeptimerTest(unittest.TestCase):
         self.assertTrue(len(listener_mock.send.mock_calls) > 0)
 
         got_start_event = False
-        got_tick_event = False
         got_end_event = False
 
         for idx in range(len(listener_mock.send.mock_calls)):
@@ -144,11 +143,8 @@ class SleeptimerTest(unittest.TestCase):
 
             if event_name[0] == 'sleeptimer_started':
                 got_start_event = True
-            if event_name[0] == 'sleeptimer_tick':
-                got_tick_event = True
             if event_name[0] == 'sleeptimer_expired':
                 got_end_event = True
 
         self.assertTrue(got_start_event)
-        self.assertTrue(got_tick_event)
         self.assertTrue(got_end_event)
