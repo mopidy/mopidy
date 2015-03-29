@@ -254,6 +254,11 @@ class LibraryController(object):
                 'library.search() with keyword argument query is deprecated',
                 DeprecationWarning)
 
+        if not query:
+            warnings.warn(
+                'library.search() with an empty "query" argument deprecated',
+                DeprecationWarning)
+
         futures = {}
         for backend, backend_uris in self._get_backends_to_uris(uris).items():
             futures[backend] = backend.library.search(
