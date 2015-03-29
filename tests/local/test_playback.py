@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import time
 import unittest
+import warnings
 
 import mock
 
@@ -55,8 +56,13 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         assert self.tracks[0].length >= 2000, \
             'First song needs to be at least 2000 miliseconds'
 
+        self._warnings_filters = warnings.filters
+        warnings.filters = warnings.filters[:]
+        warnings.filterwarnings('ignore', 'tracklist.add.*"tracks".*')
+
     def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
+        warnings.filters = self._warnings_filters
 
     def test_uri_scheme(self):
         self.assertNotIn('file', self.core.uri_schemes)

@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import random
 import unittest
+import warnings
 
 import pykka
 
@@ -36,8 +37,13 @@ class LocalTracklistProviderTest(unittest.TestCase):
 
         assert len(self.tracks) == 3, 'Need three tracks to run tests.'
 
+        self._warnings_filters = warnings.filters
+        warnings.filters = warnings.filters[:]
+        warnings.filterwarnings('ignore', 'tracklist.add.*"tracks".*')
+
     def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
+        warnings.filters = self._warnings_filters
 
     def test_length(self):
         self.assertEqual(0, len(self.controller.tl_tracks))
