@@ -104,31 +104,35 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.core.playlists.save(playlist)
         self.backend.library.dummy_search_result = SearchResult(
             tracks=[Track(uri='dummy:a', name='A')])
-        playlists = self.core.playlists.filter(name='my favs').get()
-        self.assertEqual(len(playlists), 1)
-        self.assertEqual(len(playlists[0].tracks), 2)
+
+        items = self.core.playlists.get_items(playlist.uri).get()
+        self.assertEqual(len(items), 2)
 
         self.send_request('searchaddpl "my favs" "title" "a"')
 
-        playlists = self.core.playlists.filter(name='my favs').get()
-        self.assertEqual(len(playlists), 1)
-        self.assertEqual(len(playlists[0].tracks), 3)
-        self.assertEqual(playlists[0].tracks[0].uri, 'dummy:x')
-        self.assertEqual(playlists[0].tracks[1].uri, 'dummy:y')
-        self.assertEqual(playlists[0].tracks[2].uri, 'dummy:a')
+        items = self.core.playlists.get_items(playlist.uri).get()
+        self.assertEqual(len(items), 3)
+        self.assertEqual(items[0].uri, 'dummy:x')
+        self.assertEqual(items[1].uri, 'dummy:y')
+        self.assertEqual(items[2].uri, 'dummy:a')
         self.assertInResponse('OK')
 
     def test_searchaddpl_creates_missing_playlist(self):
         self.backend.library.dummy_search_result = SearchResult(
             tracks=[Track(uri='dummy:a', name='A')])
-        self.assertEqual(
-            len(self.core.playlists.filter(name='my favs').get()), 0)
+
+        playlists = self.core.playlists.as_list().get()
+        self.assertNotIn('my favs', {p.name for p in playlists})
 
         self.send_request('searchaddpl "my favs" "title" "a"')
 
-        playlists = self.core.playlists.filter(name='my favs').get()
-        self.assertEqual(len(playlists), 1)
-        self.assertEqual(playlists[0].tracks[0].uri, 'dummy:a')
+        playlists = self.core.playlists.as_list().get()
+        playlist = {p.name: p for p in playlists}['my favs']
+
+        items = self.core.playlists.get_items(playlist.uri).get()
+
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0].uri, 'dummy:a')
         self.assertInResponse('OK')
 
     def test_listall_without_uri(self):
