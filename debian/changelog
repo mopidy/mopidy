@@ -1,3 +1,9 @@
+mopidy (1.0.0-3) unstable; urgency=medium
+
+  * Use /var/lib/mopidy/playlists as m3u/playlists_dir.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Sun, 29 Mar 2015 11:07:36 +0200
+
 mopidy (1.0.0-2) unstable; urgency=medium
 
   * Update watch file.
