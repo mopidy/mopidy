@@ -17,6 +17,8 @@ from tests import dummy_backend
 class BackendEventsTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
         self.backend = dummy_backend.create_proxy()
+        self.backend.library.dummy_library = [
+            Track(uri='dummy:a'), Track(uri='dummy:b')]
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
@@ -45,12 +47,12 @@ class BackendEventsTest(unittest.TestCase):
     def test_tracklist_add_sends_tracklist_changed_event(self, send):
         send.reset_mock()
 
-        self.core.tracklist.add([Track(uri='dummy:a')]).get()
+        self.core.tracklist.add(uris=['dummy:a']).get()
 
         self.assertEqual(send.call_args[0][0], 'tracklist_changed')
 
     def test_tracklist_clear_sends_tracklist_changed_event(self, send):
-        self.core.tracklist.add([Track(uri='dummy:a')]).get()
+        self.core.tracklist.add(uris=['dummy:a']).get()
         send.reset_mock()
 
         self.core.tracklist.clear().get()
@@ -58,8 +60,7 @@ class BackendEventsTest(unittest.TestCase):
         self.assertEqual(send.call_args[0][0], 'tracklist_changed')
 
     def test_tracklist_move_sends_tracklist_changed_event(self, send):
-        self.core.tracklist.add(
-            [Track(uri='dummy:a'), Track(uri='dummy:b')]).get()
+        self.core.tracklist.add(uris=['dummy:a', 'dummy:b']).get()
         send.reset_mock()
 
         self.core.tracklist.move(0, 1, 1).get()
@@ -67,7 +68,7 @@ class BackendEventsTest(unittest.TestCase):
         self.assertEqual(send.call_args[0][0], 'tracklist_changed')
 
     def test_tracklist_remove_sends_tracklist_changed_event(self, send):
-        self.core.tracklist.add([Track(uri='dummy:a')]).get()
+        self.core.tracklist.add(uris=['dummy:a']).get()
         send.reset_mock()
 
         self.core.tracklist.remove(uri=['dummy:a']).get()
@@ -75,8 +76,7 @@ class BackendEventsTest(unittest.TestCase):
         self.assertEqual(send.call_args[0][0], 'tracklist_changed')
 
     def test_tracklist_shuffle_sends_tracklist_changed_event(self, send):
-        self.core.tracklist.add(
-            [Track(uri='dummy:a'), Track(uri='dummy:b')]).get()
+        self.core.tracklist.add(uris=['dummy:a', 'dummy:b']).get()
         send.reset_mock()
 
         self.core.tracklist.shuffle().get()

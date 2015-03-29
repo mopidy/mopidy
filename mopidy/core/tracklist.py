@@ -333,6 +333,12 @@ class TracklistController(object):
         assert tracks is not None or uri is not None or uris is not None, \
             'tracks, uri or uris must be provided'
 
+        # TODO: assert that tracks are track instances
+
+        if tracks:
+            warnings.warn('tracklist.add() "tracks" argument is deprecated.',
+                          DeprecationWarning)
+
         if uri:
             warnings.warn('tracklist.add() "uri" argument is deprecated.',
                           DeprecationWarning)
