@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, unicode_literals
 
 import datetime
+import warnings
 
 from mopidy.mpd import exceptions, protocol, translator
 
@@ -127,7 +128,10 @@ def load(context, name, playlist_slice=slice(0, None)):
     playlist = uri is not None and context.core.playlists.lookup(uri).get()
     if not playlist:
         raise exceptions.MpdNoExistError('No such playlist')
-    context.core.tracklist.add(playlist.tracks[playlist_slice])
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore', 'tracklist.add.*"tracks".*')
+        context.core.tracklist.add(playlist.tracks[playlist_slice]).get()
 
 
 @protocol.commands.add('playlistadd')

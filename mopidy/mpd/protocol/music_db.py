@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import functools
 import itertools
+import warnings
 
 from mopidy.models import Track
 from mopidy.mpd import exceptions, protocol, translator
@@ -168,8 +169,14 @@ def findadd(context, *args):
         query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return
+
     results = context.core.library.search(query=query, exact=True).get()
-    context.core.tracklist.add(_get_tracks(results))
+
+    with warnings.catch_warnings():
+        # TODO: for now just use tracks as other wise we have to lookup the
+        # tracks we just got from the search.
+        warnings.filterwarnings('ignore', 'tracklist.add.*"tracks" argument.*')
+        context.core.tracklist.add(tracks=_get_tracks(results)).get()
 
 
 @protocol.commands.add('list')
@@ -437,8 +444,14 @@ def searchadd(context, *args):
         query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return
+
     results = context.core.library.search(query).get()
-    context.core.tracklist.add(_get_tracks(results))
+
+    with warnings.catch_warnings():
+        # TODO: for now just use tracks as other wise we have to lookup the
+        # tracks we just got from the search.
+        warnings.filterwarnings('ignore', 'tracklist.add.*"tracks".*')
+        context.core.tracklist.add(_get_tracks(results)).get()
 
 
 @protocol.commands.add('searchaddpl')

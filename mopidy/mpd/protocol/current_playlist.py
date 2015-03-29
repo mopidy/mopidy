@@ -26,18 +26,17 @@ def add(context, uri):
         return
 
     try:
-        tracks = []
-        for path, lookup_future in context.browse(uri):
-            if lookup_future:
-                for result in lookup_future.get().values():
-                    tracks.extend(result)
+        uris = []
+        for path, ref in context.browse(uri, lookup=False):
+            if ref:
+                uris.append(ref.uri)
     except exceptions.MpdNoExistError as e:
         e.message = 'directory or file not found'
         raise
 
-    if not tracks:
+    if not uris:
         raise exceptions.MpdNoExistError('directory or file not found')
-    context.core.tracklist.add(tracks=tracks)
+    context.core.tracklist.add(uris=uris).get()
 
 
 @protocol.commands.add('addid', songpos=protocol.UINT)
@@ -351,8 +350,13 @@ def swap(context, songpos1, songpos2):
     tracks.insert(songpos1, song2)
     del tracks[songpos2]
     tracks.insert(songpos2, song1)
+
+    # TODO: do we need a tracklist.replace()
     context.core.tracklist.clear()
-    context.core.tracklist.add(tracks)
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore', 'tracklist.add.*"tracks".*')
+        context.core.tracklist.add(tracks=tracks).get()
 
 
 @protocol.commands.add('swapid', tlid1=protocol.UINT, tlid2=protocol.UINT)

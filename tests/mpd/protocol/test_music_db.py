@@ -7,6 +7,8 @@ from mopidy.mpd.protocol import music_db
 
 from tests.mpd import protocol
 
+# TODO: split into more modules for faster parallel tests?
+
 
 class QueryFromMpdSearchFormatTest(unittest.TestCase):
     def test_dates_are_extracted(self):
@@ -31,6 +33,8 @@ class QueryFromMpdSearchFormatTest(unittest.TestCase):
 class QueryFromMpdListFormatTest(unittest.TestCase):
     pass  # TODO
 
+
+# TODO: why isn't core.playlists.filter getting deprecation warnings?
 
 class MusicDatabaseHandlerTest(protocol.BaseTestCase):
     def test_count(self):
