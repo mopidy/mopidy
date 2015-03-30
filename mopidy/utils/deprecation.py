@@ -21,9 +21,9 @@ _MESSAGES = {
     'core.library.lookup:uri_arg':
         'library.lookup() "uri" argument is deprecated',
     'core.library.search:kwargs_query':
-        'library.search() with keyword argument query is deprecated',
+        'library.search() with "kwargs" as query is deprecated',
     'core.library.search:empty_query':
-        'library.search() with an empty "query" argument deprecated',
+        'library.search() with empty "query" is argument deprecated',
 
     # Deprecated features in core playback:
     'core.playback.get_mute': 'playback.get_mute() is deprecated',
