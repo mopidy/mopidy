@@ -2,7 +2,6 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 import os
-import warnings
 
 import gobject
 
@@ -17,7 +16,7 @@ from mopidy import exceptions
 from mopidy.audio import playlists, utils
 from mopidy.audio.constants import PlaybackState
 from mopidy.audio.listener import AudioListener
-from mopidy.utils import process
+from mopidy.utils import deprecation, process
 
 
 logger = logging.getLogger(__name__)
@@ -606,8 +605,7 @@ class Audio(pykka.ThreadingActor):
         .. deprecated:: 1.0
             Use :meth:`emit_data` with a :class:`None` buffer instead.
         """
-        warnings.warn('audio.emit_end_of_stream() is deprecated.',
-                      DeprecationWarning)
+        deprecation.warn('audio.emit_end_of_stream')
         self._appsrc.push(None)
 
     def set_about_to_finish_callback(self, callback):

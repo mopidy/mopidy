@@ -1,8 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
-import warnings
-
 from mopidy.mpd import exceptions, protocol, translator
+from mopidy.utils import deprecation
 
 
 @protocol.commands.add('add')
@@ -163,8 +162,7 @@ def playlist(context):
 
             Do not use this, instead use ``playlistinfo``.
     """
-    warnings.warn(
-        'Do not use this, instead use playlistinfo', DeprecationWarning)
+    deprecation.warn('mpd.protocol.current_playlist.playlist')
     return playlistinfo(context)
 
 
@@ -354,8 +352,7 @@ def swap(context, songpos1, songpos2):
     # TODO: do we need a tracklist.replace()
     context.core.tracklist.clear()
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings('ignore', 'tracklist.add.*"tracks".*')
+    with deprecation.ignore('core.tracklist.add:tracks_arg'):
         context.core.tracklist.add(tracks=tracks).get()
 
 

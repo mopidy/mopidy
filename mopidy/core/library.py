@@ -4,9 +4,11 @@ import collections
 import logging
 import operator
 import urlparse
-import warnings
 
 import pykka
+
+from mopidy.utils import deprecation
+
 
 logger = logging.getLogger(__name__)
 
@@ -133,7 +135,7 @@ class LibraryController(object):
         .. deprecated:: 1.0
             Use :meth:`search` with ``exact`` set.
         """
-        warnings.warn('library.find_exact() is deprecated', DeprecationWarning)
+        deprecation.warn('core.library.find_exact')
         return self.search(query=query, uris=uris, exact=True, **kwargs)
 
     def lookup(self, uri=None, uris=None):
@@ -163,8 +165,7 @@ class LibraryController(object):
             raise ValueError("One of 'uri' or 'uris' must be set")
 
         if uri:
-            warnings.warn('library.lookup() "uri" argument is deprecated.',
-                          DeprecationWarning)
+            deprecation.warn('core.library.lookup:uri_arg')
 
         if uri is not None:
             uris = [uri]
@@ -250,14 +251,10 @@ class LibraryController(object):
         query = _normalize_query(query or kwargs)
 
         if kwargs:
-            warnings.warn(
-                'library.search() with keyword argument query is deprecated',
-                DeprecationWarning)
+            deprecation.warn('core.library.search:kwargs_query')
 
         if not query:
-            warnings.warn(
-                'library.search() with an empty "query" argument deprecated',
-                DeprecationWarning)
+            deprecation.warn('core.library.search:empty_query')
 
         futures = {}
         for backend, backend_uris in self._get_backends_to_uris(uris).items():

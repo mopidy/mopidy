@@ -2,14 +2,12 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 import urlparse
-import warnings
 
 import pykka
 
 from mopidy.core import listener
 from mopidy.models import Playlist
-from mopidy.utils.deprecation import deprecated_property
-
+from mopidy.utils import deprecation
 
 logger = logging.getLogger(__name__)
 
@@ -81,8 +79,7 @@ class PlaylistsController(object):
         .. deprecated:: 1.0
             Use :meth:`as_list` and :meth:`get_items` instead.
         """
-        warnings.warn(
-            'playlists.get_playlists() is deprecated', DeprecationWarning)
+        deprecation.warn('core.playlists.get_playlists')
 
         playlist_refs = self.as_list()
 
@@ -97,7 +94,7 @@ class PlaylistsController(object):
             return [
                 Playlist(uri=r.uri, name=r.name) for r in playlist_refs]
 
-    playlists = deprecated_property(get_playlists)
+    playlists = deprecation.deprecated_property(get_playlists)
     """
     .. deprecated:: 1.0
         Use :meth:`as_list` and :meth:`get_items` instead.
@@ -170,7 +167,7 @@ class PlaylistsController(object):
         .. deprecated:: 1.0
             Use :meth:`as_list` and filter yourself.
         """
-        warnings.warn('playlists.filter() is deprecated', DeprecationWarning)
+        deprecation.warn('core.playlists.filter')
 
         criteria = criteria or kwargs
         matches = self.playlists
