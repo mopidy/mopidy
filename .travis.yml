@@ -8,7 +8,7 @@ python:
 addons:
   apt:
     sources:
-      - mopidy
+      - mopidy-stable
     packages:
       - graphviz-dev
       - mopidy
