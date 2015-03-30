@@ -209,12 +209,6 @@ class LibraryController(object):
         """
         Search the library for tracks where ``field`` contains ``values``.
 
-        .. deprecated:: 1.0
-            Previously, if the query was empty, and the backend could support
-            it, all available tracks were returned. This has not changed, but
-            it is strongly discouraged. No new code should rely on this
-            behavior.
-
         If ``uris`` is given, the search is limited to results from within the
         URI roots. For example passing ``uris=['file:']`` will limit the search
         to the local backend.
@@ -247,6 +241,15 @@ class LibraryController(object):
 
         .. versionadded:: 1.0
             The ``exact`` keyword argument, which replaces :meth:`find_exact`.
+
+        .. deprecated:: 1.0
+            Previously, if the query was empty, and the backend could support
+            it, all available tracks were returned. This has not changed, but
+            it is strongly discouraged. No new code should rely on this
+            behavior.
+
+        .. deprecated:: 1.1
+            Providing the search query via ``kwargs`` is no longer supported.
         """
         query = _normalize_query(query or kwargs)
 
