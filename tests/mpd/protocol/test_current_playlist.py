@@ -1,8 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
-import warnings
-
 from mopidy.models import Ref, Track
+from mopidy.utils import deprecation
 
 from tests.mpd import protocol
 
@@ -233,8 +232,7 @@ class PlaylistIdCommandTest(BasePopulatedTracklistTestCase):
 
 class PlaylistInfoCommandTest(BasePopulatedTracklistTestCase):
     def test_playlist_returns_same_as_playlistinfo(self):
-        with warnings.catch_warnings():
-            warnings.filterwarnings('ignore', message='.*playlistinfo.*')
+        with deprecation.ignore('mpd.protocol.current_playlist.playlist'):
             playlist_response = self.send_request('playlist')
 
         playlistinfo_response = self.send_request('playlistinfo')

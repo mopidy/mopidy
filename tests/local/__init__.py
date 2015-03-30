@@ -1,6 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
-import warnings
+from mopidy.utils import deprecation
 
 
 def generate_song(i):
@@ -9,8 +9,7 @@ def generate_song(i):
 
 def populate_tracklist(func):
     def wrapper(self):
-        with warnings.catch_warnings():
-            warnings.filterwarnings('ignore', 'tracklist.add.*"tracks".*')
+        with deprecation.ignore('core.tracklist.add:tracks_arg'):
             self.tl_tracks = self.core.tracklist.add(self.tracks)
         return func(self)
 

@@ -1,12 +1,12 @@
 from __future__ import absolute_import, unicode_literals
 
 import unittest
-import warnings
 
 import mock
 
 from mopidy import backend, core
 from mopidy.models import Image, Ref, SearchResult, Track
+from mopidy.utils import deprecation
 
 
 class BaseCoreLibraryTest(unittest.TestCase):
@@ -273,15 +273,9 @@ class CoreLibraryTest(BaseCoreLibraryTest):
 
 
 class DeprecatedFindExactCoreLibraryTest(BaseCoreLibraryTest):
-    def setUp(self):  # noqa: N802
-        super(DeprecatedFindExactCoreLibraryTest, self).setUp()
-        self._warnings_filters = warnings.filters
-        warnings.filters = warnings.filters[:]
-        warnings.filterwarnings('ignore', '.*library.find_exact.*')
-
-    def tearDown(self):  # noqa: N802
-        super(DeprecatedFindExactCoreLibraryTest, self).tearDown()
-        warnings.filters = self._warnings_filters
+    def run(self, result=None):
+        with deprecation.ignore('core.library.find_exact'):
+            return super(DeprecatedFindExactCoreLibraryTest, self).run(result)
 
     def test_find_exact_combines_results_from_all_backends(self):
         track1 = Track(uri='dummy1:a')
@@ -360,15 +354,9 @@ class DeprecatedFindExactCoreLibraryTest(BaseCoreLibraryTest):
 
 
 class DeprecatedLookupCoreLibraryTest(BaseCoreLibraryTest):
-    def setUp(self):  # noqa: N802
-        super(DeprecatedLookupCoreLibraryTest, self).setUp()
-        self._warnings_filters = warnings.filters
-        warnings.filters = warnings.filters[:]
-        warnings.filterwarnings('ignore', 'library.lookup.*"uri" argument.*')
-
-    def tearDown(self):  # noqa: N802
-        super(DeprecatedLookupCoreLibraryTest, self).tearDown()
-        warnings.filters = self._warnings_filters
+    def run(self, result=None):
+        with deprecation.ignore('core.library.lookup:uri_arg'):
+            return super(DeprecatedLookupCoreLibraryTest, self).run(result)
 
     def test_lookup_selects_dummy1_backend(self):
         self.core.library.lookup('dummy1:a')
@@ -391,6 +379,10 @@ class DeprecatedLookupCoreLibraryTest(BaseCoreLibraryTest):
 
 
 class LegacyFindExactToSearchLibraryTest(unittest.TestCase):
+    def run(self, result=None):
+        with deprecation.ignore('core.library.find_exact'):
+            return super(LegacyFindExactToSearchLibraryTest, self).run(result)
+
     def setUp(self):  # noqa: N802
         self.backend = mock.Mock()
         self.backend.actor_ref.actor_class.__name__ = 'DummyBackend'
@@ -398,18 +390,8 @@ class LegacyFindExactToSearchLibraryTest(unittest.TestCase):
         self.backend.library = mock.Mock(spec=backend.LibraryProvider)
         self.core = core.Core(mixer=None, backends=[self.backend])
 
-        self._warnings_filters = warnings.filters
-        warnings.filters = warnings.filters[:]
-        warnings.filterwarnings('ignore', '.*library.find_exact.*')
-
-    def tearDown(self):  # noqa: N802
-        warnings.filters = self._warnings_filters
-
     def test_core_find_exact_calls_backend_search_with_exact(self):
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore')
-            self.core.library.find_exact(query={'any': ['a']})
-
+        self.core.library.find_exact(query={'any': ['a']})
         self.backend.library.search.assert_called_once_with(
             query=dict(any=['a']), uris=None, exact=True)
 

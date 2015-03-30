@@ -4,7 +4,6 @@ import os
 import shutil
 import tempfile
 import unittest
-import warnings
 
 import pykka
 
@@ -12,6 +11,7 @@ from mopidy import core
 from mopidy.m3u import actor
 from mopidy.m3u.translator import playlist_uri_to_path
 from mopidy.models import Playlist, Track
+from mopidy.utils import deprecation
 
 from tests import dummy_audio, path_to_data_dir
 from tests.m3u import generate_song
@@ -272,16 +272,10 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
 
 class DeprecatedM3UPlaylistsProviderTest(M3UPlaylistsProviderTest):
-    def setUp(self):  # noqa: N802
-        super(DeprecatedM3UPlaylistsProviderTest, self).setUp()
-        self._warnings_filters = warnings.filters
-        warnings.filters = warnings.filters[:]
-        warnings.filterwarnings('ignore', '.*filter.*')
-        warnings.filterwarnings('ignore', '.*get_playlists.*')
-
-    def tearDown(self):  # noqa: N802
-        super(DeprecatedM3UPlaylistsProviderTest, self).tearDown()
-        warnings.filters = self._warnings_filters
+    def run(self, result=None):
+        with deprecation.ignore(ids=['core.playlists.filter',
+                                     'core.playlists.get_playlists']):
+            return super(DeprecatedM3UPlaylistsProviderTest, self).run(result)
 
     def test_filter_without_criteria(self):
         self.assertEqual(self.core.playlists.get_playlists(),

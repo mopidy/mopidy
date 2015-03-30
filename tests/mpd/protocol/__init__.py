@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
 import unittest
-import warnings
 
 import mock
 
@@ -9,6 +8,7 @@ import pykka
 
 from mopidy import core
 from mopidy.mpd import session, uri_mapper
+from mopidy.utils import deprecation
 
 from tests import dummy_backend, dummy_mixer
 
@@ -42,8 +42,7 @@ class BaseTestCase(unittest.TestCase):
             self.mixer = None
         self.backend = dummy_backend.create_proxy()
 
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore')
+        with deprecation.ignore():
             self.core = core.Core.start(
                 mixer=self.mixer, backends=[self.backend]).proxy()
 

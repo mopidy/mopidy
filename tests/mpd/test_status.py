@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
 import unittest
-import warnings
 
 import pykka
 
@@ -10,6 +9,7 @@ from mopidy.core import PlaybackState
 from mopidy.models import Track
 from mopidy.mpd import dispatcher
 from mopidy.mpd.protocol import status
+from mopidy.utils import deprecation
 
 from tests import dummy_backend, dummy_mixer
 
@@ -27,8 +27,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.mixer = dummy_mixer.create_proxy()
         self.backend = dummy_backend.create_proxy()
 
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore')
+        with deprecation.ignore():
             self.core = core.Core.start(
                 mixer=self.mixer, backends=[self.backend]).proxy()
 

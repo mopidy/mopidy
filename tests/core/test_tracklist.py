@@ -1,12 +1,12 @@
 from __future__ import absolute_import, unicode_literals
 
 import unittest
-import warnings
 
 import mock
 
 from mopidy import backend, core
 from mopidy.models import Track
+from mopidy.utils import deprecation
 
 
 class TracklistTest(unittest.TestCase):
@@ -36,8 +36,7 @@ class TracklistTest(unittest.TestCase):
         self.library.lookup.reset_mock()
         self.core.tracklist.clear()
 
-        with warnings.catch_warnings():
-            warnings.filterwarnings('ignore', r'tracklist.add.*"uri".*')
+        with deprecation.ignore('core.tracklist.add:uri_arg'):
             tl_tracks = self.core.tracklist.add(uris=['dummy1:a'])
 
         self.library.lookup.assert_called_once_with('dummy1:a')

@@ -1,12 +1,12 @@
 from __future__ import absolute_import, unicode_literals
 
 import unittest
-import warnings
 
 import mock
 
 from mopidy import backend, core
 from mopidy.models import Playlist, Ref, Track
+from mopidy.utils import deprecation
 
 
 class BasePlaylistsTest(unittest.TestCase):
@@ -231,16 +231,10 @@ class PlaylistTest(BasePlaylistsTest):
 
 
 class DeprecatedFilterPlaylistsTest(BasePlaylistsTest):
-    def setUp(self):  # noqa: N802
-        super(DeprecatedFilterPlaylistsTest, self).setUp()
-        self._warnings_filters = warnings.filters
-        warnings.filters = warnings.filters[:]
-        warnings.filterwarnings('ignore', '.*filter.*')
-        warnings.filterwarnings('ignore', '.*get_playlists.*')
-
-    def tearDown(self):  # noqa: N802
-        super(DeprecatedFilterPlaylistsTest, self).tearDown()
-        warnings.filters = self._warnings_filters
+    def run(self, result=None):
+        with deprecation.ignore(ids=['core.playlists.filter',
+                                     'core.playlists.get_playlists']):
+            return super(DeprecatedFilterPlaylistsTest, self).run(result)
 
     def test_filter_returns_matching_playlists(self):
         result = self.core.playlists.filter(name='A')
@@ -254,15 +248,9 @@ class DeprecatedFilterPlaylistsTest(BasePlaylistsTest):
 
 
 class DeprecatedGetPlaylistsTest(BasePlaylistsTest):
-    def setUp(self):  # noqa: N802
-        super(DeprecatedGetPlaylistsTest, self).setUp()
-        self._warnings_filters = warnings.filters
-        warnings.filters = warnings.filters[:]
-        warnings.filterwarnings('ignore', '.*get_playlists.*')
-
-    def tearDown(self):  # noqa: N802
-        super(DeprecatedGetPlaylistsTest, self).tearDown()
-        warnings.filters = self._warnings_filters
+    def run(self, result=None):
+        with deprecation.ignore('core.playlists.get_playlists'):
+            return super(DeprecatedGetPlaylistsTest, self).run(result)
 
     def test_get_playlists_combines_result_from_backends(self):
         result = self.core.playlists.get_playlists()

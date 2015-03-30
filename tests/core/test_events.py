@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
 import unittest
-import warnings
 
 import mock
 
@@ -9,6 +8,7 @@ import pykka
 
 from mopidy import core
 from mopidy.models import Track
+from mopidy.utils import deprecation
 
 from tests import dummy_backend
 
@@ -20,8 +20,7 @@ class BackendEventsTest(unittest.TestCase):
         self.backend.library.dummy_library = [
             Track(uri='dummy:a'), Track(uri='dummy:b')]
 
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore')
+        with deprecation.ignore():
             self.core = core.Core.start(backends=[self.backend]).proxy()
 
     def tearDown(self):  # noqa: N802

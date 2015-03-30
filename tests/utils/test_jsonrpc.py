@@ -2,14 +2,13 @@ from __future__ import absolute_import, unicode_literals
 
 import json
 import unittest
-import warnings
 
 import mock
 
 import pykka
 
 from mopidy import core, models
-from mopidy.utils import jsonrpc
+from mopidy.utils import deprecation, jsonrpc
 
 from tests import dummy_backend
 
@@ -55,8 +54,7 @@ class JsonRpcTestBase(unittest.TestCase):
         self.backend = dummy_backend.create_proxy()
         self.calc = Calculator()
 
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore')
+        with deprecation.ignore():
             self.core = core.Core.start(backends=[self.backend]).proxy()
 
         self.jrw = jsonrpc.JsonRpcWrapper(

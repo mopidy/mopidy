@@ -1,10 +1,10 @@
 from __future__ import absolute_import, unicode_literals
 
 import unittest
-import warnings
 
 from mopidy.core import PlaybackState
 from mopidy.models import Track
+from mopidy.utils import deprecation
 
 from tests.mpd import protocol
 
@@ -203,8 +203,7 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.assertEqual(PLAYING, self.core.playback.state.get())
         self.assertInResponse('OK')
 
-        with warnings.catch_warnings():
-            warnings.filterwarnings('ignore', message='.*pause command w/o.*')
+        with deprecation.ignore('mpd.protocol.playback.pause:state_arg'):
             self.send_request('pause')
             self.assertEqual(PAUSED, self.core.playback.state.get())
             self.assertInResponse('OK')

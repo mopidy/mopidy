@@ -2,7 +2,6 @@ from __future__ import absolute_import, unicode_literals
 
 import random
 import unittest
-import warnings
 
 import pykka
 
@@ -10,6 +9,7 @@ from mopidy import core
 from mopidy.core import PlaybackState
 from mopidy.local import actor
 from mopidy.models import Playlist, TlTrack, Track
+from mopidy.utils import deprecation
 
 from tests import dummy_audio, path_to_data_dir
 from tests.local import generate_song, populate_tracklist
@@ -27,6 +27,10 @@ class LocalTracklistProviderTest(unittest.TestCase):
     tracks = [
         Track(uri=generate_song(i), length=4464) for i in range(1, 4)]
 
+    def run(self, result=None):
+        with deprecation.ignore('core.tracklist.add:tracks_arg'):
+            return super(LocalTracklistProviderTest, self).run(result)
+
     def setUp(self):  # noqa: N802
         self.audio = dummy_audio.create_proxy()
         self.backend = actor.LocalBackend.start(
@@ -37,13 +41,8 @@ class LocalTracklistProviderTest(unittest.TestCase):
 
         assert len(self.tracks) == 3, 'Need three tracks to run tests.'
 
-        self._warnings_filters = warnings.filters
-        warnings.filters = warnings.filters[:]
-        warnings.filterwarnings('ignore', 'tracklist.add.*"tracks".*')
-
     def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
-        warnings.filters = self._warnings_filters
 
     def test_length(self):
         self.assertEqual(0, len(self.controller.tl_tracks))
