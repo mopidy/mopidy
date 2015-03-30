@@ -338,7 +338,7 @@ def listallinfo(context, uri=None):
         if not lookup_future:
             result.append(('directory', path))
         else:
-            for uri, tracks in lookup_future.get().items():
+            for tracks in lookup_future.get().values():
                 for track in tracks:
                     result.extend(translator.track_to_mpd_format(track))
     return result
@@ -366,7 +366,7 @@ def lsinfo(context, uri=None):
         if not lookup_future:
             result.append(('directory', path.lstrip('/')))
         else:
-            for uri, tracks in lookup_future.get().items():
+            for tracks in lookup_future.get().values():
                 if tracks:
                     result.extend(translator.track_to_mpd_format(tracks[0]))
 
