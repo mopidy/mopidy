@@ -152,26 +152,12 @@ class _Appsrc(object):
 # TODO: expose this as a property on audio when #790 gets further along.
 class _Outputs(gst.Bin):
     def __init__(self):
-        gst.Bin.__init__(self)
+        gst.Bin.__init__(self, 'outputs')
 
         self._tee = gst.element_factory_make('tee')
         self.add(self._tee)
 
-        # Queue element to buy us time between the about to finish event and
-        # the actual switch, i.e. about to switch can block for longer thanks
-        # to this queue.
-        # TODO: make the min-max values a setting?
-        # TODO: this does not belong in this class.
-        queue = gst.element_factory_make('queue')
-        queue.set_property('max-size-buffers', 0)
-        queue.set_property('max-size-bytes', 0)
-        queue.set_property('max-size-time', 5 * gst.SECOND)
-        queue.set_property('min-threshold-time', 3 * gst.SECOND)
-        self.add(queue)
-
-        queue.link(self._tee)
-
-        ghost_pad = gst.GhostPad('sink', queue.get_pad('sink'))
+        ghost_pad = gst.GhostPad('sink', self._tee.get_pad('sink'))
         self.add_pad(ghost_pad)
 
         # Add an always connected fakesink which respects the clock so the tee
@@ -451,8 +437,9 @@ class Audio(pykka.ThreadingActor):
         try:
             self._setup_preferences()
             self._setup_playbin()
-            self._setup_output()
+            self._setup_outputs()
             self._setup_mixer()
+            self._setup_audio_sink()
         except gobject.GError as ex:
             logger.exception(ex)
             process.exit_process()
@@ -492,7 +479,7 @@ class Audio(pykka.ThreadingActor):
         self._signals.disconnect(self._playbin, 'source-setup')
         self._playbin.set_state(gst.STATE_NULL)
 
-    def _setup_output(self):
+    def _setup_outputs(self):
         # We don't want to use outputs for regular testing, so just install
         # an unsynced fakesink when someone asks for a 'testoutput'.
         if self._config['audio']['output'] == 'testoutput':
@@ -505,11 +492,32 @@ class Audio(pykka.ThreadingActor):
                 process.exit_process()  # TODO: move this up the chain
 
         self._handler.setup_event_handling(self._outputs.get_pad('sink'))
-        self._playbin.set_property('audio-sink', self._outputs)
 
     def _setup_mixer(self):
         if self.mixer:
             self.mixer.setup(self._playbin, self.actor_ref.proxy().mixer)
+
+    def _setup_audio_sink(self):
+        audio_sink = gst.Bin('audio-sink')
+
+        # Queue element to buy us time between the about to finish event and
+        # the actual switch, i.e. about to switch can block for longer thanks
+        # to this queue.
+        # TODO: make the min-max values a setting?
+        queue = gst.element_factory_make('queue')
+        queue.set_property('max-size-buffers', 0)
+        queue.set_property('max-size-bytes', 0)
+        queue.set_property('max-size-time', 5 * gst.SECOND)
+        queue.set_property('min-threshold-time', 3 * gst.SECOND)
+
+        audio_sink.add(queue)
+        audio_sink.add(self._outputs)
+        queue.link(self._outputs)
+
+        ghost_pad = gst.GhostPad('sink', queue.get_pad('sink'))
+        audio_sink.add_pad(ghost_pad)
+
+        self._playbin.set_property('audio-sink', audio_sink)
 
     def _teardown_mixer(self):
         if self.mixer:
