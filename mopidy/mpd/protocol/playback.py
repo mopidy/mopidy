@@ -1,9 +1,8 @@
 from __future__ import absolute_import, unicode_literals
 
-import warnings
-
 from mopidy.core import PlaybackState
 from mopidy.mpd import exceptions, protocol
+from mopidy.utils import deprecation
 
 
 @protocol.commands.add('consume', state=protocol.BOOL)
@@ -134,9 +133,7 @@ def pause(context, state=None):
     - Calls ``pause`` without any arguments to toogle pause.
     """
     if state is None:
-        warnings.warn(
-            'The use of pause command w/o the PAUSE argument is deprecated.',
-            DeprecationWarning)
+        deprecation.warn('mpd.protocol.playback.pause:state_arg')
 
         if (context.core.playback.state.get() == PlaybackState.PLAYING):
             context.core.playback.pause()

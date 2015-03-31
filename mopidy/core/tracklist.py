@@ -7,8 +7,7 @@ import random
 from mopidy import compat
 from mopidy.core import listener
 from mopidy.models import TlTrack
-from mopidy.utils.deprecation import deprecated_property
-
+from mopidy.utils import deprecation
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +29,7 @@ class TracklistController(object):
         """Get tracklist as list of :class:`mopidy.models.TlTrack`."""
         return self._tl_tracks[:]
 
-    tl_tracks = deprecated_property(get_tl_tracks)
+    tl_tracks = deprecation.deprecated_property(get_tl_tracks)
     """
     .. deprecated:: 1.0
         Use :meth:`get_tl_tracks` instead.
@@ -40,7 +39,7 @@ class TracklistController(object):
         """Get tracklist as list of :class:`mopidy.models.Track`."""
         return [tl_track.track for tl_track in self._tl_tracks]
 
-    tracks = deprecated_property(get_tracks)
+    tracks = deprecation.deprecated_property(get_tracks)
     """
     .. deprecated:: 1.0
         Use :meth:`get_tracks` instead.
@@ -50,7 +49,7 @@ class TracklistController(object):
         """Get length of the tracklist."""
         return len(self._tl_tracks)
 
-    length = deprecated_property(get_length)
+    length = deprecation.deprecated_property(get_length)
     """
     .. deprecated:: 1.0
         Use :meth:`get_length` instead.
@@ -70,7 +69,7 @@ class TracklistController(object):
         self.core.playback._on_tracklist_change()
         self._trigger_tracklist_changed()
 
-    version = deprecated_property(get_version)
+    version = deprecation.deprecated_property(get_version)
     """
     .. deprecated:: 1.0
         Use :meth:`get_version` instead.
@@ -98,7 +97,7 @@ class TracklistController(object):
             self._trigger_options_changed()
         return setattr(self, '_consume', value)
 
-    consume = deprecated_property(get_consume, set_consume)
+    consume = deprecation.deprecated_property(get_consume, set_consume)
     """
     .. deprecated:: 1.0
         Use :meth:`get_consume` and :meth:`set_consume` instead.
@@ -130,7 +129,7 @@ class TracklistController(object):
             random.shuffle(self._shuffled)
         return setattr(self, '_random', value)
 
-    random = deprecated_property(get_random, set_random)
+    random = deprecation.deprecated_property(get_random, set_random)
     """
     .. deprecated:: 1.0
         Use :meth:`get_random` and :meth:`set_random` instead.
@@ -163,7 +162,7 @@ class TracklistController(object):
             self._trigger_options_changed()
         return setattr(self, '_repeat', value)
 
-    repeat = deprecated_property(get_repeat, set_repeat)
+    repeat = deprecation.deprecated_property(get_repeat, set_repeat)
     """
     .. deprecated:: 1.0
         Use :meth:`get_repeat` and :meth:`set_repeat` instead.
@@ -193,7 +192,7 @@ class TracklistController(object):
             self._trigger_options_changed()
         return setattr(self, '_single', value)
 
-    single = deprecated_property(get_single, set_single)
+    single = deprecation.deprecated_property(get_single, set_single)
     """
     .. deprecated:: 1.0
         Use :meth:`get_single` and :meth:`set_single` instead.
@@ -332,14 +331,22 @@ class TracklistController(object):
         assert tracks is not None or uri is not None or uris is not None, \
             'tracks, uri or uris must be provided'
 
+        # TODO: assert that tracks are track instances
+
+        if tracks:
+            deprecation.warn('core.tracklist.add:tracks_arg')
+
+        if uri:
+            deprecation.warn('core.tracklist.add:uri_arg')
+
         if tracks is None:
             if uri is not None:
-                tracks = self.core.library.lookup(uri=uri)
-            elif uris is not None:
-                tracks = []
-                track_map = self.core.library.lookup(uris=uris)
-                for uri in uris:
-                    tracks.extend(track_map[uri])
+                uris = [uri]
+
+            tracks = []
+            track_map = self.core.library.lookup(uris=uris)
+            for uri in uris:
+                tracks.extend(track_map[uri])
 
         tl_tracks = []
 

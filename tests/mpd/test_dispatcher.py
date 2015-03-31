@@ -7,6 +7,7 @@ import pykka
 from mopidy import core
 from mopidy.mpd.dispatcher import MpdDispatcher
 from mopidy.mpd.exceptions import MpdAckError
+from mopidy.utils import deprecation
 
 from tests import dummy_backend
 
@@ -20,8 +21,10 @@ class MpdDispatcherTest(unittest.TestCase):
             }
         }
         self.backend = dummy_backend.create_proxy()
-        self.core = core.Core.start(backends=[self.backend]).proxy()
         self.dispatcher = MpdDispatcher(config=config)
+
+        with deprecation.ignore():
+            self.core = core.Core.start(backends=[self.backend]).proxy()
 
     def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()

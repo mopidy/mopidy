@@ -11,6 +11,7 @@ from mopidy import core
 from mopidy.m3u import actor
 from mopidy.m3u.translator import playlist_uri_to_path
 from mopidy.models import Playlist, Track
+from mopidy.utils import deprecation
 
 from tests import dummy_audio, path_to_data_dir
 from tests.m3u import generate_song
@@ -141,8 +142,8 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
     def test_create_adds_playlist_to_playlists_collection(self):
         playlist = self.core.playlists.create('test')
-        self.assert_(self.core.playlists.playlists)
-        self.assertIn(playlist, self.core.playlists.playlists)
+        playlists = self.core.playlists.as_list()
+        self.assertIn(playlist.uri, [ref.uri for ref in playlists])
 
     def test_as_list_empty_to_start_with(self):
         self.assertEqual(len(self.core.playlists.as_list()), 0)
@@ -170,30 +171,6 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
         self.core.playlists.delete(playlist.uri)
         self.assertIsNone(self.core.playlists.lookup(playlist.uri))
-
-    def test_filter_without_criteria(self):
-        self.assertEqual(
-            self.core.playlists.get_playlists(), self.core.playlists.filter())
-
-    def test_filter_with_wrong_criteria(self):
-        self.assertEqual([], self.core.playlists.filter(name='foo'))
-
-    def test_filter_with_right_criteria(self):
-        playlist = self.core.playlists.create('test')
-        playlists = self.core.playlists.filter(name='test')
-        self.assertEqual([playlist], playlists)
-
-    def test_filter_by_name_returns_single_match(self):
-        self.core.playlists.create('a')
-        playlist = self.core.playlists.create('b')
-
-        self.assertEqual([playlist], self.core.playlists.filter(name='b'))
-
-    def test_filter_by_name_returns_no_matches(self):
-        self.core.playlists.create('a')
-        self.core.playlists.create('b')
-
-        self.assertEqual([], self.core.playlists.filter(name='c'))
 
     def test_lookup_finds_playlist_by_uri(self):
         original_playlist = self.core.playlists.create('test')
@@ -292,3 +269,34 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         item_refs = self.core.playlists.get_items('dummy:unknown')
 
         self.assertIsNone(item_refs)
+
+
+class DeprecatedM3UPlaylistsProviderTest(M3UPlaylistsProviderTest):
+    def run(self, result=None):
+        with deprecation.ignore(ids=['core.playlists.filter',
+                                     'core.playlists.get_playlists']):
+            return super(DeprecatedM3UPlaylistsProviderTest, self).run(result)
+
+    def test_filter_without_criteria(self):
+        self.assertEqual(self.core.playlists.get_playlists(),
+                         self.core.playlists.filter())
+
+    def test_filter_with_wrong_criteria(self):
+        self.assertEqual([], self.core.playlists.filter(name='foo'))
+
+    def test_filter_with_right_criteria(self):
+        playlist = self.core.playlists.create('test')
+        playlists = self.core.playlists.filter(name='test')
+        self.assertEqual([playlist], playlists)
+
+    def test_filter_by_name_returns_single_match(self):
+        self.core.playlists.create('a')
+        playlist = self.core.playlists.create('b')
+
+        self.assertEqual([playlist], self.core.playlists.filter(name='b'))
+
+    def test_filter_by_name_returns_no_matches(self):
+        self.core.playlists.create('a')
+        self.core.playlists.create('b')
+
+        self.assertEqual([], self.core.playlists.filter(name='c'))

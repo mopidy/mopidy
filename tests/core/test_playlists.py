@@ -6,9 +6,10 @@ import mock
 
 from mopidy import backend, core
 from mopidy.models import Playlist, Ref, Track
+from mopidy.utils import deprecation
 
 
-class PlaylistsTest(unittest.TestCase):
+class BasePlaylistsTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
         self.plr1a = Ref.playlist(name='A', uri='dummy1:pl:a')
         self.plr1b = Ref.playlist(name='B', uri='dummy1:pl:b')
@@ -49,6 +50,8 @@ class PlaylistsTest(unittest.TestCase):
         self.core = core.Core(mixer=None, backends=[
             self.backend3, self.backend1, self.backend2])
 
+
+class PlaylistTest(BasePlaylistsTest):
     def test_as_list_combines_result_from_backends(self):
         result = self.core.playlists.as_list()
 
@@ -82,30 +85,6 @@ class PlaylistsTest(unittest.TestCase):
         self.assertIsNone(result)
         self.assertFalse(self.sp1.delete.called)
         self.assertFalse(self.sp2.delete.called)
-
-    def test_get_playlists_combines_result_from_backends(self):
-        result = self.core.playlists.get_playlists()
-
-        self.assertIn(self.pl1a, result)
-        self.assertIn(self.pl1b, result)
-        self.assertIn(self.pl2a, result)
-        self.assertIn(self.pl2b, result)
-
-    def test_get_playlists_includes_tracks_by_default(self):
-        result = self.core.playlists.get_playlists()
-
-        self.assertEqual(result[0].name, 'A')
-        self.assertEqual(len(result[0].tracks), 1)
-        self.assertEqual(result[1].name, 'B')
-        self.assertEqual(len(result[1].tracks), 1)
-
-    def test_get_playlist_can_strip_tracks_from_returned_playlists(self):
-        result = self.core.playlists.get_playlists(include_tracks=False)
-
-        self.assertEqual(result[0].name, 'A')
-        self.assertEqual(len(result[0].tracks), 0)
-        self.assertEqual(result[1].name, 'B')
-        self.assertEqual(len(result[1].tracks), 0)
 
     def test_create_without_uri_scheme_uses_first_backend(self):
         playlist = Playlist()
@@ -163,16 +142,6 @@ class PlaylistsTest(unittest.TestCase):
 
         self.assertFalse(self.sp1.delete.called)
         self.assertFalse(self.sp2.delete.called)
-
-    def test_filter_returns_matching_playlists(self):
-        result = self.core.playlists.filter(name='A')
-
-        self.assertEqual(2, len(result))
-
-    def test_filter_accepts_dict_instead_of_kwargs(self):
-        result = self.core.playlists.filter({'name': 'A'})
-
-        self.assertEqual(2, len(result))
 
     def test_lookup_selects_the_dummy1_backend(self):
         self.core.playlists.lookup('dummy1:a')
@@ -259,3 +228,50 @@ class PlaylistsTest(unittest.TestCase):
         self.assertIsNone(result)
         self.assertFalse(self.sp1.save.called)
         self.assertFalse(self.sp2.save.called)
+
+
+class DeprecatedFilterPlaylistsTest(BasePlaylistsTest):
+    def run(self, result=None):
+        with deprecation.ignore(ids=['core.playlists.filter',
+                                     'core.playlists.get_playlists']):
+            return super(DeprecatedFilterPlaylistsTest, self).run(result)
+
+    def test_filter_returns_matching_playlists(self):
+        result = self.core.playlists.filter(name='A')
+
+        self.assertEqual(2, len(result))
+
+    def test_filter_accepts_dict_instead_of_kwargs(self):
+        result = self.core.playlists.filter({'name': 'A'})
+
+        self.assertEqual(2, len(result))
+
+
+class DeprecatedGetPlaylistsTest(BasePlaylistsTest):
+    def run(self, result=None):
+        with deprecation.ignore('core.playlists.get_playlists'):
+            return super(DeprecatedGetPlaylistsTest, self).run(result)
+
+    def test_get_playlists_combines_result_from_backends(self):
+        result = self.core.playlists.get_playlists()
+
+        self.assertIn(self.pl1a, result)
+        self.assertIn(self.pl1b, result)
+        self.assertIn(self.pl2a, result)
+        self.assertIn(self.pl2b, result)
+
+    def test_get_playlists_includes_tracks_by_default(self):
+        result = self.core.playlists.get_playlists()
+
+        self.assertEqual(result[0].name, 'A')
+        self.assertEqual(len(result[0].tracks), 1)
+        self.assertEqual(result[1].name, 'B')
+        self.assertEqual(len(result[1].tracks), 1)
+
+    def test_get_playlist_can_strip_tracks_from_returned_playlists(self):
+        result = self.core.playlists.get_playlists(include_tracks=False)
+
+        self.assertEqual(result[0].name, 'A')
+        self.assertEqual(len(result[0].tracks), 0)
+        self.assertEqual(result[1].name, 'B')
+        self.assertEqual(len(result[1].tracks), 0)
