@@ -164,7 +164,9 @@ class _Outputs(gst.Bin):
 
     def _add(self, element):
         # All tee branches need a queue in front of them.
+        # But keep the queue short so the volume change isn't to slow:
         queue = gst.element_factory_make('queue')
+        queue.set_property('max-size-buffers', 5)
         self.add(element)
         self.add(queue)
         queue.link(element)
