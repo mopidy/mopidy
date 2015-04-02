@@ -34,8 +34,6 @@ _GST_STATE_MAPPING = {
     gst.STATE_PAUSED: PlaybackState.PAUSED,
     gst.STATE_NULL: PlaybackState.STOPPED}
 
-MB = 1 << 20
-
 
 class _Signals(object):
     """Helper for tracking gobject signal registrations"""
@@ -97,7 +95,7 @@ class _Appsrc(object):
         source.set_property('caps', self._caps)
         source.set_property('format', b'time')
         source.set_property('stream-type', b'seekable')
-        source.set_property('max-bytes', 1 * MB)
+        source.set_property('max-bytes', 1 << 20)  # 1MB
         source.set_property('min-percent', 50)
 
         if self._need_data_callback:
@@ -434,8 +432,8 @@ class Audio(pykka.ThreadingActor):
         playbin.set_property('flags', 2)  # GST_PLAY_FLAG_AUDIO
 
         # TODO: turn into config values...
-        playbin.set_property('buffer-size', 2 * 1024 * 1024)
-        playbin.set_property('buffer-duration', 2 * gst.SECOND)
+        playbin.set_property('buffer-size', 5 << 20)  # 5MB
+        playbin.set_property('buffer-duration', 5 * gst.SECOND)
 
         self._signals.connect(playbin, 'source-setup', self._on_source_setup)
         self._signals.connect(playbin, 'about-to-finish',
@@ -475,8 +473,8 @@ class Audio(pykka.ThreadingActor):
         queue = gst.element_factory_make('queue')
         queue.set_property('max-size-buffers', 0)
         queue.set_property('max-size-bytes', 0)
-        queue.set_property('max-size-time', 5 * gst.SECOND)
-        queue.set_property('min-threshold-time', 3 * gst.SECOND)
+        queue.set_property('max-size-time', 3 * gst.SECOND)
+        queue.set_property('min-threshold-time', 1 * gst.SECOND)
 
         audio_sink.add(queue)
         audio_sink.add(self._outputs)
