@@ -183,10 +183,6 @@ class SoftwareMixer(object):
 
     def setup(self, element, mixer_ref):
         self._element = element
-
-        self._signals.connect(element, 'notify::volume', self._volume_changed)
-        self._signals.connect(element, 'notify::mute', self._mute_changed)
-
         self._mixer.setup(mixer_ref)
 
     def teardown(self):
@@ -198,24 +194,16 @@ class SoftwareMixer(object):
 
     def set_volume(self, volume):
         self._element.set_property('volume', volume / 100.0)
+        self._mixer.trigger_volume_changed(volume)
 
     def get_mute(self):
         return self._element.get_property('mute')
 
     def set_mute(self, mute):
-        return self._element.set_property('mute', bool(mute))
-
-    def _volume_changed(self, element, property_):
-        old_volume, self._last_volume = self._last_volume, self.get_volume()
-        if old_volume != self._last_volume:
-            gst_logger.debug('Notify volume: %s', self._last_volume / 100.0)
-            self._mixer.trigger_volume_changed(self._last_volume)
-
-    def _mute_changed(self, element, property_):
-        old_mute, self._last_mute = self._last_mute, self.get_mute()
-        if old_mute != self._last_mute:
-            gst_logger.debug('Notify mute: %s', self._last_mute)
-            self._mixer.trigger_mute_changed(self._last_mute)
+        result = self._element.set_property('mute', bool(mute))
+        if result:
+            self._mixer.trigger_mute_changed(bool(mute))
+        return result
 
 
 class _Handler(object):
