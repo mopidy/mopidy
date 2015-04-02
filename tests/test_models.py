@@ -9,6 +9,7 @@ from mopidy.models import (
 
 
 class GenericCopyTest(unittest.TestCase):
+
     def compare(self, orig, other):
         self.assertEqual(orig, other)
         self.assertNotEqual(id(orig), id(other))
@@ -58,6 +59,7 @@ class GenericCopyTest(unittest.TestCase):
 
 
 class RefTest(unittest.TestCase):
+
     def test_uri(self):
         uri = 'an_uri'
         ref = Ref(uri=uri)
@@ -131,6 +133,7 @@ class RefTest(unittest.TestCase):
 
 
 class ImageTest(unittest.TestCase):
+
     def test_uri(self):
         uri = 'an_uri'
         image = Image(uri=uri)
@@ -156,6 +159,7 @@ class ImageTest(unittest.TestCase):
 
 
 class ArtistTest(unittest.TestCase):
+
     def test_uri(self):
         uri = 'an_uri'
         artist = Artist(uri=uri)
@@ -286,6 +290,7 @@ class ArtistTest(unittest.TestCase):
 
 
 class AlbumTest(unittest.TestCase):
+
     def test_uri(self):
         uri = 'an_uri'
         album = Album(uri=uri)
@@ -498,6 +503,7 @@ class AlbumTest(unittest.TestCase):
 
 
 class TrackTest(unittest.TestCase):
+
     def test_uri(self):
         uri = 'an_uri'
         track = Track(uri=uri)
@@ -796,6 +802,7 @@ class TrackTest(unittest.TestCase):
 
 
 class TlTrackTest(unittest.TestCase):
+
     def test_tlid(self):
         tlid = 123
         tl_track = TlTrack(tlid=tlid)
@@ -874,6 +881,7 @@ class TlTrackTest(unittest.TestCase):
 
 
 class PlaylistTest(unittest.TestCase):
+
     def test_uri(self):
         uri = 'an_uri'
         playlist = Playlist(uri=uri)
@@ -1065,6 +1073,7 @@ class PlaylistTest(unittest.TestCase):
 
 
 class SearchResultTest(unittest.TestCase):
+
     def test_uri(self):
         uri = 'an_uri'
         result = SearchResult(uri=uri)

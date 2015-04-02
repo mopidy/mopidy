@@ -79,6 +79,7 @@ class DummyMixin(object):
 
 
 class AudioTest(BaseTest):
+
     def test_start_playback_existing_file(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
@@ -134,6 +135,7 @@ class AudioDummyTest(DummyMixin, AudioTest):
 
 @mock.patch.object(audio.AudioListener, 'send')
 class AudioEventTest(BaseTest):
+
     def setUp(self):  # noqa: N802
         super(AudioEventTest, self).setUp()
         self.audio.enable_sync_handler().get()
@@ -435,11 +437,13 @@ class AudioEventTest(BaseTest):
 
 
 class AudioDummyEventTest(DummyMixin, AudioEventTest):
+
     """Exercise the AudioEventTest against our mock audio classes."""
 
 
 # TODO: move to mixer tests...
 class MixerTest(BaseTest):
+
     @unittest.SkipTest
     def test_set_mute(self):
         for value in (True, False):
@@ -460,6 +464,7 @@ class MixerTest(BaseTest):
 
 
 class AudioStateTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.audio = audio.Audio(config=None, mixer=None)
 
@@ -505,6 +510,7 @@ class AudioStateTest(unittest.TestCase):
 
 
 class AudioBufferingTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.audio = audio.Audio(config=None, mixer=None)
         self.audio._playbin = mock.Mock(spec=['set_state'])

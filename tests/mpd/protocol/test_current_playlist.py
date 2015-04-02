@@ -7,6 +7,7 @@ from tests.mpd import protocol
 
 
 class AddCommandsTest(protocol.BaseTestCase):
+
     def setUp(self):  # noqa: N802
         super(AddCommandsTest, self).setUp()
 
@@ -92,6 +93,7 @@ class AddCommandsTest(protocol.BaseTestCase):
 
 
 class BasePopulatedTracklistTestCase(protocol.BaseTestCase):
+
     def setUp(self):  # noqa: N802
         super(BasePopulatedTracklistTestCase, self).setUp()
         tracks = [Track(uri='dummy:/%s' % x, name=x) for x in 'abcdef']
@@ -100,6 +102,7 @@ class BasePopulatedTracklistTestCase(protocol.BaseTestCase):
 
 
 class DeleteCommandsTest(BasePopulatedTracklistTestCase):
+
     def test_clear(self):
         self.send_request('clear')
         self.assertEqual(len(self.core.tracklist.tracks.get()), 0)
@@ -155,6 +158,7 @@ class DeleteCommandsTest(BasePopulatedTracklistTestCase):
 
 
 class MoveCommandsTest(BasePopulatedTracklistTestCase):
+
     def test_move_songpos(self):
         self.send_request('move "1" "0"')
         result = [t.name for t in self.core.tracklist.tracks.get()]
@@ -186,6 +190,7 @@ class MoveCommandsTest(BasePopulatedTracklistTestCase):
 
 
 class PlaylistFindCommandTest(protocol.BaseTestCase):
+
     def test_playlistfind(self):
         self.send_request('playlistfind "tag" "needle"')
         self.assertEqualResponse('ACK [0@0] {playlistfind} Not implemented')
@@ -211,6 +216,7 @@ class PlaylistFindCommandTest(protocol.BaseTestCase):
 
 
 class PlaylistIdCommandTest(BasePopulatedTracklistTestCase):
+
     def test_playlistid_without_songid(self):
         self.send_request('playlistid')
         self.assertInResponse('Title: a')
@@ -231,6 +237,7 @@ class PlaylistIdCommandTest(BasePopulatedTracklistTestCase):
 
 
 class PlaylistInfoCommandTest(BasePopulatedTracklistTestCase):
+
     def test_playlist_returns_same_as_playlistinfo(self):
         with deprecation.ignore('mpd.protocol.current_playlist.playlist'):
             playlist_response = self.send_request('playlist')
@@ -318,6 +325,7 @@ class PlaylistInfoCommandTest(BasePopulatedTracklistTestCase):
 
 
 class PlaylistSearchCommandTest(protocol.BaseTestCase):
+
     def test_playlistsearch(self):
         self.send_request('playlistsearch "any" "needle"')
         self.assertEqualResponse('ACK [0@0] {playlistsearch} Not implemented')
@@ -328,6 +336,7 @@ class PlaylistSearchCommandTest(protocol.BaseTestCase):
 
 
 class PlChangeCommandTest(BasePopulatedTracklistTestCase):
+
     def test_plchanges_with_lower_version_returns_changes(self):
         self.send_request('plchanges "0"')
         self.assertInResponse('Title: a')
@@ -379,6 +388,7 @@ class PlChangeCommandTest(BasePopulatedTracklistTestCase):
 
 # TODO: we only seem to be testing that don't touch the non shuffled region :/
 class ShuffleCommandTest(BasePopulatedTracklistTestCase):
+
     def test_shuffle_without_range(self):
         version = self.core.tracklist.version.get()
 
@@ -409,6 +419,7 @@ class ShuffleCommandTest(BasePopulatedTracklistTestCase):
 
 
 class SwapCommandTest(BasePopulatedTracklistTestCase):
+
     def test_swap(self):
         self.send_request('swap "1" "4"')
         result = [t.name for t in self.core.tracklist.tracks.get()]

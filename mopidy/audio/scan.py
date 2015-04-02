@@ -21,6 +21,7 @@ _RAW_AUDIO = gst.Caps(b'audio/x-raw-int; audio/x-raw-float')
 
 # TODO: replace with a scan(uri, timeout=1000, proxy_config=None)?
 class Scanner(object):
+
     """
     Helper to get tags and other relevant info from URIs.
 

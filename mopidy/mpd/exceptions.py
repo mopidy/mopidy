@@ -4,6 +4,7 @@ from mopidy.exceptions import MopidyException
 
 
 class MpdAckError(MopidyException):
+
     """See fields on this class for available MPD error codes"""
 
     ACK_ERROR_NOT_LIST = 1
@@ -59,6 +60,7 @@ class MpdUnknownError(MpdAckError):
 
 
 class MpdUnknownCommand(MpdUnknownError):
+
     def __init__(self, *args, **kwargs):
         super(MpdUnknownCommand, self).__init__(*args, **kwargs)
         assert self.command is not None, 'command must be given explicitly'
@@ -67,6 +69,7 @@ class MpdUnknownCommand(MpdUnknownError):
 
 
 class MpdNoCommand(MpdUnknownCommand):
+
     def __init__(self, *args, **kwargs):
         kwargs['command'] = ''
         super(MpdNoCommand, self).__init__(*args, **kwargs)

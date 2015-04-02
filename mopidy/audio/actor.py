@@ -55,7 +55,9 @@ PLAYBIN_FLAGS = (1 << 1) | (1 << 4)
 
 
 class _Signals(object):
+
     """Helper for tracking gobject signal registrations"""
+
     def __init__(self):
         self._ids = {}
 
@@ -84,7 +86,9 @@ class _Signals(object):
 
 # TODO: expose this as a property on audio?
 class _Appsrc(object):
+
     """Helper class for dealing with appsrc based playback."""
+
     def __init__(self):
         self._signals = _Signals()
         self.reset()
@@ -151,6 +155,7 @@ class _Appsrc(object):
 
 # TODO: expose this as a property on audio when #790 gets further along.
 class _Outputs(gst.Bin):
+
     def __init__(self):
         gst.Bin.__init__(self)
 
@@ -250,6 +255,7 @@ class SoftwareMixer(object):
 
 
 class _Handler(object):
+
     def __init__(self, audio):
         self._audio = audio
         self._element = None
@@ -418,6 +424,7 @@ class _Handler(object):
 
 # TODO: create a player class which replaces the actors internals
 class Audio(pykka.ThreadingActor):
+
     """
     Audio output through `GStreamer <http://gstreamer.freedesktop.org/>`_.
     """

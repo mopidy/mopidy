@@ -9,6 +9,7 @@ from mopidy.utils.encoding import locale_decode
 
 @mock.patch('mopidy.utils.encoding.locale.getpreferredencoding')
 class LocaleDecodeTest(unittest.TestCase):
+
     def test_can_decode_utf8_strings_with_french_content(self, mock):
         mock.return_value = 'UTF-8'
 

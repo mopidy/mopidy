@@ -19,6 +19,7 @@ from tests import path_to_data_dir
 
 
 class LibraryProviderTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.backend = mock.Mock()
         self.backend.uri_schemes = ['file']

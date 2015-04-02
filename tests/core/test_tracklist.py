@@ -10,6 +10,7 @@ from mopidy.utils import deprecation
 
 
 class TracklistTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.tracks = [
             Track(uri='dummy1:a', name='foo'),

@@ -6,6 +6,7 @@ from tests.mpd import protocol
 
 
 class PlaylistsHandlerTest(protocol.BaseTestCase):
+
     def test_listplaylist(self):
         self.backend.playlists.set_dummy_playlists([
             Playlist(

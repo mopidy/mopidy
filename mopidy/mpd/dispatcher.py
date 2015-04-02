@@ -13,6 +13,7 @@ protocol.load_protocol_modules()
 
 
 class MpdDispatcher(object):
+
     """
     The MPD session feeds the MPD dispatcher with requests. The dispatcher
     finds the correct handler, processes the request and sends the response
@@ -209,6 +210,7 @@ class MpdDispatcher(object):
 
 
 class MpdContext(object):
+
     """
     This object is passed as the first argument to all MPD command handlers to
     give the command handlers access to important parts of Mopidy.

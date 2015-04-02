@@ -15,6 +15,7 @@ STOPPED = PlaybackState.STOPPED
 
 
 class PlaybackOptionsHandlerTest(protocol.BaseTestCase):
+
     def test_consume_off(self):
         self.send_request('consume "0"')
         self.assertFalse(self.core.tracklist.consume.get())
@@ -173,6 +174,7 @@ class PlaybackOptionsHandlerTest(protocol.BaseTestCase):
 
 
 class PlaybackControlHandlerTest(protocol.BaseTestCase):
+
     def setUp(self):  # noqa: N802
         super(PlaybackControlHandlerTest, self).setUp()
         self.tracks = [Track(uri='dummy:a', length=40000),

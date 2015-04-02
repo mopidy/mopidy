@@ -15,6 +15,7 @@ from mopidy.config import types
 
 
 class ConfigValueTest(unittest.TestCase):
+
     def test_deserialize_passes_through(self):
         value = types.ConfigValue()
         sentinel = object()
@@ -36,6 +37,7 @@ class ConfigValueTest(unittest.TestCase):
 
 
 class DeprecatedTest(unittest.TestCase):
+
     def test_deserialize_returns_deprecated_value(self):
         self.assertIsInstance(types.Deprecated().deserialize(b'foobar'),
                               types.DeprecatedValue)
@@ -46,6 +48,7 @@ class DeprecatedTest(unittest.TestCase):
 
 
 class StringTest(unittest.TestCase):
+
     def test_deserialize_conversion_success(self):
         value = types.String()
         self.assertEqual('foo', value.deserialize(b' foo '))
@@ -117,6 +120,7 @@ class StringTest(unittest.TestCase):
 
 
 class SecretTest(unittest.TestCase):
+
     def test_deserialize_decodes_utf8(self):
         value = types.Secret()
         result = value.deserialize('æøå'.encode('utf-8'))
@@ -152,6 +156,7 @@ class SecretTest(unittest.TestCase):
 
 
 class IntegerTest(unittest.TestCase):
+
     def test_deserialize_conversion_success(self):
         value = types.Integer()
         self.assertEqual(123, value.deserialize('123'))
@@ -186,6 +191,7 @@ class IntegerTest(unittest.TestCase):
 
 
 class BooleanTest(unittest.TestCase):
+
     def test_deserialize_conversion_success(self):
         value = types.Boolean()
         for true in ('1', 'yes', 'true', 'on'):
@@ -312,6 +318,7 @@ class LogLevelTest(unittest.TestCase):
 
 
 class HostnameTest(unittest.TestCase):
+
     @mock.patch('socket.getaddrinfo')
     def test_deserialize_conversion_success(self, getaddrinfo_mock):
         value = types.Hostname()
@@ -339,6 +346,7 @@ class HostnameTest(unittest.TestCase):
 
 
 class PortTest(unittest.TestCase):
+
     def test_valid_ports(self):
         value = types.Port()
         self.assertEqual(0, value.deserialize('0'))
@@ -356,6 +364,7 @@ class PortTest(unittest.TestCase):
 
 
 class ExpandedPathTest(unittest.TestCase):
+
     def test_is_bytes(self):
         self.assertIsInstance(types.ExpandedPath(b'/tmp', b'foo'), bytes)
 
@@ -373,6 +382,7 @@ class ExpandedPathTest(unittest.TestCase):
 
 
 class PathTest(unittest.TestCase):
+
     def test_deserialize_conversion_success(self):
         result = types.Path().deserialize(b'/foo')
         self.assertEqual('/foo', result)

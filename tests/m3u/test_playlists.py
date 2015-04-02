@@ -272,6 +272,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
 
 class DeprecatedM3UPlaylistsProviderTest(M3UPlaylistsProviderTest):
+
     def run(self, result=None):
         with deprecation.ignore(ids=['core.playlists.filter',
                                      'core.playlists.get_playlists']):

@@ -8,6 +8,7 @@ from mopidy.mpd.exceptions import (
 
 
 class MpdExceptionsTest(unittest.TestCase):
+
     def test_mpd_not_implemented_is_a_mpd_ack_error(self):
         try:
             raise MpdNotImplemented

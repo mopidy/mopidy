@@ -15,6 +15,7 @@ from tests import dummy_audio as audio
 # TODO: split into smaller easier to follow tests. setup is way to complex.
 # TODO: just mock tracklist?
 class CorePlaybackTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
@@ -601,6 +602,7 @@ class TestBackend(pykka.ThreadingActor, backend.Backend):
 
 
 class TestStream(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.audio = audio.DummyAudio.start().proxy()
         self.backend = TestBackend.start(config={}, audio=self.audio).proxy()
@@ -684,6 +686,7 @@ class TestStream(unittest.TestCase):
 
 
 class CorePlaybackWithOldBackendTest(unittest.TestCase):
+
     def test_type_error_from_old_backend_does_not_crash_core(self):
         b = mock.Mock()
         b.uri_schemes.get.return_value = ['dummy1']

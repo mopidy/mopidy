@@ -16,6 +16,7 @@ def create_proxy(config=None, mixer=None):
 
 
 class DummyAudio(pykka.ThreadingActor):
+
     def __init__(self, config=None, mixer=None):
         super(DummyAudio, self).__init__()
         self.state = audio.PlaybackState.STOPPED

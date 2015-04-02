@@ -116,6 +116,7 @@ class TrackMpdFormatTest(unittest.TestCase):
 
 
 class PlaylistMpdFormatTest(unittest.TestCase):
+
     def test_mpd_format(self):
         playlist = Playlist(tracks=[
             Track(track_no=1), Track(track_no=2), Track(track_no=3)])

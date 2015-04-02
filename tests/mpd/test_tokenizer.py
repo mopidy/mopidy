@@ -8,6 +8,7 @@ from mopidy.mpd import exceptions, tokenize
 
 
 class TestTokenizer(unittest.TestCase):
+
     def assertTokenizeEquals(self, expected, line):  # noqa: N802
         self.assertEqual(expected, tokenize.split(line))
 

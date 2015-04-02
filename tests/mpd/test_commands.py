@@ -8,6 +8,7 @@ from mopidy.mpd import exceptions, protocol
 
 
 class TestConverts(unittest.TestCase):
+
     def test_integer(self):
         self.assertEqual(123, protocol.INT('123'))
         self.assertEqual(-123, protocol.INT('-123'))
@@ -55,6 +56,7 @@ class TestConverts(unittest.TestCase):
 
 
 class TestCommands(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.commands = protocol.Commands()
 

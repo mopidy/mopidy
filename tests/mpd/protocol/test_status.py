@@ -6,6 +6,7 @@ from tests.mpd import protocol
 
 
 class StatusHandlerTest(protocol.BaseTestCase):
+
     def test_clearerror(self):
         self.send_request('clearerror')
         self.assertEqualResponse('ACK [0@0] {clearerror} Not implemented')

@@ -13,6 +13,7 @@ from tests import dummy_backend
 
 
 class MpdDispatcherTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         config = {
             'mpd': {

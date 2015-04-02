@@ -4,6 +4,7 @@ from mopidy import listener
 
 
 class CoreListener(listener.Listener):
+
     """
     Marker interface for recipients of events sent by the core actor.
 

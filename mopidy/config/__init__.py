@@ -264,6 +264,7 @@ def _postprocess(config_string):
 
 
 class Proxy(collections.Mapping):
+
     def __init__(self, data):
         self._data = data
 

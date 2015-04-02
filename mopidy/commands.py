@@ -38,6 +38,7 @@ def config_override_type(value):
 
 
 class _ParserError(Exception):
+
     def __init__(self, message):
         self.message = message
 
@@ -47,11 +48,13 @@ class _HelpError(Exception):
 
 
 class _ArgumentParser(argparse.ArgumentParser):
+
     def error(self, message):
         raise _ParserError(message)
 
 
 class _HelpAction(argparse.Action):
+
     def __init__(self, option_strings, dest=None, help=None):
         super(_HelpAction, self).__init__(
             option_strings=option_strings,
@@ -65,6 +68,7 @@ class _HelpAction(argparse.Action):
 
 
 class Command(object):
+
     """Command parser and runner for building trees of commands.
 
     This class provides a wraper around :class:`argparse.ArgumentParser`
@@ -227,6 +231,7 @@ class Command(object):
 
 
 class RootCommand(Command):
+
     def __init__(self):
         super(RootCommand, self).__init__()
         self.set(base_verbosity_level=0)

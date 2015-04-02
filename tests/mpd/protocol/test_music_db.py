@@ -11,6 +11,7 @@ from tests.mpd import protocol
 
 
 class QueryFromMpdSearchFormatTest(unittest.TestCase):
+
     def test_dates_are_extracted(self):
         result = music_db._query_from_mpd_search_parameters(
             ['Date', '1974-01-02', 'Date', '1975'], music_db._SEARCH_MAPPING)
@@ -37,6 +38,7 @@ class QueryFromMpdListFormatTest(unittest.TestCase):
 # TODO: why isn't core.playlists.filter getting deprecation warnings?
 
 class MusicDatabaseHandlerTest(protocol.BaseTestCase):
+
     def test_count(self):
         self.send_request('count "artist" "needle"')
         self.assertInResponse('songs: 0')
@@ -430,6 +432,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
 
 class MusicDatabaseFindTest(protocol.BaseTestCase):
+
     def test_find_includes_fake_artist_and_album_tracks(self):
         self.backend.library.dummy_find_exact_result = SearchResult(
             albums=[Album(uri='dummy:album:a', name='A', date='2001')],
@@ -620,6 +623,7 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
 
 
 class MusicDatabaseListTest(protocol.BaseTestCase):
+
     def test_list(self):
         self.backend.library.dummy_get_distinct_result = {
             'artist': set(['A Artist'])}
@@ -1061,6 +1065,7 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
 
 
 class MusicDatabaseSearchTest(protocol.BaseTestCase):
+
     def test_search(self):
         self.backend.library.dummy_search_result = SearchResult(
             albums=[Album(uri='dummy:album:a', name='A')],

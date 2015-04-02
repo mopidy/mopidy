@@ -8,6 +8,7 @@ from tests.mpd import protocol
 
 
 class IssueGH17RegressionTest(protocol.BaseTestCase):
+
     """
     The issue: http://github.com/mopidy/mopidy/issues/17
 
@@ -17,6 +18,7 @@ class IssueGH17RegressionTest(protocol.BaseTestCase):
     - Turn on random mode
     - Press next until you get to the unplayable track
     """
+
     def test(self):
         tracks = [
             Track(uri='dummy:a'),
@@ -51,6 +53,7 @@ class IssueGH17RegressionTest(protocol.BaseTestCase):
 
 
 class IssueGH18RegressionTest(protocol.BaseTestCase):
+
     """
     The issue: http://github.com/mopidy/mopidy/issues/18
 
@@ -89,6 +92,7 @@ class IssueGH18RegressionTest(protocol.BaseTestCase):
 
 
 class IssueGH22RegressionTest(protocol.BaseTestCase):
+
     """
     The issue: http://github.com/mopidy/mopidy/issues/22
 
@@ -123,6 +127,7 @@ class IssueGH22RegressionTest(protocol.BaseTestCase):
 
 
 class IssueGH69RegressionTest(protocol.BaseTestCase):
+
     """
     The issue: https://github.com/mopidy/mopidy/issues/69
 
@@ -151,6 +156,7 @@ class IssueGH69RegressionTest(protocol.BaseTestCase):
 
 
 class IssueGH113RegressionTest(protocol.BaseTestCase):
+
     """
     The issue: https://github.com/mopidy/mopidy/issues/113
 
@@ -176,6 +182,7 @@ class IssueGH113RegressionTest(protocol.BaseTestCase):
 
 
 class IssueGH137RegressionTest(protocol.BaseTestCase):
+
     """
     The issue: https://github.com/mopidy/mopidy/issues/137
 

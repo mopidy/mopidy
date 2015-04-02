@@ -10,6 +10,7 @@ from mopidy.utils import deprecation
 
 
 class BaseCoreLibraryTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         dummy1_root = Ref.directory(uri='dummy1:directory', name='dummy1')
         self.backend1 = mock.Mock()
@@ -41,6 +42,7 @@ class BaseCoreLibraryTest(unittest.TestCase):
 
 # TODO: split by method
 class CoreLibraryTest(BaseCoreLibraryTest):
+
     def test_get_images_returns_empty_dict_for_no_uris(self):
         self.assertEqual({}, self.core.library.get_images([]))
 
@@ -273,6 +275,7 @@ class CoreLibraryTest(BaseCoreLibraryTest):
 
 
 class DeprecatedFindExactCoreLibraryTest(BaseCoreLibraryTest):
+
     def run(self, result=None):
         with deprecation.ignore('core.library.find_exact'):
             return super(DeprecatedFindExactCoreLibraryTest, self).run(result)
@@ -354,6 +357,7 @@ class DeprecatedFindExactCoreLibraryTest(BaseCoreLibraryTest):
 
 
 class DeprecatedLookupCoreLibraryTest(BaseCoreLibraryTest):
+
     def run(self, result=None):
         with deprecation.ignore('core.library.lookup:uri_arg'):
             return super(DeprecatedLookupCoreLibraryTest, self).run(result)
@@ -379,6 +383,7 @@ class DeprecatedLookupCoreLibraryTest(BaseCoreLibraryTest):
 
 
 class LegacyFindExactToSearchLibraryTest(unittest.TestCase):
+
     def run(self, result=None):
         with deprecation.ignore('core.library.find_exact'):
             return super(LegacyFindExactToSearchLibraryTest, self).run(result)

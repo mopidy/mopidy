@@ -6,6 +6,7 @@ from mopidy import config, ext
 
 
 class ExtensionTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.ext = ext.Extension()
 

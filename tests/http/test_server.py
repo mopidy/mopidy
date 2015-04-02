@@ -12,6 +12,7 @@ from mopidy.http import actor, handlers
 
 
 class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
+
     def get_config(self):
         return {
             'http': {
@@ -43,6 +44,7 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
 
 
 class RootRedirectTest(HttpServerTest):
+
     def test_should_redirect_to_mopidy_app(self):
         response = self.fetch('/', method='GET', follow_redirects=False)
 
@@ -51,6 +53,7 @@ class RootRedirectTest(HttpServerTest):
 
 
 class LegacyStaticDirAppTest(HttpServerTest):
+
     def get_config(self):
         config = super(LegacyStaticDirAppTest, self).get_config()
         config['http']['static_dir'] = os.path.dirname(__file__)
@@ -73,6 +76,7 @@ class LegacyStaticDirAppTest(HttpServerTest):
 
 
 class MopidyAppTest(HttpServerTest):
+
     def test_should_return_index(self):
         response = self.fetch('/mopidy/', method='GET')
         body = tornado.escape.to_unicode(response.body)
@@ -103,6 +107,7 @@ class MopidyAppTest(HttpServerTest):
 
 
 class MopidyWebSocketHandlerTest(HttpServerTest):
+
     def test_should_return_ws(self):
         response = self.fetch('/mopidy/ws', method='GET')
 
@@ -119,6 +124,7 @@ class MopidyWebSocketHandlerTest(HttpServerTest):
 
 
 class MopidyRPCHandlerTest(HttpServerTest):
+
     def test_should_return_rpc_error(self):
         cmd = tornado.escape.json_encode({'action': 'get_version'})
 
@@ -164,6 +170,7 @@ class MopidyRPCHandlerTest(HttpServerTest):
 
 
 class HttpServerWithStaticFilesTest(tornado.testing.AsyncHTTPTestCase):
+
     def get_app(self):
         config = {
             'http': {
@@ -214,6 +221,7 @@ def wsgi_app_factory(config, core):
 
 
 class HttpServerWithWsgiAppTest(tornado.testing.AsyncHTTPTestCase):
+
     def get_app(self):
         config = {
             'http': {

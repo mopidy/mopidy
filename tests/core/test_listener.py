@@ -9,6 +9,7 @@ from mopidy.models import Playlist, TlTrack
 
 
 class CoreListenerTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.listener = CoreListener()
 

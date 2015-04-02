@@ -4,6 +4,7 @@ import json
 
 
 class ImmutableObject(object):
+
     """
     Superclass for immutable objects whose fields can only be modified via the
     constructor.
@@ -102,6 +103,7 @@ class ImmutableObject(object):
 
 
 class ModelJSONEncoder(json.JSONEncoder):
+
     """
     Automatically serialize Mopidy models to JSON.
 
@@ -112,6 +114,7 @@ class ModelJSONEncoder(json.JSONEncoder):
         '{"a_track": {"__model__": "Track", "name": "name"}}'
 
     """
+
     def default(self, obj):
         if isinstance(obj, ImmutableObject):
             return obj.serialize()
@@ -143,6 +146,7 @@ def model_json_decoder(dct):
 
 
 class Ref(ImmutableObject):
+
     """
     Model to represent URI references with a human friendly name and type
     attached. This is intended for use a lightweight object "free" of metadata
@@ -213,6 +217,7 @@ class Ref(ImmutableObject):
 
 
 class Image(ImmutableObject):
+
     """
     :param string uri: URI of the image
     :param int width: Optional width of image or :class:`None`
@@ -230,6 +235,7 @@ class Image(ImmutableObject):
 
 
 class Artist(ImmutableObject):
+
     """
     :param uri: artist URI
     :type uri: string
@@ -250,6 +256,7 @@ class Artist(ImmutableObject):
 
 
 class Album(ImmutableObject):
+
     """
     :param uri: album URI
     :type uri: string
@@ -303,6 +310,7 @@ class Album(ImmutableObject):
 
 
 class Track(ImmutableObject):
+
     """
     :param uri: track URI
     :type uri: string
@@ -395,6 +403,7 @@ class Track(ImmutableObject):
 
 
 class TlTrack(ImmutableObject):
+
     """
     A tracklist track. Wraps a regular track and it's tracklist ID.
 
@@ -433,6 +442,7 @@ class TlTrack(ImmutableObject):
 
 
 class Playlist(ImmutableObject):
+
     """
     :param uri: playlist URI
     :type uri: string
@@ -473,6 +483,7 @@ class Playlist(ImmutableObject):
 
 
 class SearchResult(ImmutableObject):
+
     """
     :param uri: search result URI
     :type uri: string

@@ -15,6 +15,7 @@ def path_to_data_dir(name):
 
 
 class IsA(object):
+
     def __init__(self, klass):
         self.klass = klass
 

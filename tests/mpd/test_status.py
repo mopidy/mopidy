@@ -23,6 +23,7 @@ STOPPED = PlaybackState.STOPPED
 
 
 class StatusHandlerTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.mixer = dummy_mixer.create_proxy()
         self.backend = dummy_backend.create_proxy()

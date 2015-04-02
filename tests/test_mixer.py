@@ -8,6 +8,7 @@ from mopidy import mixer
 
 
 class MixerListenerTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.listener = mixer.MixerListener()
 

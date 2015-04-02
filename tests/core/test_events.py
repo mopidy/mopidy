@@ -15,6 +15,7 @@ from tests import dummy_backend
 
 @mock.patch.object(core.CoreListener, 'send')
 class BackendEventsTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.backend = dummy_backend.create_proxy()
         self.backend.library.dummy_library = [

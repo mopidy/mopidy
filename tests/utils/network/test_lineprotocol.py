@@ -14,6 +14,7 @@ from tests import any_unicode
 
 
 class LineProtocolTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.mock = Mock(spec=network.LineProtocol)
 

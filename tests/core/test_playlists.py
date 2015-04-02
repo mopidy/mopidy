@@ -10,6 +10,7 @@ from mopidy.utils import deprecation
 
 
 class BasePlaylistsTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.plr1a = Ref.playlist(name='A', uri='dummy1:pl:a')
         self.plr1b = Ref.playlist(name='B', uri='dummy1:pl:b')
@@ -52,6 +53,7 @@ class BasePlaylistsTest(unittest.TestCase):
 
 
 class PlaylistTest(BasePlaylistsTest):
+
     def test_as_list_combines_result_from_backends(self):
         result = self.core.playlists.as_list()
 
@@ -231,6 +233,7 @@ class PlaylistTest(BasePlaylistsTest):
 
 
 class DeprecatedFilterPlaylistsTest(BasePlaylistsTest):
+
     def run(self, result=None):
         with deprecation.ignore(ids=['core.playlists.filter',
                                      'core.playlists.get_playlists']):
@@ -248,6 +251,7 @@ class DeprecatedFilterPlaylistsTest(BasePlaylistsTest):
 
 
 class DeprecatedGetPlaylistsTest(BasePlaylistsTest):
+
     def run(self, result=None):
         with deprecation.ignore('core.playlists.get_playlists'):
             return super(DeprecatedGetPlaylistsTest, self).run(result)

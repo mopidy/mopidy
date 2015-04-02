@@ -12,6 +12,7 @@ from tests import path_to_data_dir
 
 
 class LoadConfigTest(unittest.TestCase):
+
     def test_load_nothing(self):
         self.assertEqual({}, config._load([], [], []))
 
@@ -96,6 +97,7 @@ class LoadConfigTest(unittest.TestCase):
 
 
 class ValidateTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.schema = config.ConfigSchema('foo')
         self.schema['bar'] = config.ConfigValue()
