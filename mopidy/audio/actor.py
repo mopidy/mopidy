@@ -36,23 +36,6 @@ _GST_STATE_MAPPING = {
 
 MB = 1 << 20
 
-# GST_PLAY_FLAG_VIDEO (1<<0)
-# GST_PLAY_FLAG_AUDIO (1<<1)
-# GST_PLAY_FLAG_TEXT (1<<2)
-# GST_PLAY_FLAG_VIS (1<<3)
-# GST_PLAY_FLAG_SOFT_VOLUME (1<<4)
-# GST_PLAY_FLAG_NATIVE_AUDIO (1<<5)
-# GST_PLAY_FLAG_NATIVE_VIDEO (1<<6)
-# GST_PLAY_FLAG_DOWNLOAD (1<<7)
-# GST_PLAY_FLAG_BUFFERING (1<<8)
-# GST_PLAY_FLAG_DEINTERLACE (1<<9)
-# GST_PLAY_FLAG_SOFT_COLORBALANCE (1<<10)
-
-# Default flags to use for playbin: AUDIO, SOFT_VOLUME
-# TODO: consider removing soft volume when we do multi outputs and handling it
-# ourselves.
-PLAYBIN_FLAGS = (1 << 1) | (1 << 4)
-
 
 class _Signals(object):
     """Helper for tracking gobject signal registrations"""
@@ -438,7 +421,6 @@ class Audio(pykka.ThreadingActor):
             self._setup_preferences()
             self._setup_playbin()
             self._setup_outputs()
-            self._setup_mixer()
             self._setup_audio_sink()
         except gobject.GError as ex:
             logger.exception(ex)
@@ -459,7 +441,7 @@ class Audio(pykka.ThreadingActor):
 
     def _setup_playbin(self):
         playbin = gst.element_factory_make('playbin2')
-        playbin.set_property('flags', PLAYBIN_FLAGS)
+        playbin.set_property('flags', 2)  # GST_PLAY_FLAG_AUDIO
 
         # TODO: turn into config values...
         playbin.set_property('buffer-size', 2 * 1024 * 1024)
@@ -493,10 +475,6 @@ class Audio(pykka.ThreadingActor):
 
         self._handler.setup_event_handling(self._outputs.get_pad('sink'))
 
-    def _setup_mixer(self):
-        if self.mixer:
-            self.mixer.setup(self._playbin, self.actor_ref.proxy().mixer)
-
     def _setup_audio_sink(self):
         audio_sink = gst.Bin('audio-sink')
 
@@ -512,7 +490,15 @@ class Audio(pykka.ThreadingActor):
 
         audio_sink.add(queue)
         audio_sink.add(self._outputs)
-        queue.link(self._outputs)
+
+        if self.mixer:
+            volume = gst.element_factory_make('volume')
+            audio_sink.add(volume)
+            queue.link(volume)
+            volume.link(self._outputs)
+            self.mixer.setup(volume, self.actor_ref.proxy().mixer)
+        else:
+            queue.link(self._outputs)
 
         ghost_pad = gst.GhostPad('sink', queue.get_pad('sink'))
         audio_sink.add_pad(ghost_pad)
