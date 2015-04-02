@@ -5,6 +5,19 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v1.0.1 (unreleased)
+===================
+
+Audio
+-----
+
+- Software volume control has been reworked to greatly reduce the delay between
+  changing the volume and the change taking effect. (Fixes: :issue:`1097`)
+
+- Software volume is no longer tied to the PulseAudio application volume when
+  using ``pulsesink``. This behavior was confusing for many users and doesn't
+  work well with the plans for multiple outputs.
+
 v1.0.0 (2015-03-25)
 ===================
 
