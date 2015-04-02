@@ -14,6 +14,16 @@ Core API
 - Calling :meth:`mopidy.core.library.LibraryController.search`` with ``kwargs``
   as the query is no longer supported (PR: :issue:`1090`)
 
+Audio
+-----
+
+- Software volume control has been reworked to greatly reduce the delay between
+  changing the volume and the change taking effect. (Fixes: :issue:`1097`)
+
+- Software volume is no longer tied to the Pulse audio volume when using
+  ``pulsesink``. This behavior was confusing for many users and doesn't work
+  well with the plans for multiple outputs.
+
 Internal changes
 ----------------
 
