@@ -41,16 +41,25 @@ class ScannerTest(unittest.TestCase):
         name = path_to_data_dir(name)
         self.assertEqual(self.tags[name][key], value)
 
+    def check_if_missing_plugin(self):
+        if any(['missing a plug-in' in str(e) for e in self.errors.values()]):
+            raise unittest.SkipTest('Missing MP3 support?')
+
     def test_tags_is_set(self):
         self.scan(self.find('scanner/simple'))
         self.assert_(self.tags)
 
     def test_errors_is_not_set(self):
         self.scan(self.find('scanner/simple'))
+
+        self.check_if_missing_plugin()
+
         self.assert_(not self.errors)
 
     def test_duration_is_set(self):
         self.scan(self.find('scanner/simple'))
+
+        self.check_if_missing_plugin()
 
         self.assertEqual(
             self.durations[path_to_data_dir('scanner/simple/song1.mp3')], 4680)
@@ -59,16 +68,25 @@ class ScannerTest(unittest.TestCase):
 
     def test_artist_is_set(self):
         self.scan(self.find('scanner/simple'))
+
+        self.check_if_missing_plugin()
+
         self.check('scanner/simple/song1.mp3', 'artist', ['name'])
         self.check('scanner/simple/song1.ogg', 'artist', ['name'])
 
     def test_album_is_set(self):
         self.scan(self.find('scanner/simple'))
+
+        self.check_if_missing_plugin()
+
         self.check('scanner/simple/song1.mp3', 'album', ['albumname'])
         self.check('scanner/simple/song1.ogg', 'album', ['albumname'])
 
     def test_track_is_set(self):
         self.scan(self.find('scanner/simple'))
+
+        self.check_if_missing_plugin()
+
         self.check('scanner/simple/song1.mp3', 'title', ['trackname'])
         self.check('scanner/simple/song1.ogg', 'title', ['trackname'])
 
@@ -82,6 +100,9 @@ class ScannerTest(unittest.TestCase):
 
     def test_log_file_that_gst_thinks_is_mpeg_1_is_ignored(self):
         self.scan([path_to_data_dir('scanner/example.log')])
+
+        self.check_if_missing_plugin()
+
         self.assertLess(
             self.durations[path_to_data_dir('scanner/example.log')], 100)
 
