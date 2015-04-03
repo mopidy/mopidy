@@ -3,8 +3,6 @@ from __future__ import absolute_import, unicode_literals
 import logging
 import urlparse
 
-import pykka
-
 from mopidy.core import listener
 from mopidy.models import Playlist
 from mopidy.utils import deprecation
@@ -32,17 +30,21 @@ class PlaylistsController(object):
         .. versionadded:: 1.0
         """
         futures = {
-            b.actor_ref.actor_class.__name__: b.playlists.as_list()
-            for b in set(self.backends.with_playlists.values())}
+            backend: backend.playlists.as_list()
+            for backend in set(self.backends.with_playlists.values())}
 
         results = []
-        for backend_name, future in futures.items():
+        for backend, future in futures.items():
             try:
                 results.extend(future.get())
             except NotImplementedError:
+                backend_name = backend.actor_ref.actor_class.__name__
                 logger.warning(
                     '%s does not implement playlists.as_list(). '
                     'Please upgrade it.', backend_name)
+            except Exception:
+                logger.exception('%s backend caused an exception.',
+                                 backend.actor_ref.actor_class.__name__)
 
         return results
 
@@ -191,6 +193,8 @@ class PlaylistsController(object):
         else:
             return None
 
+    # TODO: there is an inconsistency between library.refresh(uri) and this
+    # call, not sure how to sort this out.
     def refresh(self, uri_scheme=None):
         """
         Refresh the playlists in :attr:`playlists`.
@@ -204,15 +208,27 @@ class PlaylistsController(object):
         :type uri_scheme: string
         """
         if uri_scheme is None:
-            futures = [b.playlists.refresh()
-                       for b in self.backends.with_playlists.values()]
-            pykka.get_all(futures)
-            listener.CoreListener.send('playlists_loaded')
+            futures = {b: b.playlists.refresh()
+                       for b in self.backends.with_playlists.values()}
+            playlists_loaded = False
+            for backend, future in futures.items():
+                try:
+                    future.get()
+                    playlists_loaded = True
+                except Exception:
+                    logger.exception('%s backend caused an exception.',
+                                     backend.actor_ref.actor_class.__name__)
+            if playlists_loaded:
+                listener.CoreListener.send('playlists_loaded')
         else:
             backend = self.backends.with_playlists.get(uri_scheme, None)
             if backend:
-                backend.playlists.refresh().get()
-                listener.CoreListener.send('playlists_loaded')
+                try:
+                    backend.playlists.refresh().get()
+                    listener.CoreListener.send('playlists_loaded')
+                except Exception:
+                    logger.exception('%s backend caused an exception.',
+                                     backend.actor_ref.actor_class.__name__)
 
     def save(self, playlist):
         """
