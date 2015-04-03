@@ -419,3 +419,71 @@ class LegacyFindExactToSearchLibraryTest(unittest.TestCase):
         self.backend.library.search.return_value.get.side_effect = TypeError
         self.core.library.search(query={'any': ['a']}, exact=True)
         # We are just testing that this doesn't fail.
+
+
+@mock.patch('mopidy.core.library.logger')
+class BackendFailuresCoreLibraryTest(unittest.TestCase):
+
+    def setUp(self):  # noqa: N802
+        dummy_root = Ref.directory(uri='dummy:directory', name='dummy')
+
+        self.library = mock.Mock(spec=backend.LibraryProvider)
+        self.library.root_directory.get.return_value = dummy_root
+
+        self.backend = mock.Mock()
+        self.backend.actor_ref.actor_class.__name__ = 'DummyBackend'
+        self.backend.uri_schemes.get.return_value = ['dummy']
+        self.backend.library = self.library
+
+        self.core = core.Core(mixer=None, backends=[self.backend])
+
+    def test_browse_backend_get_root_exception_gets_ignored(self, logger):
+        # Might happen if root_directory is a property for some weird reason.
+        self.library.root_directory.get.side_effect = Exception
+        self.assertEqual([], self.core.library.browse(None))
+        logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
+
+    def test_browse_backend_browse_uri_exception_gets_through(self, logger):
+        # TODO: is this behavior desired?
+        self.library.browse.return_value.get.side_effect = Exception
+        with self.assertRaises(Exception):
+            self.core.library.browse('dummy:directory')
+
+    def test_get_distinct_backend_exception_gets_ignored(self, logger):
+        self.library.get_distinct.return_value.get.side_effect = Exception
+        self.assertEqual(set(), self.core.library.get_distinct('artist'))
+        logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
+
+    def test_get_images_backend_exception_get_ignored(self, logger):
+        self.library.get_images.return_value.get.side_effect = Exception
+        self.assertEqual(
+            {'dummy:/1': tuple()}, self.core.library.get_images(['dummy:/1']))
+        logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
+
+    def test_lookup_backend_exceptiosn_gets_ignores(self, logger):
+        self.library.lookup.return_value.get.side_effect = Exception
+        self.assertEqual(
+            {'dummy:/1': []}, self.core.library.lookup(uris=['dummy:/1']))
+        logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
+
+    def test_refresh_backend_exception_gets_ignored(self, logger):
+        self.library.refresh.return_value.get.side_effect = Exception
+        self.core.library.refresh()
+        logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
+
+    def test_refresh_uri_backend_exception_gets_ignored(self, logger):
+        self.library.refresh.return_value.get.side_effect = Exception
+        self.core.library.refresh('dummy:/1')
+        logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
+
+    def test_search_backend_exception_gets_ignored(self, logger):
+        self.library.search.return_value.get.side_effect = Exception
+        self.assertEqual([], self.core.library.search(query={'any': ['foo']}))
+        logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
+
+    def test_search_backend_lookup_error_gets_through(self, logger):
+        # TODO: is this behavior desired? Do we need to continue handling
+        # LookupError case specially.
+        self.library.search.return_value.get.side_effect = LookupError
+        with self.assertRaises(LookupError):
+            self.core.library.search(query={'any': ['foo']})

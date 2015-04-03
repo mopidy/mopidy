@@ -5,7 +5,6 @@ import logging
 import operator
 import urlparse
 
-import pykka
 
 from mopidy.utils import deprecation
 
@@ -70,9 +69,16 @@ class LibraryController(object):
         .. versionadded:: 0.18
         """
         if uri is None:
+            directories = set()
             backends = self.backends.with_library_browse.values()
-            unique_dirs = {b.library.root_directory.get() for b in backends}
-            return sorted(unique_dirs, key=operator.attrgetter('name'))
+            futures = {b: b.library.root_directory for b in backends}
+            for backend, future in futures.items():
+                try:
+                    directories.add(future.get())
+                except Exception:
+                    logger.exception('%s backend caused an exception.',
+                                     backend.actor_ref.actor_class.__name__)
+            return sorted(directories, key=operator.attrgetter('name'))
 
         scheme = urlparse.urlparse(uri).scheme
         backend = self.backends.with_library_browse.get(scheme)
@@ -96,11 +102,15 @@ class LibraryController(object):
 
         .. versionadded:: 1.0
         """
-        futures = [b.library.get_distinct(field, query)
-                   for b in self.backends.with_library.values()]
         result = set()
-        for r in pykka.get_all(futures):
-            result.update(r)
+        futures = {b: b.library.get_distinct(field, query)
+                   for b in self.backends.with_library.values()}
+        for backend, future in futures.items():
+            try:
+                result.update(future.get())
+            except Exception:
+                logger.exception('%s backend caused an exception.',
+                                 backend.actor_ref.actor_class.__name__)
         return result
 
     def get_images(self, uris):
@@ -118,15 +128,19 @@ class LibraryController(object):
 
         .. versionadded:: 1.0
         """
-        futures = [
-            backend.library.get_images(backend_uris)
+        futures = {
+            backend: backend.library.get_images(backend_uris)
             for (backend, backend_uris)
-            in self._get_backends_to_uris(uris).items() if backend_uris]
+            in self._get_backends_to_uris(uris).items() if backend_uris}
 
         results = {uri: tuple() for uri in uris}
-        for r in pykka.get_all(futures):
-            for uri, images in r.items():
-                results[uri] += tuple(images)
+        for backend, future in futures.items():
+            try:
+                for uri, images in future.get().items():
+                    results[uri] += tuple(images)
+            except Exception:
+                logger.exception('%s backend caused an exception.',
+                                 backend.actor_ref.actor_class.__name__)
         return results
 
     def find_exact(self, query=None, uris=None, **kwargs):
@@ -171,19 +185,19 @@ class LibraryController(object):
             uris = [uri]
 
         futures = {}
-        result = {}
-        backends = self._get_backends_to_uris(uris)
+        result = {u: [] for u in uris}
 
         # TODO: lookup(uris) to backend APIs
-        for backend, backend_uris in backends.items():
-            for u in backend_uris or []:
-                futures[u] = backend.library.lookup(u)
+        for backend, backend_uris in self._get_backends_to_uris(uris).items():
+            for u in backend_uris:
+                futures[(backend, u)] = backend.library.lookup(u)
 
-        for u in uris:
-            if u in futures:
-                result[u] = futures[u].get()
-            else:
-                result[u] = []
+        for (backend, u), future in futures.items():
+            try:
+                result[u] = future.get()
+            except Exception:
+                logger.exception('%s backend caused an exception.',
+                                 backend.actor_ref.actor_class.__name__)
 
         if uri:
             return result[uri]
@@ -199,11 +213,20 @@ class LibraryController(object):
         if uri is not None:
             backend = self._get_backend(uri)
             if backend:
-                backend.library.refresh(uri).get()
+                try:
+                    backend.library.refresh(uri).get()
+                except Exception:
+                    logger.exception('%s backend caused an exception.',
+                                     backend.actor_ref.actor_class.__name__)
         else:
-            futures = [b.library.refresh(uri)
-                       for b in self.backends.with_library.values()]
-            pykka.get_all(futures)
+            futures = {b: b.library.refresh(uri)
+                       for b in self.backends.with_library.values()}
+            for backend, future in futures.items():
+                try:
+                    future.get()
+                except Exception:
+                    logger.exception('%s backend caused an exception.',
+                                     backend.actor_ref.actor_class.__name__)
 
     def search(self, query=None, uris=None, exact=False, **kwargs):
         """
@@ -273,6 +296,12 @@ class LibraryController(object):
                 logger.warning(
                     '%s does not implement library.search() with "exact" '
                     'support. Please upgrade it.', backend_name)
+            except LookupError:
+                raise
+            except Exception:
+                logger.exception('%s backend caused an exception.',
+                                 backend.actor_ref.actor_class.__name__)
+
         return [r for r in results if r]
 
 
