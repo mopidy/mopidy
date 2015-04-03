@@ -210,23 +210,23 @@ class LibraryController(object):
         :param uri: directory or track URI
         :type uri: string
         """
-        if uri is not None:
-            backend = self._get_backend(uri)
-            if backend:
-                try:
-                    backend.library.refresh(uri).get()
-                except Exception:
-                    logger.exception('%s backend caused an exception.',
-                                     backend.actor_ref.actor_class.__name__)
-        else:
-            futures = {b: b.library.refresh(uri)
-                       for b in self.backends.with_library.values()}
-            for backend, future in futures.items():
-                try:
-                    future.get()
-                except Exception:
-                    logger.exception('%s backend caused an exception.',
-                                     backend.actor_ref.actor_class.__name__)
+        futures = {}
+        backends = {}
+        uri_scheme = urlparse.urlparse(uri).scheme if uri else None
+
+        for backend_scheme, backend in self.backends.with_playlists.items():
+            backends.setdefault(backend, set()).add(backend_scheme)
+
+        for backend, backend_schemes in backends.items():
+            if uri_scheme is None or uri_scheme in backend_schemes:
+                futures[backend] = backend.library.refresh(uri)
+
+        for backend, future in futures.items():
+            try:
+                future.get()
+            except Exception:
+                logger.exception('%s backend caused an exception.',
+                                 backend.actor_ref.actor_class.__name__)
 
     def search(self, query=None, uris=None, exact=False, **kwargs):
         """

@@ -207,28 +207,27 @@ class PlaylistsController(object):
         :param uri_scheme: limit to the backend matching the URI scheme
         :type uri_scheme: string
         """
-        if uri_scheme is None:
-            futures = {b: b.playlists.refresh()
-                       for b in self.backends.with_playlists.values()}
-            playlists_loaded = False
-            for backend, future in futures.items():
-                try:
-                    future.get()
-                    playlists_loaded = True
-                except Exception:
-                    logger.exception('%s backend caused an exception.',
-                                     backend.actor_ref.actor_class.__name__)
-            if playlists_loaded:
-                listener.CoreListener.send('playlists_loaded')
-        else:
-            backend = self.backends.with_playlists.get(uri_scheme, None)
-            if backend:
-                try:
-                    backend.playlists.refresh().get()
-                    listener.CoreListener.send('playlists_loaded')
-                except Exception:
-                    logger.exception('%s backend caused an exception.',
-                                     backend.actor_ref.actor_class.__name__)
+        futures = {}
+        backends = {}
+        playlists_loaded = False
+
+        for backend_scheme, backend in self.backends.with_playlists.items():
+            backends.setdefault(backend, set()).add(backend_scheme)
+
+        for backend, backend_schemes in backends.items():
+            if uri_scheme is None or uri_scheme in backend_schemes:
+                futures[backend] = backend.playlists.refresh()
+
+        for backend, future in futures.items():
+            try:
+                future.get()
+                playlists_loaded = True
+            except Exception:
+                logger.exception('%s backend caused an exception.',
+                                 backend.actor_ref.actor_class.__name__)
+
+        if playlists_loaded:
+            listener.CoreListener.send('playlists_loaded')
 
     def save(self, playlist):
         """
