@@ -198,26 +198,22 @@ class ImmutableObject(object):
         :type values: dict
         :rtype: new instance of the model being copied
         """
-        data = {}  # TODO: do we need public key handling now?
-        for key in self.__dict__.keys():
-            public_key = key.lstrip('_')
-            value = values.pop(public_key, self.__dict__[key])
-            data[public_key] = value
+        data = {}
+        for key, value in self.__dict__.items():
+            data[key] = value
         for key in values.keys():
             if hasattr(self, key):
-                value = values.pop(key)
-                data[key] = value
+                data[key] = values.pop(key)
         if values:
+            args = ', '.join(values)
             raise TypeError(
-                'copy() got an unexpected keyword argument "%s"' % key)
+                'copy() got an unexpected keyword argument "%s"' % args)
         return self.__class__(**data)
 
     def serialize(self):
-        data = {}  # TODO: do we need public key handling now?
+        data = {}
         data['__model__'] = self.__class__.__name__
-        for key in self.__dict__.keys():
-            public_key = key.lstrip('_')
-            value = self.__dict__[key]
+        for key, value in self.__dict__.items():
             if isinstance(value, (set, frozenset, list, tuple)):
                 value = [
                     v.serialize() if isinstance(v, ImmutableObject) else v
@@ -225,7 +221,7 @@ class ImmutableObject(object):
             elif isinstance(value, ImmutableObject):
                 value = value.serialize()
             if not (isinstance(value, list) and len(value) == 0):
-                data[public_key] = value
+                data[key] = value
         return data
 
 
