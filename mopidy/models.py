@@ -21,7 +21,7 @@ class Field(object):
         :param type: if set the field value must be of this type
         :param choices: if set the field value must be one of these
         """
-        self._name = None  # Set by FieldMeta
+        self._name = None  # Set by FieldOwner
         self._choices = choices
         self._default = default
         self._type = type
@@ -197,17 +197,14 @@ class ImmutableObject(object):
         :type values: dict
         :rtype: new instance of the model being copied
         """
-        data = {}
-        for key, value in self.__dict__.items():
-            data[key] = value
-        for key in values.keys():
-            if hasattr(self, key):
-                data[key] = values.pop(key)
-        if values:
-            args = ', '.join(values)
-            raise TypeError(
-                'copy() got an unexpected keyword argument "%s"' % args)
-        return self.__class__(**data)
+        other = self.__class__()
+        other.__dict__.update(self.__dict__.copy())
+        for key, value in values.items():
+            if key not in self._fields:
+                raise TypeError(
+                    'copy() got an unexpected keyword argument "%s"' % key)
+            super(ImmutableObject, other).__setattr__(key, value)
+        return other
 
     def serialize(self):
         data = {}
