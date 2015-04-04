@@ -152,6 +152,9 @@ class ImmutableObject(object):
             return super(ImmutableObject, self).__setattr__(name, value)
         raise AttributeError('Object is immutable.')
 
+    def __delattr__(self, name):
+        raise AttributeError('Object is immutable.')
+
     def __repr__(self):
         kwarg_pairs = []
         for (key, value) in sorted(self.__dict__.items()):

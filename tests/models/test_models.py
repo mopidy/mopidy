@@ -74,6 +74,12 @@ class RefTest(unittest.TestCase):
         with self.assertRaises(AttributeError):
             ref.name = None
 
+    # TODO: add these for the more of the models?
+    def test_del_name(self):
+        ref = Ref(name='foo')
+        with self.assertRaises(AttributeError):
+            del ref.name
+
     def test_invalid_kwarg(self):
         with self.assertRaises(TypeError):
             Ref(foo='baz')
