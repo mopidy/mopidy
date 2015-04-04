@@ -118,9 +118,12 @@ class Collection(Field):
 class FieldOwner(type):
     """Helper to automatically assign field names to descriptors."""
     def __new__(cls, name, bases, attrs):
+        attrs['_fields'] = []
         for key, value in attrs.items():
             if isinstance(value, Field):
+                attrs['_fields'].append(key)
                 value._name = key
+        attrs['_fields'].sort()
         return super(FieldOwner, cls).__new__(cls, name, bases, attrs)
 
 
@@ -139,7 +142,7 @@ class ImmutableObject(object):
 
     def __init__(self, *args, **kwargs):
         for key, value in kwargs.items():
-            if not hasattr(self, key) or callable(getattr(self, key)):
+            if key not in self._fields:
                 raise TypeError(
                     '__init__() got an unexpected keyword argument "%s"' %
                     key)
