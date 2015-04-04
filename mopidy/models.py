@@ -151,8 +151,6 @@ class ImmutableObject(object):
             super(ImmutableObject, self).__setattr__(key, value)
 
     def __setattr__(self, name, value):
-        if name.startswith('_'):
-            return super(ImmutableObject, self).__setattr__(name, value)
         raise AttributeError('Object is immutable.')
 
     def __delattr__(self, name):
