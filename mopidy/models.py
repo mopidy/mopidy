@@ -2,6 +2,127 @@ from __future__ import absolute_import, unicode_literals
 
 import json
 
+# TODO: split into base models, serialization and fields?
+
+
+class Field(object):
+    def __init__(self, default=None, type=None, choices=None):
+        """
+        Base field for use in :class:`ImmutableObject`. These fields are
+        responsible type checking and other data sanitation in our models.
+
+        For simplicity fields use the Python descriptor protocol to store the
+        values in the instance dictionary. Also note that fields are mutable if
+        the object they are attached to allow it.
+
+        Default values will be validated with the exception of :class:`None`.
+
+        :param default: default value for field
+        :param type: if set the field value must be of this type
+        :param choices: if set the field value must be one of these
+        """
+        self._name = None  # Set by FieldMeta
+        self._choices = choices
+        self._default = default
+        self._type = type
+
+        if self._default is not None:
+            self.validate(self._default)
+
+    def validate(self, value):
+        """Validate and possibly modify the field value before assignment"""
+        if self._type and not isinstance(value, self._type):
+            raise TypeError('Expected %s to be a %s, not %r' %
+                            (self._name, self._type, value))
+        if self._choices and value not in self._choices:
+            raise TypeError('Expected %s to be a one of %s, not %r' %
+                            (self._name, self._choices, value))
+        return value
+
+    def __get__(self, instance, owner):
+        if not instance:
+            return self
+        return instance.__dict__.get(self._name, self._default)
+
+    def __set__(self, instance, value):
+        if value is None:
+            value = self._default
+        value = self.validate(value)
+        if value is not None:
+            instance.__dict__[self._name] = value
+        else:
+            self.__delete__(instance)
+
+    def __delete__(self, instance):
+        instance.__dict__.pop(self._name, None)
+
+
+class String(Field):
+    def __init__(self, default=None):
+        """
+        Specialized :class:`Field` which is wired up for bytes and unicode.
+
+        :param default: default value for field
+        """
+        # TODO: normalize to unicode?
+        # TODO: only allow unicode?
+        # TODO: disallow empty strings?
+        super(String, self).__init__(type=basestring, default=default)
+
+
+class Integer(Field):
+    def __init__(self, default=None, min=None, max=None):
+        """
+        :class:`Field` for storing integer numbers.
+
+        :param default: default value for field
+        :param min: if set the field value larger or equal to this value
+        :param max: if set the field value smaller or equal to this value
+        """
+        self._min = min
+        self._max = max
+        super(Integer, self).__init__(type=(int, long), default=default)
+
+    def validate(self, value):
+        value = super(Integer, self).validate(value)
+        if self._min is not None and value < self._min:
+            raise ValueError('Expected %s to be at least %d, not %d' %
+                             (self._name, self._min, value))
+        if self._max is not None and value > self._max:
+            raise ValueError('Expected %s to be at most %d, not %d' %
+                             (self._name, self._max, value))
+        return value
+
+
+class Collection(Field):
+    def __init__(self, type, container=tuple):
+        """
+        :class:`Field` for storing collections of a given type.
+
+        :param type: all items stored in the collection must be of this type
+        :param container: the type to store the items in
+        """
+        super(Collection, self).__init__(type=type, default=container())
+
+    def validate(self, value):
+        if isinstance(value, basestring):
+            raise TypeError('Expected %s to be a collection of %s, not %r'
+                            % (self._name, self._type.__name__, value))
+        for v in value:
+            if not isinstance(v, self._type):
+                raise TypeError('Expected %s to be a collection of %s, not %r'
+                                % (self._name, self._type.__name__, value))
+        return self._default.__class__(value) or None
+
+
+class FieldOwner(type):
+    """Helper to automatically assign field names to descriptors."""
+    def __new__(cls, name, bases, attrs):
+        for key, value in attrs.items():
+            if isinstance(value, Field):
+                value._name = key
+        return super(FieldOwner, cls).__new__(cls, name, bases, attrs)
+
 
 class ImmutableObject(object):
 
