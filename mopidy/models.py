@@ -198,7 +198,7 @@ class ImmutableObject(object):
         :rtype: new instance of the model being copied
         """
         other = self.__class__()
-        other.__dict__.update(self.__dict__.copy())
+        other.__dict__.update(self.__dict__)
         for key, value in values.items():
             if key not in self._fields:
                 raise TypeError(
