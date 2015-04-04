@@ -59,6 +59,14 @@ class FieldDescriptorTest(unittest.TestCase):
         self.assertEqual(None, instance.attr)
         self.assertNotIn('attr', instance.__dict__)
 
+    def test_field_can_be_set_default(self):
+        default = object()
+        instance = create_instance(Field(default=default))
+        instance.attr = 1234
+        instance.attr = default
+        self.assertEqual(default, instance.attr)
+        self.assertNotIn('attr', instance.__dict__)
+
 
 class FieldTest(unittest.TestCase):
     def test_default_handling(self):

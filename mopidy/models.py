@@ -45,13 +45,13 @@ class Field(object):
         return instance.__dict__.get(self._name, self._default)
 
     def __set__(self, instance, value):
-        if value is None:
-            value = self._default
-        value = self.validate(value)
         if value is not None:
-            instance.__dict__[self._name] = value
-        else:
+            value = self.validate(value)
+
+        if value is None or value == self._default:
             self.__delete__(instance)
+        else:
+            instance.__dict__[self._name] = value
 
     def __delete__(self, instance):
         instance.__dict__.pop(self._name, None)
@@ -146,8 +146,6 @@ class ImmutableObject(object):
                 raise TypeError(
                     '__init__() got an unexpected keyword argument "%s"' %
                     key)
-            if value == getattr(self, key):
-                continue  # Don't explicitly set default values
             super(ImmutableObject, self).__setattr__(key, value)
 
     def __setattr__(self, name, value):
