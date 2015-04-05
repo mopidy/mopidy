@@ -21,6 +21,7 @@ _RAW_AUDIO = gst.Caps(b'audio/x-raw-int; audio/x-raw-float')
 
 # TODO: replace with a scan(uri, timeout=1000, proxy_config=None)?
 class Scanner(object):
+
     """
     Helper to get tags and other relevant info from URIs.
 
@@ -73,7 +74,8 @@ def _setup_pipeline(uri, proxy_config=None):
     sink = gst.element_factory_make('fakesink')
 
     pipeline = gst.element_factory_make('pipeline')
-    pipeline.add_many(src, typefind, decodebin, sink)
+    for e in (src, typefind, decodebin, sink):
+        pipeline.add(e)
     gst.element_link_many(src, typefind, decodebin)
 
     if proxy_config:

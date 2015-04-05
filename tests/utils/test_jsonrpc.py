@@ -8,12 +8,13 @@ import mock
 import pykka
 
 from mopidy import core, models
-from mopidy.utils import jsonrpc
+from mopidy.utils import deprecation, jsonrpc
 
 from tests import dummy_backend
 
 
 class Calculator(object):
+
     def __init__(self):
         self._mem = None
 
@@ -50,10 +51,13 @@ class Calculator(object):
 
 
 class JsonRpcTestBase(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.backend = dummy_backend.create_proxy()
-        self.core = core.Core.start(backends=[self.backend]).proxy()
         self.calc = Calculator()
+
+        with deprecation.ignore():
+            self.core = core.Core.start(backends=[self.backend]).proxy()
 
         self.jrw = jsonrpc.JsonRpcWrapper(
             objects={
@@ -72,12 +76,14 @@ class JsonRpcTestBase(unittest.TestCase):
 
 
 class JsonRpcSetupTest(JsonRpcTestBase):
+
     def test_empty_object_mounts_is_not_allowed(self):
         with self.assertRaises(AttributeError):
             jsonrpc.JsonRpcWrapper(objects={'': Calculator()})
 
 
 class JsonRpcSerializationTest(JsonRpcTestBase):
+
     def test_handle_json_converts_from_and_to_json(self):
         self.jrw.handle_data = mock.Mock()
         self.jrw.handle_data.return_value = {'foo': 'response'}
@@ -143,6 +149,7 @@ class JsonRpcSerializationTest(JsonRpcTestBase):
 
 
 class JsonRpcSingleCommandTest(JsonRpcTestBase):
+
     def test_call_method_on_root(self):
         request = {
             'jsonrpc': '2.0',
@@ -247,6 +254,7 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
 
 
 class JsonRpcSingleNotificationTest(JsonRpcTestBase):
+
     def test_notification_does_not_return_a_result(self):
         request = {
             'jsonrpc': '2.0',
@@ -281,6 +289,7 @@ class JsonRpcSingleNotificationTest(JsonRpcTestBase):
 
 
 class JsonRpcBatchTest(JsonRpcTestBase):
+
     def test_batch_of_only_commands_returns_all(self):
         self.core.tracklist.set_random(True).get()
 
@@ -329,6 +338,7 @@ class JsonRpcBatchTest(JsonRpcTestBase):
 
 
 class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
+
     def test_application_error_response(self):
         request = {
             'jsonrpc': '2.0',
@@ -498,6 +508,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
 
 
 class JsonRpcBatchErrorTest(JsonRpcTestBase):
+
     def test_empty_batch_list_causes_invalid_request_error(self):
         request = []
         response = self.jrw.handle_data(request)
@@ -564,6 +575,7 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
 
 
 class JsonRpcInspectorTest(JsonRpcTestBase):
+
     def test_empty_object_mounts_is_not_allowed(self):
         with self.assertRaises(AttributeError):
             jsonrpc.JsonRpcInspector(objects={'': Calculator})

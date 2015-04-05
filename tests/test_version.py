@@ -7,6 +7,7 @@ from mopidy import __version__
 
 
 class VersionTest(unittest.TestCase):
+
     def assertVersionLess(self, first, second):  # noqa: N802
         self.assertLess(StrictVersion(first), StrictVersion(second))
 

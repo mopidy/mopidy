@@ -13,6 +13,7 @@ from mopidy.http import handlers
 
 
 class StaticFileHandlerTest(tornado.testing.AsyncHTTPTestCase):
+
     def get_app(self):
         return tornado.web.Application([
             (r'/(.*)', handlers.StaticFileHandler, {
@@ -43,6 +44,7 @@ class StaticFileHandlerTest(tornado.testing.AsyncHTTPTestCase):
 # We aren't bothering with skipIf as then we would need to "backport" gen_test
 if hasattr(tornado.websocket, 'websocket_connect'):
     class WebSocketHandlerTest(tornado.testing.AsyncHTTPTestCase):
+
         def get_app(self):
             self.core = mock.Mock()
             return tornado.web.Application([

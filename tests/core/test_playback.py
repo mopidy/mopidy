@@ -13,7 +13,9 @@ from tests import dummy_audio as audio
 
 
 # TODO: split into smaller easier to follow tests. setup is way to complex.
+# TODO: just mock tracklist?
 class CorePlaybackTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
@@ -42,13 +44,31 @@ class CorePlaybackTest(unittest.TestCase):
             Track(uri='dummy1:c', length=None),   # No duration
         ]
 
+        self.uris = [
+            'dummy1:a', 'dummy2:a', 'dummy3:a', 'dummy1:b', 'dummy1:c']
+
         self.core = core.Core(mixer=None, backends=[
             self.backend1, self.backend2, self.backend3])
-        self.core.tracklist.add(self.tracks)
+
+        def lookup(uris):
+            result = {uri: [] for uri in uris}
+            for track in self.tracks:
+                if track.uri in result:
+                    result[track.uri].append(track)
+            return result
+
+        self.lookup_patcher = mock.patch.object(self.core.library, 'lookup')
+        self.lookup_mock = self.lookup_patcher.start()
+        self.lookup_mock.side_effect = lookup
+
+        self.core.tracklist.add(uris=self.uris)
 
         self.tl_tracks = self.core.tracklist.tl_tracks
         self.unplayable_tl_track = self.tl_tracks[2]
         self.duration_less_tl_track = self.tl_tracks[4]
+
+    def tearDown(self):  # noqa: N802
+        self.lookup_patcher.stop()
 
     def trigger_end_of_track(self):
         self.core.playback._on_end_of_track()
@@ -136,7 +156,7 @@ class CorePlaybackTest(unittest.TestCase):
         self.playback2.change_track.return_value.get.return_value = False
 
         self.core.tracklist.clear()
-        self.core.tracklist.add(self.tracks[:2])
+        self.core.tracklist.add(uris=self.uris[:2])
         tl_tracks = self.core.tracklist.tl_tracks
 
         self.core.playback.play(tl_tracks[0])
@@ -582,6 +602,7 @@ class TestBackend(pykka.ThreadingActor, backend.Backend):
 
 
 class TestStream(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.audio = audio.DummyAudio.start().proxy()
         self.backend = TestBackend.start(config={}, audio=self.audio).proxy()
@@ -591,11 +612,16 @@ class TestStream(unittest.TestCase):
         self.tracks = [Track(uri='dummy:a', length=1234),
                        Track(uri='dummy:b', length=1234)]
 
-        self.core.tracklist.add(self.tracks)
+        self.lookup_patcher = mock.patch.object(self.core.library, 'lookup')
+        self.lookup_mock = self.lookup_patcher.start()
+        self.lookup_mock.return_value = {t.uri: [t] for t in self.tracks}
+
+        self.core.tracklist.add(uris=[t.uri for t in self.tracks])
 
         self.events = []
-        self.patcher = mock.patch('mopidy.audio.listener.AudioListener.send')
-        self.send_mock = self.patcher.start()
+        self.send_patcher = mock.patch(
+            'mopidy.audio.listener.AudioListener.send')
+        self.send_mock = self.send_patcher.start()
 
         def send(event, **kwargs):
             self.events.append((event, kwargs))
@@ -604,7 +630,8 @@ class TestStream(unittest.TestCase):
 
     def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
-        self.patcher.stop()
+        self.lookup_patcher.stop()
+        self.send_patcher.stop()
 
     def replay_audio_events(self):
         while self.events:
@@ -659,12 +686,15 @@ class TestStream(unittest.TestCase):
 
 
 class CorePlaybackWithOldBackendTest(unittest.TestCase):
+
     def test_type_error_from_old_backend_does_not_crash_core(self):
         b = mock.Mock()
         b.uri_schemes.get.return_value = ['dummy1']
         b.playback = mock.Mock(spec=backend.PlaybackProvider)
         b.playback.play.side_effect = TypeError
+        b.library.lookup.return_value.get.return_value = [
+            Track(uri='dummy1:a', length=40000)]
 
         c = core.Core(mixer=None, backends=[b])
-        c.tracklist.add([Track(uri='dummy1:a', length=40000)])
+        c.tracklist.add(uris=['dummy1:a'])
         c.playback.play()  # No TypeError == test passed.

@@ -142,6 +142,7 @@ def set_mopidy_headers(request_handler):
 
 
 class JsonRpcHandler(tornado.web.RequestHandler):
+
     def initialize(self, core):
         self.jsonrpc = make_jsonrpc_wrapper(core)
 
@@ -176,6 +177,7 @@ class JsonRpcHandler(tornado.web.RequestHandler):
 
 
 class ClientListHandler(tornado.web.RequestHandler):
+
     def initialize(self, apps, statics):
         self.apps = apps
         self.statics = statics
@@ -197,6 +199,7 @@ class ClientListHandler(tornado.web.RequestHandler):
 
 
 class StaticFileHandler(tornado.web.StaticFileHandler):
+
     def set_extra_headers(self, path):
         set_mopidy_headers(self)
 

@@ -7,6 +7,9 @@ import urlparse
 
 import pykka
 
+from mopidy.utils import deprecation
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -132,6 +135,7 @@ class LibraryController(object):
         .. deprecated:: 1.0
             Use :meth:`search` with ``exact`` set.
         """
+        deprecation.warn('core.library.find_exact')
         return self.search(query=query, uris=uris, exact=True, **kwargs)
 
     def lookup(self, uri=None, uris=None):
@@ -159,6 +163,9 @@ class LibraryController(object):
 
         if none_set or both_set:
             raise ValueError("One of 'uri' or 'uris' must be set")
+
+        if uri:
+            deprecation.warn('core.library.lookup:uri_arg')
 
         if uri is not None:
             uris = [uri]
@@ -202,12 +209,6 @@ class LibraryController(object):
         """
         Search the library for tracks where ``field`` contains ``values``.
 
-        .. deprecated:: 1.0
-            Previously, if the query was empty, and the backend could support
-            it, all available tracks were returned. This has not changed, but
-            it is strongly discouraged. No new code should rely on this
-            behavior.
-
         If ``uris`` is given, the search is limited to results from within the
         URI roots. For example passing ``uris=['file:']`` will limit the search
         to the local backend.
@@ -240,8 +241,24 @@ class LibraryController(object):
 
         .. versionadded:: 1.0
             The ``exact`` keyword argument, which replaces :meth:`find_exact`.
+
+        .. deprecated:: 1.0
+            Previously, if the query was empty, and the backend could support
+            it, all available tracks were returned. This has not changed, but
+            it is strongly discouraged. No new code should rely on this
+            behavior.
+
+        .. deprecated:: 1.1
+            Providing the search query via ``kwargs`` is no longer supported.
         """
         query = _normalize_query(query or kwargs)
+
+        if kwargs:
+            deprecation.warn('core.library.search:kwargs_query')
+
+        if not query:
+            deprecation.warn('core.library.search:empty_query')
+
         futures = {}
         for backend, backend_uris in self._get_backends_to_uris(uris).items():
             futures[backend] = backend.library.search(

@@ -10,6 +10,7 @@ from mopidy import compat
 
 
 class JsonRpcWrapper(object):
+
     """
     Wrap objects and make them accessible through JSON-RPC 2.0 messaging.
 
@@ -278,6 +279,7 @@ def get_combined_json_decoder(decoders):
 
 def get_combined_json_encoder(encoders):
     class JsonRpcEncoder(json.JSONEncoder):
+
         def default(self, obj):
             for encoder in encoders:
                 try:
@@ -289,6 +291,7 @@ def get_combined_json_encoder(encoders):
 
 
 class JsonRpcInspector(object):
+
     """
     Inspects a group of classes and functions to create a description of what
     methods they can expose over JSON-RPC 2.0.

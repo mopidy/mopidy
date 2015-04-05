@@ -21,6 +21,7 @@ logging.addLevelName(TRACE_LOG_LEVEL, 'TRACE')
 
 
 class DelayedHandler(logging.Handler):
+
     def __init__(self):
         logging.Handler.__init__(self)
         self._released = False
@@ -101,6 +102,7 @@ def setup_debug_logging_to_file(config):
 
 
 class VerbosityFilter(logging.Filter):
+
     def __init__(self, verbosity_level, loglevels):
         self.verbosity_level = verbosity_level
         self.loglevels = loglevels
@@ -123,6 +125,7 @@ COLORS = [b'black', b'red', b'green', b'yellow', b'blue', b'magenta', b'cyan',
 
 
 class ColorizingStreamHandler(logging.StreamHandler):
+
     """
     Stream handler which colorizes the log using ANSI escape sequences.
 

@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class MpdFrontend(pykka.ThreadingActor, CoreListener):
+
     def __init__(self, config, core):
         super(MpdFrontend, self).__init__()
 

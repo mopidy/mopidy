@@ -4,6 +4,7 @@ from mopidy import listener, models
 
 
 class Backend(object):
+
     """Backend API
 
     If the backend has problems during initialization it should raise
@@ -59,6 +60,7 @@ class Backend(object):
 
 
 class LibraryProvider(object):
+
     """
     :param backend: backend the controller is a part of
     :type backend: :class:`mopidy.backend.Backend`
@@ -148,6 +150,7 @@ class LibraryProvider(object):
 
 
 class PlaybackProvider(object):
+
     """
     :param audio: the audio actor
     :type audio: actor proxy to an instance of :class:`mopidy.audio.Audio`
@@ -280,6 +283,7 @@ class PlaybackProvider(object):
 
 
 class PlaylistsProvider(object):
+
     """
     A playlist provider exposes a collection of playlists, methods to
     create/change/delete playlists in this collection, and lookup of any
@@ -391,6 +395,7 @@ class PlaylistsProvider(object):
 
 
 class BackendListener(listener.Listener):
+
     """
     Marker interface for recipients of events sent by the backend actors.
 

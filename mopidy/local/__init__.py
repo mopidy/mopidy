@@ -48,6 +48,7 @@ class Extension(ext.Extension):
 
 
 class Library(object):
+
     """
     Local library interface.
 

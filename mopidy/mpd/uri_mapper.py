@@ -4,6 +4,7 @@ import re
 
 
 class MpdUriMapper(object):
+
     """
     Maintains the mappings between uniquified MPD names and URIs.
     """

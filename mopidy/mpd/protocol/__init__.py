@@ -83,6 +83,7 @@ def RANGE(value):  # noqa: N802
 
 
 class Commands(object):
+
     """Collection of MPD commands to expose to users.
 
     Normally used through the global instance which command handlers have been

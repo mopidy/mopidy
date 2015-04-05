@@ -11,6 +11,7 @@ from mopidy import core
 from mopidy.core import PlaybackState
 from mopidy.local import actor
 from mopidy.models import Track
+from mopidy.utils import deprecation
 
 from tests import dummy_audio, path_to_data_dir
 from tests.local import generate_song, populate_tracklist
@@ -41,6 +42,10 @@ class LocalPlaybackProviderTest(unittest.TestCase):
 
     def trigger_end_of_track(self):
         self.playback._on_end_of_track()
+
+    def run(self, result=None):
+        with deprecation.ignore('core.tracklist.add:tracks_arg'):
+            return super(LocalPlaybackProviderTest, self).run(result)
 
     def setUp(self):  # noqa: N802
         self.audio = dummy_audio.create_proxy()

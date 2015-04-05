@@ -1,8 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
-import warnings
-
 from mopidy.mpd import exceptions, protocol, translator
+from mopidy.utils import deprecation
 
 
 @protocol.commands.add('add')
@@ -22,21 +21,21 @@ def add(context, uri):
     if not uri.strip('/'):
         return
 
-    if context.core.tracklist.add(uri=uri).get():
+    if context.core.tracklist.add(uris=[uri]).get():
         return
 
     try:
-        tracks = []
-        for path, lookup_future in context.browse(uri):
-            if lookup_future:
-                tracks.extend(lookup_future.get())
+        uris = []
+        for path, ref in context.browse(uri, lookup=False):
+            if ref:
+                uris.append(ref.uri)
     except exceptions.MpdNoExistError as e:
         e.message = 'directory or file not found'
         raise
 
-    if not tracks:
+    if not uris:
         raise exceptions.MpdNoExistError('directory or file not found')
-    context.core.tracklist.add(tracks=tracks)
+    context.core.tracklist.add(uris=uris).get()
 
 
 @protocol.commands.add('addid', songpos=protocol.UINT)
@@ -62,7 +61,8 @@ def addid(context, uri, songpos=None):
         raise exceptions.MpdNoExistError('No such song')
     if songpos is not None and songpos > context.core.tracklist.length.get():
         raise exceptions.MpdArgError('Bad song index')
-    tl_tracks = context.core.tracklist.add(uri=uri, at_position=songpos).get()
+    tl_tracks = context.core.tracklist.add(
+        uris=[uri], at_position=songpos).get()
     if not tl_tracks:
         raise exceptions.MpdNoExistError('No such song')
     return ('Id', tl_tracks[0].tlid)
@@ -162,8 +162,7 @@ def playlist(context):
 
             Do not use this, instead use ``playlistinfo``.
     """
-    warnings.warn(
-        'Do not use this, instead use playlistinfo', DeprecationWarning)
+    deprecation.warn('mpd.protocol.current_playlist.playlist')
     return playlistinfo(context)
 
 
@@ -349,8 +348,12 @@ def swap(context, songpos1, songpos2):
     tracks.insert(songpos1, song2)
     del tracks[songpos2]
     tracks.insert(songpos2, song1)
+
+    # TODO: do we need a tracklist.replace()
     context.core.tracklist.clear()
-    context.core.tracklist.add(tracks)
+
+    with deprecation.ignore('core.tracklist.add:tracks_arg'):
+        context.core.tracklist.add(tracks=tracks).get()
 
 
 @protocol.commands.add('swapid', tlid1=protocol.UINT, tlid2=protocol.UINT)

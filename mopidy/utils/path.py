@@ -227,6 +227,7 @@ def check_file_path_is_inside_base_dir(file_path, base_path):
 
 # FIXME replace with mock usage in tests.
 class Mtime(object):
+
     def __init__(self):
         self.fake = None
 

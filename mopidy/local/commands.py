@@ -29,6 +29,7 @@ def _get_library(args, config):
 
 
 class LocalCommand(commands.Command):
+
     def __init__(self):
         super(LocalCommand, self).__init__()
         self.add_child('scan', ScanCommand())
@@ -162,6 +163,7 @@ class ScanCommand(commands.Command):
 
 
 class _Progress(object):
+
     def __init__(self, batch_size, total):
         self.count = 0
         self.batch_size = batch_size

@@ -17,6 +17,7 @@ from tests import any_int, any_unicode
 
 
 class ConnectionTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.mock = Mock(spec=network.Connection)
 

@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class Mixer(object):
+
     """
     Audio mixer API
 
@@ -111,6 +112,7 @@ class Mixer(object):
 
 
 class MixerListener(listener.Listener):
+
     """
     Marker interface for recipients of events sent by the mixer actor.
 

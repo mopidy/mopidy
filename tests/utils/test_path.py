@@ -16,6 +16,7 @@ import tests
 
 
 class GetOrCreateDirTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.parent = tempfile.mkdtemp()
 
@@ -67,6 +68,7 @@ class GetOrCreateDirTest(unittest.TestCase):
 
 
 class GetOrCreateFileTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.parent = tempfile.mkdtemp()
 
@@ -135,6 +137,7 @@ class GetOrCreateFileTest(unittest.TestCase):
 
 
 class PathToFileURITest(unittest.TestCase):
+
     def test_simple_path(self):
         result = path.path_to_uri('/etc/fstab')
         self.assertEqual(result, 'file:///etc/fstab')
@@ -157,6 +160,7 @@ class PathToFileURITest(unittest.TestCase):
 
 
 class UriToPathTest(unittest.TestCase):
+
     def test_simple_uri(self):
         result = path.uri_to_path('file:///etc/fstab')
         self.assertEqual(result, '/etc/fstab'.encode('utf-8'))
@@ -175,6 +179,7 @@ class UriToPathTest(unittest.TestCase):
 
 
 class SplitPathTest(unittest.TestCase):
+
     def test_empty_path(self):
         self.assertEqual([], path.split_path(''))
 
@@ -378,6 +383,7 @@ class FindMTimesTest(unittest.TestCase):
 
 # TODO: kill this in favour of just os.path.getmtime + mocks
 class MtimeTest(unittest.TestCase):
+
     def tearDown(self):  # noqa: N802
         path.mtime.undo_fake()
 

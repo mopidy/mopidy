@@ -35,6 +35,7 @@ def send(cls, event, **kwargs):
 
 
 class Listener(object):
+
     def on_event(self, event, **kwargs):
         """
         Called on all events.

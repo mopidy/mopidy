@@ -1,6 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import datetime
 import unittest
 
 from mopidy.models import Album, Artist, Playlist, TlTrack, Track
@@ -20,8 +19,8 @@ class TrackMpdFormatTest(unittest.TestCase):
         composers=[Artist(name='a composer')],
         performers=[Artist(name='a performer')],
         genre='a genre',
-        date=datetime.date(1977, 1, 1),
-        disc_no='1',
+        date='1977-1-1',
+        disc_no=1,
         comment='a comment',
         length=137000,
     )
@@ -73,8 +72,8 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assertIn(('Performer', 'a performer'), result)
         self.assertIn(('Genre', 'a genre'), result)
         self.assertIn(('Track', '7/13'), result)
-        self.assertIn(('Date', datetime.date(1977, 1, 1)), result)
-        self.assertIn(('Disc', '1'), result)
+        self.assertIn(('Date', '1977-1-1'), result)
+        self.assertIn(('Disc', 1), result)
         self.assertIn(('Pos', 9), result)
         self.assertIn(('Id', 122), result)
         self.assertNotIn(('Comment', 'a comment'), result)
@@ -116,6 +115,7 @@ class TrackMpdFormatTest(unittest.TestCase):
 
 
 class PlaylistMpdFormatTest(unittest.TestCase):
+
     def test_mpd_format(self):
         playlist = Playlist(tracks=[
             Track(track_no=1), Track(track_no=2), Track(track_no=3)])

@@ -30,6 +30,7 @@ encoded_ext_track = encoded_track.copy(name='æøå')
 # FIXME use mock instead of tempfile.NamedTemporaryFile
 
 class M3UToUriTest(unittest.TestCase):
+
     def parse(self, name):
         return translator.parse_m3u(name, data_dir)
 

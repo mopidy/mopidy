@@ -16,6 +16,7 @@ from mopidy.utils import deps
 
 
 class DepsTest(unittest.TestCase):
+
     def test_format_dependency_list(self):
         adapters = [
             lambda: dict(name='Python', version='FooPython 2.7.3'),

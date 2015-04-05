@@ -31,6 +31,7 @@ def _convert_text_list_to_dbus_format(text_list):
 
 
 class Zeroconf(object):
+
     """Publish a network service with Zeroconf.
 
     Currently, this only works on Linux using Avahi via D-Bus.

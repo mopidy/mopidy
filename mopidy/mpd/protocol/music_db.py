@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import functools
 import itertools
+import warnings
 
 from mopidy.models import Track
 from mopidy.mpd import exceptions, protocol, translator
@@ -100,7 +101,7 @@ def count(context, *args):
         query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         raise exceptions.MpdArgError('incorrect arguments')
-    results = context.core.library.find_exact(**query).get()
+    results = context.core.library.search(query=query, exact=True).get()
     result_tracks = _get_tracks(results)
     return [
         ('songs', len(result_tracks)),
@@ -141,7 +142,7 @@ def find(context, *args):
     except ValueError:
         return
 
-    results = context.core.library.find_exact(**query).get()
+    results = context.core.library.search(query=query, exact=True).get()
     result_tracks = []
     if ('artist' not in query and
             'albumartist' not in query and
@@ -168,8 +169,14 @@ def findadd(context, *args):
         query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return
-    results = context.core.library.find_exact(**query).get()
-    context.core.tracklist.add(_get_tracks(results))
+
+    results = context.core.library.search(query=query, exact=True).get()
+
+    with warnings.catch_warnings():
+        # TODO: for now just use tracks as other wise we have to lookup the
+        # tracks we just got from the search.
+        warnings.filterwarnings('ignore', 'tracklist.add.*"tracks" argument.*')
+        context.core.tracklist.add(tracks=_get_tracks(results)).get()
 
 
 @protocol.commands.add('list')
@@ -331,8 +338,9 @@ def listallinfo(context, uri=None):
         if not lookup_future:
             result.append(('directory', path))
         else:
-            for track in lookup_future.get():
-                result.extend(translator.track_to_mpd_format(track))
+            for tracks in lookup_future.get().values():
+                for track in tracks:
+                    result.extend(translator.track_to_mpd_format(track))
     return result
 
 
@@ -358,9 +366,9 @@ def lsinfo(context, uri=None):
         if not lookup_future:
             result.append(('directory', path.lstrip('/')))
         else:
-            tracks = lookup_future.get()
-            if tracks:
-                result.extend(translator.track_to_mpd_format(tracks[0]))
+            for tracks in lookup_future.get().values():
+                if tracks:
+                    result.extend(translator.track_to_mpd_format(tracks[0]))
 
     if uri in (None, '', '/'):
         result.extend(protocol.stored_playlists.listplaylists(context))
@@ -412,7 +420,7 @@ def search(context, *args):
         query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return
-    results = context.core.library.search(**query).get()
+    results = context.core.library.search(query).get()
     artists = [_artist_as_track(a) for a in _get_artists(results)]
     albums = [_album_as_track(a) for a in _get_albums(results)]
     tracks = _get_tracks(results)
@@ -436,8 +444,14 @@ def searchadd(context, *args):
         query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return
-    results = context.core.library.search(**query).get()
-    context.core.tracklist.add(_get_tracks(results))
+
+    results = context.core.library.search(query).get()
+
+    with warnings.catch_warnings():
+        # TODO: for now just use tracks as other wise we have to lookup the
+        # tracks we just got from the search.
+        warnings.filterwarnings('ignore', 'tracklist.add.*"tracks".*')
+        context.core.tracklist.add(_get_tracks(results)).get()
 
 
 @protocol.commands.add('searchaddpl')
@@ -463,7 +477,7 @@ def searchaddpl(context, *args):
         query = _query_from_mpd_search_parameters(parameters, _SEARCH_MAPPING)
     except ValueError:
         return
-    results = context.core.library.search(**query).get()
+    results = context.core.library.search(query).get()
 
     uri = context.lookup_playlist_uri_from_name(playlist_name)
     playlist = uri is not None and context.core.playlists.lookup(uri).get()

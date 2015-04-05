@@ -6,6 +6,7 @@ from tests.mpd import protocol
 
 
 class PlaylistsHandlerTest(protocol.BaseTestCase):
+
     def test_listplaylist(self):
         self.backend.playlists.set_dummy_playlists([
             Playlist(
@@ -130,54 +131,78 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_load_appends_to_tracklist(self):
-        self.core.tracklist.add([Track(uri='a'), Track(uri='b')])
+        tracks = [
+            Track(uri='dummy:a'),
+            Track(uri='dummy:b'),
+            Track(uri='dummy:c'),
+            Track(uri='dummy:d'),
+            Track(uri='dummy:e'),
+        ]
+        self.backend.library.dummy_library = tracks
+        self.core.tracklist.add(uris=['dummy:a', 'dummy:b']).get()
+
         self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
         self.backend.playlists.set_dummy_playlists([
-            Playlist(name='A-list', uri='dummy:A-list', tracks=[
-                Track(uri='c'), Track(uri='d'), Track(uri='e')])])
+            Playlist(name='A-list', uri='dummy:A-list', tracks=tracks[2:])])
 
         self.send_request('load "A-list"')
 
         tracks = self.core.tracklist.tracks.get()
         self.assertEqual(5, len(tracks))
-        self.assertEqual('a', tracks[0].uri)
-        self.assertEqual('b', tracks[1].uri)
-        self.assertEqual('c', tracks[2].uri)
-        self.assertEqual('d', tracks[3].uri)
-        self.assertEqual('e', tracks[4].uri)
+        self.assertEqual('dummy:a', tracks[0].uri)
+        self.assertEqual('dummy:b', tracks[1].uri)
+        self.assertEqual('dummy:c', tracks[2].uri)
+        self.assertEqual('dummy:d', tracks[3].uri)
+        self.assertEqual('dummy:e', tracks[4].uri)
         self.assertInResponse('OK')
 
     def test_load_with_range_loads_part_of_playlist(self):
-        self.core.tracklist.add([Track(uri='a'), Track(uri='b')])
+        tracks = [
+            Track(uri='dummy:a'),
+            Track(uri='dummy:b'),
+            Track(uri='dummy:c'),
+            Track(uri='dummy:d'),
+            Track(uri='dummy:e'),
+        ]
+        self.backend.library.dummy_library = tracks
+        self.core.tracklist.add(uris=['dummy:a', 'dummy:b']).get()
+
         self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
         self.backend.playlists.set_dummy_playlists([
-            Playlist(name='A-list', uri='dummy:A-list', tracks=[
-                Track(uri='c'), Track(uri='d'), Track(uri='e')])])
+            Playlist(name='A-list', uri='dummy:A-list', tracks=tracks[2:])])
 
         self.send_request('load "A-list" "1:2"')
 
         tracks = self.core.tracklist.tracks.get()
         self.assertEqual(3, len(tracks))
-        self.assertEqual('a', tracks[0].uri)
-        self.assertEqual('b', tracks[1].uri)
-        self.assertEqual('d', tracks[2].uri)
+        self.assertEqual('dummy:a', tracks[0].uri)
+        self.assertEqual('dummy:b', tracks[1].uri)
+        self.assertEqual('dummy:d', tracks[2].uri)
         self.assertInResponse('OK')
 
     def test_load_with_range_without_end_loads_rest_of_playlist(self):
-        self.core.tracklist.add([Track(uri='a'), Track(uri='b')])
+        tracks = [
+            Track(uri='dummy:a'),
+            Track(uri='dummy:b'),
+            Track(uri='dummy:c'),
+            Track(uri='dummy:d'),
+            Track(uri='dummy:e'),
+        ]
+        self.backend.library.dummy_library = tracks
+        self.core.tracklist.add(uris=['dummy:a', 'dummy:b']).get()
+
         self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
         self.backend.playlists.set_dummy_playlists([
-            Playlist(name='A-list', uri='dummy:A-list', tracks=[
-                Track(uri='c'), Track(uri='d'), Track(uri='e')])])
+            Playlist(name='A-list', uri='dummy:A-list', tracks=tracks[2:])])
 
         self.send_request('load "A-list" "1:"')
 
         tracks = self.core.tracklist.tracks.get()
         self.assertEqual(4, len(tracks))
-        self.assertEqual('a', tracks[0].uri)
-        self.assertEqual('b', tracks[1].uri)
-        self.assertEqual('d', tracks[2].uri)
-        self.assertEqual('e', tracks[3].uri)
+        self.assertEqual('dummy:a', tracks[0].uri)
+        self.assertEqual('dummy:b', tracks[1].uri)
+        self.assertEqual('dummy:d', tracks[2].uri)
+        self.assertEqual('dummy:e', tracks[3].uri)
         self.assertInResponse('OK')
 
     def test_load_unknown_playlist_acks(self):

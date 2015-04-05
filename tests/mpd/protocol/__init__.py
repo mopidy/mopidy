@@ -8,11 +8,13 @@ import pykka
 
 from mopidy import core
 from mopidy.mpd import session, uri_mapper
+from mopidy.utils import deprecation
 
 from tests import dummy_backend, dummy_mixer
 
 
 class MockConnection(mock.Mock):
+
     def __init__(self, *args, **kwargs):
         super(MockConnection, self).__init__(*args, **kwargs)
         self.host = mock.sentinel.host
@@ -40,8 +42,10 @@ class BaseTestCase(unittest.TestCase):
         else:
             self.mixer = None
         self.backend = dummy_backend.create_proxy()
-        self.core = core.Core.start(
-            mixer=self.mixer, backends=[self.backend]).proxy()
+
+        with deprecation.ignore():
+            self.core = core.Core.start(
+                mixer=self.mixer, backends=[self.backend]).proxy()
 
         self.uri_map = uri_mapper.MpdUriMapper(self.core)
         self.connection = MockConnection()

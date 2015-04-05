@@ -2,12 +2,10 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 import urlparse
-import warnings
 
 from mopidy.audio import PlaybackState
 from mopidy.core import listener
-from mopidy.utils.deprecation import deprecated_property
-
+from mopidy.utils import deprecation
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +46,7 @@ class PlaybackController(object):
         """
         self._current_tl_track = value
 
-    current_tl_track = deprecated_property(get_current_tl_track)
+    current_tl_track = deprecation.deprecated_property(get_current_tl_track)
     """
     .. deprecated:: 1.0
         Use :meth:`get_current_tl_track` instead.
@@ -66,7 +64,7 @@ class PlaybackController(object):
         if tl_track is not None:
             return tl_track.track
 
-    current_track = deprecated_property(get_current_track)
+    current_track = deprecation.deprecated_property(get_current_track)
     """
     .. deprecated:: 1.0
         Use :meth:`get_current_track` instead.
@@ -103,7 +101,7 @@ class PlaybackController(object):
 
         self._trigger_playback_state_changed(old_state, new_state)
 
-    state = deprecated_property(get_state, set_state)
+    state = deprecation.deprecated_property(get_state, set_state)
     """
     .. deprecated:: 1.0
         Use :meth:`get_state` and :meth:`set_state` instead.
@@ -117,7 +115,7 @@ class PlaybackController(object):
         else:
             return 0
 
-    time_position = deprecated_property(get_time_position)
+    time_position = deprecation.deprecated_property(get_time_position)
     """
     .. deprecated:: 1.0
         Use :meth:`get_time_position` instead.
@@ -129,8 +127,7 @@ class PlaybackController(object):
             Use :meth:`core.mixer.get_volume()
             <mopidy.core.MixerController.get_volume>` instead.
         """
-        warnings.warn(
-            'playback.get_volume() is deprecated', DeprecationWarning)
+        deprecation.warn('core.playback.get_volume')
         return self.core.mixer.get_volume()
 
     def set_volume(self, volume):
@@ -139,11 +136,10 @@ class PlaybackController(object):
             Use :meth:`core.mixer.set_volume()
             <mopidy.core.MixerController.set_volume>` instead.
         """
-        warnings.warn(
-            'playback.set_volume() is deprecated', DeprecationWarning)
+        deprecation.warn('core.playback.set_volume')
         return self.core.mixer.set_volume(volume)
 
-    volume = deprecated_property(get_volume, set_volume)
+    volume = deprecation.deprecated_property(get_volume, set_volume)
     """
     .. deprecated:: 1.0
         Use :meth:`core.mixer.get_volume()
@@ -158,7 +154,7 @@ class PlaybackController(object):
             Use :meth:`core.mixer.get_mute()
             <mopidy.core.MixerController.get_mute>` instead.
         """
-        warnings.warn('playback.get_mute() is deprecated', DeprecationWarning)
+        deprecation.warn('core.playback.get_mute')
         return self.core.mixer.get_mute()
 
     def set_mute(self, mute):
@@ -167,10 +163,10 @@ class PlaybackController(object):
             Use :meth:`core.mixer.set_mute()
             <mopidy.core.MixerController.set_mute>` instead.
         """
-        warnings.warn('playback.set_mute() is deprecated', DeprecationWarning)
+        deprecation.warn('core.playback.set_mute')
         return self.core.mixer.set_mute(mute)
 
-    mute = deprecated_property(get_mute, set_mute)
+    mute = deprecation.deprecated_property(get_mute, set_mute)
     """
     .. deprecated:: 1.0
         Use :meth:`core.mixer.get_mute()

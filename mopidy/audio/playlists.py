@@ -136,6 +136,7 @@ def register_typefinders():
 
 
 class BasePlaylistElement(gst.Bin):
+
     """Base class for creating GStreamer elements for playlist support.
 
     This element performs the following steps:

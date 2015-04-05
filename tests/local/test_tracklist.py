@@ -9,6 +9,7 @@ from mopidy import core
 from mopidy.core import PlaybackState
 from mopidy.local import actor
 from mopidy.models import Playlist, TlTrack, Track
+from mopidy.utils import deprecation
 
 from tests import dummy_audio, path_to_data_dir
 from tests.local import generate_song, populate_tracklist
@@ -25,6 +26,10 @@ class LocalTracklistProviderTest(unittest.TestCase):
     }
     tracks = [
         Track(uri=generate_song(i), length=4464) for i in range(1, 4)]
+
+    def run(self, result=None):
+        with deprecation.ignore('core.tracklist.add:tracks_arg'):
+            return super(LocalTracklistProviderTest, self).run(result)
 
     def setUp(self):  # noqa: N802
         self.audio = dummy_audio.create_proxy()
@@ -98,7 +103,7 @@ class LocalTracklistProviderTest(unittest.TestCase):
 
     def test_filter_by_uri_returns_nothing_if_no_match(self):
         self.controller.playlist = Playlist(
-            tracks=[Track(uri=['z']), Track(uri=['y'])])
+            tracks=[Track(uri='z'), Track(uri='y')])
         self.assertEqual([], self.controller.filter(uri=['a']))
 
     def test_filter_by_multiple_criteria_returns_elements_matching_all(self):

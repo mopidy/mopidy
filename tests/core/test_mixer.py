@@ -11,6 +11,7 @@ from tests import dummy_mixer
 
 
 class CoreMixerTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.mixer = mock.Mock(spec=mixer.Mixer)
         self.core = core.Core(mixer=self.mixer, backends=[])
@@ -39,6 +40,7 @@ class CoreMixerTest(unittest.TestCase):
 
 
 class CoreNoneMixerTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.core = core.Core(mixer=None, backends=[])
 
@@ -57,6 +59,7 @@ class CoreNoneMixerTest(unittest.TestCase):
 
 @mock.patch.object(mixer.MixerListener, 'send')
 class CoreMixerListenerTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.mixer = dummy_mixer.create_proxy()
         self.core = core.Core(mixer=self.mixer, backends=[])
@@ -78,6 +81,7 @@ class CoreMixerListenerTest(unittest.TestCase):
 
 @mock.patch.object(mixer.MixerListener, 'send')
 class CoreNoneMixerListenerTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.core = core.Core(mixer=None, backends=[])
 

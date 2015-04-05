@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class M3ULibraryProvider(backend.LibraryProvider):
+
     """Library for looking up M3U playlists."""
 
     def __init__(self, backend):

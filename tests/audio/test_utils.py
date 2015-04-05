@@ -11,6 +11,7 @@ from mopidy.models import Album, Artist, Track
 # TODO: current test is trying to test everything at once with a complete tags
 # set, instead we might want to try with a minimal one making testing easier.
 class TagsToTrackTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.tags = {
             'album': ['album'],

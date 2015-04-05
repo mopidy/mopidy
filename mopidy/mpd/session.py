@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class MpdSession(network.LineProtocol):
+
     """
     The MPD client session. Keeps track of a single client session. Any
     requests from the client is passed on to the MPD request dispatcher.

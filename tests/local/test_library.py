@@ -84,6 +84,14 @@ class LocalLibraryProviderTest(unittest.TestCase):
         pykka.ActorRegistry.stop_all()
         actor.LocalBackend.libraries = []
 
+    def find_exact(self, **query):
+        # TODO: remove this helper?
+        return self.library.search(query=query, exact=True)
+
+    def search(self, **query):
+        # TODO: remove this helper?
+        return self.library.search(query=query)
+
     def test_refresh(self):
         self.library.refresh()
 
@@ -124,12 +132,13 @@ class LocalLibraryProviderTest(unittest.TestCase):
         pass  # TODO
 
     def test_lookup(self):
-        tracks = self.library.lookup(self.tracks[0].uri)
-        self.assertEqual(tracks, self.tracks[0:1])
+        uri = self.tracks[0].uri
+        result = self.library.lookup(uris=[uri])
+        self.assertEqual(result[uri], self.tracks[0:1])
 
     def test_lookup_unknown_track(self):
-        tracks = self.library.lookup('fake uri')
-        self.assertEqual(tracks, [])
+        tracks = self.library.lookup(uris=['fake uri'])
+        self.assertEqual(tracks, {'fake uri': []})
 
     # test backward compatibility with local libraries returning a
     # single Track
@@ -149,437 +158,437 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
     # TODO: move to search_test module
     def test_find_exact_no_hits(self):
-        result = self.library.find_exact(track_name=['unknown track'])
+        result = self.find_exact(track_name=['unknown track'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.find_exact(artist=['unknown artist'])
+        result = self.find_exact(artist=['unknown artist'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.find_exact(albumartist=['unknown albumartist'])
+        result = self.find_exact(albumartist=['unknown albumartist'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.find_exact(composer=['unknown composer'])
+        result = self.find_exact(composer=['unknown composer'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.find_exact(performer=['unknown performer'])
+        result = self.find_exact(performer=['unknown performer'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.find_exact(album=['unknown album'])
+        result = self.find_exact(album=['unknown album'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.find_exact(date=['1990'])
+        result = self.find_exact(date=['1990'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.find_exact(genre=['unknown genre'])
+        result = self.find_exact(genre=['unknown genre'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.find_exact(track_no=['9'])
+        result = self.find_exact(track_no=['9'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.find_exact(track_no=['no_match'])
+        result = self.find_exact(track_no=['no_match'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.find_exact(comment=['fake comment'])
+        result = self.find_exact(comment=['fake comment'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.find_exact(uri=['fake uri'])
+        result = self.find_exact(uri=['fake uri'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.find_exact(any=['unknown any'])
+        result = self.find_exact(any=['unknown any'])
         self.assertEqual(list(result[0].tracks), [])
 
     def test_find_exact_uri(self):
         track_1_uri = 'local:track:path1'
-        result = self.library.find_exact(uri=track_1_uri)
+        result = self.find_exact(uri=track_1_uri)
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
         track_2_uri = 'local:track:path2'
-        result = self.library.find_exact(uri=track_2_uri)
+        result = self.find_exact(uri=track_2_uri)
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_find_exact_track_name(self):
-        result = self.library.find_exact(track_name=['track1'])
+        result = self.find_exact(track_name=['track1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.find_exact(track_name=['track2'])
+        result = self.find_exact(track_name=['track2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_find_exact_artist(self):
-        result = self.library.find_exact(artist=['artist1'])
+        result = self.find_exact(artist=['artist1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.find_exact(artist=['artist2'])
+        result = self.find_exact(artist=['artist2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
-        result = self.library.find_exact(artist=['artist3'])
+        result = self.find_exact(artist=['artist3'])
         self.assertEqual(list(result[0].tracks), self.tracks[3:4])
 
     def test_find_exact_composer(self):
-        result = self.library.find_exact(composer=['artist5'])
+        result = self.find_exact(composer=['artist5'])
         self.assertEqual(list(result[0].tracks), self.tracks[4:5])
 
-        result = self.library.find_exact(composer=['artist6'])
+        result = self.find_exact(composer=['artist6'])
         self.assertEqual(list(result[0].tracks), [])
 
     def test_find_exact_performer(self):
-        result = self.library.find_exact(performer=['artist6'])
+        result = self.find_exact(performer=['artist6'])
         self.assertEqual(list(result[0].tracks), self.tracks[5:6])
 
-        result = self.library.find_exact(performer=['artist5'])
+        result = self.find_exact(performer=['artist5'])
         self.assertEqual(list(result[0].tracks), [])
 
     def test_find_exact_album(self):
-        result = self.library.find_exact(album=['album1'])
+        result = self.find_exact(album=['album1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.find_exact(album=['album2'])
+        result = self.find_exact(album=['album2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_find_exact_albumartist(self):
         # Artist is both track artist and album artist
-        result = self.library.find_exact(albumartist=['artist1'])
+        result = self.find_exact(albumartist=['artist1'])
         self.assertEqual(list(result[0].tracks), [self.tracks[0]])
 
         # Artist is both track and album artist
-        result = self.library.find_exact(albumartist=['artist2'])
+        result = self.find_exact(albumartist=['artist2'])
         self.assertEqual(list(result[0].tracks), [self.tracks[1]])
 
         # Artist is just album artist
-        result = self.library.find_exact(albumartist=['artist3'])
+        result = self.find_exact(albumartist=['artist3'])
         self.assertEqual(list(result[0].tracks), [self.tracks[2]])
 
     def test_find_exact_track_no(self):
-        result = self.library.find_exact(track_no=['1'])
+        result = self.find_exact(track_no=['1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.find_exact(track_no=['2'])
+        result = self.find_exact(track_no=['2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_find_exact_genre(self):
-        result = self.library.find_exact(genre=['genre1'])
+        result = self.find_exact(genre=['genre1'])
         self.assertEqual(list(result[0].tracks), self.tracks[4:5])
 
-        result = self.library.find_exact(genre=['genre2'])
+        result = self.find_exact(genre=['genre2'])
         self.assertEqual(list(result[0].tracks), self.tracks[5:6])
 
     def test_find_exact_date(self):
-        result = self.library.find_exact(date=['2001'])
+        result = self.find_exact(date=['2001'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.find_exact(date=['2001-02-03'])
+        result = self.find_exact(date=['2001-02-03'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.find_exact(date=['2002'])
+        result = self.find_exact(date=['2002'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_find_exact_comment(self):
-        result = self.library.find_exact(
+        result = self.find_exact(
             comment=['This is a fantastic track'])
         self.assertEqual(list(result[0].tracks), self.tracks[3:4])
 
-        result = self.library.find_exact(
+        result = self.find_exact(
             comment=['This is a fantastic'])
         self.assertEqual(list(result[0].tracks), [])
 
     def test_find_exact_any(self):
         # Matches on track artist
-        result = self.library.find_exact(any=['artist1'])
+        result = self.find_exact(any=['artist1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.find_exact(any=['artist2'])
+        result = self.find_exact(any=['artist2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
         # Matches on track name
-        result = self.library.find_exact(any=['track1'])
+        result = self.find_exact(any=['track1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.find_exact(any=['track2'])
+        result = self.find_exact(any=['track2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
         # Matches on track album
-        result = self.library.find_exact(any=['album1'])
+        result = self.find_exact(any=['album1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
         # Matches on track album artists
-        result = self.library.find_exact(any=['artist3'])
+        result = self.find_exact(any=['artist3'])
         self.assertEqual(len(result[0].tracks), 2)
         self.assertIn(self.tracks[2], result[0].tracks)
         self.assertIn(self.tracks[3], result[0].tracks)
 
         # Matches on track composer
-        result = self.library.find_exact(any=['artist5'])
+        result = self.find_exact(any=['artist5'])
         self.assertEqual(list(result[0].tracks), self.tracks[4:5])
 
         # Matches on track performer
-        result = self.library.find_exact(any=['artist6'])
+        result = self.find_exact(any=['artist6'])
         self.assertEqual(list(result[0].tracks), self.tracks[5:6])
 
         # Matches on track genre
-        result = self.library.find_exact(any=['genre1'])
+        result = self.find_exact(any=['genre1'])
         self.assertEqual(list(result[0].tracks), self.tracks[4:5])
 
-        result = self.library.find_exact(any=['genre2'])
+        result = self.find_exact(any=['genre2'])
         self.assertEqual(list(result[0].tracks), self.tracks[5:6])
 
         # Matches on track date
-        result = self.library.find_exact(any=['2002'])
+        result = self.find_exact(any=['2002'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
         # Matches on track comment
-        result = self.library.find_exact(
+        result = self.find_exact(
             any=['This is a fantastic track'])
         self.assertEqual(list(result[0].tracks), self.tracks[3:4])
 
         # Matches on URI
-        result = self.library.find_exact(any=['local:track:path1'])
+        result = self.find_exact(any=['local:track:path1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
     def test_find_exact_wrong_type(self):
         with self.assertRaises(LookupError):
-            self.library.find_exact(wrong=['test'])
+            self.find_exact(wrong=['test'])
 
     def test_find_exact_with_empty_query(self):
         with self.assertRaises(LookupError):
-            self.library.find_exact(artist=[''])
+            self.find_exact(artist=[''])
 
         with self.assertRaises(LookupError):
-            self.library.find_exact(albumartist=[''])
+            self.find_exact(albumartist=[''])
 
         with self.assertRaises(LookupError):
-            self.library.find_exact(track_name=[''])
+            self.find_exact(track_name=[''])
 
         with self.assertRaises(LookupError):
-            self.library.find_exact(composer=[''])
+            self.find_exact(composer=[''])
 
         with self.assertRaises(LookupError):
-            self.library.find_exact(performer=[''])
+            self.find_exact(performer=[''])
 
         with self.assertRaises(LookupError):
-            self.library.find_exact(album=[''])
+            self.find_exact(album=[''])
 
         with self.assertRaises(LookupError):
-            self.library.find_exact(track_no=[''])
+            self.find_exact(track_no=[''])
 
         with self.assertRaises(LookupError):
-            self.library.find_exact(genre=[''])
+            self.find_exact(genre=[''])
 
         with self.assertRaises(LookupError):
-            self.library.find_exact(date=[''])
+            self.find_exact(date=[''])
 
         with self.assertRaises(LookupError):
-            self.library.find_exact(comment=[''])
+            self.find_exact(comment=[''])
 
         with self.assertRaises(LookupError):
-            self.library.find_exact(any=[''])
+            self.find_exact(any=[''])
 
     def test_search_no_hits(self):
-        result = self.library.search(track_name=['unknown track'])
+        result = self.search(track_name=['unknown track'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.search(artist=['unknown artist'])
+        result = self.search(artist=['unknown artist'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.search(albumartist=['unknown albumartist'])
+        result = self.search(albumartist=['unknown albumartist'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.search(composer=['unknown composer'])
+        result = self.search(composer=['unknown composer'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.search(performer=['unknown performer'])
+        result = self.search(performer=['unknown performer'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.search(album=['unknown album'])
+        result = self.search(album=['unknown album'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.search(track_no=['9'])
+        result = self.search(track_no=['9'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.search(track_no=['no_match'])
+        result = self.search(track_no=['no_match'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.search(genre=['unknown genre'])
+        result = self.search(genre=['unknown genre'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.search(date=['unknown date'])
+        result = self.search(date=['unknown date'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.search(comment=['unknown comment'])
+        result = self.search(comment=['unknown comment'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.search(uri=['unknown uri'])
+        result = self.search(uri=['unknown uri'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.search(any=['unknown anything'])
+        result = self.search(any=['unknown anything'])
         self.assertEqual(list(result[0].tracks), [])
 
     def test_search_uri(self):
-        result = self.library.search(uri=['TH1'])
+        result = self.search(uri=['TH1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.search(uri=['TH2'])
+        result = self.search(uri=['TH2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_search_track_name(self):
-        result = self.library.search(track_name=['Rack1'])
+        result = self.search(track_name=['Rack1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.search(track_name=['Rack2'])
+        result = self.search(track_name=['Rack2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_search_artist(self):
-        result = self.library.search(artist=['Tist1'])
+        result = self.search(artist=['Tist1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.search(artist=['Tist2'])
+        result = self.search(artist=['Tist2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_search_albumartist(self):
         # Artist is both track artist and album artist
-        result = self.library.search(albumartist=['Tist1'])
+        result = self.search(albumartist=['Tist1'])
         self.assertEqual(list(result[0].tracks), [self.tracks[0]])
 
         # Artist is both track artist and album artist
-        result = self.library.search(albumartist=['Tist2'])
+        result = self.search(albumartist=['Tist2'])
         self.assertEqual(list(result[0].tracks), [self.tracks[1]])
 
         # Artist is just album artist
-        result = self.library.search(albumartist=['Tist3'])
+        result = self.search(albumartist=['Tist3'])
         self.assertEqual(list(result[0].tracks), [self.tracks[2]])
 
     def test_search_composer(self):
-        result = self.library.search(composer=['Tist5'])
+        result = self.search(composer=['Tist5'])
         self.assertEqual(list(result[0].tracks), self.tracks[4:5])
 
     def test_search_performer(self):
-        result = self.library.search(performer=['Tist6'])
+        result = self.search(performer=['Tist6'])
         self.assertEqual(list(result[0].tracks), self.tracks[5:6])
 
     def test_search_album(self):
-        result = self.library.search(album=['Bum1'])
+        result = self.search(album=['Bum1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.search(album=['Bum2'])
+        result = self.search(album=['Bum2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_search_genre(self):
-        result = self.library.search(genre=['Enre1'])
+        result = self.search(genre=['Enre1'])
         self.assertEqual(list(result[0].tracks), self.tracks[4:5])
 
-        result = self.library.search(genre=['Enre2'])
+        result = self.search(genre=['Enre2'])
         self.assertEqual(list(result[0].tracks), self.tracks[5:6])
 
     def test_search_date(self):
-        result = self.library.search(date=['2001'])
+        result = self.search(date=['2001'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.search(date=['2001-02-03'])
+        result = self.search(date=['2001-02-03'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.search(date=['2001-02-04'])
+        result = self.search(date=['2001-02-04'])
         self.assertEqual(list(result[0].tracks), [])
 
-        result = self.library.search(date=['2002'])
+        result = self.search(date=['2002'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_search_track_no(self):
-        result = self.library.search(track_no=['1'])
+        result = self.search(track_no=['1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.search(track_no=['2'])
+        result = self.search(track_no=['2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
     def test_search_comment(self):
-        result = self.library.search(comment=['fantastic'])
+        result = self.search(comment=['fantastic'])
         self.assertEqual(list(result[0].tracks), self.tracks[3:4])
 
-        result = self.library.search(comment=['antasti'])
+        result = self.search(comment=['antasti'])
         self.assertEqual(list(result[0].tracks), self.tracks[3:4])
 
     def test_search_any(self):
         # Matches on track artist
-        result = self.library.search(any=['Tist1'])
+        result = self.search(any=['Tist1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
         # Matches on track composer
-        result = self.library.search(any=['Tist5'])
+        result = self.search(any=['Tist5'])
         self.assertEqual(list(result[0].tracks), self.tracks[4:5])
 
         # Matches on track performer
-        result = self.library.search(any=['Tist6'])
+        result = self.search(any=['Tist6'])
         self.assertEqual(list(result[0].tracks), self.tracks[5:6])
 
         # Matches on track
-        result = self.library.search(any=['Rack1'])
+        result = self.search(any=['Rack1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
-        result = self.library.search(any=['Rack2'])
+        result = self.search(any=['Rack2'])
         self.assertEqual(list(result[0].tracks), self.tracks[1:2])
 
         # Matches on track album
-        result = self.library.search(any=['Bum1'])
+        result = self.search(any=['Bum1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
         # Matches on track album artists
-        result = self.library.search(any=['Tist3'])
+        result = self.search(any=['Tist3'])
         self.assertEqual(len(result[0].tracks), 2)
         self.assertIn(self.tracks[2], result[0].tracks)
         self.assertIn(self.tracks[3], result[0].tracks)
 
         # Matches on track genre
-        result = self.library.search(any=['Enre1'])
+        result = self.search(any=['Enre1'])
         self.assertEqual(list(result[0].tracks), self.tracks[4:5])
 
-        result = self.library.search(any=['Enre2'])
+        result = self.search(any=['Enre2'])
         self.assertEqual(list(result[0].tracks), self.tracks[5:6])
 
         # Matches on track comment
-        result = self.library.search(any=['fanta'])
+        result = self.search(any=['fanta'])
         self.assertEqual(list(result[0].tracks), self.tracks[3:4])
 
-        result = self.library.search(any=['is a fan'])
+        result = self.search(any=['is a fan'])
         self.assertEqual(list(result[0].tracks), self.tracks[3:4])
 
         # Matches on URI
-        result = self.library.search(any=['TH1'])
+        result = self.search(any=['TH1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
     def test_search_wrong_type(self):
         with self.assertRaises(LookupError):
-            self.library.search(wrong=['test'])
+            self.search(wrong=['test'])
 
     def test_search_with_empty_query(self):
         with self.assertRaises(LookupError):
-            self.library.search(artist=[''])
+            self.search(artist=[''])
 
         with self.assertRaises(LookupError):
-            self.library.search(albumartist=[''])
+            self.search(albumartist=[''])
 
         with self.assertRaises(LookupError):
-            self.library.search(composer=[''])
+            self.search(composer=[''])
 
         with self.assertRaises(LookupError):
-            self.library.search(performer=[''])
+            self.search(performer=[''])
 
         with self.assertRaises(LookupError):
-            self.library.search(track_name=[''])
+            self.search(track_name=[''])
 
         with self.assertRaises(LookupError):
-            self.library.search(album=[''])
+            self.search(album=[''])
 
         with self.assertRaises(LookupError):
-            self.library.search(genre=[''])
+            self.search(genre=[''])
 
         with self.assertRaises(LookupError):
-            self.library.search(date=[''])
+            self.search(date=[''])
 
         with self.assertRaises(LookupError):
-            self.library.search(comment=[''])
+            self.search(comment=[''])
 
         with self.assertRaises(LookupError):
-            self.library.search(uri=[''])
+            self.search(uri=[''])
 
         with self.assertRaises(LookupError):
-            self.library.search(any=[''])
+            self.search(any=[''])
 
     def test_default_get_images_impl_no_images(self):
         result = self.library.get_images([track.uri for track in self.tracks])
