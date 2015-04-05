@@ -259,3 +259,42 @@ class PlaylistsTest(unittest.TestCase):
         self.assertIsNone(result)
         self.assertFalse(self.sp1.save.called)
         self.assertFalse(self.sp2.save.called)
+
+
+@mock.patch('mopidy.core.playlists.logger')
+class BackendFailuresCorePlaylistsTest(unittest.TestCase):
+
+    def setUp(self):  # noqa: N802
+        self.playlists = mock.Mock(spec=backend.PlaylistsProvider)
+
+        self.backend = mock.Mock()
+        self.backend.actor_ref.actor_class.__name__ = 'DummyBackend'
+        self.backend.uri_schemes.get.return_value = ['dummy']
+        self.backend.playlists = self.playlists
+
+        self.core = core.Core(mixer=None, backends=[self.backend])
+
+    def test_as_list_backend_exception_gets_ignored(self, logger):
+        self.playlists.as_list.get.side_effect = Exception
+        self.assertEqual([], self.core.playlists.as_list())
+        logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
+
+    def test_get_items_backend_exception_gets_through(self, logger):
+        # TODO: is this behavior desired?
+        self.playlists.get_items.return_value.get.side_effect = Exception
+        with self.assertRaises(Exception):
+            self.core.playlists.get_items('dummy:/1')
+
+    @mock.patch('mopidy.core.listener.CoreListener.send')
+    def test_refresh_backend_exception_gets_ignored(self, send, logger):
+        self.playlists.refresh.return_value.get.side_effect = Exception
+        self.core.playlists.refresh()
+        self.assertFalse(send.called)
+        logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
+
+    @mock.patch('mopidy.core.listener.CoreListener.send')
+    def test_refresh_uri_backend_exception_gets_ignored(self, send, logger):
+        self.playlists.refresh.return_value.get.side_effect = Exception
+        self.core.playlists.refresh('dummy')
+        self.assertFalse(send.called)
+        logger.exception.assert_called_with(mock.ANY, 'DummyBackend')

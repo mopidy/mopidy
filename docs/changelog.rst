@@ -4,6 +4,14 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+v1.0.1 (unreleased)
+===================
+
+Core
+----
+
+- Update core controllers to handle backend exceptions in all calls that rely
+  on multiple backends. (Issue: :issue:`667`)
 
 v1.0.1 (UNRELEASED)
 ===================

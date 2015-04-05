@@ -39,8 +39,15 @@ class TracklistTest(unittest.TestCase):
         track1 = Track(uri='dummy1:x', name='x')
         track2 = Track(uri='dummy1:y1', name='y1')
         track3 = Track(uri='dummy1:y2', name='y2')
-        self.library.lookup.return_value.get.side_effect = [
-            [track1], [track2, track3]]
+        tracks = [track1, track2, track3]
+
+        # TODO: remove when we get this into develop.
+        def lookup(uri):
+            m = mock.Mock()
+            m.get.return_value = [t for t in tracks if t.uri.startswith(uri)]
+            return m
+
+        self.library.lookup.side_effect = lookup
 
         tl_tracks = self.core.tracklist.add(uris=['dummy1:x', 'dummy1:y'])
 
