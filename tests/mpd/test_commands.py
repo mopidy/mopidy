@@ -8,6 +8,7 @@ from mopidy.mpd import exceptions, protocol
 
 
 class TestConverts(unittest.TestCase):
+
     def test_integer(self):
         self.assertEqual(123, protocol.INT('123'))
         self.assertEqual(-123, protocol.INT('-123'))
@@ -55,6 +56,7 @@ class TestConverts(unittest.TestCase):
 
 
 class TestCommands(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.commands = protocol.Commands()
 
@@ -64,7 +66,8 @@ class TestCommands(unittest.TestCase):
             pass
 
     def test_register_second_command_to_same_name_fails(self):
-        func = lambda context: True
+        def func(context):
+            pass
 
         self.commands.add('foo')(func)
         with self.assertRaises(Exception):
@@ -88,7 +91,10 @@ class TestCommands(unittest.TestCase):
 
     def test_function_has_required_and_optional_args_succeeds(self):
         sentinel = object()
-        func = lambda context, required, optional=None: sentinel
+
+        def func(context, required, optional=None):
+            return sentinel
+
         self.commands.add('bar')(func)
         self.assertEqual(sentinel, self.commands.call(['bar', 'arg']))
         self.assertEqual(sentinel, self.commands.call(['bar', 'arg', 'arg']))
@@ -111,12 +117,16 @@ class TestCommands(unittest.TestCase):
 
     def test_function_has_required_and_varargs_fails(self):
         with self.assertRaises(TypeError):
-            func = lambda context, required, *args: True
+            def func(context, required, *args):
+                pass
+
             self.commands.add('test')(func)
 
     def test_function_has_optional_and_varargs_fails(self):
         with self.assertRaises(TypeError):
-            func = lambda context, optional=None, *args: True
+            def func(context, optional=None, *args):
+                pass
+
             self.commands.add('test')(func)
 
     def test_function_hash_keywordargs_fails(self):
@@ -158,7 +168,9 @@ class TestCommands(unittest.TestCase):
         self.assertEqual('test', self.commands.call(['foo', 'test']))
 
     def test_call_passes_required_and_optional_argument(self):
-        func = lambda context, required, optional=None: (required, optional)
+        def func(context, required, optional=None):
+            return (required, optional)
+
         self.commands.add('foo')(func)
         self.assertEqual(('arg', None), self.commands.call(['foo', 'arg']))
         self.assertEqual(
@@ -182,20 +194,29 @@ class TestCommands(unittest.TestCase):
 
     def test_validator_gets_applied_to_required_arg(self):
         sentinel = object()
-        func = lambda context, required: required
+
+        def func(context, required):
+            return required
+
         self.commands.add('test', required=lambda v: sentinel)(func)
         self.assertEqual(sentinel, self.commands.call(['test', 'foo']))
 
     def test_validator_gets_applied_to_optional_arg(self):
         sentinel = object()
-        func = lambda context, optional=None: optional
+
+        def func(context, optional=None):
+            return optional
+
         self.commands.add('foo', optional=lambda v: sentinel)(func)
 
         self.assertEqual(sentinel, self.commands.call(['foo', '123']))
 
     def test_validator_skips_optional_default(self):
         sentinel = object()
-        func = lambda context, optional=sentinel: optional
+
+        def func(context, optional=sentinel):
+            return optional
+
         self.commands.add('foo', optional=lambda v: None)(func)
 
         self.assertEqual(sentinel, self.commands.call(['foo']))
@@ -203,28 +224,38 @@ class TestCommands(unittest.TestCase):
     def test_validator_applied_to_non_existent_arg_fails(self):
         self.commands.add('foo')(lambda context, arg: arg)
         with self.assertRaises(TypeError):
-            func = lambda context, wrong_arg: wrong_arg
+            def func(context, wrong_arg):
+                return wrong_arg
+
             self.commands.add('bar', arg=lambda v: v)(func)
 
     def test_validator_called_context_fails(self):
         return  # TODO: how to handle this
         with self.assertRaises(TypeError):
-            func = lambda context: True
+            def func(context):
+                pass
+
             self.commands.add('bar', context=lambda v: v)(func)
 
     def test_validator_value_error_is_converted(self):
         def validdate(value):
             raise ValueError
 
-        func = lambda context, arg: True
+        def func(context, arg):
+            pass
+
         self.commands.add('bar', arg=validdate)(func)
 
         with self.assertRaises(exceptions.MpdArgError):
             self.commands.call(['bar', 'test'])
 
     def test_auth_required_gets_stored(self):
-        func1 = lambda context: context
-        func2 = lambda context: context
+        def func1(context):
+            pass
+
+        def func2(context):
+            pass
+
         self.commands.add('foo')(func1)
         self.commands.add('bar', auth_required=False)(func2)
 
@@ -232,8 +263,12 @@ class TestCommands(unittest.TestCase):
         self.assertFalse(self.commands.handlers['bar'].auth_required)
 
     def test_list_command_gets_stored(self):
-        func1 = lambda context: context
-        func2 = lambda context: context
+        def func1(context):
+            pass
+
+        def func2(context):
+            pass
+
         self.commands.add('foo')(func1)
         self.commands.add('bar', list_command=False)(func2)
 

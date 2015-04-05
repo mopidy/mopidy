@@ -5,12 +5,13 @@ import unittest
 
 import pykka
 
-from mopidy import audio, core
+from mopidy import core
 from mopidy.core import PlaybackState
 from mopidy.local import actor
 from mopidy.models import Playlist, TlTrack, Track
+from mopidy.utils import deprecation
 
-from tests import path_to_data_dir
+from tests import dummy_audio, path_to_data_dir
 from tests.local import generate_song, populate_tracklist
 
 
@@ -26,8 +27,12 @@ class LocalTracklistProviderTest(unittest.TestCase):
     tracks = [
         Track(uri=generate_song(i), length=4464) for i in range(1, 4)]
 
+    def run(self, result=None):
+        with deprecation.ignore('core.tracklist.add:tracks_arg'):
+            return super(LocalTracklistProviderTest, self).run(result)
+
     def setUp(self):  # noqa: N802
-        self.audio = audio.DummyAudio.start().proxy()
+        self.audio = dummy_audio.create_proxy()
         self.backend = actor.LocalBackend.start(
             config=self.config, audio=self.audio).proxy()
         self.core = core.Core(mixer=None, backends=[self.backend])
@@ -310,7 +315,7 @@ class LocalTracklistProviderTest(unittest.TestCase):
     def test_version_does_not_change_when_adding_nothing(self):
         version = self.controller.version
         self.controller.add([])
-        self.assertEquals(version, self.controller.version)
+        self.assertEqual(version, self.controller.version)
 
     def test_version_increases_when_adding_something(self):
         version = self.controller.version

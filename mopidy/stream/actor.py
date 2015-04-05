@@ -15,12 +15,14 @@ logger = logging.getLogger(__name__)
 
 
 class StreamBackend(pykka.ThreadingActor, backend.Backend):
+
     def __init__(self, config, audio):
         super(StreamBackend, self).__init__()
 
         self.library = StreamLibraryProvider(
             backend=self, timeout=config['stream']['timeout'],
-            blacklist=config['stream']['metadata_blacklist'])
+            blacklist=config['stream']['metadata_blacklist'],
+            proxy=config['proxy'])
         self.playback = backend.PlaybackProvider(audio=audio, backend=self)
         self.playlists = None
 
@@ -29,9 +31,10 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
 
 
 class StreamLibraryProvider(backend.LibraryProvider):
-    def __init__(self, backend, timeout, blacklist):
+
+    def __init__(self, backend, timeout, blacklist, proxy):
         super(StreamLibraryProvider, self).__init__(backend)
-        self._scanner = scan.Scanner(timeout=timeout)
+        self._scanner = scan.Scanner(timeout=timeout, proxy_config=proxy)
         self._blacklist_re = re.compile(
             r'^(%s)$' % '|'.join(fnmatch.translate(u) for u in blacklist))
 
@@ -44,9 +47,9 @@ class StreamLibraryProvider(backend.LibraryProvider):
             return [Track(uri=uri)]
 
         try:
-            tags, duration = self._scanner.scan(uri)
-            track = utils.convert_tags_to_track(tags).copy(
-                uri=uri, length=duration)
+            result = self._scanner.scan(uri)
+            track = utils.convert_tags_to_track(result.tags).copy(
+                uri=uri, length=result.duration)
         except exceptions.ScannerError as e:
             logger.warning('Problem looking up %s: %s', uri, e)
             track = Track(uri=uri)

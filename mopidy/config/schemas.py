@@ -38,6 +38,7 @@ def _levenshtein(a, b):
 
 
 class ConfigSchema(collections.OrderedDict):
+
     """Logical group of config values that correspond to a config section.
 
     Schemas are set up by assigning config keys with config values to
@@ -47,6 +48,7 @@ class ConfigSchema(collections.OrderedDict):
     :meth:`serialize` for converting the values to a form suitable for
     persistence.
     """
+
     def __init__(self, name):
         super(ConfigSchema, self).__init__()
         self.name = name
@@ -94,17 +96,17 @@ class ConfigSchema(collections.OrderedDict):
         return result
 
 
-class LogLevelConfigSchema(object):
-    """Special cased schema for handling a config section with loglevels.
+class MapConfigSchema(object):
 
-    Expects the config keys to be logger names and the values to be log levels
-    as understood by the :class:`LogLevel` config value. Does not sub-class
-    :class:`ConfigSchema`, but implements the same serialize/deserialize
-    interface.
+    """Schema for handling multiple unknown keys with the same type.
+
+    Does not sub-class :class:`ConfigSchema`, but implements the same
+    serialize/deserialize interface.
     """
-    def __init__(self, name):
+
+    def __init__(self, name, value_type):
         self.name = name
-        self._config_value = types.LogLevel()
+        self._value_type = value_type
 
     def deserialize(self, values):
         errors = {}
@@ -112,7 +114,7 @@ class LogLevelConfigSchema(object):
 
         for key, value in values.items():
             try:
-                result[key] = self._config_value.deserialize(value)
+                result[key] = self._value_type.deserialize(value)
             except ValueError as e:  # deserialization failed
                 result[key] = None
                 errors[key] = str(e)
@@ -121,5 +123,5 @@ class LogLevelConfigSchema(object):
     def serialize(self, values, display=False):
         result = collections.OrderedDict()
         for key in sorted(values.keys()):
-            result[key] = self._config_value.serialize(values[key], display)
+            result[key] = self._value_type.serialize(values[key], display)
         return result

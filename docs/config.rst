@@ -70,6 +70,8 @@ Audio configuration
     will affect the audio volume if you're streaming the audio from Mopidy
     through Shoutcast.
 
+    If you want to disable audio mixing set the value to ``none``.
+
     If you want to use a hardware mixer, you need to install a Mopidy extension
     which integrates with your sound subsystem. E.g. for ALSA, install
     `Mopidy-ALSAMixer <https://github.com/mopidy/mopidy-alsamixer>`_.
@@ -130,6 +132,14 @@ Logging configuration
     config section should match the name of a logger. The value is the log
     level to use for that logger, one of ``debug``, ``info``, ``warning``,
     ``error``, or ``critical``.
+
+.. confval:: logcolors/*
+
+    The ``logcolors`` config section can be used to change the log color for
+    specific parts of Mopidy during development or debugging. Each key in the
+    config section should match the name of a logger. The value is the color
+    to use for that logger, one of ``black``, ``red``, ``green``, ``yellow``,
+    ``blue``, ``magenta``, ``cyan`` or ``white``.
 
 .. _the Python logging docs: http://docs.python.org/2/library/logging.config.html
 

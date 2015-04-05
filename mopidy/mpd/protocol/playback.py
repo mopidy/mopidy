@@ -1,9 +1,8 @@
 from __future__ import absolute_import, unicode_literals
 
-import warnings
-
 from mopidy.core import PlaybackState
 from mopidy.mpd import exceptions, protocol
+from mopidy.utils import deprecation
 
 
 @protocol.commands.add('consume', state=protocol.BOOL)
@@ -32,8 +31,7 @@ def crossfade(context, seconds):
     raise exceptions.MpdNotImplemented  # TODO
 
 
-# TODO: add at least reflection tests before adding NotImplemented version
-# @protocol.commands.add('mixrampdb')
+@protocol.commands.add('mixrampdb')
 def mixrampdb(context, decibels):
     """
     *musicpd.org, playback section:*
@@ -46,11 +44,10 @@ def mixrampdb(context, decibels):
     volume so use negative values, I prefer -17dB. In the absence of mixramp
     tags crossfading will be used. See http://sourceforge.net/projects/mixramp
     """
-    pass
+    raise exceptions.MpdNotImplemented  # TODO
 
 
-# TODO: add at least reflection tests before adding NotImplemented version
-# @protocol.commands.add('mixrampdelay', seconds=protocol.UINT)
+@protocol.commands.add('mixrampdelay', seconds=protocol.UINT)
 def mixrampdelay(context, seconds):
     """
     *musicpd.org, playback section:*
@@ -61,7 +58,7 @@ def mixrampdelay(context, seconds):
         value of "nan" disables MixRamp overlapping and falls back to
         crossfading.
     """
-    pass
+    raise exceptions.MpdNotImplemented  # TODO
 
 
 @protocol.commands.add('next')
@@ -136,9 +133,7 @@ def pause(context, state=None):
     - Calls ``pause`` without any arguments to toogle pause.
     """
     if state is None:
-        warnings.warn(
-            'The use of pause command w/o the PAUSE argument is deprecated.',
-            DeprecationWarning)
+        deprecation.warn('mpd.protocol.playback.pause:state_arg')
 
         if (context.core.playback.state.get() == PlaybackState.PLAYING):
             context.core.playback.pause()
@@ -397,7 +392,10 @@ def setvol(context, volume):
     - issues ``setvol 50`` without quotes around the argument.
     """
     # NOTE: we use INT as clients can pass in +N etc.
-    context.core.playback.volume = min(max(0, volume), 100)
+    value = min(max(0, volume), 100)
+    success = context.core.mixer.set_volume(value).get()
+    if not success:
+        raise exceptions.MpdSystemError('problems setting volume')
 
 
 @protocol.commands.add('single', state=protocol.BOOL)

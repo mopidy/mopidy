@@ -8,18 +8,6 @@ We've made a JavaScript library, Mopidy.js, which wraps the
 :ref:`websocket-api` and gets you quickly started with working on your client
 instead of figuring out how to communicate with Mopidy.
 
-.. warning:: API stability
-
-    Since the Mopidy.js API exposes our internal core API directly it is to be
-    regarded as **experimental**. We cannot promise to keep any form of
-    backwards compatibility between releases as we will need to change the core
-    API while working out how to support new use cases. Thus, if you use this
-    API, you must expect to do small adjustments to your client for every
-    release of Mopidy.
-
-    From Mopidy 1.0 and onwards, we intend to keep the core API far more
-    stable.
-
 
 Getting the library for browser use
 ===================================
@@ -289,9 +277,10 @@ unhandled errors. In general, unhandled errors will not go silently missing.
 
 The promise objects returned by Mopidy.js adheres to the `CommonJS Promises/A
 <http://wiki.commonjs.org/wiki/Promises/A>`_ standard. We use the
-implementation known as `when.js <https://github.com/cujojs/when>`_. Please
-refer to when.js' documentation or the standard for further details on how to
-work with promise objects.
+implementation known as `when.js <https://github.com/cujojs/when>`_, and
+reexport it as ``Mopidy.when`` so you don't have to duplicate the dependency.
+Please refer to when.js' documentation or the standard for further details on
+how to work with promise objects.
 
 
 Cleaning up

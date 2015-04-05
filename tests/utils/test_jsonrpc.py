@@ -8,11 +8,16 @@ import mock
 import pykka
 
 from mopidy import core, models
-from mopidy.backend import dummy
-from mopidy.utils import jsonrpc
+from mopidy.utils import deprecation, jsonrpc
+
+from tests import dummy_backend
 
 
 class Calculator(object):
+
+    def __init__(self):
+        self._mem = None
+
     def model(self):
         return 'TI83'
 
@@ -22,6 +27,12 @@ class Calculator(object):
 
     def sub(self, a, b):
         return a - b
+
+    def set_mem(self, value):
+        self._mem = value
+
+    def get_mem(self):
+        return self._mem
 
     def describe(self):
         return {
@@ -40,14 +51,18 @@ class Calculator(object):
 
 
 class JsonRpcTestBase(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
-        self.backend = dummy.create_dummy_backend_proxy()
-        self.core = core.Core.start(backends=[self.backend]).proxy()
+        self.backend = dummy_backend.create_proxy()
+        self.calc = Calculator()
+
+        with deprecation.ignore():
+            self.core = core.Core.start(backends=[self.backend]).proxy()
 
         self.jrw = jsonrpc.JsonRpcWrapper(
             objects={
                 'hello': lambda: 'Hello, world!',
-                'calc': Calculator(),
+                'calc': self.calc,
                 'core': self.core,
                 'core.playback': self.core.playback,
                 'core.tracklist': self.core.tracklist,
@@ -61,12 +76,14 @@ class JsonRpcTestBase(unittest.TestCase):
 
 
 class JsonRpcSetupTest(JsonRpcTestBase):
+
     def test_empty_object_mounts_is_not_allowed(self):
         with self.assertRaises(AttributeError):
             jsonrpc.JsonRpcWrapper(objects={'': Calculator()})
 
 
 class JsonRpcSerializationTest(JsonRpcTestBase):
+
     def test_handle_json_converts_from_and_to_json(self):
         self.jrw.handle_data = mock.Mock()
         self.jrw.handle_data.return_value = {'foo': 'response'}
@@ -132,6 +149,7 @@ class JsonRpcSerializationTest(JsonRpcTestBase):
 
 
 class JsonRpcSingleCommandTest(JsonRpcTestBase):
+
     def test_call_method_on_root(self):
         request = {
             'jsonrpc': '2.0',
@@ -188,12 +206,12 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
     def test_call_method_on_actor_member(self):
         request = {
             'jsonrpc': '2.0',
-            'method': 'core.playback.get_volume',
+            'method': 'core.playback.get_time_position',
             'id': 1,
         }
         response = self.jrw.handle_data(request)
 
-        self.assertEqual(response['result'], None)
+        self.assertEqual(response['result'], 0)
 
     def test_call_method_which_is_a_directly_mounted_actor_member(self):
         # 'get_uri_schemes' isn't a regular callable, but a Pykka
@@ -215,29 +233,28 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
     def test_call_method_with_positional_params(self):
         request = {
             'jsonrpc': '2.0',
-            'method': 'core.playback.set_volume',
-            'params': [37],
+            'method': 'calc.add',
+            'params': [3, 4],
             'id': 1,
         }
         response = self.jrw.handle_data(request)
 
-        self.assertEqual(response['result'], None)
-        self.assertEqual(self.core.playback.get_volume().get(), 37)
+        self.assertEqual(response['result'], 7)
 
     def test_call_methods_with_named_params(self):
         request = {
             'jsonrpc': '2.0',
-            'method': 'core.playback.set_volume',
-            'params': {'volume': 37},
+            'method': 'calc.add',
+            'params': {'a': 3, 'b': 4},
             'id': 1,
         }
         response = self.jrw.handle_data(request)
 
-        self.assertEqual(response['result'], None)
-        self.assertEqual(self.core.playback.get_volume().get(), 37)
+        self.assertEqual(response['result'], 7)
 
 
 class JsonRpcSingleNotificationTest(JsonRpcTestBase):
+
     def test_notification_does_not_return_a_result(self):
         request = {
             'jsonrpc': '2.0',
@@ -248,17 +265,17 @@ class JsonRpcSingleNotificationTest(JsonRpcTestBase):
         self.assertIsNone(response)
 
     def test_notification_makes_an_observable_change(self):
-        self.assertEqual(self.core.playback.get_volume().get(), None)
+        self.assertEqual(self.calc.get_mem(), None)
 
         request = {
             'jsonrpc': '2.0',
-            'method': 'core.playback.set_volume',
+            'method': 'calc.set_mem',
             'params': [37],
         }
         response = self.jrw.handle_data(request)
 
         self.assertIsNone(response)
-        self.assertEqual(self.core.playback.get_volume().get(), 37)
+        self.assertEqual(self.calc.get_mem(), 37)
 
     def test_notification_unknown_method_returns_nothing(self):
         request = {
@@ -272,6 +289,7 @@ class JsonRpcSingleNotificationTest(JsonRpcTestBase):
 
 
 class JsonRpcBatchTest(JsonRpcTestBase):
+
     def test_batch_of_only_commands_returns_all(self):
         self.core.tracklist.set_random(True).get()
 
@@ -320,6 +338,7 @@ class JsonRpcBatchTest(JsonRpcTestBase):
 
 
 class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
+
     def test_application_error_response(self):
         request = {
             'jsonrpc': '2.0',
@@ -489,6 +508,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
 
 
 class JsonRpcBatchErrorTest(JsonRpcTestBase):
+
     def test_empty_batch_list_causes_invalid_request_error(self):
         request = []
         response = self.jrw.handle_data(request)
@@ -526,7 +546,7 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
     def test_batch_of_both_successfull_and_failing_requests(self):
         request = [
             # Call with positional params
-            {'jsonrpc': '2.0', 'method': 'core.playback.set_volume',
+            {'jsonrpc': '2.0', 'method': 'core.playback.seek',
                 'params': [47], 'id': '1'},
             # Notification
             {'jsonrpc': '2.0', 'method': 'core.tracklist.set_consume',
@@ -547,7 +567,7 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
 
         self.assertEqual(len(response), 5)
         response = dict((row['id'], row) for row in response)
-        self.assertEqual(response['1']['result'], None)
+        self.assertEqual(response['1']['result'], False)
         self.assertEqual(response['2']['result'], None)
         self.assertEqual(response[None]['error']['code'], -32600)
         self.assertEqual(response['5']['error']['code'], -32601)
@@ -555,6 +575,7 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
 
 
 class JsonRpcInspectorTest(JsonRpcTestBase):
+
     def test_empty_object_mounts_is_not_allowed(self):
         with self.assertRaises(AttributeError):
             jsonrpc.JsonRpcInspector(objects={'': Calculator})
@@ -614,29 +635,29 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
             'core.library': core.LibraryController,
             'core.playback': core.PlaybackController,
             'core.playlists': core.PlaylistsController,
-            'core.tracklist':  core.TracklistController,
+            'core.tracklist': core.TracklistController,
         })
 
         methods = inspector.describe()
 
         self.assertIn('core.get_uri_schemes', methods)
-        self.assertEquals(len(methods['core.get_uri_schemes']['params']), 0)
+        self.assertEqual(len(methods['core.get_uri_schemes']['params']), 0)
 
         self.assertIn('core.library.lookup', methods.keys())
-        self.assertEquals(
+        self.assertEqual(
             methods['core.library.lookup']['params'][0]['name'], 'uri')
 
         self.assertIn('core.playback.next', methods)
-        self.assertEquals(len(methods['core.playback.next']['params']), 0)
+        self.assertEqual(len(methods['core.playback.next']['params']), 0)
 
         self.assertIn('core.playlists.get_playlists', methods)
-        self.assertEquals(
+        self.assertEqual(
             len(methods['core.playlists.get_playlists']['params']), 1)
 
         self.assertIn('core.tracklist.filter', methods.keys())
-        self.assertEquals(
+        self.assertEqual(
             methods['core.tracklist.filter']['params'][0]['name'], 'criteria')
-        self.assertEquals(
+        self.assertEqual(
             methods['core.tracklist.filter']['params'][1]['name'], 'kwargs')
-        self.assertEquals(
+        self.assertEqual(
             methods['core.tracklist.filter']['params'][1]['kwargs'], True)

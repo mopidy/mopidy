@@ -4,6 +4,7 @@ from mopidy import listener
 
 
 class CoreListener(listener.Listener):
+
     """
     Marker interface for recipients of events sent by the core actor.
 
@@ -161,5 +162,13 @@ class CoreListener(listener.Listener):
 
         :param time_position: the position that was seeked to in milliseconds
         :type time_position: int
+        """
+        pass
+
+    def stream_title_changed(self, title):
+        """
+        Called whenever the currently playing stream title changes.
+
+        *MAY* be implemented by actor.
         """
         pass

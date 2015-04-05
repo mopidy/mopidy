@@ -1,11 +1,15 @@
 from __future__ import absolute_import, unicode_literals
 
-import itertools
+import logging
 import urlparse
 
 import pykka
 
-from . import listener
+from mopidy.core import listener
+from mopidy.models import Playlist
+from mopidy.utils import deprecation
+
+logger = logging.getLogger(__name__)
 
 
 class PlaylistsController(object):
@@ -15,20 +19,85 @@ class PlaylistsController(object):
         self.backends = backends
         self.core = core
 
+    def as_list(self):
+        """
+        Get a list of the currently available playlists.
+
+        Returns a list of :class:`~mopidy.models.Ref` objects referring to the
+        playlists. In other words, no information about the playlists' content
+        is given.
+
+        :rtype: list of :class:`mopidy.models.Ref`
+
+        .. versionadded:: 1.0
+        """
+        futures = {
+            b.actor_ref.actor_class.__name__: b.playlists.as_list()
+            for b in set(self.backends.with_playlists.values())}
+
+        results = []
+        for backend_name, future in futures.items():
+            try:
+                results.extend(future.get())
+            except NotImplementedError:
+                logger.warning(
+                    '%s does not implement playlists.as_list(). '
+                    'Please upgrade it.', backend_name)
+
+        return results
+
+    def get_items(self, uri):
+        """
+        Get the items in a playlist specified by ``uri``.
+
+        Returns a list of :class:`~mopidy.models.Ref` objects referring to the
+        playlist's items.
+
+        If a playlist with the given ``uri`` doesn't exist, it returns
+        :class:`None`.
+
+        :rtype: list of :class:`mopidy.models.Ref`, or :class:`None`
+
+        .. versionadded:: 1.0
+        """
+        uri_scheme = urlparse.urlparse(uri).scheme
+        backend = self.backends.with_playlists.get(uri_scheme, None)
+        if backend:
+            return backend.playlists.get_items(uri).get()
+
     def get_playlists(self, include_tracks=True):
-        futures = [b.playlists.playlists
-                   for b in self.backends.with_playlists.values()]
-        results = pykka.get_all(futures)
-        playlists = list(itertools.chain(*results))
-        if not include_tracks:
-            playlists = [p.copy(tracks=[]) for p in playlists]
-        return playlists
+        """
+        Get the available playlists.
 
-    playlists = property(get_playlists)
+        :rtype: list of :class:`mopidy.models.Playlist`
+
+        .. versionchanged:: 1.0
+            If you call the method with ``include_tracks=False``, the
+            :attr:`~mopidy.models.Playlist.last_modified` field of the returned
+            playlists is no longer set.
+
+        .. deprecated:: 1.0
+            Use :meth:`as_list` and :meth:`get_items` instead.
+        """
+        deprecation.warn('core.playlists.get_playlists')
+
+        playlist_refs = self.as_list()
+
+        if include_tracks:
+            playlists = {r.uri: self.lookup(r.uri) for r in playlist_refs}
+            # Use the playlist name from as_list() because it knows about any
+            # playlist folder hierarchy, which lookup() does not.
+            return [
+                playlists[r.uri].copy(name=r.name)
+                for r in playlist_refs if playlists[r.uri] is not None]
+        else:
+            return [
+                Playlist(uri=r.uri, name=r.name) for r in playlist_refs]
+
+    playlists = deprecation.deprecated_property(get_playlists)
     """
-    The available playlists.
-
-    Read-only. List of :class:`mopidy.models.Playlist`.
+    .. deprecated:: 1.0
+        Use :meth:`as_list` and :meth:`get_items` instead.
     """
 
     def create(self, name, uri_scheme=None):
@@ -40,7 +109,7 @@ class PlaylistsController(object):
         :class:`None` or doesn't match a current backend, the first backend is
         asked to create the playlist.
 
-        All new playlists should be created by calling this method, and **not**
+        All new playlists must be created by calling this method, and **not**
         by creating new instances of :class:`mopidy.models.Playlist`.
 
         :param name: name of the new playlist
@@ -94,7 +163,12 @@ class PlaylistsController(object):
         :param criteria: one or more criteria to match by
         :type criteria: dict
         :rtype: list of :class:`mopidy.models.Playlist`
+
+        .. deprecated:: 1.0
+            Use :meth:`as_list` and filter yourself.
         """
+        deprecation.warn('core.playlists.filter')
+
         criteria = criteria or kwargs
         matches = self.playlists
         for (key, value) in criteria.iteritems():
@@ -145,14 +219,14 @@ class PlaylistsController(object):
         Save the playlist.
 
         For a playlist to be saveable, it must have the ``uri`` attribute set.
-        You should not set the ``uri`` atribute yourself, but use playlist
+        You must not set the ``uri`` atribute yourself, but use playlist
         objects returned by :meth:`create` or retrieved from :attr:`playlists`,
         which will always give you saveable playlists.
 
         The method returns the saved playlist. The return playlist may differ
         from the saved playlist. E.g. if the playlist name was changed, the
         returned playlist may have a different URI. The caller of this method
-        should throw away the playlist sent to this method, and use the
+        must throw away the playlist sent to this method, and use the
         returned playlist instead.
 
         If the playlist's URI isn't set or doesn't match the URI scheme of a

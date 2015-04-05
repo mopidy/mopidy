@@ -53,6 +53,7 @@ def stop_remaining_actors():
 
 
 class BaseThread(threading.Thread):
+
     def __init__(self):
         super(BaseThread, self).__init__()
         # No thread should block process from exiting

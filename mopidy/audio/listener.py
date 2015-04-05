@@ -4,6 +4,7 @@ from mopidy import listener
 
 
 class AudioListener(listener.Listener):
+
     """
     Marker interface for recipients of events sent by the audio actor.
 

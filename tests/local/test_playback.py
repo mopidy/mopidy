@@ -8,12 +8,13 @@ import mock
 
 import pykka
 
-from mopidy import audio, core
+from mopidy import core
 from mopidy.core import PlaybackState
 from mopidy.local import actor
 from mopidy.models import Track
+from mopidy.utils import deprecation
 
-from tests import path_to_data_dir
+from tests import dummy_audio, path_to_data_dir
 from tests.local import generate_song, populate_tracklist
 
 logger = logging.getLogger(__name__)
@@ -50,8 +51,12 @@ class LocalPlaybackProviderTest(unittest.TestCase):
             logger.debug('Replaying: %s %s', event, kwargs)
             self.core.on_event(event, **kwargs)
 
+    def run(self, result=None):
+        with deprecation.ignore('core.tracklist.add:tracks_arg'):
+            return super(LocalPlaybackProviderTest, self).run(result)
+
     def setUp(self):  # noqa: N802
-        self.audio = audio.DummyAudio.start().proxy()
+        self.audio = dummy_audio.create_proxy()
         self.backend = actor.LocalBackend.start(
             config=self.config, audio=self.audio).proxy()
         self.core = core.Core(backends=[self.backend], audio=self.audio)
@@ -438,7 +443,17 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.assertNotEqual(self.playback.current_track.uri, old_uri)
 
     @populate_tracklist
-    def test_about_to_finish_at_end_of_playlist(self):
+    def test_end_of_track_return_value(self):
+        self.playback.play()
+        self.assertEqual(self.trigger_about_to_finish(), None)
+
+    @populate_tracklist
+    def test_end_of_track_does_not_trigger_playback(self):
+        self.trigger_about_to_finish()
+        self.assertEqual(self.playback.state, PlaybackState.STOPPED)
+
+    @populate_tracklist
+    def test_end_of_track_at_end_of_playlist(self):
         self.playback.play()
 
         for i, track in enumerate(self.tracks):
@@ -465,6 +480,10 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.playback.play()
         self.assertEqual(self.playback.state, PlaybackState.PLAYING)
         self.assertEqual(self.playback.current_track, self.tracks[0])
+
+    def test_end_of_track_for_empty_playlist(self):
+        self.trigger_about_to_finish()
+        self.assertEqual(self.playback.state, PlaybackState.STOPPED)
 
     @unittest.skip('This is broken with gapless support')
     @populate_tracklist
@@ -524,6 +543,14 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.playback.play()
         for _ in self.tracks[1:]:
             self.trigger_about_to_finish()
+        tl_track = self.playback.current_tl_track
+        self.assertEqual(
+            self.tracklist.next_track(tl_track), self.tl_tracks[0])
+
+    @populate_tracklist
+    @mock.patch('random.shuffle')
+    def test_end_of_track_track_with_random(self, shuffle_mock):
+        shuffle_mock.side_effect = lambda tracks: tracks.reverse()
 
         tl_track = self.playback.current_tl_track
         self.assertEqual(
@@ -669,14 +696,14 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.assertEqual(self.tracklist.index(tl_track), None)
 
     def test_on_tracklist_change_gets_called(self):
-        callback = self.playback.on_tracklist_change
+        callback = self.playback._on_tracklist_change
 
         def wrapper():
             wrapper.called = True
             return callback()
         wrapper.called = False
 
-        self.playback.on_tracklist_change = wrapper
+        self.playback._on_tracklist_change = wrapper
         self.tracklist.add([Track()])
 
         self.assert_(wrapper.called)
@@ -812,6 +839,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.playback.pause()
         result = self.playback.seek(self.tracks[0].length - 1000)
         self.assert_(result, 'Seek return value was %s' % result)
+        self.assertEqual(self.playback.state, PlaybackState.PAUSED)
 
     @populate_tracklist
     def test_seek_when_paused_updates_position(self):
@@ -821,13 +849,6 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.playback.seek(length - 1000)
         position = self.playback.time_position
         self.assertGreaterEqual(position, length - 1010)
-
-    @populate_tracklist
-    def test_seek_when_paused_triggers_play(self):
-        self.playback.play()
-        self.playback.pause()
-        self.playback.seek(0)
-        self.assertEqual(self.playback.state, PlaybackState.PLAYING)
 
     @unittest.SkipTest
     @populate_tracklist

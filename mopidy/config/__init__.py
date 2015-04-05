@@ -22,7 +22,8 @@ _logging_schema['debug_format'] = String()
 _logging_schema['debug_file'] = Path()
 _logging_schema['config_file'] = Path(optional=True)
 
-_loglevels_schema = LogLevelConfigSchema('loglevels')
+_loglevels_schema = MapConfigSchema('loglevels', LogLevel())
+_logcolors_schema = MapConfigSchema('logcolors', LogColor())
 
 _audio_schema = ConfigSchema('audio')
 _audio_schema['mixer'] = String()
@@ -42,7 +43,8 @@ _proxy_schema['password'] = Secret(optional=True)
 # NOTE: if multiple outputs ever comes something like LogLevelConfigSchema
 # _outputs_schema = config.AudioOutputConfigSchema()
 
-_schemas = [_logging_schema, _loglevels_schema, _audio_schema, _proxy_schema]
+_schemas = [_logging_schema, _loglevels_schema, _logcolors_schema,
+            _audio_schema, _proxy_schema]
 
 _INITIAL_HELP = """
 # For further information about options in this file see:
@@ -148,6 +150,11 @@ def _load_file(parser, filename):
         logger.debug(
             'Loading config from %s failed; it does not exist', filename)
         return
+    if not os.access(filename, os.R_OK):
+        logger.warning(
+            'Loading config from %s failed; read permission missing',
+            filename)
+        return
 
     try:
         logger.info('Loading config from %s', filename)
@@ -170,13 +177,19 @@ def _validate(raw_config, schemas):
     # Get validated config
     config = {}
     errors = {}
+    sections = set(raw_config)
     for schema in schemas:
+        sections.discard(schema.name)
         values = raw_config.get(schema.name, {})
         result, error = schema.deserialize(values)
         if error:
             errors[schema.name] = error
         if result:
             config[schema.name] = result
+
+    for section in sections:
+        logger.debug('Ignoring unknown config section: %s', section)
+
     return config, errors
 
 
@@ -251,6 +264,7 @@ def _postprocess(config_string):
 
 
 class Proxy(collections.Mapping):
+
     def __init__(self, data):
         self._data = data
 

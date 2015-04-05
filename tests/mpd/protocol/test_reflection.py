@@ -4,6 +4,7 @@ from tests.mpd import protocol
 
 
 class ReflectionHandlerTest(protocol.BaseTestCase):
+
     def test_config_is_not_allowed_across_the_network(self):
         self.send_request('config')
         self.assertEqualResponse(
@@ -49,6 +50,7 @@ class ReflectionHandlerTest(protocol.BaseTestCase):
 
 
 class ReflectionWhenNotAuthedTest(protocol.BaseTestCase):
+
     def get_config(self):
         config = super(ReflectionWhenNotAuthedTest, self).get_config()
         config['mpd']['password'] = 'topsecret'

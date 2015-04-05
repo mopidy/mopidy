@@ -34,6 +34,8 @@ class TrackMpdFormatTest(unittest.TestCase):
         mtime.undo_fake()
 
     def test_track_to_mpd_format_for_empty_track(self):
+        # TODO: this is likely wrong, see:
+        # https://github.com/mopidy/mopidy/issues/923#issuecomment-79584110
         result = translator.track_to_mpd_format(Track())
         self.assertIn(('file', ''), result)
         self.assertIn(('Time', 0), result)
@@ -114,6 +116,7 @@ class TrackMpdFormatTest(unittest.TestCase):
 
 
 class PlaylistMpdFormatTest(unittest.TestCase):
+
     def test_mpd_format(self):
         playlist = Playlist(tracks=[
             Track(track_no=1), Track(track_no=2), Track(track_no=3)])

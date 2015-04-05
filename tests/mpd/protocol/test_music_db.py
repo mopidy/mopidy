@@ -7,8 +7,11 @@ from mopidy.mpd.protocol import music_db
 
 from tests.mpd import protocol
 
+# TODO: split into more modules for faster parallel tests?
+
 
 class QueryFromMpdSearchFormatTest(unittest.TestCase):
+
     def test_dates_are_extracted(self):
         result = music_db._query_from_mpd_search_parameters(
             ['Date', '1974-01-02', 'Date', '1975'], music_db._SEARCH_MAPPING)
@@ -32,7 +35,10 @@ class QueryFromMpdListFormatTest(unittest.TestCase):
     pass  # TODO
 
 
+# TODO: why isn't core.playlists.filter getting deprecation warnings?
+
 class MusicDatabaseHandlerTest(protocol.BaseTestCase):
+
     def test_count(self):
         self.send_request('count "artist" "needle"')
         self.assertInResponse('songs: 0')
@@ -55,7 +61,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         # Count the lone track
         self.backend.library.dummy_find_exact_result = SearchResult(
             tracks=[
-                Track(uri='dummy:a', name="foo", date="2001", length=4000),
+                Track(uri='dummy:a', name='foo', date='2001', length=4000),
             ])
         self.send_request('count "title" "foo"')
         self.assertInResponse('songs: 1')
@@ -104,31 +110,35 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.core.playlists.save(playlist)
         self.backend.library.dummy_search_result = SearchResult(
             tracks=[Track(uri='dummy:a', name='A')])
-        playlists = self.core.playlists.filter(name='my favs').get()
-        self.assertEqual(len(playlists), 1)
-        self.assertEqual(len(playlists[0].tracks), 2)
+
+        items = self.core.playlists.get_items(playlist.uri).get()
+        self.assertEqual(len(items), 2)
 
         self.send_request('searchaddpl "my favs" "title" "a"')
 
-        playlists = self.core.playlists.filter(name='my favs').get()
-        self.assertEqual(len(playlists), 1)
-        self.assertEqual(len(playlists[0].tracks), 3)
-        self.assertEqual(playlists[0].tracks[0].uri, 'dummy:x')
-        self.assertEqual(playlists[0].tracks[1].uri, 'dummy:y')
-        self.assertEqual(playlists[0].tracks[2].uri, 'dummy:a')
+        items = self.core.playlists.get_items(playlist.uri).get()
+        self.assertEqual(len(items), 3)
+        self.assertEqual(items[0].uri, 'dummy:x')
+        self.assertEqual(items[1].uri, 'dummy:y')
+        self.assertEqual(items[2].uri, 'dummy:a')
         self.assertInResponse('OK')
 
     def test_searchaddpl_creates_missing_playlist(self):
         self.backend.library.dummy_search_result = SearchResult(
             tracks=[Track(uri='dummy:a', name='A')])
-        self.assertEqual(
-            len(self.core.playlists.filter(name='my favs').get()), 0)
+
+        playlists = self.core.playlists.as_list().get()
+        self.assertNotIn('my favs', {p.name for p in playlists})
 
         self.send_request('searchaddpl "my favs" "title" "a"')
 
-        playlists = self.core.playlists.filter(name='my favs').get()
-        self.assertEqual(len(playlists), 1)
-        self.assertEqual(playlists[0].tracks[0].uri, 'dummy:a')
+        playlists = self.core.playlists.as_list().get()
+        playlist = {p.name: p for p in playlists}['my favs']
+
+        items = self.core.playlists.get_items(playlist.uri).get()
+
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0].uri, 'dummy:a')
         self.assertInResponse('OK')
 
     def test_listall_without_uri(self):
@@ -277,8 +287,8 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
     def test_lsinfo_without_path_returns_same_as_for_root(self):
         last_modified = 1390942873222
-        self.backend.playlists.playlists = [
-            Playlist(name='a', uri='dummy:/a', last_modified=last_modified)]
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(name='a', uri='dummy:/a', last_modified=last_modified)])
 
         response1 = self.send_request('lsinfo')
         response2 = self.send_request('lsinfo "/"')
@@ -286,8 +296,8 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
     def test_lsinfo_with_empty_path_returns_same_as_for_root(self):
         last_modified = 1390942873222
-        self.backend.playlists.playlists = [
-            Playlist(name='a', uri='dummy:/a', last_modified=last_modified)]
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(name='a', uri='dummy:/a', last_modified=last_modified)])
 
         response1 = self.send_request('lsinfo ""')
         response2 = self.send_request('lsinfo "/"')
@@ -295,8 +305,8 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
     def test_lsinfo_for_root_includes_playlists(self):
         last_modified = 1390942873222
-        self.backend.playlists.playlists = [
-            Playlist(name='a', uri='dummy:/a', last_modified=last_modified)]
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(name='a', uri='dummy:/a', last_modified=last_modified)])
 
         self.send_request('lsinfo "/"')
         self.assertInResponse('playlist: a')
@@ -384,8 +394,8 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.backend.library.dummy_browse_result = {
             'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
                         Ref.directory(uri='dummy:/foo', name='foo')]}
-        self.backend.playlists.playlists = [
-            Playlist(name='a', uri='dummy:/a', last_modified=last_modified)]
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(name='a', uri='dummy:/a', last_modified=last_modified)])
 
         response = self.send_request('lsinfo "/"')
         self.assertLess(response.index('directory: dummy'),
@@ -422,6 +432,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
 
 class MusicDatabaseFindTest(protocol.BaseTestCase):
+
     def test_find_includes_fake_artist_and_album_tracks(self):
         self.backend.library.dummy_find_exact_result = SearchResult(
             albums=[Album(uri='dummy:album:a', name='A', date='2001')],
@@ -612,12 +623,10 @@ class MusicDatabaseFindTest(protocol.BaseTestCase):
 
 
 class MusicDatabaseListTest(protocol.BaseTestCase):
-    def test_list(self):
-        self.backend.library.dummy_find_exact_result = SearchResult(
-            tracks=[
-                Track(uri='dummy:a', name='A', artists=[
-                    Artist(name='A Artist')])])
 
+    def test_list(self):
+        self.backend.library.dummy_get_distinct_result = {
+            'artist': set(['A Artist'])}
         self.send_request('list "artist" "artist" "foo"')
 
         self.assertInResponse('Artist: A Artist')
@@ -891,8 +900,8 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_list_album_with_artist_name(self):
-        self.backend.library.dummy_find_exact_result = SearchResult(
-            tracks=[Track(album=Album(name='foo'))])
+        self.backend.library.dummy_get_distinct_result = {
+            'album': set(['foo'])}
 
         self.send_request('list "album" "anartist"')
         self.assertInResponse('Album: foo')
@@ -1056,6 +1065,7 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
 
 
 class MusicDatabaseSearchTest(protocol.BaseTestCase):
+
     def test_search(self):
         self.backend.library.dummy_search_result = SearchResult(
             albums=[Album(uri='dummy:album:a', name='A')],

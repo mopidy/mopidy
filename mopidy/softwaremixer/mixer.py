@@ -21,16 +21,13 @@ class SoftwareMixer(pykka.ThreadingActor, mixer.Mixer):
         self._initial_volume = None
         self._initial_mute = None
 
-        # TODO: shouldn't this be logged by thing that choose us?
-        logger.info('Mixing using GStreamer software mixing')
-
     def setup(self, mixer_ref):
         self._audio_mixer = mixer_ref
 
         # The Mopidy startup procedure will set the initial volume of a
-        # mixer, but this happens before the audio actor is injected into the
-        # software mixer and has no effect. Thus, we need to set the initial
-        # volume again.
+        # mixer, but this happens before the audio actor's mixer is injected
+        # into the software mixer actor and has no effect. Thus, we need to set
+        # the initial volume again.
         if self._initial_volume is not None:
             self.set_volume(self._initial_volume)
         if self._initial_mute is not None:

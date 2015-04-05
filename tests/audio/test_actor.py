@@ -15,11 +15,10 @@ import mock
 import pykka
 
 from mopidy import audio, listener
-from mopidy.audio import dummy as dummy_audio
 from mopidy.audio.constants import PlaybackState
 from mopidy.utils.path import path_to_uri
 
-from tests import path_to_data_dir
+from tests import dummy_audio, path_to_data_dir
 
 # We want to make sure both our real audio class and the fake one behave
 # correctly. So each test is first run against the real class, then repeated
@@ -80,6 +79,7 @@ class DummyMixin(object):
 
 
 class AudioTest(BaseTest):
+
     def test_start_playback_existing_file(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
@@ -156,6 +156,7 @@ class DummyAudioListener(pykka.ThreadingActor, audio.AudioListener):
 
 
 class AudioEventTest(BaseTest):
+
     def setUp(self):  # noqa: N802
         super(AudioEventTest, self).setUp()
         self.audio.enable_sync_handler().get()
@@ -439,11 +440,13 @@ class AudioEventTest(BaseTest):
 
 
 class AudioDummyEventTest(DummyMixin, AudioEventTest):
+
     """Exercise the AudioEventTest against our mock audio classes."""
 
 
 # TODO: move to mixer tests...
 class MixerTest(BaseTest):
+
     @unittest.SkipTest
     def test_set_mute(self):
         for value in (True, False):
@@ -464,6 +467,7 @@ class MixerTest(BaseTest):
 
 
 class AudioStateTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.audio = audio.Audio(config=None, mixer=None)
 
@@ -509,6 +513,7 @@ class AudioStateTest(unittest.TestCase):
 
 
 class AudioBufferingTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.audio = audio.Audio(config=None, mixer=None)
         self.audio._playbin = mock.Mock(spec=['set_state'])

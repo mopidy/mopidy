@@ -1,11 +1,10 @@
 from __future__ import absolute_import, unicode_literals
 
-import copy
-
-from mopidy import listener
+from mopidy import listener, models
 
 
 class Backend(object):
+
     """Backend API
 
     If the backend has problems during initialization it should raise
@@ -61,6 +60,7 @@ class Backend(object):
 
 
 class LibraryProvider(object):
+
     """
     :param backend: backend the controller is a part of
     :type backend: :class:`mopidy.backend.Backend`
@@ -92,14 +92,34 @@ class LibraryProvider(object):
         """
         return []
 
-    # TODO: replace with search(query, exact=True, ...)
-    def find_exact(self, query=None, uris=None):
+    def get_distinct(self, field, query=None):
         """
-        See :meth:`mopidy.core.LibraryController.find_exact`.
+        See :meth:`mopidy.core.LibraryController.get_distinct`.
 
         *MAY be implemented by subclass.*
+
+        Default implementation will simply return an empty set.
         """
-        pass
+        return set()
+
+    def get_images(self, uris):
+        """
+        See :meth:`mopidy.core.LibraryController.get_images`.
+
+        *MAY be implemented by subclass.*
+
+        Default implementation will simply call lookup and try and use the
+        album art for any tracks returned. Most extensions should replace this
+        with something smarter or simply return an empty dictionary.
+        """
+        result = {}
+        for uri in uris:
+            image_uris = set()
+            for track in self.lookup(uri):
+                if track.album and track.album.images:
+                    image_uris.update(track.album.images)
+            result[uri] = [models.Image(uri=u) for u in image_uris]
+        return result
 
     def lookup(self, uri):
         """
@@ -117,16 +137,20 @@ class LibraryProvider(object):
         """
         pass
 
-    def search(self, query=None, uris=None):
+    def search(self, query=None, uris=None, exact=False):
         """
         See :meth:`mopidy.core.LibraryController.search`.
 
         *MAY be implemented by subclass.*
+
+        .. versionadded:: 1.0
+            The ``exact`` param which replaces the old ``find_exact``.
         """
         pass
 
 
 class PlaybackProvider(object):
+
     """
     :param audio: the audio actor
     :type audio: actor proxy to an instance of :class:`mopidy.audio.Audio`
@@ -172,23 +196,44 @@ class PlaybackProvider(object):
         """
         self.audio.prepare_change().get()
 
+    def translate_uri(self, uri):
+        """
+        Convert custom URI scheme to real playable URI.
+
+        *MAY be reimplemented by subclass.*
+
+        This is very likely the *only* thing you need to override as a backend
+        author. Typically this is where you convert any Mopidy specific URI
+        to a real URI and then return it. If you can't convert the URI just
+        return :class:`None`.
+
+        :param uri: the URI to translate
+        :type uri: string
+        :rtype: string or :class:`None` if the URI could not be translated
+        """
+        return uri
+
     def change_track(self, track):
         """
         Swith to provided track.
 
         *MAY be reimplemented by subclass.*
 
-        This is very likely the *only* thing you need to override as a backend
-        author. Typically this is where you convert any mopidy specific URIs
-        to real URIs and then return::
+        It is unlikely it makes sense for any backends to override
+        this. For most practical purposes it should be considered an internal
+        call between backends and core that backend authors should not touch.
 
-            return super(MyBackend, self).change_track(track.copy(uri=new_uri))
+        The default implementation will call :meth:`translate_uri` which
+        is what you want to implement.
 
         :param track: the track to play
         :type track: :class:`mopidy.models.Track`
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        self.audio.set_uri(track.uri).get()
+        uri = self.translate_uri(track.uri)
+        if not uri:
+            return False
+        self.audio.set_uri(uri).get()
         return True
 
     def resume(self):
@@ -219,7 +264,7 @@ class PlaybackProvider(object):
 
         *MAY be reimplemented by subclass.*
 
-        Should not be used for tracking if tracks have been played / when we
+        Should not be used for tracking if tracks have been played or when we
         are done playing them.
 
         :rtype: :class:`True` if successful, else :class:`False`
@@ -238,6 +283,7 @@ class PlaybackProvider(object):
 
 
 class PlaylistsProvider(object):
+
     """
     A playlist provider exposes a collection of playlists, methods to
     create/change/delete playlists in this collection, and lookup of any
@@ -251,25 +297,36 @@ class PlaylistsProvider(object):
 
     def __init__(self, backend):
         self.backend = backend
-        self._playlists = []
 
-    # TODO Replace playlists property with a get_playlists() method which
-    # returns playlist Ref's instead of the gigantic data structures we
-    # currently make available. lookup() should be used for getting full
-    # playlists with all details.
-
-    @property
-    def playlists(self):
+    def as_list(self):
         """
-        Currently available playlists.
+        Get a list of the currently available playlists.
 
-        Read/write. List of :class:`mopidy.models.Playlist`.
+        Returns a list of :class:`~mopidy.models.Ref` objects referring to the
+        playlists. In other words, no information about the playlists' content
+        is given.
+
+        :rtype: list of :class:`mopidy.models.Ref`
+
+        .. versionadded:: 1.0
         """
-        return copy.copy(self._playlists)
+        raise NotImplementedError
 
-    @playlists.setter  # noqa
-    def playlists(self, playlists):
-        self._playlists = playlists
+    def get_items(self, uri):
+        """
+        Get the items in a playlist specified by ``uri``.
+
+        Returns a list of :class:`~mopidy.models.Ref` objects referring to the
+        playlist's items.
+
+        If a playlist with the given ``uri`` doesn't exist, it returns
+        :class:`None`.
+
+        :rtype: list of :class:`mopidy.models.Ref`, or :class:`None`
+
+        .. versionadded:: 1.0
+        """
+        raise NotImplementedError
 
     def create(self, name):
         """
@@ -338,6 +395,7 @@ class PlaylistsProvider(object):
 
 
 class BackendListener(listener.Listener):
+
     """
     Marker interface for recipients of events sent by the backend actors.
 

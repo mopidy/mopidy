@@ -8,14 +8,18 @@ from __future__ import absolute_import, unicode_literals
 
 import pykka
 
-from .constants import PlaybackState
-from .listener import AudioListener
+from mopidy import audio
+
+
+def create_proxy(config=None, mixer=None):
+    return DummyAudio.start(config, mixer).proxy()
 
 
 class DummyAudio(pykka.ThreadingActor):
+
     def __init__(self, config=None, mixer=None):
         super(DummyAudio, self).__init__()
-        self.state = PlaybackState.STOPPED
+        self.state = audio.PlaybackState.STOPPED
         self._volume = 0
         self._position = 0
         self._callback = None
@@ -42,21 +46,21 @@ class DummyAudio(pykka.ThreadingActor):
 
     def set_position(self, position):
         self._position = position
-        AudioListener.send('position_changed', position=position)
+        audio.AudioListener.send('position_changed', position=position)
         return True
 
     def start_playback(self):
-        return self._change_state(PlaybackState.PLAYING)
+        return self._change_state(audio.PlaybackState.PLAYING)
 
     def pause_playback(self):
-        return self._change_state(PlaybackState.PAUSED)
+        return self._change_state(audio.PlaybackState.PAUSED)
 
     def prepare_change(self):
         self._uri = None
         return True
 
     def stop_playback(self):
-        return self._change_state(PlaybackState.STOPPED)
+        return self._change_state(audio.PlaybackState.STOPPED)
 
     def get_volume(self):
         return self._volume
@@ -84,26 +88,31 @@ class DummyAudio(pykka.ThreadingActor):
         if not self._uri:
             return False
 
-        if self.state == PlaybackState.STOPPED and self._uri:
-            AudioListener.send('position_changed', position=0)
-            AudioListener.send('stream_changed', uri=self._uri)
+        if self.state == audio.PlaybackState.STOPPED and self._uri:
+            audio.AudioListener.send('position_changed', position=0)
+            audio.AudioListener.send('stream_changed', uri=self._uri)
 
-        if new_state == PlaybackState.STOPPED:
+        if new_state == audio.PlaybackState.STOPPED:
             self._uri = None
-            AudioListener.send('stream_changed', uri=self._uri)
+            audio.AudioListener.send('stream_changed', uri=self._uri)
 
         old_state, self.state = self.state, new_state
-        AudioListener.send('state_changed', old_state=old_state,
-                           new_state=new_state, target_state=None)
+        audio.AudioListener.send(
+            'state_changed',
+            old_state=old_state, new_state=new_state, target_state=None)
 
-        if new_state == PlaybackState.PLAYING:
+        if new_state == audio.PlaybackState.PLAYING:
             self._tags['audio-codec'] = [u'fake info...']
-            AudioListener.send('tags_changed', tags=['audio-codec'])
+            audio.AudioListener.send('tags_changed', tags=['audio-codec'])
 
         return self._state_change_result
 
     def trigger_fake_playback_failure(self):
         self._state_change_result = False
+
+    def trigger_fake_tags_changed(self, tags):
+        self._tags.update(tags)
+        audio.AudioListener.send('tags_changed', tags=self._tags.keys())
 
     def get_about_to_finish_callback(self):
         # This needs to be called from outside the actor or we lock up.
@@ -114,9 +123,9 @@ class DummyAudio(pykka.ThreadingActor):
 
             if not self._uri or not self._callback:
                 self._tags = {}
-                AudioListener.send('reached_end_of_stream')
+                audio.AudioListener.send('reached_end_of_stream')
             else:
-                AudioListener.send('position_changed', position=0)
-                AudioListener.send('stream_changed', uri=self._uri)
+                audio.AudioListener.send('position_changed', position=0)
+                audio.AudioListener.send('stream_changed', uri=self._uri)
 
         return wrapper

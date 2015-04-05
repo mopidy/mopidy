@@ -12,11 +12,12 @@ from mopidy import backend
 from mopidy.models import Playlist, Ref, SearchResult
 
 
-def create_dummy_backend_proxy(config=None, audio=None):
+def create_proxy(config=None, audio=None):
     return DummyBackend.start(config=config, audio=audio).proxy()
 
 
 class DummyBackend(pykka.ThreadingActor, backend.Backend):
+
     def __init__(self, config, audio):
         super(DummyBackend, self).__init__()
 
@@ -33,6 +34,7 @@ class DummyLibraryProvider(backend.LibraryProvider):
     def __init__(self, *args, **kwargs):
         super(DummyLibraryProvider, self).__init__(*args, **kwargs)
         self.dummy_library = []
+        self.dummy_get_distinct_result = {}
         self.dummy_browse_result = {}
         self.dummy_find_exact_result = SearchResult()
         self.dummy_search_result = SearchResult()
@@ -40,8 +42,8 @@ class DummyLibraryProvider(backend.LibraryProvider):
     def browse(self, path):
         return self.dummy_browse_result.get(path, [])
 
-    def find_exact(self, **query):
-        return self.dummy_find_exact_result
+    def get_distinct(self, field, query=None):
+        return self.dummy_get_distinct_result.get(field, set())
 
     def lookup(self, uri):
         return [t for t in self.dummy_library if uri == t.uri]
@@ -49,11 +51,14 @@ class DummyLibraryProvider(backend.LibraryProvider):
     def refresh(self, uri=None):
         pass
 
-    def search(self, **query):
+    def search(self, query=None, uris=None, exact=False):
+        if exact:  # TODO: remove uses of dummy_find_exact_result
+            return self.dummy_find_exact_result
         return self.dummy_search_result
 
 
 class DummyPlaybackProvider(backend.PlaybackProvider):
+
     def __init__(self, *args, **kwargs):
         super(DummyPlaybackProvider, self).__init__(*args, **kwargs)
         self._uri = None
@@ -90,6 +95,34 @@ class DummyPlaybackProvider(backend.PlaybackProvider):
 
 
 class DummyPlaylistsProvider(backend.PlaylistsProvider):
+
+    def __init__(self, backend):
+        super(DummyPlaylistsProvider, self).__init__(backend)
+        self._playlists = []
+
+    def set_dummy_playlists(self, playlists):
+        """For tests using the dummy provider through an actor proxy."""
+        self._playlists = playlists
+
+    def as_list(self):
+        return [
+            Ref.playlist(uri=pl.uri, name=pl.name) for pl in self._playlists]
+
+    def get_items(self, uri):
+        playlist = self.lookup(uri)
+        if playlist is None:
+            return
+        return [
+            Ref.track(uri=t.uri, name=t.name) for t in playlist.tracks]
+
+    def lookup(self, uri):
+        for playlist in self._playlists:
+            if playlist.uri == uri:
+                return playlist
+
+    def refresh(self):
+        pass
+
     def create(self, name):
         playlist = Playlist(name=name, uri='dummy:%s' % name)
         self._playlists.append(playlist)
@@ -99,14 +132,6 @@ class DummyPlaylistsProvider(backend.PlaylistsProvider):
         playlist = self.lookup(uri)
         if playlist:
             self._playlists.remove(playlist)
-
-    def lookup(self, uri):
-        for playlist in self._playlists:
-            if playlist.uri == uri:
-                return playlist
-
-    def refresh(self):
-        pass
 
     def save(self, playlist):
         old_playlist = self.lookup(playlist.uri)

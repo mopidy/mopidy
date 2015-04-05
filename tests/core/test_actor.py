@@ -11,6 +11,7 @@ from mopidy.utils import versioning
 
 
 class CoreActorTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']

@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 
 class MopidyException(Exception):
+
     def __init__(self, message, *args, **kwargs):
         super(MopidyException, self).__init__(message, *args, **kwargs)
         self._message = message
@@ -25,6 +26,7 @@ class ExtensionError(MopidyException):
 
 
 class FindError(MopidyException):
+
     def __init__(self, message, errno=None):
         super(FindError, self).__init__(message, errno)
         self.errno = errno

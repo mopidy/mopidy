@@ -6,8 +6,8 @@ import os
 import tempfile
 import unittest
 
-from mopidy.local import translator
-from mopidy.models import Album, Track
+from mopidy.m3u import translator
+from mopidy.models import Track
 from mopidy.utils import path
 
 from tests import path_to_data_dir
@@ -30,6 +30,7 @@ encoded_ext_track = encoded_track.copy(name='æøå')
 # FIXME use mock instead of tempfile.NamedTemporaryFile
 
 class M3UToUriTest(unittest.TestCase):
+
     def parse(self, name):
         return translator.parse_m3u(name, data_dir)
 
@@ -118,16 +119,3 @@ class M3UToUriTest(unittest.TestCase):
 
 class URItoM3UTest(unittest.TestCase):
     pass
-
-
-class AddMusicbrainzCoverartTest(unittest.TestCase):
-    def test_add_cover_for_album(self):
-        album = Album(musicbrainz_id='someid')
-        track = Track(album=album)
-
-        expected = album.copy(
-            images=['http://coverartarchive.org/release/someid/front'])
-
-        self.assertEqual(
-            track.copy(album=expected),
-            translator.add_musicbrainz_coverart_to_track(track))

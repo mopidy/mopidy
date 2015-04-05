@@ -9,6 +9,7 @@ from mopidy.utils import network
 
 
 class FormatHostnameTest(unittest.TestCase):
+
     @patch('mopidy.utils.network.has_ipv6', True)
     def test_format_hostname_prefixes_ipv4_addresses_when_ipv6_available(self):
         network.has_ipv6 = True
@@ -22,6 +23,7 @@ class FormatHostnameTest(unittest.TestCase):
 
 
 class TryIPv6SocketTest(unittest.TestCase):
+
     @patch('socket.has_ipv6', False)
     def test_system_that_claims_no_ipv6_support(self):
         self.assertFalse(network.try_ipv6_socket())
@@ -40,6 +42,7 @@ class TryIPv6SocketTest(unittest.TestCase):
 
 
 class CreateSocketTest(unittest.TestCase):
+
     @patch('mopidy.utils.network.has_ipv6', False)
     @patch('socket.socket')
     def test_ipv4_socket(self, socket_mock):

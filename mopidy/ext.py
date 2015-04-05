@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class Extension(object):
+
     """Base class for Mopidy extensions"""
 
     dist_name = None
@@ -104,6 +105,7 @@ class Extension(object):
 
 
 class Registry(collections.Mapping):
+
     """Registry of components provided by Mopidy extensions.
 
     Passed to the :meth:`~Extension.setup` method of all extensions. The

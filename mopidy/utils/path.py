@@ -12,6 +12,7 @@ import glib
 
 from mopidy import compat, exceptions
 from mopidy.compat import queue
+from mopidy.utils import encoding
 
 
 logger = logging.getLogger(__name__)
@@ -157,7 +158,8 @@ def _find_worker(relative, follow, done, work, results, errors):
                 errors[path] = exceptions.FindError('Not a file or directory.')
 
         except OSError as e:
-            errors[path] = exceptions.FindError(e.strerror, e.errno)
+            errors[path] = exceptions.FindError(
+                encoding.locale_decode(e.strerror), e.errno)
         finally:
             work.task_done()
 
@@ -200,7 +202,7 @@ def _find(root, thread_count=10, relative=False, follow=False):
 
 def find_mtimes(root, follow=False):
     results, errors = _find(root, relative=False, follow=follow)
-    mtimes = dict((f, int(st.st_mtime)) for f, st in results.items())
+    mtimes = dict((f, int(st.st_mtime * 1000)) for f, st in results.items())
     return mtimes, errors
 
 
@@ -225,6 +227,7 @@ def check_file_path_is_inside_base_dir(file_path, base_path):
 
 # FIXME replace with mock usage in tests.
 class Mtime(object):
+
     def __init__(self):
         self.fake = None
 

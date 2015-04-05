@@ -4,9 +4,9 @@
 Troubleshooting
 ***************
 
-If you run into problems with Mopidy, we usually hang around at ``#mopidy`` at
-`irc.freenode.net <http://freenode.net/>`_ and also have a `mailing list at
-Google Groups <https://groups.google.com/forum/?fromgroups=#!forum/mopidy>`_.
+If you run into problems with Mopidy, we usually hang around at ``#mopidy`` on
+`irc.freenode.net <http://freenode.net/>`_ and also have a `discussion forum
+<https://discuss.mopidy.com/c/mopidy>`_.
 If you stumble into a bug or have a feature request, please create an issue in
 the `issue tracker <https://github.com/mopidy/mopidy/issues>`_.
 

@@ -22,15 +22,16 @@ Frontends
 =========
 
 Frontends expose Mopidy to the external world. They can implement servers for
-protocols like MPD and MPRIS, and they can be used to update other services
-when something happens in Mopidy, like the Last.fm scrobbler frontend does. See
-:ref:`frontend-api` for more details.
+protocols like HTTP, MPD and MPRIS, and they can be used to update other
+services when something happens in Mopidy, like the Last.fm scrobbler frontend
+does. See :ref:`frontend-api` for more details.
 
 .. digraph:: frontend_architecture
 
+    "HTTP\nfrontend" -> Core
     "MPD\nfrontend" -> Core
     "MPRIS\nfrontend" -> Core
-    "Last.fm\nfrontend" -> Core
+    "Scrobbler\nfrontend" -> Core
 
 
 Core
@@ -55,6 +56,7 @@ See :ref:`core-api` for more details.
     Core -> "Library\ncontroller"
     Core -> "Playback\ncontroller"
     Core -> "Playlists\ncontroller"
+    Core -> "History\ncontroller"
 
     "Library\ncontroller" -> "Local backend"
     "Library\ncontroller" -> "Spotify backend"
@@ -95,7 +97,8 @@ Audio
 
 The audio actor is a thin wrapper around the parts of the GStreamer library we
 use. If you implement an advanced backend, you may need to implement your own
-playback provider using the :ref:`audio-api`.
+playback provider using the :ref:`audio-api`, but most backends can use the
+default playback provider without any changes.
 
 
 Mixer

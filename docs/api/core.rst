@@ -64,6 +64,14 @@ Manages the music library, e.g. searching for tracks to be added to a playlist.
     :members:
 
 
+Mixer controller
+================
+
+Manages volume and muting.
+
+.. autoclass:: mopidy.core.MixerController
+    :members:
+
 Core listener
 =============
 

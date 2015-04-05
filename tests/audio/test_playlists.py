@@ -78,6 +78,7 @@ XSPF = b"""<?xml version="1.0" encoding="UTF-8"?>
 
 
 class TypeFind(object):
+
     def __init__(self, data):
         self.data = data
 

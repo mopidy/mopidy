@@ -1,5 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import nose
 
-nose.main()
+def generate_song(i):
+    return 'dummy:track:song%s' % i

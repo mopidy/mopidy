@@ -6,6 +6,7 @@ from mopidy.config import validators
 
 
 class ValidateChoiceTest(unittest.TestCase):
+
     def test_no_choices_passes(self):
         validators.validate_choice('foo', None)
 
@@ -25,6 +26,7 @@ class ValidateChoiceTest(unittest.TestCase):
 
 
 class ValidateMinimumTest(unittest.TestCase):
+
     def test_no_minimum_passes(self):
         validators.validate_minimum(10, None)
 
@@ -39,6 +41,7 @@ class ValidateMinimumTest(unittest.TestCase):
 
 
 class ValidateMaximumTest(unittest.TestCase):
+
     def test_no_maximum_passes(self):
         validators.validate_maximum(5, None)
 
@@ -53,6 +56,7 @@ class ValidateMaximumTest(unittest.TestCase):
 
 
 class ValidateRequiredTest(unittest.TestCase):
+
     def test_passes_when_false(self):
         validators.validate_required('foo', False)
         validators.validate_required('', False)

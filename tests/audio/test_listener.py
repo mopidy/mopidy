@@ -8,6 +8,7 @@ from mopidy import audio
 
 
 class AudioListenerTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.listener = audio.AudioListener()
 

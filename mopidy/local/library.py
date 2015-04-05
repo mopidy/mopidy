@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class LocalLibraryProvider(backend.LibraryProvider):
+
     """Proxy library that delegates work to our active local library."""
 
     root_directory = models.Ref.directory(
@@ -22,6 +23,16 @@ class LocalLibraryProvider(backend.LibraryProvider):
         if not self._library:
             return []
         return self._library.browse(uri)
+
+    def get_distinct(self, field, query=None):
+        if not self._library:
+            return set()
+        return self._library.get_distinct(field, query)
+
+    def get_images(self, uris):
+        if not self._library:
+            return {}
+        return self._library.get_images(uris)
 
     def refresh(self, uri=None):
         if not self._library:
@@ -41,12 +52,7 @@ class LocalLibraryProvider(backend.LibraryProvider):
             tracks = [tracks]
         return tracks
 
-    def find_exact(self, query=None, uris=None):
+    def search(self, query=None, uris=None, exact=False):
         if not self._library:
             return None
-        return self._library.search(query=query, uris=uris, exact=True)
-
-    def search(self, query=None, uris=None):
-        if not self._library:
-            return None
-        return self._library.search(query=query, uris=uris, exact=False)
+        return self._library.search(query=query, uris=uris, exact=exact)

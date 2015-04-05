@@ -189,11 +189,6 @@ class that will connect the rest of the dots.
             'Pykka >= 1.1',
             'pysoundspot',
         ],
-        test_suite='nose.collector',
-        tests_require=[
-            'nose',
-            'mock >= 1.0',
-        ],
         entry_points={
             'mopidy.ext': [
                 'soundspot = mopidy_soundspot:Extension',
@@ -312,12 +307,6 @@ This is ``mopidy_soundspot/__init__.py``::
             from .backend import SoundspotBackend
             registry.add('backend', SoundspotBackend)
 
-            # Register a custom GStreamer element
-            from .mixer import SoundspotMixer
-            gobject.type_register(SoundspotMixer)
-            gst.element_register(
-                SoundspotMixer, 'soundspotmixer', gst.RANK_MARGINAL)
-
             # Or nothing to register e.g. command extension
             pass
 
@@ -419,17 +408,6 @@ As of Mopidy 0.19, extensions can use Mopidy's built-in web server to host
 static web clients as well as Tornado and WSGI web applications. For several
 examples, see the :ref:`http-server-api` docs or explore with
 :ref:`http-explore-extension` extension.
-
-
-Example GStreamer element
-=========================
-
-If you want to extend Mopidy's GStreamer pipeline with new custom GStreamer
-elements, you'll need to register them in GStreamer before they can be used.
-
-Basically, you just implement your GStreamer element in Python and then make
-your :meth:`~mopidy.ext.Extension.setup` method register all your custom
-GStreamer elements.
 
 
 Running an extension

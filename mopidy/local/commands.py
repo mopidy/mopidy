@@ -29,6 +29,7 @@ def _get_library(args, config):
 
 
 class LocalCommand(commands.Command):
+
     def __init__(self):
         super(LocalCommand, self).__init__()
         self.add_child('scan', ScanCommand())
@@ -61,7 +62,10 @@ class ScanCommand(commands.Command):
         super(ScanCommand, self).__init__()
         self.add_argument('--limit',
                           action='store', type=int, dest='limit', default=None,
-                          help='Maxmimum number of tracks to scan')
+                          help='Maximum number of tracks to scan')
+        self.add_argument('--force',
+                          action='store_true', dest='force', default=False,
+                          help='Force rescan of all media files')
 
     def run(self, args, config):
         media_dir = config['local']['media_dir']
@@ -97,7 +101,7 @@ class ScanCommand(commands.Command):
             if mtime is None:
                 logger.debug('Missing file %s', track.uri)
                 uris_to_remove.add(track.uri)
-            elif mtime > track.last_modified:
+            elif mtime > track.last_modified or args.force:
                 uris_to_update.add(track.uri)
             uris_in_library.add(track.uri)
 
@@ -130,7 +134,8 @@ class ScanCommand(commands.Command):
             try:
                 relpath = translator.local_track_uri_to_path(uri, media_dir)
                 file_uri = path.path_to_uri(os.path.join(media_dir, relpath))
-                tags, duration = scanner.scan(file_uri)
+                result = scanner.scan(file_uri)
+                tags, duration = result.tags, result.duration
                 if duration < MIN_DURATION_MS:
                     logger.warning('Failed %s: Track shorter than %dms',
                                    uri, MIN_DURATION_MS)
@@ -138,9 +143,10 @@ class ScanCommand(commands.Command):
                     mtime = file_mtimes.get(os.path.join(media_dir, relpath))
                     track = utils.convert_tags_to_track(tags).copy(
                         uri=uri, length=duration, last_modified=mtime)
-                    track = translator.add_musicbrainz_coverart_to_track(track)
-                    # TODO: add tags to call if library supports it.
-                    library.add(track)
+                    if library.add_supports_tags_and_duration:
+                        library.add(track, tags=tags, duration=duration)
+                    else:
+                        library.add(track)
                     logger.debug('Added %s', track.uri)
             except exceptions.ScannerError as error:
                 logger.warning('Failed %s: %s', uri, error)
@@ -157,6 +163,7 @@ class ScanCommand(commands.Command):
 
 
 class _Progress(object):
+
     def __init__(self, batch_size, total):
         self.count = 0
         self.batch_size = batch_size
@@ -173,6 +180,6 @@ class _Progress(object):
             logger.info('Scanned %d of %d files in %ds.',
                         self.count, self.total, duration)
         else:
-            remainder = duration // self.count * (self.total - self.count)
+            remainder = duration / self.count * (self.total - self.count)
             logger.info('Scanned %d of %d files in %ds, ~%ds left.',
                         self.count, self.total, duration, remainder)

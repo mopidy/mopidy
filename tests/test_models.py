@@ -4,11 +4,12 @@ import json
 import unittest
 
 from mopidy.models import (
-    Album, Artist, ModelJSONEncoder, Playlist, Ref, SearchResult, TlTrack,
-    Track, model_json_decoder)
+    Album, Artist, Image, ModelJSONEncoder, Playlist, Ref, SearchResult,
+    TlTrack, Track, model_json_decoder)
 
 
 class GenericCopyTest(unittest.TestCase):
+
     def compare(self, orig, other):
         self.assertEqual(orig, other)
         self.assertNotEqual(id(orig), id(other))
@@ -54,10 +55,11 @@ class GenericCopyTest(unittest.TestCase):
 
     def test_copying_track_to_remove(self):
         track = Track(name='foo').copy(name=None)
-        self.assertEquals(track.__dict__, Track().__dict__)
+        self.assertEqual(track.__dict__, Track().__dict__)
 
 
 class RefTest(unittest.TestCase):
+
     def test_uri(self):
         uri = 'an_uri'
         ref = Ref(uri=uri)
@@ -74,10 +76,10 @@ class RefTest(unittest.TestCase):
 
     def test_invalid_kwarg(self):
         with self.assertRaises(TypeError):
-            SearchResult(foo='baz')
+            Ref(foo='baz')
 
     def test_repr_without_results(self):
-        self.assertEquals(
+        self.assertEqual(
             "Ref(name=u'foo', type=u'artist', uri=u'uri')",
             repr(Ref(uri='uri', name='foo', type='artist')))
 
@@ -130,7 +132,34 @@ class RefTest(unittest.TestCase):
         self.assertEqual(ref.type, Ref.TRACK)
 
 
+class ImageTest(unittest.TestCase):
+
+    def test_uri(self):
+        uri = 'an_uri'
+        image = Image(uri=uri)
+        self.assertEqual(image.uri, uri)
+        with self.assertRaises(AttributeError):
+            image.uri = None
+
+    def test_width(self):
+        image = Image(width=100)
+        self.assertEqual(image.width, 100)
+        with self.assertRaises(AttributeError):
+            image.width = None
+
+    def test_height(self):
+        image = Image(height=100)
+        self.assertEqual(image.height, 100)
+        with self.assertRaises(AttributeError):
+            image.height = None
+
+    def test_invalid_kwarg(self):
+        with self.assertRaises(TypeError):
+            Image(foo='baz')
+
+
 class ArtistTest(unittest.TestCase):
+
     def test_uri(self):
         uri = 'an_uri'
         artist = Artist(uri=uri)
@@ -164,7 +193,7 @@ class ArtistTest(unittest.TestCase):
             Artist(serialize='baz')
 
     def test_repr(self):
-        self.assertEquals(
+        self.assertEqual(
             "Artist(name=u'name', uri=u'uri')",
             repr(Artist(uri='uri', name='name')))
 
@@ -261,6 +290,7 @@ class ArtistTest(unittest.TestCase):
 
 
 class AlbumTest(unittest.TestCase):
+
     def test_uri(self):
         uri = 'an_uri'
         album = Album(uri=uri)
@@ -328,12 +358,12 @@ class AlbumTest(unittest.TestCase):
             Album(foo='baz')
 
     def test_repr_without_artists(self):
-        self.assertEquals(
+        self.assertEqual(
             "Album(name=u'name', uri=u'uri')",
             repr(Album(uri='uri', name='name')))
 
     def test_repr_with_artists(self):
-        self.assertEquals(
+        self.assertEqual(
             "Album(artists=[Artist(name=u'foo')], name=u'name', uri=u'uri')",
             repr(Album(uri='uri', name='name', artists=[Artist(name='foo')])))
 
@@ -473,6 +503,7 @@ class AlbumTest(unittest.TestCase):
 
 
 class TrackTest(unittest.TestCase):
+
     def test_uri(self):
         uri = 'an_uri'
         track = Track(uri=uri)
@@ -571,12 +602,12 @@ class TrackTest(unittest.TestCase):
             Track(foo='baz')
 
     def test_repr_without_artists(self):
-        self.assertEquals(
+        self.assertEqual(
             "Track(name=u'name', uri=u'uri')",
             repr(Track(uri='uri', name='name')))
 
     def test_repr_with_artists(self):
-        self.assertEquals(
+        self.assertEqual(
             "Track(artists=[Artist(name=u'foo')], name=u'name', uri=u'uri')",
             repr(Track(uri='uri', name='name', artists=[Artist(name='foo')])))
 
@@ -771,6 +802,7 @@ class TrackTest(unittest.TestCase):
 
 
 class TlTrackTest(unittest.TestCase):
+
     def test_tlid(self):
         tlid = 123
         tl_track = TlTrack(tlid=tlid)
@@ -805,7 +837,7 @@ class TlTrackTest(unittest.TestCase):
         self.assertEqual(track2, track)
 
     def test_repr(self):
-        self.assertEquals(
+        self.assertEqual(
             "TlTrack(tlid=123, track=Track(uri=u'uri'))",
             repr(TlTrack(tlid=123, track=Track(uri='uri'))))
 
@@ -849,6 +881,7 @@ class TlTrackTest(unittest.TestCase):
 
 
 class PlaylistTest(unittest.TestCase):
+
     def test_uri(self):
         uri = 'an_uri'
         playlist = Playlist(uri=uri)
@@ -937,12 +970,12 @@ class PlaylistTest(unittest.TestCase):
             Playlist(foo='baz')
 
     def test_repr_without_tracks(self):
-        self.assertEquals(
+        self.assertEqual(
             "Playlist(name=u'name', uri=u'uri')",
             repr(Playlist(uri='uri', name='name')))
 
     def test_repr_with_tracks(self):
-        self.assertEquals(
+        self.assertEqual(
             "Playlist(name=u'name', tracks=[Track(name=u'foo')], uri=u'uri')",
             repr(Playlist(uri='uri', name='name', tracks=[Track(name='foo')])))
 
@@ -1040,6 +1073,7 @@ class PlaylistTest(unittest.TestCase):
 
 
 class SearchResultTest(unittest.TestCase):
+
     def test_uri(self):
         uri = 'an_uri'
         result = SearchResult(uri=uri)
@@ -1073,7 +1107,7 @@ class SearchResultTest(unittest.TestCase):
             SearchResult(foo='baz')
 
     def test_repr_without_results(self):
-        self.assertEquals(
+        self.assertEqual(
             "SearchResult(uri=u'uri')",
             repr(SearchResult(uri='uri')))
 

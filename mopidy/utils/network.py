@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class ShouldRetrySocketCall(Exception):
+
     """Indicate that attempted socket call should be retried"""
 
 
@@ -65,6 +66,7 @@ def format_hostname(hostname):
 
 
 class Server(object):
+
     """Setup listener and register it with gobject's event loop."""
 
     def __init__(self, host, port, protocol, protocol_kwargs=None,
@@ -199,7 +201,8 @@ class Connection(object):
         except socket.error as e:
             if e.errno in (errno.EWOULDBLOCK, errno.EINTR):
                 return data
-            self.stop('Unexpected client error: %s' % e)
+            self.stop(
+                'Unexpected client error: %s' % encoding.locale_decode(e))
             return b''
 
     def enable_timeout(self):
@@ -304,6 +307,7 @@ class Connection(object):
 
 
 class LineProtocol(pykka.ThreadingActor):
+
     """
     Base class for handling line based protocols.
 

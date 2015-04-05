@@ -7,11 +7,14 @@ import mock
 import pykka
 
 from mopidy import core
-from mopidy.backend import dummy
-from mopidy.mpd import session
+from mopidy.mpd import session, uri_mapper
+from mopidy.utils import deprecation
+
+from tests import dummy_backend, dummy_mixer
 
 
 class MockConnection(mock.Mock):
+
     def __init__(self, *args, **kwargs):
         super(MockConnection, self).__init__(*args, **kwargs)
         self.host = mock.sentinel.host
@@ -24,6 +27,8 @@ class MockConnection(mock.Mock):
 
 
 class BaseTestCase(unittest.TestCase):
+    enable_mixer = True
+
     def get_config(self):
         return {
             'mpd': {
@@ -32,12 +37,21 @@ class BaseTestCase(unittest.TestCase):
         }
 
     def setUp(self):  # noqa: N802
-        self.backend = dummy.create_dummy_backend_proxy()
-        self.core = core.Core.start(backends=[self.backend]).proxy()
+        if self.enable_mixer:
+            self.mixer = dummy_mixer.create_proxy()
+        else:
+            self.mixer = None
+        self.backend = dummy_backend.create_proxy()
 
+        with deprecation.ignore():
+            self.core = core.Core.start(
+                mixer=self.mixer, backends=[self.backend]).proxy()
+
+        self.uri_map = uri_mapper.MpdUriMapper(self.core)
         self.connection = MockConnection()
         self.session = session.MpdSession(
-            self.connection, config=self.get_config(), core=self.core)
+            self.connection, config=self.get_config(), core=self.core,
+            uri_map=self.uri_map)
         self.dispatcher = self.session.dispatcher
         self.context = self.dispatcher.context
 
