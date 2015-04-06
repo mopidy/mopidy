@@ -6,21 +6,23 @@ import json
 
 
 class Field(object):
+
+    """
+    Base field for use in :class:`ImmutableObject`. These fields are
+    responsible for type checking and other data sanitation in our models.
+
+    For simplicity fields use the Python descriptor protocol to store the
+    values in the instance dictionary. Also note that fields are mutable if
+    the object they are attached to allow it.
+
+    Default values will be validated with the exception of :class:`None`.
+
+    :param default: default value for field
+    :param type: if set the field value must be of this type
+    :param choices: if set the field value must be one of these
+    """
+
     def __init__(self, default=None, type=None, choices=None):
-        """
-        Base field for use in :class:`ImmutableObject`. These fields are
-        responsible type checking and other data sanitation in our models.
-
-        For simplicity fields use the Python descriptor protocol to store the
-        values in the instance dictionary. Also note that fields are mutable if
-        the object they are attached to allow it.
-
-        Default values will be validated with the exception of :class:`None`.
-
-        :param default: default value for field
-        :param type: if set the field value must be of this type
-        :param choices: if set the field value must be one of these
-        """
         self._name = None  # Set by FieldOwner
         self._choices = choices
         self._default = default
@@ -58,12 +60,14 @@ class Field(object):
 
 
 class String(Field):
-    def __init__(self, default=None):
-        """
-        Specialized :class:`Field` which is wired up for bytes and unicode.
 
-        :param default: default value for field
-        """
+    """
+    Specialized :class:`Field` which is wired up for bytes and unicode.
+
+    :param default: default value for field
+    """
+
+    def __init__(self, default=None):
         # TODO: normalize to unicode?
         # TODO: only allow unicode?
         # TODO: disallow empty strings?
@@ -71,14 +75,16 @@ class String(Field):
 
 
 class Integer(Field):
-    def __init__(self, default=None, min=None, max=None):
-        """
-        :class:`Field` for storing integer numbers.
 
-        :param default: default value for field
-        :param min: if set the field value larger or equal to this value
-        :param max: if set the field value smaller or equal to this value
+    """
+    :class:`Field` for storing integer numbers.
+
+    :param default: default value for field
+    :param min: field value must be larger or equal to this value when set
+    :param max: field value must be smaller or equal to this value when set
         """
+
+    def __init__(self, default=None, min=None, max=None):
         self._min = min
         self._max = max
         super(Integer, self).__init__(type=(int, long), default=default)
@@ -95,13 +101,15 @@ class Integer(Field):
 
 
 class Collection(Field):
-    def __init__(self, type, container=tuple):
-        """
-        :class:`Field` for storing collections of a given type.
 
-        :param type: all items stored in the collection must be of this type
-        :param container: the type to store the items in
-        """
+    """
+    :class:`Field` for storing collections of a given type.
+
+    :param type: all items stored in the collection must be of this type
+    :param container: the type to store the items in
+    """
+
+    def __init__(self, type, container=tuple):
         super(Collection, self).__init__(type=type, default=container())
 
     def validate(self, value):
@@ -116,7 +124,9 @@ class Collection(Field):
 
 
 class FieldOwner(type):
+
     """Helper to automatically assign field names to descriptors."""
+
     def __new__(cls, name, bases, attrs):
         attrs['_fields'] = []
         for key, value in attrs.items():

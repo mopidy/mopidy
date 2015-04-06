@@ -19,7 +19,7 @@ class TrackMpdFormatTest(unittest.TestCase):
         composers=[Artist(name='a composer')],
         performers=[Artist(name='a performer')],
         genre='a genre',
-        date='1977-1-1',
+        date='1977-01-01',
         disc_no=1,
         comment='a comment',
         length=137000,
@@ -72,7 +72,7 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assertIn(('Performer', 'a performer'), result)
         self.assertIn(('Genre', 'a genre'), result)
         self.assertIn(('Track', '7/13'), result)
-        self.assertIn(('Date', '1977-1-1'), result)
+        self.assertIn(('Date', '1977-01-01'), result)
         self.assertIn(('Disc', 1), result)
         self.assertIn(('Pos', 9), result)
         self.assertIn(('Id', 122), result)

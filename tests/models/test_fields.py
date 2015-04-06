@@ -101,14 +101,19 @@ class StringTest(unittest.TestCase):
         instance = create_instance(String(default='abc'))
         self.assertEqual('abc', instance.attr)
 
-    def test_str_allowed(self):
+    def test_native_str_allowed(self):
         instance = create_instance(String())
         instance.attr = str('abc')
+        self.assertEqual('abc', instance.attr)
+
+    def test_bytes_allowed(self):
+        instance = create_instance(String())
+        instance.attr = b'abc'
         self.assertEqual(b'abc', instance.attr)
 
     def test_unicode_allowed(self):
         instance = create_instance(String())
-        instance.attr = unicode('abc')
+        instance.attr = u'abc'
         self.assertEqual(u'abc', instance.attr)
 
     def test_other_disallowed(self):
