@@ -4,14 +4,6 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
-v1.0.1 (unreleased)
-===================
-
-Core
-----
-
-- Update core controllers to handle backend exceptions in all calls that rely
-  on multiple backends. (Issue: :issue:`667`)
 
 v1.1.0 (UNRELEASED)
 ===================
@@ -21,6 +13,9 @@ Core API
 
 - Calling :meth:`mopidy.core.library.LibraryController.search`` with ``kwargs``
   as the query is no longer supported (PR: :issue:`1090`)
+
+- Update core controllers to handle backend exceptions in all calls that rely
+  on multiple backends. (Issue: :issue:`667`)
 
 Internal changes
 ----------------
