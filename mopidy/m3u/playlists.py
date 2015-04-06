@@ -76,6 +76,8 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             'Loaded %d M3U playlists from %s',
             len(playlists), self._playlists_dir)
 
+        # TODO Trigger playlists_loaded event?
+
     def save(self, playlist):
         assert playlist.uri, 'Cannot save playlist without URI'
         assert playlist.uri in self._playlists, \
