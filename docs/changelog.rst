@@ -4,7 +4,6 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
-
 v1.1.0 (UNRELEASED)
 ===================
 
@@ -13,6 +12,12 @@ Core API
 
 - Calling :meth:`mopidy.core.library.LibraryController.search`` with ``kwargs``
   as the query is no longer supported (PR: :issue:`1090`)
+
+Models
+------
+
+- Added type checks and other sanity checks to model construction and
+  serialization. (Fixes: :issue:`865`)
 
 Internal changes
 ----------------

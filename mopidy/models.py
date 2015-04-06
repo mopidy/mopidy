@@ -2,30 +2,166 @@ from __future__ import absolute_import, unicode_literals
 
 import json
 
+# TODO: split into base models, serialization and fields?
+
+
+class Field(object):
+
+    """
+    Base field for use in :class:`ImmutableObject`. These fields are
+    responsible for type checking and other data sanitation in our models.
+
+    For simplicity fields use the Python descriptor protocol to store the
+    values in the instance dictionary. Also note that fields are mutable if
+    the object they are attached to allow it.
+
+    Default values will be validated with the exception of :class:`None`.
+
+    :param default: default value for field
+    :param type: if set the field value must be of this type
+    :param choices: if set the field value must be one of these
+    """
+
+    def __init__(self, default=None, type=None, choices=None):
+        self._name = None  # Set by FieldOwner
+        self._choices = choices
+        self._default = default
+        self._type = type
+
+        if self._default is not None:
+            self.validate(self._default)
+
+    def validate(self, value):
+        """Validate and possibly modify the field value before assignment"""
+        if self._type and not isinstance(value, self._type):
+            raise TypeError('Expected %s to be a %s, not %r' %
+                            (self._name, self._type, value))
+        if self._choices and value not in self._choices:
+            raise TypeError('Expected %s to be a one of %s, not %r' %
+                            (self._name, self._choices, value))
+        return value
+
+    def __get__(self, instance, owner):
+        if not instance:
+            return self
+        return instance.__dict__.get(self._name, self._default)
+
+    def __set__(self, instance, value):
+        if value is not None:
+            value = self.validate(value)
+
+        if value is None or value == self._default:
+            self.__delete__(instance)
+        else:
+            instance.__dict__[self._name] = value
+
+    def __delete__(self, instance):
+        instance.__dict__.pop(self._name, None)
+
+
+class String(Field):
+
+    """
+    Specialized :class:`Field` which is wired up for bytes and unicode.
+
+    :param default: default value for field
+    """
+
+    def __init__(self, default=None):
+        # TODO: normalize to unicode?
+        # TODO: only allow unicode?
+        # TODO: disallow empty strings?
+        super(String, self).__init__(type=basestring, default=default)
+
+
+class Integer(Field):
+
+    """
+    :class:`Field` for storing integer numbers.
+
+    :param default: default value for field
+    :param min: field value must be larger or equal to this value when set
+    :param max: field value must be smaller or equal to this value when set
+        """
+
+    def __init__(self, default=None, min=None, max=None):
+        self._min = min
+        self._max = max
+        super(Integer, self).__init__(type=(int, long), default=default)
+
+    def validate(self, value):
+        value = super(Integer, self).validate(value)
+        if self._min is not None and value < self._min:
+            raise ValueError('Expected %s to be at least %d, not %d' %
+                             (self._name, self._min, value))
+        if self._max is not None and value > self._max:
+            raise ValueError('Expected %s to be at most %d, not %d' %
+                             (self._name, self._max, value))
+        return value
+
+
+class Collection(Field):
+
+    """
+    :class:`Field` for storing collections of a given type.
+
+    :param type: all items stored in the collection must be of this type
+    :param container: the type to store the items in
+    """
+
+    def __init__(self, type, container=tuple):
+        super(Collection, self).__init__(type=type, default=container())
+
+    def validate(self, value):
+        if isinstance(value, basestring):
+            raise TypeError('Expected %s to be a collection of %s, not %r'
+                            % (self._name, self._type.__name__, value))
+        for v in value:
+            if not isinstance(v, self._type):
+                raise TypeError('Expected %s to be a collection of %s, not %r'
+                                % (self._name, self._type.__name__, value))
+        return self._default.__class__(value) or None
+
+
+class FieldOwner(type):
+
+    """Helper to automatically assign field names to descriptors."""
+
+    def __new__(cls, name, bases, attrs):
+        attrs['_fields'] = []
+        for key, value in attrs.items():
+            if isinstance(value, Field):
+                attrs['_fields'].append(key)
+                value._name = key
+        attrs['_fields'].sort()
+        return super(FieldOwner, cls).__new__(cls, name, bases, attrs)
+
 
 class ImmutableObject(object):
 
     """
     Superclass for immutable objects whose fields can only be modified via the
-    constructor.
+    constructor. Fields should be :class:`Field` instances to ensure type
+    safety in our models.
 
     :param kwargs: kwargs to set as fields on the object
     :type kwargs: any
     """
 
+    __metaclass__ = FieldOwner
+
     def __init__(self, *args, **kwargs):
         for key, value in kwargs.items():
-            if not hasattr(self, key) or callable(getattr(self, key)):
+            if key not in self._fields:
                 raise TypeError(
                     '__init__() got an unexpected keyword argument "%s"' %
                     key)
-            if value == getattr(self, key):
-                continue  # Don't explicitly set default values
-            self.__dict__[key] = value
+            super(ImmutableObject, self).__setattr__(key, value)
 
     def __setattr__(self, name, value):
-        if name.startswith('_'):
-            return super(ImmutableObject, self).__setattr__(name, value)
+        raise AttributeError('Object is immutable.')
+
+    def __delattr__(self, name):
         raise AttributeError('Object is immutable.')
 
     def __repr__(self):
@@ -71,26 +207,19 @@ class ImmutableObject(object):
         :type values: dict
         :rtype: new instance of the model being copied
         """
-        data = {}
-        for key in self.__dict__.keys():
-            public_key = key.lstrip('_')
-            value = values.pop(public_key, self.__dict__[key])
-            data[public_key] = value
-        for key in values.keys():
-            if hasattr(self, key):
-                value = values.pop(key)
-                data[key] = value
-        if values:
-            raise TypeError(
-                'copy() got an unexpected keyword argument "%s"' % key)
-        return self.__class__(**data)
+        other = self.__class__()
+        other.__dict__.update(self.__dict__)
+        for key, value in values.items():
+            if key not in self._fields:
+                raise TypeError(
+                    'copy() got an unexpected keyword argument "%s"' % key)
+            super(ImmutableObject, other).__setattr__(key, value)
+        return other
 
     def serialize(self):
         data = {}
         data['__model__'] = self.__class__.__name__
-        for key in self.__dict__.keys():
-            public_key = key.lstrip('_')
-            value = self.__dict__[key]
+        for key, value in self.__dict__.items():
             if isinstance(value, (set, frozenset, list, tuple)):
                 value = [
                     v.serialize() if isinstance(v, ImmutableObject) else v
@@ -98,7 +227,7 @@ class ImmutableObject(object):
             elif isinstance(value, ImmutableObject):
                 value = value.serialize()
             if not (isinstance(value, list) and len(value) == 0):
-                data[public_key] = value
+                data[key] = value
         return data
 
 
@@ -161,14 +290,10 @@ class Ref(ImmutableObject):
     """
 
     #: The object URI. Read-only.
-    uri = None
+    uri = String()
 
     #: The object name. Read-only.
-    name = None
-
-    #: The object type, e.g. "artist", "album", "track", "playlist",
-    #: "directory". Read-only.
-    type = None
+    name = String()
 
     #: Constant used for comparison with the :attr:`type` field.
     ALBUM = 'album'
@@ -184,6 +309,10 @@ class Ref(ImmutableObject):
 
     #: Constant used for comparison with the :attr:`type` field.
     TRACK = 'track'
+
+    #: The object type, e.g. "artist", "album", "track", "playlist",
+    #: "directory". Read-only.
+    type = Field(choices=(ALBUM, ARTIST, DIRECTORY, PLAYLIST, TRACK))
 
     @classmethod
     def album(cls, **kwargs):
@@ -225,13 +354,13 @@ class Image(ImmutableObject):
     """
 
     #: The image URI. Read-only.
-    uri = None
+    uri = String()
 
     #: Optional width of the image or :class:`None`. Read-only.
-    width = None
+    width = Integer(min=0)
 
     #: Optional height of the image or :class:`None`. Read-only.
-    height = None
+    height = Integer(min=0)
 
 
 class Artist(ImmutableObject):
@@ -246,13 +375,13 @@ class Artist(ImmutableObject):
     """
 
     #: The artist URI. Read-only.
-    uri = None
+    uri = String()
 
     #: The artist name. Read-only.
-    name = None
+    name = String()
 
     #: The MusicBrainz ID of the artist. Read-only.
-    musicbrainz_id = None
+    musicbrainz_id = String()
 
 
 class Album(ImmutableObject):
@@ -277,36 +406,31 @@ class Album(ImmutableObject):
     """
 
     #: The album URI. Read-only.
-    uri = None
+    uri = String()
 
     #: The album name. Read-only.
-    name = None
+    name = String()
 
     #: A set of album artists. Read-only.
-    artists = frozenset()
+    artists = Collection(type=Artist, container=frozenset)
 
     #: The number of tracks in the album. Read-only.
-    num_tracks = None
+    num_tracks = Integer(min=0)
 
     #: The number of discs in the album. Read-only.
-    num_discs = None
+    num_discs = Integer(min=0)
 
     #: The album release date. Read-only.
-    date = None
+    date = String()  # TODO: add date type
 
     #: The MusicBrainz ID of the album. Read-only.
-    musicbrainz_id = None
+    musicbrainz_id = String()
 
     #: The album image URIs. Read-only.
-    images = frozenset()
+    images = Collection(type=basestring, container=frozenset)
     # XXX If we want to keep the order of images we shouldn't use frozenset()
     # as it doesn't preserve order. I'm deferring this issue until we got
     # actual usage of this field with more than one image.
-
-    def __init__(self, *args, **kwargs):
-        self.__dict__['artists'] = frozenset(kwargs.pop('artists', None) or [])
-        self.__dict__['images'] = frozenset(kwargs.pop('images', None) or [])
-        super(Album, self).__init__(*args, **kwargs)
 
 
 class Track(ImmutableObject):
@@ -345,61 +469,52 @@ class Track(ImmutableObject):
     """
 
     #: The track URI. Read-only.
-    uri = None
+    uri = String()
 
     #: The track name. Read-only.
-    name = None
+    name = String()
 
     #: A set of track artists. Read-only.
-    artists = frozenset()
+    artists = Collection(type=Artist, container=frozenset)
 
     #: The track :class:`Album`. Read-only.
-    album = None
+    album = Field(type=Album)
 
     #: A set of track composers. Read-only.
-    composers = frozenset()
+    composers = Collection(type=Artist, container=frozenset)
 
     #: A set of track performers`. Read-only.
-    performers = frozenset()
+    performers = Collection(type=Artist, container=frozenset)
 
     #: The track genre. Read-only.
-    genre = None
+    genre = String()
 
     #: The track number in the album. Read-only.
-    track_no = None
+    track_no = Integer(min=0)
 
     #: The disc number in the album. Read-only.
-    disc_no = None
+    disc_no = Integer(min=0)
 
     #: The track release date. Read-only.
-    date = None
+    date = String()  # TODO: add date type
 
     #: The track length in milliseconds. Read-only.
-    length = None
+    length = Integer(min=0)
 
     #: The track's bitrate in kbit/s. Read-only.
-    bitrate = None
+    bitrate = Integer(min=0)
 
     #: The track comment. Read-only.
-    comment = None
+    comment = String()
 
     #: The MusicBrainz ID of the track. Read-only.
-    musicbrainz_id = None
+    musicbrainz_id = String()
 
     #: Integer representing when the track was last modified. Exact meaning
     #: depends on source of track. For local files this is the modification
     #: time in milliseconds since Unix epoch. For other backends it could be an
     #: equivalent timestamp or simply a version counter.
-    last_modified = None
-
-    def __init__(self, *args, **kwargs):
-        def get(key):
-            return frozenset(kwargs.pop(key, None) or [])
-
-        self.__dict__['artists'] = get('artists')
-        self.__dict__['composers'] = get('composers')
-        self.__dict__['performers'] = get('performers')
-        super(Track, self).__init__(*args, **kwargs)
+    last_modified = Integer(min=0)
 
 
 class TlTrack(ImmutableObject):
@@ -425,10 +540,10 @@ class TlTrack(ImmutableObject):
     """
 
     #: The tracklist ID. Read-only.
-    tlid = None
+    tlid = Integer(min=0)
 
     #: The track. Read-only.
-    track = None
+    track = Field(type=Track)
 
     def __init__(self, *args, **kwargs):
         if len(args) == 2 and len(kwargs) == 0:
@@ -456,23 +571,19 @@ class Playlist(ImmutableObject):
     """
 
     #: The playlist URI. Read-only.
-    uri = None
+    uri = String()
 
     #: The playlist name. Read-only.
-    name = None
+    name = String()
 
     #: The playlist's tracks. Read-only.
-    tracks = tuple()
+    tracks = Collection(type=Track, container=tuple)
 
     #: The playlist modification time in milliseconds since Unix epoch.
     #: Read-only.
     #:
     #: Integer, or :class:`None` if unknown.
-    last_modified = None
-
-    def __init__(self, *args, **kwargs):
-        self.__dict__['tracks'] = tuple(kwargs.pop('tracks', None) or [])
-        super(Playlist, self).__init__(*args, **kwargs)
+    last_modified = Integer(min=0)
 
     # TODO: def insert(self, pos, track): ... ?
 
@@ -496,19 +607,13 @@ class SearchResult(ImmutableObject):
     """
 
     # The search result URI. Read-only.
-    uri = None
+    uri = String()
 
     # The tracks matching the search query. Read-only.
-    tracks = tuple()
+    tracks = Collection(type=Track, container=tuple)
 
     # The artists matching the search query. Read-only.
-    artists = tuple()
+    artists = Collection(type=Artist, container=tuple)
 
     # The albums matching the search query. Read-only.
-    albums = tuple()
-
-    def __init__(self, *args, **kwargs):
-        self.__dict__['tracks'] = tuple(kwargs.pop('tracks', None) or [])
-        self.__dict__['artists'] = tuple(kwargs.pop('artists', None) or [])
-        self.__dict__['albums'] = tuple(kwargs.pop('albums', None) or [])
-        super(SearchResult, self).__init__(*args, **kwargs)
+    albums = Collection(type=Album, container=tuple)

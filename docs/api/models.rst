@@ -76,6 +76,8 @@ Data model helpers
 
 .. autoclass:: mopidy.models.ImmutableObject
 
+.. autoclass:: mopidy.models.Field
+
 .. autoclass:: mopidy.models.ModelJSONEncoder
 
 .. autofunction:: mopidy.models.model_json_decoder
