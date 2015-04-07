@@ -45,7 +45,7 @@ class Field(object):
     def __get__(self, instance, owner):
         if not instance:
             return self
-        return instance.__dict__.get(self._name, self._default)
+        return getattr(instance, '_' + self._name, self._default)
 
     def __set__(self, instance, value):
         if value is not None:
@@ -54,10 +54,11 @@ class Field(object):
         if value is None or value == self._default:
             self.__delete__(instance)
         else:
-            instance.__dict__[self._name] = value
+            setattr(instance, '_' + self._name, value)
 
     def __delete__(self, instance):
-        instance.__dict__.pop(self._name, None)
+        if hasattr(instance, '_' + self._name):
+            delattr(instance, '_' + self._name)
 
 
 class String(Field):
@@ -134,12 +135,14 @@ class FieldOwner(type):
     """Helper to automatically assign field names to descriptors."""
 
     def __new__(cls, name, bases, attrs):
-        attrs['_fields'] = []
+        fields = {}
         for key, value in attrs.items():
             if isinstance(value, Field):
-                attrs['_fields'].append(key)
+                fields[key] = '_' + key
                 value._name = key
-        attrs['_fields'].sort()
+
+        attrs['_fields'] = fields
+        attrs['__slots__'] = ['_' + field for field in fields]
         return super(FieldOwner, cls).__new__(cls, name, bases, attrs)
 
 
@@ -165,14 +168,23 @@ class ImmutableObject(object):
             super(ImmutableObject, self).__setattr__(key, value)
 
     def __setattr__(self, name, value):
+        if name in self.__slots__:
+            return super(ImmutableObject, self).__setattr__(name, value)
         raise AttributeError('Object is immutable.')
 
     def __delattr__(self, name):
+        if name in self.__slots__:
+            return super(ImmutableObject, self).__delattr__(name)
         raise AttributeError('Object is immutable.')
+
+    def _items(self):
+        for field, key in self._fields.items():
+            if hasattr(self, key):
+                yield field, getattr(self, key)
 
     def __repr__(self):
         kwarg_pairs = []
-        for (key, value) in sorted(self.__dict__.items()):
+        for key, value in sorted(self._items()):
             if isinstance(value, (frozenset, tuple)):
                 if not value:
                     continue
@@ -185,15 +197,14 @@ class ImmutableObject(object):
 
     def __hash__(self):
         hash_sum = 0
-        for key, value in self.__dict__.items():
+        for key, value in self._items():
             hash_sum += hash(key) + hash(value)
         return hash_sum
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
             return False
-
-        return self.__dict__ == other.__dict__
+        return dict(self._items()) == dict(other._items())
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -224,7 +235,7 @@ class ImmutableObject(object):
     def serialize(self):
         data = {}
         data['__model__'] = self.__class__.__name__
-        for key, value in self.__dict__.items():
+        for key, value in self._items():
             if isinstance(value, (set, frozenset, list, tuple)):
                 value = [
                     v.serialize() if isinstance(v, ImmutableObject) else v

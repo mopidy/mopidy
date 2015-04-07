@@ -55,7 +55,7 @@ class GenericCopyTest(unittest.TestCase):
 
     def test_copying_track_to_remove(self):
         track = Track(name='foo').copy(name=None)
-        self.assertEqual(track.__dict__, Track().__dict__)
+        self.assertFalse(hasattr(track, '_name'))
 
 
 class RefTest(unittest.TestCase):
