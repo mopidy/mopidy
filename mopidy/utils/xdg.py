@@ -1,6 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
-import ConfigParser
+import ConfigParser as configparser
 import io
 import os
 
@@ -36,6 +36,16 @@ def get_dirs():
 
 
 def _get_user_dirs(xdg_config_dir):
+    """Returns a dict of XDG dirs read from
+    ``$XDG_CONFIG_HOME/user-dirs.dirs``.
+
+    This is used at import time for most users of :mod:`mopidy`. By rolling our
+    own implementation instead of using :meth:`glib.get_user_special_dir` we
+    make it possible for many extensions to run their test suites, which are
+    importing parts of :mod:`mopidy`, in a virtualenv with global site-packages
+    disabled, and thus no :mod:`glib` available.
+    """
+
     dirs_file = os.path.join(xdg_config_dir, 'user-dirs.dirs')
 
     if not os.path.exists(dirs_file):
@@ -48,7 +58,7 @@ def _get_user_dirs(xdg_config_dir):
     data = data.replace(b'$HOME', os.path.expanduser(b'~'))
     data = data.replace(b'"', b'')
 
-    config = ConfigParser.RawConfigParser()
+    config = configparser.RawConfigParser()
     config.readfp(io.BytesIO(data))
 
     return {
