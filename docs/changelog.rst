@@ -19,6 +19,11 @@ Models
 - Added type checks and other sanity checks to model construction and
   serialization. (Fixes: :issue:`865`)
 
+- Memory usage for models has been greatly improved. We now have a lower
+  overhead per instance by using slots, intern identifiers and automatically
+  reuse instances. For the test data set this was developed against, a library
+  of ~14000 tracks, went from needing ~75MB to ~17MB. (Fixes: :issue:`348`)
+
 Internal changes
 ----------------
 
