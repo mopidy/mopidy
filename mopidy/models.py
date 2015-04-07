@@ -224,6 +224,8 @@ class ImmutableObject(object):
         :type values: dict
         :rtype: new instance of the model being copied
         """
+        if not values:
+            return self
         other = copy.copy(self)
         for key, value in values.items():
             if key not in self._fields:

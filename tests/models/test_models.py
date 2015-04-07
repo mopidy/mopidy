@@ -12,7 +12,7 @@ class GenericCopyTest(unittest.TestCase):
 
     def compare(self, orig, other):
         self.assertEqual(orig, other)
-        self.assertNotEqual(id(orig), id(other))
+        self.assertEqual(id(orig), id(other))
 
     def test_copying_track(self):
         track = Track()
