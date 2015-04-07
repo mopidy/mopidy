@@ -19,58 +19,58 @@ class CachingTest(unittest.TestCase):
     def test_different_instance_with_different_values(self):
         self.assertIsNot(Track(uri='test1'), Track(uri='test2'))
 
-    def test_different_instance_with_copy(self):
+    def test_different_instance_with_replace(self):
         t = Track(uri='test1')
-        self.assertIsNot(t, t.copy(uri='test2'))
+        self.assertIsNot(t, t.replace(uri='test2'))
 
 
-class GenericCopyTest(unittest.TestCase):
+class GenericReplaceTest(unittest.TestCase):
 
     def compare(self, orig, other):
         self.assertEqual(orig, other)
         self.assertEqual(id(orig), id(other))
 
-    def test_copying_track(self):
+    def test_replace_track(self):
         track = Track()
-        self.compare(track, track.copy())
+        self.compare(track, track.replace())
 
-    def test_copying_artist(self):
+    def test_replace_artist(self):
         artist = Artist()
-        self.compare(artist, artist.copy())
+        self.compare(artist, artist.replace())
 
-    def test_copying_album(self):
+    def test_replace_album(self):
         album = Album()
-        self.compare(album, album.copy())
+        self.compare(album, album.replace())
 
-    def test_copying_playlist(self):
+    def test_replace_playlist(self):
         playlist = Playlist()
-        self.compare(playlist, playlist.copy())
+        self.compare(playlist, playlist.replace())
 
-    def test_copying_track_with_basic_values(self):
+    def test_replace_track_with_basic_values(self):
         track = Track(name='foo', uri='bar')
-        copy = track.copy(name='baz')
-        self.assertEqual('baz', copy.name)
-        self.assertEqual('bar', copy.uri)
+        other = track.replace(name='baz')
+        self.assertEqual('baz', other.name)
+        self.assertEqual('bar', other.uri)
 
-    def test_copying_track_with_missing_values(self):
+    def test_replace_track_with_missing_values(self):
         track = Track(uri='bar')
-        copy = track.copy(name='baz')
-        self.assertEqual('baz', copy.name)
-        self.assertEqual('bar', copy.uri)
+        other = track.replace(name='baz')
+        self.assertEqual('baz', other.name)
+        self.assertEqual('bar', other.uri)
 
-    def test_copying_track_with_private_internal_value(self):
+    def test_replace_track_with_private_internal_value(self):
         artist1 = Artist(name='foo')
         artist2 = Artist(name='bar')
         track = Track(artists=[artist1])
-        copy = track.copy(artists=[artist2])
-        self.assertIn(artist2, copy.artists)
+        other = track.replace(artists=[artist2])
+        self.assertIn(artist2, other.artists)
 
-    def test_copying_track_with_invalid_key(self):
+    def test_replace_track_with_invalid_key(self):
         with self.assertRaises(TypeError):
-            Track().copy(invalid_key=True)
+            Track().replace(invalid_key=True)
 
-    def test_copying_track_to_remove(self):
-        track = Track(name='foo').copy(name=None)
+    def test_replace_track_to_remove(self):
+        track = Track(name='foo').replace(name=None)
         self.assertFalse(hasattr(track, '_name'))
 
 
@@ -209,7 +209,7 @@ class ArtistTest(unittest.TestCase):
 
     def test_invalid_kwarg_with_name_matching_method(self):
         with self.assertRaises(TypeError):
-            Artist(copy='baz')
+            Artist(replace='baz')
 
         with self.assertRaises(TypeError):
             Artist(serialize='baz')
@@ -816,9 +816,9 @@ class TrackTest(unittest.TestCase):
         self.assertEqual(track1, track2)
         self.assertEqual(hash(track1), hash(track2))
 
-    def test_copy_can_reset_to_default_value(self):
+    def test_replace_can_reset_to_default_value(self):
         track1 = Track(name='name1')
-        track2 = Track(name='name1', album=Album()).copy(album=None)
+        track2 = Track(name='name1', album=Album()).replace(album=None)
         self.assertEqual(track1, track2)
         self.assertEqual(hash(track1), hash(track2))
 
@@ -943,7 +943,7 @@ class PlaylistTest(unittest.TestCase):
         playlist = Playlist(
             uri='an uri', name='a name', tracks=tracks,
             last_modified=last_modified)
-        new_playlist = playlist.copy(uri='another uri')
+        new_playlist = playlist.replace(uri='another uri')
         self.assertEqual(new_playlist.uri, 'another uri')
         self.assertEqual(new_playlist.name, 'a name')
         self.assertEqual(list(new_playlist.tracks), tracks)
@@ -955,7 +955,7 @@ class PlaylistTest(unittest.TestCase):
         playlist = Playlist(
             uri='an uri', name='a name', tracks=tracks,
             last_modified=last_modified)
-        new_playlist = playlist.copy(name='another name')
+        new_playlist = playlist.replace(name='another name')
         self.assertEqual(new_playlist.uri, 'an uri')
         self.assertEqual(new_playlist.name, 'another name')
         self.assertEqual(list(new_playlist.tracks), tracks)
@@ -968,7 +968,7 @@ class PlaylistTest(unittest.TestCase):
             uri='an uri', name='a name', tracks=tracks,
             last_modified=last_modified)
         new_tracks = [Track(), Track()]
-        new_playlist = playlist.copy(tracks=new_tracks)
+        new_playlist = playlist.replace(tracks=new_tracks)
         self.assertEqual(new_playlist.uri, 'an uri')
         self.assertEqual(new_playlist.name, 'a name')
         self.assertEqual(list(new_playlist.tracks), new_tracks)
@@ -981,7 +981,7 @@ class PlaylistTest(unittest.TestCase):
         playlist = Playlist(
             uri='an uri', name='a name', tracks=tracks,
             last_modified=last_modified)
-        new_playlist = playlist.copy(last_modified=new_last_modified)
+        new_playlist = playlist.replace(last_modified=new_last_modified)
         self.assertEqual(new_playlist.uri, 'an uri')
         self.assertEqual(new_playlist.name, 'a name')
         self.assertEqual(list(new_playlist.tracks), tracks)

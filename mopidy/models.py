@@ -4,6 +4,8 @@ import copy
 import json
 import weakref
 
+from mopidy.utils import deprecation
+
 # TODO: split into base models, serialization and fields?
 
 
@@ -166,6 +168,10 @@ class ImmutableObject(object):
     constructor. Fields should be :class:`Field` instances to ensure type
     safety in our models.
 
+    Note that since these models can not be changed, we heavily memoize them
+    to save memory. So constructing a class with the same arguments twice will
+    give you the same instance twice.
+
     :param kwargs: kwargs to set as fields on the object
     :type kwargs: any
     """
@@ -224,23 +230,35 @@ class ImmutableObject(object):
 
     def copy(self, **values):
         """
-        Copy the model with ``field`` updated to new value.
+        .. deprecated:: 1.1
+            Use :meth:`replace` instead. Note that we no longer return copies.
+        """
+        deprecation.warn('model.immutable.copy')
+        return self.replace(**values)
+
+    def replace(self, **kwargs):
+        """
+        Replace the fields in the model and return a new instance
 
         Examples::
 
             # Returns a track with a new name
-            Track(name='foo').copy(name='bar')
+            Track(name='foo').replace(name='bar')
             # Return an album with a new number of tracks
-            Album(num_tracks=2).copy(num_tracks=5)
+            Album(num_tracks=2).replace(num_tracks=5)
 
-        :param values: the model fields to modify
-        :type values: dict
-        :rtype: new instance of the model being copied
+        Note that internally we memoize heavily to keep memory usage down given
+        our overly repetitive data structures. So you might get an existing
+        instance if it contains the same values.
+
+        :param kwargs: kwargs to set as fields on the object
+        :type kwargs: any
+        :rtype: instance of the model with replaced fields
         """
-        if not values:
+        if not kwargs:
             return self
         other = copy.copy(self)
-        for key, value in values.items():
+        for key, value in kwargs.items():
             if key not in self._fields:
                 raise TypeError(
                     'copy() got an unexpected keyword argument "%s"' % key)
