@@ -75,6 +75,11 @@ class String(Field):
         super(String, self).__init__(type=basestring, default=default)
 
 
+class Identifier(String):
+    def validate(self, value):
+        return intern(str(super(Identifier, self).validate(value)))
+
+
 class Integer(Field):
 
     """
@@ -290,7 +295,7 @@ class Ref(ImmutableObject):
     """
 
     #: The object URI. Read-only.
-    uri = String()
+    uri = Identifier()
 
     #: The object name. Read-only.
     name = String()
@@ -354,7 +359,7 @@ class Image(ImmutableObject):
     """
 
     #: The image URI. Read-only.
-    uri = String()
+    uri = Identifier()
 
     #: Optional width of the image or :class:`None`. Read-only.
     width = Integer(min=0)
@@ -375,13 +380,13 @@ class Artist(ImmutableObject):
     """
 
     #: The artist URI. Read-only.
-    uri = String()
+    uri = Identifier()
 
     #: The artist name. Read-only.
     name = String()
 
     #: The MusicBrainz ID of the artist. Read-only.
-    musicbrainz_id = String()
+    musicbrainz_id = Identifier()
 
 
 class Album(ImmutableObject):
@@ -406,7 +411,7 @@ class Album(ImmutableObject):
     """
 
     #: The album URI. Read-only.
-    uri = String()
+    uri = Identifier()
 
     #: The album name. Read-only.
     name = String()
@@ -424,7 +429,7 @@ class Album(ImmutableObject):
     date = String()  # TODO: add date type
 
     #: The MusicBrainz ID of the album. Read-only.
-    musicbrainz_id = String()
+    musicbrainz_id = Identifier()
 
     #: The album image URIs. Read-only.
     images = Collection(type=basestring, container=frozenset)
@@ -469,7 +474,7 @@ class Track(ImmutableObject):
     """
 
     #: The track URI. Read-only.
-    uri = String()
+    uri = Identifier()
 
     #: The track name. Read-only.
     name = String()
@@ -508,7 +513,7 @@ class Track(ImmutableObject):
     comment = String()
 
     #: The MusicBrainz ID of the track. Read-only.
-    musicbrainz_id = String()
+    musicbrainz_id = Identifier()
 
     #: Integer representing when the track was last modified. Exact meaning
     #: depends on source of track. For local files this is the modification
@@ -571,7 +576,7 @@ class Playlist(ImmutableObject):
     """
 
     #: The playlist URI. Read-only.
-    uri = String()
+    uri = Identifier()
 
     #: The playlist name. Read-only.
     name = String()
@@ -607,7 +612,7 @@ class SearchResult(ImmutableObject):
     """
 
     # The search result URI. Read-only.
-    uri = String()
+    uri = Identifier()
 
     # The tracks matching the search query. Read-only.
     tracks = Collection(type=Track, container=tuple)
