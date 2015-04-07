@@ -25,6 +25,12 @@ Internal changes
 - Tests have been cleaned up to stop using deprecated APIs where feasible.
   (Partial fix: :issue:`1083`, PR: :issue:`1090`)
 
+- It is now possible to import :mod:`mopidy.backends` without having GObject or
+  GStreamer installed. In other words, a lot of backend extensions should now
+  be able to run tests in a virtualenv with global site-packages disabled. This
+  removes a lot of potential error sources. (Fixes: :issue:`1068`, PR:
+  :issue:`1115`)
+
 
 v1.0.1 (UNRELEASED)
 ===================
