@@ -8,25 +8,15 @@ import threading
 import urllib
 import urlparse
 
-import glib
-
 from mopidy import compat, exceptions
 from mopidy.compat import queue
-from mopidy.utils import encoding
+from mopidy.utils import encoding, xdg
 
 
 logger = logging.getLogger(__name__)
 
 
-XDG_DIRS = {
-    'XDG_CACHE_DIR': glib.get_user_cache_dir(),
-    'XDG_CONFIG_DIR': glib.get_user_config_dir(),
-    'XDG_DATA_DIR': glib.get_user_data_dir(),
-    'XDG_MUSIC_DIR': glib.get_user_special_dir(glib.USER_DIRECTORY_MUSIC),
-}
-
-# XDG_MUSIC_DIR can be none, so filter out any bad data.
-XDG_DIRS = dict((k, v) for k, v in XDG_DIRS.items() if v is not None)
+XDG_DIRS = xdg.get_dirs()
 
 
 def get_or_create_dir(dir_path):
