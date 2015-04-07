@@ -282,13 +282,13 @@ def model_json_decoder(dct):
 
     """
     if '__model__' in dct:
+        models = {c.__name__: c for c in ImmutableObject.__subclasses__()}
         model_name = dct.pop('__model__')
-        cls = globals().get(model_name, None)
-        if issubclass(cls, ImmutableObject):
+        if model_name in models:
             kwargs = {}
             for key, value in dct.items():
                 kwargs[key] = value
-            return cls(**kwargs)
+            return models[model_name](**kwargs)
     return dct
 
 
