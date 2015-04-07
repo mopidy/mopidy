@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+import copy
 import json
 
 # TODO: split into base models, serialization and fields?
@@ -207,8 +208,7 @@ class ImmutableObject(object):
         :type values: dict
         :rtype: new instance of the model being copied
         """
-        other = self.__class__()
-        other.__dict__.update(self.__dict__)
+        other = copy.copy(self)
         for key, value in values.items():
             if key not in self._fields:
                 raise TypeError(
