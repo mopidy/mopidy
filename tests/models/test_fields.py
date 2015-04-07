@@ -9,7 +9,7 @@ def create_instance(field):
     """Create an instance of a dummy class for testing fields."""
 
     class Dummy(object):
-        __metaclass__ = FieldOwner
+        __metaclass__ = ImmutableObjectMeta
         attr = field
 
     return Dummy()

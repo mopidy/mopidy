@@ -8,6 +8,22 @@ from mopidy.models import (
     TlTrack, Track, model_json_decoder)
 
 
+class CachingTest(unittest.TestCase):
+
+    def test_same_instance(self):
+        self.assertIs(Track(), Track())
+
+    def test_same_instance_with_values(self):
+        self.assertIs(Track(uri='test'), Track(uri='test'))
+
+    def test_different_instance_with_different_values(self):
+        self.assertIsNot(Track(uri='test1'), Track(uri='test2'))
+
+    def test_different_instance_with_copy(self):
+        t = Track(uri='test1')
+        self.assertIsNot(t, t.copy(uri='test2'))
+
+
 class GenericCopyTest(unittest.TestCase):
 
     def compare(self, orig, other):

@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import copy
 import json
+import weakref
 
 # TODO: split into base models, serialization and fields?
 
@@ -24,7 +25,7 @@ class Field(object):
     """
 
     def __init__(self, default=None, type=None, choices=None):
-        self._name = None  # Set by FieldOwner
+        self._name = None  # Set by ImmutableObjectMeta
         self._choices = choices
         self._default = default
         self._type = type
@@ -130,7 +131,7 @@ class Collection(Field):
         return self._default.__class__(value) or None
 
 
-class FieldOwner(type):
+class ImmutableObjectMeta(type):
 
     """Helper to automatically assign field names to descriptors."""
 
@@ -142,8 +143,20 @@ class FieldOwner(type):
                 value._name = key
 
         attrs['_fields'] = fields
+        attrs['_instances'] = weakref.WeakValueDictionary()
         attrs['__slots__'] = ['_' + field for field in fields]
-        return super(FieldOwner, cls).__new__(cls, name, bases, attrs)
+
+        for base in bases:
+            if '__weakref__' in getattr(base, '__slots__', []):
+                break
+        else:
+            attrs['__slots__'].append('__weakref__')
+
+        return super(ImmutableObjectMeta, cls).__new__(cls, name, bases, attrs)
+
+    def __call__(cls, *args, **kwargs):  # noqa: N805
+        instance = super(ImmutableObjectMeta, cls).__call__(*args, **kwargs)
+        return cls._instances.setdefault(weakref.ref(instance), instance)
 
 
 class ImmutableObject(object):
@@ -157,7 +170,7 @@ class ImmutableObject(object):
     :type kwargs: any
     """
 
-    __metaclass__ = FieldOwner
+    __metaclass__ = ImmutableObjectMeta
 
     def __init__(self, *args, **kwargs):
         for key, value in kwargs.items():
@@ -232,7 +245,7 @@ class ImmutableObject(object):
                 raise TypeError(
                     'copy() got an unexpected keyword argument "%s"' % key)
             super(ImmutableObject, other).__setattr__(key, value)
-        return other
+        return self._instances.setdefault(weakref.ref(other), other)
 
     def serialize(self):
         data = {}
