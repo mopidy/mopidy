@@ -1,20 +1,19 @@
 .. _arch-install:
 
-****************************
-Arch Linux: Install from AUR
-****************************
+**********************************
+Arch Linux: Install from community
+**********************************
 
 If you are running Arch Linux, you can install Mopidy using the
-`mopidy <https://aur.archlinux.org/packages/mopidy/>`_ package found in AUR.
+`mopidy <https://www.archlinux.org/packages/community/any/mopidy/>`_ package found in ``community``.
 
-#. To install Mopidy with all dependencies, you can use
-   for example `yaourt <https://wiki.archlinux.org/index.php/yaourt>`_::
+#. To install Mopidy with all dependencies, you can use::
 
-       yaourt -S mopidy
+       pacman -S mopidy
 
    To upgrade Mopidy to future releases, just upgrade your system using::
 
-       yaourt -Syua
+       pacman -Syu
 
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
    then you're ready to :doc:`run Mopidy </running>`.
@@ -24,7 +23,7 @@ Installing extensions
 =====================
 
 If you want to use any Mopidy extensions, like Spotify support or Last.fm
-scrobbling, AUR also has `packages for lots of Mopidy extensions
+scrobbling, AUR has `packages for lots of Mopidy extensions
 <https://aur.archlinux.org/packages/?K=mopidy>`_.
 
 You can also install any Mopidy extension directly from PyPI with ``pip``. To
