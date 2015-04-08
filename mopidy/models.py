@@ -145,8 +145,8 @@ class ImmutableObjectMeta(type):
                 value._name = key
 
         attrs['_fields'] = fields
+        attrs['__slots__'] = fields.values()
         attrs['_instances'] = weakref.WeakValueDictionary()
-        attrs['__slots__'] = ['_' + field for field in fields]
 
         for base in bases:
             if '__weakref__' in getattr(base, '__slots__', []):
