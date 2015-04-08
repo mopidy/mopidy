@@ -297,6 +297,9 @@ class LibraryController(object):
                     '%s does not implement library.search() with "exact" '
                     'support. Please upgrade it.', backend_name)
             except LookupError:
+                # Some of our tests check for this to catch bad queries. This
+                # is silly and should be replaced with query validation before
+                # passing it to the backends.
                 raise
             except Exception:
                 logger.exception('%s backend caused an exception.',
