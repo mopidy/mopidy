@@ -9,7 +9,7 @@ def create_instance(field):
     """Create an instance of a dummy class for testing fields."""
 
     class Dummy(object):
-        __metaclass__ = FieldOwner
+        __metaclass__ = ImmutableObjectMeta
         attr = field
 
     return Dummy()
@@ -29,15 +29,14 @@ class FieldDescriptorTest(unittest.TestCase):
         instance = create_instance(Field())
         self.assertIsNone(instance.attr)
 
-    def test_field_does_not_store_default_in_dict(self):
+    def test_field_does_not_store_default(self):
         instance = create_instance(Field())
-        self.assertNotIn('attr', instance.__dict__)
+        self.assertFalse(hasattr(instance, '_attr'))
 
     def test_field_assigment_and_retrival(self):
         instance = create_instance(Field())
         instance.attr = 1234
         self.assertEqual(1234, instance.attr)
-        self.assertEqual(1234, instance.__dict__['attr'])
 
     def test_field_can_be_reassigned(self):
         instance = create_instance(Field())
@@ -50,14 +49,14 @@ class FieldDescriptorTest(unittest.TestCase):
         instance.attr = 1234
         del instance.attr
         self.assertEqual(None, instance.attr)
-        self.assertNotIn('attr', instance.__dict__)
+        self.assertFalse(hasattr(instance, '_attr'))
 
     def test_field_can_be_set_to_none(self):
         instance = create_instance(Field())
         instance.attr = 1234
         instance.attr = None
         self.assertEqual(None, instance.attr)
-        self.assertNotIn('attr', instance.__dict__)
+        self.assertFalse(hasattr(instance, '_attr'))
 
     def test_field_can_be_set_default(self):
         default = object()
@@ -65,7 +64,7 @@ class FieldDescriptorTest(unittest.TestCase):
         instance.attr = 1234
         instance.attr = default
         self.assertEqual(default, instance.attr)
-        self.assertNotIn('attr', instance.__dict__)
+        self.assertFalse(hasattr(instance, '_attr'))
 
 
 class FieldTest(unittest.TestCase):
@@ -183,13 +182,11 @@ class CollectionTest(unittest.TestCase):
         instance = create_instance(Collection(type=int, container=frozenset))
         instance.attr = []
         self.assertEqual(frozenset(), instance.attr)
-        self.assertNotIn('attr', instance.__dict__)
 
     def test_collection_gets_stored_in_container(self):
         instance = create_instance(Collection(type=int, container=frozenset))
         instance.attr = [1, 2, 3]
         self.assertEqual(frozenset([1, 2, 3]), instance.attr)
-        self.assertEqual(frozenset([1, 2, 3]), instance.__dict__['attr'])
 
     def test_collection_with_wrong_type(self):
         instance = create_instance(Collection(type=int, container=frozenset))

@@ -1,6 +1,10 @@
 from __future__ import absolute_import, unicode_literals
 
+import copy
 import json
+import weakref
+
+from mopidy.utils import deprecation
 
 # TODO: split into base models, serialization and fields?
 
@@ -23,7 +27,7 @@ class Field(object):
     """
 
     def __init__(self, default=None, type=None, choices=None):
-        self._name = None  # Set by FieldOwner
+        self._name = None  # Set by ImmutableObjectMeta
         self._choices = choices
         self._default = default
         self._type = type
@@ -44,7 +48,7 @@ class Field(object):
     def __get__(self, instance, owner):
         if not instance:
             return self
-        return instance.__dict__.get(self._name, self._default)
+        return getattr(instance, '_' + self._name, self._default)
 
     def __set__(self, instance, value):
         if value is not None:
@@ -53,10 +57,11 @@ class Field(object):
         if value is None or value == self._default:
             self.__delete__(instance)
         else:
-            instance.__dict__[self._name] = value
+            setattr(instance, '_' + self._name, value)
 
     def __delete__(self, instance):
-        instance.__dict__.pop(self._name, None)
+        if hasattr(instance, '_' + self._name):
+            delattr(instance, '_' + self._name)
 
 
 class String(Field):
@@ -72,6 +77,11 @@ class String(Field):
         # TODO: only allow unicode?
         # TODO: disallow empty strings?
         super(String, self).__init__(type=basestring, default=default)
+
+
+class Identifier(String):
+    def validate(self, value):
+        return intern(str(super(Identifier, self).validate(value)))
 
 
 class Integer(Field):
@@ -123,18 +133,32 @@ class Collection(Field):
         return self._default.__class__(value) or None
 
 
-class FieldOwner(type):
+class ImmutableObjectMeta(type):
 
     """Helper to automatically assign field names to descriptors."""
 
     def __new__(cls, name, bases, attrs):
-        attrs['_fields'] = []
+        fields = {}
         for key, value in attrs.items():
             if isinstance(value, Field):
-                attrs['_fields'].append(key)
+                fields[key] = '_' + key
                 value._name = key
-        attrs['_fields'].sort()
-        return super(FieldOwner, cls).__new__(cls, name, bases, attrs)
+
+        attrs['_fields'] = fields
+        attrs['__slots__'] = fields.values()
+        attrs['_instances'] = weakref.WeakValueDictionary()
+
+        for base in bases:
+            if '__weakref__' in getattr(base, '__slots__', []):
+                break
+        else:
+            attrs['__slots__'].append('__weakref__')
+
+        return super(ImmutableObjectMeta, cls).__new__(cls, name, bases, attrs)
+
+    def __call__(cls, *args, **kwargs):  # noqa: N805
+        instance = super(ImmutableObjectMeta, cls).__call__(*args, **kwargs)
+        return cls._instances.setdefault(weakref.ref(instance), instance)
 
 
 class ImmutableObject(object):
@@ -144,11 +168,15 @@ class ImmutableObject(object):
     constructor. Fields should be :class:`Field` instances to ensure type
     safety in our models.
 
+    Note that since these models can not be changed, we heavily memoize them
+    to save memory. So constructing a class with the same arguments twice will
+    give you the same instance twice.
+
     :param kwargs: kwargs to set as fields on the object
     :type kwargs: any
     """
 
-    __metaclass__ = FieldOwner
+    __metaclass__ = ImmutableObjectMeta
 
     def __init__(self, *args, **kwargs):
         for key, value in kwargs.items():
@@ -159,14 +187,23 @@ class ImmutableObject(object):
             super(ImmutableObject, self).__setattr__(key, value)
 
     def __setattr__(self, name, value):
+        if name in self.__slots__:
+            return super(ImmutableObject, self).__setattr__(name, value)
         raise AttributeError('Object is immutable.')
 
     def __delattr__(self, name):
+        if name in self.__slots__:
+            return super(ImmutableObject, self).__delattr__(name)
         raise AttributeError('Object is immutable.')
+
+    def _items(self):
+        for field, key in self._fields.items():
+            if hasattr(self, key):
+                yield field, getattr(self, key)
 
     def __repr__(self):
         kwarg_pairs = []
-        for (key, value) in sorted(self.__dict__.items()):
+        for key, value in sorted(self._items()):
             if isinstance(value, (frozenset, tuple)):
                 if not value:
                     continue
@@ -179,47 +216,59 @@ class ImmutableObject(object):
 
     def __hash__(self):
         hash_sum = 0
-        for key, value in self.__dict__.items():
+        for key, value in self._items():
             hash_sum += hash(key) + hash(value)
         return hash_sum
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
             return False
-
-        return self.__dict__ == other.__dict__
+        return dict(self._items()) == dict(other._items())
 
     def __ne__(self, other):
         return not self.__eq__(other)
 
     def copy(self, **values):
         """
-        Copy the model with ``field`` updated to new value.
+        .. deprecated:: 1.1
+            Use :meth:`replace` instead. Note that we no longer return copies.
+        """
+        deprecation.warn('model.immutable.copy')
+        return self.replace(**values)
+
+    def replace(self, **kwargs):
+        """
+        Replace the fields in the model and return a new instance
 
         Examples::
 
             # Returns a track with a new name
-            Track(name='foo').copy(name='bar')
+            Track(name='foo').replace(name='bar')
             # Return an album with a new number of tracks
-            Album(num_tracks=2).copy(num_tracks=5)
+            Album(num_tracks=2).replace(num_tracks=5)
 
-        :param values: the model fields to modify
-        :type values: dict
-        :rtype: new instance of the model being copied
+        Note that internally we memoize heavily to keep memory usage down given
+        our overly repetitive data structures. So you might get an existing
+        instance if it contains the same values.
+
+        :param kwargs: kwargs to set as fields on the object
+        :type kwargs: any
+        :rtype: instance of the model with replaced fields
         """
-        other = self.__class__()
-        other.__dict__.update(self.__dict__)
-        for key, value in values.items():
+        if not kwargs:
+            return self
+        other = copy.copy(self)
+        for key, value in kwargs.items():
             if key not in self._fields:
                 raise TypeError(
                     'copy() got an unexpected keyword argument "%s"' % key)
             super(ImmutableObject, other).__setattr__(key, value)
-        return other
+        return self._instances.setdefault(weakref.ref(other), other)
 
     def serialize(self):
         data = {}
         data['__model__'] = self.__class__.__name__
-        for key, value in self.__dict__.items():
+        for key, value in self._items():
             if isinstance(value, (set, frozenset, list, tuple)):
                 value = [
                     v.serialize() if isinstance(v, ImmutableObject) else v
@@ -264,13 +313,11 @@ def model_json_decoder(dct):
 
     """
     if '__model__' in dct:
+        # TODO: move models to a global constant once we split this module
+        models = {c.__name__: c for c in ImmutableObject.__subclasses__()}
         model_name = dct.pop('__model__')
-        cls = globals().get(model_name, None)
-        if issubclass(cls, ImmutableObject):
-            kwargs = {}
-            for key, value in dct.items():
-                kwargs[key] = value
-            return cls(**kwargs)
+        if model_name in models:
+            return models[model_name](**dct)
     return dct
 
 
@@ -290,7 +337,7 @@ class Ref(ImmutableObject):
     """
 
     #: The object URI. Read-only.
-    uri = String()
+    uri = Identifier()
 
     #: The object name. Read-only.
     name = String()
@@ -354,7 +401,7 @@ class Image(ImmutableObject):
     """
 
     #: The image URI. Read-only.
-    uri = String()
+    uri = Identifier()
 
     #: Optional width of the image or :class:`None`. Read-only.
     width = Integer(min=0)
@@ -375,13 +422,13 @@ class Artist(ImmutableObject):
     """
 
     #: The artist URI. Read-only.
-    uri = String()
+    uri = Identifier()
 
     #: The artist name. Read-only.
     name = String()
 
     #: The MusicBrainz ID of the artist. Read-only.
-    musicbrainz_id = String()
+    musicbrainz_id = Identifier()
 
 
 class Album(ImmutableObject):
@@ -406,7 +453,7 @@ class Album(ImmutableObject):
     """
 
     #: The album URI. Read-only.
-    uri = String()
+    uri = Identifier()
 
     #: The album name. Read-only.
     name = String()
@@ -424,7 +471,7 @@ class Album(ImmutableObject):
     date = String()  # TODO: add date type
 
     #: The MusicBrainz ID of the album. Read-only.
-    musicbrainz_id = String()
+    musicbrainz_id = Identifier()
 
     #: The album image URIs. Read-only.
     images = Collection(type=basestring, container=frozenset)
@@ -469,7 +516,7 @@ class Track(ImmutableObject):
     """
 
     #: The track URI. Read-only.
-    uri = String()
+    uri = Identifier()
 
     #: The track name. Read-only.
     name = String()
@@ -508,7 +555,7 @@ class Track(ImmutableObject):
     comment = String()
 
     #: The MusicBrainz ID of the track. Read-only.
-    musicbrainz_id = String()
+    musicbrainz_id = Identifier()
 
     #: Integer representing when the track was last modified. Exact meaning
     #: depends on source of track. For local files this is the modification
@@ -571,7 +618,7 @@ class Playlist(ImmutableObject):
     """
 
     #: The playlist URI. Read-only.
-    uri = String()
+    uri = Identifier()
 
     #: The playlist name. Read-only.
     name = String()
@@ -607,7 +654,7 @@ class SearchResult(ImmutableObject):
     """
 
     # The search result URI. Read-only.
-    uri = String()
+    uri = Identifier()
 
     # The tracks matching the search query. Read-only.
     tracks = Collection(type=Track, container=tuple)

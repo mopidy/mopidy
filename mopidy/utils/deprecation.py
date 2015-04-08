@@ -40,6 +40,9 @@ _MESSAGES = {
         'tracklist.add() "tracks" argument is deprecated',
     'core.tracklist.add:uri_arg':
         'tracklist.add() "uri" argument is deprecated',
+
+    'models.immutable.copy':
+        'ImmutableObject.copy() is deprecated, use ImmutableObject.replace()',
 }
 
 
