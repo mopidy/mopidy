@@ -1,11 +1,11 @@
 .. _arch-install:
 
-**************************************
-Arch Linux: Install from ``[community]``
-**************************************
+**********************************
+Arch Linux: Install from community
+**********************************
 
 If you are running Arch Linux, you can install Mopidy using the
-`mopidy <https://aur.archlinux.org/packages/mopidy/>`_ package found in ``[community]``.
+`mopidy <https://www.archlinux.org/packages/community/any/mopidy/>`_ package found in ``community``.
 
 #. To install Mopidy with all dependencies, you can use::
 

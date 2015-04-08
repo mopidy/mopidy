@@ -5,7 +5,7 @@ Install from source
 *******************
 
 If you are on Linux, but can't install :ref:`from the APT archive
-<debian-install>` or :ref:`with Pacman  <arch-install>`, you can install Mopidy
+<debian-install>` or :ref:`with the Arch Linux repository <arch-install>`, you can install Mopidy
 from PyPI using the ``pip`` installer.
 
 If you are looking to contribute or wish to install from source using ``git``
