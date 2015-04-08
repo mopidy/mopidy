@@ -444,10 +444,9 @@ class BackendFailuresCoreLibraryTest(unittest.TestCase):
         logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
 
     def test_browse_backend_browse_uri_exception_gets_through(self, logger):
-        # TODO: is this behavior desired?
         self.library.browse.return_value.get.side_effect = Exception
-        with self.assertRaises(Exception):
-            self.core.library.browse('dummy:directory')
+        self.assertEqual([], self.core.library.browse('dummy:directory'))
+        logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
 
     def test_get_distinct_backend_exception_gets_ignored(self, logger):
         self.library.get_distinct.return_value.get.side_effect = Exception

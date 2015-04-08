@@ -68,23 +68,30 @@ class LibraryController(object):
 
         .. versionadded:: 0.18
         """
-        if uri is None:
-            directories = set()
-            backends = self.backends.with_library_browse.values()
-            futures = {b: b.library.root_directory for b in backends}
-            for backend, future in futures.items():
-                try:
-                    directories.add(future.get())
-                except Exception:
-                    logger.exception('%s backend caused an exception.',
-                                     backend.actor_ref.actor_class.__name__)
-            return sorted(directories, key=operator.attrgetter('name'))
+        return self._roots() if uri is None else self._browse(uri)
 
+    def _roots(self):
+        directories = set()
+        backends = self.backends.with_library_browse.values()
+        futures = {b: b.library.root_directory for b in backends}
+        for backend, future in futures.items():
+            try:
+                directories.add(future.get())
+            except Exception:
+                logger.exception('%s backend caused an exception.',
+                                 backend.actor_ref.actor_class.__name__)
+        return sorted(directories, key=operator.attrgetter('name'))
+
+    def _browse(self, uri):
         scheme = urlparse.urlparse(uri).scheme
         backend = self.backends.with_library_browse.get(scheme)
-        if not backend:
-            return []
-        return backend.library.browse(uri).get()
+        try:
+            if backend:
+                return backend.library.browse(uri).get()  # TODO: sort?
+        except Exception:
+            logger.exception('%s backend caused an exception.',
+                             backend.actor_ref.actor_class.__name__)
+        return []
 
     def get_distinct(self, field, query=None):
         """
