@@ -4,7 +4,6 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
-
 v1.1.0 (UNRELEASED)
 ===================
 
@@ -17,11 +16,23 @@ Core API
 - Update core controllers to handle backend exceptions in all calls that rely
   on multiple backends. (Issue: :issue:`667`)
 
+Models
+------
+
+- Added type checks and other sanity checks to model construction and
+  serialization. (Fixes: :issue:`865`)
+
 Internal changes
 ----------------
 
 - Tests have been cleaned up to stop using deprecated APIs where feasible.
   (Partial fix: :issue:`1083`, PR: :issue:`1090`)
+
+- It is now possible to import :mod:`mopidy.backends` without having GObject or
+  GStreamer installed. In other words, a lot of backend extensions should now
+  be able to run tests in a virtualenv with global site-packages disabled. This
+  removes a lot of potential error sources. (Fixes: :issue:`1068`, PR:
+  :issue:`1115`)
 
 
 v1.0.1 (UNRELEASED)

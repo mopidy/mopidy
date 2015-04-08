@@ -89,14 +89,7 @@ class Extension(object):
         the ``frontend`` and ``backend`` registry keys.
 
         This method can also be used for other setup tasks not involving the
-        extension registry. For example, to register custom GStreamer
-        elements::
-
-            def setup(self, registry):
-                from .mixer import SoundspotMixer
-                gobject.type_register(SoundspotMixer)
-                gst.element_register(
-                    SoundspotMixer, 'soundspotmixer', gst.RANK_MARGINAL)
+        extension registry.
 
         :param registry: the extension registry
         :type registry: :class:`Registry`
