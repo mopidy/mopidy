@@ -33,7 +33,7 @@ Init scripts
   <https://github.com/mopidy/mopidy/blob/debian/debian/mopidy.init>`_. For
   more details, see the :ref:`debian` section of the docs.
 
-- The ``mopidy`` package in `Arch Linux AUR
+- The ``mopidy`` package in `Arch Linux
   <https://aur.archlinux.org/packages/mopidy>`__ comes with a systemd init
   script.
 
