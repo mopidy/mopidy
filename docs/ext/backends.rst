@@ -57,6 +57,15 @@ Provides a backend for browsing the Internet radio channels from the `Dirble
 <http://dirble.com/>`_ directory.
 
 
+Mopidy-dLeyna
+=============
+
+https://github.com/tkem/mopidy-dleyna
+
+Provides a backend for playing music from Digital Media Servers using
+the `dLeyna <http://01.org/dleyna>`_ D-Bus interface.
+
+
 Mopidy-GMusic
 =============
 
