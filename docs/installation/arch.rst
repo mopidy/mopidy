@@ -13,7 +13,7 @@ If you are running Arch Linux, you can install Mopidy using the
 
    To upgrade Mopidy to future releases, just upgrade your system using::
 
-       pacman -Syua
+       pacman -Syu
 
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
    then you're ready to :doc:`run Mopidy </running>`.
