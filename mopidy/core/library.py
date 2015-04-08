@@ -68,7 +68,9 @@ class LibraryController(object):
 
         .. versionadded:: 0.18
         """
-        return self._roots() if uri is None else self._browse(uri)
+        if uri is None:
+            return self._roots()
+        return self._browse(uri)
 
     def _roots(self):
         directories = set()
@@ -87,7 +89,7 @@ class LibraryController(object):
         backend = self.backends.with_library_browse.get(scheme)
         try:
             if backend:
-                return backend.library.browse(uri).get()  # TODO: sort?
+                return backend.library.browse(uri).get()
         except Exception:
             logger.exception('%s backend caused an exception.',
                              backend.actor_ref.actor_class.__name__)
