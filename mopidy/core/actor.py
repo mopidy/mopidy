@@ -46,8 +46,10 @@ class Core(
     """The tracklist controller. An instance of
     :class:`mopidy.core.TracklistController`."""
 
-    def __init__(self, mixer=None, backends=None, audio=None):
+    def __init__(self, config=None, mixer=None, backends=None, audio=None):
         super(Core, self).__init__()
+
+        self._config = config
 
         self.backends = Backends(backends)
 
