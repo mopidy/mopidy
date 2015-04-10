@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import copy
+import inspect
 import json
 import weakref
 
@@ -145,11 +146,12 @@ class ImmutableObjectMeta(type):
                 value._name = key
 
         attrs['_fields'] = fields
-        attrs['__slots__'] = fields.values()
         attrs['_instances'] = weakref.WeakValueDictionary()
+        attrs['__slots__'] = fields.values()
 
-        for base in bases:
-            if '__weakref__' in getattr(base, '__slots__', []):
+        anncestors = [b for base in bases for b in inspect.getmro(base)]
+        for anncestor in anncestors:
+            if '__weakref__' in getattr(anncestor, '__slots__', []):
                 break
         else:
             attrs['__slots__'].append('__weakref__')
