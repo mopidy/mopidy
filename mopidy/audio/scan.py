@@ -160,3 +160,28 @@ def _process(pipeline, timeout_ms):
         timeout -= clock.get_time() - start
 
     raise exceptions.ScannerError('Timeout after %dms' % timeout_ms)
+
+
+if __name__ == '__main__':
+    import os
+    import sys
+
+    import gobject
+
+    from mopidy.utils import path
+
+    gobject.threads_init()
+
+    scanner = Scanner(5000)
+    for uri in sys.argv[1:]:
+        if not gst.uri_is_valid(uri):
+            uri = path.path_to_uri(os.path.abspath(uri))
+        try:
+            result = scanner.scan(uri)
+            for key in ('uri', 'mime', 'duration', 'seekable'):
+                print '%-20s   %s' % (key, getattr(result, key))
+            print 'tags'
+            for tag, value in result.tags.items():
+                print '%-20s   %s' % (tag, value)
+        except exceptions.ScannerError as error:
+            print '%s: %s' % (uri, error)
