@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import copy
 import inspect
+import itertools
 import json
 import weakref
 
@@ -225,7 +226,8 @@ class ImmutableObject(object):
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
             return False
-        return dict(self._items()) == dict(other._items())
+        return all(a == b for a, b in itertools.izip_longest(
+            self._items(), other._items(), fillvalue=object()))
 
     def __ne__(self, other):
         return not self.__eq__(other)
