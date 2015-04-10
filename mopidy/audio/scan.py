@@ -78,9 +78,8 @@ def _setup_pipeline(uri, proxy_config=None):
     if proxy_config:
         utils.setup_proxy(src, proxy_config)
 
-    decodebin.set_property('caps', _RAW_AUDIO)
-    decodebin.connect('pad-added', _pad_added, pipeline)
     typefind.connect('have-type', _have_type, decodebin)
+    decodebin.connect('pad-added', _pad_added, pipeline)
 
     return pipeline
 

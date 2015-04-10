@@ -16,8 +16,7 @@ from tests import path_to_data_dir
 class ScannerTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
         self.errors = {}
-        self.tags = {}
-        self.durations = {}
+        self.result = {}
 
     def find(self, path):
         media_dir = path_to_data_dir(path)
@@ -31,19 +30,17 @@ class ScannerTest(unittest.TestCase):
             uri = path_lib.path_to_uri(path)
             key = uri[len('file://'):]
             try:
-                result = scanner.scan(uri)
-                self.tags[key] = result.tags
-                self.durations[key] = result.duration
+                self.result[key] = scanner.scan(uri)
             except exceptions.ScannerError as error:
                 self.errors[key] = error
 
     def check(self, name, key, value):
         name = path_to_data_dir(name)
-        self.assertEqual(self.tags[name][key], value)
+        self.assertEqual(self.result[name].tags[key], value)
 
     def test_tags_is_set(self):
         self.scan(self.find('scanner/simple'))
-        self.assert_(self.tags)
+        self.assert_(self.result.values()[0].tags)
 
     def test_errors_is_not_set(self):
         self.scan(self.find('scanner/simple'))
@@ -52,10 +49,10 @@ class ScannerTest(unittest.TestCase):
     def test_duration_is_set(self):
         self.scan(self.find('scanner/simple'))
 
-        self.assertEqual(
-            self.durations[path_to_data_dir('scanner/simple/song1.mp3')], 4680)
-        self.assertEqual(
-            self.durations[path_to_data_dir('scanner/simple/song1.ogg')], 4680)
+        ogg = path_to_data_dir('scanner/simple/song1.ogg')
+        mp3 = path_to_data_dir('scanner/simple/song1.mp3')
+        self.assertEqual(self.result[mp3].duration, 4680)
+        self.assertEqual(self.result[ogg].duration, 4680)
 
     def test_artist_is_set(self):
         self.scan(self.find('scanner/simple'))
@@ -78,17 +75,17 @@ class ScannerTest(unittest.TestCase):
 
     def test_other_media_is_ignored(self):
         self.scan(self.find('scanner/image'))
-        self.assert_(self.errors)
+        self.assertFalse(self.result.values()[0].playable)
 
     def test_log_file_that_gst_thinks_is_mpeg_1_is_ignored(self):
         self.scan([path_to_data_dir('scanner/example.log')])
-        self.assertLess(
-            self.durations[path_to_data_dir('scanner/example.log')], 100)
+        log = path_to_data_dir('scanner/example.log')
+        self.assertLess(self.result[log].duration, 100)
 
     def test_empty_wav_file(self):
         self.scan([path_to_data_dir('scanner/empty.wav')])
-        self.assertEqual(
-            self.durations[path_to_data_dir('scanner/empty.wav')], 0)
+        wav = path_to_data_dir('scanner/empty.wav')
+        self.assertEqual(self.result[wav].duration, 0)
 
     @unittest.SkipTest
     def test_song_without_time_is_handeled(self):
