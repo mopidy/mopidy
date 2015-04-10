@@ -148,7 +148,7 @@ class ImmutableObjectMeta(type):
 
         attrs['_fields'] = fields
         attrs['_instances'] = weakref.WeakValueDictionary()
-        attrs['__slots__'] = fields.values()
+        attrs['__slots__'] = ['_hash'] + fields.values()
 
         anncestors = [b for base in bases for b in inspect.getmro(base)]
         for anncestor in anncestors:
@@ -218,10 +218,12 @@ class ImmutableObject(object):
         }
 
     def __hash__(self):
-        hash_sum = 0
-        for key, value in self._items():
-            hash_sum += hash(key) + hash(value)
-        return hash_sum
+        if not hasattr(self, '_hash'):
+            hash_sum = 0
+            for key, value in self._items():
+                hash_sum += hash(key) + hash(value)
+            super(ImmutableObject, self).__setattr__('_hash', hash_sum)
+        return self._hash
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
@@ -267,6 +269,7 @@ class ImmutableObject(object):
                 raise TypeError(
                     'copy() got an unexpected keyword argument "%s"' % key)
             super(ImmutableObject, other).__setattr__(key, value)
+        super(ImmutableObject, other).__delattr__('_hash')
         return self._instances.setdefault(weakref.ref(other), other)
 
     def serialize(self):
