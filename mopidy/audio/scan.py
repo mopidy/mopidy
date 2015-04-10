@@ -14,7 +14,7 @@ from mopidy.utils import encoding
 _missing_plugin_desc = gst.pbutils.missing_plugin_message_get_description
 
 _Result = collections.namedtuple(
-    'Result', ('uri', 'tags', 'duration', 'seekable', 'mime'))
+    'Result', ('uri', 'tags', 'duration', 'seekable', 'mime', 'playable'))
 
 _RAW_AUDIO = gst.Caps(b'audio/x-raw-int; audio/x-raw-float')
 
@@ -51,14 +51,14 @@ class Scanner(object):
 
         try:
             _start_pipeline(pipeline)
-            tags, mime = _process(pipeline, self._timeout_ms)
+            tags, mime, have_audio = _process(pipeline, self._timeout_ms)
             duration = _query_duration(pipeline)
             seekable = _query_seekable(pipeline)
         finally:
             pipeline.set_state(gst.STATE_NULL)
             del pipeline
 
-        return _Result(uri, tags, duration, seekable, mime)
+        return _Result(uri, tags, duration, seekable, mime, have_audio)
 
 
 # Turns out it's _much_ faster to just create a new pipeline for every as
@@ -87,8 +87,9 @@ def _setup_pipeline(uri, proxy_config=None):
 
 def _have_type(element, probability, caps, decodebin):
     decodebin.set_property('sink-caps', caps)
-    msg = gst.message_new_application(element, caps.get_structure(0))
-    element.get_bus().post(msg)
+    struct = gst.Structure('have-type')
+    struct['caps'] = caps.get_structure(0)
+    element.get_bus().post(gst.message_new_application(element, struct))
 
 
 def _pad_added(element, pad, pipeline):
@@ -98,6 +99,10 @@ def _pad_added(element, pad, pipeline):
     pipeline.add(sink)
     sink.sync_state_with_parent()
     pad.link(sink.get_pad('sink'))
+
+    if pad.get_caps().is_subset(_RAW_AUDIO):
+        struct = gst.Structure('have-audio')
+        element.get_bus().post(gst.message_new_application(element, struct))
 
 
 def _start_pipeline(pipeline):
@@ -127,7 +132,7 @@ def _process(pipeline, timeout_ms):
     clock = pipeline.get_clock()
     bus = pipeline.get_bus()
     timeout = timeout_ms * gst.MSECOND
-    tags, mime, missing_description = {}, None, None
+    tags, mime, have_audio, missing_description = {}, None, False, None
 
     types = (gst.MESSAGE_ELEMENT | gst.MESSAGE_APPLICATION | gst.MESSAGE_ERROR
              | gst.MESSAGE_EOS | gst.MESSAGE_ASYNC_DONE | gst.MESSAGE_TAG)
@@ -143,19 +148,22 @@ def _process(pipeline, timeout_ms):
                 missing_description = encoding.locale_decode(
                     _missing_plugin_desc(message))
         elif message.type == gst.MESSAGE_APPLICATION:
-            mime = message.structure.get_name()
-            if mime.startswith('text/') or mime == 'application/xml':
-                return tags, mime
+            if message.structure.get_name() == 'have-type':
+                mime = message.structure['caps'].get_name()
+                if mime.startswith('text/') or mime == 'application/xml':
+                    return tags, mime, have_audio
+            elif message.structure.get_name() == 'have-audio':
+                have_audio = True
         elif message.type == gst.MESSAGE_ERROR:
             error = encoding.locale_decode(message.parse_error()[0])
             if missing_description:
                 error = '%s (%s)' % (missing_description, error)
             raise exceptions.ScannerError(error)
         elif message.type == gst.MESSAGE_EOS:
-            return tags, mime
+            return tags, mime, have_audio
         elif message.type == gst.MESSAGE_ASYNC_DONE:
             if message.src == pipeline:
-                return tags, mime
+                return tags, mime, have_audio
         elif message.type == gst.MESSAGE_TAG:
             taglist = message.parse_tag()
             # Note that this will only keep the last tag.
@@ -182,7 +190,7 @@ if __name__ == '__main__':
             uri = path.path_to_uri(os.path.abspath(uri))
         try:
             result = scanner.scan(uri)
-            for key in ('uri', 'mime', 'duration', 'seekable'):
+            for key in ('uri', 'mime', 'duration', 'playable', 'seekable'):
                 print '%-20s   %s' % (key, getattr(result, key))
             print 'tags'
             for tag, value in result.tags.items():
