@@ -70,17 +70,16 @@ def _setup_pipeline(uri, proxy_config=None):
 
     typefind = gst.element_factory_make('typefind')
     decodebin = gst.element_factory_make('decodebin2')
-    sink = gst.element_factory_make('fakesink')
 
     pipeline = gst.element_factory_make('pipeline')
-    pipeline.add_many(src, typefind, decodebin, sink)
+    pipeline.add_many(src, typefind, decodebin)
     gst.element_link_many(src, typefind, decodebin)
 
     if proxy_config:
         utils.setup_proxy(src, proxy_config)
 
     decodebin.set_property('caps', _RAW_AUDIO)
-    decodebin.connect('pad-added', _pad_added, sink)
+    decodebin.connect('pad-added', _pad_added, pipeline)
     typefind.connect('have-type', _have_type, decodebin)
 
     return pipeline
@@ -92,8 +91,13 @@ def _have_type(element, probability, caps, decodebin):
     element.get_bus().post(msg)
 
 
-def _pad_added(element, pad, sink):
-    return pad.link(sink.get_pad('sink'))
+def _pad_added(element, pad, pipeline):
+    sink = gst.element_factory_make('fakesink')
+    sink.set_property('sync', False)
+
+    pipeline.add(sink)
+    sink.sync_state_with_parent()
+    pad.link(sink.get_pad('sink'))
 
 
 def _start_pipeline(pipeline):
