@@ -270,10 +270,12 @@ def list_(context, *args):
     if field not in _LIST_MAPPING:
         raise exceptions.MpdArgError('incorrect arguments')
 
+    query = None
     if len(params) == 1:
         if field != 'album':
             raise exceptions.MpdArgError('should be "Album" for 3 arguments')
-        query = {'artist': params}
+        if params[0].strip():
+            query = {'artist': params}
     else:
         try:
             query = _query_from_mpd_search_parameters(params, _LIST_MAPPING)
