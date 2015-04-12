@@ -5,11 +5,11 @@ import unittest
 import gobject
 gobject.threads_init()
 
+import mock
+
 import pygst
 pygst.require('0.10')
 import gst  # noqa: pygst magic is needed to import correct gst
-
-import mock
 
 from mopidy.models import Track
 from mopidy.stream import actor

@@ -5,7 +5,7 @@ import collections
 import pygst
 pygst.require('0.10')
 import gst  # noqa
-import gst.pbutils
+import gst.pbutils  # noqa
 
 from mopidy import exceptions
 from mopidy.audio import utils
