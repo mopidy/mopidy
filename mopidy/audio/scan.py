@@ -1,4 +1,5 @@
-from __future__ import absolute_import, division, unicode_literals
+from __future__ import (
+    absolute_import, division, print_function, unicode_literals)
 
 import collections
 
@@ -190,9 +191,9 @@ if __name__ == '__main__':
         try:
             result = scanner.scan(uri)
             for key in ('uri', 'mime', 'duration', 'playable', 'seekable'):
-                print '%-20s   %s' % (key, getattr(result, key))
-            print 'tags'
+                print('%-20s   %s' % (key, getattr(result, key)))
+            print('tags')
             for tag, value in result.tags.items():
-                print '%-20s   %s' % (tag, value)
+                print('%-20s   %s' % (tag, value))
         except exceptions.ScannerError as error:
-            print '%s: %s' % (uri, error)
+            print('%s: %s' % (uri, error))
