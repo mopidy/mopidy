@@ -76,7 +76,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(int(result['repeat']), 0)
 
     def test_status_method_contains_repeat_is_1(self):
-        self.core.tracklist.repeat = 1
+        self.core.tracklist.set_repeat(True)
         result = dict(status.status(self.context))
         self.assertIn('repeat', result)
         self.assertEqual(int(result['repeat']), 1)
@@ -87,7 +87,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(int(result['random']), 0)
 
     def test_status_method_contains_random_is_1(self):
-        self.core.tracklist.random = 1
+        self.core.tracklist.set_random(True)
         result = dict(status.status(self.context))
         self.assertIn('random', result)
         self.assertEqual(int(result['random']), 1)
@@ -103,7 +103,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(int(result['consume']), 0)
 
     def test_status_method_contains_consume_is_1(self):
-        self.core.tracklist.consume = 1
+        self.core.tracklist.set_consume(True)
         result = dict(status.status(self.context))
         self.assertIn('consume', result)
         self.assertEqual(int(result['consume']), 1)
