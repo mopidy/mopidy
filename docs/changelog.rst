@@ -17,6 +17,10 @@ v1.0.1 (UNRELEASED)
   behavior was confusing for many users and doesn't work well with the plans
   for multiple outputs.
 
+- Audio: Update scanner to decode all media it finds. This should fix cases
+  where the scanner hangs on non-audio files like video. The scanner will now
+  also let us know if we found any decodeable audio. (Fixes: :issue:`726`)
+
 
 v1.0.0 (2015-03-25)
 ===================
