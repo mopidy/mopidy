@@ -1,6 +1,8 @@
 from __future__ import absolute_import, unicode_literals
 
 import copy
+import inspect
+import itertools
 import json
 import weakref
 
@@ -145,11 +147,11 @@ class ImmutableObjectMeta(type):
                 value._name = key
 
         attrs['_fields'] = fields
-        attrs['__slots__'] = fields.values()
         attrs['_instances'] = weakref.WeakValueDictionary()
+        attrs['__slots__'] = ['_hash'] + fields.values()
 
-        for base in bases:
-            if '__weakref__' in getattr(base, '__slots__', []):
+        for ancestor in [b for base in bases for b in inspect.getmro(base)]:
+            if '__weakref__' in getattr(ancestor, '__slots__', []):
                 break
         else:
             attrs['__slots__'].append('__weakref__')
@@ -215,15 +217,18 @@ class ImmutableObject(object):
         }
 
     def __hash__(self):
-        hash_sum = 0
-        for key, value in self._items():
-            hash_sum += hash(key) + hash(value)
-        return hash_sum
+        if not hasattr(self, '_hash'):
+            hash_sum = 0
+            for key, value in self._items():
+                hash_sum += hash(key) + hash(value)
+            super(ImmutableObject, self).__setattr__('_hash', hash_sum)
+        return self._hash
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
             return False
-        return dict(self._items()) == dict(other._items())
+        return all(a == b for a, b in itertools.izip_longest(
+            self._items(), other._items(), fillvalue=object()))
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -263,6 +268,7 @@ class ImmutableObject(object):
                 raise TypeError(
                     'copy() got an unexpected keyword argument "%s"' % key)
             super(ImmutableObject, other).__setattr__(key, value)
+        super(ImmutableObject, other).__delattr__('_hash')
         return self._instances.setdefault(weakref.ref(other), other)
 
     def serialize(self):

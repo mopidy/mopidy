@@ -8,6 +8,17 @@ from mopidy.models import (
     TlTrack, Track, model_json_decoder)
 
 
+class InheritanceTest(unittest.TestCase):
+
+    def test_weakref_and_slots_play_nice_in_subclass(self):
+        # Check that the following does not happen:
+        # TypeError: Error when calling the metaclass bases
+        #   __weakref__ slot disallowed: either we already got one...
+
+        class Foo(Track):
+            pass
+
+
 class CachingTest(unittest.TestCase):
 
     def test_same_instance(self):
