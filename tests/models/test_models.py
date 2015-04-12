@@ -8,7 +8,7 @@ from mopidy.models import (
     TlTrack, Track, model_json_decoder)
 
 
-class InheritanecTest(unittest.TestCase):
+class InheritanceTest(unittest.TestCase):
 
     def test_weakref_and_slots_play_nice_in_subclass(self):
         # Check that the following does not happen:

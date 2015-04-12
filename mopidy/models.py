@@ -150,9 +150,8 @@ class ImmutableObjectMeta(type):
         attrs['_instances'] = weakref.WeakValueDictionary()
         attrs['__slots__'] = ['_hash'] + fields.values()
 
-        anncestors = [b for base in bases for b in inspect.getmro(base)]
-        for anncestor in anncestors:
-            if '__weakref__' in getattr(anncestor, '__slots__', []):
+        for ancestor in [b for base in bases for b in inspect.getmro(base)]:
+            if '__weakref__' in getattr(ancestor, '__slots__', []):
                 break
         else:
             attrs['__slots__'].append('__weakref__')
