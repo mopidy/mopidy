@@ -10,7 +10,7 @@ import pykka
 from mopidy import core
 from mopidy.core import PlaybackState
 from mopidy.local import actor
-from mopidy.models import Track
+from mopidy.models import TlTrack, Track
 from mopidy.utils import deprecation
 
 from tests import dummy_audio, path_to_data_dir
@@ -1088,4 +1088,4 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     @populate_tracklist
     def test_playing_track_that_isnt_in_playlist(self):
         with self.assertRaises(AssertionError):
-            self.playback.play((17, Track()))
+            self.playback.play(TlTrack(17, Track()))
