@@ -8,6 +8,8 @@ This changelog is used to track all major changes to Mopidy.
 v1.0.1 (UNRELEASED)
 ===================
 
+Bug fix release.
+
 - Audio: Software volume control has been reworked to greatly reduce the delay
   between changing the volume and the change taking effect. (Fixes:
   :issue:`1097`)
