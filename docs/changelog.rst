@@ -43,6 +43,8 @@ Internal changes
 v1.0.1 (UNRELEASED)
 ===================
 
+Bug fix release.
+
 - Audio: Software volume control has been reworked to greatly reduce the delay
   between changing the volume and the change taking effect. (Fixes:
   :issue:`1097`)
@@ -51,6 +53,10 @@ v1.0.1 (UNRELEASED)
   tied to the PulseAudio application volume when using ``pulsesink``. This
   behavior was confusing for many users and doesn't work well with the plans
   for multiple outputs.
+
+- Audio: Update scanner to decode all media it finds. This should fix cases
+  where the scanner hangs on non-audio files like video. The scanner will now
+  also let us know if we found any decodeable audio. (Fixes: :issue:`726`)
 
 
 v1.0.0 (2015-03-25)
