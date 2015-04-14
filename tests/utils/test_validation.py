@@ -98,7 +98,7 @@ def test_check_mapping_error_message():
 
 
 def test_check_query_invalid_fields():
-    for value in 'wrong', 'bar', 'foo':
+    for value in 'wrong', 'bar', 'foo', 'tlid':
         with raises(exceptions.ValidationError):
             validation.check_query({value: []})
 

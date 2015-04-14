@@ -422,16 +422,17 @@ class TracklistController(object):
         :rtype: list of :class:`mopidy.models.TlTrack`
         """
         criteria = criteria or kwargs
+        tlids = criteria.pop('tlid', [])
         validation.check_query(criteria)
+        validation.check_instances(tlids, int)
         # TODO: deprecate kwargs
 
         matches = self._tl_tracks
         for (key, values) in criteria.items():
-            if key == 'tlid':
-                matches = [ct for ct in matches if ct.tlid in values]
-            else:
-                matches = [
-                    ct for ct in matches if getattr(ct.track, key) in values]
+            matches = [
+                ct for ct in matches if getattr(ct.track, key) in values]
+        if tlids:
+            matches = [ct for ct in matches if ct.tlid in tlids]
         return matches
 
     def move(self, start, end, to_position):

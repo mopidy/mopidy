@@ -9,7 +9,7 @@ PLAYBACK_STATES = {'paused', 'stopped', 'playing'}
 
 QUERY_FIELDS = {
     'uri', 'track_name', 'album', 'artist', 'albumartist', 'composer',
-    'performer', 'track_no', 'genre', 'date', 'comment', 'any', 'tlid', 'name'}
+    'performer', 'track_no', 'genre', 'date', 'comment', 'any', 'name'}
 
 DISTINCT_FIELDS = {
     'artist', 'albumartist', 'album', 'composer', 'performer', 'date', 'genre'}
@@ -62,9 +62,7 @@ def check_query(arg, list_values=True):
     # TODO: normalize name  -> track_name
     # TODO: normalize value -> [value]
     # TODO: normalize blank -> [] or just remove field?
-    # TODO: normalize int -> str or remove int support?
     # TODO: remove list_values?
-    # TODO: don't allow for instance tlid field in all queries?
 
     if not isinstance(arg, collections.Mapping):
         raise exceptions.ValidationError(
@@ -83,10 +81,7 @@ def check_query(arg, list_values=True):
 
 
 def _check_query_value(key, arg, msg):
-    if isinstance(arg, compat.string_types):
-        if not arg.strip():
-            raise exceptions.ValidationError(msg.format(arg=arg, key=key))
-    elif not isinstance(arg, (int, long)):
+    if not isinstance(arg, compat.string_types) or not arg.strip():
         raise exceptions.ValidationError(msg.format(arg=arg, key=key))
 
 
