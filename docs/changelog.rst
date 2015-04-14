@@ -23,6 +23,8 @@ Bug fix release.
   where the scanner hangs on non-audio files like video. The scanner will now
   also let us know if we found any decodeable audio. (Fixes: :issue:`726`)
 
+- HTTP: Fix threading bug that would cause duplicate delivery of WS messages.
+
 
 v1.0.0 (2015-03-25)
 ===================
