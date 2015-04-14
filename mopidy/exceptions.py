@@ -46,3 +46,7 @@ class ScannerError(MopidyException):
 
 class AudioException(MopidyException):
     pass
+
+
+class ValidationError(ValueError):
+    pass
