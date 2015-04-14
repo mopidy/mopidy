@@ -3,9 +3,10 @@ from __future__ import absolute_import, unicode_literals
 import logging
 import urlparse
 
+from mopidy import models
 from mopidy.audio import PlaybackState
 from mopidy.core import listener
-from mopidy.utils import deprecation
+from mopidy.utils import deprecation, validation
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +97,8 @@ class PlaybackController(object):
             "PAUSED" -> "PLAYING" [ label="resume" ]
             "PAUSED" -> "STOPPED" [ label="stop" ]
         """
+        validation.check_choice(new_state, validation.PLAYBACK_STATES)
+
         (old_state, self._state) = (self.get_state(), new_state)
         logger.debug('Changing state: %s -> %s', old_state, new_state)
 
@@ -270,6 +273,7 @@ class PlaybackController(object):
         :param tl_track: track to play
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         """
+        tl_track is None or validation.check_instance(tl_track, models.TlTrack)
         self._play(tl_track, on_error_step=1)
 
     def _play(self, tl_track=None, on_error_step=1):
@@ -360,6 +364,8 @@ class PlaybackController(object):
         :type time_position: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
+        validation.check_integer(time_position, min=0)
+
         if not self.core.tracklist.tracks:
             return False
 

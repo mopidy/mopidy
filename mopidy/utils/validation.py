@@ -74,12 +74,12 @@ def check_query(arg, list_values=True):
         check_choice(key, QUERY_FIELDS, msg='Expected query field to be one '
                      'of {choices}, not {arg!r}')
         if list_values:
-            msg = 'Expected "{key}" values to be list of strings, not {arg!r}'
+            msg = 'Expected "{key}" to be list of strings, not {arg!r}'
             _check_iterable(value, msg, key=key)
             [_check_query_value(key, v, msg) for v in value]
         else:
-            _check_query_value(key, value, 'Expected "{key}" value to be a '
-                               'string, not {arg!r}')
+            _check_query_value(
+                key, value, 'Expected "{key}" to be a string, not {arg!r}')
 
 
 def _check_query_value(key, arg, msg):

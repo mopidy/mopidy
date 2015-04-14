@@ -118,7 +118,7 @@ def test_check_query_invalid_values():
 def test_check_values_error_message():
     with raises(exceptions.ValidationError) as excinfo:
         validation.check_query({'any': 'abc'})
-    assert 'Expected "any" values to be list of strings' in str(excinfo.value)
+    assert 'Expected "any" to be list of strings, not' in str(excinfo.value)
 
 
 def test_check_uri_with_valid_values():
