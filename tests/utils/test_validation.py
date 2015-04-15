@@ -11,7 +11,7 @@ def test_check_boolean_with_valid_values():
         validation.check_boolean(value)
 
 
-def test_check_boolean_with_truthy_values():
+def test_check_boolean_with_other_values():
     for value in 1, 0, None, '', list(), tuple():
         with raises(exceptions.ValidationError):
             validation.check_boolean(value)
