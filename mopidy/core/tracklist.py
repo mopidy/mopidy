@@ -398,34 +398,34 @@ class TracklistController(object):
 
             # Returns tracks with TLIDs 1, 2, 3, or 4 (tracklist ID)
             filter({'tlid': [1, 2, 3, 4]})
-            filter(tlid=[1, 2, 3, 4])
 
             # Returns track with IDs 1, 5, or 7
             filter({'id': [1, 5, 7]})
-            filter(id=[1, 5, 7])
 
             # Returns track with URIs 'xyz' or 'abc'
             filter({'uri': ['xyz', 'abc']})
-            filter(uri=['xyz', 'abc'])
 
             # Returns tracks with ID 1 and URI 'xyz'
             filter({'id': [1], 'uri': ['xyz']})
-            filter(id=[1], uri=['xyz'])
 
             # Returns track with a matching ID (1, 3 or 6) and a matching URI
             # ('xyz' or 'abc')
             filter({'id': [1, 3, 6], 'uri': ['xyz', 'abc']})
-            filter(id=[1, 3, 6], uri=['xyz', 'abc'])
 
         :param criteria: on or more criteria to match by
         :type criteria: dict, of (string, list) pairs
         :rtype: list of :class:`mopidy.models.TlTrack`
+
+        .. deprecated:: 1.1
+            Providing the criteria  via ``kwargs`` is no longer supported.
         """
+        if kwargs:
+            deprecation.warn('core.tracklist.filter:kwargs_criteria')
+
         criteria = criteria or kwargs
         tlids = criteria.pop('tlid', [])
         validation.check_query(criteria, validation.TRACKLIST_FIELDS)
         validation.check_instances(tlids, int)
-        # TODO: deprecate kwargs
         # TODO: id=[1, 2, 3] filtering can't possibly be working
 
         matches = self._tl_tracks
@@ -481,9 +481,14 @@ class TracklistController(object):
         :param criteria: on or more criteria to match by
         :type criteria: dict
         :rtype: list of :class:`mopidy.models.TlTrack` that was removed
+
+        .. deprecated:: 1.1
+            Providing the criteria  via ``kwargs`` is no longer supported.
         """
-        # TODO: deprecate kwargs
-        tl_tracks = self.filter(criteria, **kwargs)
+        if kwargs:
+            deprecation.warn('core.tracklist.remove:kwargs_criteria')
+
+        tl_tracks = self.filter(criteria or kwargs)
         for tl_track in tl_tracks:
             position = self._tl_tracks.index(tl_track)
             del self._tl_tracks[position]
