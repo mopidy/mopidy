@@ -7,9 +7,14 @@ from mopidy import compat, exceptions
 
 PLAYBACK_STATES = {'paused', 'stopped', 'playing'}
 
-QUERY_FIELDS = {
+SEARCH_FIELDS = {
     'uri', 'track_name', 'album', 'artist', 'albumartist', 'composer',
-    'performer', 'track_no', 'genre', 'date', 'comment', 'any', 'name'}
+    'performer', 'track_no', 'genre', 'date', 'comment', 'any'}
+
+PLAYLIST_FIELDS = {'uri', 'name'}  # TODO: add length and last_modified?
+
+TRACKLIST_FIELDS = {  # TODO: add bitrate, length, disc_no, track_no, modified?
+    'uri', 'name', 'genre', 'date', 'comment', 'musicbrainz_id'}
 
 DISTINCT_FIELDS = {
     'artist', 'albumartist', 'album', 'composer', 'performer', 'date', 'genre'}
@@ -58,7 +63,7 @@ def check_integer(arg, min=None, max=None):
             'Expected number smaller or equal to %d, not %r' % (max, arg))
 
 
-def check_query(arg, list_values=True):
+def check_query(arg, fields=SEARCH_FIELDS, list_values=True):
     # TODO: normalize name  -> track_name
     # TODO: normalize value -> [value]
     # TODO: normalize blank -> [] or just remove field?
@@ -69,8 +74,8 @@ def check_query(arg, list_values=True):
             'Expected a query dictionary, not {arg!r}'.format(arg=arg))
 
     for key, value in arg.items():
-        check_choice(key, QUERY_FIELDS, msg='Expected query field to be one '
-                     'of {choices}, not {arg!r}')
+        check_choice(key, fields, msg='Expected query field to be one of '
+                     '{choices}, not {arg!r}')
         if list_values:
             msg = 'Expected "{key}" to be list of strings, not {arg!r}'
             _check_iterable(value, msg, key=key)

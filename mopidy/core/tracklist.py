@@ -423,9 +423,10 @@ class TracklistController(object):
         """
         criteria = criteria or kwargs
         tlids = criteria.pop('tlid', [])
-        validation.check_query(criteria)
+        validation.check_query(criteria, validation.TRACKLIST_FIELDS)
         validation.check_instances(tlids, int)
         # TODO: deprecate kwargs
+        # TODO: id=[1, 2, 3] filtering can't possibly be working
 
         matches = self._tl_tracks
         for (key, values) in criteria.items():

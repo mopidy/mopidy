@@ -176,7 +176,8 @@ class PlaylistsController(object):
         deprecation.warn('core.playlists.filter')
 
         criteria = criteria or kwargs
-        validation.check_query(criteria, list_values=False)
+        validation.check_query(
+            criteria, validation.PLAYLIST_FIELDS, list_values=False)
 
         # TODO: stop using self playlists
         matches = self.playlists
