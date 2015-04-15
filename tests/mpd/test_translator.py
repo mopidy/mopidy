@@ -80,26 +80,26 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assertEqual(len(result), 14)
 
     def test_track_to_mpd_format_musicbrainz_trackid(self):
-        track = self.track.copy(musicbrainz_id='foo')
+        track = self.track.replace(musicbrainz_id='foo')
         result = translator.track_to_mpd_format(track)
         self.assertIn(('MUSICBRAINZ_TRACKID', 'foo'), result)
 
     def test_track_to_mpd_format_musicbrainz_albumid(self):
-        album = self.track.album.copy(musicbrainz_id='foo')
-        track = self.track.copy(album=album)
+        album = self.track.album.replace(musicbrainz_id='foo')
+        track = self.track.replace(album=album)
         result = translator.track_to_mpd_format(track)
         self.assertIn(('MUSICBRAINZ_ALBUMID', 'foo'), result)
 
     def test_track_to_mpd_format_musicbrainz_albumartistid(self):
-        artist = list(self.track.artists)[0].copy(musicbrainz_id='foo')
-        album = self.track.album.copy(artists=[artist])
-        track = self.track.copy(album=album)
+        artist = list(self.track.artists)[0].replace(musicbrainz_id='foo')
+        album = self.track.album.replace(artists=[artist])
+        track = self.track.replace(album=album)
         result = translator.track_to_mpd_format(track)
         self.assertIn(('MUSICBRAINZ_ALBUMARTISTID', 'foo'), result)
 
     def test_track_to_mpd_format_musicbrainz_artistid(self):
-        artist = list(self.track.artists)[0].copy(musicbrainz_id='foo')
-        track = self.track.copy(artists=[artist])
+        artist = list(self.track.artists)[0].replace(musicbrainz_id='foo')
+        track = self.track.replace(artists=[artist])
         result = translator.track_to_mpd_format(track)
         self.assertIn(('MUSICBRAINZ_ARTISTID', 'foo'), result)
 

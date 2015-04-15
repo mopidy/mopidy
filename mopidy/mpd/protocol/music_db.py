@@ -486,7 +486,7 @@ def searchaddpl(context, *args):
     if not playlist:
         playlist = context.core.playlists.create(playlist_name).get()
     tracks = list(playlist.tracks) + _get_tracks(results)
-    playlist = playlist.copy(tracks=tracks)
+    playlist = playlist.replace(tracks=tracks)
     context.core.playlists.save(playlist)
 
 

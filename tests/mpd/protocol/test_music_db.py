@@ -103,7 +103,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
     def test_searchaddpl_appends_to_existing_playlist(self):
         playlist = self.core.playlists.create('my favs').get()
-        playlist = playlist.copy(tracks=[
+        playlist = playlist.replace(tracks=[
             Track(uri='dummy:x', name='X'),
             Track(uri='dummy:y', name='y'),
         ])

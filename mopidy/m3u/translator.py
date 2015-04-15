@@ -98,13 +98,13 @@ def parse_m3u(file_path, media_dir=None):
             continue
 
         if urlparse.urlsplit(line).scheme:
-            tracks.append(track.copy(uri=line))
+            tracks.append(track.replace(uri=line))
         elif os.path.normpath(line) == os.path.abspath(line):
             path = path_to_uri(line)
-            tracks.append(track.copy(uri=path))
+            tracks.append(track.replace(uri=path))
         elif media_dir is not None:
             path = path_to_uri(os.path.join(media_dir, line))
-            tracks.append(track.copy(uri=path))
+            tracks.append(track.replace(uri=path))
 
         track = Track()
     return tracks

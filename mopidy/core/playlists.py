@@ -92,7 +92,7 @@ class PlaylistsController(object):
             # Use the playlist name from as_list() because it knows about any
             # playlist folder hierarchy, which lookup() does not.
             return [
-                playlists[r.uri].copy(name=r.name)
+                playlists[r.uri].replace(name=r.name)
                 for r in playlist_refs if playlists[r.uri] is not None]
         else:
             return [
