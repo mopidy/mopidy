@@ -13,8 +13,10 @@ Core API
 - Calling :meth:`mopidy.core.library.LibraryController.search`` with ``kwargs``
   as the query is no longer supported (PR: :issue:`1090`)
 
-- Update core controllers to handle backend exceptions in all calls that rely
+- Updated core controllers to handle backend exceptions in all calls that rely
   on multiple backends. (Issue: :issue:`667`)
+
+- Update core methods to do strict input checking. (Fixes: :issue:`#700`)
 
 Models
 ------
