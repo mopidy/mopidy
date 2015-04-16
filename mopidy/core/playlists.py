@@ -92,7 +92,7 @@ class PlaylistsController(object):
             # Use the playlist name from as_list() because it knows about any
             # playlist folder hierarchy, which lookup() does not.
             return [
-                playlists[r.uri].copy(name=r.name)
+                playlists[r.uri].replace(name=r.name)
                 for r in playlist_refs if playlists[r.uri] is not None]
         else:
             return [
@@ -156,15 +156,12 @@ class PlaylistsController(object):
 
             # Returns track with name 'a'
             filter({'name': 'a'})
-            filter(name='a')
 
             # Returns track with URI 'xyz'
             filter({'uri': 'xyz'})
-            filter(uri='xyz')
 
             # Returns track with name 'a' and URI 'xyz'
             filter({'name': 'a', 'uri': 'xyz'})
-            filter(name='a', uri='xyz')
 
         :param criteria: one or more criteria to match by
         :type criteria: dict
@@ -179,8 +176,7 @@ class PlaylistsController(object):
         validation.check_query(
             criteria, validation.PLAYLIST_FIELDS, list_values=False)
 
-        # TODO: stop using self playlists
-        matches = self.playlists
+        matches = self.playlists  # TODO: stop using self playlists
         for (key, value) in criteria.iteritems():
             matches = filter(lambda p: getattr(p, key) == value, matches)
         return matches

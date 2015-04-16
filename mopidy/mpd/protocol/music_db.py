@@ -6,6 +6,7 @@ import warnings
 
 from mopidy.models import Track
 from mopidy.mpd import exceptions, protocol, translator
+from mopidy.utils import deprecation
 
 _SEARCH_MAPPING = {
     'album': 'album',
@@ -142,7 +143,8 @@ def find(context, *args):
     except ValueError:
         return
 
-    results = context.core.library.search(query=query, exact=True).get()
+    with deprecation.ignore('core.library.search:empty_query'):
+        results = context.core.library.search(query=query, exact=True).get()
     result_tracks = []
     if ('artist' not in query and
             'albumartist' not in query and
@@ -422,7 +424,8 @@ def search(context, *args):
         query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return
-    results = context.core.library.search(query).get()
+    with deprecation.ignore('core.library.search:empty_query'):
+        results = context.core.library.search(query).get()
     artists = [_artist_as_track(a) for a in _get_artists(results)]
     albums = [_album_as_track(a) for a in _get_albums(results)]
     tracks = _get_tracks(results)
@@ -486,7 +489,7 @@ def searchaddpl(context, *args):
     if not playlist:
         playlist = context.core.playlists.create(playlist_name).get()
     tracks = list(playlist.tracks) + _get_tracks(results)
-    playlist = playlist.copy(tracks=tracks)
+    playlist = playlist.replace(tracks=tracks)
     context.core.playlists.save(playlist)
 
 

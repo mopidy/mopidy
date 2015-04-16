@@ -240,7 +240,7 @@ class DeprecatedFilterPlaylistsTest(BasePlaylistsTest):
             return super(DeprecatedFilterPlaylistsTest, self).run(result)
 
     def test_filter_returns_matching_playlists(self):
-        result = self.core.playlists.filter(name='A')
+        result = self.core.playlists.filter({'name': 'A'})
 
         self.assertEqual(2, len(result))
 

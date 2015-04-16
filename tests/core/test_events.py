@@ -71,7 +71,7 @@ class BackendEventsTest(unittest.TestCase):
         self.core.tracklist.add(uris=['dummy:a']).get()
         send.reset_mock()
 
-        self.core.tracklist.remove(uri=['dummy:a']).get()
+        self.core.tracklist.remove({'uri': ['dummy:a']}).get()
 
         self.assertEqual(send.call_args[0][0], 'tracklist_changed')
 
@@ -111,7 +111,7 @@ class BackendEventsTest(unittest.TestCase):
 
     def test_playlists_save_sends_playlist_changed_event(self, send):
         playlist = self.core.playlists.create('foo').get()
-        playlist = playlist.copy(name='bar')
+        playlist = playlist.replace(name='bar')
         send.reset_mock()
 
         self.core.playlists.save(playlist).get()

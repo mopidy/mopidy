@@ -143,7 +143,7 @@ class ScanCommand(commands.Command):
                                    uri, MIN_DURATION_MS)
                 else:
                     mtime = file_mtimes.get(os.path.join(media_dir, relpath))
-                    track = utils.convert_tags_to_track(tags).copy(
+                    track = utils.convert_tags_to_track(tags).replace(
                         uri=uri, length=duration, last_modified=mtime)
                     if library.add_supports_tags_and_duration:
                         library.add(track, tags=tags, duration=duration)

@@ -126,4 +126,4 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
                 file_handle.write(track.uri + '\n')
 
         # assert playlist name matches file name/uri
-        return playlist.copy(uri=uri, name=name)
+        return playlist.replace(uri=uri, name=name)

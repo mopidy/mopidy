@@ -10,8 +10,12 @@ v1.1.0 (UNRELEASED)
 Core API
 --------
 
-- Calling :meth:`mopidy.core.library.LibraryController.search`` with ``kwargs``
-  as the query is no longer supported (PR: :issue:`1090`)
+- Calling the following methods with ``kwargs`` is being deprecated.
+  (PR: :issue:`1090`)
+    - :meth:`mopidy.core.library.LibraryController.search``
+    - :meth:`mopidy.core.library.PlaylistsController.filter``
+    - :meth:`mopidy.core.library.TracklistController.filter``
+    - :meth:`mopidy.core.library.TracklistController.remove``
 
 - Updated core controllers to handle backend exceptions in all calls that rely
   on multiple backends. (Issue: :issue:`667`)
