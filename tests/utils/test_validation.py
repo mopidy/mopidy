@@ -72,6 +72,8 @@ def test_check_instances_with_invalid_values():
         validation.check_instances(None, compat.string_types)
     with raises(exceptions.ValidationError):
         validation.check_instances([None], compat.string_types)
+    with raises(exceptions.ValidationError):
+        validation.check_instances(iter(['abc']), compat.string_types)
 
 
 def test_check_instances_error_message():
@@ -110,7 +112,7 @@ def test_check_field_error_message():
 
 
 def test_check_query_invalid_values():
-    for value in '', None, 'foo', 123, [''], [None]:
+    for value in '', None, 'foo', 123, [''], [None], iter(['abc']):
         with raises(exceptions.ValidationError):
             validation.check_query({'any': value})
 
@@ -155,6 +157,8 @@ def test_check_uris_with_invalid_values():
         validation.check_uris([None])
     with raises(exceptions.ValidationError):
         validation.check_uris(['foobar:', 'foobar'])
+    with raises(exceptions.ValidationError):
+        validation.check_uris(iter(['http://example.com']))
 
 
 def test_check_uris_error_message():

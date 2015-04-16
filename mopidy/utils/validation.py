@@ -22,10 +22,12 @@ DISTINCT_FIELDS = {
 
 # TODO: _check_iterable(check, msg, **kwargs) + [check(a) for a in arg]?
 def _check_iterable(arg, msg, **kwargs):
-    """Ensure we have an iterable which is not a string."""
+    """Ensure we have an iterable which is not a string or an iterator"""
     if isinstance(arg, compat.string_types):
         raise exceptions.ValidationError(msg.format(arg=arg, **kwargs))
     elif not isinstance(arg, collections.Iterable):
+        raise exceptions.ValidationError(msg.format(arg=arg, **kwargs))
+    elif iter(arg) is iter(arg):
         raise exceptions.ValidationError(msg.format(arg=arg, **kwargs))
 
 
