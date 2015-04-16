@@ -10,7 +10,7 @@ import pykka
 from mopidy import core
 from mopidy.core import PlaybackState
 from mopidy.local import actor
-from mopidy.models import Track
+from mopidy.models import TlTrack, Track
 from mopidy.utils import deprecation
 
 from tests import dummy_audio, path_to_data_dir
@@ -841,22 +841,6 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.playback.seek(self.tracklist.tracks[-1].length * 100)
         self.assertEqual(self.playback.state, PlaybackState.STOPPED)
 
-    @unittest.SkipTest
-    @populate_tracklist
-    def test_seek_beyond_start_of_song(self):
-        # FIXME need to decide return value
-        self.playback.play()
-        result = self.playback.seek(-1000)
-        self.assert_(not result, 'Seek return value was %s' % result)
-
-    @populate_tracklist
-    def test_seek_beyond_start_of_song_update_postion(self):
-        self.playback.play()
-        self.playback.seek(-1000)
-        position = self.playback.time_position
-        self.assertGreaterEqual(position, 0)
-        self.assertEqual(self.playback.state, PlaybackState.PLAYING)
-
     @populate_tracklist
     def test_stop_when_stopped(self):
         self.playback.stop()
@@ -1088,4 +1072,4 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     @populate_tracklist
     def test_playing_track_that_isnt_in_playlist(self):
         with self.assertRaises(AssertionError):
-            self.playback.play((17, Track()))
+            self.playback.play(TlTrack(17, Track()))

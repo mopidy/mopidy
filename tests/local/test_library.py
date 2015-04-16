@@ -9,7 +9,7 @@ import mock
 
 import pykka
 
-from mopidy import core
+from mopidy import core, exceptions
 from mopidy.local import actor, json
 from mopidy.models import Album, Artist, Image, Track
 
@@ -137,8 +137,8 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertEqual(result[uri], self.tracks[0:1])
 
     def test_lookup_unknown_track(self):
-        tracks = self.library.lookup(uris=['fake uri'])
-        self.assertEqual(tracks, {'fake uri': []})
+        tracks = self.library.lookup(uris=['fake:/uri'])
+        self.assertEqual(tracks, {'fake:/uri': []})
 
     # test backward compatibility with local libraries returning a
     # single Track
@@ -343,42 +343,44 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.find_exact(any=['local:track:path1'])
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
+    # TODO: This is really just a test of the query validation code now,
+    # as this code path never even makes it to the local backend.
     def test_find_exact_wrong_type(self):
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.find_exact(wrong=['test'])
 
     def test_find_exact_with_empty_query(self):
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.find_exact(artist=[''])
 
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.find_exact(albumartist=[''])
 
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.find_exact(track_name=[''])
 
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.find_exact(composer=[''])
 
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.find_exact(performer=[''])
 
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.find_exact(album=[''])
 
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.find_exact(track_no=[''])
 
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.find_exact(genre=[''])
 
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.find_exact(date=[''])
 
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.find_exact(comment=[''])
 
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.find_exact(any=[''])
 
     def test_search_no_hits(self):
@@ -553,41 +555,41 @@ class LocalLibraryProviderTest(unittest.TestCase):
         self.assertEqual(list(result[0].tracks), self.tracks[:1])
 
     def test_search_wrong_type(self):
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.search(wrong=['test'])
 
     def test_search_with_empty_query(self):
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.search(artist=[''])
 
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.search(albumartist=[''])
 
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.search(composer=[''])
 
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.search(performer=[''])
 
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.search(track_name=[''])
 
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.search(album=[''])
 
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.search(genre=[''])
 
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.search(date=[''])
 
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.search(comment=[''])
 
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.search(uri=[''])
 
-        with self.assertRaises(LookupError):
+        with self.assertRaises(exceptions.ValidationError):
             self.search(any=[''])
 
     def test_default_get_images_impl_no_images(self):

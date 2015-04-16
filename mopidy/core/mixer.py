@@ -2,6 +2,8 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
+from mopidy.utils import validation
+
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +33,8 @@ class MixerController(object):
 
         Returns :class:`True` if call is successful, otherwise :class:`False`.
         """
+        validation.check_integer(volume, min=0, max=100)
+
         if self._mixer is None:
             return False
         else:
@@ -52,6 +56,7 @@ class MixerController(object):
 
         Returns :class:`True` if call is successful, otherwise :class:`False`.
         """
+        validation.check_boolean(mute)
         if self._mixer is None:
             return False
         else:

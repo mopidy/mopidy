@@ -5,8 +5,7 @@ import logging
 import operator
 import urlparse
 
-
-from mopidy.utils import deprecation
+from mopidy.utils import deprecation, validation
 
 
 logger = logging.getLogger(__name__)
@@ -70,6 +69,9 @@ class LibraryController(object):
         """
         if uri is None:
             return self._roots()
+        elif not uri.strip():
+            return []
+        validation.check_uri(uri)
         return self._browse(uri)
 
     def _roots(self):
@@ -111,6 +113,9 @@ class LibraryController(object):
 
         .. versionadded:: 1.0
         """
+        validation.check_choice(field, validation.DISTINCT_FIELDS)
+        query is None or validation.check_query(query)  # TODO: normalize?
+
         result = set()
         futures = {b: b.library.get_distinct(field, query)
                    for b in self.backends.with_library.values()}
@@ -137,6 +142,8 @@ class LibraryController(object):
 
         .. versionadded:: 1.0
         """
+        validation.check_uris(uris)
+
         futures = {
             backend: backend.library.get_images(backend_uris)
             for (backend, backend_uris)
@@ -187,6 +194,11 @@ class LibraryController(object):
         if none_set or both_set:
             raise ValueError("One of 'uri' or 'uris' must be set")
 
+        # TODO: validation.one_of(*args)?
+
+        uris is None or validation.check_uris(uris)
+        uri is None or validation.check_uri(uri)
+
         if uri:
             deprecation.warn('core.library.lookup:uri_arg')
 
@@ -219,6 +231,8 @@ class LibraryController(object):
         :param uri: directory or track URI
         :type uri: string
         """
+        uri is None or validation.check_uri(uri)
+
         futures = {}
         backends = {}
         uri_scheme = urlparse.urlparse(uri).scheme if uri else None
@@ -285,6 +299,10 @@ class LibraryController(object):
         """
         query = _normalize_query(query or kwargs)
 
+        uris is None or validation.check_uris(uris)
+        query is None or validation.check_query(query)
+        validation.check_boolean(exact)
+
         if kwargs:
             deprecation.warn('core.library.search:kwargs_query')
 
@@ -319,6 +337,7 @@ class LibraryController(object):
 
 def _normalize_query(query):
     broken_client = False
+    # TODO: this breaks if query is not a dictionary like object...
     for (field, values) in query.items():
         if isinstance(values, basestring):
             broken_client = True

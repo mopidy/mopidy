@@ -5,7 +5,7 @@ import urlparse
 
 from mopidy.core import listener
 from mopidy.models import Playlist
-from mopidy.utils import deprecation
+from mopidy.utils import deprecation, validation
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +62,8 @@ class PlaylistsController(object):
 
         .. versionadded:: 1.0
         """
+        validation.check_uri(uri)
+
         uri_scheme = urlparse.urlparse(uri).scheme
         backend = self.backends.with_playlists.get(uri_scheme, None)
         if backend:
@@ -139,6 +141,8 @@ class PlaylistsController(object):
         :param uri: URI of the playlist to delete
         :type uri: string
         """
+        validation.check_uri(uri)
+
         uri_scheme = urlparse.urlparse(uri).scheme
         backend = self.backends.with_playlists.get(uri_scheme, None)
         if backend:
@@ -172,6 +176,10 @@ class PlaylistsController(object):
         deprecation.warn('core.playlists.filter')
 
         criteria = criteria or kwargs
+        validation.check_query(
+            criteria, validation.PLAYLIST_FIELDS, list_values=False)
+
+        # TODO: stop using self playlists
         matches = self.playlists
         for (key, value) in criteria.iteritems():
             matches = filter(lambda p: getattr(p, key) == value, matches)
@@ -207,6 +215,8 @@ class PlaylistsController(object):
         :param uri_scheme: limit to the backend matching the URI scheme
         :type uri_scheme: string
         """
+        # TODO: check: uri_scheme is None or uri_scheme?
+
         futures = {}
         backends = {}
         playlists_loaded = False
@@ -251,8 +261,11 @@ class PlaylistsController(object):
         :type playlist: :class:`mopidy.models.Playlist`
         :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
+        validation.check_instance(playlist, Playlist)
+
         if playlist.uri is None:
-            return
+            return  # TODO: log this problem?
+
         uri_scheme = urlparse.urlparse(playlist.uri).scheme
         backend = self.backends.with_playlists.get(uri_scheme, None)
         if backend:

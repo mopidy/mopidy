@@ -1,13 +1,11 @@
 from __future__ import absolute_import, unicode_literals
 
-import collections
 import logging
 import random
 
-from mopidy import compat
 from mopidy.core import listener
-from mopidy.models import TlTrack
-from mopidy.utils import deprecation
+from mopidy.models import TlTrack, Track
+from mopidy.utils import deprecation, validation
 
 logger = logging.getLogger(__name__)
 
@@ -93,6 +91,7 @@ class TracklistController(object):
         :class:`False`
             Tracks are not removed from the tracklist.
         """
+        validation.check_boolean(value)
         if self.get_consume() != value:
             self._trigger_options_changed()
         return setattr(self, '_consume', value)
@@ -121,7 +120,7 @@ class TracklistController(object):
         :class:`False`
             Tracks are played in the order of the tracklist.
         """
-
+        validation.check_boolean(value)
         if self.get_random() != value:
             self._trigger_options_changed()
         if value:
@@ -157,7 +156,7 @@ class TracklistController(object):
         :class:`False`
             The tracklist is played once.
         """
-
+        validation.check_boolean(value)
         if self.get_repeat() != value:
             self._trigger_options_changed()
         return setattr(self, '_repeat', value)
@@ -188,6 +187,7 @@ class TracklistController(object):
         :class:`False`
             Playback continues after current song.
         """
+        validation.check_boolean(value)
         if self.get_single() != value:
             self._trigger_options_changed()
         return setattr(self, '_single', value)
@@ -205,9 +205,10 @@ class TracklistController(object):
         The position of the given track in the tracklist.
 
         :param tl_track: the track to find the index of
-        :type tl_track: :class:`mopidy.models.TlTrack`
+        :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :rtype: :class:`int` or :class:`None`
         """
+        tl_track is None or validation.check_instance(tl_track, TlTrack)
         try:
             return self._tl_tracks.index(tl_track)
         except ValueError:
@@ -223,6 +224,7 @@ class TracklistController(object):
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
+        tl_track is None or validation.check_instance(tl_track, TlTrack)
         if self.get_single() and self.get_repeat():
             return tl_track
         elif self.get_single():
@@ -247,6 +249,7 @@ class TracklistController(object):
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
+        tl_track is None or validation.check_instance(tl_track, TlTrack)
 
         if not self.get_tl_tracks():
             return None
@@ -288,6 +291,8 @@ class TracklistController(object):
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
+        tl_track is None or validation.check_instance(tl_track, TlTrack)
+
         if self.get_repeat() or self.get_consume() or self.get_random():
             return tl_track
 
@@ -330,8 +335,13 @@ class TracklistController(object):
         """
         assert tracks is not None or uri is not None or uris is not None, \
             'tracks, uri or uris must be provided'
+        # TODO: check that only one of tracks uri and uris is set...
+        # TODO: can at_position be negative?
 
-        # TODO: assert that tracks are track instances
+        tracks is None or validation.check_instances(tracks, Track)
+        uri is None or validation.check_uri(uri)
+        uris is None or validation.check_uris(uris)
+        validation.check_integer(at_position or 0)
 
         if tracks:
             deprecation.warn('core.tracklist.add:tracks_arg')
@@ -412,17 +422,18 @@ class TracklistController(object):
         :rtype: list of :class:`mopidy.models.TlTrack`
         """
         criteria = criteria or kwargs
+        tlids = criteria.pop('tlid', [])
+        validation.check_query(criteria, validation.TRACKLIST_FIELDS)
+        validation.check_instances(tlids, int)
+        # TODO: deprecate kwargs
+        # TODO: id=[1, 2, 3] filtering can't possibly be working
+
         matches = self._tl_tracks
         for (key, values) in criteria.items():
-            if (not isinstance(values, collections.Iterable) or
-                    isinstance(values, compat.string_types)):
-                # Fail hard if anyone is using the <0.17 calling style
-                raise ValueError('Filter values must be iterable: %r' % values)
-            if key == 'tlid':
-                matches = [ct for ct in matches if ct.tlid in values]
-            else:
-                matches = [
-                    ct for ct in matches if getattr(ct.track, key) in values]
+            matches = [
+                ct for ct in matches if getattr(ct.track, key) in values]
+        if tlids:
+            matches = [ct for ct in matches if ct.tlid in tlids]
         return matches
 
     def move(self, start, end, to_position):
@@ -443,6 +454,7 @@ class TracklistController(object):
 
         tl_tracks = self._tl_tracks
 
+        # TODO: use validation helpers?
         assert start < end, 'start must be smaller than end'
         assert start >= 0, 'start must be at least zero'
         assert end <= len(tl_tracks), \
@@ -470,6 +482,7 @@ class TracklistController(object):
         :type criteria: dict
         :rtype: list of :class:`mopidy.models.TlTrack` that was removed
         """
+        # TODO: deprecate kwargs
         tl_tracks = self.filter(criteria, **kwargs)
         for tl_track in tl_tracks:
             position = self._tl_tracks.index(tl_track)
@@ -491,6 +504,7 @@ class TracklistController(object):
         """
         tl_tracks = self._tl_tracks
 
+        # TOOD: use validation helpers?
         if start is not None and end is not None:
             assert start < end, 'start must be smaller than end'
 
@@ -519,6 +533,7 @@ class TracklistController(object):
         :type end: int
         :rtype: :class:`mopidy.models.TlTrack`
         """
+        # TODO: validate slice?
         return self._tl_tracks[start:end]
 
     def _mark_playing(self, tl_track):
