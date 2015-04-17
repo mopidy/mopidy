@@ -200,19 +200,32 @@ class TracklistController(object):
 
     # Methods
 
-    def index(self, tl_track):
+    def index(self, tl_track=None, tlid=None):
         """
         The position of the given track in the tracklist.
 
         :param tl_track: the track to find the index of
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
+        :param tlid: of the track to find the index of
+        :type tlid: TLID number or :class:`None`
         :rtype: :class:`int` or :class:`None`
+
+        .. versionchanged:: 1.1
+            Added the *tlid* parameter
         """
         tl_track is None or validation.check_instance(tl_track, TlTrack)
-        try:
-            return self._tl_tracks.index(tl_track)
-        except ValueError:
-            return None
+        tlid is None or validation.check_integer(tlid, min=0)
+
+        if tl_track is not None:
+            try:
+                return self._tl_tracks.index(tl_track)
+            except ValueError:
+                pass
+        elif tlid is not None:
+            for i, tl_track in enumerate(self._tl_tracks):
+                if tl_track.tlid == tlid:
+                    return i
+        return None
 
     def eot_track(self, tl_track):
         """

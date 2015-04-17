@@ -5,7 +5,7 @@ import unittest
 import mock
 
 from mopidy import backend, core
-from mopidy.models import Track
+from mopidy.models import TlTrack, Track
 from mopidy.utils import deprecation
 
 
@@ -102,3 +102,55 @@ class TracklistTest(unittest.TestCase):
             self.core.tracklist.filter({'uri': 'a'})
 
     # TODO Extract tracklist tests from the local backend tests
+
+
+class TracklistIndexTest(unittest.TestCase):
+
+    def setUp(self):  # noqa: N802
+        self.tracks = [
+            Track(uri='dummy1:a', name='foo'),
+            Track(uri='dummy1:b', name='foo'),
+            Track(uri='dummy1:c', name='bar'),
+        ]
+
+        def lookup(uris):
+            return {u: [t for t in self.tracks if t.uri == u] for u in uris}
+
+        self.core = core.Core(mixer=None, backends=[])
+        self.core.library.lookup = mock.Mock()
+        self.core.library.lookup.side_effect = lookup
+
+        self.tl_tracks = self.core.tracklist.add(uris=[
+            t.uri for t in self.tracks])
+
+    def test_index_returns_index_of_track(self):
+        self.assertEqual(0, self.core.tracklist.index(self.tl_tracks[0]))
+        self.assertEqual(1, self.core.tracklist.index(self.tl_tracks[1]))
+        self.assertEqual(2, self.core.tracklist.index(self.tl_tracks[2]))
+
+    def test_index_returns_none_if_item_not_found(self):
+        tl_track = TlTrack(0, Track())
+        self.assertEqual(self.core.tracklist.index(tl_track), None)
+
+    def test_index_returns_none_if_called_with_none(self):
+        self.assertEqual(self.core.tracklist.index(None), None)
+
+    def test_index_errors_out_for_invalid_tltrack(self):
+        with self.assertRaises(ValueError):
+            self.core.tracklist.index('abc')
+
+    def test_index_return_index_when_called_with_tlids(self):
+        tl_tracks = self.tl_tracks
+        self.assertEqual(0, self.core.tracklist.index(tlid=tl_tracks[0].tlid))
+        self.assertEqual(1, self.core.tracklist.index(tlid=tl_tracks[1].tlid))
+        self.assertEqual(2, self.core.tracklist.index(tlid=tl_tracks[2].tlid))
+
+    def test_index_returns_none_if_tlid_not_found(self):
+        self.assertEqual(self.core.tracklist.index(tlid=123), None)
+
+    def test_index_returns_none_if_called_with_tlid_none(self):
+        self.assertEqual(self.core.tracklist.index(tlid=None), None)
+
+    def test_index_errors_out_for_invalid_tlid(self):
+        with self.assertRaises(ValueError):
+            self.core.tracklist.index(tlid=-1)
