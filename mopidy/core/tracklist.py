@@ -264,13 +264,13 @@ class TracklistController(object):
         """
         tl_track is None or validation.check_instance(tl_track, TlTrack)
 
-        if not self.get_tl_tracks():
+        if not self._tl_tracks:
             return None
 
         if self.get_random() and not self._shuffled:
             if self.get_repeat() or not tl_track:
                 logger.debug('Shuffling tracks')
-                self._shuffled = self.get_tl_tracks()
+                self._shuffled = self._tl_tracks[:]
                 random.shuffle(self._shuffled)
 
         if self.get_random():
@@ -280,14 +280,14 @@ class TracklistController(object):
                 return None
 
         if tl_track is None:
-            return self.get_tl_tracks()[0]
+            return self._tl_tracks[0]
 
         next_index = self.index(tl_track) + 1
         if self.get_repeat():
-            next_index %= len(self.get_tl_tracks())
+            next_index %= len(self._tl_tracks)
 
         try:
-            return self.get_tl_tracks()[next_index]
+            return self._tl_tracks[next_index]
         except IndexError:
             return None
 
@@ -314,7 +314,9 @@ class TracklistController(object):
         if position in (None, 0):
             return None
 
-        return self.get_tl_tracks()[position - 1]
+        # Note that since we know we are at position 1-n we know this will
+        # never be out bounds for the tl_tracks list.
+        return self._tl_tracks[position - 1]
 
     def add(self, tracks=None, at_position=None, uri=None, uris=None):
         """
@@ -567,7 +569,7 @@ class TracklistController(object):
 
     def _trigger_tracklist_changed(self):
         if self.get_random():
-            self._shuffled = self.get_tl_tracks()
+            self._shuffled = self._tl_tracks[:]
             random.shuffle(self._shuffled)
         else:
             self._shuffled = []
