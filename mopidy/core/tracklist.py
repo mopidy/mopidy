@@ -274,22 +274,21 @@ class TracklistController(object):
                 random.shuffle(self._shuffled)
 
         if self.get_random():
-            try:
+            if self._shuffled:
                 return self._shuffled[0]
-            except IndexError:
-                return None
+            return None
 
         if tl_track is None:
-            return self._tl_tracks[0]
+            next_index = 0
+        else:
+            next_index = self.index(tl_track) + 1
 
-        next_index = self.index(tl_track) + 1
         if self.get_repeat():
             next_index %= len(self._tl_tracks)
-
-        try:
-            return self._tl_tracks[next_index]
-        except IndexError:
+        elif next_index >= len(self._tl_tracks):
             return None
+
+        return self._tl_tracks[next_index]
 
     def previous_track(self, tl_track):
         """
