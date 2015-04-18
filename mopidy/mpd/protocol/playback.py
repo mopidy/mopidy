@@ -183,18 +183,21 @@ def play(context, songpos=None):
 
 
 def _play_minus_one(context):
-    if (context.core.playback.state.get() == PlaybackState.PLAYING):
+    playback_state = context.core.playback.get_state().get()
+    if playback_state == PlaybackState.PLAYING:
         return  # Nothing to do
-    elif (context.core.playback.state.get() == PlaybackState.PAUSED):
+    elif playback_state == PlaybackState.PAUSED:
         return context.core.playback.resume().get()
-    elif context.core.playback.current_tl_track.get() is not None:
-        tl_track = context.core.playback.current_tl_track.get()
-        return context.core.playback.play(tl_track).get()
-    elif context.core.tracklist.slice(0, 1).get():
-        tl_track = context.core.tracklist.slice(0, 1).get()[0]
-        return context.core.playback.play(tl_track).get()
-    else:
-        return  # Fail silently
+
+    current_tl_track = context.core.playback.get_current_tl_track().get()
+    if current_tl_track is not None:
+        return context.core.playback.play(current_tl_track).get()
+
+    tl_tracks = context.core.tracklist.slice(0, 1).get()
+    if tl_tracks:
+        return context.core.playback.play(tl_tracks[0]).get()
+
+    return  # Fail silently
 
 
 @protocol.commands.add('playid', tlid=protocol.INT)
