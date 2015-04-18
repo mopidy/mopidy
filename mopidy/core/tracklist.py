@@ -204,6 +204,9 @@ class TracklistController(object):
         """
         The position of the given track in the tracklist.
 
+        If neither *tl_track* or *tlid* is given we return the index of
+        the currently playing track.
+
         :param tl_track: the track to find the index of
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :param tlid: of the track to find the index of
@@ -215,6 +218,9 @@ class TracklistController(object):
         """
         tl_track is None or validation.check_instance(tl_track, TlTrack)
         tlid is None or validation.check_integer(tlid, min=0)
+
+        if tl_track is None and tlid is None:
+            tl_track = self.core.playback.get_current_tl_track()
 
         if tl_track is not None:
             try:

@@ -117,8 +117,10 @@ class TracklistIndexTest(unittest.TestCase):
             return {u: [t for t in self.tracks if t.uri == u] for u in uris}
 
         self.core = core.Core(mixer=None, backends=[])
-        self.core.library.lookup = mock.Mock()
+        self.core.library = mock.Mock(spec=core.LibraryController)
         self.core.library.lookup.side_effect = lookup
+
+        self.core.playback = mock.Mock(spec=core.PlaybackController)
 
         self.tl_tracks = self.core.tracklist.add(uris=[
             t.uri for t in self.tracks])
@@ -154,3 +156,12 @@ class TracklistIndexTest(unittest.TestCase):
     def test_index_errors_out_for_invalid_tlid(self):
         with self.assertRaises(ValueError):
             self.core.tracklist.index(tlid=-1)
+
+    def test_index_without_args_returns_current_tl_track_index(self):
+        self.core.playback.get_current_tl_track.side_effect = [
+            None, self.tl_tracks[0], self.tl_tracks[1], self.tl_tracks[2]]
+
+        self.assertEqual(None, self.core.tracklist.index())
+        self.assertEqual(0, self.core.tracklist.index())
+        self.assertEqual(1, self.core.tracklist.index())
+        self.assertEqual(2, self.core.tracklist.index())
