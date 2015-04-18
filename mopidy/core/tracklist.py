@@ -227,6 +227,20 @@ class TracklistController(object):
                     return i
         return None
 
+    def get_eot_tlid(self):
+        """
+        The TLID of the track that will be played after the given track.
+
+        Not necessarily the same track as :meth:`get_next_tlid`.
+
+        :rtype: TLID or :class:`None`
+
+        .. versionadded:: 1.1
+        """
+
+        current_tl_track = self.core.playback.get_current_tl_track()
+        return getattr(self.eot_track(current_tl_track), 'tlid', None)
+
     def eot_track(self, tl_track):
         """
         The track that will be played after the given track.
@@ -247,6 +261,23 @@ class TracklistController(object):
         # handle "single", with that out of the way the rest of the logic is
         # shared.
         return self.next_track(tl_track)
+
+    def get_next_tlid(self):
+        """
+        The tlid of the track that will be played if calling
+        :meth:`mopidy.core.PlaybackController.next()`.
+
+        For normal playback this is the next track in the tracklist. If repeat
+        is enabled the next track can loop around the tracklist. When random is
+        enabled this should be a random track, all tracks should be played once
+        before the tracklist repeats.
+
+        :rtype: TLID or :class:`None`
+
+        .. versionadded:: 1.1
+        """
+        current_tl_track = self.core.playback.get_current_tl_track()
+        return getattr(self.next_track(current_tl_track), 'tlid', None)
 
     def next_track(self, tl_track):
         """
@@ -289,6 +320,22 @@ class TracklistController(object):
             return None
 
         return self._tl_tracks[next_index]
+
+    def get_previous_tlid(self):
+        """
+        Returns the TLID of the  track that will be played if calling
+        :meth:`mopidy.core.PlaybackController.previous()`.
+
+        For normal playback this is the previous track in the tracklist. If
+        random and/or consume is enabled it should return the current track
+        instead.
+
+        :rtype: TLID or :class:`None`
+
+        .. versionadded:: 1.1
+        """
+        current_tl_track = self.core.playback.get_current_tl_track()
+        return getattr(self.previous_track(current_tl_track), 'tlid', None)
 
     def previous_track(self, tl_track):
         """
