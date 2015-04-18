@@ -172,20 +172,20 @@ def status(context):
         - ``elapsed``: Higher resolution means time in seconds with three
           decimal places for millisecond precision.
     """
+    tl_track = context.core.playback.get_current_tl_track()
+
     futures = {
-        'tracklist.length': context.core.tracklist.length,
-        'tracklist.version': context.core.tracklist.version,
+        'tracklist.length': context.core.tracklist.get_length(),
+        'tracklist.version': context.core.tracklist.get_version(),
         'mixer.volume': context.core.mixer.get_volume(),
-        'tracklist.consume': context.core.tracklist.consume,
-        'tracklist.random': context.core.tracklist.random,
-        'tracklist.repeat': context.core.tracklist.repeat,
-        'tracklist.single': context.core.tracklist.single,
-        'playback.state': context.core.playback.state,
-        'playback.current_tl_track': context.core.playback.current_tl_track,
-        'tracklist.index': (
-            context.core.tracklist.index(
-                context.core.playback.current_tl_track.get())),
-        'playback.time_position': context.core.playback.time_position,
+        'tracklist.consume': context.core.tracklist.get_consume(),
+        'tracklist.random': context.core.tracklist.get_random(),
+        'tracklist.repeat': context.core.tracklist.get_repeat(),
+        'tracklist.single': context.core.tracklist.get_single(),
+        'playback.state': context.core.playback.get_state(),
+        'playback.current_tl_track': tl_track,
+        'tracklist.index': context.core.tracklist.index(tl_track.get()),
+        'playback.time_position': context.core.playback.get_time_position(),
     }
     pykka.get_all(futures.values())
     result = [
@@ -199,6 +199,7 @@ def status(context):
         ('xfade', _status_xfade(futures)),
         ('state', _status_state(futures)),
     ]
+    # TODO: add nextsong and nextsongid
     if futures['playback.current_tl_track'].get() is not None:
         result.append(('song', _status_songpos(futures)))
         result.append(('songid', _status_songid(futures)))

@@ -16,7 +16,7 @@ def consume(context, state):
         1. When consume is activated, each song played is removed from
         playlist.
     """
-    context.core.tracklist.consume = state
+    context.core.tracklist.set_consume(state)
 
 
 @protocol.commands.add('crossfade', seconds=protocol.UINT)
@@ -279,7 +279,7 @@ def random(context, state):
 
         Sets random state to ``STATE``, ``STATE`` should be 0 or 1.
     """
-    context.core.tracklist.random = state
+    context.core.tracklist.set_random(state)
 
 
 @protocol.commands.add('repeat', state=protocol.BOOL)
@@ -291,7 +291,7 @@ def repeat(context, state):
 
         Sets repeat state to ``STATE``, ``STATE`` should be 0 or 1.
     """
-    context.core.tracklist.repeat = state
+    context.core.tracklist.set_repeat(state)
 
 
 @protocol.commands.add('replay_gain_mode')
@@ -409,7 +409,7 @@ def single(context, state):
         single is activated, playback is stopped after current song, or
         song is repeated if the ``repeat`` mode is enabled.
     """
-    context.core.tracklist.single = state
+    context.core.tracklist.set_single(state)
 
 
 @protocol.commands.add('stop')
