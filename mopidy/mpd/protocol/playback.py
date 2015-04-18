@@ -145,8 +145,8 @@ def pause(context, state=None):
         context.core.playback.resume()
 
 
-@protocol.commands.add('play', tlid=protocol.INT)
-def play(context, tlid=None):
+@protocol.commands.add('play', songpos=protocol.INT)
+def play(context, songpos=None):
     """
     *musicpd.org, playback section:*
 
@@ -170,13 +170,13 @@ def play(context, tlid=None):
 
     - issues ``play 6`` without quotes around the argument.
     """
-    if tlid is None:
+    if songpos is None:
         return context.core.playback.play().get()
-    elif tlid == -1:
+    elif songpos == -1:
         return _play_minus_one(context)
 
     try:
-        tl_track = context.core.tracklist.slice(tlid, tlid + 1).get()[0]
+        tl_track = context.core.tracklist.slice(songpos, songpos + 1).get()[0]
         return context.core.playback.play(tl_track).get()
     except IndexError:
         raise exceptions.MpdArgError('Bad song index')
@@ -324,8 +324,8 @@ def replay_gain_status(context):
     return 'off'  # TODO
 
 
-@protocol.commands.add('seek', tlid=protocol.UINT, seconds=protocol.UINT)
-def seek(context, tlid, seconds):
+@protocol.commands.add('seek', songpos=protocol.UINT, seconds=protocol.UINT)
+def seek(context, songpos, seconds):
     """
     *musicpd.org, playback section:*
 
@@ -339,8 +339,8 @@ def seek(context, tlid, seconds):
     - issues ``seek 1 120`` without quotes around the arguments.
     """
     tl_track = context.core.playback.current_tl_track.get()
-    if context.core.tracklist.index(tl_track).get() != tlid:
-        play(context, tlid)
+    if context.core.tracklist.index(tl_track).get() != songpos:
+        play(context, songpos)
     context.core.playback.seek(seconds * 1000).get()
 
 

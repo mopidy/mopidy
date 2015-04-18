@@ -8,7 +8,7 @@ def disableoutput(context, outputid):
     """
     *musicpd.org, audio output section:*
 
-        ``disableoutput``
+        ``disableoutput {ID}``
 
         Turns an output off.
     """
@@ -25,7 +25,7 @@ def enableoutput(context, outputid):
     """
     *musicpd.org, audio output section:*
 
-        ``enableoutput``
+        ``enableoutput {ID}``
 
         Turns an output on.
     """

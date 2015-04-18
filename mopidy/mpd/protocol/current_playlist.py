@@ -73,8 +73,8 @@ def addid(context, uri, songpos=None):
     return ('Id', tl_tracks[0].tlid)
 
 
-@protocol.commands.add('delete', position=protocol.RANGE)
-def delete(context, position):
+@protocol.commands.add('delete', songrange=protocol.RANGE)
+def delete(context, songrange):
     """
     *musicpd.org, current playlist section:*
 
@@ -82,8 +82,8 @@ def delete(context, position):
 
         Deletes a song from the playlist.
     """
-    start = position.start
-    end = position.stop
+    start = songrange.start
+    end = songrange.stop
     if end is None:
         end = context.core.tracklist.length.get()
     tl_tracks = context.core.tracklist.slice(start, end).get()
@@ -119,8 +119,8 @@ def clear(context):
     context.core.tracklist.clear()
 
 
-@protocol.commands.add('move', position=protocol.RANGE, to=protocol.UINT)
-def move_range(context, position, to):
+@protocol.commands.add('move', songrange=protocol.RANGE, to=protocol.UINT)
+def move_range(context, songrange, to):
     """
     *musicpd.org, current playlist section:*
 
@@ -129,8 +129,8 @@ def move_range(context, position, to):
         Moves the song at ``FROM`` or range of songs at ``START:END`` to
         ``TO`` in the playlist.
     """
-    start = position.start
-    end = position.stop
+    start = songrange.start
+    end = songrange.stop
     if end is None:
         end = context.core.tracklist.length.get()
     context.core.tracklist.move(start, end, to)
@@ -320,8 +320,8 @@ def plchangesposid(context, version):
         return result
 
 
-@protocol.commands.add('shuffle', position=protocol.RANGE)
-def shuffle(context, position=None):
+@protocol.commands.add('shuffle', songrange=protocol.RANGE)
+def shuffle(context, songrange=None):
     """
     *musicpd.org, current playlist section:*
 
@@ -330,10 +330,10 @@ def shuffle(context, position=None):
         Shuffles the current playlist. ``START:END`` is optional and
         specifies a range of songs.
     """
-    if position is None:
+    if songrange is None:
         start, end = None, None
     else:
-        start, end = position.start, position.stop
+        start, end = songrange.start, songrange.stop
     context.core.tracklist.shuffle(start, end)
 
 
