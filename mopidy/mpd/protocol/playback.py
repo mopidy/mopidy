@@ -135,9 +135,10 @@ def pause(context, state=None):
     if state is None:
         deprecation.warn('mpd.protocol.playback.pause:state_arg')
 
-        if (context.core.playback.state.get() == PlaybackState.PLAYING):
+        playback_state = context.core.playback.get_state().get()
+        if (playback_state == PlaybackState.PLAYING):
             context.core.playback.pause()
-        elif (context.core.playback.state.get() == PlaybackState.PAUSED):
+        elif (playback_state == PlaybackState.PAUSED):
             context.core.playback.resume()
     elif state:
         context.core.playback.pause()
@@ -341,7 +342,7 @@ def seek(context, songpos, seconds):
 
     - issues ``seek 1 120`` without quotes around the arguments.
     """
-    tl_track = context.core.playback.current_tl_track.get()
+    tl_track = context.core.playback.get_current_tl_track().get()
     if context.core.tracklist.index(tl_track).get() != songpos:
         play(context, songpos)
     context.core.playback.seek(seconds * 1000).get()
@@ -356,7 +357,7 @@ def seekid(context, tlid, seconds):
 
         Seeks to the position ``TIME`` (in seconds) of song ``SONGID``.
     """
-    tl_track = context.core.playback.current_tl_track.get()
+    tl_track = context.core.playback.get_current_tl_track().get()
     if not tl_track or tl_track.tlid != tlid:
         playid(context, tlid)
     context.core.playback.seek(seconds * 1000).get()
@@ -373,7 +374,7 @@ def seekcur(context, time):
         '+' or '-', then the time is relative to the current playing position.
     """
     if time.startswith(('+', '-')):
-        position = context.core.playback.time_position.get()
+        position = context.core.playback.get_time_position().get()
         position += protocol.INT(time) * 1000
         context.core.playback.seek(position).get()
     else:

@@ -107,4 +107,4 @@ def urlhandlers(context):
     """
     return [
         ('handler', uri_scheme)
-        for uri_scheme in context.core.uri_schemes.get()]
+        for uri_scheme in context.core.get_uri_schemes().get()]

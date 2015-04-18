@@ -34,7 +34,7 @@ def currentsong(context):
         Displays the song info of the current song (same song that is
         identified in status).
     """
-    tl_track = context.core.playback.current_tl_track.get()
+    tl_track = context.core.playback.get_current_tl_track().get()
     stream_title = context.core.playback.get_stream_title().get()
     if tl_track is not None:
         position = context.core.tracklist.index(tl_track).get()
