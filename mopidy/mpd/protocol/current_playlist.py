@@ -64,17 +64,21 @@ def addid(context, uri, songpos=None):
     """
     if not uri:
         raise exceptions.MpdNoExistError('No such song')
-    if songpos is not None and songpos > context.core.tracklist.length.get():
+
+    length = context.core.tracklist.get_length()
+    if songpos is not None and songpos > length.get():
         raise exceptions.MpdArgError('Bad song index')
+
     tl_tracks = context.core.tracklist.add(
         uris=[uri], at_position=songpos).get()
+
     if not tl_tracks:
         raise exceptions.MpdNoExistError('No such song')
     return ('Id', tl_tracks[0].tlid)
 
 
-@protocol.commands.add('delete', position=protocol.RANGE)
-def delete(context, position):
+@protocol.commands.add('delete', songrange=protocol.RANGE)
+def delete(context, songrange):
     """
     *musicpd.org, current playlist section:*
 
@@ -82,10 +86,10 @@ def delete(context, position):
 
         Deletes a song from the playlist.
     """
-    start = position.start
-    end = position.stop
+    start = songrange.start
+    end = songrange.stop
     if end is None:
-        end = context.core.tracklist.length.get()
+        end = context.core.tracklist.get_length().get()
     tl_tracks = context.core.tracklist.slice(start, end).get()
     if not tl_tracks:
         raise exceptions.MpdArgError('Bad song index', command='delete')
@@ -119,8 +123,8 @@ def clear(context):
     context.core.tracklist.clear()
 
 
-@protocol.commands.add('move', position=protocol.RANGE, to=protocol.UINT)
-def move_range(context, position, to):
+@protocol.commands.add('move', songrange=protocol.RANGE, to=protocol.UINT)
+def move_range(context, songrange, to):
     """
     *musicpd.org, current playlist section:*
 
@@ -129,10 +133,10 @@ def move_range(context, position, to):
         Moves the song at ``FROM`` or range of songs at ``START:END`` to
         ``TO`` in the playlist.
     """
-    start = position.start
-    end = position.stop
+    start = songrange.start
+    end = songrange.stop
     if end is None:
-        end = context.core.tracklist.length.get()
+        end = context.core.tracklist.get_length().get()
     context.core.tracklist.move(start, end, to)
 
 
@@ -211,7 +215,7 @@ def playlistid(context, tlid=None):
         return translator.track_to_mpd_format(tl_tracks[0], position=position)
     else:
         return translator.tracks_to_mpd_format(
-            context.core.tracklist.tl_tracks.get())
+            context.core.tracklist.get_tl_tracks().get())
 
 
 @protocol.commands.add('playlistinfo')
@@ -236,7 +240,7 @@ def playlistinfo(context, parameter=None):
         tracklist_slice = protocol.RANGE(parameter)
         start, end = tracklist_slice.start, tracklist_slice.stop
 
-    tl_tracks = context.core.tracklist.tl_tracks.get()
+    tl_tracks = context.core.tracklist.get_tl_tracks().get()
     if start and start > len(tl_tracks):
         raise exceptions.MpdArgError('Bad song index')
     if end and end > len(tl_tracks):
@@ -279,10 +283,10 @@ def plchanges(context, version):
     - Calls ``plchanges "-1"`` two times per second to get the entire playlist.
     """
     # XXX Naive implementation that returns all tracks as changed
-    tracklist_version = context.core.tracklist.version.get()
+    tracklist_version = context.core.tracklist.get_version().get()
     if version < tracklist_version:
         return translator.tracks_to_mpd_format(
-            context.core.tracklist.tl_tracks.get())
+            context.core.tracklist.get_tl_tracks().get())
     elif version == tracklist_version:
         # A version match could indicate this is just a metadata update, so
         # check for a stream ref and let the client know about the change.
@@ -290,7 +294,7 @@ def plchanges(context, version):
         if stream_title is None:
             return None
 
-        tl_track = context.core.playback.current_tl_track.get()
+        tl_track = context.core.playback.get_current_tl_track().get()
         position = context.core.tracklist.index(tl_track).get()
         return translator.track_to_mpd_format(
             tl_track, position=position, stream_title=stream_title)
@@ -311,17 +315,17 @@ def plchangesposid(context, version):
         ``playlistlength`` returned by status command.
     """
     # XXX Naive implementation that returns all tracks as changed
-    if int(version) != context.core.tracklist.version.get():
+    if int(version) != context.core.tracklist.get_version().get():
         result = []
         for (position, (tlid, _)) in enumerate(
-                context.core.tracklist.tl_tracks.get()):
+                context.core.tracklist.get_tl_tracks().get()):
             result.append(('cpos', position))
             result.append(('Id', tlid))
         return result
 
 
-@protocol.commands.add('shuffle', position=protocol.RANGE)
-def shuffle(context, position=None):
+@protocol.commands.add('shuffle', songrange=protocol.RANGE)
+def shuffle(context, songrange=None):
     """
     *musicpd.org, current playlist section:*
 
@@ -330,10 +334,10 @@ def shuffle(context, position=None):
         Shuffles the current playlist. ``START:END`` is optional and
         specifies a range of songs.
     """
-    if position is None:
+    if songrange is None:
         start, end = None, None
     else:
-        start, end = position.start, position.stop
+        start, end = songrange.start, songrange.stop
     context.core.tracklist.shuffle(start, end)
 
 
@@ -346,7 +350,7 @@ def swap(context, songpos1, songpos2):
 
         Swaps the positions of ``SONG1`` and ``SONG2``.
     """
-    tracks = context.core.tracklist.tracks.get()
+    tracks = context.core.tracklist.get_tracks().get()
     song1 = tracks[songpos1]
     song2 = tracks[songpos2]
     del tracks[songpos1]
