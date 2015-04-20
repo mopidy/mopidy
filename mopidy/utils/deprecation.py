@@ -46,11 +46,13 @@ _MESSAGES = {
         'tracklist.remove() with "kwargs" as criteria is deprecated',
 
     'core.tracklist.eot_track':
-        'tracklist.eot_track() is deprecated, use tracklist.get_eot_tlid()',
+        'tracklist.eot_track() is pending deprecation, use '
+        'tracklist.get_eot_tlid()',
     'core.tracklist.next_track':
-        'tracklist.next_track() is deprecated, use tracklist.get_next_tlid()',
+        'tracklist.next_track() is pending deprecation, use '
+        'tracklist.get_next_tlid()',
     'core.tracklist.previous_track':
-        'tracklist.previous_track() is deprecated, use '
+        'tracklist.previous_track() is pending deprecation, use '
         'tracklist.get_previous_tlid()',
 
     'models.immutable.copy':

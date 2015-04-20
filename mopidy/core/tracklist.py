@@ -209,8 +209,8 @@ class TracklistController(object):
 
         :param tl_track: the track to find the index of
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
-        :param tlid: of the track to find the index of
-        :type tlid: TLID number or :class:`None`
+        :param tlid: TLID of the track to find the index of
+        :type tlid: :class:`int` or :class:`None`
         :rtype: :class:`int` or :class:`None`
 
         .. versionchanged:: 1.1
@@ -237,9 +237,9 @@ class TracklistController(object):
         """
         The TLID of the track that will be played after the given track.
 
-        Not necessarily the same track as :meth:`get_next_tlid`.
+        Not necessarily the same TLID as returned by :meth:`get_next_tlid`.
 
-        :rtype: TLID or :class:`None`
+        :rtype: :class:`int` or :class:`None`
 
         .. versionadded:: 1.1
         """
@@ -279,7 +279,7 @@ class TracklistController(object):
         enabled this should be a random track, all tracks should be played once
         before the tracklist repeats.
 
-        :rtype: TLID or :class:`None`
+        :rtype: :class:`int` or :class:`None`
 
         .. versionadded:: 1.1
         """
@@ -338,7 +338,7 @@ class TracklistController(object):
         random and/or consume is enabled it should return the current track
         instead.
 
-        :rtype: TLID or :class:`None`
+        :rtype: :class:`int` or :class:`None`
 
         .. versionadded:: 1.1
         """
@@ -369,8 +369,8 @@ class TracklistController(object):
         if position in (None, 0):
             return None
 
-        # Note that since we know we are at position 1-n we know this will
-        # never be out bounds for the tl_tracks list.
+        # Since we know we are not at zero we have to be somewhere in the range
+        # 1 - len(tracks) Thus 'position - 1' will always be within the list.
         return self._tl_tracks[position - 1]
 
     def add(self, tracks=None, at_position=None, uri=None, uris=None):
