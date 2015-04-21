@@ -8,7 +8,7 @@ import pykka
 from mopidy import core
 from mopidy.core import PlaybackState
 from mopidy.local import actor
-from mopidy.models import Playlist, TlTrack, Track
+from mopidy.models import Playlist, Track
 from mopidy.utils import deprecation
 
 from tests import dummy_audio, path_to_data_dir
@@ -175,16 +175,6 @@ class LocalTracklistProviderTest(unittest.TestCase):
     def test_add_returns_the_tl_tracks_that_was_added(self):
         tl_tracks = self.controller.add(self.controller.tracks[1:2])
         self.assertEqual(tl_tracks[0].track, self.controller.tracks[1])
-
-    def test_index_returns_index_of_track(self):
-        tl_tracks = self.controller.add(self.tracks)
-        self.assertEqual(0, self.controller.index(tl_tracks[0]))
-        self.assertEqual(1, self.controller.index(tl_tracks[1]))
-        self.assertEqual(2, self.controller.index(tl_tracks[2]))
-
-    def test_index_returns_none_if_item_not_found(self):
-        tl_track = TlTrack(0, Track())
-        self.assertEqual(self.controller.index(tl_track), None)
 
     @populate_tracklist
     def test_move_single(self):

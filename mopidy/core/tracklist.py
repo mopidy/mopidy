@@ -200,19 +200,52 @@ class TracklistController(object):
 
     # Methods
 
-    def index(self, tl_track):
+    def index(self, tl_track=None, tlid=None):
         """
         The position of the given track in the tracklist.
 
+        If neither *tl_track* or *tlid* is given we return the index of
+        the currently playing track.
+
         :param tl_track: the track to find the index of
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
+        :param tlid: TLID of the track to find the index of
+        :type tlid: :class:`int` or :class:`None`
         :rtype: :class:`int` or :class:`None`
+
+        .. versionchanged:: 1.1
+            Added the *tlid* parameter
         """
         tl_track is None or validation.check_instance(tl_track, TlTrack)
-        try:
-            return self._tl_tracks.index(tl_track)
-        except ValueError:
-            return None
+        tlid is None or validation.check_integer(tlid, min=0)
+
+        if tl_track is None and tlid is None:
+            tl_track = self.core.playback.get_current_tl_track()
+
+        if tl_track is not None:
+            try:
+                return self._tl_tracks.index(tl_track)
+            except ValueError:
+                pass
+        elif tlid is not None:
+            for i, tl_track in enumerate(self._tl_tracks):
+                if tl_track.tlid == tlid:
+                    return i
+        return None
+
+    def get_eot_tlid(self):
+        """
+        The TLID of the track that will be played after the given track.
+
+        Not necessarily the same TLID as returned by :meth:`get_next_tlid`.
+
+        :rtype: :class:`int` or :class:`None`
+
+        .. versionadded:: 1.1
+        """
+
+        current_tl_track = self.core.playback.get_current_tl_track()
+        return getattr(self.eot_track(current_tl_track), 'tlid', None)
 
     def eot_track(self, tl_track):
         """
@@ -224,6 +257,7 @@ class TracklistController(object):
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
+        deprecation.warn('core.tracklist.eot_track', pending=True)
         tl_track is None or validation.check_instance(tl_track, TlTrack)
         if self.get_single() and self.get_repeat():
             return tl_track
@@ -234,6 +268,23 @@ class TracklistController(object):
         # handle "single", with that out of the way the rest of the logic is
         # shared.
         return self.next_track(tl_track)
+
+    def get_next_tlid(self):
+        """
+        The tlid of the track that will be played if calling
+        :meth:`mopidy.core.PlaybackController.next()`.
+
+        For normal playback this is the next track in the tracklist. If repeat
+        is enabled the next track can loop around the tracklist. When random is
+        enabled this should be a random track, all tracks should be played once
+        before the tracklist repeats.
+
+        :rtype: :class:`int` or :class:`None`
+
+        .. versionadded:: 1.1
+        """
+        current_tl_track = self.core.playback.get_current_tl_track()
+        return getattr(self.next_track(current_tl_track), 'tlid', None)
 
     def next_track(self, tl_track):
         """
@@ -249,34 +300,50 @@ class TracklistController(object):
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
+        deprecation.warn('core.tracklist.next_track', pending=True)
         tl_track is None or validation.check_instance(tl_track, TlTrack)
 
-        if not self.get_tl_tracks():
+        if not self._tl_tracks:
             return None
 
         if self.get_random() and not self._shuffled:
             if self.get_repeat() or not tl_track:
                 logger.debug('Shuffling tracks')
-                self._shuffled = self.get_tl_tracks()
+                self._shuffled = self._tl_tracks[:]
                 random.shuffle(self._shuffled)
 
         if self.get_random():
-            try:
+            if self._shuffled:
                 return self._shuffled[0]
-            except IndexError:
-                return None
+            return None
 
         if tl_track is None:
-            return self.get_tl_tracks()[0]
+            next_index = 0
+        else:
+            next_index = self.index(tl_track) + 1
 
-        next_index = self.index(tl_track) + 1
         if self.get_repeat():
-            next_index %= len(self.get_tl_tracks())
-
-        try:
-            return self.get_tl_tracks()[next_index]
-        except IndexError:
+            next_index %= len(self._tl_tracks)
+        elif next_index >= len(self._tl_tracks):
             return None
+
+        return self._tl_tracks[next_index]
+
+    def get_previous_tlid(self):
+        """
+        Returns the TLID of the  track that will be played if calling
+        :meth:`mopidy.core.PlaybackController.previous()`.
+
+        For normal playback this is the previous track in the tracklist. If
+        random and/or consume is enabled it should return the current track
+        instead.
+
+        :rtype: :class:`int` or :class:`None`
+
+        .. versionadded:: 1.1
+        """
+        current_tl_track = self.core.playback.get_current_tl_track()
+        return getattr(self.previous_track(current_tl_track), 'tlid', None)
 
     def previous_track(self, tl_track):
         """
@@ -291,6 +358,7 @@ class TracklistController(object):
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
+        deprecation.warn('core.tracklist.previous_track', pending=True)
         tl_track is None or validation.check_instance(tl_track, TlTrack)
 
         if self.get_repeat() or self.get_consume() or self.get_random():
@@ -301,7 +369,9 @@ class TracklistController(object):
         if position in (None, 0):
             return None
 
-        return self.get_tl_tracks()[position - 1]
+        # Since we know we are not at zero we have to be somewhere in the range
+        # 1 - len(tracks) Thus 'position - 1' will always be within the list.
+        return self._tl_tracks[position - 1]
 
     def add(self, tracks=None, at_position=None, uri=None, uris=None):
         """
@@ -554,7 +624,7 @@ class TracklistController(object):
 
     def _trigger_tracklist_changed(self):
         if self.get_random():
-            self._shuffled = self.get_tl_tracks()
+            self._shuffled = self._tl_tracks[:]
             random.shuffle(self._shuffled)
         else:
             self._shuffled = []

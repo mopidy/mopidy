@@ -45,13 +45,27 @@ _MESSAGES = {
     'core.tracklist.remove:kwargs_criteria':
         'tracklist.remove() with "kwargs" as criteria is deprecated',
 
+    'core.tracklist.eot_track':
+        'tracklist.eot_track() is pending deprecation, use '
+        'tracklist.get_eot_tlid()',
+    'core.tracklist.next_track':
+        'tracklist.next_track() is pending deprecation, use '
+        'tracklist.get_next_tlid()',
+    'core.tracklist.previous_track':
+        'tracklist.previous_track() is pending deprecation, use '
+        'tracklist.get_previous_tlid()',
+
     'models.immutable.copy':
         'ImmutableObject.copy() is deprecated, use ImmutableObject.replace()',
 }
 
 
-def warn(msg_id):
-    warnings.warn(_MESSAGES.get(msg_id, msg_id), DeprecationWarning)
+def warn(msg_id, pending=False):
+    if pending:
+        category = PendingDeprecationWarning
+    else:
+        category = DeprecationWarning
+    warnings.warn(_MESSAGES.get(msg_id, msg_id), category)
 
 
 @contextlib.contextmanager
