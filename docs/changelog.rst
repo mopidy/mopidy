@@ -22,6 +22,10 @@ Core API
 
 - Update core methods to do strict input checking. (Fixes: :issue:`#700`)
 
+- Add ``tlid`` alternatives to methods that take ``tl_track`` and also add
+  ``get_{eot,next,previous}_tlid`` methods as light weight alternatives to the
+  ``tl_track`` versions of the calls. (Fixes: :issue:`1131` PR: :issue:`1136`)
+
 Models
 ------
 
