@@ -10,6 +10,8 @@ v1.0.1 (UNRELEASED)
 
 Bug fix release.
 
+- Core: Make the new history controller available for use. (Fixes: :js:`6`)
+
 - Audio: Software volume control has been reworked to greatly reduce the delay
   between changing the volume and the change taking effect. (Fixes:
   :issue:`1097`)
