@@ -8,6 +8,7 @@ import pykka
 
 from mopidy import backend, core
 from mopidy.models import Track
+from mopidy.utils import deprecation
 
 from tests import dummy_audio as audio
 
@@ -698,3 +699,22 @@ class CorePlaybackWithOldBackendTest(unittest.TestCase):
         c = core.Core(mixer=None, backends=[b])
         c.tracklist.add(uris=['dummy1:a'])
         c.playback.play()  # No TypeError == test passed.
+
+
+class TestPlay(unittest.TestCase):
+
+    def setUp(self):  # noqa: N802
+        self.backend = mock.Mock()
+        self.backend.uri_schemes.get.return_value = ['dummy']
+        self.core = core.Core(backends=[self.backend])
+
+        self.tracks = [Track(uri='dummy:a', length=1234),
+                       Track(uri='dummy:b', length=1234)]
+
+        with deprecation.ignore('core.tracklist.add:tracks_arg'):
+            self.tl_tracks = self.core.tracklist.add(tracks=self.tracks)
+
+    def test_play_tlid(self):
+        self.core.playback.play(tlid=self.tl_tracks[1].tlid)
+        self.backend.playback.change_track.assert_called_once_with(
+            self.tl_tracks[1].track)

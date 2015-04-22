@@ -265,18 +265,32 @@ class PlaybackController(object):
             self.set_state(PlaybackState.PAUSED)
             self._trigger_track_playback_paused()
 
-    def play(self, tl_track=None):
+    def play(self, tl_track=None, tlid=None):
         """
         Play the given track, or if the given track is :class:`None`, play the
         currently active track.
 
         :param tl_track: track to play
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
+        :param tlid: TLID of the track to play
+        :type tlid: :class:`int` or :class:`None`
         """
         tl_track is None or validation.check_instance(tl_track, models.TlTrack)
-        self._play(tl_track, on_error_step=1)
+        tlid is None or validation.check_integer(tlid, min=0)
+        # TODO: check one of or none for args
+        if tl_track:
+            deprecation.warn('core.playback.play:tl_track_kwarg', pending=True)
 
-    def _play(self, tl_track=None, on_error_step=1):
+        self._play(tl_track=tl_track, tlid=tlid, on_error_step=1)
+
+    def _play(self, tl_track=None, tlid=None, on_error_step=1):
+        if tl_track is None and tlid is not None:
+            for tl_track in self.core.tracklist.get_tl_tracks():
+                if tl_track.tlid == tlid:
+                    break
+            else:
+                tl_track = None
+
         if tl_track is None:
             if self.get_state() == PlaybackState.PAUSED:
                 return self.resume()
