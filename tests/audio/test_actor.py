@@ -6,11 +6,11 @@ import unittest
 import gobject
 gobject.threads_init()
 
+import mock
+
 import pygst
 pygst.require('0.10')
 import gst  # noqa
-
-import mock
 
 import pykka
 

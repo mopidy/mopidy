@@ -2,8 +2,12 @@ from __future__ import absolute_import, unicode_literals
 
 import re
 
+# TOOD: refactor this into a generic mapper that does not know about browse
+# or playlists and then use one instance for each case?
+
 
 class MpdUriMapper(object):
+
     """
     Maintains the mappings between uniquified MPD names and URIs.
     """
@@ -17,7 +21,8 @@ class MpdUriMapper(object):
     def __init__(self, core=None):
         self.core = core
         self._uri_from_name = {}
-        self._name_from_uri = {}
+        self._browse_name_from_uri = {}
+        self._playlist_name_from_uri = {}
 
     def _create_unique_name(self, name, uri):
         stripped_name = self._invalid_browse_chars.sub(' ', name)
@@ -30,33 +35,37 @@ class MpdUriMapper(object):
             i += 1
         return name
 
-    def insert(self, name, uri):
+    def insert(self, name, uri, playlist=False):
         """
         Create a unique and MPD compatible name that maps to the given URI.
         """
         name = self._create_unique_name(name, uri)
         self._uri_from_name[name] = uri
-        self._name_from_uri[uri] = name
+        if playlist:
+            self._playlist_name_from_uri[uri] = name
+        else:
+            self._browse_name_from_uri[uri] = name
         return name
 
     def uri_from_name(self, name):
         """
         Return the uri for the given MPD name.
         """
-        if name in self._uri_from_name:
-            return self._uri_from_name[name]
+        return self._uri_from_name.get(name)
 
     def refresh_playlists_mapping(self):
         """
         Maintain map between playlists and unique playlist names to be used by
         MPD.
         """
-        if self.core is not None:
-            for playlist_ref in self.core.playlists.as_list().get():
-                if not playlist_ref.name:
-                    continue
-                name = self._invalid_playlist_chars.sub('|', playlist_ref.name)
-                self.insert(name, playlist_ref.uri)
+        if self.core is None:
+            return
+
+        for playlist_ref in self.core.playlists.as_list().get():
+            if not playlist_ref.name:
+                continue
+            name = self._invalid_playlist_chars.sub('|', playlist_ref.name)
+            self.insert(name, playlist_ref.uri, playlist=True)
 
     def playlist_uri_from_name(self, name):
         """
@@ -70,6 +79,6 @@ class MpdUriMapper(object):
         """
         Helper function to retrieve the unique MPD playlist name from its URI.
         """
-        if uri not in self._name_from_uri:
+        if uri not in self._playlist_name_from_uri:
             self.refresh_playlists_mapping()
-        return self._name_from_uri[uri]
+        return self._playlist_name_from_uri[uri]

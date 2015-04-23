@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class HistoryController(object):
+    pykka_traversable = True
 
     def __init__(self):
         self._history = []

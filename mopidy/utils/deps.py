@@ -5,11 +5,11 @@ import os
 import platform
 import sys
 
+import pkg_resources
+
 import pygst
 pygst.require('0.10')
 import gst  # noqa
-
-import pkg_resources
 
 from mopidy.utils import formatting
 
