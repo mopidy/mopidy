@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import random
 
-from mopidy.models import Track
+from mopidy.models import Playlist, Ref, Track
 
 from tests.mpd import protocol
 
@@ -197,3 +197,33 @@ class IssueGH137RegressionTest(protocol.BaseTestCase):
             u'Album "This Is Remixed Hits - Mashups & Rare 12" Mixes"')
 
         self.assertInResponse('ACK [2@0] {list} Invalid unquoted character')
+
+
+class IssueGH1120RegressionTest(protocol.BaseTestCase):
+    """
+    The issue: https://github.com/mopidy/mopidy/issues/1120
+
+    How to reproduce:
+
+    - A playlist must be in both browse results and playlists
+    - Call for instance ``lsinfo "/"`` to populate the cache with the
+      playlist name from the playlist backend.
+    - Call ``lsinfo "/dummy"`` to override the playlist name with the browse
+      name.
+    - Call ``lsinfo "/"`` and we now have an invalid name with ``/`` in it.
+
+    """
+
+    def test(self):
+        self.backend.library.dummy_browse_result = {
+            'dummy:/': [Ref.playlist(name='Top 100 tracks', uri='dummy:/1')],
+        }
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(name='Top 100 tracks', uri='dummy:/1'),
+        ])
+
+        response1 = self.send_request('lsinfo "/"')
+        self.send_request('lsinfo "/dummy"')
+
+        response2 = self.send_request('lsinfo "/"')
+        self.assertEqual(response1, response2)
