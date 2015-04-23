@@ -8,11 +8,34 @@ Core API
     :synopsis: Core API for use by frontends
 
 The core API is the interface that is used by frontends like
-:mod:`mopidy.http` and :mod:`mopidy.mpd`. The core layer is inbetween the
-frontends and the backends.
+:mod:`mopidy.http` and :mod:`mopidy.mpd`. The core layer is in between the
+frontends and the backends. Don't forget that you will be accessing core
+as a Pykka actor.
 
 .. autoclass:: mopidy.core.Core
-    :members:
+
+  .. automethod:: get_uri_schemes
+
+  .. automethod:: get_version
+
+  .. autoattribute:: tracklist
+    :annotation:
+
+  .. autoattribute:: playback
+    :annotation:
+
+  .. autoattribute:: library
+    :annotation:
+
+  .. autoattribute:: playlists
+    :annotation:
+
+  .. autoattribute:: mixer
+    :annotation:
+
+  .. autoattribute:: history
+    :annotation:
+
 
 Tracklist controller
 ====================
@@ -124,6 +147,12 @@ Core listener
 
 Deprecated API features
 =======================
+
+Core
+----
+
+.. autoattribute:: mopidy.core.Core.version
+.. autoattribute:: mopidy.core.Core.uri_schemes
 
 TracklistController
 -------------------

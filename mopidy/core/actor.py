@@ -23,28 +23,22 @@ class Core(
         mixer.MixerListener):
 
     library = None
-    """The library controller. An instance of
-    :class:`mopidy.core.LibraryController`."""
+    """An instance of :class:`~mopidy.core.LibraryController`"""
 
     history = None
-    """The playback history controller. An instance of
-    :class:`mopidy.core.HistoryController`."""
+    """An instance of :class:`~mopidy.core.HistoryController`"""
 
     mixer = None
-    """The mixer controller. An instance of
-    :class:`mopidy.core.MixerController`."""
+    """An instance of :class:`~mopidy.core.MixerController`"""
 
     playback = None
-    """The playback controller. An instance of
-    :class:`mopidy.core.PlaybackController`."""
+    """An instance of :class:`~mopidy.core.PlaybackController`"""
 
     playlists = None
-    """The playlists controller. An instance of
-    :class:`mopidy.core.PlaylistsController`."""
+    """An instance of :class:`~mopidy.core.PlaylistsController`"""
 
     tracklist = None
-    """The tracklist controller. An instance of
-    :class:`mopidy.core.TracklistController`."""
+    """An instance of :class:`~mopidy.core.TracklistController`"""
 
     def __init__(self, config=None, mixer=None, backends=None, audio=None):
         super(Core, self).__init__()
