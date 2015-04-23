@@ -5,6 +5,35 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v1.0.1 (2015-04-23)
+===================
+
+Bug fix release.
+
+- Core: Make the new history controller available for use. (Fixes: :js:`6`)
+
+- Audio: Software volume control has been reworked to greatly reduce the delay
+  between changing the volume and the change taking effect. (Fixes:
+  :issue:`1097`, PR: :issue:`1101`)
+
+- Audio: As a side effect of the previous bug fix, software volume is no longer
+  tied to the PulseAudio application volume when using ``pulsesink``. This
+  behavior was confusing for many users and doesn't work well with the plans
+  for multiple outputs.
+
+- Audio: Update scanner to decode all media it finds. This should fix cases
+  where the scanner hangs on non-audio files like video. The scanner will now
+  also let us know if we found any decodeable audio. (Fixes: :issue:`726`, PR:
+  issue:`1124`)
+
+- HTTP: Fix threading bug that would cause duplicate delivery of WS messages.
+  (PR: :issue:`1127`)
+
+- MPD: Fix case where a playlist that is present in both browse and as a listed
+  playlist breaks the MPD frontend protocol output. (Fixes :issue:`1120`, PR:
+  :issue:`1142`)
+
+
 v1.0.0 (2015-03-25)
 ===================
 

@@ -33,8 +33,8 @@ Init scripts
   <https://github.com/mopidy/mopidy/blob/debian/debian/mopidy.init>`_. For
   more details, see the :ref:`debian` section of the docs.
 
-- The ``mopidy`` package in `Arch Linux AUR
-  <https://aur.archlinux.org/packages/mopidy>`__ comes with a systemd init
+- The ``mopidy`` package in `Arch Linux
+  <https://www.archlinux.org/packages/community/any/mopidy/>`__ comes with a systemd init
   script.
 
 - A blog post by Benjamin Guillet explains how to `Daemonize Mopidy and Launch

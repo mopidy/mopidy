@@ -8,7 +8,7 @@ import gobject
 import pygst
 pygst.require('0.10')
 import gst  # noqa
-import gst.pbutils
+import gst.pbutils  # noqa
 
 import pykka
 
@@ -33,25 +33,6 @@ _GST_STATE_MAPPING = {
     gst.STATE_PLAYING: PlaybackState.PLAYING,
     gst.STATE_PAUSED: PlaybackState.PAUSED,
     gst.STATE_NULL: PlaybackState.STOPPED}
-
-MB = 1 << 20
-
-# GST_PLAY_FLAG_VIDEO (1<<0)
-# GST_PLAY_FLAG_AUDIO (1<<1)
-# GST_PLAY_FLAG_TEXT (1<<2)
-# GST_PLAY_FLAG_VIS (1<<3)
-# GST_PLAY_FLAG_SOFT_VOLUME (1<<4)
-# GST_PLAY_FLAG_NATIVE_AUDIO (1<<5)
-# GST_PLAY_FLAG_NATIVE_VIDEO (1<<6)
-# GST_PLAY_FLAG_DOWNLOAD (1<<7)
-# GST_PLAY_FLAG_BUFFERING (1<<8)
-# GST_PLAY_FLAG_DEINTERLACE (1<<9)
-# GST_PLAY_FLAG_SOFT_COLORBALANCE (1<<10)
-
-# Default flags to use for playbin: AUDIO, SOFT_VOLUME
-# TODO: consider removing soft volume when we do multi outputs and handling it
-# ourselves.
-PLAYBIN_FLAGS = (1 << 1) | (1 << 4)
 
 
 class _Signals(object):
@@ -114,7 +95,7 @@ class _Appsrc(object):
         source.set_property('caps', self._caps)
         source.set_property('format', b'time')
         source.set_property('stream-type', b'seekable')
-        source.set_property('max-bytes', 1 * MB)
+        source.set_property('max-bytes', 1 << 20)  # 1MB
         source.set_property('min-percent', 50)
 
         if self._need_data_callback:
@@ -152,26 +133,12 @@ class _Appsrc(object):
 # TODO: expose this as a property on audio when #790 gets further along.
 class _Outputs(gst.Bin):
     def __init__(self):
-        gst.Bin.__init__(self)
+        gst.Bin.__init__(self, 'outputs')
 
         self._tee = gst.element_factory_make('tee')
         self.add(self._tee)
 
-        # Queue element to buy us time between the about to finish event and
-        # the actual switch, i.e. about to switch can block for longer thanks
-        # to this queue.
-        # TODO: make the min-max values a setting?
-        # TODO: this does not belong in this class.
-        queue = gst.element_factory_make('queue')
-        queue.set_property('max-size-buffers', 0)
-        queue.set_property('max-size-bytes', 0)
-        queue.set_property('max-size-time', 5 * gst.SECOND)
-        queue.set_property('min-threshold-time', 3 * gst.SECOND)
-        self.add(queue)
-
-        queue.link(self._tee)
-
-        ghost_pad = gst.GhostPad('sink', queue.get_pad('sink'))
+        ghost_pad = gst.GhostPad('sink', self._tee.get_pad('sink'))
         self.add_pad(ghost_pad)
 
         # Add an always connected fakesink which respects the clock so the tee
@@ -195,7 +162,9 @@ class _Outputs(gst.Bin):
 
     def _add(self, element):
         # All tee branches need a queue in front of them.
+        # But keep the queue short so the volume change isn't to slow:
         queue = gst.element_factory_make('queue')
+        queue.set_property('max-size-buffers', 5)
         self.add(element)
         self.add(queue)
         queue.link(element)
@@ -214,10 +183,6 @@ class SoftwareMixer(object):
 
     def setup(self, element, mixer_ref):
         self._element = element
-
-        self._signals.connect(element, 'notify::volume', self._volume_changed)
-        self._signals.connect(element, 'notify::mute', self._mute_changed)
-
         self._mixer.setup(mixer_ref)
 
     def teardown(self):
@@ -229,24 +194,16 @@ class SoftwareMixer(object):
 
     def set_volume(self, volume):
         self._element.set_property('volume', volume / 100.0)
+        self._mixer.trigger_volume_changed(volume)
 
     def get_mute(self):
         return self._element.get_property('mute')
 
     def set_mute(self, mute):
-        return self._element.set_property('mute', bool(mute))
-
-    def _volume_changed(self, element, property_):
-        old_volume, self._last_volume = self._last_volume, self.get_volume()
-        if old_volume != self._last_volume:
-            gst_logger.debug('Notify volume: %s', self._last_volume / 100.0)
-            self._mixer.trigger_volume_changed(self._last_volume)
-
-    def _mute_changed(self, element, property_):
-        old_mute, self._last_mute = self._last_mute, self.get_mute()
-        if old_mute != self._last_mute:
-            gst_logger.debug('Notify mute: %s', self._last_mute)
-            self._mixer.trigger_mute_changed(self._last_mute)
+        result = self._element.set_property('mute', bool(mute))
+        if result:
+            self._mixer.trigger_mute_changed(bool(mute))
+        return result
 
 
 class _Handler(object):
@@ -451,8 +408,8 @@ class Audio(pykka.ThreadingActor):
         try:
             self._setup_preferences()
             self._setup_playbin()
-            self._setup_output()
-            self._setup_mixer()
+            self._setup_outputs()
+            self._setup_audio_sink()
         except gobject.GError as ex:
             logger.exception(ex)
             process.exit_process()
@@ -472,11 +429,11 @@ class Audio(pykka.ThreadingActor):
 
     def _setup_playbin(self):
         playbin = gst.element_factory_make('playbin2')
-        playbin.set_property('flags', PLAYBIN_FLAGS)
+        playbin.set_property('flags', 2)  # GST_PLAY_FLAG_AUDIO
 
         # TODO: turn into config values...
-        playbin.set_property('buffer-size', 2 * 1024 * 1024)
-        playbin.set_property('buffer-duration', 2 * gst.SECOND)
+        playbin.set_property('buffer-size', 5 << 20)  # 5MB
+        playbin.set_property('buffer-duration', 5 * gst.SECOND)
 
         self._signals.connect(playbin, 'source-setup', self._on_source_setup)
         self._signals.connect(playbin, 'about-to-finish',
@@ -492,7 +449,7 @@ class Audio(pykka.ThreadingActor):
         self._signals.disconnect(self._playbin, 'source-setup')
         self._playbin.set_state(gst.STATE_NULL)
 
-    def _setup_output(self):
+    def _setup_outputs(self):
         # We don't want to use outputs for regular testing, so just install
         # an unsynced fakesink when someone asks for a 'testoutput'.
         if self._config['audio']['output'] == 'testoutput':
@@ -505,11 +462,36 @@ class Audio(pykka.ThreadingActor):
                 process.exit_process()  # TODO: move this up the chain
 
         self._handler.setup_event_handling(self._outputs.get_pad('sink'))
-        self._playbin.set_property('audio-sink', self._outputs)
 
-    def _setup_mixer(self):
+    def _setup_audio_sink(self):
+        audio_sink = gst.Bin('audio-sink')
+
+        # Queue element to buy us time between the about to finish event and
+        # the actual switch, i.e. about to switch can block for longer thanks
+        # to this queue.
+        # TODO: make the min-max values a setting?
+        queue = gst.element_factory_make('queue')
+        queue.set_property('max-size-buffers', 0)
+        queue.set_property('max-size-bytes', 0)
+        queue.set_property('max-size-time', 3 * gst.SECOND)
+        queue.set_property('min-threshold-time', 1 * gst.SECOND)
+
+        audio_sink.add(queue)
+        audio_sink.add(self._outputs)
+
         if self.mixer:
-            self.mixer.setup(self._playbin, self.actor_ref.proxy().mixer)
+            volume = gst.element_factory_make('volume')
+            audio_sink.add(volume)
+            queue.link(volume)
+            volume.link(self._outputs)
+            self.mixer.setup(volume, self.actor_ref.proxy().mixer)
+        else:
+            queue.link(self._outputs)
+
+        ghost_pad = gst.GhostPad('sink', queue.get_pad('sink'))
+        audio_sink.add_pad(ghost_pad)
+
+        self._playbin.set_property('audio-sink', audio_sink)
 
     def _teardown_mixer(self):
         if self.mixer:
