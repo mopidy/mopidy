@@ -51,20 +51,21 @@ class MpdUriMapper(object):
         """
         Return the uri for the given MPD name.
         """
-        if name in self._uri_from_name:
-            return self._uri_from_name[name]
+        return self._uri_from_name.get(name)
 
     def refresh_playlists_mapping(self):
         """
         Maintain map between playlists and unique playlist names to be used by
         MPD.
         """
-        if self.core is not None:
-            for playlist_ref in self.core.playlists.as_list().get():
-                if not playlist_ref.name:
-                    continue
-                name = self._invalid_playlist_chars.sub('|', playlist_ref.name)
-                self.insert(name, playlist_ref.uri, playlist=True)
+        if self.core is None:
+            return
+
+        for playlist_ref in self.core.playlists.as_list().get():
+            if not playlist_ref.name:
+                continue
+            name = self._invalid_playlist_chars.sub('|', playlist_ref.name)
+            self.insert(name, playlist_ref.uri, playlist=True)
 
     def playlist_uri_from_name(self, name):
         """
