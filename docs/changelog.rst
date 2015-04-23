@@ -27,6 +27,9 @@ Bug fix release.
 
 - HTTP: Fix threading bug that would cause duplicate delivery of WS messages.
 
+- MPD: Fix case where a playlist that is present in both browse and as a listed
+  playlist breaks the MPD frontend protocol output. (Fixes :issue:`1120`)
+
 
 v1.0.0 (2015-03-25)
 ===================
