@@ -10,7 +10,8 @@ Core API
 The core API is the interface that is used by frontends like
 :mod:`mopidy.http` and :mod:`mopidy.mpd`. The core layer is in between the
 frontends and the backends. Don't forget that you will be accessing core
-as a Pykka actor.
+as a Pykka actor. If you are only interested in being notified about changes
+in core see :class:`~mopidy.core.CoreListener`.
 
 .. autoclass:: mopidy.core.Core
 
@@ -172,17 +173,23 @@ Manipulating
 Mixer controller
 ================
 
-.. autoclass:: mopidy.core.MixerController
-    :members:
+.. class:: mopidy.core.MixerController
+
+.. automethod:: mopidy.core.MixerController.get_mute
+.. automethod:: mopidy.core.MixerController.set_mute
+.. automethod:: mopidy.core.MixerController.get_volume
+.. automethod:: mopidy.core.MixerController.set_volume
 
 History controller
 ==================
 
-.. autoclass:: mopidy.core.HistoryController
-    :members:
+.. class:: mopidy.core.HistoryController
 
-Core listener
-=============
+.. automethod:: mopidy.core.HistoryController.get_history
+.. automethod:: mopidy.core.HistoryController.get_length
+
+Core events
+===========
 
 .. autoclass:: mopidy.core.CoreListener
     :members:
