@@ -13,6 +13,7 @@ from mopidy.core.listener import CoreListener
 from mopidy.core.mixer import MixerController
 from mopidy.core.playback import PlaybackController
 from mopidy.core.playlists import PlaylistsController
+from mopidy.core.sleeptimer import SleepTimerController
 from mopidy.core.tracklist import TracklistController
 from mopidy.utils import versioning
 from mopidy.utils.deprecation import deprecated_property
@@ -42,6 +43,10 @@ class Core(
     """The playlists controller. An instance of
     :class:`mopidy.core.PlaylistsController`."""
 
+    sleeptimer = None
+    """The sleeptimer controller. An instance of
+    :class:`mopidy.core.SleepTimerController`."""
+
     tracklist = None
     """The tracklist controller. An instance of
     :class:`mopidy.core.TracklistController`."""
@@ -58,6 +63,8 @@ class Core(
         self.mixer = MixerController(mixer=mixer)
         self.playback = PlaybackController(backends=self.backends, core=self)
         self.playlists = PlaylistsController(backends=self.backends, core=self)
+        self.sleeptimer = SleepTimerController(playback=self.playback,
+                                               core=self)
         self.tracklist = TracklistController(core=self)
 
         self.audio = audio

@@ -77,3 +77,12 @@ Core listener
 
 .. autoclass:: mopidy.core.CoreListener
     :members:
+
+Sleeptimer controller
+==================
+
+Manages a sleep timer that can stop playing after a specified time.
+
+.. autoclass:: mopidy.core.SleeptimerController
+    :members:
+
