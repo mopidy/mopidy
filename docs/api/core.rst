@@ -14,6 +14,60 @@ frontends and the backends.
 .. autoclass:: mopidy.core.Core
     :members:
 
+Tracklist controller
+====================
+
+.. autoclass:: mopidy.core.TracklistController
+
+Manages everything related to the tracks we are currently playing. This is
+likely where you need to start as only tracks that are in the *tracklist* can be
+played.
+
+Manipulating
+------------
+
+.. automethod:: mopidy.core.TracklistController.add
+.. automethod:: mopidy.core.TracklistController.remove
+.. automethod:: mopidy.core.TracklistController.clear
+.. automethod:: mopidy.core.TracklistController.move
+.. automethod:: mopidy.core.TracklistController.shuffle
+
+Current state
+-------------
+
+.. automethod:: mopidy.core.TracklistController.get_tl_tracks
+.. automethod:: mopidy.core.TracklistController.index
+.. automethod:: mopidy.core.TracklistController.get_version
+
+.. automethod:: mopidy.core.TracklistController.get_length
+.. automethod:: mopidy.core.TracklistController.get_tracks
+
+.. automethod:: mopidy.core.TracklistController.slice
+.. automethod:: mopidy.core.TracklistController.filter
+
+Future state
+------------
+
+.. automethod:: mopidy.core.TracklistController.get_eot_tlid
+.. automethod:: mopidy.core.TracklistController.get_next_tlid
+.. automethod:: mopidy.core.TracklistController.get_previous_tlid
+
+.. automethod:: mopidy.core.TracklistController.eot_track
+.. automethod:: mopidy.core.TracklistController.next_track
+.. automethod:: mopidy.core.TracklistController.previous_track
+
+Options
+-------
+
+.. automethod:: mopidy.core.TracklistController.get_consume
+.. automethod:: mopidy.core.TracklistController.set_consume
+.. automethod:: mopidy.core.TracklistController.get_random
+.. automethod:: mopidy.core.TracklistController.set_random
+.. automethod:: mopidy.core.TracklistController.get_repeat
+.. automethod:: mopidy.core.TracklistController.set_repeat
+.. automethod:: mopidy.core.TracklistController.get_single
+.. automethod:: mopidy.core.TracklistController.set_single
+
 
 Playback controller
 ===================
@@ -26,16 +80,6 @@ seek, and volume control.
 
 .. autoclass:: mopidy.core.PlaybackController
     :members:
-
-
-Tracklist controller
-====================
-
-Manages everything related to the tracks we are currently playing.
-
-.. autoclass:: mopidy.core.TracklistController
-    :members:
-
 
 History controller
 ==================
@@ -77,3 +121,19 @@ Core listener
 
 .. autoclass:: mopidy.core.CoreListener
     :members:
+
+Deprecated API features
+=======================
+
+TracklistController
+-------------------
+
+.. autoattribute:: mopidy.core.TracklistController.tl_tracks
+.. autoattribute:: mopidy.core.TracklistController.tracks
+.. autoattribute:: mopidy.core.TracklistController.version
+.. autoattribute:: mopidy.core.TracklistController.length
+
+.. autoattribute:: mopidy.core.TracklistController.consume
+.. autoattribute:: mopidy.core.TracklistController.random
+.. autoattribute:: mopidy.core.TracklistController.repeat
+.. autoattribute:: mopidy.core.TracklistController.single
