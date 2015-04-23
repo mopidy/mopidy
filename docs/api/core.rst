@@ -146,6 +146,10 @@ Core listener
 Deprecated API features
 =======================
 
+.. warning::
+  Though these features still work, they are slated to go away in the next
+  major Mopidy release.
+
 Core
 ----
 
