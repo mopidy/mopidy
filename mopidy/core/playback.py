@@ -267,8 +267,10 @@ class PlaybackController(object):
 
     def play(self, tl_track=None, tlid=None):
         """
-        Play the given track, or if the given track is :class:`None`, play the
-        currently active track.
+        Play the given track, or if the given tl_track and tlid is
+        :class:`None`, play the currently active track.
+
+        Note that the track **must** already be in the tracklist.
 
         :param tl_track: track to play
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`

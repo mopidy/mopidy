@@ -101,14 +101,41 @@ Options
 Playback controller
 ===================
 
-Manages playback, with actions like play, pause, stop, next, previous,
-seek, and volume control.
-
-.. autoclass:: mopidy.core.PlaybackState
-    :members:
-
 .. autoclass:: mopidy.core.PlaybackController
-    :members:
+
+Playback control
+----------------
+
+.. automethod:: mopidy.core.PlaybackController.play
+.. automethod:: mopidy.core.PlaybackController.next
+.. automethod:: mopidy.core.PlaybackController.previous
+.. automethod:: mopidy.core.PlaybackController.stop
+.. automethod:: mopidy.core.PlaybackController.pause
+.. automethod:: mopidy.core.PlaybackController.resume
+.. automethod:: mopidy.core.PlaybackController.seek
+
+Current track
+-------------
+
+.. automethod:: mopidy.core.PlaybackController.get_current_tl_track
+.. automethod:: mopidy.core.PlaybackController.get_current_track
+.. automethod:: mopidy.core.PlaybackController.get_stream_title
+.. automethod:: mopidy.core.PlaybackController.get_time_position
+
+Playback states
+---------------
+
+.. automethod:: mopidy.core.PlaybackController.get_state
+.. automethod:: mopidy.core.PlaybackController.set_state
+
+.. class:: mopidy.core.PlaybackState
+
+  .. attribute:: STOPPED
+    :annotation: = 'stopped'
+  .. attribute:: PLAYING
+    :annotation: = 'playing'
+  .. attribute:: PAUSED
+    :annotation: = 'paused'
 
 History controller
 ==================
@@ -168,3 +195,16 @@ TracklistController
 .. autoattribute:: mopidy.core.TracklistController.random
 .. autoattribute:: mopidy.core.TracklistController.repeat
 .. autoattribute:: mopidy.core.TracklistController.single
+
+PlaylistsController
+-------------------
+
+.. automethod:: mopidy.core.PlaybackController.get_mute
+.. automethod:: mopidy.core.PlaybackController.get_volume
+
+.. autoattribute:: mopidy.core.PlaybackController.current_tl_track
+.. autoattribute:: mopidy.core.PlaybackController.current_track
+.. autoattribute:: mopidy.core.PlaybackController.state
+.. autoattribute:: mopidy.core.PlaybackController.time_position
+.. autoattribute:: mopidy.core.PlaybackController.mute
+.. autoattribute:: mopidy.core.PlaybackController.volume
