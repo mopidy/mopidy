@@ -137,6 +137,18 @@ Playback states
   .. attribute:: PAUSED
     :annotation: = 'paused'
 
+Library controller
+==================
+
+.. class:: mopidy.core.LibraryController
+
+.. automethod:: mopidy.core.LibraryController.browse
+.. automethod:: mopidy.core.LibraryController.search
+.. automethod:: mopidy.core.LibraryController.lookup
+.. automethod:: mopidy.core.LibraryController.refresh
+.. automethod:: mopidy.core.LibraryController.get_images
+.. automethod:: mopidy.core.LibraryController.get_distinct
+
 History controller
 ==================
 
@@ -149,14 +161,6 @@ Playlists controller
 
 .. autoclass:: mopidy.core.PlaylistsController
     :members:
-
-
-Library controller
-==================
-
-.. autoclass:: mopidy.core.LibraryController
-    :members:
-
 
 Mixer controller
 ================
@@ -208,3 +212,8 @@ PlaylistsController
 .. autoattribute:: mopidy.core.PlaybackController.time_position
 .. autoattribute:: mopidy.core.PlaybackController.mute
 .. autoattribute:: mopidy.core.PlaybackController.volume
+
+LibraryController
+-----------------
+
+.. automethod:: mopidy.core.LibraryController.find_exaxt
