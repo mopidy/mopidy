@@ -14,37 +14,43 @@ as a Pykka actor.
 
 .. autoclass:: mopidy.core.Core
 
+  .. attribute:: tracklist
+
+    Manages everything related to the list of tracks we will play.
+    See :class:`~mopidy.core.TracklistController`.
+
+  .. attribute:: playback
+
+    Manages playback state and the current playing track.
+    See :class:`~mopidy.core.PlaybackController`.
+
+  .. attribute:: library
+
+    Manages the music library, e.g. searching and browsing for music.
+    See :class:`~mopidy.core.LibraryController`.
+
+  .. attribute:: playlists
+
+    Manages stored playlists. See :class:`~mopidy.core.PlaylistsController`.
+
+  .. attribute:: mixer
+
+    Manages volume and muting. See :class:`~mopidy.core.MixerController`.
+
+  .. attribute:: history
+
+    Keeps record of what tracks have been played.
+    See :class:`~mopidy.core.HistoryController`.
+
   .. automethod:: get_uri_schemes
 
   .. automethod:: get_version
-
-  .. autoattribute:: tracklist
-    :annotation:
-
-  .. autoattribute:: playback
-    :annotation:
-
-  .. autoattribute:: library
-    :annotation:
-
-  .. autoattribute:: playlists
-    :annotation:
-
-  .. autoattribute:: mixer
-    :annotation:
-
-  .. autoattribute:: history
-    :annotation:
 
 
 Tracklist controller
 ====================
 
 .. autoclass:: mopidy.core.TracklistController
-
-Manages everything related to the tracks we are currently playing. This is
-likely where you need to start as only tracks that are in the *tracklist* can be
-played.
 
 Manipulating
 ------------
@@ -107,16 +113,12 @@ seek, and volume control.
 History controller
 ==================
 
-Keeps record of what tracks have been played.
-
 .. autoclass:: mopidy.core.HistoryController
     :members:
 
 
 Playlists controller
 ====================
-
-Manages persistence of playlists.
 
 .. autoclass:: mopidy.core.PlaylistsController
     :members:
@@ -125,16 +127,12 @@ Manages persistence of playlists.
 Library controller
 ==================
 
-Manages the music library, e.g. searching for tracks to be added to a playlist.
-
 .. autoclass:: mopidy.core.LibraryController
     :members:
 
 
 Mixer controller
 ================
-
-Manages volume and muting.
 
 .. autoclass:: mopidy.core.MixerController
     :members:
