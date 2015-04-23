@@ -149,23 +149,36 @@ Library controller
 .. automethod:: mopidy.core.LibraryController.get_images
 .. automethod:: mopidy.core.LibraryController.get_distinct
 
-History controller
-==================
-
-.. autoclass:: mopidy.core.HistoryController
-    :members:
-
-
 Playlists controller
 ====================
 
-.. autoclass:: mopidy.core.PlaylistsController
-    :members:
+.. class:: mopidy.core.PlaylistsController
+
+Fetching
+--------
+
+.. automethod:: mopidy.core.PlaylistsController.as_list
+.. automethod:: mopidy.core.PlaylistsController.get_items
+.. automethod:: mopidy.core.PlaylistsController.lookup
+.. automethod:: mopidy.core.PlaylistsController.refresh
+
+Manipulating
+------------
+
+.. automethod:: mopidy.core.PlaylistsController.create
+.. automethod:: mopidy.core.PlaylistsController.save
+.. automethod:: mopidy.core.PlaylistsController.delete
 
 Mixer controller
 ================
 
 .. autoclass:: mopidy.core.MixerController
+    :members:
+
+History controller
+==================
+
+.. autoclass:: mopidy.core.HistoryController
     :members:
 
 Core listener
@@ -216,4 +229,12 @@ PlaylistsController
 LibraryController
 -----------------
 
-.. automethod:: mopidy.core.LibraryController.find_exaxt
+.. automethod:: mopidy.core.LibraryController.find_exact
+
+PlaybackController
+------------------
+
+.. automethod:: mopidy.core.PlaylistsController.filter
+.. automethod:: mopidy.core.PlaylistsController.get_playlists
+
+.. autoattribute:: mopidy.core.PlaylistsController.playlists
