@@ -279,6 +279,8 @@ class LibraryController(object):
         :type query: dict
         :param uris: zero or more URI roots to limit the search to
         :type uris: list of strings or :class:`None`
+        :param exact: if the search should use exact matching
+        :type exact: :class:`bool`
         :rtype: list of :class:`mopidy.models.SearchResult`
 
         .. versionadded:: 1.0
