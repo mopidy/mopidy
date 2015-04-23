@@ -1,3 +1,9 @@
+mopidy (1.0.1-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Thu, 23 Apr 2015 23:57:37 +0200
+
 mopidy (1.0.0-3) unstable; urgency=medium
 
   * Use /var/lib/mopidy/playlists as m3u/playlists_dir.
