@@ -275,6 +275,9 @@ class LibraryController(object):
             # "file:///media/music" and "spotify:"
             search({'any': ['a']}, uris=['file:///media/music', 'spotify:'])
 
+            # Returns results matching artist 'xyz' and 'abc' in any backend
+            search({'artist': ['xyz', 'abc']})
+
         :param query: one or more queries to search for
         :type query: dict
         :param uris: zero or more URI roots to limit the search to
