@@ -219,7 +219,7 @@ class IssueGH1120RegressionTest(protocol.BaseTestCase):
             'dummy:/': [Ref.playlist(name='Top 100 tracks', uri='dummy:/1')],
         }
         self.backend.playlists.set_dummy_playlists([
-            Playlist(name='Top 100 tracks', uri='dummy:/1'),
+            Playlist(name='Top 100 tracks', uri='dummy:/1', last_modified=123),
         ])
 
         response1 = self.send_request('lsinfo "/"')
