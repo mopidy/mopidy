@@ -189,13 +189,8 @@ class LibraryController(object):
         .. deprecated:: 1.0
             The ``uri`` argument. Use ``uris`` instead.
         """
-        none_set = uri is None and uris is None
-        both_set = uri is not None and uris is not None
-
-        if none_set or both_set:
+        if sum(o is not None for o in [uri, uris]) != 1:
             raise ValueError("One of 'uri' or 'uris' must be set")
-
-        # TODO: validation.one_of(*args)?
 
         uris is None or validation.check_uris(uris)
         uri is None or validation.check_uri(uri)

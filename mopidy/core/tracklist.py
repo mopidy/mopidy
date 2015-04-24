@@ -406,10 +406,9 @@ class TracklistController(object):
         .. deprecated:: 1.0
             The ``tracks`` and ``uri`` arguments. Use ``uris``.
         """
-        assert tracks is not None or uri is not None or uris is not None, \
-            'tracks, uri or uris must be provided'
-        # TODO: check that only one of tracks uri and uris is set...
-        # TODO: can at_position be negative?
+        if sum(o is not None for o in [tracks, uri, uris]) != 1:
+            raise ValueError(
+                'Exactly one of tracks, uri or uris must be provided')
 
         tracks is None or validation.check_instances(tracks, Track)
         uri is None or validation.check_uri(uri)
