@@ -137,7 +137,8 @@ class LibraryController(object):
         Unknown URIs or URIs the corresponding backend couldn't find anything
         for will simply return an empty list for that URI.
 
-        :param list uris: list of URIs to find images for
+        :param uris: list of URIs to find images for
+        :type uris: list of string
         :rtype: {uri: tuple of :class:`mopidy.models.Image`}
 
         .. versionadded:: 1.0
@@ -170,7 +171,7 @@ class LibraryController(object):
 
     def lookup(self, uri=None, uris=None):
         """
-        Lookup the given URI.
+        Lookup the given URIs.
 
         If the URI expands to multiple tracks, the returned list will contain
         them all.
@@ -180,7 +181,7 @@ class LibraryController(object):
         :param uris: track URIs
         :type uris: list of string or :class:`None`
         :rtype: list of :class:`mopidy.models.Track` if uri was set or
-            a {uri: list of :class:`mopidy.models.Track`} if uris was set.
+            {uri: list of :class:`mopidy.models.Track`} if uris was set.
 
         .. versionadded:: 1.0
             The ``uris`` argument.
@@ -281,7 +282,7 @@ class LibraryController(object):
         :param query: one or more queries to search for
         :type query: dict
         :param uris: zero or more URI roots to limit the search to
-        :type uris: list of strings or :class:`None`
+        :type uris: list of string or :class:`None`
         :param exact: if the search should use exact matching
         :type exact: :class:`bool`
         :rtype: list of :class:`mopidy.models.SearchResult`
