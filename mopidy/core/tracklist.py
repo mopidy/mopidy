@@ -375,26 +375,29 @@ class TracklistController(object):
 
     def add(self, tracks=None, at_position=None, uri=None, uris=None):
         """
-        Add the track or list of tracks to the tracklist.
+        Add tracks to the tracklist.
 
         If ``uri`` is given instead of ``tracks``, the URI is looked up in the
         library and the resulting tracks are added to the tracklist.
 
-        If ``uris`` is given instead of ``tracks``, the URIs are looked up in
-        the library and the resulting tracks are added to the tracklist.
+        If ``uris`` is given instead of ``uri`` or ``tracks``, the URIs are
+        looked up in the library and the resulting tracks are added to the
+        tracklist.
 
-        If ``at_position`` is given, the tracks placed at the given position in
-        the tracklist. If ``at_position`` is not given, the tracks are appended
-        to the end of the tracklist.
+        If ``at_position`` is given, the tracks are inserted at the given
+        position in the tracklist. If ``at_position`` is not given, the tracks
+        are appended to the end of the tracklist.
 
         Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
 
         :param tracks: tracks to add
-        :type tracks: list of :class:`mopidy.models.Track`
-        :param at_position: position in tracklist to add track
+        :type tracks: list of :class:`mopidy.models.Track` or :class:`None`
+        :param at_position: position in tracklist to add tracks
         :type at_position: int or :class:`None`
         :param uri: URI for tracks to add
-        :type uri: string
+        :type uri: string or :class:`None`
+        :param uris: list of URIs for tracks to add
+        :type uris: list of string or :class:`None`
         :rtype: list of :class:`mopidy.models.TlTrack`
 
         .. versionadded:: 1.0
