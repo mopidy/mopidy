@@ -71,9 +71,17 @@ class String(Field):
         super(String, self).__init__(type=basestring, default=default)
 
 
+class Date(String):
+    pass  # TODO: make this check for YYYY-MM-DD, YYYY-MM, YYYY using stftime.
+
+
 class Identifier(String):
     def validate(self, value):
         return intern(str(super(Identifier, self).validate(value)))
+
+
+class Uri(Identifier):
+    pass  # TODO: validate URIs?
 
 
 class Integer(Field):

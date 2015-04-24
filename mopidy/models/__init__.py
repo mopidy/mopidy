@@ -23,7 +23,7 @@ class Ref(ImmutableObject):
     """
 
     #: The object URI. Read-only.
-    uri = fields.Identifier()
+    uri = fields.Uri()
 
     #: The object name. Read-only.
     name = fields.String()
@@ -87,7 +87,7 @@ class Image(ImmutableObject):
     """
 
     #: The image URI. Read-only.
-    uri = fields.Identifier()
+    uri = fields.Uri()
 
     #: Optional width of the image or :class:`None`. Read-only.
     width = fields.Integer(min=0)
@@ -108,7 +108,7 @@ class Artist(ImmutableObject):
     """
 
     #: The artist URI. Read-only.
-    uri = fields.Identifier()
+    uri = fields.Uri()
 
     #: The artist name. Read-only.
     name = fields.String()
@@ -139,7 +139,7 @@ class Album(ImmutableObject):
     """
 
     #: The album URI. Read-only.
-    uri = fields.Identifier()
+    uri = fields.Uri()
 
     #: The album name. Read-only.
     name = fields.String()
@@ -154,7 +154,7 @@ class Album(ImmutableObject):
     num_discs = fields.Integer(min=0)
 
     #: The album release date. Read-only.
-    date = fields.String()  # TODO: add date type
+    date = fields.Date()
 
     #: The MusicBrainz ID of the album. Read-only.
     musicbrainz_id = fields.Identifier()
@@ -202,7 +202,7 @@ class Track(ImmutableObject):
     """
 
     #: The track URI. Read-only.
-    uri = fields.Identifier()
+    uri = fields.Uri()
 
     #: The track name. Read-only.
     name = fields.String()
@@ -229,7 +229,7 @@ class Track(ImmutableObject):
     disc_no = fields.Integer(min=0)
 
     #: The track release date. Read-only.
-    date = fields.String()  # TODO: add date type
+    date = fields.Date()
 
     #: The track length in milliseconds. Read-only.
     length = fields.Integer(min=0)
@@ -304,7 +304,7 @@ class Playlist(ImmutableObject):
     """
 
     #: The playlist URI. Read-only.
-    uri = fields.Identifier()
+    uri = fields.Uri()
 
     #: The playlist name. Read-only.
     name = fields.String()
@@ -340,7 +340,7 @@ class SearchResult(ImmutableObject):
     """
 
     # The search result URI. Read-only.
-    uri = fields.Identifier()
+    uri = fields.Uri()
 
     # The tracks matching the search query. Read-only.
     tracks = fields.Collection(type=Track, container=tuple)
