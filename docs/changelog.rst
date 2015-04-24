@@ -4,6 +4,14 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+v1.0.2 (unreleased)
+===================
+
+Bug fix release.
+
+- HTTP: Make event broadcasts work with Tornado 2.3, the previous threading fix
+  broke this.
+
 
 v1.0.1 (2015-04-23)
 ===================
