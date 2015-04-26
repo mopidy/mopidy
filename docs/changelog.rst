@@ -16,6 +16,9 @@ Bug fix release.
   out this can cause distortions in certain cases. Give this an other go with
   a more generous buffer size. (Fixes: :issue:`1147`)
 
+- Audio: Make sure mute events get emitted by software mixer.
+  (Fixes: :issue:`1146`)
+
 
 v1.0.1 (2015-04-23)
 ===================

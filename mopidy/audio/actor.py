@@ -194,16 +194,14 @@ class SoftwareMixer(object):
 
     def set_volume(self, volume):
         self._element.set_property('volume', volume / 100.0)
-        self._mixer.trigger_volume_changed(volume)
+        self._mixer.trigger_volume_changed(self.get_volume())
 
     def get_mute(self):
         return self._element.get_property('mute')
 
     def set_mute(self, mute):
-        result = self._element.set_property('mute', bool(mute))
-        if result:
-            self._mixer.trigger_mute_changed(bool(mute))
-        return result
+        self._element.set_property('mute', bool(mute))
+        self._mixer.trigger_mute_changed(self.get_mute())
 
 
 class _Handler(object):
