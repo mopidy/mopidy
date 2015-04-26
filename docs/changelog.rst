@@ -12,6 +12,10 @@ Bug fix release.
 - HTTP: Make event broadcasts work with Tornado 2.3, the previous threading fix
   broke this.
 
+- Audio: Fix for :issue:`1097` tuned down the buffer size in the queue. Turns
+  out this can cause distortions in certain cases. Give this an other go with
+  a more generous buffer size. (Fixes: :issue:`1147`)
+
 
 v1.0.1 (2015-04-23)
 ===================
