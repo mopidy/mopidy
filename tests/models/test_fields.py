@@ -2,7 +2,8 @@ from __future__ import absolute_import, unicode_literals
 
 import unittest
 
-from mopidy.models import *  # noqa: F403
+from mopidy.models.fields import *  # noqa: F403
+from mopidy.models.immutable import ImmutableObjectMeta
 
 
 def create_instance(field):
