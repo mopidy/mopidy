@@ -38,7 +38,6 @@ def model_json_decoder(dct):
 
     """
     if '__model__' in dct:
-        # TODO: move models to a global constant once we split this module
         models = {c.__name__: c for c in ImmutableObject.__subclasses__()}
         model_name = dct.pop('__model__')
         if model_name in models:
