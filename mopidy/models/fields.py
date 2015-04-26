@@ -72,7 +72,7 @@ class String(Field):
 
 
 class Date(String):
-    pass  # TODO: make this check for YYYY-MM-DD, YYYY-MM, YYYY using stftime.
+    pass  # TODO: make this check for YYYY-MM-DD, YYYY-MM, YYYY using strptime.
 
 
 class Identifier(String):
@@ -80,7 +80,7 @@ class Identifier(String):
         return intern(str(super(Identifier, self).validate(value)))
 
 
-class Uri(Identifier):
+class URI(Identifier):
     pass  # TODO: validate URIs?
 
 
@@ -92,7 +92,7 @@ class Integer(Field):
     :param default: default value for field
     :param min: field value must be larger or equal to this value when set
     :param max: field value must be smaller or equal to this value when set
-        """
+    """
 
     def __init__(self, default=None, min=None, max=None):
         self._min = min

@@ -2,9 +2,11 @@ from __future__ import absolute_import, unicode_literals
 
 from mopidy.models import fields
 from mopidy.models.immutable import ImmutableObject
+from mopidy.models.serialize import ModelJSONEncoder, model_json_decoder
 
-# TODO: remove the following "exports" once users have been migrated
-from mopidy.models.serialize import model_json_decoder, ModelJSONEncoder  # noqa
+__all__ = [
+    'ImmutableObject', 'Ref', 'Image', 'Artist', 'Album', 'track', 'TlTrack',
+    'Playlist', 'SearchResult', 'model_json_decoder', 'ModelJSONEncoder']
 
 
 class Ref(ImmutableObject):
@@ -23,7 +25,7 @@ class Ref(ImmutableObject):
     """
 
     #: The object URI. Read-only.
-    uri = fields.Uri()
+    uri = fields.URI()
 
     #: The object name. Read-only.
     name = fields.String()
@@ -87,7 +89,7 @@ class Image(ImmutableObject):
     """
 
     #: The image URI. Read-only.
-    uri = fields.Uri()
+    uri = fields.URI()
 
     #: Optional width of the image or :class:`None`. Read-only.
     width = fields.Integer(min=0)
@@ -108,7 +110,7 @@ class Artist(ImmutableObject):
     """
 
     #: The artist URI. Read-only.
-    uri = fields.Uri()
+    uri = fields.URI()
 
     #: The artist name. Read-only.
     name = fields.String()
@@ -139,7 +141,7 @@ class Album(ImmutableObject):
     """
 
     #: The album URI. Read-only.
-    uri = fields.Uri()
+    uri = fields.URI()
 
     #: The album name. Read-only.
     name = fields.String()
@@ -202,7 +204,7 @@ class Track(ImmutableObject):
     """
 
     #: The track URI. Read-only.
-    uri = fields.Uri()
+    uri = fields.URI()
 
     #: The track name. Read-only.
     name = fields.String()
@@ -304,7 +306,7 @@ class Playlist(ImmutableObject):
     """
 
     #: The playlist URI. Read-only.
-    uri = fields.Uri()
+    uri = fields.URI()
 
     #: The playlist name. Read-only.
     name = fields.String()
@@ -340,7 +342,7 @@ class SearchResult(ImmutableObject):
     """
 
     # The search result URI. Read-only.
-    uri = fields.Uri()
+    uri = fields.URI()
 
     # The tracks matching the search query. Read-only.
     tracks = fields.Collection(type=Track, container=tuple)
