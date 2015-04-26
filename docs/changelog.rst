@@ -5,6 +5,22 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v1.0.2 (2015-04-27)
+===================
+
+Bug fix release.
+
+- HTTP: Make event broadcasts work with Tornado 2.3 again. The threading fix
+  in v1.0.1 broke this.
+
+- Audio: Fix for :issue:`1097` tuned down the buffer size in the queue. Turns
+  out this can cause distortions in certain cases. Give this an other go with
+  a more generous buffer size. (Fixes: :issue:`1147`, PR: :issue:`1152`)
+
+- Audio: Make sure mute events get emitted by software mixer.
+  (Fixes: :issue:`1146`, PR: :issue:`1152`)
+
+
 v1.0.1 (2015-04-23)
 ===================
 

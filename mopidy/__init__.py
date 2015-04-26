@@ -30,4 +30,4 @@ except ImportError:
 warnings.filterwarnings('ignore', 'could not open display')
 
 
-__version__ = '1.0.1'
+__version__ = '1.0.2'
