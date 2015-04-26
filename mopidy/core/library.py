@@ -190,7 +190,7 @@ class LibraryController(object):
             The ``uri`` argument. Use ``uris`` instead.
         """
         if sum(o is not None for o in [uri, uris]) != 1:
-            raise ValueError("One of 'uri' or 'uris' must be set")
+            raise ValueError('Exactly one of "uri" or "uris" must be set')
 
         uris is None or validation.check_uris(uris)
         uri is None or validation.check_uri(uri)

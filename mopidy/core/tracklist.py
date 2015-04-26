@@ -408,7 +408,7 @@ class TracklistController(object):
         """
         if sum(o is not None for o in [tracks, uri, uris]) != 1:
             raise ValueError(
-                'Exactly one of tracks, uri or uris must be provided')
+                'Exactly one of "tracks", "uri" or "uris" must be set')
 
         tracks is None or validation.check_instances(tracks, Track)
         uri is None or validation.check_uri(uri)
