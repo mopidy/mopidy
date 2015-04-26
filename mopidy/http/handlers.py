@@ -88,9 +88,13 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
     @classmethod
     def broadcast(cls, msg):
+        if hasattr(tornado.ioloop.IOLoop, 'current'):
+            loop = tornado.ioloop.IOLoop.current()
+        else:
+            loop = tornado.ioloop.IOLoop.instance()  # Fallback for 2.3
+
         # This can be called from outside the Tornado ioloop, so we need to
         # safely cross the thread boundary by adding a callback to the loop.
-        loop = tornado.ioloop.IOLoop.current()
         for client in cls.clients:
             # One callback per client to keep time we hold up the loop short
             loop.add_callback(_send_broadcast, client, msg)
