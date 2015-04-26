@@ -277,9 +277,12 @@ class PlaybackController(object):
         :param tlid: TLID of the track to play
         :type tlid: :class:`int` or :class:`None`
         """
+        if sum(o is not None for o in [tl_track, tlid]) > 1:
+            raise ValueError('At most one of "tl_track" and "tlid" may be set')
+
         tl_track is None or validation.check_instance(tl_track, models.TlTrack)
         tlid is None or validation.check_integer(tlid, min=0)
-        # TODO: check one of or none for args
+
         if tl_track:
             deprecation.warn('core.playback.play:tl_track_kwarg', pending=True)
 
