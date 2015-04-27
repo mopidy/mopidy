@@ -54,6 +54,8 @@ extension. The cassettes have NFC tags used to select playlists from Spotify.
 
 To get started with Mopidy, start by reading :ref:`installation`.
 
+.. _getting-help:
+
 **Getting help**
 
 If you get stuck, you can get help at the `Mopidy discussion forum
