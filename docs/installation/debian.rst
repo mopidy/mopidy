@@ -22,7 +22,7 @@ from scratch, we have a guide for installing Debian/Raspbian and Mopidy. See
    - Raspbian stable ("jessie") and testing ("stretch"),
    - Ubuntu 14.04 LTS and later.
 
-   Some of the packages *does not* work with Ubuntu 12.04 LTS or Debian 7
+   Some of the packages *do not* work with Ubuntu 12.04 LTS or Debian 7
    "wheezy".
 
    This is just what we currently support, not a promise to continue to
