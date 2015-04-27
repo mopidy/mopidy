@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+import functools
 import logging
 import os
 import socket
@@ -91,13 +92,14 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         if hasattr(tornado.ioloop.IOLoop, 'current'):
             loop = tornado.ioloop.IOLoop.current()
         else:
-            loop = tornado.ioloop.IOLoop.instance()  # Fallback for 2.3
+            loop = tornado.ioloop.IOLoop.instance()  # Fallback for pre 3.0
 
         # This can be called from outside the Tornado ioloop, so we need to
         # safely cross the thread boundary by adding a callback to the loop.
         for client in cls.clients:
             # One callback per client to keep time we hold up the loop short
-            loop.add_callback(_send_broadcast, client, msg)
+            # NOTE: Pre 3.0 does not support *args or **kwargs...
+            loop.add_callback(functools.partial(_send_broadcast, client, msg))
 
     def initialize(self, core):
         self.jsonrpc = make_jsonrpc_wrapper(core)

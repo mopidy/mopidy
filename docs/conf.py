@@ -106,6 +106,9 @@ from mopidy.utils.versioning import get_version
 release = get_version()
 version = '.'.join(release.split('.')[:2])
 
+# To make the build reproducible, avoid using today's date in the manpages
+today = '2015'
+
 exclude_trees = ['_build']
 
 pygments_style = 'sphinx'
