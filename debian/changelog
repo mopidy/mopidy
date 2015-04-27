@@ -1,3 +1,9 @@
+mopidy (1.0.3-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Tue, 28 Apr 2015 00:03:41 +0200
+
 mopidy (1.0.2-1) unstable; urgency=medium
 
   * New upstream release.
