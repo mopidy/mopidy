@@ -4,16 +4,18 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+
 v1.0.3 (unreleased)
 ===================
 
-- HTTP: An other follow-up to the pre 3.0 fixing. Since the tests aren't run
-  for 2.3 we didn't catch that our previous fix wasn't sufficient.
-  (Fixes: :issue:`1153`)
+- HTTP: Another follow-up to the pre 3.0 fixing. Since the tests aren't run for
+  2.3 we didn't catch that our previous fix wasn't sufficient. (Fixes:
+  :issue:`1153`, PR: :issue:`1154`)
 
 - Audio: Follow-up fix for :issue:`1097` still exhibits issues for certain
   setups. We are giving this get an other go by setting the buffer size to
-  maximum 100ms instead of a fixed number of buffers. (Fixes: :issue:`1147`)
+  maximum 100ms instead of a fixed number of buffers. (Fixes: :issue:`1147`,
+  PR: :issue:`1154`)
 
 
 v1.0.2 (2015-04-27)
