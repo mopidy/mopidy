@@ -11,6 +11,10 @@ v1.0.3 (unreleased)
   for 2.3 we didn't catch that our previous fix wasn't sufficient.
   (Fixes: :issue:`1153`)
 
+- Audio: Follow-up fix for :issue:`1097` still exhibits issues for certain
+  setups. We are giving this get an other go by setting the buffer size to
+  maximum 100ms instead of a fixed number of buffers. (Fixes: :issue:`1147`)
+
 
 v1.0.2 (2015-04-27)
 ===================
