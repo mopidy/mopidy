@@ -4,6 +4,13 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+v1.0.3 (unreleased)
+===================
+
+- HTTP: An other follow-up to the pre 3.0 fixing. Since the tests aren't run
+  for 2.3 we didn't catch that our previous fix wasn't sufficient.
+  (Fixes: :issue:`1153`)
+
 
 v1.0.2 (2015-04-27)
 ===================
