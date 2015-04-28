@@ -27,6 +27,7 @@ Core API
   ``tl_track`` versions of the calls. (Fixes: :issue:`1131` PR: :issue:`1136`,
   :issue:`1140`)
 
+
 Models
 ------
 
@@ -37,6 +38,12 @@ Models
   overhead per instance by using slots, intern identifiers and automatically
   reuse instances. For the test data set this was developed against, a library
   of ~14000 tracks, went from needing ~75MB to ~17MB. (Fixes: :issue:`348`)
+
+Utils
+-----
+
+- Add :func:`mopidy.utils.http.format_proxy` and
+  :func:`mopidy.utils.http.format_user_agent`. (Part of: :issue:`1156`)
 
 Internal changes
 ----------------
