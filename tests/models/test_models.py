@@ -113,7 +113,7 @@ class RefTest(unittest.TestCase):
 
     def test_repr_without_results(self):
         self.assertEqual(
-            "Ref(name=u'foo', type=u'artist', uri='uri')",
+            "Ref(name=u'foo', type='artist', uri='uri')",
             repr(Ref(uri='uri', name='foo', type='artist')))
 
     def test_serialize_without_results(self):

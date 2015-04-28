@@ -30,6 +30,11 @@ class Ref(ImmutableObject):
     #: The object name. Read-only.
     name = fields.String()
 
+    #: The object type, e.g. "artist", "album", "track", "playlist",
+    #: "directory". Read-only.
+    type = fields.Identifier()  # TODO: consider locking this down.
+    # type = fields.Field(choices=(ALBUM, ARTIST, DIRECTORY, PLAYLIST, TRACK))
+
     #: Constant used for comparison with the :attr:`type` field.
     ALBUM = 'album'
 
@@ -44,10 +49,6 @@ class Ref(ImmutableObject):
 
     #: Constant used for comparison with the :attr:`type` field.
     TRACK = 'track'
-
-    #: The object type, e.g. "artist", "album", "track", "playlist",
-    #: "directory". Read-only.
-    type = fields.Field(choices=(ALBUM, ARTIST, DIRECTORY, PLAYLIST, TRACK))
 
     @classmethod
     def album(cls, **kwargs):
