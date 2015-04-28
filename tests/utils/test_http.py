@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import re
+
 import pytest
 
 from mopidy.utils import http
@@ -18,3 +20,12 @@ from mopidy.utils import http
 ])
 def test_format_proxy(config, expected):
     assert http.format_proxy(config) == expected
+
+
+@pytest.mark.parametrize("name,expected", [
+    (None, r'^Mopidy/[^ ]+ CPython|/[^ ]+$'),
+    ('Foo', r'^Foo Mopidy/[^ ]+ CPython|/[^ ]+$'),
+    ('Foo/1.2.3', r'^Foo/1.2.3 Mopidy/[^ ]+ CPython|/[^ ]+$'),
+])
+def test_format_user_agent(name, expected):
+    assert re.match(expected, http.format_user_agent(name))

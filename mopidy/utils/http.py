@@ -1,5 +1,11 @@
 from __future__ import unicode_literals
 
+import platform
+
+import mopidy
+
+"Helpers for configuring HTTP clients used in Mopidy extensions."
+
 
 def format_proxy(proxy_config):
     """Convert a Mopidy proxy config to the commonly used proxy string format.
@@ -23,3 +29,17 @@ def format_proxy(proxy_config):
                            username=proxy_config.get('username'),
                            password=proxy_config.get('password'),
                            hostname=proxy_config['hostname'], port=port)
+
+
+def format_user_agent(name=None):
+    """Construct a User-Agent suitable for use in client code.
+
+    This will identify use by the provided name (which should be
+    ``dist_name/version``), Mopidy version and Python version.
+    """
+    parts = ['Mopidy/%s' % (mopidy.__version__),
+             '%s/%s' % (platform.python_implementation(),
+                        platform.python_version())]
+    if name:
+        parts.insert(0, name)
+    return ' '.join(parts)
