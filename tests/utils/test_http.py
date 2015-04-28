@@ -23,6 +23,12 @@ def test_format_proxy(config, expected):
     assert http.format_proxy(config) == expected
 
 
+def test_format_proxy_without_auth():
+    config = {'username': 'user', 'password': 'pass', 'hostname': 'proxy.lan'}
+    formated_proxy = http.format_proxy(config, auth=False)
+    assert formated_proxy == 'http://proxy.lan:80'
+
+
 @pytest.mark.parametrize("name,expected", [
     (None, r'^Mopidy/[^ ]+ CPython|/[^ ]+$'),
     ('Foo', r'^Foo Mopidy/[^ ]+ CPython|/[^ ]+$'),
