@@ -10,6 +10,7 @@ from mopidy.utils import http
 @pytest.mark.parametrize("config,expected", [
     ({}, None),
     ({'hostname': 'proxy.lan'}, 'http://proxy.lan:80'),
+    ({'scheme': None, 'hostname': 'proxy.lan'}, 'http://proxy.lan:80'),
     ({'scheme': 'https', 'hostname': 'proxy.lan'}, 'https://proxy.lan:80'),
     ({'username': 'user', 'hostname': 'proxy.lan'}, 'http://proxy.lan:80'),
     ({'password': 'pass', 'hostname': 'proxy.lan'}, 'http://proxy.lan:80'),

@@ -25,7 +25,7 @@ def format_proxy(proxy_config):
     if port < 0:
         port = 80
 
-    return template.format(scheme=proxy_config.get('scheme', 'http'),
+    return template.format(scheme=proxy_config.get('scheme') or 'http',
                            username=proxy_config.get('username'),
                            password=proxy_config.get('password'),
                            hostname=proxy_config['hostname'], port=port)
