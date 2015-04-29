@@ -18,6 +18,14 @@ class InheritanceTest(unittest.TestCase):
         class Foo(Track):
             pass
 
+    def test_sub_class_can_have_its_own_slots(self):
+
+        class Foo(Track):
+            __slots__ = ('_foo',)
+
+        f = Foo()
+        f._foo = 123
+
 
 class CachingTest(unittest.TestCase):
 

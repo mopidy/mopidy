@@ -22,7 +22,8 @@ class ImmutableObjectMeta(type):
 
         attrs['_fields'] = fields
         attrs['_instances'] = weakref.WeakValueDictionary()
-        attrs['__slots__'] = ['_hash'] + fields.values()
+        attrs['__slots__'] = list(attrs.get('__slots__', []))
+        attrs['__slots__'].extend(['_hash'] + fields.values())
 
         for ancestor in [b for base in bases for b in inspect.getmro(base)]:
             if '__weakref__' in getattr(ancestor, '__slots__', []):
