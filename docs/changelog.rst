@@ -5,6 +5,17 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v1.0.4 (2015-04-30)
+===================
+
+Bug fix release.
+
+- Audio: Since all previous attempts at tweaking the queuing for :issue:`1097`
+  seems to break things in subtle ways for different users. We are giving up
+  on tweaking the defaults and just going to live with a bit more lag on
+  software volume changes. (Fixes: :issue:`1147`)
+
+
 v1.0.3 (2015-04-28)
 ===================
 
@@ -16,7 +27,7 @@ Bug fix release.
 
 - Audio: Follow-up fix for :issue:`1097` still exhibits issues for certain
   setups. We are giving this get an other go by setting the buffer size to
-  maximum 100ms instead of a fixed number of buffers. (Fixes: :issue:`1147`,
+  maximum 100ms instead of a fixed number of buffers. (Addresses: :issue:`1147`,
   PR: :issue:`1154`)
 
 
@@ -30,7 +41,7 @@ Bug fix release.
 
 - Audio: Fix for :issue:`1097` tuned down the buffer size in the queue. Turns
   out this can cause distortions in certain cases. Give this an other go with
-  a more generous buffer size. (Fixes: :issue:`1147`, PR: :issue:`1152`)
+  a more generous buffer size. (Addresses: :issue:`1147`, PR: :issue:`1152`)
 
 - Audio: Make sure mute events get emitted by software mixer.
   (Fixes: :issue:`1146`, PR: :issue:`1152`)
