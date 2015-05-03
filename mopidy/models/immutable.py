@@ -15,7 +15,9 @@ class ImmutableObjectMeta(type):
 
     def __new__(cls, name, bases, attrs):
         fields = {}
-        for key, value in attrs.items():
+        for base in bases:  # Copy parent fields over to our state
+            fields.update(getattr(base, '_fields', {}))
+        for key, value in attrs.items():  # Add our own fields
             if isinstance(value, Field):
                 fields[key] = '_' + key
                 value._name = key
