@@ -15,8 +15,8 @@ API reference
 
     concepts
     models
-    backends
     core
+    backends
     audio
     mixer
     frontends
