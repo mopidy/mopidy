@@ -106,7 +106,7 @@ class LibraryController(object):
         recommended to use this method.
 
         :param string field: One of ``artist``, ``albumartist``, ``album``,
-            ``composer``, ``performer``, ``date``or ``genre``.
+            ``composer``, ``performer``, ``date`` or ``genre``.
         :param dict query: Query to use for limiting results, see
             :meth:`search` for details about the query format.
         :rtype: set of values corresponding to the requested field type.
