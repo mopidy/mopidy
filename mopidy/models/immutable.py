@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
 import copy
-import inspect
 import itertools
 import weakref
 
@@ -27,12 +26,6 @@ class ImmutableObjectMeta(type):
         attrs['__slots__'] = list(attrs.get('__slots__', []))
         attrs['__slots__'].extend(['_hash'] + fields.values())
 
-        for ancestor in [b for base in bases for b in inspect.getmro(base)]:
-            if '__weakref__' in getattr(ancestor, '__slots__', []):
-                break
-        else:
-            attrs['__slots__'].append('__weakref__')
-
         return super(ImmutableObjectMeta, cls).__new__(cls, name, bases, attrs)
 
     def __call__(cls, *args, **kwargs):  # noqa: N805
@@ -56,6 +49,7 @@ class ImmutableObject(object):
     """
 
     __metaclass__ = ImmutableObjectMeta
+    __slots__ = ['__weakref__']
 
     def __init__(self, *args, **kwargs):
         for key, value in kwargs.items():
