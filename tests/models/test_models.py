@@ -1168,9 +1168,3 @@ class SearchResultTest(unittest.TestCase):
         self.assertDictEqual(
             {'__model__': 'SearchResult', 'uri': 'uri'},
             SearchResult(uri='uri').serialize())
-
-    def test_to_json_and_back(self):
-        result1 = SearchResult(uri='uri')
-        serialized = json.dumps(result1, cls=ModelJSONEncoder)
-        result2 = json.loads(serialized, object_hook=model_json_decoder)
-        self.assertEqual(result1, result2)
