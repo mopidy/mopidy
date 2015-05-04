@@ -3,15 +3,14 @@ from __future__ import absolute_import, unicode_literals
 import unittest
 
 from mopidy.models.fields import *  # noqa: F403
-from mopidy.models.immutable import ImmutableObjectMeta
 
 
 def create_instance(field):
     """Create an instance of a dummy class for testing fields."""
 
     class Dummy(object):
-        __metaclass__ = ImmutableObjectMeta
         attr = field
+        attr._name = 'attr'
 
     return Dummy()
 
