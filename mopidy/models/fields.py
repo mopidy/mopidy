@@ -4,8 +4,9 @@ from __future__ import absolute_import, unicode_literals
 class Field(object):
 
     """
-    Base field for use in :class:`ImmutableObject`. These fields are
-    responsible for type checking and other data sanitation in our models.
+    Base field for use in
+    :class:`~mopidy.models.immutable.ValidatedImmutableObject`. These fields
+    are responsible for type checking and other data sanitation in our models.
 
     For simplicity fields use the Python descriptor protocol to store the
     values in the instance dictionary. Also note that fields are mutable if
@@ -19,7 +20,7 @@ class Field(object):
     """
 
     def __init__(self, default=None, type=None, choices=None):
-        self._name = None  # Set by ImmutableObjectMeta
+        self._name = None  # Set by ValidatedImmutableObjectMeta
         self._choices = choices
         self._default = default
         self._type = type
