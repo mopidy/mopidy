@@ -27,6 +27,8 @@ Core API
   ``tl_track`` versions of the calls. (Fixes: :issue:`1131` PR: :issue:`1136`,
   :issue:`1140`)
 
+- Update core to handle backend crashes and bad data. (Fixes: :issue:`1161`)
+
 Models
 ------
 
