@@ -92,3 +92,51 @@ class CoreNoneMixerListenerTest(unittest.TestCase):
     def test_forwards_mixer_mute_changed_event_to_frontends(self, send):
         self.core.mixer.set_mute(mute=True)
         self.assertEqual(send.call_count, 0)
+
+
+class CoreBadMixerTest(unittest.TestCase):
+
+    def setUp(self):  # noqa: N802
+        self.mixer = mock.Mock()
+        self.mixer.actor_ref.actor_class.__name__ = 'DummyMixer'
+        self.core = core.Core(mixer=self.mixer, backends=[])
+
+    def test_get_volume_raises_exception(self):
+        self.mixer.get_volume.return_value.get.side_effect = Exception
+        self.assertEqual(self.core.mixer.get_volume(), None)
+
+    def test_get_volume_returns_negative(self):
+        self.mixer.get_volume.return_value.get.return_value = -1
+        self.assertEqual(self.core.mixer.get_volume(), None)
+
+    def test_get_volume_returns_out_of_bound(self):
+        self.mixer.get_volume.return_value.get.return_value = 1000
+        self.assertEqual(self.core.mixer.get_volume(), None)
+
+    def test_get_volume_returns_wrong_type(self):
+        self.mixer.get_volume.return_value.get.return_value = '12'
+        self.assertEqual(self.core.mixer.get_volume(), None)
+
+    def test_set_volume_exception(self):
+        self.mixer.set_volume.return_value.get.side_effect = Exception
+        self.assertFalse(self.core.mixer.set_volume(30))
+
+    def test_set_volume_non_bool_return_value(self):
+        self.mixer.set_volume.return_value.get.return_value = 'done'
+        self.assertIs(self.core.mixer.set_volume(30), True)
+
+    def test_get_mute_raises_exception(self):
+        self.mixer.get_mute.return_value.get.side_effect = Exception
+        self.assertEqual(self.core.mixer.get_mute(), None)
+
+    def test_get_mute_returns_wrong_type(self):
+        self.mixer.get_mute.return_value.get.return_value = '12'
+        self.assertEqual(self.core.mixer.get_mute(), None)
+
+    def test_set_mute_exception(self):
+        self.mixer.set_mute.return_value.get.side_effect = Exception
+        self.assertFalse(self.core.mixer.set_mute(True))
+
+    def test_set_mute_non_bool_return_value(self):
+        self.mixer.set_mute.return_value.get.return_value = 'done'
+        self.assertIs(self.core.mixer.set_mute(True), True)
