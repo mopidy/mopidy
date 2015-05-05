@@ -1,15 +1,16 @@
 from __future__ import absolute_import, unicode_literals
 
 from mopidy.models import fields
-from mopidy.models.immutable import ImmutableObject
+from mopidy.models.immutable import ImmutableObject, ValidatedImmutableObject
 from mopidy.models.serialize import ModelJSONEncoder, model_json_decoder
 
 __all__ = [
     'ImmutableObject', 'Ref', 'Image', 'Artist', 'Album', 'track', 'TlTrack',
-    'Playlist', 'SearchResult', 'model_json_decoder', 'ModelJSONEncoder']
+    'Playlist', 'SearchResult', 'model_json_decoder', 'ModelJSONEncoder',
+    'ValidatedImmutableObject']
 
 
-class Ref(ImmutableObject):
+class Ref(ValidatedImmutableObject):
 
     """
     Model to represent URI references with a human friendly name and type
@@ -81,7 +82,7 @@ class Ref(ImmutableObject):
         return cls(**kwargs)
 
 
-class Image(ImmutableObject):
+class Image(ValidatedImmutableObject):
 
     """
     :param string uri: URI of the image
@@ -99,7 +100,7 @@ class Image(ImmutableObject):
     height = fields.Integer(min=0)
 
 
-class Artist(ImmutableObject):
+class Artist(ValidatedImmutableObject):
 
     """
     :param uri: artist URI
@@ -120,7 +121,7 @@ class Artist(ImmutableObject):
     musicbrainz_id = fields.Identifier()
 
 
-class Album(ImmutableObject):
+class Album(ValidatedImmutableObject):
 
     """
     :param uri: album URI
@@ -169,7 +170,7 @@ class Album(ImmutableObject):
     # actual usage of this field with more than one image.
 
 
-class Track(ImmutableObject):
+class Track(ValidatedImmutableObject):
 
     """
     :param uri: track URI
@@ -253,7 +254,7 @@ class Track(ImmutableObject):
     last_modified = fields.Integer(min=0)
 
 
-class TlTrack(ImmutableObject):
+class TlTrack(ValidatedImmutableObject):
 
     """
     A tracklist track. Wraps a regular track and it's tracklist ID.
@@ -292,7 +293,7 @@ class TlTrack(ImmutableObject):
         return iter([self.tlid, self.track])
 
 
-class Playlist(ImmutableObject):
+class Playlist(ValidatedImmutableObject):
 
     """
     :param uri: playlist URI
@@ -329,7 +330,7 @@ class Playlist(ImmutableObject):
         return len(self.tracks)
 
 
-class SearchResult(ImmutableObject):
+class SearchResult(ValidatedImmutableObject):
 
     """
     :param uri: search result URI
