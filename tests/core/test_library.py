@@ -429,8 +429,7 @@ class LegacyFindExactToSearchLibraryTest(unittest.TestCase):
         # We are just testing that this doesn't fail.
 
 
-@mock.patch('mopidy.core.library.logger')
-class BackendFailuresCoreLibraryTest(unittest.TestCase):
+class MockBackendCoreLibraryBase(unittest.TestCase):
 
     def setUp(self):  # noqa: N802
         dummy_root = Ref.directory(uri='dummy:directory', name='dummy')
@@ -445,158 +444,182 @@ class BackendFailuresCoreLibraryTest(unittest.TestCase):
 
         self.core = core.Core(mixer=None, backends=[self.backend])
 
-    def test_browse_backend_get_root_exception_gets_ignored(self, logger):
+
+@mock.patch('mopidy.core.library.logger')
+class BrowseBadBackendTest(MockBackendCoreLibraryBase):
+
+    def test_backend_raises_exception_for_root(self, logger):
         # Might happen if root_directory is a property for some weird reason.
         self.library.root_directory.get.side_effect = Exception
         self.assertEqual([], self.core.library.browse(None))
         logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
 
-    def test_browse_backend_get_root_bad_value(self, logger):
-        self.library.root_directory.get.return_value = 123
-        self.assertEqual([], self.core.library.browse(None))
-        logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
-
-    def test_browse_backend_get_root_none(self, logger):
+    def test_backend_returns_none_for_root(self, logger):
         self.library.root_directory.get.return_value = None
         self.assertEqual([], self.core.library.browse(None))
         logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
 
-    def test_browse_backend_browse_uri_exception_gets_ignored(self, logger):
+    def test_backend_returns_wrong_type_for_root(self, logger):
+        self.library.root_directory.get.return_value = 123
+        self.assertEqual([], self.core.library.browse(None))
+        logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
+
+    def test_backend_raises_exception_for_browse(self, logger):
         self.library.browse.return_value.get.side_effect = Exception
         self.assertEqual([], self.core.library.browse('dummy:directory'))
         logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
 
-    def test_browse_backend_browse_uri_bad_value(self, logger):
+    def test_backend_returns_wrong_type_for_browse(self, logger):
         self.library.browse.return_value.get.return_value = [123]
         self.assertEqual([], self.core.library.browse('dummy:directory'))
         logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
 
-    def test_get_distinct_backend_exception_gets_ignored(self, logger):
+
+@mock.patch('mopidy.core.library.logger')
+class GetDistinctBadBackendTest(MockBackendCoreLibraryBase):
+
+    def test_backend_raises_exception(self, logger):
         self.library.get_distinct.return_value.get.side_effect = Exception
         self.assertEqual(set(), self.core.library.get_distinct('artist'))
         logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
 
-    def test_get_distinct_backend_returns_string(self, logger):
-        self.library.get_distinct.return_value.get.return_value = 'abc'
-        self.assertEqual(set(), self.core.library.get_distinct('artist'))
-        logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
-
-    def test_get_distinct_backend_returns_none(self, logger):
+    def test_backend_returns_none(self, logger):
         self.library.get_distinct.return_value.get.return_value = None
         self.assertEqual(set(), self.core.library.get_distinct('artist'))
         self.assertFalse(logger.error.called)
 
-    def test_get_distinct_backend_returns_list_if_ints(self, logger):
+    def test_backend_returns_wrong_type(self, logger):
+        self.library.get_distinct.return_value.get.return_value = 'abc'
+        self.assertEqual(set(), self.core.library.get_distinct('artist'))
+        logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
+
+    def test_backend_returns_iterable_containing_wrong_types(self, logger):
         self.library.get_distinct.return_value.get.return_value = [1, 2, 3]
         self.assertEqual(set(), self.core.library.get_distinct('artist'))
         logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
 
-    def test_get_images_backend_exception_get_ignored(self, logger):
+
+@mock.patch('mopidy.core.library.logger')
+class GetImagesBadBackendTest(MockBackendCoreLibraryBase):
+
+    def test_backend_raises_exception(self, logger):
         uri = 'dummy:/1'
         self.library.get_images.return_value.get.side_effect = Exception
         self.assertEqual({uri: tuple()}, self.core.library.get_images([uri]))
         logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
 
-    def test_get_images_backend_returns_string(self, logger):
-        uri = 'dummy:/1'
-        self.library.get_images.return_value.get.return_value = 'abc'
-        self.assertEqual({uri: tuple()}, self.core.library.get_images([uri]))
-        logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
-
-    def test_get_images_backend_returns_none(self, logger):
+    def test_backend_returns_none(self, logger):
         uri = 'dummy:/1'
         self.library.get_images.return_value.get.return_value = None
         self.assertEqual({uri: tuple()}, self.core.library.get_images([uri]))
         self.assertFalse(logger.error.called)
 
-    def test_get_images_backend_returns_bad_dict(self, logger):
+    def test_backend_returns_wrong_type(self, logger):
+        uri = 'dummy:/1'
+        self.library.get_images.return_value.get.return_value = 'abc'
+        self.assertEqual({uri: tuple()}, self.core.library.get_images([uri]))
+        logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
+
+    def test_backend_returns_mapping_containing_wrong_types(self, logger):
         uri = 'dummy:/1'
         self.library.get_images.return_value.get.return_value = {uri: 'abc'}
         self.assertEqual({uri: tuple()}, self.core.library.get_images([uri]))
         logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
 
-    def test_get_images_backend_returns_dict_with_none(self, logger):
+    def test_backend_returns_mapping_containing_none(self, logger):
         uri = 'dummy:/1'
         self.library.get_images.return_value.get.return_value = {uri: None}
         self.assertEqual({uri: tuple()}, self.core.library.get_images([uri]))
         logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
 
-    def test_get_images_backend_returns_wrong_uri(self, logger):
+    def test_backend_returns_unknown_uri(self, logger):
         uri = 'dummy:/1'
         self.library.get_images.return_value.get.return_value = {'foo': []}
         self.assertEqual({uri: tuple()}, self.core.library.get_images([uri]))
         logger.warning.assert_called_with(mock.ANY, 'DummyBackend', 'foo')
 
-    def test_lookup_backend_exceptions_gets_ignored(self, logger):
+
+@mock.patch('mopidy.core.library.logger')
+class LookupByUrisBadBackendTest(MockBackendCoreLibraryBase):
+
+    def test_backend_raises_exception(self, logger):
         uri = 'dummy:/1'
         self.library.lookup.return_value.get.side_effect = Exception
         self.assertEqual({uri: []}, self.core.library.lookup(uris=[uri]))
         logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
 
-    def test_lookup_uris_backend_returns_string(self, logger):
-        uri = 'dummy:/1'
-        self.library.lookup.return_value.get.return_value = 'abc'
-        self.assertEqual({uri: []}, self.core.library.lookup(uris=[uri]))
-        logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
-
-    def test_lookup_uris_backend_returns_none(self, logger):
+    def test_backend_returns_none(self, logger):
         uri = 'dummy:/1'
         self.library.lookup.return_value.get.return_value = None
         self.assertEqual({uri: []}, self.core.library.lookup(uris=[uri]))
         self.assertFalse(logger.error.called)
 
-    def test_lookup_uris_backend_returns_bad_list(self, logger):
+    def test_backend_returns_wrong_type(self, logger):
+        uri = 'dummy:/1'
+        self.library.lookup.return_value.get.return_value = 'abc'
+        self.assertEqual({uri: []}, self.core.library.lookup(uris=[uri]))
+        logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
+
+    def test_backend_returns_iterable_containing_wrong_types(self, logger):
         uri = 'dummy:/1'
         self.library.lookup.return_value.get.return_value = [123]
         self.assertEqual({uri: []}, self.core.library.lookup(uris=[uri]))
         logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
 
-    def test_lookup_uri_backend_returns_string(self, logger):
-        uri = 'dummy:/1'
-        self.library.lookup.return_value.get.return_value = 'abc'
-        self.assertEqual([], self.core.library.lookup(uri))
-        logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
-
-    def test_lookup_uri_backend_returns_none(self, logger):
+    def test_backend_returns_none_with_uri(self, logger):
         uri = 'dummy:/1'
         self.library.lookup.return_value.get.return_value = None
         self.assertEqual([], self.core.library.lookup(uri))
         self.assertFalse(logger.error.called)
 
-    def test_lookup_uri_backend_returns_bad_list(self, logger):
+    def test_backend_returns_wrong_type_with_uri(self, logger):
+        uri = 'dummy:/1'
+        self.library.lookup.return_value.get.return_value = 'abc'
+        self.assertEqual([], self.core.library.lookup(uri))
+        logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
+
+    def test_backend_returns_iterable_wrong_types_with_uri(self, logger):
         uri = 'dummy:/1'
         self.library.lookup.return_value.get.return_value = [123]
         self.assertEqual([], self.core.library.lookup(uri))
         logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
 
-    def test_refresh_backend_exception_gets_ignored(self, logger):
+
+@mock.patch('mopidy.core.library.logger')
+class RefreshBadBackendTest(MockBackendCoreLibraryBase):
+
+    def test_backend_raises_exception(self, logger):
         self.library.refresh.return_value.get.side_effect = Exception
         self.core.library.refresh()
         logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
 
-    def test_refresh_uri_backend_exception_gets_ignored(self, logger):
+    def test_backend_raises_exception_with_uri(self, logger):
         self.library.refresh.return_value.get.side_effect = Exception
         self.core.library.refresh('dummy:/1')
         logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
 
-    def test_search_backend_exception_gets_ignored(self, logger):
+
+@mock.patch('mopidy.core.library.logger')
+class SearchBadBackendTest(MockBackendCoreLibraryBase):
+
+    def test_backend_raises_exception(self, logger):
         self.library.search.return_value.get.side_effect = Exception
         self.assertEqual([], self.core.library.search(query={'any': ['foo']}))
         logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
 
-    def test_search_backend_lookup_error_gets_through(self, logger):
+    def test_backend_raises_lookuperror(self, logger):
         # TODO: is this behavior desired? Do we need to continue handling
         # LookupError case specially.
         self.library.search.return_value.get.side_effect = LookupError
         with self.assertRaises(LookupError):
             self.core.library.search(query={'any': ['foo']})
 
-    def test_search_backend_returns_string(self, logger):
-        self.library.search.return_value.get.return_value = 'abc'
-        self.assertEqual([], self.core.library.search(query={'any': ['foo']}))
-        logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
-
-    def test_search_backend_returns_none(self, logger):
+    def test_backend_returns_none(self, logger):
         self.library.search.return_value.get.return_value = None
         self.assertEqual([], self.core.library.search(query={'any': ['foo']}))
         self.assertFalse(logger.error.called)
+
+    def test_backend_returns_wrong_type(self, logger):
+        self.library.search.return_value.get.return_value = 'abc'
+        self.assertEqual([], self.core.library.search(query={'any': ['foo']}))
+        logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
