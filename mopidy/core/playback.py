@@ -61,15 +61,25 @@ class PlaybackController(object):
 
         Returns a :class:`mopidy.models.Track` or :class:`None`.
         """
-        tl_track = self.get_current_tl_track()
-        if tl_track is not None:
-            return tl_track.track
+        return getattr(self.get_current_tl_track(), 'track', None)
 
     current_track = deprecation.deprecated_property(get_current_track)
     """
     .. deprecated:: 1.0
         Use :meth:`get_current_track` instead.
     """
+
+    def get_current_tlid(self):
+        """
+        Get the currently playing or selected TLID.
+
+        Extracted from :meth:`get_current_tl_track` for convenience.
+
+        Returns a :class:`int` or :class:`None`.
+
+        .. versionadded:: 1.1
+        """
+        return getattr(self.get_current_tl_track(), 'tlid', None)
 
     def get_stream_title(self):
         """Get the current stream title or :class:`None`."""
