@@ -16,8 +16,7 @@ class BaseCoreLibraryTest(unittest.TestCase):
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
         self.library1 = mock.Mock(spec=backend.LibraryProvider)
-        self.library1.get_images().get.return_value = {}
-        self.library1.get_images.reset_mock()
+        self.library1.get_images.return_value.get.return_value = {}
         self.library1.root_directory.get.return_value = dummy1_root
         self.backend1.library = self.library1
 
@@ -25,8 +24,7 @@ class BaseCoreLibraryTest(unittest.TestCase):
         self.backend2 = mock.Mock()
         self.backend2.uri_schemes.get.return_value = ['dummy2', 'du2']
         self.library2 = mock.Mock(spec=backend.LibraryProvider)
-        self.library2.get_images().get.return_value = {}
-        self.library2.get_images.reset_mock()
+        self.library2.get_images.return_value.get.return_value = {}
         self.library2.root_directory.get.return_value = dummy2_root
         self.backend2.library = self.library2
 
@@ -65,20 +63,17 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         self.library2.get_images.assert_called_once_with(['dummy2:track'])
 
     def test_get_images_returns_images(self):
-        self.library1.get_images().get.return_value = {
+        self.library1.get_images.return_value.get.return_value = {
             'dummy1:track': [Image(uri='uri')]}
-        self.library1.get_images.reset_mock()
 
         result = self.core.library.get_images(['dummy1:track'])
         self.assertEqual({'dummy1:track': (Image(uri='uri'),)}, result)
 
     def test_get_images_merges_results(self):
-        self.library1.get_images().get.return_value = {
+        self.library1.get_images.return_value.get.return_value = {
             'dummy1:track': [Image(uri='uri1')]}
-        self.library1.get_images.reset_mock()
-        self.library2.get_images().get.return_value = {
+        self.library2.get_images.return_value.get.return_value = {
             'dummy2:track': [Image(uri='uri2')]}
-        self.library2.get_images.reset_mock()
 
         result = self.core.library.get_images(
             ['dummy1:track', 'dummy2:track', 'dummy3:track', 'dummy4:track'])
@@ -106,11 +101,10 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         self.assertFalse(self.library2.browse.called)
 
     def test_browse_dummy1_selects_dummy1_backend(self):
-        self.library1.browse().get.return_value = [
+        self.library1.browse.return_value.get.return_value = [
             Ref.directory(uri='dummy1:directory:/foo/bar', name='bar'),
             Ref.track(uri='dummy1:track:/foo/baz.mp3', name='Baz'),
         ]
-        self.library1.browse.reset_mock()
 
         self.core.library.browse('dummy1:directory:/foo')
 
@@ -119,11 +113,10 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         self.library1.browse.assert_called_with('dummy1:directory:/foo')
 
     def test_browse_dummy2_selects_dummy2_backend(self):
-        self.library2.browse().get.return_value = [
+        self.library2.browse.return_value.get.return_value = [
             Ref.directory(uri='dummy2:directory:/bar/baz', name='quux'),
             Ref.track(uri='dummy2:track:/bar/foo.mp3', name='Baz'),
         ]
-        self.library2.browse.reset_mock()
 
         self.core.library.browse('dummy2:directory:/bar')
 
@@ -139,11 +132,10 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         self.assertEqual(self.library2.browse.call_count, 0)
 
     def test_browse_dir_returns_subdirs_and_tracks(self):
-        self.library1.browse().get.return_value = [
+        self.library1.browse.return_value.get.return_value = [
             Ref.directory(uri='dummy1:directory:/foo/bar', name='Bar'),
             Ref.track(uri='dummy1:track:/foo/baz.mp3', name='Baz'),
         ]
-        self.library1.browse.reset_mock()
 
         result = self.core.library.browse('dummy1:directory:/foo')
         self.assertEqual(result, [
@@ -199,10 +191,8 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         result1 = SearchResult(tracks=[track1])
         result2 = SearchResult(tracks=[track2])
 
-        self.library1.search().get.return_value = result1
-        self.library1.search.reset_mock()
-        self.library2.search().get.return_value = result2
-        self.library2.search.reset_mock()
+        self.library1.search.return_value.get.return_value = result1
+        self.library2.search.return_value.get.return_value = result2
 
         result = self.core.library.search({'any': ['a']})
 
@@ -234,10 +224,8 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         track1 = Track(uri='dummy1:a')
         result1 = SearchResult(tracks=[track1])
 
-        self.library1.search().get.return_value = result1
-        self.library1.search.reset_mock()
-        self.library2.search().get.return_value = None
-        self.library2.search.reset_mock()
+        self.library1.search.return_value.get.return_value = result1
+        self.library2.search.return_value.get.return_value = None
 
         result = self.core.library.search({'any': ['a']})
 
@@ -254,10 +242,8 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         result1 = SearchResult(tracks=[track1])
         result2 = SearchResult(tracks=[track2])
 
-        self.library1.search().get.return_value = result1
-        self.library1.search.reset_mock()
-        self.library2.search().get.return_value = result2
-        self.library2.search.reset_mock()
+        self.library1.search.return_value.get.return_value = result1
+        self.library2.search.return_value.get.return_value = result2
 
         result = self.core.library.search({'any': ['a']})
 

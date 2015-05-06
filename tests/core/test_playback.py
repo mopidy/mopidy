@@ -21,15 +21,13 @@ class CorePlaybackTest(unittest.TestCase):
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
         self.playback1 = mock.Mock(spec=backend.PlaybackProvider)
-        self.playback1.get_time_position().get.return_value = 1000
-        self.playback1.reset_mock()
+        self.playback1.get_time_position.return_value.get.return_value = 1000
         self.backend1.playback = self.playback1
 
         self.backend2 = mock.Mock()
         self.backend2.uri_schemes.get.return_value = ['dummy2']
         self.playback2 = mock.Mock(spec=backend.PlaybackProvider)
-        self.playback2.get_time_position().get.return_value = 2000
-        self.playback2.reset_mock()
+        self.playback2.get_time_position.return_value.get.return_value = 2000
         self.backend2.playback = self.playback2
 
         # A backend without the optional playback provider
