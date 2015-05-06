@@ -27,6 +27,9 @@ Core API
   ``tl_track`` versions of the calls. (Fixes: :issue:`1131` PR: :issue:`1136`,
   :issue:`1140`)
 
+- Add :meth:`mopidy.core.playback.PlaybackController.get_current_tlid`.
+  (Part of: :issue:`1137`)
+
 Models
 ------
 
