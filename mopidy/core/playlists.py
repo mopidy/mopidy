@@ -50,15 +50,15 @@ class PlaylistsController(object):
             for backend in set(self.backends.with_playlists.values())}
 
         results = []
-        for backend, future in futures.items():
+        for b, future in futures.items():
             try:
-                with _backend_error_handling(backend, NotImplementedError):
+                with _backend_error_handling(b, reraise=NotImplementedError):
                     playlists = future.get()
                     if playlists is not None:
                         validation.check_instances(playlists, Ref)
                         results.extend(playlists)
             except NotImplementedError:
-                backend_name = backend.actor_ref.actor_class.__name__
+                backend_name = b.actor_ref.actor_class.__name__
                 logger.warning(
                     '%s does not implement playlists.as_list(). '
                     'Please upgrade it.', backend_name)
@@ -110,7 +110,7 @@ class PlaylistsController(object):
         """
         deprecation.warn('core.playlists.get_playlists')
 
-        playlist_refs = self.as_list() or []
+        playlist_refs = self.as_list()
 
         if include_tracks:
             playlists = {r.uri: self.lookup(r.uri) for r in playlist_refs}
@@ -145,7 +145,7 @@ class PlaylistsController(object):
         :type name: string
         :param uri_scheme: use the backend matching the URI scheme
         :type uri_scheme: string
-        :rtype: :class:`mopidy.models.Playlist`
+        :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
         if uri_scheme in self.backends.with_playlists:
             backend = self.backends.with_playlists[uri_scheme]
@@ -310,7 +310,7 @@ class PlaylistsController(object):
             return None
 
         # TODO: we let AssertionError error through due to legacy tests :/
-        with _backend_error_handling(backend, AssertionError):
+        with _backend_error_handling(backend, reraise=AssertionError):
             playlist = backend.playlists.save(playlist).get()
             playlist is None or validation.check_instance(playlist, Playlist)
             if playlist:

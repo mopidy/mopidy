@@ -23,6 +23,7 @@ class CoreMixerTest(unittest.TestCase):
         self.mixer.get_volume.assert_called_once_with()
 
     def test_set_volume(self):
+        self.mixer.set_volume.return_value.get.return_value = True
         self.core.mixer.set_volume(30)
 
         self.mixer.set_volume.assert_called_once_with(30)
@@ -34,6 +35,7 @@ class CoreMixerTest(unittest.TestCase):
         self.mixer.get_mute.assert_called_once_with()
 
     def test_set_mute(self):
+        self.mixer.set_mute.return_value.get.return_value = True
         self.core.mixer.set_mute(True)
 
         self.mixer.set_mute.assert_called_once_with(True)
@@ -129,7 +131,7 @@ class SetVolumeBadBackendTest(MockBackendCoreMixerBase):
 
     def test_backend_returns_wrong_type(self):
         self.mixer.set_volume.return_value.get.return_value = 'done'
-        self.assertIs(self.core.mixer.set_volume(30), True)
+        self.assertIs(self.core.mixer.set_volume(30), None)
 
 
 class GetMuteBadBackendTest(MockBackendCoreMixerBase):
@@ -151,4 +153,4 @@ class SetMuteBadBackendTest(MockBackendCoreMixerBase):
 
     def test_backend_returns_wrong_type(self):
         self.mixer.set_mute.return_value.get.return_value = 'done'
-        self.assertIs(self.core.mixer.set_mute(True), True)
+        self.assertIs(self.core.mixer.set_mute(True), None)

@@ -536,7 +536,7 @@ class GetImagesBadBackendTest(MockBackendCoreLibraryBase):
         uri = 'dummy:/1'
         self.library.get_images.return_value.get.return_value = {'foo': []}
         self.assertEqual({uri: tuple()}, self.core.library.get_images([uri]))
-        logger.warning.assert_called_with(mock.ANY, 'DummyBackend', 'foo')
+        logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
 
 
 @mock.patch('mopidy.core.library.logger')

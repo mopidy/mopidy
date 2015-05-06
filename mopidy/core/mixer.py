@@ -7,6 +7,9 @@ from mopidy import exceptions
 from mopidy.utils import validation
 
 
+logger = logging.getLogger(__name__)
+
+
 @contextlib.contextmanager
 def _mixer_error_handling(mixer):
     try:
@@ -17,9 +20,6 @@ def _mixer_error_handling(mixer):
     except Exception:
         logger.exception('%s mixer caused an exception.',
                          mixer.actor_ref.actor_class.__name__)
-
-
-logger = logging.getLogger(__name__)
 
 
 class MixerController(object):
@@ -60,10 +60,11 @@ class MixerController(object):
             return False
 
         with _mixer_error_handling(self._mixer):
-            # TODO: log non-bool return values?
-            return bool(self._mixer.set_volume(volume).get())
+            result = self._mixer.set_volume(volume).get()
+            validation.check_instance(result, bool)
+            return result
 
-        return False
+        return None
 
     def get_mute(self):
         """Get mute state.
@@ -93,7 +94,8 @@ class MixerController(object):
             return False
 
         with _mixer_error_handling(self._mixer):
-            # TODO: log non-bool return values?
-            return bool(self._mixer.set_mute(bool(mute)).get())
+            result = self._mixer.set_mute(bool(mute)).get()
+            validation.check_instance(result, bool)
+            return result
 
         return None

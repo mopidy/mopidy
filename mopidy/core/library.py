@@ -14,13 +14,15 @@ logger = logging.getLogger(__name__)
 
 
 @contextlib.contextmanager
-def _backend_error_handling(backend):
+def _backend_error_handling(backend, reraise=None):
     try:
         yield
     except exceptions.ValidationError as e:
         logger.error('%s backend returned bad data: %s',
                      backend.actor_ref.actor_class.__name__, e)
-    except Exception:
+    except Exception as e:
+        if reraise and isinstance(e, reraise):
+            raise
         logger.exception('%s backend caused an exception.',
                          backend.actor_ref.actor_class.__name__)
 
@@ -174,10 +176,8 @@ class LibraryController(object):
                 validation.check_instance(future.get(), collections.Mapping)
                 for uri, images in future.get().items():
                     if uri not in uris:
-                        name = backend.actor_ref.actor_class.__name__
-                        logger.warning(
-                            '%s backend returned image for URI we did not '
-                            'ask for: %s', name, uri)
+                        raise exceptions.ValidationError(
+                            'Got unknown image URI: %s' % uri)
                     validation.check_instances(images, models.Image)
                     results[uri] += tuple(images)
         return results
@@ -330,31 +330,26 @@ class LibraryController(object):
             futures[backend] = backend.library.search(
                 query=query, uris=backend_uris, exact=exact)
 
+        # Some of our tests check for LookupError to catch bad queries. This is
+        # silly and should be replaced with query validation before passing it
+        # to the backends.
+        reraise = (TypeError, LookupError)
+
         results = []
         for backend, future in futures.items():
-            try:  # TODO: fix all these cases so we can use common helper
-                result = future.get()
-                if result is not None:
-                    validation.check_instance(result, models.SearchResult)
-                    results.append(result)
-            except exceptions.ValidationError as e:
-                logger.error('%s backend returned bad data: %s',
-                             backend.actor_ref.actor_class.__name__, e)
+            try:
+                with _backend_error_handling(backend, reraise=reraise):
+                    result = future.get()
+                    if result is not None:
+                        validation.check_instance(result, models.SearchResult)
+                        results.append(result)
             except TypeError:
                 backend_name = backend.actor_ref.actor_class.__name__
                 logger.warning(
                     '%s does not implement library.search() with "exact" '
                     'support. Please upgrade it.', backend_name)
-            except LookupError:
-                # Some of our tests check for this to catch bad queries. This
-                # is silly and should be replaced with query validation before
-                # passing it to the backends.
-                raise
-            except Exception:
-                logger.exception('%s backend caused an exception.',
-                                 backend.actor_ref.actor_class.__name__)
 
-        return [r for r in results if r]
+        return results
 
 
 def _normalize_query(query):
