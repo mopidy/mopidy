@@ -259,6 +259,11 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         self.library1.search.assert_called_once_with(
             query={'any': ['foobar']}, uris=None, exact=False)
 
+    def test_search_supports_query_strings(self):
+        self.core.library.search('artist:"foo bar"')
+        self.library1.search.assert_called_once_with(
+            query={'artist': ['foo bar']}, uris=None, exact=False)
+
 
 class DeprecatedFindExactCoreLibraryTest(BaseCoreLibraryTest):
 

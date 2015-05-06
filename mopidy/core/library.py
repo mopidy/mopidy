@@ -5,7 +5,8 @@ import logging
 import operator
 import urlparse
 
-from mopidy.utils import deprecation, validation
+from mopidy import compat
+from mopidy.utils import deprecation, search as search_util, validation
 
 
 logger = logging.getLogger(__name__)
@@ -274,8 +275,11 @@ class LibraryController(object):
             # Returns results matching artist 'xyz' and 'abc' in any backend
             search({'artist': ['xyz', 'abc']})
 
+            # Sample text based search
+            search('a artist:xyz "foo bar"')
+
         :param query: one or more queries to search for
-        :type query: dict
+        :type query: dict or a string
         :param uris: zero or more URI roots to limit the search to
         :type uris: list of string or :class:`None`
         :param exact: if the search should use exact matching
@@ -284,6 +288,9 @@ class LibraryController(object):
 
         .. versionadded:: 1.0
             The ``exact`` keyword argument, which replaces :meth:`find_exact`.
+
+        .. versionadded:: 1.1
+            Support for textual queries.
 
         .. deprecated:: 1.0
             Previously, if the query was empty, and the backend could support
@@ -294,7 +301,10 @@ class LibraryController(object):
         .. deprecated:: 1.1
             Providing the search query via ``kwargs`` is no longer supported.
         """
-        query = _normalize_query(query or kwargs)
+        if isinstance(query, compat.string_types):
+            query = _parse_query(query)
+        else:
+            query = _normalize_query(query or kwargs)
 
         uris is None or validation.check_uris(uris)
         query is None or validation.check_query(query)
@@ -330,6 +340,13 @@ class LibraryController(object):
                                  backend.actor_ref.actor_class.__name__)
 
         return [r for r in results if r]
+
+
+def _parse_query(query):
+    result = {}
+    for field, term in search_util.parse(query):
+        result.setdefault(field or 'any', []).append(term)
+    return result
 
 
 def _normalize_query(query):
