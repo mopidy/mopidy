@@ -121,6 +121,17 @@ class CorePlaybackTest(unittest.TestCase):
         self.assertEqual(
             self.core.playback.get_current_track(), self.tracks[0])
 
+    def test_get_current_tlid_none(self):
+        self.set_current_tl_track(None)
+
+        self.assertEqual(self.core.playback.get_current_tlid(), None)
+
+    def test_get_current_tlid_play(self):
+        self.core.playback.play(self.tl_tracks[0])
+
+        self.assertEqual(
+            self.core.playback.get_current_tlid(), self.tl_tracks[0].tlid)
+
     # TODO Test state
 
     def test_play_selects_dummy1_backend(self):
