@@ -118,13 +118,19 @@ class PlaylistsController(object):
         :rtype: :class:`mopidy.models.Playlist`
         """
         if uri_scheme in self.backends.with_playlists:
-            backend = self.backends.with_playlists[uri_scheme]
+            backends = [self.backends.with_playlists[uri_scheme]]
         else:
-            # TODO: this fallback looks suspicious
-            backend = list(self.backends.with_playlists.values())[0]
-        playlist = backend.playlists.create(name).get()
-        listener.CoreListener.send('playlist_changed', playlist=playlist)
-        return playlist
+            backends = self.backends.with_playlists.values()
+        for backend in backends:
+            try:
+                playlist = backend.playlists.create(name).get()
+            except Exception:
+                playlist = None
+            # Workaround for playlist providers that return None from create()
+            if not playlist:
+                continue
+            listener.CoreListener.send('playlist_changed', playlist=playlist)
+            return playlist
 
     def delete(self, uri):
         """

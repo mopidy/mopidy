@@ -5,6 +5,15 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v1.0.5 (UNRELEASED)
+===================
+
+Bug fix release.
+
+- Core: Add workaround for playlist providers that do not support
+  creating playlists.  (Fixes: :issue:`1162`, PR :issue:`1165`)
+
+
 v1.0.4 (2015-04-30)
 ===================
 
