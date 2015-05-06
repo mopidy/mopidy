@@ -148,20 +148,18 @@ class PlaylistsController(object):
         :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
         if uri_scheme in self.backends.with_playlists:
-            backend = self.backends.with_playlists[uri_scheme]
+            backends = [self.backends.with_playlists[uri_scheme]]
         else:
-            # TODO: loop over backends until one of them doesn't return None
-            backend = list(self.backends.with_playlists.values())[0]
+            backends = self.backends.with_playlists.values()
 
-        with _backend_error_handling(backend):
-            playlist = backend.playlists.create(name).get()
-
-            if playlist is None:
-                return None
-
-            validation.check_instance(playlist, Playlist)
-            listener.CoreListener.send('playlist_changed', playlist=playlist)
-            return playlist
+        for backend in backends:
+            with _backend_error_handling(backend):
+                result = backend.playlists.create(name).get()
+                if result is None:
+                    continue
+                validation.check_instance(result, Playlist)
+                listener.CoreListener.send('playlist_changed', playlist=result)
+                return result
 
         return None
 

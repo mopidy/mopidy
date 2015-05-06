@@ -90,8 +90,7 @@ class PlaylistTest(BasePlaylistsTest):
 
     def test_create_without_uri_scheme_uses_first_backend(self):
         playlist = Playlist()
-        self.sp1.create().get.return_value = playlist
-        self.sp1.reset_mock()
+        self.sp1.create.return_value.get.return_value = playlist
 
         result = self.core.playlists.create('foo')
 
@@ -99,10 +98,31 @@ class PlaylistTest(BasePlaylistsTest):
         self.sp1.create.assert_called_once_with('foo')
         self.assertFalse(self.sp2.create.called)
 
+    def test_create_without_uri_scheme_ignores_none_result(self):
+        playlist = Playlist()
+        self.sp1.create.return_value.get.return_value = None
+        self.sp2.create.return_value.get.return_value = playlist
+
+        result = self.core.playlists.create('foo')
+
+        self.assertEqual(playlist, result)
+        self.sp1.create.assert_called_once_with('foo')
+        self.sp2.create.assert_called_once_with('foo')
+
+    def test_create_without_uri_scheme_ignores_exception(self):
+        playlist = Playlist()
+        self.sp1.create.return_value.get.side_effect = Exception
+        self.sp2.create.return_value.get.return_value = playlist
+
+        result = self.core.playlists.create('foo')
+
+        self.assertEqual(playlist, result)
+        self.sp1.create.assert_called_once_with('foo')
+        self.sp2.create.assert_called_once_with('foo')
+
     def test_create_with_uri_scheme_selects_the_matching_backend(self):
         playlist = Playlist()
-        self.sp2.create().get.return_value = playlist
-        self.sp2.reset_mock()
+        self.sp2.create.return_value.get.return_value = playlist
 
         result = self.core.playlists.create('foo', uri_scheme='dummy2')
 
@@ -112,8 +132,7 @@ class PlaylistTest(BasePlaylistsTest):
 
     def test_create_with_unsupported_uri_scheme_uses_first_backend(self):
         playlist = Playlist()
-        self.sp1.create().get.return_value = playlist
-        self.sp1.reset_mock()
+        self.sp1.create.return_value.get.return_value = playlist
 
         result = self.core.playlists.create('foo', uri_scheme='dummy3')
 
@@ -190,8 +209,7 @@ class PlaylistTest(BasePlaylistsTest):
 
     def test_save_selects_the_dummy1_backend(self):
         playlist = Playlist(uri='dummy1:a')
-        self.sp1.save().get.return_value = playlist
-        self.sp1.reset_mock()
+        self.sp1.save.return_value.get.return_value = playlist
 
         result = self.core.playlists.save(playlist)
 
@@ -201,8 +219,7 @@ class PlaylistTest(BasePlaylistsTest):
 
     def test_save_selects_the_dummy2_backend(self):
         playlist = Playlist(uri='dummy2:a')
-        self.sp2.save().get.return_value = playlist
-        self.sp2.reset_mock()
+        self.sp2.save.return_value.get.return_value = playlist
 
         result = self.core.playlists.save(playlist)
 
