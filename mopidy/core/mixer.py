@@ -57,14 +57,14 @@ class MixerController(object):
         validation.check_integer(volume, min=0, max=100)
 
         if self._mixer is None:
-            return False
+            return False  # TODO: 2.0 return None
 
         with _mixer_error_handling(self._mixer):
             result = self._mixer.set_volume(volume).get()
             validation.check_instance(result, bool)
             return result
 
-        return None
+        return False
 
     def get_mute(self):
         """Get mute state.
@@ -91,11 +91,11 @@ class MixerController(object):
         """
         validation.check_boolean(mute)
         if self._mixer is None:
-            return False
+            return False  # TODO: 2.0 return None
 
         with _mixer_error_handling(self._mixer):
             result = self._mixer.set_mute(bool(mute)).get()
             validation.check_instance(result, bool)
             return result
 
-        return None
+        return False

@@ -131,7 +131,7 @@ class SetVolumeBadBackendTest(MockBackendCoreMixerBase):
 
     def test_backend_returns_wrong_type(self):
         self.mixer.set_volume.return_value.get.return_value = 'done'
-        self.assertIs(self.core.mixer.set_volume(30), None)
+        self.assertFalse(self.core.mixer.set_volume(30))
 
 
 class GetMuteBadBackendTest(MockBackendCoreMixerBase):
@@ -153,4 +153,4 @@ class SetMuteBadBackendTest(MockBackendCoreMixerBase):
 
     def test_backend_returns_wrong_type(self):
         self.mixer.set_mute.return_value.get.return_value = 'done'
-        self.assertIs(self.core.mixer.set_mute(True), None)
+        self.assertFalse(self.core.mixer.set_mute(True))
