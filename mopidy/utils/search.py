@@ -2,9 +2,10 @@ from __future__ import absolute_import, unicode_literals
 
 import re
 
+_unprintable = r'\x00-\x20\x7f-\xa0'
 _field = r'(?P<field>[a-z][a-z_]*):'
 _phrase = r'"(?P<phrase>[^"\\]*(?:\\.[^"\\]*)*)"'
-_term = r'(?P<term>[^\s":]+)'
+_term = r'(?P<term>[^":%s]+)' % _unprintable
 _query = r'(?:%s)?(?:%s|%s)' % (_field, _phrase, _term)
 
 # Ugh, the lookahead/behinds are rather ugly :/
