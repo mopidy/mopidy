@@ -11,7 +11,7 @@ from mopidy.compat import configparser
 from mopidy.config import keyring
 from mopidy.config.schemas import *  # noqa
 from mopidy.config.types import *  # noqa
-from mopidy.utils import path, versioning
+from mopidy.internal import path, versioning
 
 logger = logging.getLogger(__name__)
 

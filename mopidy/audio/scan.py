@@ -10,7 +10,7 @@ import gst.pbutils  # noqa
 
 from mopidy import exceptions
 from mopidy.audio import utils
-from mopidy.utils import encoding
+from mopidy.internal import encoding
 
 _missing_plugin_desc = gst.pbutils.missing_plugin_message_get_description
 
@@ -182,7 +182,7 @@ if __name__ == '__main__':
 
     import gobject
 
-    from mopidy.utils import path
+    from mopidy.internal import path
 
     gobject.threads_init()
 

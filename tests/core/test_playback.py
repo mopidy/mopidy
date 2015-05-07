@@ -7,8 +7,8 @@ import mock
 import pykka
 
 from mopidy import backend, core
+from mopidy.internal import deprecation
 from mopidy.models import Track
-from mopidy.utils import deprecation
 
 from tests import dummy_audio as audio
 

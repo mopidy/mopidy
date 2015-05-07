@@ -7,7 +7,7 @@ import operator
 import urlparse
 
 from mopidy import compat, exceptions, models
-from mopidy.utils import deprecation, validation
+from mopidy.internal import deprecation, validation
 
 
 logger = logging.getLogger(__name__)

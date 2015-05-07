@@ -5,8 +5,8 @@ import unittest
 import mock
 
 from mopidy import backend, core
+from mopidy.internal import deprecation
 from mopidy.models import Image, Ref, SearchResult, Track
-from mopidy.utils import deprecation
 
 
 class BaseCoreLibraryTest(unittest.TestCase):

@@ -16,7 +16,7 @@ import tornado.websocket
 from mopidy import exceptions, models, zeroconf
 from mopidy.core import CoreListener
 from mopidy.http import handlers
-from mopidy.utils import encoding, formatting, network
+from mopidy.internal import encoding, formatting, network
 
 
 logger = logging.getLogger(__name__)

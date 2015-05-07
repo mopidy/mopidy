@@ -8,7 +8,7 @@ import gobject
 
 from mock import Mock, patch, sentinel
 
-from mopidy.utils import network
+from mopidy.internal import network
 
 from tests import any_int
 

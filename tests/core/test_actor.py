@@ -7,7 +7,7 @@ import mock
 import pykka
 
 from mopidy.core import Core
-from mopidy.utils import versioning
+from mopidy.internal import versioning
 
 
 class CoreActorTest(unittest.TestCase):

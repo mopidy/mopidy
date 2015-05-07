@@ -7,8 +7,8 @@ import mock
 import pykka
 
 from mopidy import core
+from mopidy.internal import deprecation
 from mopidy.mpd import session, uri_mapper
-from mopidy.utils import deprecation
 
 from tests import dummy_backend, dummy_mixer
 

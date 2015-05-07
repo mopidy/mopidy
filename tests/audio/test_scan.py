@@ -8,7 +8,7 @@ gobject.threads_init()
 
 from mopidy import exceptions
 from mopidy.audio import scan
-from mopidy.utils import path as path_lib
+from mopidy.internal import path as path_lib
 
 from tests import path_to_data_dir
 

@@ -5,18 +5,18 @@ import unittest
 
 from mock import Mock, patch
 
-from mopidy.utils import network
+from mopidy.internal import network
 
 
 class FormatHostnameTest(unittest.TestCase):
 
-    @patch('mopidy.utils.network.has_ipv6', True)
+    @patch('mopidy.internal.network.has_ipv6', True)
     def test_format_hostname_prefixes_ipv4_addresses_when_ipv6_available(self):
         network.has_ipv6 = True
         self.assertEqual(network.format_hostname('0.0.0.0'), '::ffff:0.0.0.0')
         self.assertEqual(network.format_hostname('1.0.0.1'), '::ffff:1.0.0.1')
 
-    @patch('mopidy.utils.network.has_ipv6', False)
+    @patch('mopidy.internal.network.has_ipv6', False)
     def test_format_hostname_does_nothing_when_only_ipv4_available(self):
         network.has_ipv6 = False
         self.assertEqual(network.format_hostname('0.0.0.0'), '0.0.0.0')
@@ -43,14 +43,14 @@ class TryIPv6SocketTest(unittest.TestCase):
 
 class CreateSocketTest(unittest.TestCase):
 
-    @patch('mopidy.utils.network.has_ipv6', False)
+    @patch('mopidy.internal.network.has_ipv6', False)
     @patch('socket.socket')
     def test_ipv4_socket(self, socket_mock):
         network.create_socket()
         self.assertEqual(
             socket_mock.call_args[0], (socket.AF_INET, socket.SOCK_STREAM))
 
-    @patch('mopidy.utils.network.has_ipv6', True)
+    @patch('mopidy.internal.network.has_ipv6', True)
     @patch('socket.socket')
     def test_ipv6_socket(self, socket_mock):
         network.create_socket()

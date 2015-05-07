@@ -13,7 +13,7 @@ import gobject
 from mopidy import config as config_lib, exceptions
 from mopidy.audio import Audio
 from mopidy.core import Core
-from mopidy.utils import deps, process, timer, versioning
+from mopidy.internal import deps, process, timer, versioning
 
 logger = logging.getLogger(__name__)
 

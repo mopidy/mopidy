@@ -10,7 +10,7 @@ import unittest
 import glib
 
 from mopidy import compat, exceptions
-from mopidy.utils import path
+from mopidy.internal import path
 
 import tests
 

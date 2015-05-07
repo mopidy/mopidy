@@ -5,9 +5,9 @@ import unittest
 import pykka
 
 from mopidy import core
+from mopidy.internal import deprecation
 from mopidy.mpd.dispatcher import MpdDispatcher
 from mopidy.mpd.exceptions import MpdAckError
-from mopidy.utils import deprecation
 
 from tests import dummy_backend
 

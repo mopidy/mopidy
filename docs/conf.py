@@ -95,7 +95,7 @@ master_doc = 'index'
 project = 'Mopidy'
 copyright = '2009-2015, Stein Magnus Jodal and contributors'
 
-from mopidy.utils.versioning import get_version
+from mopidy.internal.versioning import get_version
 release = get_version()
 version = '.'.join(release.split('.')[:2])
 

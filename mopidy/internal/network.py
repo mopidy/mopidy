@@ -11,7 +11,7 @@ import gobject
 
 import pykka
 
-from mopidy.utils import encoding
+from mopidy.internal import encoding
 
 
 logger = logging.getLogger(__name__)

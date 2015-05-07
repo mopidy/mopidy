@@ -8,10 +8,10 @@ import unittest
 import pykka
 
 from mopidy import core
+from mopidy.internal import deprecation
 from mopidy.m3u import actor
 from mopidy.m3u.translator import playlist_uri_to_path
 from mopidy.models import Playlist, Track
-from mopidy.utils import deprecation
 
 from tests import dummy_audio, path_to_data_dir
 from tests.m3u import generate_song

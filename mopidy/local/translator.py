@@ -5,20 +5,20 @@ import os
 import urllib
 
 from mopidy import compat
-from mopidy.utils.path import path_to_uri, uri_to_path
+from mopidy.internal import path
 
 
 logger = logging.getLogger(__name__)
 
 
 def local_track_uri_to_file_uri(uri, media_dir):
-    return path_to_uri(local_track_uri_to_path(uri, media_dir))
+    return path.path_to_uri(local_track_uri_to_path(uri, media_dir))
 
 
 def local_track_uri_to_path(uri, media_dir):
     if not uri.startswith('local:track:'):
         raise ValueError('Invalid URI.')
-    file_path = uri_to_path(uri).split(b':', 1)[1]
+    file_path = path.uri_to_path(uri).split(b':', 1)[1]
     return os.path.join(media_dir, file_path)
 
 

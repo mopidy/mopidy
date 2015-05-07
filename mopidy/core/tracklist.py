@@ -4,8 +4,8 @@ import logging
 import random
 
 from mopidy.core import listener
+from mopidy.internal import deprecation, validation
 from mopidy.models import TlTrack, Track
-from mopidy.utils import deprecation, validation
 
 logger = logging.getLogger(__name__)
 

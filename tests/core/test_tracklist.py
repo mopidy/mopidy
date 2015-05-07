@@ -5,8 +5,8 @@ import unittest
 import mock
 
 from mopidy import backend, core
+from mopidy.internal import deprecation
 from mopidy.models import TlTrack, Track
-from mopidy.utils import deprecation
 
 
 class TracklistTest(unittest.TestCase):

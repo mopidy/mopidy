@@ -11,7 +11,7 @@ import pygst
 pygst.require('0.10')
 import gst  # noqa
 
-from mopidy.utils import formatting
+from mopidy.internal import formatting
 
 
 def format_dependency_list(adapters=None):
