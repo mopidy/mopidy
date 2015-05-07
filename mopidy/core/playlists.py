@@ -1,13 +1,29 @@
 from __future__ import absolute_import, unicode_literals
 
+import contextlib
 import logging
 import urlparse
 
+from mopidy import exceptions
 from mopidy.core import listener
-from mopidy.models import Playlist
+from mopidy.models import Playlist, Ref
 from mopidy.utils import deprecation, validation
 
 logger = logging.getLogger(__name__)
+
+
+@contextlib.contextmanager
+def _backend_error_handling(backend, reraise=None):
+    try:
+        yield
+    except exceptions.ValidationError as e:
+        logger.error('%s backend returned bad data: %s',
+                     backend.actor_ref.actor_class.__name__, e)
+    except Exception as e:
+        if reraise and isinstance(e, reraise):
+            raise
+        logger.exception('%s backend caused an exception.',
+                         backend.actor_ref.actor_class.__name__)
 
 
 class PlaylistsController(object):
@@ -34,17 +50,18 @@ class PlaylistsController(object):
             for backend in set(self.backends.with_playlists.values())}
 
         results = []
-        for backend, future in futures.items():
+        for b, future in futures.items():
             try:
-                results.extend(future.get())
+                with _backend_error_handling(b, reraise=NotImplementedError):
+                    playlists = future.get()
+                    if playlists is not None:
+                        validation.check_instances(playlists, Ref)
+                        results.extend(playlists)
             except NotImplementedError:
-                backend_name = backend.actor_ref.actor_class.__name__
+                backend_name = b.actor_ref.actor_class.__name__
                 logger.warning(
                     '%s does not implement playlists.as_list(). '
                     'Please upgrade it.', backend_name)
-            except Exception:
-                logger.exception('%s backend caused an exception.',
-                                 backend.actor_ref.actor_class.__name__)
 
         return results
 
@@ -66,8 +83,16 @@ class PlaylistsController(object):
 
         uri_scheme = urlparse.urlparse(uri).scheme
         backend = self.backends.with_playlists.get(uri_scheme, None)
-        if backend:
-            return backend.playlists.get_items(uri).get()
+
+        if not backend:
+            return None
+
+        with _backend_error_handling(backend):
+            items = backend.playlists.get_items(uri).get()
+            items is None or validation.check_instances(items, Ref)
+            return items
+
+        return None
 
     def get_playlists(self, include_tracks=True):
         """
@@ -120,22 +145,23 @@ class PlaylistsController(object):
         :type name: string
         :param uri_scheme: use the backend matching the URI scheme
         :type uri_scheme: string
-        :rtype: :class:`mopidy.models.Playlist`
+        :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
         if uri_scheme in self.backends.with_playlists:
             backends = [self.backends.with_playlists[uri_scheme]]
         else:
             backends = self.backends.with_playlists.values()
+
         for backend in backends:
-            try:
-                playlist = backend.playlists.create(name).get()
-            except Exception:
-                playlist = None
-            # Workaround for playlist providers that return None from create()
-            if not playlist:
-                continue
-            listener.CoreListener.send('playlist_changed', playlist=playlist)
-            return playlist
+            with _backend_error_handling(backend):
+                result = backend.playlists.create(name).get()
+                if result is None:
+                    continue
+                validation.check_instance(result, Playlist)
+                listener.CoreListener.send('playlist_changed', playlist=result)
+                return result
+
+        return None
 
     def delete(self, uri):
         """
@@ -151,8 +177,14 @@ class PlaylistsController(object):
 
         uri_scheme = urlparse.urlparse(uri).scheme
         backend = self.backends.with_playlists.get(uri_scheme, None)
-        if backend:
+        if not backend:
+            return
+
+        with _backend_error_handling(backend):
             backend.playlists.delete(uri).get()
+            # TODO: emit playlist changed?
+
+        # TODO: return value?
 
     def filter(self, criteria=None, **kwargs):
         """
@@ -198,10 +230,15 @@ class PlaylistsController(object):
         """
         uri_scheme = urlparse.urlparse(uri).scheme
         backend = self.backends.with_playlists.get(uri_scheme, None)
-        if backend:
-            return backend.playlists.lookup(uri).get()
-        else:
+        if not backend:
             return None
+
+        with _backend_error_handling(backend):
+            playlist = backend.playlists.lookup(uri).get()
+            playlist is None or validation.check_instance(playlist, Playlist)
+            return playlist
+
+        return None
 
     # TODO: there is an inconsistency between library.refresh(uri) and this
     # call, not sure how to sort this out.
@@ -231,12 +268,9 @@ class PlaylistsController(object):
                 futures[backend] = backend.playlists.refresh()
 
         for backend, future in futures.items():
-            try:
+            with _backend_error_handling(backend):
                 future.get()
                 playlists_loaded = True
-            except Exception:
-                logger.exception('%s backend caused an exception.',
-                                 backend.actor_ref.actor_class.__name__)
 
         if playlists_loaded:
             listener.CoreListener.send('playlists_loaded')
@@ -270,7 +304,16 @@ class PlaylistsController(object):
 
         uri_scheme = urlparse.urlparse(playlist.uri).scheme
         backend = self.backends.with_playlists.get(uri_scheme, None)
-        if backend:
+        if not backend:
+            return None
+
+        # TODO: we let AssertionError error through due to legacy tests :/
+        with _backend_error_handling(backend, reraise=AssertionError):
             playlist = backend.playlists.save(playlist).get()
-            listener.CoreListener.send('playlist_changed', playlist=playlist)
+            playlist is None or validation.check_instance(playlist, Playlist)
+            if playlist:
+                listener.CoreListener.send(
+                    'playlist_changed', playlist=playlist)
             return playlist
+
+        return None

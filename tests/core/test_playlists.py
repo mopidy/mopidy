@@ -298,8 +298,7 @@ class DeprecatedGetPlaylistsTest(BasePlaylistsTest):
         self.assertEqual(len(result[1].tracks), 0)
 
 
-@mock.patch('mopidy.core.playlists.logger')
-class BackendFailuresCorePlaylistsTest(unittest.TestCase):
+class MockBackendCorePlaylistsBase(unittest.TestCase):
 
     def setUp(self):  # noqa: N802
         self.playlists = mock.Mock(spec=backend.PlaylistsProvider)
@@ -311,27 +310,127 @@ class BackendFailuresCorePlaylistsTest(unittest.TestCase):
 
         self.core = core.Core(mixer=None, backends=[self.backend])
 
-    def test_as_list_backend_exception_gets_ignored(self, logger):
-        self.playlists.as_list.get.side_effect = Exception
+
+@mock.patch('mopidy.core.playlists.logger')
+class AsListBadBackendsTest(MockBackendCorePlaylistsBase):
+
+    def test_backend_raises_exception(self, logger):
+        self.playlists.as_list.return_value.get.side_effect = Exception
         self.assertEqual([], self.core.playlists.as_list())
         logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
 
-    def test_get_items_backend_exception_gets_through(self, logger):
-        # TODO: is this behavior desired?
+    def test_backend_returns_none(self, logger):
+        self.playlists.as_list.return_value.get.return_value = None
+        self.assertEqual([], self.core.playlists.as_list())
+        self.assertFalse(logger.error.called)
+
+    def test_backend_returns_wrong_type(self, logger):
+        self.playlists.as_list.return_value.get.return_value = 'abc'
+        self.assertEqual([], self.core.playlists.as_list())
+        logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
+
+
+@mock.patch('mopidy.core.playlists.logger')
+class GetItemsBadBackendsTest(MockBackendCorePlaylistsBase):
+
+    def test_backend_raises_exception(self, logger):
         self.playlists.get_items.return_value.get.side_effect = Exception
-        with self.assertRaises(Exception):
-            self.core.playlists.get_items('dummy:/1')
+        self.assertIsNone(self.core.playlists.get_items('dummy:/1'))
+        logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
+
+    def test_backend_returns_none(self, logger):
+        self.playlists.get_items.return_value.get.return_value = None
+        self.assertIsNone(self.core.playlists.get_items('dummy:/1'))
+        self.assertFalse(logger.error.called)
+
+    def test_backend_returns_wrong_type(self, logger):
+        self.playlists.get_items.return_value.get.return_value = 'abc'
+        self.assertIsNone(self.core.playlists.get_items('dummy:/1'))
+        logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
+
+
+@mock.patch('mopidy.core.playlists.logger')
+class CreateBadBackendsTest(MockBackendCorePlaylistsBase):
+
+    def test_backend_raises_exception(self, logger):
+        self.playlists.create.return_value.get.side_effect = Exception
+        self.assertIsNone(self.core.playlists.create('foobar'))
+        logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
+
+    def test_backend_returns_none(self, logger):
+        self.playlists.create.return_value.get.return_value = None
+        self.assertIsNone(self.core.playlists.create('foobar'))
+        self.assertFalse(logger.error.called)
+
+    def test_backend_returns_wrong_type(self, logger):
+        self.playlists.create.return_value.get.return_value = 'abc'
+        self.assertIsNone(self.core.playlists.create('foobar'))
+        logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
+
+
+@mock.patch('mopidy.core.playlists.logger')
+class DeleteBadBackendsTest(MockBackendCorePlaylistsBase):
+
+    def test_backend_raises_exception(self, logger):
+        self.playlists.delete.return_value.get.side_effect = Exception
+        self.assertIsNone(self.core.playlists.delete('dummy:/1'))
+        logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
+
+
+@mock.patch('mopidy.core.playlists.logger')
+class LookupBadBackendsTest(MockBackendCorePlaylistsBase):
+
+    def test_backend_raises_exception(self, logger):
+        self.playlists.lookup.return_value.get.side_effect = Exception
+        self.assertIsNone(self.core.playlists.lookup('dummy:/1'))
+        logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
+
+    def test_backend_returns_none(self, logger):
+        self.playlists.lookup.return_value.get.return_value = None
+        self.assertIsNone(self.core.playlists.lookup('dummy:/1'))
+        self.assertFalse(logger.error.called)
+
+    def test_backend_returns_wrong_type(self, logger):
+        self.playlists.lookup.return_value.get.return_value = 'abc'
+        self.assertIsNone(self.core.playlists.lookup('dummy:/1'))
+        logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)
+
+
+@mock.patch('mopidy.core.playlists.logger')
+class RefreshBadBackendsTest(MockBackendCorePlaylistsBase):
 
     @mock.patch('mopidy.core.listener.CoreListener.send')
-    def test_refresh_backend_exception_gets_ignored(self, send, logger):
+    def test_backend_raises_exception(self, send, logger):
         self.playlists.refresh.return_value.get.side_effect = Exception
         self.core.playlists.refresh()
         self.assertFalse(send.called)
         logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
 
     @mock.patch('mopidy.core.listener.CoreListener.send')
-    def test_refresh_uri_backend_exception_gets_ignored(self, send, logger):
+    def test_backend_raises_exception_called_with_uri(self, send, logger):
         self.playlists.refresh.return_value.get.side_effect = Exception
         self.core.playlists.refresh('dummy')
         self.assertFalse(send.called)
         logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
+
+
+@mock.patch('mopidy.core.playlists.logger')
+class SaveBadBackendsTest(MockBackendCorePlaylistsBase):
+
+    def test_backend_raises_exception(self, logger):
+        playlist = Playlist(uri='dummy:/1')
+        self.playlists.save.return_value.get.side_effect = Exception
+        self.assertIsNone(self.core.playlists.save(playlist))
+        logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
+
+    def test_backend_returns_none(self, logger):
+        playlist = Playlist(uri='dummy:/1')
+        self.playlists.save.return_value.get.return_value = None
+        self.assertIsNone(self.core.playlists.save(playlist))
+        self.assertFalse(logger.error.called)
+
+    def test_backend_returns_wrong_type(self, logger):
+        playlist = Playlist(uri='dummy:/1')
+        self.playlists.save.return_value.get.return_value = 'abc'
+        self.assertIsNone(self.core.playlists.save(playlist))
+        logger.error.assert_called_with(mock.ANY, 'DummyBackend', mock.ANY)

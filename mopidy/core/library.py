@@ -1,14 +1,30 @@
 from __future__ import absolute_import, unicode_literals
 
 import collections
+import contextlib
 import logging
 import operator
 import urlparse
 
+from mopidy import compat, exceptions, models
 from mopidy.utils import deprecation, validation
 
 
 logger = logging.getLogger(__name__)
+
+
+@contextlib.contextmanager
+def _backend_error_handling(backend, reraise=None):
+    try:
+        yield
+    except exceptions.ValidationError as e:
+        logger.error('%s backend returned bad data: %s',
+                     backend.actor_ref.actor_class.__name__, e)
+    except Exception as e:
+        if reraise and isinstance(e, reraise):
+            raise
+        logger.exception('%s backend caused an exception.',
+                         backend.actor_ref.actor_class.__name__)
 
 
 class LibraryController(object):
@@ -79,22 +95,24 @@ class LibraryController(object):
         backends = self.backends.with_library_browse.values()
         futures = {b: b.library.root_directory for b in backends}
         for backend, future in futures.items():
-            try:
-                directories.add(future.get())
-            except Exception:
-                logger.exception('%s backend caused an exception.',
-                                 backend.actor_ref.actor_class.__name__)
+            with _backend_error_handling(backend):
+                root = future.get()
+                validation.check_instance(root, models.Ref)
+                directories.add(root)
         return sorted(directories, key=operator.attrgetter('name'))
 
     def _browse(self, uri):
         scheme = urlparse.urlparse(uri).scheme
         backend = self.backends.with_library_browse.get(scheme)
-        try:
-            if backend:
-                return backend.library.browse(uri).get()
-        except Exception:
-            logger.exception('%s backend caused an exception.',
-                             backend.actor_ref.actor_class.__name__)
+
+        if not backend:
+            return []
+
+        with _backend_error_handling(backend):
+            result = backend.library.browse(uri).get()
+            validation.check_instances(result, models.Ref)
+            return result
+
         return []
 
     def get_distinct(self, field, query=None):
@@ -120,11 +138,11 @@ class LibraryController(object):
         futures = {b: b.library.get_distinct(field, query)
                    for b in self.backends.with_library.values()}
         for backend, future in futures.items():
-            try:
-                result.update(future.get())
-            except Exception:
-                logger.exception('%s backend caused an exception.',
-                                 backend.actor_ref.actor_class.__name__)
+            with _backend_error_handling(backend):
+                values = future.get()
+                if values is not None:
+                    validation.check_instances(values, compat.text_type)
+                    result.update(values)
         return result
 
     def get_images(self, uris):
@@ -152,12 +170,16 @@ class LibraryController(object):
 
         results = {uri: tuple() for uri in uris}
         for backend, future in futures.items():
-            try:
+            with _backend_error_handling(backend):
+                if future.get() is None:
+                    continue
+                validation.check_instance(future.get(), collections.Mapping)
                 for uri, images in future.get().items():
+                    if uri not in uris:
+                        raise exceptions.ValidationError(
+                            'Got unknown image URI: %s' % uri)
+                    validation.check_instances(images, models.Image)
                     results[uri] += tuple(images)
-            except Exception:
-                logger.exception('%s backend caused an exception.',
-                                 backend.actor_ref.actor_class.__name__)
         return results
 
     def find_exact(self, query=None, uris=None, **kwargs):
@@ -202,7 +224,7 @@ class LibraryController(object):
             uris = [uri]
 
         futures = {}
-        result = {u: [] for u in uris}
+        results = {u: [] for u in uris}
 
         # TODO: lookup(uris) to backend APIs
         for backend, backend_uris in self._get_backends_to_uris(uris).items():
@@ -210,15 +232,15 @@ class LibraryController(object):
                 futures[(backend, u)] = backend.library.lookup(u)
 
         for (backend, u), future in futures.items():
-            try:
-                result[u] = future.get()
-            except Exception:
-                logger.exception('%s backend caused an exception.',
-                                 backend.actor_ref.actor_class.__name__)
+            with _backend_error_handling(backend):
+                result = future.get()
+                if result is not None:
+                    validation.check_instances(result, models.Track)
+                    results[u] = result
 
         if uri:
-            return result[uri]
-        return result
+            return results[uri]
+        return results
 
     def refresh(self, uri=None):
         """
@@ -241,11 +263,8 @@ class LibraryController(object):
                 futures[backend] = backend.library.refresh(uri)
 
         for backend, future in futures.items():
-            try:
+            with _backend_error_handling(backend):
                 future.get()
-            except Exception:
-                logger.exception('%s backend caused an exception.',
-                                 backend.actor_ref.actor_class.__name__)
 
     def search(self, query=None, uris=None, exact=False, **kwargs):
         """
@@ -311,25 +330,26 @@ class LibraryController(object):
             futures[backend] = backend.library.search(
                 query=query, uris=backend_uris, exact=exact)
 
+        # Some of our tests check for LookupError to catch bad queries. This is
+        # silly and should be replaced with query validation before passing it
+        # to the backends.
+        reraise = (TypeError, LookupError)
+
         results = []
         for backend, future in futures.items():
             try:
-                results.append(future.get())
+                with _backend_error_handling(backend, reraise=reraise):
+                    result = future.get()
+                    if result is not None:
+                        validation.check_instance(result, models.SearchResult)
+                        results.append(result)
             except TypeError:
                 backend_name = backend.actor_ref.actor_class.__name__
                 logger.warning(
                     '%s does not implement library.search() with "exact" '
                     'support. Please upgrade it.', backend_name)
-            except LookupError:
-                # Some of our tests check for this to catch bad queries. This
-                # is silly and should be replaced with query validation before
-                # passing it to the backends.
-                raise
-            except Exception:
-                logger.exception('%s backend caused an exception.',
-                                 backend.actor_ref.actor_class.__name__)
 
-        return [r for r in results if r]
+        return results
 
 
 def _normalize_query(query):

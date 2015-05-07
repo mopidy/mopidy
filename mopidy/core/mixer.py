@@ -1,11 +1,25 @@
 from __future__ import absolute_import, unicode_literals
 
+import contextlib
 import logging
 
+from mopidy import exceptions
 from mopidy.utils import validation
 
 
 logger = logging.getLogger(__name__)
+
+
+@contextlib.contextmanager
+def _mixer_error_handling(mixer):
+    try:
+        yield
+    except exceptions.ValidationError as e:
+        logger.error('%s mixer returned bad data: %s',
+                     mixer.actor_ref.actor_class.__name__, e)
+    except Exception:
+        logger.exception('%s mixer caused an exception.',
+                         mixer.actor_ref.actor_class.__name__)
 
 
 class MixerController(object):
@@ -21,8 +35,15 @@ class MixerController(object):
 
         The volume scale is linear.
         """
-        if self._mixer is not None:
-            return self._mixer.get_volume().get()
+        if self._mixer is None:
+            return None
+
+        with _mixer_error_handling(self._mixer):
+            volume = self._mixer.get_volume().get()
+            volume is None or validation.check_integer(volume, min=0, max=100)
+            return volume
+
+        return None
 
     def set_volume(self, volume):
         """Set the volume.
@@ -36,9 +57,14 @@ class MixerController(object):
         validation.check_integer(volume, min=0, max=100)
 
         if self._mixer is None:
-            return False
-        else:
-            return self._mixer.set_volume(volume).get()
+            return False  # TODO: 2.0 return None
+
+        with _mixer_error_handling(self._mixer):
+            result = self._mixer.set_volume(volume).get()
+            validation.check_instance(result, bool)
+            return result
+
+        return False
 
     def get_mute(self):
         """Get mute state.
@@ -46,8 +72,15 @@ class MixerController(object):
         :class:`True` if muted, :class:`False` unmuted, :class:`None` if
         unknown.
         """
-        if self._mixer is not None:
-            return self._mixer.get_mute().get()
+        if self._mixer is None:
+            return None
+
+        with _mixer_error_handling(self._mixer):
+            mute = self._mixer.get_mute().get()
+            mute is None or validation.check_instance(mute, bool)
+            return mute
+
+        return None
 
     def set_mute(self, mute):
         """Set mute state.
@@ -58,6 +91,11 @@ class MixerController(object):
         """
         validation.check_boolean(mute)
         if self._mixer is None:
-            return False
-        else:
-            return self._mixer.set_mute(bool(mute)).get()
+            return False  # TODO: 2.0 return None
+
+        with _mixer_error_handling(self._mixer):
+            result = self._mixer.set_mute(bool(mute)).get()
+            validation.check_instance(result, bool)
+            return result
+
+        return False

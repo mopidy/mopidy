@@ -30,6 +30,8 @@ Core API
 - Add :meth:`mopidy.core.playback.PlaybackController.get_current_tlid`.
   (Part of: :issue:`1137`)
 
+- Update core to handle backend crashes and bad data. (Fixes: :issue:`1161`)
+
 Models
 ------
 
