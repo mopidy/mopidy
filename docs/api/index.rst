@@ -10,20 +10,50 @@ API reference
     extensions.
 
 
-.. toctree::
-    :glob:
+Concepts
+========
 
-    concepts
+.. toctree::
+
+    architecture
     models
+
+
+Basics
+======
+
+.. toctree::
+
     core
     frontend
     backend
-    audio
-    mixer
-    commands
     ext
-    config
-    zeroconf
+
+
+Web/JavaScript
+==============
+
+.. toctree::
+
     http-server
     http
     js
+
+
+Audio
+=====
+
+.. toctree::
+
+    audio
+    mixer
+
+
+Utilities
+=========
+
+.. toctree::
+
+    config
+    commands
+    zeroconf
