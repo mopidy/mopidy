@@ -6,8 +6,8 @@ import urlparse
 
 from mopidy import exceptions
 from mopidy.core import listener
+from mopidy.internal import deprecation, validation
 from mopidy.models import Playlist, Ref
-from mopidy.utils import deprecation, validation
 
 logger = logging.getLogger(__name__)
 

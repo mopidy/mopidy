@@ -1,6 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
-from mopidy.utils import deprecation
+from mopidy.internal import deprecation
 
 
 def generate_song(i):

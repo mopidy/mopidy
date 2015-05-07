@@ -434,8 +434,8 @@ Use of Mopidy APIs
 ==================
 
 When writing an extension, you should only use APIs documented at
-:ref:`api-ref`. Other parts of Mopidy, like :mod:`mopidy.utils`, may change at
-any time and are not something extensions should use.
+:ref:`api-ref`. Other parts of Mopidy, like :mod:`mopidy.internal`, may change
+at any time and are not something extensions should use.
 
 
 Logging in extensions

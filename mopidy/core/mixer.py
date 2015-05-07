@@ -4,7 +4,7 @@ import contextlib
 import logging
 
 from mopidy import exceptions
-from mopidy.utils import validation
+from mopidy.internal import validation
 
 
 logger = logging.getLogger(__name__)

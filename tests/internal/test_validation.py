@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from pytest import raises
 
 from mopidy import compat, exceptions
-from mopidy.utils import validation
+from mopidy.internal import validation
 
 
 def test_check_boolean_with_valid_values():

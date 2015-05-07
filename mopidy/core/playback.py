@@ -6,7 +6,7 @@ import urlparse
 from mopidy import models
 from mopidy.audio import PlaybackState
 from mopidy.core import listener
-from mopidy.utils import deprecation, validation
+from mopidy.internal import deprecation, validation
 
 logger = logging.getLogger(__name__)
 

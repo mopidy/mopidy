@@ -14,8 +14,8 @@ from mopidy.core.mixer import MixerController
 from mopidy.core.playback import PlaybackController
 from mopidy.core.playlists import PlaylistsController
 from mopidy.core.tracklist import TracklistController
-from mopidy.utils import versioning
-from mopidy.utils.deprecation import deprecated_property
+from mopidy.internal import versioning
+from mopidy.internal.deprecation import deprecated_property
 
 
 class Core(

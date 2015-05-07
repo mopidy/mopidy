@@ -41,7 +41,7 @@ sys.argv[1:] = []
 
 
 from mopidy import commands, config as config_lib, ext
-from mopidy.utils import encoding, log, path, process, versioning
+from mopidy.internal import encoding, log, path, process, versioning
 
 logger = logging.getLogger(__name__)
 
@@ -137,7 +137,7 @@ def main():
             extension.setup(registry)
 
         # Anything that wants to exit after this point must use
-        # mopidy.utils.process.exit_process as actors can have been started.
+        # mopidy.internal.process.exit_process as actors can have been started.
         try:
             return args.command.run(args, proxied_config)
         except NotImplementedError:

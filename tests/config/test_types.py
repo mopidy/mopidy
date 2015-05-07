@@ -373,7 +373,7 @@ class ExpandedPathTest(unittest.TestCase):
         expanded = b'expanded_path'
         self.assertEqual(expanded, types.ExpandedPath(original, expanded))
 
-    @mock.patch('mopidy.utils.path.expand_path')
+    @mock.patch('mopidy.internal.path.expand_path')
     def test_orginal_stores_unexpanded(self, expand_path_mock):
         original = b'~'
         expanded = b'expanded_path'

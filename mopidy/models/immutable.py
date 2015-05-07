@@ -4,8 +4,8 @@ import copy
 import itertools
 import weakref
 
+from mopidy.internal import deprecation
 from mopidy.models.fields import Field
-from mopidy.utils import deprecation
 
 
 class ImmutableObject(object):

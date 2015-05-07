@@ -1,8 +1,8 @@
 from __future__ import absolute_import, unicode_literals
 
 from mopidy.core import PlaybackState
+from mopidy.internal import deprecation
 from mopidy.mpd import exceptions, protocol
-from mopidy.utils import deprecation
 
 
 @protocol.commands.add('consume', state=protocol.BOOL)

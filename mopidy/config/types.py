@@ -6,7 +6,7 @@ import socket
 
 from mopidy import compat
 from mopidy.config import validators
-from mopidy.utils import log, path
+from mopidy.internal import log, path
 
 
 def decode(value):

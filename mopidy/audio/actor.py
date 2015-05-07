@@ -16,7 +16,7 @@ from mopidy import exceptions
 from mopidy.audio import playlists, utils
 from mopidy.audio.constants import PlaybackState
 from mopidy.audio.listener import AudioListener
-from mopidy.utils import deprecation, process
+from mopidy.internal import deprecation, process
 
 
 logger = logging.getLogger(__name__)

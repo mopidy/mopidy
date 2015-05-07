@@ -10,7 +10,7 @@ import urlparse
 
 from mopidy import compat, exceptions
 from mopidy.compat import queue
-from mopidy.utils import encoding, xdg
+from mopidy.internal import encoding, xdg
 
 
 logger = logging.getLogger(__name__)
