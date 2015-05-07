@@ -21,9 +21,9 @@ available at:
 
 You may need to adjust hostname and port for your local setup.
 
-Thus, if you use Mopidy to host your web client, like described above, you can
-load the latest version of Mopidy.js by adding the following script tag to your
-HTML file:
+Thus, if you use Mopidy to host your web client, like described in
+:ref:`static-web-client`, you can load the latest version of Mopidy.js by
+adding the following script tag to your HTML file:
 
 .. code-block:: html
 
