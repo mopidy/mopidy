@@ -272,11 +272,15 @@ Test date:
 Tested version:
     1.1 (released 2015-04-03)
 
+.. image:: mpd-client-mopidywombatclient.png
+    :width: 405
+    :height: 675
+
 You can get `Mopidy Wombat Client
 <https://play.google.com/store/apps/details?id=fr.piroxxi.mopidy.wombatclient>`_.
 
 Mopidy Wombat Client is designed to work well with Mopidy plugged to Spotify. The
-application shows a tree of your playlists and let you play them with a simple
+application shows a tree of your playlists and lets you play them with a simple
 click... And there is a Wombat :)
 
 
