@@ -1,6 +1,6 @@
-************************************
-:mod:`mopidy.local` -- Local backend
-************************************
+*************************************
+:mod:`mopidy.local` --- Local backend
+*************************************
 
 For details on how to use Mopidy's local backend, see :ref:`ext-local`.
 
