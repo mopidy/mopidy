@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 def local_uri_to_file_uri(uri, media_dir):
     """Convert local track or directory URI to file URI."""
-    return path.path_to_uri(local_uri_to_path(uri, media_dir))
+    return path_to_file_uri(local_uri_to_path(uri, media_dir))
 
 
 def local_uri_to_path(uri, media_dir):
@@ -29,6 +29,12 @@ def local_uri_to_path(uri, media_dir):
 def local_track_uri_to_path(uri, media_dir):
     # Deprecated version to keep old versions of Mopidy-Local-Sqlite working.
     return local_uri_to_path(uri, media_dir)
+
+
+def path_to_file_uri(abspath):
+    """Convert absolute path to file URI."""
+    # Re-export internal method for use by Mopidy-Local-* extensions.
+    return path.path_to_uri(abspath)
 
 
 def path_to_local_track_uri(relpath):

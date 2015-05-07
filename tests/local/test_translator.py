@@ -69,6 +69,16 @@ def test_local_uri_to_path_errors(uri):
 
 
 @pytest.mark.parametrize('path,uri', [
+    ('/foo', 'file:///foo'),
+    (b'/foo', 'file:///foo'),
+    ('/æøå', 'file:///%C3%A6%C3%B8%C3%A5'),
+    (b'/\x00\x01\x02', 'file:///%00%01%02'),
+])
+def test_path_to_file_uri(path, uri):
+    assert translator.path_to_file_uri(path) == uri
+
+
+@pytest.mark.parametrize('path,uri', [
     ('foo', 'local:track:foo'),
     (b'foo', 'local:track:foo'),
     ('æøå', 'local:track:%C3%A6%C3%B8%C3%A5'),
