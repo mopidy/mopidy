@@ -11,7 +11,7 @@ from mopidy.internal import path
 logger = logging.getLogger(__name__)
 
 
-def local_track_uri_to_file_uri(uri, media_dir):
+def local_uri_to_file_uri(uri, media_dir):
     return path.path_to_uri(local_track_uri_to_path(uri, media_dir))
 
 
