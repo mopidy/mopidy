@@ -4,7 +4,7 @@
 API reference
 *************
 
-.. note:: What is public?
+.. note::
 
     Only APIs documented here are public and open for use by Mopidy
     extensions.
