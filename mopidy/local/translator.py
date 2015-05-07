@@ -38,7 +38,8 @@ def path_to_file_uri(abspath):
 
 
 def path_to_local_track_uri(relpath):
-    """Convert path relative to media_dir to local track URI."""
+    """Convert path relative to :confval:`local/media_dir` to local track
+    URI."""
     if isinstance(relpath, compat.text_type):
         relpath = relpath.encode('utf-8')
     return b'local:track:%s' % urllib.quote(relpath)
