@@ -189,13 +189,10 @@ you've hooked up an errback (more on that a bit later) to the promise returned
 from the call, the errback will be called with a ``Mopidy.ConnectionError``
 instance.
 
-All methods in Mopidy's :ref:`core-api` is available via Mopidy.js. The core
-API attributes is *not* available, but that shouldn't be a problem as we've
-added (undocumented) getters and setters for all of them, so you can access the
-attributes as well from JavaScript. For example, the
-:attr:`mopidy.core.PlaybackController.state` attribute is available in
-JSON-RPC as the method ``core.playback.get_state`` and in Mopidy.js as
-``mopidy.playback.getState()``.
+All methods in Mopidy's :ref:`core-api` is available via Mopidy.js. For
+example, the :meth:`mopidy.core.PlaybackController.get_state` method is
+available in JSON-RPC as the method ``core.playback.get_state`` and in
+Mopidy.js as ``mopidy.playback.getState()``.
 
 Both the WebSocket API and the JavaScript API are based on introspection of the
 core Python API. Thus, they will always be up to date and immediately reflect

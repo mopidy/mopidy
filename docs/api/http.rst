@@ -62,14 +62,9 @@ JSON-RPC 2.0 messages can be recognized by checking for the key named
 please refer to the `JSON-RPC 2.0 spec
 <http://www.jsonrpc.org/specification>`_.
 
-All methods (not attributes) in the :ref:`core-api` is made available through
-JSON-RPC calls over the WebSocket. For example,
-:meth:`mopidy.core.PlaybackController.play` is available as the JSON-RPC method
-``core.playback.play``.
-
-The core API's attributes is made available through setters and getters. For
-example, the attribute :attr:`mopidy.core.PlaybackController.current_track` is
-available as the JSON-RPC method ``core.playback.get_current_track``.
+All methods in the :ref:`core-api` is made available through JSON-RPC calls
+over the WebSocket. For example, :meth:`mopidy.core.PlaybackController.play` is
+available as the JSON-RPC method ``core.playback.play``.
 
 Example JSON-RPC request::
 
