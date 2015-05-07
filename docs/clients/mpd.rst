@@ -264,6 +264,22 @@ This app looks terrible in the screen shots, got just 100+ downloads, and got a
 terrible rating. I honestly didn't take the time to test it.
 
 
+Mopidy Wombat Client
+----------
+
+Test date:
+    2015-04-03
+Tested version:
+    1.1 (released 2015-04-03)
+
+You can get `Mopidy Wombat Client
+<https://play.google.com/store/apps/details?id=fr.piroxxi.mopidy.wombatclient>`_.
+
+Mopidy Wombat Client is designed to work well with Mopidy plugged to Spotify. The
+application shows a tree of your playlists and let you play them with a simple
+click... And there is a Wombat :)
+
+
 .. _ios_mpd_clients:
 
 iOS clients
