@@ -4,9 +4,6 @@
 HTTP JSON-RPC API
 *****************
 
-.. module:: mopidy.http
-    :synopsis: The HTTP frontend APIs
-
 The :ref:`ext-http` extension makes Mopidy's :ref:`core-api` available using
 JSON-RPC over HTTP using HTTP POST and WebSockets. We also provide a JavaScript
 wrapper, called :ref:`Mopidy.js <mopidy-js>`, around the JSON-RPC over

@@ -1,8 +1,8 @@
 .. _core-api:
 
-********
-Core API
-********
+*******************************
+:mod:`mopidy.core` --- Core API
+*******************************
 
 .. module:: mopidy.core
     :synopsis: Core API for use by frontends
