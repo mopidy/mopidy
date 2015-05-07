@@ -268,8 +268,9 @@ passing it as the second argument to ``done()``:
         .done(printCurrentTrack, console.error.bind(console));
 
 If you don't hook up an error handler function and never call ``done()`` on the
-promise object, when.js will log warnings to the console that you have
-unhandled errors. In general, unhandled errors will not go silently missing.
+promise object, warnings will be logged to the console complaining that you
+have unhandled errors. In general, unhandled errors will not go silently
+missing.
 
 The promise objects returned by Mopidy.js adheres to the `CommonJS Promises/A
 <http://wiki.commonjs.org/wiki/Promises/A>`_ standard. We use the
