@@ -66,3 +66,23 @@ def test_local_uri_to_path_errors(uri):
 
     with pytest.raises(ValueError):
         translator.local_uri_to_path(uri, media_dir)
+
+
+@pytest.mark.parametrize('path,uri', [
+    ('foo', 'local:track:foo'),
+    (b'foo', 'local:track:foo'),
+    ('æøå', 'local:track:%C3%A6%C3%B8%C3%A5'),
+    (b'\x00\x01\x02', 'local:track:%00%01%02'),
+])
+def test_path_to_local_track_uri(path, uri):
+    assert translator.path_to_local_track_uri(path) == uri
+
+
+@pytest.mark.parametrize('path,uri', [
+    ('foo', 'local:directory:foo'),
+    (b'foo', 'local:directory:foo'),
+    ('æøå', 'local:directory:%C3%A6%C3%B8%C3%A5'),
+    (b'\x00\x01\x02', 'local:directory:%00%01%02'),
+])
+def test_path_to_local_directory_uri(path, uri):
+    assert translator.path_to_local_directory_uri(path) == uri
