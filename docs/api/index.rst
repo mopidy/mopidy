@@ -16,10 +16,10 @@ API reference
     concepts
     models
     core
-    backends
+    backend
     audio
     mixer
-    frontends
+    frontend
     commands
     ext
     config
