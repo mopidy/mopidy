@@ -42,8 +42,8 @@ Models
 Utils
 -----
 
-- Add :func:`mopidy.utils.http.format_proxy` and
-  :func:`mopidy.utils.http.format_user_agent`. (Part of: :issue:`1156`)
+- Add :func:`mopidy.httpclient.format_proxy` and
+  :func:`mopidy.httpclient.format_user_agent`. (Part of: :issue:`1156`)
 
 Internal changes
 ----------------

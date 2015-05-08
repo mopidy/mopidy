@@ -4,7 +4,7 @@ import re
 
 import pytest
 
-from mopidy.utils import http
+from mopidy.utils import httpclient
 
 
 @pytest.mark.parametrize("config,expected", [
@@ -20,12 +20,12 @@ from mopidy.utils import http
      'http://user:pass@proxy.lan:80'),
 ])
 def test_format_proxy(config, expected):
-    assert http.format_proxy(config) == expected
+    assert httpclient.format_proxy(config) == expected
 
 
 def test_format_proxy_without_auth():
     config = {'username': 'user', 'password': 'pass', 'hostname': 'proxy.lan'}
-    formated_proxy = http.format_proxy(config, auth=False)
+    formated_proxy = httpclient.format_proxy(config, auth=False)
     assert formated_proxy == 'http://proxy.lan:80'
 
 
@@ -35,4 +35,4 @@ def test_format_proxy_without_auth():
     ('Foo/1.2.3', r'^Foo/1.2.3 Mopidy/[^ ]+ CPython|/[^ ]+$'),
 ])
 def test_format_user_agent(name, expected):
-    assert re.match(expected, http.format_user_agent(name))
+    assert re.match(expected, httpclient.format_user_agent(name))
