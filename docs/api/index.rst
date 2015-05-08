@@ -54,6 +54,7 @@ Utilities
 
 .. toctree::
 
-    config
     commands
+    config
+    httpclient
     zeroconf
