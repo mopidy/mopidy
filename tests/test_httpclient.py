@@ -4,7 +4,7 @@ import re
 
 import pytest
 
-from mopidy.utils import httpclient
+from mopidy import httpclient
 
 
 @pytest.mark.parametrize("config,expected", [
