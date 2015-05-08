@@ -44,6 +44,12 @@ Models
   reuse instances. For the test data set this was developed against, a library
   of ~14000 tracks, went from needing ~75MB to ~17MB. (Fixes: :issue:`348`)
 
+Utils
+-----
+
+- Add :func:`mopidy.httpclient.format_proxy` and
+  :func:`mopidy.httpclient.format_user_agent`. (Part of: :issue:`1156`)
+
 Internal changes
 ----------------
 
