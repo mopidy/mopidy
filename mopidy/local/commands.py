@@ -7,8 +7,8 @@ import time
 
 from mopidy import commands, compat, exceptions
 from mopidy.audio import scan, utils
+from mopidy.internal import path
 from mopidy.local import translator
-from mopidy.utils import path
 
 
 logger = logging.getLogger(__name__)

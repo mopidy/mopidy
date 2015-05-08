@@ -6,8 +6,8 @@ import pykka
 
 from mopidy import exceptions, zeroconf
 from mopidy.core import CoreListener
+from mopidy.internal import encoding, network, process
 from mopidy.mpd import session, uri_mapper
-from mopidy.utils import encoding, network, process
 
 logger = logging.getLogger(__name__)
 

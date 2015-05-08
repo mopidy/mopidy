@@ -2,7 +2,9 @@ from __future__ import absolute_import, unicode_literals
 
 import json
 
-from mopidy.models.immutable import ImmutableObject
+from mopidy.models import immutable
+
+_MODELS = ['Ref', 'Artist', 'Album', 'Track', 'TlTrack', 'Playlist']
 
 
 class ModelJSONEncoder(json.JSONEncoder):
@@ -19,7 +21,7 @@ class ModelJSONEncoder(json.JSONEncoder):
     """
 
     def default(self, obj):
-        if isinstance(obj, ImmutableObject):
+        if isinstance(obj, immutable.ImmutableObject):
             return obj.serialize()
         return json.JSONEncoder.default(self, obj)
 
@@ -38,8 +40,8 @@ def model_json_decoder(dct):
 
     """
     if '__model__' in dct:
-        models = {c.__name__: c for c in ImmutableObject.__subclasses__()}
+        from mopidy import models
         model_name = dct.pop('__model__')
-        if model_name in models:
-            return models[model_name](**dct)
+        if model_name in _MODELS:
+            return getattr(models, model_name)(**dct)
     return dct

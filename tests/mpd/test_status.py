@@ -6,10 +6,10 @@ import pykka
 
 from mopidy import core
 from mopidy.core import PlaybackState
+from mopidy.internal import deprecation
 from mopidy.models import Track
 from mopidy.mpd import dispatcher
 from mopidy.mpd.protocol import status
-from mopidy.utils import deprecation
 
 from tests import dummy_backend, dummy_mixer
 

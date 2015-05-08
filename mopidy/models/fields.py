@@ -4,8 +4,9 @@ from __future__ import absolute_import, unicode_literals
 class Field(object):
 
     """
-    Base field for use in :class:`ImmutableObject`. These fields are
-    responsible for type checking and other data sanitation in our models.
+    Base field for use in
+    :class:`~mopidy.models.immutable.ValidatedImmutableObject`. These fields
+    are responsible for type checking and other data sanitation in our models.
 
     For simplicity fields use the Python descriptor protocol to store the
     values in the instance dictionary. Also note that fields are mutable if
@@ -19,7 +20,7 @@ class Field(object):
     """
 
     def __init__(self, default=None, type=None, choices=None):
-        self._name = None  # Set by ImmutableObjectMeta
+        self._name = None  # Set by ValidatedImmutableObjectMeta
         self._choices = choices
         self._default = default
         self._type = type
@@ -72,20 +73,41 @@ class String(Field):
 
 
 class Date(String):
+    """
+    :class:`Field` for storing ISO 8601 dates as a string.
+
+    Supported formats are ``YYYY-MM-DD``, ``YYYY-MM`` and ``YYYY``, currently
+    not validated.
+
+    :param default: default value for field
+    """
     pass  # TODO: make this check for YYYY-MM-DD, YYYY-MM, YYYY using strptime.
 
 
 class Identifier(String):
+    """
+    :class:`Field` for storing ASCII values such as GUIDs or other identifiers.
+
+    Values will be interned.
+
+    :param default: default value for field
+    """
     def validate(self, value):
         return intern(str(super(Identifier, self).validate(value)))
 
 
 class URI(Identifier):
+    """
+    :class`Field` for storing URIs
+
+    Values will be interned, currently not validated.
+
+    :param default: default value for field
+    """
     pass  # TODO: validate URIs?
 
 
 class Integer(Field):
-
     """
     :class:`Field` for storing integer numbers.
 
@@ -111,7 +133,6 @@ class Integer(Field):
 
 
 class Collection(Field):
-
     """
     :class:`Field` for storing collections of a given type.
 

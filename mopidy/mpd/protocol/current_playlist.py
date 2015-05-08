@@ -2,8 +2,8 @@ from __future__ import absolute_import, unicode_literals
 
 import urlparse
 
+from mopidy.internal import deprecation
 from mopidy.mpd import exceptions, protocol, translator
-from mopidy.utils import deprecation
 
 
 @protocol.commands.add('add')

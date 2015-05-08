@@ -1,81 +1,61 @@
 from __future__ import absolute_import, unicode_literals
 
 import copy
-import inspect
 import itertools
 import weakref
 
+from mopidy.internal import deprecation
 from mopidy.models.fields import Field
-from mopidy.utils import deprecation
-
-
-class ImmutableObjectMeta(type):
-
-    """Helper to automatically assign field names to descriptors."""
-
-    def __new__(cls, name, bases, attrs):
-        fields = {}
-        for key, value in attrs.items():
-            if isinstance(value, Field):
-                fields[key] = '_' + key
-                value._name = key
-
-        attrs['_fields'] = fields
-        attrs['_instances'] = weakref.WeakValueDictionary()
-        attrs['__slots__'] = ['_hash'] + fields.values()
-
-        for ancestor in [b for base in bases for b in inspect.getmro(base)]:
-            if '__weakref__' in getattr(ancestor, '__slots__', []):
-                break
-        else:
-            attrs['__slots__'].append('__weakref__')
-
-        return super(ImmutableObjectMeta, cls).__new__(cls, name, bases, attrs)
-
-    def __call__(cls, *args, **kwargs):  # noqa: N805
-        instance = super(ImmutableObjectMeta, cls).__call__(*args, **kwargs)
-        return cls._instances.setdefault(weakref.ref(instance), instance)
 
 
 class ImmutableObject(object):
-
     """
     Superclass for immutable objects whose fields can only be modified via the
-    constructor. Fields should be :class:`Field` instances to ensure type
-    safety in our models.
+    constructor.
 
-    Note that since these models can not be changed, we heavily memoize them
-    to save memory. So constructing a class with the same arguments twice will
-    give you the same instance twice.
+    This version of this class has been retained to avoid breaking any clients
+    relying on it's behavior. Internally in Mopidy we now use
+    :class:`ValidatedImmutableObject` for type safety and it's much smaller
+    memory footprint.
 
     :param kwargs: kwargs to set as fields on the object
     :type kwargs: any
     """
 
-    __metaclass__ = ImmutableObjectMeta
+    # Any sub-classes that don't set slots won't be effected by the base using
+    # slots as they will still get an instance dict.
+    __slots__ = ['__weakref__']
 
     def __init__(self, *args, **kwargs):
         for key, value in kwargs.items():
-            if key not in self._fields:
+            if not self._is_valid_field(key):
                 raise TypeError(
-                    '__init__() got an unexpected keyword argument "%s"' %
-                    key)
-            super(ImmutableObject, self).__setattr__(key, value)
+                    '__init__() got an unexpected keyword argument "%s"' % key)
+            self._set_field(key, value)
 
     def __setattr__(self, name, value):
-        if name in self.__slots__:
-            return super(ImmutableObject, self).__setattr__(name, value)
-        raise AttributeError('Object is immutable.')
+        if name.startswith('_'):
+            object.__setattr__(self, name, value)
+        else:
+            raise AttributeError('Object is immutable.')
 
     def __delattr__(self, name):
-        if name in self.__slots__:
-            return super(ImmutableObject, self).__delattr__(name)
-        raise AttributeError('Object is immutable.')
+        if name.startswith('_'):
+            object.__delattr__(self, name)
+        else:
+            raise AttributeError('Object is immutable.')
+
+    def _is_valid_field(self, name):
+        return hasattr(self, name) and not callable(getattr(self, name))
+
+    def _set_field(self, name, value):
+        if value == getattr(self.__class__, name):
+            self.__dict__.pop(name, None)
+        else:
+            self.__dict__[name] = value
 
     def _items(self):
-        for field, key in self._fields.items():
-            if hasattr(self, key):
-                yield field, getattr(self, key)
+        return self.__dict__.iteritems()
 
     def __repr__(self):
         kwarg_pairs = []
@@ -91,12 +71,10 @@ class ImmutableObject(object):
         }
 
     def __hash__(self):
-        if not hasattr(self, '_hash'):
-            hash_sum = 0
-            for key, value in self._items():
-                hash_sum += hash(key) + hash(value)
-            super(ImmutableObject, self).__setattr__('_hash', hash_sum)
-        return self._hash
+        hash_sum = 0
+        for key, value in self._items():
+            hash_sum += hash(key) + hash(value)
+        return hash_sum
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
@@ -110,10 +88,107 @@ class ImmutableObject(object):
     def copy(self, **values):
         """
         .. deprecated:: 1.1
-            Use :meth:`replace` instead. Note that we no longer return copies.
+            Use :meth:`replace` instead.
         """
         deprecation.warn('model.immutable.copy')
         return self.replace(**values)
+
+    def replace(self, **kwargs):
+        """
+        Replace the fields in the model and return a new instance
+
+        Examples::
+
+            # Returns a track with a new name
+            Track(name='foo').replace(name='bar')
+            # Return an album with a new number of tracks
+            Album(num_tracks=2).replace(num_tracks=5)
+
+        :param kwargs: kwargs to set as fields on the object
+        :type kwargs: any
+        :rtype: instance of the model with replaced fields
+        """
+        other = copy.copy(self)
+        for key, value in kwargs.items():
+            if not self._is_valid_field(key):
+                raise TypeError(
+                    'copy() got an unexpected keyword argument "%s"' % key)
+            other._set_field(key, value)
+        return other
+
+    def serialize(self):
+        data = {}
+        data['__model__'] = self.__class__.__name__
+        for key, value in self._items():
+            if isinstance(value, (set, frozenset, list, tuple)):
+                value = [
+                    v.serialize() if isinstance(v, ImmutableObject) else v
+                    for v in value]
+            elif isinstance(value, ImmutableObject):
+                value = value.serialize()
+            if not (isinstance(value, list) and len(value) == 0):
+                data[key] = value
+        return data
+
+
+class _ValidatedImmutableObjectMeta(type):
+
+    """Helper that initializes fields, slots and memoizes instance creation."""
+
+    def __new__(cls, name, bases, attrs):
+        fields = {}
+
+        for base in bases:  # Copy parent fields over to our state
+            fields.update(getattr(base, '_fields', {}))
+
+        for key, value in attrs.items():  # Add our own fields
+            if isinstance(value, Field):
+                fields[key] = '_' + key
+                value._name = key
+
+        attrs['_fields'] = fields
+        attrs['_instances'] = weakref.WeakValueDictionary()
+        attrs['__slots__'] = list(attrs.get('__slots__', [])) + fields.values()
+
+        return super(_ValidatedImmutableObjectMeta, cls).__new__(
+            cls, name, bases, attrs)
+
+    def __call__(cls, *args, **kwargs):  # noqa: N805
+        instance = super(_ValidatedImmutableObjectMeta, cls).__call__(
+            *args, **kwargs)
+        return cls._instances.setdefault(weakref.ref(instance), instance)
+
+
+class ValidatedImmutableObject(ImmutableObject):
+    """
+    Superclass for immutable objects whose fields can only be modified via the
+    constructor. Fields should be :class:`Field` instances to ensure type
+    safety in our models.
+
+    Note that since these models can not be changed, we heavily memoize them
+    to save memory. So constructing a class with the same arguments twice will
+    give you the same instance twice.
+    """
+
+    __metaclass__ = _ValidatedImmutableObjectMeta
+    __slots__ = ['_hash']
+
+    def __hash__(self):
+        if not hasattr(self, '_hash'):
+            hash_sum = super(ValidatedImmutableObject, self).__hash__()
+            object.__setattr__(self, '_hash', hash_sum)
+        return self._hash
+
+    def _is_valid_field(self, name):
+        return name in self._fields
+
+    def _set_field(self, name, value):
+        object.__setattr__(self, name, value)
+
+    def _items(self):
+        for field, key in self._fields.items():
+            if hasattr(self, key):
+                yield field, getattr(self, key)
 
     def replace(self, **kwargs):
         """
@@ -136,25 +211,7 @@ class ImmutableObject(object):
         """
         if not kwargs:
             return self
-        other = copy.copy(self)
-        for key, value in kwargs.items():
-            if key not in self._fields:
-                raise TypeError(
-                    'copy() got an unexpected keyword argument "%s"' % key)
-            super(ImmutableObject, other).__setattr__(key, value)
-        super(ImmutableObject, other).__delattr__('_hash')
+        other = super(ValidatedImmutableObject, self).replace(**kwargs)
+        if hasattr(self, '_hash'):
+            object.__delattr__(other, '_hash')
         return self._instances.setdefault(weakref.ref(other), other)
-
-    def serialize(self):
-        data = {}
-        data['__model__'] = self.__class__.__name__
-        for key, value in self._items():
-            if isinstance(value, (set, frozenset, list, tuple)):
-                value = [
-                    v.serialize() if isinstance(v, ImmutableObject) else v
-                    for v in value]
-            elif isinstance(value, ImmutableObject):
-                value = value.serialize()
-            if not (isinstance(value, list) and len(value) == 0):
-                data[key] = value
-        return data

@@ -6,9 +6,9 @@ import os
 import tempfile
 import unittest
 
+from mopidy.internal import path
 from mopidy.m3u import translator
 from mopidy.models import Track
-from mopidy.utils import path
 
 from tests import path_to_data_dir
 

@@ -7,9 +7,9 @@ import pykka
 
 from mopidy import core
 from mopidy.core import PlaybackState
+from mopidy.internal import deprecation
 from mopidy.local import actor
 from mopidy.models import Playlist, Track
-from mopidy.utils import deprecation
 
 from tests import dummy_audio, path_to_data_dir
 from tests.local import generate_song, populate_tracklist

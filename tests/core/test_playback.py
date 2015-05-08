@@ -7,8 +7,8 @@ import mock
 import pykka
 
 from mopidy import backend, core
+from mopidy.internal import deprecation
 from mopidy.models import Track
-from mopidy.utils import deprecation
 
 from tests import dummy_audio as audio
 
@@ -21,15 +21,13 @@ class CorePlaybackTest(unittest.TestCase):
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
         self.playback1 = mock.Mock(spec=backend.PlaybackProvider)
-        self.playback1.get_time_position().get.return_value = 1000
-        self.playback1.reset_mock()
+        self.playback1.get_time_position.return_value.get.return_value = 1000
         self.backend1.playback = self.playback1
 
         self.backend2 = mock.Mock()
         self.backend2.uri_schemes.get.return_value = ['dummy2']
         self.playback2 = mock.Mock(spec=backend.PlaybackProvider)
-        self.playback2.get_time_position().get.return_value = 2000
-        self.playback2.reset_mock()
+        self.playback2.get_time_position.return_value.get.return_value = 2000
         self.backend2.playback = self.playback2
 
         # A backend without the optional playback provider
@@ -122,6 +120,17 @@ class CorePlaybackTest(unittest.TestCase):
 
         self.assertEqual(
             self.core.playback.get_current_track(), self.tracks[0])
+
+    def test_get_current_tlid_none(self):
+        self.set_current_tl_track(None)
+
+        self.assertEqual(self.core.playback.get_current_tlid(), None)
+
+    def test_get_current_tlid_play(self):
+        self.core.playback.play(self.tl_tracks[0])
+
+        self.assertEqual(
+            self.core.playback.get_current_tlid(), self.tl_tracks[0].tlid)
 
     # TODO Test state
 

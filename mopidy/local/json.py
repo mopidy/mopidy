@@ -11,8 +11,8 @@ import tempfile
 
 import mopidy
 from mopidy import compat, local, models
+from mopidy.internal import encoding, timer
 from mopidy.local import search, storage, translator
-from mopidy.utils import encoding, timer
 
 logger = logging.getLogger(__name__)
 

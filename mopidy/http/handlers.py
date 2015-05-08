@@ -12,7 +12,7 @@ import tornado.websocket
 
 import mopidy
 from mopidy import core, models
-from mopidy.utils import encoding, jsonrpc
+from mopidy.internal import encoding, jsonrpc
 
 
 logger = logging.getLogger(__name__)

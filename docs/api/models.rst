@@ -1,6 +1,6 @@
-***********
-Data models
-***********
+************************************
+:mod:`mopidy.models` --- Data models
+************************************
 
 These immutable data models are used for all data transfer within the Mopidy
 backends and between the backends and the MPD frontend. All fields are optional
@@ -77,8 +77,29 @@ Data model helpers
 .. autoclass:: mopidy.models.ImmutableObject
     :members:
 
-.. autoclass:: mopidy.models.Field
+.. autoclass:: mopidy.models.ValidatedImmutableObject
+    :members: replace
+
+Data model (de)serialization
+----------------------------
+
+.. autofunction:: mopidy.models.model_json_decoder
 
 .. autoclass:: mopidy.models.ModelJSONEncoder
 
-.. autofunction:: mopidy.models.model_json_decoder
+Data model field types
+----------------------
+
+.. autoclass:: mopidy.models.fields.Field
+
+.. autoclass:: mopidy.models.fields.String
+
+.. autoclass:: mopidy.models.fields.Identifier
+
+.. autoclass:: mopidy.models.fields.URI
+
+.. autoclass:: mopidy.models.fields.Date
+
+.. autoclass:: mopidy.models.fields.Integer
+
+.. autoclass:: mopidy.models.fields.Collection

@@ -18,6 +18,26 @@ class InheritanceTest(unittest.TestCase):
         class Foo(Track):
             pass
 
+    def test_sub_class_can_have_its_own_slots(self):
+        # Needed for things like SpotifyTrack in mopidy-spotify 1.x
+
+        class Foo(Track):
+            __slots__ = ('_foo',)
+
+        f = Foo()
+        f._foo = 123
+
+    def test_sub_class_can_be_initialized(self):
+        # Fails with following error if fields are not handled across classes.
+        #   TypeError: __init__() got an unexpected keyword argument "type"
+        # Essentially this is testing that sub-classes take parent _fields into
+        # account.
+
+        class Foo(Ref):
+            pass
+
+        Foo.directory()
+
 
 class CachingTest(unittest.TestCase):
 
@@ -1148,9 +1168,3 @@ class SearchResultTest(unittest.TestCase):
         self.assertDictEqual(
             {'__model__': 'SearchResult', 'uri': 'uri'},
             SearchResult(uri='uri').serialize())
-
-    def test_to_json_and_back(self):
-        result1 = SearchResult(uri='uri')
-        serialized = json.dumps(result1, cls=ModelJSONEncoder)
-        result2 = json.loads(serialized, object_hook=model_json_decoder)
-        self.assertEqual(result1, result2)

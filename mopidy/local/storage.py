@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import logging
 import os
 
-from mopidy.utils import encoding, path
+from mopidy.internal import encoding, path
 
 logger = logging.getLogger(__name__)
 

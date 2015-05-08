@@ -1,8 +1,8 @@
 .. _backend-api:
 
-***********
-Backend API
-***********
+*************************************
+:mod:`mopidy.backend` --- Backend API
+*************************************
 
 .. module:: mopidy.backend
     :synopsis: The API implemented by backends

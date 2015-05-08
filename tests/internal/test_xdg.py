@@ -6,7 +6,7 @@ import mock
 
 import pytest
 
-from mopidy.utils import xdg
+from mopidy.internal import xdg
 
 
 @pytest.yield_fixture
