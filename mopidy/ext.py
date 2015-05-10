@@ -211,5 +211,7 @@ def validate_extension(extension):
         logger.info(
             'Disabled extension %s: %s', extension.ext_name, ex.message)
         return False
+    except Exception:
+        return False  # TODO: log
 
     return True
