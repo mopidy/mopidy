@@ -11,6 +11,12 @@ from mopidy import config as config_lib, exceptions
 logger = logging.getLogger(__name__)
 
 
+_extension_data_fields = ['extension', 'entry_point', 'config_schema',
+                          'config_defaults', 'command']
+
+ExtensionData = collections.namedtuple('ExtensionData', _extension_data_fields)
+
+
 class Extension(object):
 
     """Base class for Mopidy extensions"""
@@ -149,6 +155,8 @@ def load_extensions():
         logger.debug('Loading entry point: %s', entry_point)
         extension_class = entry_point.load(require=False)
 
+        # TODO: start using _extension_error_handling(...) pattern
+
         try:
             if not issubclass(extension_class, Extension):
                 continue  # TODO: log this
@@ -160,19 +168,26 @@ def load_extensions():
         except Exception:
             continue  # TODO: log this
 
-        extension.entry_point = entry_point
+        # TODO: handle exceptions and validate result...
+        config_schema = extension.get_config_schema()
+        default_config = extension.get_default_config()
+        command = extension.get_command()
 
-        # TODO: store: (instance, entry_point, command, schema, defaults)
-        installed_extensions.append(extension)
+        installed_extensions.append(ExtensionData(
+            extension, entry_point, config_schema, default_config, command))
+
+        # TODO: call validate_extension here?
+        # TODO: do basic config tests like schema contains enabled?
+
         logger.debug(
             'Loaded extension: %s %s', extension.dist_name, extension.version)
 
-    names = (e.ext_name for e in installed_extensions)
+    names = (ed.extension.ext_name for ed in installed_extensions)
     logger.debug('Discovered extensions: %s', ', '.join(names))
     return installed_extensions
 
 
-def validate_extension(extension):
+def validate_extension(extension, entry_point):
     """Verify extension's dependencies and environment.
 
     :param extensions: an extension to check
@@ -181,15 +196,15 @@ def validate_extension(extension):
 
     logger.debug('Validating extension: %s', extension.ext_name)
 
-    if extension.ext_name != extension.entry_point.name:
+    if extension.ext_name != entry_point.name:
         logger.warning(
             'Disabled extension %(ep)s: entry point name (%(ep)s) '
             'does not match extension name (%(ext)s)',
-            {'ep': extension.entry_point.name, 'ext': extension.ext_name})
+            {'ep': entry_point.name, 'ext': extension.ext_name})
         return False
 
     try:
-        extension.entry_point.require()
+        entry_point.require()
     except pkg_resources.DistributionNotFound as ex:
         logger.info(
             'Disabled extension %s: Dependency %s not found',
@@ -202,7 +217,8 @@ def validate_extension(extension):
                 'Disabled extension %s: %s required, but found %s at %s',
                 extension.ext_name, required, found, found.location)
         else:
-            logger.info('Disabled extension %s: %s', extension.ext_name, ex)
+            logger.info(
+                'Disabled extension %s: %s', extension.ext_name, ex)
         return False
 
     try:

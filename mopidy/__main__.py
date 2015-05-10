@@ -68,19 +68,20 @@ def main():
 
         installed_extensions = ext.load_extensions()
 
-        for extension in installed_extensions:
-            ext_cmd = extension.get_command()
-            if ext_cmd:
-                ext_cmd.set(extension=extension)
-                root_cmd.add_child(extension.ext_name, ext_cmd)
+        for data in installed_extensions:
+            if data.command:
+                data.command.set(extension=data.command)
+                root_cmd.add_child(data.extension.ext_name, data.command)
 
         args = root_cmd.parse(mopidy_args)
 
         create_file_structures_and_config(args, installed_extensions)
         check_old_locations()
 
+        # TODO: make config.load use extension data? or just pass in schema+def
         config, config_errors = config_lib.load(
-            args.config_files, installed_extensions, args.config_overrides)
+            args.config_files, [d.extension for d in installed_extensions],
+            args.config_overrides)
 
         verbosity_level = args.base_verbosity_level
         if args.verbosity_level:
@@ -90,8 +91,11 @@ def main():
 
         extensions = {
             'validate': [], 'config': [], 'disabled': [], 'enabled': []}
-        for extension in installed_extensions:
-            if not ext.validate_extension(extension):
+        for data in installed_extensions:
+            extension = data.extension
+
+            # TODO: factor out all of this to a helper that can be tested
+            if not ext.validate_extension(data.extension, data.entry_point):
                 config[extension.ext_name] = {'enabled': False}
                 config_errors[extension.ext_name] = {
                     'enabled': 'extension disabled by self check.'}
@@ -108,6 +112,9 @@ def main():
                 extensions['config'].append(extension)
             else:
                 extensions['enabled'].append(extension)
+
+        # TODO: convert rest of code to use new ExtensionData
+        installed_extensions = [d.extension for d in installed_extensions]
 
         log_extension_info(installed_extensions, extensions['enabled'])
 

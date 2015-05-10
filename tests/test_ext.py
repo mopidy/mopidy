@@ -8,11 +8,19 @@ import pytest
 
 from mopidy import config, exceptions, ext
 
+from tests import IsA, any_unicode
+
 
 class TestExtension(ext.Extension):
     dist_name = 'Mopidy-Foobar'
     ext_name = 'foobar'
     version = '1.2.3'
+
+    def get_default_config(self):
+        return '[foobar]\nenabled = true'
+
+
+any_testextension = IsA(TestExtension)
 
 
 # ext.Extension
@@ -69,9 +77,11 @@ def test_load_extensions(mock_entry_points):
 
     mock_entry_points.return_value = [mock_entry_point]
 
-    extensions = ext.load_extensions()
-    assert len(extensions) == 1
-    assert isinstance(extensions[0], TestExtension)
+    expected = ext.ExtensionData(
+        any_testextension, mock_entry_point, IsA(config.ConfigSchema),
+        any_unicode, None)
+
+    assert ext.load_extensions() == [expected]
 
 
 @mock.patch('pkg_resources.iter_entry_points')
@@ -110,87 +120,62 @@ def test_load_extensions_creating_instance_fails(mock_entry_points):
     assert [] == ext.load_extensions()
 
 
-@mock.patch('pkg_resources.iter_entry_points')
-def test_load_extensions_store_entry_point(mock_entry_points):
-    mock_entry_point = mock.Mock()
-    mock_entry_point.load.return_value = TestExtension
-    mock_entry_points.return_value = [mock_entry_point]
-
-    extensions = ext.load_extensions()
-    assert len(extensions) == 1
-    assert extensions[0].entry_point == mock_entry_point
-
-
 # ext.validate_extension
 
-def test_validate_extension_name_mismatch():
-    ep = mock.Mock()
-    ep.name = 'barfoo'
-
+@pytest.fixture
+def ext_data():
     extension = TestExtension()
-    extension.entry_point = ep
 
-    assert not ext.validate_extension(extension)
+    entry_point = mock.Mock()
+    entry_point.name = extension.ext_name
 
+    schema = extension.get_config_schema()
+    defaults = extension.get_default_config()
+    command = extension.get_command()
 
-def test_validate_extension_distribution_not_found():
-    ep = mock.Mock()
-    ep.name = 'foobar'
-    ep.require.side_effect = pkg_resources.DistributionNotFound
-
-    extension = TestExtension()
-    extension.entry_point = ep
-
-    assert not ext.validate_extension(extension)
+    return ext.ExtensionData(extension, entry_point, schema, defaults, command)
 
 
-def test_validate_extension_version_conflict():
-    ep = mock.Mock()
-    ep.name = 'foobar'
-    ep.require.side_effect = pkg_resources.VersionConflict
-
-    extension = TestExtension()
-    extension.entry_point = ep
-
-    assert not ext.validate_extension(extension)
+def test_validate_extension_name_mismatch(ext_data):
+    ext_data.entry_point.name = 'barfoo'
+    assert not ext.validate_extension(ext_data.extension, ext_data.entry_point)
 
 
-def test_validate_extension_exception():
-    ep = mock.Mock()
-    ep.name = 'foobar'
-    ep.require.side_effect = Exception
+def test_validate_extension_distribution_not_found(ext_data):
+    error = pkg_resources.DistributionNotFound
+    ext_data.entry_point.require.side_effect = error
+    assert not ext.validate_extension(ext_data.extension, ext_data.entry_point)
 
-    extension = TestExtension()
-    extension.entry_point = ep
+
+def test_validate_extension_version_conflict(ext_data):
+    ext_data.entry_point.require.side_effect = pkg_resources.VersionConflict
+    assert not ext.validate_extension(ext_data.extension, ext_data.entry_point)
+
+
+def test_validate_extension_exception(ext_data):
+    ext_data.entry_point.require.side_effect = Exception
 
     # We trust that entry points are well behaved, so exception will bubble.
     with pytest.raises(Exception):
-        assert not ext.validate_extension(extension)
+        assert not ext.validate_extension(
+            ext_data.extension, ext_data.entry_point)
 
 
-def test_validate_extension_instance_validate_env_ext_error():
-    ep = mock.Mock()
-    ep.name = 'foobar'
-
-    extension = TestExtension()
-    extension.entry_point = ep
-
+def test_validate_extension_instance_validate_env_ext_error(ext_data):
+    extension = ext_data.extension
     with mock.patch.object(extension, 'validate_environment') as validate:
         validate.side_effect = exceptions.ExtensionError('error')
 
-        assert not ext.validate_extension(extension)
+        assert not ext.validate_extension(
+            ext_data.extension, ext_data.entry_point)
         validate.assert_called_once_with()
 
 
-def test_validate_extension_instance_validate_env_exception():
-    ep = mock.Mock()
-    ep.name = 'foobar'
-
-    extension = TestExtension()
-    extension.entry_point = ep
-
+def test_validate_extension_instance_validate_env_exception(ext_data):
+    extension = ext_data.extension
     with mock.patch.object(extension, 'validate_environment') as validate:
         validate.side_effect = Exception
 
-        assert not ext.validate_extension(extension)
+        assert not ext.validate_extension(
+            ext_data.extension, ext_data.entry_point)
         validate.assert_called_once_with()
