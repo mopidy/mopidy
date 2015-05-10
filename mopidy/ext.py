@@ -148,8 +148,21 @@ def load_extensions():
     for entry_point in pkg_resources.iter_entry_points('mopidy.ext'):
         logger.debug('Loading entry point: %s', entry_point)
         extension_class = entry_point.load(require=False)
-        extension = extension_class()
+
+        try:
+            if not issubclass(extension_class, Extension):
+                continue  # TODO: log this
+        except TypeError:
+            continue  # TODO: log that extension_class is not a class
+
+        try:
+            extension = extension_class()
+        except Exception:
+            continue  # TODO: log this
+
         extension.entry_point = entry_point
+
+        # TODO: store: (instance, entry_point, command, schema, defaults)
         installed_extensions.append(extension)
         logger.debug(
             'Loaded extension: %s %s', extension.dist_name, extension.version)
