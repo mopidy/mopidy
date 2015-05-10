@@ -13,6 +13,9 @@ Bug fix release.
 - Core: Add workaround for playlist providers that do not support
   creating playlists.  (Fixes: :issue:`1162`, PR :issue:`1165`)
 
+- M3U: Fix encoding error when saving playlists with non-ASCII track
+  titles. (Fixes: :issue:`1175`, PR :issue:`1176`)
+
 
 v1.0.4 (2015-04-30)
 ===================
