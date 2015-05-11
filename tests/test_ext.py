@@ -154,13 +154,9 @@ def test_load_extensions_get_command_fails(iter_entry_points_mock):
 
     iter_entry_points_mock.return_value = [mock_entry_point]
 
-    expected = ext.ExtensionData(
-        any_testextension, mock_entry_point, IsA(config.ConfigSchema),
-        any_unicode, None)
-
     with mock.patch.object(TestExtension, 'get_command') as get_command:
         get_command.side_effect = Exception
-        assert [expected] == ext.load_extensions()
+        assert [] == ext.load_extensions()
         get_command.assert_called_once_with()
 
 

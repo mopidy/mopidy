@@ -155,31 +155,26 @@ def load_extensions():
         logger.debug('Loading entry point: %s', entry_point)
         extension_class = entry_point.load(require=False)
 
-        # TODO: start using _extension_error_handling(...) pattern
-
         try:
             if not issubclass(extension_class, Extension):
-                continue  # TODO: log this
+                raise TypeError  # issubclass raises TypeError on non-class
         except TypeError:
-            continue  # TODO: log that extension_class is not a class
+            logger.error('Entry point %s did not contain a valid extension'
+                         'class: %r', entry_point.name, extension_class)
+            continue
 
         try:
             extension = extension_class()
             config_schema = extension.get_config_schema()
             default_config = extension.get_default_config()
-        except Exception:
-            continue  # TODO: log this
-
-        try:
             command = extension.get_command()
         except Exception:
-            command = None  # TODO: log this.
+            logger.exception('Setup of extension from entry point %s failed, '
+                             'ignoring extension.', entry_point.name)
+            continue
 
         installed_extensions.append(ExtensionData(
             extension, entry_point, config_schema, default_config, command))
-
-        # TODO: call validate_extension here?
-        # TODO: do basic config tests like schema contains enabled?
 
         logger.debug(
             'Loaded extension: %s %s', extension.dist_name, extension.version)
