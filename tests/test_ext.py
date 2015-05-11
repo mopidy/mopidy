@@ -63,19 +63,25 @@ def test_setup_raises_not_implemented(extension):
 
 # ext.load_extensions
 
+@pytest.fixture
+def iter_entry_points_mock(request):
+    patcher = mock.patch('pkg_resources.iter_entry_points')
+    iter_entry_points = patcher.start()
+    iter_entry_points.return_value = []
+    request.addfinalizer(patcher.stop)
+    return iter_entry_points
 
-@mock.patch('pkg_resources.iter_entry_points')
-def test_load_extensions_no_extenions(mock_entry_points):
-    mock_entry_points.return_value = []
+
+def test_load_extensions_no_extenions(iter_entry_points_mock):
+    iter_entry_points_mock.return_value = []
     assert [] == ext.load_extensions()
 
 
-@mock.patch('pkg_resources.iter_entry_points')
-def test_load_extensions(mock_entry_points):
+def test_load_extensions(iter_entry_points_mock):
     mock_entry_point = mock.Mock()
     mock_entry_point.load.return_value = TestExtension
 
-    mock_entry_points.return_value = [mock_entry_point]
+    iter_entry_points_mock.return_value = [mock_entry_point]
 
     expected = ext.ExtensionData(
         any_testextension, mock_entry_point, IsA(config.ConfigSchema),
@@ -84,8 +90,7 @@ def test_load_extensions(mock_entry_points):
     assert ext.load_extensions() == [expected]
 
 
-@mock.patch('pkg_resources.iter_entry_points')
-def test_load_extensions_gets_wrong_class(mock_entry_points):
+def test_load_extensions_gets_wrong_class(iter_entry_points_mock):
 
     class WrongClass(object):
         pass
@@ -93,30 +98,29 @@ def test_load_extensions_gets_wrong_class(mock_entry_points):
     mock_entry_point = mock.Mock()
     mock_entry_point.load.return_value = WrongClass
 
-    mock_entry_points.return_value = [mock_entry_point]
+    iter_entry_points_mock.return_value = [mock_entry_point]
 
     assert [] == ext.load_extensions()
 
 
-@mock.patch('pkg_resources.iter_entry_points')
-def test_load_extensions_gets_instance(mock_entry_points):
+def test_load_extensions_gets_instance(iter_entry_points_mock):
     mock_entry_point = mock.Mock()
     mock_entry_point.load.return_value = TestExtension()
 
-    mock_entry_points.return_value = [mock_entry_point]
+    iter_entry_points_mock.return_value = [mock_entry_point]
 
     assert [] == ext.load_extensions()
 
 
-@mock.patch('pkg_resources.iter_entry_points')
-def test_load_extensions_creating_instance_fails(mock_entry_points):
+def test_load_extensions_creating_instance_fails(iter_entry_points_mock):
     mock_extension = mock.Mock(spec=ext.Extension)
     mock_extension.side_effect = Exception
 
     mock_entry_point = mock.Mock()
     mock_entry_point.load.return_value = mock_extension
 
-    mock_entry_points.return_value = [mock_entry_point]
+    iter_entry_points_mock.return_value = [mock_entry_point]
+
     assert [] == ext.load_extensions()
 
 
