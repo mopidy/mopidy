@@ -10,6 +10,8 @@ import glib
 
 import gobject
 
+import pykka
+
 from mopidy import config as config_lib, exceptions
 from mopidy.audio import Audio
 from mopidy.core import Core
@@ -230,6 +232,7 @@ class Command(object):
         raise NotImplementedError
 
 
+# TODO: move out of this utility class
 class RootCommand(Command):
 
     def __init__(self):
@@ -276,6 +279,8 @@ class RootCommand(Command):
             mixer = None
             if mixer_class is not None:
                 mixer = self.start_mixer(config, mixer_class)
+            if mixer:
+                self.configure_mixer(config, mixer)
             audio = self.start_audio(config, mixer)
             backends = self.start_backends(config, backend_classes, audio)
             core = self.start_core(config, mixer, backends, audio)
@@ -322,16 +327,23 @@ class RootCommand(Command):
         return selected_mixers[0]
 
     def start_mixer(self, config, mixer_class):
+        logger.info('Starting Mopidy mixer: %s', mixer_class.__name__)
+        mixer = None
+
         try:
-            logger.info('Starting Mopidy mixer: %s', mixer_class.__name__)
             mixer = mixer_class.start(config=config).proxy()
-            self.configure_mixer(config, mixer)
-            return mixer
+            mixer.ping().get()
         except exceptions.MixerError as exc:
-            logger.error(
-                'Mixer (%s) initialization error: %s',
-                mixer_class.__name__, exc.message)
-            raise
+            logger.error('Mixer (%s) initialization error: %s',
+                         mixer_class.__name__, exc.message)
+        except pykka.ActorDeadError as exc:
+            mixer = None
+            logger.error('Mixer actor died: %s', exc)
+        except Exception:
+            logger.exception('Mixer (%s) initialization exception:',
+                             mixer_class.__name__)
+
+        return mixer
 
     def configure_mixer(self, config, mixer):
         volume = config['audio']['mixer_volume']
