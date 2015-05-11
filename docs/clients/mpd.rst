@@ -170,37 +170,6 @@ You can get `MPDroid from Google Play
 MPDroid is a good MPD client, and really the only one we can recommend.
 
 
-BitMPC
-------
-
-Test date:
-    2012-11-06
-Tested version:
-    1.0.0 (released 2010-04-12)
-
-You can get `BitMPC from Google Play
-<https://play.google.com/store/apps/details?id=bitendian.bitmpc>`_.
-
-- The user interface lacks some finishing touches. E.g. you can't enter a
-  hostname for the server. Only IPv4 addresses are allowed.
-
-- When we last tested the same version of BitMPC using Android 2.1:
-
-  - All features exercised in the test procedure worked.
-
-  - BitMPC lacked support for single mode and consume mode.
-
-  - BitMPC crashed if Mopidy was killed or crashed.
-
-- When we tried to test using Android 4.1.1, BitMPC started and connected to
-  Mopidy without problems, but the app crashed as soon as we fired off our
-  search, and continued to crash on startup after that.
-
-In conclusion, BitMPC is usable if you got an older Android phone and don't
-care about looks. For newer Android versions, BitMPC will probably not work as
-it hasn't been maintained for 2.5 years.
-
-
 Droid MPD Client
 ----------------
 
