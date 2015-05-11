@@ -12,35 +12,6 @@ http://mpd.wikia.com/wiki/Clients.
     :local:
 
 
-Test procedure
-==============
-
-In some cases, we've used the following test procedure to compare the feature
-completeness of clients:
-
-#. Connect to Mopidy
-#. Search for "foo", with search type "any" if it can be selected
-#. Add "The Pretender" from the search results to the current playlist
-#. Start playback
-#. Pause and resume playback
-#. Adjust volume
-#. Find a playlist and append it to the current playlist
-#. Skip to next track
-#. Skip to previous track
-#. Select the last track from the current playlist
-#. Turn on repeat mode
-#. Seek to 10 seconds or so before the end of the track
-#. Wait for the end of the track and confirm that playback continues at the
-   start of the playlist
-#. Turn off repeat mode
-#. Turn on random mode
-#. Skip to next track and confirm that it random mode works
-#. Turn off random mode
-#. Stop playback
-#. Check if the app got support for single mode and consume mode
-#. Kill Mopidy and confirm that the app handles it without crashing
-
-
 MPD console clients
 ===================
 
@@ -134,18 +105,8 @@ client for OS X. It is unmaintained, but generally works well with Mopidy.
 MPD Android clients
 ===================
 
-We've tested all five MPD clients we could find for Android with Mopidy 0.8.1
-on a Samsung Galaxy Nexus with Android 4.1.2, using our standard test
-procedure.
-
-
 MPDroid
 -------
-
-Test date:
-    2012-11-06
-Tested version:
-    1.03.1 (released 2012-10-16)
 
 .. image:: mpd-client-mpdroid.jpg
     :width: 288
@@ -153,18 +114,6 @@ Tested version:
 
 You can get `MPDroid from Google Play
 <https://play.google.com/store/apps/details?id=com.namelessdev.mpdroid>`_.
-
-- MPDroid started out as a fork of PMix, and is now much better.
-
-- MPDroid's user interface looks nice.
-
-- Everything in the test procedure works.
-
-- In contrast to all other Android clients, MPDroid does support single mode or
-  consume mode.
-
-- When Mopidy is killed, MPDroid handles it gracefully and asks if you want to
-  try to reconnect.
 
 MPDroid is a good MPD client, and really the only one we can recommend.
 
@@ -177,11 +126,6 @@ MPD iOS clients
 MPoD
 ----
 
-Test date:
-    2012-11-06
-Tested version:
-    1.7.1
-
 .. image:: mpd-client-mpod.jpg
     :width: 320
     :height: 480
@@ -190,25 +134,9 @@ The `MPoD <http://www.katoemba.net/makesnosenseatall/mpod/>`_ iPhone/iPod Touch
 app can be installed from `MPoD at iTunes Store
 <https://itunes.apple.com/us/app/mpod/id285063020>`_.
 
-- The user interface looks nice.
-
-- All features exercised in the test procedure worked with MPaD, except seek,
-  which I didn't figure out to do.
-
-- Search only works in the "Browse" tab, and not under in the "Artist",
-  "Album", or "Song" tabs. For the tabs where search doesn't work, no queries
-  are sent to Mopidy when searching.
-
-- Single mode and consume mode is supported.
-
 
 MPaD
 ----
-
-Test date:
-    2012-11-06
-Tested version:
-    1.7.1
 
 .. image:: mpd-client-mpad.jpg
     :width: 480
@@ -217,20 +145,6 @@ Tested version:
 The `MPaD <http://www.katoemba.net/makesnosenseatall/mpad/>`_ iPad app can be
 purchased from `MPaD at iTunes Store
 <https://itunes.apple.com/us/app/mpad/id423097706>`_
-
-- The user interface looks nice, though I would like to be able to view the
-  current playlist in the large part of the split view.
-
-- All features exercised in the test procedure worked with MPaD.
-
-- Search only works in the "Browse" tab, and not under in the "Artist",
-  "Album", or "Song" tabs. For the tabs where search doesn't work, no queries
-  are sent to Mopidy when searching.
-
-- Single mode and consume mode is supported.
-
-- The server menu can be very slow top open, and there is no visible feedback
-  when waiting for the connection to a server to succeed.
 
 
 .. _mpd-web-clients:
