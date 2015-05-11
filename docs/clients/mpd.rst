@@ -234,21 +234,6 @@ You can get `Droid MPD Client from Google Play
 In conclusion, not a client we can recommend.
 
 
-MPD Remote
-----------
-
-Test date:
-    2012-11-06
-Tested version:
-    1.0 (released 2012-05-01)
-
-You can get `MPD Remote from Google Play
-<https://play.google.com/store/apps/details?id=fr.mildlyusefulsoftware.mpdremote>`_.
-
-This app looks terrible in the screen shots, got just 100+ downloads, and got a
-terrible rating. I honestly didn't take the time to test it.
-
-
 .. _ios_mpd_clients:
 
 iOS clients
