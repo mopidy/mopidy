@@ -184,47 +184,70 @@ def load_extensions():
     return installed_extensions
 
 
-def validate_extension(extension, entry_point):
+def validate_extension_data(data):
     """Verify extension's dependencies and environment.
 
     :param extensions: an extension to check
     :returns: if extension should be run
     """
 
-    logger.debug('Validating extension: %s', extension.ext_name)
+    logger.debug('Validating extension: %s', data.extension.ext_name)
 
-    if extension.ext_name != entry_point.name:
+    if data.extension.ext_name != data.entry_point.name:
         logger.warning(
             'Disabled extension %(ep)s: entry point name (%(ep)s) '
             'does not match extension name (%(ext)s)',
-            {'ep': entry_point.name, 'ext': extension.ext_name})
+            {'ep': data.entry_point.name, 'ext': data.extension.ext_name})
         return False
 
     try:
-        entry_point.require()
+        data.entry_point.require()
     except pkg_resources.DistributionNotFound as ex:
         logger.info(
             'Disabled extension %s: Dependency %s not found',
-            extension.ext_name, ex)
+            data.extension.ext_name, ex)
         return False
     except pkg_resources.VersionConflict as ex:
         if len(ex.args) == 2:
             found, required = ex.args
             logger.info(
                 'Disabled extension %s: %s required, but found %s at %s',
-                extension.ext_name, required, found, found.location)
+                data.extension.ext_name, required, found, found.location)
         else:
             logger.info(
-                'Disabled extension %s: %s', extension.ext_name, ex)
+                'Disabled extension %s: %s', data.extension.ext_name, ex)
         return False
 
     try:
-        extension.validate_environment()
+        data.extension.validate_environment()
     except exceptions.ExtensionError as ex:
         logger.info(
-            'Disabled extension %s: %s', extension.ext_name, ex.message)
+            'Disabled extension %s: %s', data.extension.ext_name, ex.message)
         return False
     except Exception:
-        return False  # TODO: log
+        logger.exception('Validating extension %s failed with an exception.',
+                         data.extension.ext_name)
+        return False
+
+    if not data.config_schema:
+        logger.error('Extension %s does not have a config schema, disabling.',
+                     data.extension.ext_name)
+        return False
+    elif not isinstance(data.config_schema.get('enabled'), config_lib.Boolean):
+        logger.error('Extension %s does not have the required "enabled" config'
+                     ' option, disabling.', data.extension.ext_name)
+        return False
+
+    for key, value in data.config_schema.items():
+        if not isinstance(value, config_lib.ConfigValue):
+            logger.error('Extension %s config schema contains an invalid value'
+                         ' for the option "%s", disabling.',
+                         data.extension.ext_name, key)
+            return False
+
+    if not data.config_defaults:
+        logger.error('Extension %s does not have a default config, disabling.',
+                     data.extension.ext_name)
+        return False
 
     return True

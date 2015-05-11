@@ -95,7 +95,7 @@ def main():
             extension = data.extension
 
             # TODO: factor out all of this to a helper that can be tested
-            if not ext.validate_extension(data.extension, data.entry_point):
+            if not ext.validate_extension_data(data):
                 config[extension.ext_name] = {'enabled': False}
                 config_errors[extension.ext_name] = {
                     'enabled': 'extension disabled by self check.'}

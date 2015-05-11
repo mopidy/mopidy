@@ -160,7 +160,7 @@ def test_load_extensions_get_command_fails(iter_entry_points_mock):
         get_command.assert_called_once_with()
 
 
-# ext.validate_extension
+# ext.validate_extension_data
 
 @pytest.fixture
 def ext_data():
@@ -178,18 +178,18 @@ def ext_data():
 
 def test_validate_extension_name_mismatch(ext_data):
     ext_data.entry_point.name = 'barfoo'
-    assert not ext.validate_extension(ext_data.extension, ext_data.entry_point)
+    assert not ext.validate_extension_data(ext_data)
 
 
 def test_validate_extension_distribution_not_found(ext_data):
     error = pkg_resources.DistributionNotFound
     ext_data.entry_point.require.side_effect = error
-    assert not ext.validate_extension(ext_data.extension, ext_data.entry_point)
+    assert not ext.validate_extension_data(ext_data)
 
 
 def test_validate_extension_version_conflict(ext_data):
     ext_data.entry_point.require.side_effect = pkg_resources.VersionConflict
-    assert not ext.validate_extension(ext_data.extension, ext_data.entry_point)
+    assert not ext.validate_extension_data(ext_data)
 
 
 def test_validate_extension_exception(ext_data):
@@ -197,8 +197,7 @@ def test_validate_extension_exception(ext_data):
 
     # We trust that entry points are well behaved, so exception will bubble.
     with pytest.raises(Exception):
-        assert not ext.validate_extension(
-            ext_data.extension, ext_data.entry_point)
+        assert not ext.validate_extension_data(ext_data)
 
 
 def test_validate_extension_instance_validate_env_ext_error(ext_data):
@@ -206,8 +205,7 @@ def test_validate_extension_instance_validate_env_ext_error(ext_data):
     with mock.patch.object(extension, 'validate_environment') as validate:
         validate.side_effect = exceptions.ExtensionError('error')
 
-        assert not ext.validate_extension(
-            ext_data.extension, ext_data.entry_point)
+        assert not ext.validate_extension_data(ext_data)
         validate.assert_called_once_with()
 
 
@@ -216,6 +214,31 @@ def test_validate_extension_instance_validate_env_exception(ext_data):
     with mock.patch.object(extension, 'validate_environment') as validate:
         validate.side_effect = Exception
 
-        assert not ext.validate_extension(
-            ext_data.extension, ext_data.entry_point)
+        assert not ext.validate_extension_data(ext_data)
         validate.assert_called_once_with()
+
+
+def test_validate_extension_with_missing_schema(ext_data):
+    ext_data = ext_data._replace(config_schema=None)
+    assert not ext.validate_extension_data(ext_data)
+
+
+def test_validate_extension_with_schema_that_is_missing_enabled(ext_data):
+    del ext_data.config_schema['enabled']
+    ext_data.config_schema['baz'] = config.String()
+    assert not ext.validate_extension_data(ext_data)
+
+
+def test_validate_extension_with_schema_with_wrong_types(ext_data):
+    ext_data.config_schema['enabled'] = 123
+    assert not ext.validate_extension_data(ext_data)
+
+
+def test_validate_extension_with_schema_with_invalid_type(ext_data):
+    ext_data.config_schema['baz'] = 123
+    assert not ext.validate_extension_data(ext_data)
+
+
+def test_validate_extension_with_no_defaults(ext_data):
+    ext_data = ext_data._replace(config_defaults=None)
+    assert not ext.validate_extension_data(ext_data)
