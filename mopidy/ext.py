@@ -165,13 +165,15 @@ def load_extensions():
 
         try:
             extension = extension_class()
+            config_schema = extension.get_config_schema()
+            default_config = extension.get_default_config()
         except Exception:
             continue  # TODO: log this
 
-        # TODO: handle exceptions and validate result...
-        config_schema = extension.get_config_schema()
-        default_config = extension.get_default_config()
-        command = extension.get_command()
+        try:
+            command = extension.get_command()
+        except Exception:
+            command = None  # TODO: log this.
 
         installed_extensions.append(ExtensionData(
             extension, entry_point, config_schema, default_config, command))

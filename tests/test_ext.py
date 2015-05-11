@@ -124,6 +124,46 @@ def test_load_extensions_creating_instance_fails(iter_entry_points_mock):
     assert [] == ext.load_extensions()
 
 
+def test_load_extensions_get_config_schema_fails(iter_entry_points_mock):
+    mock_entry_point = mock.Mock()
+    mock_entry_point.load.return_value = TestExtension
+
+    iter_entry_points_mock.return_value = [mock_entry_point]
+
+    with mock.patch.object(TestExtension, 'get_config_schema') as get_schema:
+        get_schema.side_effect = Exception
+        assert [] == ext.load_extensions()
+        get_schema.assert_called_once_with()
+
+
+def test_load_extensions_get_default_config_fails(iter_entry_points_mock):
+    mock_entry_point = mock.Mock()
+    mock_entry_point.load.return_value = TestExtension
+
+    iter_entry_points_mock.return_value = [mock_entry_point]
+
+    with mock.patch.object(TestExtension, 'get_default_config') as get_default:
+        get_default.side_effect = Exception
+        assert [] == ext.load_extensions()
+        get_default.assert_called_once_with()
+
+
+def test_load_extensions_get_command_fails(iter_entry_points_mock):
+    mock_entry_point = mock.Mock()
+    mock_entry_point.load.return_value = TestExtension
+
+    iter_entry_points_mock.return_value = [mock_entry_point]
+
+    expected = ext.ExtensionData(
+        any_testextension, mock_entry_point, IsA(config.ConfigSchema),
+        any_unicode, None)
+
+    with mock.patch.object(TestExtension, 'get_command') as get_command:
+        get_command.side_effect = Exception
+        assert [expected] == ext.load_extensions()
+        get_command.assert_called_once_with()
+
+
 # ext.validate_extension
 
 @pytest.fixture
