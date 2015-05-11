@@ -170,39 +170,6 @@ You can get `MPDroid from Google Play
 MPDroid is a good MPD client, and really the only one we can recommend.
 
 
-Droid MPD Client
-----------------
-
-Test date:
-    2012-11-06
-Tested version:
-    1.4.0 (released 2011-12-20)
-
-You can get `Droid MPD Client from Google Play
-<https://play.google.com/store/apps/details?id=com.soreha.droidmpdclient>`_.
-
-- No intutive way to ask the app to connect to the server after adding the
-  server hostname to the settings.
-
-- To find the search functionality, you have to select the menu,
-  then "Playlist manager", then the search tab. I do not understand why search
-  is hidden inside "Playlist manager".
-
-- The tabs "Artists" and "Albums" did not contain anything, and did not cause
-  any requests.
-
-- The tab "Folders" showed a spinner and said "Updating data..." but did not
-  send any requests.
-
-- Searching for "foo" did nothing. No request was sent to the server.
-
-- Droid MPD client does not support single mode or consume mode.
-
-- Not able to complete the test procedure, due to the above problems.
-
-In conclusion, not a client we can recommend.
-
-
 .. _ios_mpd_clients:
 
 iOS clients
