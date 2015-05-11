@@ -41,9 +41,8 @@ completeness of clients:
 #. Kill Mopidy and confirm that the app handles it without crashing
 
 
-
-Console clients
-===============
+MPD console clients
+===================
 
 ncmpcpp
 -------
@@ -83,8 +82,8 @@ A command line client. Version 0.16 and upwards seems to work nicely with
 Mopidy.
 
 
-Graphical clients
-=================
+MPD graphical clients
+=====================
 
 GMPC
 ----
@@ -132,8 +131,8 @@ client for OS X. It is unmaintained, but generally works well with Mopidy.
 
 .. _android_mpd_clients:
 
-Android clients
-===============
+MPD Android clients
+===================
 
 We've tested all five MPD clients we could find for Android with Mopidy 0.8.1
 on a Samsung Galaxy Nexus with Android 4.1.2, using our standard test
@@ -172,8 +171,8 @@ MPDroid is a good MPD client, and really the only one we can recommend.
 
 .. _ios_mpd_clients:
 
-iOS clients
-===========
+MPD iOS clients
+===============
 
 MPoD
 ----
@@ -236,8 +235,8 @@ purchased from `MPaD at iTunes Store
 
 .. _mpd-web-clients:
 
-Web clients
-===========
+MPD web clients
+===============
 
 The following web clients use the MPD protocol to communicate with Mopidy. For
 other web clients, see :ref:`http-clients`.
