@@ -234,21 +234,6 @@ You can get `Droid MPD Client from Google Play
 In conclusion, not a client we can recommend.
 
 
-PMix
-----
-
-Test date:
-    2012-11-06
-Tested version:
-    0.4.0 (released 2010-03-06)
-
-You can get `PMix from Google Play
-<https://play.google.com/store/apps/details?id=org.pmix.ui>`_.
-
-PMix haven't been updated for 2.5 years, and has less working features than
-it's fork MPDroid. Ignore PMix and use MPDroid instead.
-
-
 MPD Remote
 ----------
 
