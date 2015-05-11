@@ -66,21 +66,22 @@ def main():
         root_cmd.add_child('config', config_cmd)
         root_cmd.add_child('deps', deps_cmd)
 
-        installed_extensions = ext.load_extensions()
+        extensions_data = ext.load_extensions()
 
-        for data in installed_extensions:
-            if data.command:
+        for data in extensions_data:
+            if data.command:  # TODO: check isinstance?
                 data.command.set(extension=data.command)
                 root_cmd.add_child(data.extension.ext_name, data.command)
 
         args = root_cmd.parse(mopidy_args)
 
-        create_file_structures_and_config(args, installed_extensions)
+        create_file_structures_and_config(args, extensions_data)
         check_old_locations()
 
-        # TODO: make config.load use extension data? or just pass in schema+def
         config, config_errors = config_lib.load(
-            args.config_files, [d.extension for d in installed_extensions],
+            args.config_files,
+            [d.config_schema for d in extensions_data],
+            [d.config_defaults for d in extensions_data],
             args.config_overrides)
 
         verbosity_level = args.base_verbosity_level
@@ -91,7 +92,7 @@ def main():
 
         extensions = {
             'validate': [], 'config': [], 'disabled': [], 'enabled': []}
-        for data in installed_extensions:
+        for data in extensions_data:
             extension = data.extension
 
             # TODO: factor out all of this to a helper that can be tested
@@ -113,15 +114,13 @@ def main():
             else:
                 extensions['enabled'].append(extension)
 
-        # TODO: convert rest of code to use new ExtensionData
-        installed_extensions = [d.extension for d in installed_extensions]
-
-        log_extension_info(installed_extensions, extensions['enabled'])
+        log_extension_info([d.extension for d in extensions_data],
+                           extensions['enabled'])
 
         # Config and deps commands are simply special cased for now.
         if args.command == config_cmd:
-            return args.command.run(
-                config, config_errors, installed_extensions)
+            schemas = [d.config_schema for d in extensions_data]
+            return args.command.run(config, config_errors, schemas)
         elif args.command == deps_cmd:
             return args.command.run()
 

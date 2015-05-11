@@ -415,8 +415,8 @@ class ConfigCommand(Command):
         super(ConfigCommand, self).__init__()
         self.set(base_verbosity_level=-1)
 
-    def run(self, config, errors, extensions):
-        print(config_lib.format(config, extensions, errors))
+    def run(self, config, errors, schemas):
+        print(config_lib.format(config, schemas, errors))
         return 0
 
 
