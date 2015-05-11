@@ -140,7 +140,16 @@ def main():
             return 1
 
         for extension in extensions['enabled']:
-            extension.setup(registry)
+            try:
+                extension.setup(registry)
+            except Exception:
+                # TODO: would be nice a transactional registry. But sadly this
+                # is a bit tricky since our current API is giving out a mutable
+                # list. We might however be able to replace this with a
+                # collections.Sequence to provide a RO view.
+                logger.exception('Extension %s failed during setup, this might'
+                                 ' have left the registry in a bad state.',
+                                 extension.ext_name)
 
         # Anything that wants to exit after this point must use
         # mopidy.internal.process.exit_process as actors can have been started.
