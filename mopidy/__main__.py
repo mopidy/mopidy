@@ -70,7 +70,7 @@ def main():
 
         for data in extensions_data:
             if data.command:  # TODO: check isinstance?
-                data.command.set(extension=data.command)
+                data.command.set(extension=data.extension)
                 root_cmd.add_child(data.extension.ext_name, data.command)
 
         args = root_cmd.parse(mopidy_args)
