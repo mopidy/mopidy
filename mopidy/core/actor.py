@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import collections
 import itertools
+import logging
 
 import pykka
 
@@ -16,6 +17,9 @@ from mopidy.core.playlists import PlaylistsController
 from mopidy.core.tracklist import TracklistController
 from mopidy.internal import versioning
 from mopidy.internal.deprecation import deprecated_property
+
+
+logger = logging.getLogger(__name__)
 
 
 class Core(
@@ -145,10 +149,15 @@ class Backends(list):
             return b.actor_ref.actor_class.__name__
 
         for b in backends:
-            has_library = b.has_library().get()
-            has_library_browse = b.has_library_browse().get()
-            has_playback = b.has_playback().get()
-            has_playlists = b.has_playlists().get()
+            try:
+                has_library = b.has_library().get()
+                has_library_browse = b.has_library_browse().get()
+                has_playback = b.has_playback().get()
+                has_playlists = b.has_playlists().get()
+            except Exception:
+                self.remove(b)
+                logger.exception('Fetching backend info for %s failed',
+                                 b.actor_ref.actor_class.__name__)
 
             for scheme in b.uri_schemes.get():
                 assert scheme not in backends_by_scheme, (
