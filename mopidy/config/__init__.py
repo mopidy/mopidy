@@ -65,24 +65,20 @@ def read(config_file):
         return filehandle.read()
 
 
-def load(files, extensions, overrides):
-    # Helper to get configs, as the rest of our config system should not need
-    # to know about extensions.
+def load(files, ext_schemas, ext_defaults, overrides):
     config_dir = os.path.dirname(__file__)
     defaults = [read(os.path.join(config_dir, 'default.conf'))]
-    defaults.extend(e.get_default_config() for e in extensions)
+    defaults.extend(ext_defaults)
     raw_config = _load(files, defaults, keyring.fetch() + (overrides or []))
 
     schemas = _schemas[:]
-    schemas.extend(e.get_config_schema() for e in extensions)
+    schemas.extend(ext_schemas)
     return _validate(raw_config, schemas)
 
 
-def format(config, extensions, comments=None, display=True):
-    # Helper to format configs, as the rest of our config system should not
-    # need to know about extensions.
+def format(config, ext_schemas, comments=None, display=True):
     schemas = _schemas[:]
-    schemas.extend(e.get_config_schema() for e in extensions)
+    schemas.extend(ext_schemas)
     return _format(config, comments or {}, schemas, display, False)
 
 
