@@ -58,6 +58,10 @@ class Backend(object):
     def has_playlists(self):
         return self.playlists is not None
 
+    def ping(self):
+        """Called to check if the actor is still alive."""
+        return True
+
 
 class LibraryProvider(object):
 
