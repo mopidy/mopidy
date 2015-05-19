@@ -141,7 +141,10 @@ class JsonLibrary(local.Library):
             return []
 
     def get_distinct(self, field, query=None):
-        if field == 'artist':
+        if field == 'title':
+            def distinct(track):
+                return {track.name}
+        elif field == 'artist':
             def distinct(track):
                 return {a.name for a in track.artists}
         elif field == 'albumartist':
