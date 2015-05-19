@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+import codecs
 import logging
 import os
 import re
@@ -107,3 +108,18 @@ def parse_m3u(file_path, media_dir=None):
 
         track = Track()
     return tracks
+
+
+def save_m3u(filename, tracks, encoding='latin1', errors='replace'):
+    extended = any(track.name for track in tracks)
+    # codecs.open() always uses binary mode, just being explicit here
+    with codecs.open(filename, 'wb', encoding, errors) as m3u:
+        if extended:
+            m3u.write('#EXTM3U' + os.linesep)
+        for track in tracks:
+            if extended and track.name:
+                m3u.write('#EXTINF:%d,%s%s' % (
+                    track.length // 1000 if track.length else -1,
+                    track.name,
+                    os.linesep))
+            m3u.write(track.uri + os.linesep)

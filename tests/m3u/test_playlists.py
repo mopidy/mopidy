@@ -108,9 +108,28 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         path = playlist_uri_to_path(playlist.uri, self.playlists_dir)
 
         with open(path) as f:
-            contents = f.read().splitlines()
+            m3u = f.read().splitlines()
+        self.assertEqual(['#EXTM3U', '#EXTINF:60,Test', track.uri], m3u)
 
-        self.assertEqual(contents, ['#EXTM3U', '#EXTINF:60,Test', track.uri])
+    def test_latin1_playlist_contents_is_written_to_disk(self):
+        track = Track(uri=generate_song(1), name='Test\x9f', length=60000)
+        playlist = self.core.playlists.create('test')
+        playlist = self.core.playlists.save(playlist.copy(tracks=[track]))
+        path = playlist_uri_to_path(playlist.uri, self.playlists_dir)
+
+        with open(path, 'rb') as f:
+            m3u = f.read().splitlines()
+        self.assertEqual([b'#EXTM3U', b'#EXTINF:60,Test\x9f', track.uri], m3u)
+
+    def test_utf8_playlist_contents_is_replaced_and_written_to_disk(self):
+        track = Track(uri=generate_song(1), name='Test\u07b4', length=60000)
+        playlist = self.core.playlists.create('test')
+        playlist = self.core.playlists.save(playlist.copy(tracks=[track]))
+        path = playlist_uri_to_path(playlist.uri, self.playlists_dir)
+
+        with open(path, 'rb') as f:
+            m3u = f.read().splitlines()
+        self.assertEqual([b'#EXTM3U', b'#EXTINF:60,Test?', track.uri], m3u)
 
     def test_playlists_are_loaded_at_startup(self):
         track = Track(uri='dummy:track:path2')
