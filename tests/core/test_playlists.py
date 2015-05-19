@@ -118,6 +118,32 @@ class PlaylistsTest(unittest.TestCase):
         self.sp1.create.assert_called_once_with('foo')
         self.assertFalse(self.sp2.create.called)
 
+    def test_create_without_uri_scheme_ignores_none_result(self):
+        playlist = Playlist()
+        self.sp1.create().get.return_value = None
+        self.sp1.reset_mock()
+        self.sp2.create().get.return_value = playlist
+        self.sp2.reset_mock()
+
+        result = self.core.playlists.create('foo')
+
+        self.assertEqual(playlist, result)
+        self.sp1.create.assert_called_once_with('foo')
+        self.sp2.create.assert_called_once_with('foo')
+
+    def test_create_without_uri_scheme_ignores_exception(self):
+        playlist = Playlist()
+        self.sp1.create().get.side_effect = Exception
+        self.sp1.reset_mock()
+        self.sp2.create().get.return_value = playlist
+        self.sp2.reset_mock()
+
+        result = self.core.playlists.create('foo')
+
+        self.assertEqual(playlist, result)
+        self.sp1.create.assert_called_once_with('foo')
+        self.sp2.create.assert_called_once_with('foo')
+
     def test_create_with_uri_scheme_selects_the_matching_backend(self):
         playlist = Playlist()
         self.sp2.create().get.return_value = playlist
