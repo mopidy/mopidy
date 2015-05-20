@@ -92,10 +92,12 @@ class BackendEventsTest(unittest.TestCase):
 
         self.assertEqual(send.call_args[0][0], 'playlist_changed')
 
-    @unittest.SkipTest
-    def test_playlists_delete_sends_playlist_deleted_event(self, send):
-        # TODO We should probably add a playlist_deleted event
-        pass
+    def test_playlists_delete_sends_playlist_changed_event(self, send):
+        playlist = self.core.playlists.create('foo').get()
+
+        self.core.playlists.delete(playlist.uri).get()
+
+        self.assertEqual(send.call_args[0][0], 'playlist_changed')
 
     def test_playlists_save_sends_playlist_changed_event(self, send):
         playlist = self.core.playlists.create('foo').get()
