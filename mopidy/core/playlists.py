@@ -182,8 +182,7 @@ class PlaylistsController(object):
 
         with _backend_error_handling(backend):
             backend.playlists.delete(uri).get()
-            # TODO: error detection and reporting to user
-            listener.CoreListener.send('playlist_deleted', uri=uri)
+            listener.CoreListener.send('playlist_changed', playlist=None)
 
         # TODO: return value?
 
