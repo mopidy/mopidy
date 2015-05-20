@@ -1,9 +1,13 @@
 from __future__ import absolute_import, division, unicode_literals
 
 import datetime
+import logging
+import urlparse
 import warnings
 
 from mopidy.mpd import exceptions, protocol, translator
+
+logger = logging.getLogger(__name__)
 
 
 @protocol.commands.add('listplaylist')
@@ -135,7 +139,7 @@ def load(context, name, playlist_slice=slice(0, None)):
 
 
 @protocol.commands.add('playlistadd')
-def playlistadd(context, name, uri):
+def playlistadd(context, name, track_uri):
     """
     *musicpd.org, stored playlists section:*
 
@@ -145,7 +149,52 @@ def playlistadd(context, name, uri):
 
         ``NAME.m3u`` will be created if it does not exist.
     """
-    raise exceptions.MpdNotImplemented  # TODO
+    uri = context.lookup_playlist_uri_from_name(name)
+    playlist = uri is not None and context.core.playlists.lookup(uri).get()
+    if not playlist:
+        # Create new playlist with this single track
+        lookup_res = context.core.library.lookup(uris=[track_uri]).get()
+        tracks = [a for sl in lookup_res.values() for a in sl]
+        _playlistcreate(context, name, tracks)
+    else:
+        # Add track to existing playlist
+        uri_scheme = urlparse.urlparse(track_uri).scheme
+        lookup_res = context.core.library.lookup(uris=[track_uri]).get()
+        to_add = [a for sl in lookup_res.values() for a in sl]
+        playlist = playlist.replace(tracks=list(playlist.tracks) + to_add)
+        if context.core.playlists.save(playlist).get() is None:
+            playlist_scheme = urlparse.urlparse(playlist.uri).scheme
+            raise exceptions.MpdInvalidTrackForPlaylist(
+                playlist_scheme, uri_scheme)
+
+
+def _playlistcreate(context, name, tracks):
+    """
+    Creates new playlist using backend aprropriate for passed list of tracks
+    """
+    uri_schemes = set([urlparse.urlparse(t.uri).scheme for t in tracks])
+    for scheme in uri_schemes:
+        playlist = context.core.playlists.create(name, scheme).get()
+        if not playlist:
+            # Backend can't create playlists at all
+            logger.warning('%s backend can\'t create playlists', scheme)
+            continue
+        playlist = playlist.replace(tracks=tracks)
+        if context.core.playlists.save(playlist).get() is None:
+            # Falied to save using this backend
+            continue
+        # Created and saved
+        return
+    # Can't use backend aprropriate to passed uri schemes, use default one
+    playlist = context.core.playlists.create(name).get()
+    if not playlist:
+        # If even default backend can't save playlist, everything is lost
+        logger.warning('Default backend can\'t create playlists')
+        raise exceptions.MpdFailedToSavePlaylist(None)
+    playlist = playlist.replace(tracks=tracks)
+    if context.core.playlists.save(playlist).get() is None:
+        uri_scheme = urlparse.urlparse(playlist.uri).scheme
+        raise exceptions.MpdFailedToSavePlaylist(uri_scheme)
 
 
 @protocol.commands.add('playlistclear')
@@ -156,8 +205,18 @@ def playlistclear(context, name):
         ``playlistclear {NAME}``
 
         Clears the playlist ``NAME.m3u``.
+
+        ``NAME.m3u`` will be created if it does not exist.
     """
-    raise exceptions.MpdNotImplemented  # TODO
+    uri = context.lookup_playlist_uri_from_name(name)
+    playlist = uri is not None and context.core.playlists.lookup(uri).get()
+    if not playlist:
+        playlist = context.core.playlists.create(name).get()
+
+    # Just replace tracks with empty list and save
+    playlist = playlist.replace(tracks=[])
+    if context.core.playlists.save(playlist).get() is None:
+        raise exceptions.MpdFailedToSavePlaylist(urlparse.urlparse(uri).scheme)
 
 
 @protocol.commands.add('playlistdelete', songpos=protocol.UINT)
@@ -169,7 +228,19 @@ def playlistdelete(context, name, songpos):
 
         Deletes ``SONGPOS`` from the playlist ``NAME.m3u``.
     """
-    raise exceptions.MpdNotImplemented  # TODO
+    uri = context.lookup_playlist_uri_from_name(name)
+    playlist = uri is not None and context.core.playlists.lookup(uri).get()
+    if not playlist:
+        raise exceptions.MpdNoExistError('No such playlist')
+
+    # Convert tracks to list and remove requested
+    tracks = list(playlist.tracks)
+    tracks.pop(songpos)
+
+    # Replace tracks and save playlist
+    playlist = playlist.replace(tracks=tracks)
+    if context.core.playlists.save(playlist).get() is None:
+        raise exceptions.MpdFailedToSavePlaylist(urlparse.urlparse(uri).scheme)
 
 
 @protocol.commands.add(
@@ -189,7 +260,22 @@ def playlistmove(context, name, from_pos, to_pos):
       documentation, but just the ``SONGPOS`` to move *from*, i.e.
       ``playlistmove {NAME} {FROM_SONGPOS} {TO_SONGPOS}``.
     """
-    raise exceptions.MpdNotImplemented  # TODO
+    uri = context.lookup_playlist_uri_from_name(name)
+    playlist = uri is not None and context.core.playlists.lookup(uri).get()
+    if not playlist:
+        raise exceptions.MpdNoExistError('No such playlist')
+    if from_pos == to_pos:
+        return  # Nothing to do
+
+    # Convert tracks to list and perform move
+    tracks = list(playlist.tracks)
+    track = tracks.pop(from_pos)
+    tracks.insert(to_pos, track)
+
+    # Replace tracks and save playlist
+    playlist = playlist.replace(tracks=tracks)
+    if context.core.playlists.save(playlist).get() is None:
+        raise exceptions.MpdFailedToSavePlaylist(urlparse.urlparse(uri).scheme)
 
 
 @protocol.commands.add('rename')
@@ -201,7 +287,17 @@ def rename(context, old_name, new_name):
 
         Renames the playlist ``NAME.m3u`` to ``NEW_NAME.m3u``.
     """
-    raise exceptions.MpdNotImplemented  # TODO
+    uri = context.lookup_playlist_uri_from_name(old_name)
+    uri_scheme = urlparse.urlparse(uri).scheme
+    playlist = uri is not None and context.core.playlists.lookup(uri).get()
+    if not playlist:
+        raise exceptions.MpdNoExistError('No such playlist')
+
+    # Create copy of the playlist and remove original
+    copy = context.core.playlists.create(new_name, uri_scheme).get()
+    copy = copy.replace(tracks=playlist.tracks)
+    context.core.playlists.save(copy).get()
+    context.core.playlists.delete(uri).get()
 
 
 @protocol.commands.add('rm')
@@ -213,7 +309,8 @@ def rm(context, name):
 
         Removes the playlist ``NAME.m3u`` from the playlist directory.
     """
-    raise exceptions.MpdNotImplemented  # TODO
+    uri = context.lookup_playlist_uri_from_name(name)
+    context.core.playlists.delete(uri).get()
 
 
 @protocol.commands.add('save')
@@ -226,4 +323,16 @@ def save(context, name):
         Saves the current playlist to ``NAME.m3u`` in the playlist
         directory.
     """
-    raise exceptions.MpdNotImplemented  # TODO
+    tl_tracks = context.core.tracklist.get_tl_tracks().get()
+    tracks = [t.track for t in tl_tracks]
+    uri = context.lookup_playlist_uri_from_name(name)
+    playlist = uri is not None and context.core.playlists.lookup(uri).get()
+    if not playlist:
+        # Create new playlist
+        _playlistcreate(context, name, tracks)
+    else:
+        # Overwrite existing playlist
+        playlist = playlist.replace(tracks=tracks)
+        if not context.core.playlists.save(playlist).get():
+            raise exceptions.MpdFailedToSavePlaylist(
+                urlparse.urlparse(uri).scheme)
