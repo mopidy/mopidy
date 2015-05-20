@@ -66,10 +66,10 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
 
     def tracklist_changed(self):
         self.send_idle('playlist')
-    
+
     def playlist_changed(self, playlist):
         self.send_idle('stored_playlist')
-    
+
     def options_changed(self):
         self.send_idle('options')
 
