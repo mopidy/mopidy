@@ -215,29 +215,95 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertEqualResponse('ACK [50@0] {load} No such playlist')
 
     def test_playlistadd(self):
+        tracks = [
+            Track(uri='dummy:a'),
+            Track(uri='dummy:b'),
+        ]
+        self.backend.library.dummy_library = tracks
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(
+                name='name', uri='dummy:a1', tracks=[tracks[0]])])
+        self.send_request('playlistadd "name" "dummy:b"')
+        self.assertInResponse('OK')
+        self.assertEqual(
+            2, len(self.backend.playlists.get_items("dummy:a1").get()))
+
+    def test_playlistadd_creates_playlist(self):
+        tracks = [
+            Track(uri='dummy:a'),
+        ]
+        self.backend.library.dummy_library = tracks
         self.send_request('playlistadd "name" "dummy:a"')
-        self.assertEqualResponse('ACK [0@0] {playlistadd} Not implemented')
+        self.assertInResponse('OK')
+        self.assertNotEqual(
+            None, self.backend.playlists.lookup("dummy:name").get())
 
     def test_playlistclear(self):
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(
+                name='name', uri='dummy:a1', tracks=[Track(uri='b')])])
+
         self.send_request('playlistclear "name"')
-        self.assertEqualResponse('ACK [0@0] {playlistclear} Not implemented')
+        self.assertInResponse('OK')
+        self.assertEqual(
+            0, len(self.backend.playlists.get_items("dummy:a1").get()))
+
+    def test_playlistclear_creates_playlist(self):
+        self.send_request('playlistclear "name"')
+        self.assertInResponse('OK')
+        self.assertNotEqual(
+            None, self.backend.playlists.lookup("dummy:name").get())
 
     def test_playlistdelete(self):
-        self.send_request('playlistdelete "name" "5"')
-        self.assertEqualResponse('ACK [0@0] {playlistdelete} Not implemented')
+        tracks = [
+            Track(uri='dummy:a'),
+            Track(uri='dummy:b'),
+            Track(uri='dummy:c'),
+        ]   # len() == 3
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(
+                name='name', uri='dummy:a1', tracks=tracks)])
+
+        self.send_request('playlistdelete "name" "2"')
+        self.assertInResponse('OK')
+        self.assertEqual(
+            2, len(self.backend.playlists.get_items("dummy:a1").get()))
 
     def test_playlistmove(self):
-        self.send_request('playlistmove "name" "5" "10"')
-        self.assertEqualResponse('ACK [0@0] {playlistmove} Not implemented')
+        tracks = [
+            Track(uri='dummy:a'),
+            Track(uri='dummy:b'),
+            Track(uri='dummy:c')    # this one is getting moved to top
+        ]
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(
+                name='name', uri='dummy:a1', tracks=tracks)])
+        self.send_request('playlistmove "name" "2" "0"')
+        self.assertInResponse('OK')
+        self.assertEqual(
+            "dummy:c",
+            self.backend.playlists.get_items("dummy:a1").get()[0].uri)
 
     def test_rename(self):
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(
+                name='old_name', uri='dummy:a1', tracks=[Track(uri='b')])])
         self.send_request('rename "old_name" "new_name"')
-        self.assertEqualResponse('ACK [0@0] {rename} Not implemented')
+        self.assertInResponse('OK')
+        self.assertNotEqual(
+            None, self.backend.playlists.lookup("dummy:new_name").get())
 
     def test_rm(self):
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(
+                name='name', uri='dummy:a1', tracks=[Track(uri='b')])])
         self.send_request('rm "name"')
-        self.assertEqualResponse('ACK [0@0] {rm} Not implemented')
+        self.assertInResponse('OK')
+        self.assertEqual(
+            None, self.backend.playlists.lookup("dummy:a1").get())
 
     def test_save(self):
         self.send_request('save "name"')
-        self.assertEqualResponse('ACK [0@0] {save} Not implemented')
+        self.assertInResponse('OK')
+        self.assertNotEqual(
+            None, self.backend.playlists.lookup("dummy:name").get())
