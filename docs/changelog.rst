@@ -33,6 +33,9 @@ Core API
 
 - Update core to handle backend crashes and bad data. (Fixes: :issue:`1161`)
 
+
+- MPD: Implemented commands for modifying stored playlists (PR: :issue:`1187`)
+
 Models
 ------
 
