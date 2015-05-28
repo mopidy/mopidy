@@ -105,7 +105,7 @@ def count(context, *args):
     result_tracks = _get_tracks(results)
     return [
         ('songs', len(result_tracks)),
-        ('playtime', sum(track.length for track in result_tracks) / 1000),
+        ('playtime', sum(t.length for t in result_tracks if t.length) / 1000),
     ]
 
 

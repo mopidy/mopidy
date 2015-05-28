@@ -44,6 +44,12 @@ Models
   reuse instances. For the test data set this was developed against, a library
   of ~14000 tracks, went from needing ~75MB to ~17MB. (Fixes: :issue:`348`)
 
+MPD frontend
+------------
+
+- The MPD command ``count`` now ignores tracks with no length, which would
+  previously cause a :exc:`TypeError`. (PR: :issue:`1192`)
+
 Utils
 -----
 
