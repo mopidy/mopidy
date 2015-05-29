@@ -63,7 +63,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         playlists = {}
 
         encoding = sys.getfilesystemencoding()
-        for path in glob.glob(os.path.join(self._playlists_dir, b'*.m3u')):
+        for path in glob.glob(os.path.join(self._playlists_dir, b'*.m3u*')):
             relpath = os.path.basename(path)
             uri = translator.path_to_playlist_uri(relpath)
             name = os.path.splitext(relpath)[0].decode(encoding, 'replace')

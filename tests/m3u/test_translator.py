@@ -15,12 +15,15 @@ from tests import path_to_data_dir
 data_dir = path_to_data_dir('')
 song1_path = path_to_data_dir('song1.mp3')
 song2_path = path_to_data_dir('song2.mp3')
+song3_path = path_to_data_dir('φοο.mp3')
 encoded_path = path_to_data_dir('æøå.mp3')
 song1_uri = path.path_to_uri(song1_path)
 song2_uri = path.path_to_uri(song2_path)
+song3_uri = path.path_to_uri(song3_path)
 encoded_uri = path.path_to_uri(encoded_path)
 song1_track = Track(uri=song1_uri)
 song2_track = Track(uri=song2_uri)
+song3_track = Track(uri=song3_uri)
 encoded_track = Track(uri=encoded_uri)
 song1_ext_track = song1_track.copy(name='song1')
 song2_ext_track = song2_track.copy(name='song2', length=60000)
@@ -114,6 +117,16 @@ class M3UToUriTest(unittest.TestCase):
     def test_ext_encoding_is_latin1(self):
         tracks = self.parse(path_to_data_dir('encoding-ext.m3u'))
         self.assertEqual([encoded_ext_track], tracks)
+
+    def test_m3u8_file(self):
+        with tempfile.NamedTemporaryFile(suffix='.m3u8', delete=False) as tmp:
+            tmp.write(song3_path)
+        try:
+            tracks = self.parse(tmp.name)
+            self.assertEqual([song3_track], tracks)
+        finally:
+            if os.path.exists(tmp.name):
+                os.remove(tmp.name)
 
 
 class URItoM3UTest(unittest.TestCase):
