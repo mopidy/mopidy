@@ -20,12 +20,6 @@ for free. We use their services for the following sites:
 
 - Mailgun for sending emails from the Discourse forum.
 
-- Hosting of the Jenkins CI server at https://ci.mopidy.com.
-
-- Hosting of a Linux worker for https://ci.mopidy.com.
-
-- Hosting of a Windows worker for https://ci.mopidy.com.
-
 - CDN hosting at http://dl.mopidy.com, which is used to distribute Pi Musicbox
   images.
 
