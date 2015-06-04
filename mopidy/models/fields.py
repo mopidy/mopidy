@@ -98,7 +98,7 @@ class Identifier(String):
 
 class URI(Identifier):
     """
-    :class`Field` for storing URIs
+    :class:`Field` for storing URIs
 
     Values will be interned, currently not validated.
 
