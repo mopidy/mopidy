@@ -668,3 +668,27 @@ class CorePlaybackWithOldBackendTest(unittest.TestCase):
         c = core.Core(mixer=None, backends=[b])
         c.tracklist.add([Track(uri='dummy1:a', length=40000)])
         c.playback.play()  # No TypeError == test passed.
+        b.playback.play.assert_called_once_with()
+
+
+class Bug1177RegressionTest(unittest.TestCase):
+    def test(self):
+        b = mock.Mock()
+        b.uri_schemes.get.return_value = ['dummy']
+        b.playback = mock.Mock(spec=backend.PlaybackProvider)
+        b.playback.change_track.return_value.get.return_value = True
+        b.playback.play.return_value.get.return_value = True
+
+        track1 = Track(uri='dummy:a', length=40000)
+        track2 = Track(uri='dummy:b', length=40000)
+
+        c = core.Core(mixer=None, backends=[b])
+        c.tracklist.add([track1, track2])
+
+        c.playback.play()
+        b.playback.change_track.assert_called_once_with(track1)
+        b.playback.change_track.reset_mock()
+
+        c.playback.pause()
+        c.playback.next()
+        b.playback.change_track.assert_called_once_with(track2)

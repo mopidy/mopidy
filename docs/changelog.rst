@@ -5,6 +5,15 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v1.0.6 (unreleased)
+===================
+
+Bug fix release.
+
+- Core: Make sure track changes make it to audio while paused.
+  (Fixes: :issuse:`1177`)
+
+
 v1.0.5 (2015-05-19)
 ===================
 
