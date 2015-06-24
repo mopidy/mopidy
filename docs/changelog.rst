@@ -13,6 +13,9 @@ Bug fix release.
 - Core/MPD/Local: Add support for ``title`` in
   :meth:`mopidy.core.LibraryController.get_distinct`. (Fixes: :issue:`1181`)
 
+- Core: Make sure track changes make it to audio while paused.
+  (Fixes: :issuse:`1177`)
+
 v1.0.5 (2015-05-19)
 ===================
 
