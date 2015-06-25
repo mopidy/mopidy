@@ -646,6 +646,12 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
         self.send_request('list "foo"')
         self.assertEqualResponse('ACK [2@0] {list} incorrect arguments')
 
+    # Track title
+
+    def test_list_title(self):
+        self.send_request('list "title"')
+        self.assertInResponse('OK')
+
     # Artist
 
     def test_list_artist_with_quotes(self):

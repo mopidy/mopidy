@@ -123,8 +123,8 @@ class LibraryController(object):
         protocol supports in a more sane fashion. Other frontends are not
         recommended to use this method.
 
-        :param string field: One of ``artist``, ``albumartist``, ``album``,
-            ``composer``, ``performer``, ``date`` or ``genre``.
+        :param string field: One of ``track``, ``artist``, ``albumartist``,
+            ``album``, ``composer``, ``performer``, ``date`` or ``genre``.
         :param dict query: Query to use for limiting results, see
             :meth:`search` for details about the query format.
         :rtype: set of values corresponding to the requested field type.
