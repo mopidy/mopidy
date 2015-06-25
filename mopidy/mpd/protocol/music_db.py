@@ -22,6 +22,7 @@ _SEARCH_MAPPING = {
     'track': 'track_no'}
 
 _LIST_MAPPING = {
+    'title': 'track',
     'album': 'album',
     'albumartist': 'albumartist',
     'artist': 'artist',
@@ -31,6 +32,7 @@ _LIST_MAPPING = {
     'performer': 'performer'}
 
 _LIST_NAME_MAPPING = {
+    'title': 'Title',
     'album': 'Album',
     'albumartist': 'AlbumArtist',
     'artist': 'Artist',
