@@ -17,7 +17,8 @@ TRACKLIST_FIELDS = {  # TODO: add bitrate, length, disc_no, track_no, modified?
     'uri', 'name', 'genre', 'date', 'comment', 'musicbrainz_id'}
 
 DISTINCT_FIELDS = {
-    'artist', 'albumartist', 'album', 'composer', 'performer', 'date', 'genre'}
+    'track', 'artist', 'albumartist', 'album', 'composer', 'performer', 'date',
+    'genre'}
 
 
 # TODO: _check_iterable(check, msg, **kwargs) + [check(a) for a in arg]?
