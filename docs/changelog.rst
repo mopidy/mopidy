@@ -5,16 +5,18 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
-v1.0.6 (unreleased)
+v1.0.6 (2015-06-25)
 ===================
 
 Bug fix release.
 
 - Core/MPD/Local: Add support for ``title`` in
-  :meth:`mopidy.core.LibraryController.get_distinct`. (Fixes: :issue:`1181`)
+  :meth:`mopidy.core.LibraryController.get_distinct`. (Fixes: :issue:`1181`,
+  PR: :issue:`1183`)
 
 - Core: Make sure track changes make it to audio while paused.
-  (Fixes: :issuse:`1177`)
+  (Fixes: :issue:`1177`, PR: :issue:`1185`)
+
 
 v1.0.5 (2015-05-19)
 ===================
