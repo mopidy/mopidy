@@ -5,6 +5,15 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v1.0.7 (unreleased)
+===================
+
+Bug fix release.
+
+- Fix error in the MPD command ``list title ...``. The error was introduced in
+  v1.0.6.
+
+
 v1.0.6 (2015-06-25)
 ===================
 
