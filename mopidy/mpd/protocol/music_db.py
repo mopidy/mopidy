@@ -22,6 +22,7 @@ _SEARCH_MAPPING = {
     'track': 'track_no'}
 
 _LIST_MAPPING = {
+    'title': 'track',
     'album': 'album',
     'albumartist': 'albumartist',
     'artist': 'artist',
@@ -31,6 +32,7 @@ _LIST_MAPPING = {
     'performer': 'performer'}
 
 _LIST_NAME_MAPPING = {
+    'track': 'Title',
     'album': 'Album',
     'albumartist': 'AlbumArtist',
     'artist': 'Artist',
@@ -258,9 +260,10 @@ def list_(context, *args):
     params = list(args)
     if not params:
         raise exceptions.MpdArgError('incorrect arguments')
-    field = params.pop(0).lower()
 
-    if field not in _LIST_MAPPING:
+    field = params.pop(0).lower()
+    field = _LIST_MAPPING.get(field)
+    if field is None:
         raise exceptions.MpdArgError('incorrect arguments')
 
     if len(params) == 1:

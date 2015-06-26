@@ -97,6 +97,9 @@ class LibraryProvider(object):
         *MAY be implemented by subclass.*
 
         Default implementation will simply return an empty set.
+
+        Note that backends should always return an empty set for unexpected
+        field types.
         """
         return set()
 
