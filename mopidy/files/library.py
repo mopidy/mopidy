@@ -17,6 +17,8 @@ logger = logging.getLogger(__name__)
 
 class FilesLibraryProvider(backend.LibraryProvider):
     """Library for browsing local files."""
+    # TODO: get_images that can pull from metadata and/or .folder.png etc?
+    # TODO: handle playlists?
 
     @property
     def root_directory(self):
@@ -32,7 +34,6 @@ class FilesLibraryProvider(backend.LibraryProvider):
     def __init__(self, backend, config):
         super(FilesLibraryProvider, self).__init__(backend)
         self._media_dirs = []
-        # import pdb; pdb.set_trace()
         for entry in config['files']['media_dir']:
             media_dir = {}
             media_dict = entry.split(':')
@@ -48,15 +49,13 @@ class FilesLibraryProvider(backend.LibraryProvider):
             else:
                 media_dir['name'] = media_dict[0].replace(os.sep, '+')
             self._media_dirs.append(media_dir)
-        logger.debug(self._media_dirs)
         self._follow_symlinks = config['files']['follow_symlinks']
         self._show_hidden = config['files']['show_hidden']
         self._scanner = scan.Scanner(
             timeout=config['files']['metadata_timeout'])
 
-    def browse(self, uri, encoding=sys.getfilesystemencoding()):
+    def browse(self, uri):
         logger.debug(u'browse called with uri %s' % uri)
-        # import pdb; pdb.set_trace()
         result = []
         localpath = path.uri_to_path(uri)
         if localpath == 'root':
@@ -78,15 +77,10 @@ class FilesLibraryProvider(backend.LibraryProvider):
                 elif stat.S_ISDIR(st.st_mode):
                     result.append(models.Ref.directory(name=name, uri=uri))
                 elif stat.S_ISREG(st.st_mode) and self._check_audiofile(uri):
-                    # if self._is_playlist(child):
-                    #     result.append(models.Ref.playlist(
-                    #         name=name,
-                    #         uri='m3u:%s' % child))
-                    # else:
                     result.append(models.Ref.track(name=name, uri=uri))
                 else:
-                    logger.warn(u'Ignored file: %s' % child.decode(encoding,
-                                                                   'replace'))
+                    logger.warn(u'Ignored file: %s' % child.decode('ascii',
+                                                                   'ignore'))
                     pass
 
         result.sort(key=operator.attrgetter('name'))
@@ -98,7 +92,6 @@ class FilesLibraryProvider(backend.LibraryProvider):
         if not self._is_in_basedir(localpath):
             logger.warn(u'Not in basedir: %s' % localpath)
             return []
-        # import pdb; pdb.set_trace()
         try:
             result = self._scanner.scan(uri)
             track = utils.convert_tags_to_track(result.tags).copy(
@@ -112,8 +105,6 @@ class FilesLibraryProvider(backend.LibraryProvider):
             name = urllib2.unquote(filename).decode('ascii', 'ignore')
             track = track.copy(name=name)
         return [track]
-
-    # TODO: get_images that can pull from metadata and/or .folder.png etc?
 
     def _show_media_dirs(self):
         result = []
