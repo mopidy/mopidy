@@ -96,6 +96,7 @@ Extensions
     :maxdepth: 2
 
     ext/local
+    ext/files
     ext/m3u
     ext/stream
     ext/http
