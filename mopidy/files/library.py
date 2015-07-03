@@ -37,18 +37,29 @@ class FilesLibraryProvider(backend.LibraryProvider):
         for entry in config['files']['media_dir']:
             media_dir = {}
             media_dict = entry.split(':')
-            local_path = path.expand_path(
-                media_dict[0].encode(sys.getfilesystemencoding()))
-            st = os.stat(local_path)
-            if not stat.S_ISDIR(st.st_mode):
-                logger.warn(u'%s is not a directory' % local_path)
+            try:
+                local_path = path.expand_path(
+                    media_dict[0].encode(sys.getfilesystemencoding()))
+            except:
+                pass
+            if not local_path:
+                logger.warn('Could not expand path %s' % media_dict[0])
                 continue
-            media_dir['path'] = local_path
-            if len(media_dict) == 2:
-                media_dir['name'] = media_dict[1]
             else:
-                media_dir['name'] = media_dict[0].replace(os.sep, '+')
-            self._media_dirs.append(media_dir)
+                try:
+                    st = os.stat(local_path)
+                except:
+                    logger.warn('Could not open %s' % local_path)
+                    continue
+                if not stat.S_ISDIR(st.st_mode):
+                    logger.warn(u'%s is not a directory' % local_path)
+                    continue
+                media_dir['path'] = local_path
+                if len(media_dict) == 2:
+                    media_dir['name'] = media_dict[1]
+                else:
+                    media_dir['name'] = media_dict[0].replace(os.sep, '+')
+                self._media_dirs.append(media_dir)
         self._follow_symlinks = config['files']['follow_symlinks']
         self._show_hidden = config['files']['show_hidden']
         self._scanner = scan.Scanner(
@@ -81,7 +92,7 @@ class FilesLibraryProvider(backend.LibraryProvider):
                 else:
                     logger.warn(u'Ignored file: %s' % child.decode('ascii',
                                                                    'ignore'))
-                    pass
+                    continue
 
         result.sort(key=operator.attrgetter('name'))
         return result
@@ -118,11 +129,11 @@ class FilesLibraryProvider(backend.LibraryProvider):
     def _check_audiofile(self, uri):
         try:
             result = self._scanner.scan(uri)
-            logger.debug(u'got scan result playable: %s for %s' % (
-                result.uri, str(result.playable)))
+            logger.debug(u'got scan result playable: %s for %s' %
+                         (result.uri, str(result.playable)))
             res = result.playable
         except exceptions.ScannerError as e:
-            logger.warning(u'Problem looking up %s: %s', uri, e)
+            logger.warning(u'Problem scanning %s: %s', uri, e)
             res = False
         return res
 
