@@ -103,14 +103,20 @@ class TrackMpdFormatTest(unittest.TestCase):
         result = translator.track_to_mpd_format(track)
         self.assertIn(('MUSICBRAINZ_ARTISTID', 'foo'), result)
 
-    def test_artists_to_mpd_format(self):
+    def test_concatenate_multiple_values(self):
         artists = [Artist(name='ABBA'), Artist(name='Beatles')]
-        translated = translator.artists_to_mpd_format(artists)
-        self.assertEqual(translated, 'ABBA, Beatles')
+        translated = translator.concatenate_multiple_values(artists, 'name')
+        self.assertEqual(translated, 'ABBA;Beatles')
 
-    def test_artists_to_mpd_format_artist_with_no_name(self):
+    def test_concatenate_muultiple_values_artist_with_no_name(self):
         artists = [Artist(name=None)]
-        translated = translator.artists_to_mpd_format(artists)
+        translated = translator.concatenate_multiple_values(artists, 'name')
+        self.assertEqual(translated, '')
+
+    def test_concatenate_muultiple_values_artist_with_no_musicbrainz_id(self):
+        artists = [Artist(name="Jah Wobble")]
+        translated = translator.concatenate_multiple_values(
+            artists, 'musicbrainz_id')
         self.assertEqual(translated, '')
 
 
