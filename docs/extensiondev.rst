@@ -471,3 +471,76 @@ Is much better than::
 If you want to turn on debug logging for your own extension, but not for
 everything else due to the amount of noise, see the docs for the
 :confval:`loglevels/*` config section.
+
+
+Making HTTP requests from extensions
+====================================
+
+Many Mopidy extensions need to make HTTP requests to use some web API. Here's a
+few recommendations to those extensions.
+
+Proxies
+-------
+
+If you make HTTP requests please make sure to respect the :ref:`proxy configs
+<proxy-config>`, so that all the requests you make go through the proxy
+configured by the Mopidy user. To make this easier for extension developers,
+the helper function :func:`mopidy.httpclient.format_proxy` was added in Mopidy
+1.1. This function returns the proxy settings `formatted the way Requests
+expects <http://www.python-requests.org/en/latest/user/advanced/#proxies>`__.
+
+User-Agent strings
+------------------
+
+When you make HTTP requests, it's helpful for debugging and usage analysis if
+the client identifies itself with a proper User-Agent string. In Mopidy 1.1, we
+added the helper function :func:`mopidy.httpclient.format_user_agent`.  Here's
+an example of how to use it::
+
+    >>> from mopidy import httpclient
+    >>> import mopidy_soundspot
+    >>> httpclient.format_user_agent('%s/%s' % (
+    ...     mopidy_soundspot.Extension.dist_name, mopidy_soundspot.__version__))
+    u'Mopidy-SoundSpot/2.0.0 Mopidy/1.0.7 Python/2.7.10'
+
+Example using Requests sessions
+-------------------------------
+
+Most Mopidy extensions that make HTTP requests use the `Requests
+<http://www.python-requests.org/>`_ library to do so. When using Requests, the
+most convenient way to make sure the proxy and User-Agent header is set
+properly is to create a Requests session object and use that object to make all
+your HTTP requests::
+
+    from mopidy import httpclient
+
+    import requests
+
+    import mopidy_soundspot
+
+
+    def get_requests_session(proxy_config, user_agent):
+        proxy = httpclient.format_proxy(proxy_config)
+        full_user_agent = httpclient.format_user_agent(user_agent)
+
+        session = requests.Session()
+        session.proxies.update({'http': proxy, 'https': proxy})
+        session.headers.update({'user-agent': full_user_agent})
+
+        return session
+
+
+    # ``mopidy_config`` is the config object passed to your frontend/backend
+    # constructor
+    session = get_requests_session(
+        proxy_config=mopidy_config['proxy'],
+        user_agent='%s/%s' % (
+            mopidy_soundspot.Extension.dist_name,
+            mopidy_soundspot.__version__))
+
+    response = session.get('http://example.com')
+    # Now do something with ``response`` and/or make further requests using the
+    # ``session`` object.
+
+For further details, see Requests' docs on `session objects
+<http://www.python-requests.org/en/latest/user/advanced/#session-objects>`__.
