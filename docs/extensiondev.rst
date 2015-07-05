@@ -6,7 +6,7 @@ Extension development
 
 Mopidy started as simply an MPD server that could play music from Spotify.
 Early on, Mopidy got multiple "frontends" to expose Mopidy to more than just MPD
-clients: for example the scrobbler frontend that scrobbles your listening 
+clients: for example the scrobbler frontend that scrobbles your listening
 history to your Last.fm account, the MPRIS frontend that integrates Mopidy into the
 Ubuntu Sound Menu, and the HTTP server and JavaScript player API making web
 based Mopidy clients possible. In Mopidy 0.9 we added support for multiple
@@ -75,10 +75,10 @@ the readme of `cookiecutter-mopidy-ext
 Example README.rst
 ==================
 
-The README file should quickly explain what the extension does, how to install 
-it, and how to configure it. It should also contain a link to a tarball of the 
-latest development version of the extension. It's important that this link ends 
-with ``#egg=Mopidy-Something-dev`` for installation using 
+The README file should quickly explain what the extension does, how to install
+it, and how to configure it. It should also contain a link to a tarball of the
+latest development version of the extension. It's important that this link ends
+with ``#egg=Mopidy-Something-dev`` for installation using
 ``pip install Mopidy-Something==dev`` to work.
 
 .. code-block:: rst
@@ -230,8 +230,8 @@ The root of your Python package should have an ``__version__`` attribute with a
 class named ``Extension`` which inherits from Mopidy's extension base class,
 :class:`mopidy.ext.Extension`. This is the class referred to in the
 ``entry_points`` part of ``setup.py``. Any imports of other files in your
-extension, outside of Mopidy and it's core requirements, should be kept inside 
-methods. This ensures that this file can be imported without raising 
+extension, outside of Mopidy and it's core requirements, should be kept inside
+methods. This ensures that this file can be imported without raising
 :exc:`ImportError` exceptions for missing dependencies, etc.
 
 The default configuration for the extension is defined by the
@@ -245,7 +245,7 @@ change them. The exception is if the config value has security implications; in
 that case you should default to the most secure configuration. Leave any
 configurations that don't have meaningful defaults blank, like ``username``
 and ``password``. In the example below, we've chosen to maintain the default
-config as a separate file named ``ext.conf``. This makes it easy to include the 
+config as a separate file named ``ext.conf``. This makes it easy to include the
 default config in documentation without duplicating it.
 
 This is ``mopidy_soundspot/__init__.py``::
@@ -413,11 +413,11 @@ examples, see the :ref:`http-server-api` docs or explore with
 Running an extension
 ====================
 
-Once your extension is ready to go, to see it in action you'll need to register 
-it with Mopidy. Typically this is done by running ``python setup.py install`` 
-from your extension's Git repo root directory. While developing your extension 
-and to avoid doing this every time you make a change, you can instead run 
-``python setup.py develop`` to effectively link Mopidy directly with your 
+Once your extension is ready to go, to see it in action you'll need to register
+it with Mopidy. Typically this is done by running ``python setup.py install``
+from your extension's Git repo root directory. While developing your extension
+and to avoid doing this every time you make a change, you can instead run
+``python setup.py develop`` to effectively link Mopidy directly with your
 development files.
 
 
