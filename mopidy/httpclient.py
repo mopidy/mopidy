@@ -15,6 +15,8 @@ def format_proxy(proxy_config, auth=True):
 
     You can also opt out of getting the basic auth by setting ``auth`` to
     :class:`False`.
+
+    .. versionadded:: 1.1
     """
     if not proxy_config.get('hostname'):
         return None
@@ -39,6 +41,8 @@ def format_user_agent(name=None):
 
     This will identify use by the provided ``name`` (which should be on the
     format ``dist_name/version``), Mopidy version and Python version.
+
+    .. versionadded:: 1.1
     """
     parts = ['Mopidy/%s' % (mopidy.__version__),
              '%s/%s' % (platform.python_implementation(),
