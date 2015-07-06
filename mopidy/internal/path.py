@@ -199,7 +199,7 @@ def find_mtimes(root, follow=False):
 def is_local_path_inside_base_dir(local_path, base_path):
     if local_path.endswith(os.sep):
         raise ValueError('Local path %s cannot end with a path separator'
-                           % local_path)
+                         % local_path)
     # Expand symlinks
     real_base_path = os.path.realpath(base_path)
     real_local_path = os.path.realpath(local_path)
