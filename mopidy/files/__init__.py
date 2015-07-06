@@ -24,8 +24,7 @@ class Extension(ext.Extension):
         schema['media_dir'] = config.List(optional=True)
         schema['show_dotfiles'] = config.Boolean(optional=True)
         schema['follow_symlinks'] = config.Boolean(optional=True)
-        schema['metadata_timeout'] = config.Integer(
-            minimum=1000, maximum=1000 * 60 * 60, optional=True)
+        schema['metadata_timeout'] = config.Integer(optional=True)
         return schema
 
     def setup(self, registry):
