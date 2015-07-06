@@ -196,23 +196,23 @@ def find_mtimes(root, follow=False):
     return mtimes, errors
 
 
-def check_file_path_is_inside_base_dir(file_path, base_path):
-    assert not file_path.endswith(os.sep), (
-        'File path %s cannot end with a path separator' % file_path)
-
+def is_local_path_inside_base_dir(local_path, base_path):
+    if local_path.endswith(os.sep):
+        raise ValueError('Local path %s cannot end with a path separator'
+                           % local_path)
     # Expand symlinks
     real_base_path = os.path.realpath(base_path)
-    real_file_path = os.path.realpath(file_path)
+    real_local_path = os.path.realpath(local_path)
 
-    # Use dir of file for prefix comparision, so we don't accept
-    # /tmp/foo.m3u as being inside /tmp/foo, simply because they have a
-    # common prefix, /tmp/foo, which matches the base path, /tmp/foo.
-    real_dir_path = os.path.dirname(real_file_path)
+    if os.path.isfile(local_path):
+        # Use dir of file for prefix comparision, so we don't accept
+        # /tmp/foo.m3u as being inside /tmp/foo, simply because they have a
+        # common prefix, /tmp/foo, which matches the base path, /tmp/foo.
+        real_local_path = os.path.dirname(real_local_path)
 
     # Check if dir of file is the base path or a subdir
-    common_prefix = os.path.commonprefix([real_base_path, real_dir_path])
-    assert common_prefix == real_base_path, (
-        'File path %s must be in %s' % (real_file_path, real_base_path))
+    common_prefix = os.path.commonprefix([real_base_path, real_local_path])
+    return common_prefix == real_base_path
 
 
 # FIXME replace with mock usage in tests.

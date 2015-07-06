@@ -24,8 +24,8 @@ class FilesLibraryProvider(backend.LibraryProvider):
         if not self._media_dirs:
             return None
         elif len(self._media_dirs) == 1:
-            localpath = self._media_dirs[0]['path']
-            uri = path.path_to_uri(localpath)
+            local_path = self._media_dirs[0]['path']
+            uri = path.path_to_uri(local_path)
         else:
             uri = u'file:root'
         return models.Ref.directory(name='Files', uri=uri)
@@ -41,14 +41,15 @@ class FilesLibraryProvider(backend.LibraryProvider):
     def browse(self, uri):
         logger.debug('browse called with uri %s', uri)
         result = []
-        localpath = path.uri_to_path(uri)
-        if localpath == 'root':
+        local_path = path.uri_to_path(uri)
+        if local_path == 'root':
             return list(self._get_media_dirs_refs())
-        if not self._is_in_basedir(localpath):
-            logger.warn(u'Not in basedir: %s', localpath)
-            return []
-        for name in os.listdir(localpath):
-            child = os.path.join(localpath, name)
+        for name in os.listdir(local_path):
+            if not self._is_in_basedir(local_path):
+                logger.warn(u'Not in base_dir: %s', local_path)
+                continue
+            child = os.path.join(local_path, name)
+            logger.debug('child: %s', child)
             uri = path.path_to_uri(child)
             name = name.decode(sys.getfilesystemencoding(), 'ignore')
             if not self._show_dotfiles and name.startswith(b'.'):
@@ -59,7 +60,7 @@ class FilesLibraryProvider(backend.LibraryProvider):
                 st = os.lstat(child)
             if stat.S_ISDIR(st.st_mode):
                 result.append(models.Ref.directory(name=name, uri=uri))
-            elif stat.S_ISREG(st.st_mode) and self._check_audiofile(uri):
+            elif stat.S_ISREG(st.st_mode) and self._is_audiofile(uri):
                 result.append(models.Ref.track(name=name, uri=uri))
             else:
                 logger.warn('Ignored file: %s',
@@ -71,9 +72,9 @@ class FilesLibraryProvider(backend.LibraryProvider):
 
     def lookup(self, uri):
         logger.debug(u'looking up uri = %s', uri)
-        localpath = path.uri_to_path(uri)
-        if not self._is_in_basedir(localpath):
-            logger.warn(u'Not in basedir: %s', localpath)
+        local_path = path.uri_to_path(uri)
+        if not self._is_in_basedir(local_path):
+            logger.warn(u'Not in base_dir: %s', local_path)
             return []
         try:
             result = self._scanner.scan(uri)
@@ -83,7 +84,7 @@ class FilesLibraryProvider(backend.LibraryProvider):
             logger.warning(u'Problem looking up %s: %s', uri, e)
             track = models.Track(uri=uri)
         if not track.name:
-            filename = os.path.basename(localpath)
+            filename = os.path.basename(local_path)
             name = urllib2.unquote(filename).decode(
                 sys.getfilesystemencoding(), 'ignore')
             track = track.copy(name=name)
@@ -114,16 +115,7 @@ class FilesLibraryProvider(backend.LibraryProvider):
                 name=media_dir['name'],
                 uri=path.path_to_uri(media_dir['path']))
 
-    def _show_media_dirs(self):
-        result = []
-        for media_dir in self._media_dirs:
-            dir = models.Ref.directory(
-                name=media_dir['name'],
-                uri=path.path_to_uri(media_dir['path']))
-            result.append(dir)
-        return result
-
-    def _check_audiofile(self, uri):
+    def _is_audiofile(self, uri):
         try:
             result = self._scanner.scan(uri)
             logger.debug('got scan result playable: %s for %s',
@@ -133,21 +125,12 @@ class FilesLibraryProvider(backend.LibraryProvider):
             logger.warning('Problem scanning %s: %s', uri, e)
             return False
 
-    def _is_playlist(self, child):
-        return os.path.splitext(child)[1] == '.m3u'
-
-    def _is_in_basedir(self, localpath):
+    def _is_in_basedir(self, local_path):
         res = False
-        basedirs = [mdir['path'] for mdir in self._media_dirs]
-        for basedir in basedirs:
-            if basedir == localpath:
+        base_dirs = [mdir['path'] for mdir in self._media_dirs]
+        for base_dir in base_dirs:
+            if path.is_local_path_inside_base_dir(local_path, base_dir):
                 res = True
-            else:
-                try:
-                    path.check_file_path_is_inside_base_dir(localpath, basedir)
-                    res = True
-                except:
-                    pass
         if not res:
-            logger.warn('%s not inside any basedir', localpath)
+            logger.warn('%s not inside any base_dir', local_path)
         return res
