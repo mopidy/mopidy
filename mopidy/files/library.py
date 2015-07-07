@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 import logging
 import operator
 import os
-import stat
 import sys
 import urllib2
 
@@ -27,7 +26,7 @@ class FilesLibraryProvider(backend.LibraryProvider):
             local_path = self._media_dirs[0]['path']
             uri = path.path_to_uri(local_path)
         else:
-            uri = u'file:root'
+            uri = 'file:root'
         return models.Ref.directory(name='Files', uri=uri)
 
     def __init__(self, backend, config):
@@ -39,49 +38,52 @@ class FilesLibraryProvider(backend.LibraryProvider):
             timeout=config['files']['metadata_timeout'])
 
     def browse(self, uri):
-        logger.debug('browse called with uri %s', uri)
+        logger.debug('Browsing files at: %s', uri)
         result = []
         local_path = path.uri_to_path(uri)
         if local_path == 'root':
             return list(self._get_media_dirs_refs())
-        for name in os.listdir(local_path):
-            if not self._is_in_basedir(local_path):
-                logger.warn(u'Not in base_dir: %s', local_path)
+        for dir_entry in os.listdir(local_path):
+            child_path = os.path.join(local_path, dir_entry)
+            uri = path.path_to_uri(child_path)
+            printable_path = child_path.decode(sys.getfilesystemencoding(),
+                                               'ignore')
+
+            if os.path.islink(child_path) and not self._follow_symlinks:
+                logger.debug('Ignoring symlink: %s', printable_path)
                 continue
-            child = os.path.join(local_path, name)
-            logger.debug('child: %s', child)
-            uri = path.path_to_uri(child)
-            name = name.decode(sys.getfilesystemencoding(), 'ignore')
-            if not self._show_dotfiles and name.startswith(b'.'):
+
+            if not self._is_in_basedir(os.path.realpath(child_path)):
+                logger.debug('Ignoring symlink to outside base dir: %s',
+                             printable_path)
                 continue
-            if self._follow_symlinks:
-                st = os.stat(child)
-            else:
-                st = os.lstat(child)
-            if stat.S_ISDIR(st.st_mode):
-                result.append(models.Ref.directory(name=name, uri=uri))
-            elif stat.S_ISREG(st.st_mode) and self._is_audiofile(uri):
-                result.append(models.Ref.track(name=name, uri=uri))
-            else:
-                logger.warn('Ignored file: %s',
-                            child.decode(sys.getfilesystemencoding(),
-                                         'ignore'))
+
+            if not self._show_dotfiles and dir_entry.startswith(b'.'):
                 continue
+
+            if os.path.isdir(child_path):
+                result.append(models.Ref.directory(name=dir_entry, uri=uri))
+            elif os.path.isfile(child_path):
+                if self._is_audiofile(uri):
+                    result.append(models.Ref.track(name=dir_entry, uri=uri))
+                else:
+                    logger.debug('Ignoring non-audiofile: %s', printable_path)
+
         result.sort(key=operator.attrgetter('name'))
         return result
 
     def lookup(self, uri):
-        logger.debug(u'looking up uri = %s', uri)
+        logger.debug('looking up uri = %s', uri)
         local_path = path.uri_to_path(uri)
         if not self._is_in_basedir(local_path):
-            logger.warn(u'Not in base_dir: %s', local_path)
+            logger.warn('Ignoring URI outside base dir: %s', local_path)
             return []
         try:
             result = self._scanner.scan(uri)
             track = utils.convert_tags_to_track(result.tags).copy(
                 uri=uri, length=result.duration)
         except exceptions.ScannerError as e:
-            logger.warning(u'Problem looking up %s: %s', uri, e)
+            logger.warning('Problem looking up %s: %s', uri, e)
             track = models.Track(uri=uri)
         if not track.name:
             filename = os.path.basename(local_path)
@@ -91,7 +93,7 @@ class FilesLibraryProvider(backend.LibraryProvider):
         return [track]
 
     def _get_media_dirs(self, config):
-        for entry in config['files']['media_dir']:
+        for entry in config['files']['media_dirs']:
             media_dir = {}
             media_dir_split = entry.split('|', 1)
             local_path = path.expand_path(

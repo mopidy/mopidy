@@ -24,10 +24,10 @@ See :ref:`config` for general help on configuring Mopidy.
 
     If the files extension should be enabled or not.
 
-.. confval:: files/media_dir
+.. confval:: files/media_dirs
 
     A list of directories to be browsable.
-    Optionally the path can be followed by | and a name that will be shown for that path.
+    Optionally the path can be followed by ``|`` and a name that will be shown for that path.
 
 .. confval:: files/show_dotfiles
 

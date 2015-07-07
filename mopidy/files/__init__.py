@@ -21,7 +21,7 @@ class Extension(ext.Extension):
 
     def get_config_schema(self):
         schema = super(Extension, self).get_config_schema()
-        schema['media_dir'] = config.List(optional=True)
+        schema['media_dirs'] = config.List(optional=True)
         schema['show_dotfiles'] = config.Boolean(optional=True)
         schema['follow_symlinks'] = config.Boolean(optional=True)
         schema['metadata_timeout'] = config.Integer(optional=True)
