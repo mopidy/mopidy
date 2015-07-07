@@ -61,7 +61,8 @@ class FilesLibraryProvider(backend.LibraryProvider):
             if not self._show_dotfiles and dir_entry.startswith(b'.'):
                 continue
 
-            dir_entry = dir_entry.decode(sys.getfilesystemencoding(), 'replace')
+            dir_entry = dir_entry.decode(sys.getfilesystemencoding(),
+                                         'replace')
             if os.path.isdir(child_path):
                 result.append(models.Ref.directory(name=dir_entry, uri=uri))
             elif os.path.isfile(child_path):
