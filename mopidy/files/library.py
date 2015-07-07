@@ -131,7 +131,7 @@ class FilesLibraryProvider(backend.LibraryProvider):
         res = False
         base_dirs = [mdir['path'] for mdir in self._media_dirs]
         for base_dir in base_dirs:
-            if path.is_local_path_inside_base_dir(local_path, base_dir):
+            if path.is_path_inside_base_dir(local_path, base_dir):
                 res = True
         if not res:
             logger.warn('%s not inside any base_dir', local_path)
