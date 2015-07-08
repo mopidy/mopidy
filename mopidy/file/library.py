@@ -13,6 +13,7 @@ from mopidy.internal import path
 logger = logging.getLogger(__name__)
 FS_ENCODING = sys.getfilesystemencoding()
 
+
 class FilesLibraryProvider(backend.LibraryProvider):
     """Library for browsing local files."""
     # TODO: get_images that can pull from metadata and/or .folder.png etc?
@@ -32,10 +33,10 @@ class FilesLibraryProvider(backend.LibraryProvider):
     def __init__(self, backend, config):
         super(FilesLibraryProvider, self).__init__(backend)
         self._media_dirs = list(self._get_media_dirs(config))
-        self._follow_symlinks = config['files']['follow_symlinks']
-        self._show_dotfiles = config['files']['show_dotfiles']
+        self._follow_symlinks = config['file']['follow_symlinks']
+        self._show_dotfiles = config['file']['show_dotfiles']
         self._scanner = scan.Scanner(
-            timeout=config['files']['metadata_timeout'])
+            timeout=config['file']['metadata_timeout'])
 
     def browse(self, uri):
         logger.debug('Browsing files at: %s', uri)
@@ -46,7 +47,7 @@ class FilesLibraryProvider(backend.LibraryProvider):
         if not self._is_in_basedir(os.path.realpath(local_path)):
             logger.warning(
                 'Rejected attempt to browse path (%s) outside dirs defined '
-                'in files/media_dirs config.',
+                'in file/media_dirs config.',
                 local_path.decode(FS_ENCODING, 'replace'))
             return []
         for dir_entry in os.listdir(local_path):
@@ -101,17 +102,18 @@ class FilesLibraryProvider(backend.LibraryProvider):
         return [track]
 
     def _get_media_dirs(self, config):
-        for entry in config['files']['media_dirs']:
+        for entry in config['file']['media_dirs']:
             media_dir = {}
             media_dir_split = entry.split('|', 1)
             local_path = path.expand_path(
                 media_dir_split[0].encode(FS_ENCODING))
             if not local_path:
-                logger.warn('Failed expanding path (%s) from files/media_dirs config value.',
-                            media_dir_split[0])
+                logger.warning('Failed expanding path (%s) from file/media_dirs'
+                               'config value.',
+                               media_dir_split[0])
                 continue
             elif not os.path.isdir(local_path):
-                logger.warn('%s is not a directory', local_path)
+                logger.warning('%s is not a directory', local_path)
                 continue
             media_dir['path'] = local_path
             if len(media_dir_split) == 2:

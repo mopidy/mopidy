@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 
 class Extension(ext.Extension):
 
-    dist_name = 'Mopidy-Files'
-    ext_name = 'files'
+    dist_name = 'Mopidy-File'
+    ext_name = 'file'
     version = mopidy.__version__
 
     def get_default_config(self):

@@ -65,10 +65,10 @@ https://github.com/tkem/mopidy-dleyna
 Provides a backend for playing music from Digital Media Servers using
 the `dLeyna <http://01.org/dleyna>`_ D-Bus interface.
 
-Mopidy-Files
-============
+Mopidy-File
+===========
 
-Bundled with Mopidy. See :ref:`ext-files`.
+Bundled with Mopidy. See :ref:`ext-file`.
 
 Mopidy-Grooveshark
 ==================
