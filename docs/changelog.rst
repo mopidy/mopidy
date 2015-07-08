@@ -50,6 +50,10 @@ MPD frontend
 - The MPD command ``count`` now ignores tracks with no length, which would
   previously cause a :exc:`TypeError`. (PR: :issue:`1192`)
 
+- Concatenate multiple artists, composers and performers using the "A;B" format
+  instead of "A, B". This is a part of updating our protocol implementation to
+  match MPD 0.19. (PR: :issue:`1213`)
+
 Utils
 -----
 

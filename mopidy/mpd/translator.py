@@ -93,7 +93,7 @@ def track_to_mpd_format(track, position=None, stream_title=None):
 
 def concat_multi_values(models, attribute):
     """
-    Format mopidy model values for output to MPD client.
+    Format Mopidy model values for output to MPD client.
 
     :param models: the models
     :type models: array of :class:`mopidy.models.Artist`,
