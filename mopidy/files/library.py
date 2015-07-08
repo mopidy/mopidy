@@ -11,7 +11,7 @@ from mopidy.audio import scan, utils
 from mopidy.internal import path
 
 logger = logging.getLogger(__name__)
-
+FS_ENCODING = sys.getfilesystemencoding()
 
 class FilesLibraryProvider(backend.LibraryProvider):
     """Library for browsing local files."""
@@ -43,11 +43,17 @@ class FilesLibraryProvider(backend.LibraryProvider):
         local_path = path.uri_to_path(uri)
         if local_path == 'root':
             return list(self._get_media_dirs_refs())
+        if not self._is_in_basedir(os.path.realpath(local_path)):
+            logger.warning(
+                'Rejected attempt to browse path (%s) outside dirs defined '
+                'in files/media_dirs config.',
+                local_path.decode(FS_ENCODING, 'replace'))
+            return []
         for dir_entry in os.listdir(local_path):
             child_path = os.path.join(local_path, dir_entry)
             uri = path.path_to_uri(child_path)
-            printable_path = child_path.decode(sys.getfilesystemencoding(),
-                                               'ignore')
+            printable_path = child_path.decode(FS_ENCODING,
+                                               'replace')
 
             if os.path.islink(child_path) and not self._follow_symlinks:
                 logger.debug('Ignoring symlink: %s', printable_path)
@@ -61,7 +67,7 @@ class FilesLibraryProvider(backend.LibraryProvider):
             if not self._show_dotfiles and dir_entry.startswith(b'.'):
                 continue
 
-            dir_entry = dir_entry.decode(sys.getfilesystemencoding(),
+            dir_entry = dir_entry.decode(FS_ENCODING,
                                          'replace')
             if os.path.isdir(child_path):
                 result.append(models.Ref.directory(name=dir_entry, uri=uri))
@@ -75,22 +81,22 @@ class FilesLibraryProvider(backend.LibraryProvider):
         return result
 
     def lookup(self, uri):
-        logger.debug('looking up uri = %s', uri)
+        logger.debug('Looking up file URI: %s', uri)
         local_path = path.uri_to_path(uri)
         if not self._is_in_basedir(local_path):
-            logger.warn('Ignoring URI outside base dir: %s', local_path)
+            logger.warning('Ignoring URI outside base dir: %s', local_path)
             return []
         try:
             result = self._scanner.scan(uri)
             track = utils.convert_tags_to_track(result.tags).copy(
                 uri=uri, length=result.duration)
         except exceptions.ScannerError as e:
-            logger.warning('Problem looking up %s: %s', uri, e)
+            logger.warning('Failed looking up %s: %s', uri, e)
             track = models.Track(uri=uri)
         if not track.name:
             filename = os.path.basename(local_path)
             name = urllib2.unquote(filename).decode(
-                sys.getfilesystemencoding(), 'ignore')
+                FS_ENCODING, 'replace')
             track = track.copy(name=name)
         return [track]
 
@@ -99,9 +105,10 @@ class FilesLibraryProvider(backend.LibraryProvider):
             media_dir = {}
             media_dir_split = entry.split('|', 1)
             local_path = path.expand_path(
-                media_dir_split[0].encode(sys.getfilesystemencoding()))
+                media_dir_split[0].encode(FS_ENCODING))
             if not local_path:
-                logger.warn('Could not expand path %s', media_dir_split[0])
+                logger.warn('Failed expanding path (%s) from files/media_dirs config value.',
+                            media_dir_split[0])
                 continue
             elif not os.path.isdir(local_path):
                 logger.warn('%s is not a directory', local_path)
@@ -110,6 +117,7 @@ class FilesLibraryProvider(backend.LibraryProvider):
             if len(media_dir_split) == 2:
                 media_dir['name'] = media_dir_split[1]
             else:
+                # TODO Mpd client should accept / in dir name
                 media_dir['name'] = media_dir_split[0].replace(os.sep, '+')
             yield media_dir
 
@@ -122,19 +130,15 @@ class FilesLibraryProvider(backend.LibraryProvider):
     def _is_audiofile(self, uri):
         try:
             result = self._scanner.scan(uri)
-            logger.debug('got scan result playable: %s for %s',
-                         result.uri, str(result.playable))
+            logger.debug(
+                'Scan indicates that file %s is %s.',
+                result.uri, result.playable and 'playable' or 'unplayable')
             return result.playable
         except exceptions.ScannerError as e:
-            logger.debug('Could not scan %s: %s', uri, e)
+            logger.debug("Failed scanning %s: %s", uri, e)
             return False
 
     def _is_in_basedir(self, local_path):
-        res = False
-        base_dirs = [mdir['path'] for mdir in self._media_dirs]
-        for base_dir in base_dirs:
-            if path.is_path_inside_base_dir(local_path, base_dir):
-                res = True
-        if not res:
-            logger.warn('%s not inside any base_dir', local_path)
-        return res
+        return any(
+            path.is_path_inside_base_dir(local_path, media_dir['path'])
+            for media_dir in self._media_dirs)
