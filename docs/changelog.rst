@@ -21,7 +21,7 @@ Core API
 - Updated core controllers to handle backend exceptions in all calls that rely
   on multiple backends. (Issue: :issue:`667`)
 
-- Update core methods to do strict input checking. (Fixes: :issue:`#700`)
+- Update core methods to do strict input checking. (Fixes: :issue:`700`)
 
 - Add ``tlid`` alternatives to methods that take ``tl_track`` and also add
   ``get_{eot,next,previous}_tlid`` methods as light weight alternatives to the
