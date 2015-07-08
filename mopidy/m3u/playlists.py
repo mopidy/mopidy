@@ -51,10 +51,11 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             if os.path.exists(path):
                 os.remove(path)
             else:
-                logger.warn('Trying to delete missing playlist file %s', path)
+                logger.warning(
+                    'Trying to delete missing playlist file %s', path)
             del self._playlists[uri]
         else:
-            logger.warn('Trying to delete unknown playlist %s', uri)
+            logger.warning('Trying to delete unknown playlist %s', uri)
 
     def lookup(self, uri):
         return self._playlists.get(uri)
