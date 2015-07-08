@@ -126,7 +126,7 @@ class FilesLibraryProvider(backend.LibraryProvider):
                          result.uri, str(result.playable))
             return result.playable
         except exceptions.ScannerError as e:
-            logger.debug('Problem scanning %s: %s', uri, e)
+            logger.debug('Could not scan %s: %s', uri, e)
             return False
 
     def _is_in_basedir(self, local_path):
