@@ -37,7 +37,7 @@ def track_to_mpd_format(track, position=None, stream_title=None):
         # TODO: only show length if not none, see:
         # https://github.com/mopidy/mopidy/issues/923#issuecomment-79584110
         ('Time', track.length and (track.length // 1000) or 0),
-        ('Artist', artists_to_mpd_format(track.artists)),
+        ('Artist', concat_multi_values(track.artists, 'name')),
         ('Title', track.name or ''),
         ('Album', track.album and track.album.name or ''),
     ]
@@ -58,26 +58,27 @@ def track_to_mpd_format(track, position=None, stream_title=None):
         result.append(('Id', tlid))
     if track.album is not None and track.album.musicbrainz_id is not None:
         result.append(('MUSICBRAINZ_ALBUMID', track.album.musicbrainz_id))
-    # FIXME don't use first and best artist?
-    # FIXME don't duplicate following code?
+
     if track.album is not None and track.album.artists:
-        artists = artists_to_mpd_format(track.album.artists)
-        result.append(('AlbumArtist', artists))
-        artists = [
-            a for a in track.album.artists if a.musicbrainz_id is not None]
-        if artists:
-            result.append(
-                ('MUSICBRAINZ_ALBUMARTISTID', artists[0].musicbrainz_id))
+        result.append(
+            ('AlbumArtist', concat_multi_values(track.album.artists, 'name')))
+        musicbrainz_ids = concat_multi_values(
+            track.album.artists, 'musicbrainz_id')
+        if musicbrainz_ids:
+            result.append(('MUSICBRAINZ_ALBUMARTISTID', musicbrainz_ids))
+
     if track.artists:
-        artists = [a for a in track.artists if a.musicbrainz_id is not None]
-        if artists:
-            result.append(('MUSICBRAINZ_ARTISTID', artists[0].musicbrainz_id))
+        musicbrainz_ids = concat_multi_values(track.artists, 'musicbrainz_id')
+        if musicbrainz_ids:
+            result.append(('MUSICBRAINZ_ARTISTID', musicbrainz_ids))
 
     if track.composers:
-        result.append(('Composer', artists_to_mpd_format(track.composers)))
+        result.append(
+            ('Composer', concat_multi_values(track.composers, 'name')))
 
     if track.performers:
-        result.append(('Performer', artists_to_mpd_format(track.performers)))
+        result.append(
+            ('Performer', concat_multi_values(track.performers, 'name')))
 
     if track.genre:
         result.append(('Genre', track.genre))
@@ -90,17 +91,24 @@ def track_to_mpd_format(track, position=None, stream_title=None):
     return result
 
 
-def artists_to_mpd_format(artists):
+def concat_multi_values(models, attribute):
     """
-    Format track artists for output to MPD client.
+    Format mopidy model values for output to MPD client.
 
-    :param artists: the artists
-    :type track: array of :class:`mopidy.models.Artist`
+    :param models: the models
+    :type models: array of :class:`mopidy.models.Artist`,
+        :class:`mopidy.models.Album` or :class:`mopidy.models.Track`
+    :param attribute: the attribute to use
+    :type attribute: string
     :rtype: string
     """
-    artists = list(artists)
-    artists.sort(key=lambda a: a.name)
-    return ', '.join([a.name for a in artists if a.name])
+    # Don't sort the values. MPD doesn't appear to (or if it does it's not
+    # strict alphabetical). If we just use them in the order in which they come
+    # in then the musicbrainz ids have a higher chance of staying in sync
+    return ';'.join(
+        getattr(m, attribute)
+        for m in models if getattr(m, attribute, None) is not None
+    )
 
 
 def tracks_to_mpd_format(tracks, start=0, end=None):
