@@ -54,6 +54,30 @@ MPD frontend
   instead of "A, B". This is a part of updating our protocol implementation to
   match MPD 0.19. (PR: :issue:`1213`)
 
+File backend
+------------
+
+The :ref:`Mopidy-File <ext-file>` backend is new bundled backend. It is similar
+to Mopidy-Local since it works with local files, but it differs in a few key
+ways:
+
+- Mopidy-File lets you browse your media files by their file hierarchy.
+
+- It supports multiple media directories, all exposed under the "Files"
+  directory when you browse your library with e.g. an MPD client.
+
+- There is no index of the media files, like the JSON or Sqlite files used by
+  Mopidy-Local. Thus no need to scan the music collection before starting
+  Mopidy. Everything is read from the file system when needed and changes to
+  the file system is thus immediately visible in Mopidy clients.
+
+- Because there is no index, there is no support for search.
+
+Our long term plan is to keep this very simple file backend in Mopidy, as it
+has a well defined and limited scope, while splitting the more feature rich
+Mopidy-Local extension out to an independent project. (Fixes: :issue:`1004`,
+PR: :issue:`1207`)
+
 Utils
 -----
 
