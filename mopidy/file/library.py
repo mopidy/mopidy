@@ -74,11 +74,8 @@ class FileLibraryProvider(backend.LibraryProvider):
             name = dir_entry.decode(FS_ENCODING, 'replace')
             if os.path.isdir(child_path):
                 result.append(models.Ref.directory(name=name, uri=uri))
-            elif os.path.isfile(child_path):
-                if self._is_audiofile(uri):
-                    result.append(models.Ref.track(name=name, uri=uri))
-                else:
-                    logger.debug('Ignoring non-audiofile: %s', printable_path)
+            elif os.path.isfile(child_path) and self._is_audio_file(uri):
+                result.append(models.Ref.track(name=name, uri=uri))
 
         result.sort(key=operator.attrgetter('name'))
         return result
@@ -138,15 +135,16 @@ class FileLibraryProvider(backend.LibraryProvider):
                 name=media_dir['name'],
                 uri=path.path_to_uri(media_dir['path']))
 
-    def _is_audiofile(self, uri):
+    def _is_audio_file(self, uri):
         try:
             result = self._scanner.scan(uri)
-            logger.debug(
-                'Scan indicates that file %s is %s.',
-                result.uri, result.playable and 'playable' or 'unplayable')
+            if result.playable:
+                logger.debug('Playable file: %s', result.uri)
+            else:
+                logger.debug('Unplayable file: %s (not audio)', result.uri)
             return result.playable
         except exceptions.ScannerError as e:
-            logger.debug('Failed scanning %s: %s', uri, e)
+            logger.debug('Unplayable file: %s (%s)', uri, e)
             return False
 
     def _is_in_basedir(self, local_path):
