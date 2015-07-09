@@ -50,25 +50,22 @@ class FileLibraryProvider(backend.LibraryProvider):
         if not self._is_in_basedir(os.path.realpath(local_path)):
             logger.warning(
                 'Rejected attempt to browse path (%s) outside dirs defined '
-                'in file/media_dirs config.',
-                local_path.decode(FS_ENCODING, 'replace'))
+                'in file/media_dirs config.', uri)
             return []
 
         for dir_entry in os.listdir(local_path):
             child_path = os.path.join(local_path, dir_entry)
             uri = path.path_to_uri(child_path)
-            printable_path = child_path.decode(FS_ENCODING, 'replace')
 
             if not self._show_dotfiles and dir_entry.startswith(b'.'):
                 continue
 
             if os.path.islink(child_path) and not self._follow_symlinks:
-                logger.debug('Ignoring symlink: %s', printable_path)
+                logger.debug('Ignoring symlink: %s', uri)
                 continue
 
             if not self._is_in_basedir(os.path.realpath(child_path)):
-                logger.debug('Ignoring symlink to outside base dir: %s',
-                             printable_path)
+                logger.debug('Ignoring symlink to outside base dir: %s', uri)
                 continue
 
             name = dir_entry.decode(FS_ENCODING, 'replace')
@@ -98,8 +95,7 @@ class FileLibraryProvider(backend.LibraryProvider):
 
         if not track.name:
             filename = os.path.basename(local_path)
-            name = urllib2.unquote(filename).decode(
-                FS_ENCODING, 'replace')
+            name = urllib2.unquote(filename).decode(FS_ENCODING, 'replace')
             track = track.copy(name=name)
 
         return [track]
