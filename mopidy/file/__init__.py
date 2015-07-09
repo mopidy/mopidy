@@ -28,5 +28,5 @@ class Extension(ext.Extension):
         return schema
 
     def setup(self, registry):
-        from .backend import FilesBackend
-        registry.add('backend', FilesBackend)
+        from .backend import FileBackend
+        registry.add('backend', FileBackend)
