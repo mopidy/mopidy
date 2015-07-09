@@ -59,6 +59,9 @@ class FileLibraryProvider(backend.LibraryProvider):
             uri = path.path_to_uri(child_path)
             printable_path = child_path.decode(FS_ENCODING, 'replace')
 
+            if not self._show_dotfiles and dir_entry.startswith(b'.'):
+                continue
+
             if os.path.islink(child_path) and not self._follow_symlinks:
                 logger.debug('Ignoring symlink: %s', printable_path)
                 continue
@@ -66,9 +69,6 @@ class FileLibraryProvider(backend.LibraryProvider):
             if not self._is_in_basedir(os.path.realpath(child_path)):
                 logger.debug('Ignoring symlink to outside base dir: %s',
                              printable_path)
-                continue
-
-            if not self._show_dotfiles and dir_entry.startswith(b'.'):
                 continue
 
             name = dir_entry.decode(FS_ENCODING, 'replace')
