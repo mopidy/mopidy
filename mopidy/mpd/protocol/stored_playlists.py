@@ -186,7 +186,8 @@ def _playlistcreate(context, name, tracks):
         # Created and saved
         return
     # Can't use backend aprropriate to passed uri schemes, use default one
-    playlist = context.core.playlists.create(name).get()
+    scheme = context.dispatcher.config['mpd']['default_playlist_scheme']
+    playlist = context.core.playlists.create(name, scheme).get()
     if not playlist:
         # If even default backend can't save playlist, everything is lost
         logger.warning('Default backend can\'t create playlists')
