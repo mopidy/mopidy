@@ -22,7 +22,7 @@ class TrackMpdFormatTest(unittest.TestCase):
         date='1977-01-01',
         disc_no=1,
         comment='a comment',
-        length=137000,
+        length=137000
     )
 
     def setUp(self):  # noqa: N802
@@ -78,6 +78,25 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assertIn(('Id', 122), result)
         self.assertNotIn(('Comment', 'a comment'), result)
         self.assertEqual(len(result), 14)
+
+    def test_track_to_mpd_format_with_last_modified(self):
+        track = self.track.replace(last_modified=995303899000)
+        result = translator.track_to_mpd_format(track)
+        self.assertIn(('file', 'a uri'), result)
+        self.assertIn(('Time', 137), result)
+        self.assertIn(('Artist', 'an artist'), result)
+        self.assertIn(('Title', 'a name'), result)
+        self.assertIn(('Album', 'an album'), result)
+        self.assertIn(('AlbumArtist', 'an other artist'), result)
+        self.assertIn(('Composer', 'a composer'), result)
+        self.assertIn(('Performer', 'a performer'), result)
+        self.assertIn(('Genre', 'a genre'), result)
+        self.assertIn(('Track', '7/13'), result)
+        self.assertIn(('Date', '1977-01-01'), result)
+        self.assertIn(('Disc', 1), result)
+        self.assertIn(('Last-Modified', '2001-07-16T18:18:19'), result)
+        self.assertNotIn(('Comment', 'a comment'), result)
+        self.assertEqual(len(result), 13)
 
     def test_track_to_mpd_format_musicbrainz_trackid(self):
         track = self.track.replace(musicbrainz_id='foo')

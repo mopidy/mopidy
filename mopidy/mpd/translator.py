@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+import datetime
 import re
 
 from mopidy.models import TlTrack
@@ -85,6 +86,11 @@ def track_to_mpd_format(track, position=None, stream_title=None):
 
     if track.disc_no:
         result.append(('Disc', track.disc_no))
+
+    if track.last_modified is not None:
+        datestring = datetime.datetime.fromtimestamp(
+            track.last_modified // 1000).strftime('%Y-%m-%dT%H:%M:%S%Z')
+        result.append(('Last-Modified', datestring))
 
     if track.musicbrainz_id is not None:
         result.append(('MUSICBRAINZ_TRACKID', track.musicbrainz_id))
