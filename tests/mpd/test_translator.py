@@ -23,7 +23,7 @@ class TrackMpdFormatTest(unittest.TestCase):
         date='1977-01-01',
         disc_no=1,
         comment='a comment',
-        length=137000
+        length=137000,
     )
 
     def setUp(self):  # noqa: N802
