@@ -89,7 +89,7 @@ def track_to_mpd_format(track, position=None, stream_title=None):
 
     if track.last_modified is not None:
         datestring = datetime.datetime.fromtimestamp(
-            track.last_modified // 1000).strftime('%Y-%m-%dT%H:%M:%S%Z')
+            track.last_modified // 1000).isoformat()
         result.append(('Last-Modified', datestring))
 
     if track.musicbrainz_id is not None:
