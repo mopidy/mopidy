@@ -34,6 +34,7 @@ setup(
             'mopidy = mopidy.__main__:main',
         ],
         'mopidy.ext': [
+            'core = mopidy.core:Extension',
             'http = mopidy.http:Extension',
             'local = mopidy.local:Extension',
             'file = mopidy.file:Extension',

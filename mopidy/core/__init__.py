@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 # flake8: noqa
 from .actor import Core
+from .ext import Extension
 from .history import HistoryController
 from .library import LibraryController
 from .listener import CoreListener
