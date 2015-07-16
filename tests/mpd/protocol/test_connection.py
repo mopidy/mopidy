@@ -10,7 +10,7 @@ class ConnectionHandlerTest(protocol.BaseTestCase):
     def test_close_closes_the_client_connection(self):
         with patch.object(self.session, 'close') as close_mock:
             self.send_request('close')
-            close_mock.assertEqualResponsecalled_once_with()
+            close_mock.assert_called_once_with()
         self.assertEqualResponse('OK')
 
     def test_empty_request(self):
