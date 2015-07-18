@@ -18,7 +18,8 @@ class Extension(ext.Extension):
 
     def get_config_schema(self):
         schema = super(Extension, self).get_config_schema()
-        del schema['enabled']  # core cannot be disabled
+        schema['max_tracklist_length'] = config.Integer(
+            minimum=1, maximum=10000)
         return schema
 
     def setup(self, registry):
