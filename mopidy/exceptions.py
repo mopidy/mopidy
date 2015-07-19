@@ -19,6 +19,13 @@ class MopidyException(Exception):
 
 class BackendError(MopidyException):
     pass
+    
+
+class CoreError(MopidyException):
+    
+    def __init(self, message, errno=None):
+        super(CoreError, self).__init(message, errno)
+        self.errno = errno
 
 
 class ExtensionError(MopidyException):
@@ -42,6 +49,13 @@ class MixerError(MopidyException):
 
 class ScannerError(MopidyException):
     pass
+
+    
+class TracklistFull(CoreError):
+    
+    def __init(self, message, errno=None):
+        super(TracklistFull, self).__init(message, errno)
+        self.errno = errno
 
 
 class AudioException(MopidyException):
