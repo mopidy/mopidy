@@ -10,7 +10,7 @@ v1.0.8 (unreleased)
 Bug fix release.
 
 - Fix reversal of ``Title`` and ``Name`` in MPD protocol (Fixes: :issue:`1212`
-  PR: :issue:`1219`)
+  PR: :issue:`1214`)
 
 
 v1.0.7 (2015-06-26)
