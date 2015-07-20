@@ -11,7 +11,13 @@ from mopidy.models import TlTrack, Track
 
 class TracklistTest(unittest.TestCase):
 
-    def setUp(self):  # noqa: N802
+    def setUp(self):  # noqa:
+        config = {
+            'core': {
+                'max_tracklist_length': 10000,
+            }
+        }
+
         self.tracks = [
             Track(uri='dummy1:a', name='foo'),
             Track(uri='dummy1:b', name='foo'),
@@ -29,7 +35,7 @@ class TracklistTest(unittest.TestCase):
         self.library.lookup.side_effect = lookup
         self.backend.library = self.library
 
-        self.core = core.Core(mixer=None, backends=[self.backend])
+        self.core = core.Core(config, mixer=None, backends=[self.backend])
         self.tl_tracks = self.core.tracklist.add(uris=[
             t.uri for t in self.tracks])
 
@@ -107,6 +113,12 @@ class TracklistTest(unittest.TestCase):
 class TracklistIndexTest(unittest.TestCase):
 
     def setUp(self):  # noqa: N802
+        config = {
+            'core': {
+                'max_tracklist_length': 10000,
+            }
+        }
+
         self.tracks = [
             Track(uri='dummy1:a', name='foo'),
             Track(uri='dummy1:b', name='foo'),
@@ -116,7 +128,7 @@ class TracklistIndexTest(unittest.TestCase):
         def lookup(uris):
             return {u: [t for t in self.tracks if t.uri == u] for u in uris}
 
-        self.core = core.Core(mixer=None, backends=[])
+        self.core = core.Core(config, mixer=None, backends=[])
         self.core.library = mock.Mock(spec=core.LibraryController)
         self.core.library.lookup.side_effect = lookup
 
