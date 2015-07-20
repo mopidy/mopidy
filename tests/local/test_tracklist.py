@@ -17,6 +17,9 @@ from tests.local import generate_song, populate_tracklist
 
 class LocalTracklistProviderTest(unittest.TestCase):
     config = {
+        'core': {
+            'max_tracklist_length': 10000
+        },
         'local': {
             'media_dir': path_to_data_dir(''),
             'data_dir': path_to_data_dir(''),
@@ -35,7 +38,7 @@ class LocalTracklistProviderTest(unittest.TestCase):
         self.audio = dummy_audio.create_proxy()
         self.backend = actor.LocalBackend.start(
             config=self.config, audio=self.audio).proxy()
-        self.core = core.Core(mixer=None, backends=[self.backend])
+        self.core = core.Core(self.config, mixer=None, backends=[self.backend])
         self.controller = self.core.tracklist
         self.playback = self.core.playback
 

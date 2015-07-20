@@ -25,12 +25,20 @@ STOPPED = PlaybackState.STOPPED
 class StatusHandlerTest(unittest.TestCase):
 
     def setUp(self):  # noqa: N802
+        config = {
+            'core': {
+                'max_tracklist_length': 10000,
+            }
+        }
+
         self.mixer = dummy_mixer.create_proxy()
         self.backend = dummy_backend.create_proxy()
 
         with deprecation.ignore():
             self.core = core.Core.start(
-                mixer=self.mixer, backends=[self.backend]).proxy()
+                config,
+                mixer=self.mixer,
+                backends=[self.backend]).proxy()
 
         self.dispatcher = dispatcher.MpdDispatcher(core=self.core)
         self.context = self.dispatcher.context
