@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import logging
 import random
 
+from mopidy import exceptions
 from mopidy.core import listener
 from mopidy.internal import deprecation, validation
 from mopidy.models import TlTrack, Track
@@ -433,6 +434,13 @@ class TracklistController(object):
         tl_tracks = []
 
         for track in tracks:
+            if(self.get_length() >=
+                    self.core._config['core']['max_tracklist_length']):
+
+                raise exceptions.TracklistFull(
+                    'TracklistFull: Tried to add ' +
+                    'too many uris to the tracklist.')
+                break
             tl_track = TlTrack(self._next_tlid, track)
             self._next_tlid += 1
             if at_position is not None:
