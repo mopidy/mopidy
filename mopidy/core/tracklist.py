@@ -432,15 +432,13 @@ class TracklistController(object):
                 tracks.extend(track_map[uri])
 
         tl_tracks = []
+        max_length = self.core._config['core']['max_tracklist_length']
 
         for track in tracks:
-            if(self.get_length() >=
-                    self.core._config['core']['max_tracklist_length']):
-
+            if self.get_length() >= max_length:
                 raise exceptions.TracklistFull(
-                    'TracklistFull: Tried to add ' +
-                    'too many uris to the tracklist.')
-                break
+                    'Tracklist may contain at most %d tracks.' % max_length)
+
             tl_track = TlTrack(self._next_tlid, track)
             self._next_tlid += 1
             if at_position is not None:
