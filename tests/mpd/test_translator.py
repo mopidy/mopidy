@@ -118,6 +118,22 @@ class TrackMpdFormatTest(unittest.TestCase):
         translated = translator.concat_multi_values(artists, 'musicbrainz_id')
         self.assertEqual(translated, '')
 
+    def test_track_to_mpd_format_with_stream_title(self):
+        result = translator.track_to_mpd_format(self.track, stream_title='foo')
+        self.assertIn(('Name', 'a name'), result)
+        self.assertIn(('Title', 'foo'), result)
+
+    def test_track_to_mpd_format_with_empty_stream_title(self):
+        result = translator.track_to_mpd_format(self.track, stream_title='')
+        self.assertIn(('Name', 'a name'), result)
+        self.assertIn(('Title', ''), result)
+
+    def test_track_to_mpd_format_with_stream_and_no_track_name(self):
+        track = self.track.replace(name=None)
+        result = translator.track_to_mpd_format(track, stream_title='foo')
+        self.assertNotIn(('Name', ''), result)
+        self.assertIn(('Title', 'foo'), result)
+
 
 class PlaylistMpdFormatTest(unittest.TestCase):
 
