@@ -36,6 +36,7 @@ class BaseTestCase(unittest.TestCase):
             },
             'mpd': {
                 'password': None,
+                'default_playlist_scheme': 'dummy',
             }
         }
 
