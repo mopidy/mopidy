@@ -33,6 +33,9 @@ Core API
 
 - Update core to handle backend crashes and bad data. (Fixes: :issue:`1161`)
 
+- Add `max_tracklist_length` config and limitation. (Fixes: :issue:`997`
+  PR: :issue:`1225`)
+
 Models
 ------
 
