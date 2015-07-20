@@ -38,12 +38,15 @@ def track_to_mpd_format(track, position=None, stream_title=None):
         # https://github.com/mopidy/mopidy/issues/923#issuecomment-79584110
         ('Time', track.length and (track.length // 1000) or 0),
         ('Artist', concat_multi_values(track.artists, 'name')),
-        ('Title', track.name or ''),
         ('Album', track.album and track.album.name or ''),
     ]
 
-    if stream_title:
-        result.append(('Name', stream_title))
+    if stream_title is not None:
+        result.append(('Title', stream_title))
+        if track.name:
+            result.append(('Name', track.name))
+    else:
+        result.append(('Title', track.name or ''))
 
     if track.date:
         result.append(('Date', track.date))
