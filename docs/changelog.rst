@@ -4,6 +4,14 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+v1.0.8 (unreleased)
+===================
+
+Bug fix release.
+
+- Fix reversal of ``Title`` and ``Name`` in MPD protocol (Fixes: :issue:`1212`
+  PR: :issue:`1219`)
+
 
 v1.0.7 (2015-06-26)
 ===================
