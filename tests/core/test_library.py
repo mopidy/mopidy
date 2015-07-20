@@ -204,7 +204,8 @@ class CoreLibraryTest(unittest.TestCase):
         self.core.library.refresh()
 
         self.library1.refresh.assert_called_once_with(None)
-        self.library2.refresh.assert_called_twice_with(None)
+        self.library2.refresh.assert_called_with(None)
+        self.assertEqual(self.library2.refresh.call_count, 2)
 
     def test_find_exact_combines_results_from_all_backends(self):
         track1 = Track(uri='dummy1:a')
