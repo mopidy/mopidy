@@ -430,8 +430,7 @@ def swapid(context, tlid1, tlid2):
     swap(context, position1, position2)
 
 
-# TODO: add at least reflection tests before adding NotImplemented version
-# @protocol.commands.add('addtagid', tlid=protocol.UINT)
+@protocol.commands.add('addtagid', tlid=protocol.UINT)
 def addtagid(context, tlid, tag, value):
     """
     *musicpd.org, current playlist section:*
@@ -442,12 +441,13 @@ def addtagid(context, tlid, tag, value):
         for remote songs. This change is volatile: it may be overwritten by
         tags received from the server, and the data is gone when the song gets
         removed from the queue.
+
+    .. versionadded:: MPD protocol 0.19
     """
-    pass
+    raise exceptions.MpdNotImplemented  # TODO
 
 
-# TODO: add at least reflection tests before adding NotImplemented version
-# @protocol.commands.add('cleartagid', tlid=protocol.UINT)
+@protocol.commands.add('cleartagid', tlid=protocol.UINT)
 def cleartagid(context, tlid, tag):
     """
     *musicpd.org, current playlist section:*
@@ -457,5 +457,7 @@ def cleartagid(context, tlid, tag):
         Removes tags from the specified song. If TAG is not specified, then all
         tag values will be removed. Editing song tags is only possible for
         remote songs.
+
+    .. versionadded:: MPD protocol 0.19
     """
-    pass
+    raise exceptions.MpdNotImplemented  # TODO

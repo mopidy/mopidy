@@ -459,3 +459,14 @@ class SwapCommandTest(BasePopulatedTracklistTestCase):
         self.send_request('swapid "8" "0"')
         self.assertEqualResponse(
             'ACK [50@0] {swapid} No such song')
+
+
+class TagCommandTest(protocol.BaseTestCase):
+
+    def test_addtagid(self):
+        self.send_request('addtagid 17 artist Abba')
+        self.assertEqualResponse('ACK [0@0] {addtagid} Not implemented')
+
+    def test_cleartagid(self):
+        self.send_request('cleartagid 17 artist')
+        self.assertEqualResponse('ACK [0@0] {cleartagid} Not implemented')

@@ -61,6 +61,8 @@ MPD frontend
   implemented" error:
 
   - ``rangeid``
+  - ``addtagid``
+  - ``cleartagid``
 
 File backend
 ------------
