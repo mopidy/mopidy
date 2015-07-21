@@ -71,6 +71,14 @@ Current playlist
     :members:
 
 
+Mounts and neighbors
+--------------------
+
+.. automodule:: mopidy.mpd.protocol.mount
+    :synopsis: MPD protocol: mounts and neighbors
+    :members:
+
+
 Music database
 --------------
 

@@ -33,7 +33,8 @@ def load_protocol_modules():
     """
     from . import (  # noqa
         audio_output, channels, command_list, connection, current_playlist,
-        music_db, playback, reflection, status, stickers, stored_playlists)
+        mount, music_db, playback, reflection, status, stickers,
+        stored_playlists)
 
 
 def INT(value):  # noqa: N802

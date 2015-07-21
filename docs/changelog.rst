@@ -57,12 +57,16 @@ MPD frontend
   instead of "A, B". This is a part of updating our protocol implementation to
   match MPD 0.19. (PR: :issue:`1213`)
 
-- Add skeletons of new or otherwise missing MPD commands that return a "not
-  implemented" error:
+- Add "not implemented" skeletons of new commands in the MPD protocol version
+  0.19:
 
   - ``rangeid``
   - ``addtagid``
   - ``cleartagid``
+  - ``mount``
+  - ``unmount``
+  - ``listmounts``
+  - ``listneighbors``
 
 File backend
 ------------
