@@ -324,6 +324,37 @@ def plchangesposid(context, version):
         return result
 
 
+# TODO: add at least reflection tests before adding NotImplemented version
+# @protocol.commands.add(
+#     'prio', priority=protocol.UINT, position=protocol.RANGE)
+def prio(context, priority, position):
+    """
+    *musicpd.org, current playlist section:*
+
+        ``prio {PRIORITY} {START:END...}``
+
+        Set the priority of the specified songs. A higher priority means that
+        it will be played first when "random" mode is enabled.
+
+        A priority is an integer between 0 and 255. The default priority of new
+        songs is 0.
+    """
+    pass
+
+
+# TODO: add at least reflection tests before adding NotImplemented version
+# @protocol.commands.add('prioid')
+def prioid(context, *args):
+    """
+    *musicpd.org, current playlist section:*
+
+        ``prioid {PRIORITY} {ID...}``
+
+        Same as prio, but address the songs with their id.
+    """
+    pass
+
+
 @protocol.commands.add('shuffle', songrange=protocol.RANGE)
 def shuffle(context, songrange=None):
     """
@@ -381,37 +412,6 @@ def swapid(context, tlid1, tlid2):
     position1 = context.core.tracklist.index(tl_tracks1[0]).get()
     position2 = context.core.tracklist.index(tl_tracks2[0]).get()
     swap(context, position1, position2)
-
-
-# TODO: add at least reflection tests before adding NotImplemented version
-# @protocol.commands.add(
-#     'prio', priority=protocol.UINT, position=protocol.RANGE)
-def prio(context, priority, position):
-    """
-    *musicpd.org, current playlist section:*
-
-        ``prio {PRIORITY} {START:END...}``
-
-        Set the priority of the specified songs. A higher priority means that
-        it will be played first when "random" mode is enabled.
-
-        A priority is an integer between 0 and 255. The default priority of new
-        songs is 0.
-    """
-    pass
-
-
-# TODO: add at least reflection tests before adding NotImplemented version
-# @protocol.commands.add('prioid')
-def prioid(context, *args):
-    """
-    *musicpd.org, current playlist section:*
-
-        ``prioid {PRIORITY} {ID...}``
-
-        Same as prio, but address the songs with their id.
-    """
-    pass
 
 
 # TODO: add at least reflection tests before adding NotImplemented version
