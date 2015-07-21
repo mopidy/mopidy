@@ -349,6 +349,29 @@ def listallinfo(context, uri=None):
     return result
 
 
+@protocol.commands.add('listfiles')
+def listfiles(context, uri=None):
+    """
+    *musicpd.org, music database section:*
+
+        ``listfiles [URI]``
+
+        Lists the contents of the directory URI, including files are not
+        recognized by MPD. URI can be a path relative to the music directory or
+        an URI understood by one of the storage plugins. The response contains
+        at least one line for each directory entry with the prefix "file: " or
+        "directory: ", and may be followed by file attributes such as
+        "Last-Modified" and "size".
+
+        For example, "smb://SERVER" returns a list of all shares on the given
+        SMB/CIFS server; "nfs://servername/path" obtains a directory listing
+        from the NFS server.
+
+    .. versionadded:: MPD protocol 0.19
+    """
+    raise exceptions.MpdNotImplemented  # TODO
+
+
 @protocol.commands.add('lsinfo')
 def lsinfo(context, uri=None):
     """

@@ -60,13 +60,22 @@ MPD frontend
 - Add "not implemented" skeletons of new commands in the MPD protocol version
   0.19:
 
-  - ``rangeid``
-  - ``addtagid``
-  - ``cleartagid``
-  - ``mount``
-  - ``unmount``
-  - ``listmounts``
-  - ``listneighbors``
+  - Current playlist:
+
+    - ``rangeid``
+    - ``addtagid``
+    - ``cleartagid``
+
+  - Mounts and neighbors:
+
+    - ``mount``
+    - ``unmount``
+    - ``listmounts``
+    - ``listneighbors``
+
+  - Music DB:
+
+    - ``listfiles``
 
 File backend
 ------------

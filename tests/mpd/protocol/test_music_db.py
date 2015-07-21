@@ -295,6 +295,10 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('directory: /dummy/a')
         self.assertInResponse('directory: /dummy/a [2]')
 
+    def test_listfiles(self):
+        self.send_request('listfiles')
+        self.assertEqualResponse('ACK [0@0] {listfiles} Not implemented')
+
     def test_lsinfo_without_path_returns_same_as_for_root(self):
         last_modified = 1390942873222
         self.backend.playlists.set_dummy_playlists([
