@@ -48,6 +48,22 @@ To install, run::
     pip install Mopidy-Local-Images
 
 
+Mopidy-Material-Webclient
+=========================
+
+https://github.com/matgallacher/mopidy-material-webclient
+
+A Mopidy web client with an Android Material design feel.
+
+.. image:: /ext/material_webclient.png
+   :width: 960
+   :height: 520
+
+To install, run::
+
+    pip install Mopidy-Material-Webclient
+
+
 Mopidy-Mobile
 =============
 

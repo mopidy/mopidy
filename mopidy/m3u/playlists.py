@@ -67,7 +67,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         for path in glob.glob(os.path.join(self._playlists_dir, b'*.m3u')):
             relpath = os.path.basename(path)
             uri = translator.path_to_playlist_uri(relpath)
-            name = os.path.splitext(relpath)[0].decode(encoding)
+            name = os.path.splitext(relpath)[0].decode(encoding, 'replace')
             tracks = translator.parse_m3u(path)
             playlists[uri] = Playlist(uri=uri, name=name, tracks=tracks)
 

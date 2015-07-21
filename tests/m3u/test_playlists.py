@@ -1,9 +1,12 @@
+# encoding: utf-8
+
 from __future__ import absolute_import, unicode_literals
 
 import os
 import shutil
 import tempfile
 import unittest
+import urllib
 
 import pykka
 
@@ -109,6 +112,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
         with open(path) as f:
             m3u = f.read().splitlines()
+
         self.assertEqual(['#EXTM3U', '#EXTINF:60,Test', track.uri], m3u)
 
     def test_latin1_playlist_contents_is_written_to_disk(self):
@@ -143,9 +147,17 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.assertEqual(playlist.name, result.name)
         self.assertEqual(track.uri, result.tracks[0].uri)
 
-    @unittest.SkipTest
-    def test_santitising_of_playlist_filenames(self):
-        pass
+    def test_load_playlist_with_nonfilesystem_encoding_of_filename(self):
+        uri = 'm3u:%s.m3u' % urllib.quote('øæå'.encode('latin-1'))
+        path = playlist_uri_to_path(uri, self.playlists_dir)
+        with open(path, 'wb+') as f:
+            f.write(b'#EXTM3U\n')
+
+        self.core.playlists.refresh()
+
+        self.assertEqual(len(self.core.playlists.as_list()), 1)
+        result = self.core.playlists.lookup(uri)
+        self.assertEqual('\ufffd\ufffd\ufffd', result.name)
 
     @unittest.SkipTest
     def test_playlists_dir_is_created(self):
