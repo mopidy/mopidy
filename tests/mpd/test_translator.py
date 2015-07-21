@@ -1,6 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import datetime
 import unittest
 
 from mopidy.internal import path
@@ -82,12 +81,6 @@ class TrackMpdFormatTest(unittest.TestCase):
 
     def test_track_to_mpd_format_with_last_modified(self):
         track = self.track.replace(last_modified=995303899000)
-        # Due to this being local time-zone dependant, we have
-        # to calculate what the Last-Modified output will look like
-        # on the machine where the tests are being run. So this only tests
-        # that the output is actually there.
-        datestring = datetime.datetime.fromtimestamp(
-            track.last_modified // 1000).isoformat()
         result = translator.track_to_mpd_format(track)
         self.assertIn(('file', 'a uri'), result)
         self.assertIn(('Time', 137), result)
@@ -101,7 +94,7 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assertIn(('Track', '7/13'), result)
         self.assertIn(('Date', '1977-01-01'), result)
         self.assertIn(('Disc', 1), result)
-        self.assertIn(('Last-Modified', datestring), result)
+        self.assertIn(('Last-Modified', '2001-07-16T17:18:19Z'), result)
         self.assertNotIn(('Comment', 'a comment'), result)
         self.assertEqual(len(result), 13)
 

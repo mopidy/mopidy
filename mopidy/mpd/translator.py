@@ -87,10 +87,10 @@ def track_to_mpd_format(track, position=None, stream_title=None):
     if track.disc_no:
         result.append(('Disc', track.disc_no))
 
-    if track.last_modified is not None:
-        datestring = datetime.datetime.fromtimestamp(
+    if track.last_modified:
+        datestring = datetime.datetime.utcfromtimestamp(
             track.last_modified // 1000).isoformat()
-        result.append(('Last-Modified', datestring))
+        result.append(('Last-Modified', datestring + 'Z'))
 
     if track.musicbrainz_id is not None:
         result.append(('MUSICBRAINZ_TRACKID', track.musicbrainz_id))
