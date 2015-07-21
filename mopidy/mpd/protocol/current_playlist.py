@@ -183,10 +183,6 @@ def playlistfind(context, tag, needle):
         ``playlistfind {TAG} {NEEDLE}``
 
         Finds songs in the current playlist with strict matching.
-
-    *GMPC:*
-
-    - does not add quotes around the tag.
     """
     if tag == 'filename':
         tl_tracks = context.core.tracklist.filter({'uri': [needle]}).get()
@@ -260,7 +256,6 @@ def playlistsearch(context, tag, needle):
 
     *GMPC:*
 
-    - does not add quotes around the tag
     - uses ``filename`` and ``any`` as tags
     """
     raise exceptions.MpdNotImplemented  # TODO

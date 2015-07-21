@@ -96,7 +96,6 @@ def count(context, *args):
 
     *GMPC:*
 
-    - does not add quotes around the tag argument.
     - use multiple tag-needle pairs to make more specific searches.
     """
     try:
@@ -125,13 +124,11 @@ def find(context, *args):
 
     *GMPC:*
 
-    - does not add quotes around the field argument.
     - also uses ``find album "[ALBUM]" artist "[ARTIST]"`` to list album
       tracks.
 
     *ncmpc:*
 
-    - does not add quotes around the field argument.
     - capitalizes the type argument.
 
     *ncmpcpp:*
@@ -255,13 +252,8 @@ def list_(context, *args):
                 Genre: Rock
                 OK
 
-    *GMPC:*
-
-    - does not add quotes around the field argument.
-
     *ncmpc:*
 
-    - does not add quotes around the field argument.
     - capitalizes the field argument.
     """
     params = list(args)
@@ -428,7 +420,6 @@ def search(context, *args):
 
     *GMPC:*
 
-    - does not add quotes around the field argument.
     - uses the undocumented field ``any``.
     - searches for multiple words like this::
 
@@ -436,7 +427,6 @@ def search(context, *args):
 
     *ncmpc:*
 
-    - does not add quotes around the field argument.
     - capitalizes the field argument.
 
     *ncmpcpp:*
