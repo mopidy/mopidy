@@ -355,6 +355,22 @@ def prioid(context, *args):
     pass
 
 
+@protocol.commands.add('rangeid', tlid=protocol.UINT, songrange=protocol.RANGE)
+def rangeid(context, tlid, songrange):
+    """
+    *musicpd.org, current playlist section:*
+
+        ``rangeid {ID} {START:END}``
+
+        Specifies the portion of the song that shall be played. START and END
+        are offsets in seconds (fractional seconds allowed); both are optional.
+        Omitting both (i.e. sending just ":") means "remove the range, play
+        everything". A song that is currently playing cannot be manipulated
+        this way.
+    """
+    raise exceptions.MpdNotImplemented  # TODO
+
+
 @protocol.commands.add('shuffle', songrange=protocol.RANGE)
 def shuffle(context, songrange=None):
     """

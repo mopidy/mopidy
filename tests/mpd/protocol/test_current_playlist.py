@@ -386,6 +386,13 @@ class PlChangeCommandTest(BasePopulatedTracklistTestCase):
         self.assertInResponse('OK')
 
 
+class RangeIdCommandTest(protocol.BaseTestCase):
+
+    def test_rangeid(self):
+        self.send_request('rangeid 17 0:30')
+        self.assertEqualResponse('ACK [0@0] {rangeid} Not implemented')
+
+
 # TODO: we only seem to be testing that don't touch the non shuffled region :/
 class ShuffleCommandTest(BasePopulatedTracklistTestCase):
 

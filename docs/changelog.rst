@@ -57,6 +57,11 @@ MPD frontend
   instead of "A, B". This is a part of updating our protocol implementation to
   match MPD 0.19. (PR: :issue:`1213`)
 
+- Add skeletons of new or otherwise missing MPD commands that return a "not
+  implemented" error:
+
+  - ``rangeid``
+
 File backend
 ------------
 
