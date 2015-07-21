@@ -47,8 +47,9 @@ _proxy_schema['password'] = Secret(optional=True)
 # NOTE: if multiple outputs ever comes something like LogLevelConfigSchema
 # _outputs_schema = config.AudioOutputConfigSchema()
 
-_schemas = [_logging_schema, _loglevels_schema, _logcolors_schema,
-            _audio_schema, _proxy_schema]
+_schemas = [
+    _core_schema, _logging_schema, _loglevels_schema, _logcolors_schema,
+    _audio_schema, _proxy_schema]
 
 _INITIAL_HELP = """
 # For further information about options in this file see:
