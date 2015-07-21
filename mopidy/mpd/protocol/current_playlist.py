@@ -324,9 +324,8 @@ def plchangesposid(context, version):
         return result
 
 
-# TODO: add at least reflection tests before adding NotImplemented version
-# @protocol.commands.add(
-#     'prio', priority=protocol.UINT, position=protocol.RANGE)
+@protocol.commands.add(
+    'prio', priority=protocol.UINT, position=protocol.RANGE)
 def prio(context, priority, position):
     """
     *musicpd.org, current playlist section:*
@@ -339,11 +338,10 @@ def prio(context, priority, position):
         A priority is an integer between 0 and 255. The default priority of new
         songs is 0.
     """
-    pass
+    raise exceptions.MpdNotImplemented  # TODO
 
 
-# TODO: add at least reflection tests before adding NotImplemented version
-# @protocol.commands.add('prioid')
+@protocol.commands.add('prioid')
 def prioid(context, *args):
     """
     *musicpd.org, current playlist section:*
@@ -352,7 +350,7 @@ def prioid(context, *args):
 
         Same as prio, but address the songs with their id.
     """
-    pass
+    raise exceptions.MpdNotImplemented  # TODO
 
 
 @protocol.commands.add('rangeid', tlid=protocol.UINT, songrange=protocol.RANGE)
@@ -367,6 +365,8 @@ def rangeid(context, tlid, songrange):
         Omitting both (i.e. sending just ":") means "remove the range, play
         everything". A song that is currently playing cannot be manipulated
         this way.
+
+    .. versionadded:: MPD protocol 0.19
     """
     raise exceptions.MpdNotImplemented  # TODO
 

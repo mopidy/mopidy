@@ -386,6 +386,17 @@ class PlChangeCommandTest(BasePopulatedTracklistTestCase):
         self.assertInResponse('OK')
 
 
+class PrioCommandTest(protocol.BaseTestCase):
+
+    def test_prio(self):
+        self.send_request('prio 255 0:10')
+        self.assertEqualResponse('ACK [0@0] {prio} Not implemented')
+
+    def test_prioid(self):
+        self.send_request('prioid 255 17 23')
+        self.assertEqualResponse('ACK [0@0] {prioid} Not implemented')
+
+
 class RangeIdCommandTest(protocol.BaseTestCase):
 
     def test_rangeid(self):
