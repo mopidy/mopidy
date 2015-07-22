@@ -4,7 +4,7 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
-v1.0.8 (unreleased)
+v1.0.8 (2015-07-22)
 ===================
 
 Bug fix release.
