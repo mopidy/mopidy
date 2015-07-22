@@ -361,7 +361,8 @@ def rangeid(context, tlid, songrange):
         everything". A song that is currently playing cannot be manipulated
         this way.
 
-    .. versionadded:: MPD protocol 0.19
+    .. versionadded:: 0.19
+        New in MPD protocol version 0.19
     """
     raise exceptions.MpdNotImplemented  # TODO
 
@@ -437,7 +438,8 @@ def addtagid(context, tlid, tag, value):
         tags received from the server, and the data is gone when the song gets
         removed from the queue.
 
-    .. versionadded:: MPD protocol 0.19
+    .. versionadded:: 0.19
+        New in MPD protocol version 0.19
     """
     raise exceptions.MpdNotImplemented  # TODO
 
@@ -453,6 +455,7 @@ def cleartagid(context, tlid, tag):
         tag values will be removed. Editing song tags is only possible for
         remote songs.
 
-    .. versionadded:: MPD protocol 0.19
+    .. versionadded:: 0.19
+        New in MPD protocol version 0.19
     """
     raise exceptions.MpdNotImplemented  # TODO

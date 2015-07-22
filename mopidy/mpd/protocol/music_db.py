@@ -359,7 +359,8 @@ def listfiles(context, uri=None):
         SMB/CIFS server; "nfs://servername/path" obtains a directory listing
         from the NFS server.
 
-    .. versionadded:: MPD protocol 0.19
+    .. versionadded:: 0.19
+        New in MPD protocol version 0.19
     """
     raise exceptions.MpdNotImplemented  # TODO
 

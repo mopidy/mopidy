@@ -214,8 +214,8 @@ class TracklistController(object):
         :type tlid: :class:`int` or :class:`None`
         :rtype: :class:`int` or :class:`None`
 
-        .. versionchanged:: 1.1
-            Added the *tlid* parameter
+        .. versionadded:: 1.1
+            The *tlid* parameter
         """
         tl_track is None or validation.check_instance(tl_track, TlTrack)
         tlid is None or validation.check_integer(tlid, min=0)

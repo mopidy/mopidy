@@ -14,7 +14,8 @@ def mount(context, path, uri):
 
             mount foo nfs://192.168.1.4/export/mp3
 
-    .. versionadded:: MPD protocol 0.19
+    .. versionadded:: 0.19
+        New in MPD protocol version 0.19
     """
     raise exceptions.MpdNotImplemented  # TODO
 
@@ -30,7 +31,8 @@ def unmount(context, path):
 
             unmount foo
 
-    .. versionadded:: MPD protocol 0.19
+    .. versionadded:: 0.19
+        New in MPD protocol version 0.19
     """
     raise exceptions.MpdNotImplemented  # TODO
 
@@ -52,7 +54,8 @@ def listmounts(context):
             storage: nfs://192.168.1.4/export/mp3
             OK
 
-    .. versionadded:: MPD protocol 0.19
+    .. versionadded:: 0.19
+        New in MPD protocol version 0.19
     """
     raise exceptions.MpdNotImplemented  # TODO
 
@@ -73,6 +76,7 @@ def listneighbors(context):
             name: FOO (Samba 4.1.11-Debian)
             OK
 
-    .. versionadded:: MPD protocol 0.19
+    .. versionadded:: 0.19
+        New in MPD protocol version 0.19
     """
     raise exceptions.MpdNotImplemented  # TODO
