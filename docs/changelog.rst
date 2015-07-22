@@ -130,7 +130,7 @@ Internal changes
   :issue:`1115`)
 
 
-v1.0.8 (UNRELEASED)
+v1.0.8 (2015-07-22)
 ===================
 
 Bug fix release.
