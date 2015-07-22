@@ -13,6 +13,12 @@ frontends and the backends. Don't forget that you will be accessing core
 as a Pykka actor. If you are only interested in being notified about changes
 in core see :class:`~mopidy.core.CoreListener`.
 
+.. versionchanged:: 1.1
+    All core API calls are now type checked.
+
+.. versionchanged:: 1.1
+    All backend return values are now type checked.
+
 .. autoclass:: mopidy.core.Core
 
   .. attribute:: tracklist

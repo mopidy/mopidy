@@ -5,7 +5,7 @@
 These immutable data models are used for all data transfer within the Mopidy
 backends and between the backends and the MPD frontend. All fields are optional
 and immutable. In other words, they can only be set through the class
-constructor during instance creation.
+constructor during instance creation. Additionally fields are type checked.
 
 If you want to modify a model, use the
 :meth:`~mopidy.models.ImmutableObject.replace` method. It accepts keyword

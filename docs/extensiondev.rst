@@ -437,6 +437,9 @@ When writing an extension, you should only use APIs documented at
 :ref:`api-ref`. Other parts of Mopidy, like :mod:`mopidy.internal`, may change
 at any time and are not something extensions should use.
 
+Mopidy performs type checking to help catch extension bugs. This applies to
+both to frontend calls into core and return values from backends. Additionally
+model fields always get validated to further guard against bad data.
 
 Logging in extensions
 =====================
