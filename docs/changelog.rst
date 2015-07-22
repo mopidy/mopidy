@@ -77,6 +77,9 @@ MPD frontend
 
     - ``listfiles``
 
+- Track data now include the ``Last-Modified`` field if set on the track model.
+  (Fixes: :issue:`1218`, PR: :issue:`1219`)
+
 File backend
 ------------
 
