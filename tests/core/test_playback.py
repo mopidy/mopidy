@@ -536,6 +536,12 @@ class CorePlaybackTest(unittest.TestCase):
         self.assertFalse(self.playback1.seek.called)
         self.playback2.seek.assert_called_once_with(10000)
 
+    def test_seek_normalizes_negative_positions_to_zero(self):
+        self.core.playback.play(self.tl_tracks[0])
+        self.core.playback.seek(-100)
+
+        self.playback1.seek.assert_called_once_with(0)
+
     def test_seek_fails_for_unplayable_track(self):
         self.set_current_tl_track(self.unplayable_tl_track)
         self.core.playback.state = core.PlaybackState.PLAYING

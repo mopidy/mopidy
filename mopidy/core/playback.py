@@ -399,7 +399,12 @@ class PlaybackController(object):
         :type time_position: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
-        validation.check_integer(time_position, min=0)
+        validation.check_integer(time_position)
+
+        if time_position < 0:
+            logger.debug(
+                'Client seeked to negative position. Seeking to zero.')
+            time_position = 0
 
         if not self.core.tracklist.tracks:
             return False
