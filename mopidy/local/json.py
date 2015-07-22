@@ -174,7 +174,7 @@ class JsonLibrary(local.Library):
         search_result = search.search(self._tracks.values(), query, limit=None)
         for track in search_result.tracks:
             distinct_result.update(distinct(track))
-        return distinct_result
+        return distinct_result - {None}
 
     def search(self, query=None, limit=100, offset=0, uris=None, exact=False):
         tracks = self._tracks.values()

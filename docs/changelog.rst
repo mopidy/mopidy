@@ -80,6 +80,13 @@ MPD frontend
 - Track data now include the ``Last-Modified`` field if set on the track model.
   (Fixes: :issue:`1218`, PR: :issue:`1219`)
 
+Local backend
+-------------
+
+- Filter out :class:`None` from
+  :meth:`~mopidy.backend.LibraryProvider.get_distinct` results. All returned
+  results should be strings. (Fixes: :issue:`1202`)
+
 File backend
 ------------
 
