@@ -48,6 +48,22 @@ To install, run::
     pip install Mopidy-Local-Images
 
 
+Mopidy-Material-Webclient
+=========================
+
+https://github.com/matgallacher/mopidy-material-webclient
+
+A Mopidy web client with an Android Material design feel.
+
+.. image:: /ext/material_webclient.png
+   :width: 960
+   :height: 520
+
+To install, run::
+
+    pip install Mopidy-Material-Webclient
+
+
 Mopidy-Mobile
 =============
 
@@ -141,6 +157,21 @@ https://github.com/woutervanwijk/mopidy-websettings
 
 A web extension for changing settings. Used by the Pi MusicBox distribution
 for Raspberry Pi, but also usable for other projects.
+
+
+Mopster
+=======
+
+https://github.com/cowbell/mopster
+
+Simple web client hosted online written in Ember.js and styled using basic
+Bootstrap by Wojciech Wnętrzak.
+
+.. image:: /ext/mopster.png
+    :width: 1275
+    :height: 628
+
+To use, just visit http://mopster.cowbell-labs.com/.
 
 
 Other web clients

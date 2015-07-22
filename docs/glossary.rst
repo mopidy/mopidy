@@ -6,7 +6,7 @@ Glossary
 
     backend
         A part of Mopidy providing music library, playlist storage and/or
-        playback capability to the :term:`core`. Mopidy have a backend for each
+        playback capability to the :term:`core`. Mopidy has a backend for each
         music store or music service it supports. See :ref:`backend-api` for
         details.
 

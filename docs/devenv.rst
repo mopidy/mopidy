@@ -325,13 +325,6 @@ For each successful build, Travis submits code coverage data to `coveralls.io
 <https://coveralls.io/r/mopidy/mopidy>`_. If you're out of work, coveralls might
 help you find areas in the code which could need better test coverage.
 
-In addition, we run a Jenkins CI server at https://ci.mopidy.com/ that runs all
-tests on multiple platforms (Ubuntu, OS X, x86, arm) for every commit we push
-to the ``develop`` branch in the main Mopidy repo on GitHub. Thus, new code
-isn't tested by Jenkins before it is merged into the ``develop`` branch, which
-is a bit late, but good enough to get broad testing before new code is
-released.
-
 
 .. _code-linting:
 

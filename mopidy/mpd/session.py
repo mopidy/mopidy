@@ -2,8 +2,8 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
+from mopidy.internal import formatting, network
 from mopidy.mpd import dispatcher, protocol
-from mopidy.utils import formatting, network
 
 logger = logging.getLogger(__name__)
 

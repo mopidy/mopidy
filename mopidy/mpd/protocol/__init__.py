@@ -22,8 +22,8 @@ ENCODING = 'UTF-8'
 #: The MPD protocol uses ``\n`` as line terminator.
 LINE_TERMINATOR = '\n'
 
-#: The MPD protocol version is 0.17.0.
-VERSION = '0.17.0'
+#: The MPD protocol version is 0.19.0.
+VERSION = '0.19.0'
 
 
 def load_protocol_modules():
@@ -33,7 +33,8 @@ def load_protocol_modules():
     """
     from . import (  # noqa
         audio_output, channels, command_list, connection, current_playlist,
-        music_db, playback, reflection, status, stickers, stored_playlists)
+        mount, music_db, playback, reflection, status, stickers,
+        stored_playlists)
 
 
 def INT(value):  # noqa: N802

@@ -4,15 +4,118 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
-
 v1.1.0 (UNRELEASED)
 ===================
 
 Core API
 --------
 
-- Calling :meth:`mopidy.core.library.LibraryController.search`` with ``kwargs``
-  as the query is no longer supported (PR: :issue:`1090`)
+- Calling the following methods with ``kwargs`` is being deprecated.
+  (PR: :issue:`1090`)
+
+  - :meth:`mopidy.core.library.LibraryController.search`
+  - :meth:`mopidy.core.library.PlaylistsController.filter`
+  - :meth:`mopidy.core.library.TracklistController.filter`
+  - :meth:`mopidy.core.library.TracklistController.remove`
+
+- Updated core controllers to handle backend exceptions in all calls that rely
+  on multiple backends. (Issue: :issue:`667`)
+
+- Update core methods to do strict input checking. (Fixes: :issue:`700`)
+
+- Add ``tlid`` alternatives to methods that take ``tl_track`` and also add
+  ``get_{eot,next,previous}_tlid`` methods as light weight alternatives to the
+  ``tl_track`` versions of the calls. (Fixes: :issue:`1131` PR: :issue:`1136`,
+  :issue:`1140`)
+
+- Add :meth:`mopidy.core.playback.PlaybackController.get_current_tlid`.
+  (Part of: :issue:`1137`)
+
+- Update core to handle backend crashes and bad data. (Fixes: :issue:`1161`)
+
+- Add `max_tracklist_length` config and limitation. (Fixes: :issue:`997`
+  PR: :issue:`1225`)
+
+Models
+------
+
+- Added type checks and other sanity checks to model construction and
+  serialization. (Fixes: :issue:`865`)
+
+- Memory usage for models has been greatly improved. We now have a lower
+  overhead per instance by using slots, intern identifiers and automatically
+  reuse instances. For the test data set this was developed against, a library
+  of ~14000 tracks, went from needing ~75MB to ~17MB. (Fixes: :issue:`348`)
+
+MPD frontend
+------------
+
+- The MPD command ``count`` now ignores tracks with no length, which would
+  previously cause a :exc:`TypeError`. (PR: :issue:`1192`)
+
+- Concatenate multiple artists, composers and performers using the "A;B" format
+  instead of "A, B". This is a part of updating our protocol implementation to
+  match MPD 0.19. (PR: :issue:`1213`)
+
+- Add "not implemented" skeletons of new commands in the MPD protocol version
+  0.19:
+
+  - Current playlist:
+
+    - ``rangeid``
+    - ``addtagid``
+    - ``cleartagid``
+
+  - Mounts and neighbors:
+
+    - ``mount``
+    - ``unmount``
+    - ``listmounts``
+    - ``listneighbors``
+
+  - Music DB:
+
+    - ``listfiles``
+
+- Track data now include the ``Last-Modified`` field if set on the track model.
+  (Fixes: :issue:`1218`, PR: :issue:`1219`)
+
+Local backend
+-------------
+
+- Filter out :class:`None` from
+  :meth:`~mopidy.backend.LibraryProvider.get_distinct` results. All returned
+  results should be strings. (Fixes: :issue:`1202`)
+
+File backend
+------------
+
+The :ref:`Mopidy-File <ext-file>` backend is a new bundled backend. It is
+similar to Mopidy-Local since it works with local files, but it differs in a
+few key ways:
+
+- Mopidy-File lets you browse your media files by their file hierarchy.
+
+- It supports multiple media directories, all exposed under the "Files"
+  directory when you browse your library with e.g. an MPD client.
+
+- There is no index of the media files, like the JSON or SQLite files used by
+  Mopidy-Local. Thus no need to scan the music collection before starting
+  Mopidy. Everything is read from the file system when needed and changes to
+  the file system is thus immediately visible in Mopidy clients.
+
+- Because there is no index, there is no support for search.
+
+Our long term plan is to keep this very simple file backend in Mopidy, as it
+has a well defined and limited scope, while splitting the more feature rich
+Mopidy-Local extension out to an independent project. (Fixes: :issue:`1004`,
+PR: :issue:`1207`)
+
+Utils
+-----
+
+- Add :func:`mopidy.httpclient.format_proxy` and
+  :func:`mopidy.httpclient.format_user_agent`. (Part of: :issue:`1156`)
 
 Internal changes
 ----------------
@@ -20,18 +123,129 @@ Internal changes
 - Tests have been cleaned up to stop using deprecated APIs where feasible.
   (Partial fix: :issue:`1083`, PR: :issue:`1090`)
 
+- It is now possible to import :mod:`mopidy.backends` without having GObject or
+  GStreamer installed. In other words, a lot of backend extensions should now
+  be able to run tests in a virtualenv with global site-packages disabled. This
+  removes a lot of potential error sources. (Fixes: :issue:`1068`, PR:
+  :issue:`1115`)
 
-v1.0.1 (UNRELEASED)
+
+v1.0.8 (2015-07-22)
 ===================
+
+Bug fix release.
+
+- Fix reversal of ``Title`` and ``Name`` in MPD protocol (Fixes: :issue:`1212`
+  PR: :issue:`1214`)
+
+- Fix crash if an M3U file in the :confval:`m3u/playlist_dir` directory has a
+  file name not decodable with the current file system encoding. (Fixes:
+  :issue:`1209`)
+
+
+v1.0.7 (2015-06-26)
+===================
+
+Bug fix release.
+
+- Fix error in the MPD command ``list title ...``. The error was introduced in
+  v1.0.6.
+
+
+v1.0.6 (2015-06-25)
+===================
+
+Bug fix release.
+
+- Core/MPD/Local: Add support for ``title`` in
+  :meth:`mopidy.core.LibraryController.get_distinct`. (Fixes: :issue:`1181`,
+  PR: :issue:`1183`)
+
+- Core: Make sure track changes make it to audio while paused.
+  (Fixes: :issue:`1177`, PR: :issue:`1185`)
+
+
+v1.0.5 (2015-05-19)
+===================
+
+Bug fix release.
+
+- Core: Add workaround for playlist providers that do not support
+  creating playlists.  (Fixes: :issue:`1162`, PR :issue:`1165`)
+
+- M3U: Fix encoding error when saving playlists with non-ASCII track
+  titles. (Fixes: :issue:`1175`, PR :issue:`1176`)
+
+
+v1.0.4 (2015-04-30)
+===================
+
+Bug fix release.
+
+- Audio: Since all previous attempts at tweaking the queuing for :issue:`1097`
+  seems to break things in subtle ways for different users. We are giving up
+  on tweaking the defaults and just going to live with a bit more lag on
+  software volume changes. (Fixes: :issue:`1147`)
+
+
+v1.0.3 (2015-04-28)
+===================
+
+Bug fix release.
+
+- HTTP: Another follow-up to the Tornado <3.0 fixing. Since the tests aren't
+  run for Tornado 2.3 we didn't catch that our previous fix wasn't sufficient.
+  (Fixes: :issue:`1153`, PR: :issue:`1154`)
+
+- Audio: Follow-up fix for :issue:`1097` still exhibits issues for certain
+  setups. We are giving this get an other go by setting the buffer size to
+  maximum 100ms instead of a fixed number of buffers. (Addresses: :issue:`1147`,
+  PR: :issue:`1154`)
+
+
+v1.0.2 (2015-04-27)
+===================
+
+Bug fix release.
+
+- HTTP: Make event broadcasts work with Tornado 2.3 again. The threading fix
+  in v1.0.1 broke this.
+
+- Audio: Fix for :issue:`1097` tuned down the buffer size in the queue. Turns
+  out this can cause distortions in certain cases. Give this an other go with
+  a more generous buffer size. (Addresses: :issue:`1147`, PR: :issue:`1152`)
+
+- Audio: Make sure mute events get emitted by software mixer.
+  (Fixes: :issue:`1146`, PR: :issue:`1152`)
+
+
+v1.0.1 (2015-04-23)
+===================
+
+Bug fix release.
+
+- Core: Make the new history controller available for use. (Fixes: :js:`6`)
 
 - Audio: Software volume control has been reworked to greatly reduce the delay
   between changing the volume and the change taking effect. (Fixes:
-  :issue:`1097`)
+  :issue:`1097`, PR: :issue:`1101`)
 
 - Audio: As a side effect of the previous bug fix, software volume is no longer
   tied to the PulseAudio application volume when using ``pulsesink``. This
   behavior was confusing for many users and doesn't work well with the plans
   for multiple outputs.
+
+- Audio: Update scanner to decode all media it finds. This should fix cases
+  where the scanner hangs on non-audio files like video. The scanner will now
+  also let us know if we found any decodeable audio. (Fixes: :issue:`726`, PR:
+  issue:`1124`)
+
+- HTTP: Fix threading bug that would cause duplicate delivery of WS messages.
+  (PR: :issue:`1127`)
+
+- MPD: Fix case where a playlist that is present in both browse and as a listed
+  playlist breaks the MPD frontend protocol output. (Fixes :issue:`1120`, PR:
+  :issue:`1142`)
 
 
 v1.0.0 (2015-03-25)

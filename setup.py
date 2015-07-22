@@ -36,6 +36,7 @@ setup(
         'mopidy.ext': [
             'http = mopidy.http:Extension',
             'local = mopidy.local:Extension',
+            'file = mopidy.file:Extension',
             'm3u = mopidy.m3u:Extension',
             'mpd = mopidy.mpd:Extension',
             'softwaremixer = mopidy.softwaremixer:Extension',

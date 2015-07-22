@@ -58,6 +58,10 @@ class Backend(object):
     def has_playlists(self):
         return self.playlists is not None
 
+    def ping(self):
+        """Called to check if the actor is still alive."""
+        return True
+
 
 class LibraryProvider(object):
 
@@ -99,6 +103,9 @@ class LibraryProvider(object):
         *MAY be implemented by subclass.*
 
         Default implementation will simply return an empty set.
+
+        Note that backends should always return an empty set for unexpected
+        field types.
         """
         return set()
 
@@ -400,7 +407,7 @@ class BackendListener(listener.Listener):
     Marker interface for recipients of events sent by the backend actors.
 
     Any Pykka actor that mixes in this class will receive calls to the methods
-    defined here when the corresponding events happen in the core actor. This
+    defined here when the corresponding events happen in a backend actor. This
     interface is used both for looking up what actors to notify of the events,
     and for providing default implementations for those listeners that are not
     interested in all events.

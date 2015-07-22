@@ -8,7 +8,7 @@ import pygst
 pygst.require('0.10')
 import gst  # noqa
 
-from mopidy import compat
+from mopidy import compat, httpclient
 from mopidy.models import Album, Artist, Track
 
 logger = logging.getLogger(__name__)
@@ -142,11 +142,7 @@ def setup_proxy(element, config):
     if not hasattr(element.props, 'proxy') or not config.get('hostname'):
         return
 
-    proxy = "%s://%s:%d" % (config.get('scheme', 'http'),
-                            config.get('hostname'),
-                            config.get('port', 80))
-
-    element.set_property('proxy', proxy)
+    element.set_property('proxy', httpclient.format_proxy(config, auth=False))
     element.set_property('proxy-id', config.get('username'))
     element.set_property('proxy-pw', config.get('password'))
 

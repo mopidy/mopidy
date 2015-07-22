@@ -51,10 +51,11 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             if os.path.exists(path):
                 os.remove(path)
             else:
-                logger.warn('Trying to delete missing playlist file %s', path)
+                logger.warning(
+                    'Trying to delete missing playlist file %s', path)
             del self._playlists[uri]
         else:
-            logger.warn('Trying to delete unknown playlist %s', uri)
+            logger.warning('Trying to delete unknown playlist %s', uri)
 
     def lookup(self, uri):
         return self._playlists.get(uri)
@@ -66,7 +67,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         for path in glob.glob(os.path.join(self._playlists_dir, b'*.m3u')):
             relpath = os.path.basename(path)
             uri = translator.path_to_playlist_uri(relpath)
-            name = os.path.splitext(relpath)[0].decode(encoding)
+            name = os.path.splitext(relpath)[0].decode(encoding, 'replace')
             tracks = translator.parse_m3u(path)
             playlists[uri] = Playlist(uri=uri, name=name, tracks=tracks)
 
@@ -75,6 +76,8 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         logger.info(
             'Loaded %d M3U playlists from %s',
             len(playlists), self._playlists_dir)
+
+        # TODO Trigger playlists_loaded event?
 
     def save(self, playlist):
         assert playlist.uri, 'Cannot save playlist without URI'
@@ -87,11 +90,6 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             self.delete(original_uri)
         self._playlists[playlist.uri] = playlist
         return playlist
-
-    def _write_m3u_extinf(self, file_handle, track):
-        title = track.name.encode('latin-1', 'replace')
-        runtime = track.length // 1000 if track.length else -1
-        file_handle.write('#EXTINF:' + str(runtime) + ',' + title + '\n')
 
     def _sanitize_m3u_name(self, name, encoding=sys.getfilesystemencoding()):
         name = self._invalid_filename_chars.sub('|', name.strip())
@@ -113,15 +111,6 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             name, _ = os.path.splitext(os.path.basename(path).decode(encoding))
         else:
             raise ValueError('M3U playlist needs name or URI')
-        extended = any(track.name for track in playlist.tracks)
-
-        with open(path, 'w') as file_handle:
-            if extended:
-                file_handle.write('#EXTM3U\n')
-            for track in playlist.tracks:
-                if extended and track.name:
-                    self._write_m3u_extinf(file_handle, track)
-                file_handle.write(track.uri + '\n')
-
+        translator.save_m3u(path, playlist.tracks, 'latin1')
         # assert playlist name matches file name/uri
-        return playlist.copy(uri=uri, name=name)
+        return playlist.replace(uri=uri, name=name)

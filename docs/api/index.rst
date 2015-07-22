@@ -4,26 +4,57 @@
 API reference
 *************
 
-.. note:: What is public?
+.. note::
 
     Only APIs documented here are public and open for use by Mopidy
     extensions.
 
 
-.. toctree::
-    :glob:
+Concepts
+========
 
-    concepts
+.. toctree::
+
+    architecture
     models
-    backends
+
+
+Basics
+======
+
+.. toctree::
+
     core
-    audio
-    mixer
-    frontends
-    commands
+    frontend
+    backend
     ext
-    config
-    zeroconf
+
+
+Web/JavaScript
+==============
+
+.. toctree::
+
     http-server
     http
     js
+
+
+Audio
+=====
+
+.. toctree::
+
+    audio
+    mixer
+
+
+Utilities
+=========
+
+.. toctree::
+
+    commands
+    config
+    httpclient
+    zeroconf

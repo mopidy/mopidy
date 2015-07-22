@@ -48,7 +48,7 @@ class StreamLibraryProvider(backend.LibraryProvider):
 
         try:
             result = self._scanner.scan(uri)
-            track = utils.convert_tags_to_track(result.tags).copy(
+            track = utils.convert_tags_to_track(result.tags).replace(
                 uri=uri, length=result.duration)
         except exceptions.ScannerError as e:
             logger.warning('Problem looking up %s: %s', uri, e)

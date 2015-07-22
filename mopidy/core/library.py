@@ -1,16 +1,30 @@
 from __future__ import absolute_import, unicode_literals
 
 import collections
+import contextlib
 import logging
 import operator
 import urlparse
 
-import pykka
-
-from mopidy.utils import deprecation
+from mopidy import compat, exceptions, models
+from mopidy.internal import deprecation, validation
 
 
 logger = logging.getLogger(__name__)
+
+
+@contextlib.contextmanager
+def _backend_error_handling(backend, reraise=None):
+    try:
+        yield
+    except exceptions.ValidationError as e:
+        logger.error('%s backend returned bad data: %s',
+                     backend.actor_ref.actor_class.__name__, e)
+    except Exception as e:
+        if reraise and isinstance(e, reraise):
+            raise
+        logger.exception('%s backend caused an exception.',
+                         backend.actor_ref.actor_class.__name__)
 
 
 class LibraryController(object):
@@ -41,8 +55,8 @@ class LibraryController(object):
         Browse directories and tracks at the given ``uri``.
 
         ``uri`` is a string which represents some directory belonging to a
-        backend. To get the intial root directories for backends pass None as
-        the URI.
+        backend. To get the intial root directories for backends pass
+        :class:`None` as the URI.
 
         Returns a list of :class:`mopidy.models.Ref` objects for the
         directories and tracks at the given ``uri``.
@@ -70,15 +84,36 @@ class LibraryController(object):
         .. versionadded:: 0.18
         """
         if uri is None:
-            backends = self.backends.with_library_browse.values()
-            unique_dirs = {b.library.root_directory.get() for b in backends}
-            return sorted(unique_dirs, key=operator.attrgetter('name'))
+            return self._roots()
+        elif not uri.strip():
+            return []
+        validation.check_uri(uri)
+        return self._browse(uri)
 
+    def _roots(self):
+        directories = set()
+        backends = self.backends.with_library_browse.values()
+        futures = {b: b.library.root_directory for b in backends}
+        for backend, future in futures.items():
+            with _backend_error_handling(backend):
+                root = future.get()
+                validation.check_instance(root, models.Ref)
+                directories.add(root)
+        return sorted(directories, key=operator.attrgetter('name'))
+
+    def _browse(self, uri):
         scheme = urlparse.urlparse(uri).scheme
         backend = self.backends.with_library_browse.get(scheme)
+
         if not backend:
             return []
-        return backend.library.browse(uri).get()
+
+        with _backend_error_handling(backend):
+            result = backend.library.browse(uri).get()
+            validation.check_instances(result, models.Ref)
+            return result
+
+        return []
 
     def get_distinct(self, field, query=None):
         """
@@ -88,19 +123,26 @@ class LibraryController(object):
         protocol supports in a more sane fashion. Other frontends are not
         recommended to use this method.
 
-        :param string field: One of ``artist``, ``albumartist``, ``album``,
-            ``composer``, ``performer``, ``date``or ``genre``.
+        :param string field: One of ``track``, ``artist``, ``albumartist``,
+            ``album``, ``composer``, ``performer``, ``date`` or ``genre``.
         :param dict query: Query to use for limiting results, see
             :meth:`search` for details about the query format.
         :rtype: set of values corresponding to the requested field type.
 
         .. versionadded:: 1.0
         """
-        futures = [b.library.get_distinct(field, query)
-                   for b in self.backends.with_library.values()]
+        validation.check_choice(field, validation.DISTINCT_FIELDS)
+        query is None or validation.check_query(query)  # TODO: normalize?
+
         result = set()
-        for r in pykka.get_all(futures):
-            result.update(r)
+        futures = {b: b.library.get_distinct(field, query)
+                   for b in self.backends.with_library.values()}
+        for backend, future in futures.items():
+            with _backend_error_handling(backend):
+                values = future.get()
+                if values is not None:
+                    validation.check_instances(values, compat.text_type)
+                    result.update(values)
         return result
 
     def get_images(self, uris):
@@ -113,20 +155,31 @@ class LibraryController(object):
         Unknown URIs or URIs the corresponding backend couldn't find anything
         for will simply return an empty list for that URI.
 
-        :param list uris: list of URIs to find images for
+        :param uris: list of URIs to find images for
+        :type uris: list of string
         :rtype: {uri: tuple of :class:`mopidy.models.Image`}
 
         .. versionadded:: 1.0
         """
-        futures = [
-            backend.library.get_images(backend_uris)
+        validation.check_uris(uris)
+
+        futures = {
+            backend: backend.library.get_images(backend_uris)
             for (backend, backend_uris)
-            in self._get_backends_to_uris(uris).items() if backend_uris]
+            in self._get_backends_to_uris(uris).items() if backend_uris}
 
         results = {uri: tuple() for uri in uris}
-        for r in pykka.get_all(futures):
-            for uri, images in r.items():
-                results[uri] += tuple(images)
+        for backend, future in futures.items():
+            with _backend_error_handling(backend):
+                if future.get() is None:
+                    continue
+                validation.check_instance(future.get(), collections.Mapping)
+                for uri, images in future.get().items():
+                    if uri not in uris:
+                        raise exceptions.ValidationError(
+                            'Got unknown image URI: %s' % uri)
+                    validation.check_instances(images, models.Image)
+                    results[uri] += tuple(images)
         return results
 
     def find_exact(self, query=None, uris=None, **kwargs):
@@ -140,7 +193,7 @@ class LibraryController(object):
 
     def lookup(self, uri=None, uris=None):
         """
-        Lookup the given URI.
+        Lookup the given URIs.
 
         If the URI expands to multiple tracks, the returned list will contain
         them all.
@@ -150,7 +203,7 @@ class LibraryController(object):
         :param uris: track URIs
         :type uris: list of string or :class:`None`
         :rtype: list of :class:`mopidy.models.Track` if uri was set or
-            a {uri: list of :class:`mopidy.models.Track`} if uris was set.
+            {uri: list of :class:`mopidy.models.Track`} if uris was set.
 
         .. versionadded:: 1.0
             The ``uris`` argument.
@@ -158,11 +211,11 @@ class LibraryController(object):
         .. deprecated:: 1.0
             The ``uri`` argument. Use ``uris`` instead.
         """
-        none_set = uri is None and uris is None
-        both_set = uri is not None and uris is not None
+        if sum(o is not None for o in [uri, uris]) != 1:
+            raise ValueError('Exactly one of "uri" or "uris" must be set')
 
-        if none_set or both_set:
-            raise ValueError("One of 'uri' or 'uris' must be set")
+        uris is None or validation.check_uris(uris)
+        uri is None or validation.check_uri(uri)
 
         if uri:
             deprecation.warn('core.library.lookup:uri_arg')
@@ -171,23 +224,23 @@ class LibraryController(object):
             uris = [uri]
 
         futures = {}
-        result = {}
-        backends = self._get_backends_to_uris(uris)
+        results = {u: [] for u in uris}
 
         # TODO: lookup(uris) to backend APIs
-        for backend, backend_uris in backends.items():
-            for u in backend_uris or []:
-                futures[u] = backend.library.lookup(u)
+        for backend, backend_uris in self._get_backends_to_uris(uris).items():
+            for u in backend_uris:
+                futures[(backend, u)] = backend.library.lookup(u)
 
-        for u in uris:
-            if u in futures:
-                result[u] = futures[u].get()
-            else:
-                result[u] = []
+        for (backend, u), future in futures.items():
+            with _backend_error_handling(backend):
+                result = future.get()
+                if result is not None:
+                    validation.check_instances(result, models.Track)
+                    results[u] = result
 
         if uri:
-            return result[uri]
-        return result
+            return results[uri]
+        return results
 
     def refresh(self, uri=None):
         """
@@ -196,14 +249,22 @@ class LibraryController(object):
         :param uri: directory or track URI
         :type uri: string
         """
-        if uri is not None:
-            backend = self._get_backend(uri)
-            if backend:
-                backend.library.refresh(uri).get()
-        else:
-            futures = [b.library.refresh(uri)
-                       for b in self.backends.with_library.values()]
-            pykka.get_all(futures)
+        uri is None or validation.check_uri(uri)
+
+        futures = {}
+        backends = {}
+        uri_scheme = urlparse.urlparse(uri).scheme if uri else None
+
+        for backend_scheme, backend in self.backends.with_playlists.items():
+            backends.setdefault(backend, set()).add(backend_scheme)
+
+        for backend, backend_schemes in backends.items():
+            if uri_scheme is None or uri_scheme in backend_schemes:
+                futures[backend] = backend.library.refresh(uri)
+
+        for backend, future in futures.items():
+            with _backend_error_handling(backend):
+                future.get()
 
     def search(self, query=None, uris=None, exact=False, **kwargs):
         """
@@ -217,26 +278,27 @@ class LibraryController(object):
 
             # Returns results matching 'a' in any backend
             search({'any': ['a']})
-            search(any=['a'])
 
             # Returns results matching artist 'xyz' in any backend
             search({'artist': ['xyz']})
-            search(artist=['xyz'])
 
             # Returns results matching 'a' and 'b' and artist 'xyz' in any
             # backend
             search({'any': ['a', 'b'], 'artist': ['xyz']})
-            search(any=['a', 'b'], artist=['xyz'])
 
             # Returns results matching 'a' if within the given URI roots
             # "file:///media/music" and "spotify:"
             search({'any': ['a']}, uris=['file:///media/music', 'spotify:'])
-            search(any=['a'], uris=['file:///media/music', 'spotify:'])
+
+            # Returns results matching artist 'xyz' and 'abc' in any backend
+            search({'artist': ['xyz', 'abc']})
 
         :param query: one or more queries to search for
         :type query: dict
         :param uris: zero or more URI roots to limit the search to
-        :type uris: list of strings or :class:`None`
+        :type uris: list of string or :class:`None`
+        :param exact: if the search should use exact matching
+        :type exact: :class:`bool`
         :rtype: list of :class:`mopidy.models.SearchResult`
 
         .. versionadded:: 1.0
@@ -253,6 +315,10 @@ class LibraryController(object):
         """
         query = _normalize_query(query or kwargs)
 
+        uris is None or validation.check_uris(uris)
+        query is None or validation.check_query(query)
+        validation.check_boolean(exact)
+
         if kwargs:
             deprecation.warn('core.library.search:kwargs_query')
 
@@ -264,20 +330,31 @@ class LibraryController(object):
             futures[backend] = backend.library.search(
                 query=query, uris=backend_uris, exact=exact)
 
+        # Some of our tests check for LookupError to catch bad queries. This is
+        # silly and should be replaced with query validation before passing it
+        # to the backends.
+        reraise = (TypeError, LookupError)
+
         results = []
         for backend, future in futures.items():
             try:
-                results.append(future.get())
+                with _backend_error_handling(backend, reraise=reraise):
+                    result = future.get()
+                    if result is not None:
+                        validation.check_instance(result, models.SearchResult)
+                        results.append(result)
             except TypeError:
                 backend_name = backend.actor_ref.actor_class.__name__
                 logger.warning(
                     '%s does not implement library.search() with "exact" '
                     'support. Please upgrade it.', backend_name)
-        return [r for r in results if r]
+
+        return results
 
 
 def _normalize_query(query):
     broken_client = False
+    # TODO: this breaks if query is not a dictionary like object...
     for (field, values) in query.items():
         if isinstance(values, basestring):
             broken_client = True

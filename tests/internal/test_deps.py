@@ -6,13 +6,13 @@ import unittest
 
 import mock
 
+import pkg_resources
+
 import pygst
 pygst.require('0.10')
 import gst  # noqa
 
-import pkg_resources
-
-from mopidy.utils import deps
+from mopidy.internal import deps
 
 
 class DepsTest(unittest.TestCase):

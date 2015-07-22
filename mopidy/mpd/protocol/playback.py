@@ -1,8 +1,8 @@
 from __future__ import absolute_import, unicode_literals
 
 from mopidy.core import PlaybackState
+from mopidy.internal import deprecation
 from mopidy.mpd import exceptions, protocol
-from mopidy.utils import deprecation
 
 
 @protocol.commands.add('consume', state=protocol.BOOL)
@@ -16,7 +16,7 @@ def consume(context, state):
         1. When consume is activated, each song played is removed from
         playlist.
     """
-    context.core.tracklist.consume = state
+    context.core.tracklist.set_consume(state)
 
 
 @protocol.commands.add('crossfade', seconds=protocol.UINT)
@@ -135,9 +135,10 @@ def pause(context, state=None):
     if state is None:
         deprecation.warn('mpd.protocol.playback.pause:state_arg')
 
-        if (context.core.playback.state.get() == PlaybackState.PLAYING):
+        playback_state = context.core.playback.get_state().get()
+        if (playback_state == PlaybackState.PLAYING):
             context.core.playback.pause()
-        elif (context.core.playback.state.get() == PlaybackState.PAUSED):
+        elif (playback_state == PlaybackState.PAUSED):
             context.core.playback.resume()
     elif state:
         context.core.playback.pause()
@@ -145,8 +146,8 @@ def pause(context, state=None):
         context.core.playback.resume()
 
 
-@protocol.commands.add('play', tlid=protocol.INT)
-def play(context, tlid=None):
+@protocol.commands.add('play', songpos=protocol.INT)
+def play(context, songpos=None):
     """
     *musicpd.org, playback section:*
 
@@ -170,31 +171,34 @@ def play(context, tlid=None):
 
     - issues ``play 6`` without quotes around the argument.
     """
-    if tlid is None:
+    if songpos is None:
         return context.core.playback.play().get()
-    elif tlid == -1:
+    elif songpos == -1:
         return _play_minus_one(context)
 
     try:
-        tl_track = context.core.tracklist.slice(tlid, tlid + 1).get()[0]
+        tl_track = context.core.tracklist.slice(songpos, songpos + 1).get()[0]
         return context.core.playback.play(tl_track).get()
     except IndexError:
         raise exceptions.MpdArgError('Bad song index')
 
 
 def _play_minus_one(context):
-    if (context.core.playback.state.get() == PlaybackState.PLAYING):
+    playback_state = context.core.playback.get_state().get()
+    if playback_state == PlaybackState.PLAYING:
         return  # Nothing to do
-    elif (context.core.playback.state.get() == PlaybackState.PAUSED):
+    elif playback_state == PlaybackState.PAUSED:
         return context.core.playback.resume().get()
-    elif context.core.playback.current_tl_track.get() is not None:
-        tl_track = context.core.playback.current_tl_track.get()
-        return context.core.playback.play(tl_track).get()
-    elif context.core.tracklist.slice(0, 1).get():
-        tl_track = context.core.tracklist.slice(0, 1).get()[0]
-        return context.core.playback.play(tl_track).get()
-    else:
-        return  # Fail silently
+
+    current_tl_track = context.core.playback.get_current_tl_track().get()
+    if current_tl_track is not None:
+        return context.core.playback.play(current_tl_track).get()
+
+    tl_tracks = context.core.tracklist.slice(0, 1).get()
+    if tl_tracks:
+        return context.core.playback.play(tl_tracks[0]).get()
+
+    return  # Fail silently
 
 
 @protocol.commands.add('playid', tlid=protocol.INT)
@@ -217,7 +221,7 @@ def playid(context, tlid):
     """
     if tlid == -1:
         return _play_minus_one(context)
-    tl_tracks = context.core.tracklist.filter(tlid=[tlid]).get()
+    tl_tracks = context.core.tracklist.filter({'tlid': [tlid]}).get()
     if not tl_tracks:
         raise exceptions.MpdNoExistError('No such song')
     return context.core.playback.play(tl_tracks[0]).get()
@@ -279,7 +283,7 @@ def random(context, state):
 
         Sets random state to ``STATE``, ``STATE`` should be 0 or 1.
     """
-    context.core.tracklist.random = state
+    context.core.tracklist.set_random(state)
 
 
 @protocol.commands.add('repeat', state=protocol.BOOL)
@@ -291,7 +295,7 @@ def repeat(context, state):
 
         Sets repeat state to ``STATE``, ``STATE`` should be 0 or 1.
     """
-    context.core.tracklist.repeat = state
+    context.core.tracklist.set_repeat(state)
 
 
 @protocol.commands.add('replay_gain_mode')
@@ -324,8 +328,8 @@ def replay_gain_status(context):
     return 'off'  # TODO
 
 
-@protocol.commands.add('seek', tlid=protocol.UINT, seconds=protocol.UINT)
-def seek(context, tlid, seconds):
+@protocol.commands.add('seek', songpos=protocol.UINT, seconds=protocol.UINT)
+def seek(context, songpos, seconds):
     """
     *musicpd.org, playback section:*
 
@@ -338,9 +342,9 @@ def seek(context, tlid, seconds):
 
     - issues ``seek 1 120`` without quotes around the arguments.
     """
-    tl_track = context.core.playback.current_tl_track.get()
-    if context.core.tracklist.index(tl_track).get() != tlid:
-        play(context, tlid)
+    tl_track = context.core.playback.get_current_tl_track().get()
+    if context.core.tracklist.index(tl_track).get() != songpos:
+        play(context, songpos)
     context.core.playback.seek(seconds * 1000).get()
 
 
@@ -353,7 +357,7 @@ def seekid(context, tlid, seconds):
 
         Seeks to the position ``TIME`` (in seconds) of song ``SONGID``.
     """
-    tl_track = context.core.playback.current_tl_track.get()
+    tl_track = context.core.playback.get_current_tl_track().get()
     if not tl_track or tl_track.tlid != tlid:
         playid(context, tlid)
     context.core.playback.seek(seconds * 1000).get()
@@ -370,7 +374,7 @@ def seekcur(context, time):
         '+' or '-', then the time is relative to the current playing position.
     """
     if time.startswith(('+', '-')):
-        position = context.core.playback.time_position.get()
+        position = context.core.playback.get_time_position().get()
         position += protocol.INT(time) * 1000
         context.core.playback.seek(position).get()
     else:
@@ -409,7 +413,7 @@ def single(context, state):
         single is activated, playback is stopped after current song, or
         song is repeated if the ``repeat`` mode is enabled.
     """
-    context.core.tracklist.single = state
+    context.core.tracklist.set_single(state)
 
 
 @protocol.commands.add('stop')

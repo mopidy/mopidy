@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+import codecs
 import logging
 import os
 import re
@@ -7,9 +8,8 @@ import urllib
 import urlparse
 
 from mopidy import compat
+from mopidy.internal import encoding, path
 from mopidy.models import Track
-from mopidy.utils.encoding import locale_decode
-from mopidy.utils.path import path_to_uri, uri_to_path
 
 
 M3U_EXTINF_RE = re.compile(r'#EXTINF:(-1|\d+),(.*)')
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 def playlist_uri_to_path(uri, playlists_dir):
     if not uri.startswith('m3u:'):
         raise ValueError('Invalid URI %s' % uri)
-    file_path = uri_to_path(uri)
+    file_path = path.uri_to_path(uri)
     return os.path.join(playlists_dir, file_path)
 
 
@@ -80,7 +80,7 @@ def parse_m3u(file_path, media_dir=None):
         with open(file_path) as m3u:
             contents = m3u.readlines()
     except IOError as error:
-        logger.warning('Couldn\'t open m3u: %s', locale_decode(error))
+        logger.warning('Couldn\'t open m3u: %s', encoding.locale_decode(error))
         return tracks
 
     if not contents:
@@ -98,13 +98,28 @@ def parse_m3u(file_path, media_dir=None):
             continue
 
         if urlparse.urlsplit(line).scheme:
-            tracks.append(track.copy(uri=line))
+            tracks.append(track.replace(uri=line))
         elif os.path.normpath(line) == os.path.abspath(line):
-            path = path_to_uri(line)
-            tracks.append(track.copy(uri=path))
+            uri = path.path_to_uri(line)
+            tracks.append(track.replace(uri=uri))
         elif media_dir is not None:
-            path = path_to_uri(os.path.join(media_dir, line))
-            tracks.append(track.copy(uri=path))
+            uri = path.path_to_uri(os.path.join(media_dir, line))
+            tracks.append(track.replace(uri=uri))
 
         track = Track()
     return tracks
+
+
+def save_m3u(filename, tracks, encoding='latin1', errors='replace'):
+    extended = any(track.name for track in tracks)
+    # codecs.open() always uses binary mode, just being explicit here
+    with codecs.open(filename, 'wb', encoding, errors) as m3u:
+        if extended:
+            m3u.write('#EXTM3U' + os.linesep)
+        for track in tracks:
+            if extended and track.name:
+                m3u.write('#EXTINF:%d,%s%s' % (
+                    track.length // 1000 if track.length else -1,
+                    track.name,
+                    os.linesep))
+            m3u.write(track.uri + os.linesep)

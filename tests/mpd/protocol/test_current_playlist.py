@@ -1,7 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
+from mopidy.internal import deprecation
 from mopidy.models import Ref, Track
-from mopidy.utils import deprecation
 
 from tests.mpd import protocol
 
@@ -386,6 +386,24 @@ class PlChangeCommandTest(BasePopulatedTracklistTestCase):
         self.assertInResponse('OK')
 
 
+class PrioCommandTest(protocol.BaseTestCase):
+
+    def test_prio(self):
+        self.send_request('prio 255 0:10')
+        self.assertEqualResponse('ACK [0@0] {prio} Not implemented')
+
+    def test_prioid(self):
+        self.send_request('prioid 255 17 23')
+        self.assertEqualResponse('ACK [0@0] {prioid} Not implemented')
+
+
+class RangeIdCommandTest(protocol.BaseTestCase):
+
+    def test_rangeid(self):
+        self.send_request('rangeid 17 0:30')
+        self.assertEqualResponse('ACK [0@0] {rangeid} Not implemented')
+
+
 # TODO: we only seem to be testing that don't touch the non shuffled region :/
 class ShuffleCommandTest(BasePopulatedTracklistTestCase):
 
@@ -441,3 +459,14 @@ class SwapCommandTest(BasePopulatedTracklistTestCase):
         self.send_request('swapid "8" "0"')
         self.assertEqualResponse(
             'ACK [50@0] {swapid} No such song')
+
+
+class TagCommandTest(protocol.BaseTestCase):
+
+    def test_addtagid(self):
+        self.send_request('addtagid 17 artist Abba')
+        self.assertEqualResponse('ACK [0@0] {addtagid} Not implemented')
+
+    def test_cleartagid(self):
+        self.send_request('cleartagid 17 artist')
+        self.assertEqualResponse('ACK [0@0] {cleartagid} Not implemented')

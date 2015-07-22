@@ -1,8 +1,8 @@
 .. _concepts:
 
-*************************
-Architecture and concepts
-*************************
+************
+Architecture
+************
 
 The overall architecture of Mopidy is organized around multiple frontends and
 backends. The frontends use the core API. The core actor makes multiple backends

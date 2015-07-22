@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import collections
 import itertools
+import logging
 
 import pykka
 
@@ -14,8 +15,11 @@ from mopidy.core.mixer import MixerController
 from mopidy.core.playback import PlaybackController
 from mopidy.core.playlists import PlaylistsController
 from mopidy.core.tracklist import TracklistController
-from mopidy.utils import versioning
-from mopidy.utils.deprecation import deprecated_property
+from mopidy.internal import versioning
+from mopidy.internal.deprecation import deprecated_property
+
+
+logger = logging.getLogger(__name__)
 
 
 class Core(
@@ -23,31 +27,27 @@ class Core(
         mixer.MixerListener):
 
     library = None
-    """The library controller. An instance of
-    :class:`mopidy.core.LibraryController`."""
+    """An instance of :class:`~mopidy.core.LibraryController`"""
 
     history = None
-    """The playback history controller. An instance of
-    :class:`mopidy.core.HistoryController`."""
+    """An instance of :class:`~mopidy.core.HistoryController`"""
 
     mixer = None
-    """The mixer controller. An instance of
-    :class:`mopidy.core.MixerController`."""
+    """An instance of :class:`~mopidy.core.MixerController`"""
 
     playback = None
-    """The playback controller. An instance of
-    :class:`mopidy.core.PlaybackController`."""
+    """An instance of :class:`~mopidy.core.PlaybackController`"""
 
     playlists = None
-    """The playlists controller. An instance of
-    :class:`mopidy.core.PlaylistsController`."""
+    """An instance of :class:`~mopidy.core.PlaylistsController`"""
 
     tracklist = None
-    """The tracklist controller. An instance of
-    :class:`mopidy.core.TracklistController`."""
+    """An instance of :class:`~mopidy.core.TracklistController`"""
 
-    def __init__(self, mixer=None, backends=None, audio=None):
+    def __init__(self, config=None, mixer=None, backends=None, audio=None):
         super(Core, self).__init__()
+
+        self._config = config
 
         self.backends = Backends(backends)
 
@@ -150,10 +150,15 @@ class Backends(list):
             return b.actor_ref.actor_class.__name__
 
         for b in backends:
-            has_library = b.has_library().get()
-            has_library_browse = b.has_library_browse().get()
-            has_playback = b.has_playback().get()
-            has_playlists = b.has_playlists().get()
+            try:
+                has_library = b.has_library().get()
+                has_library_browse = b.has_library_browse().get()
+                has_playback = b.has_playback().get()
+                has_playlists = b.has_playlists().get()
+            except Exception:
+                self.remove(b)
+                logger.exception('Fetching backend info for %s failed',
+                                 b.actor_ref.actor_class.__name__)
 
             for scheme in b.uri_schemes.get():
                 assert scheme not in backends_by_scheme, (

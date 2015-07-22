@@ -8,7 +8,7 @@ import gobject
 import pygst
 pygst.require('0.10')
 import gst  # noqa
-import gst.pbutils
+import gst.pbutils  # noqa
 
 import pykka
 
@@ -16,7 +16,7 @@ from mopidy import exceptions
 from mopidy.audio import playlists, utils
 from mopidy.audio.constants import PlaybackState
 from mopidy.audio.listener import AudioListener
-from mopidy.utils import deprecation, process
+from mopidy.internal import deprecation, process
 
 
 logger = logging.getLogger(__name__)
@@ -166,10 +166,7 @@ class _Outputs(gst.Bin):
         logger.info('Audio output set to "%s"', description)
 
     def _add(self, element):
-        # All tee branches need a queue in front of them.
-        # But keep the queue short so the volume change isn't to slow:
         queue = gst.element_factory_make('queue')
-        queue.set_property('max-size-buffers', 5)
         self.add(element)
         self.add(queue)
         queue.link(element)
@@ -199,16 +196,14 @@ class SoftwareMixer(object):
 
     def set_volume(self, volume):
         self._element.set_property('volume', volume / 100.0)
-        self._mixer.trigger_volume_changed(volume)
+        self._mixer.trigger_volume_changed(self.get_volume())
 
     def get_mute(self):
         return self._element.get_property('mute')
 
     def set_mute(self, mute):
-        result = self._element.set_property('mute', bool(mute))
-        if result:
-            self._mixer.trigger_mute_changed(bool(mute))
-        return result
+        self._element.set_property('mute', bool(mute))
+        self._mixer.trigger_mute_changed(self.get_mute())
 
 
 class _Handler(object):

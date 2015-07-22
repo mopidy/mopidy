@@ -6,9 +6,9 @@ import os
 import tempfile
 import unittest
 
+from mopidy.internal import path
 from mopidy.m3u import translator
 from mopidy.models import Track
-from mopidy.utils import path
 
 from tests import path_to_data_dir
 
@@ -22,9 +22,9 @@ encoded_uri = path.path_to_uri(encoded_path)
 song1_track = Track(uri=song1_uri)
 song2_track = Track(uri=song2_uri)
 encoded_track = Track(uri=encoded_uri)
-song1_ext_track = song1_track.copy(name='song1')
-song2_ext_track = song2_track.copy(name='song2', length=60000)
-encoded_ext_track = encoded_track.copy(name='æøå')
+song1_ext_track = song1_track.replace(name='song1')
+song2_ext_track = song2_track.replace(name='song2', length=60000)
+encoded_ext_track = encoded_track.replace(name='æøå')
 
 
 # FIXME use mock instead of tempfile.NamedTemporaryFile

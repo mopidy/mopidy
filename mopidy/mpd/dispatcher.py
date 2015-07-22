@@ -167,7 +167,8 @@ class MpdDispatcher(object):
         # TODO: check that blacklist items are valid commands?
         blacklist = self.config['mpd'].get('command_blacklist', [])
         if tokens and tokens[0] in blacklist:
-            logger.warning('Client sent us blacklisted command: %s', tokens[0])
+            logger.warning(
+                'MPD client used blacklisted command: %s', tokens[0])
             raise exceptions.MpdDisabled(command=tokens[0])
         try:
             return protocol.commands.call(tokens, context=self.context)

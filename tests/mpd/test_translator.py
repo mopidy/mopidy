@@ -1,11 +1,10 @@
 from __future__ import absolute_import, unicode_literals
 
-import datetime
 import unittest
 
+from mopidy.internal import path
 from mopidy.models import Album, Artist, Playlist, TlTrack, Track
 from mopidy.mpd import translator
-from mopidy.utils.path import mtime
 
 
 class TrackMpdFormatTest(unittest.TestCase):
@@ -20,18 +19,18 @@ class TrackMpdFormatTest(unittest.TestCase):
         composers=[Artist(name='a composer')],
         performers=[Artist(name='a performer')],
         genre='a genre',
-        date=datetime.date(1977, 1, 1),
-        disc_no='1',
+        date='1977-01-01',
+        disc_no=1,
         comment='a comment',
         length=137000,
     )
 
     def setUp(self):  # noqa: N802
         self.media_dir = '/dir/subdir'
-        mtime.set_fake_time(1234567)
+        path.mtime.set_fake_time(1234567)
 
     def tearDown(self):  # noqa: N802
-        mtime.undo_fake()
+        path.mtime.undo_fake()
 
     def test_track_to_mpd_format_for_empty_track(self):
         # TODO: this is likely wrong, see:
@@ -73,46 +72,78 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assertIn(('Performer', 'a performer'), result)
         self.assertIn(('Genre', 'a genre'), result)
         self.assertIn(('Track', '7/13'), result)
-        self.assertIn(('Date', datetime.date(1977, 1, 1)), result)
-        self.assertIn(('Disc', '1'), result)
+        self.assertIn(('Date', '1977-01-01'), result)
+        self.assertIn(('Disc', 1), result)
         self.assertIn(('Pos', 9), result)
         self.assertIn(('Id', 122), result)
         self.assertNotIn(('Comment', 'a comment'), result)
         self.assertEqual(len(result), 14)
 
+    def test_track_to_mpd_format_with_last_modified(self):
+        track = self.track.replace(last_modified=995303899000)
+        result = translator.track_to_mpd_format(track)
+        self.assertIn(('Last-Modified', '2001-07-16T17:18:19Z'), result)
+
+    def test_track_to_mpd_format_with_last_modified_of_zero(self):
+        track = self.track.replace(last_modified=0)
+        result = translator.track_to_mpd_format(track)
+        keys = [k for k, v in result]
+        self.assertNotIn('Last-Modified', keys)
+
     def test_track_to_mpd_format_musicbrainz_trackid(self):
-        track = self.track.copy(musicbrainz_id='foo')
+        track = self.track.replace(musicbrainz_id='foo')
         result = translator.track_to_mpd_format(track)
         self.assertIn(('MUSICBRAINZ_TRACKID', 'foo'), result)
 
     def test_track_to_mpd_format_musicbrainz_albumid(self):
-        album = self.track.album.copy(musicbrainz_id='foo')
-        track = self.track.copy(album=album)
+        album = self.track.album.replace(musicbrainz_id='foo')
+        track = self.track.replace(album=album)
         result = translator.track_to_mpd_format(track)
         self.assertIn(('MUSICBRAINZ_ALBUMID', 'foo'), result)
 
     def test_track_to_mpd_format_musicbrainz_albumartistid(self):
-        artist = list(self.track.artists)[0].copy(musicbrainz_id='foo')
-        album = self.track.album.copy(artists=[artist])
-        track = self.track.copy(album=album)
+        artist = list(self.track.artists)[0].replace(musicbrainz_id='foo')
+        album = self.track.album.replace(artists=[artist])
+        track = self.track.replace(album=album)
         result = translator.track_to_mpd_format(track)
         self.assertIn(('MUSICBRAINZ_ALBUMARTISTID', 'foo'), result)
 
     def test_track_to_mpd_format_musicbrainz_artistid(self):
-        artist = list(self.track.artists)[0].copy(musicbrainz_id='foo')
-        track = self.track.copy(artists=[artist])
+        artist = list(self.track.artists)[0].replace(musicbrainz_id='foo')
+        track = self.track.replace(artists=[artist])
         result = translator.track_to_mpd_format(track)
         self.assertIn(('MUSICBRAINZ_ARTISTID', 'foo'), result)
 
-    def test_artists_to_mpd_format(self):
+    def test_concat_multi_values(self):
         artists = [Artist(name='ABBA'), Artist(name='Beatles')]
-        translated = translator.artists_to_mpd_format(artists)
-        self.assertEqual(translated, 'ABBA, Beatles')
+        translated = translator.concat_multi_values(artists, 'name')
+        self.assertEqual(translated, 'ABBA;Beatles')
 
-    def test_artists_to_mpd_format_artist_with_no_name(self):
+    def test_concat_multi_values_artist_with_no_name(self):
         artists = [Artist(name=None)]
-        translated = translator.artists_to_mpd_format(artists)
+        translated = translator.concat_multi_values(artists, 'name')
         self.assertEqual(translated, '')
+
+    def test_concat_multi_values_artist_with_no_musicbrainz_id(self):
+        artists = [Artist(name='Jah Wobble')]
+        translated = translator.concat_multi_values(artists, 'musicbrainz_id')
+        self.assertEqual(translated, '')
+
+    def test_track_to_mpd_format_with_stream_title(self):
+        result = translator.track_to_mpd_format(self.track, stream_title='foo')
+        self.assertIn(('Name', 'a name'), result)
+        self.assertIn(('Title', 'foo'), result)
+
+    def test_track_to_mpd_format_with_empty_stream_title(self):
+        result = translator.track_to_mpd_format(self.track, stream_title='')
+        self.assertIn(('Name', 'a name'), result)
+        self.assertIn(('Title', ''), result)
+
+    def test_track_to_mpd_format_with_stream_and_no_track_name(self):
+        track = self.track.replace(name=None)
+        result = translator.track_to_mpd_format(track, stream_title='foo')
+        self.assertNotIn(('Name', ''), result)
+        self.assertIn(('Title', 'foo'), result)
 
 
 class PlaylistMpdFormatTest(unittest.TestCase):

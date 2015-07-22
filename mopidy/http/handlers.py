@@ -1,16 +1,18 @@
 from __future__ import absolute_import, unicode_literals
 
+import functools
 import logging
 import os
 import socket
 
 import tornado.escape
+import tornado.ioloop
 import tornado.web
 import tornado.websocket
 
 import mopidy
 from mopidy import core, models
-from mopidy.utils import encoding, jsonrpc
+from mopidy.internal import encoding, jsonrpc
 
 
 logger = logging.getLogger(__name__)
@@ -65,6 +67,19 @@ def make_jsonrpc_wrapper(core_actor):
     )
 
 
+def _send_broadcast(client, msg):
+    # We could check for client.ws_connection, but we don't really
+    # care why the broadcast failed, we just want the rest of them
+    # to succeed, so catch everything.
+    try:
+        client.write_message(msg)
+    except Exception as e:
+        error_msg = encoding.locale_decode(e)
+        logger.debug('Broadcast of WebSocket message to %s failed: %s',
+                     client.request.remote_ip, error_msg)
+        # TODO: should this do the same cleanup as the on_message code?
+
+
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
     # XXX This set is shared by all WebSocketHandler objects. This isn't
@@ -74,17 +89,17 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
     @classmethod
     def broadcast(cls, msg):
+        if hasattr(tornado.ioloop.IOLoop, 'current'):
+            loop = tornado.ioloop.IOLoop.current()
+        else:
+            loop = tornado.ioloop.IOLoop.instance()  # Fallback for pre 3.0
+
+        # This can be called from outside the Tornado ioloop, so we need to
+        # safely cross the thread boundary by adding a callback to the loop.
         for client in cls.clients:
-            # We could check for client.ws_connection, but we don't really
-            # care why the broadcast failed, we just want the rest of them
-            # to succeed, so catch everything.
-            try:
-                client.write_message(msg)
-            except Exception as e:
-                error_msg = encoding.locale_decode(e)
-                logger.debug('Broadcast of WebSocket message to %s failed: %s',
-                             client.request.remote_ip, error_msg)
-                # TODO: should this do the same cleanup as the on_message code?
+            # One callback per client to keep time we hold up the loop short
+            # NOTE: Pre 3.0 does not support *args or **kwargs...
+            loop.add_callback(functools.partial(_send_broadcast, client, msg))
 
     def initialize(self, core):
         self.jsonrpc = make_jsonrpc_wrapper(core)

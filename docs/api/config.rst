@@ -1,8 +1,8 @@
 .. _config-api:
 
-**********
-Config API
-**********
+***********************************
+:mod:`mopidy.config` --- Config API
+***********************************
 
 .. automodule:: mopidy.config
     :synopsis: Config API for config loading and validation

@@ -7,8 +7,8 @@ import mock
 import pykka
 
 from mopidy import core
+from mopidy.internal import deprecation
 from mopidy.models import Track
-from mopidy.utils import deprecation
 
 from tests import dummy_backend
 
@@ -17,12 +17,19 @@ from tests import dummy_backend
 class BackendEventsTest(unittest.TestCase):
 
     def setUp(self):  # noqa: N802
+        config = {
+            'core': {
+                'max_tracklist_length': 10000,
+            }
+        }
+
         self.backend = dummy_backend.create_proxy()
         self.backend.library.dummy_library = [
             Track(uri='dummy:a'), Track(uri='dummy:b')]
 
         with deprecation.ignore():
-            self.core = core.Core.start(backends=[self.backend]).proxy()
+            self.core = core.Core.start(
+                config, backends=[self.backend]).proxy()
 
     def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
@@ -45,15 +52,12 @@ class BackendEventsTest(unittest.TestCase):
         self.assertEqual(send.call_args[1]['mute'], True)
 
     def test_tracklist_add_sends_tracklist_changed_event(self, send):
-        send.reset_mock()
-
         self.core.tracklist.add(uris=['dummy:a']).get()
 
         self.assertEqual(send.call_args[0][0], 'tracklist_changed')
 
     def test_tracklist_clear_sends_tracklist_changed_event(self, send):
         self.core.tracklist.add(uris=['dummy:a']).get()
-        send.reset_mock()
 
         self.core.tracklist.clear().get()
 
@@ -61,7 +65,6 @@ class BackendEventsTest(unittest.TestCase):
 
     def test_tracklist_move_sends_tracklist_changed_event(self, send):
         self.core.tracklist.add(uris=['dummy:a', 'dummy:b']).get()
-        send.reset_mock()
 
         self.core.tracklist.move(0, 1, 1).get()
 
@@ -69,37 +72,29 @@ class BackendEventsTest(unittest.TestCase):
 
     def test_tracklist_remove_sends_tracklist_changed_event(self, send):
         self.core.tracklist.add(uris=['dummy:a']).get()
-        send.reset_mock()
 
-        self.core.tracklist.remove(uri=['dummy:a']).get()
+        self.core.tracklist.remove({'uri': ['dummy:a']}).get()
 
         self.assertEqual(send.call_args[0][0], 'tracklist_changed')
 
     def test_tracklist_shuffle_sends_tracklist_changed_event(self, send):
         self.core.tracklist.add(uris=['dummy:a', 'dummy:b']).get()
-        send.reset_mock()
 
         self.core.tracklist.shuffle().get()
 
         self.assertEqual(send.call_args[0][0], 'tracklist_changed')
 
     def test_playlists_refresh_sends_playlists_loaded_event(self, send):
-        send.reset_mock()
-
         self.core.playlists.refresh().get()
 
         self.assertEqual(send.call_args[0][0], 'playlists_loaded')
 
     def test_playlists_refresh_uri_sends_playlists_loaded_event(self, send):
-        send.reset_mock()
-
         self.core.playlists.refresh(uri_scheme='dummy').get()
 
         self.assertEqual(send.call_args[0][0], 'playlists_loaded')
 
     def test_playlists_create_sends_playlist_changed_event(self, send):
-        send.reset_mock()
-
         self.core.playlists.create('foo').get()
 
         self.assertEqual(send.call_args[0][0], 'playlist_changed')
@@ -111,8 +106,7 @@ class BackendEventsTest(unittest.TestCase):
 
     def test_playlists_save_sends_playlist_changed_event(self, send):
         playlist = self.core.playlists.create('foo').get()
-        playlist = playlist.copy(name='bar')
-        send.reset_mock()
+        playlist = playlist.replace(name='bar')
 
         self.core.playlists.save(playlist).get()
 

@@ -30,6 +30,9 @@ _MESSAGES = {
     'core.playback.set_mute': 'playback.set_mute() is deprecated',
     'core.playback.get_volume': 'playback.get_volume() is deprecated',
     'core.playback.set_volume': 'playback.set_volume() is deprecated',
+    'core.playback.play:tl_track_kwargs':
+        'playback.play() with "tl_track" argument is pending deprecation use '
+        '"tlid" instead',
 
     # Deprecated features in core playlists:
     'core.playlists.filter': 'playlists.filter() is deprecated',
@@ -40,11 +43,32 @@ _MESSAGES = {
         'tracklist.add() "tracks" argument is deprecated',
     'core.tracklist.add:uri_arg':
         'tracklist.add() "uri" argument is deprecated',
+    'core.tracklist.filter:kwargs_criteria':
+        'tracklist.filter() with "kwargs" as criteria is deprecated',
+    'core.tracklist.remove:kwargs_criteria':
+        'tracklist.remove() with "kwargs" as criteria is deprecated',
+
+    'core.tracklist.eot_track':
+        'tracklist.eot_track() is pending deprecation, use '
+        'tracklist.get_eot_tlid()',
+    'core.tracklist.next_track':
+        'tracklist.next_track() is pending deprecation, use '
+        'tracklist.get_next_tlid()',
+    'core.tracklist.previous_track':
+        'tracklist.previous_track() is pending deprecation, use '
+        'tracklist.get_previous_tlid()',
+
+    'models.immutable.copy':
+        'ImmutableObject.copy() is deprecated, use ImmutableObject.replace()',
 }
 
 
-def warn(msg_id):
-    warnings.warn(_MESSAGES.get(msg_id, msg_id), DeprecationWarning)
+def warn(msg_id, pending=False):
+    if pending:
+        category = PendingDeprecationWarning
+    else:
+        category = DeprecationWarning
+    warnings.warn(_MESSAGES.get(msg_id, msg_id), category)
 
 
 @contextlib.contextmanager

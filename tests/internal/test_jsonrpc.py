@@ -8,7 +8,7 @@ import mock
 import pykka
 
 from mopidy import core, models
-from mopidy.utils import deprecation, jsonrpc
+from mopidy.internal import deprecation, jsonrpc
 
 from tests import dummy_backend
 

@@ -1,151 +1,16 @@
 from __future__ import absolute_import, unicode_literals
 
-import json
+from mopidy.models import fields
+from mopidy.models.immutable import ImmutableObject, ValidatedImmutableObject
+from mopidy.models.serialize import ModelJSONEncoder, model_json_decoder
+
+__all__ = [
+    'ImmutableObject', 'Ref', 'Image', 'Artist', 'Album', 'track', 'TlTrack',
+    'Playlist', 'SearchResult', 'model_json_decoder', 'ModelJSONEncoder',
+    'ValidatedImmutableObject']
 
 
-class ImmutableObject(object):
-
-    """
-    Superclass for immutable objects whose fields can only be modified via the
-    constructor.
-
-    :param kwargs: kwargs to set as fields on the object
-    :type kwargs: any
-    """
-
-    def __init__(self, *args, **kwargs):
-        for key, value in kwargs.items():
-            if not hasattr(self, key) or callable(getattr(self, key)):
-                raise TypeError(
-                    '__init__() got an unexpected keyword argument "%s"' %
-                    key)
-            if value == getattr(self, key):
-                continue  # Don't explicitly set default values
-            self.__dict__[key] = value
-
-    def __setattr__(self, name, value):
-        if name.startswith('_'):
-            return super(ImmutableObject, self).__setattr__(name, value)
-        raise AttributeError('Object is immutable.')
-
-    def __repr__(self):
-        kwarg_pairs = []
-        for (key, value) in sorted(self.__dict__.items()):
-            if isinstance(value, (frozenset, tuple)):
-                if not value:
-                    continue
-                value = list(value)
-            kwarg_pairs.append('%s=%s' % (key, repr(value)))
-        return '%(classname)s(%(kwargs)s)' % {
-            'classname': self.__class__.__name__,
-            'kwargs': ', '.join(kwarg_pairs),
-        }
-
-    def __hash__(self):
-        hash_sum = 0
-        for key, value in self.__dict__.items():
-            hash_sum += hash(key) + hash(value)
-        return hash_sum
-
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            return False
-
-        return self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def copy(self, **values):
-        """
-        Copy the model with ``field`` updated to new value.
-
-        Examples::
-
-            # Returns a track with a new name
-            Track(name='foo').copy(name='bar')
-            # Return an album with a new number of tracks
-            Album(num_tracks=2).copy(num_tracks=5)
-
-        :param values: the model fields to modify
-        :type values: dict
-        :rtype: new instance of the model being copied
-        """
-        data = {}
-        for key in self.__dict__.keys():
-            public_key = key.lstrip('_')
-            value = values.pop(public_key, self.__dict__[key])
-            data[public_key] = value
-        for key in values.keys():
-            if hasattr(self, key):
-                value = values.pop(key)
-                data[key] = value
-        if values:
-            raise TypeError(
-                'copy() got an unexpected keyword argument "%s"' % key)
-        return self.__class__(**data)
-
-    def serialize(self):
-        data = {}
-        data['__model__'] = self.__class__.__name__
-        for key in self.__dict__.keys():
-            public_key = key.lstrip('_')
-            value = self.__dict__[key]
-            if isinstance(value, (set, frozenset, list, tuple)):
-                value = [
-                    v.serialize() if isinstance(v, ImmutableObject) else v
-                    for v in value]
-            elif isinstance(value, ImmutableObject):
-                value = value.serialize()
-            if not (isinstance(value, list) and len(value) == 0):
-                data[public_key] = value
-        return data
-
-
-class ModelJSONEncoder(json.JSONEncoder):
-
-    """
-    Automatically serialize Mopidy models to JSON.
-
-    Usage::
-
-        >>> import json
-        >>> json.dumps({'a_track': Track(name='name')}, cls=ModelJSONEncoder)
-        '{"a_track": {"__model__": "Track", "name": "name"}}'
-
-    """
-
-    def default(self, obj):
-        if isinstance(obj, ImmutableObject):
-            return obj.serialize()
-        return json.JSONEncoder.default(self, obj)
-
-
-def model_json_decoder(dct):
-    """
-    Automatically deserialize Mopidy models from JSON.
-
-    Usage::
-
-        >>> import json
-        >>> json.loads(
-        ...     '{"a_track": {"__model__": "Track", "name": "name"}}',
-        ...     object_hook=model_json_decoder)
-        {u'a_track': Track(artists=[], name=u'name')}
-
-    """
-    if '__model__' in dct:
-        model_name = dct.pop('__model__')
-        cls = globals().get(model_name, None)
-        if issubclass(cls, ImmutableObject):
-            kwargs = {}
-            for key, value in dct.items():
-                kwargs[key] = value
-            return cls(**kwargs)
-    return dct
-
-
-class Ref(ImmutableObject):
+class Ref(ValidatedImmutableObject):
 
     """
     Model to represent URI references with a human friendly name and type
@@ -161,14 +26,15 @@ class Ref(ImmutableObject):
     """
 
     #: The object URI. Read-only.
-    uri = None
+    uri = fields.URI()
 
     #: The object name. Read-only.
-    name = None
+    name = fields.String()
 
     #: The object type, e.g. "artist", "album", "track", "playlist",
     #: "directory". Read-only.
-    type = None
+    type = fields.Identifier()  # TODO: consider locking this down.
+    # type = fields.Field(choices=(ALBUM, ARTIST, DIRECTORY, PLAYLIST, TRACK))
 
     #: Constant used for comparison with the :attr:`type` field.
     ALBUM = 'album'
@@ -216,7 +82,7 @@ class Ref(ImmutableObject):
         return cls(**kwargs)
 
 
-class Image(ImmutableObject):
+class Image(ValidatedImmutableObject):
 
     """
     :param string uri: URI of the image
@@ -225,16 +91,16 @@ class Image(ImmutableObject):
     """
 
     #: The image URI. Read-only.
-    uri = None
+    uri = fields.URI()
 
     #: Optional width of the image or :class:`None`. Read-only.
-    width = None
+    width = fields.Integer(min=0)
 
     #: Optional height of the image or :class:`None`. Read-only.
-    height = None
+    height = fields.Integer(min=0)
 
 
-class Artist(ImmutableObject):
+class Artist(ValidatedImmutableObject):
 
     """
     :param uri: artist URI
@@ -246,16 +112,16 @@ class Artist(ImmutableObject):
     """
 
     #: The artist URI. Read-only.
-    uri = None
+    uri = fields.URI()
 
     #: The artist name. Read-only.
-    name = None
+    name = fields.String()
 
     #: The MusicBrainz ID of the artist. Read-only.
-    musicbrainz_id = None
+    musicbrainz_id = fields.Identifier()
 
 
-class Album(ImmutableObject):
+class Album(ValidatedImmutableObject):
 
     """
     :param uri: album URI
@@ -277,39 +143,34 @@ class Album(ImmutableObject):
     """
 
     #: The album URI. Read-only.
-    uri = None
+    uri = fields.URI()
 
     #: The album name. Read-only.
-    name = None
+    name = fields.String()
 
     #: A set of album artists. Read-only.
-    artists = frozenset()
+    artists = fields.Collection(type=Artist, container=frozenset)
 
     #: The number of tracks in the album. Read-only.
-    num_tracks = None
+    num_tracks = fields.Integer(min=0)
 
     #: The number of discs in the album. Read-only.
-    num_discs = None
+    num_discs = fields.Integer(min=0)
 
     #: The album release date. Read-only.
-    date = None
+    date = fields.Date()
 
     #: The MusicBrainz ID of the album. Read-only.
-    musicbrainz_id = None
+    musicbrainz_id = fields.Identifier()
 
     #: The album image URIs. Read-only.
-    images = frozenset()
+    images = fields.Collection(type=basestring, container=frozenset)
     # XXX If we want to keep the order of images we shouldn't use frozenset()
     # as it doesn't preserve order. I'm deferring this issue until we got
     # actual usage of this field with more than one image.
 
-    def __init__(self, *args, **kwargs):
-        self.__dict__['artists'] = frozenset(kwargs.pop('artists', None) or [])
-        self.__dict__['images'] = frozenset(kwargs.pop('images', None) or [])
-        super(Album, self).__init__(*args, **kwargs)
 
-
-class Track(ImmutableObject):
+class Track(ValidatedImmutableObject):
 
     """
     :param uri: track URI
@@ -345,64 +206,55 @@ class Track(ImmutableObject):
     """
 
     #: The track URI. Read-only.
-    uri = None
+    uri = fields.URI()
 
     #: The track name. Read-only.
-    name = None
+    name = fields.String()
 
     #: A set of track artists. Read-only.
-    artists = frozenset()
+    artists = fields.Collection(type=Artist, container=frozenset)
 
     #: The track :class:`Album`. Read-only.
-    album = None
+    album = fields.Field(type=Album)
 
     #: A set of track composers. Read-only.
-    composers = frozenset()
+    composers = fields.Collection(type=Artist, container=frozenset)
 
     #: A set of track performers`. Read-only.
-    performers = frozenset()
+    performers = fields.Collection(type=Artist, container=frozenset)
 
     #: The track genre. Read-only.
-    genre = None
+    genre = fields.String()
 
     #: The track number in the album. Read-only.
-    track_no = None
+    track_no = fields.Integer(min=0)
 
     #: The disc number in the album. Read-only.
-    disc_no = None
+    disc_no = fields.Integer(min=0)
 
     #: The track release date. Read-only.
-    date = None
+    date = fields.Date()
 
     #: The track length in milliseconds. Read-only.
-    length = None
+    length = fields.Integer(min=0)
 
     #: The track's bitrate in kbit/s. Read-only.
-    bitrate = None
+    bitrate = fields.Integer(min=0)
 
     #: The track comment. Read-only.
-    comment = None
+    comment = fields.String()
 
     #: The MusicBrainz ID of the track. Read-only.
-    musicbrainz_id = None
+    musicbrainz_id = fields.Identifier()
 
     #: Integer representing when the track was last modified. Exact meaning
     #: depends on source of track. For local files this is the modification
     #: time in milliseconds since Unix epoch. For other backends it could be an
     #: equivalent timestamp or simply a version counter.
-    last_modified = None
-
-    def __init__(self, *args, **kwargs):
-        def get(key):
-            return frozenset(kwargs.pop(key, None) or [])
-
-        self.__dict__['artists'] = get('artists')
-        self.__dict__['composers'] = get('composers')
-        self.__dict__['performers'] = get('performers')
-        super(Track, self).__init__(*args, **kwargs)
+    last_modified = fields.Integer(min=0)
 
 
-class TlTrack(ImmutableObject):
+class TlTrack(ValidatedImmutableObject):
 
     """
     A tracklist track. Wraps a regular track and it's tracklist ID.
@@ -425,10 +277,10 @@ class TlTrack(ImmutableObject):
     """
 
     #: The tracklist ID. Read-only.
-    tlid = None
+    tlid = fields.Integer(min=0)
 
     #: The track. Read-only.
-    track = None
+    track = fields.Field(type=Track)
 
     def __init__(self, *args, **kwargs):
         if len(args) == 2 and len(kwargs) == 0:
@@ -441,7 +293,7 @@ class TlTrack(ImmutableObject):
         return iter([self.tlid, self.track])
 
 
-class Playlist(ImmutableObject):
+class Playlist(ValidatedImmutableObject):
 
     """
     :param uri: playlist URI
@@ -456,23 +308,19 @@ class Playlist(ImmutableObject):
     """
 
     #: The playlist URI. Read-only.
-    uri = None
+    uri = fields.URI()
 
     #: The playlist name. Read-only.
-    name = None
+    name = fields.String()
 
     #: The playlist's tracks. Read-only.
-    tracks = tuple()
+    tracks = fields.Collection(type=Track, container=tuple)
 
     #: The playlist modification time in milliseconds since Unix epoch.
     #: Read-only.
     #:
     #: Integer, or :class:`None` if unknown.
-    last_modified = None
-
-    def __init__(self, *args, **kwargs):
-        self.__dict__['tracks'] = tuple(kwargs.pop('tracks', None) or [])
-        super(Playlist, self).__init__(*args, **kwargs)
+    last_modified = fields.Integer(min=0)
 
     # TODO: def insert(self, pos, track): ... ?
 
@@ -482,7 +330,7 @@ class Playlist(ImmutableObject):
         return len(self.tracks)
 
 
-class SearchResult(ImmutableObject):
+class SearchResult(ValidatedImmutableObject):
 
     """
     :param uri: search result URI
@@ -496,19 +344,13 @@ class SearchResult(ImmutableObject):
     """
 
     # The search result URI. Read-only.
-    uri = None
+    uri = fields.URI()
 
     # The tracks matching the search query. Read-only.
-    tracks = tuple()
+    tracks = fields.Collection(type=Track, container=tuple)
 
     # The artists matching the search query. Read-only.
-    artists = tuple()
+    artists = fields.Collection(type=Artist, container=tuple)
 
     # The albums matching the search query. Read-only.
-    albums = tuple()
-
-    def __init__(self, *args, **kwargs):
-        self.__dict__['tracks'] = tuple(kwargs.pop('tracks', None) or [])
-        self.__dict__['artists'] = tuple(kwargs.pop('artists', None) or [])
-        self.__dict__['albums'] = tuple(kwargs.pop('albums', None) or [])
-        super(SearchResult, self).__init__(*args, **kwargs)
+    albums = fields.Collection(type=Album, container=tuple)

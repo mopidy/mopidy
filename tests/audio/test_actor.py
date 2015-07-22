@@ -6,17 +6,17 @@ import unittest
 import gobject
 gobject.threads_init()
 
+import mock
+
 import pygst
 pygst.require('0.10')
 import gst  # noqa
-
-import mock
 
 import pykka
 
 from mopidy import audio, listener
 from mopidy.audio.constants import PlaybackState
-from mopidy.utils.path import path_to_uri
+from mopidy.internal import path
 
 from tests import dummy_audio, path_to_data_dir
 
@@ -36,8 +36,8 @@ class BaseTest(unittest.TestCase):
         }
     }
 
-    uris = [path_to_uri(path_to_data_dir('song1.wav')),
-            path_to_uri(path_to_data_dir('song2.wav'))]
+    uris = [path.path_to_uri(path_to_data_dir('song1.wav')),
+            path.path_to_uri(path_to_data_dir('song2.wav'))]
 
     audio_class = audio.Audio
 
@@ -53,7 +53,7 @@ class BaseTest(unittest.TestCase):
                 'hostname': '',
             },
         }
-        self.song_uri = path_to_uri(path_to_data_dir('song1.wav'))
+        self.song_uri = path.path_to_uri(path_to_data_dir('song1.wav'))
         self.audio = self.audio_class.start(config=config, mixer=None).proxy()
 
     def tearDown(self):  # noqa

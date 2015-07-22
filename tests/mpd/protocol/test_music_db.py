@@ -79,6 +79,16 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('playtime: 650')
         self.assertInResponse('OK')
 
+    def test_count_with_track_length_none(self):
+        self.backend.library.dummy_find_exact_result = SearchResult(
+            tracks=[
+                Track(uri='dummy:b', date="2001", length=None),
+            ])
+        self.send_request('count "date" "2001"')
+        self.assertInResponse('songs: 1')
+        self.assertInResponse('playtime: 0')
+        self.assertInResponse('OK')
+
     def test_findadd(self):
         self.backend.library.dummy_find_exact_result = SearchResult(
             tracks=[Track(uri='dummy:a', name='A')])
@@ -103,7 +113,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
     def test_searchaddpl_appends_to_existing_playlist(self):
         playlist = self.core.playlists.create('my favs').get()
-        playlist = playlist.copy(tracks=[
+        playlist = playlist.replace(tracks=[
             Track(uri='dummy:x', name='X'),
             Track(uri='dummy:y', name='y'),
         ])
@@ -284,6 +294,10 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.send_request('listallinfo')
         self.assertInResponse('directory: /dummy/a')
         self.assertInResponse('directory: /dummy/a [2]')
+
+    def test_listfiles(self):
+        self.send_request('listfiles')
+        self.assertEqualResponse('ACK [0@0] {listfiles} Not implemented')
 
     def test_lsinfo_without_path_returns_same_as_for_root(self):
         last_modified = 1390942873222
@@ -635,6 +649,12 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
     def test_list_foo_returns_ack(self):
         self.send_request('list "foo"')
         self.assertEqualResponse('ACK [2@0] {list} incorrect arguments')
+
+    # Track title
+
+    def test_list_title(self):
+        self.send_request('list "title"')
+        self.assertInResponse('OK')
 
     # Artist
 

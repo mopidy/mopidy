@@ -18,7 +18,7 @@ If you are running OS X, you can install everything needed with Homebrew.
    date before you continue::
 
        brew update
-       brew upgrade
+       brew upgrade --all
 
    Notice that this will upgrade all software on your system that have been
    installed with Homebrew.

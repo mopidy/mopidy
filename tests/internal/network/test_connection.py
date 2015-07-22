@@ -11,7 +11,7 @@ from mock import Mock, call, patch, sentinel
 
 import pykka
 
-from mopidy.utils import network
+from mopidy.internal import network
 
 from tests import any_int, any_unicode
 

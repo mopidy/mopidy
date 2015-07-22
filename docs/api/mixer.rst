@@ -1,8 +1,8 @@
 .. _mixer-api:
 
-***************
-Audio mixer API
-***************
+***************************************
+:mod:`mopidy.mixer` --- Audio mixer API
+***************************************
 
 .. module:: mopidy.mixer
     :synopsis: The audio mixer API

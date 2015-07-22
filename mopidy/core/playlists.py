@@ -1,15 +1,29 @@
 from __future__ import absolute_import, unicode_literals
 
+import contextlib
 import logging
 import urlparse
 
-import pykka
-
+from mopidy import exceptions
 from mopidy.core import listener
-from mopidy.models import Playlist
-from mopidy.utils import deprecation
+from mopidy.internal import deprecation, validation
+from mopidy.models import Playlist, Ref
 
 logger = logging.getLogger(__name__)
+
+
+@contextlib.contextmanager
+def _backend_error_handling(backend, reraise=None):
+    try:
+        yield
+    except exceptions.ValidationError as e:
+        logger.error('%s backend returned bad data: %s',
+                     backend.actor_ref.actor_class.__name__, e)
+    except Exception as e:
+        if reraise and isinstance(e, reraise):
+            raise
+        logger.exception('%s backend caused an exception.',
+                         backend.actor_ref.actor_class.__name__)
 
 
 class PlaylistsController(object):
@@ -32,14 +46,19 @@ class PlaylistsController(object):
         .. versionadded:: 1.0
         """
         futures = {
-            b.actor_ref.actor_class.__name__: b.playlists.as_list()
-            for b in set(self.backends.with_playlists.values())}
+            backend: backend.playlists.as_list()
+            for backend in set(self.backends.with_playlists.values())}
 
         results = []
-        for backend_name, future in futures.items():
+        for b, future in futures.items():
             try:
-                results.extend(future.get())
+                with _backend_error_handling(b, reraise=NotImplementedError):
+                    playlists = future.get()
+                    if playlists is not None:
+                        validation.check_instances(playlists, Ref)
+                        results.extend(playlists)
             except NotImplementedError:
+                backend_name = b.actor_ref.actor_class.__name__
                 logger.warning(
                     '%s does not implement playlists.as_list(). '
                     'Please upgrade it.', backend_name)
@@ -60,10 +79,20 @@ class PlaylistsController(object):
 
         .. versionadded:: 1.0
         """
+        validation.check_uri(uri)
+
         uri_scheme = urlparse.urlparse(uri).scheme
         backend = self.backends.with_playlists.get(uri_scheme, None)
-        if backend:
-            return backend.playlists.get_items(uri).get()
+
+        if not backend:
+            return None
+
+        with _backend_error_handling(backend):
+            items = backend.playlists.get_items(uri).get()
+            items is None or validation.check_instances(items, Ref)
+            return items
+
+        return None
 
     def get_playlists(self, include_tracks=True):
         """
@@ -88,7 +117,7 @@ class PlaylistsController(object):
             # Use the playlist name from as_list() because it knows about any
             # playlist folder hierarchy, which lookup() does not.
             return [
-                playlists[r.uri].copy(name=r.name)
+                playlists[r.uri].replace(name=r.name)
                 for r in playlist_refs if playlists[r.uri] is not None]
         else:
             return [
@@ -116,16 +145,23 @@ class PlaylistsController(object):
         :type name: string
         :param uri_scheme: use the backend matching the URI scheme
         :type uri_scheme: string
-        :rtype: :class:`mopidy.models.Playlist`
+        :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
         if uri_scheme in self.backends.with_playlists:
-            backend = self.backends.with_playlists[uri_scheme]
+            backends = [self.backends.with_playlists[uri_scheme]]
         else:
-            # TODO: this fallback looks suspicious
-            backend = list(self.backends.with_playlists.values())[0]
-        playlist = backend.playlists.create(name).get()
-        listener.CoreListener.send('playlist_changed', playlist=playlist)
-        return playlist
+            backends = self.backends.with_playlists.values()
+
+        for backend in backends:
+            with _backend_error_handling(backend):
+                result = backend.playlists.create(name).get()
+                if result is None:
+                    continue
+                validation.check_instance(result, Playlist)
+                listener.CoreListener.send('playlist_changed', playlist=result)
+                return result
+
+        return None
 
     def delete(self, uri):
         """
@@ -137,10 +173,18 @@ class PlaylistsController(object):
         :param uri: URI of the playlist to delete
         :type uri: string
         """
+        validation.check_uri(uri)
+
         uri_scheme = urlparse.urlparse(uri).scheme
         backend = self.backends.with_playlists.get(uri_scheme, None)
-        if backend:
+        if not backend:
+            return
+
+        with _backend_error_handling(backend):
             backend.playlists.delete(uri).get()
+            # TODO: emit playlist changed?
+
+        # TODO: return value?
 
     def filter(self, criteria=None, **kwargs):
         """
@@ -150,15 +194,12 @@ class PlaylistsController(object):
 
             # Returns track with name 'a'
             filter({'name': 'a'})
-            filter(name='a')
 
             # Returns track with URI 'xyz'
             filter({'uri': 'xyz'})
-            filter(uri='xyz')
 
             # Returns track with name 'a' and URI 'xyz'
             filter({'name': 'a', 'uri': 'xyz'})
-            filter(name='a', uri='xyz')
 
         :param criteria: one or more criteria to match by
         :type criteria: dict
@@ -170,7 +211,10 @@ class PlaylistsController(object):
         deprecation.warn('core.playlists.filter')
 
         criteria = criteria or kwargs
-        matches = self.playlists
+        validation.check_query(
+            criteria, validation.PLAYLIST_FIELDS, list_values=False)
+
+        matches = self.playlists  # TODO: stop using self playlists
         for (key, value) in criteria.iteritems():
             matches = filter(lambda p: getattr(p, key) == value, matches)
         return matches
@@ -186,11 +230,18 @@ class PlaylistsController(object):
         """
         uri_scheme = urlparse.urlparse(uri).scheme
         backend = self.backends.with_playlists.get(uri_scheme, None)
-        if backend:
-            return backend.playlists.lookup(uri).get()
-        else:
+        if not backend:
             return None
 
+        with _backend_error_handling(backend):
+            playlist = backend.playlists.lookup(uri).get()
+            playlist is None or validation.check_instance(playlist, Playlist)
+            return playlist
+
+        return None
+
+    # TODO: there is an inconsistency between library.refresh(uri) and this
+    # call, not sure how to sort this out.
     def refresh(self, uri_scheme=None):
         """
         Refresh the playlists in :attr:`playlists`.
@@ -203,16 +254,26 @@ class PlaylistsController(object):
         :param uri_scheme: limit to the backend matching the URI scheme
         :type uri_scheme: string
         """
-        if uri_scheme is None:
-            futures = [b.playlists.refresh()
-                       for b in self.backends.with_playlists.values()]
-            pykka.get_all(futures)
+        # TODO: check: uri_scheme is None or uri_scheme?
+
+        futures = {}
+        backends = {}
+        playlists_loaded = False
+
+        for backend_scheme, backend in self.backends.with_playlists.items():
+            backends.setdefault(backend, set()).add(backend_scheme)
+
+        for backend, backend_schemes in backends.items():
+            if uri_scheme is None or uri_scheme in backend_schemes:
+                futures[backend] = backend.playlists.refresh()
+
+        for backend, future in futures.items():
+            with _backend_error_handling(backend):
+                future.get()
+                playlists_loaded = True
+
+        if playlists_loaded:
             listener.CoreListener.send('playlists_loaded')
-        else:
-            backend = self.backends.with_playlists.get(uri_scheme, None)
-            if backend:
-                backend.playlists.refresh().get()
-                listener.CoreListener.send('playlists_loaded')
 
     def save(self, playlist):
         """
@@ -236,11 +297,23 @@ class PlaylistsController(object):
         :type playlist: :class:`mopidy.models.Playlist`
         :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
+        validation.check_instance(playlist, Playlist)
+
         if playlist.uri is None:
-            return
+            return  # TODO: log this problem?
+
         uri_scheme = urlparse.urlparse(playlist.uri).scheme
         backend = self.backends.with_playlists.get(uri_scheme, None)
-        if backend:
+        if not backend:
+            return None
+
+        # TODO: we let AssertionError error through due to legacy tests :/
+        with _backend_error_handling(backend, reraise=AssertionError):
             playlist = backend.playlists.save(playlist).get()
-            listener.CoreListener.send('playlist_changed', playlist=playlist)
+            playlist is None or validation.check_instance(playlist, Playlist)
+            if playlist:
+                listener.CoreListener.send(
+                    'playlist_changed', playlist=playlist)
             return playlist
+
+        return None

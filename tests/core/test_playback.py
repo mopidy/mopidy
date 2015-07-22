@@ -7,6 +7,7 @@ import mock
 import pykka
 
 from mopidy import backend, core
+from mopidy.internal import deprecation
 from mopidy.models import Track
 
 from tests import dummy_audio
@@ -23,10 +24,13 @@ class TestBackend(pykka.ThreadingActor, backend.Backend):
 
 
 class TestCurrentAndPendingTlTrack(unittest.TestCase):
+    config = {'core': {'max_tracklist_length': 10000}}
+
     def setUp(self):  # noqa: N802
         self.audio = dummy_audio.DummyAudio.start().proxy()
         self.backend = TestBackend.start(config={}, audio=self.audio).proxy()
-        self.core = core.Core(audio=self.audio, backends=[self.backend])
+        self.core = core.Core(
+            audio=self.audio, backends=[self.backend], config=self.config)
         self.playback = self.core.playback
 
         self.tracks = [Track(uri='dummy:a', length=1234),
@@ -93,18 +97,22 @@ class TestCurrentAndPendingTlTrack(unittest.TestCase):
 class CorePlaybackTest(unittest.TestCase):
 
     def setUp(self):  # noqa: N802
+        config = {
+            'core': {
+                'max_tracklist_length': 10000,
+            }
+        }
+
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
         self.playback1 = mock.Mock(spec=backend.PlaybackProvider)
-        self.playback1.get_time_position().get.return_value = 1000
-        self.playback1.reset_mock()
+        self.playback1.get_time_position.return_value.get.return_value = 1000
         self.backend1.playback = self.playback1
 
         self.backend2 = mock.Mock()
         self.backend2.uri_schemes.get.return_value = ['dummy2']
         self.playback2 = mock.Mock(spec=backend.PlaybackProvider)
-        self.playback2.get_time_position().get.return_value = 2000
-        self.playback2.reset_mock()
+        self.playback2.get_time_position.return_value.get.return_value = 2000
         self.backend2.playback = self.playback2
 
         # A backend without the optional playback provider
@@ -123,7 +131,7 @@ class CorePlaybackTest(unittest.TestCase):
         self.uris = [
             'dummy1:a', 'dummy2:a', 'dummy3:a', 'dummy1:b', 'dummy1:c']
 
-        self.core = core.Core(mixer=None, backends=[
+        self.core = core.Core(config, mixer=None, backends=[
             self.backend1, self.backend2, self.backend3])
 
         def lookup(uris):
@@ -197,6 +205,17 @@ class CorePlaybackTest(unittest.TestCase):
 
         self.assertEqual(
             self.core.playback.get_current_track(), self.tracks[0])
+
+    def test_get_current_tlid_none(self):
+        self.set_current_tl_track(None)
+
+        self.assertEqual(self.core.playback.get_current_tlid(), None)
+
+    def test_get_current_tlid_play(self):
+        self.core.playback.play(self.tl_tracks[0])
+
+        self.assertEqual(
+            self.core.playback.get_current_tlid(), self.tl_tracks[0].tlid)
 
     # TODO Test state
 
@@ -598,6 +617,12 @@ class CorePlaybackTest(unittest.TestCase):
         self.assertFalse(self.playback1.seek.called)
         self.playback2.seek.assert_called_once_with(10000)
 
+    def test_seek_normalizes_negative_positions_to_zero(self):
+        self.core.playback.play(self.tl_tracks[0])
+        self.core.playback.seek(-100)
+
+        self.playback1.seek.assert_called_once_with(0)
+
     def test_seek_fails_for_unplayable_track(self):
         self.set_current_tl_track(self.unplayable_tl_track)
         self.core.playback.state = core.PlaybackState.PLAYING
@@ -672,9 +697,15 @@ class CorePlaybackTest(unittest.TestCase):
 class TestStream(unittest.TestCase):
 
     def setUp(self):  # noqa: N802
+        config = {
+            'core': {
+                'max_tracklist_length': 10000,
+            }
+        }
         self.audio = dummy_audio.DummyAudio.start().proxy()
         self.backend = TestBackend.start(config={}, audio=self.audio).proxy()
-        self.core = core.Core(audio=self.audio, backends=[self.backend])
+        self.core = core.Core(
+            config, audio=self.audio, backends=[self.backend])
         self.playback = self.core.playback
 
         self.tracks = [Track(uri='dummy:a', length=1234),
@@ -756,6 +787,12 @@ class TestStream(unittest.TestCase):
 class CorePlaybackWithOldBackendTest(unittest.TestCase):
 
     def test_type_error_from_old_backend_does_not_crash_core(self):
+        config = {
+            'core': {
+                'max_tracklist_length': 10000,
+            }
+        }
+
         b = mock.Mock()
         b.uri_schemes.get.return_value = ['dummy1']
         b.playback = mock.Mock(spec=backend.PlaybackProvider)
@@ -763,6 +800,61 @@ class CorePlaybackWithOldBackendTest(unittest.TestCase):
         b.library.lookup.return_value.get.return_value = [
             Track(uri='dummy1:a', length=40000)]
 
-        c = core.Core(mixer=None, backends=[b])
+        c = core.Core(config, mixer=None, backends=[b])
         c.tracklist.add(uris=['dummy1:a'])
         c.playback.play()  # No TypeError == test passed.
+        b.playback.play.assert_called_once_with()
+
+
+class TestPlay(unittest.TestCase):
+
+    def setUp(self):  # noqa: N802
+        config = {
+            'core': {
+                'max_tracklist_length': 10000,
+            }
+        }
+
+        self.backend = mock.Mock()
+        self.backend.uri_schemes.get.return_value = ['dummy']
+        self.core = core.Core(config, backends=[self.backend])
+
+        self.tracks = [Track(uri='dummy:a', length=1234),
+                       Track(uri='dummy:b', length=1234)]
+
+        with deprecation.ignore('core.tracklist.add:tracks_arg'):
+            self.tl_tracks = self.core.tracklist.add(tracks=self.tracks)
+
+    def test_play_tlid(self):
+        self.core.playback.play(tlid=self.tl_tracks[1].tlid)
+        self.backend.playback.change_track.assert_called_once_with(
+            self.tl_tracks[1].track)
+
+
+class Bug1177RegressionTest(unittest.TestCase):
+    def test(self):
+        config = {
+            'core': {
+                'max_tracklist_length': 10000,
+            }
+        }
+
+        b = mock.Mock()
+        b.uri_schemes.get.return_value = ['dummy']
+        b.playback = mock.Mock(spec=backend.PlaybackProvider)
+        b.playback.change_track.return_value.get.return_value = True
+        b.playback.play.return_value.get.return_value = True
+
+        track1 = Track(uri='dummy:a', length=40000)
+        track2 = Track(uri='dummy:b', length=40000)
+
+        c = core.Core(config, mixer=None, backends=[b])
+        c.tracklist.add([track1, track2])
+
+        c.playback.play()
+        b.playback.change_track.assert_called_once_with(track1)
+        b.playback.change_track.reset_mock()
+
+        c.playback.pause()
+        c.playback.next()
+        b.playback.change_track.assert_called_once_with(track2)

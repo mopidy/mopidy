@@ -6,10 +6,10 @@ import pykka
 
 from mopidy import core
 from mopidy.core import PlaybackState
+from mopidy.internal import deprecation
 from mopidy.models import Track
 from mopidy.mpd import dispatcher
 from mopidy.mpd.protocol import status
-from mopidy.utils import deprecation
 
 from tests import dummy_backend, dummy_mixer
 
@@ -25,12 +25,20 @@ STOPPED = PlaybackState.STOPPED
 class StatusHandlerTest(unittest.TestCase):
 
     def setUp(self):  # noqa: N802
+        config = {
+            'core': {
+                'max_tracklist_length': 10000,
+            }
+        }
+
         self.mixer = dummy_mixer.create_proxy()
         self.backend = dummy_backend.create_proxy()
 
         with deprecation.ignore():
             self.core = core.Core.start(
-                mixer=self.mixer, backends=[self.backend]).proxy()
+                config,
+                mixer=self.mixer,
+                backends=[self.backend]).proxy()
 
         self.dispatcher = dispatcher.MpdDispatcher(core=self.core)
         self.context = self.dispatcher.context
@@ -76,7 +84,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(int(result['repeat']), 0)
 
     def test_status_method_contains_repeat_is_1(self):
-        self.core.tracklist.repeat = 1
+        self.core.tracklist.set_repeat(True)
         result = dict(status.status(self.context))
         self.assertIn('repeat', result)
         self.assertEqual(int(result['repeat']), 1)
@@ -87,7 +95,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(int(result['random']), 0)
 
     def test_status_method_contains_random_is_1(self):
-        self.core.tracklist.random = 1
+        self.core.tracklist.set_random(True)
         result = dict(status.status(self.context))
         self.assertIn('random', result)
         self.assertEqual(int(result['random']), 1)
@@ -103,7 +111,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(int(result['consume']), 0)
 
     def test_status_method_contains_consume_is_1(self):
-        self.core.tracklist.consume = 1
+        self.core.tracklist.set_consume(True)
         result = dict(status.status(self.context))
         self.assertIn('consume', result)
         self.assertEqual(int(result['consume']), 1)

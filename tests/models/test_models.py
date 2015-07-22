@@ -8,54 +8,101 @@ from mopidy.models import (
     TlTrack, Track, model_json_decoder)
 
 
-class GenericCopyTest(unittest.TestCase):
+class InheritanceTest(unittest.TestCase):
+
+    def test_weakref_and_slots_play_nice_in_subclass(self):
+        # Check that the following does not happen:
+        # TypeError: Error when calling the metaclass bases
+        #   __weakref__ slot disallowed: either we already got one...
+
+        class Foo(Track):
+            pass
+
+    def test_sub_class_can_have_its_own_slots(self):
+        # Needed for things like SpotifyTrack in mopidy-spotify 1.x
+
+        class Foo(Track):
+            __slots__ = ('_foo',)
+
+        f = Foo()
+        f._foo = 123
+
+    def test_sub_class_can_be_initialized(self):
+        # Fails with following error if fields are not handled across classes.
+        #   TypeError: __init__() got an unexpected keyword argument "type"
+        # Essentially this is testing that sub-classes take parent _fields into
+        # account.
+
+        class Foo(Ref):
+            pass
+
+        Foo.directory()
+
+
+class CachingTest(unittest.TestCase):
+
+    def test_same_instance(self):
+        self.assertIs(Track(), Track())
+
+    def test_same_instance_with_values(self):
+        self.assertIs(Track(uri='test'), Track(uri='test'))
+
+    def test_different_instance_with_different_values(self):
+        self.assertIsNot(Track(uri='test1'), Track(uri='test2'))
+
+    def test_different_instance_with_replace(self):
+        t = Track(uri='test1')
+        self.assertIsNot(t, t.replace(uri='test2'))
+
+
+class GenericReplaceTest(unittest.TestCase):
 
     def compare(self, orig, other):
         self.assertEqual(orig, other)
-        self.assertNotEqual(id(orig), id(other))
+        self.assertEqual(id(orig), id(other))
 
-    def test_copying_track(self):
+    def test_replace_track(self):
         track = Track()
-        self.compare(track, track.copy())
+        self.compare(track, track.replace())
 
-    def test_copying_artist(self):
+    def test_replace_artist(self):
         artist = Artist()
-        self.compare(artist, artist.copy())
+        self.compare(artist, artist.replace())
 
-    def test_copying_album(self):
+    def test_replace_album(self):
         album = Album()
-        self.compare(album, album.copy())
+        self.compare(album, album.replace())
 
-    def test_copying_playlist(self):
+    def test_replace_playlist(self):
         playlist = Playlist()
-        self.compare(playlist, playlist.copy())
+        self.compare(playlist, playlist.replace())
 
-    def test_copying_track_with_basic_values(self):
+    def test_replace_track_with_basic_values(self):
         track = Track(name='foo', uri='bar')
-        copy = track.copy(name='baz')
-        self.assertEqual('baz', copy.name)
-        self.assertEqual('bar', copy.uri)
+        other = track.replace(name='baz')
+        self.assertEqual('baz', other.name)
+        self.assertEqual('bar', other.uri)
 
-    def test_copying_track_with_missing_values(self):
+    def test_replace_track_with_missing_values(self):
         track = Track(uri='bar')
-        copy = track.copy(name='baz')
-        self.assertEqual('baz', copy.name)
-        self.assertEqual('bar', copy.uri)
+        other = track.replace(name='baz')
+        self.assertEqual('baz', other.name)
+        self.assertEqual('bar', other.uri)
 
-    def test_copying_track_with_private_internal_value(self):
+    def test_replace_track_with_private_internal_value(self):
         artist1 = Artist(name='foo')
         artist2 = Artist(name='bar')
         track = Track(artists=[artist1])
-        copy = track.copy(artists=[artist2])
-        self.assertIn(artist2, copy.artists)
+        other = track.replace(artists=[artist2])
+        self.assertIn(artist2, other.artists)
 
-    def test_copying_track_with_invalid_key(self):
+    def test_replace_track_with_invalid_key(self):
         with self.assertRaises(TypeError):
-            Track().copy(invalid_key=True)
+            Track().replace(invalid_key=True)
 
-    def test_copying_track_to_remove(self):
-        track = Track(name='foo').copy(name=None)
-        self.assertEqual(track.__dict__, Track().__dict__)
+    def test_replace_track_to_remove(self):
+        track = Track(name='foo').replace(name=None)
+        self.assertFalse(hasattr(track, '_name'))
 
 
 class RefTest(unittest.TestCase):
@@ -74,13 +121,19 @@ class RefTest(unittest.TestCase):
         with self.assertRaises(AttributeError):
             ref.name = None
 
+    # TODO: add these for the more of the models?
+    def test_del_name(self):
+        ref = Ref(name='foo')
+        with self.assertRaises(AttributeError):
+            del ref.name
+
     def test_invalid_kwarg(self):
         with self.assertRaises(TypeError):
             Ref(foo='baz')
 
     def test_repr_without_results(self):
         self.assertEqual(
-            "Ref(name=u'foo', type=u'artist', uri=u'uri')",
+            "Ref(name=u'foo', type='artist', uri='uri')",
             repr(Ref(uri='uri', name='foo', type='artist')))
 
     def test_serialize_without_results(self):
@@ -187,14 +240,14 @@ class ArtistTest(unittest.TestCase):
 
     def test_invalid_kwarg_with_name_matching_method(self):
         with self.assertRaises(TypeError):
-            Artist(copy='baz')
+            Artist(replace='baz')
 
         with self.assertRaises(TypeError):
             Artist(serialize='baz')
 
     def test_repr(self):
         self.assertEqual(
-            "Artist(name=u'name', uri=u'uri')",
+            "Artist(name=u'name', uri='uri')",
             repr(Artist(uri='uri', name='name')))
 
     def test_serialize(self):
@@ -359,12 +412,12 @@ class AlbumTest(unittest.TestCase):
 
     def test_repr_without_artists(self):
         self.assertEqual(
-            "Album(name=u'name', uri=u'uri')",
+            "Album(name=u'name', uri='uri')",
             repr(Album(uri='uri', name='name')))
 
     def test_repr_with_artists(self):
         self.assertEqual(
-            "Album(artists=[Artist(name=u'foo')], name=u'name', uri=u'uri')",
+            "Album(artists=[Artist(name=u'foo')], name=u'name', uri='uri')",
             repr(Album(uri='uri', name='name', artists=[Artist(name='foo')])))
 
     def test_serialize_without_artists(self):
@@ -603,12 +656,12 @@ class TrackTest(unittest.TestCase):
 
     def test_repr_without_artists(self):
         self.assertEqual(
-            "Track(name=u'name', uri=u'uri')",
+            "Track(name=u'name', uri='uri')",
             repr(Track(uri='uri', name='name')))
 
     def test_repr_with_artists(self):
         self.assertEqual(
-            "Track(artists=[Artist(name=u'foo')], name=u'name', uri=u'uri')",
+            "Track(artists=[Artist(name=u'foo')], name=u'name', uri='uri')",
             repr(Track(uri='uri', name='name', artists=[Artist(name='foo')])))
 
     def test_serialize_without_artists(self):
@@ -794,9 +847,9 @@ class TrackTest(unittest.TestCase):
         self.assertEqual(track1, track2)
         self.assertEqual(hash(track1), hash(track2))
 
-    def test_copy_can_reset_to_default_value(self):
+    def test_replace_can_reset_to_default_value(self):
         track1 = Track(name='name1')
-        track2 = Track(name='name1', album=Album()).copy(album=None)
+        track2 = Track(name='name1', album=Album()).replace(album=None)
         self.assertEqual(track1, track2)
         self.assertEqual(hash(track1), hash(track2))
 
@@ -838,7 +891,7 @@ class TlTrackTest(unittest.TestCase):
 
     def test_repr(self):
         self.assertEqual(
-            "TlTrack(tlid=123, track=Track(uri=u'uri'))",
+            "TlTrack(tlid=123, track=Track(uri='uri'))",
             repr(TlTrack(tlid=123, track=Track(uri='uri'))))
 
     def test_serialize(self):
@@ -921,7 +974,7 @@ class PlaylistTest(unittest.TestCase):
         playlist = Playlist(
             uri='an uri', name='a name', tracks=tracks,
             last_modified=last_modified)
-        new_playlist = playlist.copy(uri='another uri')
+        new_playlist = playlist.replace(uri='another uri')
         self.assertEqual(new_playlist.uri, 'another uri')
         self.assertEqual(new_playlist.name, 'a name')
         self.assertEqual(list(new_playlist.tracks), tracks)
@@ -933,7 +986,7 @@ class PlaylistTest(unittest.TestCase):
         playlist = Playlist(
             uri='an uri', name='a name', tracks=tracks,
             last_modified=last_modified)
-        new_playlist = playlist.copy(name='another name')
+        new_playlist = playlist.replace(name='another name')
         self.assertEqual(new_playlist.uri, 'an uri')
         self.assertEqual(new_playlist.name, 'another name')
         self.assertEqual(list(new_playlist.tracks), tracks)
@@ -946,7 +999,7 @@ class PlaylistTest(unittest.TestCase):
             uri='an uri', name='a name', tracks=tracks,
             last_modified=last_modified)
         new_tracks = [Track(), Track()]
-        new_playlist = playlist.copy(tracks=new_tracks)
+        new_playlist = playlist.replace(tracks=new_tracks)
         self.assertEqual(new_playlist.uri, 'an uri')
         self.assertEqual(new_playlist.name, 'a name')
         self.assertEqual(list(new_playlist.tracks), new_tracks)
@@ -959,7 +1012,7 @@ class PlaylistTest(unittest.TestCase):
         playlist = Playlist(
             uri='an uri', name='a name', tracks=tracks,
             last_modified=last_modified)
-        new_playlist = playlist.copy(last_modified=new_last_modified)
+        new_playlist = playlist.replace(last_modified=new_last_modified)
         self.assertEqual(new_playlist.uri, 'an uri')
         self.assertEqual(new_playlist.name, 'a name')
         self.assertEqual(list(new_playlist.tracks), tracks)
@@ -971,12 +1024,12 @@ class PlaylistTest(unittest.TestCase):
 
     def test_repr_without_tracks(self):
         self.assertEqual(
-            "Playlist(name=u'name', uri=u'uri')",
+            "Playlist(name=u'name', uri='uri')",
             repr(Playlist(uri='uri', name='name')))
 
     def test_repr_with_tracks(self):
         self.assertEqual(
-            "Playlist(name=u'name', tracks=[Track(name=u'foo')], uri=u'uri')",
+            "Playlist(name=u'name', tracks=[Track(name=u'foo')], uri='uri')",
             repr(Playlist(uri='uri', name='name', tracks=[Track(name='foo')])))
 
     def test_serialize_without_tracks(self):
@@ -1108,16 +1161,10 @@ class SearchResultTest(unittest.TestCase):
 
     def test_repr_without_results(self):
         self.assertEqual(
-            "SearchResult(uri=u'uri')",
+            "SearchResult(uri='uri')",
             repr(SearchResult(uri='uri')))
 
     def test_serialize_without_results(self):
         self.assertDictEqual(
             {'__model__': 'SearchResult', 'uri': 'uri'},
             SearchResult(uri='uri').serialize())
-
-    def test_to_json_and_back(self):
-        result1 = SearchResult(uri='uri')
-        serialized = json.dumps(result1, cls=ModelJSONEncoder)
-        result2 = json.loads(serialized, object_hook=model_json_decoder)
-        self.assertEqual(result1, result2)

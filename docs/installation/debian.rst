@@ -18,12 +18,12 @@ from scratch, we have a guide for installing Debian/Raspbian and Mopidy. See
 
    The packages should work with:
 
-   - Debian stable and testing,
-   - Raspbian stable and testing,
+   - Debian stable ("jessie") and testing ("stretch"),
+   - Raspbian stable ("jessie") and testing ("stretch"),
    - Ubuntu 14.04 LTS and later.
 
-   Some of the packages, including the core "mopidy" packages, does *not* work
-   on Ubuntu 12.04 LTS.
+   Some of the packages *do not* work with Ubuntu 12.04 LTS or Debian 7
+   "wheezy".
 
    This is just what we currently support, not a promise to continue to
    support the same in the future. We *will* drop support for older
@@ -46,6 +46,13 @@ from scratch, we have a guide for installing Debian/Raspbian and Mopidy. See
    ``/etc/apt/sources.list.d/mopidy.list``::
 
        sudo wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/mopidy.list
+
+   .. note::
+
+       If you're still running Debian 7 "wheezy" or Raspbian "wheezy", you
+       should edit :file:`/etc/apt/sources.list.d/mopidy.list` and replace
+       "stable" with "wheezy". This will give you the latest set of packages
+       that is compatible with Debian "wheezy".
 
 #. Install Mopidy and all dependencies::
 

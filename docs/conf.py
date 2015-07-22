@@ -47,7 +47,6 @@ class Mock(object):
             return Mock()
 
 MOCK_MODULES = [
-    'cherrypy',
     'dbus',
     'dbus.mainloop',
     'dbus.mainloop.glib',
@@ -61,12 +60,6 @@ MOCK_MODULES = [
     'pykka.actor',
     'pykka.future',
     'pykka.registry',
-    'pylast',
-    'ws4py',
-    'ws4py.messaging',
-    'ws4py.server',
-    'ws4py.server.cherrypyserver',
-    'ws4py.websocket',
 ]
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
@@ -102,9 +95,12 @@ master_doc = 'index'
 project = 'Mopidy'
 copyright = '2009-2015, Stein Magnus Jodal and contributors'
 
-from mopidy.utils.versioning import get_version
+from mopidy.internal.versioning import get_version
 release = get_version()
 version = '.'.join(release.split('.')[:2])
+
+# To make the build reproducible, avoid using today's date in the manpages
+today = '2015'
 
 exclude_trees = ['_build']
 

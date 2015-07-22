@@ -21,9 +21,9 @@ available at:
 
 You may need to adjust hostname and port for your local setup.
 
-Thus, if you use Mopidy to host your web client, like described above, you can
-load the latest version of Mopidy.js by adding the following script tag to your
-HTML file:
+Thus, if you use Mopidy to host your web client, like described in
+:ref:`static-web-client`, you can load the latest version of Mopidy.js by
+adding the following script tag to your HTML file:
 
 .. code-block:: html
 
@@ -189,13 +189,10 @@ you've hooked up an errback (more on that a bit later) to the promise returned
 from the call, the errback will be called with a ``Mopidy.ConnectionError``
 instance.
 
-All methods in Mopidy's :ref:`core-api` is available via Mopidy.js. The core
-API attributes is *not* available, but that shouldn't be a problem as we've
-added (undocumented) getters and setters for all of them, so you can access the
-attributes as well from JavaScript. For example, the
-:attr:`mopidy.core.PlaybackController.state` attribute is available in
-JSON-RPC as the method ``core.playback.get_state`` and in Mopidy.js as
-``mopidy.playback.getState()``.
+All methods in Mopidy's :ref:`core-api` is available via Mopidy.js. For
+example, the :meth:`mopidy.core.PlaybackController.get_state` method is
+available in JSON-RPC as the method ``core.playback.get_state`` and in
+Mopidy.js as ``mopidy.playback.getState()``.
 
 Both the WebSocket API and the JavaScript API are based on introspection of the
 core Python API. Thus, they will always be up to date and immediately reflect
@@ -218,8 +215,7 @@ by looking at the method's ``description`` and ``params`` attributes:
 
 JSON-RPC 2.0 limits method parameters to be sent *either* by-position or
 by-name. Combinations of both, like we're used to from Python, isn't supported
-by JSON-RPC 2.0. To further limit this, Mopidy.js currently only supports
-passing parameters by-position.
+by JSON-RPC 2.0.
 
 Obviously, you'll want to get a return value from many of your method calls.
 Since everything is happening across the WebSocket and maybe even across the
@@ -272,8 +268,9 @@ passing it as the second argument to ``done()``:
         .done(printCurrentTrack, console.error.bind(console));
 
 If you don't hook up an error handler function and never call ``done()`` on the
-promise object, when.js will log warnings to the console that you have
-unhandled errors. In general, unhandled errors will not go silently missing.
+promise object, warnings will be logged to the console complaining that you
+have unhandled errors. In general, unhandled errors will not go silently
+missing.
 
 The promise objects returned by Mopidy.js adheres to the `CommonJS Promises/A
 <http://wiki.commonjs.org/wiki/Promises/A>`_ standard. We use the

@@ -3,8 +3,8 @@ from __future__ import absolute_import, unicode_literals
 import unittest
 
 from mopidy.core import PlaybackState
+from mopidy.internal import deprecation
 from mopidy.models import Track
-from mopidy.utils import deprecation
 
 from tests.mpd import protocol
 
