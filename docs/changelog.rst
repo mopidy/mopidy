@@ -4,6 +4,18 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+v1.0.8 (2015-07-22)
+===================
+
+Bug fix release.
+
+- Fix reversal of ``Title`` and ``Name`` in MPD protocol (Fixes: :issue:`1212`
+  PR: :issue:`1214`)
+
+- Fix crash if an M3U file in the :confval:`m3u/playlist_dir` directory has a
+  file name not decodable with the current file system encoding. (Fixes:
+  :issue:`1209`)
+
 
 v1.0.7 (2015-06-26)
 ===================

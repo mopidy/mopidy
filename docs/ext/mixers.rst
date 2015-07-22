@@ -29,6 +29,14 @@ Extension for controlling volume using an external Arcam amplifier. Developed
 and tested with an Arcam AVR-300.
 
 
+Mopidy-dam1021
+==============
+
+https://github.com/fortaa/mopidy-dam1021
+
+Extension for controlling volume using a dam1021 DAC device.
+
+
 Mopidy-NAD
 ==========
 
