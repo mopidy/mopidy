@@ -5,7 +5,7 @@ from __future__ import absolute_import, unicode_literals
 import io
 import unittest
 
-from mopidy.audio import playlists
+from mopidy.internal import playlists
 
 
 BAD = b'foobarbaz'
