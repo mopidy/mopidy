@@ -4,6 +4,8 @@ from __future__ import absolute_import, unicode_literals
 
 import unittest
 
+import pytest
+
 from mopidy.internal import playlists
 
 
@@ -75,6 +77,20 @@ XSPF = b"""<?xml version="1.0" encoding="UTF-8"?>
 </playlist>
 """
 
+EXPECTED = [b'file:///tmp/foo', b'file:///tmp/bar', b'file:///tmp/baz']
+
+
+@pytest.mark.parametrize('data,result', [
+    (BAD, []),
+    (M3U, EXPECTED),
+    (PLS, EXPECTED),
+    (ASX, EXPECTED),
+    (SIMPLE_ASX, EXPECTED),
+    (XSPF, EXPECTED),
+])
+def test_parse(data, result):
+    assert playlists.parse(data) == result
+
 
 class BasePlaylistTest(object):
     valid = None
@@ -90,8 +106,7 @@ class BasePlaylistTest(object):
 
     def test_parse_valid_playlist(self):
         uris = list(self.parse(self.valid))
-        expected = [b'file:///tmp/foo', b'file:///tmp/bar', b'file:///tmp/baz']
-        self.assertEqual(uris, expected)
+        self.assertEqual(uris, EXPECTED)
 
     def test_parse_invalid_playlist(self):
         uris = list(self.parse(self.invalid))

@@ -14,6 +14,19 @@ except ImportError:
     import xml.etree.ElementTree as elementtree
 
 
+def parse(data):
+    handlers = {
+        detect_m3u_header: parse_m3u,
+        detect_pls_header: parse_pls,
+        detect_asx_header: parse_asx,
+        detect_xspf_header: parse_xspf,
+    }
+    for detector, parser in handlers.items():
+        if detector(data):
+            return list(parser(data))
+    return []
+
+
 def detect_m3u_header(data):
     return data[0:7].upper() == b'#EXTM3U'
 
