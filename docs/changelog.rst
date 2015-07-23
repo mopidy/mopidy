@@ -7,6 +7,11 @@ This changelog is used to track all major changes to Mopidy.
 v1.1.0 (UNRELEASED)
 ===================
 
+Dependencies
+------------
+
+- Mopidy now requires Requests.
+
 Core API
 --------
 
