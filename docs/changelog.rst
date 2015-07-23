@@ -85,6 +85,12 @@ MPD frontend
 - Track data now include the ``Last-Modified`` field if set on the track model.
   (Fixes: :issue:`1218`, PR: :issue:`1219`)
 
+Stream backend
+--------------
+
+- Move stream playlist parsing from GStreamer to the stream backend. (Fixes:
+  :issue:`671`)
+
 Local backend
 -------------
 
