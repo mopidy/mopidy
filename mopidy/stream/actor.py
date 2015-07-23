@@ -20,21 +20,23 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
         super(StreamBackend, self).__init__()
 
         self.library = StreamLibraryProvider(
-            backend=self, timeout=config['stream']['timeout'],
-            blacklist=config['stream']['metadata_blacklist'],
-            proxy=config['proxy'])
+            backend=self, blacklist=config['stream']['metadata_blacklist'])
         self.playback = backend.PlaybackProvider(audio=audio, backend=self)
         self.playlists = None
 
         self.uri_schemes = audio_lib.supported_uri_schemes(
             config['stream']['protocols'])
 
+        self._scanner = scan.Scanner(
+            timeout=config['stream']['timeout'],
+            proxy_config=config['proxy'])
+
 
 class StreamLibraryProvider(backend.LibraryProvider):
 
-    def __init__(self, backend, timeout, blacklist, proxy):
+    def __init__(self, backend, blacklist):
         super(StreamLibraryProvider, self).__init__(backend)
-        self._scanner = scan.Scanner(timeout=timeout, proxy_config=proxy)
+        self._scanner = backend._scanner
         self._blacklist_re = re.compile(
             r'^(%s)$' % '|'.join(fnmatch.translate(u) for u in blacklist))
 
