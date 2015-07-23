@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import, unicode_literals
 
-import io
 import unittest
 
 from mopidy.internal import playlists
@@ -77,15 +76,6 @@ XSPF = b"""<?xml version="1.0" encoding="UTF-8"?>
 """
 
 
-class TypeFind(object):
-
-    def __init__(self, data):
-        self.data = data
-
-    def peek(self, start, end):
-        return self.data[start:end]
-
-
 class BasePlaylistTest(object):
     valid = None
     invalid = None
@@ -93,18 +83,18 @@ class BasePlaylistTest(object):
     parse = None
 
     def test_detect_valid_header(self):
-        self.assertTrue(self.detect(TypeFind(self.valid)))
+        self.assertTrue(self.detect(self.valid))
 
     def test_detect_invalid_header(self):
-        self.assertFalse(self.detect(TypeFind(self.invalid)))
+        self.assertFalse(self.detect(self.invalid))
 
     def test_parse_valid_playlist(self):
-        uris = list(self.parse(io.BytesIO(self.valid)))
+        uris = list(self.parse(self.valid))
         expected = [b'file:///tmp/foo', b'file:///tmp/bar', b'file:///tmp/baz']
         self.assertEqual(uris, expected)
 
     def test_parse_invalid_playlist(self):
-        uris = list(self.parse(io.BytesIO(self.invalid)))
+        uris = list(self.parse(self.invalid))
         self.assertEqual(uris, [])
 
 

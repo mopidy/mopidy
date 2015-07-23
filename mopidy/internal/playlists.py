@@ -14,18 +14,16 @@ except ImportError:
     import xml.etree.ElementTree as elementtree
 
 
-# TODO: make detect_FOO_header reusable in general mopidy code.
-# i.e. give it just a "peek" like function.
-def detect_m3u_header(typefind):
-    return typefind.peek(0, 7).upper() == b'#EXTM3U'
+def detect_m3u_header(data):
+    return data[0:7].upper() == b'#EXTM3U'
 
 
-def detect_pls_header(typefind):
-    return typefind.peek(0, 10).lower() == b'[playlist]'
+def detect_pls_header(data):
+    return data[0:10].lower() == b'[playlist]'
 
 
-def detect_xspf_header(typefind):
-    data = typefind.peek(0, 150)
+def detect_xspf_header(data):
+    data = data[0:150]
     if b'xspf' not in data.lower():
         return False
 
@@ -38,8 +36,8 @@ def detect_xspf_header(typefind):
     return False
 
 
-def detect_asx_header(typefind):
-    data = typefind.peek(0, 50)
+def detect_asx_header(data):
+    data = data[0:50]
     if b'asx' not in data.lower():
         return False
 
@@ -55,7 +53,7 @@ def detect_asx_header(typefind):
 def parse_m3u(data):
     # TODO: convert non URIs to file URIs.
     found_header = False
-    for line in data.readlines():
+    for line in data.splitlines():
         if found_header or line.startswith(b'#EXTM3U'):
             found_header = True
         else:
@@ -68,7 +66,7 @@ def parse_pls(data):
     # TODO: convert non URIs to file URIs.
     try:
         cp = configparser.RawConfigParser()
-        cp.readfp(data)
+        cp.readfp(io.BytesIO(data))
     except configparser.Error:
         return
 
@@ -82,7 +80,7 @@ def parse_pls(data):
 def parse_xspf(data):
     try:
         # Last element will be root.
-        for event, element in elementtree.iterparse(data):
+        for event, element in elementtree.iterparse(io.BytesIO(data)):
             element.tag = element.tag.lower()  # normalize
     except elementtree.ParseError:
         return
@@ -95,7 +93,7 @@ def parse_xspf(data):
 def parse_asx(data):
     try:
         # Last element will be root.
-        for event, element in elementtree.iterparse(data):
+        for event, element in elementtree.iterparse(io.BytesIO(data)):
             element.tag = element.tag.lower()  # normalize
     except elementtree.ParseError:
         return
