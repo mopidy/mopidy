@@ -1,6 +1,11 @@
 from __future__ import absolute_import, unicode_literals
 
+import logging
+
 from mopidy import listener, models
+
+
+logger = logging.getLogger(__name__)
 
 
 class Backend(object):
@@ -238,6 +243,9 @@ class PlaybackProvider(object):
         :rtype: :class:`True` if successful, else :class:`False`
         """
         uri = self.translate_uri(track.uri)
+        if uri != track.uri:
+            logger.debug(
+                'Backend translated URI from %s to %s', track.uri, uri)
         if not uri:
             return False
         self.audio.set_uri(uri).get()
