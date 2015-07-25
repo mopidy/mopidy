@@ -172,13 +172,14 @@ class CoreLibraryTest(BaseCoreLibraryTest):
 
     def test_lookup_adds_source(self):
         # Overwrite the source_name attribute
-        self.backend1.source_name.get.return_value = 'hamspam'
+        source = 'hamspam'
+        self.backend1.source_name.get.return_value = source
 
-        track = Track(name='abc', source='hamspam')
-        self.library1.lookup().get.return_value = [track]
+        track = Track(name='abc')
+        self.library1.lookup.return_value.get.return_value = [track]
 
         result = self.core.library.lookup(uris=['dummy1:a'])
-        assert result == {'dummy1:a': [track]}
+        assert result == {'dummy1:a': [track.replace(source=source)]}
 
     def test_refresh_with_uri_selects_dummy1_backend(self):
         self.core.library.refresh('dummy1:a')
