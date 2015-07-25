@@ -54,6 +54,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
                 logger.warning(
                     'Trying to delete missing playlist file %s', path)
             del self._playlists[uri]
+            logger.info('Deleted playlist %s', uri)
         else:
             logger.warning('Trying to delete unknown playlist %s', uri)
 

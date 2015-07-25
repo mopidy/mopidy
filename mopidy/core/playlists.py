@@ -178,11 +178,12 @@ class PlaylistsController(object):
         uri_scheme = urlparse.urlparse(uri).scheme
         backend = self.backends.with_playlists.get(uri_scheme, None)
         if not backend:
-            return
+            return None  # TODO: error reporting to user
 
         with _backend_error_handling(backend):
             backend.playlists.delete(uri).get()
-            # TODO: emit playlist changed?
+            # TODO: error detection and reporting to user
+            listener.CoreListener.send('playlist_deleted', uri=uri)
 
         # TODO: return value?
 
