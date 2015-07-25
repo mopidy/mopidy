@@ -31,6 +31,7 @@ class TracklistTest(unittest.TestCase):
 
         self.backend = mock.Mock()
         self.backend.uri_schemes.get.return_value = ['dummy1']
+        self.backend.source_name.get.return_value = None
         self.library = mock.Mock(spec=backend.LibraryProvider)
         self.library.lookup.side_effect = lookup
         self.backend.library = self.library

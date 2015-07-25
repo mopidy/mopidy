@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 class LocalBackend(pykka.ThreadingActor, backend.Backend):
     uri_schemes = ['local']
     libraries = []
+    source_name = 'local'
 
     def __init__(self, config, audio):
         super(LocalBackend, self).__init__()

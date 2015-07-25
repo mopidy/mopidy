@@ -41,27 +41,35 @@ class LocalLibraryProviderTest(unittest.TestCase):
         Track(
             uri='local:track:path1', name='track1',
             artists=[artists[0]], album=albums[0],
-            date='2001-02-03', length=4000, track_no=1),
+            date='2001-02-03', length=4000, track_no=1,
+            source='local'),
         Track(
             uri='local:track:path2', name='track2',
             artists=[artists[1]], album=albums[1],
-            date='2002', length=4000, track_no=2),
+            date='2002', length=4000, track_no=2,
+            source='local'),
         Track(
             uri='local:track:path3', name='track3',
             artists=[artists[3]], album=albums[2],
-            date='2003', length=4000, track_no=3),
+            date='2003', length=4000, track_no=3,
+            source='local'),
         Track(
             uri='local:track:path4', name='track4',
             artists=[artists[2]], album=albums[3],
             date='2004', length=60000, track_no=4,
-            comment='This is a fantastic track'),
+            comment='This is a fantastic track',
+            source='local'),
         Track(
             uri='local:track:path5', name='track5', genre='genre1',
-            album=albums[3], length=4000, composers=[artists[4]]),
+            album=albums[3], length=4000, composers=[artists[4]],
+            source='local'),
         Track(
             uri='local:track:path6', name='track6', genre='genre2',
-            album=albums[3], length=4000, performers=[artists[5]]),
-        Track(uri='local:track:nameless', album=albums[-1]),
+            album=albums[3], length=4000, performers=[artists[5]],
+            source='local'),
+        Track(
+            uri='local:track:nameless', album=albums[-1],
+            source='local'),
     ]
 
     config = {
@@ -114,7 +122,7 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
             # Sanity check that value is in the library
             result = backend.library.lookup(self.tracks[0].uri)
-            self.assertEqual(result, self.tracks[0:1])
+            self.assertEqual(result, [self.tracks[0].replace(source=None)])
 
             # Clear and refresh.
             open(tmplib, 'w').close()
@@ -134,7 +142,8 @@ class LocalLibraryProviderTest(unittest.TestCase):
     def test_lookup(self):
         uri = self.tracks[0].uri
         result = self.library.lookup(uris=[uri])
-        self.assertEqual(result[uri], self.tracks[0:1])
+        tracks = [self.tracks[0].replace(source='local')]
+        self.assertEqual(result[uri], tracks)
 
     def test_lookup_unknown_track(self):
         tracks = self.library.lookup(uris=['fake:/uri'])
