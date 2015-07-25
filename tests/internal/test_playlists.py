@@ -16,6 +16,7 @@ EXTM3U = b"""#EXTM3U
 file:///tmp/foo
 #EXTINF:321,Example Artist - Example \xc5\xa7\xc5\x95
 file:///tmp/bar
+
 #EXTINF:213,Some Artist - Other title
 file:///tmp/baz
 """
@@ -25,6 +26,7 @@ NumberOfEntries=3
 File1=file:///tmp/foo
 Title1=Sample Title
 Length1=123
+
 File2=file:///tmp/bar
 Title2=Example \xc5\xa7\xc5\x95
 Length2=321
