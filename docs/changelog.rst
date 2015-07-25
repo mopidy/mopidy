@@ -47,6 +47,9 @@ Models
   reuse instances. For the test data set this was developed against, a library
   of ~14000 tracks, went from needing ~75MB to ~17MB. (Fixes: :issue:`348`)
 
+- Added :attr:`mopidy.models.Artist.sortname` field that is mapped to
+  ``musicbrainz-sortname`` tag. (Fixes: :issue:`940`)
+
 MPD frontend
 ------------
 
