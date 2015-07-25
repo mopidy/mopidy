@@ -61,13 +61,6 @@ Mopidy's core has the following configuration values that you can change.
 Core configuration
 ------------------
 
-.. confval:: core/max_tracklist_length
-
-    Max length of the tracklist. Defaults to 10000.
-
-    The original MPD server only supports 10000 tracks in the tracklist. Some
-    MPD clients will crash if this limit is exceeded.
-
 .. confval:: core/cache_dir
 
     Path to directory for storing cached information.
@@ -79,6 +72,13 @@ Core configuration
 .. confval:: core/data_dir
 
     Path to directory with data files.
+
+.. confval:: core/max_tracklist_length
+
+    Max length of the tracklist. Defaults to 10000.
+
+    The original MPD server only supports 10000 tracks in the tracklist. Some
+    MPD clients will crash if this limit is exceeded.
 
 
 Audio configuration
