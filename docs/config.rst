@@ -68,6 +68,18 @@ Core configuration
     The original MPD server only supports 10000 tracks in the tracklist. Some
     MPD clients will crash if this limit is exceeded.
 
+.. confval:: core/cache_dir
+
+    Path to directory for storing cached information.
+
+.. confval:: core/config_dir
+
+    Path to directory with configuration files.
+
+.. confval:: core/data_dir
+
+    Path to directory with data files.
+
 
 Audio configuration
 -------------------

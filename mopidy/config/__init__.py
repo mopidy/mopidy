@@ -18,6 +18,9 @@ logger = logging.getLogger(__name__)
 _core_schema = ConfigSchema('core')
 # MPD supports at most 10k tracks, some clients segfault when this is exceeded.
 _core_schema['max_tracklist_length'] = Integer(minimum=1, maximum=10000)
+_core_schema['cache_dir'] = Path()
+_core_schema['config_dir'] = Path()
+_core_schema['data_dir'] = Path()
 
 _logging_schema = ConfigSchema('logging')
 _logging_schema['color'] = Boolean()
