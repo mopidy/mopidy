@@ -21,6 +21,14 @@ file:///tmp/bar
 file:///tmp/baz
 """
 
+URILIST = b"""
+file:///tmp/foo
+# a comment
+file:///tmp/bar
+
+file:///tmp/baz
+"""
+
 PLS = b"""[Playlist]
 NumberOfEntries=3
 File1=file:///tmp/foo
@@ -84,6 +92,7 @@ EXPECTED = [b'file:///tmp/foo', b'file:///tmp/bar', b'file:///tmp/baz']
 
 @pytest.mark.parametrize('data,result', [
     (BAD, []),
+    (URILIST, EXPECTED),
     (EXTM3U, EXPECTED),
     (PLS, EXPECTED),
     (ASX, EXPECTED),
@@ -148,3 +157,17 @@ class XspfPlaylistTest(BasePlaylistTest, unittest.TestCase):
     invalid = BAD
     detect = staticmethod(playlists.detect_xspf_header)
     parse = staticmethod(playlists.parse_xspf)
+
+
+class UriListPlaylistTest(unittest.TestCase):
+    valid = URILIST
+    invalid = BAD
+    parse = staticmethod(playlists.parse_urilist)
+
+    def test_parse_valid_playlist(self):
+        uris = list(self.parse(self.valid))
+        self.assertEqual(uris, EXPECTED)
+
+    def test_parse_invalid_playlist(self):
+        uris = list(self.parse(self.invalid))
+        self.assertEqual(uris, [])

@@ -7,6 +7,7 @@ pygst.require('0.10')
 import gst  # noqa
 
 from mopidy.compat import configparser
+from mopidy.internal import validation
 
 try:
     import xml.etree.cElementTree as elementtree
@@ -24,7 +25,7 @@ def parse(data):
     for detector, parser in handlers.items():
         if detector(data):
             return list(parser(data))
-    return []
+    return parse_urilist(data)  # Fallback
 
 
 def detect_extm3u_header(data):
@@ -116,3 +117,16 @@ def parse_asx(data):
 
     for entry in element.findall('entry[@href]'):
         yield entry.get('href', '').strip()
+
+
+def parse_urilist(data):
+    result = []
+    for line in data.splitlines():
+        if not line.strip() or line.startswith('#'):
+            continue
+        try:
+            validation.check_uri(line)
+        except ValueError:
+            return []
+        result.append(line)
+    return result
