@@ -16,7 +16,7 @@ except ImportError:
 
 def parse(data):
     handlers = {
-        detect_m3u_header: parse_m3u,
+        detect_extm3u_header: parse_extm3u,
         detect_pls_header: parse_pls,
         detect_asx_header: parse_asx,
         detect_xspf_header: parse_xspf,
@@ -27,7 +27,7 @@ def parse(data):
     return []
 
 
-def detect_m3u_header(data):
+def detect_extm3u_header(data):
     return data[0:7].upper() == b'#EXTM3U'
 
 
@@ -63,7 +63,7 @@ def detect_asx_header(data):
     return False
 
 
-def parse_m3u(data):
+def parse_extm3u(data):
     # TODO: convert non URIs to file URIs.
     found_header = False
     for line in data.splitlines():

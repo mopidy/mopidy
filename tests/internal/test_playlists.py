@@ -11,7 +11,7 @@ from mopidy.internal import playlists
 
 BAD = b'foobarbaz'
 
-M3U = b"""#EXTM3U
+EXTM3U = b"""#EXTM3U
 #EXTINF:123, Sample artist - Sample title
 file:///tmp/foo
 #EXTINF:321,Example Artist - Example \xc5\xa7\xc5\x95
@@ -82,7 +82,7 @@ EXPECTED = [b'file:///tmp/foo', b'file:///tmp/bar', b'file:///tmp/baz']
 
 @pytest.mark.parametrize('data,result', [
     (BAD, []),
-    (M3U, EXPECTED),
+    (EXTM3U, EXPECTED),
     (PLS, EXPECTED),
     (ASX, EXPECTED),
     (SIMPLE_ASX, EXPECTED),
@@ -113,11 +113,11 @@ class BasePlaylistTest(object):
         self.assertEqual(uris, [])
 
 
-class M3uPlaylistTest(BasePlaylistTest, unittest.TestCase):
-    valid = M3U
+class ExtM3uPlaylistTest(BasePlaylistTest, unittest.TestCase):
+    valid = EXTM3U
     invalid = BAD
-    detect = staticmethod(playlists.detect_m3u_header)
-    parse = staticmethod(playlists.parse_m3u)
+    detect = staticmethod(playlists.detect_extm3u_header)
+    parse = staticmethod(playlists.parse_extm3u)
 
 
 class PlsPlaylistTest(BasePlaylistTest, unittest.TestCase):
