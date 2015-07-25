@@ -4,6 +4,7 @@ import datetime
 import re
 
 from mopidy.models import TlTrack
+from mopidy.mpd.protocol import tagtype_list
 
 # TODO: special handling of local:// uri scheme
 normalize_path_re = re.compile(r'[^/]+')
@@ -35,8 +36,6 @@ def track_to_mpd_format(track, position=None, stream_title=None):
 
     result = [
         ('file', track.uri or ''),
-        # TODO: only show length if not none, see:
-        # https://github.com/mopidy/mopidy/issues/923#issuecomment-79584110
         ('Time', track.length and (track.length // 1000) or 0),
         ('Artist', concat_multi_values(track.artists, 'name')),
         ('Album', track.album and track.album.name or ''),
@@ -97,7 +96,29 @@ def track_to_mpd_format(track, position=None, stream_title=None):
 
     if track.musicbrainz_id is not None:
         result.append(('MUSICBRAINZ_TRACKID', track.musicbrainz_id))
+
+    # clean up result
+    result = [element for element in result if _has_value(*element)]
+
     return result
+
+
+def _has_value(tagtype, value):
+    """
+    Determine whether to add the tagtype
+    to the output or not (if they have a default value).
+
+    :param tagtype: the mpd tagtype
+    :type tagtype: string
+    :param value: the associated value
+    :type value: multiple
+    :rtype: bool
+    """
+    if tagtype in tagtype_list.TAGTYPE_LIST:
+        if not value:
+            return False
+
+    return True
 
 
 def concat_multi_values(models, attribute):
