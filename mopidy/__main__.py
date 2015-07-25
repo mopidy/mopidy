@@ -166,7 +166,7 @@ def main():
         raise
 
 
-def create_file_structures_and_config(args, extensions):
+def create_file_structures_and_config(args, extensions_data):
     path.get_or_create_dir(b'$XDG_DATA_DIR/mopidy')
     path.get_or_create_dir(b'$XDG_CONFIG_DIR/mopidy')
 
@@ -176,7 +176,7 @@ def create_file_structures_and_config(args, extensions):
         return
 
     try:
-        default = config_lib.format_initial(extensions)
+        default = config_lib.format_initial(extensions_data)
         path.get_or_create_file(config_file, mkdir=False, content=default)
         logger.info('Initialized %s with default config', config_file)
     except IOError as error:
