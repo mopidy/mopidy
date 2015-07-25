@@ -237,7 +237,7 @@ class LibraryController(object):
         for (backend, u), future in futures.items():
             with _backend_error_handling(backend):
                 result = future.get()
-                source = backend.source_name.get()
+                source = self.backends.source_names.get(backend)
                 if result is not None:
                     validation.check_instances(result, models.Track)
 
@@ -355,7 +355,7 @@ class LibraryController(object):
                     if result is not None:
                         validation.check_instance(result, models.SearchResult)
 
-                        source = backend.source_name.get()
+                        source = self.backends.source_names.get(backend)
                         if source:
                             newtracks = [t.replace(source=source)
                                          for t in result.tracks]

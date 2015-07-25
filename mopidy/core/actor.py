@@ -142,6 +142,7 @@ class Backends(list):
         self.with_library_browse = collections.OrderedDict()
         self.with_playback = collections.OrderedDict()
         self.with_playlists = collections.OrderedDict()
+        self.source_names = dict()
 
         backends_by_scheme = {}
 
@@ -154,6 +155,7 @@ class Backends(list):
                 has_library_browse = b.has_library_browse().get()
                 has_playback = b.has_playback().get()
                 has_playlists = b.has_playlists().get()
+                source_name = b.source_name.get()
             except Exception:
                 self.remove(b)
                 logger.exception('Fetching backend info for %s failed',
@@ -174,3 +176,5 @@ class Backends(list):
                     self.with_playback[scheme] = b
                 if has_playlists:
                     self.with_playlists[scheme] = b
+
+            self.source_names[b] = source_name
