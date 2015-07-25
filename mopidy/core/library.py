@@ -198,6 +198,9 @@ class LibraryController(object):
         If the URI expands to multiple tracks, the returned list will contain
         them all.
 
+        Tracks will be annotated with the ``source`` field, if the backend
+        provides such a value.
+
         :param uri: track URI
         :type uri: string or :class:`None`
         :param uris: track URIs
@@ -234,8 +237,14 @@ class LibraryController(object):
         for (backend, u), future in futures.items():
             with _backend_error_handling(backend):
                 result = future.get()
+                source = self.backends.source_names.get(backend)
                 if result is not None:
                     validation.check_instances(result, models.Track)
+
+                    # Add the backend source to the tracks
+                    if source:
+                        result = [r.replace(source=source) for r in result]
+
                     results[u] = result
 
         if uri:
@@ -273,6 +282,9 @@ class LibraryController(object):
         If ``uris`` is given, the search is limited to results from within the
         URI roots. For example passing ``uris=['file:']`` will limit the search
         to the local backend.
+
+        Tracks will be annotated with the ``source`` field, if the backend
+        provides such a value.
 
         Examples::
 
@@ -342,7 +354,14 @@ class LibraryController(object):
                     result = future.get()
                     if result is not None:
                         validation.check_instance(result, models.SearchResult)
-                        results.append(result)
+
+                        source = self.backends.source_names.get(backend)
+                        if source:
+                            newtracks = [t.replace(source=source)
+                                         for t in result.tracks]
+                            results.append(result.replace(tracks=newtracks))
+                        else:
+                            results.append(result)
             except TypeError:
                 backend_name = backend.actor_ref.actor_class.__name__
                 logger.warning(

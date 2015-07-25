@@ -253,6 +253,9 @@ class Track(ValidatedImmutableObject):
     #: equivalent timestamp or simply a version counter.
     last_modified = fields.Integer(min=0)
 
+    #: The track source, e.g. "spotify" or "local". Read-only.
+    source = fields.String()
+
 
 class TlTrack(ValidatedImmutableObject):
 

@@ -42,6 +42,13 @@ class Backend(object):
     #: List of URI schemes this backend can handle.
     uri_schemes = []
 
+    #: String describing the source of tracks returned by this backend.
+    #:
+    #: If you override this value, it will be added to all track objects and
+    #: can be used by clients. An example for this might be a client showing a
+    #: Spotify logo for Spotify tracks.
+    source_name = None
+
     # Because the providers is marked as pykka_traversible, we can't get() them
     # from another actor, and need helper methods to check if the providers are
     # set or None.

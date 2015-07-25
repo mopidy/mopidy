@@ -15,6 +15,7 @@ class BaseCoreLibraryTest(unittest.TestCase):
         dummy1_root = Ref.directory(uri='dummy1:directory', name='dummy1')
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
+        self.backend1.source_name.get.return_value = None
         self.backend1.actor_ref.actor_class.__name__ = 'DummyBackend1'
         self.library1 = mock.Mock(spec=backend.LibraryProvider)
         self.library1.get_images.return_value.get.return_value = {}
@@ -25,6 +26,7 @@ class BaseCoreLibraryTest(unittest.TestCase):
         self.backend2 = mock.Mock()
         self.backend2.uri_schemes.get.return_value = ['dummy2', 'du2']
         self.backend2.actor_ref.actor_class.__name__ = 'DummyBackend2'
+        self.backend2.source_name.get.return_value = None
         self.library2 = mock.Mock(spec=backend.LibraryProvider)
         self.library2.get_images.return_value.get.return_value = {}
         self.library2.root_directory.get.return_value = dummy2_root
@@ -34,6 +36,7 @@ class BaseCoreLibraryTest(unittest.TestCase):
         self.backend3 = mock.Mock()
         self.backend3.uri_schemes.get.return_value = ['dummy3']
         self.backend3.actor_ref.actor_class.__name__ = 'DummyBackend3'
+        self.backend3.source_name.get.return_value = None
         self.backend3.has_library().get.return_value = False
         self.backend3.has_library_browse().get.return_value = False
 
@@ -167,6 +170,17 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         self.assertFalse(self.library1.lookup.called)
         self.assertFalse(self.library2.lookup.called)
 
+    def test_lookup_adds_source(self):
+        # Overwrite the source_name attribute
+        source = 'hamspam'
+        self.backend1.source_name.get.return_value = source
+
+        track = Track(name='abc')
+        self.library1.lookup.return_value.get.return_value = [track]
+
+        result = self.core.library.lookup(uris=['dummy1:a'])
+        assert result == {'dummy1:a': [track.replace(source=source)]}
+
     def test_refresh_with_uri_selects_dummy1_backend(self):
         self.core.library.refresh('dummy1:a')
 
@@ -264,6 +278,22 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         self.core.library.search({'any': 'foobar'})
         self.library1.search.assert_called_once_with(
             query={'any': ['foobar']}, uris=None, exact=False)
+
+    def test_search_adds_source(self):
+        # Overwrite the source_name attribute
+        self.backend1.source_name.get.return_value = 'hamspam'
+
+        track = Track(name='abc')
+        track_with_source = Track(name='abc', source='hamspam')
+
+        # The library doesn't set the source
+        library_result = SearchResult(tracks=[track])
+        self.library1.search.return_value.get.return_value = library_result
+
+        # ...but it should be in the final search results.
+        result = self.core.library.search({'any': ['a']})
+        assert len(result) == 1
+        assert track_with_source in result[0].tracks
 
 
 class DeprecatedFindExactCoreLibraryTest(BaseCoreLibraryTest):

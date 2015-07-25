@@ -26,12 +26,14 @@ class CorePlaybackTest(unittest.TestCase):
 
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
+        self.backend1.source_name.get.return_value = None
         self.playback1 = mock.Mock(spec=backend.PlaybackProvider)
         self.playback1.get_time_position.return_value.get.return_value = 1000
         self.backend1.playback = self.playback1
 
         self.backend2 = mock.Mock()
         self.backend2.uri_schemes.get.return_value = ['dummy2']
+        self.backend2.source_name.get.return_value = None
         self.playback2 = mock.Mock(spec=backend.PlaybackProvider)
         self.playback2.get_time_position.return_value.get.return_value = 2000
         self.backend2.playback = self.playback2
@@ -40,6 +42,7 @@ class CorePlaybackTest(unittest.TestCase):
         self.backend3 = mock.Mock()
         self.backend3.uri_schemes.get.return_value = ['dummy3']
         self.backend3.has_playback().get.return_value = False
+        self.backend3.source_name.get.return_value = None
 
         self.tracks = [
             Track(uri='dummy1:a', length=40000),
@@ -726,6 +729,7 @@ class CorePlaybackWithOldBackendTest(unittest.TestCase):
         b = mock.Mock()
         b.actor_ref.actor_class.__name__ = 'DummyBackend'
         b.uri_schemes.get.return_value = ['dummy1']
+        b.source_name.get.return_value = None
         b.playback = mock.Mock(spec=backend.PlaybackProvider)
         b.playback.play.side_effect = TypeError
         b.library.lookup.return_value.get.return_value = [
@@ -748,6 +752,7 @@ class TestPlay(unittest.TestCase):
 
         self.backend = mock.Mock()
         self.backend.uri_schemes.get.return_value = ['dummy']
+        self.backend.source_name.get.return_value = None
         self.core = core.Core(config, backends=[self.backend])
 
         self.tracks = [Track(uri='dummy:a', length=1234),
@@ -772,6 +777,7 @@ class Bug1177RegressionTest(unittest.TestCase):
 
         b = mock.Mock()
         b.uri_schemes.get.return_value = ['dummy']
+        b.source_name.get.return_value = None
         b.playback = mock.Mock(spec=backend.PlaybackProvider)
         b.playback.change_track.return_value.get.return_value = True
         b.playback.play.return_value.get.return_value = True

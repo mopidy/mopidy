@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 class FileBackend(pykka.ThreadingActor, backend.Backend):
     uri_schemes = ['file']
+    source_name = 'file'
 
     def __init__(self, config, audio):
         super(FileBackend, self).__init__()

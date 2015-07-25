@@ -16,6 +16,8 @@ logger = logging.getLogger(__name__)
 
 class StreamBackend(pykka.ThreadingActor, backend.Backend):
 
+    source_name = 'stream'
+
     def __init__(self, config, audio):
         super(StreamBackend, self).__init__()
 

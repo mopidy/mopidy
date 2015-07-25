@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 class M3UBackend(pykka.ThreadingActor, backend.Backend):
     uri_schemes = ['m3u']
+    source_name = 'm3u'
 
     def __init__(self, config, audio):
         super(M3UBackend, self).__init__()

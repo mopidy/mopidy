@@ -47,6 +47,10 @@ Models
   reuse instances. For the test data set this was developed against, a library
   of ~14000 tracks, went from needing ~75MB to ~17MB. (Fixes: :issue:`348`)
 
+- Added ``source`` field to :class:`mopidy.models.Track` models. It can contain
+  fields like ``local``, ``stream`` or ``spotify``. Extensions can set that
+  field by specifying ``source_name`` as a attribute on the backend.
+
 MPD frontend
 ------------
 
