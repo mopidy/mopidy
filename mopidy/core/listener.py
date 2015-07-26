@@ -129,7 +129,7 @@ class CoreListener(listener.Listener):
 
         *MAY* be implemented by actor.
 
-        :param uri: the uri of the deleted playlist
+        :param uri: the URI of the deleted playlist
         :type uri: string
         """
         pass

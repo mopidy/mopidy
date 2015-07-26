@@ -41,7 +41,7 @@ Core API
 - Add `max_tracklist_length` config and limitation. (Fixes: :issue:`997`
   PR: :issue:`1225`)
 
-- Added ``playlist_deleted`` event (Fixes: :issue:`996`)
+- Added ``playlist_deleted`` event. (Fixes: :issue:`996`)
 
 Models
 ------
