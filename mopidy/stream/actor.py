@@ -10,9 +10,9 @@ import pykka
 
 import requests
 
-from mopidy import audio as audio_lib, backend, exceptions, httpclient, stream
+from mopidy import audio as audio_lib, backend, exceptions, stream
 from mopidy.audio import scan, utils
-from mopidy.internal import playlists
+from mopidy.internal import http, playlists
 from mopidy.models import Track
 
 logger = logging.getLogger(__name__)
@@ -95,7 +95,7 @@ class StreamPlaybackProvider(backend.PlaybackProvider):
     def _download(self, uri):
         timeout = self._config['stream']['timeout'] / 1000.0
 
-        session = get_requests_session(
+        session = http.get_requests_session(
             proxy_config=self._config['proxy'],
             user_agent='%s/%s' % (
                 stream.Extension.dist_name, stream.Extension.version))
@@ -126,14 +126,3 @@ class StreamPlaybackProvider(backend.PlaybackProvider):
             return None
 
         return content
-
-
-def get_requests_session(proxy_config, user_agent):
-    proxy = httpclient.format_proxy(proxy_config)
-    full_user_agent = httpclient.format_user_agent(user_agent)
-
-    session = requests.Session()
-    session.proxies.update({'http': proxy, 'https': proxy})
-    session.headers.update({'user-agent': full_user_agent})
-
-    return session
