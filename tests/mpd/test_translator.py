@@ -15,7 +15,7 @@ class TrackMpdFormatTest(unittest.TestCase):
         album=Album(
             name='an album', num_tracks=13,
             artists=[Artist(name='an other artist')],
-            uri='urischeme:album:12345', images=['image1', 'image2']),
+            uri='urischeme:album:12345', images=['image1']),
         track_no=7,
         composers=[Artist(name='a composer')],
         performers=[Artist(name='a performer')],
@@ -78,7 +78,7 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assertIn(('Pos', 9), result)
         self.assertIn(('Id', 122), result)
         self.assertIn(('X-AlbumUri', 'urischeme:album:12345'), result)
-        self.assertIn(('X-AlbumImage', 'image1;image2'), result)
+        self.assertIn(('X-AlbumImage', 'image1'), result)
         self.assertNotIn(('Comment', 'a comment'), result)
         self.assertEqual(len(result), 16)
 
