@@ -57,6 +57,27 @@ Models
 - Added :attr:`mopidy.models.Artist.sortname` field that is mapped to
   ``musicbrainz-sortname`` tag. (Fixes: :issue:`940`)
 
+Configuration
+-------------
+
+- Add new configurations to set base directories to be used by Mopidy and
+  Mopidy extensions: :confval:`core/cache_dir`, :confval:`core/config_dir`, and
+  :confval:`core/data_dir`. (Fixes: :issue:`843`, PR: :issue:`1232`)
+
+Extension support
+-----------------
+
+- Add new methods to :class:`~mopidy.ext.Extension` class for getting cache,
+  config and data dirs specific to your extension:
+
+  - :meth:`mopidy.ext.Extension.get_cache_dir`
+  - :meth:`mopidy.ext.Extension.get_config_dir`
+  - :meth:`mopidy.ext.Extension.get_data_dir`
+
+  Extensions should use these methods so that the correct directories are used
+  both when Mopidy is run by a regular user and when run as a system service.
+  (Fixes: :issue:`843`, PR: :issue:`1232`)
+
 MPD frontend
 ------------
 

@@ -63,15 +63,33 @@ Core configuration
 
 .. confval:: core/cache_dir
 
-    Path to directory for storing cached information.
+    Path to base directory for storing cached data.
+
+    When running Mopidy as a regular user, this should usually be
+    ``$XDG_CACHE_DIR/mopidy``, i.e. :file:`~/.cache/mopidy`.
+
+    When running Mopidy as a system service, this should usually be
+    :file:`/var/cache/mopidy`.
 
 .. confval:: core/config_dir
 
-    Path to directory with configuration files.
+    Path to base directory for config files.
+
+    When running Mopidy as a regular user, this should usually be
+    ``$XDG_CONFIG_DIR/mopidy``, i.e. :file:`~/.config/mopidy`.
+
+    When running Mopidy as a system service, this should usually be
+    :file:`/etc/mopidy`.
 
 .. confval:: core/data_dir
 
-    Path to directory with data files.
+    Path to base directory for persistent data files.
+
+    When running Mopidy as a regular user, this should usually be
+    ``$XDG_DATA_DIR/mopidy``, i.e. :file:`~/.local/share/mopidy`.
+
+    When running Mopidy as a system service, this should usually be
+    :file:`/var/lib/mopidy`.
 
 .. confval:: core/max_tracklist_length
 

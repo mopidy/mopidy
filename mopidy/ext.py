@@ -61,9 +61,9 @@ class Extension(object):
         return schema
 
     def get_cache_dir(self, config):
-        """Get or create cache directory for extension and return path
+        """Get or create cache directory for the extension.
 
-        :param config: Loaded configuration
+        :param config: the Mopidy config object
         :return: string
         """
         assert self.ext_name is not None
@@ -73,9 +73,9 @@ class Extension(object):
         return cache_dir_path
 
     def get_config_dir(self, config):
-        """Get or create configuration directory for extension and return path
+        """Get or create configuration directory for the extension.
 
-        :param config: Loaded configuration
+        :param config: the Mopidy config object
         :return: string
         """
         assert self.ext_name is not None
@@ -85,9 +85,9 @@ class Extension(object):
         return config_dir_path
 
     def get_data_dir(self, config):
-        """Get or create data directory for extension and return path
+        """Get or create data directory for the extension.
 
-        :param config: Loaded configuration
+        :param config: the Mopidy config object
         :returns: string
         """
         assert self.ext_name is not None
