@@ -61,6 +61,18 @@ Mopidy's core has the following configuration values that you can change.
 Core configuration
 ------------------
 
+.. confval:: core/cache_dir
+
+    Path to directory for storing cached information.
+
+.. confval:: core/config_dir
+
+    Path to directory with configuration files.
+
+.. confval:: core/data_dir
+
+    Path to directory with data files.
+
 .. confval:: core/max_tracklist_length
 
     Max length of the tracklist. Defaults to 10000.
