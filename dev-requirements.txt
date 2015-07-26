@@ -14,6 +14,7 @@ responses
 
 # Test runners
 pytest
+pytest-capturelog
 pytest-cov
 pytest-xdist
 tox
