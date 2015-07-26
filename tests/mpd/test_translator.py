@@ -14,7 +14,8 @@ class TrackMpdFormatTest(unittest.TestCase):
         name='a name',
         album=Album(
             name='an album', num_tracks=13,
-            artists=[Artist(name='an other artist')]),
+            artists=[Artist(name='an other artist')],
+            uri='urischeme:album:12345', images=['image1', 'image2']),
         track_no=7,
         composers=[Artist(name='a composer')],
         performers=[Artist(name='a performer')],
@@ -76,8 +77,10 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assertIn(('Disc', 1), result)
         self.assertIn(('Pos', 9), result)
         self.assertIn(('Id', 122), result)
+        self.assertIn(('X-AlbumUri', 'urischeme:album:12345'), result)
+        self.assertIn(('X-AlbumImage', 'image2;image1'), result)
         self.assertNotIn(('Comment', 'a comment'), result)
-        self.assertEqual(len(result), 14)
+        self.assertEqual(len(result), 16)
 
     def test_track_to_mpd_format_with_last_modified(self):
         track = self.track.replace(last_modified=995303899000)
