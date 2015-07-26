@@ -7,6 +7,11 @@ This changelog is used to track all major changes to Mopidy.
 v1.1.0 (UNRELEASED)
 ===================
 
+Dependencies
+------------
+
+- Mopidy now requires Requests.
+
 Core API
 --------
 
@@ -82,6 +87,12 @@ MPD frontend
 
 - Track data now include the ``Last-Modified`` field if set on the track model.
   (Fixes: :issue:`1218`, PR: :issue:`1219`)
+
+Stream backend
+--------------
+
+- Move stream playlist parsing from GStreamer to the stream backend. (Fixes:
+  :issue:`671`)
 
 Local backend
 -------------

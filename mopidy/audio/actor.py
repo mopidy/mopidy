@@ -13,7 +13,7 @@ import gst.pbutils  # noqa
 import pykka
 
 from mopidy import exceptions
-from mopidy.audio import playlists, utils
+from mopidy.audio import icy, utils
 from mopidy.audio.constants import PlaybackState
 from mopidy.audio.listener import AudioListener
 from mopidy.internal import deprecation, process
@@ -26,8 +26,7 @@ logger = logging.getLogger(__name__)
 # set_state on a pipeline.
 gst_logger = logging.getLogger('mopidy.audio.gst')
 
-playlists.register_typefinders()
-playlists.register_elements()
+icy.register()
 
 _GST_STATE_MAPPING = {
     gst.STATE_PLAYING: PlaybackState.PLAYING,

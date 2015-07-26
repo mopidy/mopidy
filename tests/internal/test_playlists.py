@@ -2,20 +2,30 @@
 
 from __future__ import absolute_import, unicode_literals
 
-import io
 import unittest
 
-from mopidy.audio import playlists
+import pytest
+
+from mopidy.internal import playlists
 
 
 BAD = b'foobarbaz'
 
-M3U = b"""#EXTM3U
+EXTM3U = b"""#EXTM3U
 #EXTINF:123, Sample artist - Sample title
 file:///tmp/foo
 #EXTINF:321,Example Artist - Example \xc5\xa7\xc5\x95
 file:///tmp/bar
+
 #EXTINF:213,Some Artist - Other title
+file:///tmp/baz
+"""
+
+URILIST = b"""
+file:///tmp/foo
+# a comment
+file:///tmp/bar
+
 file:///tmp/baz
 """
 
@@ -24,6 +34,7 @@ NumberOfEntries=3
 File1=file:///tmp/foo
 Title1=Sample Title
 Length1=123
+
 File2=file:///tmp/bar
 Title2=Example \xc5\xa7\xc5\x95
 Length2=321
@@ -76,14 +87,20 @@ XSPF = b"""<?xml version="1.0" encoding="UTF-8"?>
 </playlist>
 """
 
+EXPECTED = [b'file:///tmp/foo', b'file:///tmp/bar', b'file:///tmp/baz']
 
-class TypeFind(object):
 
-    def __init__(self, data):
-        self.data = data
-
-    def peek(self, start, end):
-        return self.data[start:end]
+@pytest.mark.parametrize('data,result', [
+    (BAD, []),
+    (URILIST, EXPECTED),
+    (EXTM3U, EXPECTED),
+    (PLS, EXPECTED),
+    (ASX, EXPECTED),
+    (SIMPLE_ASX, EXPECTED),
+    (XSPF, EXPECTED),
+])
+def test_parse(data, result):
+    assert playlists.parse(data) == result
 
 
 class BasePlaylistTest(object):
@@ -93,26 +110,25 @@ class BasePlaylistTest(object):
     parse = None
 
     def test_detect_valid_header(self):
-        self.assertTrue(self.detect(TypeFind(self.valid)))
+        self.assertTrue(self.detect(self.valid))
 
     def test_detect_invalid_header(self):
-        self.assertFalse(self.detect(TypeFind(self.invalid)))
+        self.assertFalse(self.detect(self.invalid))
 
     def test_parse_valid_playlist(self):
-        uris = list(self.parse(io.BytesIO(self.valid)))
-        expected = [b'file:///tmp/foo', b'file:///tmp/bar', b'file:///tmp/baz']
-        self.assertEqual(uris, expected)
+        uris = list(self.parse(self.valid))
+        self.assertEqual(uris, EXPECTED)
 
     def test_parse_invalid_playlist(self):
-        uris = list(self.parse(io.BytesIO(self.invalid)))
+        uris = list(self.parse(self.invalid))
         self.assertEqual(uris, [])
 
 
-class M3uPlaylistTest(BasePlaylistTest, unittest.TestCase):
-    valid = M3U
+class ExtM3uPlaylistTest(BasePlaylistTest, unittest.TestCase):
+    valid = EXTM3U
     invalid = BAD
-    detect = staticmethod(playlists.detect_m3u_header)
-    parse = staticmethod(playlists.parse_m3u)
+    detect = staticmethod(playlists.detect_extm3u_header)
+    parse = staticmethod(playlists.parse_extm3u)
 
 
 class PlsPlaylistTest(BasePlaylistTest, unittest.TestCase):
@@ -141,3 +157,17 @@ class XspfPlaylistTest(BasePlaylistTest, unittest.TestCase):
     invalid = BAD
     detect = staticmethod(playlists.detect_xspf_header)
     parse = staticmethod(playlists.parse_xspf)
+
+
+class UriListPlaylistTest(unittest.TestCase):
+    valid = URILIST
+    invalid = BAD
+    parse = staticmethod(playlists.parse_urilist)
+
+    def test_parse_valid_playlist(self):
+        uris = list(self.parse(self.valid))
+        self.assertEqual(uris, EXPECTED)
+
+    def test_parse_invalid_playlist(self):
+        uris = list(self.parse(self.invalid))
+        self.assertEqual(uris, [])
