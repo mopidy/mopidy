@@ -110,9 +110,9 @@ class StreamPlaybackProvider(backend.PlaybackProvider):
             return None
 
         deadline = time.time() + timeout
-        content = b''
+        content = []
         for chunk in response.iter_content(4096):
-            content += chunk
+            content.append(chunk)
             if time.time() > deadline:
                 logger.warning(
                     'Download of stream playlist (%s) failed due to download '
@@ -125,4 +125,4 @@ class StreamPlaybackProvider(backend.PlaybackProvider):
                 uri, response.reason)
             return None
 
-        return content
+        return b''.join(content)
