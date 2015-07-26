@@ -45,7 +45,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
         self.send_request('listplaylistinfo "name"')
         self.assertInResponse('file: dummy:a')
-        self.assertInResponse('Track: 0')
+        self.assertNotInResponse('Track: 0')
         self.assertNotInResponse('Pos: 0')
         self.assertInResponse('OK')
 
@@ -56,7 +56,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
         self.send_request('listplaylistinfo name')
         self.assertInResponse('file: dummy:a')
-        self.assertInResponse('Track: 0')
+        self.assertNotInResponse('Track: 0')
         self.assertNotInResponse('Pos: 0')
         self.assertInResponse('OK')
 
@@ -72,7 +72,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
         self.send_request('listplaylistinfo "a [2]"')
         self.assertInResponse('file: c')
-        self.assertInResponse('Track: 0')
+        self.assertNotInResponse('Track: 0')
         self.assertNotInResponse('Pos: 0')
         self.assertInResponse('OK')
 

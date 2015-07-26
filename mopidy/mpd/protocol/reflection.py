@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 from mopidy.mpd import exceptions, protocol
+from mopidy.mpd.protocol import tagtype_list
 
 
 @protocol.commands.add('config', list_command=False)
@@ -93,7 +94,9 @@ def tagtypes(context):
 
         Shows a list of available song metadata.
     """
-    pass  # TODO
+    return [
+        ('tagtype', tagtype) for tagtype in tagtype_list.TAGTYPE_LIST
+    ]
 
 
 @protocol.commands.add('urlhandlers')
