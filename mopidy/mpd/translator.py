@@ -97,7 +97,6 @@ def track_to_mpd_format(track, position=None, stream_title=None):
     if track.musicbrainz_id is not None:
         result.append(('MUSICBRAINZ_TRACKID', track.musicbrainz_id))
 
-    # clean up result
     result = [element for element in result if _has_value(*element)]
 
     return result
@@ -105,19 +104,15 @@ def track_to_mpd_format(track, position=None, stream_title=None):
 
 def _has_value(tagtype, value):
     """
-    Determine whether to add the tagtype
-    to the output or not (if they have a default value).
+    Determine whether to add the tagtype to the output or not.
 
-    :param tagtype: the mpd tagtype
+    :param tagtype: the MPD tagtype
     :type tagtype: string
-    :param value: the associated value
-    :type value: multiple
+    :param value: the tag value
     :rtype: bool
     """
     if tagtype in tagtype_list.TAGTYPE_LIST:
-        if not value:
-            return False
-
+        return bool(value)
     return True
 
 

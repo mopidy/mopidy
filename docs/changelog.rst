@@ -80,6 +80,11 @@ MPD frontend
 - Track data now include the ``Last-Modified`` field if set on the track model.
   (Fixes: :issue:`1218`, PR: :issue:`1219`)
 
+- Implement ``tagtypes`` MPD command. (PR: :issue:`1235`)
+
+- Exclude empty tags fields from metadata output. (Fixes: :issue:`1045`, PR:
+  :issue:`1235`)
+
 Local backend
 -------------
 

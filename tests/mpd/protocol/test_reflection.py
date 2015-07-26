@@ -41,7 +41,6 @@ class ReflectionHandlerTest(protocol.BaseTestCase):
 
     def test_tagtypes(self):
         self.send_request('tagtypes')
-        self.assertInResponse('OK')
         self.assertInResponse('tagtype: Artist')
         self.assertInResponse('tagtype: ArtistSort')
         self.assertInResponse('tagtype: Album')
@@ -59,6 +58,7 @@ class ReflectionHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('tagtype: MUSICBRAINZ_ALBUMID')
         self.assertInResponse('tagtype: MUSICBRAINZ_ALBUMARTISTID')
         self.assertInResponse('tagtype: MUSICBRAINZ_TRACKID')
+        self.assertInResponse('OK')
 
     def test_urlhandlers(self):
         self.send_request('urlhandlers')
