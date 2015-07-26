@@ -78,7 +78,7 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assertIn(('Pos', 9), result)
         self.assertIn(('Id', 122), result)
         self.assertIn(('X-AlbumUri', 'urischeme:album:12345'), result)
-        self.assertIn(('X-AlbumImage', 'image2;image1'), result)
+        self.assertIn(('X-AlbumImage', 'image1;image2'), result)
         self.assertNotIn(('Comment', 'a comment'), result)
         self.assertEqual(len(result), 16)
 
