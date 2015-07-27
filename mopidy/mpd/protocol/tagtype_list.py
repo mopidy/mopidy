@@ -19,4 +19,6 @@ TAGTYPE_LIST = [
     'MUSICBRAINZ_ALBUMID',
     'MUSICBRAINZ_ALBUMARTISTID',
     'MUSICBRAINZ_TRACKID',
+    'X-AlbumUri',
+    'X-AlbumImage',
 ]

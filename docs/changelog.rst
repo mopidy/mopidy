@@ -116,6 +116,9 @@ MPD frontend
 - Exclude empty tags fields from metadata output. (Fixes: :issue:`1045`, PR:
   :issue:`1235`)
 
+- Implement protocol extensions to output Album URIs and Album Images when
+  outputting track data to clients. (PR: :issue:`1230`)
+
 Stream backend
 --------------
 
