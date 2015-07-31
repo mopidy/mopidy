@@ -2,15 +2,14 @@ Source: mopidy
 Section: sound
 Priority: optional
 Maintainer: Stein Magnus Jodal <stein.magnus@jodal.no>
-Build-Depends:
-    debhelper (>= 9),
-    dh-python,
-    dh-systemd (>= 1.5),
-    po-debconf,
-    python (>= 2.7),
-    python-setuptools,
-    python-sphinx (>= 1.0),
-    python-pygraphviz
+Build-Depends: debhelper (>= 9),
+               dh-python,
+               dh-systemd (>= 1.5),
+               po-debconf,
+               python (>= 2.7),
+               python-pygraphviz,
+               python-setuptools,
+               python-sphinx (>= 1.0),
 Standards-Version: 3.9.6
 Homepage: http://www.mopidy.com/
 Vcs-Git: git://github.com/mopidy/mopidy.git
@@ -19,22 +18,19 @@ X-Python-Version: >= 2.7
 
 Package: mopidy
 Architecture: all
-Depends:
-    ${misc:Depends},
-    ${python:Depends},
-    adduser,
-    debconf,
-    lsb-base,
-    gstreamer0.10-plugins-good,
-    python-gst0.10,
-    python-tornado (>= 2.3)
-Recommends:
-    gstreamer0.10-alsa,
-    gstreamer0.10-plugins-ugly,
-    gstreamer0.10-pulseaudio,
-    gstreamer0.10-tools
-Suggests:
-    mopidy-doc
+Depends: adduser,
+         debconf,
+         gstreamer0.10-plugins-good,
+         lsb-base,
+         python-gst0.10,
+         python-tornado (>= 2.3),
+         ${misc:Depends},
+         ${python:Depends},
+Recommends: gstreamer0.10-alsa,
+            gstreamer0.10-plugins-ugly,
+            gstreamer0.10-pulseaudio,
+            gstreamer0.10-tools,
+Suggests: mopidy-doc,
 Description: music server with support for MPD/HTTP clients
  Mopidy is an extensible music server which can play music from local
  files, radio streams, and cloud services such as Spotify and SoundCloud.
@@ -46,11 +42,10 @@ Description: music server with support for MPD/HTTP clients
 Package: mopidy-doc
 Section: doc
 Architecture: all
-Depends:
-    ${misc:Depends},
-    ${sphinxdoc:Depends}
-Recommends: mopidy
-Replaces: mopidy (<< 0.7.3-2)
+Depends: ${misc:Depends},
+         ${sphinxdoc:Depends},
+Recommends: mopidy,
+Replaces: mopidy (<< 0.7.3-2),
 Description: music server with support for MPD/HTTP clients - documentation
  Mopidy is an extensible music server which can play music from local
  files, radio streams, and cloud services such as Spotify and SoundCloud.
