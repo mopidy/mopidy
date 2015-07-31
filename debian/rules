@@ -3,14 +3,15 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-%:
-	dh $@ --with python2,sphinxdoc,systemd
+export PYBUILD_DISABLE=test
 
-override_dh_clean:
-	rm -rf build/
+%:
+	dh $@ --with python2,sphinxdoc,systemd --buildsystem=pybuild
+
+override_dh_auto_clean:
 	make -C docs/ clean
 	debconf-updatepo
-	dh_clean
+	dh_auto_clean
 
 override_dh_auto_build:
 

@@ -3,7 +3,8 @@ Section: sound
 Priority: optional
 Maintainer: Stein Magnus Jodal <stein.magnus@jodal.no>
 Build-Depends:
-    debhelper (>= 8.0.0),
+    debhelper (>= 9),
+    dh-python,
     dh-systemd (>= 1.5),
     po-debconf,
     python (>= 2.7),

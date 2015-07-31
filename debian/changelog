@@ -1,5 +1,6 @@
 mopidy (1.0.8-2) unstable; urgency=medium
 
+  * Use pybuild as build system.
   * Add pydist file, mapping the PyPI package "Mopidy" to the Debian package
     "mopidy".
 
