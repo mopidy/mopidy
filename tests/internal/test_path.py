@@ -380,6 +380,18 @@ class FindMTimesTest(unittest.TestCase):
         self.assertEqual(expected, result)
         self.assertEqual({}, errors)
 
+    def test_gives_mtime_in_milliseconds(self):
+        fname = self.touch('foobar')
+
+        os.utime(fname, (1, 3.14159265))
+
+        result, errors = path.find_mtimes(fname)
+
+        self.assertEqual(len(result), 1)
+        mtime, = result.values()
+        self.assertEqual(mtime, 3141)
+        self.assertEqual(errors, {})
+
 
 # TODO: kill this in favour of just os.path.getmtime + mocks
 class MtimeTest(unittest.TestCase):
