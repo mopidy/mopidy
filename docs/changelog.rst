@@ -119,6 +119,14 @@ MPD frontend
 - Implement protocol extensions to output Album URIs and Album Images when
   outputting track data to clients. (PR: :issue:`1230`)
 
+- The MPD commands ``lsinfo`` and ``listplaylists`` are now implemented using
+  the :meth:`~mopidy.core.PlaylistsProvider.as_list` method, which retrieves a
+  lot less data and is thus much faster than the deprecated
+  :meth:`~mopidy.core.PlaylistsProvider.get_playlists`. The drawback is that
+  the ``Last-Modified`` timestamp is not available through this method, and the
+  timestamps in the MPD command responses are now always set to the current
+  time.
+
 Stream backend
 --------------
 
