@@ -73,11 +73,14 @@ def parse_m3u(file_path, media_dir=None):
     - Lines starting with # are ignored, except for extended M3U directives.
     - Track.name and Track.length are set from extended M3U directives.
     - m3u files are latin-1.
+    - m3u8 files are utf-8
     """
     # TODO: uris as bytes
+    file_encoding = 'utf-8' if file_path.endswith(b'.m3u8') else 'latin1'
+
     tracks = []
     try:
-        with open(file_path) as m3u:
+        with codecs.open(file_path, 'rb', file_encoding, 'replace') as m3u:
             contents = m3u.readlines()
     except IOError as error:
         logger.warning('Couldn\'t open m3u: %s', encoding.locale_decode(error))
@@ -86,12 +89,13 @@ def parse_m3u(file_path, media_dir=None):
     if not contents:
         return tracks
 
-    extended = contents[0].decode('latin1').startswith('#EXTM3U')
+    # Strip newlines left by codecs
+    contents = [line.strip() for line in contents]
+
+    extended = contents[0].startswith('#EXTM3U')
 
     track = Track()
     for line in contents:
-        line = line.strip().decode('latin1')
-
         if line.startswith('#'):
             if extended and line.startswith('#EXTINF'):
                 track = m3u_extinf_to_track(line)
