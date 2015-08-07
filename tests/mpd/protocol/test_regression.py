@@ -2,7 +2,10 @@ from __future__ import absolute_import, unicode_literals
 
 import random
 
+import mock
+
 from mopidy.models import Playlist, Ref, Track
+from mopidy.mpd.protocol import stored_playlists
 
 from tests.mpd import protocol
 
@@ -214,12 +217,14 @@ class IssueGH1120RegressionTest(protocol.BaseTestCase):
 
     """
 
-    def test(self):
+    @mock.patch.object(stored_playlists, '_get_last_modified')
+    def test(self, last_modified_mock):
+        last_modified_mock.return_value = '2015-08-05T22:51:06Z'
         self.backend.library.dummy_browse_result = {
             'dummy:/': [Ref.playlist(name='Top 100 tracks', uri='dummy:/1')],
         }
         self.backend.playlists.set_dummy_playlists([
-            Playlist(name='Top 100 tracks', uri='dummy:/1', last_modified=123),
+            Playlist(name='Top 100 tracks', uri='dummy:/1'),
         ])
 
         response1 = self.send_request('lsinfo "/"')
