@@ -164,6 +164,12 @@ has a well defined and limited scope, while splitting the more feature rich
 Mopidy-Local extension out to an independent project. (Fixes: :issue:`1004`,
 PR: :issue:`1207`)
 
+M3U backend
+-----------
+
+- Support loading UTF-8 encoded M3U files with the ``.m3u8`` file extension.
+  (PR: :issue:`1193`)
+
 Utils
 -----
 
