@@ -4,6 +4,7 @@ from tests.mpd import protocol
 
 
 class ReflectionHandlerTest(protocol.BaseTestCase):
+
     def test_config_is_not_allowed_across_the_network(self):
         self.send_request('config')
         self.assertEqualResponse(
@@ -40,6 +41,23 @@ class ReflectionHandlerTest(protocol.BaseTestCase):
 
     def test_tagtypes(self):
         self.send_request('tagtypes')
+        self.assertInResponse('tagtype: Artist')
+        self.assertInResponse('tagtype: ArtistSort')
+        self.assertInResponse('tagtype: Album')
+        self.assertInResponse('tagtype: AlbumArtist')
+        self.assertInResponse('tagtype: AlbumArtistSort')
+        self.assertInResponse('tagtype: Title')
+        self.assertInResponse('tagtype: Track')
+        self.assertInResponse('tagtype: Name')
+        self.assertInResponse('tagtype: Genre')
+        self.assertInResponse('tagtype: Date')
+        self.assertInResponse('tagtype: Composer')
+        self.assertInResponse('tagtype: Performer')
+        self.assertInResponse('tagtype: Disc')
+        self.assertInResponse('tagtype: MUSICBRAINZ_ARTISTID')
+        self.assertInResponse('tagtype: MUSICBRAINZ_ALBUMID')
+        self.assertInResponse('tagtype: MUSICBRAINZ_ALBUMARTISTID')
+        self.assertInResponse('tagtype: MUSICBRAINZ_TRACKID')
         self.assertInResponse('OK')
 
     def test_urlhandlers(self):
@@ -49,6 +67,7 @@ class ReflectionHandlerTest(protocol.BaseTestCase):
 
 
 class ReflectionWhenNotAuthedTest(protocol.BaseTestCase):
+
     def get_config(self):
         config = super(ReflectionWhenNotAuthedTest, self).get_config()
         config['mpd']['password'] = 'topsecret'

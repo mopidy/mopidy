@@ -2,16 +2,25 @@ from __future__ import absolute_import, unicode_literals
 
 import collections
 import logging
+import os
 
 import pkg_resources
 
 from mopidy import config as config_lib, exceptions
+from mopidy.internal import path
 
 
 logger = logging.getLogger(__name__)
 
 
+_extension_data_fields = ['extension', 'entry_point', 'config_schema',
+                          'config_defaults', 'command']
+
+ExtensionData = collections.namedtuple('ExtensionData', _extension_data_fields)
+
+
 class Extension(object):
+
     """Base class for Mopidy extensions"""
 
     dist_name = None
@@ -51,6 +60,42 @@ class Extension(object):
         schema['enabled'] = config_lib.Boolean()
         return schema
 
+    def get_cache_dir(self, config):
+        """Get or create cache directory for the extension.
+
+        :param config: the Mopidy config object
+        :return: string
+        """
+        assert self.ext_name is not None
+        cache_dir_path = bytes(os.path.join(config['core']['cache_dir'],
+                                            self.ext_name))
+        path.get_or_create_dir(cache_dir_path)
+        return cache_dir_path
+
+    def get_config_dir(self, config):
+        """Get or create configuration directory for the extension.
+
+        :param config: the Mopidy config object
+        :return: string
+        """
+        assert self.ext_name is not None
+        config_dir_path = bytes(os.path.join(config['core']['config_dir'],
+                                             self.ext_name))
+        path.get_or_create_dir(config_dir_path)
+        return config_dir_path
+
+    def get_data_dir(self, config):
+        """Get or create data directory for the extension.
+
+        :param config: the Mopidy config object
+        :returns: string
+        """
+        assert self.ext_name is not None
+        data_dir_path = bytes(os.path.join(config['core']['data_dir'],
+                                           self.ext_name))
+        path.get_or_create_dir(data_dir_path)
+        return data_dir_path
+
     def get_command(self):
         """Command to expose to command line users running ``mopidy``.
 
@@ -88,14 +133,7 @@ class Extension(object):
         the ``frontend`` and ``backend`` registry keys.
 
         This method can also be used for other setup tasks not involving the
-        extension registry. For example, to register custom GStreamer
-        elements::
-
-            def setup(self, registry):
-                from .mixer import SoundspotMixer
-                gobject.type_register(SoundspotMixer)
-                gst.element_register(
-                    SoundspotMixer, 'soundspotmixer', gst.RANK_MARGINAL)
+        extension registry.
 
         :param registry: the extension registry
         :type registry: :class:`Registry`
@@ -104,6 +142,7 @@ class Extension(object):
 
 
 class Registry(collections.Mapping):
+
     """Registry of components provided by Mopidy extensions.
 
     Passed to the :meth:`~Extension.setup` method of all extensions. The
@@ -153,55 +192,100 @@ def load_extensions():
     for entry_point in pkg_resources.iter_entry_points('mopidy.ext'):
         logger.debug('Loading entry point: %s', entry_point)
         extension_class = entry_point.load(require=False)
-        extension = extension_class()
-        extension.entry_point = entry_point
-        installed_extensions.append(extension)
+
+        try:
+            if not issubclass(extension_class, Extension):
+                raise TypeError  # issubclass raises TypeError on non-class
+        except TypeError:
+            logger.error('Entry point %s did not contain a valid extension'
+                         'class: %r', entry_point.name, extension_class)
+            continue
+
+        try:
+            extension = extension_class()
+            config_schema = extension.get_config_schema()
+            default_config = extension.get_default_config()
+            command = extension.get_command()
+        except Exception:
+            logger.exception('Setup of extension from entry point %s failed, '
+                             'ignoring extension.', entry_point.name)
+            continue
+
+        installed_extensions.append(ExtensionData(
+            extension, entry_point, config_schema, default_config, command))
+
         logger.debug(
             'Loaded extension: %s %s', extension.dist_name, extension.version)
 
-    names = (e.ext_name for e in installed_extensions)
+    names = (ed.extension.ext_name for ed in installed_extensions)
     logger.debug('Discovered extensions: %s', ', '.join(names))
     return installed_extensions
 
 
-def validate_extension(extension):
+def validate_extension_data(data):
     """Verify extension's dependencies and environment.
 
     :param extensions: an extension to check
     :returns: if extension should be run
     """
 
-    logger.debug('Validating extension: %s', extension.ext_name)
+    logger.debug('Validating extension: %s', data.extension.ext_name)
 
-    if extension.ext_name != extension.entry_point.name:
+    if data.extension.ext_name != data.entry_point.name:
         logger.warning(
             'Disabled extension %(ep)s: entry point name (%(ep)s) '
             'does not match extension name (%(ext)s)',
-            {'ep': extension.entry_point.name, 'ext': extension.ext_name})
+            {'ep': data.entry_point.name, 'ext': data.extension.ext_name})
         return False
 
     try:
-        extension.entry_point.require()
+        data.entry_point.require()
     except pkg_resources.DistributionNotFound as ex:
         logger.info(
             'Disabled extension %s: Dependency %s not found',
-            extension.ext_name, ex)
+            data.extension.ext_name, ex)
         return False
     except pkg_resources.VersionConflict as ex:
         if len(ex.args) == 2:
             found, required = ex.args
             logger.info(
                 'Disabled extension %s: %s required, but found %s at %s',
-                extension.ext_name, required, found, found.location)
+                data.extension.ext_name, required, found, found.location)
         else:
-            logger.info('Disabled extension %s: %s', extension.ext_name, ex)
+            logger.info(
+                'Disabled extension %s: %s', data.extension.ext_name, ex)
         return False
 
     try:
-        extension.validate_environment()
+        data.extension.validate_environment()
     except exceptions.ExtensionError as ex:
         logger.info(
-            'Disabled extension %s: %s', extension.ext_name, ex.message)
+            'Disabled extension %s: %s', data.extension.ext_name, ex.message)
+        return False
+    except Exception:
+        logger.exception('Validating extension %s failed with an exception.',
+                         data.extension.ext_name)
+        return False
+
+    if not data.config_schema:
+        logger.error('Extension %s does not have a config schema, disabling.',
+                     data.extension.ext_name)
+        return False
+    elif not isinstance(data.config_schema.get('enabled'), config_lib.Boolean):
+        logger.error('Extension %s does not have the required "enabled" config'
+                     ' option, disabling.', data.extension.ext_name)
+        return False
+
+    for key, value in data.config_schema.items():
+        if not isinstance(value, config_lib.ConfigValue):
+            logger.error('Extension %s config schema contains an invalid value'
+                         ' for the option "%s", disabling.',
+                         data.extension.ext_name, key)
+            return False
+
+    if not data.config_defaults:
+        logger.error('Extension %s does not have a default config, disabling.',
+                     data.extension.ext_name)
         return False
 
     return True

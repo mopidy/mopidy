@@ -4,9 +4,6 @@
 HTTP JSON-RPC API
 *****************
 
-.. module:: mopidy.http
-    :synopsis: The HTTP frontend APIs
-
 The :ref:`ext-http` extension makes Mopidy's :ref:`core-api` available using
 JSON-RPC over HTTP using HTTP POST and WebSockets. We also provide a JavaScript
 wrapper, called :ref:`Mopidy.js <mopidy-js>`, around the JSON-RPC over
@@ -65,14 +62,9 @@ JSON-RPC 2.0 messages can be recognized by checking for the key named
 please refer to the `JSON-RPC 2.0 spec
 <http://www.jsonrpc.org/specification>`_.
 
-All methods (not attributes) in the :ref:`core-api` is made available through
-JSON-RPC calls over the WebSocket. For example,
-:meth:`mopidy.core.PlaybackController.play` is available as the JSON-RPC method
-``core.playback.play``.
-
-The core API's attributes is made available through setters and getters. For
-example, the attribute :attr:`mopidy.core.PlaybackController.current_track` is
-available as the JSON-RPC method ``core.playback.get_current_track``.
+All methods in the :ref:`core-api` is made available through JSON-RPC calls
+over the WebSocket. For example, :meth:`mopidy.core.PlaybackController.play` is
+available as the JSON-RPC method ``core.playback.play``.
 
 Example JSON-RPC request::
 

@@ -2,13 +2,14 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
+from mopidy.internal import formatting, network
 from mopidy.mpd import dispatcher, protocol
-from mopidy.utils import formatting, network
 
 logger = logging.getLogger(__name__)
 
 
 class MpdSession(network.LineProtocol):
+
     """
     The MPD client session. Keeps track of a single client session. Any
     requests from the client is passed on to the MPD request dispatcher.

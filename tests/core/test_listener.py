@@ -9,6 +9,7 @@ from mopidy.models import Playlist, TlTrack
 
 
 class CoreListenerTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.listener = CoreListener()
 
@@ -45,6 +46,9 @@ class CoreListenerTest(unittest.TestCase):
 
     def test_listener_has_default_impl_for_playlist_changed(self):
         self.listener.playlist_changed(Playlist())
+
+    def test_listener_has_default_impl_for_playlist_deleted(self):
+        self.listener.playlist_deleted(Playlist())
 
     def test_listener_has_default_impl_for_options_changed(self):
         self.listener.options_changed()

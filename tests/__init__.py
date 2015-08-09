@@ -15,6 +15,7 @@ def path_to_data_dir(name):
 
 
 class IsA(object):
+
     def __init__(self, klass):
         self.klass = klass
 
@@ -31,6 +32,6 @@ class IsA(object):
         return str(self.klass)
 
 
-any_int = IsA(int)
+any_int = IsA((int, long))
 any_str = IsA(str)
 any_unicode = IsA(compat.text_type)

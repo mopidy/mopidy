@@ -1,9 +1,15 @@
 from __future__ import absolute_import, unicode_literals
 
+import logging
+
 from mopidy import listener, models
 
 
+logger = logging.getLogger(__name__)
+
+
 class Backend(object):
+
     """Backend API
 
     If the backend has problems during initialization it should raise
@@ -57,8 +63,13 @@ class Backend(object):
     def has_playlists(self):
         return self.playlists is not None
 
+    def ping(self):
+        """Called to check if the actor is still alive."""
+        return True
+
 
 class LibraryProvider(object):
+
     """
     :param backend: backend the controller is a part of
     :type backend: :class:`mopidy.backend.Backend`
@@ -151,6 +162,7 @@ class LibraryProvider(object):
 
 
 class PlaybackProvider(object):
+
     """
     :param audio: the audio actor
     :type audio: actor proxy to an instance of :class:`mopidy.audio.Audio`
@@ -231,6 +243,9 @@ class PlaybackProvider(object):
         :rtype: :class:`True` if successful, else :class:`False`
         """
         uri = self.translate_uri(track.uri)
+        if uri != track.uri:
+            logger.debug(
+                'Backend translated URI from %s to %s', track.uri, uri)
         if not uri:
             return False
         self.audio.set_uri(uri).get()
@@ -283,6 +298,7 @@ class PlaybackProvider(object):
 
 
 class PlaylistsProvider(object):
+
     """
     A playlist provider exposes a collection of playlists, methods to
     create/change/delete playlists in this collection, and lookup of any
@@ -394,6 +410,7 @@ class PlaylistsProvider(object):
 
 
 class BackendListener(listener.Listener):
+
     """
     Marker interface for recipients of events sent by the backend actors.
 

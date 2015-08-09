@@ -25,6 +25,8 @@ For details on how to make a Mopidy extension, see the :ref:`extensiondev`
 guide.
 
 
+.. _static-web-client:
+
 Static web client example
 =========================
 

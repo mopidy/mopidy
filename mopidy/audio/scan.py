@@ -10,7 +10,7 @@ import gst.pbutils  # noqa
 
 from mopidy import exceptions
 from mopidy.audio import utils
-from mopidy.utils import encoding
+from mopidy.internal import encoding
 
 _missing_plugin_desc = gst.pbutils.missing_plugin_message_get_description
 
@@ -22,6 +22,7 @@ _RAW_AUDIO = gst.Caps(b'audio/x-raw-int; audio/x-raw-float')
 
 # TODO: replace with a scan(uri, timeout=1000, proxy_config=None)?
 class Scanner(object):
+
     """
     Helper to get tags and other relevant info from URIs.
 
@@ -73,7 +74,8 @@ def _setup_pipeline(uri, proxy_config=None):
     decodebin = gst.element_factory_make('decodebin2')
 
     pipeline = gst.element_factory_make('pipeline')
-    pipeline.add_many(src, typefind, decodebin)
+    for e in (src, typefind, decodebin):
+        pipeline.add(e)
     gst.element_link_many(src, typefind, decodebin)
 
     if proxy_config:
@@ -180,7 +182,7 @@ if __name__ == '__main__':
 
     import gobject
 
-    from mopidy.utils import path
+    from mopidy.internal import path
 
     gobject.threads_init()
 

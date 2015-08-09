@@ -1,8 +1,8 @@
 .. _audio-api:
 
-*********
-Audio API
-*********
+*********************************
+:mod:`mopidy.audio` --- Audio API
+*********************************
 
 .. module:: mopidy.audio
     :synopsis: Thin wrapper around the parts of GStreamer we use

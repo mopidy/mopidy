@@ -13,10 +13,10 @@ import gst.pbutils  # noqa
 import pykka
 
 from mopidy import exceptions
-from mopidy.audio import playlists, utils
+from mopidy.audio import icy, utils
 from mopidy.audio.constants import PlaybackState
 from mopidy.audio.listener import AudioListener
-from mopidy.utils import process
+from mopidy.internal import deprecation, process
 
 
 logger = logging.getLogger(__name__)
@@ -26,8 +26,7 @@ logger = logging.getLogger(__name__)
 # set_state on a pipeline.
 gst_logger = logging.getLogger('mopidy.audio.gst')
 
-playlists.register_typefinders()
-playlists.register_elements()
+icy.register()
 
 _GST_STATE_MAPPING = {
     gst.STATE_PLAYING: PlaybackState.PLAYING,
@@ -36,7 +35,9 @@ _GST_STATE_MAPPING = {
 
 
 class _Signals(object):
+
     """Helper for tracking gobject signal registrations"""
+
     def __init__(self):
         self._ids = {}
 
@@ -65,7 +66,9 @@ class _Signals(object):
 
 # TODO: expose this as a property on audio?
 class _Appsrc(object):
+
     """Helper class for dealing with appsrc based playback."""
+
     def __init__(self):
         self._signals = _Signals()
         self.reset()
@@ -132,6 +135,7 @@ class _Appsrc(object):
 
 # TODO: expose this as a property on audio when #790 gets further along.
 class _Outputs(gst.Bin):
+
     def __init__(self):
         gst.Bin.__init__(self, 'outputs')
 
@@ -202,6 +206,7 @@ class SoftwareMixer(object):
 
 
 class _Handler(object):
+
     def __init__(self, audio):
         self._audio = audio
         self._element = None
@@ -370,6 +375,7 @@ class _Handler(object):
 
 # TODO: create a player class which replaces the actors internals
 class Audio(pykka.ThreadingActor):
+
     """
     Audio output through `GStreamer <http://gstreamer.freedesktop.org/>`_.
     """
@@ -582,6 +588,7 @@ class Audio(pykka.ThreadingActor):
         .. deprecated:: 1.0
             Use :meth:`emit_data` with a :class:`None` buffer instead.
         """
+        deprecation.warn('audio.emit_end_of_stream')
         self._appsrc.push(None)
 
     def set_about_to_finish_callback(self, callback):

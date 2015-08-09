@@ -4,6 +4,7 @@ from tests.mpd import protocol
 
 
 class AuthenticationActiveTest(protocol.BaseTestCase):
+
     def get_config(self):
         config = super(AuthenticationActiveTest, self).get_config()
         config['mpd']['password'] = 'topsecret'
@@ -52,6 +53,7 @@ class AuthenticationActiveTest(protocol.BaseTestCase):
 
 
 class AuthenticationInactiveTest(protocol.BaseTestCase):
+
     def test_authentication_with_anything_when_password_check_turned_off(self):
         self.send_request('any request at all')
         self.assertTrue(self.dispatcher.authenticated)

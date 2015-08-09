@@ -7,8 +7,8 @@ import time
 
 from mopidy import commands, compat, exceptions
 from mopidy.audio import scan, utils
+from mopidy.internal import path
 from mopidy.local import translator
-from mopidy.utils import path
 
 
 logger = logging.getLogger(__name__)
@@ -29,6 +29,7 @@ def _get_library(args, config):
 
 
 class LocalCommand(commands.Command):
+
     def __init__(self):
         super(LocalCommand, self).__init__()
         self.add_child('scan', ScanCommand())
@@ -142,7 +143,7 @@ class ScanCommand(commands.Command):
                                    uri, MIN_DURATION_MS)
                 else:
                     mtime = file_mtimes.get(os.path.join(media_dir, relpath))
-                    track = utils.convert_tags_to_track(tags).copy(
+                    track = utils.convert_tags_to_track(tags).replace(
                         uri=uri, length=duration, last_modified=mtime)
                     if library.add_supports_tags_and_duration:
                         library.add(track, tags=tags, duration=duration)
@@ -164,6 +165,7 @@ class ScanCommand(commands.Command):
 
 
 class _Progress(object):
+
     def __init__(self, batch_size, total):
         self.count = 0
         self.batch_size = batch_size

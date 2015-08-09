@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 
 class PlaybackState(object):
+
     """
     Enum of playback states.
     """

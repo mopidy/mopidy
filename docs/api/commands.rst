@@ -1,8 +1,8 @@
 .. _commands-api:
 
-************
-Commands API
-************
+***************************************
+:mod:`mopidy.commands` --- Commands API
+***************************************
 
 .. automodule:: mopidy.commands
     :synopsis: Commands API for Mopidy CLI.

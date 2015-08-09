@@ -17,6 +17,7 @@ def create_proxy(config=None, audio=None):
 
 
 class DummyBackend(pykka.ThreadingActor, backend.Backend):
+
     def __init__(self, config, audio):
         super(DummyBackend, self).__init__()
 
@@ -57,6 +58,7 @@ class DummyLibraryProvider(backend.LibraryProvider):
 
 
 class DummyPlaybackProvider(backend.PlaybackProvider):
+
     def __init__(self, *args, **kwargs):
         super(DummyPlaybackProvider, self).__init__(*args, **kwargs)
         self._uri = None
@@ -93,6 +95,7 @@ class DummyPlaybackProvider(backend.PlaybackProvider):
 
 
 class DummyPlaylistsProvider(backend.PlaylistsProvider):
+
     def __init__(self, backend):
         super(DummyPlaylistsProvider, self).__init__(backend)
         self._playlists = []

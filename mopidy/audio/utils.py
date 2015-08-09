@@ -8,7 +8,7 @@ import pygst
 pygst.require('0.10')
 import gst  # noqa
 
-from mopidy import compat
+from mopidy import compat, httpclient
 from mopidy.models import Album, Artist, Track
 
 logger = logging.getLogger(__name__)
@@ -65,15 +65,21 @@ def supported_uri_schemes(uri_schemes):
     return supported_schemes
 
 
-def _artists(tags, artist_name, artist_id=None):
+def _artists(tags, artist_name, artist_id=None, artist_sortname=None):
     # Name missing, don't set artist
     if not tags.get(artist_name):
         return None
-    # One artist name and id, provide artist with id.
-    if len(tags[artist_name]) == 1 and artist_id in tags:
-        return [Artist(name=tags[artist_name][0],
-                       musicbrainz_id=tags[artist_id][0])]
-    # Multiple artist, provide artists without id.
+    # One artist name and either id or sortname, include all available fields
+    if len(tags[artist_name]) == 1 and \
+            (artist_id in tags or artist_sortname in tags):
+        attrs = {'name': tags[artist_name][0]}
+        if artist_id in tags:
+            attrs['musicbrainz_id'] = tags[artist_id][0]
+        if artist_sortname in tags:
+            attrs['sortname'] = tags[artist_sortname][0]
+        return [Artist(**attrs)]
+
+    # Multiple artist, provide artists with name only to avoid ambiguity.
     return [Artist(name=name) for name in tags[artist_name]]
 
 
@@ -91,8 +97,9 @@ def convert_tags_to_track(tags):
 
     track_kwargs['composers'] = _artists(tags, gst.TAG_COMPOSER)
     track_kwargs['performers'] = _artists(tags, gst.TAG_PERFORMER)
-    track_kwargs['artists'] = _artists(
-        tags, gst.TAG_ARTIST, 'musicbrainz-artistid')
+    track_kwargs['artists'] = _artists(tags, gst.TAG_ARTIST,
+                                       'musicbrainz-artistid',
+                                       'musicbrainz-sortname')
     album_kwargs['artists'] = _artists(
         tags, gst.TAG_ALBUM_ARTIST, 'musicbrainz-albumartistid')
 
@@ -142,11 +149,7 @@ def setup_proxy(element, config):
     if not hasattr(element.props, 'proxy') or not config.get('hostname'):
         return
 
-    proxy = "%s://%s:%d" % (config.get('scheme', 'http'),
-                            config.get('hostname'),
-                            config.get('port', 80))
-
-    element.set_property('proxy', proxy)
+    element.set_property('proxy', httpclient.format_proxy(config, auth=False))
     element.set_property('proxy-id', config.get('username'))
     element.set_property('proxy-pw', config.get('password'))
 

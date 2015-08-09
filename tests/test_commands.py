@@ -9,6 +9,7 @@ from mopidy import commands
 
 
 class ConfigOverrideTypeTest(unittest.TestCase):
+
     def test_valid_override(self):
         expected = (b'section', b'key', b'value')
         self.assertEqual(
@@ -44,6 +45,7 @@ class ConfigOverrideTypeTest(unittest.TestCase):
 
 
 class CommandParsingTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.exit_patcher = mock.patch.object(commands.Command, 'exit')
         self.exit_mock = self.exit_patcher.start()
@@ -258,6 +260,7 @@ class CommandParsingTest(unittest.TestCase):
 
 
 class UsageTest(unittest.TestCase):
+
     @mock.patch('sys.argv')
     def test_prog_name_default_and_override(self, argv_mock):
         argv_mock.__getitem__.return_value = '/usr/bin/foo'
@@ -294,6 +297,7 @@ class UsageTest(unittest.TestCase):
 
 
 class HelpTest(unittest.TestCase):
+
     @mock.patch('sys.argv')
     def test_prog_name_default_and_override(self, argv_mock):
         argv_mock.__getitem__.return_value = '/usr/bin/foo'
@@ -485,6 +489,7 @@ class HelpTest(unittest.TestCase):
 
 
 class RunTest(unittest.TestCase):
+
     def test_default_implmentation_raises_error(self):
         with self.assertRaises(NotImplementedError):
             commands.Command().run()

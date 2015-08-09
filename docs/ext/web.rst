@@ -159,6 +159,21 @@ A web extension for changing settings. Used by the Pi MusicBox distribution
 for Raspberry Pi, but also usable for other projects.
 
 
+Mopster
+=======
+
+https://github.com/cowbell/mopster
+
+Simple web client hosted online written in Ember.js and styled using basic
+Bootstrap by Wojciech Wnętrzak.
+
+.. image:: /ext/mopster.png
+    :width: 1275
+    :height: 628
+
+To use, just visit http://mopster.cowbell-labs.com/.
+
+
 Other web clients
 =================
 

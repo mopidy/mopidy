@@ -1,22 +1,31 @@
 from __future__ import absolute_import, unicode_literals
 
+from mopidy.internal import deprecation
 from mopidy.models import Ref, Track
 
 from tests.mpd import protocol
 
 
-class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
-    def test_add(self):
-        needle = Track(uri='dummy://foo')
-        self.backend.library.dummy_library = [
-            Track(), Track(), needle, Track()]
-        self.core.tracklist.add(
-            [Track(), Track(), Track(), Track(), Track()])
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
+class AddCommandsTest(protocol.BaseTestCase):
 
-        self.send_request('add "dummy://foo"')
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 6)
-        self.assertEqual(self.core.tracklist.tracks.get()[5], needle)
+    def setUp(self):  # noqa: N802
+        super(AddCommandsTest, self).setUp()
+
+        self.tracks = [Track(uri='dummy:/a', name='a'),
+                       Track(uri='dummy:/foo/b', name='b')]
+
+        self.refs = {'/a': Ref.track(uri='dummy:/a', name='a'),
+                     '/foo': Ref.directory(uri='dummy:/foo', name='foo'),
+                     '/foo/b': Ref.track(uri='dummy:/foo/b', name='b')}
+
+        self.backend.library.dummy_library = self.tracks
+
+    def test_add(self):
+        for track in [self.tracks[0], self.tracks[0], self.tracks[1]]:
+            self.send_request('add "%s"' % track.uri)
+
+        self.assertEqual(len(self.core.tracklist.tracks.get()), 3)
+        self.assertEqual(self.core.tracklist.tracks.get()[2], self.tracks[1])
         self.assertEqualResponse('OK')
 
     def test_add_with_uri_not_found_in_library_should_ack(self):
@@ -25,220 +34,153 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
             'ACK [50@0] {add} directory or file not found')
 
     def test_add_with_empty_uri_should_not_add_anything_and_ok(self):
-        self.backend.library.dummy_library = [Track(uri='dummy:/a', name='a')]
         self.backend.library.dummy_browse_result = {
-            'dummy:/': [Ref.track(uri='dummy:/a', name='a')]}
+            'dummy:/': [self.refs['/a']]}
 
         self.send_request('add ""')
         self.assertEqual(len(self.core.tracklist.tracks.get()), 0)
         self.assertInResponse('OK')
 
     def test_add_with_library_should_recurse(self):
-        tracks = [Track(uri='dummy:/a', name='a'),
-                  Track(uri='dummy:/foo/b', name='b')]
-
-        self.backend.library.dummy_library = tracks
         self.backend.library.dummy_browse_result = {
-            'dummy:/': [Ref.track(uri='dummy:/a', name='a'),
-                        Ref.directory(uri='dummy:/foo', name='foo')],
-            'dummy:/foo': [Ref.track(uri='dummy:/foo/b', name='b')]}
+            'dummy:/': [self.refs['/a'], self.refs['/foo']],
+            'dummy:/foo': [self.refs['/foo/b']]}
 
         self.send_request('add "/dummy"')
-        self.assertEqual(self.core.tracklist.tracks.get(), tracks)
+        self.assertEqual(self.core.tracklist.tracks.get(), self.tracks)
         self.assertInResponse('OK')
 
     def test_add_root_should_not_add_anything_and_ok(self):
-        self.backend.library.dummy_library = [Track(uri='dummy:/a', name='a')]
         self.backend.library.dummy_browse_result = {
-            'dummy:/': [Ref.track(uri='dummy:/a', name='a')]}
+            'dummy:/': [self.refs['/a']]}
 
         self.send_request('add "/"')
         self.assertEqual(len(self.core.tracklist.tracks.get()), 0)
         self.assertInResponse('OK')
 
     def test_addid_without_songpos(self):
-        needle = Track(uri='dummy://foo')
-        self.backend.library.dummy_library = [
-            Track(), Track(), needle, Track()]
-        self.core.tracklist.add(
-            [Track(), Track(), Track(), Track(), Track()])
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
+        for track in [self.tracks[0], self.tracks[0], self.tracks[1]]:
+            self.send_request('addid "%s"' % track.uri)
+        tl_tracks = self.core.tracklist.tl_tracks.get()
 
-        self.send_request('addid "dummy://foo"')
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 6)
-        self.assertEqual(self.core.tracklist.tracks.get()[5], needle)
-        self.assertInResponse(
-            'Id: %d' % self.core.tracklist.tl_tracks.get()[5].tlid)
+        self.assertEqual(len(tl_tracks), 3)
+        self.assertEqual(tl_tracks[2].track, self.tracks[1])
+        self.assertInResponse('Id: %d' % tl_tracks[2].tlid)
         self.assertInResponse('OK')
+
+    def test_addid_with_songpos(self):
+        for track in [self.tracks[0], self.tracks[0]]:
+            self.send_request('add "%s"' % track.uri)
+        self.send_request('addid "%s" "1"' % self.tracks[1].uri)
+        tl_tracks = self.core.tracklist.tl_tracks.get()
+
+        self.assertEqual(len(tl_tracks), 3)
+        self.assertEqual(tl_tracks[1].track, self.tracks[1])
+        self.assertInResponse('Id: %d' % tl_tracks[1].tlid)
+        self.assertInResponse('OK')
+
+    def test_addid_with_songpos_out_of_bounds_should_ack(self):
+        self.send_request('addid "%s" "3"' % self.tracks[0].uri)
+        self.assertEqualResponse('ACK [2@0] {addid} Bad song index')
 
     def test_addid_with_empty_uri_acks(self):
         self.send_request('addid ""')
         self.assertEqualResponse('ACK [50@0] {addid} No such song')
 
-    def test_addid_with_songpos(self):
-        needle = Track(uri='dummy://foo')
-        self.backend.library.dummy_library = [
-            Track(), Track(), needle, Track()]
-        self.core.tracklist.add(
-            [Track(), Track(), Track(), Track(), Track()])
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
-
-        self.send_request('addid "dummy://foo" "3"')
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 6)
-        self.assertEqual(self.core.tracklist.tracks.get()[3], needle)
-        self.assertInResponse(
-            'Id: %d' % self.core.tracklist.tl_tracks.get()[3].tlid)
-        self.assertInResponse('OK')
-
-    def test_addid_with_songpos_out_of_bounds_should_ack(self):
-        needle = Track(uri='dummy://foo')
-        self.backend.library.dummy_library = [
-            Track(), Track(), needle, Track()]
-        self.core.tracklist.add(
-            [Track(), Track(), Track(), Track(), Track()])
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
-
-        self.send_request('addid "dummy://foo" "6"')
-        self.assertEqualResponse('ACK [2@0] {addid} Bad song index')
-
     def test_addid_with_uri_not_found_in_library_should_ack(self):
         self.send_request('addid "dummy://foo"')
         self.assertEqualResponse('ACK [50@0] {addid} No such song')
 
-    def test_clear(self):
-        self.core.tracklist.add(
-            [Track(), Track(), Track(), Track(), Track()])
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
 
+class BasePopulatedTracklistTestCase(protocol.BaseTestCase):
+
+    def setUp(self):  # noqa: N802
+        super(BasePopulatedTracklistTestCase, self).setUp()
+        tracks = [Track(uri='dummy:/%s' % x, name=x) for x in 'abcdef']
+        self.backend.library.dummy_library = tracks
+        self.core.tracklist.add(uris=[t.uri for t in tracks])
+
+
+class DeleteCommandsTest(BasePopulatedTracklistTestCase):
+
+    def test_clear(self):
         self.send_request('clear')
         self.assertEqual(len(self.core.tracklist.tracks.get()), 0)
         self.assertEqual(self.core.playback.current_track.get(), None)
         self.assertInResponse('OK')
 
     def test_delete_songpos(self):
-        self.core.tracklist.add(
-            [Track(), Track(), Track(), Track(), Track()])
+        tl_tracks = self.core.tracklist.tl_tracks.get()
+        self.send_request('delete "%d"' % tl_tracks[1].tlid)
         self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
-
-        self.send_request(
-            'delete "%d"' % self.core.tracklist.tl_tracks.get()[2].tlid)
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 4)
         self.assertInResponse('OK')
 
     def test_delete_songpos_out_of_bounds(self):
-        self.core.tracklist.add(
-            [Track(), Track(), Track(), Track(), Track()])
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
-
-        self.send_request('delete "5"')
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
+        self.send_request('delete "8"')
+        self.assertEqual(len(self.core.tracklist.tracks.get()), 6)
         self.assertEqualResponse('ACK [2@0] {delete} Bad song index')
 
     def test_delete_open_range(self):
-        self.core.tracklist.add(
-            [Track(), Track(), Track(), Track(), Track()])
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
-
         self.send_request('delete "1:"')
         self.assertEqual(len(self.core.tracklist.tracks.get()), 1)
         self.assertInResponse('OK')
 
-    def test_delete_closed_range(self):
-        self.core.tracklist.add(
-            [Track(), Track(), Track(), Track(), Track()])
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
+    # TODO: check how this should work.
+    # def test_delete_open_upper_range(self):
+    #     self.send_request('delete ":8"')
+    #     self.assertEqual(len(self.core.tracklist.tracks.get()), 0)
+    #     self.assertInResponse('OK')
 
+    def test_delete_closed_range(self):
         self.send_request('delete "1:3"')
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 3)
+        self.assertEqual(len(self.core.tracklist.tracks.get()), 4)
         self.assertInResponse('OK')
 
-    def test_delete_range_out_of_bounds(self):
-        self.core.tracklist.add(
-            [Track(), Track(), Track(), Track(), Track()])
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
-
-        self.send_request('delete "5:7"')
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
+    def test_delete_entire_range_out_of_bounds(self):
+        self.send_request('delete "8:9"')
+        self.assertEqual(len(self.core.tracklist.tracks.get()), 6)
         self.assertEqualResponse('ACK [2@0] {delete} Bad song index')
 
-    def test_deleteid(self):
-        self.core.tracklist.add([Track(), Track()])
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
+    def test_delete_upper_range_out_of_bounds(self):
+        self.send_request('delete "5:9"')
+        self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
+        self.assertEqualResponse('OK')
 
+    def test_deleteid(self):
         self.send_request('deleteid "1"')
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 1)
+        self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
         self.assertInResponse('OK')
 
     def test_deleteid_does_not_exist(self):
-        self.core.tracklist.add([Track(), Track()])
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
-
         self.send_request('deleteid "12345"')
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
+        self.assertEqual(len(self.core.tracklist.tracks.get()), 6)
         self.assertEqualResponse('ACK [50@0] {deleteid} No such song')
 
-    def test_move_songpos(self):
-        self.core.tracklist.add([
-            Track(name='a'), Track(name='b'), Track(name='c'),
-            Track(name='d'), Track(name='e'), Track(name='f'),
-        ])
 
+class MoveCommandsTest(BasePopulatedTracklistTestCase):
+
+    def test_move_songpos(self):
         self.send_request('move "1" "0"')
-        tracks = self.core.tracklist.tracks.get()
-        self.assertEqual(tracks[0].name, 'b')
-        self.assertEqual(tracks[1].name, 'a')
-        self.assertEqual(tracks[2].name, 'c')
-        self.assertEqual(tracks[3].name, 'd')
-        self.assertEqual(tracks[4].name, 'e')
-        self.assertEqual(tracks[5].name, 'f')
+        result = [t.name for t in self.core.tracklist.tracks.get()]
+        self.assertEqual(result, ['b', 'a', 'c', 'd', 'e', 'f'])
         self.assertInResponse('OK')
 
     def test_move_open_range(self):
-        self.core.tracklist.add([
-            Track(name='a'), Track(name='b'), Track(name='c'),
-            Track(name='d'), Track(name='e'), Track(name='f'),
-        ])
-
         self.send_request('move "2:" "0"')
-        tracks = self.core.tracklist.tracks.get()
-        self.assertEqual(tracks[0].name, 'c')
-        self.assertEqual(tracks[1].name, 'd')
-        self.assertEqual(tracks[2].name, 'e')
-        self.assertEqual(tracks[3].name, 'f')
-        self.assertEqual(tracks[4].name, 'a')
-        self.assertEqual(tracks[5].name, 'b')
+        result = [t.name for t in self.core.tracklist.tracks.get()]
+        self.assertEqual(result, ['c', 'd', 'e', 'f', 'a', 'b'])
         self.assertInResponse('OK')
 
     def test_move_closed_range(self):
-        self.core.tracklist.add([
-            Track(name='a'), Track(name='b'), Track(name='c'),
-            Track(name='d'), Track(name='e'), Track(name='f'),
-        ])
-
         self.send_request('move "1:3" "0"')
-        tracks = self.core.tracklist.tracks.get()
-        self.assertEqual(tracks[0].name, 'b')
-        self.assertEqual(tracks[1].name, 'c')
-        self.assertEqual(tracks[2].name, 'a')
-        self.assertEqual(tracks[3].name, 'd')
-        self.assertEqual(tracks[4].name, 'e')
-        self.assertEqual(tracks[5].name, 'f')
+        result = [t.name for t in self.core.tracklist.tracks.get()]
+        self.assertEqual(result, ['b', 'c', 'a', 'd', 'e', 'f'])
         self.assertInResponse('OK')
 
     def test_moveid(self):
-        self.core.tracklist.add([
-            Track(name='a'), Track(name='b'), Track(name='c'),
-            Track(name='d'), Track(name='e'), Track(name='f'),
-        ])
-
         self.send_request('moveid "4" "2"')
-        tracks = self.core.tracklist.tracks.get()
-        self.assertEqual(tracks[0].name, 'a')
-        self.assertEqual(tracks[1].name, 'b')
-        self.assertEqual(tracks[2].name, 'e')
-        self.assertEqual(tracks[3].name, 'c')
-        self.assertEqual(tracks[4].name, 'd')
-        self.assertEqual(tracks[5].name, 'f')
+        result = [t.name for t in self.core.tracklist.tracks.get()]
+        self.assertEqual(result, ['a', 'b', 'e', 'c', 'd', 'f'])
         self.assertInResponse('OK')
 
     def test_moveid_with_tlid_not_found_in_tracklist_should_ack(self):
@@ -246,10 +188,8 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertEqualResponse(
             'ACK [50@0] {moveid} No such song')
 
-    def test_playlist_returns_same_as_playlistinfo(self):
-        playlist_response = self.send_request('playlist')
-        playlistinfo_response = self.send_request('playlistinfo')
-        self.assertEqual(playlist_response, playlistinfo_response)
+
+class PlaylistFindCommandTest(protocol.BaseTestCase):
 
     def test_playlistfind(self):
         self.send_request('playlistfind "tag" "needle"')
@@ -264,25 +204,26 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertEqualResponse('OK')
 
     def test_playlistfind_by_filename_in_tracklist(self):
-        self.core.tracklist.add([Track(uri='file:///exists')])
+        track = Track(uri='dummy:///exists')
+        self.backend.library.dummy_library = [track]
+        self.core.tracklist.add(uris=[track.uri])
 
-        self.send_request('playlistfind filename "file:///exists"')
-        self.assertInResponse('file: file:///exists')
+        self.send_request('playlistfind filename "dummy:///exists"')
+        self.assertInResponse('file: dummy:///exists')
         self.assertInResponse('Id: 0')
         self.assertInResponse('Pos: 0')
         self.assertInResponse('OK')
 
-    def test_playlistid_without_songid(self):
-        self.core.tracklist.add([Track(name='a'), Track(name='b')])
 
+class PlaylistIdCommandTest(BasePopulatedTracklistTestCase):
+
+    def test_playlistid_without_songid(self):
         self.send_request('playlistid')
         self.assertInResponse('Title: a')
         self.assertInResponse('Title: b')
         self.assertInResponse('OK')
 
     def test_playlistid_with_songid(self):
-        self.core.tracklist.add([Track(name='a'), Track(name='b')])
-
         self.send_request('playlistid "1"')
         self.assertNotInResponse('Title: a')
         self.assertNotInResponse('Id: 0')
@@ -291,17 +232,20 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_playlistid_with_not_existing_songid_fails(self):
-        self.core.tracklist.add([Track(name='a'), Track(name='b')])
-
         self.send_request('playlistid "25"')
         self.assertEqualResponse('ACK [50@0] {playlistid} No such song')
 
-    def test_playlistinfo_without_songpos_or_range(self):
-        self.core.tracklist.add([
-            Track(name='a'), Track(name='b'), Track(name='c'),
-            Track(name='d'), Track(name='e'), Track(name='f'),
-        ])
 
+class PlaylistInfoCommandTest(BasePopulatedTracklistTestCase):
+
+    def test_playlist_returns_same_as_playlistinfo(self):
+        with deprecation.ignore('mpd.protocol.current_playlist.playlist'):
+            playlist_response = self.send_request('playlist')
+
+        playlistinfo_response = self.send_request('playlistinfo')
+        self.assertEqual(playlist_response, playlistinfo_response)
+
+    def test_playlistinfo_without_songpos_or_range(self):
         self.send_request('playlistinfo')
         self.assertInResponse('Title: a')
         self.assertInResponse('Pos: 0')
@@ -320,10 +264,6 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
     def test_playlistinfo_with_songpos(self):
         # Make the track's CPID not match the playlist position
         self.core.tracklist.tlid = 17
-        self.core.tracklist.add([
-            Track(name='a'), Track(name='b'), Track(name='c'),
-            Track(name='d'), Track(name='e'), Track(name='f'),
-        ])
 
         self.send_request('playlistinfo "4"')
         self.assertNotInResponse('Title: a')
@@ -346,11 +286,6 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertEqual(response1, response2)
 
     def test_playlistinfo_with_open_range(self):
-        self.core.tracklist.add([
-            Track(name='a'), Track(name='b'), Track(name='c'),
-            Track(name='d'), Track(name='e'), Track(name='f'),
-        ])
-
         self.send_request('playlistinfo "2:"')
         self.assertNotInResponse('Title: a')
         self.assertNotInResponse('Pos: 0')
@@ -367,11 +302,6 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_playlistinfo_with_closed_range(self):
-        self.core.tracklist.add([
-            Track(name='a'), Track(name='b'), Track(name='c'),
-            Track(name='d'), Track(name='e'), Track(name='f'),
-        ])
-
         self.send_request('playlistinfo "2:4"')
         self.assertNotInResponse('Title: a')
         self.assertNotInResponse('Title: b')
@@ -393,6 +323,9 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.send_request('playlistinfo "0"')
         self.assertInResponse('OK')
 
+
+class PlaylistSearchCommandTest(protocol.BaseTestCase):
+
     def test_playlistsearch(self):
         self.send_request('playlistsearch "any" "needle"')
         self.assertEqualResponse('ACK [0@0] {playlistsearch} Not implemented')
@@ -401,10 +334,10 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.send_request('playlistsearch any "needle"')
         self.assertEqualResponse('ACK [0@0] {playlistsearch} Not implemented')
 
-    def test_plchanges_with_lower_version_returns_changes(self):
-        self.core.tracklist.add(
-            [Track(name='a'), Track(name='b'), Track(name='c')])
 
+class PlChangeCommandTest(BasePopulatedTracklistTestCase):
+
+    def test_plchanges_with_lower_version_returns_changes(self):
         self.send_request('plchanges "0"')
         self.assertInResponse('Title: a')
         self.assertInResponse('Title: b')
@@ -412,9 +345,6 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_plchanges_with_equal_version_returns_nothing(self):
-        self.core.tracklist.add(
-            [Track(name='a'), Track(name='b'), Track(name='c')])
-
         self.assertEqual(self.core.tracklist.version.get(), 1)
         self.send_request('plchanges "1"')
         self.assertNotInResponse('Title: a')
@@ -423,9 +353,6 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_plchanges_with_greater_version_returns_nothing(self):
-        self.core.tracklist.add(
-            [Track(name='a'), Track(name='b'), Track(name='c')])
-
         self.assertEqual(self.core.tracklist.version.get(), 1)
         self.send_request('plchanges "2"')
         self.assertNotInResponse('Title: a')
@@ -434,9 +361,6 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_plchanges_with_minus_one_returns_entire_playlist(self):
-        self.core.tracklist.add(
-            [Track(name='a'), Track(name='b'), Track(name='c')])
-
         self.send_request('plchanges "-1"')
         self.assertInResponse('Title: a')
         self.assertInResponse('Title: b')
@@ -444,9 +368,6 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_plchanges_without_quotes_works(self):
-        self.core.tracklist.add(
-            [Track(name='a'), Track(name='b'), Track(name='c')])
-
         self.send_request('plchanges 0')
         self.assertInResponse('Title: a')
         self.assertInResponse('Title: b')
@@ -454,8 +375,6 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_plchangesposid(self):
-        self.core.tracklist.add([Track(), Track(), Track()])
-
         self.send_request('plchangesposid "0"')
         tl_tracks = self.core.tracklist.tl_tracks.get()
         self.assertInResponse('cpos: 0')
@@ -466,11 +385,29 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('Id: %d' % tl_tracks[2].tlid)
         self.assertInResponse('OK')
 
+
+class PrioCommandTest(protocol.BaseTestCase):
+
+    def test_prio(self):
+        self.send_request('prio 255 0:10')
+        self.assertEqualResponse('ACK [0@0] {prio} Not implemented')
+
+    def test_prioid(self):
+        self.send_request('prioid 255 17 23')
+        self.assertEqualResponse('ACK [0@0] {prioid} Not implemented')
+
+
+class RangeIdCommandTest(protocol.BaseTestCase):
+
+    def test_rangeid(self):
+        self.send_request('rangeid 17 0:30')
+        self.assertEqualResponse('ACK [0@0] {rangeid} Not implemented')
+
+
+# TODO: we only seem to be testing that don't touch the non shuffled region :/
+class ShuffleCommandTest(BasePopulatedTracklistTestCase):
+
     def test_shuffle_without_range(self):
-        self.core.tracklist.add([
-            Track(name='a'), Track(name='b'), Track(name='c'),
-            Track(name='d'), Track(name='e'), Track(name='f'),
-        ])
         version = self.core.tracklist.version.get()
 
         self.send_request('shuffle')
@@ -478,77 +415,58 @@ class CurrentPlaylistHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_shuffle_with_open_range(self):
-        self.core.tracklist.add([
-            Track(name='a'), Track(name='b'), Track(name='c'),
-            Track(name='d'), Track(name='e'), Track(name='f'),
-        ])
         version = self.core.tracklist.version.get()
 
         self.send_request('shuffle "4:"')
         self.assertLess(version, self.core.tracklist.version.get())
-        tracks = self.core.tracklist.tracks.get()
-        self.assertEqual(tracks[0].name, 'a')
-        self.assertEqual(tracks[1].name, 'b')
-        self.assertEqual(tracks[2].name, 'c')
-        self.assertEqual(tracks[3].name, 'd')
+
+        result = [t.name for t in self.core.tracklist.tracks.get()]
+        self.assertEqual(result[:4], ['a', 'b', 'c', 'd'])
         self.assertInResponse('OK')
 
     def test_shuffle_with_closed_range(self):
-        self.core.tracklist.add([
-            Track(name='a'), Track(name='b'), Track(name='c'),
-            Track(name='d'), Track(name='e'), Track(name='f'),
-        ])
         version = self.core.tracklist.version.get()
 
         self.send_request('shuffle "1:3"')
         self.assertLess(version, self.core.tracklist.version.get())
-        tracks = self.core.tracklist.tracks.get()
-        self.assertEqual(tracks[0].name, 'a')
-        self.assertEqual(tracks[3].name, 'd')
-        self.assertEqual(tracks[4].name, 'e')
-        self.assertEqual(tracks[5].name, 'f')
+
+        result = [t.name for t in self.core.tracklist.tracks.get()]
+        self.assertEqual(result[:1], ['a'])
+        self.assertEqual(result[3:], ['d', 'e', 'f'])
         self.assertInResponse('OK')
 
-    def test_swap(self):
-        self.core.tracklist.add([
-            Track(name='a'), Track(name='b'), Track(name='c'),
-            Track(name='d'), Track(name='e'), Track(name='f'),
-        ])
 
+class SwapCommandTest(BasePopulatedTracklistTestCase):
+
+    def test_swap(self):
         self.send_request('swap "1" "4"')
-        tracks = self.core.tracklist.tracks.get()
-        self.assertEqual(tracks[0].name, 'a')
-        self.assertEqual(tracks[1].name, 'e')
-        self.assertEqual(tracks[2].name, 'c')
-        self.assertEqual(tracks[3].name, 'd')
-        self.assertEqual(tracks[4].name, 'b')
-        self.assertEqual(tracks[5].name, 'f')
+        result = [t.name for t in self.core.tracklist.tracks.get()]
+        self.assertEqual(result, ['a', 'e', 'c', 'd', 'b', 'f'])
         self.assertInResponse('OK')
 
     def test_swapid(self):
-        self.core.tracklist.add([
-            Track(name='a'), Track(name='b'), Track(name='c'),
-            Track(name='d'), Track(name='e'), Track(name='f'),
-        ])
-
         self.send_request('swapid "1" "4"')
-        tracks = self.core.tracklist.tracks.get()
-        self.assertEqual(tracks[0].name, 'a')
-        self.assertEqual(tracks[1].name, 'e')
-        self.assertEqual(tracks[2].name, 'c')
-        self.assertEqual(tracks[3].name, 'd')
-        self.assertEqual(tracks[4].name, 'b')
-        self.assertEqual(tracks[5].name, 'f')
+        result = [t.name for t in self.core.tracklist.tracks.get()]
+        self.assertEqual(result, ['a', 'e', 'c', 'd', 'b', 'f'])
         self.assertInResponse('OK')
 
     def test_swapid_with_first_id_unknown_should_ack(self):
-        self.core.tracklist.add([Track()])
-        self.send_request('swapid "0" "4"')
+        self.send_request('swapid "0" "8"')
         self.assertEqualResponse(
             'ACK [50@0] {swapid} No such song')
 
     def test_swapid_with_second_id_unknown_should_ack(self):
-        self.core.tracklist.add([Track()])
-        self.send_request('swapid "4" "0"')
+        self.send_request('swapid "8" "0"')
         self.assertEqualResponse(
             'ACK [50@0] {swapid} No such song')
+
+
+class TagCommandTest(protocol.BaseTestCase):
+
+    def test_addtagid(self):
+        self.send_request('addtagid 17 artist Abba')
+        self.assertEqualResponse('ACK [0@0] {addtagid} Not implemented')
+
+    def test_cleartagid(self):
+        self.send_request('cleartagid 17 artist')
+        self.assertEqualResponse('ACK [0@0] {cleartagid} Not implemented')

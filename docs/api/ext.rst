@@ -1,8 +1,8 @@
 .. _ext-api:
 
-*************
-Extension API
-*************
+**********************************
+:mod:`mopidy.ext` -- Extension API
+**********************************
 
 If you want to learn how to make Mopidy extensions, read :ref:`extensiondev`.
 

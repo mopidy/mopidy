@@ -40,7 +40,7 @@ class PlaybackHistoryTest(unittest.TestCase):
         result = self.history.get_history()
         (timestamp, ref) = result[0]
 
-        self.assertIsInstance(timestamp, int)
+        self.assertIsInstance(timestamp, (int, long))
         self.assertEqual(track.uri, ref.uri)
         self.assertIn(track.name, ref.name)
         for artist in track.artists:

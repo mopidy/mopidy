@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import functools
 import itertools
 
+from mopidy.internal import deprecation
 from mopidy.models import Track
 from mopidy.mpd import exceptions, protocol, translator
 
@@ -95,18 +96,17 @@ def count(context, *args):
 
     *GMPC:*
 
-    - does not add quotes around the tag argument.
     - use multiple tag-needle pairs to make more specific searches.
     """
     try:
         query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         raise exceptions.MpdArgError('incorrect arguments')
-    results = context.core.library.find_exact(**query).get()
+    results = context.core.library.search(query=query, exact=True).get()
     result_tracks = _get_tracks(results)
     return [
         ('songs', len(result_tracks)),
-        ('playtime', sum(track.length for track in result_tracks) / 1000),
+        ('playtime', sum(t.length for t in result_tracks if t.length) / 1000),
     ]
 
 
@@ -124,13 +124,11 @@ def find(context, *args):
 
     *GMPC:*
 
-    - does not add quotes around the field argument.
     - also uses ``find album "[ALBUM]" artist "[ARTIST]"`` to list album
       tracks.
 
     *ncmpc:*
 
-    - does not add quotes around the field argument.
     - capitalizes the type argument.
 
     *ncmpcpp:*
@@ -143,7 +141,8 @@ def find(context, *args):
     except ValueError:
         return
 
-    results = context.core.library.find_exact(**query).get()
+    with deprecation.ignore('core.library.search:empty_query'):
+        results = context.core.library.search(query=query, exact=True).get()
     result_tracks = []
     if ('artist' not in query and
             'albumartist' not in query and
@@ -170,8 +169,13 @@ def findadd(context, *args):
         query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return
-    results = context.core.library.find_exact(**query).get()
-    context.core.tracklist.add(_get_tracks(results))
+
+    results = context.core.library.search(query=query, exact=True).get()
+
+    with deprecation.ignore('core.tracklist.add:tracks_arg'):
+        # TODO: for now just use tracks as other wise we have to lookup the
+        # tracks we just got from the search.
+        context.core.tracklist.add(tracks=_get_tracks(results)).get()
 
 
 @protocol.commands.add('list')
@@ -248,13 +252,8 @@ def list_(context, *args):
                 Genre: Rock
                 OK
 
-    *GMPC:*
-
-    - does not add quotes around the field argument.
-
     *ncmpc:*
 
-    - does not add quotes around the field argument.
     - capitalizes the field argument.
     """
     params = list(args)
@@ -266,10 +265,12 @@ def list_(context, *args):
     if field is None:
         raise exceptions.MpdArgError('incorrect arguments')
 
+    query = None
     if len(params) == 1:
         if field != 'album':
             raise exceptions.MpdArgError('should be "Album" for 3 arguments')
-        query = {'artist': params}
+        if params[0].strip():
+            query = {'artist': params}
     else:
         try:
             query = _query_from_mpd_search_parameters(params, _LIST_MAPPING)
@@ -334,9 +335,34 @@ def listallinfo(context, uri=None):
         if not lookup_future:
             result.append(('directory', path))
         else:
-            for track in lookup_future.get():
-                result.extend(translator.track_to_mpd_format(track))
+            for tracks in lookup_future.get().values():
+                for track in tracks:
+                    result.extend(translator.track_to_mpd_format(track))
     return result
+
+
+@protocol.commands.add('listfiles')
+def listfiles(context, uri=None):
+    """
+    *musicpd.org, music database section:*
+
+        ``listfiles [URI]``
+
+        Lists the contents of the directory URI, including files are not
+        recognized by MPD. URI can be a path relative to the music directory or
+        an URI understood by one of the storage plugins. The response contains
+        at least one line for each directory entry with the prefix "file: " or
+        "directory: ", and may be followed by file attributes such as
+        "Last-Modified" and "size".
+
+        For example, "smb://SERVER" returns a list of all shares on the given
+        SMB/CIFS server; "nfs://servername/path" obtains a directory listing
+        from the NFS server.
+
+    .. versionadded:: 0.19
+        New in MPD protocol version 0.19
+    """
+    raise exceptions.MpdNotImplemented  # TODO
 
 
 @protocol.commands.add('lsinfo')
@@ -361,9 +387,9 @@ def lsinfo(context, uri=None):
         if not lookup_future:
             result.append(('directory', path.lstrip('/')))
         else:
-            tracks = lookup_future.get()
-            if tracks:
-                result.extend(translator.track_to_mpd_format(tracks[0]))
+            for tracks in lookup_future.get().values():
+                if tracks:
+                    result.extend(translator.track_to_mpd_format(tracks[0]))
 
     if uri in (None, '', '/'):
         result.extend(protocol.stored_playlists.listplaylists(context))
@@ -395,7 +421,6 @@ def search(context, *args):
 
     *GMPC:*
 
-    - does not add quotes around the field argument.
     - uses the undocumented field ``any``.
     - searches for multiple words like this::
 
@@ -403,7 +428,6 @@ def search(context, *args):
 
     *ncmpc:*
 
-    - does not add quotes around the field argument.
     - capitalizes the field argument.
 
     *ncmpcpp:*
@@ -415,7 +439,8 @@ def search(context, *args):
         query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return
-    results = context.core.library.search(**query).get()
+    with deprecation.ignore('core.library.search:empty_query'):
+        results = context.core.library.search(query).get()
     artists = [_artist_as_track(a) for a in _get_artists(results)]
     albums = [_album_as_track(a) for a in _get_albums(results)]
     tracks = _get_tracks(results)
@@ -439,8 +464,13 @@ def searchadd(context, *args):
         query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return
-    results = context.core.library.search(**query).get()
-    context.core.tracklist.add(_get_tracks(results))
+
+    results = context.core.library.search(query).get()
+
+    with deprecation.ignore('core.tracklist.add:tracks_arg'):
+        # TODO: for now just use tracks as other wise we have to lookup the
+        # tracks we just got from the search.
+        context.core.tracklist.add(_get_tracks(results)).get()
 
 
 @protocol.commands.add('searchaddpl')
@@ -466,14 +496,14 @@ def searchaddpl(context, *args):
         query = _query_from_mpd_search_parameters(parameters, _SEARCH_MAPPING)
     except ValueError:
         return
-    results = context.core.library.search(**query).get()
+    results = context.core.library.search(query).get()
 
     uri = context.lookup_playlist_uri_from_name(playlist_name)
     playlist = uri is not None and context.core.playlists.lookup(uri).get()
     if not playlist:
         playlist = context.core.playlists.create(playlist_name).get()
     tracks = list(playlist.tracks) + _get_tracks(results)
-    playlist = playlist.copy(tracks=tracks)
+    playlist = playlist.replace(tracks=tracks)
     context.core.playlists.save(playlist)
 
 

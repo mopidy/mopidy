@@ -12,8 +12,6 @@ from mopidy.http import actor
 class HttpEventsTest(unittest.TestCase):
 
     def test_track_playback_paused_is_broadcasted(self, broadcast):
-        broadcast.reset_mock()
-
         actor.on_event('track_playback_paused', foo='bar')
 
         self.assertDictEqual(
@@ -23,8 +21,6 @@ class HttpEventsTest(unittest.TestCase):
             })
 
     def test_track_playback_resumed_is_broadcasted(self, broadcast):
-        broadcast.reset_mock()
-
         actor.on_event('track_playback_resumed', foo='bar')
 
         self.assertDictEqual(

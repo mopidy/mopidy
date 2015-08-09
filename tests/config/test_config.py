@@ -6,12 +6,13 @@ import unittest
 
 import mock
 
-from mopidy import config
+from mopidy import config, ext
 
 from tests import path_to_data_dir
 
 
 class LoadConfigTest(unittest.TestCase):
+
     def test_load_nothing(self):
         self.assertEqual({}, config._load([], [], []))
 
@@ -96,6 +97,7 @@ class LoadConfigTest(unittest.TestCase):
 
 
 class ValidateTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.schema = config.ConfigSchema('foo')
         self.schema['bar'] = config.ConfigValue()
@@ -290,3 +292,23 @@ class PostProcessorTest(unittest.TestCase):
     def test_conversion(self):
         result = config._postprocess(PROCESSED_CONFIG)
         self.assertEqual(result, INPUT_CONFIG)
+
+
+def test_format_initial():
+    extension = ext.Extension()
+    extension.ext_name = 'foo'
+    extension.get_default_config = lambda: None
+    extensions_data = [
+        ext.ExtensionData(
+            extension=extension,
+            entry_point=None,
+            config_schema=None,
+            config_defaults=None,
+            command=None,
+        ),
+    ]
+
+    result = config.format_initial(extensions_data)
+
+    assert '# For further information' in result
+    assert '[foo]\n' in result

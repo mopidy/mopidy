@@ -8,9 +8,8 @@ import urllib
 import urlparse
 
 from mopidy import compat
+from mopidy.internal import encoding, path
 from mopidy.models import Track
-from mopidy.utils.encoding import locale_decode
-from mopidy.utils.path import path_to_uri, uri_to_path
 
 
 M3U_EXTINF_RE = re.compile(r'#EXTINF:(-1|\d+),(.*)')
@@ -21,7 +20,7 @@ logger = logging.getLogger(__name__)
 def playlist_uri_to_path(uri, playlists_dir):
     if not uri.startswith('m3u:'):
         raise ValueError('Invalid URI %s' % uri)
-    file_path = uri_to_path(uri)
+    file_path = path.uri_to_path(uri)
     return os.path.join(playlists_dir, file_path)
 
 
@@ -74,38 +73,42 @@ def parse_m3u(file_path, media_dir=None):
     - Lines starting with # are ignored, except for extended M3U directives.
     - Track.name and Track.length are set from extended M3U directives.
     - m3u files are latin-1.
+    - m3u8 files are utf-8
     """
     # TODO: uris as bytes
+    file_encoding = 'utf-8' if file_path.endswith(b'.m3u8') else 'latin1'
+
     tracks = []
     try:
-        with open(file_path) as m3u:
+        with codecs.open(file_path, 'rb', file_encoding, 'replace') as m3u:
             contents = m3u.readlines()
     except IOError as error:
-        logger.warning('Couldn\'t open m3u: %s', locale_decode(error))
+        logger.warning('Couldn\'t open m3u: %s', encoding.locale_decode(error))
         return tracks
 
     if not contents:
         return tracks
 
-    extended = contents[0].decode('latin1').startswith('#EXTM3U')
+    # Strip newlines left by codecs
+    contents = [line.strip() for line in contents]
+
+    extended = contents[0].startswith('#EXTM3U')
 
     track = Track()
     for line in contents:
-        line = line.strip().decode('latin1')
-
         if line.startswith('#'):
             if extended and line.startswith('#EXTINF'):
                 track = m3u_extinf_to_track(line)
             continue
 
         if urlparse.urlsplit(line).scheme:
-            tracks.append(track.copy(uri=line))
+            tracks.append(track.replace(uri=line))
         elif os.path.normpath(line) == os.path.abspath(line):
-            path = path_to_uri(line)
-            tracks.append(track.copy(uri=path))
+            uri = path.path_to_uri(line)
+            tracks.append(track.replace(uri=uri))
         elif media_dir is not None:
-            path = path_to_uri(os.path.join(media_dir, line))
-            tracks.append(track.copy(uri=path))
+            uri = path.path_to_uri(os.path.join(media_dir, line))
+            tracks.append(track.replace(uri=uri))
 
         track = Track()
     return tracks
