@@ -107,6 +107,8 @@ class Artist(ValidatedImmutableObject):
     :type uri: string
     :param name: artist name
     :type name: string
+    :param sortname: artist name for sorting
+    :type sortname: string
     :param musicbrainz_id: MusicBrainz ID
     :type musicbrainz_id: string
     """
