@@ -9,11 +9,13 @@ v1.1.0 (2015-08-09)
 
 Mopidy 1.1 is here!
 
-Since the release of 1.0, we've closed or merged approximately 55 issues and
+Since the release of 1.0, we've closed or merged approximately 65 issues and
 pull requests through about 400 commits by a record high 20 extraordinary
 people, including 14 newcomers. That's less issues and commits than in the 1.0
 release, but even more contributors, and a doubling of the number of newcomers.
-Thanks to :ref:`everyone <authors>` who has :ref:`contributed <contributing>`!
+Thanks to :ref:`everyone <authors>` who has :ref:`contributed <contributing>`,
+especially those that joined the sprint at EuroPython 2015 in Bilbao, Spain a
+couple of weeks ago!
 
 As we promised with the release of Mopidy 1.0, any extension working with
 Mopidy 1.0 should continue working with all Mopidy 1.x releases. However, this
