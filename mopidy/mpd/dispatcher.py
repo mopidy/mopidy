@@ -13,6 +13,7 @@ protocol.load_protocol_modules()
 
 
 class MpdDispatcher(object):
+
     """
     The MPD session feeds the MPD dispatcher with requests. The dispatcher
     finds the correct handler, processes the request and sends the response
@@ -166,7 +167,8 @@ class MpdDispatcher(object):
         # TODO: check that blacklist items are valid commands?
         blacklist = self.config['mpd'].get('command_blacklist', [])
         if tokens and tokens[0] in blacklist:
-            logger.warning('Client sent us blacklisted command: %s', tokens[0])
+            logger.warning(
+                'MPD client used blacklisted command: %s', tokens[0])
             raise exceptions.MpdDisabled(command=tokens[0])
         try:
             return protocol.commands.call(tokens, context=self.context)
@@ -209,6 +211,7 @@ class MpdDispatcher(object):
 
 
 class MpdContext(object):
+
     """
     This object is passed as the first argument to all MPD command handlers to
     give the command handlers access to important parts of Mopidy.
@@ -267,10 +270,10 @@ class MpdContext(object):
         given path.
 
         If ``lookup`` is true and the ``path`` is to a track, the returned
-        ``data`` is a future which will contain the
-        :class:`mopidy.models.Track` model. If ``lookup`` is false and the
-        ``path`` is to a track, the returned ``data`` will be a
-        :class:`mopidy.models.Ref` for the track.
+        ``data`` is a future which will contain the results from looking up
+        the URI with :meth:`mopidy.core.LibraryController.lookup` If ``lookup``
+        is false and the ``path`` is to a track, the returned ``data`` will be
+        a :class:`mopidy.models.Ref` for the track.
 
         For all entries that are not tracks, the returned ``data`` will be
         :class:`None`.
@@ -302,7 +305,8 @@ class MpdContext(object):
 
                 if ref.type == ref.TRACK:
                     if lookup:
-                        yield (path, self.core.library.lookup(ref.uri))
+                        # TODO: can we lookup all the refs at once now?
+                        yield (path, self.core.library.lookup(uris=[ref.uri]))
                     else:
                         yield (path, ref)
                 else:

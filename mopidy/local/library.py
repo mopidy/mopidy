@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class LocalLibraryProvider(backend.LibraryProvider):
+
     """Proxy library that delegates work to our active local library."""
 
     root_directory = models.Ref.directory(

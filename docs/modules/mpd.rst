@@ -1,6 +1,6 @@
-*******************************
-:mod:`mopidy.mpd` -- MPD server
-*******************************
+********************************
+:mod:`mopidy.mpd` --- MPD server
+********************************
 
 For details on how to use Mopidy's MPD server, see :ref:`ext-mpd`.
 
@@ -68,6 +68,14 @@ Current playlist
 
 .. automodule:: mopidy.mpd.protocol.current_playlist
     :synopsis: MPD protocol: current playlist
+    :members:
+
+
+Mounts and neighbors
+--------------------
+
+.. automodule:: mopidy.mpd.protocol.mount
+    :synopsis: MPD protocol: mounts and neighbors
     :members:
 
 

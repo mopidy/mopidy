@@ -7,6 +7,7 @@ from mopidy.models import Album, Track
 
 
 class LocalLibrarySearchTest(unittest.TestCase):
+
     def test_find_exact_with_album_query(self):
         expected_tracks = [Track(album=Album(name='foo'))]
         tracks = [Track(), Track(album=Album(name='bar'))] + expected_tracks

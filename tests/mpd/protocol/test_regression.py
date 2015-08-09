@@ -2,12 +2,16 @@ from __future__ import absolute_import, unicode_literals
 
 import random
 
+import mock
+
 from mopidy.models import Playlist, Ref, Track
+from mopidy.mpd.protocol import stored_playlists
 
 from tests.mpd import protocol
 
 
 class IssueGH17RegressionTest(protocol.BaseTestCase):
+
     """
     The issue: http://github.com/mopidy/mopidy/issues/17
 
@@ -17,15 +21,19 @@ class IssueGH17RegressionTest(protocol.BaseTestCase):
     - Turn on random mode
     - Press next until you get to the unplayable track
     """
+
     def test(self):
-        self.core.tracklist.add([
+        tracks = [
             Track(uri='dummy:a'),
             Track(uri='dummy:b'),
             Track(uri='dummy:error'),
             Track(uri='dummy:d'),
             Track(uri='dummy:e'),
             Track(uri='dummy:f'),
-        ])
+        ]
+        self.backend.library.dummy_library = tracks
+        self.core.tracklist.add(uris=[t.uri for t in tracks]).get()
+
         random.seed(1)  # Playlist order: abcfde
 
         self.send_request('play')
@@ -48,6 +56,7 @@ class IssueGH17RegressionTest(protocol.BaseTestCase):
 
 
 class IssueGH18RegressionTest(protocol.BaseTestCase):
+
     """
     The issue: http://github.com/mopidy/mopidy/issues/18
 
@@ -59,9 +68,13 @@ class IssueGH18RegressionTest(protocol.BaseTestCase):
     """
 
     def test(self):
-        self.core.tracklist.add([
+        tracks = [
             Track(uri='dummy:a'), Track(uri='dummy:b'), Track(uri='dummy:c'),
-            Track(uri='dummy:d'), Track(uri='dummy:e'), Track(uri='dummy:f')])
+            Track(uri='dummy:d'), Track(uri='dummy:e'), Track(uri='dummy:f'),
+        ]
+        self.backend.library.dummy_library = tracks
+        self.core.tracklist.add(uris=[t.uri for t in tracks]).get()
+
         random.seed(1)
 
         self.send_request('play')
@@ -82,6 +95,7 @@ class IssueGH18RegressionTest(protocol.BaseTestCase):
 
 
 class IssueGH22RegressionTest(protocol.BaseTestCase):
+
     """
     The issue: http://github.com/mopidy/mopidy/issues/22
 
@@ -95,9 +109,13 @@ class IssueGH22RegressionTest(protocol.BaseTestCase):
     """
 
     def test(self):
-        self.core.tracklist.add([
+        tracks = [
             Track(uri='dummy:a'), Track(uri='dummy:b'), Track(uri='dummy:c'),
-            Track(uri='dummy:d'), Track(uri='dummy:e'), Track(uri='dummy:f')])
+            Track(uri='dummy:d'), Track(uri='dummy:e'), Track(uri='dummy:f'),
+        ]
+        self.backend.library.dummy_library = tracks
+        self.core.tracklist.add(uris=[t.uri for t in tracks]).get()
+
         random.seed(1)
 
         self.send_request('play')
@@ -112,6 +130,7 @@ class IssueGH22RegressionTest(protocol.BaseTestCase):
 
 
 class IssueGH69RegressionTest(protocol.BaseTestCase):
+
     """
     The issue: https://github.com/mopidy/mopidy/issues/69
 
@@ -124,9 +143,13 @@ class IssueGH69RegressionTest(protocol.BaseTestCase):
 
     def test(self):
         self.core.playlists.create('foo')
-        self.core.tracklist.add([
+
+        tracks = [
             Track(uri='dummy:a'), Track(uri='dummy:b'), Track(uri='dummy:c'),
-            Track(uri='dummy:d'), Track(uri='dummy:e'), Track(uri='dummy:f')])
+            Track(uri='dummy:d'), Track(uri='dummy:e'), Track(uri='dummy:f'),
+        ]
+        self.backend.library.dummy_library = tracks
+        self.core.tracklist.add(uris=[t.uri for t in tracks]).get()
 
         self.send_request('play')
         self.send_request('stop')
@@ -136,6 +159,7 @@ class IssueGH69RegressionTest(protocol.BaseTestCase):
 
 
 class IssueGH113RegressionTest(protocol.BaseTestCase):
+
     """
     The issue: https://github.com/mopidy/mopidy/issues/113
 
@@ -161,6 +185,7 @@ class IssueGH113RegressionTest(protocol.BaseTestCase):
 
 
 class IssueGH137RegressionTest(protocol.BaseTestCase):
+
     """
     The issue: https://github.com/mopidy/mopidy/issues/137
 
@@ -192,12 +217,14 @@ class IssueGH1120RegressionTest(protocol.BaseTestCase):
 
     """
 
-    def test(self):
+    @mock.patch.object(stored_playlists, '_get_last_modified')
+    def test(self, last_modified_mock):
+        last_modified_mock.return_value = '2015-08-05T22:51:06Z'
         self.backend.library.dummy_browse_result = {
             'dummy:/': [Ref.playlist(name='Top 100 tracks', uri='dummy:/1')],
         }
         self.backend.playlists.set_dummy_playlists([
-            Playlist(name='Top 100 tracks', uri='dummy:/1', last_modified=123),
+            Playlist(name='Top 100 tracks', uri='dummy:/1'),
         ])
 
         response1 = self.send_request('lsinfo "/"')

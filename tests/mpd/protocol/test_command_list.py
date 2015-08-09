@@ -4,6 +4,7 @@ from tests.mpd import protocol
 
 
 class CommandListsTest(protocol.BaseTestCase):
+
     def test_command_list_begin(self):
         response = self.send_request('command_list_begin')
         self.assertEqual([], response)

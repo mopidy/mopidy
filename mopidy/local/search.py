@@ -43,8 +43,8 @@ def find_exact(tracks, query=None, limit=100, offset=0, uris=None):
                 return filter(lambda a: q == a.name, t.artists)
 
             def albumartist_filter(t):
-                return any([q == a.name for a in getattr(t.album,
-                           'artists', [])])
+                return any([
+                    q == a.name for a in getattr(t.album, 'artists', [])])
 
             def composer_filter(t):
                 return any([q == a.name for a in getattr(t, 'composers', [])])
@@ -150,8 +150,8 @@ def search(tracks, query=None, limit=100, offset=0, uris=None):
                             q in t.album.name.lower())
 
             def artist_filter(t):
-                return bool(filter(lambda a:
-                            bool(a.name and q in a.name.lower()), t.artists))
+                return bool(filter(
+                    lambda a: bool(a.name and q in a.name.lower()), t.artists))
 
             def albumartist_filter(t):
                 return any([a.name and q in a.name.lower()

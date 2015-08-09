@@ -16,7 +16,7 @@ import pykka
 
 from mopidy import audio
 from mopidy.audio.constants import PlaybackState
-from mopidy.utils.path import path_to_uri
+from mopidy.internal import path
 
 from tests import dummy_audio, path_to_data_dir
 
@@ -36,8 +36,8 @@ class BaseTest(unittest.TestCase):
         }
     }
 
-    uris = [path_to_uri(path_to_data_dir('song1.wav')),
-            path_to_uri(path_to_data_dir('song2.wav'))]
+    uris = [path.path_to_uri(path_to_data_dir('song1.wav')),
+            path.path_to_uri(path_to_data_dir('song2.wav'))]
 
     audio_class = audio.Audio
 
@@ -53,7 +53,7 @@ class BaseTest(unittest.TestCase):
                 'hostname': '',
             },
         }
-        self.song_uri = path_to_uri(path_to_data_dir('song1.wav'))
+        self.song_uri = path.path_to_uri(path_to_data_dir('song1.wav'))
         self.audio = self.audio_class.start(config=config, mixer=None).proxy()
 
     def tearDown(self):  # noqa
@@ -79,6 +79,7 @@ class DummyMixin(object):
 
 
 class AudioTest(BaseTest):
+
     def test_start_playback_existing_file(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
@@ -134,6 +135,7 @@ class AudioDummyTest(DummyMixin, AudioTest):
 
 @mock.patch.object(audio.AudioListener, 'send')
 class AudioEventTest(BaseTest):
+
     def setUp(self):  # noqa: N802
         super(AudioEventTest, self).setUp()
         self.audio.enable_sync_handler().get()
@@ -435,11 +437,13 @@ class AudioEventTest(BaseTest):
 
 
 class AudioDummyEventTest(DummyMixin, AudioEventTest):
+
     """Exercise the AudioEventTest against our mock audio classes."""
 
 
 # TODO: move to mixer tests...
 class MixerTest(BaseTest):
+
     @unittest.SkipTest
     def test_set_mute(self):
         for value in (True, False):
@@ -460,6 +464,7 @@ class MixerTest(BaseTest):
 
 
 class AudioStateTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.audio = audio.Audio(config=None, mixer=None)
 
@@ -505,6 +510,7 @@ class AudioStateTest(unittest.TestCase):
 
 
 class AudioBufferingTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.audio = audio.Audio(config=None, mixer=None)
         self.audio._playbin = mock.Mock(spec=['set_state'])

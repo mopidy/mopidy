@@ -4,6 +4,7 @@ from tests.mpd import protocol
 
 
 class StickersHandlerTest(protocol.BaseTestCase):
+
     def test_sticker_get(self):
         self.send_request(
             'sticker get "song" "file:///dev/urandom" "a_name"')

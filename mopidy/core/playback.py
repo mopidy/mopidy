@@ -2,12 +2,11 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 import urlparse
-import warnings
 
+from mopidy import models
 from mopidy.audio import PlaybackState
 from mopidy.core import listener
-from mopidy.utils.deprecation import deprecated_property
-
+from mopidy.internal import deprecation, validation
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +47,7 @@ class PlaybackController(object):
         """
         self._current_tl_track = value
 
-    current_tl_track = deprecated_property(get_current_tl_track)
+    current_tl_track = deprecation.deprecated_property(get_current_tl_track)
     """
     .. deprecated:: 1.0
         Use :meth:`get_current_tl_track` instead.
@@ -62,15 +61,25 @@ class PlaybackController(object):
 
         Returns a :class:`mopidy.models.Track` or :class:`None`.
         """
-        tl_track = self.get_current_tl_track()
-        if tl_track is not None:
-            return tl_track.track
+        return getattr(self.get_current_tl_track(), 'track', None)
 
-    current_track = deprecated_property(get_current_track)
+    current_track = deprecation.deprecated_property(get_current_track)
     """
     .. deprecated:: 1.0
         Use :meth:`get_current_track` instead.
     """
+
+    def get_current_tlid(self):
+        """
+        Get the currently playing or selected TLID.
+
+        Extracted from :meth:`get_current_tl_track` for convenience.
+
+        Returns a :class:`int` or :class:`None`.
+
+        .. versionadded:: 1.1
+        """
+        return getattr(self.get_current_tl_track(), 'tlid', None)
 
     def get_stream_title(self):
         """Get the current stream title or :class:`None`."""
@@ -98,12 +107,14 @@ class PlaybackController(object):
             "PAUSED" -> "PLAYING" [ label="resume" ]
             "PAUSED" -> "STOPPED" [ label="stop" ]
         """
+        validation.check_choice(new_state, validation.PLAYBACK_STATES)
+
         (old_state, self._state) = (self.get_state(), new_state)
         logger.debug('Changing state: %s -> %s', old_state, new_state)
 
         self._trigger_playback_state_changed(old_state, new_state)
 
-    state = deprecated_property(get_state, set_state)
+    state = deprecation.deprecated_property(get_state, set_state)
     """
     .. deprecated:: 1.0
         Use :meth:`get_state` and :meth:`set_state` instead.
@@ -117,7 +128,7 @@ class PlaybackController(object):
         else:
             return 0
 
-    time_position = deprecated_property(get_time_position)
+    time_position = deprecation.deprecated_property(get_time_position)
     """
     .. deprecated:: 1.0
         Use :meth:`get_time_position` instead.
@@ -129,8 +140,7 @@ class PlaybackController(object):
             Use :meth:`core.mixer.get_volume()
             <mopidy.core.MixerController.get_volume>` instead.
         """
-        warnings.warn(
-            'playback.get_volume() is deprecated', DeprecationWarning)
+        deprecation.warn('core.playback.get_volume')
         return self.core.mixer.get_volume()
 
     def set_volume(self, volume):
@@ -139,11 +149,10 @@ class PlaybackController(object):
             Use :meth:`core.mixer.set_volume()
             <mopidy.core.MixerController.set_volume>` instead.
         """
-        warnings.warn(
-            'playback.set_volume() is deprecated', DeprecationWarning)
+        deprecation.warn('core.playback.set_volume')
         return self.core.mixer.set_volume(volume)
 
-    volume = deprecated_property(get_volume, set_volume)
+    volume = deprecation.deprecated_property(get_volume, set_volume)
     """
     .. deprecated:: 1.0
         Use :meth:`core.mixer.get_volume()
@@ -158,7 +167,7 @@ class PlaybackController(object):
             Use :meth:`core.mixer.get_mute()
             <mopidy.core.MixerController.get_mute>` instead.
         """
-        warnings.warn('playback.get_mute() is deprecated', DeprecationWarning)
+        deprecation.warn('core.playback.get_mute')
         return self.core.mixer.get_mute()
 
     def set_mute(self, mute):
@@ -167,10 +176,10 @@ class PlaybackController(object):
             Use :meth:`core.mixer.set_mute()
             <mopidy.core.MixerController.set_mute>` instead.
         """
-        warnings.warn('playback.set_mute() is deprecated', DeprecationWarning)
+        deprecation.warn('core.playback.set_mute')
         return self.core.mixer.set_mute(mute)
 
-    mute = deprecated_property(get_mute, set_mute)
+    mute = deprecation.deprecated_property(get_mute, set_mute)
     """
     .. deprecated:: 1.0
         Use :meth:`core.mixer.get_mute()
@@ -272,17 +281,37 @@ class PlaybackController(object):
             self.set_state(PlaybackState.PAUSED)
             self._trigger_track_playback_paused()
 
-    def play(self, tl_track=None):
+    def play(self, tl_track=None, tlid=None):
         """
-        Play the given track, or if the given track is :class:`None`, play the
-        currently active track.
+        Play the given track, or if the given tl_track and tlid is
+        :class:`None`, play the currently active track.
+
+        Note that the track **must** already be in the tracklist.
 
         :param tl_track: track to play
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
+        :param tlid: TLID of the track to play
+        :type tlid: :class:`int` or :class:`None`
         """
-        self._play(tl_track, on_error_step=1)
+        if sum(o is not None for o in [tl_track, tlid]) > 1:
+            raise ValueError('At most one of "tl_track" and "tlid" may be set')
 
-    def _play(self, tl_track=None, on_error_step=1):
+        tl_track is None or validation.check_instance(tl_track, models.TlTrack)
+        tlid is None or validation.check_integer(tlid, min=0)
+
+        if tl_track:
+            deprecation.warn('core.playback.play:tl_track_kwarg', pending=True)
+
+        self._play(tl_track=tl_track, tlid=tlid, on_error_step=1)
+
+    def _play(self, tl_track=None, tlid=None, on_error_step=1):
+        if tl_track is None and tlid is not None:
+            for tl_track in self.core.tracklist.get_tl_tracks():
+                if tl_track.tlid == tlid:
+                    break
+            else:
+                tl_track = None
+
         if tl_track is None:
             if self.get_state() == PlaybackState.PAUSED:
                 return self.resume()
@@ -319,8 +348,11 @@ class PlaybackController(object):
                     backend.playback.change_track(tl_track.track).get() and
                     backend.playback.play().get())
             except TypeError:
-                logger.error('%s needs to be updated to work with this '
-                             'version of Mopidy.', backend)
+                logger.error(
+                    '%s needs to be updated to work with this '
+                    'version of Mopidy.',
+                    backend.actor_ref.actor_class.__name__)
+                logger.debug('Backend exception', exc_info=True)
 
         if success:
             self.core.tracklist._mark_playing(tl_track)
@@ -370,6 +402,13 @@ class PlaybackController(object):
         :type time_position: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
+        validation.check_integer(time_position)
+
+        if time_position < 0:
+            logger.debug(
+                'Client seeked to negative position. Seeking to zero.')
+            time_position = 0
+
         if not self.core.tracklist.tracks:
             return False
 

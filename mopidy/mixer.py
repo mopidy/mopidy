@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class Mixer(object):
+
     """
     Audio mixer API
 
@@ -109,8 +110,13 @@ class Mixer(object):
         logger.debug('Mixer event: mute_changed(mute=%s)', mute)
         MixerListener.send('mute_changed', mute=mute)
 
+    def ping(self):
+        """Called to check if the actor is still alive."""
+        return True
+
 
 class MixerListener(listener.Listener):
+
     """
     Marker interface for recipients of events sent by the mixer actor.
 

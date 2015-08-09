@@ -5,9 +5,9 @@ import logging
 import pykka
 
 from mopidy import backend
+from mopidy.internal import encoding, path
 from mopidy.m3u.library import M3ULibraryProvider
 from mopidy.m3u.playlists import M3UPlaylistsProvider
-from mopidy.utils import encoding, path
 
 
 logger = logging.getLogger(__name__)

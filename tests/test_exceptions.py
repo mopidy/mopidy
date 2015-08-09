@@ -6,6 +6,7 @@ from mopidy import exceptions
 
 
 class ExceptionsTest(unittest.TestCase):
+
     def test_exception_can_include_message_string(self):
         exc = exceptions.MopidyException('foo')
 

@@ -8,12 +8,13 @@ gobject.threads_init()
 
 from mopidy import exceptions
 from mopidy.audio import scan
-from mopidy.utils import path as path_lib
+from mopidy.internal import path as path_lib
 
 from tests import path_to_data_dir
 
 
 class ScannerTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.errors = {}
         self.result = {}
@@ -38,16 +39,25 @@ class ScannerTest(unittest.TestCase):
         name = path_to_data_dir(name)
         self.assertEqual(self.result[name].tags[key], value)
 
+    def check_if_missing_plugin(self):
+        if any(['missing a plug-in' in str(e) for e in self.errors.values()]):
+            raise unittest.SkipTest('Missing MP3 support?')
+
     def test_tags_is_set(self):
         self.scan(self.find('scanner/simple'))
         self.assert_(self.result.values()[0].tags)
 
     def test_errors_is_not_set(self):
         self.scan(self.find('scanner/simple'))
+
+        self.check_if_missing_plugin()
+
         self.assert_(not self.errors)
 
     def test_duration_is_set(self):
         self.scan(self.find('scanner/simple'))
+
+        self.check_if_missing_plugin()
 
         ogg = path_to_data_dir('scanner/simple/song1.ogg')
         mp3 = path_to_data_dir('scanner/simple/song1.mp3')
@@ -56,16 +66,25 @@ class ScannerTest(unittest.TestCase):
 
     def test_artist_is_set(self):
         self.scan(self.find('scanner/simple'))
+
+        self.check_if_missing_plugin()
+
         self.check('scanner/simple/song1.mp3', 'artist', ['name'])
         self.check('scanner/simple/song1.ogg', 'artist', ['name'])
 
     def test_album_is_set(self):
         self.scan(self.find('scanner/simple'))
+
+        self.check_if_missing_plugin()
+
         self.check('scanner/simple/song1.mp3', 'album', ['albumname'])
         self.check('scanner/simple/song1.ogg', 'album', ['albumname'])
 
     def test_track_is_set(self):
         self.scan(self.find('scanner/simple'))
+
+        self.check_if_missing_plugin()
+
         self.check('scanner/simple/song1.mp3', 'title', ['trackname'])
         self.check('scanner/simple/song1.ogg', 'title', ['trackname'])
 
@@ -79,6 +98,9 @@ class ScannerTest(unittest.TestCase):
 
     def test_log_file_that_gst_thinks_is_mpeg_1_is_ignored(self):
         self.scan([path_to_data_dir('scanner/example.log')])
+
+        self.check_if_missing_plugin()
+
         log = path_to_data_dir('scanner/example.log')
         self.assertLess(self.result[log].duration, 100)
 

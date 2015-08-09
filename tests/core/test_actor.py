@@ -7,10 +7,11 @@ import mock
 import pykka
 
 from mopidy.core import Core
-from mopidy.utils import versioning
+from mopidy.internal import versioning
 
 
 class CoreActorTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']

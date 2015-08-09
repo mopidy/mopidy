@@ -11,6 +11,7 @@ from tests import any_unicode
 
 
 class ConfigSchemaTest(unittest.TestCase):
+
     def setUp(self):  # noqa: N802
         self.schema = schemas.ConfigSchema('test')
         self.schema['foo'] = mock.Mock()
@@ -87,6 +88,7 @@ class ConfigSchemaTest(unittest.TestCase):
 
 
 class MapConfigSchemaTest(unittest.TestCase):
+
     def test_conversion(self):
         schema = schemas.MapConfigSchema('test', types.LogLevel())
         result, errors = schema.deserialize(
@@ -97,6 +99,7 @@ class MapConfigSchemaTest(unittest.TestCase):
 
 
 class DidYouMeanTest(unittest.TestCase):
+
     def test_suggestions(self):
         choices = ('enabled', 'username', 'password', 'bitrate', 'timeout')
 

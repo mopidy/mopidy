@@ -4,6 +4,7 @@ from tests.mpd import protocol
 
 
 class ChannelsHandlerTest(protocol.BaseTestCase):
+
     def test_subscribe(self):
         self.send_request('subscribe "topic"')
         self.assertEqualResponse('ACK [0@0] {subscribe} Not implemented')

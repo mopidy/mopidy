@@ -6,6 +6,7 @@ from tests.mpd import protocol
 
 
 class ConnectionHandlerTest(protocol.BaseTestCase):
+
     def test_close_closes_the_client_connection(self):
         with patch.object(self.session, 'close') as close_mock:
             self.send_request('close')

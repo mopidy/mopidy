@@ -4,6 +4,7 @@ from mopidy import listener
 
 
 class CoreListener(listener.Listener):
+
     """
     Marker interface for recipients of events sent by the core actor.
 
@@ -119,6 +120,17 @@ class CoreListener(listener.Listener):
 
         :param playlist: the changed playlist
         :type playlist: :class:`mopidy.models.Playlist`
+        """
+        pass
+
+    def playlist_deleted(self, uri):
+        """
+        Called whenever a playlist is deleted.
+
+        *MAY* be implemented by actor.
+
+        :param uri: the URI of the deleted playlist
+        :type uri: string
         """
         pass
 

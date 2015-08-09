@@ -6,21 +6,24 @@ from tests.mpd import protocol
 
 
 class StatusHandlerTest(protocol.BaseTestCase):
+
     def test_clearerror(self):
         self.send_request('clearerror')
         self.assertEqualResponse('ACK [0@0] {clearerror} Not implemented')
 
     def test_currentsong(self):
-        track = Track()
-        self.core.tracklist.add([track])
+        track = Track(uri='dummy:/a')
+        self.backend.library.dummy_library = [track]
+        self.core.tracklist.add(uris=[track.uri]).get()
+
         self.core.playback.play()
         self.send_request('currentsong')
-        self.assertInResponse('file: ')
+        self.assertInResponse('file: dummy:/a')
         self.assertInResponse('Time: 0')
-        self.assertInResponse('Artist: ')
-        self.assertInResponse('Title: ')
-        self.assertInResponse('Album: ')
-        self.assertInResponse('Track: 0')
+        self.assertNotInResponse('Artist: ')
+        self.assertNotInResponse('Title: ')
+        self.assertNotInResponse('Album: ')
+        self.assertNotInResponse('Track: 0')
         self.assertNotInResponse('Date: ')
         self.assertInResponse('Pos: 0')
         self.assertInResponse('Id: 0')

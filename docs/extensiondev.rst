@@ -6,7 +6,7 @@ Extension development
 
 Mopidy started as simply an MPD server that could play music from Spotify.
 Early on, Mopidy got multiple "frontends" to expose Mopidy to more than just MPD
-clients: for example the scrobbler frontend that scrobbles your listening 
+clients: for example the scrobbler frontend that scrobbles your listening
 history to your Last.fm account, the MPRIS frontend that integrates Mopidy into the
 Ubuntu Sound Menu, and the HTTP server and JavaScript player API making web
 based Mopidy clients possible. In Mopidy 0.9 we added support for multiple
@@ -75,10 +75,10 @@ the readme of `cookiecutter-mopidy-ext
 Example README.rst
 ==================
 
-The README file should quickly explain what the extension does, how to install 
-it, and how to configure it. It should also contain a link to a tarball of the 
-latest development version of the extension. It's important that this link ends 
-with ``#egg=Mopidy-Something-dev`` for installation using 
+The README file should quickly explain what the extension does, how to install
+it, and how to configure it. It should also contain a link to a tarball of the
+latest development version of the extension. It's important that this link ends
+with ``#egg=Mopidy-Something-dev`` for installation using
 ``pip install Mopidy-Something==dev`` to work.
 
 .. code-block:: rst
@@ -230,8 +230,8 @@ The root of your Python package should have an ``__version__`` attribute with a
 class named ``Extension`` which inherits from Mopidy's extension base class,
 :class:`mopidy.ext.Extension`. This is the class referred to in the
 ``entry_points`` part of ``setup.py``. Any imports of other files in your
-extension, outside of Mopidy and it's core requirements, should be kept inside 
-methods. This ensures that this file can be imported without raising 
+extension, outside of Mopidy and it's core requirements, should be kept inside
+methods. This ensures that this file can be imported without raising
 :exc:`ImportError` exceptions for missing dependencies, etc.
 
 The default configuration for the extension is defined by the
@@ -245,7 +245,7 @@ change them. The exception is if the config value has security implications; in
 that case you should default to the most secure configuration. Leave any
 configurations that don't have meaningful defaults blank, like ``username``
 and ``password``. In the example below, we've chosen to maintain the default
-config as a separate file named ``ext.conf``. This makes it easy to include the 
+config as a separate file named ``ext.conf``. This makes it easy to include the
 default config in documentation without duplicating it.
 
 This is ``mopidy_soundspot/__init__.py``::
@@ -413,11 +413,11 @@ examples, see the :ref:`http-server-api` docs or explore with
 Running an extension
 ====================
 
-Once your extension is ready to go, to see it in action you'll need to register 
-it with Mopidy. Typically this is done by running ``python setup.py install`` 
-from your extension's Git repo root directory. While developing your extension 
-and to avoid doing this every time you make a change, you can instead run 
-``python setup.py develop`` to effectively link Mopidy directly with your 
+Once your extension is ready to go, to see it in action you'll need to register
+it with Mopidy. Typically this is done by running ``python setup.py install``
+from your extension's Git repo root directory. While developing your extension
+and to avoid doing this every time you make a change, you can instead run
+``python setup.py develop`` to effectively link Mopidy directly with your
 development files.
 
 
@@ -434,9 +434,12 @@ Use of Mopidy APIs
 ==================
 
 When writing an extension, you should only use APIs documented at
-:ref:`api-ref`. Other parts of Mopidy, like :mod:`mopidy.utils`, may change at
-any time and are not something extensions should use.
+:ref:`api-ref`. Other parts of Mopidy, like :mod:`mopidy.internal`, may change
+at any time and are not something extensions should use.
 
+Mopidy performs type checking to help catch extension bugs. This applies to
+both frontend calls into core and return values from backends. Additionally
+model fields always get validated to further guard against bad data.
 
 Logging in extensions
 =====================
@@ -471,3 +474,76 @@ Is much better than::
 If you want to turn on debug logging for your own extension, but not for
 everything else due to the amount of noise, see the docs for the
 :confval:`loglevels/*` config section.
+
+
+Making HTTP requests from extensions
+====================================
+
+Many Mopidy extensions need to make HTTP requests to use some web API. Here's a
+few recommendations to those extensions.
+
+Proxies
+-------
+
+If you make HTTP requests please make sure to respect the :ref:`proxy configs
+<proxy-config>`, so that all the requests you make go through the proxy
+configured by the Mopidy user. To make this easier for extension developers,
+the helper function :func:`mopidy.httpclient.format_proxy` was added in Mopidy
+1.1. This function returns the proxy settings `formatted the way Requests
+expects <http://www.python-requests.org/en/latest/user/advanced/#proxies>`__.
+
+User-Agent strings
+------------------
+
+When you make HTTP requests, it's helpful for debugging and usage analysis if
+the client identifies itself with a proper User-Agent string. In Mopidy 1.1, we
+added the helper function :func:`mopidy.httpclient.format_user_agent`.  Here's
+an example of how to use it::
+
+    >>> from mopidy import httpclient
+    >>> import mopidy_soundspot
+    >>> httpclient.format_user_agent('%s/%s' % (
+    ...     mopidy_soundspot.Extension.dist_name, mopidy_soundspot.__version__))
+    u'Mopidy-SoundSpot/2.0.0 Mopidy/1.0.7 Python/2.7.10'
+
+Example using Requests sessions
+-------------------------------
+
+Most Mopidy extensions that make HTTP requests use the `Requests
+<http://www.python-requests.org/>`_ library to do so. When using Requests, the
+most convenient way to make sure the proxy and User-Agent header is set
+properly is to create a Requests session object and use that object to make all
+your HTTP requests::
+
+    from mopidy import httpclient
+
+    import requests
+
+    import mopidy_soundspot
+
+
+    def get_requests_session(proxy_config, user_agent):
+        proxy = httpclient.format_proxy(proxy_config)
+        full_user_agent = httpclient.format_user_agent(user_agent)
+
+        session = requests.Session()
+        session.proxies.update({'http': proxy, 'https': proxy})
+        session.headers.update({'user-agent': full_user_agent})
+
+        return session
+
+
+    # ``mopidy_config`` is the config object passed to your frontend/backend
+    # constructor
+    session = get_requests_session(
+        proxy_config=mopidy_config['proxy'],
+        user_agent='%s/%s' % (
+            mopidy_soundspot.Extension.dist_name,
+            mopidy_soundspot.__version__))
+
+    response = session.get('http://example.com')
+    # Now do something with ``response`` and/or make further requests using the
+    # ``session`` object.
+
+For further details, see Requests' docs on `session objects
+<http://www.python-requests.org/en/latest/user/advanced/#session-objects>`__.

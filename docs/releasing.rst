@@ -47,8 +47,7 @@ Creating releases
 
 #. Push to GitHub::
 
-    git push
-    git push --tags
+    git push --follow-tags
 
 #. Upload the previously built and tested sdist and bdist_wheel packages to
    PyPI::
