@@ -554,7 +554,7 @@ class TracklistController(object):
         :rtype: list of :class:`mopidy.models.TlTrack` that was removed
 
         .. deprecated:: 1.1
-            Providing the criteria  via ``kwargs`` is no longer supported.
+            Providing the criteria  via ``kwargs``.
         """
         if kwargs:
             deprecation.warn('core.tracklist.remove:kwargs_criteria')
