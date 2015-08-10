@@ -1,9 +1,9 @@
-mopidy (1.1.0-2) UNRELEASED; urgency=medium
+mopidy (1.1.0-2) unstable; urgency=medium
 
   * Set core/{cache,config,data}_dir config values in /etc/mopidy/mopidy.conf
     to /var/cache/mopidy, /etc/mopidy and /var/lib/mopidy respectively.
 
- -- Stein Magnus Jodal <stein.magnus@jodal.no>  Mon, 10 Aug 2015 11:14:17 +0200
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Mon, 10 Aug 2015 21:38:14 +0200
 
 mopidy (1.1.0-1) unstable; urgency=medium
 
