@@ -108,7 +108,7 @@ class FileLibraryProvider(backend.LibraryProvider):
                 media_dir_split[0].encode(FS_ENCODING))
 
             if not local_path:
-                logger.warning('Failed expanding path (%s) from'
+                logger.warning('Failed expanding path (%s) from '
                                'file/media_dirs config value.',
                                media_dir_split[0])
                 continue
