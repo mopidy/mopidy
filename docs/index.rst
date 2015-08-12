@@ -78,6 +78,7 @@ Usage
 =====
 
 .. toctree::
+    :caption: Usage
     :maxdepth: 2
 
     installation/index
@@ -93,6 +94,7 @@ Extensions
 ==========
 
 .. toctree::
+    :caption: Extensions
     :maxdepth: 2
 
     ext/local
@@ -112,6 +114,7 @@ Clients
 =======
 
 .. toctree::
+    :caption: Clients
     :maxdepth: 2
 
     clients/http
@@ -124,6 +127,7 @@ About
 =====
 
 .. toctree::
+    :caption: About
     :maxdepth: 1
 
     authors
@@ -136,6 +140,7 @@ Development
 ===========
 
 .. toctree::
+    :caption: Development
     :maxdepth: 2
 
     contributing
@@ -149,6 +154,7 @@ Reference
 =========
 
 .. toctree::
+    :caption: Reference
     :maxdepth: 2
 
     glossary
