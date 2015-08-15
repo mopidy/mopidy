@@ -4,6 +4,19 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+
+v1.1.1 (UNRELEASED)
+===================
+
+Bug fix release.
+
+- Stream: If "file" is present in the :confval:`stream/protocols` config value
+  and the :ref:`ext-file` extension is enabled, we exited with an error because
+  two extensions claimed the same URI scheme. We now log a warning recommending
+  to remove "file" from the :confval:`stream/protocols` config, and then
+  proceed startup. (Fixes: :issue:`1248`, PR: :issue:`1254`)
+
+
 v1.1.0 (2015-08-09)
 ===================
 
