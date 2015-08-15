@@ -10,6 +10,12 @@ v1.1.1 (UNRELEASED)
 
 Bug fix release.
 
+- Stream: If "file" is present in the :confval:`stream/protocols` config value
+  and the :ref:`ext-file` extension is enabled, we exited with an error because
+  two extensions claimed the same URI scheme. We now log a warning recommending
+  to remove "file" from the :confval:`stream/protocols` config, and then
+  proceed startup. (Fixes: :issue:`1248`, PR: :issue:`1254`)
+
 - File: Adjust log levels when failing to expand ``$XDG_MUSIC_DIR`` into a real
   path. This usually happens when running Mopidy as a system service, and thus
   with a limited set of environment variables. (Fixes: :issue:`1249`, PR:
