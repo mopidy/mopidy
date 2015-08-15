@@ -4,6 +4,18 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+
+v1.1.1 (UNRELEASED)
+===================
+
+Bug fix release.
+
+- File: Adjust log levels when failing to expand ``$XDG_MUSIC_DIR`` into a real
+  path. This usually happens when running Mopidy as a system service, and thus
+  with a limited set of environment variables. (Fixes: :issue:`1249`, PR:
+  :issue:`1255`)
+
+
 v1.1.0 (2015-08-09)
 ===================
 
