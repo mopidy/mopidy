@@ -139,7 +139,7 @@ def _process(pipeline, timeout_ms):
     types = (gst.MESSAGE_ELEMENT | gst.MESSAGE_APPLICATION | gst.MESSAGE_ERROR
              | gst.MESSAGE_EOS | gst.MESSAGE_ASYNC_DONE | gst.MESSAGE_TAG)
 
-    start = clock.get_time()
+    previous = clock.get_time()
     while timeout > 0:
         message = bus.timed_pop_filtered(timeout, types)
 
@@ -171,7 +171,9 @@ def _process(pipeline, timeout_ms):
             # Note that this will only keep the last tag.
             tags.update(utils.convert_taglist(taglist))
 
-        timeout -= clock.get_time() - start
+        now = clock.get_time()
+        timeout -= now - previous
+        previous = now
 
     raise exceptions.ScannerError('Timeout after %dms' % timeout_ms)
 
