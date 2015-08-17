@@ -21,6 +21,9 @@ Bug fix release.
   with a limited set of environment variables. (Fixes: :issue:`1249`, PR:
   :issue:`1255`)
 
+- Audio: Fix timeout handling in scanner. This regression caused timeouts to
+  expire before it should, causing scans to fail.
+
 
 v1.1.0 (2015-08-09)
 ===================
