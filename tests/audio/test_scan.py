@@ -40,8 +40,11 @@ class ScannerTest(unittest.TestCase):
         self.assertEqual(self.result[name].tags[key], value)
 
     def check_if_missing_plugin(self):
-        if any(['missing a plug-in' in str(e) for e in self.errors.values()]):
-            raise unittest.SkipTest('Missing MP3 support?')
+        for path, result in self.result.items():
+            if not path.endswith('.mp3'):
+                continue
+            if not result.playable and result.mime == 'audio/mpeg':
+                raise unittest.SkipTest('Missing MP3 support?')
 
     def test_tags_is_set(self):
         self.scan(self.find('scanner/simple'))
