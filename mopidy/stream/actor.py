@@ -3,12 +3,9 @@ from __future__ import absolute_import, unicode_literals
 import fnmatch
 import logging
 import re
-import time
 import urlparse
 
 import pykka
-
-import requests
 
 from mopidy import audio as audio_lib, backend, exceptions, stream
 from mopidy.audio import scan, utils
@@ -77,6 +74,10 @@ class StreamPlaybackProvider(backend.PlaybackProvider):
         super(StreamPlaybackProvider, self).__init__(audio, backend)
         self._config = config
         self._scanner = backend._scanner
+        self._session = http.get_requests_session(
+            proxy_config=config['proxy'],
+            user_agent='%s/%s' % (
+                stream.Extension.dist_name, stream.Extension.version))
 
     def translate_uri(self, uri):
         try:
@@ -90,7 +91,7 @@ class StreamPlaybackProvider(backend.PlaybackProvider):
                 scan_result.mime.startswith('application/')):
             return uri
 
-        content = self._download(uri)
+        content = http.download(self._session, uri)
         if content is None:
             return None
 
@@ -98,38 +99,3 @@ class StreamPlaybackProvider(backend.PlaybackProvider):
         if tracks:
             # TODO Test streams and return first that seems to be playable
             return tracks[0]
-
-    def _download(self, uri):
-        timeout = self._config['stream']['timeout'] / 1000.0
-
-        session = http.get_requests_session(
-            proxy_config=self._config['proxy'],
-            user_agent='%s/%s' % (
-                stream.Extension.dist_name, stream.Extension.version))
-
-        try:
-            response = session.get(
-                uri, stream=True, timeout=timeout)
-        except requests.exceptions.Timeout:
-            logger.warning(
-                'Download of stream playlist (%s) failed due to connection '
-                'timeout after %.3fs', uri, timeout)
-            return None
-
-        deadline = time.time() + timeout
-        content = []
-        for chunk in response.iter_content(4096):
-            content.append(chunk)
-            if time.time() > deadline:
-                logger.warning(
-                    'Download of stream playlist (%s) failed due to download '
-                    'taking more than %.3fs', uri, timeout)
-                return None
-
-        if not response.ok:
-            logger.warning(
-                'Problem downloading stream playlist %s: %s',
-                uri, response.reason)
-            return None
-
-        return b''.join(content)

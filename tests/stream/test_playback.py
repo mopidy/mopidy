@@ -112,12 +112,12 @@ def test_translate_uri_when_playlist_download_fails(provider, caplog):
     result = provider.translate_uri(URI)
 
     assert result is None
-    assert 'Problem downloading stream playlist' in caplog.text()
+    assert 'Problem downloading' in caplog.text()
 
 
 def test_translate_uri_times_out_if_connection_times_out(provider, caplog):
-    with mock.patch.object(actor.requests, 'Session') as session_mock:
-        get_mock = session_mock.return_value.get
+    with mock.patch.object(provider, '_session') as session_mock:
+        get_mock = session_mock.get
         get_mock.side_effect = requests.exceptions.Timeout
 
         result = provider.translate_uri(URI)
@@ -125,8 +125,8 @@ def test_translate_uri_times_out_if_connection_times_out(provider, caplog):
     get_mock.assert_called_once_with(URI, timeout=1.0, stream=True)
     assert result is None
     assert (
-        'Download of stream playlist (%s) failed due to connection '
-        'timeout after 1.000s' % URI in caplog.text())
+        'Download of %r failed due to connection timeout after 1.000s' % URI
+        in caplog.text())
 
 
 @responses.activate
@@ -134,12 +134,12 @@ def test_translate_uri_times_out_if_download_is_slow(provider, caplog):
     responses.add(
         responses.GET, URI, body=BODY, content_type='audio/x-mpegurl')
 
-    with mock.patch.object(actor, 'time') as time_mock:
+    with mock.patch('mopidy.internal.http.time') as time_mock:
         time_mock.time.side_effect = [0, TIMEOUT + 1]
 
         result = provider.translate_uri(URI)
 
     assert result is None
     assert (
-        'Download of stream playlist (%s) failed due to download taking '
-        'more than 1.000s' % URI in caplog.text())
+        'Download of %r failed due to download taking more than 1.000s' %
+        URI in caplog.text())
