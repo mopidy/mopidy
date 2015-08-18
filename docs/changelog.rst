@@ -24,6 +24,9 @@ Bug fix release.
 - Audio: Fix timeout handling in scanner. This regression caused timeouts to
   expire before it should, causing scans to fail.
 
+- Audio: Update scanner to emit MIME type instead of an error when missing a
+  plugin.
+
 
 v1.1.0 (2015-08-09)
 ===================
