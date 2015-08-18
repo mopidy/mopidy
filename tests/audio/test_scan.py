@@ -109,6 +109,17 @@ class ScannerTest(unittest.TestCase):
         wav = path_to_data_dir('scanner/empty.wav')
         self.assertEqual(self.result[wav].duration, 0)
 
+    def test_uri_list(self):
+        path = path_to_data_dir('scanner/playlist.m3u')
+        self.scan([path])
+        self.assertEqual(self.result[path].mime, 'text/uri-list')
+
+    def test_text_plain(self):
+        # GStreamer decode bin hardcodes bad handling of text plain :/
+        path = path_to_data_dir('scanner/plain.txt')
+        self.scan([path])
+        self.assertIn(path, self.errors)
+
     @unittest.SkipTest
     def test_song_without_time_is_handeled(self):
         pass
