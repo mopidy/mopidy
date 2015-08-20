@@ -113,9 +113,8 @@ from a regular Mopidy setup you'll want to know about.
 
       sudo service mopidy status
 
-- Mopidy installed from a Debian package can use both Mopidy extensions
-  installed both from Debian packages and extensions installed with pip. This
-  has always been the case.
+- Mopidy installed from a Debian package can use Mopidy extensions installed
+  both from Debian packages and with pip. This has always been the case.
 
   Mopidy installed with pip can use extensions installed with pip, but
   not extensions installed from a Debian package released before August 2015.
