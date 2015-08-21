@@ -21,6 +21,11 @@ Bug fix release.
   with a limited set of environment variables. (Fixes: :issue:`1249`, PR:
   :issue:`1255`)
 
+- File: When browsing files, we no longer scan the files to check if they're
+  playable. This makes browsing of the file hierarchy instant for HTTP clients,
+  which do no scanning of the files' metadata, and a bit faster for MPD
+  clients, which no longer scan the files twice.
+
 - Audio: Fix timeout handling in scanner. This regression caused timeouts to
   expire before it should, causing scans to fail.
 
