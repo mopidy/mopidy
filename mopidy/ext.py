@@ -63,6 +63,8 @@ class Extension(object):
     def get_cache_dir(self, config):
         """Get or create cache directory for the extension.
 
+        Use this directory to cache data that can safely be thrown away.
+
         :param config: the Mopidy config object
         :return: string
         """
@@ -86,6 +88,8 @@ class Extension(object):
 
     def get_data_dir(self, config):
         """Get or create data directory for the extension.
+
+        Use this directory to store data that should be persistent.
 
         :param config: the Mopidy config object
         :returns: string
