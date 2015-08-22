@@ -14,6 +14,15 @@ Bug fix release.
   backends with a library provider. Previously, it wrongly worked for all
   backends with a playlists provider. (Fixes: :issue:`1257`)
 
+- Core: Respect :confval:`core/cache_dir` and :confval:`core/data_dir` config
+  values added in 1.1.0 when creating the dirs Mopidy need to store data. This
+  should not change the behavior for desktop users running Mopidy. When running
+  Mopidy as a system service installed from a package which sets the core dir
+  configs properly (e.g. Debian and Arch packages), this fix avoids the
+  creation of a couple of directories that should not be used, typically
+  :file:`/var/lib/mopidy/.local` and :file:`/var/lib/mopidy/.cache`. (Fixes:
+  :issue:`1259`)
+
 - Stream: If "file" is present in the :confval:`stream/protocols` config value
   and the :ref:`ext-file` extension is enabled, we exited with an error because
   two extensions claimed the same URI scheme. We now log a warning recommending

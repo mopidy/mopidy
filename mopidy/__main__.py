@@ -75,14 +75,15 @@ def main():
 
         args = root_cmd.parse(mopidy_args)
 
-        create_file_structures_and_config(args, extensions_data)
-        check_old_locations()
-
         config, config_errors = config_lib.load(
             args.config_files,
             [d.config_schema for d in extensions_data],
             [d.config_defaults for d in extensions_data],
             args.config_overrides)
+
+        create_core_dirs(config)
+        create_initial_config_file(args, extensions_data)
+        check_old_locations()
 
         verbosity_level = args.base_verbosity_level
         if args.verbosity_level:
@@ -166,12 +167,17 @@ def main():
         raise
 
 
-def create_file_structures_and_config(args, extensions_data):
-    path.get_or_create_dir(b'$XDG_DATA_DIR/mopidy')
-    path.get_or_create_dir(b'$XDG_CONFIG_DIR/mopidy')
+def create_core_dirs(config):
+    path.get_or_create_dir(config['core']['cache_dir'])
+    path.get_or_create_dir(config['core']['config_dir'])
+    path.get_or_create_dir(config['core']['data_dir'])
 
-    # Initialize whatever the last config file is with defaults
+
+def create_initial_config_file(args, extensions_data):
+    """Initialize whatever the last config file is with defaults"""
+
     config_file = args.config_files[-1]
+
     if os.path.exists(path.expand_path(config_file)):
         return
 
