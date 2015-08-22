@@ -256,7 +256,7 @@ chain. The function will be called with the error object as the only argument:
 .. code-block:: js
 
     mopidy.playback.getCurrentTrack()
-        .catch(console.error.bind(console));
+        .catch(console.error.bind(console))
         .done(printCurrentTrack);
 
 You can also register the error handler at the end of the promise chain by
