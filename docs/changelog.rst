@@ -23,6 +23,12 @@ Bug fix release.
   :file:`/var/lib/mopidy/.local` and :file:`/var/lib/mopidy/.cache`. (Fixes:
   :issue:`1259`)
 
+- Local: Deprecate :confval:`local/data_dir` and respect
+  :confval:`core/data_dir` instead. This does not change the defaults for
+  desktop users, only system services installed from packages that properly set
+  :confval:`core/data_dir`, like the Debian and Arch packages. (Fixes:
+  :issue:`1259`)
+
 - Stream: If "file" is present in the :confval:`stream/protocols` config value
   and the :ref:`ext-file` extension is enabled, we exited with an error because
   two extensions claimed the same URI scheme. We now log a warning recommending

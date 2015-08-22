@@ -65,10 +65,11 @@ class LocalLibraryProviderTest(unittest.TestCase):
     ]
 
     config = {
+        'core': {
+            'data_dir': path_to_data_dir(''),
+        },
         'local': {
             'media_dir': path_to_data_dir(''),
-            'data_dir': path_to_data_dir(''),
-            'playlists_dir': b'',
             'library': 'json',
         },
     }
@@ -105,11 +106,15 @@ class LocalLibraryProviderTest(unittest.TestCase):
 
         tmpdir = tempfile.mkdtemp()
         try:
-            tmplib = os.path.join(tmpdir, 'library.json.gz')
-            shutil.copy(path_to_data_dir('library.json.gz'), tmplib)
+            tmpdir_local = os.path.join(tmpdir, 'local')
+            shutil.copytree(path_to_data_dir('local'), tmpdir_local)
 
-            config = {'local': self.config['local'].copy()}
-            config['local']['data_dir'] = tmpdir
+            config = {
+                'core': {
+                    'data_dir': tmpdir,
+                },
+                'local': self.config['local'],
+            }
             backend = actor.LocalBackend(config=config, audio=None)
 
             # Sanity check that value is in the library
@@ -117,6 +122,7 @@ class LocalLibraryProviderTest(unittest.TestCase):
             self.assertEqual(result, self.tracks[0:1])
 
             # Clear and refresh.
+            tmplib = os.path.join(tmpdir_local, 'library.json.gz')
             open(tmplib, 'w').close()
             backend.library.refresh()
 

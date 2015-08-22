@@ -23,12 +23,11 @@ from tests.local import generate_song, populate_tracklist
 class LocalPlaybackProviderTest(unittest.TestCase):
     config = {
         'core': {
+            'data_dir': path_to_data_dir(''),
             'max_tracklist_length': 10000,
         },
         'local': {
             'media_dir': path_to_data_dir(''),
-            'data_dir': path_to_data_dir(''),
-            'playlists_dir': b'',
             'library': 'json',
         }
     }
