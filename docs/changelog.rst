@@ -21,19 +21,19 @@ Bug fix release.
   configs properly (e.g. Debian and Arch packages), this fix avoids the
   creation of a couple of directories that should not be used, typically
   :file:`/var/lib/mopidy/.local` and :file:`/var/lib/mopidy/.cache`. (Fixes:
-  :issue:`1259`)
+  :issue:`1259`, PR: :issue:`1266`)
 
 - Local: Deprecate :confval:`local/data_dir` and respect
   :confval:`core/data_dir` instead. This does not change the defaults for
   desktop users, only system services installed from packages that properly set
   :confval:`core/data_dir`, like the Debian and Arch packages. (Fixes:
-  :issue:`1259`)
+  :issue:`1259`, PR: :issue:`1266`)
 
 - M3U: Changed default for the :confval:`m3u/playlists_dir` from
   ``$XDG_DATA_DIR/mopidy/m3u`` to unset, which now means the extension's data
   dir. This does not change the defaults for desktop users, only system
   services installed from packages that properly set :confval:`core/data_dir`,
-  like the Debian and Arch pakages. (Fixes: :issue:`1259`)
+  like the Debian and Arch pakages. (Fixes: :issue:`1259`, PR: :issue:`1266`)
 
 - Stream: If "file" is present in the :confval:`stream/protocols` config value
   and the :ref:`ext-file` extension is enabled, we exited with an error because
