@@ -16,6 +16,10 @@ Bug fix release.
   to remove "file" from the :confval:`stream/protocols` config, and then
   proceed startup. (Fixes: :issue:`1248`, PR: :issue:`1254`)
 
+- Stream: Fix bug in new playlist parser. A non-ASCII char in an urilist
+  comment would cause a crash while parsing due to comparision of a non-ASCII
+  bytestring with a Unicode string. (Fixes: :issue:`1265`)
+
 - File: Adjust log levels when failing to expand ``$XDG_MUSIC_DIR`` into a real
   path. This usually happens when running Mopidy as a system service, and thus
   with a limited set of environment variables. (Fixes: :issue:`1249`, PR:
