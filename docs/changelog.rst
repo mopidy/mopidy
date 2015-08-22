@@ -10,6 +10,10 @@ v1.1.1 (UNRELEASED)
 
 Bug fix release.
 
+- Core: Make :meth:`mopidy.core.LibraryController.refresh` work for all
+  backends with a library provider. Previously, it wrongly worked for all
+  backends with a playlists provider. (Fixes: :issue:`1257`)
+
 - Stream: If "file" is present in the :confval:`stream/protocols` config value
   and the :ref:`ext-file` extension is enabled, we exited with an error because
   two extensions claimed the same URI scheme. We now log a warning recommending
