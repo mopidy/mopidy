@@ -23,7 +23,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
     def __init__(self, *args, **kwargs):
         super(M3UPlaylistsProvider, self).__init__(*args, **kwargs)
 
-        self._playlists_dir = self.backend._config['m3u']['playlists_dir']
+        self._playlists_dir = self.backend._playlists_dir
         self._playlists = {}
         self.refresh()
 

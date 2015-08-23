@@ -14,6 +14,27 @@ Bug fix release.
   backends with a library provider. Previously, it wrongly worked for all
   backends with a playlists provider. (Fixes: :issue:`1257`)
 
+- Core: Respect :confval:`core/cache_dir` and :confval:`core/data_dir` config
+  values added in 1.1.0 when creating the dirs Mopidy need to store data. This
+  should not change the behavior for desktop users running Mopidy. When running
+  Mopidy as a system service installed from a package which sets the core dir
+  configs properly (e.g. Debian and Arch packages), this fix avoids the
+  creation of a couple of directories that should not be used, typically
+  :file:`/var/lib/mopidy/.local` and :file:`/var/lib/mopidy/.cache`. (Fixes:
+  :issue:`1259`, PR: :issue:`1266`)
+
+- Local: Deprecate :confval:`local/data_dir` and respect
+  :confval:`core/data_dir` instead. This does not change the defaults for
+  desktop users, only system services installed from packages that properly set
+  :confval:`core/data_dir`, like the Debian and Arch packages. (Fixes:
+  :issue:`1259`, PR: :issue:`1266`)
+
+- M3U: Changed default for the :confval:`m3u/playlists_dir` from
+  ``$XDG_DATA_DIR/mopidy/m3u`` to unset, which now means the extension's data
+  dir. This does not change the defaults for desktop users, only system
+  services installed from packages that properly set :confval:`core/data_dir`,
+  like the Debian and Arch pakages. (Fixes: :issue:`1259`, PR: :issue:`1266`)
+
 - Stream: If "file" is present in the :confval:`stream/protocols` config value
   and the :ref:`ext-file` extension is enabled, we exited with an error because
   two extensions claimed the same URI scheme. We now log a warning recommending

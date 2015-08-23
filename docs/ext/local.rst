@@ -47,8 +47,8 @@ active at a time.
 To create a new library provider you must create class that implements the
 :class:`mopidy.local.Library` interface and install it in the extension
 registry under ``local:library``. Any data that the library needs to store on
-disc should be stored in :confval:`local/data_dir` using the library name as
-part of the filename or directory to avoid any conflicts.
+disc should be stored in the extension's data dir, as returned by
+:meth:`~mopidy.ext.Extension.get_data_dir`.
 
 
 Configuration
