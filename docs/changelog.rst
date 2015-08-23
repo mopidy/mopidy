@@ -5,6 +5,21 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v1.2.0 (UNRELEASED)
+===================
+
+Feature release.
+
+Cleanups
+--------
+
+- Removed warning if :file:`~/.mopidy` exists. We stopped using this location
+  in 0.6, released in October 2011.
+
+- Removed warning if :file:`~/.config/mopidy/settings.py` exists. We stopped
+  using this settings file in 0.14, released in April 2013.
+
+
 v1.1.1 (UNRELEASED)
 ===================
 
