@@ -37,7 +37,8 @@ class CoreActorTest(unittest.TestCase):
 
         self.assertRaisesRegexp(
             AssertionError,
-            'Cannot add URI scheme dummy1 for B2, it is already handled by B1',
+            'Cannot add URI scheme "dummy1" for B2, '
+            'it is already handled by B1',
             Core, mixer=None, backends=[self.backend1, self.backend2])
 
     def test_version(self):

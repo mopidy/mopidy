@@ -36,6 +36,13 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
         self.uri_schemes = audio_lib.supported_uri_schemes(
             config['stream']['protocols'])
 
+        if 'file' in self.uri_schemes and config['file']['enabled']:
+            logger.warning(
+                'The stream/protocols config value includes the "file" '
+                'protocol. "file" playback is now handled by Mopidy-File. '
+                'Please remove it from the stream/protocols config.')
+            self.uri_schemes -= {'file'}
+
 
 class StreamLibraryProvider(backend.LibraryProvider):
 

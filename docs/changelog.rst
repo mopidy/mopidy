@@ -4,6 +4,65 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+
+v1.1.1 (UNRELEASED)
+===================
+
+Bug fix release.
+
+- Core: Make :meth:`mopidy.core.LibraryController.refresh` work for all
+  backends with a library provider. Previously, it wrongly worked for all
+  backends with a playlists provider. (Fixes: :issue:`1257`)
+
+- Core: Respect :confval:`core/cache_dir` and :confval:`core/data_dir` config
+  values added in 1.1.0 when creating the dirs Mopidy need to store data. This
+  should not change the behavior for desktop users running Mopidy. When running
+  Mopidy as a system service installed from a package which sets the core dir
+  configs properly (e.g. Debian and Arch packages), this fix avoids the
+  creation of a couple of directories that should not be used, typically
+  :file:`/var/lib/mopidy/.local` and :file:`/var/lib/mopidy/.cache`. (Fixes:
+  :issue:`1259`, PR: :issue:`1266`)
+
+- Local: Deprecate :confval:`local/data_dir` and respect
+  :confval:`core/data_dir` instead. This does not change the defaults for
+  desktop users, only system services installed from packages that properly set
+  :confval:`core/data_dir`, like the Debian and Arch packages. (Fixes:
+  :issue:`1259`, PR: :issue:`1266`)
+
+- M3U: Changed default for the :confval:`m3u/playlists_dir` from
+  ``$XDG_DATA_DIR/mopidy/m3u`` to unset, which now means the extension's data
+  dir. This does not change the defaults for desktop users, only system
+  services installed from packages that properly set :confval:`core/data_dir`,
+  like the Debian and Arch pakages. (Fixes: :issue:`1259`, PR: :issue:`1266`)
+
+- Stream: If "file" is present in the :confval:`stream/protocols` config value
+  and the :ref:`ext-file` extension is enabled, we exited with an error because
+  two extensions claimed the same URI scheme. We now log a warning recommending
+  to remove "file" from the :confval:`stream/protocols` config, and then
+  proceed startup. (Fixes: :issue:`1248`, PR: :issue:`1254`)
+
+- Stream: Fix bug in new playlist parser. A non-ASCII char in an urilist
+  comment would cause a crash while parsing due to comparision of a non-ASCII
+  bytestring with a Unicode string. (Fixes: :issue:`1265`)
+
+- File: Adjust log levels when failing to expand ``$XDG_MUSIC_DIR`` into a real
+  path. This usually happens when running Mopidy as a system service, and thus
+  with a limited set of environment variables. (Fixes: :issue:`1249`, PR:
+  :issue:`1255`)
+
+- File: When browsing files, we no longer scan the files to check if they're
+  playable. This makes browsing of the file hierarchy instant for HTTP clients,
+  which do no scanning of the files' metadata, and a bit faster for MPD
+  clients, which no longer scan the files twice. (Fixes: :issue:`1260`, PR:
+  :issue:`1261`)
+
+- Audio: Fix timeout handling in scanner. This regression caused timeouts to
+  expire before it should, causing scans to fail.
+
+- Audio: Update scanner to emit MIME type instead of an error when missing a
+  plugin.
+
+
 v1.1.0 (2015-08-09)
 ===================
 

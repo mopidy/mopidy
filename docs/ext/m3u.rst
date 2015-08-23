@@ -52,4 +52,5 @@ See :ref:`config` for general help on configuring Mopidy.
 
 .. confval:: m3u/playlists_dir
 
-    Path to directory with M3U files.
+    Path to directory with M3U files. Unset by default, in which case the
+    extension's data dir is used to store playlists.
