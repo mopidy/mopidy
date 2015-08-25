@@ -334,7 +334,9 @@ class TracklistController(object):
         next_track = self._tl_tracks[next_index]
         if next_track.tlid == self._first_unplayable and \
            self.core.history.get_length() == 0:
+            logger.warning('No more playable tracks in current tracklist')
             return None
+
         return next_track
 
     def get_previous_tlid(self):
