@@ -332,10 +332,13 @@ class TracklistController(object):
             return None
 
         next_track = self._tl_tracks[next_index]
-        if next_track.tlid == self._first_unplayable and \
-           self.core.history.get_length() == 0:
-            logger.warning('No more playable tracks in current tracklist')
-            return None
+        if next_track.tlid == self._first_unplayable:
+            # Next track is unplayable, check for infinite loop
+            if not set(self.get_tl_tracks()) & \
+               set(self.core.history.get_history()):
+                # None of the other tracks in the list are playable either
+                logger.warning('No more playable tracks in current tracklist')
+                return None
 
         return next_track
 
