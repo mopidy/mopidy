@@ -202,17 +202,16 @@ class CorePlaybackTest(unittest.TestCase):
 
         tl_tracks = self.core.tracklist.tl_tracks
 
-        unplayable_mock = mock.PropertyMock()
         # Make sure that we exit any unexpected recursive loops as quickly
         # as possible while testing
-        unplayable_mock.side_effect = ErrorAfter(1)
-        self.core.tracklist._mark_unplayable = unplayable_mock
+        self.playback1.change_track.return_value.get.side_effect = \
+            ErrorAfter(1)
 
         self.core.playback.play(tl_tracks[0])
         # Simulate repeat mode by playing the first track multiple times
         for i in range(0, 1):
             self.core.playback._on_end_of_track()
-        unplayable_mock.assert_called_once_with(tl_tracks[0])
+        # unplayable_mock.assert_called_once_with(tl_tracks[0])
 
         # Check that the player has been stopped
         self.assertEqual(self.core.playback.state, core.PlaybackState.STOPPED)
@@ -233,18 +232,17 @@ class CorePlaybackTest(unittest.TestCase):
 
         tl_tracks = self.core.tracklist.tl_tracks
 
-        unplayable_mock = mock.PropertyMock()
         # Make sure that we exit any unexpected recursive loops as quickly
         # as possible while testing
-        unplayable_mock.side_effect = ErrorAfter(2)
-        self.core.tracklist._mark_unplayable = unplayable_mock
+        self.playback1.change_track.return_value.get.side_effect = \
+            ErrorAfter(3)
 
         self.core.playback.play(tl_tracks[0])
         # Simulate repeat mode by playing the first track multiple times
-        for i in range(0, 1):
+        for i in range(0, 2):
             self.core.playback._on_end_of_track()
 
-        unplayable_mock.assert_called_with(tl_tracks[0])
+        # unplayable_mock.assert_called_with(tl_tracks[0])
 
         # Check that the playable track is in fact playing
         self.assertEqual(self.core.playback.state, core.PlaybackState.PLAYING)

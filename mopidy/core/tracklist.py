@@ -22,10 +22,13 @@ class TracklistController(object):
 
         self._shuffled = []
 
+        self._first_unplayable = None
+
     # Properties
 
     def get_tl_tracks(self):
         """Get tracklist as list of :class:`mopidy.models.TlTrack`."""
+        self._first_unplayable = None
         return self._tl_tracks[:]
 
     tl_tracks = deprecation.deprecated_property(get_tl_tracks)
@@ -328,7 +331,11 @@ class TracklistController(object):
         elif next_index >= len(self._tl_tracks):
             return None
 
-        return self._tl_tracks[next_index]
+        next_track = self._tl_tracks[next_index]
+        if next_track.tlid == self._first_unplayable and \
+           self.core.history.get_length() == 0:
+            return None
+        return next_track
 
     def get_previous_tlid(self):
         """
@@ -622,6 +629,8 @@ class TracklistController(object):
         logger.warning('Track is not playable: %s', tl_track.track.uri)
         if self.get_random() and tl_track in self._shuffled:
             self._shuffled.remove(tl_track)
+        if self._first_unplayable is None:
+            self._first_unplayable = tl_track.tlid
 
     def _mark_played(self, tl_track):
         """Internal method for :class:`mopidy.core.PlaybackController`."""
