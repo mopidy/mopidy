@@ -5,6 +5,7 @@ import unittest
 import mock
 
 import pykka
+import pytest
 
 from mopidy import backend, core
 from mopidy.internal import deprecation
@@ -175,6 +176,9 @@ class CorePlaybackTest(unittest.TestCase):
         self.core.tracklist.add(uris=self.uris[:2])
         tl_tracks = self.core.tracklist.tl_tracks
 
+        unplayable_mock = mock.PropertyMock()
+        self.core.tracklist._mark_unplayable = unplayable_mock
+
         self.core.playback.play(tl_tracks[0])
         self.core.playback.play(tl_tracks[1])
 
@@ -182,6 +186,25 @@ class CorePlaybackTest(unittest.TestCase):
         # and that next was called. This is just an indirect way of checking
         # this :(
         self.assertEqual(self.core.playback.state, core.PlaybackState.STOPPED)
+        unplayable_mock.assert_called_once_with(tl_tracks[1])
+
+
+    def test_play_skips_to_next_on_unplayable_track_avoids_infinite_loop(self):
+        # with pytest.raises(CallableExhausted):
+        """Checks that we avoid infinte loops when backend.change_track fails."""
+        self.playback1.change_track.return_value.get.return_value = False
+
+        self.core.tracklist.clear()
+        self.core.tracklist.add(uris=self.uris[:1])
+        self.core.tracklist.set_repeat(True)
+        tl_tracks = self.core.tracklist.tl_tracks
+
+        unplayable_mock = mock.PropertyMock()
+        unplayable_mock.side_effect = ErrorAfter(2)
+        self.core.tracklist._mark_unplayable = unplayable_mock
+
+        self.core.playback.play(tl_tracks[0])
+
 
     @mock.patch(
         'mopidy.core.playback.listener.CoreListener', spec=core.CoreListener)
@@ -789,3 +812,22 @@ class Bug1177RegressionTest(unittest.TestCase):
         c.playback.pause()
         c.playback.next()
         b.playback.change_track.assert_called_once_with(track2)
+
+
+class ErrorAfter(object):
+    '''
+    Callable that will raise `CallableExhausted`
+    exception after `limit` calls
+
+    '''
+    def __init__(self, limit):
+        self.limit = limit
+        self.calls = 0
+
+    def __call__(self, *args, **kwargs):
+        self.calls += 1
+        if self.calls > self.limit:
+            raise CallableExhausted
+
+class CallableExhausted(Exception):
+    pass
