@@ -5,7 +5,6 @@ import unittest
 import mock
 
 import pykka
-import pytest
 
 from mopidy import backend, core
 from mopidy.internal import deprecation
@@ -188,7 +187,6 @@ class CorePlaybackTest(unittest.TestCase):
         self.assertEqual(self.core.playback.state, core.PlaybackState.STOPPED)
         unplayable_mock.assert_called_once_with(tl_tracks[1])
 
-
     def test_play_skips_to_next_on_unplayable_track_avoids_infinite_loop(self):
         # with pytest.raises(CallableExhausted):
         """Checks that we avoid infinte loops when backend.change_track fails."""
@@ -204,7 +202,6 @@ class CorePlaybackTest(unittest.TestCase):
         self.core.tracklist._mark_unplayable = unplayable_mock
 
         self.core.playback.play(tl_tracks[0])
-
 
     @mock.patch(
         'mopidy.core.playback.listener.CoreListener', spec=core.CoreListener)
@@ -828,6 +825,7 @@ class ErrorAfter(object):
         self.calls += 1
         if self.calls > self.limit:
             raise CallableExhausted
+
 
 class CallableExhausted(Exception):
     pass
