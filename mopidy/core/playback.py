@@ -363,9 +363,11 @@ class PlaybackController(object):
             self._trigger_track_playback_started()
             self._last_track_skipped_on_error = None
         else:
-            if self._last_track_skipped_on_error and self._last_track_skipped_on_error == \
-                    self.get_current_tl_track().tlid:
-                # Avoid infinite loop triggered by skipping the same track multiple times in succession
+            if self._last_track_skipped_on_error and \
+               self._last_track_skipped_on_error == \
+               self.get_current_tl_track().tlid:
+                # Avoid infinite loop triggered by skipping the same track
+                # multiple times in succession
                 self.stop()
                 return
             self.core.tracklist._mark_unplayable(tl_track)

@@ -189,7 +189,9 @@ class CorePlaybackTest(unittest.TestCase):
 
     def test_play_skips_to_next_on_unplayable_track_avoids_infinite_loop(self):
         # with pytest.raises(CallableExhausted):
-        """Checks that we avoid infinte loops when backend.change_track fails."""
+
+        # Checks that we avoid infinte loops when backend.change_track
+        # fails.
         self.playback1.change_track.return_value.get.return_value = False
 
         self.core.tracklist.clear()
@@ -812,11 +814,9 @@ class Bug1177RegressionTest(unittest.TestCase):
 
 
 class ErrorAfter(object):
-    '''
-    Callable that will raise `CallableExhausted`
-    exception after `limit` calls
 
-    '''
+    # Callable that will raise `CallableExhausted`
+    # exception after `limit` calls
     def __init__(self, limit):
         self.limit = limit
         self.calls = 0
