@@ -367,11 +367,10 @@ class PlaybackController(object):
                self._first_track_skipped_on_error == \
                self.get_current_tl_track().tlid:
                 if not any(self.core.history.get_history()):
-                    # Avoid infinite loop triggered by skipping the same track
-                    # multiple times in succession
+                    # Avoid infinite loop that can occur if none of the tracks
+                    # in the tracklist are playable.
                     self.stop()
                     return
-                    # pass
             self.core.tracklist._mark_unplayable(tl_track)
             if self._first_track_skipped_on_error is None:
                 self._first_track_skipped_on_error = tl_track.tlid
