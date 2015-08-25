@@ -22,7 +22,7 @@ class PlaybackController(object):
         self._stream_title = None
         self._state = PlaybackState.STOPPED
 
-        self._last_track_skipped_on_error = None
+        self._first_track_skipped_on_error = None
 
     def _get_backend(self):
         # TODO: take in track instead
@@ -245,6 +245,7 @@ class PlaybackController(object):
         Used by :class:`mopidy.core.TracklistController`.
         """
         tracklist = self.core.tracklist.get_tl_tracks()
+        self._first_track_skipped_on_error = None
         if self.get_current_tl_track() not in tracklist:
             self.stop()
             self._set_current_tl_track(None)
@@ -361,17 +362,19 @@ class PlaybackController(object):
             self.core.history._add_track(tl_track.track)
             # TODO: replace with stream-changed
             self._trigger_track_playback_started()
-            self._last_track_skipped_on_error = None
         else:
-            if self._last_track_skipped_on_error and \
-               self._last_track_skipped_on_error == \
+            if self._first_track_skipped_on_error and \
+               self._first_track_skipped_on_error == \
                self.get_current_tl_track().tlid:
-                # Avoid infinite loop triggered by skipping the same track
-                # multiple times in succession
-                self.stop()
-                return
+                if not any(self.core.history.get_history()):
+                    # Avoid infinite loop triggered by skipping the same track
+                    # multiple times in succession
+                    self.stop()
+                    return
+                    # pass
             self.core.tracklist._mark_unplayable(tl_track)
-            self._last_track_skipped_on_error = tl_track.tlid
+            if self._first_track_skipped_on_error is None:
+                self._first_track_skipped_on_error = tl_track.tlid
             if on_error_step == 1:
                 self.next()
             elif on_error_step == -1:

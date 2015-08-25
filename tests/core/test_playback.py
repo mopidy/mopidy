@@ -169,7 +169,7 @@ class CorePlaybackTest(unittest.TestCase):
 
     def test_play_skips_to_next_on_unplayable_track(self):
         """Checks that we handle backend.change_track failing."""
-        self.playback2.change_track.return_value.get.return_value = False
+        self.playback1.change_track.return_value.get.return_value = False
 
         self.core.tracklist.clear()
         self.core.tracklist.add(uris=self.uris[:2])
@@ -179,13 +179,13 @@ class CorePlaybackTest(unittest.TestCase):
         self.core.tracklist._mark_unplayable = unplayable_mock
 
         self.core.playback.play(tl_tracks[0])
-        self.core.playback.play(tl_tracks[1])
+        unplayable_mock.assert_called_once_with(tl_tracks[0])
+        assert self.core.playback.get_current_tl_track() == tl_tracks[1]
 
         # TODO: we really want to check that the track was marked unplayable
         # and that next was called. This is just an indirect way of checking
         # this :(
-        self.assertEqual(self.core.playback.state, core.PlaybackState.STOPPED)
-        unplayable_mock.assert_called_once_with(tl_tracks[1])
+        self.assertEqual(self.core.playback.state, core.PlaybackState.PLAYING)
 
     def test_play_skips_to_next_on_unplayable_track_avoids_infinite_loop(self):
         # with pytest.raises(CallableExhausted):
@@ -193,17 +193,46 @@ class CorePlaybackTest(unittest.TestCase):
         # Checks that we avoid infinte loops when backend.change_track
         # fails.
         self.playback1.change_track.return_value.get.return_value = False
+        self.playback2.change_track.return_value.get.return_value = False
 
         self.core.tracklist.clear()
         self.core.tracklist.add(uris=self.uris[:1])
+
         self.core.tracklist.set_repeat(True)
+
         tl_tracks = self.core.tracklist.tl_tracks
 
         unplayable_mock = mock.PropertyMock()
-        unplayable_mock.side_effect = ErrorAfter(2)
+        unplayable_mock.side_effect = ErrorAfter(1)
         self.core.tracklist._mark_unplayable = unplayable_mock
 
         self.core.playback.play(tl_tracks[0])
+        for i in range(0, 1):
+            self.core.playback._on_end_of_track()
+        unplayable_mock.assert_called_once_with(tl_tracks[0])
+
+    def test_play_skips_to_next_allows_repeat_for_multiple_tracks(self):
+        # with pytest.raises(CallableExhausted):
+
+            # Checks that we allow tracklists to repeat when
+            # backend.change_track fails with at least one playable track.
+            self.playback1.change_track.return_value.get.return_value = False
+            self.playback2.change_track.return_value.get.return_value = True
+
+            self.core.tracklist.clear()
+            self.core.tracklist.add(uris=self.uris[:2])
+
+            self.core.tracklist.set_repeat(True)
+
+            tl_tracks = self.core.tracklist.tl_tracks
+
+            unplayable_mock = mock.PropertyMock()
+            unplayable_mock.side_effect = ErrorAfter(2)
+            self.core.tracklist._mark_unplayable = unplayable_mock
+
+            self.core.playback.play(tl_tracks[0])
+            for i in range(0, 1):
+                self.core.playback._on_end_of_track()
 
     @mock.patch(
         'mopidy.core.playback.listener.CoreListener', spec=core.CoreListener)
