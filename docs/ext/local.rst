@@ -35,6 +35,23 @@ To make a local library for your music available for Mopidy:
 #. Start Mopidy, find the music library in a client, and play some local music!
 
 
+Updating the local library
+==========================
+
+When you've added or removed music in your collection and want to update
+Mopidy's index of your local library, you need to rescan::
+
+    mopidy local scan
+
+Note that if you are using the default local library storage, ``json``, you
+need to restart Mopidy after the scan completes for the updated index to be
+used.
+
+If you want index updates to come into effect immediately, you can try out
+`Mopidy-Local-SQLite <https://github.com/mopidy/mopidy-local-sqlite>`_, which
+will probably become the default backend in the near future.
+
+
 Pluggable library support
 =========================
 
