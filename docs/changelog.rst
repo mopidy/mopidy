@@ -29,6 +29,10 @@ Bug fix release.
   :confval:`core/data_dir`, like the Debian and Arch packages. (Fixes:
   :issue:`1259`, PR: :issue:`1266`)
 
+- Local: Change default value of :confval:`local/scan_flush_threshold` from
+  1000 to 100 to shorten the time Mopidy-Local-SQLite blocks incoming requests
+  while scanning the local library.
+
 - M3U: Changed default for the :confval:`m3u/playlists_dir` from
   ``$XDG_DATA_DIR/mopidy/m3u`` to unset, which now means the extension's data
   dir. This does not change the defaults for desktop users, only system
