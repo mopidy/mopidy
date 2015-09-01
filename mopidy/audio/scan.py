@@ -160,15 +160,16 @@ def _process(pipeline, timeout_ms):
                 missing_message = message
         elif message.type == Gst.MessageType.APPLICATION:
             if message.get_structure().get_name() == 'have-type':
-                mime = message.get_structure()['caps'].get_name()
-                if mime.startswith('text/') or mime == 'application/xml':
+                mime = message.get_structure().get_value('caps').get_name()
+                if mime and (
+                        mime.startswith('text/') or mime == 'application/xml'):
                     return tags, mime, have_audio
             elif message.get_structure().get_name() == 'have-audio':
                 have_audio = True
         elif message.type == Gst.MessageType.ERROR:
             error = encoding.locale_decode(message.parse_error()[0])
             if missing_message and not mime:
-                caps = missing_message.get_structure()['detail']
+                caps = missing_message.get_structure().get_value('detail')
                 mime = caps.get_structure(0).get_name()
                 return tags, mime, have_audio
             raise exceptions.ScannerError(error)
