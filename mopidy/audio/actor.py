@@ -560,7 +560,7 @@ class Audio(pykka.ThreadingActor):
         :type seek_data: callable which takes time position in ms
         """
         self._appsrc.prepare(
-            Gst.Caps(bytes(caps)), need_data, enough_data, seek_data)
+            Gst.Caps.from_string(caps), need_data, enough_data, seek_data)
         self._playbin.set_property('uri', 'appsrc://')
 
     def emit_data(self, buffer_):
