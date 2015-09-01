@@ -65,7 +65,7 @@ class Scanner(object):
 # Turns out it's _much_ faster to just create a new pipeline for every as
 # decodebins and other elements don't seem to take well to being reused.
 def _setup_pipeline(uri, proxy_config=None):
-    src = Gst.element_make_from_uri(Gst.URI_SRC, uri)
+    src = Gst.Element.make_from_uri(Gst.URI_SRC, uri)
     if not src:
         raise exceptions.ScannerError('GStreamer can not open: %s' % uri)
 
