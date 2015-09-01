@@ -421,8 +421,7 @@ class Audio(pykka.ThreadingActor):
         # TODO: move out of audio actor?
         # Fix for https://github.com/mopidy/mopidy/issues/604
         registry = Gst.Registry.get()
-        jacksink = registry.find_feature(
-            'jackaudiosink', Gst.TYPE_ELEMENT_FACTORY)
+        jacksink = registry.find_feature('jackaudiosink', Gst.ElementFactory)
         if jacksink:
             jacksink.set_rank(Gst.RANK_SECONDARY)
 
