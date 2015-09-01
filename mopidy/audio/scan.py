@@ -58,7 +58,7 @@ class Scanner(object):
             duration = _query_duration(pipeline)
             seekable = _query_seekable(pipeline)
         finally:
-            pipeline.set_state(Gst.STATE_NULL)
+            pipeline.set_state(Gst.State.NULL)
             del pipeline
 
         return _Result(uri, tags, duration, seekable, mime, have_audio)
@@ -110,8 +110,8 @@ def _pad_added(element, pad, pipeline):
 
 
 def _start_pipeline(pipeline):
-    if pipeline.set_state(Gst.STATE_PAUSED) == Gst.STATE_CHANGE_NO_PREROLL:
-        pipeline.set_state(Gst.STATE_PLAYING)
+    if pipeline.set_state(Gst.State.PAUSED) == Gst.State.CHANGE_NO_PREROLL:
+        pipeline.set_state(Gst.State.PLAYING)
 
 
 def _query_duration(pipeline):
