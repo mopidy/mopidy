@@ -77,7 +77,8 @@ def _setup_pipeline(uri, proxy_config=None):
     pipeline = Gst.ElementFactory.make('pipeline')
     for e in (src, typefind, decodebin):
         pipeline.add(e)
-    Gst.element_link_many(src, typefind, decodebin)
+    src.link(typefind)
+    typefind.link(decodebin)
 
     if proxy_config:
         utils.setup_proxy(src, proxy_config)
