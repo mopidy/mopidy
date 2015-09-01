@@ -423,7 +423,7 @@ class Audio(pykka.ThreadingActor):
         registry = Gst.Registry.get()
         jacksink = registry.find_feature('jackaudiosink', Gst.ElementFactory)
         if jacksink:
-            jacksink.set_rank(Gst.RANK_SECONDARY)
+            jacksink.set_rank(Gst.Rank.SECONDARY)
 
     def _setup_playbin(self):
         playbin = Gst.ElementFactory.make('playbin')
