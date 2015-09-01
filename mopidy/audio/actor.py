@@ -614,7 +614,7 @@ class Audio(pykka.ThreadingActor):
         :rtype: int
         """
         try:
-            gst_position = self._playbin.query_position(Gst.FORMAT_TIME)[0]
+            gst_position = self._playbin.query_position(Gst.Format.TIME)[0]
             return utils.clocktime_to_millisecond(gst_position)
         except Gst.QueryError:
             # TODO: take state into account for this and possibly also return
@@ -633,7 +633,7 @@ class Audio(pykka.ThreadingActor):
         # TODO: double check seek flags in use.
         gst_position = utils.millisecond_to_clocktime(position)
         result = self._playbin.seek_simple(
-            Gst.Format(Gst.FORMAT_TIME), Gst.SeekFlag.FLUSH, gst_position)
+            Gst.Format.TIME, Gst.SeekFlag.FLUSH, gst_position)
         gst_logger.debug('Sent flushing seek: position=%s', gst_position)
         return result
 
