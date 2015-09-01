@@ -71,10 +71,10 @@ def _setup_pipeline(uri, proxy_config=None):
     if not src:
         raise exceptions.ScannerError('GStreamer can not open: %s' % uri)
 
-    typefind = Gst.element_factory_make('typefind')
-    decodebin = Gst.element_factory_make('decodebin2')
+    typefind = Gst.ElementFactory.make('typefind')
+    decodebin = Gst.ElementFactory.make('decodebin2')
 
-    pipeline = Gst.element_factory_make('pipeline')
+    pipeline = Gst.ElementFactory.make('pipeline')
     for e in (src, typefind, decodebin):
         pipeline.add(e)
     Gst.element_link_many(src, typefind, decodebin)
@@ -96,7 +96,7 @@ def _have_type(element, probability, caps, decodebin):
 
 
 def _pad_added(element, pad, pipeline):
-    sink = Gst.element_factory_make('fakesink')
+    sink = Gst.ElementFactory.make('fakesink')
     sink.set_property('sync', False)
 
     pipeline.add(sink)
