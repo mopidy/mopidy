@@ -63,6 +63,16 @@ Bug fix release.
   clients, which no longer scan the files twice. (Fixes: :issue:`1260`, PR:
   :issue:`1261`)
 
+- File: Allow looking up metadata about any ``file://`` URI, just like we did
+  in Mopidy 1.0.x, where Mopidy-Stream handled ``file://`` URIs. In Mopidy
+  1.1.0, Mopidy-File did not allow one to lookup files outside the directories
+  listed in :confval:`file/media_dir`. This broke Mopidy-Local-SQLite when the
+  :confval:`local/media_dir` directory was not within one of the
+  :confval:`file/media_dirs` directories. For browsing of files, we still limit
+  access to files inside the :confval:`file/media_dir` directories. For lookup,
+  you can now read metadata for any file you know the path of. (Fixes:
+  :issue:`1268`, PR: :issue:`1273`)
+
 - Audio: Fix timeout handling in scanner. This regression caused timeouts to
   expire before it should, causing scans to fail.
 
