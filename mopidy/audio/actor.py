@@ -6,7 +6,7 @@ import threading
 
 import gi
 gi.require_version('Gst', '1.0')
-from gi.repository import GObject, Gst
+from gi.repository import GObject, Gst, GstPbutils
 
 import pykka
 
@@ -250,7 +250,7 @@ class _Handler(object):
         elif msg.type == Gst.MessageType.TAG:
             self.on_tag(msg.parse_tag())
         elif msg.type == Gst.MessageType.ELEMENT:
-            if Gst.pbutils.is_missing_plugin_message(msg):
+            if GstPbutils.is_missing_plugin_message(msg):
                 self.on_missing_plugin(msg)
 
     def on_event(self, pad, event):
@@ -347,12 +347,12 @@ class _Handler(object):
         AudioListener.send('tags_changed', tags=tags.keys())
 
     def on_missing_plugin(self, msg):
-        desc = Gst.pbutils.missing_plugin_message_get_description(msg)
-        debug = Gst.pbutils.missing_plugin_message_get_installer_detail(msg)
+        desc = GstPbutils.missing_plugin_message_get_description(msg)
+        debug = GstPbutils.missing_plugin_message_get_installer_detail(msg)
 
         gst_logger.debug('Got missing-plugin message: description:%s', desc)
         logger.warning('Could not find a %s to handle media.', desc)
-        if Gst.pbutils.install_plugins_supported():
+        if GstPbutils.install_plugins_supported():
             logger.info('You might be able to fix this by running: '
                         'gst-installer "%s"', debug)
         # TODO: store the missing plugins installer info in a file so we can
