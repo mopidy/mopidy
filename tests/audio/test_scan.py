@@ -8,7 +8,7 @@ gi.require_version('Gst', '1.0')
 from gi.repository import GObject, Gst
 
 GObject.threads_init()
-Gst.init(None)
+Gst.init()
 
 from mopidy import exceptions
 from mopidy.audio import scan

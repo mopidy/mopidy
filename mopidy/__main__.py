@@ -22,6 +22,7 @@ except ImportError:
     raise
 
 GObject.threads_init()
+Gst.init()
 
 try:
     # Make GObject's mainloop the event loop for python-dbus
@@ -32,13 +33,6 @@ except ImportError:
     pass
 
 import pykka.debug
-
-
-# Extract any command line arguments. This needs to be done before GStreamer is
-# imported, so that GStreamer doesn't hijack e.g. ``--help``.
-mopidy_args = sys.argv[1:]
-sys.argv[1:] = []
-
 
 from mopidy import commands, config as config_lib, ext
 from mopidy.internal import encoding, log, path, process, versioning
@@ -73,7 +67,7 @@ def main():
                 data.command.set(extension=data.extension)
                 root_cmd.add_child(data.extension.ext_name, data.command)
 
-        args = root_cmd.parse(mopidy_args)
+        args = root_cmd.parse(sys.argv[1:])
 
         config, config_errors = config_lib.load(
             args.config_files,
