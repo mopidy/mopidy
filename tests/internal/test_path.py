@@ -7,7 +7,7 @@ import shutil
 import tempfile
 import unittest
 
-import glib
+from gi.repository import GLib
 
 from mopidy import compat, exceptions
 from mopidy.internal import path
@@ -215,7 +215,7 @@ class ExpandPathTest(unittest.TestCase):
 
     def test_xdg_subsititution(self):
         self.assertEqual(
-            glib.get_user_data_dir() + b'/foo',
+            GLib.get_user_data_dir() + b'/foo',
             path.expand_path(b'$XDG_DATA_DIR/foo'))
 
     def test_xdg_subsititution_unknown(self):

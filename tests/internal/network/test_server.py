@@ -4,7 +4,7 @@ import errno
 import socket
 import unittest
 
-import gobject
+from gi.repository import GObject
 
 from mock import Mock, patch, sentinel
 
@@ -91,11 +91,11 @@ class ServerTest(unittest.TestCase):
             network.Server.create_server_socket(
                 self.mock, sentinel.host, sentinel.port)
 
-    @patch.object(gobject, 'io_add_watch', new=Mock())
+    @patch.object(GObject, 'io_add_watch', new=Mock())
     def test_register_server_socket_sets_up_io_watch(self):
         network.Server.register_server_socket(self.mock, sentinel.fileno)
-        gobject.io_add_watch.assert_called_once_with(
-            sentinel.fileno, gobject.IO_IN, self.mock.handle_connection)
+        GObject.io_add_watch.assert_called_once_with(
+            sentinel.fileno, GObject.IO_IN, self.mock.handle_connection)
 
     def test_handle_connection(self):
         self.mock.accept_connection.return_value = (
@@ -103,7 +103,7 @@ class ServerTest(unittest.TestCase):
         self.mock.maximum_connections_exceeded.return_value = False
 
         self.assertTrue(network.Server.handle_connection(
-            self.mock, sentinel.fileno, gobject.IO_IN))
+            self.mock, sentinel.fileno, GObject.IO_IN))
         self.mock.accept_connection.assert_called_once_with()
         self.mock.maximum_connections_exceeded.assert_called_once_with()
         self.mock.init_connection.assert_called_once_with(
@@ -116,7 +116,7 @@ class ServerTest(unittest.TestCase):
         self.mock.maximum_connections_exceeded.return_value = True
 
         self.assertTrue(network.Server.handle_connection(
-            self.mock, sentinel.fileno, gobject.IO_IN))
+            self.mock, sentinel.fileno, GObject.IO_IN))
         self.mock.accept_connection.assert_called_once_with()
         self.mock.maximum_connections_exceeded.assert_called_once_with()
         self.mock.reject_connection.assert_called_once_with(
