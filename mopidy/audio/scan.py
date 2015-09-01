@@ -159,16 +159,16 @@ def _process(pipeline, timeout_ms):
             if GstPbutils.is_missing_plugin_message(message):
                 missing_message = message
         elif message.type == Gst.MessageType.APPLICATION:
-            if message.structure.get_name() == 'have-type':
-                mime = message.structure['caps'].get_name()
+            if message.get_structure().get_name() == 'have-type':
+                mime = message.get_structure()['caps'].get_name()
                 if mime.startswith('text/') or mime == 'application/xml':
                     return tags, mime, have_audio
-            elif message.structure.get_name() == 'have-audio':
+            elif message.get_structure().get_name() == 'have-audio':
                 have_audio = True
         elif message.type == Gst.MessageType.ERROR:
             error = encoding.locale_decode(message.parse_error()[0])
             if missing_message and not mime:
-                caps = missing_message.structure['detail']
+                caps = missing_message.get_structure()['detail']
                 mime = caps.get_structure(0).get_name()
                 return tags, mime, have_audio
             raise exceptions.ScannerError(error)
