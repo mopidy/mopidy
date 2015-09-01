@@ -25,9 +25,10 @@ logger = logging.getLogger(__name__)
 gst_logger = logging.getLogger('mopidy.audio.gst')
 
 _GST_STATE_MAPPING = {
-    Gst.STATE_PLAYING: PlaybackState.PLAYING,
-    Gst.STATE_PAUSED: PlaybackState.PAUSED,
-    Gst.STATE_NULL: PlaybackState.STOPPED}
+    Gst.State.PLAYING: PlaybackState.PLAYING,
+    Gst.State.PAUSED: PlaybackState.PAUSED,
+    Gst.State.NULL: PlaybackState.STOPPED,
+}
 
 
 class _Signals(object):
@@ -265,17 +266,17 @@ class _Handler(object):
                          old_state.value_name, new_state.value_name,
                          pending_state.value_name)
 
-        if new_state == Gst.STATE_READY and pending_state == Gst.STATE_NULL:
+        if new_state == Gst.State.READY and pending_state == Gst.State.NULL:
             # XXX: We're not called on the last state change when going down to
             # NULL, so we rewrite the second to last call to get the expected
             # behavior.
-            new_state = Gst.STATE_NULL
-            pending_state = Gst.STATE_VOID_PENDING
+            new_state = Gst.State.NULL
+            pending_state = Gst.State.VOID_PENDING
 
-        if pending_state != Gst.STATE_VOID_PENDING:
+        if pending_state != Gst.State.VOID_PENDING:
             return  # Ignore intermediate state changes
 
-        if new_state == Gst.STATE_READY:
+        if new_state == Gst.State.READY:
             return  # Ignore READY state as it's GStreamer specific
 
         new_state = _GST_STATE_MAPPING[new_state]
@@ -304,13 +305,13 @@ class _Handler(object):
 
         level = logging.getLevelName('TRACE')
         if percent < 10 and not self._audio._buffering:
-            self._audio._playbin.set_state(Gst.STATE_PAUSED)
+            self._audio._playbin.set_state(Gst.State.PAUSED)
             self._audio._buffering = True
             level = logging.DEBUG
         if percent == 100:
             self._audio._buffering = False
-            if self._audio._target_state == Gst.STATE_PLAYING:
-                self._audio._playbin.set_state(Gst.STATE_PLAYING)
+            if self._audio._target_state == Gst.State.PLAYING:
+                self._audio._playbin.set_state(Gst.State.PLAYING)
             level = logging.DEBUG
 
         gst_logger.log(level, 'Got buffering message: percent=%d%%', percent)
@@ -386,7 +387,7 @@ class Audio(pykka.ThreadingActor):
         super(Audio, self).__init__()
 
         self._config = config
-        self._target_state = Gst.STATE_NULL
+        self._target_state = Gst.State.NULL
         self._buffering = False
         self._tags = {}
 
@@ -445,7 +446,7 @@ class Audio(pykka.ThreadingActor):
         self._handler.teardown_event_handling()
         self._signals.disconnect(self._playbin, 'about-to-finish')
         self._signals.disconnect(self._playbin, 'source-setup')
-        self._playbin.set_state(Gst.STATE_NULL)
+        self._playbin.set_state(Gst.State.NULL)
 
     def _setup_outputs(self):
         # We don't want to use outputs for regular testing, so just install
@@ -642,7 +643,7 @@ class Audio(pykka.ThreadingActor):
 
         :rtype: :class:`True` if successfull, else :class:`False`
         """
-        return self._set_state(Gst.STATE_PLAYING)
+        return self._set_state(Gst.State.PLAYING)
 
     def pause_playback(self):
         """
@@ -650,7 +651,7 @@ class Audio(pykka.ThreadingActor):
 
         :rtype: :class:`True` if successfull, else :class:`False`
         """
-        return self._set_state(Gst.STATE_PAUSED)
+        return self._set_state(Gst.State.PAUSED)
 
     def prepare_change(self):
         """
@@ -659,9 +660,9 @@ class Audio(pykka.ThreadingActor):
         This function *MUST* be called before changing URIs or doing
         changes like updating data that is being pushed. The reason for this
         is that GStreamer will reset all its state when it changes to
-        :attr:`gst.STATE_READY`.
+        :attr:`Gst.State.READY`.
         """
-        return self._set_state(Gst.STATE_READY)
+        return self._set_state(Gst.State.READY)
 
     def stop_playback(self):
         """
@@ -670,7 +671,7 @@ class Audio(pykka.ThreadingActor):
         :rtype: :class:`True` if successfull, else :class:`False`
         """
         self._buffering = False
-        return self._set_state(Gst.STATE_NULL)
+        return self._set_state(Gst.State.NULL)
 
     def wait_for_state_change(self):
         """Block until any pending state changes are complete.
@@ -695,7 +696,7 @@ class Audio(pykka.ThreadingActor):
         """
         Internal method for setting the raw GStreamer state.
 
-        .. digraph:: gst_state_transitions
+        .. digraph:: Gst.State.transitions
 
             graph [rankdir="LR"];
             node [fontsize=10];
@@ -707,8 +708,8 @@ class Audio(pykka.ThreadingActor):
             "READY" -> "NULL"
             "READY" -> "PAUSED"
 
-        :param state: State to set playbin to. One of: `Gst.STATE_NULL`,
-            `Gst.STATE_READY`, `Gst.STATE_PAUSED` and `Gst.STATE_PLAYING`.
+        :param state: State to set playbin to. One of: `Gst.State.NULL`,
+            `Gst.State.READY`, `Gst.State.PAUSED` and `Gst.State.PLAYING`.
         :type state: :class:`Gst.State`
         :rtype: :class:`True` if successfull, else :class:`False`
         """
@@ -717,7 +718,7 @@ class Audio(pykka.ThreadingActor):
         gst_logger.debug('State change to %s: result=%s', state.value_name,
                          result.value_name)
 
-        if result == Gst.STATE_CHANGE_FAILURE:
+        if result == Gst.State.CHANGE_FAILURE:
             logger.warning(
                 'Setting GStreamer state to %s failed', state.value_name)
             return False
