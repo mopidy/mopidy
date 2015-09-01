@@ -633,7 +633,7 @@ class Audio(pykka.ThreadingActor):
         # TODO: double check seek flags in use.
         gst_position = utils.millisecond_to_clocktime(position)
         result = self._playbin.seek_simple(
-            Gst.Format(Gst.FORMAT_TIME), Gst.SEEK_FLAG_FLUSH, gst_position)
+            Gst.Format(Gst.FORMAT_TIME), Gst.SeekFlags.FLUSH, gst_position)
         gst_logger.debug('Sent flushing seek: position=%s', gst_position)
         return result
 
