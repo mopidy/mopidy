@@ -152,7 +152,7 @@ class _Outputs(Gst.Bin):
         # XXX This only works for pipelines not in use until #790 gets done.
         try:
             output = Gst.parse_bin_from_description(
-                description, ghost_unconnected_pads=True)
+                description, ghost_unlinked_pads=True)
         except GObject.GError as ex:
             logger.error(
                 'Failed to create audio output "%s": %s', description, ex)
