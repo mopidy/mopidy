@@ -139,7 +139,7 @@ class _Outputs(Gst.Bin):
         self._tee = Gst.ElementFactory.make('tee')
         self.add(self._tee)
 
-        ghost_pad = Gst.GhostPad('sink', self._tee.get_pad('sink'))
+        ghost_pad = Gst.GhostPad.new('sink', self._tee.get_pad('sink'))
         self.add_pad(ghost_pad)
 
         # Add an always connected fakesink which respects the clock so the tee
@@ -487,7 +487,7 @@ class Audio(pykka.ThreadingActor):
         else:
             queue.link(self._outputs)
 
-        ghost_pad = Gst.GhostPad('sink', queue.get_pad('sink'))
+        ghost_pad = Gst.GhostPad.new('sink', queue.get_pad('sink'))
         audio_sink.add_pad(ghost_pad)
 
         self._playbin.set_property('audio-sink', audio_sink)
