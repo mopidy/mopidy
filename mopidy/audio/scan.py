@@ -14,8 +14,6 @@ from mopidy.internal import encoding
 _Result = collections.namedtuple(
     'Result', ('uri', 'tags', 'duration', 'seekable', 'mime', 'playable'))
 
-_RAW_AUDIO = Gst.Caps(b'audio/x-raw-int; audio/x-raw-float')
-
 
 # TODO: replace with a scan(uri, timeout=1000, proxy_config=None)?
 class Scanner(object):
@@ -104,7 +102,7 @@ def _pad_added(element, pad, pipeline):
     sink.sync_state_with_parent()
     pad.link(sink.get_static_pad('sink'))
 
-    if pad.query_caps().is_subset(_RAW_AUDIO):
+    if pad.query_caps().is_subset(Gst.Caps.from_string('audio/x-raw')):
         struct = Gst.Structure('have-audio')
         element.get_bus().post(Gst.message_new_application(element, struct))
 
