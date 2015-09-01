@@ -233,21 +233,23 @@ class _Handler(object):
         self._event_handler_id = None
 
     def on_message(self, bus, msg):
-        if msg.type == Gst.MESSAGE_STATE_CHANGED and msg.src == self._element:
+        if (
+                msg.type == Gst.MessageType.STATE_CHANGED and
+                msg.src == self._element):
             self.on_playbin_state_changed(*msg.parse_state_changed())
-        elif msg.type == Gst.MESSAGE_BUFFERING:
+        elif msg.type == Gst.MessageType.BUFFERING:
             self.on_buffering(msg.parse_buffering(), msg.structure)
-        elif msg.type == Gst.MESSAGE_EOS:
+        elif msg.type == Gst.MessageType.EOS:
             self.on_end_of_stream()
-        elif msg.type == Gst.MESSAGE_ERROR:
+        elif msg.type == Gst.MessageType.ERROR:
             self.on_error(*msg.parse_error())
-        elif msg.type == Gst.MESSAGE_WARNING:
+        elif msg.type == Gst.MessageType.WARNING:
             self.on_warning(*msg.parse_warning())
-        elif msg.type == Gst.MESSAGE_ASYNC_DONE:
+        elif msg.type == Gst.MessageType.ASYNC_DONE:
             self.on_async_done()
-        elif msg.type == Gst.MESSAGE_TAG:
+        elif msg.type == Gst.MessageType.TAG:
             self.on_tag(msg.parse_tag())
-        elif msg.type == Gst.MESSAGE_ELEMENT:
+        elif msg.type == Gst.MessageType.ELEMENT:
             if Gst.pbutils.is_missing_plugin_message(msg):
                 self.on_missing_plugin(msg)
 
