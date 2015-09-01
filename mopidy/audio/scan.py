@@ -70,7 +70,7 @@ def _setup_pipeline(uri, proxy_config=None):
         raise exceptions.ScannerError('GStreamer can not open: %s' % uri)
 
     typefind = Gst.ElementFactory.make('typefind')
-    decodebin = Gst.ElementFactory.make('decodebin2')
+    decodebin = Gst.ElementFactory.make('decodebin')
 
     pipeline = Gst.ElementFactory.make('pipeline')
     for e in (src, typefind, decodebin):
