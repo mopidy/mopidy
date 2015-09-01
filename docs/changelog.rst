@@ -23,6 +23,9 @@ Bug fix release.
   :file:`/var/lib/mopidy/.local` and :file:`/var/lib/mopidy/.cache`. (Fixes:
   :issue:`1259`, PR: :issue:`1266`)
 
+- Core: Fix error in :meth:`~mopidy.core.TracklistController.get_eot_tlid`
+  docstring. (Fixes: :issue:`1269`)
+
 - Local: Deprecate :confval:`local/data_dir` and respect
   :confval:`core/data_dir` instead. This does not change the defaults for
   desktop users, only system services installed from packages that properly set
@@ -126,7 +129,7 @@ Core API
 
 - Add ``tlid`` alternatives to methods that take ``tl_track`` and also add
   ``get_{eot,next,previous}_tlid`` methods as light weight alternatives to the
-  ``tl_track`` versions of the calls. (Fixes: :issue:`1131` PR: :issue:`1136`,
+  ``tl_track`` versions of the calls. (Fixes: :issue:`1131`, PR: :issue:`1136`,
   :issue:`1140`)
 
 - Add :meth:`mopidy.core.PlaybackController.get_current_tlid`.
