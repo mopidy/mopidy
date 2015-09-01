@@ -420,7 +420,7 @@ class Audio(pykka.ThreadingActor):
     def _setup_preferences(self):
         # TODO: move out of audio actor?
         # Fix for https://github.com/mopidy/mopidy/issues/604
-        registry = Gst.registry_get_default()
+        registry = Gst.Registry.get()
         jacksink = registry.find_feature(
             'jackaudiosink', Gst.TYPE_ELEMENT_FACTORY)
         if jacksink:

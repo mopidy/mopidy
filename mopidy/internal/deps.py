@@ -186,6 +186,6 @@ def _gstreamer_check_elements():
     ]
     known_elements = [
         factory.get_name() for factory in
-        Gst.registry_get_default().get_feature_list(Gst.TYPE_ELEMENT_FACTORY)]
+        Gst.Registry.get().get_feature_list(Gst.TYPE_ELEMENT_FACTORY)]
     return [
         (element, element in known_elements) for element in elements_to_check]
