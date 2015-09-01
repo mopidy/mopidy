@@ -102,7 +102,7 @@ def _pad_added(element, pad, pipeline):
 
     pipeline.add(sink)
     sink.sync_state_with_parent()
-    pad.link(sink.get_pad('sink'))
+    pad.link(sink.get_static_pad('sink'))
 
     if pad.query_caps().is_subset(_RAW_AUDIO):
         struct = Gst.Structure('have-audio')
