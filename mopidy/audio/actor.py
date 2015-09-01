@@ -257,7 +257,7 @@ class _Handler(object):
             # Handle stream changed messages when they reach our output bin.
             # If we listen for it on the bus we get one per tee branch.
             msg = event.parse_sink_message()
-            if msg.structure.has_name('playbin2-stream-changed'):
+            if msg.structure.has_name('playbin-stream-changed'):
                 self.on_stream_changed(msg.structure['uri'])
         return True
 
@@ -427,7 +427,7 @@ class Audio(pykka.ThreadingActor):
             jacksink.set_rank(Gst.RANK_SECONDARY)
 
     def _setup_playbin(self):
-        playbin = Gst.ElementFactory.make('playbin2')
+        playbin = Gst.ElementFactory.make('playbin')
         playbin.set_property('flags', 2)  # GST_PLAY_FLAG_AUDIO
 
         # TODO: turn into config values...
