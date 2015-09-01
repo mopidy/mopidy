@@ -91,8 +91,8 @@ def _setup_pipeline(uri, proxy_config=None):
 
 def _have_type(element, probability, caps, decodebin):
     decodebin.set_property('sink-caps', caps)
-    struct = Gst.Structure('have-type')
-    struct['caps'] = caps.get_structure(0)
+    struct = Gst.Structure.new_empty('have-type')
+    struct.set_value('caps', caps.get_structure(0))
     element.get_bus().post(Gst.message_new_application(element, struct))
 
 
