@@ -219,7 +219,8 @@ class _Handler(object):
 
     def setup_event_handling(self, pad):
         self._pad = pad
-        self._event_handler_id = pad.add_event_probe(self.on_event)
+        self._event_handler_id = pad.add_probe(
+            Gst.PadProbeType.EVENT_BOTH, self.on_event)
 
     def teardown_message_handling(self):
         bus = self._element.get_bus()
@@ -228,7 +229,7 @@ class _Handler(object):
         self._message_handler_id = None
 
     def teardown_event_handling(self):
-        self._pad.remove_event_probe(self._event_handler_id)
+        self._pad.remove_probe(self._event_handler_id)
         self._event_handler_id = None
 
     def on_message(self, bus, msg):
