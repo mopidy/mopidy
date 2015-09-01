@@ -7,12 +7,12 @@ import sys
 import textwrap
 
 try:
-    import gobject   # noqa
+    from gi.repository import GObject, Gst
 except ImportError:
     print(textwrap.dedent("""
-        ERROR: The gobject Python package was not found.
+        ERROR: The GObject and Gst Python packages were not found.
 
-        Mopidy requires GStreamer (and GObject) to work. These are C libraries
+        Mopidy requires GStreamer and GObject to work. These are C libraries
         with a number of dependencies themselves, and cannot be installed with
         the regular Python tools like pip.
 
@@ -21,7 +21,7 @@ except ImportError:
     """))
     raise
 
-gobject.threads_init()
+GObject.threads_init()
 
 try:
     # Make GObject's mainloop the event loop for python-dbus
