@@ -23,7 +23,7 @@ class Extension(ext.Extension):
         schema = super(Extension, self).get_config_schema()
         schema['library'] = config.String()
         schema['media_dir'] = config.Path()
-        schema['data_dir'] = config.Path(optional=True)
+        schema['data_dir'] = config.Deprecated()
         schema['playlists_dir'] = config.Deprecated()
         schema['tag_cache_file'] = config.Deprecated()
         schema['scan_timeout'] = config.Integer(

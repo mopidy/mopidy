@@ -10,6 +10,12 @@ v1.2.0 (UNRELEASED)
 
 Feature release.
 
+Local
+-----
+
+- Made :confval:`local/data_dir` really deprecated. This change breaks older
+  versions of Mopidy-Local-SQLite and Mopidy-Local-Images.
+
 Cleanups
 --------
 
