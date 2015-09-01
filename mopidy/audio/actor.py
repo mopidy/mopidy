@@ -135,7 +135,7 @@ class _Outputs(Gst.Bin):
     def __init__(self):
         Gst.Bin.__init__(self, 'outputs')
 
-        self._tee = Gst.element_factory_make('tee')
+        self._tee = Gst.ElementFactory.make('tee')
         self.add(self._tee)
 
         ghost_pad = Gst.GhostPad('sink', self._tee.get_pad('sink'))
@@ -143,7 +143,7 @@ class _Outputs(Gst.Bin):
 
         # Add an always connected fakesink which respects the clock so the tee
         # doesn't fail even if we don't have any outputs.
-        fakesink = Gst.element_factory_make('fakesink')
+        fakesink = Gst.ElementFactory.make('fakesink')
         fakesink.set_property('sync', True)
         self._add(fakesink)
 
@@ -161,7 +161,7 @@ class _Outputs(Gst.Bin):
         logger.info('Audio output set to "%s"', description)
 
     def _add(self, element):
-        queue = Gst.element_factory_make('queue')
+        queue = Gst.ElementFactory.make('queue')
         self.add(element)
         self.add(queue)
         queue.link(element)
@@ -426,7 +426,7 @@ class Audio(pykka.ThreadingActor):
             jacksink.set_rank(Gst.RANK_SECONDARY)
 
     def _setup_playbin(self):
-        playbin = Gst.element_factory_make('playbin2')
+        playbin = Gst.ElementFactory.make('playbin2')
         playbin.set_property('flags', 2)  # GST_PLAY_FLAG_AUDIO
 
         # TODO: turn into config values...
@@ -451,7 +451,7 @@ class Audio(pykka.ThreadingActor):
         # We don't want to use outputs for regular testing, so just install
         # an unsynced fakesink when someone asks for a 'testoutput'.
         if self._config['audio']['output'] == 'testoutput':
-            self._outputs = Gst.element_factory_make('fakesink')
+            self._outputs = Gst.ElementFactory.make('fakesink')
         else:
             self._outputs = _Outputs()
             try:
@@ -468,7 +468,7 @@ class Audio(pykka.ThreadingActor):
         # the actual switch, i.e. about to switch can block for longer thanks
         # to this queue.
         # TODO: make the min-max values a setting?
-        queue = Gst.element_factory_make('queue')
+        queue = Gst.ElementFactory.make('queue')
         queue.set_property('max-size-buffers', 0)
         queue.set_property('max-size-bytes', 0)
         queue.set_property('max-size-time', 3 * Gst.SECOND)
@@ -478,7 +478,7 @@ class Audio(pykka.ThreadingActor):
         audio_sink.add(self._outputs)
 
         if self.mixer:
-            volume = Gst.element_factory_make('volume')
+            volume = Gst.ElementFactory.make('volume')
             audio_sink.add(volume)
             queue.link(volume)
             volume.link(self._outputs)
