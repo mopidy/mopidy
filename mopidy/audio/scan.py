@@ -191,6 +191,7 @@ if __name__ == '__main__':
     from mopidy.internal import path
 
     GObject.threads_init()
+    Gst.init()
 
     scanner = Scanner(5000)
     for uri in sys.argv[1:]:
