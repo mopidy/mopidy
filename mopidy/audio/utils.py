@@ -57,7 +57,7 @@ def supported_uri_schemes(uri_schemes):
     supported_schemes = set()
     registry = Gst.Registry.get()
 
-    for factory in registry.get_feature_list(Gst.TYPE_ELEMENT_FACTORY):
+    for factory in registry.get_feature_list(Gst.ElementFactory):
         for uri in factory.get_uri_protocols():
             if uri in uri_schemes:
                 supported_schemes.add(uri)
