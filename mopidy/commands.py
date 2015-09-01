@@ -19,7 +19,7 @@ from mopidy.internal import deps, process, timer, versioning
 logger = logging.getLogger(__name__)
 
 _default_config = []
-for base in GLib.get_system_config_dirs() + (GLib.get_user_config_dir(),):
+for base in GLib.get_system_config_dirs() + [GLib.get_user_config_dir()]:
     _default_config.append(os.path.join(base, b'mopidy', b'mopidy.conf'))
 DEFAULT_CONFIG = b':'.join(_default_config)
 
