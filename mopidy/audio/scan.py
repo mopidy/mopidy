@@ -127,7 +127,7 @@ def _query_duration(pipeline):
 
 
 def _query_seekable(pipeline):
-    query = Gst.query_new_seeking(Gst.Format.TIME)
+    query = Gst.Query.new_seeking(Gst.Format.TIME)
     pipeline.query(query)
     return query.parse_seeking()[1]
 
