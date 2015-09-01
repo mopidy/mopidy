@@ -31,7 +31,7 @@ def create_buffer(data, capabilites=None, timestamp=None, duration=None):
             capabilites = Gst.caps_from_string(capabilites)
         buffer_.set_caps(capabilites)
     if timestamp:
-        buffer_.timestamp = timestamp
+        buffer_.pts = timestamp
     if duration:
         buffer_.duration = duration
     return buffer_
