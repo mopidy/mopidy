@@ -81,10 +81,6 @@ class FileLibraryProvider(backend.LibraryProvider):
         logger.debug('Looking up file URI: %s', uri)
         local_path = path.uri_to_path(uri)
 
-        if not self._is_in_basedir(local_path):
-            logger.warning('Ignoring URI outside base dir: %s', local_path)
-            return []
-
         try:
             result = self._scanner.scan(uri)
             track = utils.convert_tags_to_track(result.tags).copy(
