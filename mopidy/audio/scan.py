@@ -141,8 +141,13 @@ def _process(pipeline, timeout_ms):
     missing_message = None
 
     types = (
-        Gst.MESSAGE_ELEMENT | Gst.MESSAGE_APPLICATION | Gst.MESSAGE_ERROR |
-        Gst.MESSAGE_EOS | Gst.MESSAGE_ASYNC_DONE | Gst.MESSAGE_TAG)
+        Gst.MessageType.ELEMENT |
+        Gst.MessageType.APPLICATION |
+        Gst.MessageType.ERROR |
+        Gst.MessageType.EOS |
+        Gst.MessageType.ASYNC_DONE |
+        Gst.MessageType.TAG
+    )
 
     previous = clock.get_time()
     while timeout > 0:
@@ -150,29 +155,29 @@ def _process(pipeline, timeout_ms):
 
         if message is None:
             break
-        elif message.type == Gst.MESSAGE_ELEMENT:
+        elif message.type == Gst.MessageType.ELEMENT:
             if GstPbutils.is_missing_plugin_message(message):
                 missing_message = message
-        elif message.type == Gst.MESSAGE_APPLICATION:
+        elif message.type == Gst.MessageType.APPLICATION:
             if message.structure.get_name() == 'have-type':
                 mime = message.structure['caps'].get_name()
                 if mime.startswith('text/') or mime == 'application/xml':
                     return tags, mime, have_audio
             elif message.structure.get_name() == 'have-audio':
                 have_audio = True
-        elif message.type == Gst.MESSAGE_ERROR:
+        elif message.type == Gst.MessageType.ERROR:
             error = encoding.locale_decode(message.parse_error()[0])
             if missing_message and not mime:
                 caps = missing_message.structure['detail']
                 mime = caps.get_structure(0).get_name()
                 return tags, mime, have_audio
             raise exceptions.ScannerError(error)
-        elif message.type == Gst.MESSAGE_EOS:
+        elif message.type == Gst.MessageType.EOS:
             return tags, mime, have_audio
-        elif message.type == Gst.MESSAGE_ASYNC_DONE:
+        elif message.type == Gst.MessageType.ASYNC_DONE:
             if message.src == pipeline:
                 return tags, mime, have_audio
-        elif message.type == Gst.MESSAGE_TAG:
+        elif message.type == Gst.MessageType.TAG:
             taglist = message.parse_tag()
             # Note that this will only keep the last tag.
             tags.update(utils.convert_taglist(taglist))
