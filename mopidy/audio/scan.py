@@ -108,7 +108,8 @@ def _pad_added(element, pad, pipeline):
 
 
 def _start_pipeline(pipeline):
-    if pipeline.set_state(Gst.State.PAUSED) == Gst.State.CHANGE_NO_PREROLL:
+    result = pipeline.set_state(Gst.State.PAUSED)
+    if result == Gst.StateChangeReturn.NO_PREROLL:
         pipeline.set_state(Gst.State.PLAYING)
 
 
