@@ -91,7 +91,7 @@ def _have_type(element, probability, caps, decodebin):
     decodebin.set_property('sink-caps', caps)
     struct = Gst.Structure.new_empty('have-type')
     struct.set_value('caps', caps.get_structure(0))
-    element.get_bus().post(Gst.message_new_application(element, struct))
+    element.get_bus().post(Gst.Message.new_application(element, struct))
 
 
 def _pad_added(element, pad, pipeline):
@@ -104,7 +104,7 @@ def _pad_added(element, pad, pipeline):
 
     if pad.query_caps().is_subset(Gst.Caps.from_string('audio/x-raw')):
         struct = Gst.Structure('have-audio')
-        element.get_bus().post(Gst.message_new_application(element, struct))
+        element.get_bus().post(Gst.Message.new_application(element, struct))
 
 
 def _start_pipeline(pipeline):
