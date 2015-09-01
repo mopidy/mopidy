@@ -721,7 +721,7 @@ class Audio(pykka.ThreadingActor):
         gst_logger.debug('State change to %s: result=%s', state.value_name,
                          result.value_name)
 
-        if result == Gst.State.CHANGE_FAILURE:
+        if result == Gst.StateChangeReturn.FAILURE:
             logger.warning(
                 'Setting GStreamer state to %s failed', state.value_name)
             return False
