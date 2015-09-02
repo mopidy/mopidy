@@ -4,8 +4,6 @@ import mock
 
 import pytest
 
-import requests
-
 import responses
 
 from mopidy import exceptions
@@ -105,41 +103,10 @@ def test_translate_uri_when_scanner_fails(scanner, provider, caplog):
     assert 'Problem scanning URI bar: foo failed' in caplog.text()
 
 
-@responses.activate
 def test_translate_uri_when_playlist_download_fails(provider, caplog):
-    responses.add(responses.GET, URI, body=BODY, status=500)
-
-    result = provider.translate_uri(URI)
-
-    assert result is None
-    assert 'Problem downloading' in caplog.text()
-
-
-def test_translate_uri_times_out_if_connection_times_out(provider, caplog):
-    with mock.patch.object(provider, '_session') as session_mock:
-        get_mock = session_mock.get
-        get_mock.side_effect = requests.exceptions.Timeout
-
-        result = provider.translate_uri(URI)
-
-    get_mock.assert_called_once_with(URI, timeout=1.0, stream=True)
-    assert result is None
-    assert (
-        'Download of %r failed due to connection timeout after 1.000s' % URI
-        in caplog.text())
-
-
-@responses.activate
-def test_translate_uri_times_out_if_download_is_slow(provider, caplog):
-    responses.add(
-        responses.GET, URI, body=BODY, content_type='audio/x-mpegurl')
-
-    with mock.patch('mopidy.internal.http.time') as time_mock:
-        time_mock.time.side_effect = [0, TIMEOUT + 1]
+    with mock.patch.object(actor, 'http') as http_mock:
+        http_mock.download.return_value = None
 
         result = provider.translate_uri(URI)
 
     assert result is None
-    assert (
-        'Download of %r failed due to download taking more than 1.000s' %
-        URI in caplog.text())
