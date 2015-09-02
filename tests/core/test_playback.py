@@ -794,6 +794,7 @@ class CorePlaybackWithOldBackendTest(unittest.TestCase):
         }
 
         b = mock.Mock()
+        b.actor_ref.actor_class.__name__ = 'DummyBackend'
         b.uri_schemes.get.return_value = ['dummy1']
         b.playback = mock.Mock(spec=backend.PlaybackProvider)
         b.playback.play.side_effect = TypeError

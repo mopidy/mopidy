@@ -3,6 +3,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import os
+import platform
 import shutil
 import tempfile
 import unittest
@@ -156,8 +157,11 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.core.playlists.refresh()
 
         self.assertEqual(len(self.core.playlists.as_list()), 1)
-        result = self.core.playlists.lookup(uri)
-        self.assertEqual('\ufffd\ufffd\ufffd', result.name)
+        result = self.core.playlists.as_list()
+        if platform.system() == 'Darwin':
+            self.assertEqual('%F8%E6%E5', result[0].name)
+        else:
+            self.assertEqual('\ufffd\ufffd\ufffd', result[0].name)
 
     @unittest.SkipTest
     def test_playlists_dir_is_created(self):

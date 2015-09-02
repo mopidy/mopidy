@@ -345,8 +345,11 @@ class PlaybackController(object):
                     backend.playback.change_track(tl_track.track).get() and
                     backend.playback.play().get())
             except TypeError:
-                logger.error('%s needs to be updated to work with this '
-                             'version of Mopidy.', backend)
+                logger.error(
+                    '%s needs to be updated to work with this '
+                    'version of Mopidy.',
+                    backend.actor_ref.actor_class.__name__)
+                logger.debug('Backend exception', exc_info=True)
 
         if success:
             self.core.tracklist._mark_playing(tl_track)

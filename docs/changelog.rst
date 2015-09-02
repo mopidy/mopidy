@@ -4,19 +4,154 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
-v1.1.0 (UNRELEASED)
+
+v1.2.0 (UNRELEASED)
 ===================
+
+Feature release.
+
+Local
+-----
+
+- Made :confval:`local/data_dir` really deprecated. This change breaks older
+  versions of Mopidy-Local-SQLite and Mopidy-Local-Images.
+
+Cleanups
+--------
+
+- Removed warning if :file:`~/.mopidy` exists. We stopped using this location
+  in 0.6, released in October 2011.
+
+- Removed warning if :file:`~/.config/mopidy/settings.py` exists. We stopped
+  using this settings file in 0.14, released in April 2013.
+
+
+v1.1.1 (UNRELEASED)
+===================
+
+Bug fix release.
+
+- Core: Make :meth:`mopidy.core.LibraryController.refresh` work for all
+  backends with a library provider. Previously, it wrongly worked for all
+  backends with a playlists provider. (Fixes: :issue:`1257`)
+
+- Core: Respect :confval:`core/cache_dir` and :confval:`core/data_dir` config
+  values added in 1.1.0 when creating the dirs Mopidy need to store data. This
+  should not change the behavior for desktop users running Mopidy. When running
+  Mopidy as a system service installed from a package which sets the core dir
+  configs properly (e.g. Debian and Arch packages), this fix avoids the
+  creation of a couple of directories that should not be used, typically
+  :file:`/var/lib/mopidy/.local` and :file:`/var/lib/mopidy/.cache`. (Fixes:
+  :issue:`1259`, PR: :issue:`1266`)
+
+- Core: Fix error in :meth:`~mopidy.core.TracklistController.get_eot_tlid`
+  docstring. (Fixes: :issue:`1269`)
+
+- Local: Deprecate :confval:`local/data_dir` and respect
+  :confval:`core/data_dir` instead. This does not change the defaults for
+  desktop users, only system services installed from packages that properly set
+  :confval:`core/data_dir`, like the Debian and Arch packages. (Fixes:
+  :issue:`1259`, PR: :issue:`1266`)
+
+- Local: Change default value of :confval:`local/scan_flush_threshold` from
+  1000 to 100 to shorten the time Mopidy-Local-SQLite blocks incoming requests
+  while scanning the local library.
+
+- M3U: Changed default for the :confval:`m3u/playlists_dir` from
+  ``$XDG_DATA_DIR/mopidy/m3u`` to unset, which now means the extension's data
+  dir. This does not change the defaults for desktop users, only system
+  services installed from packages that properly set :confval:`core/data_dir`,
+  like the Debian and Arch pakages. (Fixes: :issue:`1259`, PR: :issue:`1266`)
+
+- Stream: If "file" is present in the :confval:`stream/protocols` config value
+  and the :ref:`ext-file` extension is enabled, we exited with an error because
+  two extensions claimed the same URI scheme. We now log a warning recommending
+  to remove "file" from the :confval:`stream/protocols` config, and then
+  proceed startup. (Fixes: :issue:`1248`, PR: :issue:`1254`)
+
+- Stream: Fix bug in new playlist parser. A non-ASCII char in an urilist
+  comment would cause a crash while parsing due to comparision of a non-ASCII
+  bytestring with a Unicode string. (Fixes: :issue:`1265`)
+
+- File: Adjust log levels when failing to expand ``$XDG_MUSIC_DIR`` into a real
+  path. This usually happens when running Mopidy as a system service, and thus
+  with a limited set of environment variables. (Fixes: :issue:`1249`, PR:
+  :issue:`1255`)
+
+- File: When browsing files, we no longer scan the files to check if they're
+  playable. This makes browsing of the file hierarchy instant for HTTP clients,
+  which do no scanning of the files' metadata, and a bit faster for MPD
+  clients, which no longer scan the files twice. (Fixes: :issue:`1260`, PR:
+  :issue:`1261`)
+
+- File: Allow looking up metadata about any ``file://`` URI, just like we did
+  in Mopidy 1.0.x, where Mopidy-Stream handled ``file://`` URIs. In Mopidy
+  1.1.0, Mopidy-File did not allow one to lookup files outside the directories
+  listed in :confval:`file/media_dir`. This broke Mopidy-Local-SQLite when the
+  :confval:`local/media_dir` directory was not within one of the
+  :confval:`file/media_dirs` directories. For browsing of files, we still limit
+  access to files inside the :confval:`file/media_dir` directories. For lookup,
+  you can now read metadata for any file you know the path of. (Fixes:
+  :issue:`1268`, PR: :issue:`1273`)
+
+- Audio: Fix timeout handling in scanner. This regression caused timeouts to
+  expire before it should, causing scans to fail.
+
+- Audio: Update scanner to emit MIME type instead of an error when missing a
+  plugin.
+
+
+v1.1.0 (2015-08-09)
+===================
+
+Mopidy 1.1 is here!
+
+Since the release of 1.0, we've closed or merged approximately 65 issues and
+pull requests through about 400 commits by a record high 20 extraordinary
+people, including 14 newcomers. That's less issues and commits than in the 1.0
+release, but even more contributors, and a doubling of the number of newcomers.
+Thanks to :ref:`everyone <authors>` who has :ref:`contributed <contributing>`,
+especially those that joined the sprint at EuroPython 2015 in Bilbao, Spain a
+couple of weeks ago!
+
+As we promised with the release of Mopidy 1.0, any extension working with
+Mopidy 1.0 should continue working with all Mopidy 1.x releases. However, this
+release brings a lot stronger enforcement of our documented APIs. If an
+extension doesn't use the APIs properly, it may no longer work. The advantage
+of this change is that Mopidy is now more robust against errors in extensions,
+and also provides vastly better error messages when extensions misbehave. This
+should make it easier to create quality extensions.
+
+The major features of Mopidy 1.1 are:
+
+- Validation of the arguments to all core API methods, as well as all responses
+  from backends and all data model attributes.
+
+- New bundled backend, Mopidy-File. It is similar to Mopidy-Local, but allows
+  you to browse and play music from local disk without running a scan to index
+  the music first. The drawback is that it doesn't support searching.
+
+- The Mopidy-MPD server should now be up to date with the 0.19 version of the
+  MPD protocol.
+
+Dependencies
+------------
+
+- Mopidy now requires Requests.
+
+- Heads up: Porting from GStreamer 0.10 to 1.x and support for running Mopidy
+  with Python 3.4+ is not far off on our roadmap.
 
 Core API
 --------
 
-- Calling the following methods with ``kwargs`` is being deprecated.
-  (PR: :issue:`1090`)
+- **Deprecated:** Calling the following methods with ``kwargs`` is being
+  deprecated. (PR: :issue:`1090`)
 
-  - :meth:`mopidy.core.library.LibraryController.search`
-  - :meth:`mopidy.core.library.PlaylistsController.filter`
-  - :meth:`mopidy.core.library.TracklistController.filter`
-  - :meth:`mopidy.core.library.TracklistController.remove`
+  - :meth:`mopidy.core.LibraryController.search`
+  - :meth:`mopidy.core.PlaylistsController.filter`
+  - :meth:`mopidy.core.TracklistController.filter`
+  - :meth:`mopidy.core.TracklistController.remove`
 
 - Updated core controllers to handle backend exceptions in all calls that rely
   on multiple backends. (Issue: :issue:`667`)
@@ -25,16 +160,18 @@ Core API
 
 - Add ``tlid`` alternatives to methods that take ``tl_track`` and also add
   ``get_{eot,next,previous}_tlid`` methods as light weight alternatives to the
-  ``tl_track`` versions of the calls. (Fixes: :issue:`1131` PR: :issue:`1136`,
+  ``tl_track`` versions of the calls. (Fixes: :issue:`1131`, PR: :issue:`1136`,
   :issue:`1140`)
 
-- Add :meth:`mopidy.core.playback.PlaybackController.get_current_tlid`.
+- Add :meth:`mopidy.core.PlaybackController.get_current_tlid`.
   (Part of: :issue:`1137`)
 
 - Update core to handle backend crashes and bad data. (Fixes: :issue:`1161`)
 
-- Add `max_tracklist_length` config and limitation. (Fixes: :issue:`997`
-  PR: :issue:`1225`)
+- Add :confval:`core/max_tracklist_length` config and limitation. (Fixes:
+  :issue:`997` PR: :issue:`1225`)
+
+- Added ``playlist_deleted`` event. (Fixes: :issue:`996`)
 
 Models
 ------
@@ -43,9 +180,85 @@ Models
   serialization. (Fixes: :issue:`865`)
 
 - Memory usage for models has been greatly improved. We now have a lower
-  overhead per instance by using slots, intern identifiers and automatically
+  overhead per instance by using slots, interned identifiers and automatically
   reuse instances. For the test data set this was developed against, a library
-  of ~14000 tracks, went from needing ~75MB to ~17MB. (Fixes: :issue:`348`)
+  of ~14.000 tracks, went from needing ~75MB to ~17MB. (Fixes: :issue:`348`)
+
+- Added :attr:`mopidy.models.Artist.sortname` field that is mapped to
+  ``musicbrainz-sortname`` tag. (Fixes: :issue:`940`)
+
+Configuration
+-------------
+
+- Add new configurations to set base directories to be used by Mopidy and
+  Mopidy extensions: :confval:`core/cache_dir`, :confval:`core/config_dir`, and
+  :confval:`core/data_dir`. (Fixes: :issue:`843`, PR: :issue:`1232`)
+
+Extension support
+-----------------
+
+- Add new methods to :class:`~mopidy.ext.Extension` class for getting cache,
+  config and data directories specific to your extension:
+
+  - :meth:`mopidy.ext.Extension.get_cache_dir`
+  - :meth:`mopidy.ext.Extension.get_config_dir`
+  - :meth:`mopidy.ext.Extension.get_data_dir`
+
+  Extensions should use these methods so that the correct directories are used
+  both when Mopidy is run by a regular user and when run as a system service.
+  (Fixes: :issue:`843`, PR: :issue:`1232`)
+
+- Add :func:`mopidy.httpclient.format_proxy` and
+  :func:`mopidy.httpclient.format_user_agent`. (Part of: :issue:`1156`)
+
+- It is now possible to import :mod:`mopidy.backends` without having GObject or
+  GStreamer installed. In other words, a lot of backend extensions should now
+  be able to run tests in a virtualenv with global site-packages disabled. This
+  removes a lot of potential error sources. (Fixes: :issue:`1068`, PR:
+  :issue:`1115`)
+
+Local backend
+-------------
+
+- Filter out :class:`None` from
+  :meth:`~mopidy.backend.LibraryProvider.get_distinct` results. All returned
+  results should be strings. (Fixes: :issue:`1202`)
+
+Stream backend
+--------------
+
+- Move stream playlist parsing from GStreamer to the stream backend. (Fixes:
+  :issue:`671`)
+
+File backend
+------------
+
+The :ref:`Mopidy-File <ext-file>` backend is a new bundled backend. It is
+similar to Mopidy-Local since it works with local files, but it differs in a
+few key ways:
+
+- Mopidy-File lets you browse your media files by their file hierarchy.
+
+- It supports multiple media directories, all exposed under the "Files"
+  directory when you browse your library with e.g. an MPD client.
+
+- There is no index of the media files, like the JSON or SQLite files used by
+  Mopidy-Local. Thus no need to scan the music collection before starting
+  Mopidy. Everything is read from the file system when needed and changes to
+  the file system is thus immediately visible in Mopidy clients.
+
+- Because there is no index, there is no support for search.
+
+Our long term plan is to keep this very simple file backend in Mopidy, as it
+has a well defined and limited scope, while splitting the more feature rich
+Mopidy-Local extension out to an independent project. (Fixes: :issue:`1004`,
+PR: :issue:`1207`)
+
+M3U backend
+-----------
+
+- Support loading UTF-8 encoded M3U files with the ``.m3u8`` file extension.
+  (PR: :issue:`1193`)
 
 MPD frontend
 ------------
@@ -80,54 +293,27 @@ MPD frontend
 - Track data now include the ``Last-Modified`` field if set on the track model.
   (Fixes: :issue:`1218`, PR: :issue:`1219`)
 
-Local backend
--------------
+- Implement ``tagtypes`` MPD command. (PR: :issue:`1235`)
 
-- Filter out :class:`None` from
-  :meth:`~mopidy.backend.LibraryProvider.get_distinct` results. All returned
-  results should be strings. (Fixes: :issue:`1202`)
+- Exclude empty tags fields from metadata output. (Fixes: :issue:`1045`, PR:
+  :issue:`1235`)
 
-File backend
-------------
+- Implement protocol extensions to output Album URIs and Album Images when
+  outputting track data to clients. (PR: :issue:`1230`)
 
-The :ref:`Mopidy-File <ext-file>` backend is a new bundled backend. It is
-similar to Mopidy-Local since it works with local files, but it differs in a
-few key ways:
-
-- Mopidy-File lets you browse your media files by their file hierarchy.
-
-- It supports multiple media directories, all exposed under the "Files"
-  directory when you browse your library with e.g. an MPD client.
-
-- There is no index of the media files, like the JSON or SQLite files used by
-  Mopidy-Local. Thus no need to scan the music collection before starting
-  Mopidy. Everything is read from the file system when needed and changes to
-  the file system is thus immediately visible in Mopidy clients.
-
-- Because there is no index, there is no support for search.
-
-Our long term plan is to keep this very simple file backend in Mopidy, as it
-has a well defined and limited scope, while splitting the more feature rich
-Mopidy-Local extension out to an independent project. (Fixes: :issue:`1004`,
-PR: :issue:`1207`)
-
-Utils
------
-
-- Add :func:`mopidy.httpclient.format_proxy` and
-  :func:`mopidy.httpclient.format_user_agent`. (Part of: :issue:`1156`)
+- The MPD commands ``lsinfo`` and ``listplaylists`` are now implemented using
+  the :meth:`~mopidy.core.PlaylistsController.as_list` method, which retrieves
+  a lot less data and is thus much faster than the deprecated
+  :meth:`~mopidy.core.PlaylistsController.get_playlists`. The drawback is that
+  the ``Last-Modified`` timestamp is not available through this method, and the
+  timestamps in the MPD command responses are now always set to the current
+  time.
 
 Internal changes
 ----------------
 
 - Tests have been cleaned up to stop using deprecated APIs where feasible.
   (Partial fix: :issue:`1083`, PR: :issue:`1090`)
-
-- It is now possible to import :mod:`mopidy.backends` without having GObject or
-  GStreamer installed. In other words, a lot of backend extensions should now
-  be able to run tests in a virtualenv with global site-packages disabled. This
-  removes a lot of potential error sources. (Fixes: :issue:`1068`, PR:
-  :issue:`1115`)
 
 
 v1.0.8 (2015-07-22)

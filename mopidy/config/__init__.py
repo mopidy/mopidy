@@ -16,6 +16,9 @@ from mopidy.internal import path, versioning
 logger = logging.getLogger(__name__)
 
 _core_schema = ConfigSchema('core')
+_core_schema['cache_dir'] = Path()
+_core_schema['config_dir'] = Path()
+_core_schema['data_dir'] = Path()
 # MPD supports at most 10k tracks, some clients segfault when this is exceeded.
 _core_schema['max_tracklist_length'] = Integer(minimum=1, maximum=10000)
 
@@ -87,20 +90,23 @@ def format(config, ext_schemas, comments=None, display=True):
     return _format(config, comments or {}, schemas, display, False)
 
 
-def format_initial(extensions):
+def format_initial(extensions_data):
     config_dir = os.path.dirname(__file__)
     defaults = [read(os.path.join(config_dir, 'default.conf'))]
-    defaults.extend(e.get_default_config() for e in extensions)
+    defaults.extend(d.extension.get_default_config() for d in extensions_data)
     raw_config = _load([], defaults, [])
 
     schemas = _schemas[:]
-    schemas.extend(e.get_config_schema() for e in extensions)
+    schemas.extend(d.extension.get_config_schema() for d in extensions_data)
 
     config, errors = _validate(raw_config, schemas)
 
     versions = ['Mopidy %s' % versioning.get_version()]
-    for extension in sorted(extensions, key=lambda ext: ext.dist_name):
-        versions.append('%s %s' % (extension.dist_name, extension.version))
+    extensions_data = sorted(
+        extensions_data, key=lambda d: d.extension.dist_name)
+    for data in extensions_data:
+        versions.append('%s %s' % (
+            data.extension.dist_name, data.extension.version))
 
     header = _INITIAL_HELP.strip() % {'versions': '\n#   '.join(versions)}
     formatted_config = _format(

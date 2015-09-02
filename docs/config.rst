@@ -57,6 +57,60 @@ Core configuration values
 
 Mopidy's core has the following configuration values that you can change.
 
+
+Core configuration
+------------------
+
+.. confval:: core/cache_dir
+
+    Path to base directory for storing cached data.
+
+    Mopidy and extensions will use this path to cache data that can safely be
+    thrown away.
+
+    If your system is running from an SD card, it can help avoid wear and
+    corruption of your SD card by pointing this config to another location. If
+    you have enough RAM, a tmpfs might be a good choice.
+
+    When running Mopidy as a regular user, this should usually be
+    ``$XDG_CACHE_DIR/mopidy``, i.e. :file:`~/.cache/mopidy`.
+
+    When running Mopidy as a system service, this should usually be
+    :file:`/var/cache/mopidy`.
+
+.. confval:: core/config_dir
+
+    Path to base directory for config files.
+
+    When running Mopidy as a regular user, this should usually be
+    ``$XDG_CONFIG_DIR/mopidy``, i.e. :file:`~/.config/mopidy`.
+
+    When running Mopidy as a system service, this should usually be
+    :file:`/etc/mopidy`.
+
+.. confval:: core/data_dir
+
+    Path to base directory for persistent data files.
+
+    Mopidy and extensions will use this path to store data that cannot be
+    be thrown away and reproduced without some effort. Examples include
+    Mopidy-Local's index of your media library and Mopidy-M3U's stored
+    playlists.
+
+    When running Mopidy as a regular user, this should usually be
+    ``$XDG_DATA_DIR/mopidy``, i.e. :file:`~/.local/share/mopidy`.
+
+    When running Mopidy as a system service, this should usually be
+    :file:`/var/lib/mopidy`.
+
+.. confval:: core/max_tracklist_length
+
+    Max length of the tracklist. Defaults to 10000.
+
+    The original MPD server only supports 10000 tracks in the tracklist. Some
+    MPD clients will crash if this limit is exceeded.
+
+
 Audio configuration
 -------------------
 

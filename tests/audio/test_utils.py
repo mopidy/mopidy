@@ -31,11 +31,13 @@ class TagsToTrackTest(unittest.TestCase):
             'musicbrainz-trackid': ['trackid'],
             'musicbrainz-albumid': ['albumid'],
             'musicbrainz-artistid': ['artistid'],
+            'musicbrainz-sortname': ['sortname'],
             'musicbrainz-albumartistid': ['albumartistid'],
             'bitrate': [1000],
         }
 
-        artist = Artist(name='artist', musicbrainz_id='artistid')
+        artist = Artist(name='artist', musicbrainz_id='artistid',
+                        sortname='sortname')
         composer = Artist(name='composer')
         performer = Artist(name='performer')
         albumartist = Artist(name='albumartist',
@@ -245,3 +247,15 @@ class TagsToTrackTest(unittest.TestCase):
         del self.tags['comment']
         self.tags['copyright'] = ['copyright1', 'copyright2']
         self.check(self.track.replace(comment='copyright1; copyright2'))
+
+    def test_sortname(self):
+        self.tags['musicbrainz-sortname'] = ['another_sortname']
+        artist = Artist(name='artist', sortname='another_sortname',
+                        musicbrainz_id='artistid')
+        self.check(self.track.replace(artists=[artist]))
+
+    def test_missing_sortname(self):
+        del self.tags['musicbrainz-sortname']
+        artist = Artist(name='artist', sortname=None,
+                        musicbrainz_id='artistid')
+        self.check(self.track.replace(artists=[artist]))

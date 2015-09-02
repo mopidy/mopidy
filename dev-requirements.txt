@@ -10,9 +10,11 @@ flake8-import-order
 
 # Mock dependencies in tests
 mock
+responses
 
 # Test runners
 pytest
+pytest-capturelog
 pytest-cov
 pytest-xdist
 tox

@@ -123,6 +123,17 @@ class CoreListener(listener.Listener):
         """
         pass
 
+    def playlist_deleted(self, uri):
+        """
+        Called whenever a playlist is deleted.
+
+        *MAY* be implemented by actor.
+
+        :param uri: the URI of the deleted playlist
+        :type uri: string
+        """
+        pass
+
     def options_changed(self):
         """
         Called whenever an option is changed.

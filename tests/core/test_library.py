@@ -20,6 +20,7 @@ class BaseCoreLibraryTest(unittest.TestCase):
         self.library1.get_images.return_value.get.return_value = {}
         self.library1.root_directory.get.return_value = dummy1_root
         self.backend1.library = self.library1
+        self.backend1.has_playlists.return_value.get.return_value = False
 
         dummy2_root = Ref.directory(uri='dummy2:directory', name='dummy2')
         self.backend2 = mock.Mock()
@@ -29,13 +30,14 @@ class BaseCoreLibraryTest(unittest.TestCase):
         self.library2.get_images.return_value.get.return_value = {}
         self.library2.root_directory.get.return_value = dummy2_root
         self.backend2.library = self.library2
+        self.backend2.has_playlists.return_value.get.return_value = False
 
         # A backend without the optional library provider
         self.backend3 = mock.Mock()
         self.backend3.uri_schemes.get.return_value = ['dummy3']
         self.backend3.actor_ref.actor_class.__name__ = 'DummyBackend3'
-        self.backend3.has_library().get.return_value = False
-        self.backend3.has_library_browse().get.return_value = False
+        self.backend3.has_library.return_value.get.return_value = False
+        self.backend3.has_library_browse.return_value.get.return_value = False
 
         self.core = core.Core(mixer=None, backends=[
             self.backend1, self.backend2, self.backend3])

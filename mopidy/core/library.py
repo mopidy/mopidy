@@ -255,7 +255,7 @@ class LibraryController(object):
         backends = {}
         uri_scheme = urlparse.urlparse(uri).scheme if uri else None
 
-        for backend_scheme, backend in self.backends.with_playlists.items():
+        for backend_scheme, backend in self.backends.with_library.items():
             backends.setdefault(backend, set()).add(backend_scheme)
 
         for backend, backend_schemes in backends.items():

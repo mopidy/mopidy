@@ -107,6 +107,8 @@ class Artist(ValidatedImmutableObject):
     :type uri: string
     :param name: artist name
     :type name: string
+    :param sortname: artist name for sorting
+    :type sortname: string
     :param musicbrainz_id: MusicBrainz ID
     :type musicbrainz_id: string
     """
@@ -116,6 +118,9 @@ class Artist(ValidatedImmutableObject):
 
     #: The artist name. Read-only.
     name = fields.String()
+
+    #: Artist name for better sorting, e.g. with articles stripped
+    sortname = fields.String()
 
     #: The MusicBrainz ID of the artist. Read-only.
     musicbrainz_id = fields.Identifier()

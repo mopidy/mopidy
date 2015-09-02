@@ -75,29 +75,29 @@ def listplaylists(context):
     - ncmpcpp 0.5.10 segfaults if we return 'playlist: ' on a line, so we must
       ignore playlists without names, which isn't very useful anyway.
     """
+    last_modified = _get_last_modified()
     result = []
-    for playlist in context.core.playlists.get_playlists().get():
-        if not playlist.name:
+    for playlist_ref in context.core.playlists.as_list().get():
+        if not playlist_ref.name:
             continue
-        name = context.lookup_playlist_name_from_uri(playlist.uri)
+        name = context.lookup_playlist_name_from_uri(playlist_ref.uri)
         result.append(('playlist', name))
-        result.append(('Last-Modified', _get_last_modified(playlist)))
+        result.append(('Last-Modified', last_modified))
     return result
 
 
 # TODO: move to translators?
-def _get_last_modified(playlist):
+def _get_last_modified(last_modified=None):
     """Formats last modified timestamp of a playlist for MPD.
 
     Time in UTC with second precision, formatted in the ISO 8601 format, with
     the "Z" time zone marker for UTC. For example, "1970-01-01T00:00:00Z".
     """
-    if playlist.last_modified is None:
+    if last_modified is None:
         # If unknown, assume the playlist is modified
         dt = datetime.datetime.utcnow()
     else:
-        dt = datetime.datetime.utcfromtimestamp(
-            playlist.last_modified / 1000.0)
+        dt = datetime.datetime.utcfromtimestamp(last_modified / 1000.0)
     dt = dt.replace(microsecond=0)
     return '%sZ' % dt.isoformat()
 

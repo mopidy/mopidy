@@ -1,5 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
+import os
+
 import mock
 
 import pkg_resources
@@ -11,7 +13,7 @@ from mopidy import config, exceptions, ext
 from tests import IsA, any_unicode
 
 
-class TestExtension(ext.Extension):
+class DummyExtension(ext.Extension):
     dist_name = 'Mopidy-Foobar'
     ext_name = 'foobar'
     version = '1.2.3'
@@ -20,10 +22,10 @@ class TestExtension(ext.Extension):
         return '[foobar]\nenabled = true'
 
 
-any_testextension = IsA(TestExtension)
+any_testextension = IsA(DummyExtension)
 
 
-class ExtensionTest(object):
+class TestExtension(object):
 
     @pytest.fixture
     def extension(self):
@@ -53,8 +55,23 @@ class ExtensionTest(object):
         with pytest.raises(NotImplementedError):
             extension.setup(None)
 
+    def test_get_cache_dir_raises_assertion_error(self, extension):
+        config = {'core': {'cache_dir': '/tmp'}}
+        with pytest.raises(AssertionError):  # ext_name not set
+            extension.get_cache_dir(config)
 
-class LoadExtensionsTest(object):
+    def test_get_config_dir_raises_assertion_error(self, extension):
+        config = {'core': {'config_dir': '/tmp'}}
+        with pytest.raises(AssertionError):  # ext_name not set
+            extension.get_config_dir(config)
+
+    def test_get_data_dir_raises_assertion_error(self, extension):
+        config = {'core': {'data_dir': '/tmp'}}
+        with pytest.raises(AssertionError):  # ext_name not set
+            extension.get_data_dir(config)
+
+
+class TestLoadExtensions(object):
 
     @pytest.yield_fixture
     def iter_entry_points_mock(self, request):
@@ -70,7 +87,7 @@ class LoadExtensionsTest(object):
 
     def test_load_extensions(self, iter_entry_points_mock):
         mock_entry_point = mock.Mock()
-        mock_entry_point.load.return_value = TestExtension
+        mock_entry_point.load.return_value = DummyExtension
 
         iter_entry_points_mock.return_value = [mock_entry_point]
 
@@ -94,7 +111,7 @@ class LoadExtensionsTest(object):
 
     def test_gets_instance(self, iter_entry_points_mock):
         mock_entry_point = mock.Mock()
-        mock_entry_point.load.return_value = TestExtension()
+        mock_entry_point.load.return_value = DummyExtension()
 
         iter_entry_points_mock.return_value = [mock_entry_point]
 
@@ -113,11 +130,11 @@ class LoadExtensionsTest(object):
 
     def test_get_config_schema_fails(self, iter_entry_points_mock):
         mock_entry_point = mock.Mock()
-        mock_entry_point.load.return_value = TestExtension
+        mock_entry_point.load.return_value = DummyExtension
 
         iter_entry_points_mock.return_value = [mock_entry_point]
 
-        with mock.patch.object(TestExtension, 'get_config_schema') as get:
+        with mock.patch.object(DummyExtension, 'get_config_schema') as get:
             get.side_effect = Exception
 
             assert ext.load_extensions() == []
@@ -125,11 +142,11 @@ class LoadExtensionsTest(object):
 
     def test_get_default_config_fails(self, iter_entry_points_mock):
         mock_entry_point = mock.Mock()
-        mock_entry_point.load.return_value = TestExtension
+        mock_entry_point.load.return_value = DummyExtension
 
         iter_entry_points_mock.return_value = [mock_entry_point]
 
-        with mock.patch.object(TestExtension, 'get_default_config') as get:
+        with mock.patch.object(DummyExtension, 'get_default_config') as get:
             get.side_effect = Exception
 
             assert ext.load_extensions() == []
@@ -137,22 +154,22 @@ class LoadExtensionsTest(object):
 
     def test_get_command_fails(self, iter_entry_points_mock):
         mock_entry_point = mock.Mock()
-        mock_entry_point.load.return_value = TestExtension
+        mock_entry_point.load.return_value = DummyExtension
 
         iter_entry_points_mock.return_value = [mock_entry_point]
 
-        with mock.patch.object(TestExtension, 'get_command') as get:
+        with mock.patch.object(DummyExtension, 'get_command') as get:
             get.side_effect = Exception
 
             assert ext.load_extensions() == []
             get.assert_called_once_with()
 
 
-class ValidateExtensionDataTest(object):
+class TestValidateExtensionData(object):
 
     @pytest.fixture
     def ext_data(self):
-        extension = TestExtension()
+        extension = DummyExtension()
 
         entry_point = mock.Mock()
         entry_point.name = extension.ext_name
@@ -221,3 +238,36 @@ class ValidateExtensionDataTest(object):
     def test_no_default_config(self, ext_data):
         ext_data = ext_data._replace(config_defaults=None)
         assert not ext.validate_extension_data(ext_data)
+
+    def test_get_cache_dir(self, ext_data):
+        core_cache_dir = '/tmp'
+        config = {'core': {'cache_dir': core_cache_dir}}
+        extension = ext_data.extension
+
+        with mock.patch.object(ext.path, 'get_or_create_dir'):
+            cache_dir = extension.get_cache_dir(config)
+
+        expected = os.path.join(core_cache_dir, extension.ext_name)
+        assert cache_dir == expected
+
+    def test_get_config_dir(self, ext_data):
+        core_config_dir = '/tmp'
+        config = {'core': {'config_dir': core_config_dir}}
+        extension = ext_data.extension
+
+        with mock.patch.object(ext.path, 'get_or_create_dir'):
+            config_dir = extension.get_config_dir(config)
+
+        expected = os.path.join(core_config_dir, extension.ext_name)
+        assert config_dir == expected
+
+    def test_get_data_dir(self, ext_data):
+        core_data_dir = '/tmp'
+        config = {'core': {'data_dir': core_data_dir}}
+        extension = ext_data.extension
+
+        with mock.patch.object(ext.path, 'get_or_create_dir'):
+            data_dir = extension.get_data_dir(config)
+
+        expected = os.path.join(core_data_dir, extension.ext_name)
+        assert data_dir == expected

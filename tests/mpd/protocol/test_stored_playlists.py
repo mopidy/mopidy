@@ -1,6 +1,9 @@
 from __future__ import absolute_import, unicode_literals
 
+import mock
+
 from mopidy.models import Playlist, Track
+from mopidy.mpd.protocol import stored_playlists
 
 from tests.mpd import protocol
 
@@ -45,7 +48,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
         self.send_request('listplaylistinfo "name"')
         self.assertInResponse('file: dummy:a')
-        self.assertInResponse('Track: 0')
+        self.assertNotInResponse('Track: 0')
         self.assertNotInResponse('Pos: 0')
         self.assertInResponse('OK')
 
@@ -56,7 +59,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
         self.send_request('listplaylistinfo name')
         self.assertInResponse('file: dummy:a')
-        self.assertInResponse('Track: 0')
+        self.assertNotInResponse('Track: 0')
         self.assertNotInResponse('Pos: 0')
         self.assertInResponse('OK')
 
@@ -72,19 +75,20 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
         self.send_request('listplaylistinfo "a [2]"')
         self.assertInResponse('file: c')
-        self.assertInResponse('Track: 0')
+        self.assertNotInResponse('Track: 0')
         self.assertNotInResponse('Pos: 0')
         self.assertInResponse('OK')
 
-    def test_listplaylists(self):
-        last_modified = 1390942873222
+    @mock.patch.object(stored_playlists, '_get_last_modified')
+    def test_listplaylists(self, last_modified_mock):
+        last_modified_mock.return_value = '2015-08-05T22:51:06Z'
         self.backend.playlists.set_dummy_playlists([
-            Playlist(name='a', uri='dummy:a', last_modified=last_modified)])
+            Playlist(name='a', uri='dummy:a')])
 
         self.send_request('listplaylists')
         self.assertInResponse('playlist: a')
         # Date without milliseconds and with time zone information
-        self.assertInResponse('Last-Modified: 2014-01-28T21:01:13Z')
+        self.assertInResponse('Last-Modified: 2015-08-05T22:51:06Z')
         self.assertInResponse('OK')
 
     def test_listplaylists_duplicate(self):

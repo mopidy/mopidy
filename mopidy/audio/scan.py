@@ -12,8 +12,6 @@ from mopidy import exceptions
 from mopidy.audio import utils
 from mopidy.internal import encoding
 
-_missing_plugin_desc = gst.pbutils.missing_plugin_message_get_description
-
 _Result = collections.namedtuple(
     'Result', ('uri', 'tags', 'duration', 'seekable', 'mime', 'playable'))
 
@@ -134,12 +132,12 @@ def _process(pipeline, timeout_ms):
     clock = pipeline.get_clock()
     bus = pipeline.get_bus()
     timeout = timeout_ms * gst.MSECOND
-    tags, mime, have_audio, missing_description = {}, None, False, None
+    tags, mime, have_audio, missing_message = {}, None, False, None
 
     types = (gst.MESSAGE_ELEMENT | gst.MESSAGE_APPLICATION | gst.MESSAGE_ERROR
              | gst.MESSAGE_EOS | gst.MESSAGE_ASYNC_DONE | gst.MESSAGE_TAG)
 
-    start = clock.get_time()
+    previous = clock.get_time()
     while timeout > 0:
         message = bus.timed_pop_filtered(timeout, types)
 
@@ -147,8 +145,7 @@ def _process(pipeline, timeout_ms):
             break
         elif message.type == gst.MESSAGE_ELEMENT:
             if gst.pbutils.is_missing_plugin_message(message):
-                missing_description = encoding.locale_decode(
-                    _missing_plugin_desc(message))
+                missing_message = message
         elif message.type == gst.MESSAGE_APPLICATION:
             if message.structure.get_name() == 'have-type':
                 mime = message.structure['caps'].get_name()
@@ -158,8 +155,10 @@ def _process(pipeline, timeout_ms):
                 have_audio = True
         elif message.type == gst.MESSAGE_ERROR:
             error = encoding.locale_decode(message.parse_error()[0])
-            if missing_description:
-                error = '%s (%s)' % (missing_description, error)
+            if missing_message and not mime:
+                caps = missing_message.structure['detail']
+                mime = caps.get_structure(0).get_name()
+                return tags, mime, have_audio
             raise exceptions.ScannerError(error)
         elif message.type == gst.MESSAGE_EOS:
             return tags, mime, have_audio
@@ -171,7 +170,9 @@ def _process(pipeline, timeout_ms):
             # Note that this will only keep the last tag.
             tags.update(utils.convert_taglist(taglist))
 
-        timeout -= clock.get_time() - start
+        now = clock.get_time()
+        timeout -= now - previous
+        previous = now
 
     raise exceptions.ScannerError('Timeout after %dms' % timeout_ms)
 

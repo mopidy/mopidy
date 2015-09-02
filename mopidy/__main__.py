@@ -75,14 +75,14 @@ def main():
 
         args = root_cmd.parse(mopidy_args)
 
-        create_file_structures_and_config(args, extensions_data)
-        check_old_locations()
-
         config, config_errors = config_lib.load(
             args.config_files,
             [d.config_schema for d in extensions_data],
             [d.config_defaults for d in extensions_data],
             args.config_overrides)
+
+        create_core_dirs(config)
+        create_initial_config_file(args, extensions_data)
 
         verbosity_level = args.base_verbosity_level
         if args.verbosity_level:
@@ -166,39 +166,28 @@ def main():
         raise
 
 
-def create_file_structures_and_config(args, extensions):
-    path.get_or_create_dir(b'$XDG_DATA_DIR/mopidy')
-    path.get_or_create_dir(b'$XDG_CONFIG_DIR/mopidy')
+def create_core_dirs(config):
+    path.get_or_create_dir(config['core']['cache_dir'])
+    path.get_or_create_dir(config['core']['config_dir'])
+    path.get_or_create_dir(config['core']['data_dir'])
 
-    # Initialize whatever the last config file is with defaults
+
+def create_initial_config_file(args, extensions_data):
+    """Initialize whatever the last config file is with defaults"""
+
     config_file = args.config_files[-1]
+
     if os.path.exists(path.expand_path(config_file)):
         return
 
     try:
-        default = config_lib.format_initial(extensions)
+        default = config_lib.format_initial(extensions_data)
         path.get_or_create_file(config_file, mkdir=False, content=default)
         logger.info('Initialized %s with default config', config_file)
     except IOError as error:
         logger.warning(
             'Unable to initialize %s with default config: %s',
             config_file, encoding.locale_decode(error))
-
-
-def check_old_locations():
-    dot_mopidy_dir = path.expand_path(b'~/.mopidy')
-    if os.path.isdir(dot_mopidy_dir):
-        logger.warning(
-            'Old Mopidy dot dir found at %s. Please migrate your config to '
-            'the ini-file based config format. See release notes for further '
-            'instructions.', dot_mopidy_dir)
-
-    old_settings_file = path.expand_path(b'$XDG_CONFIG_DIR/mopidy/settings.py')
-    if os.path.isfile(old_settings_file):
-        logger.warning(
-            'Old Mopidy settings file found at %s. Please migrate your '
-            'config to the ini-file based config format. See release notes '
-            'for further instructions.', old_settings_file)
 
 
 def log_extension_info(all_extensions, enabled_extensions):

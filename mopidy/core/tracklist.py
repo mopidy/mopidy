@@ -236,7 +236,7 @@ class TracklistController(object):
 
     def get_eot_tlid(self):
         """
-        The TLID of the track that will be played after the given track.
+        The TLID of the track that will be played after the current track.
 
         Not necessarily the same TLID as returned by :meth:`get_next_tlid`.
 
@@ -332,7 +332,7 @@ class TracklistController(object):
 
     def get_previous_tlid(self):
         """
-        Returns the TLID of the  track that will be played if calling
+        Returns the TLID of the track that will be played if calling
         :meth:`mopidy.core.PlaybackController.previous()`.
 
         For normal playback this is the previous track in the tracklist. If
@@ -554,7 +554,7 @@ class TracklistController(object):
         :rtype: list of :class:`mopidy.models.TlTrack` that was removed
 
         .. deprecated:: 1.1
-            Providing the criteria  via ``kwargs`` is no longer supported.
+            Providing the criteria  via ``kwargs``.
         """
         if kwargs:
             deprecation.warn('core.tracklist.remove:kwargs_criteria')
