@@ -256,9 +256,9 @@ class _Handler(object):
                 self.on_missing_plugin(msg)
 
     def on_event(self, pad, event):
-        if event.type == Gst.EVENT_NEWSEGMENT:
+        if event.type == Gst.EventType.SEGMENT:
             self.on_new_segment(*event.parse_new_segment())
-        elif event.type == Gst.EVENT_SINK_MESSAGE:
+        elif event.type == Gst.EventType.SINK_MESSAGE:
             # Handle stream changed messages when they reach our output bin.
             # If we listen for it on the bus we get one per tee branch.
             msg = event.parse_sink_message()
