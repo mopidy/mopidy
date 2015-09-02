@@ -116,9 +116,11 @@ class _Appsrc(object):
 
         if buffer_ is None:
             gst_logger.debug('Sending appsrc end-of-stream event.')
-            return self._source.emit('end-of-stream') == Gst.FLOW_OK
+            result = self._source.emit('end-of-stream')
+            return result == Gst.FlowReturn.OK
         else:
-            return self._source.emit('push-buffer', buffer_) == Gst.FLOW_OK
+            result = self._source.emit('push-buffer', buffer_)
+            return result == Gst.FlowReturn.OK
 
     def _on_signal(self, element, clocktime, func):
         # This shim is used to ensure we always return true, and also handles
