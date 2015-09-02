@@ -690,7 +690,7 @@ class Audio(pykka.ThreadingActor):
         """
         def sync_handler(bus, message):
             self._handler.on_message(bus, message)
-            return Gst.BUS_DROP
+            return Gst.BusSyncReply.DROP
 
         bus = self._playbin.get_bus()
         bus.set_sync_handler(sync_handler)
