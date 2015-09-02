@@ -8,7 +8,7 @@ import gi
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst
 
-from mopidy import compat, httpclient
+from mopidy import httpclient
 from mopidy.models import Album, Artist, Track
 
 logger = logging.getLogger(__name__)
@@ -24,12 +24,11 @@ def create_buffer(data, capabilites=None, timestamp=None, duration=None):
     """Create a new GStreamer buffer based on provided data.
 
     Mainly intended to keep gst imports out of non-audio modules.
+
+    .. versionchanged:: 1.2
+        ``capabilites`` argument is no longer in use
     """
-    buffer_ = Gst.Buffer(data)
-    if capabilites:
-        if isinstance(capabilites, compat.string_types):
-            capabilites = Gst.caps_from_string(capabilites)
-        buffer_.set_caps(capabilites)
+    buffer_ = Gst.Buffer.new_wrapped(data)
     if timestamp:
         buffer_.pts = timestamp
     if duration:
