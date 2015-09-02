@@ -743,7 +743,7 @@ class Audio(pykka.ThreadingActor):
         :param track: the current track
         :type track: :class:`mopidy.models.Track`
         """
-        taglist = Gst.TagList()
+        taglist = Gst.TagList.new_empty()
         artists = [a for a in (track.artists or []) if a.name]
 
         # Default to blank data to trick shoutcast into clearing any previous
