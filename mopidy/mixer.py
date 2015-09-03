@@ -130,7 +130,7 @@ class MixerListener(listener.Listener):
     @staticmethod
     def send(event, **kwargs):
         """Helper to allow calling of mixer listener events"""
-        listener.send_async(MixerListener, event, **kwargs)
+        listener.send(MixerListener, event, **kwargs)
 
     def volume_changed(self, volume):
         """
