@@ -14,7 +14,7 @@ import gst  # noqa
 
 import pykka
 
-from mopidy import audio, listener
+from mopidy import audio
 from mopidy.audio.constants import PlaybackState
 from mopidy.internal import path
 
@@ -162,12 +162,8 @@ class AudioEventTest(BaseTest):
         self.audio.enable_sync_handler().get()
         self.listener = DummyAudioListener.start().proxy()
 
-        self.original_send_async = listener.send_async
-        listener.send_async = listener.send
-
     def tearDown(self):  # noqa: N802
         super(AudioEventTest, self).setUp()
-        listener.send_async = self.original_send_async
 
     def assertEvent(self, event, **kwargs):  # noqa: N802
         self.assertIn((event, kwargs), self.listener.get_events().get())
