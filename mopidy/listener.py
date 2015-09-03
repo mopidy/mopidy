@@ -7,16 +7,6 @@ import pykka
 logger = logging.getLogger(__name__)
 
 
-def send_async(cls, event, **kwargs):
-    # This file is imported by mopidy.backends, which again is imported by all
-    # backend extensions. By importing modules that are not easily installable
-    # close to their use, we make some extensions able to run their tests in a
-    # virtualenv with global site-packages disabled.
-    import gobject
-
-    gobject.idle_add(lambda: send(cls, event, **kwargs))
-
-
 def send(cls, event, **kwargs):
     listeners = pykka.ActorRegistry.get_by_class(cls)
     logger.debug('Sending %s to %s: %s', event, cls.__name__, kwargs)

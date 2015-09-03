@@ -426,7 +426,7 @@ class BackendListener(listener.Listener):
     @staticmethod
     def send(event, **kwargs):
         """Helper to allow calling of backend listener events"""
-        listener.send_async(BackendListener, event, **kwargs)
+        listener.send(BackendListener, event, **kwargs)
 
     def playlists_loaded(self):
         """

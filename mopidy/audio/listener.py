@@ -18,7 +18,7 @@ class AudioListener(listener.Listener):
     @staticmethod
     def send(event, **kwargs):
         """Helper to allow calling of audio listener events"""
-        listener.send_async(AudioListener, event, **kwargs)
+        listener.send(AudioListener, event, **kwargs)
 
     def reached_end_of_stream(self):
         """
