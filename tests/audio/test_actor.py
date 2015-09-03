@@ -261,6 +261,37 @@ class AudioEventTest(BaseTest):
         self.audio.wait_for_state_change().get()
         self.assertEvent('stream_changed', uri=self.uris[0])
 
+    def test_stream_changed_event_on_multiple_changes(self):
+        self.audio.prepare_change()
+        self.audio.set_uri(self.uris[0])
+        self.listener.clear_events()
+        self.audio.start_playback()
+
+        self.audio.wait_for_state_change().get()
+        self.assertEvent('stream_changed', uri=self.uris[0])
+
+        self.audio.prepare_change()
+        self.audio.set_uri(self.uris[1])
+        self.audio.pause_playback()
+
+        self.audio.wait_for_state_change().get()
+        self.assertEvent('stream_changed', uri=self.uris[1])
+
+    def test_stream_changed_event_on_playing_to_paused(self):
+        self.audio.prepare_change()
+        self.audio.set_uri(self.uris[0])
+        self.listener.clear_events()
+        self.audio.start_playback()
+
+        self.audio.wait_for_state_change().get()
+        self.assertEvent('stream_changed', uri=self.uris[0])
+
+        self.listener.clear_events()
+        self.audio.pause_playback()
+
+        self.audio.wait_for_state_change().get()
+        self.assertNotEvent('stream_changed', uri=self.uris[0])
+
     def test_stream_changed_event_on_paused_to_stopped(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
@@ -281,6 +312,21 @@ class AudioEventTest(BaseTest):
 
         self.audio.wait_for_state_change().get()
         self.assertEvent('position_changed', position=0)
+
+    def test_stream_changed_event_on_paused_to_playing(self):
+        self.audio.prepare_change()
+        self.audio.set_uri(self.uris[0])
+        self.listener.clear_events()
+        self.audio.pause_playback()
+
+        self.audio.wait_for_state_change().get()
+        self.assertEvent('stream_changed', uri=self.uris[0])
+
+        self.listener.clear_events()
+        self.audio.start_playback()
+
+        self.audio.wait_for_state_change().get()
+        self.assertNotEvent('stream_changed', uri=self.uris[0])
 
     def test_position_changed_on_play(self):
         self.audio.prepare_change()
@@ -346,6 +392,8 @@ class AudioEventTest(BaseTest):
 
         if not event.wait(timeout=1.0):
             self.fail('Stream changed not reached within deadline')
+
+        self.assertEvent('stream_changed', uri=self.uris[0])
 
     def test_reached_end_of_stream_event(self):
         event = self.listener.wait('reached_end_of_stream').get()
