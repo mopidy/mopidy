@@ -30,7 +30,7 @@ class M3UBackend(pykka.ThreadingActor, backend.Backend):
                     'Could not create M3U playlists dir: %s',
                     encoding.locale_decode(error))
         else:
-            self._playlists_dir = m3u.Extension().get_data_dir(config)
+            self._playlists_dir = m3u.Extension.get_data_dir(config)
 
         self.playlists = M3UPlaylistsProvider(backend=self)
         self.library = M3ULibraryProvider(backend=self)
