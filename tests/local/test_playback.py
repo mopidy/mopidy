@@ -182,8 +182,8 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     @populate_tracklist
     def test_play_when_pause_after_next(self):
         self.playback.play()
-        self.playback.next()
-        self.playback.next()
+        self.playback.next().get()
+        self.playback.next().get()
         track = self.playback.get_current_track().get()
         self.playback.pause()
         self.playback.play()
@@ -203,9 +203,10 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     @populate_tracklist
     def test_play_skips_to_next_track_on_failure(self):
         # If backend's play() returns False, it is a failure.
-        return_values = [True, False]
-        self.backend.playback.play = lambda: return_values.pop()
-        self.playback.play()
+        uri = self.backend.playback.translate_uri(self.tracks[0].uri).get()
+        self.audio.trigger_fake_playback_failure(uri)
+
+        self.playback.play().get()
         self.assert_current_track_is_not(self.tracks[0])
         self.assert_current_track_is(self.tracks[1])
 
@@ -225,15 +226,15 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     @populate_tracklist
     def test_previous(self):
         self.playback.play()
-        self.playback.next()
+        self.playback.next().get()
         self.playback.previous()
         self.assert_current_track_is(self.tracks[0])
 
     @populate_tracklist
     def test_previous_more(self):
         self.playback.play()  # At track 0
-        self.playback.next()  # At track 1
-        self.playback.next()  # At track 2
+        self.playback.next().get()  # At track 1
+        self.playback.next().get()  # At track 2
         self.playback.previous()  # At track 1
         self.assert_current_track_is(self.tracks[1])
 
@@ -280,7 +281,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         old_track = self.playback.get_current_track().get()
         old_position = self.tracklist.index().get()
 
-        self.playback.next()
+        self.playback.next().get()
 
         self.assertEqual(self.tracklist.index().get(), old_position + 1)
         self.assert_current_track_is_not(old_track)
@@ -329,11 +330,12 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     @populate_tracklist
     def test_next_skips_to_next_track_on_failure(self):
         # If backend's play() returns False, it is a failure.
-        return_values = [True, False, True]
-        self.backend.playback.play = lambda: return_values.pop()
+        uri = self.backend.playback.translate_uri(self.tracks[1].uri).get()
+        self.audio.trigger_fake_playback_failure(uri)
+
         self.playback.play()
         self.assert_current_track_is(self.tracks[0])
-        self.playback.next()
+        self.playback.next().get()
         self.assert_current_track_is_not(self.tracks[1])
         self.assert_current_track_is(self.tracks[2])
 
@@ -349,7 +351,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     @populate_tracklist
     def test_next_track_after_previous(self):
         self.playback.play()
-        self.playback.next()
+        self.playback.next().get()
         self.playback.previous()
         self.assert_next_tl_track_is(self.tl_tracks.get()[1])
 
@@ -360,7 +362,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     def test_next_track_at_end_of_playlist(self):
         self.playback.play()
         for _ in self.tl_tracks.get()[1:]:
-            self.playback.next()
+            self.playback.next().get()
         self.assert_next_tl_track_is(None)
 
     @populate_tracklist
@@ -368,7 +370,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.tracklist.repeat = True
         self.playback.play()
         for _ in self.tracks[1:]:
-            self.playback.next()
+            self.playback.next().get()
         self.assert_next_tl_track_is(self.tl_tracks.get()[0])
 
     @populate_tracklist
@@ -392,7 +394,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.tracklist.repeat = True
         self.playback.play()
         self.assert_current_track_is(self.tracks[0])
-        self.playback.next()
+        self.playback.next().get()
         self.assert_current_track_is(self.tracks[1])
 
     @populate_tracklist
@@ -403,7 +405,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.tracklist.random = True
         self.playback.play()
         self.assert_current_track_is(self.tracks[-1])
-        self.playback.next()
+        self.playback.next().get()
         self.assert_current_track_is(self.tracks[-2])
 
     @populate_tracklist
@@ -600,14 +602,14 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     @populate_tracklist
     def test_previous_track_after_next(self):
         self.playback.play()
-        self.playback.next()
+        self.playback.next().get()
         self.assert_previous_tl_track_is(self.tl_tracks.get()[0])
 
     @populate_tracklist
     def test_previous_track_after_previous(self):
         self.playback.play()  # At track 0
-        self.playback.next()  # At track 1
-        self.playback.next()  # At track 2
+        self.playback.next().get()  # At track 1
+        self.playback.next().get()  # At track 2
         self.playback.previous()  # At track 1
         self.assert_previous_tl_track_is(self.tl_tracks.get()[0])
 
@@ -642,7 +644,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     @populate_tracklist
     def test_current_track_after_next(self):
         self.playback.play()
-        self.playback.next()
+        self.playback.next().get()
         self.assert_current_track_is(self.tracks[1])
 
     @populate_tracklist
@@ -657,7 +659,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     @populate_tracklist
     def test_tracklist_position_after_next(self):
         self.playback.play()
-        self.playback.next()
+        self.playback.next().get()
         self.assert_current_track_index_is(1)
 
     @populate_tracklist
@@ -816,7 +818,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     @populate_tracklist
     def test_seek_beyond_end_of_song_jumps_to_next_song(self):
         self.playback.play()
-        self.playback.seek(self.tracks[0].length * 100)
+        self.playback.seek(self.tracks[0].length * 100).get()
         self.assert_current_track_is(self.tracks[1])
 
     @populate_tracklist
@@ -904,7 +906,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
 
         self.tracklist.random = True
         self.playback.play()
-        self.playback.next()
+        self.playback.next().get()
         current_track = self.playback.get_current_track().get()
         self.playback.previous()
         self.assert_current_track_is(current_track)
@@ -975,7 +977,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.tracklist.random = True
         self.playback.play()
         for _ in self.tracks[1:]:
-            self.playback.next()
+            self.playback.next().get()
         self.assert_next_tl_track_is(None)
 
     @populate_tracklist
@@ -992,7 +994,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.tracklist.random = True
         self.playback.play()
         for _ in self.tracks:
-            self.playback.next()
+            self.playback.next().get()
         self.assert_next_tl_track_is_not(None)
         self.assert_state_is(PlaybackState.STOPPED)
         self.playback.play()
@@ -1029,7 +1031,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
             track = self.playback.get_current_track().get()
             self.assertNotIn(track, played)
             played.append(track)
-            self.playback.next()
+            self.playback.next().get()
 
     @populate_tracklist
     @mock.patch('random.shuffle')
@@ -1043,7 +1045,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.playback.play()
         self.tracklist.random = True
         while self.playback.get_state().get() != PlaybackState.STOPPED:
-            self.playback.next()
+            self.playback.next().get()
             actual.append(self.playback.get_current_tl_track().get())
             if len(actual) > len(expected):
                 break

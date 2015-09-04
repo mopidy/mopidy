@@ -318,10 +318,11 @@ class TracklistController(object):
                 return self._shuffled[0]
             return None
 
-        if tl_track is None:
+        next_index = self.index(tl_track)
+        if next_index is None:
             next_index = 0
         else:
-            next_index = self.index(tl_track) + 1
+            next_index += 1
 
         if self.get_repeat():
             next_index %= len(self._tl_tracks)

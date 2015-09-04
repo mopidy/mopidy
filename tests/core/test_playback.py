@@ -23,6 +23,120 @@ class TestBackend(pykka.ThreadingActor, backend.Backend):
         self.playback = backend.PlaybackProvider(audio=audio, backend=self)
 
 
+class PlaybackBaseTest(unittest.TestCase):
+    config = {'core': {'max_tracklist_length': 10000}}
+    tracks = [Track(uri='dummy:a', length=1234),
+              Track(uri='dummy:b', length=1234)]
+
+    def setUp(self):  # noqa: N802
+        self.audio = dummy_audio.DummyAudio.start().proxy()
+        self.backend = TestBackend.start(
+            audio=self.audio, config=self.config).proxy()
+        self.core = core.Core(
+            audio=self.audio, backends=[self.backend], config=self.config)
+        self.playback = self.core.playback
+
+        with deprecation.ignore('core.tracklist.add:tracks_arg'):
+            self.core.tracklist.add(self.tracks)
+
+        self.events = []
+        self.patcher = mock.patch('mopidy.audio.listener.AudioListener.send')
+        self.send_mock = self.patcher.start()
+
+        def send(event, **kwargs):
+            self.events.append((event, kwargs))
+
+        self.send_mock.side_effect = send
+
+    def tearDown(self):  # noqa: N802
+        pykka.ActorRegistry.stop_all()
+        self.patcher.stop()
+
+    def replay_events(self, until=None):
+        while self.events:
+            if self.events[0][0] == until:
+                break
+            event, kwargs = self.events.pop(0)
+            self.core.on_event(event, **kwargs)
+
+    def trigger_about_to_finish(self, replay_until=None):
+        self.replay_events()
+        callback = self.audio.get_about_to_finish_callback().get()
+        callback()
+        self.replay_events(until=replay_until)
+
+
+class TestNextHandling(PlaybackBaseTest):
+
+    def test_get_current_tl_track_next(self):
+        self.core.playback.play()
+        self.replay_events()
+
+        self.core.playback.next()
+        self.replay_events()
+
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        current_tl_track = self.core.playback.get_current_tl_track()
+        self.assertEqual(current_tl_track, tl_tracks[1])
+
+    def test_get_pending_tl_track_next(self):
+        self.core.playback.play()
+        self.replay_events()
+
+        self.core.playback.next()
+
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.assertEqual(self.core.playback._pending_tl_track, tl_tracks[1])
+
+    def test_get_current_track_next(self):
+        self.core.playback.play()
+        self.replay_events()
+
+        self.core.playback.next()
+        self.replay_events()
+
+        current_track = self.core.playback.get_current_track()
+        self.assertEqual(current_track, self.tracks[1])
+
+
+class TestPlayUnknownHanlding(PlaybackBaseTest):
+
+    tracks = [Track(uri='unknown:a', length=1234),
+              Track(uri='dummy:b', length=1234)]
+
+    def test_play_skips_to_next_on_track_without_playback_backend(self):
+        self.core.playback.play()
+
+        self.replay_events()
+
+        current_track = self.core.playback.get_current_track()
+        self.assertEqual(current_track, self.tracks[1])
+
+
+class TestConsumeHandling(PlaybackBaseTest):
+
+    def test_next_in_consume_mode_removes_finished_track(self):
+        tl_track = self.core.tracklist.get_tl_tracks()[0]
+
+        self.core.playback.play(tl_track)
+        self.core.tracklist.consume = True
+        self.replay_events()
+
+        self.core.playback.next()
+        self.replay_events()
+
+        self.assertNotIn(tl_track, self.core.tracklist.get_tl_tracks())
+
+    def test_on_about_to_finish_in_consume_mode_removes_finished_track(self):
+        tl_track = self.core.tracklist.get_tl_tracks()[0]
+
+        self.core.playback.play(tl_track)
+        self.core.tracklist.consume = True
+        self.trigger_about_to_finish()
+
+        self.assertNotIn(tl_track, self.core.tracklist.get_tl_tracks())
+
+
 class TestCurrentAndPendingTlTrack(unittest.TestCase):
     config = {'core': {'max_tracklist_length': 10000}}
 
@@ -172,13 +286,6 @@ class CorePlaybackTest(unittest.TestCase):
         self.assertEqual(
             self.core.playback.get_current_tl_track(), self.tl_tracks[0])
 
-    def test_get_current_tl_track_next(self):
-        self.core.playback.play(self.tl_tracks[0])
-        self.core.playback.next()
-
-        self.assertEqual(
-            self.core.playback.get_current_tl_track(), self.tl_tracks[1])
-
     def test_get_current_tl_track_prev(self):
         self.core.playback.play(self.tl_tracks[1])
         self.core.playback.previous()
@@ -191,13 +298,6 @@ class CorePlaybackTest(unittest.TestCase):
 
         self.assertEqual(
             self.core.playback.get_current_track(), self.tracks[0])
-
-    def test_get_current_track_next(self):
-        self.core.playback.play(self.tl_tracks[0])
-        self.core.playback.next()
-
-        self.assertEqual(
-            self.core.playback.get_current_track(), self.tracks[1])
 
     def test_get_current_track_prev(self):
         self.core.playback.play(self.tl_tracks[1])
@@ -234,17 +334,6 @@ class CorePlaybackTest(unittest.TestCase):
         self.playback2.prepare_change.assert_called_once_with()
         self.playback2.change_track.assert_called_once_with(self.tracks[1])
         self.playback2.play.assert_called_once_with()
-
-    def test_play_skips_to_next_on_track_without_playback_backend(self):
-        self.core.playback.play(self.unplayable_tl_track)
-
-        self.playback1.prepare_change.assert_called_once_with()
-        self.playback1.change_track.assert_called_once_with(self.tracks[3])
-        self.playback1.play.assert_called_once_with()
-        self.assertFalse(self.playback2.play.called)
-
-        self.assertEqual(
-            self.core.playback.current_tl_track, self.tl_tracks[3])
 
     def test_play_skips_to_next_on_unplayable_track(self):
         """Checks that we handle backend.change_track failing."""
@@ -458,15 +547,6 @@ class CorePlaybackTest(unittest.TestCase):
 
         self.assertIn(tl_track, self.core.tracklist.tl_tracks)
 
-    def test_next_in_consume_mode_removes_finished_track(self):
-        tl_track = self.tl_tracks[0]
-        self.core.playback.play(tl_track)
-        self.core.tracklist.consume = True
-
-        self.core.playback.next()
-
-        self.assertNotIn(tl_track, self.core.tracklist.tl_tracks)
-
     @unittest.skip('Currently tests wrong events, and nothing generates them.')
     @mock.patch(
         'mopidy.core.playback.listener.CoreListener', spec=core.CoreListener)
@@ -543,15 +623,6 @@ class CorePlaybackTest(unittest.TestCase):
         self.core.playback._on_about_to_finish()  # TODO trigger_about_to..
 
         self.assertIn(tl_track, self.core.tracklist.tl_tracks)
-
-    def test_on_about_to_finish_in_consume_mode_removes_finished_track(self):
-        tl_track = self.tl_tracks[0]
-        self.core.playback.play(tl_track)
-        self.core.tracklist.consume = True
-
-        self.core.playback._on_about_to_finish()  # TODO trigger_about_to..
-
-        self.assertNotIn(tl_track, self.core.tracklist.tl_tracks)
 
     @unittest.skip('Currently tests wrong events, and nothing generates them.')
     @mock.patch(
