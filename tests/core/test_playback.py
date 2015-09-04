@@ -13,6 +13,7 @@ from mopidy.models import Track
 from tests import dummy_audio
 
 
+# TODO: Replace this with dummy_backend no that it uses a real playbackprovider
 # Since we rely on our DummyAudio to actually emit events we need a "real"
 # backend and not a mock so the right calls make it through to audio.
 class TestBackend(pykka.ThreadingActor, backend.Backend):
@@ -97,6 +98,76 @@ class TestNextHandling(PlaybackBaseTest):
 
         current_track = self.core.playback.get_current_track()
         self.assertEqual(current_track, self.tracks[1])
+
+
+class TestPreviousHandling(PlaybackBaseTest):
+    # TODO Test previous() more
+
+    def test_get_current_tl_track_prev(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play(tl_tracks[1])
+        self.core.playback.previous()
+        self.replay_events()
+
+        self.assertEqual(
+            self.core.playback.get_current_tl_track(), tl_tracks[0])
+
+    def test_get_current_track_prev(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play(tl_tracks[1])
+        self.core.playback.previous()
+        self.replay_events()
+
+        self.assertEqual(
+            self.core.playback.get_current_track(), self.tracks[0])
+
+    def test_previous_keeps_finished_track_in_tracklist(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play(tl_tracks[1])
+
+        self.core.playback.previous()
+        self.replay_events()
+
+        self.assertIn(tl_tracks[1], self.core.tracklist.tl_tracks)
+
+    def test_previous_keeps_finished_track_even_in_consume_mode(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play(tl_tracks[1])
+        self.core.tracklist.consume = True
+
+        self.core.playback.previous()
+        self.replay_events()
+
+        self.assertIn(tl_tracks[1], self.core.tracklist.tl_tracks)
+
+    @unittest.skip('Currently tests wrong events, and nothing generates them.')
+    @mock.patch(
+        'mopidy.core.playback.listener.CoreListener', spec=core.CoreListener)
+    def test_previous_emits_events(self, listener_mock):
+        self.core.playback.play(self.tl_tracks[1])
+        listener_mock.reset_mock()
+
+        self.core.playback.previous()
+
+        self.assertListEqual(
+            listener_mock.send.mock_calls,
+            [
+                mock.call(
+                    'playback_state_changed',
+                    old_state='playing', new_state='stopped'),
+                mock.call(
+                    'track_playback_ended',
+                    tl_track=self.tl_tracks[1], time_position=mock.ANY),
+                mock.call(
+                    'playback_state_changed',
+                    old_state='stopped', new_state='playing'),
+                mock.call(
+                    'track_playback_started', tl_track=self.tl_tracks[0]),
+            ])
 
 
 class TestPlayUnknownHanlding(PlaybackBaseTest):
@@ -286,22 +357,8 @@ class CorePlaybackTest(unittest.TestCase):
         self.assertEqual(
             self.core.playback.get_current_tl_track(), self.tl_tracks[0])
 
-    def test_get_current_tl_track_prev(self):
-        self.core.playback.play(self.tl_tracks[1])
-        self.core.playback.previous()
-
-        self.assertEqual(
-            self.core.playback.get_current_tl_track(), self.tl_tracks[0])
-
     def test_get_current_track_play(self):
         self.core.playback.play(self.tl_tracks[0])
-
-        self.assertEqual(
-            self.core.playback.get_current_track(), self.tracks[0])
-
-    def test_get_current_track_prev(self):
-        self.core.playback.play(self.tl_tracks[1])
-        self.core.playback.previous()
 
         self.assertEqual(
             self.core.playback.get_current_track(), self.tracks[0])
@@ -570,50 +627,6 @@ class CorePlaybackTest(unittest.TestCase):
                     old_state='stopped', new_state='playing'),
                 mock.call(
                     'track_playback_started', tl_track=self.tl_tracks[1]),
-            ])
-
-    # TODO Test previous() more
-
-    def test_previous_keeps_finished_track_in_tracklist(self):
-        tl_track = self.tl_tracks[1]
-        self.core.playback.play(tl_track)
-
-        self.core.playback.previous()
-
-        self.assertIn(tl_track, self.core.tracklist.tl_tracks)
-
-    def test_previous_keeps_finished_track_even_in_consume_mode(self):
-        tl_track = self.tl_tracks[1]
-        self.core.playback.play(tl_track)
-        self.core.tracklist.consume = True
-
-        self.core.playback.previous()
-
-        self.assertIn(tl_track, self.core.tracklist.tl_tracks)
-
-    @unittest.skip('Currently tests wrong events, and nothing generates them.')
-    @mock.patch(
-        'mopidy.core.playback.listener.CoreListener', spec=core.CoreListener)
-    def test_previous_emits_events(self, listener_mock):
-        self.core.playback.play(self.tl_tracks[1])
-        listener_mock.reset_mock()
-
-        self.core.playback.previous()
-
-        self.assertListEqual(
-            listener_mock.send.mock_calls,
-            [
-                mock.call(
-                    'playback_state_changed',
-                    old_state='playing', new_state='stopped'),
-                mock.call(
-                    'track_playback_ended',
-                    tl_track=self.tl_tracks[1], time_position=mock.ANY),
-                mock.call(
-                    'playback_state_changed',
-                    old_state='stopped', new_state='playing'),
-                mock.call(
-                    'track_playback_started', tl_track=self.tl_tracks[0]),
             ])
 
     def test_on_about_to_finish_keeps_finished_track_in_tracklist(self):

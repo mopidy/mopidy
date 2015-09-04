@@ -395,28 +395,19 @@ class PlaybackController(object):
         The current playback state will be kept. If it was playing, playing
         will continue. If it was paused, it will still be paused, etc.
         """
-        original_tl_track = self.get_current_tl_track()
-        prev_tl_track = self.core.tracklist.previous_track(original_tl_track)
+        state = self.get_state()
+        current = self._pending_tl_track or self._current_tl_track
 
-        backend = self._get_backend(prev_tl_track)
-        self._set_current_tl_track(prev_tl_track)
-
-        if backend:
-            backend.playback.prepare_change()
-            # TODO: check return values of change track
-            backend.playback.change_track(prev_tl_track.track)
-            if self.get_state() == PlaybackState.PLAYING:
-                result = backend.playback.play().get()
-            elif self.get_state() == PlaybackState.PAUSED:
-                result = backend.playback.pause().get()
+        while current:
+            pending = self.core.tracklist.previous_track(current)
+            if self._change(pending, state):
+                break
             else:
-                result = True
-
-            if result and self.get_state() != PlaybackState.PAUSED:
-                self._trigger_track_playback_started()
-            elif not result:
-                self.core.tracklist._mark_unplayable(prev_tl_track)
-                self.previous()
+                self.core.tracklist._mark_unplayable(pending)
+            # TODO: this could be needed to prevent a loop in rare cases
+            # if current == pending:
+            #     break
+            current = pending
 
         # TODO: no return value?
 

@@ -227,7 +227,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     def test_previous(self):
         self.playback.play()
         self.playback.next().get()
-        self.playback.previous()
+        self.playback.previous().get()
         self.assert_current_track_is(self.tracks[0])
 
     @populate_tracklist
@@ -235,7 +235,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.playback.play()  # At track 0
         self.playback.next().get()  # At track 1
         self.playback.next().get()  # At track 2
-        self.playback.previous()  # At track 1
+        self.playback.previous().get()  # At track 1
         self.assert_current_track_is(self.tracks[1])
 
     @populate_tracklist
@@ -266,11 +266,12 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     @populate_tracklist
     def test_previous_skips_to_previous_track_on_failure(self):
         # If backend's play() returns False, it is a failure.
-        return_values = [True, False, True]
-        self.backend.playback.play = lambda: return_values.pop()
+        uri = self.backend.playback.translate_uri(self.tracks[1].uri).get()
+        self.audio.trigger_fake_playback_failure(uri)
+
         self.playback.play(self.tl_tracks.get()[2])
         self.assert_current_track_is(self.tracks[2])
-        self.playback.previous()
+        self.playback.previous().get()
         self.assert_current_track_is_not(self.tracks[1])
         self.assert_current_track_is(self.tracks[0])
 
@@ -352,7 +353,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
     def test_next_track_after_previous(self):
         self.playback.play()
         self.playback.next().get()
-        self.playback.previous()
+        self.playback.previous().get()
         self.assert_next_tl_track_is(self.tl_tracks.get()[1])
 
     def test_next_track_empty_playlist(self):
@@ -610,7 +611,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
         self.playback.play()  # At track 0
         self.playback.next().get()  # At track 1
         self.playback.next().get()  # At track 2
-        self.playback.previous()  # At track 1
+        self.playback.previous().get()  # At track 1
         self.assert_previous_tl_track_is(self.tl_tracks.get()[0])
 
     def test_previous_track_empty_playlist(self):
