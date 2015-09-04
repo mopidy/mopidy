@@ -10,6 +10,8 @@ v1.1.1 (UNRELEASED)
 
 Bug fix release.
 
+- Dependencies: Specify that we need Requests >= 2.0, not just any version.
+
 - Core: Make :meth:`mopidy.core.LibraryController.refresh` work for all
   backends with a library provider. Previously, it wrongly worked for all
   backends with a playlists provider. (Fixes: :issue:`1257`)
