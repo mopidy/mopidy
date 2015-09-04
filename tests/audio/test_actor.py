@@ -59,7 +59,7 @@ class BaseTest(unittest.TestCase):
     def tearDown(self):  # noqa
         pykka.ActorRegistry.stop_all()
 
-    def possibly_trigger_fake_playback_error(self):
+    def possibly_trigger_fake_playback_error(self, uri):
         pass
 
     def possibly_trigger_fake_about_to_finish(self):
@@ -69,8 +69,8 @@ class BaseTest(unittest.TestCase):
 class DummyMixin(object):
     audio_class = dummy_audio.DummyAudio
 
-    def possibly_trigger_fake_playback_error(self):
-        self.audio.trigger_fake_playback_failure()
+    def possibly_trigger_fake_playback_error(self, uri):
+        self.audio.trigger_fake_playback_failure(uri)
 
     def possibly_trigger_fake_about_to_finish(self):
         callback = self.audio.get_about_to_finish_callback().get()
@@ -86,7 +86,7 @@ class AudioTest(BaseTest):
         self.assertTrue(self.audio.start_playback().get())
 
     def test_start_playback_non_existing_file(self):
-        self.possibly_trigger_fake_playback_error()
+        self.possibly_trigger_fake_playback_error(self.uris[0] + 'bogus')
 
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0] + 'bogus')

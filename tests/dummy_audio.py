@@ -24,9 +24,9 @@ class DummyAudio(pykka.ThreadingActor):
         self._position = 0
         self._callback = None
         self._uri = None
-        self._state_change_result = True
         self._stream_changed = False
         self._tags = {}
+        self._bad_uris = set()
 
     def set_uri(self, uri):
         assert self._uri is None, 'prepare change not called before set'
@@ -110,10 +110,10 @@ class DummyAudio(pykka.ThreadingActor):
             self._tags['audio-codec'] = [u'fake info...']
             audio.AudioListener.send('tags_changed', tags=['audio-codec'])
 
-        return self._state_change_result
+        return self._uri not in self._bad_uris
 
-    def trigger_fake_playback_failure(self):
-        self._state_change_result = False
+    def trigger_fake_playback_failure(self, uri):
+        self._bad_uris.add(uri)
 
     def trigger_fake_tags_changed(self, tags):
         self._tags.update(tags)
