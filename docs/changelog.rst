@@ -28,6 +28,12 @@ Bug fix release.
 - Core: Fix error in :meth:`~mopidy.core.TracklistController.get_eot_tlid`
   docstring. (Fixes: :issue:`1269`)
 
+- Extension support: Make :meth:`~mopidy.ext.Extension.get_cache_dir`,
+  :meth:`~mopidy.ext.Extension.get_config_dir`, and
+  :meth:`~mopidy.ext.Extension.get_data_dir` class methods, so they can be used
+  without creating an instance of the :class:`~mopidy.ext.Extension` class.
+  (Fixes: :issue:`1275`)
+
 - Local: Deprecate :confval:`local/data_dir` and respect
   :confval:`core/data_dir` instead. This does not change the defaults for
   desktop users, only system services installed from packages that properly set

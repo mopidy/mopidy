@@ -12,7 +12,7 @@ import tempfile
 import mopidy
 from mopidy import compat, local, models
 from mopidy.internal import encoding, timer
-from mopidy.local import Extension, search, storage, translator
+from mopidy.local import search, storage, translator
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +116,7 @@ class JsonLibrary(local.Library):
         self._browse_cache = None
         self._media_dir = config['local']['media_dir']
         self._json_file = os.path.join(
-            Extension().get_data_dir(config), b'library.json.gz')
+            local.Extension.get_data_dir(config), b'library.json.gz')
 
         storage.check_dirs_and_files(config)
 
