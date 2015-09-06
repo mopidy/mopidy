@@ -28,6 +28,9 @@ Bug fix release.
 - Core: Fix error in :meth:`~mopidy.core.TracklistController.get_eot_tlid`
   docstring. (Fixes: :issue:`1269`)
 
+- Audio: Add ``timeout`` parameter to :meth:`~mopidy.audio.scan.Scanner.scan`.
+  (Part of: :issue:`1250`)
+
 - Extension support: Make :meth:`~mopidy.ext.Extension.get_cache_dir`,
   :meth:`~mopidy.ext.Extension.get_config_dir`, and
   :meth:`~mopidy.ext.Extension.get_data_dir` class methods, so they can be used
