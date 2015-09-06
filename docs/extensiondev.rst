@@ -255,11 +255,6 @@ This is ``mopidy_soundspot/__init__.py``::
     import logging
     import os
 
-    import pygst
-    pygst.require('0.10')
-    import gst
-    import gobject
-
     from mopidy import config, exceptions, ext
 
 
