@@ -53,6 +53,11 @@ Bug fix release.
   services installed from packages that properly set :confval:`core/data_dir`,
   like the Debian and Arch pakages. (Fixes: :issue:`1259`, PR: :issue:`1266`)
 
+- Stream: Expand nested playlists to find the stream URI. This used to work,
+  but regressed in 1.1.0 with the extraction of stream playlist parsing from
+  GStreamer to being handled by the Mopidy-Stream backend. (Fixes:
+  :issue:`1250`)
+
 - Stream: If "file" is present in the :confval:`stream/protocols` config value
   and the :ref:`ext-file` extension is enabled, we exited with an error because
   two extensions claimed the same URI scheme. We now log a warning recommending
