@@ -29,7 +29,7 @@ Bug fix release.
   docstring. (Fixes: :issue:`1269`)
 
 - Audio: Add ``timeout`` parameter to :meth:`~mopidy.audio.scan.Scanner.scan`.
-  (Part of: :issue:`1250`)
+  (Part of: :issue:`1250`, PR: :issue:`1281`)
 
 - Extension support: Make :meth:`~mopidy.ext.Extension.get_cache_dir`,
   :meth:`~mopidy.ext.Extension.get_config_dir`, and
@@ -56,7 +56,7 @@ Bug fix release.
 - Stream: Expand nested playlists to find the stream URI. This used to work,
   but regressed in 1.1.0 with the extraction of stream playlist parsing from
   GStreamer to being handled by the Mopidy-Stream backend. (Fixes:
-  :issue:`1250`)
+  :issue:`1250`, PR: :issue:`1281`)
 
 - Stream: If "file" is present in the :confval:`stream/protocols` config value
   and the :ref:`ext-file` extension is enabled, we exited with an error because
