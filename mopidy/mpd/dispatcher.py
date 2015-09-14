@@ -271,9 +271,9 @@ class MpdContext(object):
 
         If ``lookup`` is true and the ``path`` is to a track, the returned
         ``data`` is a future which will contain the results from looking up
-        the URI with :meth:`mopidy.core.LibraryController.lookup` If ``lookup``
-        is false and the ``path`` is to a track, the returned ``data`` will be
-        a :class:`mopidy.models.Ref` for the track.
+        the URI with :meth:`mopidy.core.LibraryController.lookup`. If
+        ``lookup`` is false and the ``path`` is to a track, the returned
+        ``data`` will be a :class:`mopidy.models.Ref` for the track.
 
         For all entries that are not tracks, the returned ``data`` will be
         :class:`None`.

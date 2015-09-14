@@ -58,17 +58,17 @@ class TestExtension(object):
     def test_get_cache_dir_raises_assertion_error(self, extension):
         config = {'core': {'cache_dir': '/tmp'}}
         with pytest.raises(AssertionError):  # ext_name not set
-            extension.get_cache_dir(config)
+            ext.Extension.get_cache_dir(config)
 
     def test_get_config_dir_raises_assertion_error(self, extension):
         config = {'core': {'config_dir': '/tmp'}}
         with pytest.raises(AssertionError):  # ext_name not set
-            extension.get_config_dir(config)
+            ext.Extension.get_config_dir(config)
 
     def test_get_data_dir_raises_assertion_error(self, extension):
         config = {'core': {'data_dir': '/tmp'}}
         with pytest.raises(AssertionError):  # ext_name not set
-            extension.get_data_dir(config)
+            ext.Extension.get_data_dir(config)
 
 
 class TestLoadExtensions(object):

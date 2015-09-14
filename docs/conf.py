@@ -78,7 +78,7 @@ def setup(app):
 
 # -- General configuration ----------------------------------------------------
 
-needs_sphinx = '1.0'
+needs_sphinx = '1.3'
 
 extensions = [
     'sphinx.ext.autodoc',

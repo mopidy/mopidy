@@ -14,45 +14,34 @@ instructions should work for you as well. If you're setting up a Raspberry Pi
 from scratch, we have a guide for installing Debian/Raspbian and Mopidy. See
 :ref:`raspberrypi-installation`.
 
+The packages are built for:
+
+- Debian wheezy (oldstable), which also works for Raspbian wheezy and Ubuntu
+  12.04 LTS.
+- Debian jessie (stable), which also works for Raspbian jessie and Ubuntu 14.04
+  LTS and newer.
+
+The packages are available for multiple CPU architectures: i386, amd64, armel,
+and armhf (compatible with Raspberry Pi 1 and 2).
+
 .. note::
-
-   The packages should work with:
-
-   - Debian stable ("jessie") and testing ("stretch"),
-   - Raspbian stable ("jessie") and testing ("stretch"),
-   - Ubuntu 14.04 LTS and later.
-
-   Some of the packages *do not* work with Ubuntu 12.04 LTS or Debian 7
-   "wheezy".
 
    This is just what we currently support, not a promise to continue to
    support the same in the future. We *will* drop support for older
-   distributions when supporting those stops us from moving forward with the
-   project.
+   distributions and architectures when supporting those stops us from moving
+   forward with the project.
 
 #. Add the archive's GPG key::
 
        wget -q -O - https://apt.mopidy.com/mopidy.gpg | sudo apt-key add -
 
-#. Add the following to ``/etc/apt/sources.list``, or if you have the directory
-   ``/etc/apt/sources.list.d/``, add it to a file called ``mopidy.list`` in
-   that directory::
+#. If you run Debian wheezy or Ubuntu 12.04 LTS::
 
-       # Mopidy APT archive
-       deb http://apt.mopidy.com/ stable main contrib non-free
-       deb-src http://apt.mopidy.com/ stable main contrib non-free
+       sudo wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/wheezy.list
 
-   For the lazy, you can simply run the following command to create
-   ``/etc/apt/sources.list.d/mopidy.list``::
+   Or, if you run any newer Debian/Ubuntu distro::
 
-       sudo wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/mopidy.list
-
-   .. note::
-
-       If you're still running Debian 7 "wheezy" or Raspbian "wheezy", you
-       should edit :file:`/etc/apt/sources.list.d/mopidy.list` and replace
-       "stable" with "wheezy". This will give you the latest set of packages
-       that is compatible with Debian "wheezy".
+       sudo wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/jessie.list
 
 #. Install Mopidy and all dependencies::
 

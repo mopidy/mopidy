@@ -71,7 +71,7 @@ class FileLibraryProvider(backend.LibraryProvider):
             name = dir_entry.decode(FS_ENCODING, 'replace')
             if os.path.isdir(child_path):
                 result.append(models.Ref.directory(name=name, uri=uri))
-            elif os.path.isfile(child_path) and self._is_audio_file(uri):
+            elif os.path.isfile(child_path):
                 result.append(models.Ref.track(name=name, uri=uri))
 
         result.sort(key=operator.attrgetter('name'))
@@ -80,10 +80,6 @@ class FileLibraryProvider(backend.LibraryProvider):
     def lookup(self, uri):
         logger.debug('Looking up file URI: %s', uri)
         local_path = path.uri_to_path(uri)
-
-        if not self._is_in_basedir(local_path):
-            logger.warning('Ignoring URI outside base dir: %s', local_path)
-            return []
 
         try:
             result = self._scanner.scan(uri)
@@ -108,12 +104,15 @@ class FileLibraryProvider(backend.LibraryProvider):
                 media_dir_split[0].encode(FS_ENCODING))
 
             if not local_path:
-                logger.warning('Failed expanding path (%s) from'
-                               'file/media_dirs config value.',
-                               media_dir_split[0])
+                logger.debug(
+                    'Failed expanding path (%s) from file/media_dirs config '
+                    'value.',
+                    media_dir_split[0])
                 continue
             elif not os.path.isdir(local_path):
-                logger.warning('%s is not a directory', local_path)
+                logger.warning(
+                    '%s is not a directory. Please create the directory or '
+                    'update the file/media_dirs config value.', local_path)
                 continue
 
             media_dir['path'] = local_path
@@ -130,18 +129,6 @@ class FileLibraryProvider(backend.LibraryProvider):
             yield models.Ref.directory(
                 name=media_dir['name'],
                 uri=path.path_to_uri(media_dir['path']))
-
-    def _is_audio_file(self, uri):
-        try:
-            result = self._scanner.scan(uri)
-            if result.playable:
-                logger.debug('Playable file: %s', result.uri)
-            else:
-                logger.debug('Unplayable file: %s (not audio)', result.uri)
-            return result.playable
-        except exceptions.ScannerError as e:
-            logger.debug('Unplayable file: %s (%s)', uri, e)
-            return False
 
     def _is_in_basedir(self, local_path):
         return any(

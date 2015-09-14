@@ -4,16 +4,111 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+
+v1.1.1 (2015-09-14)
+===================
+
+Bug fix release.
+
+- Dependencies: Specify that we need Requests >= 2.0, not just any version.
+  This ensures that we fail earlier if Mopidy is used with a too old Requests.
+
+- Core: Make :meth:`mopidy.core.LibraryController.refresh` work for all
+  backends with a library provider. Previously, it wrongly worked for all
+  backends with a playlists provider. (Fixes: :issue:`1257`)
+
+- Core: Respect :confval:`core/cache_dir` and :confval:`core/data_dir` config
+  values added in 1.1.0 when creating the dirs Mopidy need to store data. This
+  should not change the behavior for desktop users running Mopidy. When running
+  Mopidy as a system service installed from a package which sets the core dir
+  configs properly (e.g. Debian and Arch packages), this fix avoids the
+  creation of a couple of directories that should not be used, typically
+  :file:`/var/lib/mopidy/.local` and :file:`/var/lib/mopidy/.cache`. (Fixes:
+  :issue:`1259`, PR: :issue:`1266`)
+
+- Core: Fix error in :meth:`~mopidy.core.TracklistController.get_eot_tlid`
+  docstring. (Fixes: :issue:`1269`)
+
+- Audio: Add ``timeout`` parameter to :meth:`~mopidy.audio.scan.Scanner.scan`.
+  (Part of: :issue:`1250`, PR: :issue:`1281`)
+
+- Extension support: Make :meth:`~mopidy.ext.Extension.get_cache_dir`,
+  :meth:`~mopidy.ext.Extension.get_config_dir`, and
+  :meth:`~mopidy.ext.Extension.get_data_dir` class methods, so they can be used
+  without creating an instance of the :class:`~mopidy.ext.Extension` class.
+  (Fixes: :issue:`1275`)
+
+- Local: Deprecate :confval:`local/data_dir` and respect
+  :confval:`core/data_dir` instead. This does not change the defaults for
+  desktop users, only system services installed from packages that properly set
+  :confval:`core/data_dir`, like the Debian and Arch packages. (Fixes:
+  :issue:`1259`, PR: :issue:`1266`)
+
+- Local: Change default value of :confval:`local/scan_flush_threshold` from
+  1000 to 100 to shorten the time Mopidy-Local-SQLite blocks incoming requests
+  while scanning the local library.
+
+- M3U: Changed default for the :confval:`m3u/playlists_dir` from
+  ``$XDG_DATA_DIR/mopidy/m3u`` to unset, which now means the extension's data
+  dir. This does not change the defaults for desktop users, only system
+  services installed from packages that properly set :confval:`core/data_dir`,
+  like the Debian and Arch pakages. (Fixes: :issue:`1259`, PR: :issue:`1266`)
+
+- Stream: Expand nested playlists to find the stream URI. This used to work,
+  but regressed in 1.1.0 with the extraction of stream playlist parsing from
+  GStreamer to being handled by the Mopidy-Stream backend. (Fixes:
+  :issue:`1250`, PR: :issue:`1281`)
+
+- Stream: If "file" is present in the :confval:`stream/protocols` config value
+  and the :ref:`ext-file` extension is enabled, we exited with an error because
+  two extensions claimed the same URI scheme. We now log a warning recommending
+  to remove "file" from the :confval:`stream/protocols` config, and then
+  proceed startup. (Fixes: :issue:`1248`, PR: :issue:`1254`)
+
+- Stream: Fix bug in new playlist parser. A non-ASCII char in an urilist
+  comment would cause a crash while parsing due to comparision of a non-ASCII
+  bytestring with a Unicode string. (Fixes: :issue:`1265`)
+
+- File: Adjust log levels when failing to expand ``$XDG_MUSIC_DIR`` into a real
+  path. This usually happens when running Mopidy as a system service, and thus
+  with a limited set of environment variables. (Fixes: :issue:`1249`, PR:
+  :issue:`1255`)
+
+- File: When browsing files, we no longer scan the files to check if they're
+  playable. This makes browsing of the file hierarchy instant for HTTP clients,
+  which do no scanning of the files' metadata, and a bit faster for MPD
+  clients, which no longer scan the files twice. (Fixes: :issue:`1260`, PR:
+  :issue:`1261`)
+
+- File: Allow looking up metadata about any ``file://`` URI, just like we did
+  in Mopidy 1.0.x, where Mopidy-Stream handled ``file://`` URIs. In Mopidy
+  1.1.0, Mopidy-File did not allow one to lookup files outside the directories
+  listed in :confval:`file/media_dir`. This broke Mopidy-Local-SQLite when the
+  :confval:`local/media_dir` directory was not within one of the
+  :confval:`file/media_dirs` directories. For browsing of files, we still limit
+  access to files inside the :confval:`file/media_dir` directories. For lookup,
+  you can now read metadata for any file you know the path of. (Fixes:
+  :issue:`1268`, PR: :issue:`1273`)
+
+- Audio: Fix timeout handling in scanner. This regression caused timeouts to
+  expire before it should, causing scans to fail.
+
+- Audio: Update scanner to emit MIME type instead of an error when missing a
+  plugin.
+
+
 v1.1.0 (2015-08-09)
 ===================
 
 Mopidy 1.1 is here!
 
-Since the release of 1.0, we've closed or merged approximately 55 issues and
+Since the release of 1.0, we've closed or merged approximately 65 issues and
 pull requests through about 400 commits by a record high 20 extraordinary
 people, including 14 newcomers. That's less issues and commits than in the 1.0
 release, but even more contributors, and a doubling of the number of newcomers.
-Thanks to :ref:`everyone <authors>` who has :ref:`contributed <contributing>`!
+Thanks to :ref:`everyone <authors>` who has :ref:`contributed <contributing>`,
+especially those that joined the sprint at EuroPython 2015 in Bilbao, Spain a
+couple of weeks ago!
 
 As we promised with the release of Mopidy 1.0, any extension working with
 Mopidy 1.0 should continue working with all Mopidy 1.x releases. However, this
@@ -61,7 +156,7 @@ Core API
 
 - Add ``tlid`` alternatives to methods that take ``tl_track`` and also add
   ``get_{eot,next,previous}_tlid`` methods as light weight alternatives to the
-  ``tl_track`` versions of the calls. (Fixes: :issue:`1131` PR: :issue:`1136`,
+  ``tl_track`` versions of the calls. (Fixes: :issue:`1131`, PR: :issue:`1136`,
   :issue:`1140`)
 
 - Add :meth:`mopidy.core.PlaybackController.get_current_tlid`.
