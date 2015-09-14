@@ -28,6 +28,9 @@ Bug fix release.
 - Core: Fix error in :meth:`~mopidy.core.TracklistController.get_eot_tlid`
   docstring. (Fixes: :issue:`1269`)
 
+- Audio: Add ``timeout`` parameter to :meth:`~mopidy.audio.scan.Scanner.scan`.
+  (Part of: :issue:`1250`, PR: :issue:`1281`)
+
 - Extension support: Make :meth:`~mopidy.ext.Extension.get_cache_dir`,
   :meth:`~mopidy.ext.Extension.get_config_dir`, and
   :meth:`~mopidy.ext.Extension.get_data_dir` class methods, so they can be used
@@ -49,6 +52,11 @@ Bug fix release.
   dir. This does not change the defaults for desktop users, only system
   services installed from packages that properly set :confval:`core/data_dir`,
   like the Debian and Arch pakages. (Fixes: :issue:`1259`, PR: :issue:`1266`)
+
+- Stream: Expand nested playlists to find the stream URI. This used to work,
+  but regressed in 1.1.0 with the extraction of stream playlist parsing from
+  GStreamer to being handled by the Mopidy-Stream backend. (Fixes:
+  :issue:`1250`, PR: :issue:`1281`)
 
 - Stream: If "file" is present in the :confval:`stream/protocols` config value
   and the :ref:`ext-file` extension is enabled, we exited with an error because
