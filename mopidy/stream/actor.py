@@ -81,14 +81,14 @@ class StreamPlaybackProvider(backend.PlaybackProvider):
                 stream.Extension.dist_name, stream.Extension.version))
 
     def translate_uri(self, uri):
-        return unwrap_stream(
+        return _unwrap_stream(
             uri,
             timeout=self._config['stream']['timeout'],
             scanner=self._scanner,
             requests_session=self._session)
 
 
-def unwrap_stream(uri, timeout, scanner, requests_session):
+def _unwrap_stream(uri, timeout, scanner, requests_session):
     """
     Get a stream URI from a playlist URI, ``uri``.
 
