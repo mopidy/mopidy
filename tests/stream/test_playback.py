@@ -4,8 +4,6 @@ import mock
 
 import pytest
 
-import requests
-
 import responses
 
 from mopidy import exceptions
@@ -14,7 +12,8 @@ from mopidy.stream import actor
 
 
 TIMEOUT = 1000
-URI = 'http://example.com/listen.m3u'
+PLAYLIST_URI = 'http://example.com/listen.m3u'
+STREAM_URI = 'http://example.com/stream.mp3'
 BODY = """
 #EXTM3U
 http://example.com/stream.mp3
@@ -39,9 +38,7 @@ def audio():
 
 @pytest.fixture
 def scanner():
-    scanner = mock.Mock(spec=scan.Scanner)
-    scanner.scan.return_value.mime = 'text/foo'
-    return scanner
+    return mock.Mock(spec=scan.Scanner)
 
 
 @pytest.fixture
@@ -57,89 +54,134 @@ def provider(audio, backend, config):
     return actor.StreamPlaybackProvider(audio, backend, config)
 
 
-@responses.activate
-def test_translate_uri_of_audio_stream_returns_same_uri(
-        scanner, provider):
+class TestTranslateURI(object):
 
-    scanner.scan.return_value.mime = 'audio/ogg'
+    @responses.activate
+    def test_audio_stream_returns_same_uri(self, scanner, provider):
+        scanner.scan.return_value.mime = 'audio/mpeg'
 
-    result = provider.translate_uri(URI)
+        result = provider.translate_uri(STREAM_URI)
 
-    scanner.scan.assert_called_once_with(URI)
-    assert result == URI
+        scanner.scan.assert_called_once_with(STREAM_URI, timeout=mock.ANY)
+        assert result == STREAM_URI
 
+    @responses.activate
+    def test_text_playlist_with_mpeg_stream(
+            self, scanner, provider, caplog):
 
-@responses.activate
-def test_translate_uri_of_playlist_returns_first_uri_in_list(
-        scanner, provider):
+        scanner.scan.side_effect = [
+            mock.Mock(mime='text/foo'),  # scanning playlist
+            mock.Mock(mime='audio/mpeg'),  # scanning stream
+        ]
+        responses.add(
+            responses.GET, PLAYLIST_URI,
+            body=BODY, content_type='audio/x-mpegurl')
 
-    responses.add(
-        responses.GET, URI, body=BODY, content_type='audio/x-mpegurl')
+        result = provider.translate_uri(PLAYLIST_URI)
 
-    result = provider.translate_uri(URI)
+        assert scanner.scan.mock_calls == [
+            mock.call(PLAYLIST_URI, timeout=mock.ANY),
+            mock.call(STREAM_URI, timeout=mock.ANY),
+        ]
+        assert result == STREAM_URI
 
-    scanner.scan.assert_called_once_with(URI)
-    assert result == 'http://example.com/stream.mp3'
-    assert responses.calls[0].request.headers['User-Agent'].startswith(
-        'Mopidy-Stream/')
+        # Check logging to ensure debuggability
+        assert 'Unwrapping stream from URI: %s' % PLAYLIST_URI
+        assert 'Parsed playlist (%s)' % PLAYLIST_URI in caplog.text()
+        assert 'Unwrapping stream from URI: %s' % STREAM_URI
+        assert (
+            'Unwrapped potential audio/mpeg stream: %s' % STREAM_URI
+            in caplog.text())
 
+        # Check proper Requests session setup
+        assert responses.calls[0].request.headers['User-Agent'].startswith(
+            'Mopidy-Stream/')
 
-@responses.activate
-def test_translate_uri_of_playlist_with_xml_mimetype(scanner, provider):
-    scanner.scan.return_value.mime = 'application/xspf+xml'
-    responses.add(
-        responses.GET, URI, body=BODY, content_type='application/xspf+xml')
+    @responses.activate
+    def test_xml_playlist_with_mpeg_stream(self, scanner, provider):
+        scanner.scan.side_effect = [
+            mock.Mock(mime='application/xspf+xml'),  # scanning playlist
+            mock.Mock(mime='audio/mpeg'),  # scanning stream
+        ]
+        responses.add(
+            responses.GET, PLAYLIST_URI,
+            body=BODY, content_type='application/xspf+xml')
 
-    result = provider.translate_uri(URI)
+        result = provider.translate_uri(PLAYLIST_URI)
 
-    scanner.scan.assert_called_once_with(URI)
-    assert result == 'http://example.com/stream.mp3'
+        assert scanner.scan.mock_calls == [
+            mock.call(PLAYLIST_URI, timeout=mock.ANY),
+            mock.call(STREAM_URI, timeout=mock.ANY),
+        ]
+        assert result == STREAM_URI
 
+    @responses.activate
+    def test_scan_fails_but_playlist_parsing_succeeds(
+            self, scanner, provider, caplog):
 
-def test_translate_uri_when_scanner_fails(scanner, provider, caplog):
-    scanner.scan.side_effect = exceptions.ScannerError('foo failed')
+        scanner.scan.side_effect = [
+            exceptions.ScannerError('some failure'),  # scanning playlist
+            mock.Mock(mime='audio/mpeg'),  # scanning stream
+        ]
+        responses.add(
+            responses.GET, PLAYLIST_URI,
+            body=BODY, content_type='audio/x-mpegurl')
 
-    result = provider.translate_uri('bar')
+        result = provider.translate_uri(PLAYLIST_URI)
 
-    assert result is None
-    assert 'Problem scanning URI bar: foo failed' in caplog.text()
+        assert 'Unwrapping stream from URI: %s' % PLAYLIST_URI
+        assert (
+            'GStreamer failed scanning URI (%s)' % PLAYLIST_URI
+            in caplog.text())
+        assert 'Parsed playlist (%s)' % PLAYLIST_URI in caplog.text()
+        assert (
+            'Unwrapped potential audio/mpeg stream: %s' % STREAM_URI
+            in caplog.text())
+        assert result == STREAM_URI
 
+    @responses.activate
+    def test_scan_fails_and_playlist_parsing_fails(
+            self, scanner, provider, caplog):
 
-@responses.activate
-def test_translate_uri_when_playlist_download_fails(provider, caplog):
-    responses.add(responses.GET, URI, body=BODY, status=500)
+        scanner.scan.side_effect = exceptions.ScannerError('some failure')
+        responses.add(
+            responses.GET, STREAM_URI,
+            body=b'some audio data', content_type='audio/mpeg')
 
-    result = provider.translate_uri(URI)
+        result = provider.translate_uri(STREAM_URI)
 
-    assert result is None
-    assert 'Problem downloading stream playlist' in caplog.text()
+        assert 'Unwrapping stream from URI: %s' % STREAM_URI
+        assert (
+            'GStreamer failed scanning URI (%s)' % STREAM_URI
+            in caplog.text())
+        assert (
+            'Failed parsing URI (%s) as playlist; found potential stream.'
+            % STREAM_URI in caplog.text())
+        assert result == STREAM_URI
 
+    def test_failed_download_returns_none(self, provider, caplog):
+        with mock.patch.object(actor, 'http') as http_mock:
+            http_mock.download.return_value = None
 
-def test_translate_uri_times_out_if_connection_times_out(provider, caplog):
-    with mock.patch.object(actor.requests, 'Session') as session_mock:
-        get_mock = session_mock.return_value.get
-        get_mock.side_effect = requests.exceptions.Timeout
+            result = provider.translate_uri(PLAYLIST_URI)
 
-        result = provider.translate_uri(URI)
+        assert result is None
 
-    get_mock.assert_called_once_with(URI, timeout=1.0, stream=True)
-    assert result is None
-    assert (
-        'Download of stream playlist (%s) failed due to connection '
-        'timeout after 1.000s' % URI in caplog.text())
+    @responses.activate
+    def test_playlist_references_itself(self, scanner, provider, caplog):
+        scanner.scan.return_value.mime = 'text/foo'
+        responses.add(
+            responses.GET, PLAYLIST_URI,
+            body=BODY.replace(STREAM_URI, PLAYLIST_URI),
+            content_type='audio/x-mpegurl')
 
+        result = provider.translate_uri(PLAYLIST_URI)
 
-@responses.activate
-def test_translate_uri_times_out_if_download_is_slow(provider, caplog):
-    responses.add(
-        responses.GET, URI, body=BODY, content_type='audio/x-mpegurl')
-
-    with mock.patch.object(actor, 'time') as time_mock:
-        time_mock.time.side_effect = [0, TIMEOUT + 1]
-
-        result = provider.translate_uri(URI)
-
-    assert result is None
-    assert (
-        'Download of stream playlist (%s) failed due to download taking '
-        'more than 1.000s' % URI in caplog.text())
+        assert 'Unwrapping stream from URI: %s' % PLAYLIST_URI in caplog.text()
+        assert (
+            'Parsed playlist (%s) and found new URI: %s'
+            % (PLAYLIST_URI, PLAYLIST_URI)) in caplog.text()
+        assert (
+            'Unwrapping stream from URI (%s) failed: '
+            'playlist referenced itself' % PLAYLIST_URI) in caplog.text()
+        assert result is None

@@ -8,8 +8,6 @@ import urlparse
 
 import pykka
 
-import requests
-
 from mopidy import audio as audio_lib, backend, exceptions, stream
 from mopidy.audio import scan, utils
 from mopidy.internal import http, playlists
@@ -35,6 +33,13 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
 
         self.uri_schemes = audio_lib.supported_uri_schemes(
             config['stream']['protocols'])
+
+        if 'file' in self.uri_schemes and config['file']['enabled']:
+            logger.warning(
+                'The stream/protocols config value includes the "file" '
+                'protocol. "file" playback is now handled by Mopidy-File. '
+                'Please remove it from the stream/protocols config.')
+            self.uri_schemes -= {'file'}
 
 
 class StreamLibraryProvider(backend.LibraryProvider):
@@ -70,59 +75,84 @@ class StreamPlaybackProvider(backend.PlaybackProvider):
         super(StreamPlaybackProvider, self).__init__(audio, backend)
         self._config = config
         self._scanner = backend._scanner
-
-    def translate_uri(self, uri):
-        try:
-            scan_result = self._scanner.scan(uri)
-        except exceptions.ScannerError as e:
-            logger.warning(
-                'Problem scanning URI %s: %s', uri, e)
-            return None
-
-        if not (scan_result.mime.startswith('text/') or
-                scan_result.mime.startswith('application/')):
-            return uri
-
-        content = self._download(uri)
-        if content is None:
-            return None
-
-        tracks = list(playlists.parse(content))
-        if tracks:
-            # TODO Test streams and return first that seems to be playable
-            return tracks[0]
-
-    def _download(self, uri):
-        timeout = self._config['stream']['timeout'] / 1000.0
-
-        session = http.get_requests_session(
-            proxy_config=self._config['proxy'],
+        self._session = http.get_requests_session(
+            proxy_config=config['proxy'],
             user_agent='%s/%s' % (
                 stream.Extension.dist_name, stream.Extension.version))
 
+    def translate_uri(self, uri):
+        return _unwrap_stream(
+            uri,
+            timeout=self._config['stream']['timeout'],
+            scanner=self._scanner,
+            requests_session=self._session)
+
+
+def _unwrap_stream(uri, timeout, scanner, requests_session):
+    """
+    Get a stream URI from a playlist URI, ``uri``.
+
+    Unwraps nested playlists until something that's not a playlist is found or
+    the ``timeout`` is reached.
+    """
+
+    original_uri = uri
+    seen_uris = set()
+    deadline = time.time() + timeout
+
+    while time.time() < deadline:
+        if uri in seen_uris:
+            logger.info(
+                'Unwrapping stream from URI (%s) failed: '
+                'playlist referenced itself', uri)
+            return None
+        else:
+            seen_uris.add(uri)
+
+        logger.debug('Unwrapping stream from URI: %s', uri)
+
         try:
-            response = session.get(
-                uri, stream=True, timeout=timeout)
-        except requests.exceptions.Timeout:
-            logger.warning(
-                'Download of stream playlist (%s) failed due to connection '
-                'timeout after %.3fs', uri, timeout)
-            return None
-
-        deadline = time.time() + timeout
-        content = []
-        for chunk in response.iter_content(4096):
-            content.append(chunk)
-            if time.time() > deadline:
-                logger.warning(
-                    'Download of stream playlist (%s) failed due to download '
-                    'taking more than %.3fs', uri, timeout)
+            scan_timeout = deadline - time.time()
+            if scan_timeout < 0:
+                logger.info(
+                    'Unwrapping stream from URI (%s) failed: '
+                    'timed out in %sms', uri, timeout)
                 return None
+            scan_result = scanner.scan(uri, timeout=scan_timeout)
+        except exceptions.ScannerError as exc:
+            logger.debug('GStreamer failed scanning URI (%s): %s', uri, exc)
+            scan_result = None
 
-        if not response.ok:
-            logger.warning(
-                'Problem downloading stream playlist %s: %s',
-                uri, response.reason)
+        if scan_result is not None and not (
+                scan_result.mime.startswith('text/') or
+                scan_result.mime.startswith('application/')):
+            logger.debug(
+                'Unwrapped potential %s stream: %s', scan_result.mime, uri)
+            return uri
+
+        download_timeout = deadline - time.time()
+        if download_timeout < 0:
+            logger.info(
+                'Unwrapping stream from URI (%s) failed: timed out in %sms',
+                uri, timeout)
+            return None
+        content = http.download(
+            requests_session, uri, timeout=download_timeout)
+
+        if content is None:
+            logger.info(
+                'Unwrapping stream from URI (%s) failed: '
+                'error downloading URI %s', original_uri, uri)
             return None
 
-        return b''.join(content)
+        uris = playlists.parse(content)
+        if not uris:
+            logger.debug(
+                'Failed parsing URI (%s) as playlist; found potential stream.',
+                uri)
+            return uri
+
+        # TODO Test streams and return first that seems to be playable
+        logger.debug(
+            'Parsed playlist (%s) and found new URI: %s', uri, uris[0])
+        uri = uris[0]

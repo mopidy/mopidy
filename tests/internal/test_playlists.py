@@ -23,7 +23,7 @@ file:///tmp/baz
 
 URILIST = b"""
 file:///tmp/foo
-# a comment
+# a comment \xc5\xa7\xc5\x95
 file:///tmp/bar
 
 file:///tmp/baz

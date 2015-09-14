@@ -116,7 +116,7 @@ class JsonLibrary(local.Library):
         self._browse_cache = None
         self._media_dir = config['local']['media_dir']
         self._json_file = os.path.join(
-            config['local']['data_dir'], b'library.json.gz')
+            local.Extension.get_data_dir(config), b'library.json.gz')
 
         storage.check_dirs_and_files(config)
 

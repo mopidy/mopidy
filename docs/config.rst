@@ -65,6 +65,13 @@ Core configuration
 
     Path to base directory for storing cached data.
 
+    Mopidy and extensions will use this path to cache data that can safely be
+    thrown away.
+
+    If your system is running from an SD card, it can help avoid wear and
+    corruption of your SD card by pointing this config to another location. If
+    you have enough RAM, a tmpfs might be a good choice.
+
     When running Mopidy as a regular user, this should usually be
     ``$XDG_CACHE_DIR/mopidy``, i.e. :file:`~/.cache/mopidy`.
 
@@ -84,6 +91,11 @@ Core configuration
 .. confval:: core/data_dir
 
     Path to base directory for persistent data files.
+
+    Mopidy and extensions will use this path to store data that cannot be
+    be thrown away and reproduced without some effort. Examples include
+    Mopidy-Local's index of your media library and Mopidy-M3U's stored
+    playlists.
 
     When running Mopidy as a regular user, this should usually be
     ``$XDG_DATA_DIR/mopidy``, i.e. :file:`~/.local/share/mopidy`.

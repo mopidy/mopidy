@@ -122,7 +122,7 @@ def parse_asx(data):
 def parse_urilist(data):
     result = []
     for line in data.splitlines():
-        if not line.strip() or line.startswith('#'):
+        if not line.strip() or line.startswith(b'#'):
             continue
         try:
             validation.check_uri(line)
