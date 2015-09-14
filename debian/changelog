@@ -1,6 +1,7 @@
 mopidy (1.1.1-1) unstable; urgency=medium
 
   * New upstream release.
+  * Add patch: 0001-Make-docs-buildable-with-older-Sphinx.patch
 
  -- Stein Magnus Jodal <stein.magnus@jodal.no>  Mon, 14 Sep 2015 10:48:29 +0200
 
