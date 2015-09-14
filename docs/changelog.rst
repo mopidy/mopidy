@@ -5,12 +5,13 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
-v1.1.1 (UNRELEASED)
+v1.1.1 (2015-09-14)
 ===================
 
 Bug fix release.
 
 - Dependencies: Specify that we need Requests >= 2.0, not just any version.
+  This ensures that we fail earlier if Mopidy is used with a too old Requests.
 
 - Core: Make :meth:`mopidy.core.LibraryController.refresh` work for all
   backends with a library provider. Previously, it wrongly worked for all
