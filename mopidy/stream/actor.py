@@ -97,9 +97,18 @@ def _unwrap_stream(uri, timeout, scanner, requests_session):
     """
 
     original_uri = uri
+    seen_uris = set()
     deadline = time.time() + timeout
 
     while time.time() < deadline:
+        if uri in seen_uris:
+            logger.info(
+                'Unwrapping stream from URI (%s) failed: '
+                'playlist referenced itself', uri)
+            return None
+        else:
+            seen_uris.add(uri)
+
         logger.debug('Unwrapping stream from URI: %s', uri)
 
         try:
@@ -107,8 +116,7 @@ def _unwrap_stream(uri, timeout, scanner, requests_session):
             if scan_timeout < 0:
                 logger.info(
                     'Unwrapping stream from URI (%s) failed: '
-                    'timed out in %sms',
-                    uri, timeout)
+                    'timed out in %sms', uri, timeout)
                 return None
             scan_result = scanner.scan(uri, timeout=scan_timeout)
         except exceptions.ScannerError as exc:

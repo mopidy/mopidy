@@ -166,3 +166,22 @@ class TestTranslateURI(object):
             result = provider.translate_uri(PLAYLIST_URI)
 
         assert result is None
+
+    @responses.activate
+    def test_playlist_references_itself(self, scanner, provider, caplog):
+        scanner.scan.return_value.mime = 'text/foo'
+        responses.add(
+            responses.GET, PLAYLIST_URI,
+            body=BODY.replace(STREAM_URI, PLAYLIST_URI),
+            content_type='audio/x-mpegurl')
+
+        result = provider.translate_uri(PLAYLIST_URI)
+
+        assert 'Unwrapping stream from URI: %s' % PLAYLIST_URI in caplog.text()
+        assert (
+            'Parsed playlist (%s) and found new URI: %s'
+            % (PLAYLIST_URI, PLAYLIST_URI)) in caplog.text()
+        assert (
+            'Unwrapping stream from URI (%s) failed: '
+            'playlist referenced itself' % PLAYLIST_URI) in caplog.text()
+        assert result is None
