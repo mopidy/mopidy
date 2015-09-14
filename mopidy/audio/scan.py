@@ -33,12 +33,15 @@ class Scanner(object):
         self._timeout_ms = int(timeout)
         self._proxy_config = proxy_config or {}
 
-    def scan(self, uri):
+    def scan(self, uri, timeout=None):
         """
         Scan the given uri collecting relevant metadata.
 
         :param uri: URI of the resource to scan.
-        :type event: string
+        :type uri: string
+        :param timeout: timeout for scanning a URI in ms. Defaults to the
+            ``timeout`` value used when creating the scanner.
+        :type timeout: int
         :return: A named tuple containing
             ``(uri, tags, duration, seekable, mime)``.
             ``tags`` is a dictionary of lists for all the tags we found.
@@ -46,12 +49,13 @@ class Scanner(object):
             :class:`None` if the URI has no duration. ``seekable`` is boolean.
             indicating if a seek would succeed.
         """
+        timeout = int(timeout or self._timeout_ms)
         tags, duration, seekable, mime = None, None, None, None
         pipeline = _setup_pipeline(uri, self._proxy_config)
 
         try:
             _start_pipeline(pipeline)
-            tags, mime, have_audio = _process(pipeline, self._timeout_ms)
+            tags, mime, have_audio = _process(pipeline, timeout)
             duration = _query_duration(pipeline)
             seekable = _query_seekable(pipeline)
         finally:
@@ -132,7 +136,10 @@ def _process(pipeline, timeout_ms):
     clock = pipeline.get_clock()
     bus = pipeline.get_bus()
     timeout = timeout_ms * gst.MSECOND
-    tags, mime, have_audio, missing_message = {}, None, False, None
+    tags = {}
+    mime = None
+    have_audio = False
+    missing_message = None
 
     types = (gst.MESSAGE_ELEMENT | gst.MESSAGE_APPLICATION | gst.MESSAGE_ERROR
              | gst.MESSAGE_EOS | gst.MESSAGE_ASYNC_DONE | gst.MESSAGE_TAG)
