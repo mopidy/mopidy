@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
 import logging
-import socket
 import string
 
 logger = logging.getLogger(__name__)
@@ -64,13 +63,13 @@ class Zeroconf(object):
         except dbus.exceptions.DBusException as e:
             logger.debug('%s: Server failed: %s', self, e)
 
-        self.display_hostname = '%s.local' % socket.getfqdn()
+        self.display_hostname = '%s' % self.server.GetHostName()
         self.name = string.Template(name).safe_substitute(
             hostname=self.display_hostname, port=port)
 
     def __str__(self):
-        return 'Zeroconf service %s at [%s]:%d' % (
-            self.stype, self.host, self.port)
+        return 'Zeroconf service "%s" (%s at [%s]:%d)' % (
+            self.name, self.stype, self.host, self.port)
 
     def publish(self):
         """Publish the service.
