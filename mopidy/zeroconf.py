@@ -40,18 +40,17 @@ class Zeroconf(object):
     :param str stype: service type, e.g. '_mpd._tcp'
     :param int port: TCP port of the service, e.g. 6600
     :param str domain: local network domain name, defaults to ''
-    :param str host: interface to advertise the service on, defaults to all
-        interfaces
+    :param str host: interface to advertise the service on, defaults to ''
     :param text: extra information depending on ``stype``, defaults to empty
         list
     :type text: list of str
     """
 
-    def __init__(self, name, stype, port, domain=None, text=None):
-        self.group = None
+    def __init__(self, name, stype, port, domain='', host='', text=None):
         self.stype = stype
-        self.domain = domain or ''
         self.port = port
+        self.domain = domain
+        self.host = host
         self.text = text or []
 
         self.bus = None
@@ -65,10 +64,9 @@ class Zeroconf(object):
         except dbus.exceptions.DBusException as e:
             logger.debug('%s: Server failed: %s', self, e)
 
-        template = string.Template(name)
-        self.name = template.safe_substitute(
-            hostname=socket.getfqdn(), port=self.port)
-        self.host = '%s.local' % socket.getfqdn()
+        self.display_hostname = '%s.local' % socket.getfqdn()
+        self.name = string.Template(name).safe_substitute(
+            hostname=self.display_hostname, port=port)
 
     def __str__(self):
         return 'Zeroconf service %s at [%s]:%d' % (
@@ -110,7 +108,8 @@ class Zeroconf(object):
 
             self.group.AddService(
                 _AVAHI_IF_UNSPEC, _AVAHI_PROTO_UNSPEC,
-                dbus.UInt32(_AVAHI_PUBLISHFLAGS_NONE), self.name, self.stype,
+                dbus.UInt32(_AVAHI_PUBLISHFLAGS_NONE),
+                self.name, self.stype,
                 self.domain, self.host, dbus.UInt16(self.port),
                 _convert_text_list_to_dbus_format(self.text))
 
