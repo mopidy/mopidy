@@ -54,6 +54,17 @@ class Zeroconf(object):
         self.port = port
         self.text = text or []
 
+        self.bus = None
+        self.server = None
+        self.group = None
+        try:
+            self.bus = dbus.SystemBus()
+            self.server = dbus.Interface(
+                self.bus.get_object('org.freedesktop.Avahi', '/'),
+                'org.freedesktop.Avahi.Server')
+        except dbus.exceptions.DBusException as e:
+            logger.debug('%s: Server failed: %s', self, e)
+
         template = string.Template(name)
         self.name = template.safe_substitute(
             hostname=socket.getfqdn(), port=self.port)
@@ -78,21 +89,23 @@ class Zeroconf(object):
             logger.debug('%s: dbus not installed; publish failed.', self)
             return False
 
-        try:
-            bus = dbus.SystemBus()
+        if not self.bus:
+            logger.debug('%s: Bus not available; publish failed.', self)
+            return False
 
-            if not bus.name_has_owner('org.freedesktop.Avahi'):
+        if not self.server:
+            logger.debug('%s: Server not available; publish failed.', self)
+            return False
+
+        try:
+            if not self.bus.name_has_owner('org.freedesktop.Avahi'):
                 logger.debug(
                     '%s: Avahi service not running; publish failed.', self)
                 return False
 
-            server = dbus.Interface(
-                bus.get_object('org.freedesktop.Avahi', '/'),
-                'org.freedesktop.Avahi.Server')
-
             self.group = dbus.Interface(
-                bus.get_object(
-                    'org.freedesktop.Avahi', server.EntryGroupNew()),
+                self.bus.get_object(
+                    'org.freedesktop.Avahi', self.server.EntryGroupNew()),
                 'org.freedesktop.Avahi.EntryGroup')
 
             self.group.AddService(
