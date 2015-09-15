@@ -37,8 +37,8 @@ class Zeroconf(object):
     Currently, this only works on Linux using Avahi via D-Bus.
 
     :param str name: human readable name of the service, e.g. 'MPD on neptune'
-    :param int port: TCP port of the service, e.g. 6600
     :param str stype: service type, e.g. '_mpd._tcp'
+    :param int port: TCP port of the service, e.g. 6600
     :param str domain: local network domain name, defaults to ''
     :param str host: interface to advertise the service on, defaults to all
         interfaces
@@ -47,9 +47,9 @@ class Zeroconf(object):
     :type text: list of str
     """
 
-    def __init__(self, name, port, stype=None, domain=None, text=None):
+    def __init__(self, name, stype, port, domain=None, text=None):
         self.group = None
-        self.stype = stype or '_http._tcp'
+        self.stype = stype
         self.domain = domain or ''
         self.port = port
         self.text = text or []
