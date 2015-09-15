@@ -57,10 +57,12 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
 
         if self.zeroconf_name:
             self.zeroconf_http = zeroconf.Zeroconf(
-                stype='_http._tcp', name=self.zeroconf_name,
+                name=self.zeroconf_name,
+                stype='_http._tcp',
                 port=self.port)
             self.zeroconf_mopidy_http = zeroconf.Zeroconf(
-                stype='_mopidy-http._tcp', name=self.zeroconf_name,
+                name=self.zeroconf_name,
+                stype='_mopidy-http._tcp',
                 port=self.port)
             self.zeroconf_http.publish()
             self.zeroconf_mopidy_http.publish()

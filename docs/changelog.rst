@@ -16,6 +16,16 @@ Local
 - Made :confval:`local/data_dir` really deprecated. This change breaks older
   versions of Mopidy-Local-SQLite and Mopidy-Local-Images.
 
+Zeroconf
+--------
+
+- Require ``stype`` argument to :class:`mopidy.zeroconf.Zeroconf`.
+
+- Use Avahi's interface selection by default. (Fixes: :issue:`1283`)
+
+- Use Avahi server's hostname instead of ``socket.getfqdn()`` in service
+  display name.
+
 Cleanups
 --------
 
