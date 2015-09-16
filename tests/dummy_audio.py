@@ -15,6 +15,7 @@ def create_proxy(config=None, mixer=None):
     return DummyAudio.start(config, mixer).proxy()
 
 
+# TODO: reset position on track change?
 class DummyAudio(pykka.ThreadingActor):
 
     def __init__(self, config=None, mixer=None):
