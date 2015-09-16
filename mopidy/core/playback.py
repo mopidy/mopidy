@@ -207,6 +207,8 @@ class PlaybackController(object):
             self._trigger_track_playback_started()
 
     def _on_about_to_finish(self):
+        self._trigger_track_playback_ended(self.get_time_position())
+
         # TODO: check that we always have a current track
         original_tl_track = self.get_current_tl_track()
         next_tl_track = self.core.tracklist.eot_track(original_tl_track)
@@ -244,6 +246,7 @@ class PlaybackController(object):
         current = self._pending_tl_track or self._current_tl_track
 
         # TODO: move to pending track?
+        self._trigger_track_playback_ended(self.get_time_position())
         self.core.tracklist._mark_played(self._current_tl_track)
 
         while current:
@@ -290,7 +293,43 @@ class PlaybackController(object):
         if tl_track:
             deprecation.warn('core.playback.play:tl_track_kwarg', pending=True)
 
-        self._play(tl_track=tl_track, tlid=tlid, on_error_step=1)
+        if tl_track is None and tlid is not None:
+            for tl_track in self.core.tracklist.get_tl_tracks():
+                if tl_track.tlid == tlid:
+                    break
+            else:
+                tl_track = None
+
+        if tl_track is not None:
+            # TODO: allow from outside tracklist, would make sense given refs?
+            assert tl_track in self.core.tracklist.get_tl_tracks()
+        elif tl_track is None and self.get_state() == PlaybackState.PAUSED:
+            self.resume()
+            return
+
+        original = self._current_tl_track
+        current = self._pending_tl_track or self._current_tl_track
+        pending = tl_track or current or self.core.tracklist.next_track(None)
+
+        if original != pending and self.get_state() != PlaybackState.STOPPED:
+            self._trigger_track_playback_ended(self.get_time_position())
+
+        if pending:
+            # TODO: remove?
+            self.set_state(PlaybackState.PLAYING)
+
+        while pending:
+            # TODO: should we consume unplayable tracks in this loop?
+            if self._change(pending, PlaybackState.PLAYING):
+                break
+            else:
+                self.core.tracklist._mark_unplayable(pending)
+            current = pending
+            pending = self.core.tracklist.next_track(current)
+
+        # TODO: move to top and get rid of original?
+        self.core.tracklist._mark_played(original)
+        # TODO return result?
 
     def _change(self, pending_tl_track, state):
         self._pending_tl_track = pending_tl_track
@@ -327,67 +366,6 @@ class PlaybackController(object):
 
         raise Exception('Unknown state: %s' % state)
 
-    def _play(self, tl_track=None, tlid=None, on_error_step=1):
-        if tl_track is None and tlid is not None:
-            for tl_track in self.core.tracklist.get_tl_tracks():
-                if tl_track.tlid == tlid:
-                    break
-            else:
-                tl_track = None
-
-        if tl_track is None:
-            if self.get_state() == PlaybackState.PAUSED:
-                return self.resume()
-
-            if self.get_current_tl_track() is not None:
-                tl_track = self.get_current_tl_track()
-            else:
-                if on_error_step == 1:
-                    tl_track = self.core.tracklist.next_track(tl_track)
-                elif on_error_step == -1:
-                    tl_track = self.core.tracklist.previous_track(tl_track)
-
-            if tl_track is None:
-                return
-
-        assert tl_track in self.core.tracklist.get_tl_tracks()
-
-        # TODO: switch to:
-        # backend.play(track)
-        # wait for state change?
-
-        if self.get_state() == PlaybackState.PLAYING:
-            self.stop()
-
-        self._set_current_tl_track(tl_track)
-        self.set_state(PlaybackState.PLAYING)
-        backend = self._get_backend(tl_track)
-        success = False
-
-        if backend:
-            backend.playback.prepare_change()
-            try:
-                success = (
-                    backend.playback.change_track(tl_track.track).get() and
-                    backend.playback.play().get())
-            except TypeError:
-                logger.error(
-                    '%s needs to be updated to work with this '
-                    'version of Mopidy.',
-                    backend.actor_ref.actor_class.__name__)
-                logger.debug('Backend exception', exc_info=True)
-
-        if success:
-            # TODO: replace with stream-changed
-            self._trigger_track_playback_started()
-        else:
-            self.core.tracklist._mark_unplayable(tl_track)
-            if on_error_step == 1:
-                # TODO: can cause an endless loop for single track repeat.
-                self.next()
-            elif on_error_step == -1:
-                self.previous()
-
     def previous(self):
         """
         Change to the previous track.
@@ -395,6 +373,8 @@ class PlaybackController(object):
         The current playback state will be kept. If it was playing, playing
         will continue. If it was paused, it will still be paused, etc.
         """
+        self._trigger_track_playback_ended(self.get_time_position())
+
         state = self.get_state()
         current = self._pending_tl_track or self._current_tl_track
 
@@ -443,15 +423,23 @@ class PlaybackController(object):
         if not self.core.tracklist.tracks:
             return False
 
-        if self.current_track and self.current_track.length is None:
-            return False
-
         if self.get_state() == PlaybackState.STOPPED:
             self.play()
 
+        # TODO: uncomment once we have tests for this. Should fix seek after
+        # about to finish doing wrong track.
+        # if self._current_tl_track and self._pending_tl_track:
+        #     self.play(self._current_tl_track)
+
+        # We need to prefer the still playing track, but if nothing is playing
+        # we fall back to the pending one.
+        tl_track = self._current_tl_track or self._pending_tl_track
+        if tl_track and tl_track.track.length is None:
+            return False
+
         if time_position < 0:
             time_position = 0
-        elif time_position > self.current_track.length:
+        elif time_position > tl_track.track.length:
             # TODO: gstreamer will trigger a about to finish for us, use that?
             self.next()
             return True
