@@ -300,8 +300,8 @@ class _Handler(object):
             AudioListener.send('stream_changed', uri=None)
 
         if 'GST_DEBUG_DUMP_DOT_DIR' in os.environ:
-            Gst.DEBUG_BIN_TO_DOT_FILE(
-                self._audio._playbin, Gst.DEBUG_GRAPH_SHOW_ALL, 'mopidy')
+            Gst.debug_bin_to_dot_file(
+                self._audio._playbin, Gst.DebugGraphDetails.ALL, 'mopidy')
 
     def on_buffering(self, percent, structure=None):
         if structure and structure.has_field('buffering-mode'):
