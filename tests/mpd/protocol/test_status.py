@@ -26,7 +26,7 @@ class StatusHandlerTest(protocol.BaseTestCase):
         self.assertNotInResponse('Track: 0')
         self.assertNotInResponse('Date: ')
         self.assertInResponse('Pos: 0')
-        self.assertInResponse('Id: 0')
+        self.assertInResponse('Id: 1')
         self.assertInResponse('OK')
 
     def test_currentsong_without_song(self):
