@@ -3,6 +3,7 @@
 *.pyc
 *.swp
 *~
+.cache/
 .coverage
 .idea
 .noseids
@@ -15,5 +16,5 @@ dist/
 docs/_build/
 mopidy.log*
 nosetests.xml
-xunit-*.xml
 tmp/
+xunit-*.xml
