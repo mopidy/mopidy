@@ -11,7 +11,7 @@
 
 #### How are PR handled
 
-<1. Before spending any time on making a pull request:
+1. Before spending any time on making a pull request:
 
 
   * If it’s a bug, file an issue.
@@ -42,4 +42,4 @@
 
     * Write in the imperative, present tense: “add” not “added”.
 
-8. Send a pull request to the develop branch. See the GitHub pull request docs for help.>
+8. Send a pull request to the develop branch. See the GitHub pull request docs for help.
