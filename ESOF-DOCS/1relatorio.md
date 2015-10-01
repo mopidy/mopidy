@@ -53,7 +53,7 @@ Mopidy plays music from local disk, Spotify, SoundCloud, Google Play Music, and 
 To contribute to the development of Mopidy,first follow the instructions to install a regular install of Mopidy, then continue with reading Contributing and Development environment.
 The following steps help you get a good initial setup. 
 
-#####1. Install Mopidy the regular way:
+1. #####Install Mopidy the regular way:
 		The installation depends upon your OS and/or distribution, if you’re running e.g. Debian, start with installing Mopidy from Debian packages.
 
 #####2. Make a development workspace:
