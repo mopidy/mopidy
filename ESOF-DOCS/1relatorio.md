@@ -65,7 +65,7 @@ The virtualenv will wall off Mopidy and its dependencies from the rest of your s
 
 Most of us use the virtualenvwrapper to ease working with virtualenvs,
 
-##P.S: SEE HOW TO INSTALL VIRTUALENVWRAPPER
+P.S: SEE HOW TO INSTALL VIRTUALENVWRAPPER
 
 To create a virtualenv:
 >mkvirtualenv -a ~/mopidy-dev --python `which python2.7` \
