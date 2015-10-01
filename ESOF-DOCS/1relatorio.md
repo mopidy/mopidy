@@ -95,7 +95,7 @@ The following steps help you get a good initial setup.
    Assuming you’re still inside the Git repo, use pip to install Mopidy from the Git repo in an “editable” form:
    >pip install --editable .
 
-   >#####Warning
+   #####Warning
    >It’s not uncommon to clean up in the Git repo now and then, e.g. by running git clean.
 
    >If you do this, then the Mopidy.egg-info directory will be removed, and pkg_resources will no longer know how to locate the “console script” entry point or the bundled Mopidy extensions.
