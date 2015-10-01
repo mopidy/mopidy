@@ -57,16 +57,21 @@ The following steps help you get a good initial setup.
 
 2. Make a development workspace
    >mkdir ~/mopidy-dev
+   
    It will contain all the Git repositories you’ll check out when working on Mopidy and extensions.
  
 3. Make a virtualenv, is a tool to create isolated Python environments.
+   
    The virtualenv will wall off Mopidy and its dependencies from the rest of your system. All development and installation of Python dependencies, versions of Mopidy, and extensions are done inside the virtualenv.
-   Most of us use the virtualenvwrapper to ease working with virtualenvs,
+  
+  Most of us use the virtualenvwrapper to ease working with virtualenvs,
    P.S: SEE HOW TO INSTALL VIRTUALENVWRAPPER
+   
    To create a virtualenv:
    >mkvirtualenv -a ~/mopidy-dev --python `which python2.7` \
    --system-site-packages mopidy
-   Now, each time you open a terminal and want to activate the mopidy virtualenv, run:
+  
+  Now, each time you open a terminal and want to activate the mopidy virtualenv, run:
    >workon mopidy
 
 4. Clone the repo from GitHub
@@ -74,22 +79,27 @@ The following steps help you get a good initial setup.
    >cd ~/mopidy-dev/mopidy/
 
 5. Install development tools
+   
    We use a number of Python development tools. The dev-requirements.txt file has comments describing what we use each dependency for
+  
    Install them all into the active virtualenv by running pip:
    >pip install --upgrade -r dev-requirements.txt
+   
    To upgrade the tools in the future, just rerun the exact same command.
 
 6. Install Mopidy from the Git repo
-   we’ll want to run Mopidy from the Git repo. There’s two reasons for this: first of all, it lets you easily change the source code, restart Mopidy, and see the change take effect. Second, it’s a convenient way to keep at the bleeding edge, testing the latest developments in Mopidy itself or test some extension against the latest Mopidy changes.
+   
+   We’ll want to run Mopidy from the Git repo. There’s two reasons for this: first of all, it lets you easily change the source code, restart Mopidy, and see the change take effect. Second, it’s a convenient way to keep at the bleeding edge, testing the latest developments in Mopidy itself or test some extension against the latest Mopidy changes.
+  
    Assuming you’re still inside the Git repo, use pip to install Mopidy from the Git repo in an “editable” form:
    >pip install --editable .
 
 >#####Warning
 >It’s not uncommon to clean up in the Git repo now and then, e.g. by running git clean.
 
-If you do this, then the Mopidy.egg-info directory will be removed, and pkg_resources will no longer know how to locate the “console script” entry point or the bundled Mopidy extensions.
+>If you do this, then the Mopidy.egg-info directory will be removed, and pkg_resources will no longer know how to locate the “console script” entry point or the bundled Mopidy extensions.
 
-The fix is simply to run the install command again:
+>The fix is simply to run the install command again:
 >pip install --editable .
 
 Finally, we can go back to the workspace, again using a virtualenvwrapper tool:
