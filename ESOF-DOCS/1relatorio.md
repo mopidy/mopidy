@@ -1,6 +1,11 @@
-# Primeiro relatorio
+# First Report
 
 ### Introduction
+Mopidy is an extensible music server written in Python.
+
+Mopidy plays music from local disk, Spotify, SoundCloud, Google Play Music, and more. You edit the playlist from any phone, tablet, or computer using a range of MPD and web clients.
+
+To contribute to the development of Mopidy,first follow the instructions to install a regular install of Mopidy, then continue with reading Contributing and Development environment.
 
 ### Development process
 
@@ -45,3 +50,26 @@
     * Write in the imperative, present tense: “add” not “added”.
 
 8. Send a pull request to the develop branch. See the GitHub pull request docs for help.
+
+### Development Environment
+The following steps help you get a good initial setup.
+
+1. Install Mopidy the regular way, the installation depends upon your OS and/or distribution, if you’re running e.g. Debian, start with installing Mopidy from Debian packages.
+
+2. Make a development workspace
+ >mkdir ~/mopidy-dev
+ It will contain all the Git repositories you’ll check out when working on Mopidy and extensions.
+ 
+3. Make a virtualenv, is a tool to create isolated Python environments.
+The virtualenv will wall off Mopidy and its dependencies from the rest of your system. All development and installation of Python dependencies, versions of Mopidy, and extensions are done inside the virtualenv.
+Most of us use the virtualenvwrapper to ease working with virtualenvs,
+##HOW TO INSTALL VIRTUALENVWRAPPER
+To create a virtualenv:
+>mkvirtualenv -a ~/mopidy-dev --python `which python2.7` \
+  --system-site-packages mopidy
+Now, each time you open a terminal and want to activate the mopidy virtualenv, run:
+>workon mopidy
+
+4. Clone the repo from GitHub
+5. Install development tools
+6. Install Mopidy from the Git repo
