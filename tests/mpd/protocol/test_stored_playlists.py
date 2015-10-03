@@ -223,10 +223,12 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.backend.playlists.set_dummy_playlists([
             Playlist(
                 name='name', uri='dummy:a1', tracks=[tracks[0]])])
+
         self.send_request('playlistadd "name" "dummy:b"')
+
         self.assertInResponse('OK')
         self.assertEqual(
-            2, len(self.backend.playlists.get_items("dummy:a1").get()))
+            2, len(self.backend.playlists.get_items('dummy:a1').get()))
 
     def test_playlistadd_creates_playlist(self):
         tracks = [
@@ -236,7 +238,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.send_request('playlistadd "name" "dummy:a"')
         self.assertInResponse('OK')
         self.assertNotEqual(
-            None, self.backend.playlists.lookup("dummy:name").get())
+            None, self.backend.playlists.lookup('dummy:name').get())
 
     def test_playlistclear(self):
         self.backend.playlists.set_dummy_playlists([
@@ -290,8 +292,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
                 name='old_name', uri='dummy:a1', tracks=[Track(uri='b')])])
         self.send_request('rename "old_name" "new_name"')
         self.assertInResponse('OK')
-        self.assertNotEqual(
-            None, self.backend.playlists.lookup("dummy:new_name").get())
+        self.assertIsNotNone(self.backend.playlists.lookup("dummy:new_name").get())
 
     def test_rm(self):
         self.backend.playlists.set_dummy_playlists([
