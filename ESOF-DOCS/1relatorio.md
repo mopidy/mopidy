@@ -1,27 +1,32 @@
-# First Report
+# Software Processes in Mopidy
+---
 
-### Introduction
-Mopidy is an extensible music server written in Python.
+## Introduction
 
-Mopidy plays music from local disk, Spotify, SoundCloud, Google Play Music, and more. You edit the playlist from any phone, tablet, or computer using a range of MPD and web clients.
+Mopidy is an extensible music server written in Python and plays music from local disk, Spotify, SoundCloud, Google Play Music, and more.The playlist can be edit from any phone, tablet, or computer using a range of MPD and web clients. Mopidy runs on Linux computers or Macs that have a network connectivity and audio output.
 
-### Development process
+## Development process
 
-[*Link from docs here*](https://docs.mopidy.com/en/latest/contributing/)
+### Contributing
 
-- Uses IRC and a [forum](discuss.mopidy.com) for Q&A, discussions and helping users
-- Helping others is considered a very good way to contribute as there is usually high demand for help which consumes development time from contributors
-- Relies on **issue tracker** from github for *bug reports* and *feature requests*
-- PR's are the main way to contribute to the project and have a very strict guideline
+**Helping users**
 
-#### How are PR handled
+One way to contribute to Mopidy, a great place to start is by helping other users on IRC and in the [discussion forum](discuss.mopidy.com) for Q&A. This contribution is highly valued to the person in charge because  free up time for other contributors to spend more time on fixing bugs or implementing new features.
+
+**Issue guidelines**
+
+The other way to contribut is case you found a bug ou have a feature request, check first if there's already an issue in the [issue tracker](https://github.com/mopidy/mopidy/issues). If there is, see if there is anything you  can add to help reproduce or fix the issue.
+If there is no exising issue matching your bug or feature request, create a [new issue](https://github.com/mopidy/mopidy/issues/new). Include as much relevant information as possible. If it’s a bug, including how to reproduce the bug and any relevant logs or error messages.
+
+**Pull Request**
+
+Finally, the PR's are the last way to contribut to Mopidy and it's important follow some guidelines.
 
 1. Before spending any time on making a pull request:
 
+    * If it’s a bug, file an issue.
 
-  * If it’s a bug, file an issue.
-
-  * If it’s an enhancement, discuss it with other Mopidy developers first, either in a GitHub issue, on the discussion forum, or on IRC. Making sure your ideas and solutions are aligned with other contributors greatly increases the odds of your pull request being quickly accepted.
+    * If it’s an enhancement, discuss it with other Mopidy developers first, either in a GitHub issue, on the discussion forum, or on IRC. Making sure your ideas and solutions are aligned with other contributors greatly increases the odds of your pull request being quickly accepted.
 
 2. Create a new branch, based on the develop branch, for every feature or bug fix. Keep branches small and on topic, as that makes them far easier to review. We often use the following naming convention for branches:
 
@@ -48,60 +53,3 @@ Mopidy plays music from local disk, Spotify, SoundCloud, Google Play Music, and 
     * Write in the imperative, present tense: “add” not “added”.
 
 8. Send a pull request to the develop branch. See the GitHub pull request docs for help.
-
-### Development Environment
-To contribute to the development of Mopidy,first follow the instructions to install a regular install of Mopidy, then continue with reading Contributing and Development environment.
-The following steps help you get a good initial setup. 
-
-1. Install Mopidy the regular way:
-   The installation depends upon your OS and/or distribution, if you’re running e.g. Debian, start with installing Mopidy from Debian packages.
-
-2. Make a development workspace:
-   >mkdir ~/mopidy-dev
-   
-   It will contain all the Git repositories you’ll check out when working on Mopidy and extensions.
- 
-3. Make a virtualenv:
-   
-   The virtualenv,is a tool to create isolated Python environments, will wall off Mopidy and its dependencies from the rest of your system. All development and installation of Python dependencies, versions of Mopidy, and extensions are done inside the virtualenv.
-  
-   Most of us use the virtualenvwrapper to ease working with virtualenvs,
-   P.S: SEE HOW TO INSTALL VIRTUALENVWRAPPER
-   
-   To create a virtualenv:
-   >mkvirtualenv -a ~/mopidy-dev --python `which python2.7` \
-   --system-site-packages mopidy
-  
-   Now, each time you open a terminal and want to activate the mopidy virtualenv, run:
-   >workon mopidy
-
-4. Clone the repo from GitHub:
-   >git clone https://github.com/mopidy/mopidy.git
-   >cd ~/mopidy-dev/mopidy/
-
-5. Install development tools
-   
-   We use a number of Python development tools. The dev-requirements.txt file has comments describing what we use each dependency for
-  
-   Install them all into the active virtualenv by running pip:
-   >pip install --upgrade -r dev-requirements.txt
-   
-   To upgrade the tools in the future, just rerun the exact same command.
-
-6. Install Mopidy from the Git repo:
-   
-   We’ll want to run Mopidy from the Git repo. There’s two reasons for this: first of all, it lets you easily change the source code, restart Mopidy, and see the change take effect. Second, it’s a convenient way to keep at the bleeding edge, testing the latest developments in Mopidy itself or test some extension against the latest Mopidy changes.
-  
-   Assuming you’re still inside the Git repo, use pip to install Mopidy from the Git repo in an “editable” form:
-   >pip install --editable .
-
-   #####Warning
-   >It’s not uncommon to clean up in the Git repo now and then, e.g. by running git clean.
-
-   >If you do this, then the Mopidy.egg-info directory will be removed, and pkg_resources will no longer know how to locate the “console script” entry point or the bundled Mopidy extensions.
-
-   >The fix is simply to run the install command again:
-   >pip install --editable .
-
-   Finally, we can go back to the workspace, again using a virtualenvwrapper tool:
-   >cdproject
