@@ -269,6 +269,9 @@ class LibraryController(object):
     def search(self, query=None, uris=None, exact=False, **kwargs):
         """
         Search the library for tracks where ``field`` contains ``values``.
+        ``field`` can be one of ``uri``, ``track_name``, ``album``, ``artist``,
+        ``albumartist``, ``composer``, ``performer``, ``track_no``, ``genre``,
+        ``date``, ``comment`` or ``any``.
 
         If ``uris`` is given, the search is limited to results from within the
         URI roots. For example passing ``uris=['file:']`` will limit the search
