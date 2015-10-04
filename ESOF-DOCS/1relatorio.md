@@ -4,6 +4,7 @@
 * [Mopidy](#mopidy)
     * [What is Mopidy?](#intro)
     * [Development process](#development-process)
+        * [Methodologies](#methodologies)
         * [Contributing](#contributing)
             * [Helping users](#helping-users)
             * [Issue guidelines](#issue-guidelines)
@@ -23,6 +24,12 @@ Since it is just a server (an [MPD](http://www.musicpd.org) and HTTP server to b
 The playlist can be edited from any phone, tablet, or computer using a range of [MPD](https://docs.mopidy.com/en/latest/clients/mpd/) and [web clients](https://docs.mopidy.com/en/latest/ext/web/#ext-web).
 
 ## Development Process
+
+### Methodologies
+
+We contacted [Stein Magnus Jodal](https://github.com/jodal), the owner and main contributor of this project, but unfortunately he did not reply to our email.
+
+For our analysis the Mopidy use TAD and FDD as methodology software develop process, TAD is present on Pull Requests because tests must be include for every bux fix or new feature add. Every month, in periods of active development, the Mopidy team intend to release at least one feature, so FDD is present on this point.
 
 ### Contributing
 
@@ -92,3 +99,12 @@ Provides a CDN service for free, accelerating requests to all the Mopidy service
 </a>
 
 Provides a freeSSL certificate for the website [mopidy.com](http://mopidy.com).
+
+
+
+
+
+
+
+
+
