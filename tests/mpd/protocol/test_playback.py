@@ -292,12 +292,12 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_playid(self):
-        self.send_request('playid "0"')
+        self.send_request('playid "1"')
         self.assertEqual(PLAYING, self.core.playback.state.get())
         self.assertInResponse('OK')
 
     def test_playid_without_quotes(self):
-        self.send_request('playid 0')
+        self.send_request('playid 1')
         self.assertEqual(PLAYING, self.core.playback.state.get())
         self.assertInResponse('OK')
 
@@ -398,7 +398,7 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
     def test_seekid_in_current_track(self):
         self.core.playback.play()
 
-        self.send_request('seekid "0" "30"')
+        self.send_request('seekid "1" "30"')
 
         current_track = self.core.playback.current_track.get()
         self.assertEqual(current_track, self.tracks[0])
@@ -409,10 +409,10 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
     def test_seekid_in_another_track(self):
         self.core.playback.play()
 
-        self.send_request('seekid "1" "30"')
+        self.send_request('seekid "2" "30"')
 
         current_tl_track = self.core.playback.current_tl_track.get()
-        self.assertEqual(current_tl_track.tlid, 1)
+        self.assertEqual(current_tl_track.tlid, 2)
         self.assertEqual(current_tl_track.track, self.tracks[1])
         self.assertInResponse('OK')
 

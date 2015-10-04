@@ -20,11 +20,22 @@ v1.2.0 (UNRELEASED)
 
 Feature release.
 
-Local
------
+Core API
+--------
+
+- Start ``tlid`` counting at 1 instead of 0 to keep in sync with MPD's
+  ``songid``.
+
+Local backend
+--------------
 
 - Made :confval:`local/data_dir` really deprecated. This change breaks older
   versions of Mopidy-Local-SQLite and Mopidy-Local-Images.
+
+MPD frontend
+------------
+
+- Start ``songid`` counting at 1 instead of 0 to match the original MPD server.
 
 Zeroconf
 --------

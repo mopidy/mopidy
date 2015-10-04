@@ -178,13 +178,13 @@ class MoveCommandsTest(BasePopulatedTracklistTestCase):
         self.assertInResponse('OK')
 
     def test_moveid(self):
-        self.send_request('moveid "4" "2"')
+        self.send_request('moveid "5" "2"')
         result = [t.name for t in self.core.tracklist.tracks.get()]
         self.assertEqual(result, ['a', 'b', 'e', 'c', 'd', 'f'])
         self.assertInResponse('OK')
 
     def test_moveid_with_tlid_not_found_in_tracklist_should_ack(self):
-        self.send_request('moveid "9" "0"')
+        self.send_request('moveid "10" "0"')
         self.assertEqualResponse(
             'ACK [50@0] {moveid} No such song')
 
@@ -210,7 +210,7 @@ class PlaylistFindCommandTest(protocol.BaseTestCase):
 
         self.send_request('playlistfind filename "dummy:///exists"')
         self.assertInResponse('file: dummy:///exists')
-        self.assertInResponse('Id: 0')
+        self.assertInResponse('Id: 1')
         self.assertInResponse('Pos: 0')
         self.assertInResponse('OK')
 
@@ -224,11 +224,11 @@ class PlaylistIdCommandTest(BasePopulatedTracklistTestCase):
         self.assertInResponse('OK')
 
     def test_playlistid_with_songid(self):
-        self.send_request('playlistid "1"')
+        self.send_request('playlistid "2"')
         self.assertNotInResponse('Title: a')
-        self.assertNotInResponse('Id: 0')
+        self.assertNotInResponse('Id: 1')
         self.assertInResponse('Title: b')
-        self.assertInResponse('Id: 1')
+        self.assertInResponse('Id: 2')
         self.assertInResponse('OK')
 
     def test_playlistid_with_not_existing_songid_fails(self):
@@ -445,18 +445,18 @@ class SwapCommandTest(BasePopulatedTracklistTestCase):
         self.assertInResponse('OK')
 
     def test_swapid(self):
-        self.send_request('swapid "1" "4"')
+        self.send_request('swapid "2" "5"')
         result = [t.name for t in self.core.tracklist.tracks.get()]
         self.assertEqual(result, ['a', 'e', 'c', 'd', 'b', 'f'])
         self.assertInResponse('OK')
 
     def test_swapid_with_first_id_unknown_should_ack(self):
-        self.send_request('swapid "0" "8"')
+        self.send_request('swapid "1" "8"')
         self.assertEqualResponse(
             'ACK [50@0] {swapid} No such song')
 
     def test_swapid_with_second_id_unknown_should_ack(self):
-        self.send_request('swapid "8" "0"')
+        self.send_request('swapid "8" "1"')
         self.assertEqualResponse(
             'ACK [50@0] {swapid} No such song')
 

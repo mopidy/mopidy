@@ -16,7 +16,7 @@ class TracklistController(object):
 
     def __init__(self, core):
         self.core = core
-        self._next_tlid = 0
+        self._next_tlid = 1
         self._tl_tracks = []
         self._version = 0
 
@@ -218,7 +218,7 @@ class TracklistController(object):
             The *tlid* parameter
         """
         tl_track is None or validation.check_instance(tl_track, TlTrack)
-        tlid is None or validation.check_integer(tlid, min=0)
+        tlid is None or validation.check_integer(tlid, min=1)
 
         if tl_track is None and tlid is None:
             tl_track = self.core.playback.get_current_tl_track()

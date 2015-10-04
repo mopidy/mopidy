@@ -164,7 +164,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.core.playback.play()
         result = dict(status.status(self.context))
         self.assertIn('songid', result)
-        self.assertEqual(int(result['songid']), 0)
+        self.assertEqual(int(result['songid']), 1)
 
     def test_status_method_when_playing_contains_time_with_no_length(self):
         self.set_tracklist(Track(uri='dummy:/a', length=None))
