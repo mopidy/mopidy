@@ -4,10 +4,11 @@
 * [Mopidy](#mopidy)
     * [What is Mopidy?](#intro)
     * [Development process](#development-process)
-    * [Contributing](#contributing)
-        * [Helping users](#helping-users)
-        * [Issue guidelines](#issue-guidelines)
-        * [Pull Requests](#pull-requests)
+        * [Contributing](#contributing)
+            * [Helping users](#helping-users)
+            * [Issue guidelines](#issue-guidelines)
+            * [Pull Requests](#pull-requests)
+        * [Releases](#releases)
 
 <div id='intro'/>
 ## What is Mopidy?
@@ -48,3 +49,9 @@ Code contributions are made mainly by [Github's Pull Request feature](https://he
 4. Documentation must also be included for any new feature.
 
 5. Send a pull request to the `develop` branch.
+
+### Releases
+
+After the changelog is commited and the version bumped, the `develop` branch is merged into the `master` branch, a tag is created and the Debian package is updated.
+
+The news about a new release are spread through the Mopidy IRC, Twitter and mailing list so that all the package maintainers from different distributions can update their respective package and make it easily available to install for the end user.
