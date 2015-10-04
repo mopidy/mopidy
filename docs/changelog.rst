@@ -4,6 +4,16 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+v1.1.2 (UNRELEASED)
+===================
+
+Bug fix release.
+
+- Stream: If an URI is considered playable, don't consider it as a candidate
+  for playlist parsing. Just looking at MIME type prefixes isn't enough, as for
+  example Ogg Vorbis has the MIME type ``application/ogg``. (Fixes:
+  :issue:`1299`)
+
 
 v1.1.1 (2015-09-14)
 ===================

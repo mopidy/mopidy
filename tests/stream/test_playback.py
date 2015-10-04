@@ -38,7 +38,9 @@ def audio():
 
 @pytest.fixture
 def scanner():
-    return mock.Mock(spec=scan.Scanner)
+    scan_mock = mock.Mock(spec=scan.Scanner)
+    scan_mock.scan.return_value = None
+    return scan_mock
 
 
 @pytest.fixture
@@ -58,7 +60,24 @@ class TestTranslateURI(object):
 
     @responses.activate
     def test_audio_stream_returns_same_uri(self, scanner, provider):
-        scanner.scan.return_value.mime = 'audio/mpeg'
+        scanner.scan.side_effect = [
+            # Set playable to False to test detection by mimetype
+            mock.Mock(mime='audio/mpeg', playable=False),
+        ]
+
+        result = provider.translate_uri(STREAM_URI)
+
+        scanner.scan.assert_called_once_with(STREAM_URI, timeout=mock.ANY)
+        assert result == STREAM_URI
+
+    @responses.activate
+    def test_playable_ogg_stream_is_not_considered_a_playlist(
+            self, scanner, provider):
+
+        scanner.scan.side_effect = [
+            # Set playable to True to ignore detection as possible playlist
+            mock.Mock(mime='application/ogg', playable=True),
+        ]
 
         result = provider.translate_uri(STREAM_URI)
 
@@ -70,8 +89,10 @@ class TestTranslateURI(object):
             self, scanner, provider, caplog):
 
         scanner.scan.side_effect = [
-            mock.Mock(mime='text/foo'),  # scanning playlist
-            mock.Mock(mime='audio/mpeg'),  # scanning stream
+            # Scanning playlist
+            mock.Mock(mime='text/foo', playable=False),
+            # Scanning stream
+            mock.Mock(mime='audio/mpeg', playable=True),
         ]
         responses.add(
             responses.GET, PLAYLIST_URI,
@@ -100,8 +121,10 @@ class TestTranslateURI(object):
     @responses.activate
     def test_xml_playlist_with_mpeg_stream(self, scanner, provider):
         scanner.scan.side_effect = [
-            mock.Mock(mime='application/xspf+xml'),  # scanning playlist
-            mock.Mock(mime='audio/mpeg'),  # scanning stream
+            # Scanning playlist
+            mock.Mock(mime='application/xspf+xml', playable=False),
+            # Scanning stream
+            mock.Mock(mime='audio/mpeg', playable=True),
         ]
         responses.add(
             responses.GET, PLAYLIST_URI,
@@ -120,8 +143,10 @@ class TestTranslateURI(object):
             self, scanner, provider, caplog):
 
         scanner.scan.side_effect = [
-            exceptions.ScannerError('some failure'),  # scanning playlist
-            mock.Mock(mime='audio/mpeg'),  # scanning stream
+            # Scanning playlist
+            exceptions.ScannerError('some failure'),
+            # Scanning stream
+            mock.Mock(mime='audio/mpeg', playable=True),
         ]
         responses.add(
             responses.GET, PLAYLIST_URI,
@@ -169,7 +194,9 @@ class TestTranslateURI(object):
 
     @responses.activate
     def test_playlist_references_itself(self, scanner, provider, caplog):
-        scanner.scan.return_value.mime = 'text/foo'
+        scanner.scan.side_effect = [
+            mock.Mock(mime='text/foo', playable=False)
+        ]
         responses.add(
             responses.GET, PLAYLIST_URI,
             body=BODY.replace(STREAM_URI, PLAYLIST_URI),
