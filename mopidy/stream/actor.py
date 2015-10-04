@@ -123,12 +123,14 @@ def _unwrap_stream(uri, timeout, scanner, requests_session):
             logger.debug('GStreamer failed scanning URI (%s): %s', uri, exc)
             scan_result = None
 
-        if scan_result is not None and not (
-                scan_result.mime.startswith('text/') or
-                scan_result.mime.startswith('application/')):
-            logger.debug(
-                'Unwrapped potential %s stream: %s', scan_result.mime, uri)
-            return uri
+        if scan_result is not None:
+            if scan_result.playable or (
+                not scan_result.mime.startswith('text/') and
+                not scan_result.mime.startswith('application/')
+            ):
+                logger.debug(
+                    'Unwrapped potential %s stream: %s', scan_result.mime, uri)
+                return uri
 
         download_timeout = deadline - time.time()
         if download_timeout < 0:
