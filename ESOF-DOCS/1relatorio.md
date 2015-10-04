@@ -9,6 +9,9 @@
             * [Issue guidelines](#issue-guidelines)
             * [Pull Requests](#pull-requests)
         * [Releases](#releases)
+          * [Versioning](#versioning)
+          * [Schedule](#schedule)
+          * [Procedure](#procedure)
 
 <div id='intro'/>
 ## What is Mopidy?
@@ -51,6 +54,18 @@ Code contributions are made mainly by [Github's Pull Request feature](https://he
 5. Send a pull request to the `develop` branch.
 
 ### Releases
+#### Versioning
+Mopidy follows [Semantic Versioning](http://semver.org/) which means that the version numbers have three parts, MAJOR.MINOR.PATCH.
+
+Extensions should stay compatible throughout a major version but there's no promise they'll break on a major release (e.g. from 1.x to 2.x).
+Every major release should be accompanied by a FAQ regarding big changes to the extensions API which extension developers can resort to.
+
+#### Schedule
+New features are intended to be released every month with bug fixes being released when the bugs in question are too serious to wait for the next feature release.
+
+Bug fixes are only released for the latest feature release, which means that previous minor versions aren't supported as to not spread the limited resources.
+
+#### Procedure
 
 After the changelog is commited and the version bumped, the `develop` branch is merged into the `master` branch, a tag is created and the Debian package is updated.
 
