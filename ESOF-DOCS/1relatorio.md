@@ -70,3 +70,25 @@ Bug fixes are only released for the latest feature release, which means that pre
 After the changelog is commited and the version bumped, the `develop` branch is merged into the `master` branch, a tag is created and the Debian package is updated.
 
 The news about a new release are spread through the Mopidy IRC, Twitter and mailing list so that all the package maintainers from different distributions can update their respective package and make it easily available to install for the end user.
+
+### Sponsors
+#### Rackspace
+<a href="http://www.rackspace.com">
+<img src="./images/sponsors/rackspace.jpg" height="80"/>
+</a>
+
+Provides hosting services for free like the APT package repository, the Discourse forum and a mailing service.
+
+#### Fastly
+<a href="http://www.fastly.com">
+<img src="./images/sponsors/fastly.png" height="80"/>
+</a>
+
+Provides a CDN service for free, accelerating requests to all the Mopidy services.
+
+#### GlobalSign
+<a href="http://www.globalsign.com">
+<img src="./images/sponsors/globalsign.png" height="80"/>
+</a>
+
+Provides a freeSSL certificate for the website [mopidy.com](http://mopidy.com).
