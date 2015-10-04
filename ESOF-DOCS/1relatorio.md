@@ -1,55 +1,50 @@
-# Software Processes in Mopidy
----
+# Mopidy
 
-## Introduction
+## Table of Contents
+* [Mopidy](#mopidy)
+    * [What is Mopidy?](#intro)
+    * [Development process](#development-process)
+    * [Contributing](#contributing)
+        * [Helping users](#helping-users)
+        * [Issue guidelines](#issue-guidelines)
+        * [Pull Requests](#pull-requests)
 
-Mopidy is an extensible music server written in Python and plays music from local disk, Spotify, SoundCloud, Google Play Music, and more.The playlist can be edit from any phone, tablet, or computer using a range of MPD and web clients. Mopidy runs on Linux computers or Macs that have a network connectivity and audio output.
+<div id='intro'/>
+## What is Mopidy?
 
-## Development process
+Mopidy is an extensible music server written in Python which plays music from local disk (vanilla) or Spotify, SoundCloud, Google Play Music and other cloud servers through the use of extensions.
+It runs on Linux computers or Macs that have a network connectivity and audio output.
+
+Since it is just a server (an [MPD](http://www.musicpd.org) and HTTP server to be exact), additional frontends need to be used in other to control Mopidy.
+The playlist can be edited from any phone, tablet, or computer using a range of [MPD](https://docs.mopidy.com/en/latest/clients/mpd/) and [web clients](https://docs.mopidy.com/en/latest/ext/web/#ext-web).
+
+## Development Process
 
 ### Contributing
 
-**Helping users**
+#### Helping Users
 
-One way to contribute to Mopidy, a great place to start is by helping other users on IRC and in the [discussion forum](discuss.mopidy.com) for Q&A. This contribution is highly valued to the person in charge because  free up time for other contributors to spend more time on fixing bugs or implementing new features.
+Considered as the best way to contribute to Mopidy, helping other users is highly appreciated as it frees up development time from contributors.
 
-**Issue guidelines**
+A great place to start is by joining both IRC (*#mopidy* at [irc.freenode.net](irc.freenode.net)) and the [discussion forum](discuss.mopidy.com) and answering questions from users in need of help.
 
-The other way to contribut is case you found a bug ou have a feature request, check first if there's already an issue in the [issue tracker](https://github.com/mopidy/mopidy/issues). If there is, see if there is anything you  can add to help reproduce or fix the issue.
-If there is no exising issue matching your bug or feature request, create a [new issue](https://github.com/mopidy/mopidy/issues/new). Include as much relevant information as possible. If it’s a bug, including how to reproduce the bug and any relevant logs or error messages.
+#### Issue Guidelines
 
-**Pull Request**
+Another valuable contribution is filing an issue in the [issue tracker](https://github.com/mopidy/mopidy/issues) for any bugs found or features wanted. If the issue already exists, helping reproduce the bugs or flesh out the new feature is also welcomed.
 
-Finally, the PR's are the last way to contribut to Mopidy and it's important follow some guidelines.
+#### Pull Requests
 
-1. Before spending any time on making a pull request:
+Code contributions are made mainly by [Github's Pull Request feature](https://help.github.com/articles/using-pull-requests) and they should follow some guidelines:
 
-    * If it’s a bug, file an issue.
+1. A new branch, based on the `develop` branch, should be created for every feature or bug fix. Branches should be kept small and on topic, as that makes them far easier to review. The naming convetions for branches are as follows:
+    * Features get the prefix `feature/` e.g. `feature/track-last-modified-as-ms`
+    * Bug fixes get the prefix `fix/` e.g. `fix/902-consume-track-on-next`
+    * Improvements to the documentation get the prefix `docs/` e.g. `docs/add-ext-mopidy-spotify-tunigo`
 
-    * If it’s an enhancement, discuss it with other Mopidy developers first, either in a GitHub issue, on the discussion forum, or on IRC. Making sure your ideas and solutions are aligned with other contributors greatly increases the odds of your pull request being quickly accepted.
+2. The [code style](https://docs.mopidy.com/en/latest/codestyle/#codestyle) must be followed and the [flake8](https://flake8.readthedocs.org/en/2.4.1/) linter must not show any warnings as [Travis CI](https://travis-ci.org/) will check.
 
-2. Create a new branch, based on the develop branch, for every feature or bug fix. Keep branches small and on topic, as that makes them far easier to review. We often use the following naming convention for branches:
+3. Tests must be included for any new feature or substantial bug fix.
 
-    * Features get the prefix feature/, e.g. feature/track-last-modified-as-ms.
+4. Documentation must also be included for any new feature.
 
-    * Bug fixes get the prefix fix/, e.g. fix/902-consume-track-on-next.
-
-    * Improvements to the documentation get the prefix docs/, e.g. docs/add-ext-mopidy-spotify-tunigo.
-
-3. Follow the code style, especially make sure the flake8 linter does not complain about anything. Travis CI will check that your pull request is “flake8 clean”. See Style checking and linting.
-
-4. Include tests for any new feature or substantial bug fix. See Running tests.
-
-5. Include documentation for any new feature. See Writing documentation.
-
-6. Feel free to include a changelog entry in your pull request. The changelog is in docs/changelog.rst.
-
-7. Write good commit messages.
-
-    * Follow the template “topic: description” for the first line of the commit message, e.g. “mpd: Switch list command to using list_distinct”. See the commit history for inspiration.
-
-    * Use the rest of the commit message to explain anything you feel isn’t obvious. It’s better to have the details here than in the pull request description, since the commit message will live forever.
-
-    * Write in the imperative, present tense: “add” not “added”.
-
-8. Send a pull request to the develop branch. See the GitHub pull request docs for help.
+5. Send a pull request to the `develop` branch.
