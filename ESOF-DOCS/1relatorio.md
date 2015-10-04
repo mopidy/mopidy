@@ -28,9 +28,11 @@ The playlist can be edited from any phone, tablet, or computer using a range of 
 
 ### Methodologies
 
-We contacted [Stein Magnus Jodal](https://github.com/jodal), the owner and main contributor of this project, but unfortunately he did not reply to our email.
+We tried to get in contact with the owner and main contributor of the project [Stein Magnus Jodal](https://github.com/jodal) in order to get some insight into the development process and methods used during the development of the application.
+Unfortunately, he didn't reply to our email yet.
 
-For our analysis the Mopidy use TAD and FDD as methodology software develop process, TAD is present on Pull Requests because tests must be include for every bux fix or new feature add. Every month, in periods of active development, the Mopidy team intend to release at least one feature, so FDD is present on this point.
+A mix of [FDD(Feature-Driven Development)](https://en.wikipedia.org/wiki/Feature-driven_development) and TAD(Test-After Development) looks to be used as a framework to develop the application.
+From the documentation available, it seems that progress is made when a certain feature is requested (or needed/wanted) and the job of implementing that feature is assigned to a contributor. This contributor must also include unit tests for the feature implemented before it is accepted in the code. This is all acomplished with the help of Github tools such as the [issue tracker](https://github.com/mopidy/mopidy/issues) for discussing features and [pull requests](https://github.com/mopidy/mopidy/pulls) for reviewing and accepting the implementation of those features.
 
 ### Contributing
 
