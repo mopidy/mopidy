@@ -13,6 +13,7 @@
           * [Versioning](#versioning)
           * [Schedule](#schedule)
           * [Procedure](#procedure)
+    * [Sponsors](#sponsors)
 
 <div id='intro'/>
 ## What is Mopidy?
