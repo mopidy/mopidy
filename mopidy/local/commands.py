@@ -76,6 +76,9 @@ class ScanCommand(commands.Command):
             bytes(file_ext.lower()) for file_ext in excluded_file_extensions)
 
         library = _get_library(args, config)
+        if library == 1:
+            logger.error('Unable to scan local library: does not exist')
+            return 1
 
         file_mtimes, file_errors = path.find_mtimes(
             media_dir, follow=config['local']['scan_follow_symlinks'])
