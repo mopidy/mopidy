@@ -336,7 +336,7 @@ class PlaybackController(object):
 
         if not pending_tl_track:
             self.stop()
-            self._on_end_of_stream()  # pretend and EOS happend for cleanup
+            self._on_end_of_stream()  # pretend an EOS happened for cleanup
             return True
 
         backend = self._get_backend(pending_tl_track)

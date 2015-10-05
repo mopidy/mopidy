@@ -13,9 +13,10 @@ from mopidy.models import Track
 from tests import dummy_audio
 
 
-# TODO: Replace this with dummy_backend no that it uses a real playbackprovider
-# Since we rely on our DummyAudio to actually emit events we need a "real"
-# backend and not a mock so the right calls make it through to audio.
+# TODO: Replace this with dummy_backend now that it uses a real
+# playbackprovider Since we rely on our DummyAudio to actually emit events we
+# need a "real" backend and not a mock so the right calls make it through to
+# audio.
 class TestBackend(pykka.ThreadingActor, backend.Backend):
     uri_schemes = ['dummy']
 
