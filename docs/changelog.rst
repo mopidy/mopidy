@@ -14,6 +14,51 @@ Bug fix release.
   example Ogg Vorbis has the MIME type ``application/ogg``. (Fixes:
   :issue:`1299`)
 
+- Local: If the scan or clear commands are used on a library that does not
+  exist, return an error. Raise level of error when getting nonexistent library
+  from warning to error. (Fixes: :issue:`1298`)
+
+v1.2.0 (UNRELEASED)
+===================
+
+Feature release.
+
+Core API
+--------
+
+- Start ``tlid`` counting at 1 instead of 0 to keep in sync with MPD's
+  ``songid``.
+
+Local backend
+--------------
+
+- Made :confval:`local/data_dir` really deprecated. This change breaks older
+  versions of Mopidy-Local-SQLite and Mopidy-Local-Images.
+
+MPD frontend
+------------
+
+- Start ``songid`` counting at 1 instead of 0 to match the original MPD server.
+
+Zeroconf
+--------
+
+- Require ``stype`` argument to :class:`mopidy.zeroconf.Zeroconf`.
+
+- Use Avahi's interface selection by default. (Fixes: :issue:`1283`)
+
+- Use Avahi server's hostname instead of ``socket.getfqdn()`` in service
+  display name.
+
+Cleanups
+--------
+
+- Removed warning if :file:`~/.mopidy` exists. We stopped using this location
+  in 0.6, released in October 2011.
+
+- Removed warning if :file:`~/.config/mopidy/settings.py` exists. We stopped
+  using this settings file in 0.14, released in April 2013.
+
 
 v1.1.1 (2015-09-14)
 ===================

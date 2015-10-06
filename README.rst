@@ -53,8 +53,6 @@ To get started with Mopidy, check out
 - `Discussion forum <https://discuss.mopidy.com/>`_
 - `Source code <https://github.com/mopidy/mopidy>`_
 - `Issue tracker <https://github.com/mopidy/mopidy/issues>`_
-- `Development branch tarball <https://github.com/mopidy/mopidy/archive/develop.tar.gz#egg=mopidy-dev>`_
-
 - IRC: ``#mopidy`` at `irc.freenode.net <http://freenode.net/>`_
 - Announcement list: `mopidy@googlegroups.com <https://groups.google.com/forum/?fromgroups=#!forum/mopidy>`_
 - Twitter: `@mopidy <https://twitter.com/mopidy/>`_

@@ -297,7 +297,7 @@ class PlaybackController(object):
             raise ValueError('At most one of "tl_track" and "tlid" may be set')
 
         tl_track is None or validation.check_instance(tl_track, models.TlTrack)
-        tlid is None or validation.check_integer(tlid, min=0)
+        tlid is None or validation.check_integer(tlid, min=1)
 
         if tl_track:
             deprecation.warn('core.playback.play:tl_track_kwarg', pending=True)

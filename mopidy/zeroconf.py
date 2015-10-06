@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
 import logging
-import socket
 import string
 
 logger = logging.getLogger(__name__)
@@ -37,31 +36,40 @@ class Zeroconf(object):
     Currently, this only works on Linux using Avahi via D-Bus.
 
     :param str name: human readable name of the service, e.g. 'MPD on neptune'
-    :param int port: TCP port of the service, e.g. 6600
     :param str stype: service type, e.g. '_mpd._tcp'
+    :param int port: TCP port of the service, e.g. 6600
     :param str domain: local network domain name, defaults to ''
-    :param str host: interface to advertise the service on, defaults to all
-        interfaces
+    :param str host: interface to advertise the service on, defaults to ''
     :param text: extra information depending on ``stype``, defaults to empty
         list
     :type text: list of str
     """
 
-    def __init__(self, name, port, stype=None, domain=None, text=None):
-        self.group = None
-        self.stype = stype or '_http._tcp'
-        self.domain = domain or ''
+    def __init__(self, name, stype, port, domain='', host='', text=None):
+        self.stype = stype
         self.port = port
+        self.domain = domain
+        self.host = host
         self.text = text or []
 
-        template = string.Template(name)
-        self.name = template.safe_substitute(
-            hostname=socket.getfqdn(), port=self.port)
-        self.host = '%s.local' % socket.getfqdn()
+        self.bus = None
+        self.server = None
+        self.group = None
+        try:
+            self.bus = dbus.SystemBus()
+            self.server = dbus.Interface(
+                self.bus.get_object('org.freedesktop.Avahi', '/'),
+                'org.freedesktop.Avahi.Server')
+        except dbus.exceptions.DBusException as e:
+            logger.debug('%s: Server failed: %s', self, e)
+
+        self.display_hostname = '%s' % self.server.GetHostName()
+        self.name = string.Template(name).safe_substitute(
+            hostname=self.display_hostname, port=port)
 
     def __str__(self):
-        return 'Zeroconf service %s at [%s]:%d' % (
-            self.stype, self.host, self.port)
+        return 'Zeroconf service "%s" (%s at [%s]:%d)' % (
+            self.name, self.stype, self.host, self.port)
 
     def publish(self):
         """Publish the service.
@@ -78,26 +86,29 @@ class Zeroconf(object):
             logger.debug('%s: dbus not installed; publish failed.', self)
             return False
 
-        try:
-            bus = dbus.SystemBus()
+        if not self.bus:
+            logger.debug('%s: Bus not available; publish failed.', self)
+            return False
 
-            if not bus.name_has_owner('org.freedesktop.Avahi'):
+        if not self.server:
+            logger.debug('%s: Server not available; publish failed.', self)
+            return False
+
+        try:
+            if not self.bus.name_has_owner('org.freedesktop.Avahi'):
                 logger.debug(
                     '%s: Avahi service not running; publish failed.', self)
                 return False
 
-            server = dbus.Interface(
-                bus.get_object('org.freedesktop.Avahi', '/'),
-                'org.freedesktop.Avahi.Server')
-
             self.group = dbus.Interface(
-                bus.get_object(
-                    'org.freedesktop.Avahi', server.EntryGroupNew()),
+                self.bus.get_object(
+                    'org.freedesktop.Avahi', self.server.EntryGroupNew()),
                 'org.freedesktop.Avahi.EntryGroup')
 
             self.group.AddService(
                 _AVAHI_IF_UNSPEC, _AVAHI_PROTO_UNSPEC,
-                dbus.UInt32(_AVAHI_PUBLISHFLAGS_NONE), self.name, self.stype,
+                dbus.UInt32(_AVAHI_PUBLISHFLAGS_NONE),
+                self.name, self.stype,
                 self.domain, self.host, dbus.UInt16(self.port),
                 _convert_text_list_to_dbus_format(self.text))
 

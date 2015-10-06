@@ -83,7 +83,6 @@ def main():
 
         create_core_dirs(config)
         create_initial_config_file(args, extensions_data)
-        check_old_locations()
 
         verbosity_level = args.base_verbosity_level
         if args.verbosity_level:
@@ -189,22 +188,6 @@ def create_initial_config_file(args, extensions_data):
         logger.warning(
             'Unable to initialize %s with default config: %s',
             config_file, encoding.locale_decode(error))
-
-
-def check_old_locations():
-    dot_mopidy_dir = path.expand_path(b'~/.mopidy')
-    if os.path.isdir(dot_mopidy_dir):
-        logger.warning(
-            'Old Mopidy dot dir found at %s. Please migrate your config to '
-            'the ini-file based config format. See release notes for further '
-            'instructions.', dot_mopidy_dir)
-
-    old_settings_file = path.expand_path(b'$XDG_CONFIG_DIR/mopidy/settings.py')
-    if os.path.isfile(old_settings_file):
-        logger.warning(
-            'Old Mopidy settings file found at %s. Please migrate your '
-            'config to the ini-file based config format. See release notes '
-            'for further instructions.', old_settings_file)
 
 
 def log_extension_info(all_extensions, enabled_extensions):

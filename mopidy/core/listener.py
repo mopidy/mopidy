@@ -18,7 +18,7 @@ class CoreListener(listener.Listener):
     @staticmethod
     def send(event, **kwargs):
         """Helper to allow calling of core listener events"""
-        listener.send_async(CoreListener, event, **kwargs)
+        listener.send(CoreListener, event, **kwargs)
 
     def on_event(self, event, **kwargs):
         """
