@@ -40,6 +40,10 @@ class BaseTest(unittest.TestCase):
             audio=self.audio, backends=[self.backend], config=self.config)
         self.playback = self.core.playback
 
+        # We don't have a core actor running, so call about to finish directly.
+        self.audio.set_about_to_finish_callback(
+            self.playback._on_about_to_finish)
+
         with deprecation.ignore('core.tracklist.add:tracks_arg'):
             self.core.tracklist.add(self.tracks)
 

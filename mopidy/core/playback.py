@@ -27,7 +27,8 @@ class PlaybackController(object):
         self._pending_tl_track = None
 
         if self._audio:
-            self._audio.set_about_to_finish_callback(self._on_about_to_finish)
+            self._audio.set_about_to_finish_callback(
+                self._on_about_to_finish_callback)
 
     def _get_backend(self, tl_track):
         if tl_track is None:
@@ -205,6 +206,19 @@ class PlaybackController(object):
             self._set_current_tl_track(self._pending_tl_track)
             self._pending_tl_track = None
             self._trigger_track_playback_started()
+
+    def _on_about_to_finish_callback(self):
+        """Callback that performs a blocking actor call to the real callback.
+
+        This is passed to audio, which is allowed to call this code from the
+        audio thread. We pass execution into the core actor to ensure that
+        there is no unsafe access of state in core. This must block until
+        we get a response.
+        """
+        self.core.actor_ref.ask({
+            'command': 'pykka_call', 'args': tuple(), 'kwargs': {},
+            'attr_path': ('playback', '_on_about_to_finish'),
+        })
 
     def _on_about_to_finish(self):
         self._trigger_track_playback_ended(self.get_time_position())
