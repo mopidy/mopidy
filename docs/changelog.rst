@@ -14,6 +14,9 @@ Bug fix release.
   example Ogg Vorbis has the MIME type ``application/ogg``. (Fixes:
   :issue:`1299`)
 
+- Local: If the scan or clear commands are used on a library that does not
+  exist, exit with an error. (Fixes: :issue:`1298`)
+
 
 v1.2.0 (UNRELEASED)
 ===================

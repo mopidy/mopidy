@@ -111,7 +111,7 @@ To start the music server, run::
 
     mopidy
 
-To start the server with an additional config file than can override configs
+To start the server with an additional config file, that can override configs
 set in the default config files, run::
 
     mopidy --config ./my-config.conf

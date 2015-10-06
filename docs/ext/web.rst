@@ -145,6 +145,20 @@ To install, run::
 
     pip install Mopidy-Party
 
+Mopidy-Party
+============
+
+https://github.com/Lesterpig/mopidy-party
+
+Minimal web client designed for collaborative music management during parties.
+
+.. image:: /ext/mopidy_party.png
+
+To install, run::
+
+    pip install Mopidy-Party
+
+
 Mopidy-Simple-Webclient
 =======================
 

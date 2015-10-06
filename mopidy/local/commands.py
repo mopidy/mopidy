@@ -21,8 +21,8 @@ def _get_library(args, config):
     library_name = config['local']['library']
 
     if library_name not in libraries:
-        logger.warning('Local library %s not found', library_name)
-        return 1
+        logger.error('Local library %s not found', library_name)
+        return None
 
     logger.debug('Using %s as the local library', library_name)
     return libraries[library_name](config)
@@ -41,6 +41,9 @@ class ClearCommand(commands.Command):
 
     def run(self, args, config):
         library = _get_library(args, config)
+        if library is None:
+            return 1
+
         prompt = '\nAre you sure you want to clear the library? [y/N] '
 
         if compat.input(prompt).lower() != 'y':
@@ -76,6 +79,8 @@ class ScanCommand(commands.Command):
             bytes(file_ext.lower()) for file_ext in excluded_file_extensions)
 
         library = _get_library(args, config)
+        if library is None:
+            return 1
 
         file_mtimes, file_errors = path.find_mtimes(
             media_dir, follow=config['local']['scan_follow_symlinks'])
