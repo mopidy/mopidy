@@ -25,6 +25,18 @@ Cleanups
 - Removed warning if :file:`~/.config/mopidy/settings.py` exists. We stopped
   using this settings file in 0.14, released in April 2013.
 
+Gapless
+-------
+
+- Add partial support for gapless playback. Gapless now works as long as you
+  don't change tracks or use next/previous. (PR: :issue:`1288`)
+
+- Core playback has been refactored to better handle gapless, and async state
+  changes.
+
+- Tests have been updated to always use a core actor so async state changes
+  don't trip us up.
+
 
 v1.1.1 (UNRELEASED)
 ===================
