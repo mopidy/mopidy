@@ -362,7 +362,6 @@ class PlaybackController(object):
         else:
             self.core.tracklist._mark_unplayable(tl_track)
             if on_error_step == 1:
-                # TODO: can cause an endless loop for single track repeat.
                 self.next()
             elif on_error_step == -1:
                 self.previous()

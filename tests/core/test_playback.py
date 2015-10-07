@@ -169,19 +169,83 @@ class CorePlaybackTest(unittest.TestCase):
 
     def test_play_skips_to_next_on_unplayable_track(self):
         """Checks that we handle backend.change_track failing."""
-        self.playback2.change_track.return_value.get.return_value = False
+        self.playback1.change_track.return_value.get.return_value = False
 
         self.core.tracklist.clear()
         self.core.tracklist.add(uris=self.uris[:2])
         tl_tracks = self.core.tracklist.tl_tracks
 
-        self.core.playback.play(tl_tracks[0])
-        self.core.playback.play(tl_tracks[1])
+        unplayable_mock = mock.PropertyMock()
+        self.core.tracklist._mark_unplayable = unplayable_mock
 
-        # TODO: we really want to check that the track was marked unplayable
-        # and that next was called. This is just an indirect way of checking
-        # this :(
+        self.core.playback.play(tl_tracks[0])
+        # Check that track was marked as unplayable
+        unplayable_mock.assert_called_once_with(tl_tracks[0])
+        # Check that we skipped ot the next track
+        assert self.core.playback.get_current_tl_track() == tl_tracks[1]
+
+        # Check that next track is playing
+        self.assertEqual(self.core.playback.state, core.PlaybackState.PLAYING)
+
+    def test_play_skips_to_next_on_unplayable_track_avoids_infinite_loop(self):
+        # with pytest.raises(CallableExhausted):
+
+        # Checks that we avoid infinte loops when backend.change_track
+        # fails.
+        self.playback1.change_track.return_value.get.return_value = False
+
+        self.core.tracklist.clear()
+        self.core.tracklist.add(uris=self.uris[:1])
+
+        # Enable repeat mode to check for infinite loops
+        self.core.tracklist.set_repeat(True)
+
+        tl_tracks = self.core.tracklist.tl_tracks
+
+        # Make sure that we exit any unexpected recursive loops as quickly
+        # as possible while testing
+        self.playback1.change_track.return_value.get.side_effect = \
+            ErrorAfter(1)
+
+        self.core.playback.play(tl_tracks[0])
+        # Simulate repeat mode by playing the first track multiple times
+        for i in range(0, 1):
+            self.core.playback._on_end_of_track()
+        # unplayable_mock.assert_called_once_with(tl_tracks[0])
+
+        # Check that the player has been stopped
         self.assertEqual(self.core.playback.state, core.PlaybackState.STOPPED)
+
+    def test_play_skips_to_next_allows_repeat_for_multiple_tracks(self):
+        # with pytest.raises(CallableExhausted):
+
+        # Checks that we allow tracklists to repeat when
+        # backend.change_track fails but we have at least one playable track.
+        self.playback1.change_track.return_value.get.return_value = False
+        self.playback2.change_track.return_value.get.return_value = True
+
+        self.core.tracklist.clear()
+        self.core.tracklist.add(uris=self.uris[:2])
+
+        # Enable repeat mode to check for infinite loops
+        self.core.tracklist.set_repeat(True)
+
+        tl_tracks = self.core.tracklist.tl_tracks
+
+        # Make sure that we exit any unexpected recursive loops as quickly
+        # as possible while testing
+        self.playback1.change_track.return_value.get.side_effect = \
+            ErrorAfter(3)
+
+        self.core.playback.play(tl_tracks[0])
+        # Simulate repeat mode by playing the first track multiple times
+        for i in range(0, 2):
+            self.core.playback._on_end_of_track()
+
+        # unplayable_mock.assert_called_with(tl_tracks[0])
+
+        # Check that the playable track is in fact playing
+        self.assertEqual(self.core.playback.state, core.PlaybackState.PLAYING)
 
     @mock.patch(
         'mopidy.core.playback.listener.CoreListener', spec=core.CoreListener)
@@ -789,3 +853,21 @@ class Bug1177RegressionTest(unittest.TestCase):
         c.playback.pause()
         c.playback.next()
         b.playback.change_track.assert_called_once_with(track2)
+
+
+class ErrorAfter(object):
+
+    # Callable that will raise `CallableExhausted`
+    # exception after `limit` calls
+    def __init__(self, limit):
+        self.limit = limit
+        self.calls = 0
+
+    def __call__(self, *args, **kwargs):
+        self.calls += 1
+        if self.calls > self.limit:
+            raise CallableExhausted
+
+
+class CallableExhausted(Exception):
+    pass
