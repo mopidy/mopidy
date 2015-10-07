@@ -16,7 +16,7 @@ class StatusHandlerTest(protocol.BaseTestCase):
         self.backend.library.dummy_library = [track]
         self.core.tracklist.add(uris=[track.uri]).get()
 
-        self.core.playback.play()
+        self.core.playback.play().get()
         self.send_request('currentsong')
         self.assertInResponse('file: dummy:/a')
         self.assertInResponse('Time: 0')

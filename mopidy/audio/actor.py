@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 import os
+import threading
 
 import gobject
 
@@ -406,6 +407,7 @@ class Audio(pykka.ThreadingActor):
             self.mixer = SoftwareMixer(mixer)
 
     def on_start(self):
+        self._thread = threading.current_thread()
         try:
             self._setup_preferences()
             self._setup_playbin()
@@ -499,6 +501,11 @@ class Audio(pykka.ThreadingActor):
             self.mixer.teardown()
 
     def _on_about_to_finish(self, element):
+        if self._thread == threading.current_thread():
+            logger.error(
+                'about-to-finish in actor, aborting to avoid deadlock.')
+            return
+
         gst_logger.debug('Got about-to-finish event.')
         if self._about_to_finish_callback:
             logger.debug('Running about to finish callback.')

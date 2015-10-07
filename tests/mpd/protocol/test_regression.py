@@ -31,6 +31,7 @@ class IssueGH17RegressionTest(protocol.BaseTestCase):
             Track(uri='dummy:e'),
             Track(uri='dummy:f'),
         ]
+        self.audio.trigger_fake_playback_failure('dummy:error')
         self.backend.library.dummy_library = tracks
         self.core.tracklist.add(uris=[t.uri for t in tracks]).get()
 
