@@ -81,7 +81,7 @@ After the changelog is commited and the version bumped, the `develop` branch is 
 
 The news about a new release are spread through the Mopidy IRC, Twitter and mailing list so that all the package maintainers from different distributions can update their respective package and make it easily available to install for the end user.
 
-### Sponsors
+## Sponsors
 #### Rackspace
 <a href="http://www.rackspace.com">
 <img src="./images/sponsors/rackspace.jpg" height="80"/>
