@@ -18,6 +18,9 @@ On mopidy new requirements are suggested essentially by the developers, because 
 
 ## Analysis and Negotiation
 
+The analysis and trading is done between the project responsible and the developer that have the idea for a new feature. 
+The feature is propouse on [issue tracker](https://github.com/mopidy/mopidy/issues) to be or not accepted. Therefore, the analysis and negotiation is made and discussed internally.
+
 ## Specification
 
 ## Validation
