@@ -1,5 +1,6 @@
 # Mopidy Requirements
 
+## Table of contents
 @@TOC@@
 
 ## Introduction
@@ -10,7 +11,7 @@
 
 Mopidy requires a Unix based system (for example a Linux distribution or a Macintosh) with network connectivity and audio output.
 
-### Elicitation and Anylisis
+### Elicitation and Analysis
 
 New features can be suggested essentially by everyone, however, the ones that are added are a mix of what the developers feel is most important/requested and other functionality they think is fun to make, even though they may only be useful for a very limited number of users or for specific use cases.
 
@@ -25,16 +26,3 @@ Mopidy itself does not have a SRS (Software Requirements Specification) document
 * [Module Reference](https://mopidy.readthedocs.org/en/latest/modules/)
 
 ### Validation
-
-### Managment
-
-
-
-
-
-
-
-
-
-
-
