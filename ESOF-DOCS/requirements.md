@@ -2,7 +2,6 @@
 
 ## Table of contents
 - [Mopidy Requirements](#mopidy-requirements)
-    - [Table of contents](#table-of-contents)
     - [Introduction](#introduction)
     - [Requirements](#requirements)
         - [System Requirements](#system-requirements)
@@ -15,14 +14,16 @@
 
 ## Introduction
 
-In this document can be found a description about the usage and requirements of Mopidy. It's purpose is to provide the users the possibility of setting up a server that allows them to browse music whether through [MPD](http://www.musicpd.org) or [web clients](https://docs.mopidy.com/en/latest/ext/web/#ext-web). It was made to be very customizable so the users can enjoy it the way they want , it was thought to be versatile so it can play music from major cloud services through the usage of [extensions] (https://en.wikipedia.org/wiki/Software_extension) ( installable add-ons to extend capabilities of a software ). 
+Mopidy is an extensible music server written in Python which plays music from local disk.
+It was made to be very customizable and extensible so that both the users and developers can shape it the way they want it.
 
+The software was designed into various modules which accompanied with a good documentation makes it very easy to contribute to. It also makes use of a very laid back policy regarding new feature requests.
 
 ## Requirements
 
 ### System Requirements
 
-Mopidy requires a Unix based system (for example a Linux distribution or a Macintosh) with network connectivity and audio output.
+Mopidy requires a Unix based system (for example a Linux distribution or a Macintosh) with network connectivity and audio output. It also needs Python to be installed on the system, although most distributions make use of a package manager for dealing with dependencies.
 
 ### Elicitation and Analysis
 
