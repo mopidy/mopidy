@@ -3,29 +3,38 @@
 ## Table of Contents
 * [Mopidy Requirements](#mopidy-requirements)
     * [Introduction](#intro)
-    * [Elicitation](#elicitation)
-    * [Analysis and Negotiation](#analysis-and-negotiation)
-    * [Specification](#specification)
-    * [Validation](#validation)
-    * [Managment](#managment)
+    * [Requirements](#requirements)
+        * [Elicitation](#elicitation)
+        * [Analysis and Negotiation](#analysis-and-negotiation)
+        * [Specification](#specification)
+        * [Validation](#validation)
+        * [Managment](#managment)
 
 <div id='intro'/>
 ## Introduction
 
-## Elicitation
+## Requirements
+
+###Sistem Requirements
+
+Sported on Linux computers or Macs that have a network connectivity and audio output.
+
+### Elicitation
 
 On mopidy new requirements are suggested essentially by the developers, because every month features are release. The features added is a mix of what the developers feel is most important/requested of the missing features, and features they think its fun to make, even though they may be useful for very few users or for a limited use case.
 
-## Analysis and Negotiation
+### Analysis and Negotiation
 
 The analysis and trading is done between the project responsible and the developer that have the idea for a new feature. 
 The feature is propouse on [issue tracker](https://github.com/mopidy/mopidy/issues) to be or not accepted. Therefore, the analysis and negotiation is made and discussed internally.
 
-## Specification
+### Specification
 
-## Validation
+In this phase, some documentation like a SRS document should be produced in order to specify the requisites to be fulfilled. Mopidy dont have any SRS document, however he have some important documents to understand how Mopidy works, like [Glossary](https://mopidy.readthedocs.org/en/latest/glossary/), [Mopidy Command](https://mopidy.readthedocs.org/en/latest/command/), [API Reference](https://mopidy.readthedocs.org/en/latest/api/), [Module Reference](https://mopidy.readthedocs.org/en/latest/modules/).
 
-## Managment
+### Validation
+
+### Managment
 
 
 
