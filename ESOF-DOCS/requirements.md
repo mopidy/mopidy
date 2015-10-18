@@ -41,6 +41,9 @@ Mopidy itself does not have a SRS (Software Requirements Specification) document
 
 ### Validation
 
+The development of this project is very informal and as such the release schedule as it's discussion isn't very strict. Through the use of social networking such as the IRC and the discussion forum , the requirements are set taking in consideration the issues and necessities shown by the users therefore the features added in every release are a mix of what the developers feel is the most important and requested.  
+Following a [Semantic Versioning](http://semver.org/)  every major release is accompanied by a FAQ regarding big changes to the extensions API which developers can resort to. Bugfixes are released whenever bugs are discovered and too serious to wait, though bugfix releases are not provided to older versions besides the newest to prevent the spread of the limited resources this project has.
+
 ### Use cases
 
 Since Mopidy is just a music server in itself that plays music from local disk, it needs to be extended in order to be controlled or play music from other sources. This is done through the use of extensions.
