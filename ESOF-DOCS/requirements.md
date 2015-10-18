@@ -27,9 +27,7 @@ Mopidy requires a Unix based system (for example a Linux distribution or a Macin
 
 ### Elicitation and Analysis
 
-New features can be suggested essentially by everyone, however, the ones that are added are a mix of what the developers feel is most important/requested and other functionality they think is fun to make, even though they may only be useful for a very limited number of users or for specific use cases.
-
-The suggestions and discussions of these features take place in the [issue tracker](https://github.com/mopidy/mopidy/issues) of the Github repository, which later are merged upstream through the use of pull requests.
+New features can be suggested essentially by everyone. The suggestions and discussions of these features take place in the [issue tracker](https://github.com/mopidy/mopidy/issues) of the Github repository, which later are merged upstream through the use of pull requests.
 
 ### Specification
 
@@ -41,8 +39,10 @@ Mopidy itself does not have a SRS (Software Requirements Specification) document
 
 ### Validation
 
-The development of this project is very informal and as such the release schedule as it's discussion isn't very strict. Through the use of social networking such as the IRC and the discussion forum , the requirements are set taking in consideration the issues and necessities shown by the users therefore the features added in every release are a mix of what the developers feel is the most important and requested.  
-Following a [Semantic Versioning](http://semver.org/)  every major release is accompanied by a FAQ regarding big changes to the extensions API which developers can resort to. Bugfixes are released whenever bugs are discovered and too serious to wait, though bugfix releases are not provided to older versions besides the newest to prevent the spread of the limited resources this project has.
+The development of this project is very informal and, as such, the release schedule as its discussion isn't very strict. The features that are acepted and added are a mix of what the developers think is most important/requested as well as features that they just find fun to make, even though they may only be of use for a very limited number of users.
+
+Following a [Semantic Versioning](http://semver.org/)  every major release is accompanied by a FAQ regarding big changes to the extensions API which developers can resort to. 
+Bugfixes are released whenever bugs are discovered and too serious to wait, though bugfix releases are not provided to older versions besides the newest to prevent the spread of the limited resources this project has.
 
 ### Use cases
 
