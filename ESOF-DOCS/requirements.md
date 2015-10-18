@@ -15,6 +15,9 @@
 
 ## Introduction
 
+In this document can be found a description about the usage and requirements of Mopidy. It's purpose is to provide the users the possibility of setting up a server that allows them to browse music whether through [MPD](http://www.musicpd.org) or [web clients](https://docs.mopidy.com/en/latest/ext/web/#ext-web). It was made to be very customizable so the users can enjoy it the way they want , it was thought to be versatile so it can play music from major cloud services through the usage of [extensions] (https://en.wikipedia.org/wiki/Software_extension) ( installable add-ons to extend capabilities of a software ). 
+
+
 ## Requirements
 
 ### System Requirements
