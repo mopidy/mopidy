@@ -1,7 +1,17 @@
 # Mopidy Requirements
 
 ## Table of contents
-@@TOC@@
+- [Mopidy Requirements](#mopidy-requirements)
+    - [Table of contents](#table-of-contents)
+    - [Introduction](#introduction)
+    - [Requirements](#requirements)
+        - [System Requirements](#system-requirements)
+        - [Elicitation and Analysis](#elicitation-and-analysis)
+        - [Specification](#specification)
+        - [Validation](#validation)
+        - [Use cases](#use-cases)
+            - [Backends](#backends)
+            - [Frontends](#frontends)
 
 ## Introduction
 
@@ -57,8 +67,3 @@ Frontends on the other hand are what make it possible to control the server itse
 Frontends can also be web based, making it possible to control Mopidy remotely ([Android clients](http://mopidy.readthedocs.org/en/latest/clients/mpd/#mpd-android-clients), [Web clients](http://mopidy.readthedocs.org/en/latest/clients/mpd/#mpd-web-clients)).
 
 <img src="./images/uml/core.png" width="600" />
-
-
-
-
-
