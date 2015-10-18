@@ -1,31 +1,32 @@
 # Mopidy Requirements
 
-## Table of Contents
-* [Mopidy Requirements](#mopidy-requirements)
-    * [Introduction](#intro)
-    * [Elicitation](#elicitation)
-    * [Analysis and Negotiation](#analysis-and-negotiation)
-    * [Specification](#specification)
-    * [Validation](#validation)
-    * [Managment](#managment)
+@@TOC@@
 
-<div id='intro'/>
 ## Introduction
 
-## Elicitation
+## Requirements
 
-On mopidy new requirements are suggested essentially by the developers, because every month features are release. The features added is a mix of what the developers feel is most important/requested of the missing features, and features they think its fun to make, even though they may be useful for very few users or for a limited use case.
+### System Requirements
 
-## Analysis and Negotiation
+Mopidy requires a Unix based system (for example a Linux distribution or a Macintosh) with network connectivity and audio output.
 
-The analysis and trading is done between the project responsible and the developer that have the idea for a new feature. 
-The feature is propouse on [issue tracker](https://github.com/mopidy/mopidy/issues) to be or not accepted. Therefore, the analysis and negotiation is made and discussed internally.
+### Elicitation and Anylisis
 
-## Specification
+New features can be suggested essentially by everyone, however, the ones that are added are a mix of what the developers feel is most important/requested and other functionality they think is fun to make, even though they may only be useful for a very limited number of users or for specific use cases.
 
-## Validation
+The suggestions and discussions of these features take place in the [issue tracker](https://github.com/mopidy/mopidy/issues) of the Github repository, which later are merged upstream through the use of pull requests.
 
-## Managment
+### Specification
+
+Mopidy itself does not have a SRS (Software Requirements Specification) document, however, there are some other documents available which explain the inner workings of the software:
+* [Glossary](https://mopidy.readthedocs.org/en/latest/glossary/)
+* [Mopidy Command](https://mopidy.readthedocs.org/en/latest/command/)
+* [API Reference](https://mopidy.readthedocs.org/en/latest/api/)
+* [Module Reference](https://mopidy.readthedocs.org/en/latest/modules/)
+
+### Validation
+
+### Managment
 
 
 
