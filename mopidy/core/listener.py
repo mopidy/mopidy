@@ -181,7 +181,7 @@ class CoreListener(listener.Listener):
         Called whenever the currently playing stream title changes.
 
         *MAY* be implemented by actor.
-        
+
         :param title: the new stream title
         :type title: string
         """
