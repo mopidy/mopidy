@@ -51,9 +51,5 @@ Init scripts
   <https://www.archlinux.org/packages/community/any/mopidy/>`__ comes with a systemd init
   script.
 
-- A blog post by Benjamin Guillet explains how to `Daemonize Mopidy and Launch
-  It at Login on OS X
-  <http://www.benjaminguillet.com/blog/2013/08/16/launch-mopidy-at-login-on-os-x/>`_.
-
 - Issue :issue:`266` contains a bunch of init scripts for Mopidy, including
   Upstart init scripts.

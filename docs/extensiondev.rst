@@ -214,7 +214,7 @@ file::
     include mopidy_soundspot/ext.conf
 
 For details on the ``MANIFEST.in`` file format, check out the `distutils docs
-<http://docs.python.org/2/distutils/sourcedist.html#manifest-template>`_.
+<https://docs.python.org/2/distutils/sourcedist.html#manifest-template>`_.
 `check-manifest <https://pypi.python.org/pypi/check-manifest>`_ is a very
 useful tool to check your ``MANIFEST.in`` file for completeness.
 

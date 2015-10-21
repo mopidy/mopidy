@@ -4,7 +4,7 @@
 Raspberry Pi: Mopidy on a credit card
 *************************************
 
-Mopidy runs nicely on a `Raspberry Pi <http://www.raspberrypi.org/>`_. As of
+Mopidy runs nicely on a `Raspberry Pi <https://www.raspberrypi.org/>`_. As of
 January 2013, Mopidy will run with Spotify support on both the armel
 (soft-float) and armhf (hard-float) architectures, which includes the Raspbian
 distribution.
@@ -28,7 +28,7 @@ If you don't know which one to select, go for the armhf variant, as it'll give
 you a lot better performance.
 
 #. Download the latest "wheezy" disk image from
-   http://www.raspberrypi.org/downloads/. This was last tested with the images
+   https://www.raspberrypi.org/downloads/. This was last tested with the images
    from 2013-05-25 for armhf and 2013-05-29 for armel.
 
 #. Flash the OS image to your SD card. See

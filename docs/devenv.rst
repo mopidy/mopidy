@@ -300,7 +300,7 @@ the given module, ``mopidy`` in this example, are covered by the test suite::
 .. note::
 
     Up to date test coverage statistics can also be viewed online at
-    `coveralls.io <https://coveralls.io/r/mopidy/mopidy>`_.
+    `coveralls.io <https://coveralls.io/github/mopidy/mopidy>`_.
 
 If we want to speed up the test suite, we can even get a list of the ten
 slowest tests::
@@ -322,7 +322,7 @@ CI, and the build status will be visible in the GitHub pull request interface,
 making it easier to evaluate the quality of pull requests.
 
 For each successful build, Travis submits code coverage data to `coveralls.io
-<https://coveralls.io/r/mopidy/mopidy>`_. If you're out of work, coveralls might
+<https://coveralls.io/github/mopidy/mopidy>`_. If you're out of work, coveralls might
 help you find areas in the code which could need better test coverage.
 
 
@@ -392,7 +392,7 @@ OS::
     open _build/html/index.html        # OS X
 
 The documentation at https://docs.mopidy.com/ is hosted by `Read the Docs
-<https://www.readhtedocs.org/>`_, which automatically updates the documentation
+<https://readthedocs.org/>`_, which automatically updates the documentation
 when a change is pushed to the ``mopidy/mopidy`` repo at GitHub.
 
 
