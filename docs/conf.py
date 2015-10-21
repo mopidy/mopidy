@@ -180,3 +180,4 @@ linkcheck_ignore = [ #Some sites work in browser but linkcheck fails.
     r'http://vk.com',
     r'http://$']
 linkcheck_anchors = False #This breaks on links that use # for other stuff
+linkcheck_timeout = 30
