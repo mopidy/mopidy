@@ -154,7 +154,7 @@ Extension for browsing RSS feeds of podcasts and stream the episodes.
 
 
 Mopidy-Podcast-gpodder
-==========================
+======================
 
 https://github.com/tkem/mopidy-podcast-gpodder
 

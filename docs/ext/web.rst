@@ -118,7 +118,7 @@ To install, run::
 Mopidy-MusicBox-Webclient
 =========================
 
-https://github.com/pimusicbox/Mopidy-MusicBox-Webclient
+https://github.com/pimusicbox/mopidy-musicbox-webclient
 
 The first web client for Mopidy, made with jQuery Mobile by Wouter van Wijk.
 Also the web client used for Wouter's popular `Pi Musicbox

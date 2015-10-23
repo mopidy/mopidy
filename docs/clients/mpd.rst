@@ -167,5 +167,5 @@ projects are a real match made in heaven."
 Partify
 -------
 
-`Partify <http://partify.club/>`_ is a web based MPD client focusing on
+`Partify <https://github.com/fhats/partify>`_ is a web based MPD client focusing on
 making music playing collaborative and social.
