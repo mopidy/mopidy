@@ -114,15 +114,12 @@ def _start_pipeline(pipeline):
 
 
 def _query_duration(pipeline):
-    try:
-        duration = pipeline.query_duration(Gst.Format.TIME, None)[0]
-    except Gst.QueryError:
+    success, duration = pipeline.query_duration(Gst.Format.TIME)
+
+    if not success or duration < 0:
         return None
 
-    if duration < 0:
-        return None
-    else:
-        return duration // Gst.MSECOND
+    return duration // Gst.MSECOND
 
 
 def _query_seekable(pipeline):
