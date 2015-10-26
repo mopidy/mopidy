@@ -621,14 +621,15 @@ class Audio(pykka.ThreadingActor):
 
         :rtype: int
         """
-        try:
-            gst_position = self._playbin.query_position(Gst.Format.TIME)[1]
-            return utils.clocktime_to_millisecond(gst_position)
-        except Gst.QueryError:
+        success, position = self._playbin.query_position(Gst.Format.TIME)
+
+        if not success:
             # TODO: take state into account for this and possibly also return
             # None as the unknown value instead of zero?
             logger.debug('Position query failed')
             return 0
+
+        return utils.clocktime_to_millisecond(position)
 
     def set_position(self, position):
         """
