@@ -305,8 +305,10 @@ class _Handler(object):
                 self._audio._playbin, Gst.DebugGraphDetails.ALL, 'mopidy')
 
     def on_buffering(self, percent, structure=None):
-        if structure and structure.has_field('buffering-mode'):
-            if structure.get_enum('buffering-mode') == Gst.BufferingMode.LIVE:
+        if structure is not None and structure.has_field('buffering-mode'):
+            buffering_mode = structure.get_enum(
+                'buffering-mode', Gst.BufferingMode)
+            if buffering_mode == Gst.BufferingMode.LIVE:
                 return  # Live sources stall in paused.
 
         level = logging.getLevelName('TRACE')
