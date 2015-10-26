@@ -2,6 +2,7 @@ from __future__ import (
     absolute_import, division, print_function, unicode_literals)
 
 import collections
+import time
 
 import gi
 gi.require_version('Gst', '1.0')
@@ -129,9 +130,7 @@ def _query_seekable(pipeline):
 
 
 def _process(pipeline, timeout_ms):
-    clock = pipeline.get_clock()
     bus = pipeline.get_bus()
-    timeout = timeout_ms * Gst.MSECOND
     tags = {}
     mime = None
     have_audio = False
@@ -146,9 +145,10 @@ def _process(pipeline, timeout_ms):
         Gst.MessageType.TAG
     )
 
-    previous = clock.get_time()
+    timeout = timeout_ms
+    previous = int(time.time() * 1000)
     while timeout > 0:
-        message = bus.timed_pop_filtered(timeout, types)
+        message = bus.timed_pop_filtered(timeout * Gst.MSECOND, types)
 
         if message is None:
             break
@@ -180,7 +180,7 @@ def _process(pipeline, timeout_ms):
             # Note that this will only keep the last tag.
             tags.update(utils.convert_taglist(taglist))
 
-        now = clock.get_time()
+        now = int(time.time() * 1000)
         timeout -= now - previous
         previous = now
 
