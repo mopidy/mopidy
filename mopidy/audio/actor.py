@@ -136,7 +136,8 @@ class _Appsrc(object):
 class _Outputs(Gst.Bin):
 
     def __init__(self):
-        Gst.Bin.__init__(self, 'outputs')
+        Gst.Bin.__init__(self)
+        # TODO gst1: Set 'outputs' as the Bin name for easier debugging
 
         self._tee = Gst.ElementFactory.make('tee')
         self.add(self._tee)
@@ -468,7 +469,7 @@ class Audio(pykka.ThreadingActor):
             self._outputs.get_static_pad('sink'))
 
     def _setup_audio_sink(self):
-        audio_sink = Gst.Bin('audio-sink')
+        audio_sink = Gst.ElementFactory.make('bin', 'audio-sink')
 
         # Queue element to buy us time between the about to finish event and
         # the actual switch, i.e. about to switch can block for longer thanks
