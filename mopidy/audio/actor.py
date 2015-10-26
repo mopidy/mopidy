@@ -619,7 +619,7 @@ class Audio(pykka.ThreadingActor):
         :rtype: int
         """
         try:
-            gst_position = self._playbin.query_position(Gst.Format.TIME)[0]
+            gst_position = self._playbin.query_position(Gst.Format.TIME)[1]
             return utils.clocktime_to_millisecond(gst_position)
         except Gst.QueryError:
             # TODO: take state into account for this and possibly also return
