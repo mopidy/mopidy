@@ -258,7 +258,7 @@ class _Handler(object):
 
     def on_event(self, pad, event):
         if event.type == Gst.EventType.SEGMENT:
-            self.on_new_segment(*event.parse_new_segment())
+            self.on_new_segment(event.parse_new_segment())
         elif event.type == Gst.EventType.SINK_MESSAGE:
             # Handle stream changed messages when they reach our output bin.
             # If we listen for it on the bus we get one per tee branch.
@@ -364,11 +364,18 @@ class _Handler(object):
         # can provide a 'mopidy install-missing-plugins' if the system has the
         # required helper installed?
 
-    def on_new_segment(self, update, rate, format_, start, stop, position):
-        gst_logger.debug('Got new-segment event: update=%s rate=%s format=%s '
-                         'start=%s stop=%s position=%s', update, rate,
-                         format_.value_name, start, stop, position)
-        position_ms = position // Gst.MSECOND
+    def on_new_segment(self, segment):
+        gst_logger.debug(
+            'Got new-segment event: '
+            'rate=%(rate)s format=%(format)s start=%(start)s stop=%(stop)s '
+            'position=%(position)s', {
+                'rate': segment.rate,
+                'format': Gst.Format.get_name(segment.format),
+                'start': segment.start,
+                'stop': segment.stop,
+                'position': segment.position
+            })
+        position_ms = segment.position // Gst.MSECOND
         logger.debug('Audio event: position_changed(position=%s)', position_ms)
         AudioListener.send('position_changed', position=position_ms)
 
