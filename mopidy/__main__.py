@@ -7,6 +7,8 @@ import sys
 import textwrap
 
 try:
+    import gi
+    gi.require_version('Gst', '1.0')
     from gi.repository import GObject, Gst
 except ImportError:
     print(textwrap.dedent("""
