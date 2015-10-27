@@ -694,7 +694,7 @@ class Audio(pykka.ThreadingActor):
 
         Should only be used by tests.
         """
-        self._playbin.get_state(timeout=1)
+        self._playbin.get_state(timeout=Gst.CLOCK_TIME_NONE)
 
     def enable_sync_handler(self):
         """Enable manual processing of messages from bus.
