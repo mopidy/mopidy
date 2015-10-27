@@ -54,7 +54,7 @@ Mopidy-Dirble
 https://github.com/mopidy/mopidy-dirble
 
 Provides a backend for browsing the Internet radio channels from the `Dirble
-<http://dirble.com/>`_ directory.
+<https://dirble.com/>`_ directory.
 
 
 Mopidy-dLeyna
@@ -63,7 +63,7 @@ Mopidy-dLeyna
 https://github.com/tkem/mopidy-dleyna
 
 Provides a backend for playing music from Digital Media Servers using
-the `dLeyna <http://01.org/dleyna>`_ D-Bus interface.
+the `dLeyna <https://01.org/dleyna>`_ D-Bus interface.
 
 Mopidy-File
 ===========
@@ -76,13 +76,13 @@ Mopidy-Grooveshark
 https://github.com/camilonova/mopidy-grooveshark
 
 Provides a backend for playing music from `Grooveshark
-<http://grooveshark.com/>`_.
+<http://grooveshark.im/>`_.
 
 
 Mopidy-GMusic
 =============
 
-https://github.com/hechtus/mopidy-gmusic
+https://github.com/mopidy/mopidy-gmusic
 
 Provides a backend for playing music from `Google Play Music
 <https://play.google.com/music/>`_.
@@ -153,13 +153,13 @@ https://github.com/tkem/mopidy-podcast
 Extension for browsing RSS feeds of podcasts and stream the episodes.
 
 
-Mopidy-Podcast-gpodder.net
-==========================
+Mopidy-Podcast-gpodder
+======================
 
 https://github.com/tkem/mopidy-podcast-gpodder
 
 Extension for Mopidy-Podcast that lets you search and browse podcasts from the
-`gpodder.net <https://gpodder.net/>`_ web site.
+`gpodder <http://gpodder.org/>`_ web site.
 
 
 Mopidy-Podcast-iTunes
@@ -177,7 +177,7 @@ Mopidy-radio-de
 https://github.com/hechtus/mopidy-radio-de
 
 Extension for listening to Internet radio stations and podcasts listed at
-`radio.de <http://www.radio.de/>`_, `rad.io <http://www.rad.io/>`_,
+`radio.de <http://www.radio.de/>`_, `radio.net <http://www.radio.net/>`_,
 `radio.fr <http://www.radio.fr/>`_, and `radio.at <http://www.radio.at/>`_.
 
 
@@ -196,7 +196,7 @@ Mopidy-SoundCloud
 https://github.com/mopidy/mopidy-soundcloud
 
 Provides a backend for playing music from the `SoundCloud
-<http://www.soundcloud.com/>`_ service.
+<https://soundcloud.com/>`_ service.
 
 
 Mopidy-Spotify
@@ -204,7 +204,7 @@ Mopidy-Spotify
 
 https://github.com/mopidy/mopidy-spotify
 
-Extension for playing music from the `Spotify <http://www.spotify.com/>`_ music
+Extension for playing music from the `Spotify <https://www.spotify.com/>`_ music
 streaming service.
 
 
@@ -214,7 +214,7 @@ Mopidy-Spotify-Tunigo
 https://github.com/trygveaa/mopidy-spotify-tunigo
 
 Extension for providing the browse feature of `Spotify
-<http://www.spotify.com/>`_. This lets you browse playlists, genres and new
+<https://www.spotify.com/>`_. This lets you browse playlists, genres and new
 releases.
 
 
@@ -239,7 +239,7 @@ Mopidy-TuneIn
 https://github.com/kingosticks/mopidy-tunein
 
 Provides a backend for playing music from the `TuneIn
-<http://www.tunein.com/>`_ online radio service.
+<http://tunein.com/>`_ online radio service.
 
 
 Mopidy-VKontakte
@@ -254,7 +254,7 @@ Provides a backend for playing music from the `VKontakte social network
 Mopidy-YouTube
 ==============
 
-https://github.com/dz0ny/mopidy-youtube
+https://github.com/mopidy/mopidy-youtube
 
 Provides a backend for playing music from the `YouTube
-<http://www.youtube.com/>`_ service.
+<https://www.youtube.com/>`_ service.

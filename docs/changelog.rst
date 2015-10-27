@@ -2090,7 +2090,7 @@ already have.
 
 - Mopidy.js now works both from browsers and from Node.js environments. This
   means that you now can make Mopidy clients in Node.js. Mopidy.js has been
-  published to the `npm registry <https://npmjs.org/package/mopidy>`_ for easy
+  published to the `npm registry <https://www.npmjs.com/package/mopidy>`_ for easy
   installation in Node.js projects.
 
 - Upgrade Mopidy.js' build system Grunt from 0.3 to 0.4.
@@ -2846,9 +2846,9 @@ Please note that 0.6.0 requires some updated dependencies, as listed under
   subsystems: player, playlist, options, and mixer. (Fixes: :issue:`32`)
 
 - A new frontend :mod:`mopidy.frontends.mpris` have been added. It exposes
-  Mopidy through the `MPRIS interface <http://www.mpris.org/>`_ over D-Bus. In
+  Mopidy through the `MPRIS interface <http://specifications.freedesktop.org/mpris-spec/latest/>`_ over D-Bus. In
   practice, this makes it possible to control Mopidy through the `Ubuntu Sound
-  Menu <https://wiki.ubuntu.com/SoundMenu>`_.
+  Menu <https://wiki.ubuntu.com/Sound#menu>`_.
 
 **Changes**
 

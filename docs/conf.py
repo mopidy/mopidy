@@ -167,7 +167,17 @@ extlinks = {
 # -- Options for intersphinx extension ----------------------------------------
 
 intersphinx_mapping = {
-    'python': ('http://docs.python.org/2', None),
-    'pykka': ('http://www.pykka.org/en/latest/', None),
+    'python': ('https://docs.python.org/2', None),
+    'pykka': ('https://www.pykka.org/en/latest/', None),
     'tornado': ('http://www.tornadoweb.org/en/stable/', None),
 }
+
+# -- Options for linkcheck builder -------------------------------------------
+
+linkcheck_ignore = [  # Some sites work in browser but linkcheck fails.
+    r'http://localhost:\d+/',
+    r'http://wiki.commonjs.org',
+    r'http://vk.com',
+    r'http://$']
+
+linkcheck_anchors = False  # This breaks on links that use # for other stuff
