@@ -1,6 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
-import datetime
+import collections
 import logging
 import numbers
 
@@ -8,7 +8,7 @@ import gi
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst
 
-from mopidy import httpclient
+from mopidy import compat, httpclient
 from mopidy.models import Album, Artist, Track
 
 logger = logging.getLogger(__name__)
@@ -154,7 +154,7 @@ def setup_proxy(element, config):
 
 
 def convert_taglist(taglist):
-    """Convert a :class:`Gst.Taglist` to plain Python types.
+    """Convert a :class:`Gst.TagList` to plain Python types.
 
     Knows how to convert:
 
@@ -167,37 +167,26 @@ def convert_taglist(taglist):
     Unknown types will be ignored and debug logged. Tag keys are all strings
     defined as part GStreamer under GstTagList_.
 
-    .. _GstTagList: http://gstreamer.freedesktop.org/data/doc/gstreamer/\
-0.10.36/gstreamer/html/gstreamer-GstTagList.html
+    .. _GstTagList: https://developer.gnome.org/gstreamer/stable/\
+gstreamer-GstTagList.html
 
     :param taglist: A GStreamer taglist to be converted.
-    :type taglist: :class:`Gst.Taglist`
+    :type taglist: :class:`Gst.TagList`
     :rtype: dictionary of tag keys with a list of values.
     """
-    result = {}
+    result = collections.defaultdict(list)
 
-    # Taglists are not really dicts, hence the lack of .items() and
-    # explicit use of .keys()
-    for key in taglist.keys():
-        result.setdefault(key, [])
+    for n in range(taglist.n_tags()):
+        tag = taglist.nth_tag_name(n)
 
-        values = taglist[key]
-        if not isinstance(values, list):
-            values = [values]
+        for i in range(taglist.get_tag_size(tag)):
+            value = taglist.get_value_index(tag, i)
 
-        for value in values:
-            if isinstance(value, Gst.Date):
-                try:
-                    date = datetime.date(value.year, value.month, value.day)
-                    result[key].append(date)
-                except ValueError:
-                    logger.debug('Ignoring invalid date: %r = %r', key, value)
-            elif isinstance(value, Gst.Buffer):
-                result[key].append(bytes(value))
-            elif isinstance(
-                    value, (compat.string_types, bool, numbers.Number)):
-                result[key].append(value)
+            if isinstance(value, Gst.DateTime):
+                result[tag].append(value.to_iso8601_string())
+            if isinstance(value, (compat.string_types, bool, numbers.Number)):
+                result[tag].append(value)
             else:
-                logger.debug('Ignoring unknown data: %r = %r', key, value)
+                logger.debug('Ignoring unknown tag data: %r = %r', tag, value)
 
     return result
