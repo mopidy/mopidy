@@ -4,13 +4,13 @@ import platform
 import sys
 import unittest
 
+import gi
+gi.require_version('Gst', '1.0')
+from gi.repository import Gst
+
 import mock
 
 import pkg_resources
-
-import pygst
-pygst.require('0.10')
-import gst  # noqa
 
 from mopidy.internal import deps
 
@@ -74,12 +74,11 @@ class DepsTest(unittest.TestCase):
 
         self.assertEqual('GStreamer', result['name'])
         self.assertEqual(
-            '.'.join(map(str, gst.get_gst_version())), result['version'])
-        self.assertIn('gst', result['path'])
+            '.'.join(map(str, Gst.version())), result['version'])
+        self.assertIn('gi', result['path'])
         self.assertNotIn('__init__.py', result['path'])
-        self.assertIn('Python wrapper: gst-python', result['other'])
-        self.assertIn(
-            '.'.join(map(str, gst.get_pygst_version())), result['other'])
+        self.assertIn('Python wrapper: python-gi', result['other'])
+        self.assertIn(gi.__version__, result['other'])
         self.assertIn('Relevant elements:', result['other'])
 
     @mock.patch('pkg_resources.get_distribution')
