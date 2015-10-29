@@ -154,13 +154,15 @@ def playlistadd(context, name, track_uri):
     if not playlist:
         # Create new playlist with this single track
         lookup_res = context.core.library.lookup(uris=[track_uri]).get()
-        tracks = [track for selections in lookup_res.values() for track in selections]
+        tracks = [track for selections in lookup_res.values()
+                  for track in selections]
         _create_playlist(context, name, tracks)
     else:
         # Add track to existing playlist
         uri_scheme = urlparse.urlparse(track_uri).scheme
         lookup_res = context.core.library.lookup(uris=[track_uri]).get()
-        to_add = [track for selections in lookup_res.values() for track in selections]
+        to_add = [track for selections in lookup_res.values()
+                  for track in selections]
         playlist = playlist.replace(tracks=list(playlist.tracks) + to_add)
         if context.core.playlists.save(playlist).get() is None:
             playlist_scheme = urlparse.urlparse(playlist.uri).scheme
@@ -186,7 +188,8 @@ def _create_playlist(context, name, tracks):
         # Created and saved
         return
     # Can't use backend appropriate for passed uri schemes, use default one
-    default_scheme = context.dispatcher.config['mpd']['default_playlist_scheme']
+    default_scheme = context.dispatcher.config[
+        'mpd']['default_playlist_scheme']
     playlist = context.core.playlists.create(name, default_scheme).get()
     if not playlist:
         # If even MPD's default backend can't save playlist, everything is lost

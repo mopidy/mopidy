@@ -292,7 +292,8 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
                 name='old_name', uri='dummy:a1', tracks=[Track(uri='b')])])
         self.send_request('rename "old_name" "new_name"')
         self.assertInResponse('OK')
-        self.assertIsNotNone(self.backend.playlists.lookup("dummy:new_name").get())
+        self.assertIsNotNone(
+            self.backend.playlists.lookup("dummy:new_name").get())
 
     def test_rm(self):
         self.backend.playlists.set_dummy_playlists([
