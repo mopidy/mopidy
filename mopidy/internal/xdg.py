@@ -53,15 +53,15 @@ def _get_user_dirs(xdg_config_dir):
         return {}
 
     with open(dirs_file, 'rb') as fh:
-        data = fh.read()
+        data = fh.read().decode('utf-8')
 
-    data = b'[XDG_USER_DIRS]\n' + data
-    data = data.replace(b'$HOME', os.path.expanduser(b'~'))
-    data = data.replace(b'"', b'')
+    data = '[XDG_USER_DIRS]\n' + data
+    data = data.replace('$HOME', os.path.expanduser('~'))
+    data = data.replace('"', '')
 
     config = configparser.RawConfigParser()
-    config.readfp(io.BytesIO(data))
+    config.readfp(io.StringIO(data))
 
     return {
-        k.decode('utf-8').upper(): os.path.abspath(v)
+        k.upper(): os.path.abspath(v)
         for k, v in config.items('XDG_USER_DIRS') if v is not None}
