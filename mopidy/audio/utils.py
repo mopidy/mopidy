@@ -195,7 +195,8 @@ def convert_taglist(taglist):
                     logger.debug('Ignoring invalid date: %r = %r', key, value)
             elif isinstance(value, gst.Buffer):
                 result[key].append(bytes(value))
-            elif isinstance(value, (basestring, bool, numbers.Number)):
+            elif isinstance(
+                    value, (compat.string_types, bool, numbers.Number)):
                 result[key].append(value)
             else:
                 logger.debug('Ignoring unknown data: %r = %r', key, value)

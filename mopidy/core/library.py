@@ -359,7 +359,7 @@ def _normalize_query(query):
     broken_client = False
     # TODO: this breaks if query is not a dictionary like object...
     for (field, values) in query.items():
-        if isinstance(values, basestring):
+        if isinstance(values, compat.string_types):
             broken_client = True
             query[field] = [values]
     if broken_client:

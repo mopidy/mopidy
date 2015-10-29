@@ -1,5 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
+from mopidy import compat
+
 
 class Field(object):
 
@@ -69,7 +71,7 @@ class String(Field):
         # TODO: normalize to unicode?
         # TODO: only allow unicode?
         # TODO: disallow empty strings?
-        super(String, self).__init__(type=basestring, default=default)
+        super(String, self).__init__(type=compat.string_types, default=default)
 
 
 class Date(String):
@@ -144,7 +146,7 @@ class Collection(Field):
         super(Collection, self).__init__(type=type, default=container())
 
     def validate(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, compat.string_types):
             raise TypeError('Expected %s to be a collection of %s, not %r'
                             % (self._name, self._type.__name__, value))
         for v in value:
