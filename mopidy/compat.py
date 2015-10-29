@@ -29,12 +29,12 @@ if PY2:
 
     urllib = fake_python3_urllib_module()
 
-    integer_types = (int, long)
-    string_types = basestring
-    text_type = unicode
+    integer_types = (int, long)  # noqa
+    string_types = basestring  # noqa
+    text_type = unicode  # noqa
 
-    input = raw_input
-    intern = intern
+    input = raw_input  # noqa
+    intern = intern  # noqa
 
     def itervalues(dct, **kwargs):
         return iter(dct.itervalues(**kwargs))
