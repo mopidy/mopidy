@@ -121,7 +121,8 @@ class Integer(Field):
     def __init__(self, default=None, min=None, max=None):
         self._min = min
         self._max = max
-        super(Integer, self).__init__(type=(int, long), default=default)
+        super(Integer, self).__init__(
+            type=compat.integer_types, default=default)
 
     def validate(self, value):
         value = super(Integer, self).validate(value)

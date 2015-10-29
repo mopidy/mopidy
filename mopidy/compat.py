@@ -29,6 +29,7 @@ if PY2:
 
     urllib = fake_python3_urllib_module()
 
+    integer_types = (int, long)
     string_types = basestring
     text_type = unicode
 
@@ -43,6 +44,7 @@ else:
     import _thread as thread  # noqa
     import urllib  # noqa
 
+    integer_types = (int,)
     string_types = (str,)
     text_type = str
 
