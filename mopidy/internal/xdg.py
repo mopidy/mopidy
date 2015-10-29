@@ -47,7 +47,7 @@ def _get_user_dirs(xdg_config_dir):
     disabled, and thus no :mod:`glib` available.
     """
 
-    dirs_file = os.path.join(xdg_config_dir, 'user-dirs.dirs')
+    dirs_file = os.path.join(xdg_config_dir, b'user-dirs.dirs')
 
     if not os.path.exists(dirs_file):
         return {}
