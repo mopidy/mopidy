@@ -236,6 +236,9 @@ Core API
   :issue:`997` PR: :issue:`1225`)
 
 - Added ``playlist_deleted`` event. (Fixes: :issue:`996`)
+=======
+
+- MPD: Implemented commands for modifying stored playlists (PR: :issue:`1187`)
 
 Models
 ------
