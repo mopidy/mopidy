@@ -25,6 +25,18 @@ Local backend
 MPD frontend
 ------------
 
+- Implemented commands for modifying stored playlists:
+
+  - ``playlistadd``
+  - ``playlistclear``
+  - ``playlistdelete``
+  - ``playlistmove``
+  - ``rename``
+  - ``rm``
+  - ``save``
+
+  (Fixes: :issue:`1014`, PR: :issue:`1187`, :issue:`1308`, :issue:`1322`)
+
 - Start ``songid`` counting at 1 instead of 0 to match the original MPD server.
 
 Zeroconf
