@@ -1,9 +1,9 @@
 from __future__ import absolute_import, unicode_literals
 
 import collections
-import urlparse
 
 from mopidy import compat, exceptions
+from mopidy.compat import urllib
 
 PLAYBACK_STATES = {'paused', 'stopped', 'playing'}
 
@@ -96,7 +96,7 @@ def _check_query_value(key, arg, msg):
 def check_uri(arg, msg='Expected a valid URI, not {arg!r}'):
     if not isinstance(arg, compat.string_types):
         raise exceptions.ValidationError(msg.format(arg=arg))
-    elif urlparse.urlparse(arg).scheme == '':
+    elif urllib.parse.urlparse(arg).scheme == '':
         raise exceptions.ValidationError(msg.format(arg=arg))
 
 

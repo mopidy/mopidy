@@ -4,10 +4,9 @@ import codecs
 import logging
 import os
 import re
-import urllib
-import urlparse
 
 from mopidy import compat
+from mopidy.compat import urllib
 from mopidy.internal import encoding, path
 from mopidy.models import Track
 
@@ -28,7 +27,7 @@ def path_to_playlist_uri(relpath):
     """Convert path relative to playlists_dir to M3U URI."""
     if isinstance(relpath, compat.text_type):
         relpath = relpath.encode('utf-8')
-    return b'm3u:%s' % urllib.quote(relpath)
+    return b'm3u:%s' % urllib.parse.quote(relpath)
 
 
 def m3u_extinf_to_track(line):
@@ -101,7 +100,7 @@ def parse_m3u(file_path, media_dir=None):
                 track = m3u_extinf_to_track(line)
             continue
 
-        if urlparse.urlsplit(line).scheme:
+        if urllib.parse.urlsplit(line).scheme:
             tracks.append(track.replace(uri=line))
         elif os.path.normpath(line) == os.path.abspath(line):
             uri = path.path_to_uri(line)
