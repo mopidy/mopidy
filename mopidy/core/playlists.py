@@ -2,9 +2,9 @@ from __future__ import absolute_import, unicode_literals
 
 import contextlib
 import logging
-import urlparse
 
 from mopidy import exceptions
+from mopidy.compat import urllib
 from mopidy.core import listener
 from mopidy.internal import deprecation, validation
 from mopidy.models import Playlist, Ref
@@ -81,7 +81,7 @@ class PlaylistsController(object):
         """
         validation.check_uri(uri)
 
-        uri_scheme = urlparse.urlparse(uri).scheme
+        uri_scheme = urllib.parse.urlparse(uri).scheme
         backend = self.backends.with_playlists.get(uri_scheme, None)
 
         if not backend:
@@ -175,7 +175,7 @@ class PlaylistsController(object):
         """
         validation.check_uri(uri)
 
-        uri_scheme = urlparse.urlparse(uri).scheme
+        uri_scheme = urllib.parse.urlparse(uri).scheme
         backend = self.backends.with_playlists.get(uri_scheme, None)
         if not backend:
             return None  # TODO: error reporting to user
@@ -229,7 +229,7 @@ class PlaylistsController(object):
         :type uri: string
         :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
-        uri_scheme = urlparse.urlparse(uri).scheme
+        uri_scheme = urllib.parse.urlparse(uri).scheme
         backend = self.backends.with_playlists.get(uri_scheme, None)
         if not backend:
             return None
@@ -303,7 +303,7 @@ class PlaylistsController(object):
         if playlist.uri is None:
             return  # TODO: log this problem?
 
-        uri_scheme = urlparse.urlparse(playlist.uri).scheme
+        uri_scheme = urllib.parse.urlparse(playlist.uri).scheme
         backend = self.backends.with_playlists.get(uri_scheme, None)
         if not backend:
             return None

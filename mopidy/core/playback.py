@@ -1,10 +1,10 @@
 from __future__ import absolute_import, unicode_literals
 
 import logging
-import urlparse
 
 from mopidy import models
 from mopidy.audio import PlaybackState
+from mopidy.compat import urllib
 from mopidy.core import listener
 from mopidy.internal import deprecation, validation
 
@@ -33,7 +33,7 @@ class PlaybackController(object):
     def _get_backend(self, tl_track):
         if tl_track is None:
             return None
-        uri_scheme = urlparse.urlparse(tl_track.track.uri).scheme
+        uri_scheme = urllib.parse.urlparse(tl_track.track.uri).scheme
         return self.backends.with_playback.get(uri_scheme, None)
 
     # Properties

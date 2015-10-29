@@ -4,9 +4,9 @@ import collections
 import contextlib
 import logging
 import operator
-import urlparse
 
 from mopidy import compat, exceptions, models
+from mopidy.compat import urllib
 from mopidy.internal import deprecation, validation
 
 
@@ -35,7 +35,7 @@ class LibraryController(object):
         self.core = core
 
     def _get_backend(self, uri):
-        uri_scheme = urlparse.urlparse(uri).scheme
+        uri_scheme = urllib.parse.urlparse(uri).scheme
         return self.backends.with_library.get(uri_scheme, None)
 
     def _get_backends_to_uris(self, uris):
@@ -102,7 +102,7 @@ class LibraryController(object):
         return sorted(directories, key=operator.attrgetter('name'))
 
     def _browse(self, uri):
-        scheme = urlparse.urlparse(uri).scheme
+        scheme = urllib.parse.urlparse(uri).scheme
         backend = self.backends.with_library_browse.get(scheme)
 
         if not backend:
@@ -253,7 +253,7 @@ class LibraryController(object):
 
         futures = {}
         backends = {}
-        uri_scheme = urlparse.urlparse(uri).scheme if uri else None
+        uri_scheme = urllib.parse.urlparse(uri).scheme if uri else None
 
         for backend_scheme, backend in self.backends.with_library.items():
             backends.setdefault(backend, set()).add(backend_scheme)

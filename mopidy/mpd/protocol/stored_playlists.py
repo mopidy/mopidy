@@ -2,9 +2,9 @@ from __future__ import absolute_import, division, unicode_literals
 
 import datetime
 import logging
-import urlparse
 import warnings
 
+from mopidy.compat import urllib
 from mopidy.mpd import exceptions, protocol, translator
 
 logger = logging.getLogger(__name__)
@@ -170,8 +170,8 @@ def playlistadd(context, name, track_uri):
             tracks=list(old_playlist.tracks) + new_tracks)
         saved_playlist = context.core.playlists.save(new_playlist).get()
         if saved_playlist is None:
-            playlist_scheme = urlparse.urlparse(old_playlist.uri).scheme
-            uri_scheme = urlparse.urlparse(track_uri).scheme
+            playlist_scheme = urllib.parse.urlparse(old_playlist.uri).scheme
+            uri_scheme = urllib.parse.urlparse(track_uri).scheme
             raise exceptions.MpdInvalidTrackForPlaylist(
                 playlist_scheme, uri_scheme)
 
@@ -180,7 +180,7 @@ def _create_playlist(context, name, tracks):
     """
     Creates new playlist using backend appropriate for the given tracks
     """
-    uri_schemes = set([urlparse.urlparse(t.uri).scheme for t in tracks])
+    uri_schemes = set([urllib.parse.urlparse(t.uri).scheme for t in tracks])
     for scheme in uri_schemes:
         new_playlist = context.core.playlists.create(name, scheme).get()
         if new_playlist is None:
@@ -204,7 +204,7 @@ def _create_playlist(context, name, tracks):
     new_playlist = new_playlist.replace(tracks=tracks)
     saved_playlist = context.core.playlists.save(new_playlist).get()
     if saved_playlist is None:
-        uri_scheme = urlparse.urlparse(new_playlist.uri).scheme
+        uri_scheme = urllib.parse.urlparse(new_playlist.uri).scheme
         raise exceptions.MpdFailedToSavePlaylist(uri_scheme)
 
 
@@ -227,7 +227,8 @@ def playlistclear(context, name):
     # Just replace tracks with empty list and save
     playlist = playlist.replace(tracks=[])
     if context.core.playlists.save(playlist).get() is None:
-        raise exceptions.MpdFailedToSavePlaylist(urlparse.urlparse(uri).scheme)
+        raise exceptions.MpdFailedToSavePlaylist(
+            urllib.parse.urlparse(uri).scheme)
 
 
 @protocol.commands.add('playlistdelete', songpos=protocol.UINT)
@@ -252,7 +253,8 @@ def playlistdelete(context, name, songpos):
     playlist = playlist.replace(tracks=tracks)
     saved_playlist = context.core.playlists.save(playlist).get()
     if saved_playlist is None:
-        raise exceptions.MpdFailedToSavePlaylist(urlparse.urlparse(uri).scheme)
+        raise exceptions.MpdFailedToSavePlaylist(
+            urllib.parse.urlparse(uri).scheme)
 
 
 @protocol.commands.add(
@@ -288,7 +290,8 @@ def playlistmove(context, name, from_pos, to_pos):
     playlist = playlist.replace(tracks=tracks)
     saved_playlist = context.core.playlists.save(playlist).get()
     if saved_playlist is None:
-        raise exceptions.MpdFailedToSavePlaylist(urlparse.urlparse(uri).scheme)
+        raise exceptions.MpdFailedToSavePlaylist(
+            urllib.parse.urlparse(uri).scheme)
 
 
 @protocol.commands.add('rename')
@@ -301,7 +304,7 @@ def rename(context, old_name, new_name):
         Renames the playlist ``NAME.m3u`` to ``NEW_NAME.m3u``.
     """
     uri = context.lookup_playlist_uri_from_name(old_name)
-    uri_scheme = urlparse.urlparse(uri).scheme
+    uri_scheme = urllib.parse.urlparse(uri).scheme
     old_playlist = uri is not None and context.core.playlists.lookup(uri).get()
     if not old_playlist:
         raise exceptions.MpdNoExistError('No such playlist')
@@ -350,4 +353,4 @@ def save(context, name):
         saved_playlist = context.core.playlists.save(new_playlist).get()
         if saved_playlist is None:
             raise exceptions.MpdFailedToSavePlaylist(
-                urlparse.urlparse(uri).scheme)
+                urllib.parse.urlparse(uri).scheme)
