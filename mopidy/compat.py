@@ -1,3 +1,5 @@
+from __future__ import absolute_import, unicode_literals
+
 import sys
 
 PY2 = sys.version_info[0] == 2
