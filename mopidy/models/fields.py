@@ -95,7 +95,7 @@ class Identifier(String):
     :param default: default value for field
     """
     def validate(self, value):
-        return intern(str(super(Identifier, self).validate(value)))
+        return compat.intern(str(super(Identifier, self).validate(value)))
 
 
 class URI(Identifier):

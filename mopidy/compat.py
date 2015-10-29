@@ -34,6 +34,7 @@ if PY2:
     text_type = unicode
 
     input = raw_input
+    intern = intern
 
     def itervalues(dct, **kwargs):
         return iter(dct.itervalues(**kwargs))
@@ -49,6 +50,7 @@ else:
     text_type = str
 
     input = input
+    intern = sys.intern
 
     def itervalues(dct, **kwargs):
         return iter(dct.values(**kwargs))
