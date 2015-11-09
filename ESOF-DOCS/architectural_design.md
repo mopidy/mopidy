@@ -26,19 +26,20 @@ Even so, we think this representation of packages should be somewhat correct bas
 ### Implementation view
 <img src="./images/architectural/ImplementationView.jpg"/>
 
-The overall architecture of Mopidy is organized around multiple frontends and backends. The frontends use the core API. The core actor makes multiple backends work as one. The backends connect to various music sources. The core actor use the mixer actor to control volume, while the backends use the audio actor to play audio.
-The core is organized as a set of controllers with responsiblity for separate sets of functionality.
+The overall architecture of Mopidy is organized around multiple frontends and backends.
+The frontends use the core interface and the core component, using the backend's interface, makes multiple backends work as one.
+It also makes use of the mixer interface in order to control volume, while the backends use the audio interface in order to play the actual audio.
 
-Frontends expose Mopidy to the external world. They can implement servers for protocols like HTTP, MPD and MPRIS, and they can be used to update other services when something happens in Mopidy, like the Last.fm scrobbler frontend does.
+**Frontends** expose Mopidy to the external world. They can implement servers for protocols like HTTP, MPD and MPRIS, and they can be used to update other services when something happens in Mopidy, like the Last.fm scrobbler frontend does.
 
-The core is the single actor that the frontends send their requests to. For every request from a frontend it calls out to one or more backends which does the real work, and when the backends respond, the core actor is responsible for combining the responses into a single response to the requesting frontend.
+The **core** is the single component that the frontends send their requests to. For every request from a frontend it calls out to one or more backends which does the real work, and when the backends respond, the core component is responsible for combining the responses into a single response to the requesting frontend.
 
-The backends are organized as a set of providers with responsiblity for separate sets of functionality, similar to the core actor.
-Anything specific to i.e. Spotify integration or local storage is contained in the backends. To integrate with new music sources, you just add a new backend.
+The **backends** are organized as a set of providers with responsiblity for separate sets of functionality, similar to the core component.
+Anything specific to i.e. Spotify integration or local storage is contained in the backends. To integrate with new music sources, a new backend just needs to be added.
 
-The audio actor is a thin wrapper around the parts of the GStreamer library we use. If you implement an advanced backend, you may need to implement your own playback provider using the [mopidy.audio — Audio API](https://docs.mopidy.com/en/latest/api/audio/#audio-api), but most backends can use the default playback provider without any changes.
+The **audio** component is a thin wrapper around the parts of the GStreamer library, most backends can use the default playback provider without any changes.
 
-The mixer actor is responsible for volume control and muting. The default mixer use the audio actor to control volume in software. 
+The **mixer** component is responsible for volume control and muting. The default mixer uses the audio component to control volume in software.
 
 ### Deployment view
 <img src="./images/architectural/DeploymentView.jpg"/>
