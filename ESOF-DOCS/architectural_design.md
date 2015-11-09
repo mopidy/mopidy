@@ -24,7 +24,7 @@ We will use the **4 + 1 view model** to describe Mopidy's architecture.
 Even so, we think this representation of packages should be somewhat correct based on how the project is organized in folders.
 
 ### Implementation view
-<img src="./images/architectural/ImplementationView.jpg" width="1000" />
+<img src="./images/architectural/ImplementationView.jpg"/>
 
 The overall architecture of Mopidy is organized around multiple frontends and backends. The frontends use the core API. The core actor makes multiple backends work as one. The backends connect to various music sources. The core actor use the mixer actor to control volume, while the backends use the audio actor to play audio.
 The core is organized as a set of controllers with responsiblity for separate sets of functionality.
@@ -41,6 +41,15 @@ The audio actor is a thin wrapper around the parts of the GStreamer library we u
 The mixer actor is responsible for volume control and muting. The default mixer use the audio actor to control volume in software. 
 
 ### Deployment view
+<img src="./images/architectural/DeploymentView.jpg"/>
+
+Since Mopidy in itself is just a server it doesn't have many requirements in order to run (Unix based system with internet connection, Python 2.7 or higher and GStreamer if sound playback is desired).
+Although, if more functionality is needed, a couple more steps have to be taken.
+
+For starters there needs to be a server machine where Mopidy runs, which can be extended in functionality by using the various backends for music services (Spotify, Youtube, Soundcloud, etc).
+Next, if having control over the server is desired, some frontends should also be installed, the main ones being the HTTP frontend (for control using a web client/browser) and the MPD frontend which comes bundled with Mopidy already.
+
+All that's left is a user machine: PC, Smartphone, etc. that has a client installed (Web or MPD client) so it can access and control the music server. It is worth noting that **both** the server and client can be the same machine, provided that machine fulfills the requirements previously specified.
 
 ### Process view
 
