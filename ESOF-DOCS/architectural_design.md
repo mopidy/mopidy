@@ -18,6 +18,10 @@ We will use the **4 + 1 view model** to describe Mopidy's architecture.
 + **Process view** : The process view shows how the system is composed of interacting processes.
 
 ### Logical view
+<img src="./images/architectural/LogicalView.jpg" width="1000" />
+
+**NOTE:** Due to the lack of knowledge of Python from the group there was a bit of a struggle trying to understand the inner workings of the code in the project.
+Even so, we think this representation of packages should be somewhat correct based on how the project is organized in folders.
 
 ### Implementation view
 <img src="./images/architectural/ImplementationView.jpg" width="1000" />
