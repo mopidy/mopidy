@@ -30,7 +30,7 @@ The overall architecture of Mopidy is organized around multiple frontends and ba
 The frontends use the core interface and the core component, using the backend's interface, makes multiple backends work as one.
 It also makes use of the mixer interface in order to control volume, while the backends use the audio interface in order to play the actual audio.
 
-**Frontends** expose Mopidy to the external world. They can implement servers for protocols like HTTP, MPD and MPRIS, and they can be used to update other services when something happens in Mopidy, like the Last.fm scrobbler frontend does.
+The **frontends** expose Mopidy to the external world. They can implement servers for protocols like HTTP, MPD and MPRIS, and they can be used to update other services when something happens in Mopidy, like the Last.fm scrobbler frontend does.
 
 The **core** is the single component that the frontends send their requests to. For every request from a frontend it calls out to one or more backends which does the real work, and when the backends respond, the core component is responsible for combining the responses into a single response to the requesting frontend.
 
