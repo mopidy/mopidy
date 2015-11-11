@@ -1,4 +1,4 @@
- # Mopidy Software Architecture
+# Mopidy Software Architecture
 
 ## Table of contents
 - [Mopidy Software Architecture](#mopidy-software-architecture)
