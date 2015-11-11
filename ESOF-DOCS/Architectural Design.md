@@ -1,7 +1,13 @@
  # Mopidy Software Architecture
 
 ## Table of contents
-@@TOC@@
+- [Mopidy Software Architecture](#mopidy-software-architecture)
+    - [Introduction](#introduction)
+    - [The 4 + 1 architectural view model](#the-4--1-architectural-view-model)
+        - [Logical view](#logical-view)
+        - [Implementation view](#implementation-view)
+        - [Deployment view](#deployment-view)
+        - [Process view](#process-view)
 
 ## Introduction
 
@@ -54,4 +60,3 @@ All that's left is a user machine: PC, Smartphone, etc. that has a client instal
 
 ### Process view
 <img src="./images/architectural/ProcessView.jpg" />
-
