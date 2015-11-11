@@ -53,4 +53,5 @@ Next, if having control over the server is desired, some frontends should also b
 All that's left is a user machine: PC, Smartphone, etc. that has a client installed (Web or MPD client) so it can access and control the music server. It is worth noting that **both** the server and client can be the same machine, provided that machine fulfills the requirements previously specified.
 
 ### Process view
+<img ser="./images/architectural/ProcessView.jpg" />
 
