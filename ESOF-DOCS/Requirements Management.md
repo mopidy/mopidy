@@ -11,7 +11,8 @@
         - [Use cases](#use-cases)
             - [Backends](#backends)
             - [Frontends](#frontends)
-
+        - [Domain model](#domain-model)
+        
 ## Introduction
 
 Mopidy is an extensible music server written in Python which plays music from local disk.
@@ -74,3 +75,23 @@ Frontends on the other hand are what make it possible to control the server itse
 Frontends can also be web based, making it possible to control Mopidy remotely ([Android clients](http://mopidy.readthedocs.org/en/latest/clients/mpd/#mpd-android-clients), [Web clients](http://mopidy.readthedocs.org/en/latest/clients/mpd/#mpd-web-clients)).
 
 <img src="./images/uml/core.png" width="600" />
+
+#### Domain model
+
+<img src="./images/uml/domainmodel.png" width=“600” />
+
+## Glossary
+
+* Frontend - Exposes Mopidy to the external world , it can implement protocols like HTTP , MPD and MPRIS and serves to send the requests to the core.
+
+* Core - It combines the responses into a single response to the requesting frontend. Which is to say that it's responsible for making possible multiple frontends use multiple backends, being able to control the tracklist,playlist,library,playback and history.
+
+* Mixer - By default it uses Audio to control volume and muting in software but there are alternative implementations that typically are indipendent of the Audio .
+
+* Backend - It integrates the music sources providing all the requests made by the frontend ,it also uses Audio to provide playback independently of the backend of choice.
+
+* Audio - It's a playback provider using parts of the GStreamer library although there is the possibility to implement different playback providers.
+
+
+
+
