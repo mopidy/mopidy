@@ -16,6 +16,13 @@ Core API
 - Start ``tlid`` counting at 1 instead of 0 to keep in sync with MPD's
   ``songid``.
 
+Models
+------
+
+- **Deprecated:** :attr:`mopidy.models.Album.images` is deprecated. Use
+  :meth:`mopidy.core.LibraryController.get_images` instead. (Fixes:
+  :issue:`1325`)
+
 Local backend
 --------------
 
