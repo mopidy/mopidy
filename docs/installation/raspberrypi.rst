@@ -181,7 +181,7 @@ Appendix C: Installation on XBian
 Similar to the Raspbmc issue outlined in Appendix B, it's not possible to 
 install Mopidy on XBian without first resolving a dependency problem between 
 ``gstreamer0.10-plugins-good`` and ``libtag1c2a``. More information can be
-found in `this post
+found in `this issue
 <https://github.com/xbianonpi/xbian/issues/378#issuecomment-37723392>`_.
 
 Run the following commands to remedy this and then install Mopidy as normal::
