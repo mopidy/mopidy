@@ -111,11 +111,7 @@ modindex_common_prefix = ['mopidy.']
 
 # -- Options for HTML output --------------------------------------------------
 
-# 'sphinx_rtd_theme' is bundled with Sphinx 1.3, which we don't have when
-# building the docs as part of the Debian packages on e.g. Debian wheezy.
-# html_theme = 'sphinx_rtd_theme'
-html_theme = 'default'
-html_theme_path = ['_themes']
+html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 html_use_modindex = True
