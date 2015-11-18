@@ -23,16 +23,23 @@ Most of the functionality available came from user or developer requests.
 ## Degree of Testability
 
 ### Controllability
+(The degree to which it is possible to control the state of the component under test (CUT) as required for testing.)
 
 ### Observability
+(The degree to which it is possible to observe (intermediate and final) test results.)
 
 ### Isolateability
+(The degree to which the component under test (CUT) can be tested in isolation.)
 
 ### Separation of concerns
+(The degree to which the component under test has a single, well defined responsibility.)
 
 ### Understandability
+(The degree to which the component under test is documented or self-explaining.)
 
 ### Heterogeneity
+(The degree to which the use of diverse technologies requires to use diverse test methods and tools in parallel.)
 
 
 ## Test Statistics
+There are **2056** tests total
