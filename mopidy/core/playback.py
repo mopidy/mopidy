@@ -25,7 +25,9 @@ class PlaybackController(object):
 
         self._current_tl_track = None
         self._pending_tl_track = None
+
         self._last_position = None
+        self._previous = False
 
         if self._audio:
             self._audio.set_about_to_finish_callback(
@@ -208,6 +210,7 @@ class PlaybackController(object):
         else:
             # This code path handles the stop() case, uri should be none.
             position, self._last_position = self._last_position, None
+
         self._trigger_track_playback_ended(position)
 
         self._stream_title = None
@@ -242,9 +245,6 @@ class PlaybackController(object):
         if backend:
             backend.playback.change_track(next_tl_track.track).get()
 
-        # TODO: move to stream changed and eos or just via trigger ended
-        self.core.tracklist._mark_played(original_tl_track)
-
     def _on_tracklist_change(self):
         """
         Tell the playback controller that the current playlist has changed.
@@ -266,8 +266,6 @@ class PlaybackController(object):
         """
         state = self.get_state()
         current = self._pending_tl_track or self._current_tl_track
-
-        self.core.tracklist._mark_played(self._current_tl_track)
 
         while current:
             pending = self.core.tracklist.next_track(current)
@@ -327,7 +325,6 @@ class PlaybackController(object):
             self.resume()
             return
 
-        original = self._current_tl_track
         current = self._pending_tl_track or self._current_tl_track
         pending = tl_track or current or self.core.tracklist.next_track(None)
 
@@ -344,8 +341,6 @@ class PlaybackController(object):
             current = pending
             pending = self.core.tracklist.next_track(current)
 
-        # TODO: move to top and get rid of original?
-        self.core.tracklist._mark_played(original)
         # TODO return result?
 
     def _change(self, pending_tl_track, state):
@@ -390,6 +385,7 @@ class PlaybackController(object):
         The current playback state will be kept. If it was playing, playing
         will continue. If it was paused, it will still be paused, etc.
         """
+        self._previous = True
         state = self.get_state()
         current = self._pending_tl_track or self._current_tl_track
 
@@ -495,20 +491,25 @@ class PlaybackController(object):
             time_position=self.get_time_position())
 
     def _trigger_track_playback_started(self):
-        # TODO: replace with stream-changed
-        logger.debug('Triggering track playback started event')
         if self.get_current_tl_track() is None:
             return
 
+        logger.debug('Triggering track playback started event')
         tl_track = self.get_current_tl_track()
         self.core.tracklist._mark_playing(tl_track)
         self.core.history._add_track(tl_track.track)
         listener.CoreListener.send('track_playback_started', tl_track=tl_track)
 
     def _trigger_track_playback_ended(self, time_position_before_stop):
-        logger.debug('Triggering track playback ended event')
         if self.get_current_tl_track() is None:
             return
+
+        logger.debug('Triggering track playback ended event')
+
+        if not self._previous:
+            self.core.tracklist._mark_played(self._current_tl_track)
+        self._previous = False
+
         # TODO: Use the lowest of track duration and position.
         listener.CoreListener.send(
             'track_playback_ended',
@@ -522,5 +523,6 @@ class PlaybackController(object):
             old_state=old_state, new_state=new_state)
 
     def _trigger_seeked(self, time_position):
+        # TODO: Trigger this from audio events?
         logger.debug('Triggering seeked event')
         listener.CoreListener.send('seeked', time_position=time_position)
