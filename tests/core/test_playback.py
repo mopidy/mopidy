@@ -347,11 +347,11 @@ class EventEmissionTest(BaseTest):
             listener_mock.send.mock_calls,
             [
                 mock.call(
-                    'track_playback_ended',
-                    tl_track=tl_tracks[0], time_position=mock.ANY),
-                mock.call(
                     'playback_state_changed',
                     old_state='paused', new_state='playing'),
+                mock.call(
+                    'track_playback_ended',
+                    tl_track=tl_tracks[0], time_position=mock.ANY),
                 mock.call(
                     'track_playback_started', tl_track=tl_tracks[1]),
             ])
@@ -371,11 +371,11 @@ class EventEmissionTest(BaseTest):
             listener_mock.send.mock_calls,
             [
                 mock.call(
-                    'track_playback_ended',
-                    tl_track=tl_tracks[0], time_position=mock.ANY),
-                mock.call(
                     'playback_state_changed', old_state='playing',
                     new_state='playing'),
+                mock.call(
+                    'track_playback_ended',
+                    tl_track=tl_tracks[0], time_position=mock.ANY),
                 mock.call(
                     'track_playback_started', tl_track=tl_tracks[2]),
             ])
