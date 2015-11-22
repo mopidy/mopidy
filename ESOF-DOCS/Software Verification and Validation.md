@@ -14,7 +14,9 @@ The main techniques used for verifying and validating (V&V) are **static techniq
 - **Dynamic techniques**: execute the system and observe its behavior (software testing and simulation).
 
 
-In Mopidy the software is constantly and consistently validated through the use of tools such as [Travis CI](https://travis-ci.org) and [Tox](https://tox.readthedocs.org/en/latest/) with [pytest](http://pytest.org/latest/) as a backend for testing.
+In Mopidy the software is constantly and consistently validated through the use of tools such as [Travis CI](https://travis-ci.org) and [Tox](https://tox.readthedocs.org/en/latest/) with [pytest](http://pytest.org/latest/) as a backend for testing the python code.
+Tests for documentation and code style (flake8) are also included in the testing suite.
+
 It is also very strict regarding new code contributed to the project as it requires tests for said code/features to be included with the contribution in order to be accepted upstream.
 
 On the other hand verification is not as important, seeing as there isn't really a formal specification or requirements document.
