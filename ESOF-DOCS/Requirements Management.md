@@ -86,7 +86,7 @@ Frontends can also be web based, making it possible to control Mopidy remotely (
 
 * Core - It combines the responses into a single response to the requesting frontend. Which is to say that it's responsible for making possible multiple frontends use multiple backends, being able to control the tracklist,playlist,library,playback and history.
 
-* Mixer - By default it uses Audio to control volume and muting in software but there are alternative implementations that typically are indipendent of the Audio .
+* Mixer - By default it uses Audio to control volume and muting in software but there are alternative implementations that typically are independent of the Audio .
 
 * Backend - It integrates the music sources providing all the requests made by the frontend ,it also uses Audio to provide playback independently of the backend of choice.
 
