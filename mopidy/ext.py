@@ -54,7 +54,7 @@ class Extension(object):
     def get_config_schema(self):
         """The extension's config validation schema
 
-        :returns: :class:`~mopidy.config.schema.ExtensionConfigSchema`
+        :returns: :class:`~mopidy.config.schemas.ConfigSchema`
         """
         schema = config_lib.ConfigSchema(self.ext_name)
         schema['enabled'] = config_lib.Boolean()
