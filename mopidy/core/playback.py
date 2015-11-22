@@ -217,6 +217,7 @@ class PlaybackController(object):
         if self._pending_tl_track:
             self._set_current_tl_track(self._pending_tl_track)
             self._pending_tl_track = None
+            self.set_state(PlaybackState.PLAYING)
             self._trigger_track_playback_started()
 
     def _on_about_to_finish_callback(self):
@@ -233,6 +234,9 @@ class PlaybackController(object):
         })
 
     def _on_about_to_finish(self):
+        if self._state == PlaybackState.STOPPED:
+            return
+
         # TODO: check that we always have a current track
         original_tl_track = self.get_current_tl_track()
         next_tl_track = self.core.tracklist.eot_track(original_tl_track)
@@ -327,10 +331,6 @@ class PlaybackController(object):
 
         current = self._pending_tl_track or self._current_tl_track
         pending = tl_track or current or self.core.tracklist.next_track(None)
-
-        if pending:
-            # TODO: remove?
-            self.set_state(PlaybackState.PLAYING)
 
         while pending:
             # TODO: should we consume unplayable tracks in this loop?
