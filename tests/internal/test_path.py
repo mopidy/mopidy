@@ -133,7 +133,7 @@ class GetOrCreateFileTest(unittest.TestCase):
         file_path = os.path.join(self.parent, b'test')
         created = path.get_or_create_file(file_path, content='foobaræøå')
         with open(created) as fh:
-            self.assertEqual(fh.read(), b'foobaræøå')
+            self.assertEqual(fh.read(), b'foobar\xc3\xa6\xc3\xb8\xc3\xa5')
 
 
 class PathToFileURITest(unittest.TestCase):

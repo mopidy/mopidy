@@ -16,6 +16,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
                 name='name', uri='dummy:name', tracks=[Track(uri='dummy:a')])])
 
         self.send_request('listplaylist "name"')
+
         self.assertInResponse('file: dummy:a')
         self.assertInResponse('OK')
 
@@ -25,11 +26,13 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
                 name='name', uri='dummy:name', tracks=[Track(uri='dummy:a')])])
 
         self.send_request('listplaylist name')
+
         self.assertInResponse('file: dummy:a')
         self.assertInResponse('OK')
 
     def test_listplaylist_fails_if_no_playlist_is_found(self):
         self.send_request('listplaylist "name"')
+
         self.assertEqualResponse('ACK [50@0] {listplaylist} No such playlist')
 
     def test_listplaylist_duplicate(self):
@@ -38,6 +41,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.backend.playlists.set_dummy_playlists([playlist1, playlist2])
 
         self.send_request('listplaylist "a [2]"')
+
         self.assertInResponse('file: c')
         self.assertInResponse('OK')
 
@@ -47,6 +51,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
                 name='name', uri='dummy:name', tracks=[Track(uri='dummy:a')])])
 
         self.send_request('listplaylistinfo "name"')
+
         self.assertInResponse('file: dummy:a')
         self.assertNotInResponse('Track: 0')
         self.assertNotInResponse('Pos: 0')
@@ -58,6 +63,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
                 name='name', uri='dummy:name', tracks=[Track(uri='dummy:a')])])
 
         self.send_request('listplaylistinfo name')
+
         self.assertInResponse('file: dummy:a')
         self.assertNotInResponse('Track: 0')
         self.assertNotInResponse('Pos: 0')
@@ -65,6 +71,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
     def test_listplaylistinfo_fails_if_no_playlist_is_found(self):
         self.send_request('listplaylistinfo "name"')
+
         self.assertEqualResponse(
             'ACK [50@0] {listplaylistinfo} No such playlist')
 
@@ -74,6 +81,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.backend.playlists.set_dummy_playlists([playlist1, playlist2])
 
         self.send_request('listplaylistinfo "a [2]"')
+
         self.assertInResponse('file: c')
         self.assertNotInResponse('Track: 0')
         self.assertNotInResponse('Pos: 0')
@@ -86,6 +94,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
             Playlist(name='a', uri='dummy:a')])
 
         self.send_request('listplaylists')
+
         self.assertInResponse('playlist: a')
         # Date without milliseconds and with time zone information
         self.assertInResponse('Last-Modified: 2015-08-05T22:51:06Z')
@@ -97,6 +106,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.backend.playlists.set_dummy_playlists([playlist1, playlist2])
 
         self.send_request('listplaylists')
+
         self.assertInResponse('playlist: a')
         self.assertInResponse('playlist: a [2]')
         self.assertInResponse('OK')
@@ -107,13 +117,16 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
             Playlist(name='', uri='dummy:', last_modified=last_modified)])
 
         self.send_request('listplaylists')
+
         self.assertNotInResponse('playlist: ')
         self.assertInResponse('OK')
 
     def test_listplaylists_replaces_newline_with_space(self):
         self.backend.playlists.set_dummy_playlists([
             Playlist(name='a\n', uri='dummy:')])
+
         self.send_request('listplaylists')
+
         self.assertInResponse('playlist: a ')
         self.assertNotInResponse('playlist: a\n')
         self.assertInResponse('OK')
@@ -121,7 +134,9 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
     def test_listplaylists_replaces_carriage_return_with_space(self):
         self.backend.playlists.set_dummy_playlists([
             Playlist(name='a\r', uri='dummy:')])
+
         self.send_request('listplaylists')
+
         self.assertInResponse('playlist: a ')
         self.assertNotInResponse('playlist: a\r')
         self.assertInResponse('OK')
@@ -129,7 +144,9 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
     def test_listplaylists_replaces_forward_slash_with_pipe(self):
         self.backend.playlists.set_dummy_playlists([
             Playlist(name='a/b', uri='dummy:')])
+
         self.send_request('listplaylists')
+
         self.assertInResponse('playlist: a|b')
         self.assertNotInResponse('playlist: a/b')
         self.assertInResponse('OK')
@@ -211,33 +228,110 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
     def test_load_unknown_playlist_acks(self):
         self.send_request('load "unknown playlist"')
+
         self.assertEqual(0, len(self.core.tracklist.tracks.get()))
         self.assertEqualResponse('ACK [50@0] {load} No such playlist')
 
     def test_playlistadd(self):
+        tracks = [
+            Track(uri='dummy:a'),
+            Track(uri='dummy:b'),
+        ]
+        self.backend.library.dummy_library = tracks
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(
+                name='name', uri='dummy:a1', tracks=[tracks[0]])])
+
+        self.send_request('playlistadd "name" "dummy:b"')
+
+        self.assertInResponse('OK')
+        self.assertEqual(
+            2, len(self.backend.playlists.get_items('dummy:a1').get()))
+
+    def test_playlistadd_creates_playlist(self):
+        tracks = [
+            Track(uri='dummy:a'),
+        ]
+        self.backend.library.dummy_library = tracks
+
         self.send_request('playlistadd "name" "dummy:a"')
-        self.assertEqualResponse('ACK [0@0] {playlistadd} Not implemented')
+
+        self.assertInResponse('OK')
+        self.assertIsNotNone(self.backend.playlists.lookup('dummy:name').get())
 
     def test_playlistclear(self):
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(
+                name='name', uri='dummy:a1', tracks=[Track(uri='b')])])
+
         self.send_request('playlistclear "name"')
-        self.assertEqualResponse('ACK [0@0] {playlistclear} Not implemented')
+
+        self.assertInResponse('OK')
+        self.assertEqual(
+            0, len(self.backend.playlists.get_items('dummy:a1').get()))
+
+    def test_playlistclear_creates_playlist(self):
+        self.send_request('playlistclear "name"')
+
+        self.assertInResponse('OK')
+        self.assertIsNotNone(self.backend.playlists.lookup('dummy:name').get())
 
     def test_playlistdelete(self):
-        self.send_request('playlistdelete "name" "5"')
-        self.assertEqualResponse('ACK [0@0] {playlistdelete} Not implemented')
+        tracks = [
+            Track(uri='dummy:a'),
+            Track(uri='dummy:b'),
+            Track(uri='dummy:c'),
+        ]   # len() == 3
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(
+                name='name', uri='dummy:a1', tracks=tracks)])
+
+        self.send_request('playlistdelete "name" "2"')
+
+        self.assertInResponse('OK')
+        self.assertEqual(
+            2, len(self.backend.playlists.get_items('dummy:a1').get()))
 
     def test_playlistmove(self):
-        self.send_request('playlistmove "name" "5" "10"')
-        self.assertEqualResponse('ACK [0@0] {playlistmove} Not implemented')
+        tracks = [
+            Track(uri='dummy:a'),
+            Track(uri='dummy:b'),
+            Track(uri='dummy:c')    # this one is getting moved to top
+        ]
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(
+                name='name', uri='dummy:a1', tracks=tracks)])
+
+        self.send_request('playlistmove "name" "2" "0"')
+
+        self.assertInResponse('OK')
+        self.assertEqual(
+            "dummy:c",
+            self.backend.playlists.get_items('dummy:a1').get()[0].uri)
 
     def test_rename(self):
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(
+                name='old_name', uri='dummy:a1', tracks=[Track(uri='b')])])
+
         self.send_request('rename "old_name" "new_name"')
-        self.assertEqualResponse('ACK [0@0] {rename} Not implemented')
+
+        self.assertInResponse('OK')
+        self.assertIsNotNone(
+            self.backend.playlists.lookup('dummy:new_name').get())
 
     def test_rm(self):
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(
+                name='name', uri='dummy:a1', tracks=[Track(uri='b')])])
+
         self.send_request('rm "name"')
-        self.assertEqualResponse('ACK [0@0] {rm} Not implemented')
+
+        self.assertInResponse('OK')
+        self.assertIsNone(self.backend.playlists.lookup('dummy:a1').get())
 
     def test_save(self):
         self.send_request('save "name"')
-        self.assertEqualResponse('ACK [0@0] {save} Not implemented')
+
+        self.assertInResponse('OK')
+        self.assertIsNotNone(self.backend.playlists.lookup('dummy:name').get())

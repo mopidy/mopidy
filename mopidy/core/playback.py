@@ -1,10 +1,10 @@
 from __future__ import absolute_import, unicode_literals
 
 import logging
-import urlparse
 
 from mopidy import models
 from mopidy.audio import PlaybackState
+from mopidy.compat import urllib
 from mopidy.core import listener
 from mopidy.internal import deprecation, validation
 
@@ -14,21 +14,29 @@ logger = logging.getLogger(__name__)
 class PlaybackController(object):
     pykka_traversable = True
 
-    def __init__(self, backends, core):
+    def __init__(self, audio, backends, core):
+        # TODO: these should be internal
         self.backends = backends
         self.core = core
+        self._audio = audio
 
-        self._current_tl_track = None
         self._stream_title = None
         self._state = PlaybackState.STOPPED
 
-    def _get_backend(self):
-        # TODO: take in track instead
-        track = self.get_current_track()
-        if track is None:
+        self._current_tl_track = None
+        self._pending_tl_track = None
+
+        self._last_position = None
+        self._previous = False
+
+        if self._audio:
+            self._audio.set_about_to_finish_callback(
+                self._on_about_to_finish_callback)
+
+    def _get_backend(self, tl_track):
+        if tl_track is None:
             return None
-        uri = track.uri
-        uri_scheme = urlparse.urlparse(uri).scheme
+        uri_scheme = urllib.parse.urlparse(tl_track.track.uri).scheme
         return self.backends.with_playback.get(uri_scheme, None)
 
     # Properties
@@ -122,7 +130,7 @@ class PlaybackController(object):
 
     def get_time_position(self):
         """Get time position in milliseconds."""
-        backend = self._get_backend()
+        backend = self._get_backend(self.get_current_tl_track())
         if backend:
             return backend.playback.get_time_position().get()
         else:
@@ -190,51 +198,52 @@ class PlaybackController(object):
 
     # Methods
 
-    # TODO: remove this.
-    def _change_track(self, tl_track, on_error_step=1):
-        """
-        Change to the given track, keeping the current playback state.
+    def _on_end_of_stream(self):
+        self.set_state(PlaybackState.STOPPED)
+        if self._current_tl_track:
+            self._trigger_track_playback_ended(self.get_time_position())
+        self._set_current_tl_track(None)
 
-        :param tl_track: track to change to
-        :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
-        :param on_error_step: direction to step at play error, 1 for next
-            track (default), -1 for previous track. **INTERNAL**
-        :type on_error_step: int, -1 or 1
-        """
-        old_state = self.get_state()
-        self.stop()
-        self._set_current_tl_track(tl_track)
-        if old_state == PlaybackState.PLAYING:
-            self._play(on_error_step=on_error_step)
-        elif old_state == PlaybackState.PAUSED:
-            # NOTE: this is just a quick hack to fix #1177 as this code has
-            # already been killed in the gapless branch.
-            backend = self._get_backend()
-            if backend:
-                backend.playback.prepare_change()
-                backend.playback.change_track(tl_track.track).get()
-            self.pause()
+    def _on_stream_changed(self, uri):
+        if self._last_position is None:
+            position = self.get_time_position()
+        else:
+            # This code path handles the stop() case, uri should be none.
+            position, self._last_position = self._last_position, None
 
-    # TODO: this is not really end of track, this is on_need_next_track
-    def _on_end_of_track(self):
-        """
-        Tell the playback controller that end of track is reached.
+        self._trigger_track_playback_ended(position)
 
-        Used by event handler in :class:`mopidy.core.Core`.
-        """
-        if self.get_state() == PlaybackState.STOPPED:
-            return
+        self._stream_title = None
+        if self._pending_tl_track:
+            self._set_current_tl_track(self._pending_tl_track)
+            self._pending_tl_track = None
+            self._trigger_track_playback_started()
 
+    def _on_about_to_finish_callback(self):
+        """Callback that performs a blocking actor call to the real callback.
+
+        This is passed to audio, which is allowed to call this code from the
+        audio thread. We pass execution into the core actor to ensure that
+        there is no unsafe access of state in core. This must block until
+        we get a response.
+        """
+        self.core.actor_ref.ask({
+            'command': 'pykka_call', 'args': tuple(), 'kwargs': {},
+            'attr_path': ('playback', '_on_about_to_finish'),
+        })
+
+    def _on_about_to_finish(self):
+        # TODO: check that we always have a current track
         original_tl_track = self.get_current_tl_track()
         next_tl_track = self.core.tracklist.eot_track(original_tl_track)
 
-        if next_tl_track:
-            self._change_track(next_tl_track)
-        else:
-            self.stop()
-            self._set_current_tl_track(None)
+        # TODO: only set pending if we have a backend that can play it?
+        # TODO: skip tracks that don't have a backend?
+        self._pending_tl_track = next_tl_track
+        backend = self._get_backend(next_tl_track)
 
-        self.core.tracklist._mark_played(original_tl_track)
+        if backend:
+            backend.playback.change_track(next_tl_track.track).get()
 
     def _on_tracklist_change(self):
         """
@@ -242,13 +251,11 @@ class PlaybackController(object):
 
         Used by :class:`mopidy.core.TracklistController`.
         """
-        tracklist = self.core.tracklist.get_tl_tracks()
-        if self.get_current_tl_track() not in tracklist:
+        if not self.core.tracklist.tl_tracks:
             self.stop()
             self._set_current_tl_track(None)
-
-    def _on_stream_changed(self, uri):
-        self._stream_title = None
+        elif self.get_current_tl_track() not in self.core.tracklist.tl_tracks:
+            self._set_current_tl_track(None)
 
     def next(self):
         """
@@ -257,23 +264,25 @@ class PlaybackController(object):
         The current playback state will be kept. If it was playing, playing
         will continue. If it was paused, it will still be paused, etc.
         """
-        original_tl_track = self.get_current_tl_track()
-        next_tl_track = self.core.tracklist.next_track(original_tl_track)
+        state = self.get_state()
+        current = self._pending_tl_track or self._current_tl_track
 
-        if next_tl_track:
-            # TODO: switch to:
-            # backend.play(track)
-            # wait for state change?
-            self._change_track(next_tl_track)
-        else:
-            self.stop()
-            self._set_current_tl_track(None)
+        while current:
+            pending = self.core.tracklist.next_track(current)
+            if self._change(pending, state):
+                break
+            else:
+                self.core.tracklist._mark_unplayable(pending)
+            # TODO: this could be needed to prevent a loop in rare cases
+            # if current == pending:
+            #     break
+            current = pending
 
-        self.core.tracklist._mark_played(original_tl_track)
+        # TODO return result?
 
     def pause(self):
         """Pause playback."""
-        backend = self._get_backend()
+        backend = self._get_backend(self.get_current_tl_track())
         if not backend or backend.playback.pause().get():
             # TODO: switch to:
             # backend.track(pause)
@@ -297,14 +306,11 @@ class PlaybackController(object):
             raise ValueError('At most one of "tl_track" and "tlid" may be set')
 
         tl_track is None or validation.check_instance(tl_track, models.TlTrack)
-        tlid is None or validation.check_integer(tlid, min=0)
+        tlid is None or validation.check_integer(tlid, min=1)
 
         if tl_track:
             deprecation.warn('core.playback.play:tl_track_kwarg', pending=True)
 
-        self._play(tl_track=tl_track, tlid=tlid, on_error_step=1)
-
-    def _play(self, tl_track=None, tlid=None, on_error_step=1):
         if tl_track is None and tlid is not None:
             for tl_track in self.core.tracklist.get_tl_tracks():
                 if tl_track.tlid == tlid:
@@ -312,60 +318,65 @@ class PlaybackController(object):
             else:
                 tl_track = None
 
-        if tl_track is None:
-            if self.get_state() == PlaybackState.PAUSED:
-                return self.resume()
+        if tl_track is not None:
+            # TODO: allow from outside tracklist, would make sense given refs?
+            assert tl_track in self.core.tracklist.get_tl_tracks()
+        elif tl_track is None and self.get_state() == PlaybackState.PAUSED:
+            self.resume()
+            return
 
-            if self.get_current_tl_track() is not None:
-                tl_track = self.get_current_tl_track()
+        current = self._pending_tl_track or self._current_tl_track
+        pending = tl_track or current or self.core.tracklist.next_track(None)
+
+        if pending:
+            # TODO: remove?
+            self.set_state(PlaybackState.PLAYING)
+
+        while pending:
+            # TODO: should we consume unplayable tracks in this loop?
+            if self._change(pending, PlaybackState.PLAYING):
+                break
             else:
-                if on_error_step == 1:
-                    tl_track = self.core.tracklist.next_track(tl_track)
-                elif on_error_step == -1:
-                    tl_track = self.core.tracklist.previous_track(tl_track)
+                self.core.tracklist._mark_unplayable(pending)
+            current = pending
+            pending = self.core.tracklist.next_track(current)
 
-            if tl_track is None:
-                return
+        # TODO return result?
 
-        assert tl_track in self.core.tracklist.get_tl_tracks()
+    def _change(self, pending_tl_track, state):
+        self._pending_tl_track = pending_tl_track
 
-        # TODO: switch to:
-        # backend.play(track)
-        # wait for state change?
-
-        if self.get_state() == PlaybackState.PLAYING:
+        if not pending_tl_track:
             self.stop()
+            self._on_end_of_stream()  # pretend an EOS happened for cleanup
+            return True
 
-        self._set_current_tl_track(tl_track)
-        self.set_state(PlaybackState.PLAYING)
-        backend = self._get_backend()
-        success = False
+        backend = self._get_backend(pending_tl_track)
+        if not backend:
+            return False
 
-        if backend:
-            backend.playback.prepare_change()
+        backend.playback.prepare_change()
+        if not backend.playback.change_track(pending_tl_track.track).get():
+            return False  # TODO: test for this path
+
+        if state == PlaybackState.PLAYING:
             try:
-                success = (
-                    backend.playback.change_track(tl_track.track).get() and
-                    backend.playback.play().get())
+                return backend.playback.play().get()
             except TypeError:
-                logger.error(
-                    '%s needs to be updated to work with this '
-                    'version of Mopidy.',
-                    backend.actor_ref.actor_class.__name__)
-                logger.debug('Backend exception', exc_info=True)
+                # TODO: check by binding against underlying play method using
+                # inspect and otherwise re-raise?
+                logger.error('%s needs to be updated to work with this '
+                             'version of Mopidy.', backend)
+                return False
+        elif state == PlaybackState.PAUSED:
+            return backend.playback.pause().get()
+        elif state == PlaybackState.STOPPED:
+            # TODO: emit some event now?
+            self._current_tl_track = self._pending_tl_track
+            self._pending_tl_track = None
+            return True
 
-        if success:
-            self.core.tracklist._mark_playing(tl_track)
-            self.core.history._add_track(tl_track.track)
-            # TODO: replace with stream-changed
-            self._trigger_track_playback_started()
-        else:
-            self.core.tracklist._mark_unplayable(tl_track)
-            if on_error_step == 1:
-                # TODO: can cause an endless loop for single track repeat.
-                self.next()
-            elif on_error_step == -1:
-                self.previous()
+        raise Exception('Unknown state: %s' % state)
 
     def previous(self):
         """
@@ -374,18 +385,28 @@ class PlaybackController(object):
         The current playback state will be kept. If it was playing, playing
         will continue. If it was paused, it will still be paused, etc.
         """
-        tl_track = self.get_current_tl_track()
-        # TODO: switch to:
-        # self.play(....)
-        # wait for state change?
-        self._change_track(
-            self.core.tracklist.previous_track(tl_track), on_error_step=-1)
+        self._previous = True
+        state = self.get_state()
+        current = self._pending_tl_track or self._current_tl_track
+
+        while current:
+            pending = self.core.tracklist.previous_track(current)
+            if self._change(pending, state):
+                break
+            else:
+                self.core.tracklist._mark_unplayable(pending)
+            # TODO: this could be needed to prevent a loop in rare cases
+            # if current == pending:
+            #     break
+            current = pending
+
+        # TODO: no return value?
 
     def resume(self):
         """If paused, resume playing the current track."""
         if self.get_state() != PlaybackState.PAUSED:
             return
-        backend = self._get_backend()
+        backend = self._get_backend(self.get_current_tl_track())
         if backend and backend.playback.resume().get():
             self.set_state(PlaybackState.PLAYING)
             # TODO: trigger via gst messages
@@ -402,6 +423,7 @@ class PlaybackController(object):
         :type time_position: int
         :rtype: :class:`True` if successful, else :class:`False`
         """
+        # TODO: seek needs to take pending tracks into account :(
         validation.check_integer(time_position)
 
         if time_position < 0:
@@ -412,19 +434,28 @@ class PlaybackController(object):
         if not self.core.tracklist.tracks:
             return False
 
-        if self.current_track and self.current_track.length is None:
-            return False
-
         if self.get_state() == PlaybackState.STOPPED:
             self.play()
 
+        # TODO: uncomment once we have tests for this. Should fix seek after
+        # about to finish doing wrong track.
+        # if self._current_tl_track and self._pending_tl_track:
+        #     self.play(self._current_tl_track)
+
+        # We need to prefer the still playing track, but if nothing is playing
+        # we fall back to the pending one.
+        tl_track = self._current_tl_track or self._pending_tl_track
+        if tl_track and tl_track.track.length is None:
+            return False
+
         if time_position < 0:
             time_position = 0
-        elif time_position > self.current_track.length:
+        elif time_position > tl_track.track.length:
+            # TODO: gstreamer will trigger a about to finish for us, use that?
             self.next()
             return True
 
-        backend = self._get_backend()
+        backend = self._get_backend(self.get_current_tl_track())
         if not backend:
             return False
 
@@ -436,11 +467,10 @@ class PlaybackController(object):
     def stop(self):
         """Stop playing."""
         if self.get_state() != PlaybackState.STOPPED:
-            backend = self._get_backend()
-            time_position_before_stop = self.get_time_position()
+            self._last_position = self.get_time_position()
+            backend = self._get_backend(self.get_current_tl_track())
             if not backend or backend.playback.stop().get():
                 self.set_state(PlaybackState.STOPPED)
-                self._trigger_track_playback_ended(time_position_before_stop)
 
     def _trigger_track_playback_paused(self):
         logger.debug('Triggering track playback paused event')
@@ -461,17 +491,26 @@ class PlaybackController(object):
             time_position=self.get_time_position())
 
     def _trigger_track_playback_started(self):
-        logger.debug('Triggering track playback started event')
         if self.get_current_tl_track() is None:
             return
-        listener.CoreListener.send(
-            'track_playback_started',
-            tl_track=self.get_current_tl_track())
+
+        logger.debug('Triggering track playback started event')
+        tl_track = self.get_current_tl_track()
+        self.core.tracklist._mark_playing(tl_track)
+        self.core.history._add_track(tl_track.track)
+        listener.CoreListener.send('track_playback_started', tl_track=tl_track)
 
     def _trigger_track_playback_ended(self, time_position_before_stop):
-        logger.debug('Triggering track playback ended event')
         if self.get_current_tl_track() is None:
             return
+
+        logger.debug('Triggering track playback ended event')
+
+        if not self._previous:
+            self.core.tracklist._mark_played(self._current_tl_track)
+        self._previous = False
+
+        # TODO: Use the lowest of track duration and position.
         listener.CoreListener.send(
             'track_playback_ended',
             tl_track=self.get_current_tl_track(),
@@ -484,5 +523,6 @@ class PlaybackController(object):
             old_state=old_state, new_state=new_state)
 
     def _trigger_seeked(self, time_position):
+        # TODO: Trigger this from audio events?
         logger.debug('Triggering seeked event')
         listener.CoreListener.send('seeked', time_position=time_position)

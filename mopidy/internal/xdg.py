@@ -1,8 +1,9 @@
 from __future__ import absolute_import, unicode_literals
 
-import ConfigParser as configparser
 import io
 import os
+
+from mopidy.compat import configparser
 
 
 def get_dirs():
@@ -46,21 +47,21 @@ def _get_user_dirs(xdg_config_dir):
     disabled, and thus no :mod:`glib` available.
     """
 
-    dirs_file = os.path.join(xdg_config_dir, 'user-dirs.dirs')
+    dirs_file = os.path.join(xdg_config_dir, b'user-dirs.dirs')
 
     if not os.path.exists(dirs_file):
         return {}
 
     with open(dirs_file, 'rb') as fh:
-        data = fh.read()
+        data = fh.read().decode('utf-8')
 
-    data = b'[XDG_USER_DIRS]\n' + data
-    data = data.replace(b'$HOME', os.path.expanduser(b'~'))
-    data = data.replace(b'"', b'')
+    data = '[XDG_USER_DIRS]\n' + data
+    data = data.replace('$HOME', os.path.expanduser('~'))
+    data = data.replace('"', '')
 
     config = configparser.RawConfigParser()
-    config.readfp(io.BytesIO(data))
+    config.readfp(io.StringIO(data))
 
     return {
-        k.decode('utf-8').upper(): os.path.abspath(v)
+        k.upper(): os.path.abspath(v)
         for k, v in config.items('XDG_USER_DIRS') if v is not None}

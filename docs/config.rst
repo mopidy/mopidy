@@ -195,7 +195,7 @@ Logging configuration
     to use for that logger, one of ``black``, ``red``, ``green``, ``yellow``,
     ``blue``, ``magenta``, ``cyan`` or ``white``.
 
-.. _the Python logging docs: http://docs.python.org/2/library/logging.config.html
+.. _the Python logging docs: https://docs.python.org/2/library/logging.config.html
 
 
 .. _proxy-config:

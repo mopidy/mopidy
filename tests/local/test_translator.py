@@ -42,11 +42,15 @@ def test_local_uri_to_file_uri_errors(uri):
     ('local:directory:A/B', b'/home/alice/Music/A/B'),
     ('local:directory:A%20B', b'/home/alice/Music/A B'),
     ('local:directory:A+B', b'/home/alice/Music/A+B'),
-    ('local:directory:%C3%A6%C3%B8%C3%A5', b'/home/alice/Music/æøå'),
+    (
+        'local:directory:%C3%A6%C3%B8%C3%A5',
+        b'/home/alice/Music/\xc3\xa6\xc3\xb8\xc3\xa5'),
     ('local:track:A/B.mp3', b'/home/alice/Music/A/B.mp3'),
     ('local:track:A%20B.mp3', b'/home/alice/Music/A B.mp3'),
     ('local:track:A+B.mp3', b'/home/alice/Music/A+B.mp3'),
-    ('local:track:%C3%A6%C3%B8%C3%A5.mp3', b'/home/alice/Music/æøå.mp3'),
+    (
+        'local:track:%C3%A6%C3%B8%C3%A5.mp3',
+        b'/home/alice/Music/\xc3\xa6\xc3\xb8\xc3\xa5.mp3'),
 ])
 def test_local_uri_to_path(uri, path):
     media_dir = b'/home/alice/Music'

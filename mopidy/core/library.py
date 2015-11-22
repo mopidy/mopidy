@@ -4,9 +4,9 @@ import collections
 import contextlib
 import logging
 import operator
-import urlparse
 
 from mopidy import compat, exceptions, models
+from mopidy.compat import urllib
 from mopidy.internal import deprecation, validation
 
 
@@ -35,7 +35,7 @@ class LibraryController(object):
         self.core = core
 
     def _get_backend(self, uri):
-        uri_scheme = urlparse.urlparse(uri).scheme
+        uri_scheme = urllib.parse.urlparse(uri).scheme
         return self.backends.with_library.get(uri_scheme, None)
 
     def _get_backends_to_uris(self, uris):
@@ -102,7 +102,7 @@ class LibraryController(object):
         return sorted(directories, key=operator.attrgetter('name'))
 
     def _browse(self, uri):
-        scheme = urlparse.urlparse(uri).scheme
+        scheme = urllib.parse.urlparse(uri).scheme
         backend = self.backends.with_library_browse.get(scheme)
 
         if not backend:
@@ -149,7 +149,7 @@ class LibraryController(object):
         """Lookup the images for the given URIs
 
         Backends can use this to return image URIs for any URI they know about
-        be it tracks, albums, playlists... The lookup result is a dictionary
+        be it tracks, albums, playlists. The lookup result is a dictionary
         mapping the provided URIs to lists of images.
 
         Unknown URIs or URIs the corresponding backend couldn't find anything
@@ -253,7 +253,7 @@ class LibraryController(object):
 
         futures = {}
         backends = {}
-        uri_scheme = urlparse.urlparse(uri).scheme if uri else None
+        uri_scheme = urllib.parse.urlparse(uri).scheme if uri else None
 
         for backend_scheme, backend in self.backends.with_library.items():
             backends.setdefault(backend, set()).add(backend_scheme)
@@ -269,6 +269,9 @@ class LibraryController(object):
     def search(self, query=None, uris=None, exact=False, **kwargs):
         """
         Search the library for tracks where ``field`` contains ``values``.
+        ``field`` can be one of ``uri``, ``track_name``, ``album``, ``artist``,
+        ``albumartist``, ``composer``, ``performer``, ``track_no``, ``genre``,
+        ``date``, ``comment`` or ``any``.
 
         If ``uris`` is given, the search is limited to results from within the
         URI roots. For example passing ``uris=['file:']`` will limit the search
@@ -356,7 +359,7 @@ def _normalize_query(query):
     broken_client = False
     # TODO: this breaks if query is not a dictionary like object...
     for (field, values) in query.items():
-        if isinstance(values, basestring):
+        if isinstance(values, compat.string_types):
             broken_client = True
             query[field] = [values]
     if broken_client:

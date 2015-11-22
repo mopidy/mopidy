@@ -59,7 +59,7 @@ MPD graphical clients
 GMPC
 ----
 
-`GMPC <http://gmpc.wikia.com>`_ is a graphical MPD client (GTK+) which works
+`GMPC <http://gmpc.wikia.com/wiki/Gnome_Music_Player_Client>`_ is a graphical MPD client (GTK+) which works
 well with Mopidy.
 
 .. image:: mpd-client-gmpc.png
@@ -76,7 +76,7 @@ before it will catch up.
 Sonata
 ------
 
-`Sonata <http://sonata.berlios.de/>`_ is a graphical MPD client (GTK+).
+`Sonata <https://github.com/multani/sonata>`_ is a graphical MPD client (GTK+).
 It generally works well with Mopidy, except for search.
 
 .. image:: mpd-client-sonata.png
@@ -87,11 +87,7 @@ When you search in Sonata, it only sends the first to letters of the search
 query to Mopidy, and then does the rest of the filtering itself on the client
 side. Since Spotify has a collection of millions of tracks and they only return
 the first 100 hits for any search query, searching for two-letter combinations
-seldom returns any useful results. See :issue:`1` and the closed `Sonata bug`_
-for details.
-
-.. _Sonata bug: http://developer.berlios.de/feature/?func=detailfeature&feature_id=5038&group_id=7323
-
+seldom returns any useful results. See :issue:`1` for details.
 
 Theremin
 --------
@@ -171,5 +167,5 @@ projects are a real match made in heaven."
 Partify
 -------
 
-`Partify <http://www.partify.us/>`_ is a web based MPD client focusing on
+`Partify <https://github.com/fhats/partify>`_ is a web based MPD client focusing on
 making music playing collaborative and social.

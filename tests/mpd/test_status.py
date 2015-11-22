@@ -11,7 +11,7 @@ from mopidy.models import Track
 from mopidy.mpd import dispatcher
 from mopidy.mpd.protocol import status
 
-from tests import dummy_backend, dummy_mixer
+from tests import dummy_audio, dummy_backend, dummy_mixer
 
 
 PAUSED = PlaybackState.PAUSED
@@ -31,12 +31,14 @@ class StatusHandlerTest(unittest.TestCase):
             }
         }
 
+        self.audio = dummy_audio.create_proxy()
         self.mixer = dummy_mixer.create_proxy()
-        self.backend = dummy_backend.create_proxy()
+        self.backend = dummy_backend.create_proxy(audio=self.audio)
 
         with deprecation.ignore():
             self.core = core.Core.start(
                 config,
+                audio=self.audio,
                 mixer=self.mixer,
                 backends=[self.backend]).proxy()
 
@@ -154,21 +156,21 @@ class StatusHandlerTest(unittest.TestCase):
     def test_status_method_when_playlist_loaded_contains_song(self):
         self.set_tracklist(Track(uri='dummy:/a'))
 
-        self.core.playback.play()
+        self.core.playback.play().get()
         result = dict(status.status(self.context))
         self.assertIn('song', result)
         self.assertGreaterEqual(int(result['song']), 0)
 
     def test_status_method_when_playlist_loaded_contains_tlid_as_songid(self):
         self.set_tracklist(Track(uri='dummy:/a'))
-        self.core.playback.play()
+        self.core.playback.play().get()
         result = dict(status.status(self.context))
         self.assertIn('songid', result)
-        self.assertEqual(int(result['songid']), 0)
+        self.assertEqual(int(result['songid']), 1)
 
     def test_status_method_when_playing_contains_time_with_no_length(self):
         self.set_tracklist(Track(uri='dummy:/a', length=None))
-        self.core.playback.play()
+        self.core.playback.play().get()
         result = dict(status.status(self.context))
         self.assertIn('time', result)
         (position, total) = result['time'].split(':')
@@ -188,7 +190,7 @@ class StatusHandlerTest(unittest.TestCase):
 
     def test_status_method_when_playing_contains_elapsed(self):
         self.set_tracklist(Track(uri='dummy:/a', length=60000))
-        self.core.playback.play()
+        self.core.playback.play().get()
         self.core.playback.pause()
         self.core.playback.seek(59123)
         result = dict(status.status(self.context))
@@ -197,7 +199,7 @@ class StatusHandlerTest(unittest.TestCase):
 
     def test_status_method_when_starting_playing_contains_elapsed_zero(self):
         self.set_tracklist(Track(uri='dummy:/a', length=10000))
-        self.core.playback.play()
+        self.core.playback.play().get()
         self.core.playback.pause()
         result = dict(status.status(self.context))
         self.assertIn('elapsed', result)
@@ -205,7 +207,7 @@ class StatusHandlerTest(unittest.TestCase):
 
     def test_status_method_when_playing_contains_bitrate(self):
         self.set_tracklist(Track(uri='dummy:/a', bitrate=3200))
-        self.core.playback.play()
+        self.core.playback.play().get()
         result = dict(status.status(self.context))
         self.assertIn('bitrate', result)
         self.assertEqual(int(result['bitrate']), 3200)

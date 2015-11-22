@@ -25,6 +25,7 @@ class Extension(ext.Extension):
         schema['connection_timeout'] = config.Integer(minimum=1)
         schema['zeroconf'] = config.String(optional=True)
         schema['command_blacklist'] = config.List(optional=True)
+        schema['default_playlist_scheme'] = config.String()
         return schema
 
     def validate_environment(self):

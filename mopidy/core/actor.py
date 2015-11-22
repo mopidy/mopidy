@@ -54,7 +54,8 @@ class Core(
         self.library = LibraryController(backends=self.backends, core=self)
         self.history = HistoryController()
         self.mixer = MixerController(mixer=mixer)
-        self.playback = PlaybackController(backends=self.backends, core=self)
+        self.playback = PlaybackController(
+            audio=audio, backends=self.backends, core=self)
         self.playlists = PlaylistsController(backends=self.backends, core=self)
         self.tracklist = TracklistController(core=self)
 
@@ -84,7 +85,7 @@ class Core(
     """
 
     def reached_end_of_stream(self):
-        self.playback._on_end_of_track()
+        self.playback._on_end_of_stream()
 
     def stream_changed(self, uri):
         self.playback._on_stream_changed(uri)

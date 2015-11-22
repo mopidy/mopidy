@@ -10,11 +10,41 @@ v1.2.0 (UNRELEASED)
 
 Feature release.
 
-Local
------
+Core API
+--------
+
+- Start ``tlid`` counting at 1 instead of 0 to keep in sync with MPD's
+  ``songid``.
+
+Models
+------
+
+- **Deprecated:** :attr:`mopidy.models.Album.images` is deprecated. Use
+  :meth:`mopidy.core.LibraryController.get_images` instead. (Fixes:
+  :issue:`1325`)
+
+Local backend
+--------------
 
 - Made :confval:`local/data_dir` really deprecated. This change breaks older
   versions of Mopidy-Local-SQLite and Mopidy-Local-Images.
+
+MPD frontend
+------------
+
+- Implemented commands for modifying stored playlists:
+
+  - ``playlistadd``
+  - ``playlistclear``
+  - ``playlistdelete``
+  - ``playlistmove``
+  - ``rename``
+  - ``rm``
+  - ``save``
+
+  (Fixes: :issue:`1014`, PR: :issue:`1187`, :issue:`1308`, :issue:`1322`)
+
+- Start ``songid`` counting at 1 instead of 0 to match the original MPD server.
 
 Zeroconf
 --------
@@ -34,6 +64,32 @@ Cleanups
 
 - Removed warning if :file:`~/.config/mopidy/settings.py` exists. We stopped
   using this settings file in 0.14, released in April 2013.
+
+Gapless
+-------
+
+- Add partial support for gapless playback. Gapless now works as long as you
+  don't change tracks or use next/previous. (PR: :issue:`1288`)
+
+- Core playback has been refactored to better handle gapless, and async state
+  changes.
+
+- Tests have been updated to always use a core actor so async state changes
+  don't trip us up.
+
+
+v1.1.2 (UNRELEASED)
+===================
+
+Bug fix release.
+
+- Stream: If an URI is considered playable, don't consider it as a candidate
+  for playlist parsing. Just looking at MIME type prefixes isn't enough, as for
+  example Ogg Vorbis has the MIME type ``application/ogg``. (Fixes:
+  :issue:`1299`)
+
+- Local: If the scan or clear commands are used on a library that does not
+  exist, exit with an error. (Fixes: :issue:`1298`)
 
 
 v1.1.1 (2015-09-14)
@@ -2053,7 +2109,7 @@ already have.
 
 - Mopidy.js now works both from browsers and from Node.js environments. This
   means that you now can make Mopidy clients in Node.js. Mopidy.js has been
-  published to the `npm registry <https://npmjs.org/package/mopidy>`_ for easy
+  published to the `npm registry <https://www.npmjs.com/package/mopidy>`_ for easy
   installation in Node.js projects.
 
 - Upgrade Mopidy.js' build system Grunt from 0.3 to 0.4.
@@ -2809,9 +2865,9 @@ Please note that 0.6.0 requires some updated dependencies, as listed under
   subsystems: player, playlist, options, and mixer. (Fixes: :issue:`32`)
 
 - A new frontend :mod:`mopidy.frontends.mpris` have been added. It exposes
-  Mopidy through the `MPRIS interface <http://www.mpris.org/>`_ over D-Bus. In
+  Mopidy through the `MPRIS interface <http://specifications.freedesktop.org/mpris-spec/latest/>`_ over D-Bus. In
   practice, this makes it possible to control Mopidy through the `Ubuntu Sound
-  Menu <https://wiki.ubuntu.com/SoundMenu>`_.
+  Menu <https://wiki.ubuntu.com/Sound#menu>`_.
 
 **Changes**
 
