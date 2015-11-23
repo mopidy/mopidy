@@ -743,7 +743,7 @@ class Audio(pykka.ThreadingActor):
         """
         Set track metadata for currently playing song.
 
-        Only needs to be called by sources such as `appsrc` which do not
+        Only needs to be called by sources such as ``appsrc`` which do not
         already inject tags in playbin, e.g. when using :meth:`emit_data` to
         deliver raw audio data to GStreamer.
 
@@ -753,20 +753,27 @@ class Audio(pykka.ThreadingActor):
         taglist = Gst.TagList.new_empty()
         artists = [a for a in (track.artists or []) if a.name]
 
+        def set_value(tag, value):
+            gobject_value = GObject.Value()
+            gobject_value.init(GObject.TYPE_STRING)
+            gobject_value.set_string(value)
+            taglist.add_value(
+                Gst.TagMergeMode.REPLACE, Gst.TAG_ARTIST, gobject_value)
+
         # Default to blank data to trick shoutcast into clearing any previous
         # values it might have.
-        taglist[Gst.TAG_ARTIST] = ' '
-        taglist[Gst.TAG_TITLE] = ' '
-        taglist[Gst.TAG_ALBUM] = ' '
+        set_value(Gst.TAG_ARTIST, ' ')
+        set_value(Gst.TAG_TITLE, ' ')
+        set_value(Gst.TAG_ALBUM, ' ')
 
         if artists:
-            taglist[Gst.TAG_ARTIST] = ', '.join([a.name for a in artists])
+            set_value(Gst.TAG_ARTIST, ', '.join([a.name for a in artists]))
 
         if track.name:
-            taglist[Gst.TAG_TITLE] = track.name
+            set_value(Gst.TAG_TITLE, track.name)
 
         if track.album and track.album.name:
-            taglist[Gst.TAG_ALBUM] = track.album.name
+            set_value(Gst.TAG_ALBUM, track.album.name)
 
         event = Gst.event_new_tag(taglist)
         # TODO: check if we get this back on our own bus?
