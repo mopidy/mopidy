@@ -223,7 +223,7 @@ class _Handler(object):
     def setup_event_handling(self, pad):
         self._pad = pad
         self._event_handler_id = pad.add_probe(
-            Gst.PadProbeType.EVENT_BOTH, self.on_event)
+            Gst.PadProbeType.EVENT_BOTH, self.on_pad_event)
 
     def teardown_message_handling(self):
         bus = self._element.get_bus()
@@ -258,10 +258,11 @@ class _Handler(object):
         elif msg.type == Gst.MessageType.STREAM_START:
             self.on_stream_changed(self._audio._playbin.get_property('uri'))
 
-    def on_event(self, pad, event):
+    def on_pad_event(self, pad, pad_probe_info):
+        event = pad_probe_info.get_event()
         if event.type == Gst.EventType.SEGMENT:
             self.on_new_segment(event.parse_new_segment())
-        return True
+        return Gst.PadProbeReturn.OK
 
     def on_playbin_state_changed(self, old_state, new_state, pending_state):
         gst_logger.debug('Got state-changed message: old=%s new=%s pending=%s',
