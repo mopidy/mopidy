@@ -23,6 +23,12 @@ Models
   :meth:`mopidy.core.LibraryController.get_images` instead. (Fixes:
   :issue:`1325`)
 
+Extension support
+-----------------
+
+- Log exception and continue if an extension crashes during setup. Previously,
+  we let Mopidy crash if an extension's setup crashed. (PR: :issue:`1337`)
+
 Local backend
 --------------
 
