@@ -19,13 +19,15 @@ class Field(object):
     :param default: default value for field
     :param type: if set the field value must be of this type
     :param choices: if set the field value must be one of these
+    :param blank: if set the field value is allowed to be blank
     """
 
-    def __init__(self, default=None, type=None, choices=None):
-        self._name = None  # Set by ValidatedImmutableObjectMeta
+    def __init__(self, default=None, type=None, choices=None, blank=True):
+        self._name = None  # Set by _ValidatedImmutableObjectMeta
         self._choices = choices
         self._default = default
         self._type = type
+        self._blank = blank
 
         if self._default is not None:
             self.validate(self._default)
@@ -67,11 +69,18 @@ class String(Field):
     :param default: default value for field
     """
 
-    def __init__(self, default=None):
+    def __init__(self, default=None, blank=True):
         # TODO: normalize to unicode?
         # TODO: only allow unicode?
-        # TODO: disallow empty strings?
-        super(String, self).__init__(type=compat.string_types, default=default)
+        super(String, self).__init__(type=compat.string_types,
+                                     default=default,
+                                     blank=blank)
+
+    def validate(self, value):
+        value = super(String, self).validate(value)
+        if not self._blank and not len(value):
+            raise ValueError('Field "%s" must not be empty.' % (self._name,))
+        return value
 
 
 class Date(String):

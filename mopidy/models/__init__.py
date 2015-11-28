@@ -216,7 +216,7 @@ class Track(ValidatedImmutableObject):
     """
 
     #: The track URI. Read-only.
-    uri = fields.URI()
+    uri = fields.URI(blank=False)
 
     #: The track name. Read-only.
     name = fields.String()
