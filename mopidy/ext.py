@@ -198,7 +198,13 @@ def load_extensions():
 
     for entry_point in pkg_resources.iter_entry_points('mopidy.ext'):
         logger.debug('Loading entry point: %s', entry_point)
-        extension_class = entry_point.load(require=False)
+        try:
+            extension_class = entry_point.load(require=False)
+        except Exception as e:
+            logger.exception("Failed to load extension {}: {}".format(
+                entry_point.name, e
+            ), exc_info=e)
+            continue
 
         try:
             if not issubclass(extension_class, Extension):
