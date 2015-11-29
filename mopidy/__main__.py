@@ -9,21 +9,20 @@ import textwrap
 try:
     import gi
     gi.require_version('Gst', '1.0')
-    from gi.repository import GObject, Gst
+    from gi.repository import Gst
 except ImportError:
     print(textwrap.dedent("""
-        ERROR: The GObject and Gst Python packages were not found.
+        ERROR: The GStreamer Python package was not found.
 
-        Mopidy requires GStreamer and GObject to work. These are C libraries
-        with a number of dependencies themselves, and cannot be installed with
-        the regular Python tools like pip.
+        Mopidy requires GStreamer to work. GStreamer is a C library with a
+        number of dependencies itself, and cannot be installed with the regular
+        Python tools like pip.
 
         Please see http://docs.mopidy.com/en/latest/installation/ for
         instructions on how to install the required dependencies.
     """))
     raise
 
-GObject.threads_init()
 Gst.init()
 
 try:
