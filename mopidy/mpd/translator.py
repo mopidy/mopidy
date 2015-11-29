@@ -1,10 +1,14 @@
 from __future__ import absolute_import, unicode_literals
 
 import datetime
+import logging
 import re
 
 from mopidy.models import TlTrack
 from mopidy.mpd.protocol import tagtype_list
+
+
+logger = logging.getLogger(__name__)
 
 # TODO: special handling of local:// uri scheme
 normalize_path_re = re.compile(r'[^/]+')
@@ -34,8 +38,12 @@ def track_to_mpd_format(track, position=None, stream_title=None):
     else:
         (tlid, track) = (None, track)
 
+    if not track.uri:
+        logger.warning('Ignoring track without uri')
+        return []
+
     result = [
-        ('file', track.uri or ''),
+        ('file', track.uri),
         ('Time', track.length and (track.length // 1000) or 0),
         ('Artist', concat_multi_values(track.artists, 'name')),
         ('Album', track.album and track.album.name or ''),
