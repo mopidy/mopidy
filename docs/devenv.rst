@@ -74,6 +74,26 @@ This will both activate the ``mopidy`` virtualenv, and change the current
 working directory to ``~/mopidy-dev``.
 
 
+Creating a virtualenv with pyenv
+================================
+
+Creating a virtualenv with `pyenv <https://github.com/pyenv/pyenv>`__ (and its
+plugin `pyenv-virtualenv https://github.com/yyuu/pyenv-virtualenv/`__) is
+similar:
+
+    pyenv virtualenv -p $(PYENV_VERSION=system pyenv which python2.7) \
+      --system-site-packages system mopidy
+
+To work on it, you can enable it in your shell:
+
+    pyenv shell mopidy
+
+Or set it for the mopidy source directory (after cloning it, see below),
+which will automatically use it when changing into this directory:
+
+    cd ~/mopidy-dev/mopidy/
+    pyenv local mopidy
+
 Clone the repo from GitHub
 --------------------------
 
