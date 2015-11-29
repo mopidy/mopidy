@@ -16,7 +16,7 @@ env:
 before_install:
   - "sudo sed -i '/127.0.1.1/d' /etc/hosts"  # Workaround tornadoweb/tornado#1573
   - "sudo apt-get update -qq"
-  - "sudo apt-get install -y graphviz-dev gstreamer0.10-plugins-good python-gst0.10"
+  - "sudo apt-get install -y gir1.2-gst-plugins-base-1.0 gir1.2-gstreamer-1.0 graphviz-dev gstreamer1.0-plugins-good python-gst-1.0"
 
 install:
   - "pip install tox"
