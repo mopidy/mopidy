@@ -6,7 +6,7 @@ import time
 
 import gi
 gi.require_version('Gst', '1.0')
-from gi.repository import GObject, Gst, GstPbutils
+from gi.repository import Gst, GstPbutils
 
 from mopidy import exceptions
 from mopidy.audio import utils
@@ -193,7 +193,6 @@ if __name__ == '__main__':
 
     from mopidy.internal import path
 
-    GObject.threads_init()
     Gst.init()
 
     scanner = Scanner(5000)
