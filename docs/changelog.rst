@@ -10,6 +10,12 @@ v1.2.0 (UNRELEASED)
 
 Feature release.
 
+Dependencies
+------------
+
+- Mopidy now requires GStreamer 1.x, as we've finally ported from GStreamer
+  0.10.
+
 Core API
 --------
 
@@ -122,6 +128,14 @@ Cleanups
 
 - Catch errors when loading :confval:`logging/config_file`.
   (Fixes: :issue:`1320`)
+
+Audio
+-----
+
+- **Breaking:** The audio scanner now returns ISO-8601 formatted strings
+  instead of :class:`~datetime.datetime` objects for dates found in tags.
+  Because of this change, we can now return years without months or days, which
+  matches the semantics of the date fields in our data models.
 
 Gapless
 -------
