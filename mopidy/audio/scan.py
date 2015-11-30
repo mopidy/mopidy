@@ -7,6 +7,7 @@ import time
 import gi
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst, GstPbutils
+Gst.is_initialized() or Gst.init()
 
 from mopidy import exceptions
 from mopidy.audio import utils
@@ -192,8 +193,6 @@ if __name__ == '__main__':
     import sys
 
     from mopidy.internal import path
-
-    Gst.init()
 
     scanner = Scanner(5000)
     for uri in sys.argv[1:]:
