@@ -262,7 +262,7 @@ class _Handler(object):
     def on_pad_event(self, pad, pad_probe_info):
         event = pad_probe_info.get_event()
         if event.type == Gst.EventType.SEGMENT:
-            self.on_new_segment(event.parse_new_segment())
+            self.on_segment(event.parse_segment())
         return Gst.PadProbeReturn.OK
 
     def on_playbin_state_changed(self, old_state, new_state, pending_state):
@@ -362,9 +362,9 @@ class _Handler(object):
         # can provide a 'mopidy install-missing-plugins' if the system has the
         # required helper installed?
 
-    def on_new_segment(self, segment):
+    def on_segment(self, segment):
         gst_logger.debug(
-            'Got new-segment event: '
+            'Got SEGMENT pad event: '
             'rate=%(rate)s format=%(format)s start=%(start)s stop=%(stop)s '
             'position=%(position)s', {
                 'rate': segment.rate,
