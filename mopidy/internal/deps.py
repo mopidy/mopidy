@@ -8,6 +8,7 @@ import sys
 import gi
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst
+Gst.is_initialized() or Gst.init()
 
 import pkg_resources
 

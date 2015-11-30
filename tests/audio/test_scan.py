@@ -3,12 +3,6 @@ from __future__ import absolute_import, unicode_literals
 import os
 import unittest
 
-import gi
-gi.require_version('Gst', '1.0')
-from gi.repository import Gst
-
-Gst.init()
-
 from mopidy import exceptions
 from mopidy.audio import scan
 from mopidy.internal import path as path_lib

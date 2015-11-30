@@ -22,8 +22,8 @@ except ImportError:
         instructions on how to install the required dependencies.
     """))
     raise
-
-Gst.init()
+else:
+    Gst.init()
 
 try:
     # Make GObject's mainloop the event loop for python-dbus
