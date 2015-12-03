@@ -105,7 +105,7 @@ def _pad_added(element, pad, pipeline):
     pad.link(sink.get_static_pad('sink'))
 
     if pad.query_caps().is_subset(Gst.Caps.from_string('audio/x-raw')):
-        struct = Gst.Structure('have-audio')
+        struct = Gst.Structure.new_empty('have-audio')
         element.get_bus().post(Gst.Message.new_application(element, struct))
 
 
