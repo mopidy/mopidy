@@ -223,6 +223,8 @@ class PlaybackController(object):
             if self._pending_position is None:
                 self.set_state(PlaybackState.PLAYING)
                 self._trigger_track_playback_started()
+            else:
+                self._seek(self._pending_position)
 
     def _on_position_changed(self, position):
         if self._pending_position == position:
@@ -446,11 +448,6 @@ class PlaybackController(object):
         if self.get_state() == PlaybackState.STOPPED:
             self.play()
 
-        # Make sure we switch back to previous track if we get a seek while we
-        # have a pending track.
-        if self._current_tl_track and self._pending_tl_track:
-            self._change(self._current_tl_track, self.get_state())
-
         # We need to prefer the still playing track, but if nothing is playing
         # we fall back to the pending one.
         tl_track = self._current_tl_track or self._pending_tl_track
@@ -464,11 +461,20 @@ class PlaybackController(object):
             self.next()
             return True
 
+        # Store our target position.
         self._pending_position = time_position
+
+        # Make sure we switch back to previous track if we get a seek while we
+        # have a pending track.
+        if self._current_tl_track and self._pending_tl_track:
+            self._change(self._current_tl_track, self.get_state())
+        else:
+            return self._seek(time_position)
+
+    def _seek(self, time_position):
         backend = self._get_backend(self.get_current_tl_track())
         if not backend:
             return False
-
         return backend.playback.seek(time_position).get()
 
     def stop(self):
