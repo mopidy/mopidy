@@ -437,10 +437,10 @@ class PlaybackController(object):
         if self.get_state() == PlaybackState.STOPPED:
             self.play()
 
-        # TODO: uncomment once we have tests for this. Should fix seek after
-        # about to finish doing wrong track.
-        # if self._current_tl_track and self._pending_tl_track:
-        #     self.play(self._current_tl_track)
+        # Make sure we switch back to previous track if we get a seek while we
+        # have a pending track.
+        if self._current_tl_track and self._pending_tl_track:
+            self._change(self._current_tl_track, self.get_state())
 
         # We need to prefer the still playing track, but if nothing is playing
         # we fall back to the pending one.
