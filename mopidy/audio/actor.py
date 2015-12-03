@@ -794,7 +794,7 @@ class Audio(pykka.ThreadingActor):
         gst_logger.debug(
             'Sending TAG event for track %r: %r',
             track.uri, taglist.to_string())
-        event = Gst.event_new_tag(taglist)
+        event = Gst.Event.new_tag(taglist)
         # TODO: check if we get this back on our own bus?
         self._playbin.send_event(event)
 
