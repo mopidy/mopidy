@@ -434,6 +434,7 @@ class EventEmissionTest(BaseTest):
         self.core.playback.play(tl_tracks[0])
         self.replay_events()
         self.core.playback.seek(1000)
+        self.replay_events()
         listener_mock.reset_mock()
 
         self.core.playback.stop()
@@ -456,6 +457,7 @@ class EventEmissionTest(BaseTest):
         self.core.playback.play(tl_tracks[0])
         self.replay_events()
         self.core.playback.seek(1000)
+        self.replay_events()
         listener_mock.reset_mock()
 
         self.core.playback.next()
@@ -504,6 +506,7 @@ class EventEmissionTest(BaseTest):
         listener_mock.reset_mock()
 
         self.core.playback.seek(1000)
+        self.replay_events()
 
         listener_mock.send.assert_called_once_with(
             'seeked', time_position=1000)

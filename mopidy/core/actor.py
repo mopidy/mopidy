@@ -90,6 +90,9 @@ class Core(
     def stream_changed(self, uri):
         self.playback._on_stream_changed(uri)
 
+    def position_changed(self, position):
+        self.playback._on_position_changed(position)
+
     def state_changed(self, old_state, new_state, target_state):
         # XXX: This is a temporary fix for issue #232 while we wait for a more
         # permanent solution with the implementation of issue #234. When the

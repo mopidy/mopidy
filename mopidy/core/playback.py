@@ -26,6 +26,7 @@ class PlaybackController(object):
         self._current_tl_track = None
         self._pending_tl_track = None
 
+        self._pending_position = None
         self._last_position = None
         self._previous = False
 
@@ -219,6 +220,11 @@ class PlaybackController(object):
             self._pending_tl_track = None
             self.set_state(PlaybackState.PLAYING)
             self._trigger_track_playback_started()
+
+    def _on_position_changed(self, position):
+        if self._pending_position == position:
+            self._trigger_seeked(position)
+            self._pending_position = None
 
     def _on_about_to_finish_callback(self):
         """Callback that performs a blocking actor call to the real callback.
@@ -455,14 +461,12 @@ class PlaybackController(object):
             self.next()
             return True
 
+        self._pending_position = time_position
         backend = self._get_backend(self.get_current_tl_track())
         if not backend:
             return False
 
-        success = backend.playback.seek(time_position).get()
-        if success:
-            self._trigger_seeked(time_position)
-        return success
+        return backend.playback.seek(time_position).get()
 
     def stop(self):
         """Stop playing."""
