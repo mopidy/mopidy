@@ -6,8 +6,6 @@ import mock
 
 import pykka
 
-import pytest
-
 from mopidy import backend, core
 from mopidy.internal import deprecation
 from mopidy.models import Track
@@ -534,7 +532,6 @@ class EventEmissionTest(BaseTest):
             ],
             listener_mock.send.mock_calls)
 
-    @pytest.mark.xfail
     def test_seek_race_condition_emits_events(self, listener_mock):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 

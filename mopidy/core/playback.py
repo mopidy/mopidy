@@ -212,14 +212,17 @@ class PlaybackController(object):
             # This code path handles the stop() case, uri should be none.
             position, self._last_position = self._last_position, None
 
-        self._trigger_track_playback_ended(position)
+        if self._pending_position is None:
+            self._trigger_track_playback_ended(position)
 
         self._stream_title = None
         if self._pending_tl_track:
             self._set_current_tl_track(self._pending_tl_track)
             self._pending_tl_track = None
-            self.set_state(PlaybackState.PLAYING)
-            self._trigger_track_playback_started()
+
+            if self._pending_position is None:
+                self.set_state(PlaybackState.PLAYING)
+                self._trigger_track_playback_started()
 
     def _on_position_changed(self, position):
         if self._pending_position == position:
