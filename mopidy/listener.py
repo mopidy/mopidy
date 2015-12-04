@@ -41,4 +41,8 @@ class Listener(object):
         :type event: string
         :param kwargs: any other arguments to the specific event handlers
         """
-        getattr(self, event)(**kwargs)
+        try:
+            getattr(self, event)(**kwargs)
+        except Exception:
+            # Ensure we don't crash the actor due to "bad" events.
+            logger.exception('Triggering event failed: %s', event)
