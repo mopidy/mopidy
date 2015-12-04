@@ -24,6 +24,9 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
         self.zeroconf_name = config['mpd']['zeroconf']
         self.zeroconf_service = None
 
+        self._setup_server(config, core)
+
+    def _setup_server(self, config, core):
         try:
             network.Server(
                 self.hostname, self.port,
