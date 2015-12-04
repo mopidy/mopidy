@@ -261,7 +261,7 @@ class _Handler(object):
             if GstPbutils.is_missing_plugin_message(msg):
                 self.on_missing_plugin(msg)
         elif msg.type == Gst.MessageType.STREAM_START:
-            self.on_stream_changed(self._audio._playbin.get_property('uri'))
+            self.on_stream_start()
 
     def on_pad_event(self, pad, pad_probe_info):
         event = pad_probe_info.get_event()
@@ -374,8 +374,9 @@ class _Handler(object):
         # can provide a 'mopidy install-missing-plugins' if the system has the
         # required helper installed?
 
-    def on_stream_changed(self, uri):
-        gst_logger.debug('Got STREAM_CHANGED bus message: uri=%r', uri)
+    def on_stream_start(self):
+        gst_logger.debug('Got STREAM_START bus message')
+        uri = self._audio._pending_uri
         logger.debug('Audio event: stream_changed(uri=%r)', uri)
         AudioListener.send('stream_changed', uri=uri)
 
@@ -415,6 +416,7 @@ class Audio(pykka.ThreadingActor):
         self._target_state = Gst.State.NULL
         self._buffering = False
         self._tags = {}
+        self._pending_uri = None
 
         self._playbin = None
         self._outputs = None
@@ -561,6 +563,7 @@ class Audio(pykka.ThreadingActor):
             current_volume = None
 
         self._tags = {}  # TODO: add test for this somehow
+        self._pending_uri = uri
         self._playbin.set_property('uri', uri)
 
         if self.mixer is not None and current_volume is not None:
@@ -586,7 +589,9 @@ class Audio(pykka.ThreadingActor):
         """
         self._appsrc.prepare(
             Gst.Caps.from_string(caps), need_data, enough_data, seek_data)
-        self._playbin.set_property('uri', 'appsrc://')
+        uri = 'appsrc://'
+        self._pending_uri = uri
+        self._playbin.set_property('uri', uri)
 
     def emit_data(self, buffer_):
         """
