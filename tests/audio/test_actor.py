@@ -163,7 +163,7 @@ class AudioEventTest(BaseTest):
         self.listener = DummyAudioListener.start().proxy()
 
     def tearDown(self):  # noqa: N802
-        super(AudioEventTest, self).setUp()
+        super(AudioEventTest, self).tearDown()
 
     def assertEvent(self, event, **kwargs):  # noqa: N802
         self.assertIn((event, kwargs), self.listener.get_events().get())
