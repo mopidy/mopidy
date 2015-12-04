@@ -23,6 +23,12 @@ class TestCreateBuffer(object):
         assert buf.duration == 1000000
         assert buf.get_size() == len(b'123')
 
+    def test_fails_if_data_has_zero_length(self):
+        with pytest.raises(ValueError) as excinfo:
+            utils.create_buffer(b'', timestamp=0, duration=1000000)
+
+        assert 'Cannot create buffer without data' in str(excinfo.value)
+
 
 # TODO: keep ids without name?
 # TODO: current test is trying to test everything at once with a complete tags
