@@ -17,6 +17,8 @@ Bug fix release.
 - Local: If the scan or clear commands are used on a library that does not
   exist, exit with an error. (Fixes: :issue:`1298`)
 
+- MPD: Notify idling clients when a seek is performed. (Fixes: :issue:`1331`)
+
 
 v1.1.1 (2015-09-14)
 ===================
