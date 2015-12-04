@@ -4,7 +4,7 @@ import logging
 
 import pykka
 
-from mopidy import exceptions, zeroconf
+from mopidy import exceptions, listener, zeroconf
 from mopidy.core import CoreListener
 from mopidy.internal import encoding, network, process
 from mopidy.mpd import session, uri_mapper
@@ -57,9 +57,7 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
         process.stop_actors_by_class(session.MpdSession)
 
     def send_idle(self, subsystem):
-        listeners = pykka.ActorRegistry.get_by_class(session.MpdSession)
-        for listener in listeners:
-            getattr(listener.proxy(), 'on_idle')(subsystem)
+        listener.send(session.MpdSession, subsystem)
 
     def playback_state_changed(self, old_state, new_state):
         self.send_idle('player')

@@ -41,7 +41,7 @@ class MpdSession(network.LineProtocol):
 
         self.send_lines(response)
 
-    def on_idle(self, subsystem):
+    def on_event(self, subsystem):
         self.dispatcher.handle_idle(subsystem)
 
     def decode(self, line):
