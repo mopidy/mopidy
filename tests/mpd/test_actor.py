@@ -22,7 +22,7 @@ from mopidy.mpd import actor
     (['options_changed'], 'options'),
     (['volume_changed', 'volume'], 'mixer'),
     (['mute_changed', 'mute'], 'output'),
-    (['seeked', 'time_position'], None),
+    (['seeked', 'time_position'], 'player'),
     (['stream_title_changed', 'title'], 'playlist'),
 ])
 def test_idle_hooked_up_correctly(event, expected):
