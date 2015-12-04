@@ -28,6 +28,9 @@ def create_buffer(data, capabilites=None, timestamp=None, duration=None):
     .. versionchanged:: 1.2
         ``capabilites`` argument is no longer in use
     """
+    if not data:
+        raise ValueError(
+            'Cannot create buffer without data: length=%d' % len(data))
     buffer_ = Gst.Buffer.new_wrapped(data)
     if timestamp is not None:
         buffer_.pts = timestamp
