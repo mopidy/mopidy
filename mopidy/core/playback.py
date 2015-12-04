@@ -131,6 +131,8 @@ class PlaybackController(object):
 
     def get_time_position(self):
         """Get time position in milliseconds."""
+        if self._pending_position is not None:
+            return self._pending_position
         backend = self._get_backend(self.get_current_tl_track())
         if backend:
             return backend.playback.get_time_position().get()

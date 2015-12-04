@@ -855,7 +855,6 @@ class BackendSelectionTest(unittest.TestCase):
         self.core.playback.play(self.tl_tracks[0])
         self.trigger_stream_changed()
 
-        self.core.playback.seek(10000)
         self.core.playback.time_position
 
         self.playback1.get_time_position.assert_called_once_with()
@@ -865,7 +864,6 @@ class BackendSelectionTest(unittest.TestCase):
         self.core.playback.play(self.tl_tracks[1])
         self.trigger_stream_changed()
 
-        self.core.playback.seek(10000)
         self.core.playback.time_position
 
         self.assertFalse(self.playback1.get_time_position.called)
