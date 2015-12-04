@@ -29,9 +29,9 @@ def create_buffer(data, capabilites=None, timestamp=None, duration=None):
         ``capabilites`` argument is no longer in use
     """
     buffer_ = Gst.Buffer.new_wrapped(data)
-    if timestamp:
+    if timestamp is not None:
         buffer_.pts = timestamp
-    if duration:
+    if duration is not None:
         buffer_.duration = duration
     return buffer_
 
