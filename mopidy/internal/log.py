@@ -19,6 +19,8 @@ LOG_LEVELS = {
 TRACE_LOG_LEVEL = 5
 logging.addLevelName(TRACE_LOG_LEVEL, 'TRACE')
 
+logger = logging.getLogger(__name__)
+
 
 class DelayedHandler(logging.Handler):
 
@@ -54,8 +56,12 @@ def setup_logging(config, verbosity_level, save_debug_log):
     if config['logging']['config_file']:
         # Logging config from file must be read before other handlers are
         # added. If not, the other handlers will have no effect.
-        logging.config.fileConfig(config['logging']['config_file'],
-                                  disable_existing_loggers=False)
+        try:
+            path = config['logging']['config_file']
+            logging.config.fileConfig(path, disable_existing_loggers=False)
+        except Exception as e:
+            # Catch everything as logging does not specify what can go wrong.
+            logger.error('Loading logging config %r failed. %s', path, e)
 
     setup_console_logging(config, verbosity_level)
     if save_debug_log:

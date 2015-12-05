@@ -90,6 +90,9 @@ Cleanups
 - The ``on_event`` handler in our listener helper now catches exceptions. This
   means that any errors in event handling won't crash the actor in question.
 
+- Catch errors when loading :confval:`logging/config_file`.
+  (Fixes: :issue:`1320`)
+
 Gapless
 -------
 
