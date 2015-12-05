@@ -90,7 +90,7 @@ Gapless
 - Seek events are now triggered when the seek completes. Previously the event
   was emitted when the seek was requested, not when it completed. Further
   changes have been made to make seek work correctly for gapless related corner
-  cases. (Fixes: :issue:`1305` PR: :pr:`1346`)
+  cases. (Fixes: :issue:`1305` PR: :issue:`1346`)
 
 
 v1.1.2 (UNRELEASED)
