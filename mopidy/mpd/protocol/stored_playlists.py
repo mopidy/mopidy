@@ -322,16 +322,28 @@ def rename(context, old_name, new_name):
 
         Renames the playlist ``NAME.m3u`` to ``NEW_NAME.m3u``.
     """
-    uri = context.lookup_playlist_uri_from_name(old_name)
-    uri_scheme = urllib.parse.urlparse(uri).scheme
-    old_playlist = uri is not None and context.core.playlists.lookup(uri).get()
+    _check_playlist_name(old_name)
+    _check_playlist_name(new_name)
+
+    old_uri = context.lookup_playlist_uri_from_name(old_name)
+    if not old_uri:
+        raise exceptions.MpdNoExistError('No such playlist')
+
+    old_playlist = context.core.playlists.lookup(old_uri).get()
     if not old_playlist:
         raise exceptions.MpdNoExistError('No such playlist')
 
+    new_uri = context.lookup_playlist_uri_from_name(new_name)
+    if new_uri and context.core.playlists.lookup(new_uri).get():
+        raise exceptions.MpdExistError('Playlist already exists')
+    # TODO: should we purge the mapping in an else?
+
     # Create copy of the playlist and remove original
+    uri_scheme = urllib.parse.urlparse(old_uri).scheme
     new_playlist = context.core.playlists.create(new_name, uri_scheme).get()
     new_playlist = new_playlist.replace(tracks=old_playlist.tracks)
     saved_playlist = context.core.playlists.save(new_playlist).get()
+
     if saved_playlist is None:
         raise exceptions.MpdFailedToSavePlaylist(uri_scheme)
     context.core.playlists.delete(old_playlist.uri).get()

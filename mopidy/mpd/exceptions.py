@@ -80,6 +80,10 @@ class MpdNoExistError(MpdAckError):
     error_code = MpdAckError.ACK_ERROR_NO_EXIST
 
 
+class MpdExistError(MpdAckError):
+    error_code = MpdAckError.ACK_ERROR_EXIST
+
+
 class MpdSystemError(MpdAckError):
     error_code = MpdAckError.ACK_ERROR_SYSTEM
 

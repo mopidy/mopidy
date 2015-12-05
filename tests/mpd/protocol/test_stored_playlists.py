@@ -387,6 +387,31 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertIsNotNone(
             self.backend.playlists.lookup('dummy:new_name').get())
 
+    def test_rename_unknown_playlist_acks(self):
+        self.send_request('rename "foo" "bar"')
+        self.assertInResponse('ACK [50@0] {rename} No such playlist')
+
+    def test_rename_to_existing_acks(self):
+        self.send_request('save "foo"')
+        self.send_request('save "bar"')
+
+        self.send_request('rename "foo" "bar"')
+        self.assertInResponse('ACK [56@0] {rename} Playlist already exists')
+
+    def test_rename_invalid_name_acks(self):
+        expected = ('ACK [2@0] {rename} playlist name is invalid: playlist '
+                    'names may not contain slashes, newlines or carriage '
+                    'returns')
+
+        self.send_request('rename "foo/bar" "bar"')
+        self.assertInResponse(expected)
+
+        self.send_request('rename "foo" "foo/bar"')
+        self.assertInResponse(expected)
+
+        self.send_request('rename "bar/foo" "foo/bar"')
+        self.assertInResponse(expected)
+
     def test_rm(self):
         self.backend.playlists.set_dummy_playlists([
             Playlist(
