@@ -16,7 +16,7 @@ from mopidy.mpd import actor
     (['track_playback_ended', 'tl_track', 'time_position'], None),
     (['playback_state_changed', 'old_state', 'new_state'], 'player'),
     (['tracklist_changed'], 'playlist'),
-    (['playlists_loaded'], None),
+    (['playlists_loaded'], 'stored_playlist'),
     (['playlist_changed', 'playlist'], 'stored_playlist'),
     (['playlist_deleted', 'uri'], 'stored_playlist'),
     (['options_changed'], 'options'),
