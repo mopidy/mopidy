@@ -16,6 +16,10 @@ Core API
 - Start ``tlid`` counting at 1 instead of 0 to keep in sync with MPD's
   ``songid``.
 
+- :meth:`~mopidy.core.PlaybackController.get_time_position` now returns the
+  seek target while a seek is in progress.  This gives better results than just
+  failing the position query. (Fixes: :issue:`312` PR: :issue:`1346`)
+
 Models
 ------
 
@@ -82,6 +86,11 @@ Gapless
 
 - Tests have been updated to always use a core actor so async state changes
   don't trip us up.
+
+- Seek events are now triggered when the seek completes. Previously the event
+  was emitted when the seek was requested, not when it completed. Further
+  changes have been made to make seek work correctly for gapless related corner
+  cases. (Fixes: :issue:`1305` PR: :issue:`1346`)
 
 
 v1.1.2 (UNRELEASED)

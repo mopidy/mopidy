@@ -432,6 +432,7 @@ class EventEmissionTest(BaseTest):
         self.core.playback.play(tl_tracks[0])
         self.replay_events()
         self.core.playback.seek(1000)
+        self.replay_events()
         listener_mock.reset_mock()
 
         self.core.playback.stop()
@@ -454,6 +455,7 @@ class EventEmissionTest(BaseTest):
         self.core.playback.play(tl_tracks[0])
         self.replay_events()
         self.core.playback.seek(1000)
+        self.replay_events()
         listener_mock.reset_mock()
 
         self.core.playback.next()
@@ -502,6 +504,7 @@ class EventEmissionTest(BaseTest):
         listener_mock.reset_mock()
 
         self.core.playback.seek(1000)
+        self.replay_events()
 
         listener_mock.send.assert_called_once_with(
             'seeked', time_position=1000)
@@ -527,6 +530,24 @@ class EventEmissionTest(BaseTest):
                 mock.call(
                     'track_playback_started', tl_track=tl_tracks[1]),
             ],
+            listener_mock.send.mock_calls)
+
+    def test_seek_race_condition_emits_events(self, listener_mock):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play(tl_tracks[0])
+        self.trigger_about_to_finish(replay_until='stream_changed')
+        listener_mock.reset_mock()
+
+        self.core.playback.seek(1000)
+        self.replay_events()
+
+        # When we trigger seek after an about to finish the other code that
+        # emits track stopped/started and playback state changed events gets
+        # triggered as we have to switch back to the previous track.
+        # The correct behavior would be to only emit seeked.
+        self.assertListEqual(
+            [mock.call('seeked', time_position=1000)],
             listener_mock.send.mock_calls)
 
     def test_previous_emits_events(self, listener_mock):
@@ -631,6 +652,19 @@ class SeekTest(BaseTest):
 
         self.core.playback.seek(1000)
         self.assertEqual(self.core.playback.state, core.PlaybackState.PAUSED)
+
+    def test_seek_race_condition_after_about_to_finish(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play(tl_tracks[0])
+        self.replay_events()
+
+        self.trigger_about_to_finish(replay_until='stream_changed')
+        self.core.playback.seek(1000)
+        self.replay_events()
+
+        current_tl_track = self.core.playback.get_current_tl_track()
+        self.assertEqual(current_tl_track, tl_tracks[0])
 
 
 class TestStream(BaseTest):
@@ -821,7 +855,6 @@ class BackendSelectionTest(unittest.TestCase):
         self.core.playback.play(self.tl_tracks[0])
         self.trigger_stream_changed()
 
-        self.core.playback.seek(10000)
         self.core.playback.time_position
 
         self.playback1.get_time_position.assert_called_once_with()
@@ -831,7 +864,6 @@ class BackendSelectionTest(unittest.TestCase):
         self.core.playback.play(self.tl_tracks[1])
         self.trigger_stream_changed()
 
-        self.core.playback.seek(10000)
         self.core.playback.time_position
 
         self.assertFalse(self.playback1.get_time_position.called)

@@ -26,6 +26,7 @@ class PlaybackController(object):
         self._current_tl_track = None
         self._pending_tl_track = None
 
+        self._pending_position = None
         self._last_position = None
         self._previous = False
 
@@ -130,6 +131,8 @@ class PlaybackController(object):
 
     def get_time_position(self):
         """Get time position in milliseconds."""
+        if self._pending_position is not None:
+            return self._pending_position
         backend = self._get_backend(self.get_current_tl_track())
         if backend:
             return backend.playback.get_time_position().get()
@@ -211,14 +214,24 @@ class PlaybackController(object):
             # This code path handles the stop() case, uri should be none.
             position, self._last_position = self._last_position, None
 
-        self._trigger_track_playback_ended(position)
+        if self._pending_position is None:
+            self._trigger_track_playback_ended(position)
 
         self._stream_title = None
         if self._pending_tl_track:
             self._set_current_tl_track(self._pending_tl_track)
             self._pending_tl_track = None
-            self.set_state(PlaybackState.PLAYING)
-            self._trigger_track_playback_started()
+
+            if self._pending_position is None:
+                self.set_state(PlaybackState.PLAYING)
+                self._trigger_track_playback_started()
+            else:
+                self._seek(self._pending_position)
+
+    def _on_position_changed(self, position):
+        if self._pending_position == position:
+            self._trigger_seeked(position)
+            self._pending_position = None
 
     def _on_about_to_finish_callback(self):
         """Callback that performs a blocking actor call to the real callback.
@@ -437,11 +450,6 @@ class PlaybackController(object):
         if self.get_state() == PlaybackState.STOPPED:
             self.play()
 
-        # TODO: uncomment once we have tests for this. Should fix seek after
-        # about to finish doing wrong track.
-        # if self._current_tl_track and self._pending_tl_track:
-        #     self.play(self._current_tl_track)
-
         # We need to prefer the still playing track, but if nothing is playing
         # we fall back to the pending one.
         tl_track = self._current_tl_track or self._pending_tl_track
@@ -455,14 +463,21 @@ class PlaybackController(object):
             self.next()
             return True
 
+        # Store our target position.
+        self._pending_position = time_position
+
+        # Make sure we switch back to previous track if we get a seek while we
+        # have a pending track.
+        if self._current_tl_track and self._pending_tl_track:
+            self._change(self._current_tl_track, self.get_state())
+        else:
+            return self._seek(time_position)
+
+    def _seek(self, time_position):
         backend = self._get_backend(self.get_current_tl_track())
         if not backend:
             return False
-
-        success = backend.playback.seek(time_position).get()
-        if success:
-            self._trigger_seeked(time_position)
-        return success
+        return backend.playback.seek(time_position).get()
 
     def stop(self):
         """Stop playing."""
