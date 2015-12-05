@@ -254,9 +254,12 @@ def playlistdelete(context, name, songpos):
     if not playlist:
         raise exceptions.MpdNoExistError('No such playlist')
 
-    # Convert tracks to list and remove requested
-    tracks = list(playlist.tracks)
-    tracks.pop(songpos)
+    try:
+        # Convert tracks to list and remove requested
+        tracks = list(playlist.tracks)
+        tracks.pop(songpos)
+    except IndexError:
+        raise exceptions.MpdArgError('Bad song index')
 
     # Replace tracks and save playlist
     playlist = playlist.replace(tracks=tracks)

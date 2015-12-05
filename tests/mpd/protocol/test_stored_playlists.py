@@ -314,6 +314,15 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
                               'invalid: playlist names may not contain '
                               'slashes, newlines or carriage returns')
 
+    def test_playlistdelete_unknown_playlist_acks(self):
+        self.send_request('playlistdelete "foobar" "0"')
+        self.assertInResponse('ACK [50@0] {playlistdelete} No such playlist')
+
+    def test_playlistdelete_unknown_index_acks(self):
+        self.send_request('save "foobar"')
+        self.send_request('playlistdelete "foobar" "0"')
+        self.assertInResponse('ACK [2@0] {playlistdelete} Bad song index')
+
     def test_playlistmove(self):
         tracks = [
             Track(uri='dummy:a'),
