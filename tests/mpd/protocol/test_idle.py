@@ -10,7 +10,7 @@ from tests.mpd import protocol
 class IdleHandlerTest(protocol.BaseTestCase):
 
     def idle_event(self, subsystem):
-        self.session.on_idle(subsystem)
+        self.session.on_event(subsystem)
 
     def assertEqualEvents(self, events):  # noqa: N802
         self.assertEqual(set(events), self.context.events)

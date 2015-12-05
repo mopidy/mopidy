@@ -56,6 +56,18 @@ MPD frontend
 
 - Start ``songid`` counting at 1 instead of 0 to match the original MPD server.
 
+- Idle events are now emitted on ``seekeded`` events. This fix means that
+  clients relying on ``idle`` events now get notified about seeks.
+  (Fixes: :issue:`1331` :issue:`1347`)
+
+- Idle events are now emitted on ``playlists_loaded`` events. This fix means
+  that clients relying on ``idle`` events now get notified about playlist loads.
+  (Fixes: :issue:`1331` PR: :issue:`1347`)
+
+- Event handler for ``playlist_deleted`` has been unbroken. This unreported bug
+  would cause the MPD Frontend to crash preventing any further communication
+  via the MPD protocol. (PR: :issue:`1347`)
+
 Zeroconf
 --------
 
@@ -74,6 +86,9 @@ Cleanups
 
 - Removed warning if :file:`~/.config/mopidy/settings.py` exists. We stopped
   using this settings file in 0.14, released in April 2013.
+
+- The ``on_event`` handler in our listener helper now catches exceptions. This
+  means that any errors in event handling won't crash the actor in question.
 
 Gapless
 -------
