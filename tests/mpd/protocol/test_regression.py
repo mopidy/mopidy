@@ -233,3 +233,24 @@ class IssueGH1120RegressionTest(protocol.BaseTestCase):
 
         response2 = self.send_request('lsinfo "/"')
         self.assertEqual(response1, response2)
+
+
+class IssueGH1348RegressionTest(protocol.BaseTestCase):
+
+    """
+    The issue: http://github.com/mopidy/mopidy/issues/1348
+    """
+
+    def test(self):
+        self.backend.library.dummy_library = [Track(uri='dummy:a')]
+
+        # Create a dummy playlist and trigger population of mapping
+        self.send_request('playlistadd "testing1" "dummy:a"')
+        self.send_request('listplaylists')
+
+        # Create an other playlist which isn't in the map
+        self.send_request('playlistadd "testing2" "dummy:a"')
+        self.assertEqual(['OK'], self.send_request('rm "testing2"'))
+
+        playlists = self.backend.playlists.as_list().get()
+        self.assertEqual(['testing1'], [ref.name for ref in playlists])
