@@ -45,4 +45,5 @@ class Listener(object):
             getattr(self, event)(**kwargs)
         except Exception:
             # Ensure we don't crash the actor due to "bad" events.
-            logger.exception('Triggering event failed: %s', event)
+            logger.exception(
+                'Triggering event failed: %s(%s)', event, ', '.join(kwargs))
