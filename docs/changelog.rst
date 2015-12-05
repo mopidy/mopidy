@@ -23,6 +23,9 @@ Bug fix release.
   the player is paused, the new track would not be added to the history or
   marked as currently playing. (Fixes: :issue:`1352`)
 
+- Main: Catch errors when loading :confval:`logging/config_file`. (Fixes:
+  :issue:`1320`)
+
 
 v1.1.1 (2015-09-14)
 ===================
