@@ -340,6 +340,42 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
             "dummy:c",
             self.backend.playlists.get_items('dummy:a1').get()[0].uri)
 
+    def test_playlistmove_invalid_name_acks(self):
+        self.send_request('playlistmove "foo/bar" "0" "1"')
+        self.assertInResponse('ACK [2@0] {playlistmove} playlist name is '
+                              'invalid: playlist names may not contain '
+                              'slashes, newlines or carriage returns')
+
+    def test_playlistmove_unknown_playlist_acks(self):
+        self.send_request('playlistmove "foobar" "0" "1"')
+        self.assertInResponse('ACK [50@0] {playlistmove} No such playlist')
+
+    def test_playlistmove_unknown_position_acks(self):
+        self.send_request('save "foobar"')
+        self.send_request('playlistmove "foobar" "0" "1"')
+        self.assertInResponse('ACK [2@0] {playlistmove} Bad song index')
+
+    def test_playlistmove_same_index_shortcircuits_everything(self):
+        # Bad indexes on unknown playlist:
+        self.send_request('playlistmove "foobar" "0" "0"')
+        self.assertInResponse('OK')
+
+        self.send_request('playlistmove "foobar" "100000" "100000"')
+        self.assertInResponse('OK')
+
+        # Bad indexes on known playlist:
+        self.send_request('save "foobar"')
+
+        self.send_request('playlistmove "foobar" "0" "0"')
+        self.assertInResponse('OK')
+
+        self.send_request('playlistmove "foobar" "10" "10"')
+        self.assertInResponse('OK')
+
+        # Invalid playlist name:
+        self.send_request('playlistmove "foo/bar" "0" "0"')
+        self.assertInResponse('OK')
+
     def test_rename(self):
         self.backend.playlists.set_dummy_playlists([
             Playlist(

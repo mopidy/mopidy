@@ -286,6 +286,10 @@ def playlistmove(context, name, from_pos, to_pos):
       documentation, but just the ``SONGPOS`` to move *from*, i.e.
       ``playlistmove {NAME} {FROM_SONGPOS} {TO_SONGPOS}``.
     """
+    if from_pos == to_pos:
+        return
+
+    _check_playlist_name(name)
     uri = context.lookup_playlist_uri_from_name(name)
     playlist = uri is not None and context.core.playlists.lookup(uri).get()
     if not playlist:
@@ -293,10 +297,13 @@ def playlistmove(context, name, from_pos, to_pos):
     if from_pos == to_pos:
         return  # Nothing to do
 
-    # Convert tracks to list and perform move
-    tracks = list(playlist.tracks)
-    track = tracks.pop(from_pos)
-    tracks.insert(to_pos, track)
+    try:
+        # Convert tracks to list and perform move
+        tracks = list(playlist.tracks)
+        track = tracks.pop(from_pos)
+        tracks.insert(to_pos, track)
+    except IndexError:
+        raise exceptions.MpdArgError('Bad song index')
 
     # Replace tracks and save playlist
     playlist = playlist.replace(tracks=tracks)
