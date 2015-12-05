@@ -328,6 +328,8 @@ def rm(context, name):
         Removes the playlist ``NAME.m3u`` from the playlist directory.
     """
     uri = context.lookup_playlist_uri_from_name(name)
+    if not uri:
+        raise exceptions.MpdNoExistError('No such playlist')
     context.core.playlists.delete(uri).get()
 
 

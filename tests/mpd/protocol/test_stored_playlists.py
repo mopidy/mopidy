@@ -330,6 +330,10 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
         self.assertIsNone(self.backend.playlists.lookup('dummy:a1').get())
 
+    def test_rm_unknown_playlist_acks(self):
+        self.send_request('rm "name"')
+        self.assertInResponse('ACK [50@0] {rm} No such playlist')
+
     def test_save(self):
         self.send_request('save "name"')
 
