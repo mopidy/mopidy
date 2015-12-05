@@ -232,6 +232,10 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertEqual(0, len(self.core.tracklist.tracks.get()))
         self.assertEqualResponse('ACK [50@0] {load} No such playlist')
 
+        # No invalid name check for load.
+        self.send_request('load "unknown/playlist"')
+        self.assertEqualResponse('ACK [50@0] {load} No such playlist')
+
     def test_playlistadd(self):
         tracks = [
             Track(uri='dummy:a'),
@@ -259,6 +263,12 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
         self.assertIsNotNone(self.backend.playlists.lookup('dummy:name').get())
 
+    def test_playlistadd_invalid_name_acks(self):
+        self.send_request('playlistadd "foo/bar" "dummy:a"')
+        self.assertInResponse('ACK [2@0] {playlistadd} playlist name is '
+                              'invalid: playlist names may not contain '
+                              'slashes, newlines or carriage returns')
+
     def test_playlistclear(self):
         self.backend.playlists.set_dummy_playlists([
             Playlist(
@@ -276,6 +286,12 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
         self.assertIsNotNone(self.backend.playlists.lookup('dummy:name').get())
 
+    def test_playlistclear_invalid_name_acks(self):
+        self.send_request('playlistclear "foo/bar"')
+        self.assertInResponse('ACK [2@0] {playlistclear} playlist name is '
+                              'invalid: playlist names may not contain '
+                              'slashes, newlines or carriage returns')
+
     def test_playlistdelete(self):
         tracks = [
             Track(uri='dummy:a'),
@@ -291,6 +307,12 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
         self.assertEqual(
             2, len(self.backend.playlists.get_items('dummy:a1').get()))
+
+    def test_playlistdelete_invalid_name_acks(self):
+        self.send_request('playlistdelete "foo/bar" "0"')
+        self.assertInResponse('ACK [2@0] {playlistdelete} playlist name is '
+                              'invalid: playlist names may not contain '
+                              'slashes, newlines or carriage returns')
 
     def test_playlistmove(self):
         tracks = [
@@ -334,8 +356,20 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.send_request('rm "name"')
         self.assertInResponse('ACK [50@0] {rm} No such playlist')
 
+    def test_rm_invalid_name_acks(self):
+        self.send_request('rm "foo/bar"')
+        self.assertInResponse('ACK [2@0] {rm} playlist name is invalid: '
+                              'playlist names may not contain slashes, '
+                              'newlines or carriage returns')
+
     def test_save(self):
         self.send_request('save "name"')
 
         self.assertInResponse('OK')
         self.assertIsNotNone(self.backend.playlists.lookup('dummy:name').get())
+
+    def test_save_invalid_name_acks(self):
+        self.send_request('save "foo/bar"')
+        self.assertInResponse('ACK [2@0] {save} playlist name is invalid: '
+                              'playlist names may not contain slashes, '
+                              'newlines or carriage returns')

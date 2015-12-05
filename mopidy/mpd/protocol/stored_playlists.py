@@ -2,12 +2,18 @@ from __future__ import absolute_import, division, unicode_literals
 
 import datetime
 import logging
+import re
 import warnings
 
 from mopidy.compat import urllib
 from mopidy.mpd import exceptions, protocol, translator
 
 logger = logging.getLogger(__name__)
+
+
+def _check_playlist_name(name):
+    if re.search('[/\n\r]', name):
+        raise exceptions.MpdInvalidPlaylistName()
 
 
 @protocol.commands.add('listplaylist')
@@ -149,6 +155,7 @@ def playlistadd(context, name, track_uri):
 
         ``NAME.m3u`` will be created if it does not exist.
     """
+    _check_playlist_name(name)
     uri = context.lookup_playlist_uri_from_name(name)
     old_playlist = uri is not None and context.core.playlists.lookup(uri).get()
     if not old_playlist:
@@ -219,6 +226,7 @@ def playlistclear(context, name):
 
     The playlist will be created if it does not exist.
     """
+    _check_playlist_name(name)
     uri = context.lookup_playlist_uri_from_name(name)
     playlist = uri is not None and context.core.playlists.lookup(uri).get()
     if not playlist:
@@ -240,6 +248,7 @@ def playlistdelete(context, name, songpos):
 
         Deletes ``SONGPOS`` from the playlist ``NAME.m3u``.
     """
+    _check_playlist_name(name)
     uri = context.lookup_playlist_uri_from_name(name)
     playlist = uri is not None and context.core.playlists.lookup(uri).get()
     if not playlist:
@@ -327,6 +336,7 @@ def rm(context, name):
 
         Removes the playlist ``NAME.m3u`` from the playlist directory.
     """
+    _check_playlist_name(name)
     uri = context.lookup_playlist_uri_from_name(name)
     if not uri:
         raise exceptions.MpdNoExistError('No such playlist')
@@ -343,6 +353,7 @@ def save(context, name):
         Saves the current playlist to ``NAME.m3u`` in the playlist
         directory.
     """
+    _check_playlist_name(name)
     tracks = context.core.tracklist.get_tracks().get()
     uri = context.lookup_playlist_uri_from_name(name)
     playlist = uri is not None and context.core.playlists.lookup(uri).get()
