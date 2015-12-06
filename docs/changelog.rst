@@ -4,6 +4,24 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+v1.1.2 (UNRELEASED)
+===================
+
+Bug fix release.
+
+- Stream: If an URI is considered playable, don't consider it as a candidate
+  for playlist parsing. Just looking at MIME type prefixes isn't enough, as for
+  example Ogg Vorbis has the MIME type ``application/ogg``. (Fixes:
+  :issue:`1299`)
+
+- Local: If the scan or clear commands are used on a library that does not
+  exist, exit with an error. (Fixes: :issue:`1298`)
+
+- MPD: Notify idling clients when a seek is performed. (Fixes: :issue:`1331`)
+
+- Core: Fix error in :meth:`~mopidy.core.PlaybackController._change_track`
+  docstring. (Fixes: :issue:`1352`)
+
 
 v1.1.1 (2015-09-14)
 ===================
