@@ -29,7 +29,11 @@ def download(session, uri, timeout=1.0, chunk_size=4096):
                        '%.3fs', uri, timeout)
         return None
     except requests.exceptions.InvalidSchema:
-        logger.warning('%s has an unsupported schema.', uri)
+        logger.warning('Download of %r failed due to unsupported schema', uri)
+        return None
+    except requests.exceptions.RequestException as exc:
+        logger.warning('Download of %r failed: %s', uri, exc)
+        logger.debug('Download exception details', exc_info=True)
         return None
 
     content = []

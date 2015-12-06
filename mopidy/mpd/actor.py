@@ -77,3 +77,6 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
 
     def stream_title_changed(self, title):
         self.send_idle('playlist')
+
+    def seeked(self, time_position):
+        self.send_idle('player')
