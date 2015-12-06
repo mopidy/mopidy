@@ -19,6 +19,9 @@ Bug fix release.
 
 - MPD: Notify idling clients when a seek is performed. (Fixes: :issue:`1331`)
 
+- Core: Fix error in :meth:`~mopidy.core.PlaybackController._change_track`
+  docstring. (Fixes: :issue:`1352`)
+
 
 v1.1.1 (2015-09-14)
 ===================
