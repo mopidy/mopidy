@@ -813,20 +813,17 @@ class Bug1352RegressionTest(unittest.TestCase):
         c = core.Core(config, mixer=None, backends=[b])
         c.tracklist.add([track1, track2])
 
-        d = mock.Mock()
-        c.history._add_track = d
+        c.history._add_track = mock.PropertyMock()
+        c.tracklist._mark_playing = mock.PropertyMock()
 
-        e = mock.Mock()
-        c.tracklist._mark_playing = e
 
         c.playback.play()
         b.playback.change_track.reset_mock()
-        d.reset_mock()
-        e.reset_mock()
+        c.history._add_track.reset_mock()
+        c.tracklist._mark_playing.reset_mock()
 
         c.playback.pause()
         c.playback.next()
         b.playback.change_track.assert_called_once_with(track2)
-
-        d.assert_called_once_with(track2)
-        e.assert_called_once_with(tl_track2)
+        c.history._add_track.assert_called_once_with(track2)
+        c.tracklist._mark_playing.assert_called_once_with(tl_track2)

@@ -211,9 +211,8 @@ class PlaybackController(object):
             # code has already been killed in the gapless branch.
             backend = self._get_backend()
             if backend:
-                success = (
-                    backend.playback.prepare_change().get and
-                    backend.playback.change_track(tl_track.track).get())
+                backend.playback.prepare_change()
+                success = backend.playback.change_track(tl_track.track).get()
                 if success:
                     self.core.tracklist._mark_playing(tl_track)
                     self.core.history._add_track(tl_track.track)
