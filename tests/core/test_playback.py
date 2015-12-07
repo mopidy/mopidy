@@ -816,7 +816,6 @@ class Bug1352RegressionTest(unittest.TestCase):
         c.history._add_track = mock.PropertyMock()
         c.tracklist._mark_playing = mock.PropertyMock()
 
-
         c.playback.play()
         b.playback.change_track.reset_mock()
         c.history._add_track.reset_mock()
