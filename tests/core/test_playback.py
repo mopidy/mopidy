@@ -390,22 +390,20 @@ class CorePlaybackTest(unittest.TestCase):
 
     def test_next_in_consume_mode_removes_unplayable_track(self):
         self.backend1.playback.change_track = mock.PropertyMock()
-        self.backend1.playback.change_track.return_value.get.return_value = \
-            False
+        self.backend1.playback.change_track.return_value.get.return_value = (
+            False)
 
         self.backend2.playback.change_track = mock.PropertyMock()
-        self.backend2.playback.change_track.return_value.get.return_value = \
-            False
-        self.core.tracklist.consume = True
+        self.backend2.playback.change_track.return_value.get.return_value = (
+            False)
+        self.core.tracklist.set_consume(True)
 
         self.core.playback.play(self.tl_tracks[0])
         self.core.playback.next()
 
-        self.assertNotIn(self.tl_tracks[1], self.core.tracklist.tl_tracks)
-        self.assertNotIn(self.tl_tracks[2], self.core.tracklist.tl_tracks)
-
-        self.backend1.playback.change_track.reset_mock()
-        self.backend2.playback.change_track.reset_mock()
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.assertNotIn(self.tl_tracks[1], tl_tracks)
+        self.assertNotIn(self.tl_tracks[2], tl_tracks)
 
     @mock.patch(
         'mopidy.core.playback.listener.CoreListener', spec=core.CoreListener)
@@ -822,15 +820,15 @@ class Bug1358RegressionTest(unittest.TestCase):
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
         self.playback1 = mock.Mock(spec=backend.PlaybackProvider)
-        self.backend1.playback.change_track.return_value.get.return_value = \
-            False
+        self.backend1.playback.change_track.return_value.get.return_value = (
+            False)
         self.backend1.playback = self.playback1
 
         self.backend2 = mock.Mock()
         self.backend2.uri_schemes.get.return_value = ['dummy2']
         self.playback2 = mock.Mock(spec=backend.PlaybackProvider)
-        self.backend1.playback.change_track.return_value.get.return_value = \
-            False
+        self.backend1.playback.change_track.return_value.get.return_value = (
+            False)
         self.backend2.playback = self.playback2
 
         self.tracks = [
@@ -838,11 +836,10 @@ class Bug1358RegressionTest(unittest.TestCase):
             Track(uri='dummy2:a', length=40000),
         ]
 
-        self.uris = [
-            'dummy1:a', 'dummy2:a']
+        self.uris = [t.uri for t in self.tracks]
 
-        self.core = core.Core(config, mixer=None,
-                              backends=[self.backend1, self.backend2])
+        self.core = core.Core(
+            config, mixer=None, backends=[self.backend1, self.backend2])
 
         def lookup(uris):
             result = {uri: [] for uri in uris}
@@ -857,16 +854,17 @@ class Bug1358RegressionTest(unittest.TestCase):
 
         self.core.tracklist.add(uris=self.uris)
 
-        self.tl_tracks = self.core.tracklist.tl_tracks
+        self.tl_tracks = self.core.tracklist.get_tl_tracks()
 
     def tearDown(self):  # noqa: N802
         self.lookup_patcher.stop()
 
     def test_next_in_consume_mode_removes_unplayable_track(self):
-        self.core.tracklist.consume = True
+        self.core.tracklist.set_consume(True)
 
         self.core.playback.play(self.tl_tracks[0])
         self.core.playback.next()
 
-        self.assertNotIn(self.tl_tracks[0], self.core.tracklist.tl_tracks)
-        self.assertNotIn(self.tl_tracks[1], self.core.tracklist.tl_tracks)
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.assertNotIn(self.tl_tracks[0], tl_tracks)
+        self.assertNotIn(self.tl_tracks[1], tl_tracks)
