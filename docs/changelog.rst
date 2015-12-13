@@ -20,6 +20,9 @@ Core API
   seek target while a seek is in progress.  This gives better results than just
   failing the position query. (Fixes: :issue:`312` PR: :issue:`1346`)
 
+- Add :meth:`mopidy.core.PlaylistsController.get_uri_schemes`. (PR:
+  :issue:`1362`)
+
 Models
 ------
 

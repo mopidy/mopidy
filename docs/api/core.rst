@@ -161,6 +161,8 @@ Playlists controller
 
 .. class:: mopidy.core.PlaylistsController
 
+.. automethod:: mopidy.core.PlaylistsController.get_uri_schemes
+
 Fetching
 --------
 

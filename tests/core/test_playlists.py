@@ -248,6 +248,10 @@ class PlaylistTest(BasePlaylistsTest):
         self.assertFalse(self.sp1.save.called)
         self.assertFalse(self.sp2.save.called)
 
+    def test_get_uri_schemes(self):
+        result = self.core.playlists.get_uri_schemes()
+        self.assertEquals(result, ['dummy1', 'dummy2'])
+
 
 class DeprecatedFilterPlaylistsTest(BasePlaylistsTest):
 

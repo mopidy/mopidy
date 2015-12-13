@@ -33,6 +33,16 @@ class PlaylistsController(object):
         self.backends = backends
         self.core = core
 
+    def get_uri_schemes(self):
+        """
+        Get the list of URI schemes that support playlists.
+
+        :rtype: list of string
+
+        .. versionadded:: 1.2
+        """
+        return list(sorted(self.backends.with_playlists.keys()))
+
     def as_list(self):
         """
         Get a list of the currently available playlists.
