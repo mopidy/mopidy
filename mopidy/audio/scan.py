@@ -115,13 +115,23 @@ def _start_pipeline(pipeline):
         pipeline.set_state(Gst.State.PLAYING)
 
 
-def _query_duration(pipeline):
+def _query_duration(pipeline, timeout=100):
     success, duration = pipeline.query_duration(Gst.Format.TIME)
+    if success and duration >= 0:
+        return duration // Gst.MSECOND
 
-    if not success or duration < 0:
+    result = pipeline.set_state(Gst.State.PLAYING)
+    if result == Gst.StateChangeReturn.FAILURE:
         return None
 
-    return duration // Gst.MSECOND
+    gst_timeout = timeout * Gst.MSECOND
+    bus = pipeline.get_bus()
+    bus.timed_pop_filtered(gst_timeout, Gst.MessageType.DURATION_CHANGED)
+
+    success, duration = pipeline.query_duration(Gst.Format.TIME)
+    if success and duration >= 0:
+        return duration // Gst.MSECOND
+    return None
 
 
 def _query_seekable(pipeline):
