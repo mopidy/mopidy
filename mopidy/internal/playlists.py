@@ -2,10 +2,6 @@ from __future__ import absolute_import, unicode_literals
 
 import io
 
-import pygst
-pygst.require('0.10')
-import gst  # noqa
-
 from mopidy.compat import configparser
 from mopidy.internal import validation
 

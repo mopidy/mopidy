@@ -1,12 +1,12 @@
 from __future__ import absolute_import, unicode_literals
 
-import datetime
+import collections
 import logging
 import numbers
 
-import pygst
-pygst.require('0.10')
-import gst  # noqa
+import gi
+gi.require_version('Gst', '1.0')
+from gi.repository import Gst
 
 from mopidy import compat, httpclient
 from mopidy.models import Album, Artist, Track
@@ -17,34 +17,36 @@ logger = logging.getLogger(__name__)
 def calculate_duration(num_samples, sample_rate):
     """Determine duration of samples using GStreamer helper for precise
     math."""
-    return gst.util_uint64_scale(num_samples, gst.SECOND, sample_rate)
+    return Gst.util_uint64_scale(num_samples, Gst.SECOND, sample_rate)
 
 
 def create_buffer(data, capabilites=None, timestamp=None, duration=None):
     """Create a new GStreamer buffer based on provided data.
 
     Mainly intended to keep gst imports out of non-audio modules.
+
+    .. versionchanged:: 1.2
+        ``capabilites`` argument is no longer in use
     """
-    buffer_ = gst.Buffer(data)
-    if capabilites:
-        if isinstance(capabilites, compat.string_types):
-            capabilites = gst.caps_from_string(capabilites)
-        buffer_.set_caps(capabilites)
-    if timestamp:
-        buffer_.timestamp = timestamp
-    if duration:
+    if not data:
+        raise ValueError(
+            'Cannot create buffer without data: length=%d' % len(data))
+    buffer_ = Gst.Buffer.new_wrapped(data)
+    if timestamp is not None:
+        buffer_.pts = timestamp
+    if duration is not None:
         buffer_.duration = duration
     return buffer_
 
 
 def millisecond_to_clocktime(value):
     """Convert a millisecond time to internal GStreamer time."""
-    return value * gst.MSECOND
+    return value * Gst.MSECOND
 
 
 def clocktime_to_millisecond(value):
     """Convert an internal GStreamer time to millisecond time."""
-    return value // gst.MSECOND
+    return value // Gst.MSECOND
 
 
 def supported_uri_schemes(uri_schemes):
@@ -55,9 +57,9 @@ def supported_uri_schemes(uri_schemes):
     :rtype: set of URI schemes we can support via this GStreamer install.
     """
     supported_schemes = set()
-    registry = gst.registry_get_default()
+    registry = Gst.Registry.get()
 
-    for factory in registry.get_feature_list(gst.TYPE_ELEMENT_FACTORY):
+    for factory in registry.get_feature_list(Gst.ElementFactory):
         for uri in factory.get_uri_protocols():
             if uri in uri_schemes:
                 supported_schemes.add(uri)
@@ -95,37 +97,37 @@ def convert_tags_to_track(tags):
     album_kwargs = {}
     track_kwargs = {}
 
-    track_kwargs['composers'] = _artists(tags, gst.TAG_COMPOSER)
-    track_kwargs['performers'] = _artists(tags, gst.TAG_PERFORMER)
-    track_kwargs['artists'] = _artists(tags, gst.TAG_ARTIST,
+    track_kwargs['composers'] = _artists(tags, Gst.TAG_COMPOSER)
+    track_kwargs['performers'] = _artists(tags, Gst.TAG_PERFORMER)
+    track_kwargs['artists'] = _artists(tags, Gst.TAG_ARTIST,
                                        'musicbrainz-artistid',
                                        'musicbrainz-sortname')
     album_kwargs['artists'] = _artists(
-        tags, gst.TAG_ALBUM_ARTIST, 'musicbrainz-albumartistid')
+        tags, Gst.TAG_ALBUM_ARTIST, 'musicbrainz-albumartistid')
 
-    track_kwargs['genre'] = '; '.join(tags.get(gst.TAG_GENRE, []))
-    track_kwargs['name'] = '; '.join(tags.get(gst.TAG_TITLE, []))
+    track_kwargs['genre'] = '; '.join(tags.get(Gst.TAG_GENRE, []))
+    track_kwargs['name'] = '; '.join(tags.get(Gst.TAG_TITLE, []))
     if not track_kwargs['name']:
-        track_kwargs['name'] = '; '.join(tags.get(gst.TAG_ORGANIZATION, []))
+        track_kwargs['name'] = '; '.join(tags.get(Gst.TAG_ORGANIZATION, []))
 
     track_kwargs['comment'] = '; '.join(tags.get('comment', []))
     if not track_kwargs['comment']:
-        track_kwargs['comment'] = '; '.join(tags.get(gst.TAG_LOCATION, []))
+        track_kwargs['comment'] = '; '.join(tags.get(Gst.TAG_LOCATION, []))
     if not track_kwargs['comment']:
-        track_kwargs['comment'] = '; '.join(tags.get(gst.TAG_COPYRIGHT, []))
+        track_kwargs['comment'] = '; '.join(tags.get(Gst.TAG_COPYRIGHT, []))
 
-    track_kwargs['track_no'] = tags.get(gst.TAG_TRACK_NUMBER, [None])[0]
-    track_kwargs['disc_no'] = tags.get(gst.TAG_ALBUM_VOLUME_NUMBER, [None])[0]
-    track_kwargs['bitrate'] = tags.get(gst.TAG_BITRATE, [None])[0]
+    track_kwargs['track_no'] = tags.get(Gst.TAG_TRACK_NUMBER, [None])[0]
+    track_kwargs['disc_no'] = tags.get(Gst.TAG_ALBUM_VOLUME_NUMBER, [None])[0]
+    track_kwargs['bitrate'] = tags.get(Gst.TAG_BITRATE, [None])[0]
     track_kwargs['musicbrainz_id'] = tags.get('musicbrainz-trackid', [None])[0]
 
-    album_kwargs['name'] = tags.get(gst.TAG_ALBUM, [None])[0]
-    album_kwargs['num_tracks'] = tags.get(gst.TAG_TRACK_COUNT, [None])[0]
-    album_kwargs['num_discs'] = tags.get(gst.TAG_ALBUM_VOLUME_COUNT, [None])[0]
+    album_kwargs['name'] = tags.get(Gst.TAG_ALBUM, [None])[0]
+    album_kwargs['num_tracks'] = tags.get(Gst.TAG_TRACK_COUNT, [None])[0]
+    album_kwargs['num_discs'] = tags.get(Gst.TAG_ALBUM_VOLUME_COUNT, [None])[0]
     album_kwargs['musicbrainz_id'] = tags.get('musicbrainz-albumid', [None])[0]
 
-    if tags.get(gst.TAG_DATE) and tags.get(gst.TAG_DATE)[0]:
-        track_kwargs['date'] = tags[gst.TAG_DATE][0].isoformat()
+    if tags.get(Gst.TAG_DATE) and tags.get(Gst.TAG_DATE)[0]:
+        track_kwargs['date'] = tags[Gst.TAG_DATE][0].isoformat()
 
     # Clear out any empty values we found
     track_kwargs = {k: v for k, v in track_kwargs.items() if v}
@@ -142,7 +144,7 @@ def setup_proxy(element, config):
     """Configure a GStreamer element with proxy settings.
 
     :param element: element to setup proxy in.
-    :type element: :class:`gst.GstElement`
+    :type element: :class:`Gst.GstElement`
     :param config: proxy settings to use.
     :type config: :class:`dict`
     """
@@ -155,7 +157,7 @@ def setup_proxy(element, config):
 
 
 def convert_taglist(taglist):
-    """Convert a :class:`gst.Taglist` to plain Python types.
+    """Convert a :class:`Gst.TagList` to plain Python types.
 
     Knows how to convert:
 
@@ -168,37 +170,26 @@ def convert_taglist(taglist):
     Unknown types will be ignored and debug logged. Tag keys are all strings
     defined as part GStreamer under GstTagList_.
 
-    .. _GstTagList: http://gstreamer.freedesktop.org/data/doc/gstreamer/\
-0.10.36/gstreamer/html/gstreamer-GstTagList.html
+    .. _GstTagList: https://developer.gnome.org/gstreamer/stable/\
+gstreamer-GstTagList.html
 
     :param taglist: A GStreamer taglist to be converted.
-    :type taglist: :class:`gst.Taglist`
+    :type taglist: :class:`Gst.TagList`
     :rtype: dictionary of tag keys with a list of values.
     """
-    result = {}
+    result = collections.defaultdict(list)
 
-    # Taglists are not really dicts, hence the lack of .items() and
-    # explicit use of .keys()
-    for key in taglist.keys():
-        result.setdefault(key, [])
+    for n in range(taglist.n_tags()):
+        tag = taglist.nth_tag_name(n)
 
-        values = taglist[key]
-        if not isinstance(values, list):
-            values = [values]
+        for i in range(taglist.get_tag_size(tag)):
+            value = taglist.get_value_index(tag, i)
 
-        for value in values:
-            if isinstance(value, gst.Date):
-                try:
-                    date = datetime.date(value.year, value.month, value.day)
-                    result[key].append(date)
-                except ValueError:
-                    logger.debug('Ignoring invalid date: %r = %r', key, value)
-            elif isinstance(value, gst.Buffer):
-                result[key].append(bytes(value))
-            elif isinstance(
-                    value, (compat.string_types, bool, numbers.Number)):
-                result[key].append(value)
+            if isinstance(value, Gst.DateTime):
+                result[tag].append(value.to_iso8601_string())
+            if isinstance(value, (compat.string_types, bool, numbers.Number)):
+                result[tag].append(value)
             else:
-                logger.debug('Ignoring unknown data: %r = %r', key, value)
+                logger.debug('Ignoring unknown tag data: %r = %r', tag, value)
 
     return result

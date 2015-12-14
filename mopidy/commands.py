@@ -7,9 +7,7 @@ import logging
 import os
 import sys
 
-import glib
-
-import gobject
+from gi.repository import GLib, GObject
 
 import pykka
 
@@ -21,7 +19,7 @@ from mopidy.internal import deps, process, timer, versioning
 logger = logging.getLogger(__name__)
 
 _default_config = []
-for base in glib.get_system_config_dirs() + (glib.get_user_config_dir(),):
+for base in GLib.get_system_config_dirs() + [GLib.get_user_config_dir()]:
     _default_config.append(os.path.join(base, b'mopidy', b'mopidy.conf'))
 DEFAULT_CONFIG = b':'.join(_default_config)
 
@@ -286,7 +284,7 @@ class RootCommand(Command):
             help='`section/key=value` values to override config options')
 
     def run(self, args, config):
-        loop = gobject.MainLoop()
+        loop = GObject.MainLoop()
 
         mixer_class = self.get_mixer_class(config, args.registry['mixer'])
         backend_classes = args.registry['backend']
