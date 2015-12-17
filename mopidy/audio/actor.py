@@ -12,7 +12,7 @@ Gst.is_initialized() or Gst.init()
 import pykka
 
 from mopidy import exceptions
-from mopidy.audio import utils
+from mopidy.audio import tags as tags_lib, utils
 from mopidy.audio.constants import PlaybackState
 from mopidy.audio.listener import AudioListener
 from mopidy.internal import deprecation, process
@@ -325,7 +325,7 @@ class _Handler(object):
         gst_logger.debug('Got ASYNC_DONE bus message.')
 
     def on_tag(self, taglist):
-        tags = utils.convert_taglist(taglist)
+        tags = tags_lib.convert_taglist(taglist)
         gst_logger.debug('Got TAG bus message: tags=%r', dict(tags))
         self._audio._tags.update(tags)
         logger.debug('Audio event: tags_changed(tags=%r)', tags.keys())

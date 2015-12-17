@@ -7,7 +7,7 @@ import sys
 import urllib2
 
 from mopidy import backend, exceptions, models
-from mopidy.audio import scan, utils
+from mopidy.audio import scan, tags
 from mopidy.internal import path
 
 
@@ -83,7 +83,7 @@ class FileLibraryProvider(backend.LibraryProvider):
 
         try:
             result = self._scanner.scan(uri)
-            track = utils.convert_tags_to_track(result.tags).copy(
+            track = tags.convert_tags_to_track(result.tags).copy(
                 uri=uri, length=result.duration)
         except exceptions.ScannerError as e:
             logger.warning('Failed looking up %s: %s', uri, e)

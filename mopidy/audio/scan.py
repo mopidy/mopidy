@@ -10,7 +10,7 @@ from gi.repository import Gst, GstPbutils
 Gst.is_initialized() or Gst.init()
 
 from mopidy import exceptions
-from mopidy.audio import utils
+from mopidy.audio import tags as tags_lib, utils
 from mopidy.internal import encoding
 
 # GST_ELEMENT_FACTORY_LIST:
@@ -214,7 +214,7 @@ def _process(pipeline, timeout_ms):
         elif message.type == Gst.MessageType.TAG:
             taglist = message.parse_tag()
             # Note that this will only keep the last tag.
-            tags.update(utils.convert_taglist(taglist))
+            tags.update(tags_lib.convert_taglist(taglist))
 
         now = int(time.time() * 1000)
         timeout -= now - previous
