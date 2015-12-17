@@ -12,6 +12,7 @@ from mopidy import compat, httpclient
 from mopidy.models import Album, Artist, Track
 
 logger = logging.getLogger(__name__)
+TRACE = logging.getLevelName('TRACE')
 
 
 def calculate_duration(num_samples, sample_rate):
@@ -190,7 +191,8 @@ gstreamer-GstTagList.html
             if isinstance(value, (compat.string_types, bool, numbers.Number)):
                 result[tag].append(value)
             else:
-                logger.debug('Ignoring unknown tag data: %r = %r', tag, value)
+                logger.log(
+                    TRACE, 'Ignoring unknown tag data: %r = %r', tag, value)
 
     return result
 
