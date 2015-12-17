@@ -13,6 +13,17 @@ from mopidy import exceptions
 from mopidy.audio import utils
 from mopidy.internal import encoding
 
+# GST_ELEMENT_FACTORY_LIST:
+_DECODER = 1 << 0
+_AUDIO = 1 << 50
+_DEMUXER = 1 << 5
+_DEPAYLOADER = 1 << 8
+_PARSER = 1 << 6
+
+# GST_TYPE_AUTOPLUG_SELECT_RESULT:
+_SELECT_TRY = 0
+_SELECT_EXPOSE = 1
+
 _Result = collections.namedtuple(
     'Result', ('uri', 'tags', 'duration', 'seekable', 'mime', 'playable'))
 
@@ -85,6 +96,7 @@ def _setup_pipeline(uri, proxy_config=None):
 
     typefind.connect('have-type', _have_type, decodebin)
     decodebin.connect('pad-added', _pad_added, pipeline)
+    decodebin.connect('autoplug-select', _autoplug_select)
 
     return pipeline
 
@@ -105,8 +117,19 @@ def _pad_added(element, pad, pipeline):
     pad.link(sink.get_static_pad('sink'))
 
     if pad.query_caps().is_subset(Gst.Caps.from_string('audio/x-raw')):
+        # Probably won't happen due to autoplug-select fix, but lets play it
+        # safe until we've tested more.
         struct = Gst.Structure.new_empty('have-audio')
         element.get_bus().post(Gst.Message.new_application(element, struct))
+
+
+def _autoplug_select(element, pad, caps, factory):
+    if factory.list_is_type(_DECODER | _AUDIO):
+        struct = Gst.Structure.new_empty('have-audio')
+        element.get_bus().post(Gst.Message.new_application(element, struct))
+    if not factory.list_is_type(_DEMUXER | _DEPAYLOADER | _PARSER):
+        return _SELECT_EXPOSE
+    return _SELECT_TRY
 
 
 def _start_pipeline(pipeline):
