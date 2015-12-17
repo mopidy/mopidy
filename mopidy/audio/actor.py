@@ -32,43 +32,13 @@ _GST_STATE_MAPPING = {
 }
 
 
-class _Signals(object):
-
-    """Helper for tracking gobject signal registrations"""
-
-    def __init__(self):
-        self._ids = {}
-
-    def connect(self, element, event, func, *args):
-        """Connect a function + args to signal event on an element.
-
-        Each event may only be handled by one callback in this implementation.
-        """
-        assert (element, event) not in self._ids
-        self._ids[(element, event)] = element.connect(event, func, *args)
-
-    def disconnect(self, element, event):
-        """Disconnect whatever handler we have for and element+event pair.
-
-        Does nothing it the handler has already been removed.
-        """
-        signal_id = self._ids.pop((element, event), None)
-        if signal_id is not None:
-            element.disconnect(signal_id)
-
-    def clear(self):
-        """Clear all registered signal handlers."""
-        for element, event in self._ids.keys():
-            element.disconnect(self._ids.pop((element, event)))
-
-
 # TODO: expose this as a property on audio?
 class _Appsrc(object):
 
     """Helper class for dealing with appsrc based playback."""
 
     def __init__(self):
-        self._signals = _Signals()
+        self._signals = utils.Signals()
         self.reset()
 
     def reset(self):
@@ -181,7 +151,7 @@ class SoftwareMixer(object):
         self._element = None
         self._last_volume = None
         self._last_mute = None
-        self._signals = _Signals()
+        self._signals = utils.Signals()
 
     def setup(self, element, mixer_ref):
         self._element = element
@@ -424,7 +394,7 @@ class Audio(pykka.ThreadingActor):
 
         self._handler = _Handler(self)
         self._appsrc = _Appsrc()
-        self._signals = _Signals()
+        self._signals = utils.Signals()
 
         if mixer and self._config['audio']['mixer'] == 'software':
             self.mixer = SoftwareMixer(mixer)
