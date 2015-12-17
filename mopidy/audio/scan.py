@@ -61,7 +61,7 @@ class Scanner(object):
         """
         timeout = int(timeout or self._timeout_ms)
         tags, duration, seekable, mime = None, None, None, None
-        pipeline = _setup_pipeline(uri, self._proxy_config)
+        pipeline, signals = _setup_pipeline(uri, self._proxy_config)
 
         try:
             _start_pipeline(pipeline)
@@ -69,6 +69,7 @@ class Scanner(object):
             duration = _query_duration(pipeline)
             seekable = _query_seekable(pipeline)
         finally:
+            signals.clear()
             pipeline.set_state(Gst.State.NULL)
             del pipeline
 
@@ -94,11 +95,12 @@ def _setup_pipeline(uri, proxy_config=None):
     if proxy_config:
         utils.setup_proxy(src, proxy_config)
 
-    typefind.connect('have-type', _have_type, decodebin)
-    decodebin.connect('pad-added', _pad_added, pipeline)
-    decodebin.connect('autoplug-select', _autoplug_select)
+    signals = utils.Signals()
+    signals.connect(typefind, 'have-type', _have_type, decodebin)
+    signals.connect(decodebin, 'pad-added', _pad_added, pipeline)
+    signals.connect(decodebin, 'autoplug-select', _autoplug_select)
 
-    return pipeline
+    return pipeline, signals
 
 
 def _have_type(element, probability, caps, decodebin):
