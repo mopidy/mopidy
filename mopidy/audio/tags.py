@@ -10,11 +10,11 @@ from gi.repository import Gst
 Gst.is_initialized() or Gst.init()
 
 from mopidy import compat
+from mopidy.internal import log
 from mopidy.models import Album, Artist, Track
 
 
 logger = logging.getLogger(__name__)
-TRACE = logging.getLevelName('TRACE')
 
 
 def convert_taglist(taglist):
@@ -52,7 +52,8 @@ gstreamer-GstTagList.html
                 result[tag].append(value)
             else:
                 logger.log(
-                    TRACE, 'Ignoring unknown tag data: %r = %r', tag, value)
+                    log.TRACE_LOG_LEVEL,
+                    'Ignoring unknown tag data: %r = %r', tag, value)
 
     return result
 
