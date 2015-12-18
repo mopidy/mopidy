@@ -41,13 +41,13 @@ class TestConvertTaglist(object):
 
     def test_date_time_tag(self):
         taglist = self.make_taglist(Gst.TAG_DATE_TIME, [
-            Gst.DateTime.new_from_iso8601_string(b'2014-01-07')
+            Gst.DateTime.new_from_iso8601_string(b'2014-01-07 14:13:12')
         ])
 
         result = tags.convert_taglist(taglist)
 
         assert isinstance(result[Gst.TAG_DATE_TIME][0], compat.text_type)
-        assert result[Gst.TAG_DATE_TIME][0] == '2014-01-07'
+        assert result[Gst.TAG_DATE_TIME][0] == '2014-01-07T14:13:12Z'
 
     def test_string_tag(self):
         taglist = self.make_taglist(Gst.TAG_ARTIST, [b'ABBA', b'ACDC'])
@@ -84,7 +84,7 @@ class TagsToTrackTest(unittest.TestCase):
             'track-count': [2],
             'album-disc-number': [2],
             'album-disc-count': [3],
-            'date': [datetime.date(2006, 1, 1,)],
+            'date': ['2006-01-01'],
             'container-format': ['ID3 tag'],
             'genre': ['genre'],
             'comment': ['comment'],
@@ -172,7 +172,7 @@ class TagsToTrackTest(unittest.TestCase):
         self.check(self.track.replace(date=None))
 
     def test_multiple_track_date(self):
-        self.tags['date'].append(datetime.date(2030, 1, 1))
+        self.tags['date'].append('2030-01-01')
         self.check(self.track)
 
     def test_missing_track_comment(self):
