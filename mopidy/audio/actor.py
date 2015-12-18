@@ -249,7 +249,6 @@ class _Handler(object):
             # XXX: We're not called on the last state change when going down to
             # NULL, so we rewrite the second to last call to get the expected
             # behavior.
-            # TODO/Gst1: Is this workaround still needed?
             new_state = Gst.State.NULL
             pending_state = Gst.State.VOID_PENDING
 
