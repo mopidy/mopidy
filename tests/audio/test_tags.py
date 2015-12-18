@@ -111,10 +111,11 @@ class TagsToTrackTest(unittest.TestCase):
         albumartist = Artist(name='albumartist',
                              musicbrainz_id='albumartistid')
 
-        album = Album(name='album', num_tracks=2, num_discs=3,
+        album = Album(name='album', date='2006-01-01',
+                      num_tracks=2, num_discs=3,
                       musicbrainz_id='albumid', artists=[albumartist])
 
-        self.track = Track(name='track', date='2006-01-01',
+        self.track = Track(name='track',
                            genre='genre', track_no=1, disc_no=2,
                            comment='comment', musicbrainz_id='trackid',
                            album=album, bitrate=1000, artists=[artist],
@@ -177,7 +178,8 @@ class TagsToTrackTest(unittest.TestCase):
 
     def test_missing_track_date(self):
         del self.tags['date']
-        self.check(self.track.replace(date=None))
+        self.check(
+            self.track.replace(album=self.track.album.replace(date=None)))
 
     def test_multiple_track_date(self):
         self.tags['date'].append('2030-01-01')

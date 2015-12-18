@@ -106,7 +106,7 @@ def convert_tags_to_track(tags):
     album_kwargs['num_discs'] = tags.get(Gst.TAG_ALBUM_VOLUME_COUNT, [None])[0]
     album_kwargs['musicbrainz_id'] = tags.get('musicbrainz-albumid', [None])[0]
 
-    track_kwargs['date'] = tags.get(Gst.TAG_DATE, [None])[0]
+    album_kwargs['date'] = tags.get(Gst.TAG_DATE, [None])[0]
 
     # Clear out any empty values we found
     track_kwargs = {k: v for k, v in track_kwargs.items() if v}
