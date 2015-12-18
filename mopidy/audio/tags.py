@@ -1,12 +1,13 @@
 from __future__ import absolute_import, unicode_literals
 
 import collections
+import datetime
 import logging
 import numbers
 
 import gi
 gi.require_version('Gst', '1.0')
-from gi.repository import Gst
+from gi.repository import GLib, Gst
 Gst.is_initialized() or Gst.init()
 
 from mopidy import compat
@@ -46,6 +47,10 @@ gstreamer-GstTagList.html
         for i in range(taglist.get_tag_size(tag)):
             value = taglist.get_value_index(tag, i)
 
+            if isinstance(value, GLib.Date):
+                date = datetime.date(
+                    value.get_year(), value.get_month(), value.get_day())
+                result[tag].append(date.isoformat().decode('utf-8'))
             if isinstance(value, Gst.DateTime):
                 result[tag].append(value.to_iso8601_string().decode('utf-8'))
             elif isinstance(value, bytes):

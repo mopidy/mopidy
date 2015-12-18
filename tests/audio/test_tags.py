@@ -2,12 +2,11 @@
 
 from __future__ import absolute_import, unicode_literals
 
-import datetime
 import unittest
 
 import gi
 gi.require_version('Gst', '1.0')
-from gi.repository import GObject, Gst
+from gi.repository import GLib, GObject, Gst
 
 from mopidy import compat
 from mopidy.audio import tags
@@ -20,7 +19,7 @@ class TestConvertTaglist(object):
         taglist = Gst.TagList.new_empty()
 
         for value in values:
-            if isinstance(value, Gst.DateTime):
+            if isinstance(value, (GLib.Date, Gst.DateTime)):
                 taglist.add_value(Gst.TagMergeMode.APPEND, tag, value)
                 continue
 
@@ -38,6 +37,15 @@ class TestConvertTaglist(object):
             taglist.add_value(Gst.TagMergeMode.APPEND, tag, gobject_value)
 
         return taglist
+
+    def test_date_tag(self):
+        date = GLib.Date.new_dmy(7, 1, 2014)
+        taglist = self.make_taglist(Gst.TAG_DATE, [date])
+
+        result = tags.convert_taglist(taglist)
+
+        assert isinstance(result[Gst.TAG_DATE][0], compat.text_type)
+        assert result[Gst.TAG_DATE][0] == '2014-01-07'
 
     def test_date_time_tag(self):
         taglist = self.make_taglist(Gst.TAG_DATE_TIME, [
