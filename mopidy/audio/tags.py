@@ -47,8 +47,10 @@ gstreamer-GstTagList.html
             value = taglist.get_value_index(tag, i)
 
             if isinstance(value, Gst.DateTime):
-                result[tag].append(value.to_iso8601_string())
-            if isinstance(value, (compat.string_types, bool, numbers.Number)):
+                result[tag].append(value.to_iso8601_string().decode('utf-8'))
+            elif isinstance(value, bytes):
+                result[tag].append(value.decode('utf-8', 'replace'))
+            elif isinstance(value, (compat.text_type, bool, numbers.Number)):
                 result[tag].append(value)
             else:
                 logger.log(

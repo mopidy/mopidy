@@ -1,10 +1,70 @@
+# encoding: utf-8
+
 from __future__ import absolute_import, unicode_literals
 
 import datetime
 import unittest
 
+import gi
+gi.require_version('Gst', '1.0')
+from gi.repository import GObject, Gst
+
+from mopidy import compat
 from mopidy.audio import tags
 from mopidy.models import Album, Artist, Track
+
+
+class TestConvertTaglist(object):
+
+    def make_taglist(self, tag, values):
+        taglist = Gst.TagList.new_empty()
+
+        for value in values:
+            if isinstance(value, Gst.DateTime):
+                taglist.add_value(Gst.TagMergeMode.APPEND, tag, value)
+                continue
+
+            gobject_value = GObject.Value()
+            if isinstance(value, bytes):
+                gobject_value.init(GObject.TYPE_STRING)
+                gobject_value.set_string(value)
+            elif isinstance(value, int):
+                gobject_value.init(GObject.TYPE_UINT)
+                gobject_value.set_uint(value)
+                gobject_value.init(GObject.TYPE_VALUE)
+                gobject_value.set_value(value)
+            else:
+                raise TypeError
+            taglist.add_value(Gst.TagMergeMode.APPEND, tag, gobject_value)
+
+        return taglist
+
+    def test_date_time_tag(self):
+        taglist = self.make_taglist(Gst.TAG_DATE_TIME, [
+            Gst.DateTime.new_from_iso8601_string(b'2014-01-07')
+        ])
+
+        result = tags.convert_taglist(taglist)
+
+        assert isinstance(result[Gst.TAG_DATE_TIME][0], compat.text_type)
+        assert result[Gst.TAG_DATE_TIME][0] == '2014-01-07'
+
+    def test_string_tag(self):
+        taglist = self.make_taglist(Gst.TAG_ARTIST, [b'ABBA', b'ACDC'])
+
+        result = tags.convert_taglist(taglist)
+
+        assert isinstance(result[Gst.TAG_ARTIST][0], compat.text_type)
+        assert result[Gst.TAG_ARTIST][0] == 'ABBA'
+        assert isinstance(result[Gst.TAG_ARTIST][1], compat.text_type)
+        assert result[Gst.TAG_ARTIST][1] == 'ACDC'
+
+    def test_integer_tag(self):
+        taglist = self.make_taglist(Gst.TAG_BITRATE, [17])
+
+        result = tags.convert_taglist(taglist)
+
+        assert result[Gst.TAG_BITRATE][0] == 17
 
 
 # TODO: keep ids without name?
