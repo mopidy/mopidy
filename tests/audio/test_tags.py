@@ -185,6 +185,11 @@ class TagsToTrackTest(unittest.TestCase):
         self.tags['date'].append('2030-01-01')
         self.check(self.track)
 
+    def test_datetime_instead_of_date(self):
+        del self.tags['date']
+        self.tags['datetime'] = ['2006-01-01T14:13:12Z']
+        self.check(self.track)
+
     def test_missing_track_comment(self):
         del self.tags['comment']
         self.check(self.track.replace(comment=None))
