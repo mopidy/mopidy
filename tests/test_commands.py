@@ -5,7 +5,7 @@ import unittest
 
 import mock
 
-from mopidy import commands
+from mopidy import commands, compat
 
 
 class ConfigOverrideTypeTest(unittest.TestCase):
@@ -29,7 +29,7 @@ class ConfigOverrideTypeTest(unittest.TestCase):
         self.assertIsInstance(value, bytes)
 
     def test_empty_override(self):
-        expected = ('section', 'key', '')
+        expected = (b'section', b'key', b'')
         self.assertEqual(
             expected, commands.config_override_type(b'section/key='))
         self.assertEqual(
@@ -141,11 +141,16 @@ class CommandParsingTest(unittest.TestCase):
         cmd.add_argument('--bar', type=int)
 
         with self.assertRaises(SystemExit):
-            cmd.parse(['--bar', b'zero'], prog='foo')
+            cmd.parse(['--bar', 'zero'], prog='foo')
 
-        self.exit_mock.assert_called_once_with(
-            1, "argument --bar: invalid int value: 'zero'",
-            'usage: foo [--bar BAR]')
+        if compat.PY2:
+            self.exit_mock.assert_called_once_with(
+                1, "argument --bar: invalid int value: u'zero'",
+                'usage: foo [--bar BAR]')
+        else:
+            self.exit_mock.assert_called_once_with(
+                1, "argument --bar: invalid int value: 'zero'",
+                'usage: foo [--bar BAR]')
 
     @mock.patch('sys.argv')
     def test_command_error_usage_prog(self, argv_mock):
@@ -173,8 +178,13 @@ class CommandParsingTest(unittest.TestCase):
         with self.assertRaises(SystemExit):
             cmd.parse([], prog='foo')
 
-        self.exit_mock.assert_called_once_with(
-            1, 'argument --bar is required', 'usage: foo --bar BAR')
+        if compat.PY2:
+            self.exit_mock.assert_called_once_with(
+                1, 'argument --bar is required', 'usage: foo --bar BAR')
+        else:
+            self.exit_mock.assert_called_once_with(
+                1, 'the following arguments are required: --bar',
+                'usage: foo --bar BAR')
 
     def test_missing_positionals(self):
         cmd = commands.Command()
@@ -183,8 +193,13 @@ class CommandParsingTest(unittest.TestCase):
         with self.assertRaises(SystemExit):
             cmd.parse([], prog='foo')
 
-        self.exit_mock.assert_called_once_with(
-            1, 'too few arguments', 'usage: foo bar')
+        if compat.PY2:
+            self.exit_mock.assert_called_once_with(
+                1, 'too few arguments', 'usage: foo bar')
+        else:
+            self.exit_mock.assert_called_once_with(
+                1, 'the following arguments are required: bar, _args',
+                'usage: foo bar')
 
     def test_missing_positionals_subcommand(self):
         child = commands.Command()
@@ -196,8 +211,13 @@ class CommandParsingTest(unittest.TestCase):
         with self.assertRaises(SystemExit):
             cmd.parse(['bar'], prog='foo')
 
-        self.exit_mock.assert_called_once_with(
-            1, 'too few arguments', 'usage: foo bar baz')
+        if compat.PY2:
+            self.exit_mock.assert_called_once_with(
+                1, 'too few arguments', 'usage: foo bar baz')
+        else:
+            self.exit_mock.assert_called_once_with(
+                1, 'the following arguments are required: baz, _args',
+                'usage: foo bar baz')
 
     def test_unknown_command(self):
         cmd = commands.Command()

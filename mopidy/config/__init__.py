@@ -131,7 +131,10 @@ def _load(files, defaults, overrides):
     for default in defaults:
         if isinstance(default, compat.text_type):
             default = default.encode('utf-8')
-        parser.readfp(io.BytesIO(default))
+        if compat.PY2:
+            parser.readfp(io.BytesIO(default))
+        else:
+            parser.read_string(default.decode())
 
     # Load config from a series of config files
     files = [path.expand_path(f) for f in files]
