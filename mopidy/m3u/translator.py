@@ -99,7 +99,9 @@ def parse_m3u(file_path, media_dir=None):
             if extended and line.startswith('#EXTINF'):
                 track = m3u_extinf_to_track(line)
             continue
-
+        if not track.name:
+            name = os.path.basename(os.path.splitext(line)[0])
+            track = track.replace(name=urllib.parse.unquote(name))
         if urllib.parse.urlsplit(line).scheme:
             tracks.append(track.replace(uri=line))
         elif os.path.normpath(line) == os.path.abspath(line):
