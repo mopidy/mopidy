@@ -17,7 +17,7 @@ Mopidy-ALSAMixer
 
 https://github.com/mopidy/mopidy-alsamixer
 
-Extension for controlling volume one a Linux system using ALSA.
+Extension for controlling volume on a Linux system using ALSA.
 
 
 Mopidy-Arcam
