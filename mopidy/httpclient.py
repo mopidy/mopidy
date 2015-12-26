@@ -21,8 +21,8 @@ def format_proxy(proxy_config, auth=True):
     if not proxy_config.get('hostname'):
         return None
 
-    port = proxy_config.get('port', 80)
-    if port < 0:
+    port = proxy_config.get('port')
+    if not port or port < 0:
         port = 80
 
     if proxy_config.get('username') and proxy_config.get('password') and auth:
