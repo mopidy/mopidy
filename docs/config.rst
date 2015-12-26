@@ -204,7 +204,7 @@ Proxy configuration
 -------------------
 
 Not all parts of Mopidy or all Mopidy extensions respect the proxy
-server configuration when connecting to the Internt. Currently, this is at
+server configuration when connecting to the Internet. Currently, this is at
 least used when Mopidy's audio subsystem reads media directly from the network,
 like when listening to Internet radio streams, and by the Mopidy-Spotify
 extension. With time, we hope that more of the Mopidy ecosystem will respect
