@@ -35,8 +35,8 @@ Mopidy-Local-Images
 
 https://github.com/tkem/mopidy-local-images
 
-Not a full-featured Web client, but rather a local library and Web
-extension which allows other Web clients access to album art embedded
+Not a full-featured web client, but rather a local library and web
+extension which allows other web clients access to album art embedded
 in local media files.
 
 .. image:: /ext/local_images.jpg
@@ -69,7 +69,7 @@ Mopidy-Mobile
 
 https://github.com/tkem/mopidy-mobile
 
-A Mopidy Web client extension and hybrid mobile app, made with Ionic,
+A Mopidy web client extension and hybrid mobile app, made with Ionic,
 AngularJS and Apache Cordova by Thomas Kemmer.
 
 .. image:: /ext/mobile.png
@@ -132,18 +132,6 @@ To install, run::
 
     pip install Mopidy-MusicBox-Webclient
 
-Mopidy-Party
-============
-
-https://github.com/Lesterpig/mopidy-party
-
-Minimal web client designed for collaborative music management during parties.
-
-.. image:: /ext/mopidy_party.png
-
-To install, run::
-
-    pip install Mopidy-Party
 
 Mopidy-Party
 ============
