@@ -178,7 +178,7 @@ class Core(
             raise TypeError('missing file name')
 
         file_name = os.path.join(
-            self._config['core']['config_dir'], name)
+            self._config['core']['data_dir'], name)
         file_name += '.state'
 
         data = {}
@@ -212,7 +212,7 @@ class Core(
             raise TypeError('missing file name')
 
         file_name = os.path.join(
-            self._config['core']['config_dir'], name)
+            self._config['core']['data_dir'], name)
         file_name += '.state'
 
         data = storage.load(file_name)
