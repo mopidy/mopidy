@@ -644,3 +644,35 @@ class TracklistController(object):
     def _trigger_options_changed(self):
         logger.debug('Triggering options changed event')
         listener.CoreListener.send('options_changed')
+
+    def _state_export(self, data):
+        """Internal method for :class:`mopidy.Core`."""
+        data['tracklist'] = {}
+        data['tracklist']['tl_tracks'] = self._tl_tracks
+        data['tracklist']['next_tlid'] = self._next_tlid
+        data['tracklist']['consume'] = self.get_consume()
+        data['tracklist']['random'] = self.get_random()
+        data['tracklist']['repeat'] = self.get_repeat()
+        data['tracklist']['single'] = self.get_single()
+
+    def _state_import(self, data, coverage):
+        """Internal method for :class:`mopidy.Core`."""
+        if 'tracklist' not in data:
+            return
+        if 'mode' in coverage:
+            # TODO: only one _trigger_options_changed() for all options
+            if 'consume' in data['tracklist']:
+                self.set_consume(data['tracklist']['consume'])
+            if 'random' in data['tracklist']:
+                self.set_random(data['tracklist']['random'])
+            if 'repeat' in data['tracklist']:
+                self.set_repeat(data['tracklist']['repeat'])
+            if 'single' in data['tracklist']:
+                self.set_single(data['tracklist']['single'])
+        if 'tracklist' in coverage:
+            if 'next_tlid' in data['tracklist']:
+                if data['tracklist']['next_tlid'] > self._next_tlid:
+                    self._next_tlid = data['tracklist']['next_tlid']
+            if 'tl_tracks' in data['tracklist']:
+                self._tl_tracks = data['tracklist']['tl_tracks']
+                self._trigger_tracklist_changed()

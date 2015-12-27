@@ -99,3 +99,16 @@ class MixerController(object):
             return result
 
         return False
+
+    def _state_export(self, data):
+        """Internal method for :class:`mopidy.Core`."""
+        data['mixer'] = {}
+        data['mixer']['volume'] = self.get_volume()
+
+    def _state_import(self, data, coverage):
+        """Internal method for :class:`mopidy.Core`."""
+        if 'mixer' not in data:
+            return
+        if 'volume' in coverage:
+            if 'volume' in data['mixer']:
+                self.set_volume(data['mixer']['volume'])

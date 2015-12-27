@@ -57,3 +57,16 @@ class HistoryController(object):
         :rtype: list of (timestamp, :class:`mopidy.models.Ref`) tuples
         """
         return copy.copy(self._history)
+
+    def _state_export(self, data):
+        """Internal method for :class:`mopidy.Core`."""
+        data['history'] = {}
+        data['history']['history'] = self._history
+
+    def _state_import(self, data, coverage):
+        """Internal method for :class:`mopidy.Core`."""
+        if 'history' not in data:
+            return
+        if 'history' in coverage:
+            if 'history' in data['history']:
+                self._history = data['history']['history']

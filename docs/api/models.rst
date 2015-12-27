@@ -87,6 +87,13 @@ Data model (de)serialization
 
 .. autoclass:: mopidy.models.ModelJSONEncoder
 
+Data model import/export
+----------------------------
+
+.. autofunction:: mopidy.models.storage.save
+
+.. autofunction:: mopidy.models.storage.load
+
 Data model field types
 ----------------------
 

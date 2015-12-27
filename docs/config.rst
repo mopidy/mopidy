@@ -110,7 +110,17 @@ Core configuration
     The original MPD server only supports 10000 tracks in the tracklist. Some
     MPD clients will crash if this limit is exceeded.
 
+.. confval:: core/restore_state
 
+    Restore last state at start. Defaults to ``off``.
+
+    Save state when Mopidy ends and restore state at next start.
+    Allowed values:
+     
+    - ``off``: restore nothing
+    - ``load``: restore settings, volume and play queue
+    - ``play``: restore settings, volume, play queue and start playback
+    
 Audio configuration
 -------------------
 

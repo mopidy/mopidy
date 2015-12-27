@@ -53,6 +53,9 @@ in core see :class:`~mopidy.core.CoreListener`.
 
   .. automethod:: get_version
 
+  .. automethod:: save_state
+
+  .. automethod:: load_state
 
 Tracklist controller
 ====================

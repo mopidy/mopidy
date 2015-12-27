@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import collections
 import itertools
 import logging
+import os
 
 import pykka
 
@@ -17,6 +18,7 @@ from mopidy.core.playlists import PlaylistsController
 from mopidy.core.tracklist import TracklistController
 from mopidy.internal import versioning
 from mopidy.internal.deprecation import deprecated_property
+from mopidy.models import storage
 
 
 logger = logging.getLogger(__name__)
@@ -132,6 +134,93 @@ class Core(
             title = tags['title'][0]
             self.playback._stream_title = title
             CoreListener.send('stream_title_changed', title=title)
+
+    def on_start(self):
+        logger.debug("core on_start")
+        try:
+            amount = self._config['core']['restore_state']
+            coverage = []
+            if not amount or 'off' == amount:
+                pass
+            elif 'load' == amount:
+                coverage = ['tracklist', 'mode', 'volume', 'history']
+            elif 'play' == amount:
+                coverage = ['tracklist', 'mode', 'autoplay', 'volume',
+                            'history']
+            else:
+                logger.warn('Unknown value for config '
+                            'core.restore_state: %s', amount)
+            if len(coverage):
+                self.load_state('persistent', coverage)
+        except Exception as e:
+            logger.warn('Unexpected error: %s', str(e))
+        pykka.ThreadingActor.on_start(self)
+
+    def on_stop(self):
+        logger.debug("core on_stop")
+        try:
+            amount = self._config['core']['restore_state']
+            if amount and 'off' != amount:
+                self.save_state('persistent')
+        except Exception as e:
+            logger.warn('on_stop: Unexpected error: %s', str(e))
+        pykka.ThreadingActor.on_stop(self)
+
+    def save_state(self, name):
+        """
+        Save current state to disk.
+
+        :param name: a name (for later use with :meth:`load_state`)
+        :type name: str
+        """
+        logger.info('Save state: "%s"', name)
+        if not name:
+            raise TypeError('missing file name')
+
+        file_name = os.path.join(
+            self._config['core']['config_dir'], name)
+        file_name += '.state'
+
+        data = {}
+        self.tracklist._state_export(data)
+        self.history._state_export(data)
+        self.playback._state_export(data)
+        self.mixer._state_export(data)
+        storage.save(file_name, data)
+
+    def load_state(self, name, coverage):
+        """
+        Restore state from disk.
+
+        Load state from disk and restore it. Parameter `coverage`
+        limits the amount data to restore. Possible
+        values for `coverage` (list of one or more of):
+
+            - 'tracklist' fill the tracklist
+            - 'mode' set tracklist properties (consume, random, repeat, single)
+            - 'autoplay' start playing ('tracklist' also required)
+            - 'volume' set mixer volume
+            - 'history' restore history
+
+        :param name: a name (used previously with :meth:`save_state`)
+        :type path: str
+        :param coverage: amount of data to restore
+        :type coverage: list of string (see above)
+        """
+        logger.info('Load state: "%s"', name)
+        if not name:
+            raise TypeError('missing file name')
+
+        file_name = os.path.join(
+            self._config['core']['config_dir'], name)
+        file_name += '.state'
+
+        data = storage.load(file_name)
+        self.history._state_import(data, coverage)
+        self.tracklist._state_import(data, coverage)
+        self.playback._state_import(data, coverage)
+        self.mixer._state_import(data, coverage)
+        logger.info('Load state done')
 
 
 class Backends(list):
