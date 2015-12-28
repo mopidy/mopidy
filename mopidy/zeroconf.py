@@ -55,17 +55,20 @@ class Zeroconf(object):
         self.bus = None
         self.server = None
         self.group = None
-        try:
-            self.bus = dbus.SystemBus()
-            self.server = dbus.Interface(
-                self.bus.get_object('org.freedesktop.Avahi', '/'),
-                'org.freedesktop.Avahi.Server')
-        except dbus.exceptions.DBusException as e:
-            logger.debug('%s: Server failed: %s', self, e)
+        self.display_hostname = None
+        self.name = None
 
-        self.display_hostname = '%s' % self.server.GetHostName()
-        self.name = string.Template(name).safe_substitute(
-            hostname=self.display_hostname, port=port)
+        if dbus:
+            try:
+                self.bus = dbus.SystemBus()
+                self.server = dbus.Interface(
+                    self.bus.get_object('org.freedesktop.Avahi', '/'),
+                    'org.freedesktop.Avahi.Server')
+                self.display_hostname = '%s' % self.server.GetHostName()
+                self.name = string.Template(name).safe_substitute(
+                    hostname=self.display_hostname, port=port)
+            except dbus.exceptions.DBusException as e:
+                logger.debug('%s: Server failed: %s', self, e)
 
     def __str__(self):
         return 'Zeroconf service "%s" (%s at [%s]:%d)' % (
