@@ -42,6 +42,12 @@ Local backend
 - Made :confval:`local/data_dir` really deprecated. This change breaks older
   versions of Mopidy-Local-SQLite and Mopidy-Local-Images.
 
+M3U backend
+-----------
+
+- Derive track name from file name for non-extended M3U
+  playlists. (Fixes: :issue:`1364`, PR: :issue:`1369`)
+
 MPD frontend
 ------------
 
