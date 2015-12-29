@@ -8,7 +8,7 @@ import pykka
 
 from mopidy import backend, core
 from mopidy.internal import deprecation
-from mopidy.models import Track
+from mopidy.models import TlTrack, Track
 
 from tests import dummy_audio as audio
 
@@ -806,6 +806,43 @@ class Bug1177RegressionTest(unittest.TestCase):
         c.playback.pause()
         c.playback.next()
         b.playback.change_track.assert_called_once_with(track2)
+
+
+class Bug1352RegressionTest(unittest.TestCase):
+    def test(self):
+        config = {
+            'core': {
+                'max_tracklist_length': 10000,
+            }
+        }
+
+        b = mock.Mock()
+        b.uri_schemes.get.return_value = ['dummy']
+        b.playback = mock.Mock(spec=backend.PlaybackProvider)
+        b.playback.change_track.return_value.get.return_value = True
+        b.playback.play.return_value.get.return_value = True
+
+        track1 = Track(uri='dummy:a', length=40000)
+        track2 = Track(uri='dummy:b', length=40000)
+
+        tl_track2 = TlTrack(1, track2)
+
+        c = core.Core(config, mixer=None, backends=[b])
+        c.tracklist.add([track1, track2])
+
+        c.history._add_track = mock.PropertyMock()
+        c.tracklist._mark_playing = mock.PropertyMock()
+
+        c.playback.play()
+        b.playback.change_track.reset_mock()
+        c.history._add_track.reset_mock()
+        c.tracklist._mark_playing.reset_mock()
+
+        c.playback.pause()
+        c.playback.next()
+        b.playback.change_track.assert_called_once_with(track2)
+        c.history._add_track.assert_called_once_with(track2)
+        c.tracklist._mark_playing.assert_called_once_with(tl_track2)
 
 
 class Bug1358RegressionTest(unittest.TestCase):

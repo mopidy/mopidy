@@ -19,6 +19,10 @@ Bug fix release.
 
 - MPD: Notify idling clients when a seek is performed. (Fixes: :issue:`1331`)
 
+- Core: Fix bug in playback controller. If changing to another track while
+  the player is paused, the new track would not be added to the history or
+  marked as currently playing. (Fixes: :issue:`1352`)
+
 
 v1.1.1 (2015-09-14)
 ===================
