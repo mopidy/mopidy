@@ -115,6 +115,23 @@ class TestPlayHandling(BaseTest):
         current_tl_track = self.core.playback.get_current_tl_track()
         self.assertEqual(tl_tracks[1], current_tl_track)
 
+    def test_resume_skips_to_next_on_unplayable_track(self):
+        """Checks that we handle backend.change_track failing when
+           resuming playback."""
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play(tl_tracks[0])
+        self.core.playback.pause()
+
+        self.audio.trigger_fake_playback_failure(tl_tracks[1].track.uri)
+
+        self.core.playback.next()
+        self.core.playback.resume()
+        self.replay_events()
+
+        current_tl_track = self.core.playback.get_current_tl_track()
+        self.assertEqual(tl_tracks[2], current_tl_track)
+
     def test_play_tlid(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
