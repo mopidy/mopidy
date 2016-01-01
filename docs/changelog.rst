@@ -29,6 +29,9 @@ Bug fix release.
 - MPD: Don't return tracks with empty URIs. (Partly fixes: :issue:`1340`, PR:
   :issue:`1343`)
 
+- Core: Make :meth:`~mopidy.core.LibraryController.lookup` ignore tracks with
+  empty URIs. (Partly fixes: :issue:`1340`, PR: :issue:`1381`)
+
 
 v1.1.1 (2015-09-14)
 ===================

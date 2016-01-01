@@ -236,7 +236,7 @@ class LibraryController(object):
                 result = future.get()
                 if result is not None:
                     validation.check_instances(result, models.Track)
-                    results[u] = result
+                    results[u] = [r for r in result if r.uri]
 
         if uri:
             return results[uri]
