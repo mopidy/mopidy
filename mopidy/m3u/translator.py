@@ -1,130 +1,119 @@
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import, print_function, unicode_literals
 
-import codecs
-import logging
 import os
-import re
 
-from mopidy import compat
-from mopidy.compat import urllib
-from mopidy.internal import encoding, path
-from mopidy.models import Track
+from mopidy import models
 
+from . import Extension
 
-M3U_EXTINF_RE = re.compile(r'#EXTINF:(-1|\d+),(.*)')
+try:
+    from urllib.parse import quote_from_bytes, unquote_to_bytes
+except ImportError:
+    import urllib
 
-logger = logging.getLogger(__name__)
+    def quote_from_bytes(bytes, safe=b'/'):
+        # Python 3 returns Unicode string
+        return urllib.quote(bytes, safe).decode('utf-8')
 
+    def unquote_to_bytes(string):
+        if isinstance(string, bytes):
+            return urllib.unquote(string)
+        else:
+            return urllib.unquote(string.encode('utf-8'))
 
-def playlist_uri_to_path(uri, playlists_dir):
-    if not uri.startswith('m3u:'):
-        raise ValueError('Invalid URI %s' % uri)
-    file_path = path.uri_to_path(uri)
-    return os.path.join(playlists_dir, file_path)
-
-
-def path_to_playlist_uri(relpath):
-    """Convert path relative to playlists_dir to M3U URI."""
-    if isinstance(relpath, compat.text_type):
-        relpath = relpath.encode('utf-8')
-    return b'm3u:%s' % urllib.parse.quote(relpath)
-
-
-def m3u_extinf_to_track(line):
-    """Convert extended M3U directive to track template."""
-    m = M3U_EXTINF_RE.match(line)
-    if not m:
-        logger.warning('Invalid extended M3U directive: %s', line)
-        return Track()
-    (runtime, title) = m.groups()
-    if int(runtime) > 0:
-        return Track(name=title, length=1000 * int(runtime))
-    else:
-        return Track(name=title)
+try:
+    from urllib.parse import urlsplit, urlunsplit
+except ImportError:
+    from urlparse import urlsplit, urlunsplit
 
 
-def parse_m3u(file_path, media_dir=None):
-    r"""
-    Convert M3U file list to list of tracks
+try:
+    from os import fsencode, fsdecode
+except ImportError:
+    import sys
 
-    Example M3U data::
+    # no 'surrogateescape' in Python 2; 'replace' for backward compatibility
+    def fsencode(filename, encoding=sys.getfilesystemencoding()):
+        return filename.encode(encoding, 'replace')
 
-        # This is a comment
-        Alternative\Band - Song.mp3
-        Classical\Other Band - New Song.mp3
-        Stuff.mp3
-        D:\More Music\Foo.mp3
-        http://www.example.com:8000/Listen.pls
-        http://www.example.com/~user/Mine.mp3
+    def fsdecode(filename, encoding=sys.getfilesystemencoding()):
+        return filename.decode(encoding, 'replace')
 
-    Example extended M3U data::
 
-        #EXTM3U
-        #EXTINF:123, Sample artist - Sample title
-        Sample.mp3
-        #EXTINF:321,Example Artist - Example title
-        Greatest Hits\Example.ogg
-        #EXTINF:-1,Radio XMP
-        http://mp3stream.example.com:8000/
+def path_to_uri(path, scheme=Extension.ext_name):
+    """Convert file path to URI."""
+    assert isinstance(path, bytes), 'Mopidy paths should be bytes'
+    uripath = quote_from_bytes(os.path.normpath(path))
+    return urlunsplit((scheme, None, uripath, None, None))
 
-    - Relative paths of songs should be with respect to location of M3U.
-    - Paths are normally platform specific.
-    - Lines starting with # are ignored, except for extended M3U directives.
-    - Track.name and Track.length are set from extended M3U directives.
-    - m3u files are latin-1.
-    - m3u8 files are utf-8
-    """
-    # TODO: uris as bytes
-    file_encoding = 'utf-8' if file_path.endswith(b'.m3u8') else 'latin1'
 
-    tracks = []
+def uri_to_path(uri):
+    """Convert URI to file path."""
+    # TODO: decide on Unicode vs. bytes for URIs
+    return unquote_to_bytes(urlsplit(uri).path)
+
+
+def name_from_path(path):
+    """Extract name from file path."""
+    name, _ = os.path.splitext(os.path.basename(path))
     try:
-        with codecs.open(file_path, 'rb', file_encoding, 'replace') as m3u:
-            contents = m3u.readlines()
-    except IOError as error:
-        logger.warning('Couldn\'t open m3u: %s', encoding.locale_decode(error))
-        return tracks
+        return fsdecode(name)
+    except UnicodeError:
+        return None
 
-    if not contents:
-        return tracks
 
-    # Strip newlines left by codecs
-    contents = [line.strip() for line in contents]
+def path_from_name(name, ext=None, sep='|'):
+    """Convert name with optional extension to file path."""
+    if ext:
+        return fsencode(name.replace(os.sep, sep) + ext)
+    else:
+        return fsencode(name.replace(os.sep, sep))
 
-    extended = contents[0].startswith('#EXTM3U')
 
-    track = Track()
-    for line in contents:
+def path_to_ref(path):
+    return models.Ref.playlist(
+        uri=path_to_uri(path),
+        name=name_from_path(path)
+    )
+
+
+def load_items(fp, basedir):
+    refs = []
+    name = None
+    for line in filter(None, (line.strip() for line in fp)):
         if line.startswith('#'):
-            if extended and line.startswith('#EXTINF'):
-                track = m3u_extinf_to_track(line)
+            if line.startswith('#EXTINF:'):
+                name = line.partition(',')[2]
             continue
-        if not track.name:
-            name = os.path.basename(os.path.splitext(line)[0])
-            track = track.replace(name=urllib.parse.unquote(name))
-        if urllib.parse.urlsplit(line).scheme:
-            tracks.append(track.replace(uri=line))
-        elif os.path.normpath(line) == os.path.abspath(line):
-            uri = path.path_to_uri(line)
-            tracks.append(track.replace(uri=uri))
-        elif media_dir is not None:
-            uri = path.path_to_uri(os.path.join(media_dir, line))
-            tracks.append(track.replace(uri=uri))
-
-        track = Track()
-    return tracks
+        elif not urlsplit(line).scheme:
+            path = os.path.join(basedir, fsencode(line))
+            if not name:
+                name = name_from_path(path)
+            uri = path_to_uri(path, scheme='file')
+        else:
+            uri = line  # do *not* extract name from (stream?) URI path
+        refs.append(models.Ref.track(uri=uri, name=name))
+        name = None
+    return refs
 
 
-def save_m3u(filename, tracks, encoding='latin1', errors='replace'):
-    extended = any(track.name for track in tracks)
-    # codecs.open() always uses binary mode, just being explicit here
-    with codecs.open(filename, 'wb', encoding, errors) as m3u:
-        if extended:
-            m3u.write('#EXTM3U' + os.linesep)
-        for track in tracks:
-            if extended and track.name:
-                m3u.write('#EXTINF:%d,%s%s' % (
-                    track.length // 1000 if track.length else -1,
-                    track.name,
-                    os.linesep))
-            m3u.write(track.uri + os.linesep)
+def dump_items(items, fp):
+    if any(item.name for item in items):
+        print('#EXTM3U', file=fp)
+    for item in items:
+        if item.name:
+            print('#EXTINF:-1,%s' % item.name, file=fp)
+        # TODO: convert file URIs to (relative) paths?
+        if isinstance(item.uri, bytes):
+            print(item.uri.decode('utf-8'), file=fp)
+        else:
+            print(item.uri, file=fp)
+
+
+def playlist(path, items=[], mtime=None):
+    return models.Playlist(
+        uri=path_to_uri(path),
+        name=name_from_path(path),
+        tracks=[models.Track(uri=item.uri, name=item.name) for item in items],
+        last_modified=(int(mtime * 1000) if mtime else None)
+    )
