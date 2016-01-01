@@ -35,8 +35,8 @@ Mopidy-Local-Images
 
 https://github.com/tkem/mopidy-local-images
 
-Not a full-featured Web client, but rather a local library and Web
-extension which allows other Web clients access to album art embedded
+Not a full-featured web client, but rather a local library and web
+extension which allows other web clients access to album art embedded
 in local media files.
 
 .. image:: /ext/local_images.jpg
@@ -69,7 +69,7 @@ Mopidy-Mobile
 
 https://github.com/tkem/mopidy-mobile
 
-A Mopidy Web client extension and hybrid mobile app, made with Ionic,
+A Mopidy web client extension and hybrid mobile app, made with Ionic,
 AngularJS and Apache Cordova by Thomas Kemmer.
 
 .. image:: /ext/mobile.png
@@ -162,6 +162,22 @@ Bootstrap by Peter Odding.
 To install, run::
 
     pip install Mopidy-Simple-Webclient
+
+
+Mopidy-Spotmop
+==============
+
+https://github.com/jaedb/spotmop
+
+A client targeted at Spotify users. Made by James Barnsley.
+
+.. image:: /ext/spotmop.jpg
+    :width: 720
+    :height: 455
+
+To install, run::
+
+    pip install Mopidy-Spotmop
 
 
 Mopidy-WebSettings

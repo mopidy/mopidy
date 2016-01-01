@@ -126,3 +126,11 @@ Pull request guidelines
 
 #. Send a pull request to the ``develop`` branch. See the `GitHub pull request
    docs <https://help.github.com/articles/using-pull-requests>`_ for help.
+
+.. note::
+
+    If you are contributing a bug fix for a specific minor version of Mopidy
+    you should create the branch based on ``release-x.y`` instead of
+    ``develop``. When the release is done the changes will be merged back into
+    ``develop`` automatically as part of the normal release process. See
+    :ref:`creating-releases`.
