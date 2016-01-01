@@ -172,7 +172,9 @@ def tracks_to_mpd_format(tracks, start=0, end=None):
     assert len(tracks) == len(positions)
     result = []
     for track, position in zip(tracks, positions):
-        result.append(track_to_mpd_format(track, position))
+        formatted_track = track_to_mpd_format(track, position)
+        if formatted_track:
+            result.append(formatted_track)
     return result
 
 
