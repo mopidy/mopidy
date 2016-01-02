@@ -31,12 +31,6 @@ Bug fix release.
 - MPD: Don't return tracks with empty URIs. (Partly fixes: :issue:`1340`, PR:
   :issue:`1343`)
 
-- Main: Catch errors when loading :confval:`logging/config_file`. (Fixes:
-  :issue:`1320`)
-
-- MPD: Don't return tracks with empty URIs. (Partly fixes: :issue:`1340`, PR:
-  :issue:`1343`)
-
 
 v1.1.1 (2015-09-14)
 ===================
