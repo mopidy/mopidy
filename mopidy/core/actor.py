@@ -180,6 +180,7 @@ class Core(
         file_name = os.path.join(
             self._config['core']['data_dir'], name)
         file_name += '.state'
+        logger.info('Save state to "%s"', file_name)
 
         data = {}
         self.tracklist._state_export(data)

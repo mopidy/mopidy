@@ -6,7 +6,7 @@ import random
 from mopidy import exceptions
 from mopidy.core import listener
 from mopidy.internal import deprecation, validation
-from mopidy.models import TlTrack, Track
+from mopidy.models import TlTrack, Track, TracklistState
 
 logger = logging.getLogger(__name__)
 
@@ -647,32 +647,27 @@ class TracklistController(object):
 
     def _state_export(self, data):
         """Internal method for :class:`mopidy.Core`."""
-        data['tracklist'] = {}
-        data['tracklist']['tl_tracks'] = self._tl_tracks
-        data['tracklist']['next_tlid'] = self._next_tlid
-        data['tracklist']['consume'] = self.get_consume()
-        data['tracklist']['random'] = self.get_random()
-        data['tracklist']['repeat'] = self.get_repeat()
-        data['tracklist']['single'] = self.get_single()
+        data['tracklist'] = TracklistState(
+            tracks=self._tl_tracks,
+            next_tlid=self._next_tlid,
+            consume=self.get_consume(),
+            random=self.get_random(),
+            repeat=self.get_repeat(),
+            single=self.get_single())
 
     def _state_import(self, data, coverage):
         """Internal method for :class:`mopidy.Core`."""
-        if 'tracklist' not in data:
-            return
-        if 'mode' in coverage:
-            # TODO: only one _trigger_options_changed() for all options
-            if 'consume' in data['tracklist']:
-                self.set_consume(data['tracklist']['consume'])
-            if 'random' in data['tracklist']:
-                self.set_random(data['tracklist']['random'])
-            if 'repeat' in data['tracklist']:
-                self.set_repeat(data['tracklist']['repeat'])
-            if 'single' in data['tracklist']:
-                self.set_single(data['tracklist']['single'])
-        if 'tracklist' in coverage:
-            if 'next_tlid' in data['tracklist']:
-                if data['tracklist']['next_tlid'] > self._next_tlid:
-                    self._next_tlid = data['tracklist']['next_tlid']
-            if 'tl_tracks' in data['tracklist']:
-                self._tl_tracks = data['tracklist']['tl_tracks']
+        if 'tracklist' in data:
+            tls = data['tracklist']
+            if 'mode' in coverage:
+                self.set_consume(tls.consume)
+                self.set_random(tls.random)
+                self.set_repeat(tls.repeat)
+                self.set_single(tls.single)
+            if 'tracklist' in coverage:
+                if tls.next_tlid > self._next_tlid:
+                    self._next_tlid = tls.next_tlid
+                self._tl_tracks = []
+                for track in tls.tracks:
+                    self._tl_tracks.append(track)
                 self._trigger_tracklist_changed()

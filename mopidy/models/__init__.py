@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 from mopidy import compat
+from mopidy.internal import validation
 from mopidy.models import fields
 from mopidy.models.immutable import ImmutableObject, ValidatedImmutableObject
 from mopidy.models.serialize import ModelJSONEncoder, model_json_decoder
@@ -8,7 +9,8 @@ from mopidy.models.serialize import ModelJSONEncoder, model_json_decoder
 __all__ = [
     'ImmutableObject', 'Ref', 'Image', 'Artist', 'Album', 'track', 'TlTrack',
     'Playlist', 'SearchResult', 'model_json_decoder', 'ModelJSONEncoder',
-    'ValidatedImmutableObject']
+    'ValidatedImmutableObject', 'HistoryTrack', 'HistoryState', 'MixerState',
+    'PlaybackState', 'TracklistState']
 
 
 class Ref(ValidatedImmutableObject):
@@ -360,3 +362,104 @@ class SearchResult(ValidatedImmutableObject):
 
     # The albums matching the search query. Read-only.
     albums = fields.Collection(type=Album, container=tuple)
+
+
+class HistoryTrack(ValidatedImmutableObject):
+    """
+    A history track. Wraps a :class:`Ref` and it's timestamp.
+
+    :param timestamp: the timestamp
+    :type timestamp: int
+    :param track: the track
+    :type track: :class:`Ref`
+    """
+
+    # The timestamp. Read-only.
+    timestamp = fields.Integer()
+
+    # The track. Read-only.
+    track = fields.Field(type=Ref)
+
+
+class HistoryState(ValidatedImmutableObject):
+    """
+    State of the history controller.
+    Internally used for import/export of current state.
+
+    :param history: the track history
+    :type history: list of :class:`HistoryTrack`
+    """
+
+    # The tracks. Read-only.
+    history = fields.Collection(type=HistoryTrack, container=tuple)
+
+
+class MixerState(ValidatedImmutableObject):
+    """
+    State of the mixer controller.
+    Internally used for import/export of current state.
+
+    :param volume: the volume
+    :type volume: int
+    """
+
+    # The volume. Read-only.
+    volume = fields.Integer(min=0, max=100)
+
+
+class PlaybackState(ValidatedImmutableObject):
+    """
+    State of the playback controller.
+    Internally used for import/export of current state.
+
+    :param tl_track: current track
+    :type tl_track: :class:`TlTrack`
+    :param position: play position
+    :type position: int
+    :param state: playback state
+    :type state: :class:`TlTrack`
+    """
+
+    # The current playing track. Read-only.
+    tl_track = fields.Field(type=TlTrack)
+
+    # The playback position. Read-only.
+    position = fields.Integer(min=0)
+
+    # The playback state. Read-only.
+    state = fields.Field(choices=validation.PLAYBACK_STATES)
+
+
+class TracklistState(ValidatedImmutableObject):
+
+    """
+    State of the tracklist controller.
+    Internally used for import/export of current state.
+
+    :param repeat: the repeat mode
+    :type repeat: bool
+    :param consume: the consume mode
+    :type consume: bool
+    :param random: the random mode
+    :type random: bool
+    :param single: the single mode
+    :type single: bool
+    """
+
+    # The repeat mode. Read-only.
+    repeat = fields.Boolean()
+
+    # The consume mode. Read-only.
+    consume = fields.Boolean()
+
+    # The random mode. Read-only.
+    random = fields.Boolean()
+
+    # The single mode. Read-only.
+    single = fields.Boolean()
+
+    # The repeat mode. Read-only.
+    next_tlid = fields.Integer(min=0)
+
+    # The list of tracks. Read-only.
+    tracks = fields.Collection(type=TlTrack, container=tuple)

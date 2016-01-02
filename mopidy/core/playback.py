@@ -526,20 +526,18 @@ class PlaybackController(object):
 
     def _state_export(self, data):
         """Internal method for :class:`mopidy.Core`."""
-        data['playback'] = {}
-        data['playback']['current_tl_track'] = self.get_current_tl_track()
-        data['playback']['position'] = self.get_time_position()
-        # TODO: export/import get_state()?
+        data['playback'] = models.PlaybackState(
+            tl_track=self.get_current_tl_track(),
+            position=self.get_time_position(),
+            state=self.get_state())
 
     def _state_import(self, data, coverage):
         """Internal method for :class:`mopidy.Core`."""
-        if 'playback' not in data:
-            return
-        if 'autoplay' in coverage:
-            if 'current_tl_track' in data['playback']:
-                tl_track = data['playback']['current_tl_track']
+        if 'playback' in data:
+            ps = data['playback']
+            if 'autoplay' in coverage:
+                tl_track = ps.tl_track
                 if tl_track is not None:
                     self.play(tl_track=tl_track)
                     # TODO: Seek not working. It seeks to early.
-                    # if 'position' in data['playback']:
-                    #     self.seek(data['playback']['position'])
+                    # self.seek(ps.position)

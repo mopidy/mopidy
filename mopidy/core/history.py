@@ -60,13 +60,17 @@ class HistoryController(object):
 
     def _state_export(self, data):
         """Internal method for :class:`mopidy.Core`."""
-        data['history'] = {}
-        data['history']['history'] = self._history
+        history_list = []
+        for timestamp, track in self._history:
+            history_list.append(models.HistoryTrack(
+                                timestamp=timestamp, track=track))
+        data['history'] = models.HistoryState(history=history_list)
 
     def _state_import(self, data, coverage):
         """Internal method for :class:`mopidy.Core`."""
-        if 'history' not in data:
-            return
-        if 'history' in coverage:
-            if 'history' in data['history']:
-                self._history = data['history']['history']
+        if 'history' in data:
+            hstate = data['history']
+            if 'history' in coverage:
+                self._history = []
+                for htrack in hstate.history:
+                    self._history.append((htrack.timestamp, htrack.track))

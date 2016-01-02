@@ -5,6 +5,7 @@ import logging
 
 from mopidy import exceptions
 from mopidy.internal import validation
+from mopidy.models import MixerState
 
 
 logger = logging.getLogger(__name__)
@@ -102,13 +103,11 @@ class MixerController(object):
 
     def _state_export(self, data):
         """Internal method for :class:`mopidy.Core`."""
-        data['mixer'] = {}
-        data['mixer']['volume'] = self.get_volume()
+        data['mixer'] = MixerState(volume=self.get_volume())
 
     def _state_import(self, data, coverage):
         """Internal method for :class:`mopidy.Core`."""
-        if 'mixer' not in data:
-            return
-        if 'volume' in coverage:
-            if 'volume' in data['mixer']:
-                self.set_volume(data['mixer']['volume'])
+        if 'mixer' in data:
+            ms = data['mixer']
+            if 'volume' in coverage:
+                self.set_volume(ms.volume)

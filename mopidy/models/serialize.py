@@ -4,7 +4,9 @@ import json
 
 from mopidy.models import immutable
 
-_MODELS = ['Ref', 'Artist', 'Album', 'Track', 'TlTrack', 'Playlist']
+_MODELS = ['Ref', 'Artist', 'Album', 'Track', 'TlTrack', 'Playlist',
+           'HistoryTrack', 'HistoryState', 'MixerState', 'PlaybackState',
+           'TracklistState']
 
 
 class ModelJSONEncoder(json.JSONEncoder):

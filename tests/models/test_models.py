@@ -4,8 +4,9 @@ import json
 import unittest
 
 from mopidy.models import (
-    Album, Artist, Image, ModelJSONEncoder, Playlist, Ref, SearchResult,
-    TlTrack, Track, model_json_decoder)
+    Album, Artist, HistoryState, HistoryTrack, Image, MixerState,
+    ModelJSONEncoder, PlaybackState, Playlist,
+    Ref, SearchResult, TlTrack, Track, TracklistState, model_json_decoder)
 
 
 class InheritanceTest(unittest.TestCase):
@@ -1168,3 +1169,164 @@ class SearchResultTest(unittest.TestCase):
         self.assertDictEqual(
             {'__model__': 'SearchResult', 'uri': 'uri'},
             SearchResult(uri='uri').serialize())
+
+
+class HistoryTrackTest(unittest.TestCase):
+
+    def test_track(self):
+        track = Ref.track()
+        result = HistoryTrack(track=track)
+        self.assertEqual(result.track, track)
+        with self.assertRaises(AttributeError):
+            result.track = None
+
+    def test_timestamp(self):
+        timestamp = 1234
+        result = HistoryTrack(timestamp=timestamp)
+        self.assertEqual(result.timestamp, timestamp)
+        with self.assertRaises(AttributeError):
+            result.timestamp = None
+
+
+class HistoryStateTest(unittest.TestCase):
+
+    def test_history_list(self):
+        history = (HistoryTrack(),
+                   HistoryTrack())
+        result = HistoryState(history=history)
+        self.assertEqual(result.history, history)
+        with self.assertRaises(AttributeError):
+            result.history = None
+
+    def test_history_string_fail(self):
+        history = 'not_a_valid_history'
+        with self.assertRaises(TypeError):
+            HistoryState(history=history)
+
+
+class MixerStateTest(unittest.TestCase):
+
+    def test_volume(self):
+        volume = 37
+        result = MixerState(volume=volume)
+        self.assertEqual(result.volume, volume)
+        with self.assertRaises(AttributeError):
+            result.volume = None
+
+    def test_volume_invalid(self):
+        volume = 105
+        with self.assertRaises(ValueError):
+            MixerState(volume=volume)
+
+
+class PlaybackStateTest(unittest.TestCase):
+
+    def test_position(self):
+        position = 123456
+        result = PlaybackState(position=position)
+        self.assertEqual(result.position, position)
+        with self.assertRaises(AttributeError):
+            result.position = None
+
+    def test_position_invalid(self):
+        position = -1
+        with self.assertRaises(ValueError):
+            PlaybackState(position=position)
+
+    def test_tl_track(self):
+        tl_track = TlTrack()
+        result = PlaybackState(tl_track=tl_track)
+        self.assertEqual(result.tl_track, tl_track)
+        with self.assertRaises(AttributeError):
+            result.tl_track = None
+
+    def test_tl_track_none(self):
+        tl_track = None
+        result = PlaybackState(tl_track=tl_track)
+        self.assertEqual(result.tl_track, tl_track)
+        with self.assertRaises(AttributeError):
+            result.tl_track = None
+
+    def test_tl_track_invalid(self):
+        tl_track = Track()
+        with self.assertRaises(TypeError):
+            PlaybackState(tl_track=tl_track)
+
+    def test_state(self):
+        state = 'playing'
+        result = PlaybackState(state=state)
+        self.assertEqual(result.state, state)
+        with self.assertRaises(AttributeError):
+            result.state = None
+
+    def test_state_invalid(self):
+        state = 'not_a_state'
+        with self.assertRaises(TypeError):
+            PlaybackState(state=state)
+
+
+class TracklistStateTest(unittest.TestCase):
+
+    def test_repeat_true(self):
+        repeat = True
+        result = TracklistState(repeat=repeat)
+        self.assertEqual(result.repeat, repeat)
+        with self.assertRaises(AttributeError):
+            result.repeat = None
+
+    def test_repeat_false(self):
+        repeat = False
+        result = TracklistState(repeat=repeat)
+        self.assertEqual(result.repeat, repeat)
+        with self.assertRaises(AttributeError):
+            result.repeat = None
+
+    def test_repeat_invalid(self):
+        repeat = 33
+        with self.assertRaises(TypeError):
+            TracklistState(repeat=repeat)
+
+    def test_consume_true(self):
+        val = True
+        result = TracklistState(consume=val)
+        self.assertEqual(result.consume, val)
+        with self.assertRaises(AttributeError):
+            result.repeat = None
+
+    def test_random_true(self):
+        val = True
+        result = TracklistState(random=val)
+        self.assertEqual(result.random, val)
+        with self.assertRaises(AttributeError):
+            result.random = None
+
+    def test_single_true(self):
+        val = True
+        result = TracklistState(single=val)
+        self.assertEqual(result.single, val)
+        with self.assertRaises(AttributeError):
+            result.single = None
+
+    def test_next_tlid(self):
+        val = 654
+        result = TracklistState(next_tlid=val)
+        self.assertEqual(result.next_tlid, val)
+        with self.assertRaises(AttributeError):
+            result.next_tlid = None
+
+    def test_next_tlid_invalid(self):
+        val = -1
+        with self.assertRaises(ValueError):
+            TracklistState(next_tlid=val)
+
+    def test_tracks(self):
+        tracks = (TlTrack(), TlTrack())
+        result = TracklistState(tracks=tracks)
+        self.assertEqual(result.tracks, tracks)
+        with self.assertRaises(AttributeError):
+            result.tracks = None
+
+    def test_tracks_invalid(self):
+        tracks = (Track(), Track())
+        with self.assertRaises(TypeError):
+            TracklistState(tracks=tracks)
