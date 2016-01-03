@@ -1,5 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
+import shutil
+import tempfile
 import unittest
 
 import mock
@@ -43,3 +45,29 @@ class CoreActorTest(unittest.TestCase):
 
     def test_version(self):
         self.assertEqual(self.core.version, versioning.get_version())
+
+
+class CoreActorExportRestoreTest(unittest.TestCase):
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+        config = {
+            'core': {
+                'max_tracklist_length': 10000,
+                'restore_state': 'play',
+                'data_dir': self.temp_dir,
+            }
+        }
+
+        self.core = Core.start(
+            config=config, mixer=None, backends=[]).proxy()
+
+    def tearDown(self):  # noqa: N802
+        pykka.ActorRegistry.stop_all()
+        shutil.rmtree(self.temp_dir)
+
+    def test_restore_on_start(self):
+        # cover mopidy.core.actor.on_start and .on_stop
+        # starting the actor by calling any function:
+        self.core.get_version()
+        pass

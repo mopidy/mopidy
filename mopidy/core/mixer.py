@@ -101,13 +101,15 @@ class MixerController(object):
 
         return False
 
-    def _state_export(self, data):
+    def _export_state(self):
         """Internal method for :class:`mopidy.Core`."""
-        data['mixer'] = MixerState(volume=self.get_volume())
+        return MixerState(volume=self.get_volume())
 
-    def _state_import(self, data, coverage):
+    def _restore_state(self, state, coverage):
         """Internal method for :class:`mopidy.Core`."""
-        if 'mixer' in data:
-            ms = data['mixer']
+        if state:
+            if not isinstance(state, MixerState):
+                raise TypeError('Expect an argument of type "MixerState"')
             if 'volume' in coverage:
-                self.set_volume(ms.volume)
+                if state.volume:
+                    self.set_volume(state.volume)

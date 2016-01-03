@@ -138,18 +138,19 @@ class Core(
     def on_start(self):
         logger.debug("core on_start")
         try:
-            amount = self._config['core']['restore_state']
             coverage = []
-            if not amount or 'off' == amount:
-                pass
-            elif 'load' == amount:
-                coverage = ['tracklist', 'mode', 'volume', 'history']
-            elif 'play' == amount:
-                coverage = ['tracklist', 'mode', 'autoplay', 'volume',
-                            'history']
-            else:
-                logger.warn('Unknown value for config '
-                            'core.restore_state: %s', amount)
+            if self._config and 'restore_state' in self._config['core']:
+                amount = self._config['core']['restore_state']
+                if not amount or 'off' == amount:
+                    pass
+                elif 'load' == amount:
+                    coverage = ['tracklist', 'mode', 'volume', 'history']
+                elif 'play' == amount:
+                    coverage = ['tracklist', 'mode', 'autoplay', 'volume',
+                                'history']
+                else:
+                    logger.warn('Unknown value for config '
+                                'core.restore_state: %s', amount)
             if len(coverage):
                 self.load_state('persistent', coverage)
         except Exception as e:
@@ -159,9 +160,10 @@ class Core(
     def on_stop(self):
         logger.debug("core on_stop")
         try:
-            amount = self._config['core']['restore_state']
-            if amount and 'off' != amount:
-                self.save_state('persistent')
+            if self._config and 'restore_state' in self._config['core']:
+                amount = self._config['core']['restore_state']
+                if amount and 'off' != amount:
+                    self.save_state('persistent')
         except Exception as e:
             logger.warn('on_stop: Unexpected error: %s', str(e))
         pykka.ThreadingActor.on_stop(self)
@@ -183,10 +185,10 @@ class Core(
         logger.info('Save state to "%s"', file_name)
 
         data = {}
-        self.tracklist._state_export(data)
-        self.history._state_export(data)
-        self.playback._state_export(data)
-        self.mixer._state_export(data)
+        data['tracklist'] = self.tracklist._export_state()
+        data['history'] = self.history._export_state()
+        data['playback'] = self.playback._export_state()
+        data['mixer'] = self.mixer._export_state()
         storage.save(file_name, data)
 
     def load_state(self, name, coverage):
@@ -217,11 +219,15 @@ class Core(
         file_name += '.state'
 
         data = storage.load(file_name)
-        self.history._state_import(data, coverage)
-        self.tracklist._state_import(data, coverage)
-        self.playback._state_import(data, coverage)
-        self.mixer._state_import(data, coverage)
-        logger.info('Load state done')
+        if 'history' in data:
+            self.history._restore_state(data['history'], coverage)
+        if 'tracklist' in data:
+            self.tracklist._restore_state(data['tracklist'], coverage)
+        if 'playback' in data:
+            self.playback._restore_state(data['playback'], coverage)
+        if 'mixer' in data:
+            self.mixer._restore_state(data['mixer'], coverage)
+        logger.debug('Load state done. file_name="%s"', file_name)
 
 
 class Backends(list):

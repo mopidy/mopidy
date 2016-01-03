@@ -7,6 +7,7 @@ import mock
 import pykka
 
 from mopidy import core, mixer
+from mopidy.models import MixerState
 from tests import dummy_mixer
 
 
@@ -154,3 +155,39 @@ class SetMuteBadBackendTest(MockBackendCoreMixerBase):
     def test_backend_returns_wrong_type(self):
         self.mixer.set_mute.return_value.get.return_value = 'done'
         self.assertFalse(self.core.mixer.set_mute(True))
+
+
+class CoreMixerExportRestoreTest(unittest.TestCase):
+
+    def setUp(self):  # noqa: N802
+        self.mixer = dummy_mixer.create_proxy()
+        self.core = core.Core(mixer=self.mixer, backends=[])
+
+    def test_export(self):
+        volume = 32
+        target = MixerState(volume=volume)
+        self.core.mixer.set_volume(volume)
+        value = self.core.mixer._export_state()
+        self.assertEqual(target, value)
+
+    def test_import(self):
+        self.core.mixer.set_volume(11)
+        volume = 45
+        target = MixerState(volume=volume)
+        coverage = ['volume']
+        self.core.mixer._restore_state(target, coverage)
+        self.assertEqual(volume, self.core.mixer.get_volume())
+
+    def test_import_not_covered(self):
+        self.core.mixer.set_volume(21)
+        target = MixerState(volume=56)
+        coverage = ['other']
+        self.core.mixer._restore_state(target, coverage)
+        self.assertEqual(21, self.core.mixer.get_volume())
+
+    def test_import_invalid_type(self):
+        with self.assertRaises(TypeError):
+            self.core.mixer._restore_state(11, None)
+
+    def test_import_none(self):
+        self.core.mixer._restore_state(None, None)

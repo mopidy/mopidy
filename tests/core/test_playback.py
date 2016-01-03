@@ -8,7 +8,7 @@ import pykka
 
 from mopidy import backend, core
 from mopidy.internal import deprecation
-from mopidy.models import Track
+from mopidy.models import PlaybackState, Track
 
 from tests import dummy_audio
 
@@ -874,3 +874,59 @@ class Bug1177RegressionTest(unittest.TestCase):
         c.playback.pause()
         c.playback.next()
         b.playback.change_track.assert_called_once_with(track2)
+
+
+class CorePlaybackExportRestoreTest(BaseTest):
+
+    def test_export(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play(tl_tracks[1])
+        self.replay_events()
+
+        state = PlaybackState(
+            position=0, state='playing', tl_track=tl_tracks[1])
+        value = self.core.playback._export_state()
+
+        self.assertEqual(state, value)
+
+    def test_import(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.stop()
+        self.replay_events()
+        self.assertEqual('stopped', self.core.playback.get_state())
+
+        state = PlaybackState(
+            position=0, state='playing', tl_track=tl_tracks[2])
+        coverage = ['autoplay']
+        self.core.playback._restore_state(state, coverage)
+        self.replay_events()
+
+        self.assertEqual('playing', self.core.playback.get_state())
+        self.assertEqual(tl_tracks[2],
+                         self.core.playback.get_current_tl_track())
+
+    def test_import_not_covered(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.stop()
+        self.replay_events()
+        self.assertEqual('stopped', self.core.playback.get_state())
+
+        state = PlaybackState(
+            position=0, state='playing', tl_track=tl_tracks[2])
+        coverage = ['other']
+        self.core.playback._restore_state(state, coverage)
+        self.replay_events()
+
+        self.assertEqual('stopped', self.core.playback.get_state())
+        self.assertEqual(None,
+                         self.core.playback.get_current_tl_track())
+
+    def test_import_invalid_type(self):
+        with self.assertRaises(TypeError):
+            self.core.playback._restore_state(11, None)
+
+    def test_import_none(self):
+        self.core.playback._restore_state(None, None)

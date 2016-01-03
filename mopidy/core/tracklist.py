@@ -645,9 +645,9 @@ class TracklistController(object):
         logger.debug('Triggering options changed event')
         listener.CoreListener.send('options_changed')
 
-    def _state_export(self, data):
+    def _export_state(self):
         """Internal method for :class:`mopidy.Core`."""
-        data['tracklist'] = TracklistState(
+        return TracklistState(
             tracks=self._tl_tracks,
             next_tlid=self._next_tlid,
             consume=self.get_consume(),
@@ -655,19 +655,20 @@ class TracklistController(object):
             repeat=self.get_repeat(),
             single=self.get_single())
 
-    def _state_import(self, data, coverage):
+    def _restore_state(self, state, coverage):
         """Internal method for :class:`mopidy.Core`."""
-        if 'tracklist' in data:
-            tls = data['tracklist']
+        if state:
+            if not isinstance(state, TracklistState):
+                raise TypeError('Expect an argument of type "TracklistState"')
             if 'mode' in coverage:
-                self.set_consume(tls.consume)
-                self.set_random(tls.random)
-                self.set_repeat(tls.repeat)
-                self.set_single(tls.single)
+                self.set_consume(state.consume)
+                self.set_random(state.random)
+                self.set_repeat(state.repeat)
+                self.set_single(state.single)
             if 'tracklist' in coverage:
-                if tls.next_tlid > self._next_tlid:
-                    self._next_tlid = tls.next_tlid
+                if state.next_tlid > self._next_tlid:
+                    self._next_tlid = state.next_tlid
                 self._tl_tracks = []
-                for track in tls.tracks:
+                for track in state.tracks:
                     self._tl_tracks.append(track)
                 self._trigger_tracklist_changed()

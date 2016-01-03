@@ -524,20 +524,19 @@ class PlaybackController(object):
         logger.debug('Triggering seeked event')
         listener.CoreListener.send('seeked', time_position=time_position)
 
-    def _state_export(self, data):
+    def _export_state(self):
         """Internal method for :class:`mopidy.Core`."""
-        data['playback'] = models.PlaybackState(
+        return models.PlaybackState(
             tl_track=self.get_current_tl_track(),
             position=self.get_time_position(),
             state=self.get_state())
 
-    def _state_import(self, data, coverage):
+    def _restore_state(self, state, coverage):
         """Internal method for :class:`mopidy.Core`."""
-        if 'playback' in data:
-            ps = data['playback']
+        if state:
+            if not isinstance(state, models.PlaybackState):
+                raise TypeError('Expect an argument of type "PlaybackState"')
             if 'autoplay' in coverage:
-                tl_track = ps.tl_track
-                if tl_track is not None:
-                    self.play(tl_track=tl_track)
-                    # TODO: Seek not working. It seeks to early.
-                    # self.seek(ps.position)
+                if state.tl_track is not None:
+                    self.play(tl_track=state.tl_track)
+                    # TODO: seek to state.position?

@@ -58,19 +58,20 @@ class HistoryController(object):
         """
         return copy.copy(self._history)
 
-    def _state_export(self, data):
+    def _export_state(self):
         """Internal method for :class:`mopidy.Core`."""
         history_list = []
         for timestamp, track in self._history:
             history_list.append(models.HistoryTrack(
                                 timestamp=timestamp, track=track))
-        data['history'] = models.HistoryState(history=history_list)
+        return models.HistoryState(history=history_list)
 
-    def _state_import(self, data, coverage):
+    def _restore_state(self, state, coverage):
         """Internal method for :class:`mopidy.Core`."""
-        if 'history' in data:
-            hstate = data['history']
+        if state:
+            if not isinstance(state, models.HistoryState):
+                raise TypeError('Expect an argument of type "HistoryState"')
             if 'history' in coverage:
                 self._history = []
-                for htrack in hstate.history:
+                for htrack in state.history:
                     self._history.append((htrack.timestamp, htrack.track))
