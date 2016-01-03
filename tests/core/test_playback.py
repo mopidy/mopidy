@@ -41,19 +41,32 @@ class CorePlaybackTest(unittest.TestCase):
         self.backend3.uri_schemes.get.return_value = ['dummy3']
         self.backend3.has_playback().get.return_value = False
 
+        # A backend for which 'change_track' fails
+        self.backend4 = mock.Mock()
+        self.backend4.uri_schemes.get.return_value = ['dummy4']
+        self.playback4 = mock.Mock(spec=backend.PlaybackProvider)
+        self.playback4.get_time_position.return_value.get.return_value = 1000
+        future_mock = mock.Mock(spec=pykka.future.Future)
+        future_mock.get.return_value = False
+        self.playback4.change_track.return_value = future_mock
+        self.backend4.playback = self.playback4
+
         self.tracks = [
             Track(uri='dummy1:a', length=40000),
             Track(uri='dummy2:a', length=40000),
-            Track(uri='dummy3:a', length=40000),  # Unplayable
+            Track(uri='dummy3:a', length=40000),  # No playback provider
             Track(uri='dummy1:b', length=40000),
             Track(uri='dummy1:c', length=None),   # No duration
+            Track(uri='dummy4:a', length=40000),  # Unplayable
+            Track(uri='dummy1:d', length=40000),
         ]
 
         self.uris = [
-            'dummy1:a', 'dummy2:a', 'dummy3:a', 'dummy1:b', 'dummy1:c']
+            'dummy1:a', 'dummy2:a', 'dummy3:a', 'dummy1:b', 'dummy1:c',
+            'dummy4:a', 'dummy1:d']
 
         self.core = core.Core(config, mixer=None, backends=[
-            self.backend1, self.backend2, self.backend3])
+            self.backend1, self.backend2, self.backend3, self.backend4])
 
         def lookup(uris):
             result = {uri: [] for uri in uris}
@@ -172,16 +185,40 @@ class CorePlaybackTest(unittest.TestCase):
         self.playback2.change_track.return_value.get.return_value = False
 
         self.core.tracklist.clear()
-        self.core.tracklist.add(uris=self.uris[:2])
+        self.core.tracklist.add(uris=self.uris[-2:])
         tl_tracks = self.core.tracklist.tl_tracks
 
         self.core.playback.play(tl_tracks[0])
-        self.core.playback.play(tl_tracks[1])
 
-        # TODO: we really want to check that the track was marked unplayable
-        # and that next was called. This is just an indirect way of checking
-        # this :(
-        self.assertEqual(self.core.playback.state, core.PlaybackState.STOPPED)
+        assert self.core.playback.get_current_tl_track() == tl_tracks[1]
+
+    def test_pause_play_skips_to_next_on_unplayable_track(self):
+        """Checks that we handle backend.change_track failing."""
+        self.playback2.change_track.return_value.get.return_value = False
+
+        self.core.tracklist.clear()
+        self.core.tracklist.add(uris=self.uris[-3:])
+        tl_tracks = self.core.tracklist.tl_tracks
+
+        self.core.playback.pause()
+        self.core.playback._set_current_tl_track(tl_tracks[0])
+        self.core.playback.next()
+        self.core.playback.play(self.core.playback.get_current_tl_track())
+        assert self.core.playback.get_current_tl_track() == tl_tracks[2]
+
+    def test_pause_resume_skips_to_next_on_unplayable_track(self):
+        """Checks that we handle backend.change_track failing."""
+        self.playback2.change_track.return_value.get.return_value = False
+
+        self.core.tracklist.clear()
+        self.core.tracklist.add(uris=self.uris[-3:])
+        tl_tracks = self.core.tracklist.tl_tracks
+
+        self.core.playback.pause()
+        self.core.playback._set_current_tl_track(tl_tracks[0])
+        self.core.playback.next()
+        self.core.playback.resume()
+        assert self.core.playback.get_current_tl_track() == tl_tracks[2]
 
     @mock.patch(
         'mopidy.core.playback.listener.CoreListener', spec=core.CoreListener)
