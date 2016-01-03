@@ -236,6 +236,8 @@ class LibraryController(object):
                 result = future.get()
                 if result is not None:
                     validation.check_instances(result, models.Track)
+                    # TODO Consider making Track.uri field mandatory, and
+                    # then remove this filtering of tracks without URIs.
                     results[u] = [r for r in result if r.uri]
 
         if uri:
