@@ -39,7 +39,7 @@ class CorePlaybackTest(unittest.TestCase):
         # A backend without the optional playback provider
         self.backend3 = mock.Mock()
         self.backend3.uri_schemes.get.return_value = ['dummy3']
-        self.backend3.has_playback().get.return_value = False
+        self.backend3.has_playback.return_value.get.return_value = False
 
         # A backend for which 'change_track' fails
         self.backend4 = mock.Mock()
