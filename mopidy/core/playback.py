@@ -217,8 +217,7 @@ class PlaybackController(object):
                     self.core.tracklist._mark_playing(tl_track)
                     self.core.history._add_track(tl_track.track)
                 else:
-                    self.core.tracklist._mark_unplayable(
-                        self.get_current_tl_track())
+                    self.core.tracklist._mark_unplayable(tl_track)
                     if on_error_step == 1:
                         # TODO: can cause an endless loop for single track
                         # repeat.
