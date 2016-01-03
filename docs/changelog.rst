@@ -9,6 +9,20 @@ v1.1.2 (UNRELEASED)
 
 Bug fix release.
 
+- Main: Catch errors when loading :confval:`logging/config_file`. (Fixes:
+  :issue:`1320`)
+
+- Core: If changing to another track while
+  the player is paused, the new track would not be added to the history or
+  marked as currently playing. (Fixes: :issue:`1352`, PR: :issue:`1356`)
+
+- Core: Skips over unplayable tracks if the user attempts to change tracks
+  while paused, like we already did if in playing state. (Fixes :issue:`1378`,
+  PR: :issue:`1379`)
+
+- Core: Make :meth:`~mopidy.core.LibraryController.lookup` ignore tracks with
+  empty URIs. (Partly fixes: :issue:`1340`, PR: :issue:`1381`)
+
 - Stream: If an URI is considered playable, don't consider it as a candidate
   for playlist parsing. Just looking at MIME type prefixes isn't enough, as for
   example Ogg Vorbis has the MIME type ``application/ogg``. (Fixes:
@@ -19,20 +33,8 @@ Bug fix release.
 
 - MPD: Notify idling clients when a seek is performed. (Fixes: :issue:`1331`)
 
-- Core: Fix bug in playback controller. If changing to another track while
-  the player is paused, the new track would not be added to the history or
-  marked as currently playing. (Fixes: :issue:`1352`) Also skips over
-  unplayable tracks if the user attempts to change tracks while paused.
-  (Fixes :issue:`1378`).
-
-- Main: Catch errors when loading :confval:`logging/config_file`. (Fixes:
-  :issue:`1320`)
-
 - MPD: Don't return tracks with empty URIs. (Partly fixes: :issue:`1340`, PR:
   :issue:`1343`)
-
-- Core: Make :meth:`~mopidy.core.LibraryController.lookup` ignore tracks with
-  empty URIs. (Partly fixes: :issue:`1340`, PR: :issue:`1381`)
 
 
 v1.1.1 (2015-09-14)
