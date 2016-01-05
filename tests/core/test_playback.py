@@ -899,7 +899,7 @@ class CorePlaybackExportRestoreTest(BaseTest):
 
         state = PlaybackState(
             position=0, state='playing', tl_track=tl_tracks[2])
-        coverage = ['autoplay']
+        coverage = ['play-always']
         self.core.playback._restore_state(state, coverage)
         self.replay_events()
 
