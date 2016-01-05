@@ -80,8 +80,21 @@ class MpdNoExistError(MpdAckError):
     error_code = MpdAckError.ACK_ERROR_NO_EXIST
 
 
+class MpdExistError(MpdAckError):
+    error_code = MpdAckError.ACK_ERROR_EXIST
+
+
 class MpdSystemError(MpdAckError):
     error_code = MpdAckError.ACK_ERROR_SYSTEM
+
+
+class MpdInvalidPlaylistName(MpdAckError):
+    error_code = MpdAckError.ACK_ERROR_ARG
+
+    def __init__(self, *args, **kwargs):
+        super(MpdInvalidPlaylistName, self).__init__(*args, **kwargs)
+        self.message = ('playlist name is invalid: playlist names may not '
+                        'contain slashes, newlines or carriage returns')
 
 
 class MpdNotImplemented(MpdAckError):

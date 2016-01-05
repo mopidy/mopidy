@@ -81,4 +81,4 @@ Mopidy-Webhooks
 https://github.com/paddycarey/mopidy-webhooks
 
 Extension for sending HTTP POST requests with JSON payloads to a remote server
-on when Mopidy core triggers an event and on regular intervals.
+when Mopidy core triggers an event and on regular intervals.

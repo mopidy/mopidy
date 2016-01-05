@@ -2,12 +2,18 @@ from __future__ import absolute_import, division, unicode_literals
 
 import datetime
 import logging
+import re
 import warnings
 
 from mopidy.compat import urllib
 from mopidy.mpd import exceptions, protocol, translator
 
 logger = logging.getLogger(__name__)
+
+
+def _check_playlist_name(name):
+    if re.search('[/\n\r]', name):
+        raise exceptions.MpdInvalidPlaylistName()
 
 
 @protocol.commands.add('listplaylist')
@@ -149,6 +155,7 @@ def playlistadd(context, name, track_uri):
 
         ``NAME.m3u`` will be created if it does not exist.
     """
+    _check_playlist_name(name)
     uri = context.lookup_playlist_uri_from_name(name)
     old_playlist = uri is not None and context.core.playlists.lookup(uri).get()
     if not old_playlist:
@@ -219,6 +226,7 @@ def playlistclear(context, name):
 
     The playlist will be created if it does not exist.
     """
+    _check_playlist_name(name)
     uri = context.lookup_playlist_uri_from_name(name)
     playlist = uri is not None and context.core.playlists.lookup(uri).get()
     if not playlist:
@@ -240,14 +248,18 @@ def playlistdelete(context, name, songpos):
 
         Deletes ``SONGPOS`` from the playlist ``NAME.m3u``.
     """
+    _check_playlist_name(name)
     uri = context.lookup_playlist_uri_from_name(name)
     playlist = uri is not None and context.core.playlists.lookup(uri).get()
     if not playlist:
         raise exceptions.MpdNoExistError('No such playlist')
 
-    # Convert tracks to list and remove requested
-    tracks = list(playlist.tracks)
-    tracks.pop(songpos)
+    try:
+        # Convert tracks to list and remove requested
+        tracks = list(playlist.tracks)
+        tracks.pop(songpos)
+    except IndexError:
+        raise exceptions.MpdArgError('Bad song index')
 
     # Replace tracks and save playlist
     playlist = playlist.replace(tracks=tracks)
@@ -274,6 +286,10 @@ def playlistmove(context, name, from_pos, to_pos):
       documentation, but just the ``SONGPOS`` to move *from*, i.e.
       ``playlistmove {NAME} {FROM_SONGPOS} {TO_SONGPOS}``.
     """
+    if from_pos == to_pos:
+        return
+
+    _check_playlist_name(name)
     uri = context.lookup_playlist_uri_from_name(name)
     playlist = uri is not None and context.core.playlists.lookup(uri).get()
     if not playlist:
@@ -281,10 +297,13 @@ def playlistmove(context, name, from_pos, to_pos):
     if from_pos == to_pos:
         return  # Nothing to do
 
-    # Convert tracks to list and perform move
-    tracks = list(playlist.tracks)
-    track = tracks.pop(from_pos)
-    tracks.insert(to_pos, track)
+    try:
+        # Convert tracks to list and perform move
+        tracks = list(playlist.tracks)
+        track = tracks.pop(from_pos)
+        tracks.insert(to_pos, track)
+    except IndexError:
+        raise exceptions.MpdArgError('Bad song index')
 
     # Replace tracks and save playlist
     playlist = playlist.replace(tracks=tracks)
@@ -303,16 +322,28 @@ def rename(context, old_name, new_name):
 
         Renames the playlist ``NAME.m3u`` to ``NEW_NAME.m3u``.
     """
-    uri = context.lookup_playlist_uri_from_name(old_name)
-    uri_scheme = urllib.parse.urlparse(uri).scheme
-    old_playlist = uri is not None and context.core.playlists.lookup(uri).get()
+    _check_playlist_name(old_name)
+    _check_playlist_name(new_name)
+
+    old_uri = context.lookup_playlist_uri_from_name(old_name)
+    if not old_uri:
+        raise exceptions.MpdNoExistError('No such playlist')
+
+    old_playlist = context.core.playlists.lookup(old_uri).get()
     if not old_playlist:
         raise exceptions.MpdNoExistError('No such playlist')
 
+    new_uri = context.lookup_playlist_uri_from_name(new_name)
+    if new_uri and context.core.playlists.lookup(new_uri).get():
+        raise exceptions.MpdExistError('Playlist already exists')
+    # TODO: should we purge the mapping in an else?
+
     # Create copy of the playlist and remove original
+    uri_scheme = urllib.parse.urlparse(old_uri).scheme
     new_playlist = context.core.playlists.create(new_name, uri_scheme).get()
     new_playlist = new_playlist.replace(tracks=old_playlist.tracks)
     saved_playlist = context.core.playlists.save(new_playlist).get()
+
     if saved_playlist is None:
         raise exceptions.MpdFailedToSavePlaylist(uri_scheme)
     context.core.playlists.delete(old_playlist.uri).get()
@@ -327,7 +358,10 @@ def rm(context, name):
 
         Removes the playlist ``NAME.m3u`` from the playlist directory.
     """
+    _check_playlist_name(name)
     uri = context.lookup_playlist_uri_from_name(name)
+    if not uri:
+        raise exceptions.MpdNoExistError('No such playlist')
     context.core.playlists.delete(uri).get()
 
 
@@ -341,6 +375,7 @@ def save(context, name):
         Saves the current playlist to ``NAME.m3u`` in the playlist
         directory.
     """
+    _check_playlist_name(name)
     tracks = context.core.tracklist.get_tracks().get()
     uri = context.lookup_playlist_uri_from_name(name)
     playlist = uri is not None and context.core.playlists.lookup(uri).get()

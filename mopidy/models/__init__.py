@@ -148,6 +148,10 @@ class Album(ValidatedImmutableObject):
     :type musicbrainz_id: string
     :param images: album image URIs
     :type images: list of strings
+
+    .. deprecated:: 1.2
+        The ``images`` field is deprecated.
+        Use :meth:`mopidy.core.LibraryController.get_images` instead.
     """
 
     #: The album URI. Read-only.
@@ -172,10 +176,10 @@ class Album(ValidatedImmutableObject):
     musicbrainz_id = fields.Identifier()
 
     #: The album image URIs. Read-only.
+    #:
+    #: .. deprecated:: 1.2
+    #:     Use :meth:`mopidy.core.LibraryController.get_images` instead.
     images = fields.Collection(type=compat.string_types, container=frozenset)
-    # XXX If we want to keep the order of images we shouldn't use frozenset()
-    # as it doesn't preserve order. I'm deferring this issue until we got
-    # actual usage of this field with more than one image.
 
 
 class Track(ValidatedImmutableObject):

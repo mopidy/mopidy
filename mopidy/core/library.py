@@ -149,7 +149,7 @@ class LibraryController(object):
         """Lookup the images for the given URIs
 
         Backends can use this to return image URIs for any URI they know about
-        be it tracks, albums, playlists... The lookup result is a dictionary
+        be it tracks, albums, playlists. The lookup result is a dictionary
         mapping the provided URIs to lists of images.
 
         Unknown URIs or URIs the corresponding backend couldn't find anything

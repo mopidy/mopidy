@@ -26,6 +26,10 @@ class PlaybackController(object):
         self._current_tl_track = None
         self._pending_tl_track = None
 
+        self._pending_position = None
+        self._last_position = None
+        self._previous = False
+
         if self._audio:
             self._audio.set_about_to_finish_callback(
                 self._on_about_to_finish_callback)
@@ -127,6 +131,8 @@ class PlaybackController(object):
 
     def get_time_position(self):
         """Get time position in milliseconds."""
+        if self._pending_position is not None:
+            return self._pending_position
         backend = self._get_backend(self.get_current_tl_track())
         if backend:
             return backend.playback.get_time_position().get()
@@ -197,15 +203,35 @@ class PlaybackController(object):
 
     def _on_end_of_stream(self):
         self.set_state(PlaybackState.STOPPED)
+        if self._current_tl_track:
+            self._trigger_track_playback_ended(self.get_time_position())
         self._set_current_tl_track(None)
-        # TODO: self._trigger_track_playback_ended?
 
     def _on_stream_changed(self, uri):
+        if self._last_position is None:
+            position = self.get_time_position()
+        else:
+            # This code path handles the stop() case, uri should be none.
+            position, self._last_position = self._last_position, None
+
+        if self._pending_position is None:
+            self._trigger_track_playback_ended(position)
+
         self._stream_title = None
         if self._pending_tl_track:
             self._set_current_tl_track(self._pending_tl_track)
             self._pending_tl_track = None
-            self._trigger_track_playback_started()
+
+            if self._pending_position is None:
+                self.set_state(PlaybackState.PLAYING)
+                self._trigger_track_playback_started()
+            else:
+                self._seek(self._pending_position)
+
+    def _on_position_changed(self, position):
+        if self._pending_position == position:
+            self._trigger_seeked(position)
+            self._pending_position = None
 
     def _on_about_to_finish_callback(self):
         """Callback that performs a blocking actor call to the real callback.
@@ -221,7 +247,8 @@ class PlaybackController(object):
         })
 
     def _on_about_to_finish(self):
-        self._trigger_track_playback_ended(self.get_time_position())
+        if self._state == PlaybackState.STOPPED:
+            return
 
         # TODO: check that we always have a current track
         original_tl_track = self.get_current_tl_track()
@@ -234,8 +261,6 @@ class PlaybackController(object):
 
         if backend:
             backend.playback.change_track(next_tl_track.track).get()
-
-        self.core.tracklist._mark_played(original_tl_track)
 
     def _on_tracklist_change(self):
         """
@@ -258,10 +283,6 @@ class PlaybackController(object):
         """
         state = self.get_state()
         current = self._pending_tl_track or self._current_tl_track
-
-        # TODO: move to pending track?
-        self._trigger_track_playback_ended(self.get_time_position())
-        self.core.tracklist._mark_played(self._current_tl_track)
 
         while current:
             pending = self.core.tracklist.next_track(current)
@@ -321,16 +342,8 @@ class PlaybackController(object):
             self.resume()
             return
 
-        original = self._current_tl_track
         current = self._pending_tl_track or self._current_tl_track
         pending = tl_track or current or self.core.tracklist.next_track(None)
-
-        if original != pending and self.get_state() != PlaybackState.STOPPED:
-            self._trigger_track_playback_ended(self.get_time_position())
-
-        if pending:
-            # TODO: remove?
-            self.set_state(PlaybackState.PLAYING)
 
         while pending:
             # TODO: should we consume unplayable tracks in this loop?
@@ -341,8 +354,6 @@ class PlaybackController(object):
             current = pending
             pending = self.core.tracklist.next_track(current)
 
-        # TODO: move to top and get rid of original?
-        self.core.tracklist._mark_played(original)
         # TODO return result?
 
     def _change(self, pending_tl_track, state):
@@ -387,8 +398,7 @@ class PlaybackController(object):
         The current playback state will be kept. If it was playing, playing
         will continue. If it was paused, it will still be paused, etc.
         """
-        self._trigger_track_playback_ended(self.get_time_position())
-
+        self._previous = True
         state = self.get_state()
         current = self._pending_tl_track or self._current_tl_track
 
@@ -440,11 +450,6 @@ class PlaybackController(object):
         if self.get_state() == PlaybackState.STOPPED:
             self.play()
 
-        # TODO: uncomment once we have tests for this. Should fix seek after
-        # about to finish doing wrong track.
-        # if self._current_tl_track and self._pending_tl_track:
-        #     self.play(self._current_tl_track)
-
         # We need to prefer the still playing track, but if nothing is playing
         # we fall back to the pending one.
         tl_track = self._current_tl_track or self._pending_tl_track
@@ -458,23 +463,29 @@ class PlaybackController(object):
             self.next()
             return True
 
+        # Store our target position.
+        self._pending_position = time_position
+
+        # Make sure we switch back to previous track if we get a seek while we
+        # have a pending track.
+        if self._current_tl_track and self._pending_tl_track:
+            self._change(self._current_tl_track, self.get_state())
+        else:
+            return self._seek(time_position)
+
+    def _seek(self, time_position):
         backend = self._get_backend(self.get_current_tl_track())
         if not backend:
             return False
-
-        success = backend.playback.seek(time_position).get()
-        if success:
-            self._trigger_seeked(time_position)
-        return success
+        return backend.playback.seek(time_position).get()
 
     def stop(self):
         """Stop playing."""
         if self.get_state() != PlaybackState.STOPPED:
+            self._last_position = self.get_time_position()
             backend = self._get_backend(self.get_current_tl_track())
-            time_position_before_stop = self.get_time_position()
             if not backend or backend.playback.stop().get():
                 self.set_state(PlaybackState.STOPPED)
-                self._trigger_track_playback_ended(time_position_before_stop)
 
     def _trigger_track_playback_paused(self):
         logger.debug('Triggering track playback paused event')
@@ -495,20 +506,26 @@ class PlaybackController(object):
             time_position=self.get_time_position())
 
     def _trigger_track_playback_started(self):
-        # TODO: replace with stream-changed
-        logger.debug('Triggering track playback started event')
         if self.get_current_tl_track() is None:
             return
 
+        logger.debug('Triggering track playback started event')
         tl_track = self.get_current_tl_track()
         self.core.tracklist._mark_playing(tl_track)
         self.core.history._add_track(tl_track.track)
         listener.CoreListener.send('track_playback_started', tl_track=tl_track)
 
     def _trigger_track_playback_ended(self, time_position_before_stop):
-        logger.debug('Triggering track playback ended event')
         if self.get_current_tl_track() is None:
             return
+
+        logger.debug('Triggering track playback ended event')
+
+        if not self._previous:
+            self.core.tracklist._mark_played(self._current_tl_track)
+        self._previous = False
+
+        # TODO: Use the lowest of track duration and position.
         listener.CoreListener.send(
             'track_playback_ended',
             tl_track=self.get_current_tl_track(),
@@ -521,6 +538,7 @@ class PlaybackController(object):
             old_state=old_state, new_state=new_state)
 
     def _trigger_seeked(self, time_position):
+        # TODO: Trigger this from audio events?
         logger.debug('Triggering seeked event')
         listener.CoreListener.send('seeked', time_position=time_position)
 

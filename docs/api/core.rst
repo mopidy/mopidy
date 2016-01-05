@@ -164,6 +164,8 @@ Playlists controller
 
 .. class:: mopidy.core.PlaylistsController
 
+.. automethod:: mopidy.core.PlaylistsController.get_uri_schemes
+
 Fetching
 --------
 
@@ -229,8 +231,8 @@ TracklistController
 .. autoattribute:: mopidy.core.TracklistController.repeat
 .. autoattribute:: mopidy.core.TracklistController.single
 
-PlaylistsController
--------------------
+PlaybackController
+------------------
 
 .. automethod:: mopidy.core.PlaybackController.get_mute
 .. automethod:: mopidy.core.PlaybackController.get_volume
@@ -247,8 +249,8 @@ LibraryController
 
 .. automethod:: mopidy.core.LibraryController.find_exact
 
-PlaybackController
-------------------
+PlaylistsController
+-------------------
 
 .. automethod:: mopidy.core.PlaylistsController.filter
 .. automethod:: mopidy.core.PlaylistsController.get_playlists

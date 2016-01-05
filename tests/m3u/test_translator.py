@@ -20,13 +20,15 @@ encoded_path = path_to_data_dir('æøå.mp3')
 song1_uri = path.path_to_uri(song1_path)
 song2_uri = path.path_to_uri(song2_path)
 song3_uri = path.path_to_uri(song3_path)
+song4_uri = 'http://example.com/foo%20bar.mp3'
 encoded_uri = path.path_to_uri(encoded_path)
-song1_track = Track(uri=song1_uri)
-song2_track = Track(uri=song2_uri)
-song3_track = Track(uri=song3_uri)
-encoded_track = Track(uri=encoded_uri)
-song1_ext_track = song1_track.replace(name='song1')
-song2_ext_track = song2_track.replace(name='song2', length=60000)
+song1_track = Track(name='song1', uri=song1_uri)
+song2_track = Track(name='song2', uri=song2_uri)
+song3_track = Track(name='φοο', uri=song3_uri)
+song4_track = Track(name='foo bar', uri=song4_uri)
+encoded_track = Track(name='æøå', uri=encoded_uri)
+song1_ext_track = song1_track.replace(name='Song #1')
+song2_ext_track = song2_track.replace(name='Song #2', length=60000)
 encoded_ext_track = encoded_track.replace(name='æøå')
 
 
@@ -84,9 +86,11 @@ class M3UToUriTest(unittest.TestCase):
     def test_file_with_uri(self):
         with tempfile.NamedTemporaryFile(delete=False) as tmp:
             tmp.write(song1_uri)
+            tmp.write('\n')
+            tmp.write(song4_uri)
         try:
             tracks = self.parse(tmp.name)
-            self.assertEqual([song1_track], tracks)
+            self.assertEqual([song1_track, song4_track], tracks)
         finally:
             if os.path.exists(tmp.name):
                 os.remove(tmp.name)

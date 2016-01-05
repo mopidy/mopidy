@@ -6,6 +6,7 @@ Here we try to keep an up to date record of how Mopidy releases are made. This
 documentation serves both as a checklist, to reduce the project's dependency on
 key individuals, and as a stepping stone to more automation.
 
+.. _creating-releases:
 
 Creating releases
 =================

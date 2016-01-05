@@ -998,7 +998,7 @@ class LocalPlaybackProviderTest(unittest.TestCase):
             self.playback.next().get()
         self.assert_next_tl_track_is_not(None)
         self.assert_state_is(PlaybackState.STOPPED)
-        self.playback.play()
+        self.playback.play().get()
         self.assert_state_is(PlaybackState.PLAYING)
 
     @populate_tracklist

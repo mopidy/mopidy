@@ -115,6 +115,23 @@ class TestPlayHandling(BaseTest):
         current_tl_track = self.core.playback.get_current_tl_track()
         self.assertEqual(tl_tracks[1], current_tl_track)
 
+    def test_resume_skips_to_next_on_unplayable_track(self):
+        """Checks that we handle backend.change_track failing when
+           resuming playback."""
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play(tl_tracks[0])
+        self.core.playback.pause()
+
+        self.audio.trigger_fake_playback_failure(tl_tracks[1].track.uri)
+
+        self.core.playback.next()
+        self.core.playback.resume()
+        self.replay_events()
+
+        current_tl_track = self.core.playback.get_current_tl_track()
+        self.assertEqual(tl_tracks[2], current_tl_track)
+
     def test_play_tlid(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -314,6 +331,8 @@ class TestCurrentAndPendingTlTrack(BaseTest):
     'mopidy.core.playback.listener.CoreListener', spec=core.CoreListener)
 class EventEmissionTest(BaseTest):
 
+    maxDiff = None
+
     def test_play_when_stopped_emits_events(self, listener_mock):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -321,14 +340,14 @@ class EventEmissionTest(BaseTest):
         self.replay_events()
 
         self.assertListEqual(
-            listener_mock.send.mock_calls,
             [
                 mock.call(
                     'playback_state_changed',
                     old_state='stopped', new_state='playing'),
                 mock.call(
                     'track_playback_started', tl_track=tl_tracks[0]),
-            ])
+            ],
+            listener_mock.send.mock_calls)
 
     def test_play_when_paused_emits_events(self, listener_mock):
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -344,7 +363,6 @@ class EventEmissionTest(BaseTest):
         self.replay_events()
 
         self.assertListEqual(
-            listener_mock.send.mock_calls,
             [
                 mock.call(
                     'track_playback_ended',
@@ -354,7 +372,8 @@ class EventEmissionTest(BaseTest):
                     old_state='paused', new_state='playing'),
                 mock.call(
                     'track_playback_started', tl_track=tl_tracks[1]),
-            ])
+            ],
+            listener_mock.send.mock_calls)
 
     def test_play_when_playing_emits_events(self, listener_mock):
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -366,9 +385,7 @@ class EventEmissionTest(BaseTest):
         self.core.playback.play(tl_tracks[2])
         self.replay_events()
 
-        # TODO: Do we want to emit playing->playing for this case?
         self.assertListEqual(
-            listener_mock.send.mock_calls,
             [
                 mock.call(
                     'track_playback_ended',
@@ -378,7 +395,8 @@ class EventEmissionTest(BaseTest):
                     new_state='playing'),
                 mock.call(
                     'track_playback_started', tl_track=tl_tracks[2]),
-            ])
+            ],
+            listener_mock.send.mock_calls)
 
     def test_pause_emits_events(self, listener_mock):
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -392,7 +410,6 @@ class EventEmissionTest(BaseTest):
         self.core.playback.pause()
 
         self.assertListEqual(
-            listener_mock.send.mock_calls,
             [
                 mock.call(
                     'playback_state_changed',
@@ -400,7 +417,8 @@ class EventEmissionTest(BaseTest):
                 mock.call(
                     'track_playback_paused',
                     tl_track=tl_tracks[0], time_position=1000),
-            ])
+            ],
+            listener_mock.send.mock_calls)
 
     def test_resume_emits_events(self, listener_mock):
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -415,7 +433,6 @@ class EventEmissionTest(BaseTest):
         self.core.playback.resume()
 
         self.assertListEqual(
-            listener_mock.send.mock_calls,
             [
                 mock.call(
                     'playback_state_changed',
@@ -423,7 +440,8 @@ class EventEmissionTest(BaseTest):
                 mock.call(
                     'track_playback_resumed',
                     tl_track=tl_tracks[0], time_position=1000),
-            ])
+            ],
+            listener_mock.send.mock_calls)
 
     def test_stop_emits_events(self, listener_mock):
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -431,13 +449,13 @@ class EventEmissionTest(BaseTest):
         self.core.playback.play(tl_tracks[0])
         self.replay_events()
         self.core.playback.seek(1000)
+        self.replay_events()
         listener_mock.reset_mock()
 
         self.core.playback.stop()
         self.replay_events()
 
         self.assertListEqual(
-            listener_mock.send.mock_calls,
             [
                 mock.call(
                     'playback_state_changed',
@@ -445,7 +463,8 @@ class EventEmissionTest(BaseTest):
                 mock.call(
                     'track_playback_ended',
                     tl_track=tl_tracks[0], time_position=1000),
-            ])
+            ],
+            listener_mock.send.mock_calls)
 
     def test_next_emits_events(self, listener_mock):
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -453,23 +472,26 @@ class EventEmissionTest(BaseTest):
         self.core.playback.play(tl_tracks[0])
         self.replay_events()
         self.core.playback.seek(1000)
+        self.replay_events()
         listener_mock.reset_mock()
 
         self.core.playback.next()
         self.replay_events()
 
-        # TODO: should we be emitting playing -> playing?
         self.assertListEqual(
-            listener_mock.send.mock_calls,
             [
                 mock.call(
                     'track_playback_ended',
                     tl_track=tl_tracks[0], time_position=mock.ANY),
                 mock.call(
+                    'playback_state_changed',
+                    old_state='playing', new_state='playing'),
+                mock.call(
                     'track_playback_started', tl_track=tl_tracks[1]),
-            ])
+            ],
+            listener_mock.send.mock_calls)
 
-    def test_on_end_of_track_emits_events(self, listener_mock):
+    def test_gapless_track_change_emits_events(self, listener_mock):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
         self.core.playback.play(tl_tracks[0])
@@ -479,14 +501,17 @@ class EventEmissionTest(BaseTest):
         self.trigger_about_to_finish()
 
         self.assertListEqual(
-            listener_mock.send.mock_calls,
             [
                 mock.call(
                     'track_playback_ended',
                     tl_track=tl_tracks[0], time_position=mock.ANY),
                 mock.call(
+                    'playback_state_changed',
+                    old_state='playing', new_state='playing'),
+                mock.call(
                     'track_playback_started', tl_track=tl_tracks[1]),
-            ])
+            ],
+            listener_mock.send.mock_calls)
 
     def test_seek_emits_seeked_event(self, listener_mock):
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -496,6 +521,7 @@ class EventEmissionTest(BaseTest):
         listener_mock.reset_mock()
 
         self.core.playback.seek(1000)
+        self.replay_events()
 
         listener_mock.send.assert_called_once_with(
             'seeked', time_position=1000)
@@ -511,14 +537,35 @@ class EventEmissionTest(BaseTest):
         self.replay_events()
 
         self.assertListEqual(
-            listener_mock.send.mock_calls,
             [
                 mock.call(
                     'track_playback_ended',
                     tl_track=tl_tracks[0], time_position=mock.ANY),
                 mock.call(
+                    'playback_state_changed',
+                    old_state='playing', new_state='playing'),
+                mock.call(
                     'track_playback_started', tl_track=tl_tracks[1]),
-            ])
+            ],
+            listener_mock.send.mock_calls)
+
+    def test_seek_race_condition_emits_events(self, listener_mock):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play(tl_tracks[0])
+        self.trigger_about_to_finish(replay_until='stream_changed')
+        listener_mock.reset_mock()
+
+        self.core.playback.seek(1000)
+        self.replay_events()
+
+        # When we trigger seek after an about to finish the other code that
+        # emits track stopped/started and playback state changed events gets
+        # triggered as we have to switch back to the previous track.
+        # The correct behavior would be to only emit seeked.
+        self.assertListEqual(
+            [mock.call('seeked', time_position=1000)],
+            listener_mock.send.mock_calls)
 
     def test_previous_emits_events(self, listener_mock):
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -531,14 +578,17 @@ class EventEmissionTest(BaseTest):
         self.replay_events()
 
         self.assertListEqual(
-            listener_mock.send.mock_calls,
             [
                 mock.call(
                     'track_playback_ended',
                     tl_track=tl_tracks[1], time_position=mock.ANY),
                 mock.call(
+                    'playback_state_changed',
+                    old_state='playing', new_state='playing'),
+                mock.call(
                     'track_playback_started', tl_track=tl_tracks[0]),
-            ])
+            ],
+            listener_mock.send.mock_calls)
 
 
 class UnplayableURITest(BaseTest):
@@ -612,11 +662,26 @@ class SeekTest(BaseTest):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
         self.core.playback.play(tl_tracks[0])
+        self.replay_events()
+
         self.core.playback.pause()
         self.replay_events()
 
         self.core.playback.seek(1000)
         self.assertEqual(self.core.playback.state, core.PlaybackState.PAUSED)
+
+    def test_seek_race_condition_after_about_to_finish(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play(tl_tracks[0])
+        self.replay_events()
+
+        self.trigger_about_to_finish(replay_until='stream_changed')
+        self.core.playback.seek(1000)
+        self.replay_events()
+
+        current_tl_track = self.core.playback.get_current_tl_track()
+        self.assertEqual(current_tl_track, tl_tracks[0])
 
 
 class TestStream(BaseTest):
@@ -807,7 +872,6 @@ class BackendSelectionTest(unittest.TestCase):
         self.core.playback.play(self.tl_tracks[0])
         self.trigger_stream_changed()
 
-        self.core.playback.seek(10000)
         self.core.playback.time_position
 
         self.playback1.get_time_position.assert_called_once_with()
@@ -817,7 +881,6 @@ class BackendSelectionTest(unittest.TestCase):
         self.core.playback.play(self.tl_tracks[1])
         self.trigger_stream_changed()
 
-        self.core.playback.seek(10000)
         self.core.playback.time_position
 
         self.assertFalse(self.playback1.get_time_position.called)

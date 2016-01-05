@@ -54,7 +54,7 @@ class Extension(object):
     def get_config_schema(self):
         """The extension's config validation schema
 
-        :returns: :class:`~mopidy.config.schema.ExtensionConfigSchema`
+        :returns: :class:`~mopidy.config.schemas.ConfigSchema`
         """
         schema = config_lib.ConfigSchema(self.ext_name)
         schema['enabled'] = config_lib.Boolean()
@@ -198,7 +198,12 @@ def load_extensions():
 
     for entry_point in pkg_resources.iter_entry_points('mopidy.ext'):
         logger.debug('Loading entry point: %s', entry_point)
-        extension_class = entry_point.load(require=False)
+        try:
+            extension_class = entry_point.load(require=False)
+        except Exception as e:
+            logger.exception("Failed to load extension %s: %s" % (
+                entry_point.name, e))
+            continue
 
         try:
             if not issubclass(extension_class, Extension):

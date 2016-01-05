@@ -16,14 +16,40 @@ Core API
 - Start ``tlid`` counting at 1 instead of 0 to keep in sync with MPD's
   ``songid``.
 
+- :meth:`~mopidy.core.PlaybackController.get_time_position` now returns the
+  seek target while a seek is in progress.  This gives better results than just
+  failing the position query. (Fixes: :issue:`312` PR: :issue:`1346`)
+
+- Add :meth:`mopidy.core.PlaylistsController.get_uri_schemes`. (PR:
+  :issue:`1362`)
+
 - Persist state between runs. The amount of data to persist can be 
   controlled by config value :confval:`core/restore_state`
+
+Models
+------
+
+- **Deprecated:** :attr:`mopidy.models.Album.images` is deprecated. Use
+  :meth:`mopidy.core.LibraryController.get_images` instead. (Fixes:
+  :issue:`1325`)
+
+Extension support
+-----------------
+
+- Log exception and continue if an extension crashes during setup. Previously,
+  we let Mopidy crash if an extension's setup crashed. (PR: :issue:`1337`)
 
 Local backend
 --------------
 
 - Made :confval:`local/data_dir` really deprecated. This change breaks older
   versions of Mopidy-Local-SQLite and Mopidy-Local-Images.
+
+M3U backend
+-----------
+
+- Derive track name from file name for non-extended M3U
+  playlists. (Fixes: :issue:`1364`, PR: :issue:`1369`)
 
 MPD frontend
 ------------
@@ -41,6 +67,18 @@ MPD frontend
   (Fixes: :issue:`1014`, PR: :issue:`1187`, :issue:`1308`, :issue:`1322`)
 
 - Start ``songid`` counting at 1 instead of 0 to match the original MPD server.
+
+- Idle events are now emitted on ``seekeded`` events. This fix means that
+  clients relying on ``idle`` events now get notified about seeks.
+  (Fixes: :issue:`1331` :issue:`1347`)
+
+- Idle events are now emitted on ``playlists_loaded`` events. This fix means
+  that clients relying on ``idle`` events now get notified about playlist loads.
+  (Fixes: :issue:`1331` PR: :issue:`1347`)
+
+- Event handler for ``playlist_deleted`` has been unbroken. This unreported bug
+  would cause the MPD Frontend to crash preventing any further communication
+  via the MPD protocol. (PR: :issue:`1347`)
 
 Zeroconf
 --------
@@ -61,6 +99,12 @@ Cleanups
 - Removed warning if :file:`~/.config/mopidy/settings.py` exists. We stopped
   using this settings file in 0.14, released in April 2013.
 
+- The ``on_event`` handler in our listener helper now catches exceptions. This
+  means that any errors in event handling won't crash the actor in question.
+
+- Catch errors when loading :confval:`logging/config_file`.
+  (Fixes: :issue:`1320`)
+
 Gapless
 -------
 
@@ -72,6 +116,11 @@ Gapless
 
 - Tests have been updated to always use a core actor so async state changes
   don't trip us up.
+
+- Seek events are now triggered when the seek completes. Previously the event
+  was emitted when the seek was requested, not when it completed. Further
+  changes have been made to make seek work correctly for gapless related corner
+  cases. (Fixes: :issue:`1305` PR: :issue:`1346`)
 
 
 v1.1.2 (UNRELEASED)
