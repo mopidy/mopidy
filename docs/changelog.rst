@@ -36,6 +36,9 @@ Bug fix release.
 - MPD: Don't return tracks with empty URIs. (Partly fixes: :issue:`1340`, PR:
   :issue:`1343`)
 
+- Proxy: Handle case where :confval:`proxy/port` is either missing from config
+  or set to an empty string. (PR: :issue:`1371`)
+
 
 v1.1.1 (2015-09-14)
 ===================
