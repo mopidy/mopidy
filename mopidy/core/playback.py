@@ -536,7 +536,12 @@ class PlaybackController(object):
         if state:
             if not isinstance(state, models.PlaybackState):
                 raise TypeError('Expect an argument of type "PlaybackState"')
-            if 'autoplay' in coverage:
-                if state.tl_track is not None:
+            new_state = ''
+            if 'play-always' in coverage:
+                new_state = PlaybackState.PLAYING
+            if 'play-last' in coverage:
+                new_state = state.state
+            if state.tl_track is not None:
+                if PlaybackState.PLAYING == new_state:
                     self.play(tl_track=state.tl_track)
                     # TODO: seek to state.position?

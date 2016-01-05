@@ -417,7 +417,7 @@ class PlaybackState(ValidatedImmutableObject):
     :param position: play position
     :type position: int
     :param state: playback state
-    :type state: :class:`TlTrack`
+    :type state: :class:`validation.PLAYBACK_STATES`
     """
 
     # The current playing track. Read-only.

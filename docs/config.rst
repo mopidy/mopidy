@@ -118,8 +118,11 @@ Core configuration
     Allowed values:
      
     - ``off``: restore nothing
+    - ``volume``: restore volume
     - ``load``: restore settings, volume and play queue
-    - ``play``: restore settings, volume, play queue and start playback
+    - ``last``: like ``load``, additional start playback if last state was 
+      'playing'
+    - ``play``: like ``load``, additional start playback
     
 Audio configuration
 -------------------

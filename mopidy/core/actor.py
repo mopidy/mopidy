@@ -143,10 +143,15 @@ class Core(
                 amount = self._config['core']['restore_state']
                 if not amount or 'off' == amount:
                     pass
+                elif 'volume' == amount:
+                    coverage = ['volume']
                 elif 'load' == amount:
                     coverage = ['tracklist', 'mode', 'volume', 'history']
+                elif 'last' == amount:
+                    coverage = ['tracklist', 'mode', 'play-last', 'volume',
+                                'history']
                 elif 'play' == amount:
-                    coverage = ['tracklist', 'mode', 'autoplay', 'volume',
+                    coverage = ['tracklist', 'mode', 'play-always', 'volume',
                                 'history']
                 else:
                     logger.warn('Unknown value for config '
@@ -175,14 +180,13 @@ class Core(
         :param name: a name (for later use with :meth:`load_state`)
         :type name: str
         """
-        logger.info('Save state: "%s"', name)
         if not name:
             raise TypeError('missing file name')
 
         file_name = os.path.join(
             self._config['core']['data_dir'], name)
         file_name += '.state'
-        logger.info('Save state to "%s"', file_name)
+        logger.info('Save state to %s', file_name)
 
         data = {}
         data['tracklist'] = self.tracklist._export_state()
@@ -190,6 +194,7 @@ class Core(
         data['playback'] = self.playback._export_state()
         data['mixer'] = self.mixer._export_state()
         storage.save(file_name, data)
+        logger.debug('Save state done')
 
     def load_state(self, name, coverage):
         """
@@ -210,13 +215,13 @@ class Core(
         :param coverage: amount of data to restore
         :type coverage: list of string (see above)
         """
-        logger.info('Load state: "%s"', name)
         if not name:
             raise TypeError('missing file name')
 
         file_name = os.path.join(
             self._config['core']['data_dir'], name)
         file_name += '.state'
+        logger.info('Load state from %s', file_name)
 
         data = storage.load(file_name)
         if 'history' in data:
@@ -224,10 +229,11 @@ class Core(
         if 'tracklist' in data:
             self.tracklist._restore_state(data['tracklist'], coverage)
         if 'playback' in data:
+            # playback after tracklist
             self.playback._restore_state(data['playback'], coverage)
         if 'mixer' in data:
             self.mixer._restore_state(data['mixer'], coverage)
-        logger.debug('Load state done. file_name="%s"', file_name)
+        logger.debug('Load state done.')
 
 
 class Backends(list):

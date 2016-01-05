@@ -16,6 +16,9 @@ Core API
 - Start ``tlid`` counting at 1 instead of 0 to keep in sync with MPD's
   ``songid``.
 
+- Persist state between runs. The amount of data to persist can be 
+  controlled by config value :confval:`core/restore_state`
+
 Local backend
 --------------
 
