@@ -138,43 +138,39 @@ class Core(
             self.playback._stream_title = title
             CoreListener.send('stream_title_changed', title=title)
 
-    def on_start(self):
-        logger.debug("core on_start")
+    def setup(self):
         try:
             coverage = []
             if self._config and 'restore_state' in self._config['core']:
-                amount = self._config['core']['restore_state']
-                if not amount or 'off' == amount:
+                value = self._config['core']['restore_state']
+                if not value or 'off' == value:
                     pass
-                elif 'volume' == amount:
+                elif 'volume' == value:
                     coverage = ['volume']
-                elif 'load' == amount:
+                elif 'load' == value:
                     coverage = ['tracklist', 'mode', 'volume', 'history']
-                elif 'last' == amount:
+                elif 'last' == value:
                     coverage = ['tracklist', 'mode', 'play-last', 'volume',
                                 'history']
-                elif 'play' == amount:
+                elif 'play' == value:
                     coverage = ['tracklist', 'mode', 'play-always', 'volume',
                                 'history']
                 else:
                     logger.warn('Unknown value for config '
-                                'core.restore_state: %s', amount)
+                                'core.restore_state: %s', value)
             if len(coverage):
                 self.load_state('persistent', coverage)
         except Exception as e:
-            logger.warn('Unexpected error: %s', str(e))
-        pykka.ThreadingActor.on_start(self)
+            logger.warn('setup: Unexpected error: %s', str(e))
 
-    def on_stop(self):
-        logger.debug("core on_stop")
+    def teardown(self):
         try:
             if self._config and 'restore_state' in self._config['core']:
                 amount = self._config['core']['restore_state']
                 if amount and 'off' != amount:
                     self.save_state('persistent')
         except Exception as e:
-            logger.warn('on_stop: Unexpected error: %s', str(e))
-        pykka.ThreadingActor.on_stop(self)
+            logger.warn('teardown: Unexpected error: %s', str(e))
 
     def save_state(self, name):
         """
@@ -184,7 +180,7 @@ class Core(
         :type name: str
         """
         if not name:
-            raise TypeError('missing file name')
+            raise TypeError('Missing file name.')
 
         file_name = os.path.join(
             self._config['core']['data_dir'], name)
@@ -219,7 +215,7 @@ class Core(
         :type coverage: list of string (see above)
         """
         if not name:
-            raise TypeError('missing file name')
+            raise TypeError('Missing file name.')
 
         file_name = os.path.join(
             self._config['core']['data_dir'], name)

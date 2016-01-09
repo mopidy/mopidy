@@ -291,6 +291,7 @@ class RootCommand(Command):
         mixer_class = self.get_mixer_class(config, args.registry['mixer'])
         backend_classes = args.registry['backend']
         frontend_classes = args.registry['frontend']
+        core = None
 
         exit_status_code = 0
         try:
@@ -316,7 +317,7 @@ class RootCommand(Command):
         finally:
             loop.quit()
             self.stop_frontends(frontend_classes)
-            self.stop_core()
+            self.stop_core(core)
             self.stop_backends(backend_classes)
             self.stop_audio()
             if mixer_class is not None:
@@ -392,8 +393,10 @@ class RootCommand(Command):
 
     def start_core(self, config, mixer, backends, audio):
         logger.info('Starting Mopidy core')
-        return Core.start(
+        core = Core.start(
             config=config, mixer=mixer, backends=backends, audio=audio).proxy()
+        core.setup().get()
+        return core
 
     def start_frontends(self, config, frontend_classes, core):
         logger.info(
@@ -410,8 +413,10 @@ class RootCommand(Command):
         for frontend_class in frontend_classes:
             process.stop_actors_by_class(frontend_class)
 
-    def stop_core(self):
+    def stop_core(self, core):
         logger.info('Stopping Mopidy core')
+        if core:
+            core.teardown().get()
         process.stop_actors_by_class(Core)
 
     def stop_backends(self, backend_classes):
