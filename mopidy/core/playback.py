@@ -554,7 +554,7 @@ class PlaybackController(object):
         if state:
             if not isinstance(state, models.PlaybackState):
                 raise TypeError('Expect an argument of type "PlaybackState"')
-            new_state = ''
+            new_state = None
             if 'play-always' in coverage:
                 new_state = PlaybackState.PLAYING
             if 'play-last' in coverage:
