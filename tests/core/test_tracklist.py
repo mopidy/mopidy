@@ -221,7 +221,7 @@ class TracklistExportRestoreTest(unittest.TestCase):
                                 single=False,
                                 random=False,
                                 next_tlid=next_tlid,
-                                tracks=tl_tracks)
+                                tl_tracks=tl_tracks)
         value = self.core.tracklist._export_state()
         self.assertEqual(target, value)
 
@@ -231,7 +231,7 @@ class TracklistExportRestoreTest(unittest.TestCase):
                                 single=True,
                                 random=False,
                                 next_tlid=12,
-                                tracks=self.tl_tracks)
+                                tl_tracks=self.tl_tracks)
         coverage = ['mode', 'tracklist']
         self.core.tracklist._restore_state(target, coverage)
         self.assertEqual(False, self.core.tracklist.get_consume())
@@ -253,7 +253,7 @@ class TracklistExportRestoreTest(unittest.TestCase):
                                 single=True,
                                 random=False,
                                 next_tlid=12,
-                                tracks=self.tl_tracks)
+                                tl_tracks=self.tl_tracks)
         coverage = ['mode']
         self.core.tracklist._restore_state(target, coverage)
         self.assertEqual(False, self.core.tracklist.get_consume())
@@ -270,7 +270,7 @@ class TracklistExportRestoreTest(unittest.TestCase):
                                 single=True,
                                 random=False,
                                 next_tlid=12,
-                                tracks=self.tl_tracks)
+                                tl_tracks=self.tl_tracks)
         coverage = ['tracklist']
         self.core.tracklist._restore_state(target, coverage)
         self.assertEqual(False, self.core.tracklist.get_consume())

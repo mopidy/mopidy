@@ -374,14 +374,14 @@ class HistoryTrack(ValidatedImmutableObject):
 
     :param timestamp: the timestamp
     :type timestamp: int
-    :param track: the track
+    :param track: the track reference
     :type track: :class:`Ref`
     """
 
     # The timestamp. Read-only.
     timestamp = fields.Integer()
 
-    # The track. Read-only.
+    # The track reference. Read-only.
     track = fields.Field(type=Ref)
 
 
@@ -448,6 +448,10 @@ class TracklistState(ValidatedImmutableObject):
     :type random: bool
     :param single: the single mode
     :type single: bool
+    :param next_tlid: the single mode
+    :type next_tlid: bool
+    :param tl_tracks: the single mode
+    :type tl_tracks: list of :class:`TlTrack`
     """
 
     # The repeat mode. Read-only.
@@ -466,4 +470,4 @@ class TracklistState(ValidatedImmutableObject):
     next_tlid = fields.Integer(min=0)
 
     # The list of tracks. Read-only.
-    tracks = fields.Collection(type=TlTrack, container=tuple)
+    tl_tracks = fields.Collection(type=TlTrack, container=tuple)

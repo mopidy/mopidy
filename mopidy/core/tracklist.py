@@ -648,7 +648,7 @@ class TracklistController(object):
     def _export_state(self):
         """Internal method for :class:`mopidy.Core`."""
         return TracklistState(
-            tracks=self._tl_tracks,
+            tl_tracks=self._tl_tracks,
             next_tlid=self._next_tlid,
             consume=self.get_consume(),
             random=self.get_random(),
@@ -669,6 +669,6 @@ class TracklistController(object):
                 if state.next_tlid > self._next_tlid:
                     self._next_tlid = state.next_tlid
                 self._tl_tracks = []
-                for track in state.tracks:
+                for track in state.tl_tracks:
                     self._tl_tracks.append(track)
                 self._trigger_tracklist_changed()

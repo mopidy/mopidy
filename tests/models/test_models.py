@@ -1321,12 +1321,12 @@ class TracklistStateTest(unittest.TestCase):
 
     def test_tracks(self):
         tracks = (TlTrack(), TlTrack())
-        result = TracklistState(tracks=tracks)
-        self.assertEqual(result.tracks, tracks)
+        result = TracklistState(tl_tracks=tracks)
+        self.assertEqual(result.tl_tracks, tracks)
         with self.assertRaises(AttributeError):
-            result.tracks = None
+            result.tl_tracks = None
 
     def test_tracks_invalid(self):
         tracks = (Track(), Track())
         with self.assertRaises(TypeError):
-            TracklistState(tracks=tracks)
+            TracklistState(tl_tracks=tracks)
