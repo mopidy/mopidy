@@ -1,10 +1,12 @@
 from __future__ import absolute_import, unicode_literals
 
+import contextlib
 import io
 import locale
 import logging
 import operator
 import os
+import tempfile
 
 from mopidy import backend
 
@@ -19,6 +21,33 @@ def log_environment_error(message, error):
     else:
         strerror = error.strerror
     logger.error('%s: %s', message, strerror)
+
+
+@contextlib.contextmanager
+def replace(path, mode='w+b', encoding=None, errors=None):
+    try:
+        (fd, tempname) = tempfile.mkstemp(dir=os.path.dirname(path))
+    except TypeError:
+        # Python 3 requires dir to be of type str until v3.5
+        import sys
+        path = path.decode(sys.getfilesystemencoding())
+        (fd, tempname) = tempfile.mkstemp(dir=os.path.dirname(path))
+    try:
+        fp = io.open(fd, mode, encoding=encoding, errors=errors)
+    except:
+        os.remove(tempname)
+        os.close(fd)
+        raise
+    try:
+        yield fp
+        fp.flush()
+        os.fsync(fd)
+        os.rename(tempname, path)
+    except:
+        os.remove(tempname)
+        raise
+    finally:
+        fp.close()
 
 
 class M3UPlaylistsProvider(backend.PlaylistsProvider):
@@ -114,4 +143,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             encoding = self._default_encoding
         if not os.path.isabs(path):
             path = os.path.join(self._playlists_dir, path)
-        return io.open(path, mode, encoding=encoding, errors='replace')
+        if 'w' in mode:
+            return replace(path, mode, encoding=encoding, errors='replace')
+        else:
+            return io.open(path, mode, encoding=encoding, errors='replace')
