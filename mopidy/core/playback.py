@@ -545,7 +545,7 @@ class PlaybackController(object):
     def _export_state(self):
         """Internal method for :class:`mopidy.Core`."""
         return models.PlaybackState(
-            tl_track=self.get_current_tl_track(),
+            tlid=self.get_current_tlid(),
             position=self.get_time_position(),
             state=self.get_state())
 
@@ -559,7 +559,7 @@ class PlaybackController(object):
                 new_state = PlaybackState.PLAYING
             if 'play-last' in coverage:
                 new_state = state.state
-            if state.tl_track is not None:
+            if state.tlid is not None:
                 if PlaybackState.PLAYING == new_state:
-                    self.play(tl_track=state.tl_track)
+                    self.play(tlid=state.tlid)
                     # TODO: seek to state.position?

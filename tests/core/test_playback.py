@@ -948,7 +948,7 @@ class CorePlaybackExportRestoreTest(BaseTest):
         self.replay_events()
 
         state = PlaybackState(
-            position=0, state='playing', tl_track=tl_tracks[1])
+            position=0, state='playing', tlid=tl_tracks[1].tlid)
         value = self.core.playback._export_state()
 
         self.assertEqual(state, value)
@@ -961,7 +961,7 @@ class CorePlaybackExportRestoreTest(BaseTest):
         self.assertEqual('stopped', self.core.playback.get_state())
 
         state = PlaybackState(
-            position=0, state='playing', tl_track=tl_tracks[2])
+            position=0, state='playing', tlid=tl_tracks[2].tlid)
         coverage = ['play-always']
         self.core.playback._restore_state(state, coverage)
         self.replay_events()
@@ -978,7 +978,7 @@ class CorePlaybackExportRestoreTest(BaseTest):
         self.assertEqual('stopped', self.core.playback.get_state())
 
         state = PlaybackState(
-            position=0, state='playing', tl_track=tl_tracks[2])
+            position=0, state='playing', tlid=tl_tracks[2].tlid)
         coverage = ['other']
         self.core.playback._restore_state(state, coverage)
         self.replay_events()

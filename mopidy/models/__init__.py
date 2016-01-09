@@ -416,16 +416,16 @@ class PlaybackState(ValidatedImmutableObject):
     State of the playback controller.
     Internally used for import/export of current state.
 
-    :param tl_track: current track
-    :type tl_track: :class:`TlTrack`
+    :param tlid: current track tlid
+    :type tlid: int
     :param position: play position
     :type position: int
     :param state: playback state
     :type state: :class:`validation.PLAYBACK_STATES`
     """
 
-    # The current playing track. Read-only.
-    tl_track = fields.Field(type=TlTrack)
+    # The tlid of current playing track. Read-only.
+    tlid = fields.Integer(min=1)
 
     # The playback position. Read-only.
     position = fields.Integer(min=0)
