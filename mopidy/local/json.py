@@ -6,6 +6,8 @@ import os
 import re
 import sys
 
+import mopidy
+
 from mopidy import compat, local, models
 from mopidy.internal import timer
 from mopidy.local import search, storage, translator
@@ -164,7 +166,9 @@ class JsonLibrary(local.Library):
         self._tracks.pop(uri, None)
 
     def close(self):
-        models.storage.save(self._json_file, {'tracks': self._tracks.values()})
+        models.storage.save(self._json_file,
+                            {'version': mopidy.__version__,
+                             'tracks': self._tracks.values()})
 
     def clear(self):
         try:

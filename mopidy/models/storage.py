@@ -6,7 +6,6 @@ import logging
 import os
 import tempfile
 
-import mopidy
 from mopidy import models
 from mopidy.internal import encoding
 
@@ -22,6 +21,7 @@ def load(path):
     :return: deserialized data
     :rtype: dict
     """
+    # Todo: raise an exception in case of error?
     if not os.path.isfile(path):
         logger.info('File does not exist: %s.', path)
         return {}
@@ -44,7 +44,6 @@ def save(path, data):
     :param data: dictionary containing data to save
     :type data: dict
     """
-    data['version'] = mopidy.__version__
     directory, basename = os.path.split(path)
 
     # TODO: cleanup directory/basename.* files.

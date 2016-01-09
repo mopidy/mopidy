@@ -7,6 +7,8 @@ import os
 
 import pykka
 
+import mopidy
+
 from mopidy import audio, backend, mixer
 from mopidy.audio import PlaybackState
 from mopidy.core.history import HistoryController
@@ -188,6 +190,7 @@ class Core(
         logger.info('Save state to %s', file_name)
 
         data = {}
+        data['version'] = mopidy.__version__
         data['tracklist'] = self.tracklist._export_state()
         data['history'] = self.history._export_state()
         data['playback'] = self.playback._export_state()
