@@ -4,7 +4,8 @@ import unittest
 
 from mopidy import compat
 from mopidy.core import HistoryController
-from mopidy.models import Artist, HistoryState, HistoryTrack, Ref, Track
+from mopidy.internal.models import HistoryState, HistoryTrack
+from mopidy.models import Artist, Ref, Track
 
 
 class PlaybackHistoryTest(unittest.TestCase):

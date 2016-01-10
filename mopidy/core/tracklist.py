@@ -6,7 +6,8 @@ import random
 from mopidy import exceptions
 from mopidy.core import listener
 from mopidy.internal import deprecation, validation
-from mopidy.models import TlTrack, Track, TracklistState
+from mopidy.internal.models import TracklistState
+from mopidy.models import TlTrack, Track
 
 logger = logging.getLogger(__name__)
 
@@ -658,8 +659,6 @@ class TracklistController(object):
     def _restore_state(self, state, coverage):
         """Internal method for :class:`mopidy.Core`."""
         if state:
-            if not isinstance(state, TracklistState):
-                raise TypeError('Expect an argument of type "TracklistState"')
             if 'mode' in coverage:
                 self.set_consume(state.consume)
                 self.set_random(state.random)
@@ -670,5 +669,9 @@ class TracklistController(object):
                     self._next_tlid = state.next_tlid
                 self._tl_tracks = []
                 for track in state.tl_tracks:
+                    # TODO: check if any backend will play the track.
+                    # Could be an issue with music streaming services
+                    # (login), disabled extensions and automatically
+                    # generated playlists (pandora).
                     self._tl_tracks.append(track)
                 self._trigger_tracklist_changed()

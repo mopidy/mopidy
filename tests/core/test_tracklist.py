@@ -6,7 +6,8 @@ import mock
 
 from mopidy import backend, core
 from mopidy.internal import deprecation
-from mopidy.models import TlTrack, Track, TracklistState
+from mopidy.internal.models import TracklistState
+from mopidy.models import TlTrack, Track
 
 
 class TracklistTest(unittest.TestCase):

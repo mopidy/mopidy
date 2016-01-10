@@ -2,11 +2,10 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
-from mopidy import models
 from mopidy.audio import PlaybackState
 from mopidy.compat import urllib
 from mopidy.core import listener
-from mopidy.internal import deprecation, validation
+from mopidy.internal import deprecation, models, validation
 
 logger = logging.getLogger(__name__)
 
@@ -552,14 +551,13 @@ class PlaybackController(object):
     def _restore_state(self, state, coverage):
         """Internal method for :class:`mopidy.Core`."""
         if state:
-            if not isinstance(state, models.PlaybackState):
-                raise TypeError('Expect an argument of type "PlaybackState"')
             new_state = None
             if 'play-always' in coverage:
                 new_state = PlaybackState.PLAYING
             if 'play-last' in coverage:
                 new_state = state.state
             if state.tlid is not None:
+                # TODO: restore to 'paused' state
                 if PlaybackState.PLAYING == new_state:
                     self.play(tlid=state.tlid)
                     # TODO: seek to state.position?

@@ -5,7 +5,7 @@ import logging
 import time
 
 from mopidy import models
-
+from mopidy.internal.models import HistoryState, HistoryTrack
 
 logger = logging.getLogger(__name__)
 
@@ -62,15 +62,13 @@ class HistoryController(object):
         """Internal method for :class:`mopidy.Core`."""
         history_list = []
         for timestamp, track in self._history:
-            history_list.append(models.HistoryTrack(
+            history_list.append(HistoryTrack(
                                 timestamp=timestamp, track=track))
-        return models.HistoryState(history=history_list)
+        return HistoryState(history=history_list)
 
     def _restore_state(self, state, coverage):
         """Internal method for :class:`mopidy.Core`."""
         if state:
-            if not isinstance(state, models.HistoryState):
-                raise TypeError('Expect an argument of type "HistoryState"')
             if 'history' in coverage:
                 self._history = []
                 for htrack in state.history:

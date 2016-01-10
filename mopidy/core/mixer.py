@@ -5,7 +5,7 @@ import logging
 
 from mopidy import exceptions
 from mopidy.internal import validation
-from mopidy.models import MixerState
+from mopidy.internal.models import MixerState
 
 
 logger = logging.getLogger(__name__)
@@ -108,8 +108,6 @@ class MixerController(object):
     def _restore_state(self, state, coverage):
         """Internal method for :class:`mopidy.Core`."""
         if state:
-            if not isinstance(state, MixerState):
-                raise TypeError('Expect an argument of type "MixerState"')
             if 'volume' in coverage:
                 if state.volume:
                     self.set_volume(state.volume)

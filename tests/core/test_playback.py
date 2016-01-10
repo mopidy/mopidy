@@ -8,7 +8,8 @@ import pykka
 
 from mopidy import backend, core
 from mopidy.internal import deprecation
-from mopidy.models import PlaybackState, Track
+from mopidy.internal.models import PlaybackState
+from mopidy.models import Track
 
 from tests import dummy_audio
 

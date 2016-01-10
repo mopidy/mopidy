@@ -18,9 +18,9 @@ from mopidy.core.mixer import MixerController
 from mopidy.core.playback import PlaybackController
 from mopidy.core.playlists import PlaylistsController
 from mopidy.core.tracklist import TracklistController
-from mopidy.internal import versioning
+from mopidy.internal import storage, validation, versioning
 from mopidy.internal.deprecation import deprecated_property
-from mopidy.models import storage
+from mopidy.internal.models import CoreState
 
 
 logger = logging.getLogger(__name__)
@@ -163,7 +163,7 @@ class Core(
             if len(coverage):
                 self.load_state('persistent', coverage)
         except Exception as e:
-            logger.warn('setup: Unexpected error: %s', str(e))
+            logger.warn('Restore state: Unexpected error: %s', str(e))
 
     def teardown(self):
         try:
@@ -172,7 +172,7 @@ class Core(
                 if amount and 'off' != amount:
                     self.save_state('persistent')
         except Exception as e:
-            logger.warn('teardown: Unexpected error: %s', str(e))
+            logger.warn('Export state: Unexpected error: %s', str(e))
 
     def save_state(self, name):
         """
@@ -191,12 +191,13 @@ class Core(
 
         data = {}
         data['version'] = mopidy.__version__
-        data['tracklist'] = self.tracklist._export_state()
-        data['history'] = self.history._export_state()
-        data['playback'] = self.playback._export_state()
-        data['mixer'] = self.mixer._export_state()
+        data['state'] = CoreState(
+            tracklist=self.tracklist._export_state(),
+            history=self.history._export_state(),
+            playback=self.playback._export_state(),
+            mixer=self.mixer._export_state())
         storage.save(file_name, data)
-        logger.debug('Save state done')
+        logger.debug('Save state done.')
 
     def load_state(self, name, coverage):
         """
@@ -226,15 +227,14 @@ class Core(
         logger.info('Load state from %s', file_name)
 
         data = storage.load(file_name)
-        if 'history' in data:
-            self.history._restore_state(data['history'], coverage)
-        if 'tracklist' in data:
-            self.tracklist._restore_state(data['tracklist'], coverage)
-        if 'playback' in data:
+        if 'state' in data:
+            core_state = data['state']
+            validation.check_instance(core_state, CoreState)
+            self.history._restore_state(core_state.history, coverage)
+            self.tracklist._restore_state(core_state.tracklist, coverage)
             # playback after tracklist
-            self.playback._restore_state(data['playback'], coverage)
-        if 'mixer' in data:
-            self.mixer._restore_state(data['mixer'], coverage)
+            self.playback._restore_state(core_state.playback, coverage)
+            self.mixer._restore_state(core_state.mixer, coverage)
         logger.debug('Load state done.')
 
 
