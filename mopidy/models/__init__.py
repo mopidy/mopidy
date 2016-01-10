@@ -348,14 +348,14 @@ class SearchResult(ValidatedImmutableObject):
     :type albums: list of :class:`Album` elements
     """
 
-    # The search result URI. Read-only.
+    #: The search result URI. Read-only.
     uri = fields.URI()
 
-    # The tracks matching the search query. Read-only.
+    #: The tracks matching the search query. Read-only.
     tracks = fields.Collection(type=Track, container=tuple)
 
-    # The artists matching the search query. Read-only.
+    #: The artists matching the search query. Read-only.
     artists = fields.Collection(type=Artist, container=tuple)
 
-    # The albums matching the search query. Read-only.
+    #: The albums matching the search query. Read-only.
     albums = fields.Collection(type=Album, container=tuple)
