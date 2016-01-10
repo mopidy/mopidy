@@ -23,6 +23,9 @@ Bug fix release.
 - Core: Make :meth:`~mopidy.core.LibraryController.lookup` ignore tracks with
   empty URIs. (Partly fixes: :issue:`1340`, PR: :issue:`1381`)
 
+- Core: Fix crash if backends emits events with wrong names or arguments.
+  (Fixes: :issue:`1383`)
+
 - Stream: If an URI is considered playable, don't consider it as a candidate
   for playlist parsing. Just looking at MIME type prefixes isn't enough, as for
   example Ogg Vorbis has the MIME type ``application/ogg``. (Fixes:
