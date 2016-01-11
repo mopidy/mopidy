@@ -2,137 +2,145 @@
 
 from __future__ import absolute_import, unicode_literals
 
-import os
-import tempfile
-import unittest
+import io
 
-from mopidy.internal import path
 from mopidy.m3u import translator
-from mopidy.models import Track
-
-from tests import path_to_data_dir
-
-data_dir = path_to_data_dir('')
-song1_path = path_to_data_dir('song1.mp3')
-song2_path = path_to_data_dir('song2.mp3')
-song3_path = path_to_data_dir('φοο.mp3')
-encoded_path = path_to_data_dir('æøå.mp3')
-song1_uri = path.path_to_uri(song1_path)
-song2_uri = path.path_to_uri(song2_path)
-song3_uri = path.path_to_uri(song3_path)
-song4_uri = 'http://example.com/foo%20bar.mp3'
-encoded_uri = path.path_to_uri(encoded_path)
-song1_track = Track(name='song1', uri=song1_uri)
-song2_track = Track(name='song2', uri=song2_uri)
-song3_track = Track(name='φοο', uri=song3_uri)
-song4_track = Track(name='foo bar', uri=song4_uri)
-encoded_track = Track(name='æøå', uri=encoded_uri)
-song1_ext_track = song1_track.replace(name='Song #1')
-song2_ext_track = song2_track.replace(name='Song #2', length=60000)
-encoded_ext_track = encoded_track.replace(name='æøå')
+from mopidy.models import Playlist, Ref, Track
 
 
-# FIXME use mock instead of tempfile.NamedTemporaryFile
-
-class M3UToUriTest(unittest.TestCase):
-
-    def parse(self, name):
-        return translator.parse_m3u(name, data_dir)
-
-    def test_empty_file(self):
-        tracks = self.parse(path_to_data_dir('empty.m3u'))
-        self.assertEqual([], tracks)
-
-    def test_basic_file(self):
-        tracks = self.parse(path_to_data_dir('one.m3u'))
-        self.assertEqual([song1_track], tracks)
-
-    def test_file_with_comment(self):
-        tracks = self.parse(path_to_data_dir('comment.m3u'))
-        self.assertEqual([song1_track], tracks)
-
-    def test_file_is_relative_to_correct_dir(self):
-        with tempfile.NamedTemporaryFile(delete=False) as tmp:
-            tmp.write('song1.mp3')
-        try:
-            tracks = self.parse(tmp.name)
-            self.assertEqual([song1_track], tracks)
-        finally:
-            if os.path.exists(tmp.name):
-                os.remove(tmp.name)
-
-    def test_file_with_absolute_files(self):
-        with tempfile.NamedTemporaryFile(delete=False) as tmp:
-            tmp.write(song1_path)
-        try:
-            tracks = self.parse(tmp.name)
-            self.assertEqual([song1_track], tracks)
-        finally:
-            if os.path.exists(tmp.name):
-                os.remove(tmp.name)
-
-    def test_file_with_multiple_absolute_files(self):
-        with tempfile.NamedTemporaryFile(delete=False) as tmp:
-            tmp.write(song1_path + '\n')
-            tmp.write('# comment \n')
-            tmp.write(song2_path)
-        try:
-            tracks = self.parse(tmp.name)
-            self.assertEqual([song1_track, song2_track], tracks)
-        finally:
-            if os.path.exists(tmp.name):
-                os.remove(tmp.name)
-
-    def test_file_with_uri(self):
-        with tempfile.NamedTemporaryFile(delete=False) as tmp:
-            tmp.write(song1_uri)
-            tmp.write('\n')
-            tmp.write(song4_uri)
-        try:
-            tracks = self.parse(tmp.name)
-            self.assertEqual([song1_track, song4_track], tracks)
-        finally:
-            if os.path.exists(tmp.name):
-                os.remove(tmp.name)
-
-    def test_encoding_is_latin1(self):
-        tracks = self.parse(path_to_data_dir('encoding.m3u'))
-        self.assertEqual([encoded_track], tracks)
-
-    def test_open_missing_file(self):
-        tracks = self.parse(path_to_data_dir('non-existant.m3u'))
-        self.assertEqual([], tracks)
-
-    def test_empty_ext_file(self):
-        tracks = self.parse(path_to_data_dir('empty-ext.m3u'))
-        self.assertEqual([], tracks)
-
-    def test_basic_ext_file(self):
-        tracks = self.parse(path_to_data_dir('one-ext.m3u'))
-        self.assertEqual([song1_ext_track], tracks)
-
-    def test_multi_ext_file(self):
-        tracks = self.parse(path_to_data_dir('two-ext.m3u'))
-        self.assertEqual([song1_ext_track, song2_ext_track], tracks)
-
-    def test_ext_file_with_comment(self):
-        tracks = self.parse(path_to_data_dir('comment-ext.m3u'))
-        self.assertEqual([song1_ext_track], tracks)
-
-    def test_ext_encoding_is_latin1(self):
-        tracks = self.parse(path_to_data_dir('encoding-ext.m3u'))
-        self.assertEqual([encoded_ext_track], tracks)
-
-    def test_m3u8_file(self):
-        with tempfile.NamedTemporaryFile(suffix='.m3u8', delete=False) as tmp:
-            tmp.write(song3_path)
-        try:
-            tracks = self.parse(tmp.name)
-            self.assertEqual([song3_track], tracks)
-        finally:
-            if os.path.exists(tmp.name):
-                os.remove(tmp.name)
+def loads(s, basedir=b'.'):
+    return translator.load_items(io.StringIO(s), basedir=basedir)
 
 
-class URItoM3UTest(unittest.TestCase):
-    pass
+def dumps(items):
+    fp = io.StringIO()
+    translator.dump_items(items, fp)
+    return fp.getvalue()
+
+
+def test_path_to_uri():
+    from mopidy.m3u.translator import path_to_uri
+
+    assert path_to_uri(b'test') == 'm3u:test'
+    assert path_to_uri(b'test.m3u') == 'm3u:test.m3u'
+    assert path_to_uri(b'./test.m3u') == 'm3u:test.m3u'
+    assert path_to_uri(b'foo/../test.m3u') == 'm3u:test.m3u'
+    assert path_to_uri(b'Test Playlist.m3u') == 'm3u:Test%20Playlist.m3u'
+    assert path_to_uri(b'test.mp3', scheme='file') == 'file:///test.mp3'
+
+
+def test_latin1_path_to_uri():
+    path = 'æøå.m3u'.encode('latin-1')
+    assert translator.path_to_uri(path) == 'm3u:%E6%F8%E5.m3u'
+
+
+def test_utf8_path_to_uri():
+    path = 'æøå.m3u'.encode('utf-8')
+    assert translator.path_to_uri(path) == 'm3u:%C3%A6%C3%B8%C3%A5.m3u'
+
+
+def test_uri_to_path():
+    from mopidy.m3u.translator import uri_to_path
+
+    assert uri_to_path('m3u:test.m3u') == b'test.m3u'
+    assert uri_to_path(b'm3u:test.m3u') == b'test.m3u'
+    assert uri_to_path('m3u:Test%20Playlist.m3u') == b'Test Playlist.m3u'
+    assert uri_to_path(b'm3u:Test%20Playlist.m3u') == b'Test Playlist.m3u'
+    assert uri_to_path('m3u:%E6%F8%E5.m3u') == b'\xe6\xf8\xe5.m3u'
+    assert uri_to_path(b'm3u:%E6%F8%E5.m3u') == b'\xe6\xf8\xe5.m3u'
+    assert uri_to_path('file:///test.mp3') == b'/test.mp3'
+    assert uri_to_path(b'file:///test.mp3') == b'/test.mp3'
+
+
+def test_name_from_path():
+    from mopidy.m3u.translator import name_from_path
+
+    assert name_from_path(b'test') == 'test'
+    assert name_from_path(b'test.m3u') == 'test'
+    assert name_from_path(b'../test.m3u') == 'test'
+
+
+def test_path_from_name():
+    from mopidy.m3u.translator import path_from_name
+
+    assert path_from_name('test') == b'test'
+    assert path_from_name('test', '.m3u') == b'test.m3u'
+    assert path_from_name('foo/bar', sep='-') == b'foo-bar'
+
+
+def test_path_to_ref():
+    from mopidy.m3u.translator import path_to_ref
+
+    assert path_to_ref(b'test.m3u') == Ref.playlist(
+        uri='m3u:test.m3u', name='test'
+    )
+    assert path_to_ref(b'Test Playlist.m3u') == Ref.playlist(
+        uri='m3u:Test%20Playlist.m3u', name='Test Playlist'
+    )
+
+
+def test_load_items():
+    assert loads('') == []
+
+    assert loads('test.mp3', basedir=b'/playlists') == [
+        Ref.track(uri='file:///playlists/test.mp3', name='test')
+    ]
+    assert loads('../test.mp3', basedir=b'/playlists') == [
+        Ref.track(uri='file:///test.mp3', name='test')
+    ]
+    assert loads('/test.mp3') == [
+        Ref.track(uri='file:///test.mp3', name='test')
+    ]
+    assert loads('file:///test.mp3') == [
+        Ref.track(uri='file:///test.mp3')
+    ]
+    assert loads('http://example.com/stream') == [
+        Ref.track(uri='http://example.com/stream')
+    ]
+
+    assert loads('#EXTM3U\n#EXTINF:42,Test\nfile:///test.mp3\n') == [
+        Ref.track(uri='file:///test.mp3', name='Test')
+    ]
+    assert loads('#EXTM3U\n#EXTINF:-1,Test\nhttp://example.com/stream\n') == [
+        Ref.track(uri='http://example.com/stream', name='Test')
+    ]
+
+
+def test_dump_items():
+    assert dumps([]) == ''
+    assert dumps([Ref.track(uri='file:///test.mp3')]) == (
+        'file:///test.mp3\n'
+    )
+    assert dumps([Ref.track(uri='file:///test.mp3', name='test')]) == (
+        '#EXTM3U\n'
+        '#EXTINF:-1,test\n'
+        'file:///test.mp3\n'
+    )
+    assert dumps([Track(uri='file:///test.mp3', name='test', length=42)]) == (
+        '#EXTM3U\n'
+        '#EXTINF:-1,test\n'
+        'file:///test.mp3\n'
+    )
+    assert dumps([Track(uri='http://example.com/stream')]) == (
+        'http://example.com/stream\n'
+    )
+    assert dumps([Track(uri='http://example.com/stream', name='Test')]) == (
+        '#EXTM3U\n'
+        '#EXTINF:-1,Test\n'
+        'http://example.com/stream\n'
+    )
+
+
+def test_playlist():
+    from mopidy.m3u.translator import playlist
+
+    assert playlist(b'test.m3u') == Playlist(
+        uri='m3u:test.m3u',
+        name='test'
+    )
+    assert playlist(b'test.m3u', [Ref(uri='file:///test.mp3')], 1) == Playlist(
+        uri='m3u:test.m3u',
+        name='test',
+        tracks=[Track(uri='file:///test.mp3')],
+        last_modified=1000
+    )

@@ -48,6 +48,23 @@ M3U backend
 - Derive track name from file name for non-extended M3U
   playlists. (Fixes: :issue:`1364`, PR: :issue:`1369`)
 
+- Major refactoring of the M3U playlist extension. (Fixes:
+  :issue:`1370` PR: :issue:`1386`)
+
+  - Add :confval:`m3u/default_encoding` and :confval:`m3u/default_extension`
+    config values for improved text encoding support.
+
+  - No longer scan playlist directory and parse playlists at startup or refresh.
+    Similarly to the file extension, this now happens on request.
+
+  - Use :class:`mopidy.models.Ref` instances when reading and writing
+    playlists. Therefore, ``Track.length`` is no longer stored in
+    extended M3U playlists and ``#EXTINF`` runtime is always set to
+    -1.
+
+  - Improve reliability of playlist updates using the core playlist API by
+    applying the write-replace pattern for file updates.
+
 MPD frontend
 ------------
 
