@@ -464,12 +464,10 @@ class Audio(pykka.ThreadingActor):
         # Queue element to buy us time between the about-to-finish event and
         # the actual switch, i.e. about to switch can block for longer thanks
         # to this queue.
-        # TODO: make the min-max values a setting?
+        # TODO: See if settings should be set to minimize latency. Previous
+        # setting breaks appsrc, and settings before that broke on a few
+        # systems. So leave the default to play it safe.
         queue = Gst.ElementFactory.make('queue')
-        queue.set_property('max-size-buffers', 0)
-        queue.set_property('max-size-bytes', 0)
-        queue.set_property('max-size-time', 3 * Gst.SECOND)
-        queue.set_property('min-threshold-time', 1 * Gst.SECOND)
 
         audio_sink.add(queue)
         audio_sink.add(self._outputs)
