@@ -18,7 +18,7 @@ from mopidy.core.mixer import MixerController
 from mopidy.core.playback import PlaybackController
 from mopidy.core.playlists import PlaylistsController
 from mopidy.core.tracklist import TracklistController
-from mopidy.internal import storage, validation, versioning
+from mopidy.internal import path, storage, validation, versioning
 from mopidy.internal.deprecation import deprecated_property
 from mopidy.internal.models import CoreState
 
@@ -144,24 +144,10 @@ class Core(
         try:
             coverage = []
             if self._config and 'restore_state' in self._config['core']:
-                value = self._config['core']['restore_state']
-                if not value or 'off' == value:
-                    pass
-                elif 'volume' == value:
-                    coverage = ['volume']
-                elif 'load' == value:
-                    coverage = ['tracklist', 'mode', 'volume', 'history']
-                elif 'last' == value:
-                    coverage = ['tracklist', 'mode', 'play-last', 'volume',
-                                'history']
-                elif 'play' == value:
-                    coverage = ['tracklist', 'mode', 'play-always', 'volume',
-                                'history']
-                else:
-                    logger.warn('Unknown value for config '
-                                'core.restore_state: %s', value)
+                coverage = self._config_to_coverage(
+                    self._config['core']['restore_state'])
             if len(coverage):
-                self.load_state('persistent', coverage)
+                self._load_state(coverage)
         except Exception as e:
             logger.warn('Restore state: Unexpected error: %s', str(e))
 
@@ -170,23 +156,43 @@ class Core(
             if self._config and 'restore_state' in self._config['core']:
                 amount = self._config['core']['restore_state']
                 if amount and 'off' != amount:
-                    self.save_state('persistent')
+                    self._save_state()
         except Exception as e:
-            logger.warn('Export state: Unexpected error: %s', str(e))
+            logger.warn('Unexpected error while saving state: %s', str(e))
 
-    def save_state(self, name):
+    @staticmethod
+    def _config_to_coverage(value):
+        coverage = []
+        if not value or 'off' == value:
+            pass
+        elif 'volume' == value:
+            coverage = ['volume']
+        elif 'load' == value:
+            coverage = ['tracklist', 'mode', 'volume', 'history']
+        elif 'last' == value:
+            coverage = ['tracklist', 'mode', 'play-last', 'volume',
+                        'history']
+        elif 'play' == value:
+            coverage = ['tracklist', 'mode', 'play-always', 'volume',
+                        'history']
+        else:
+            logger.warn('Unknown value for config '
+                        'core.restore_state: %s', value)
+        return coverage
+
+    def _get_data_dir(self):
+        # get or create data director for core
+        data_dir_path = bytes(
+            os.path.join(self._config['core']['data_dir'], 'core'))
+        path.get_or_create_dir(data_dir_path)
+        return data_dir_path
+
+    def _save_state(self):
         """
         Save current state to disk.
-
-        :param name: a name (for later use with :meth:`load_state`)
-        :type name: str
         """
-        if not name:
-            raise TypeError('Missing file name.')
 
-        file_name = os.path.join(
-            self._config['core']['data_dir'], name)
-        file_name += '.state'
+        file_name = os.path.join(self._get_data_dir(), 'persistent.state')
         logger.info('Save state to %s', file_name)
 
         data = {}
@@ -199,7 +205,7 @@ class Core(
         storage.save(file_name, data)
         logger.debug('Save state done.')
 
-    def load_state(self, name, coverage):
+    def _load_state(self, coverage):
         """
         Restore state from disk.
 
@@ -213,17 +219,11 @@ class Core(
             - 'volume' set mixer volume
             - 'history' restore history
 
-        :param name: a name (used previously with :meth:`save_state`)
-        :type path: str
         :param coverage: amount of data to restore
         :type coverage: list of string (see above)
         """
-        if not name:
-            raise TypeError('Missing file name.')
 
-        file_name = os.path.join(
-            self._config['core']['data_dir'], name)
-        file_name += '.state'
+        file_name = os.path.join(self._get_data_dir(), 'persistent.state')
         logger.info('Load state from %s', file_name)
 
         data = storage.load(file_name)
