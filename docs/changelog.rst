@@ -39,6 +39,9 @@ Bug fix release.
 - MPD: Don't return tracks with empty URIs. (Partly fixes: :issue:`1340`, PR:
   :issue:`1343`)
 
+- MPD: Add ``volume`` command that was reintroduced, though still as a
+  deprecated command, in MPD 0.18 and is in use by some clients like mpc.
+
 - Proxy: Handle case where :confval:`proxy/port` is either missing from config
   or set to an empty string. (PR: :issue:`1371`)
 

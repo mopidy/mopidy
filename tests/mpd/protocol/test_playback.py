@@ -453,6 +453,38 @@ class VolumeTest(protocol.BaseTestCase):
         self.assertEqual(50, self.core.mixer.get_volume().get())
         self.assertInResponse('OK')
 
+    def test_volume_plus(self):
+        self.core.mixer.set_volume(50)
+
+        self.send_request('volume +20')
+
+        self.assertEqual(70, self.core.mixer.get_volume().get())
+        self.assertInResponse('OK')
+
+    def test_volume_minus(self):
+        self.core.mixer.set_volume(50)
+
+        self.send_request('volume -20')
+
+        self.assertEqual(30, self.core.mixer.get_volume().get())
+        self.assertInResponse('OK')
+
+    def test_volume_less_than_minus_100(self):
+        self.core.mixer.set_volume(50)
+
+        self.send_request('volume -110')
+
+        self.assertEqual(50, self.core.mixer.get_volume().get())
+        self.assertInResponse('ACK [2@0] {volume} Invalid volume value')
+
+    def test_volume_more_than_plus_100(self):
+        self.core.mixer.set_volume(50)
+
+        self.send_request('volume +110')
+
+        self.assertEqual(50, self.core.mixer.get_volume().get())
+        self.assertInResponse('ACK [2@0] {volume} Invalid volume value')
+
 
 class VolumeWithNoMixerTest(protocol.BaseTestCase):
     enable_mixer = False
@@ -460,3 +492,7 @@ class VolumeWithNoMixerTest(protocol.BaseTestCase):
     def test_setvol_without_mixer_fails(self):
         self.send_request('setvol "100"')
         self.assertInResponse('ACK [52@0] {setvol} problems setting volume')
+
+    def test_volume_without_mixer_failes(self):
+        self.send_request('volume +100')
+        self.assertInResponse('ACK [52@0] {volume} problems setting volume')
