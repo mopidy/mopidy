@@ -141,8 +141,9 @@ def _process(pipeline, timeout_ms):
     have_audio = False
     missing_message = None
 
-    types = (gst.MESSAGE_ELEMENT | gst.MESSAGE_APPLICATION | gst.MESSAGE_ERROR
-             | gst.MESSAGE_EOS | gst.MESSAGE_ASYNC_DONE | gst.MESSAGE_TAG)
+    types = (
+        gst.MESSAGE_ELEMENT | gst.MESSAGE_APPLICATION | gst.MESSAGE_ERROR |
+        gst.MESSAGE_EOS | gst.MESSAGE_ASYNC_DONE | gst.MESSAGE_TAG)
 
     previous = clock.get_time()
     while timeout > 0:
