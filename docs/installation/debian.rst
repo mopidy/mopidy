@@ -48,7 +48,7 @@ and armhf (compatible with Raspberry Pi 1 and 2).
        sudo apt-get update
        sudo apt-get install mopidy
 
-#. Before continuing, make sure you've read the :ref:`debian` section to learn
+#. Before continuing, make sure you've read the :ref:`service` section to learn
    about the differences between running Mopidy as a system service and
    manually as your own system user.
 
