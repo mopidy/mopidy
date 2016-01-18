@@ -90,3 +90,9 @@ Mopidy can be started, stopped, and restarted using the ``service`` command::
 You can check if Mopidy is currently running as a service by running::
 
     sudo service mopidy status
+
+
+Service on OS X
+===============
+
+If you're installing Mopidy on OS X, see :ref:`osx-service`.
