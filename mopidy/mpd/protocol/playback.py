@@ -426,3 +426,27 @@ def stop(context):
         Stops playing.
     """
     context.core.playback.stop()
+
+
+@protocol.commands.add('volume', change=protocol.INT)
+def volume(context, change):
+    """
+    *musicpd.org, playback section:*
+
+        ``volume {CHANGE}``
+
+        Changes volume by amount ``CHANGE``.
+
+        Note: ``volume`` is deprecated, use ``setvol`` instead.
+    """
+    if change < -100 or change > 100:
+        raise exceptions.MpdArgError('Invalid volume value')
+
+    old_volume = context.core.mixer.get_volume().get()
+    if old_volume is None:
+        raise exceptions.MpdSystemError('problems setting volume')
+
+    new_volume = min(max(0, old_volume + change), 100)
+    success = context.core.mixer.set_volume(new_volume).get()
+    if not success:
+        raise exceptions.MpdSystemError('problems setting volume')
