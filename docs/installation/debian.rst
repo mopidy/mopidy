@@ -48,12 +48,9 @@ and armhf (compatible with Raspberry Pi 1 and 2).
        sudo apt-get update
        sudo apt-get install mopidy
 
-#. Before continuing, make sure you've read the :ref:`service` section to learn
-   about the differences between running Mopidy as a system service and
-   manually as your own system user.
-
 #. Finally, you need to set a couple of :doc:`config values </config>`, and then
-   you're ready to :doc:`run Mopidy </running>`.
+   you're ready to :doc:`run Mopidy </running>` or run Mopidy as a
+   :ref:`service <service>`.
 
 When a new release of Mopidy is out, and you can't wait for you system to
 figure it out for itself, run the following to upgrade right away::
