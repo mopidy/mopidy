@@ -41,6 +41,7 @@ Bug fix release.
 
 - MPD: Add ``volume`` command that was reintroduced, though still as a
   deprecated command, in MPD 0.18 and is in use by some clients like mpc.
+  (Fixes: :issue:`1393`, PR: :issue:`1397`)
 
 - Proxy: Handle case where :confval:`proxy/port` is either missing from config
   or set to an empty string. (PR: :issue:`1371`)

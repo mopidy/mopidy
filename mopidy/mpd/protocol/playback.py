@@ -440,7 +440,7 @@ def volume(context, change):
         Note: ``volume`` is deprecated, use ``setvol`` instead.
     """
     if change < -100 or change > 100:
-        raise exceptions.MpdArgError('Invalid volume value', command='volume')
+        raise exceptions.MpdArgError('Invalid volume value')
 
     old_volume = context.core.mixer.get_volume().get()
     if old_volume is None:
