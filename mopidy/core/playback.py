@@ -207,13 +207,24 @@ class PlaybackController(object):
         if old_state == PlaybackState.PLAYING:
             self._play(on_error_step=on_error_step)
         elif old_state == PlaybackState.PAUSED:
-            # NOTE: this is just a quick hack to fix #1177 as this code has
-            # already been killed in the gapless branch.
+            # NOTE: this is just a quick hack to fix #1177, #1352, and #1378
+            # as this code has already been killed in the gapless branch.
             backend = self._get_backend()
             if backend:
                 backend.playback.prepare_change()
-                backend.playback.change_track(tl_track.track).get()
-            self.pause()
+                success = backend.playback.change_track(tl_track.track).get()
+                if success:
+                    self.core.tracklist._mark_playing(tl_track)
+                    self.core.history._add_track(tl_track.track)
+                else:
+                    self.core.tracklist._mark_unplayable(tl_track)
+                    if on_error_step == 1:
+                        # TODO: can cause an endless loop for single track
+                        # repeat.
+                        self.next()
+                    elif on_error_step == -1:
+                        self.previous()
+                self.pause()
 
     # TODO: this is not really end of track, this is on_need_next_track
     def _on_end_of_track(self):

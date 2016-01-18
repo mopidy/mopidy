@@ -39,21 +39,8 @@ using ``pkill``::
     pkill mopidy
 
 
-Init scripts
-============
+Running as a service
+====================
 
-- The ``mopidy`` package at `apt.mopidy.com <http://apt.mopidy.com/>`__ comes
-  with an `sysvinit init script
-  <https://github.com/mopidy/mopidy/blob/debian/debian/mopidy.init>`_. For
-  more details, see the :ref:`debian` section of the docs.
-
-- The ``mopidy`` package in `Arch Linux
-  <https://www.archlinux.org/packages/community/any/mopidy/>`__ comes with a systemd init
-  script.
-
-- A blog post by Benjamin Guillet explains how to `Daemonize Mopidy and Launch
-  It at Login on OS X
-  <http://www.benjaminguillet.com/blog/2013/08/16/launch-mopidy-at-login-on-os-x/>`_.
-
-- Issue :issue:`266` contains a bunch of init scripts for Mopidy, including
-  Upstart init scripts.
+Once you're done exploring Mopidy and want to run it as a proper service, check
+out :ref:`service`.

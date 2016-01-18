@@ -93,14 +93,14 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 project = 'Mopidy'
-copyright = '2009-2015, Stein Magnus Jodal and contributors'
+copyright = '2009-2016, Stein Magnus Jodal and contributors'
 
 from mopidy.internal.versioning import get_version
 release = get_version()
 version = '.'.join(release.split('.')[:2])
 
 # To make the build reproducible, avoid using today's date in the manpages
-today = '2015'
+today = '2016'
 
 exclude_trees = ['_build']
 

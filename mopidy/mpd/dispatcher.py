@@ -47,6 +47,7 @@ class MpdDispatcher(object):
         return self._call_next_filter(request, response, filter_chain)
 
     def handle_idle(self, subsystem):
+        # TODO: validate against mopidy/mpd/protocol/status.SUBSYSTEMS
         self.context.events.add(subsystem)
 
         subsystems = self.context.subscriptions.intersection(

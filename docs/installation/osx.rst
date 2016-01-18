@@ -86,6 +86,8 @@ For a full list of available Mopidy extensions, including those not installable
 from Homebrew, see :ref:`ext`.
 
 
+.. _osx-service:
+
 Running Mopidy automatically on login
 =====================================
 

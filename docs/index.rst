@@ -81,8 +81,8 @@ announcements related to Mopidy and Mopidy extensions.
     installation/index
     config
     running
+    service
     troubleshooting
-    debian
 
 
 .. _ext:

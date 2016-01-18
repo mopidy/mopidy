@@ -1,75 +1,68 @@
 .. _raspberrypi-installation:
 
-*************************************
-Raspberry Pi: Mopidy on a credit card
-*************************************
+************
+Raspberry Pi
+************
 
-Mopidy runs nicely on a `Raspberry Pi <http://www.raspberrypi.org/>`_. As of
-January 2013, Mopidy will run with Spotify support on both the armel
-(soft-float) and armhf (hard-float) architectures, which includes the Raspbian
-distribution.
+Mopidy runs on all versions of `Raspberry Pi <http://www.raspberrypi.org/>`_.
+However, note that Raspberry Pi 2 B's CPU is approximately six times as
+powerful as Raspberry Pi 1 and Raspberry Pi Zero, so Mopidy will be more joyful
+to use on a Raspberry Pi 2.
 
-.. image:: raspberry-pi-by-jwrodgers.jpg
+.. image:: raspberrypi2.jpg
     :width: 640
-    :height: 427
+    :height: 363
 
 
 .. _raspi-wheezy:
 
-How to for Raspbian "wheezy" and Debian "wheezy"
-================================================
+How to for Raspbian Jessie
+==========================
 
-This guide applies for both:
+#. Download the latest Jessie or Jessie Lite disk image from
+   http://www.raspberrypi.org/downloads/raspbian/.
 
-- Raspbian "wheezy" for armhf (hard-float), and
-- Debian "wheezy" for armel (soft-float)
+   If you're only using your Pi for Mopidy, go with Jessie Lite as you won't
+   need the full graphical desktop included in the Jessie image.
 
-If you don't know which one to select, go for the armhf variant, as it'll give
-you a lot better performance.
+#. Flash the Raspbian image you downloaded to your SD card.
 
-#. Download the latest "wheezy" disk image from
-   http://www.raspberrypi.org/downloads/. This was last tested with the images
-   from 2013-05-25 for armhf and 2013-05-29 for armel.
+   See the `Raspberry Pi installation docs
+   <https://www.raspberrypi.org/documentation/installation/installing-images/README.md>`_
+   for instructions.
 
-#. Flash the OS image to your SD card. See
-   http://elinux.org/RPi_Easy_SD_Card_Setup for help.
+#. If you connect a monitor and a keyboard, you'll see that the Pi boots right
+   into the ``raspi-config`` tool.
 
-#. If you have an SD card that's >2 GB, you don't have to resize the file
-   systems on another computer. Just boot up your Raspberry Pi with the
-   unaltered partions, and it will boot right into the ``raspi-config`` tool,
-   which will let you grow the root file system to fill the SD card. This tool
-   will also allow you do other useful stuff, like turning on the SSH server.
+   If you boot with only a network cable connected, you'll have to find the IP
+   address of the Pi yourself, e.g. by looking in the client list on your
+   router/DHCP server. When you have found the Pi's IP address, you can SSH to
+   the IP address and login with the user ``pi`` and password ``raspberry``.
+   Once logged in, run ``sudo raspi-config`` to start the config tool as the
+   ``root`` user.
 
-#. You can login to the default user using username ``pi`` and password
-   ``raspberry``. To become root, just enter ``sudo -i``.
+#. Use the ``raspi-config`` tool to setup the basics of your Pi. You might want
+   to do one or more of the following:
 
-#. To avoid a couple of potential problems with Mopidy, turn on IPv6 support:
+   - Expand the file system to fill the SD card.
+   - Change the password of the ``pi`` user.
+   - Change the time zone.
 
-   - Load the IPv6 kernel module now::
+   Under "Advanced Options":
 
-         sudo modprobe ipv6
+   - Set a hostname.
+   - Enable SSH if not already enabled.
+   - If your will use HDMI for display and 3.5mm jack for audio, force the
+     audio output to the 3.5mm jack. By default it will use HDMI for audio
+     output if an HDMI cable is connected and the 3.5mm jack if not.
 
-   - Add ``ipv6`` to ``/etc/modules`` to ensure the IPv6 kernel module is
-     loaded on boot::
+   Once done, select "Finish" and restart your Pi.
 
-         echo ipv6 | sudo tee -a /etc/modules
+   If you want to change any settings later, you can simply rerun ``sudo
+   raspi-config``.
 
-#. Since I have a HDMI cable connected, but want the sound on the analog sound
-   connector, I have to run::
-
-       sudo amixer cset numid=3 1
-
-   to force it to use analog output. ``1`` means analog, ``0`` means auto, and
-   is the default, while ``2`` means HDMI. You can test sound output
-   independent of Mopidy by running::
-
-       aplay /usr/share/sounds/alsa/Front_Center.wav
-
-   If you hear a voice saying "Front Center", then your sound is working.
-
-   To make the change to analog output stick, you can add the ``amixer``
-   command to e.g. ``/etc/rc.local``, which will be executed when the system is
-   booting.
+#. Once you've rebooted and has logged in as the ``pi`` user, you can enter
+   ``sudo -i`` to become ``root``.
 
 #. Install Mopidy and its dependencies as described in :ref:`debian-install`.
 
@@ -79,114 +72,19 @@ you a lot better performance.
    starting at boot.
 
 
-Appendix A: Fixing audio quality issues
-=======================================
+Testing sound output
+====================
 
-As of about April 2013 the following steps should resolve any audio
-issues for HDMI and analog without the use of an external USB sound
-card.
+You can test sound output independent of Mopidy by running::
 
-#. Ensure your system is up to date. On Debian based systems run::
+    aplay /usr/share/sounds/alsa/Front_Center.wav
 
-      sudo apt-get update
-      sudo apt-get dist-upgrade
+If you hear a voice saying "Front Center", then your sound is working.
 
-#. Ensure you have a new enough firmware. On Debian based systems
-   `rpi-update <https://github.com/Hexxeh/rpi-update>`_
-   can be used.
+If you want to change your audio output setting, simply rerun ``sudo
+raspi-config``. Alternatively, you can change the audio output setting
+directly by running:
 
-#. Update either ``~/.asoundrc`` or ``/etc/asound.conf`` to the
-   following::
-
-       pcm.!default {
-               type hw
-               card 0
-       }
-       ctl.!default {
-               type hw
-               card 0
-       }
-
-   Note that if you have an ``~/.asoundrc`` it will overide any global
-   settings from ``/etc/asound.conf``.
-
-#. For Mopidy to output audio directly to ALSA, instead of Jack which
-   GStreamer usually defaults to on Raspberry Pi, install the
-   ``gstreamer0.10-alsa`` package::
-
-       sudo apt-get install gstreamer0.10-alsa
-
-   Then update your ``~/.config/mopidy/mopidy.conf`` to contain::
-
-       [audio]
-       output = alsasink
-
-Following these steps you should be able to get crackle free sound on either
-HDMI or analog. Note that you might need to ensure that PulseAudio is no longer
-running to get this working nicely.
-
-This recipe has been confirmed as working by a number of users on our issue
-tracker and IRC. As a reference, the following versions where used for testing
-this, however all newer and some older version are likely to work as we have
-not determined the exact revision that fixed this::
-
-    $ uname -a
-    Linux raspberrypi 3.6.11+ #408 PREEMPT Wed Apr 10 20:33:39 BST 2013 armv6l GNU/Linux
-
-    $ /opt/vc/bin/vcgencmd version
-    Apr 25 2013 01:07:36
-    Copyright (c) 2012 Broadcom
-    version 386589 (release)
-
-The only remaining known issue is a slight gap in playback at track changes
-this is likely due to gapless playback not being implemented and is being
-worked on irrespective of Raspberry Pi related work.
-
-
-Appendix B: Raspbmc not booting
-===============================
-
-Due to a dependency version problem where XBMC uses another version of libtag
-than what Debian originally ships with, you might have to make some minor
-changes for Raspbmc to start properly after installing Mopidy.
-
-If you notice that XBMC is not starting but gets stuck in a loop,
-you need to make the following changes::
-
-    sudo ln -sf /home/pi/.xbmc-current/xbmc-bin/lib/xbmc/system/libtag.so.1 \
-        /usr/lib/arm-linux-gnueabihf/libtag.so.1
-
-However, this will not persist the changes.  To persist the changes edit
-:file:`/etc/ld.so.conf.d/arm-linux-gnueabihf.conf` and add the following at the
-top::
-
-    /home/pi/.xbmc-current/xbmc-bin/lib/xbmc/system
-
-It's very important to add it at the top of the file as this indicates the
-priority of the folder in which to look for shared libraries.
-
-XBMC doesn't play nicely with the system wide installed version of libtag that
-got installed together with Mopidy, but rather vendors in its own version.
-
-More info about this issue can be found in `this post
-<http://geeks.noeit.com/xbmc-library-dependency-error/>`_.
-
-Please note that if you're running Xbian or another XBMC distribution these
-instructions might vary for your system.
-
-
-Appendix C: Installation on XBian
-=================================
-
-Similar to the Raspbmc issue outlined in Appendix B, it's not possible to 
-install Mopidy on XBian without first resolving a dependency problem between 
-``gstreamer0.10-plugins-good`` and ``libtag1c2a``. More information can be
-found in `this post
-<https://github.com/xbianonpi/xbian/issues/378#issuecomment-37723392>`_.
-
-Run the following commands to remedy this and then install Mopidy as normal::
-
-    cd /tmp
-    wget http://apt.xbian.org/pool/stable/rpi-wheezy/l/libtag1c2a/libtag1c2a_1.7.2-1_armhf.deb
-    sudo dpkg -i libtag1c2a_1.7.2-1_armhf.deb
-    rm libtag1c2a_1.7.2-1_armhf.deb
+- Auto (HDMI if connected, else 3.5mm jack): ``sudo amixer cset numid=3 0``
+- Use 3.5mm jack: ``sudo amixer cset numid=3 1``
+- Use HDMI: ``sudo amixer cset numid=3 2``

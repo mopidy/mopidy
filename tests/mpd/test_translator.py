@@ -56,7 +56,7 @@ class TrackMpdFormatTest(unittest.TestCase):
 
     def test_track_to_mpd_format_with_position_and_tlid(self):
         result = translator.track_to_mpd_format(
-            TlTrack(2, Track()), position=1)
+            TlTrack(2, Track(uri='a uri')), position=1)
         self.assertIn(('Pos', 1), result)
         self.assertIn(('Id', 2), result)
 
@@ -153,13 +153,17 @@ class PlaylistMpdFormatTest(unittest.TestCase):
 
     def test_mpd_format(self):
         playlist = Playlist(tracks=[
-            Track(track_no=1), Track(track_no=2), Track(track_no=3)])
+            Track(uri='foo', track_no=1),
+            Track(uri='bar', track_no=2),
+            Track(uri='baz', track_no=3)])
         result = translator.playlist_to_mpd_format(playlist)
         self.assertEqual(len(result), 3)
 
     def test_mpd_format_with_range(self):
         playlist = Playlist(tracks=[
-            Track(track_no=1), Track(track_no=2), Track(track_no=3)])
+            Track(uri='foo', track_no=1),
+            Track(uri='bar', track_no=2),
+            Track(uri='baz', track_no=3)])
         result = translator.playlist_to_mpd_format(playlist, 1, 2)
         self.assertEqual(len(result), 1)
         self.assertEqual(dict(result[0])['Track'], 2)

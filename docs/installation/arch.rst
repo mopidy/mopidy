@@ -16,7 +16,8 @@ If you are running Arch Linux, you can install Mopidy using the
        pacman -Syu
 
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
-   then you're ready to :doc:`run Mopidy </running>`.
+   then you're ready to :doc:`run Mopidy </running>` or run Mopidy as a
+   :ref:`service <service>`.
 
 
 Installing extensions
