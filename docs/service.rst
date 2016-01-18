@@ -22,7 +22,7 @@ highest priority, so it can override configs from all other config files.
 Thus, you can do all your changes in this file.
 
 
-mopidy User
+mopidy user
 ===========
 
 The init script runs Mopidy as the ``mopidy`` user, which is automatically
