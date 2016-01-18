@@ -112,18 +112,3 @@ from a regular Mopidy setup you'll want to know about.
 - You can check if Mopidy is currently running as a system service by running::
 
       sudo service mopidy status
-
-- Mopidy installed from a Debian package can use Mopidy extensions installed
-  both from Debian packages and with pip. This has always been the case.
-
-  Mopidy installed with pip can use extensions installed with pip, but
-  not extensions installed from a Debian package released before August 2015.
-  This is because the Debian packages used to install extensions into
-  :file:`/usr/share/mopidy` which is normally not on your ``PYTHONPATH``.
-  Thus, your pip-installed Mopidy would not find the Debian package-installed
-  extensions.
-
-  In August 2015, all Mopidy extension Debian packages was modified to install
-  into :file:`/usr/lib/python2.7/dist-packages`, like any other Python Debian
-  package. Thus, Mopidy installed with pip can now use extensions installed
-  from Debian.
