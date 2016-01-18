@@ -14,20 +14,16 @@ the same way on their distribution.
 Configuration
 =============
 
-All configuration is in :file:`/etc/mopidy`, not in your user's home directory.
-
-The main configuration file is :file:`/etc/mopidy/mopidy.conf`.  If there are
-more than one configuration file, this is the configuration file with the
-highest priority, so it can override configs from all other config files.
-Thus, you can do all your changes in this file.
+All configuration is in :file:`/etc/mopidy/mopidy.conf`, not in your user's
+home directory.
 
 
 mopidy user
 ===========
 
-The init script runs Mopidy as the ``mopidy`` user, which is automatically
-created when you install the Mopidy package. The ``mopidy`` user will need read
-access to any local music you want Mopidy to play.
+The Mopidy service runs as the ``mopidy`` user, which is automatically created
+when you install the Mopidy package. The ``mopidy`` user will need read access
+to any local music you want Mopidy to play.
 
 
 Subcommands
