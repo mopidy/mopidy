@@ -9,12 +9,12 @@ v1.1.2 (UNRELEASED)
 
 Bug fix release.
 
-- Main: Catch errors when loading :confval:`logging/config_file`. (Fixes:
-  :issue:`1320`)
+- Main: Catch errors when loading the :confval:`logging/config_file` file.
+  (Fixes: :issue:`1320`)
 
-- Core: If changing to another track while
-  the player is paused, the new track would not be added to the history or
-  marked as currently playing. (Fixes: :issue:`1352`, PR: :issue:`1356`)
+- Core: If changing to another track while the player is paused, the new track
+  would not be added to the history or marked as currently playing. (Fixes:
+  :issue:`1352`, PR: :issue:`1356`)
 
 - Core: Skips over unplayable tracks if the user attempts to change tracks
   while paused, like we already did if in playing state. (Fixes :issue:`1378`,
