@@ -543,7 +543,7 @@ your HTTP requests::
 For further details, see Requests' docs on `session objects
 <http://www.python-requests.org/en/latest/user/advanced/#session-objects>`__.
 
-Testing Extensions
+Testing extensions
 ==================
 
 Creating test cases for your extensions makes them much simpler to maintain
@@ -557,7 +557,7 @@ When it comes to running tests, Mopidy typically makes use of testing tools
 like `tox <https://tox.readthedocs.org/en/latest/>`_ and
 `pytest <http://pytest.org/latest/>`_.
 
-Testing Approach
+Testing approach
 ----------------
 
 To a large extent the testing approach to follow depends on how your extension
@@ -574,7 +574,7 @@ In general your tests should cover the extension definition, the relevant
 Mopidy controllers, and the Pykka backend and / or frontend actors that form
 part of the extension.
 
-Testing the Extension Definition
+Testing the extension definition
 --------------------------------
 Test cases for checking the definition of the extension should ensure that:
 - the extension provides a ``ext.conf`` configuration file containing the
@@ -613,7 +613,7 @@ An example of what these tests could look like is provided below::
         registry.add.assert_has_calls(calls, any_order=True)
 
 
-Testing Backend Actors
+Testing backend actors
 ----------------------
 Backends can usually be constructed with a small mockup of the configuration
 file, and mocking the audio actor::
@@ -671,19 +671,19 @@ Once you have a backend instance to work with, testing the various playback,
 library, and other providers is straight forward and should not require any
 special setup or processing.
 
-Testing Libraries
+Testing libraries
 -----------------
 Library test cases should cover the implementations of the standard Mopidy
 API (e.g. ``browse``, ``lookup``, ``refresh``, ``get_images``, ``search``,
 etc.)
 
-Testing Playback Controllers
+Testing playback controllers
 ----------------------------
 Testing ``change_track`` and ``translate_uri`` is probably the highest
 priority, since these methods are used to prepare the track and provide its
 audio URL to Mopidy's core for playback.
 
-Testing Frontends
+Testing frontends
 -----------------
 Because most frontends will interact with the Mopidy core, it will most likely
 be necessary to have a full core running for testing purposes::
@@ -730,11 +730,11 @@ With all of that done you should finally be ready to instantiate your frontend::
     self.frontend = frontend.MyFrontend.start(config(), self.core).proxy()
 
 
-...and then just remember that the normal core and frontend methods will usually
-return ``pykka.ThreadingFuture`` objects, so you will need to add ``.get()`` at
+Keep in mind that the normal core and frontend methods will usually return
+``pykka.ThreadingFuture`` objects, so you will need to add ``.get()`` at
 the end of most method calls in order to get to the actual return values.
 
-Triggering Events
+Triggering events
 -----------------
 There may be test case scenarios that require simulating certain event triggers
 that your extension's actors can listen for and respond on. An example for
@@ -751,8 +751,9 @@ actor, may look something like this::
     self.send_mock.side_effect = send
 
 
-...and then just call ``replay_events()`` at the relevant points in your code
-to have the events fire::
+Once all of the events have been captured, a method like
+``replay_events()`` can be called at the relevant points in the code to have
+the events fire::
 
     def replay_events(self, my_actor, until=None):
         while self.events:
@@ -762,8 +763,6 @@ to have the events fire::
             frontend.on_event(event, **kwargs).get()
 
 
-Further Reading
----------------
-The `/tests <https://github.com/mopidy/mopidy/tree/develop/tests>`_
-directory on the Mopidy development branch contains hundreds of sample test
-cases that cover virtually every aspect of using the server.
+For further details and examples, refer to the
+`/tests <https://github.com/mopidy/mopidy/tree/develop/tests>`_
+directory on the Mopidy development branch.
