@@ -542,3 +542,245 @@ your HTTP requests::
 
 For further details, see Requests' docs on `session objects
 <http://www.python-requests.org/en/latest/user/advanced/#session-objects>`__.
+
+Testing extensions
+==================
+
+Creating test cases for your extensions makes them much simpler to maintain
+over the long term. It can also make it easier for you to review and accept
+pull requests from other contributors knowing that they will not break the
+extension in some unanticipated way.
+
+Before getting started, it is important to familiarize yourself with the
+Python `mock library <https://docs.python.org/dev/library/unittest.mock.html>`_.
+When it comes to running tests, Mopidy typically makes use of testing tools
+like `tox <https://tox.readthedocs.org/en/latest/>`_ and
+`pytest <http://pytest.org/latest/>`_.
+
+Testing approach
+----------------
+
+To a large extent the testing approach to follow depends on how your extension
+is structured, which parts of Mopidy it interacts with, and if it uses any 3rd
+party APIs or makes any HTTP requests to the outside world.
+
+The sections that follow contain code extracts that highlight some of the
+key areas that should be tested. For more exhaustive examples, you may want to
+take a look at the test cases that ship with Mopidy itself which covers
+everything from instantiating various controllers, reading configuration files,
+and simulating events that your extension can listen to.
+
+In general your tests should cover the extension definition, the relevant
+Mopidy controllers, and the Pykka backend and / or frontend actors that form
+part of the extension.
+
+Testing the extension definition
+--------------------------------
+
+Test cases for checking the definition of the extension should ensure that:
+
+- the extension provides a ``ext.conf`` configuration file containing the
+  relevant parameters with their default values,
+- that the config schema is fully defined, and
+- that the extension's actor(s) are added to the Mopidy registry on setup.
+
+An example of what these tests could look like is provided below::
+
+    def test_get_default_config(self):
+        ext = Extension()
+        config = ext.get_default_config()
+
+        assert '[my_extension]' in config
+        assert 'enabled = true' in config
+        assert 'param_1 = value_1' in config
+        assert 'param_2 = value_2' in config
+        assert 'param_n = value_n' in config
+
+    def test_get_config_schema(self):
+        ext = Extension()
+        schema = ext.get_config_schema()
+
+        assert 'enabled' in schema
+        assert 'param_1' in schema
+        assert 'param_2' in schema
+        assert 'param_n' in schema
+
+    def test_setup(self):
+        registry = mock.Mock()
+
+        ext = Extension()
+        ext.setup(registry)
+        calls = [mock.call('frontend', frontend_lib.MyFrontend),
+                 mock.call('backend',  backend_lib.MyBackend)]
+        registry.add.assert_has_calls(calls, any_order=True)
+
+
+Testing backend actors
+----------------------
+
+Backends can usually be constructed with a small mockup of the configuration
+file, and mocking the audio actor::
+
+    @pytest.fixture
+    def config():
+        return {
+            'http': {
+                'hostname': '127.0.0.1',
+                'port': '6680'
+            },
+            'proxy': {
+                'hostname': 'host_mock',
+                'port': 'port_mock'
+            },
+            'my_extension': {
+                'enabled': True,
+                'param_1': 'value_1',
+                'param_2': 'value_2',
+                'param_n': 'value_n',
+            }
+        }
+
+    def get_backend(config):
+        return backend.MyBackend(config=config, audio=mock.Mock())
+
+The following libraries might be useful for mocking any HTTP requests that
+your extension makes:
+
+- `responses <https://pypi.python.org/pypi/responses>`_ - A utility library for
+  mocking out the requests Python library.
+- `vcrpy <https://pypi.python.org/pypi/vcrpy>`_ - Automatically mock your HTTP
+  interactions to simplify and speed up testing.
+
+At the very least, you'll probably want to patch ``requests`` or any other web
+API's that you use to avoid any unintended HTTP requests from being made by
+your backend during testing::
+
+    from mock import patch
+    @mock.patch('requests.get',
+                mock.Mock(side_effect=Exception('Intercepted unintended HTTP call')))
+
+
+Backend tests should also ensure that:
+
+- the backend provides a unique URI scheme,
+- that it sets up the various providers (e.g. library, playback, etc.)
+
+::
+
+    def test_uri_schemes(config):
+        backend = get_backend(config)
+
+        assert 'my_scheme' in backend.uri_schemes
+
+
+    def test_init_sets_up_the_providers(config):
+        backend = get_backend(config)
+
+        assert isinstance(backend.library, library.MyLibraryProvider)
+        assert isinstance(backend.playback, playback.MyPlaybackProvider)
+
+
+Once you have a backend instance to work with, testing the various playback,
+library, and other providers is straight forward and should not require any
+special setup or processing.
+
+Testing libraries
+-----------------
+
+Library test cases should cover the implementations of the standard Mopidy
+API (e.g. ``browse``, ``lookup``, ``refresh``, ``get_images``, ``search``,
+etc.)
+
+Testing playback controllers
+----------------------------
+
+Testing ``change_track`` and ``translate_uri`` is probably the highest
+priority, since these methods are used to prepare the track and provide its
+audio URL to Mopidy's core for playback.
+
+Testing frontends
+-----------------
+
+Because most frontends will interact with the Mopidy core, it will most likely
+be necessary to have a full core running for testing purposes::
+
+    self.core = core.Core.start(
+                config, backends=[get_backend(config]).proxy()
+
+
+It may be advisable to take a quick look at the
+`Pykka API <https://www.pykka.org/en/latest/>`_ at this point to make sure that
+you are familiar with ``ThreadingActor``, ``ThreadingFuture``, and the
+``proxies`` that allow you to access the attributes and methods of the actor
+directly.
+
+You'll also need a list of :class:`~mopidy.models.Track` and a list of URIs in
+order to populate the core with some simple tracks that can be used for
+testing::
+
+    class BaseTest(unittest.TestCase):
+        tracks = [
+            models.Track(uri='my_scheme:track:id1', length=40000),  # Regular track
+            models.Track(uri='my_scheme:track:id2', length=None),   # No duration
+        ]
+
+    uris = [ 'my_scheme:track:id1', 'my_scheme:track:id2']
+
+
+In the ``setup()`` method of your test class, you will then probably need to
+monkey patch looking up tracks in the library (so that it will always use the
+lists that you defined), and then populate the core's tracklist::
+
+    def lookup(uris):
+        result = {uri: [] for uri in uris}
+        for track in self.tracks:
+            if track.uri in result:
+                result[track.uri].append(track)
+        return result
+
+    self.core.library.lookup = lookup
+    self.tl_tracks = self.core.tracklist.add(uris=self.uris).get()
+
+
+With all of that done you should finally be ready to instantiate your frontend::
+
+    self.frontend = frontend.MyFrontend.start(config(), self.core).proxy()
+
+
+Keep in mind that the normal core and frontend methods will usually return
+``pykka.ThreadingFuture`` objects, so you will need to add ``.get()`` at
+the end of most method calls in order to get to the actual return values.
+
+Triggering events
+-----------------
+
+There may be test case scenarios that require simulating certain event triggers
+that your extension's actors can listen for and respond on. An example for
+patching the listener to store these events, and then play them back for your
+actor, may look something like this::
+
+    self.events = []
+    self.patcher = mock.patch('mopidy.listener.send')
+    self.send_mock = self.patcher.start()
+
+    def send(cls, event, **kwargs):
+        self.events.append((event, kwargs))
+
+    self.send_mock.side_effect = send
+
+
+Once all of the events have been captured, a method like
+``replay_events()`` can be called at the relevant points in the code to have
+the events fire::
+
+    def replay_events(self, my_actor, until=None):
+        while self.events:
+            if self.events[0][0] == until:
+                break
+            event, kwargs = self.events.pop(0)
+            frontend.on_event(event, **kwargs).get()
+
+
+For further details and examples, refer to the
+`/tests <https://github.com/mopidy/mopidy/tree/develop/tests>`_
+directory on the Mopidy development branch.
