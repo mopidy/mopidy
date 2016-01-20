@@ -1,0 +1,58 @@
+# Italian translation of mopidy debconf messages
+# Copyright (C) 2014, mopidy package copyright holder
+# This file is distributed under the same license as the mopidy package.
+# Beatrice Torracca <beatricet@libero.it>, 2014.
+msgid ""
+msgstr ""
+"Project-Id-Version: mopidy\n"
+"Report-Msgid-Bugs-To: mopidy@packages.debian.org\n"
+"POT-Creation-Date: 2014-08-05 07:37+0200\n"
+"PO-Revision-Date: 2014-08-20 16:05+0200\n"
+"Last-Translator: Beatrice Torracca <beatricet@libero.it>\n"
+"Language-Team: Italian <debian-l10n-italian@lists.debian.org>\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Virtaal 0.7.1\n"
+
+#. Type: boolean
+#. Description
+#: ../mopidy.templates:2001
+msgid "Start the Mopidy server at boot?"
+msgstr "Far partire il server Mopidy all'avvio?"
+
+#. Type: boolean
+#. Description
+#: ../mopidy.templates:2001
+msgid ""
+"The Mopidy server can be run as a system service, automatically starting at "
+"boot. It will be listening to MPD connections on port 6600 and HTTP "
+"connections on port 6680. By default, it will only accept connections from "
+"the local machine."
+msgstr ""
+"Il server Mopidy può essere eseguito come servizio di sistema che viene "
+"fatto partire automaticamente all'avvio. Rimarrà in ascolto per connessioni "
+"MPD sulla porta 6600 e connessioni HTTP sulla porta 6680. In modo "
+"predefinito accetterà connessioni solamente dalla macchina locale."
+
+#. Type: boolean
+#. Description
+#: ../mopidy.templates:2001
+msgid ""
+"You have the option of starting the Mopidy server automatically on system "
+"boot. If in doubt, it is suggested to not start it automatically on boot."
+msgstr ""
+"È possibile scegliere di far partire il server Mopidy automaticamente "
+"all'avvio del sistema. Se si è in dubbio, è consigliato non farlo partire "
+"automaticamente all'avvio."
+
+#. Type: boolean
+#. Description
+#: ../mopidy.templates:2001
+msgid ""
+"This setting can be modified later by running \"dpkg-reconfigure mopidy\"."
+msgstr ""
+"Questa impostazione può essere modificata in un secondo momento eseguendo "
+"«dpkg-reconfigure mopidy»."

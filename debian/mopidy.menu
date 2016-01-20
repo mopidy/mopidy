@@ -1,0 +1,2 @@
+?package(mopidy):needs="text" section="Applications/Sound"\
+  title="Mopidy" command="/usr/bin/mopidy"

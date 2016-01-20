@@ -1,0 +1,101 @@
+From: Stein Magnus Jodal <stein.magnus@jodal.no>
+Date: Mon, 14 Sep 2015 10:56:18 +0200
+Subject: Make docs buildable with older Sphinx
+
+Sphinx 1.3 is only needed for ToC captions. The docs build completes
+successfully with older Sphinx versions as well, like Sphinx 1.1
+packaged in Debian wheezy.
+---
+ docs/conf.py   |  2 +-
+ docs/index.rst | 24 ++++++++++++++++++------
+ 2 files changed, 19 insertions(+), 7 deletions(-)
+
+diff --git a/docs/conf.py b/docs/conf.py
+index cbb2f22..cc76072 100644
+--- a/docs/conf.py
++++ b/docs/conf.py
+@@ -78,7 +78,7 @@ def setup(app):
+ 
+ # -- General configuration ----------------------------------------------------
+ 
+-needs_sphinx = '1.3'
++needs_sphinx = '1.0'
+ 
+ extensions = [
+     'sphinx.ext.autodoc',
+diff --git a/docs/index.rst b/docs/index.rst
+index 70d14a7..9085024 100644
+--- a/docs/index.rst
++++ b/docs/index.rst
+@@ -74,8 +74,10 @@ If you want to stay up to date on Mopidy developments, you can follow `@mopidy
+ announcements related to Mopidy and Mopidy extensions.
+ 
+ 
++Usage
++=====
++
+ .. toctree::
+-    :caption: Usage
+     :maxdepth: 2
+ 
+     installation/index
+@@ -87,8 +89,10 @@ announcements related to Mopidy and Mopidy extensions.
+ 
+ .. _ext:
+ 
++Extensions
++==========
++
+ .. toctree::
+-    :caption: Extensions
+     :maxdepth: 2
+ 
+     ext/local
+@@ -104,8 +108,10 @@ announcements related to Mopidy and Mopidy extensions.
+     ext/web
+ 
+ 
++Clients
++=======
++
+ .. toctree::
+-    :caption: Clients
+     :maxdepth: 2
+ 
+     clients/http
+@@ -114,8 +120,10 @@ announcements related to Mopidy and Mopidy extensions.
+     clients/upnp
+ 
+ 
++About
++=====
++
+ .. toctree::
+-    :caption: About
+     :maxdepth: 1
+ 
+     authors
+@@ -124,8 +132,10 @@ announcements related to Mopidy and Mopidy extensions.
+     versioning
+ 
+ 
++Development
++===========
++
+ .. toctree::
+-    :caption: Development
+     :maxdepth: 2
+ 
+     contributing
+@@ -135,8 +145,10 @@ announcements related to Mopidy and Mopidy extensions.
+     extensiondev
+ 
+ 
++Reference
++=========
++
+ .. toctree::
+-    :caption: Reference
+     :maxdepth: 2
+ 
+     glossary

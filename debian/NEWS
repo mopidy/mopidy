@@ -1,0 +1,9 @@
+mopidy (0.19.4-3) unstable; urgency=medium
+
+    Mopidy no longer reads configuration files in
+    /etc/mopidy/extensions.d. If you've previously configured anything in
+    /etc/mopidy/extensions.d, you should move the configuration to
+    /etc/mopidy/mopidy.conf. Debian packages of Mopidy extensions should
+    install their default configuration into /usr/share/mopidy/conf.d.
+
+ -- Stein Magnus Jodal <stein.magnus@jodal.no>  Mon, 13 Oct 2014 18:55:50 +0200

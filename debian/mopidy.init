@@ -1,0 +1,116 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          mopidy
+# Required-Start:    $network $remote_fs
+# Required-Stop:     $network $remote_fs
+# Should-Start:      $named alsa-utils avahi dbus pulseaudio
+# Should-Stop:       $named alsa-utils avahi dbus pulseaudio
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Mopidy music server
+### END INIT INFO
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+DESC="Mopidy music server"
+NAME=mopidy
+DAEMON=/usr/bin/mopidy
+DAEMON_USER=mopidy
+DAEMON_GROUP=audio
+CONFIG_FILES="/usr/share/mopidy/conf.d:/etc/mopidy/mopidy.conf"
+PIDFILE=/var/run/$NAME.pid
+SCRIPTNAME=/etc/init.d/$NAME
+
+# Exit if the package is not installed
+[ -x $DAEMON ] || exit 0
+
+# Read configuration variable file if present
+[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+# Load the VERBOSE setting and other rcS variables
+. /lib/init/vars.sh
+
+# Define LSB log_* functions.
+. /lib/lsb/init-functions
+
+do_start()
+{
+    start-stop-daemon --start --quiet --name $NAME --pidfile $PIDFILE \
+        --startas $DAEMON --test > /dev/null \
+        || return 1
+    start-stop-daemon --start --quiet --name $NAME --pidfile $PIDFILE \
+        --chuid $DAEMON_USER:$DAEMON_GROUP --background --make-pidfile \
+        --startas $DAEMON -- --quiet --config $CONFIG_FILES \
+        || return 2
+}
+
+do_stop()
+{
+    start-stop-daemon --stop --quiet --name $NAME --pidfile $PIDFILE \
+        --retry=TERM/30/KILL/5
+    RETVAL="$?"
+    [ "$RETVAL" = 2 ] && return 2
+    # Wait for children to finish too if this is a daemon that forks
+    # and if the daemon is only ever run from this initscript.
+    # This typically happens with pulseaudio.
+    start-stop-daemon --stop --quiet --oknodo --user $DAEMON_USER \
+        --retry=TERM/30/KILL/5
+    [ "$?" = 2 ] && return 2
+    rm -f $PIDFILE
+    return "$RETVAL"
+}
+
+# Remove the action from $@ before it is used by the run action
+action=$1
+[ "$action" != "" ] && shift
+
+case "$action" in
+    start)
+        [ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC " "$NAME"
+        do_start
+        case "$?" in
+            0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+            2)   [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+        esac
+        ;;
+    stop)
+        [ "$VERBOSE" != no ] && log_daemon_msg "Stopping $DESC" "$NAME"
+        do_stop
+        case "$?" in
+            0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+            2)   [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+        esac
+        ;;
+    status)
+        status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
+        ;;
+    restart|force-reload)
+        log_daemon_msg "Restarting $DESC" "$NAME"
+        do_stop
+        case "$?" in
+            0|1)
+                do_start
+                case "$?" in
+                    0) log_end_msg 0 ;;
+                    1) log_end_msg 1 ;; # Old process is still running
+                    *) log_end_msg 1 ;; # Failed to start
+                esac
+                ;;
+            *)
+                # Failed to stop
+                log_end_msg 1
+                ;;
+        esac
+        ;;
+    run)
+        echo -n "\"service mopidy run\" is deprecated. " 1>&2
+        echo "Use \"mopidyctl\" instead." 1>&2
+        /usr/sbin/mopidyctl $@
+        ;;
+    *)
+        echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload|run}" >&2
+        exit 3
+        ;;
+esac
+
+:

@@ -1,0 +1,3 @@
+# The postinst script both installs init scripts and enables/disables it
+# depending on user input via debconf.
+mopidy binary: duplicate-updaterc.d-calls-in-postinst

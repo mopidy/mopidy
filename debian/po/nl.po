@@ -1,0 +1,59 @@
+# Dutch translation of mopidy debconf templates.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the mopidy package.
+# Frans Spiesschaert <Frans.Spiesschaert@yucom.be>, 2014.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: mopidy\n"
+"Report-Msgid-Bugs-To: mopidy@packages.debian.org\n"
+"POT-Creation-Date: 2014-08-05 07:37+0200\n"
+"PO-Revision-Date: 2014-10-08 21:48+0200\n"
+"Last-Translator: Frans Spiesschaert <Frans.Spiesschaert@yucom.be>\n"
+"Language-Team: Debian Dutch l10n Team <debian-l10n-dutch@lists.debian.org>\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. Type: boolean
+#. Description
+#: ../mopidy.templates:2001
+msgid "Start the Mopidy server at boot?"
+msgstr "De Mopidy-server starten bij het opstarten van de computer?"
+
+#. Type: boolean
+#. Description
+#: ../mopidy.templates:2001
+msgid ""
+"The Mopidy server can be run as a system service, automatically starting at "
+"boot. It will be listening to MPD connections on port 6600 and HTTP "
+"connections on port 6680. By default, it will only accept connections from "
+"the local machine."
+msgstr ""
+"De Mopidy-server kan uitgevoerd worden als een systeemdienst die automatisch "
+"start bij het opstarten van de computer. Hij zal luisteren naar MPD-"
+"verbindingen op poort 6600 en HTTP-verbindingen op poort 6680. Standaard "
+"aanvaardt de dienst enkel verbindingen die van de lokale computer afkomstig "
+"zijn."
+
+#. Type: boolean
+#. Description
+#: ../mopidy.templates:2001
+msgid ""
+"You have the option of starting the Mopidy server automatically on system "
+"boot. If in doubt, it is suggested to not start it automatically on boot."
+msgstr ""
+"U kunt kiezen of u de Mopidy-server automatisch wilt laten starten bij het "
+"opstarten van de computer. Bij twijfel wordt aanbevolen om hem niet "
+"automatisch te starten als de computer opatart."
+
+#. Type: boolean
+#. Description
+#: ../mopidy.templates:2001
+msgid ""
+"This setting can be modified later by running \"dpkg-reconfigure mopidy\"."
+msgstr ""
+"Deze instelling kan later gewijzigd worden via het commando \"dpkg-"
+"reconfigure mopidy\"."

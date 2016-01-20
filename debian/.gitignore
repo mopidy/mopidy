@@ -1,0 +1,6 @@
+mopidy/
+mopidy-doc/
+files
+*.debhelper
+*.log
+*.substvars

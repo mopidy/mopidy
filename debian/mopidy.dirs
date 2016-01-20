@@ -1,0 +1,8 @@
+etc/mopidy
+usr/share/mopidy/conf.d
+var/cache/mopidy
+var/lib/mopidy
+var/lib/mopidy/local
+var/lib/mopidy/media
+var/lib/mopidy/playlists
+var/log/mopidy

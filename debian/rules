@@ -1,0 +1,40 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+export PYBUILD_DISABLE=test
+
+%:
+	dh $@ --with python2,sphinxdoc,systemd --buildsystem=pybuild
+
+override_dh_auto_clean:
+	make -C docs/ clean
+	debconf-updatepo
+	dh_auto_clean
+
+override_dh_auto_build:
+
+override_dh_auto_install:
+	dh_auto_install
+	# Move mopidy command into private module dir so it gets Mopidy
+	# extensions on its PYTHONPATH
+	mkdir -p debian/tmp/usr/share/mopidy
+	mv debian/tmp/usr/bin/mopidy debian/tmp/usr/share/mopidy/mopidy-cmd
+
+override_dh_installinit:
+	dh_installinit --no-start
+
+override_dh_systemd_enable:
+	dh_systemd_enable --no-enable
+
+override_dh_installchangelogs:
+	dh_installchangelogs docs/changelog.rst
+
+override_dh_installdocs:
+	python setup.py build_sphinx
+	dh_installdocs
+
+override_dh_installman:
+	make -C docs/ clean man
+	dh_installman

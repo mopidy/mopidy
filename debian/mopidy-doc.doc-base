@@ -1,0 +1,12 @@
+Document: mopidy-doc
+Title: Mopidy documentation
+Author: Stein Magnus Jodal
+Section: Sound
+
+Format: HTML
+Index: /usr/share/doc/mopidy-doc/html/index.html
+Files: /usr/share/doc/mopidy-doc/html/*.html
+
+Format: Text
+Index: /usr/share/doc/mopidy-doc/rst/index.txt
+Files: /usr/share/doc/mopidy-doc/rst/*.txt

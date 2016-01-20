@@ -1,0 +1,22 @@
+# These templates have been reviewed by the debian-l10n-english
+# team
+#
+# If modifications/additions/rewording are needed, please ask
+# debian-l10n-english@lists.debian.org for advice.
+#
+# Even minor modifications require translation updates and such
+# changes should be coordinated with translators and reviewers.
+
+Template: mopidy/daemon
+Type: boolean
+Default: false
+_Description: Start the Mopidy server at boot?
+ The Mopidy server can be run as a system service, automatically starting
+ at boot. It will be listening to MPD connections on port 6600 and HTTP
+ connections on port 6680. By default, it will only accept connections from
+ the local machine.
+ .
+ You have the option of starting the Mopidy server automatically on system
+ boot. If in doubt, it is suggested to not start it automatically on boot.
+ .
+ This setting can be modified later by running "dpkg-reconfigure mopidy".
