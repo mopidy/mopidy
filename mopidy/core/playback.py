@@ -516,7 +516,8 @@ class PlaybackController(object):
         listener.CoreListener.send('track_playback_started', tl_track=tl_track)
 
     def _trigger_track_playback_ended(self, time_position_before_stop):
-        if self.get_current_tl_track() is None:
+        tl_track = self.get_current_tl_track()
+        if tl_track is None:
             return
 
         logger.debug('Triggering track playback ended event')
@@ -528,7 +529,7 @@ class PlaybackController(object):
         # TODO: Use the lowest of track duration and position.
         listener.CoreListener.send(
             'track_playback_ended',
-            tl_track=self.get_current_tl_track(),
+            tl_track=tl_track,
             time_position=time_position_before_stop)
 
     def _trigger_playback_state_changed(self, old_state, new_state):
