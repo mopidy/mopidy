@@ -577,6 +577,7 @@ part of the extension.
 Testing the extension definition
 --------------------------------
 Test cases for checking the definition of the extension should ensure that:
+
 - the extension provides a ``ext.conf`` configuration file containing the
   relevant parameters with their default values,
 - that the config schema is fully defined, and
@@ -651,6 +652,7 @@ testing::
 
 
 Backend tests should also ensure that:
+
 - the backend provides a unique URI scheme,
 - that it sets up the various providers (e.g. library, playback, etc.)::
 
