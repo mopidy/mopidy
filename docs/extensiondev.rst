@@ -576,6 +576,7 @@ part of the extension.
 
 Testing the extension definition
 --------------------------------
+
 Test cases for checking the definition of the extension should ensure that:
 
 - the extension provides a ``ext.conf`` configuration file containing the
@@ -589,20 +590,20 @@ An example of what these tests could look like is provided below::
         ext = Extension()
         config = ext.get_default_config()
 
-        self.assertIn('[my_extension]', config)
-        self.assertIn('enabled = true', config)
-        self.assertIn('param_1 = value_1', config)
-        self.assertIn('param_2 = value_2', config)
-        self.assertIn('param_n = value_n', config)
+        assert '[my_extension]' in config
+        assert 'enabled = true' in config
+        assert 'param_1 = value_1' in config
+        assert 'param_2 = value_2' in config
+        assert 'param_n = value_n' in config
 
     def test_get_config_schema(self):
         ext = Extension()
         schema = ext.get_config_schema()
 
-        self.assertIn('enabled', schema)
-        self.assertIn('param_1', schema)
-        self.assertIn('param_2', schema)
-        self.assertIn('param_n', schema)
+        assert 'enabled' in schema
+        assert 'param_1' in schema
+        assert 'param_2' in schema
+        assert 'param_n' in schema
 
     def test_setup(self):
         registry = mock.Mock()
@@ -616,10 +617,11 @@ An example of what these tests could look like is provided below::
 
 Testing backend actors
 ----------------------
+
 Backends can usually be constructed with a small mockup of the configuration
 file, and mocking the audio actor::
 
-    @pytest.fixture()
+    @pytest.fixture
     def config():
         return {
             'http': {
@@ -641,10 +643,17 @@ file, and mocking the audio actor::
     def get_backend(config):
         return backend.MyBackend(config=config, audio=mock.Mock())
 
+The following libraries might be useful for mocking any HTTP requests that
+your extension makes:
 
-You'll probably want to patch ``requests`` or any other web API's that you use
-to avoid any unintended HTTP requests from being made by your backend during
-testing::
+- `responses <https://pypi.python.org/pypi/responses>`_ - A utility library for
+  mocking out the requests Python library.
+- `vcrpy <https://pypi.python.org/pypi/vcrpy>`_ - Automatically mock your HTTP
+  interactions to simplify and speed up testing.
+
+At the very least, you'll probably want to patch ``requests`` or any other web
+API's that you use to avoid any unintended HTTP requests from being made by
+your backend during testing::
 
     from mock import patch
     @mock.patch('requests.get',
@@ -654,7 +663,9 @@ testing::
 Backend tests should also ensure that:
 
 - the backend provides a unique URI scheme,
-- that it sets up the various providers (e.g. library, playback, etc.)::
+- that it sets up the various providers (e.g. library, playback, etc.)
+
+::
 
     def test_uri_schemes(config):
         backend = get_backend(config)
@@ -675,18 +686,21 @@ special setup or processing.
 
 Testing libraries
 -----------------
+
 Library test cases should cover the implementations of the standard Mopidy
 API (e.g. ``browse``, ``lookup``, ``refresh``, ``get_images``, ``search``,
 etc.)
 
 Testing playback controllers
 ----------------------------
+
 Testing ``change_track`` and ``translate_uri`` is probably the highest
 priority, since these methods are used to prepare the track and provide its
 audio URL to Mopidy's core for playback.
 
 Testing frontends
 -----------------
+
 Because most frontends will interact with the Mopidy core, it will most likely
 be necessary to have a full core running for testing purposes::
 
@@ -700,8 +714,9 @@ you are familiar with ``ThreadingActor``, ``ThreadingFuture``, and the
 ``proxies`` that allow you to access the attributes and methods of the actor
 directly.
 
-You'll also need a list of ``models.Track`` and a list of URIs in order to
-populate the core with some simple tracks that can be used for testing::
+You'll also need a list of :class:`~mopidy.models.Track` and a list of URIs in
+order to populate the core with some simple tracks that can be used for
+testing::
 
     class BaseTest(unittest.TestCase):
         tracks = [
@@ -738,6 +753,7 @@ the end of most method calls in order to get to the actual return values.
 
 Triggering events
 -----------------
+
 There may be test case scenarios that require simulating certain event triggers
 that your extension's actors can listen for and respond on. An example for
 patching the listener to store these events, and then play them back for your
