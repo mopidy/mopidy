@@ -491,7 +491,8 @@ class EventEmissionTest(BaseTest):
             ],
             listener_mock.send.mock_calls)
 
-    def test_next_emits_events_when_consume_mode_is_enabled(self, listener_mock):
+    def test_next_emits_events_when_consume_mode_is_enabled(self,
+                                                            listener_mock):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
         self.core.tracklist.set_consume(True)
