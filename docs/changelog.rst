@@ -25,7 +25,7 @@ Core API
 
 - The ``track_playback_ended`` event now includes the correct ``tl_track``
   reference when changing to the next track in consume mode. (Fixes:
-  :issue:`1402` PR: :issue:`1403`)
+  :issue:`1402` PR: :issue:`1403` PR: :issue:`1406`)
 
 Models
 ------
