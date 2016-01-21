@@ -705,7 +705,7 @@ Because most frontends will interact with the Mopidy core, it will most likely
 be necessary to have a full core running for testing purposes::
 
     self.core = core.Core.start(
-                config, backends=[get_backend(config]).proxy()
+                config, backends=[get_backend(config)]).proxy()
 
 
 It may be advisable to take a quick look at the
