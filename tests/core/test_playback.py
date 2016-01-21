@@ -492,6 +492,36 @@ class EventEmissionTest(BaseTest):
             ],
             listener_mock.send.mock_calls)
 
+    def test_next_emits_events_when_consume_mode_is_enabled(
+            self,
+            listener_mock):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tl_tracks[0])
+        self.replay_events()
+        self.core.playback.seek(1000)
+        self.replay_events()
+        listener_mock.reset_mock()
+
+        self.core.playback.next()
+        self.replay_events()
+
+        self.assertListEqual(
+            [
+                mock.call(
+                    'tracklist_changed'),
+                mock.call(
+                    'track_playback_ended',
+                    tl_track=tl_tracks[0], time_position=mock.ANY),
+                mock.call(
+                    'playback_state_changed',
+                    old_state='playing', new_state='playing'),
+                mock.call(
+                    'track_playback_started', tl_track=tl_tracks[1]),
+            ],
+            listener_mock.send.mock_calls)
+
     def test_gapless_track_change_emits_events(self, listener_mock):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 

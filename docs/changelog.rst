@@ -23,8 +23,12 @@ Core API
 - Add :meth:`mopidy.core.PlaylistsController.get_uri_schemes`. (PR:
   :issue:`1362`)
 
-- Persist state between runs. The amount of data to persist can be 
+- Persist state between runs. The amount of data to persist can be
   controlled by config value :confval:`core/restore_state`
+
+- The ``track_playback_ended`` event now includes the correct ``tl_track``
+  reference when changing to the next track in consume mode. (Fixes:
+  :issue:`1402` PR: :issue:`1403` PR: :issue:`1406`)
 
 Models
 ------
@@ -40,7 +44,7 @@ Extension support
   we let Mopidy crash if an extension's setup crashed. (PR: :issue:`1337`)
 
 Local backend
---------------
+-------------
 
 - Made :confval:`local/data_dir` really deprecated. This change breaks older
   versions of Mopidy-Local-SQLite and Mopidy-Local-Images.
@@ -50,6 +54,23 @@ M3U backend
 
 - Derive track name from file name for non-extended M3U
   playlists. (Fixes: :issue:`1364`, PR: :issue:`1369`)
+
+- Major refactoring of the M3U playlist extension. (Fixes:
+  :issue:`1370` PR: :issue:`1386`)
+
+  - Add :confval:`m3u/default_encoding` and :confval:`m3u/default_extension`
+    config values for improved text encoding support.
+
+  - No longer scan playlist directory and parse playlists at startup or refresh.
+    Similarly to the file extension, this now happens on request.
+
+  - Use :class:`mopidy.models.Ref` instances when reading and writing
+    playlists. Therefore, ``Track.length`` is no longer stored in
+    extended M3U playlists and ``#EXTINF`` runtime is always set to
+    -1.
+
+  - Improve reliability of playlist updates using the core playlist API by
+    applying the write-replace pattern for file updates.
 
 MPD frontend
 ------------

@@ -54,3 +54,14 @@ See :ref:`config` for general help on configuring Mopidy.
 
     Path to directory with M3U files. Unset by default, in which case the
     extension's data dir is used to store playlists.
+
+.. confval:: m3u/default_encoding
+
+    Text encoding used for files with extension ``.m3u``.  Default is
+    ``latin-1``. Note that files with extension ``.m3u8`` are always
+    expected to be UTF-8 encoded.
+
+.. confval:: m3u/default_extension
+
+    The file extension for M3U playlists created using the core playlist
+    API. Default is ``.m3u8``.
