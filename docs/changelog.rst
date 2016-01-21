@@ -23,6 +23,10 @@ Core API
 - Add :meth:`mopidy.core.PlaylistsController.get_uri_schemes`. (PR:
   :issue:`1362`)
 
+- The ``track_playback_ended`` event now includes the correct ``tl_track``
+  reference when changing to the next track in consume mode. (Fixes:
+  :issue:`1402` PR: :issue:`1403` PR: :issue:`1406`)
+
 Models
 ------
 
@@ -37,7 +41,7 @@ Extension support
   we let Mopidy crash if an extension's setup crashed. (PR: :issue:`1337`)
 
 Local backend
---------------
+-------------
 
 - Made :confval:`local/data_dir` really deprecated. This change breaks older
   versions of Mopidy-Local-SQLite and Mopidy-Local-Images.
