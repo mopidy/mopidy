@@ -259,7 +259,10 @@ class PlaybackController(object):
         backend = self._get_backend(next_tl_track)
 
         if backend:
-            backend.playback.change_track(next_tl_track.track).get()
+            try:
+                backend.playback.change_track(next_tl_track.track).get()
+            except Exception as e:
+                logger.error('Change track failed: %s', e)
 
     def _on_tracklist_change(self):
         """
@@ -343,6 +346,8 @@ class PlaybackController(object):
 
         current = self._pending_tl_track or self._current_tl_track
         pending = tl_track or current or self.core.tracklist.next_track(None)
+        # avoid endless loop if 'repeat' is 'true' and no track is playable
+        count = self.core.tracklist.get_length()
 
         while pending:
             # TODO: should we consume unplayable tracks in this loop?
@@ -352,6 +357,10 @@ class PlaybackController(object):
                 self.core.tracklist._mark_unplayable(pending)
             current = pending
             pending = self.core.tracklist.next_track(current)
+            count -= 1
+            if not count:
+                logger.info('No playable track in the list.')
+                break
 
         # TODO return result?
 
@@ -368,8 +377,12 @@ class PlaybackController(object):
             return False
 
         backend.playback.prepare_change()
-        if not backend.playback.change_track(pending_tl_track.track).get():
-            return False  # TODO: test for this path
+        try:
+            if not backend.playback.change_track(pending_tl_track.track).get():
+                return False  # TODO: test for this path
+        except Exception as e:
+            logger.error('Change track failed: %s', e)
+            return False
 
         if state == PlaybackState.PLAYING:
             try:
