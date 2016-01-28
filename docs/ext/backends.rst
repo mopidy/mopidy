@@ -115,7 +115,7 @@ Bundled with Mopidy. See :ref:`ext-local`.
 Mopidy-Local-Images
 ===================
 
-https://github.com/tkem/mopidy-local-images
+https://github.com/mopidy/mopidy-local-images
 
 Extension which plugs into Mopidy-Local to allow Web clients access to
 album art embedded in local media files.  Not to be used on its own,
@@ -126,7 +126,7 @@ local library provider being used.
 Mopidy-Local-SQLite
 ===================
 
-https://github.com/tkem/mopidy-local-sqlite
+https://github.com/mopidy/mopidy-local-sqlite
 
 Extension which plugs into Mopidy-Local to use an SQLite database to keep
 track of your local media. This extension lets you browse your music collection
