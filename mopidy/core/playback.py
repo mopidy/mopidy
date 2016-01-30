@@ -1,13 +1,29 @@
 from __future__ import absolute_import, unicode_literals
 
+import contextlib
 import logging
 
+from mopidy import exceptions
 from mopidy.audio import PlaybackState
 from mopidy.compat import urllib
 from mopidy.core import listener
 from mopidy.internal import deprecation, models, validation
 
 logger = logging.getLogger(__name__)
+
+
+@contextlib.contextmanager
+def _backend_error_handling(backend, reraise=None):
+    try:
+        yield
+    except exceptions.ValidationError as e:
+        logger.error('%s backend returned bad data: %s',
+                     backend.actor_ref.actor_class.__name__, e)
+    except Exception as e:
+        if reraise and isinstance(e, reraise):
+            raise
+        logger.exception('%s backend caused an exception.',
+                         backend.actor_ref.actor_class.__name__)
 
 
 class PlaybackController(object):
@@ -259,10 +275,8 @@ class PlaybackController(object):
         backend = self._get_backend(next_tl_track)
 
         if backend:
-            try:
+            with _backend_error_handling(backend):
                 backend.playback.change_track(next_tl_track.track).get()
-            except Exception as e:
-                logger.error('Change track failed: %s', e)
 
     def _on_tracklist_change(self):
         """
@@ -377,12 +391,12 @@ class PlaybackController(object):
             return False
 
         backend.playback.prepare_change()
-        try:
-            if not backend.playback.change_track(pending_tl_track.track).get():
-                return False  # TODO: test for this path
-        except Exception as e:
-            logger.error('Change track failed: %s', e)
-            return False
+        track_change_result = False
+        with _backend_error_handling(backend):
+            track_change_result = backend.playback.change_track(
+                pending_tl_track.track).get()
+        if not track_change_result:
+            return False  # TODO: test for this path
 
         if state == PlaybackState.PLAYING:
             try:
