@@ -141,10 +141,27 @@ Gapless
   cases. (Fixes: :issue:`1305` PR: :issue:`1346`)
 
 
-v1.1.2 (UNRELEASED)
+v1.1.2 (2016-01-18)
 ===================
 
 Bug fix release.
+
+- Main: Catch errors when loading the :confval:`logging/config_file` file.
+  (Fixes: :issue:`1320`)
+
+- Core: If changing to another track while the player is paused, the new track
+  would not be added to the history or marked as currently playing. (Fixes:
+  :issue:`1352`, PR: :issue:`1356`)
+
+- Core: Skips over unplayable tracks if the user attempts to change tracks
+  while paused, like we already did if in playing state. (Fixes :issue:`1378`,
+  PR: :issue:`1379`)
+
+- Core: Make :meth:`~mopidy.core.LibraryController.lookup` ignore tracks with
+  empty URIs. (Partly fixes: :issue:`1340`, PR: :issue:`1381`)
+
+- Core: Fix crash if backends emits events with wrong names or arguments.
+  (Fixes: :issue:`1383`)
 
 - Stream: If an URI is considered playable, don't consider it as a candidate
   for playlist parsing. Just looking at MIME type prefixes isn't enough, as for
@@ -153,6 +170,18 @@ Bug fix release.
 
 - Local: If the scan or clear commands are used on a library that does not
   exist, exit with an error. (Fixes: :issue:`1298`)
+
+- MPD: Notify idling clients when a seek is performed. (Fixes: :issue:`1331`)
+
+- MPD: Don't return tracks with empty URIs. (Partly fixes: :issue:`1340`, PR:
+  :issue:`1343`)
+
+- MPD: Add ``volume`` command that was reintroduced, though still as a
+  deprecated command, in MPD 0.18 and is in use by some clients like mpc.
+  (Fixes: :issue:`1393`, PR: :issue:`1397`)
+
+- Proxy: Handle case where :confval:`proxy/port` is either missing from config
+  or set to an empty string. (PR: :issue:`1371`)
 
 
 v1.1.1 (2015-09-14)
