@@ -4,15 +4,10 @@ from __future__ import (
 import collections
 import time
 
-import gi
-gi.require_version('Gst', '1.0')
-gi.require_version('GstPbutils', '1.0')
-from gi.repository import Gst, GstPbutils
-Gst.is_initialized() or Gst.init()
-
 from mopidy import exceptions
 from mopidy.audio import tags as tags_lib, utils
 from mopidy.internal import encoding
+from mopidy.internal.gi import Gst, GstPbutils
 
 # GST_ELEMENT_FACTORY_LIST:
 _DECODER = 1 << 0

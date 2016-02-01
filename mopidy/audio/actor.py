@@ -4,12 +4,6 @@ import logging
 import os
 import threading
 
-import gi
-gi.require_version('Gst', '1.0')
-gi.require_version('GstPbutils', '1.0')
-from gi.repository import GObject, Gst, GstPbutils
-Gst.is_initialized() or Gst.init()
-
 import pykka
 
 from mopidy import exceptions
@@ -17,6 +11,7 @@ from mopidy.audio import tags as tags_lib, utils
 from mopidy.audio.constants import PlaybackState
 from mopidy.audio.listener import AudioListener
 from mopidy.internal import deprecation, process
+from mopidy.internal.gi import GObject, Gst, GstPbutils
 
 
 logger = logging.getLogger(__name__)

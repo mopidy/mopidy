@@ -5,14 +5,10 @@ import os
 import platform
 import sys
 
-import gi
-gi.require_version('Gst', '1.0')
-from gi.repository import Gst
-Gst.is_initialized() or Gst.init()
-
 import pkg_resources
 
 from mopidy.internal import formatting
+from mopidy.internal.gi import Gst, gi
 
 
 def format_dependency_list(adapters=None):

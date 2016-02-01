@@ -1,10 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
-import gi
-gi.require_version('Gst', '1.0')
-from gi.repository import Gst
-
 from mopidy import httpclient
+from mopidy.internal.gi import Gst
 
 
 def calculate_duration(num_samples, sample_rate):

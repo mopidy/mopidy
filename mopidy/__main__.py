@@ -4,26 +4,8 @@ import logging
 import os
 import signal
 import sys
-import textwrap
 
-try:
-    import gi
-    gi.require_version('Gst', '1.0')
-    from gi.repository import Gst
-except ImportError:
-    print(textwrap.dedent("""
-        ERROR: The GStreamer Python package was not found.
-
-        Mopidy requires GStreamer to work. GStreamer is a C library with a
-        number of dependencies itself, and cannot be installed with the regular
-        Python tools like pip.
-
-        Please see http://docs.mopidy.com/en/latest/installation/ for
-        instructions on how to install the required dependencies.
-    """))
-    raise
-else:
-    Gst.init()
+from mopidy.internal.gi import Gst  # noqa: Import to initialize
 
 try:
     # Make GObject's mainloop the event loop for python-dbus

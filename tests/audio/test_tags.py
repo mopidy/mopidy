@@ -4,12 +4,9 @@ from __future__ import absolute_import, unicode_literals
 
 import unittest
 
-import gi
-gi.require_version('Gst', '1.0')
-from gi.repository import GLib, GObject, Gst
-
 from mopidy import compat
 from mopidy.audio import tags
+from mopidy.internal.gi import GLib, GObject, Gst
 from mopidy.models import Album, Artist, Track
 
 

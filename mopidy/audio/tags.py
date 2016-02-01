@@ -5,13 +5,9 @@ import datetime
 import logging
 import numbers
 
-import gi
-gi.require_version('Gst', '1.0')
-from gi.repository import GLib, Gst
-Gst.is_initialized() or Gst.init()
-
 from mopidy import compat
 from mopidy.internal import log
+from mopidy.internal.gi import GLib, Gst
 from mopidy.models import Album, Artist, Track
 
 

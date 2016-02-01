@@ -3,10 +3,6 @@ from __future__ import absolute_import, unicode_literals
 import threading
 import unittest
 
-import gi
-gi.require_version('Gst', '1.0')
-from gi.repository import Gst
-
 import mock
 
 import pykka
@@ -14,6 +10,7 @@ import pykka
 from mopidy import audio
 from mopidy.audio.constants import PlaybackState
 from mopidy.internal import path
+from mopidy.internal.gi import Gst
 
 from tests import dummy_audio, path_to_data_dir
 

@@ -4,15 +4,12 @@ import platform
 import sys
 import unittest
 
-import gi
-gi.require_version('Gst', '1.0')
-from gi.repository import Gst
-
 import mock
 
 import pkg_resources
 
 from mopidy.internal import deps
+from mopidy.internal.gi import Gst, gi
 
 
 class DepsTest(unittest.TestCase):
