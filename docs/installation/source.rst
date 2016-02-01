@@ -50,11 +50,18 @@ please follow the directions :ref:`here <contributing>`.
    If you use Arch Linux, install the following packages from the official
    repository::
 
-       sudo pacman -S gst-python gst-plugins-good gst-plugins-ugly
+       sudo pacman -S python2-gobject gst-python gst-plugins-good
+       gst-plugins-ugly
+
+   .. warning::
+
+       ``gst-python`` installs GStreamer GI overrides for Python 3. As far as
+       we know, Arch currently lacks a package with the corresponding overrides
+       built for Python 2. If a ``gst-python2`` package is added, it will
+       depend on ``python2-gobject``, so we can then shorten this package list.
 
    If you use Fedora you can install GStreamer like this::
 
-       # TODO Update to GStreamer 1
        sudo yum install -y python-gstreamer1 gstreamer1-plugins-good \
            gstreamer1-plugins-ugly
 
