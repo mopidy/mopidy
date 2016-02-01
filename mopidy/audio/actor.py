@@ -696,7 +696,7 @@ class Audio(pykka.ThreadingActor):
         """
         Internal method for setting the raw GStreamer state.
 
-        .. digraph:: Gst.State.transitions
+        .. digraph:: gst_state_transitions
 
             graph [rankdir="LR"];
             node [fontsize=10];
