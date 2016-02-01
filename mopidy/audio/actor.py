@@ -746,6 +746,7 @@ class Audio(pykka.ThreadingActor):
 
         # Default to blank data to trick shoutcast into clearing any previous
         # values it might have.
+        # TODO: Verify if this works at all, likely it doesn't.
         set_value(Gst.TAG_ARTIST, ' ')
         set_value(Gst.TAG_TITLE, ' ')
         set_value(Gst.TAG_ALBUM, ' ')

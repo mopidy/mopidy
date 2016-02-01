@@ -137,6 +137,11 @@ def _start_pipeline(pipeline):
 
 
 def _query_duration(pipeline, timeout=100):
+    # 1. Try and get a duration, return if success.
+    # 2. Some formats need to play some buffers before duration is found.
+    # 3. Wait for a duration change event.
+    # 4. Try and get a duration again.
+
     success, duration = pipeline.query_duration(Gst.Format.TIME)
     if success and duration >= 0:
         return duration // Gst.MSECOND
