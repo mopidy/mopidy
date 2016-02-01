@@ -76,11 +76,6 @@ please follow the directions :ref:`here <contributing>`.
    <https://pypi.python.org/pypi/Mopidy>`_. To upgrade Mopidy to future
    releases, just rerun this command.
 
-   Alternatively, if you want to track Mopidy development closer, you may
-   install a snapshot of Mopidy's ``develop`` Git branch using pip::
-
-       sudo pip install --allow-unverified=mopidy mopidy==dev
-
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
    then you're ready to :doc:`run Mopidy </running>`.
 
