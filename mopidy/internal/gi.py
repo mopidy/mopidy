@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+import sys
 import textwrap
 
 
@@ -22,6 +23,14 @@ except ImportError:
     raise
 else:
     Gst.is_initialized() or Gst.init()
+
+
+REQUIRED_GST_VERSION = (1, 2)
+
+if Gst.version() < REQUIRED_GST_VERSION:
+    sys.exit(
+        'ERROR: Mopidy requires GStreamer >= %s, but found %s.' % (
+            '.'.join(map(str, REQUIRED_GST_VERSION)), Gst.version_string()))
 
 
 __all__ = [
