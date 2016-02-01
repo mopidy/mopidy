@@ -60,7 +60,7 @@ please follow the directions :ref:`here <contributing>`.
 
    If you use Gentoo you can install GStreamer like this::
 
-       emerge -av gst-python gst-plugins-good gst-plugins-ugly gst-plugins-meta
+       emerge -av gst-python gst-plugins-meta
 
    ``gst-plugins-meta`` is the one that actually pulls in the plugins you want,
    so pay attention to the USE flags, e.g. ``alsa``, ``mp3``, etc.
