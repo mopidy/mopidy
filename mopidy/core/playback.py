@@ -459,7 +459,7 @@ class PlaybackController(object):
         if time_position < 0:
             time_position = 0
         elif time_position > tl_track.track.length:
-            # TODO: gstreamer will trigger a about to finish for us, use that?
+            # TODO: GStreamer will trigger a about-to-finish for us, use that?
             self.next()
             return True
 

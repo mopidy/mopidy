@@ -7,11 +7,8 @@ import sys
 
 import pkg_resources
 
-import pygst
-pygst.require('0.10')
-import gst  # noqa
-
 from mopidy.internal import formatting
+from mopidy.internal.gi import Gst, gi
 
 
 def format_dependency_list(adapters=None):
@@ -110,8 +107,7 @@ def pkg_info(project_name=None, include_extras=False):
 
 def gstreamer_info():
     other = []
-    other.append('Python wrapper: gst-python %s' % (
-        '.'.join(map(str, gst.get_pygst_version()))))
+    other.append('Python wrapper: python-gi %s' % gi.__version__)
 
     found_elements = []
     missing_elements = []
@@ -135,8 +131,8 @@ def gstreamer_info():
 
     return {
         'name': 'GStreamer',
-        'version': '.'.join(map(str, gst.get_gst_version())),
-        'path': os.path.dirname(gst.__file__),
+        'version': '.'.join(map(str, Gst.version())),
+        'path': os.path.dirname(gi.__file__),
         'other': '\n'.join(other),
     }
 
@@ -187,6 +183,6 @@ def _gstreamer_check_elements():
     ]
     known_elements = [
         factory.get_name() for factory in
-        gst.registry_get_default().get_feature_list(gst.TYPE_ELEMENT_FACTORY)]
+        Gst.Registry.get().get_feature_list(Gst.ElementFactory)]
     return [
         (element, element in known_elements) for element in elements_to_check]

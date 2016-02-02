@@ -10,6 +10,12 @@ v1.2.0 (UNRELEASED)
 
 Feature release.
 
+Dependencies
+------------
+
+- Mopidy now requires GStreamer 1.x, as we've finally ported from GStreamer
+  0.10.
+
 Core API
 --------
 
@@ -122,6 +128,33 @@ Cleanups
 
 - Catch errors when loading :confval:`logging/config_file`.
   (Fixes: :issue:`1320`)
+
+Audio
+-----
+
+- **Breaking:** The audio scanner now returns ISO-8601 formatted strings
+  instead of :class:`~datetime.datetime` objects for dates found in tags.
+  Because of this change, we can now return years without months or days, which
+  matches the semantics of the date fields in our data models.
+
+- **Breaking:** :meth:`mopidy.audio.Audio.set_appsrc`'s ``caps`` argument has
+  changed format due to the upgrade from GStreamer 0.10 to GStreamer 1. As
+  far as we know, this is only used by Mopidy-Spotify. As an example, with
+  GStreamer 0.10 the Mopidy-Spotify caps was::
+
+      audio/x-raw-int, endianness=(int)1234, channels=(int)2, width=(int)16,
+      depth=(int)16, signed=(boolean)true, rate=(int)44100
+
+  With GStreamer 1 this changes to::
+
+      audio/x-raw,format=S16LE,rate=44100,channels=2,layout=interleaved
+
+  If your Mopidy backend uses ``set_appsrc()``, please refer to GStreamer
+  documentation for details on the new caps string format.
+
+- **Deprecated:** :func:`mopidy.audio.utils.create_buffer`'s ``capabilities``
+  argument is no longer in use and will be removed in the future. As far as we
+  know, this is only used by Mopidy-Spotify.
 
 Gapless
 -------

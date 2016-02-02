@@ -7,7 +7,7 @@ import socket
 import sys
 import threading
 
-import gobject
+from gi.repository import GObject
 
 import pykka
 
@@ -67,7 +67,7 @@ def format_hostname(hostname):
 
 class Server(object):
 
-    """Setup listener and register it with gobject's event loop."""
+    """Setup listener and register it with GObject's event loop."""
 
     def __init__(self, host, port, protocol, protocol_kwargs=None,
                  max_connections=5, timeout=30):
@@ -87,7 +87,7 @@ class Server(object):
         return sock
 
     def register_server_socket(self, fileno):
-        gobject.io_add_watch(fileno, gobject.IO_IN, self.handle_connection)
+        GObject.io_add_watch(fileno, GObject.IO_IN, self.handle_connection)
 
     def handle_connection(self, fd, flags):
         try:
@@ -132,7 +132,7 @@ class Server(object):
 class Connection(object):
     # NOTE: the callback code is _not_ run in the actor's thread, but in the
     # same one as the event loop. If code in the callbacks blocks, the rest of
-    # gobject code will likely be blocked as well...
+    # GObject code will likely be blocked as well...
     #
     # Also note that source_remove() return values are ignored on purpose, a
     # false return value would only tell us that what we thought was registered
@@ -211,14 +211,14 @@ class Connection(object):
             return
 
         self.disable_timeout()
-        self.timeout_id = gobject.timeout_add_seconds(
+        self.timeout_id = GObject.timeout_add_seconds(
             self.timeout, self.timeout_callback)
 
     def disable_timeout(self):
         """Deactivate timeout mechanism."""
         if self.timeout_id is None:
             return
-        gobject.source_remove(self.timeout_id)
+        GObject.source_remove(self.timeout_id)
         self.timeout_id = None
 
     def enable_recv(self):
@@ -226,9 +226,9 @@ class Connection(object):
             return
 
         try:
-            self.recv_id = gobject.io_add_watch(
+            self.recv_id = GObject.io_add_watch(
                 self.sock.fileno(),
-                gobject.IO_IN | gobject.IO_ERR | gobject.IO_HUP,
+                GObject.IO_IN | GObject.IO_ERR | GObject.IO_HUP,
                 self.recv_callback)
         except socket.error as e:
             self.stop('Problem with connection: %s' % e)
@@ -236,7 +236,7 @@ class Connection(object):
     def disable_recv(self):
         if self.recv_id is None:
             return
-        gobject.source_remove(self.recv_id)
+        GObject.source_remove(self.recv_id)
         self.recv_id = None
 
     def enable_send(self):
@@ -244,9 +244,9 @@ class Connection(object):
             return
 
         try:
-            self.send_id = gobject.io_add_watch(
+            self.send_id = GObject.io_add_watch(
                 self.sock.fileno(),
-                gobject.IO_OUT | gobject.IO_ERR | gobject.IO_HUP,
+                GObject.IO_OUT | GObject.IO_ERR | GObject.IO_HUP,
                 self.send_callback)
         except socket.error as e:
             self.stop('Problem with connection: %s' % e)
@@ -255,11 +255,11 @@ class Connection(object):
         if self.send_id is None:
             return
 
-        gobject.source_remove(self.send_id)
+        GObject.source_remove(self.send_id)
         self.send_id = None
 
     def recv_callback(self, fd, flags):
-        if flags & (gobject.IO_ERR | gobject.IO_HUP):
+        if flags & (GObject.IO_ERR | GObject.IO_HUP):
             self.stop('Bad client flags: %s' % flags)
             return True
 
@@ -283,7 +283,7 @@ class Connection(object):
         return True
 
     def send_callback(self, fd, flags):
-        if flags & (gobject.IO_ERR | gobject.IO_HUP):
+        if flags & (GObject.IO_ERR | GObject.IO_HUP):
             self.stop('Bad client flags: %s' % flags)
             return True
 
