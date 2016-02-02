@@ -149,7 +149,7 @@ Audio
 
       audio/x-raw,format=S16LE,rate=44100,channels=2,layout=interleaved
 
-  If you Mopidy backend uses ``set_appsrc()``, please refer to GStreamer
+  If your Mopidy backend uses ``set_appsrc()``, please refer to GStreamer
   documentation for details on the new caps string format.
 
 - **Deprecated:** :func:`mopidy.audio.utils.create_buffer`'s ``capabilities``
