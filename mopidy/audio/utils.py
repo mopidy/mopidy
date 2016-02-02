@@ -88,7 +88,7 @@ class Signals(object):
         self._ids[(element, event)] = element.connect(event, func, *args)
 
     def disconnect(self, element, event):
-        """Disconnect whatever handler we have for and element+event pair.
+        """Disconnect whatever handler we have for an element+event pair.
 
         Does nothing it the handler has already been removed.
         """
