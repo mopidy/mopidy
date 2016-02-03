@@ -164,7 +164,7 @@ def _gstreamer_check_elements():
         'lame',
         'mad',
         'mpegaudioparse',
-        # 'mpg123audiodec',  # Only available in GStreamer 1.x
+        'mpg123audiodec',
 
         # Ogg Vorbis encoding and decoding
         'vorbisdec',
