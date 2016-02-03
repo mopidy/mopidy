@@ -748,8 +748,7 @@ class Audio(pykka.ThreadingActor):
             gobject_value = GObject.Value()
             gobject_value.init(GObject.TYPE_STRING)
             gobject_value.set_string(value)
-            taglist.add_value(
-                Gst.TagMergeMode.REPLACE, Gst.TAG_ARTIST, gobject_value)
+            taglist.add_value(Gst.TagMergeMode.REPLACE, tag, gobject_value)
 
         # Default to blank data to trick shoutcast into clearing any previous
         # values it might have.
