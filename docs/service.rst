@@ -105,8 +105,8 @@ directly. Running PulseAudio as a system-wide daemon is discouraged by upstream
 for details). Rather you can configure PulseAudio and Mopidy so Mopidy sends
 the sound to the PulseAudio server already running as your main user.
 
-First, configure PulseAudio to accept sound over tcp from localhost by
-uncommenting or adding the tcp module to :file:`/etc/pulse/default.pa` or
+First, configure PulseAudio to accept sound over TCP from localhost by
+uncommenting or adding the TCP module to :file:`/etc/pulse/default.pa` or
 :file:`$XDG_CONFIG_HOME/pulse/default.pa` (typically
 :file:`~/.config/pulse/default.pa`)::
 
