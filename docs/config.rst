@@ -49,21 +49,18 @@ below, together with their default values. In addition, all :ref:`extensions
 defaults are documented on the :ref:`extension pages <ext>`.
 
 
-Default core configuration
-==========================
+Default configuration
+=====================
+
+This is the default configuration for Mopidy itself. All extensions bring
+additional configuration values with their own defaults.
 
 .. literalinclude:: ../mopidy/config/default.conf
     :language: ini
 
 
-Core configuration values
-=========================
-
-Mopidy's core has the following configuration values that you can change.
-
-
-Core configuration
-------------------
+Core config section
+===================
 
 .. confval:: core/cache_dir
 
@@ -116,7 +113,10 @@ Core configuration
 
 
 Audio configuration
--------------------
+===================
+
+These are the available audio configurations. For specific use cases, see
+:ref:`audio`.
 
 .. confval:: audio/mixer
 
@@ -153,8 +153,9 @@ Audio configuration
     ``gst-inspect-1.0`` to see what output properties can be set on the sink.
     For example: ``gst-inspect-1.0 shout2send``
 
+
 Logging configuration
----------------------
+=====================
 
 .. confval:: logging/color
 
@@ -205,7 +206,7 @@ Logging configuration
 .. _proxy-config:
 
 Proxy configuration
--------------------
+===================
 
 Not all parts of Mopidy or all Mopidy extensions respect the proxy
 server configuration when connecting to the Internet. Currently, this is at
@@ -239,9 +240,10 @@ these configurations to help users on locked down networks.
 Extension configuration
 =======================
 
-Mopidy's extensions have their own config values that you may want to tweak.
-For the available config values, please refer to the docs for each extension.
-Most, if not all, can be found at :ref:`ext`.
+Each installed Mopidy extension adds its own configuration section with one or
+more config values that you may want to tweak. For the available config
+values, please refer to the docs for each extension. Most, if not all, can be
+found at :ref:`ext`.
 
 Mopidy extensions are enabled by default when they are installed. If you want
 to disable an extension without uninstalling it, all extensions support the
@@ -254,118 +256,14 @@ following to your ``mopidy.conf``::
     enabled = false
 
 
-Advanced configurations
-=======================
+Adding new configuration values
+===============================
 
-Custom audio sink
------------------
-
-If you have successfully installed GStreamer, and then run the
-``gst-inspect-1.0`` command, you should see a long listing of installed
-plugins, ending in a summary line::
-
-    $ gst-inspect-1.0
-    ... long list of installed plugins ...
-    Total count: 233 plugins, 1339 features
-
-Next, you should be able to produce a audible tone by running::
-
-    gst-launch-1.0 audiotestsrc ! audioresample ! autoaudiosink
-
-If you cannot hear any sound when running this command, you won't hear any
-sound from Mopidy either, as Mopidy by default uses GStreamer's
-``autoaudiosink`` to play audio. Thus, make this work before you file a bug
-against Mopidy.
-
-If you for some reason want to use some other GStreamer audio sink than
-``autoaudiosink``, you can set the :confval:`audio/output` config value to a
-partial GStreamer pipeline description describing the GStreamer sink you want
-to use.
-
-Example ``mopidy.conf`` for using OSS4:
-
-.. code-block:: ini
-
-    [audio]
-    output = oss4sink
-
-Again, this is the equivalent of the following ``gst-launch-1.0`` command, so
-make this work first::
-
-    gst-launch-1.0 audiotestsrc ! audioresample ! oss4sink
-
-
-Streaming through SHOUTcast/Icecast
------------------------------------
-
-.. warning:: Known issue
-
-   Currently, Mopidy does not handle end-of-track vs end-of-stream signalling
-   in GStreamer correctly. This causes the SHOUTcast stream to be disconnected
-   at the end of each track, rendering it quite useless. For further details,
-   see :issue:`492`. You can also try the workaround_ mentioned below.
-
-If you want to play the audio on another computer than the one running Mopidy,
-you can stream the audio from Mopidy through an SHOUTcast or Icecast audio
-streaming server. Multiple media players can then be connected to the streaming
-server simultaneously. To use the SHOUTcast output, do the following:
-
-#. Install, configure and start the Icecast server. It can be found in the
-   ``icecast2`` package in Debian/Ubuntu.
-
-#. Set the :confval:`audio/output` config value to ``lamemp3enc ! shout2send``.
-   An Ogg Vorbis encoder could be used instead of the lame MP3 encoder.
-
-#. You might also need to change the ``shout2send`` default settings, run
-   ``gst-inspect-1.0 shout2send`` to see the available settings. Most likely
-   you want to change ``ip``, ``username``, ``password``, and ``mount``.
-
-   Example for MP3 streaming:
-
-   .. code-block:: ini
-
-       [audio]
-       output = lamemp3enc ! shout2send mount=mopidy ip=127.0.0.1 port=8000 password=hackme
-
-   Example for Ogg Vorbis streaming:
-
-   .. code-block:: ini
-
-       [audio]
-       output = audioresample ! audioconvert ! vorbisenc ! oggmux ! shout2send mount=mopidy ip=127.0.0.1 port=8000 password=hackme
-
-Other advanced setups are also possible for outputs. Basically, anything you
-can use with the ``gst-launch-1.0`` command can be plugged into
-:confval:`audio/output`.
-
-.. _workaround:
-
-**Workaround for end-of-track issues - fallback streams**
-
-By using a *fallback stream* playing silence, you can somewhat mitigate the
-signalling issues.
-
-Example Icecast configuration:
-
-.. code-block:: xml
-
-    <mount>
-      <mount-name>/mopidy</mount-name>
-      <fallback-mount>/silence.mp3</fallback-mount>
-      <fallback-override>1</fallback-override>
-    </mount>
-
-The ``silence.mp3`` file needs to be placed in the directory defined by
-``<webroot>...</webroot>``.
-
-
-New configuration values
-------------------------
-
-Mopidy's config validator will stop you from defining any config values in
-your config file that Mopidy doesn't know about. This may sound obnoxious,
-but it helps us detect typos in your config, and deprecated config values that
-should be removed or updated.
+Mopidy's config validator will validate all of its own config sections and the
+config sections belonging to any installed extension. It will raise an error if
+you add any config values in your config file that Mopidy doesn't know about.
+This may sound obnoxious, but it helps us detect typos in your config, and to
+warn about deprecated config values that should be removed or updated.
 
 If you're extending Mopidy, and want to use Mopidy's configuration
 system, you can add new sections to the config without triggering the config

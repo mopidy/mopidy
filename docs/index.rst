@@ -82,6 +82,7 @@ announcements related to Mopidy and Mopidy extensions.
     config
     running
     service
+    audio
     troubleshooting
 
 
