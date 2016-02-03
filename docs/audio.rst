@@ -4,6 +4,14 @@
 Advanced audio setups
 *********************
 
+Mopidy has very few :ref:`audio-config`, but the ones we have are very powerful
+because they let you modify the GStreamer audio pipeline directly. Here we
+describe some use cases that can be solved with the audio configs and
+GStreamer.
+
+
+.. _custom-sink:
+
 Custom audio sink
 =================
 
@@ -42,28 +50,24 @@ make this work first::
     gst-launch-1.0 audiotestsrc ! audioresample ! oss4sink
 
 
-Streaming through SHOUTcast/Icecast
-===================================
+.. _streaming:
 
-.. warning:: Known issue
-
-   Currently, Mopidy does not handle end-of-track vs end-of-stream signalling
-   in GStreamer correctly. This causes the SHOUTcast stream to be disconnected
-   at the end of each track, rendering it quite useless. For further details,
-   see :issue:`492`. You can also try the workaround_ mentioned below.
+Streaming through Icecast
+=========================
 
 If you want to play the audio on another computer than the one running Mopidy,
-you can stream the audio from Mopidy through an SHOUTcast or Icecast audio
-streaming server. Multiple media players can then be connected to the streaming
-server simultaneously. To use the SHOUTcast output, do the following:
+you can stream the audio from Mopidy through an Icecast audio streaming server.
+Multiple media players can then be connected to the streaming server
+simultaneously. To use the Icecast output, do the following:
 
 #. Install, configure and start the Icecast server. It can be found in the
    ``icecast2`` package in Debian/Ubuntu.
 
-#. Set the :confval:`audio/output` config value to ``lamemp3enc ! shout2send``.
-   An Ogg Vorbis encoder could be used instead of the lame MP3 encoder.
+#. Set the :confval:`audio/output` config value to encode the output audio to
+   MP3 (``lamemp3enc``) or Ogg Vorbis (``audioresample ! audioconvert !
+   vorbisenc ! oggmux``) and send it to Icecast (``shout2send``).
 
-#. You might also need to change the ``shout2send`` default settings, run
+   You might also need to change the ``shout2send`` default settings, run
    ``gst-inspect-1.0 shout2send`` to see the available settings. Most likely
    you want to change ``ip``, ``username``, ``password``, and ``mount``.
 
@@ -85,12 +89,31 @@ Other advanced setups are also possible for outputs. Basically, anything you
 can use with the ``gst-launch-1.0`` command can be plugged into
 :confval:`audio/output`.
 
-.. _workaround:
 
-**Workaround for end-of-track issues - fallback streams**
+Known issues
+------------
+
+- **Changing track:** As of Mopidy 1.2 we support gapless playback, and the
+  stream does no longer end when changing from one track to another.
+
+- **Previous/next:** The stream ends on previous and next. See :issue:`1306`
+  for details. This can be worked around using a fallback stream, as described
+  below.
+
+- **Pause:** Pausing playback stops the stream. This is probably not something
+  we're going to fix. This can be worked around using a fallback stream, as
+  described below.
+
+- **Metadata:** Track metadata is mostly missing from the stream. For Spotify,
+  fixing :issue:`1357` should help. The general issue for other extensions is
+  :issue:`866`.
+
+
+Fallback stream
+---------------
 
 By using a *fallback stream* playing silence, you can somewhat mitigate the
-signalling issues.
+known issues above.
 
 Example Icecast configuration:
 
@@ -102,5 +125,6 @@ Example Icecast configuration:
       <fallback-override>1</fallback-override>
     </mount>
 
-The ``silence.mp3`` file needs to be placed in the directory defined by
-``<webroot>...</webroot>``.
+You can easily find MP3 files with just silence by searching the web. The
+``silence.mp3`` file needs to be placed in the directory defined by
+``<webroot>...</webroot>`` in the Icecast configuration.

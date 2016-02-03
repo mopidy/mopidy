@@ -112,6 +112,8 @@ Core config section
     MPD clients will crash if this limit is exceeded.
 
 
+.. _audio-config:
+
 Audio configuration
 ===================
 
