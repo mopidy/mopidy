@@ -4,10 +4,10 @@
 Advanced audio setups
 *********************
 
-Mopidy has very few :ref:`audio-config`, but the ones we have are very powerful
-because they let you modify the GStreamer audio pipeline directly. Here we
-describe some use cases that can be solved with the audio configs and
-GStreamer.
+Mopidy has very few :ref:`audio configs <audio-config>`, but the ones we
+have are very powerful because they let you modify the GStreamer audio pipeline
+directly. Here we describe some use cases that can be solved with the audio
+configs and GStreamer.
 
 
 .. _custom-sink:
