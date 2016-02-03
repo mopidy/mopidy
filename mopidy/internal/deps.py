@@ -161,7 +161,7 @@ def _gstreamer_check_elements():
         'flump3dec',
         'id3demux',
         'id3v2mux',
-        'lame',
+        'lamemp3enc',
         'mad',
         'mpegaudioparse',
         'mpg123audiodec',

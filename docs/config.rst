@@ -313,22 +313,22 @@ server simultaneously. To use the SHOUTcast output, do the following:
 #. Install, configure and start the Icecast server. It can be found in the
    ``icecast2`` package in Debian/Ubuntu.
 
-#. Set the :confval:`audio/output` config value to ``lame ! shout2send``. An
-   Ogg Vorbis encoder could be used instead of the lame MP3 encoder.
+#. Set the :confval:`audio/output` config value to ``lamemp3enc ! shout2send``.
+   An Ogg Vorbis encoder could be used instead of the lame MP3 encoder.
 
 #. You might also need to change the ``shout2send`` default settings, run
    ``gst-inspect-0.10 shout2send`` to see the available settings. Most likely
    you want to change ``ip``, ``username``, ``password``, and ``mount``.
-   
+
    Example for MP3 streaming:
 
    .. code-block:: ini
 
        [audio]
-       output = lame ! shout2send mount=mopidy ip=127.0.0.1 port=8000 password=hackme
+       output = lamemp3enc ! shout2send mount=mopidy ip=127.0.0.1 port=8000 password=hackme
 
    Example for Ogg Vorbis streaming:
-   
+
    .. code-block:: ini
 
        [audio]
