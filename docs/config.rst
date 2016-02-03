@@ -150,8 +150,8 @@ Audio configuration
     Expects a GStreamer sink. Typical values are ``autoaudiosink``,
     ``alsasink``, ``osssink``, ``oss4sink``, ``pulsesink``, and ``shout2send``,
     and additional arguments specific to each sink. You can use the command
-    ``gst-inspect-0.10`` to see what output properties can be set on the sink.
-    For example: ``gst-inspect-0.10 shout2send``
+    ``gst-inspect-1.0`` to see what output properties can be set on the sink.
+    For example: ``gst-inspect-1.0 shout2send``
 
 Logging configuration
 ---------------------
@@ -260,17 +260,17 @@ Advanced configurations
 Custom audio sink
 -----------------
 
-If you have successfully installed GStreamer, and then run the ``gst-inspect``
-or ``gst-inspect-0.10`` command, you should see a long listing of installed
+If you have successfully installed GStreamer, and then run the
+``gst-inspect-1.0`` command, you should see a long listing of installed
 plugins, ending in a summary line::
 
-    $ gst-inspect-0.10
+    $ gst-inspect-1.0
     ... long list of installed plugins ...
-    Total count: 254 plugins (1 blacklist entry not shown), 1156 features
+    Total count: 233 plugins, 1339 features
 
 Next, you should be able to produce a audible tone by running::
 
-    gst-launch-0.10 audiotestsrc ! audioresample ! autoaudiosink
+    gst-launch-1.0 audiotestsrc ! audioresample ! autoaudiosink
 
 If you cannot hear any sound when running this command, you won't hear any
 sound from Mopidy either, as Mopidy by default uses GStreamer's
@@ -289,10 +289,10 @@ Example ``mopidy.conf`` for using OSS4:
     [audio]
     output = oss4sink
 
-Again, this is the equivalent of the following ``gst-inspect`` command, so make
-this work first::
+Again, this is the equivalent of the following ``gst-launch-1.0`` command, so
+make this work first::
 
-    gst-launch-0.10 audiotestsrc ! audioresample ! oss4sink
+    gst-launch-1.0 audiotestsrc ! audioresample ! oss4sink
 
 
 Streaming through SHOUTcast/Icecast
@@ -317,7 +317,7 @@ server simultaneously. To use the SHOUTcast output, do the following:
    An Ogg Vorbis encoder could be used instead of the lame MP3 encoder.
 
 #. You might also need to change the ``shout2send`` default settings, run
-   ``gst-inspect-0.10 shout2send`` to see the available settings. Most likely
+   ``gst-inspect-1.0 shout2send`` to see the available settings. Most likely
    you want to change ``ip``, ``username``, ``password``, and ``mount``.
 
    Example for MP3 streaming:
@@ -335,7 +335,7 @@ server simultaneously. To use the SHOUTcast output, do the following:
        output = audioresample ! audioconvert ! vorbisenc ! oggmux ! shout2send mount=mopidy ip=127.0.0.1 port=8000 password=hackme
 
 Other advanced setups are also possible for outputs. Basically, anything you
-can use with the ``gst-launch-0.10`` command can be plugged into
+can use with the ``gst-launch-1.0`` command can be plugged into
 :confval:`audio/output`.
 
 .. _workaround:
