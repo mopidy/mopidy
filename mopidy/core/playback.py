@@ -361,8 +361,8 @@ class PlaybackController(object):
         current = self._pending_tl_track or self._current_tl_track
         pending = tl_track or current or self.core.tracklist.next_track(None)
         # avoid endless loop if 'repeat' is 'true' and no track is playable
-        # TODO: could miss a playable track in a shuffled playlist
-        count = self.core.tracklist.get_length()
+        # * 2 -> second run to get all playable track in a shuffled playlist
+        count = self.core.tracklist.get_length() * 2
 
         while pending:
             # TODO: should we consume unplayable tracks in this loop?
