@@ -674,4 +674,4 @@ class TracklistController(object):
                     # (login), disabled extensions and automatically
                     # generated playlists (pandora).
                     self._tl_tracks.append(track)
-                self._trigger_tracklist_changed()
+                self._increase_version()
