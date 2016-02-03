@@ -385,6 +385,7 @@ class Audio(pykka.ThreadingActor):
 
         self._playbin = None
         self._outputs = None
+        self._queue = None
         self._about_to_finish_callback = None
 
         self._handler = _Handler(self)
@@ -481,6 +482,7 @@ class Audio(pykka.ThreadingActor):
         audio_sink.add_pad(ghost_pad)
 
         self._playbin.set_property('audio-sink', audio_sink)
+        self._queue = queue
 
     def _teardown_mixer(self):
         if self.mixer:
@@ -628,7 +630,12 @@ class Audio(pykka.ThreadingActor):
         # TODO: double check seek flags in use.
         gst_position = utils.millisecond_to_clocktime(position)
         gst_logger.debug('Sending flushing seek: position=%r', gst_position)
-        result = self._playbin.seek_simple(
+        # Send seek event to the queue not the playbin. The default behavior
+        # for bins is to forward this event to all sinks. Which results in
+        # duplicate seek events making it to appsrc. Since elements are not
+        # allowed to act on the seek event, only modify it, this should be safe
+        # to do.
+        result = self._queue.seek_simple(
             Gst.Format.TIME, Gst.SeekFlags.FLUSH, gst_position)
         return result
 
