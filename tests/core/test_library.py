@@ -153,8 +153,8 @@ class CoreLibraryTest(BaseCoreLibraryTest):
             self.core.library.lookup('dummy1:a', ['dummy2:a'])
 
     def test_lookup_can_handle_uris(self):
-        track1 = Track(name='abc')
-        track2 = Track(name='def')
+        track1 = Track(uri='dummy1:a', name='abc')
+        track2 = Track(uri='dummy2:a', name='def')
 
         self.library1.lookup().get.return_value = [track1]
         self.library2.lookup().get.return_value = [track2]
@@ -168,6 +168,15 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         self.assertEqual(result, {'dummy3:a': []})
         self.assertFalse(self.library1.lookup.called)
         self.assertFalse(self.library2.lookup.called)
+
+    def test_lookup_ignores_tracks_without_uri_set(self):
+        track1 = Track(uri='dummy1:a', name='abc')
+        track2 = Track()
+
+        self.library1.lookup().get.return_value = [track1, track2]
+
+        result = self.core.library.lookup(uris=['dummy1:a'])
+        self.assertEqual(result, {'dummy1:a': [track1]})
 
     def test_refresh_with_uri_selects_dummy1_backend(self):
         self.core.library.refresh('dummy1:a')

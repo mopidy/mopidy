@@ -8,7 +8,7 @@ import time
 import pykka
 
 from mopidy import audio as audio_lib, backend, exceptions, stream
-from mopidy.audio import scan, utils
+from mopidy.audio import scan, tags
 from mopidy.compat import urllib
 from mopidy.internal import http, playlists
 from mopidy.models import Track
@@ -60,7 +60,7 @@ class StreamLibraryProvider(backend.LibraryProvider):
 
         try:
             result = self._scanner.scan(uri)
-            track = utils.convert_tags_to_track(result.tags).replace(
+            track = tags.convert_tags_to_track(result.tags).replace(
                 uri=uri, length=result.duration)
         except exceptions.ScannerError as e:
             logger.warning('Problem looking up %s: %s', uri, e)

@@ -55,20 +55,28 @@ Data model API
     :synopsis: Data model API
 
 .. autoclass:: mopidy.models.Ref
+    :members:
 
 .. autoclass:: mopidy.models.Track
+    :members:
 
 .. autoclass:: mopidy.models.Album
+    :members:
 
 .. autoclass:: mopidy.models.Artist
+    :members:
 
 .. autoclass:: mopidy.models.Playlist
+    :members:
 
 .. autoclass:: mopidy.models.Image
+    :members:
 
 .. autoclass:: mopidy.models.TlTrack
+    :members:
 
 .. autoclass:: mopidy.models.SearchResult
+    :members:
 
 
 Data model helpers

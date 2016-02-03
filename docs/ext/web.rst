@@ -164,6 +164,22 @@ To install, run::
     pip install Mopidy-Simple-Webclient
 
 
+Mopidy-Spotmop
+==============
+
+https://github.com/jaedb/spotmop
+
+A client targeted at Spotify users. Made by James Barnsley.
+
+.. image:: /ext/spotmop.jpg
+    :width: 720
+    :height: 455
+
+To install, run::
+
+    pip install Mopidy-Spotmop
+
+
 Mopidy-WebSettings
 ==================
 

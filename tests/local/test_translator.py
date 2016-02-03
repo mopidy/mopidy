@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import pytest
 
+from mopidy import compat
 from mopidy.local import translator
 
 
@@ -89,7 +90,9 @@ def test_path_to_file_uri(path, uri):
     (b'\x00\x01\x02', 'local:track:%00%01%02'),
 ])
 def test_path_to_local_track_uri(path, uri):
-    assert translator.path_to_local_track_uri(path) == uri
+    result = translator.path_to_local_track_uri(path)
+    assert isinstance(result, compat.text_type)
+    assert result == uri
 
 
 @pytest.mark.parametrize('path,uri', [
@@ -99,4 +102,6 @@ def test_path_to_local_track_uri(path, uri):
     (b'\x00\x01\x02', 'local:directory:%00%01%02'),
 ])
 def test_path_to_local_directory_uri(path, uri):
-    assert translator.path_to_local_directory_uri(path) == uri
+    result = translator.path_to_local_directory_uri(path)
+    assert isinstance(result, compat.text_type)
+    assert result == uri

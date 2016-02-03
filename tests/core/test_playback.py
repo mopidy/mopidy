@@ -232,7 +232,7 @@ class TestPreviousHandling(BaseTest):
         self.assertIn(tl_tracks[1], self.core.tracklist.tl_tracks)
 
 
-class TestPlayUnknownHanlding(BaseTest):
+class TestPlayUnknownHandling(BaseTest):
 
     tracks = [Track(uri='unknown:a', length=1234),
               Track(uri='dummy:b', length=1234)]
@@ -264,7 +264,7 @@ class TestConsumeHandling(BaseTest):
         tl_track = self.core.tracklist.get_tl_tracks()[0]
 
         self.core.playback.play(tl_track)
-        self.core.tracklist.consume = True
+        self.core.tracklist.set_consume(True)
         self.replay_events()
 
         self.core.playback.next()

@@ -10,6 +10,12 @@ v1.2.0 (UNRELEASED)
 
 Feature release.
 
+Dependencies
+------------
+
+- Mopidy now requires GStreamer 1.x, as we've finally ported from GStreamer
+  0.10.
+
 Core API
 --------
 
@@ -126,6 +132,33 @@ Cleanups
 - Catch errors when loading :confval:`logging/config_file`.
   (Fixes: :issue:`1320`)
 
+Audio
+-----
+
+- **Breaking:** The audio scanner now returns ISO-8601 formatted strings
+  instead of :class:`~datetime.datetime` objects for dates found in tags.
+  Because of this change, we can now return years without months or days, which
+  matches the semantics of the date fields in our data models.
+
+- **Breaking:** :meth:`mopidy.audio.Audio.set_appsrc`'s ``caps`` argument has
+  changed format due to the upgrade from GStreamer 0.10 to GStreamer 1. As
+  far as we know, this is only used by Mopidy-Spotify. As an example, with
+  GStreamer 0.10 the Mopidy-Spotify caps was::
+
+      audio/x-raw-int, endianness=(int)1234, channels=(int)2, width=(int)16,
+      depth=(int)16, signed=(boolean)true, rate=(int)44100
+
+  With GStreamer 1 this changes to::
+
+      audio/x-raw,format=S16LE,rate=44100,channels=2,layout=interleaved
+
+  If your Mopidy backend uses ``set_appsrc()``, please refer to GStreamer
+  documentation for details on the new caps string format.
+
+- **Deprecated:** :func:`mopidy.audio.utils.create_buffer`'s ``capabilities``
+  argument is no longer in use and will be removed in the future. As far as we
+  know, this is only used by Mopidy-Spotify.
+
 Gapless
 -------
 
@@ -144,10 +177,27 @@ Gapless
   cases. (Fixes: :issue:`1305` PR: :issue:`1346`)
 
 
-v1.1.2 (UNRELEASED)
+v1.1.2 (2016-01-18)
 ===================
 
 Bug fix release.
+
+- Main: Catch errors when loading the :confval:`logging/config_file` file.
+  (Fixes: :issue:`1320`)
+
+- Core: If changing to another track while the player is paused, the new track
+  would not be added to the history or marked as currently playing. (Fixes:
+  :issue:`1352`, PR: :issue:`1356`)
+
+- Core: Skips over unplayable tracks if the user attempts to change tracks
+  while paused, like we already did if in playing state. (Fixes :issue:`1378`,
+  PR: :issue:`1379`)
+
+- Core: Make :meth:`~mopidy.core.LibraryController.lookup` ignore tracks with
+  empty URIs. (Partly fixes: :issue:`1340`, PR: :issue:`1381`)
+
+- Core: Fix crash if backends emits events with wrong names or arguments.
+  (Fixes: :issue:`1383`)
 
 - Stream: If an URI is considered playable, don't consider it as a candidate
   for playlist parsing. Just looking at MIME type prefixes isn't enough, as for
@@ -156,6 +206,18 @@ Bug fix release.
 
 - Local: If the scan or clear commands are used on a library that does not
   exist, exit with an error. (Fixes: :issue:`1298`)
+
+- MPD: Notify idling clients when a seek is performed. (Fixes: :issue:`1331`)
+
+- MPD: Don't return tracks with empty URIs. (Partly fixes: :issue:`1340`, PR:
+  :issue:`1343`)
+
+- MPD: Add ``volume`` command that was reintroduced, though still as a
+  deprecated command, in MPD 0.18 and is in use by some clients like mpc.
+  (Fixes: :issue:`1393`, PR: :issue:`1397`)
+
+- Proxy: Handle case where :confval:`proxy/port` is either missing from config
+  or set to an empty string. (PR: :issue:`1371`)
 
 
 v1.1.1 (2015-09-14)

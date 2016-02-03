@@ -25,6 +25,10 @@ create the configuration file yourself, or run the ``mopidy`` command, and it
 will create an empty config file for you and print what config values must be
 set to successfully start Mopidy.
 
+If running Mopidy as a service, the location of the config file and other
+details documented here differs a bit. See :ref:`service` for details about
+this.
+
 When you have created the configuration file, open it in a text editor, and add
 the config values you want to change.  If you want to keep the default for a
 config value, you **should not** add it to the config file, but leave it out so
