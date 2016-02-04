@@ -251,6 +251,7 @@ class TracklistExportRestoreTest(unittest.TestCase):
         self.assertEqual(5, self.core.tracklist.get_length())
 
     def test_import_mode_only(self):
+        old_version = self.core.tracklist.get_version()
         target = TracklistState(consume=False,
                                 repeat=True,
                                 single=True,
@@ -266,8 +267,10 @@ class TracklistExportRestoreTest(unittest.TestCase):
         self.assertEqual(1, self.core.tracklist._next_tlid)
         self.assertEqual(0, self.core.tracklist.get_length())
         self.assertEqual([], self.core.tracklist.get_tl_tracks())
+        self.assertEqual(self.core.tracklist.get_version(), old_version)
 
     def test_import_tracklist_only(self):
+        old_version = self.core.tracklist.get_version()
         target = TracklistState(consume=False,
                                 repeat=True,
                                 single=True,
@@ -283,6 +286,7 @@ class TracklistExportRestoreTest(unittest.TestCase):
         self.assertEqual(12, self.core.tracklist._next_tlid)
         self.assertEqual(4, self.core.tracklist.get_length())
         self.assertEqual(self.tl_tracks, self.core.tracklist.get_tl_tracks())
+        self.assertGreater(self.core.tracklist.get_version(), old_version)
 
     def test_import_invalid_type(self):
         with self.assertRaises(TypeError):
