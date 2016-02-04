@@ -227,6 +227,7 @@ class TracklistExportRestoreTest(unittest.TestCase):
         self.assertEqual(target, value)
 
     def test_import(self):
+        old_version = self.core.tracklist.get_version()
         target = TracklistState(consume=False,
                                 repeat=True,
                                 single=True,
@@ -242,6 +243,7 @@ class TracklistExportRestoreTest(unittest.TestCase):
         self.assertEqual(12, self.core.tracklist._next_tlid)
         self.assertEqual(4, self.core.tracklist.get_length())
         self.assertEqual(self.tl_tracks, self.core.tracklist.get_tl_tracks())
+        self.assertGreater(self.core.tracklist.get_version(), old_version)
 
         # after import, adding more tracks must be possible
         self.core.tracklist.add(uris=[self.tracks[1].uri])
