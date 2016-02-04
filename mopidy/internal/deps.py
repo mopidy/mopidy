@@ -161,10 +161,10 @@ def _gstreamer_check_elements():
         'flump3dec',
         'id3demux',
         'id3v2mux',
-        'lame',
+        'lamemp3enc',
         'mad',
-        'mp3parse',
-        # 'mpg123audiodec',  # Only available in GStreamer 1.x
+        'mpegaudioparse',
+        'mpg123audiodec',
 
         # Ogg Vorbis encoding and decoding
         'vorbisdec',

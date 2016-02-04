@@ -159,6 +159,10 @@ Audio
   argument is no longer in use and will be removed in the future. As far as we
   know, this is only used by Mopidy-Spotify.
 
+- Duplicate seek events getting to AppSrc based backends is now fixed. This
+  should prevent seeking in Mopidy-Spotify from glitching.
+  (Fixes: :issue:`1404`)
+
 Gapless
 -------
 
