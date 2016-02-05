@@ -37,7 +37,7 @@ please follow the directions :ref:`here <contributing>`.
        On Fedora Linux, you must replace ``pip`` with ``pip-python`` in the
        following steps.
 
-#. Then you'll need to install GStreamer 1.x (>= 1.2), with Python bindings.
+#. Then you'll need to install GStreamer >= 1.2.3, with Python bindings.
    GStreamer is packaged for most popular Linux distributions. Search for
    GStreamer in your package manager, and make sure to install the Python
    bindings, and the "good" and "ugly" plugin sets.

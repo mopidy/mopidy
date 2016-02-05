@@ -13,8 +13,8 @@ Feature release.
 Dependencies
 ------------
 
-- Mopidy now requires GStreamer 1.x, as we've finally ported from GStreamer
-  0.10.
+- Mopidy now requires GStreamer >= 1.2.3, as we've finally ported from
+  GStreamer 0.10.
 
 Core API
 --------

@@ -25,7 +25,7 @@ else:
     Gst.is_initialized() or Gst.init()
 
 
-REQUIRED_GST_VERSION = (1, 2)
+REQUIRED_GST_VERSION = (1, 2, 3)
 
 if Gst.version() < REQUIRED_GST_VERSION:
     sys.exit(
