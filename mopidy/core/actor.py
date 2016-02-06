@@ -145,8 +145,9 @@ class Core(
         try:
             coverage = []
             if self._config and 'restore_state' in self._config['core']:
-                coverage = self._config_to_coverage(
-                    self._config['core']['restore_state'])
+                if self._config['core']['restore_state']:
+                    coverage = ['tracklist', 'mode', 'play-last', 'volume',
+                                'history']
             if len(coverage):
                 self._load_state(coverage)
         except Exception as e:
@@ -156,31 +157,10 @@ class Core(
         """ Do not call this function. It is for internal use at shutdown."""
         try:
             if self._config and 'restore_state' in self._config['core']:
-                amount = self._config['core']['restore_state']
-                if amount and 'off' != amount:
+                if self._config['core']['restore_state']:
                     self._save_state()
         except Exception as e:
             logger.warn('Unexpected error while saving state: %s', str(e))
-
-    @staticmethod
-    def _config_to_coverage(value):
-        coverage = []
-        if not value or 'off' == value:
-            pass
-        elif 'volume' == value:
-            coverage = ['volume']
-        elif 'load' == value:
-            coverage = ['tracklist', 'mode', 'volume', 'history']
-        elif 'last' == value:
-            coverage = ['tracklist', 'mode', 'play-last', 'volume',
-                        'history']
-        elif 'play' == value:
-            coverage = ['tracklist', 'mode', 'play-always', 'volume',
-                        'history']
-        else:
-            logger.warn('Unknown value for config '
-                        'core.restore_state: %s', value)
-        return coverage
 
     def _get_data_dir(self):
         # get or create data director for core

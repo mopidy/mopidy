@@ -54,7 +54,7 @@ class CoreActorExportRestoreTest(unittest.TestCase):
         config = {
             'core': {
                 'max_tracklist_length': 10000,
-                'restore_state': 'last',
+                'restore_state': True,
                 'data_dir': self.temp_dir,
             }
         }
@@ -73,25 +73,3 @@ class CoreActorExportRestoreTest(unittest.TestCase):
     def test_restore_state(self):
         self.core.setup()
         # TODO: implement meaningful test
-
-    def test_export_coverage_none(self):
-        result = Core._config_to_coverage(None)
-        self.assertEqual(result, [])
-        result = Core._config_to_coverage('off')
-        self.assertEqual(result, [])
-
-    def test_export_coverage(self):
-        result = Core._config_to_coverage('volume')
-        self.assertEqual(result, ['volume'])
-
-        result = Core._config_to_coverage('load')
-        target = ['tracklist', 'mode', 'volume', 'history']
-        self.assertEqual(result, target)
-
-        result = Core._config_to_coverage('last')
-        target = ['tracklist', 'mode', 'play-last', 'volume', 'history']
-        self.assertEqual(result, target)
-
-        result = Core._config_to_coverage('play')
-        target = ['tracklist', 'mode', 'play-always', 'volume', 'history']
-        self.assertEqual(result, target)

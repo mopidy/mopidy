@@ -113,20 +113,12 @@ Core config section
 
 .. confval:: core/restore_state
 
-    Restore last state at start. Defaults to ``off``.
+    When set to ``true``, Mopidy saves the state when it ends and 
+    restores the state at next start.
 
-    Save state when Mopidy ends and restore state at next start.
-    Allowed values:
-     
-    - ``off``: restore nothing
-    - ``volume``: restore volume
-    - ``load``: restore settings, volume and play queue
-    - ``last``: like ``load``, additional start playback if last state was 
-      'playing'
-    - ``play``: like ``load``, additional start playback
+    Default is ``false``.
 
 .. _audio-config:
-
 
 Audio configuration
 ===================
