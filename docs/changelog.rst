@@ -5,7 +5,7 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
-v1.2.0 (UNRELEASED)
+v2.0.0 (UNRELEASED)
 ===================
 
 Feature release.
@@ -13,8 +13,8 @@ Feature release.
 Dependencies
 ------------
 
-- Mopidy now requires GStreamer 1.x, as we've finally ported from GStreamer
-  0.10.
+- Mopidy now requires GStreamer >= 1.2.3, as we've finally ported from
+  GStreamer 0.10.
 
 Core API
 --------
