@@ -60,10 +60,18 @@ class HistoryController(object):
 
     def _export_state(self):
         """Internal method for :class:`mopidy.Core`."""
+
+        # 500 tracks a 3 minutes -> 24 hours history
+        count_max = 500
+        count = 1
         history_list = []
         for timestamp, track in self._history:
             history_list.append(HistoryTrack(
                                 timestamp=timestamp, track=track))
+            count += 1
+            if count_max < count:
+                logger.info('Limit history to %s tracks.', count_max)
+                break
         return HistoryState(history=history_list)
 
     def _restore_state(self, state, coverage):
