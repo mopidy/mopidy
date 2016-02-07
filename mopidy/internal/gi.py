@@ -22,7 +22,7 @@ except ImportError:
     """))
     raise
 else:
-    Gst.is_initialized() or Gst.init([])
+    Gst.init([])
 
 
 REQUIRED_GST_VERSION = (1, 2, 3)
