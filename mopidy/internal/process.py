@@ -4,8 +4,7 @@ import logging
 import signal
 import threading
 
-from pykka import ActorDeadError
-from pykka.registry import ActorRegistry
+import pykka
 
 from mopidy.compat import thread
 
@@ -31,14 +30,14 @@ def exit_handler(signum, frame):
 
 
 def stop_actors_by_class(klass):
-    actors = ActorRegistry.get_by_class(klass)
+    actors = pykka.ActorRegistry.get_by_class(klass)
     logger.debug('Stopping %d instance(s) of %s', len(actors), klass.__name__)
     for actor in actors:
         actor.stop()
 
 
 def stop_remaining_actors():
-    num_actors = len(ActorRegistry.get_all())
+    num_actors = len(pykka.ActorRegistry.get_all())
     while num_actors:
         logger.error(
             'There are actor threads still running, this is probably a bug')
@@ -47,8 +46,8 @@ def stop_remaining_actors():
             num_actors, threading.active_count() - num_actors,
             ', '.join([t.name for t in threading.enumerate()]))
         logger.debug('Stopping %d actor(s)...', num_actors)
-        ActorRegistry.stop_all()
-        num_actors = len(ActorRegistry.get_all())
+        pykka.ActorRegistry.stop_all()
+        num_actors = len(pykka.ActorRegistry.get_all())
     logger.debug('All actors stopped.')
 
 
@@ -67,7 +66,7 @@ class BaseThread(threading.Thread):
             logger.info('Interrupted by user')
         except ImportError as e:
             logger.error(e)
-        except ActorDeadError as e:
+        except pykka.ActorDeadError as e:
             logger.warning(e)
         except Exception as e:
             logger.exception(e)

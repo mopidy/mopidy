@@ -41,9 +41,6 @@ MOCK_MODULES = [
     'dbus.service',
     'mopidy.internal.gi',
     'pykka',
-    'pykka.actor',
-    'pykka.future',
-    'pykka.registry',
 ]
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
