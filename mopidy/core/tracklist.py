@@ -626,7 +626,7 @@ class TracklistController(object):
 
     def _mark_played(self, tl_track):
         """Internal method for :class:`mopidy.core.PlaybackController`."""
-        if self.consume and tl_track is not None:
+        if self.get_consume() and tl_track is not None:
             self.remove({'tlid': [tl_track.tlid]})
             return True
         return False
