@@ -4,11 +4,10 @@ import errno
 import socket
 import unittest
 
-from gi.repository import GObject
-
 from mock import Mock, patch, sentinel
 
 from mopidy.internal import network
+from mopidy.internal.gi import GObject
 
 from tests import any_int
 

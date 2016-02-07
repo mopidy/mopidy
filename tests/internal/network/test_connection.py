@@ -5,13 +5,12 @@ import logging
 import socket
 import unittest
 
-from gi.repository import GObject
-
 from mock import Mock, call, patch, sentinel
 
 import pykka
 
 from mopidy.internal import network
+from mopidy.internal.gi import GObject
 
 from tests import any_int, any_unicode
 
