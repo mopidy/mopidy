@@ -231,21 +231,6 @@ class TestPreviousHandling(BaseTest):
         self.assertIn(tl_tracks[1], self.core.tracklist.tl_tracks)
 
 
-class TestPlayUnknownHandling(BaseTest):
-
-    tracks = [Track(uri='unknown:a', length=1234),
-              Track(uri='dummy:b', length=1234)]
-
-    # TODO: move to UnplayableTest?
-    def test_play_skips_to_next_on_track_without_playback_backend(self):
-        self.core.playback.play()
-
-        self.replay_events()
-
-        current_track = self.core.playback.get_current_track()
-        self.assertEqual(current_track, self.tracks[1])
-
-
 class OnAboutToFinishTest(BaseTest):
 
     def test_on_about_to_finish_keeps_finished_track_in_tracklist(self):
@@ -625,12 +610,21 @@ class TestUnplayableURI(BaseTest):
 
     tracks = [
         Track(uri='unplayable://'),
+        Track(uri='dummy:b'),
     ]
 
     def setUp(self):  # noqa: N802
         super(TestUnplayableURI, self).setUp()
         tl_tracks = self.core.tracklist.get_tl_tracks()
         self.core.playback._set_current_tl_track(tl_tracks[0])
+
+    def test_play_skips_to_next_if_track_is_unplayable(self):
+        self.core.playback.play()
+
+        self.replay_events()
+
+        current_track = self.core.playback.get_current_track()
+        self.assertEqual(current_track, self.tracks[1])
 
     def test_pause_changes_state_even_if_track_is_unplayable(self):
         self.core.playback.pause()
