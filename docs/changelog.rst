@@ -92,7 +92,7 @@ MPD frontend
 
 - Start ``songid`` counting at 1 instead of 0 to match the original MPD server.
 
-- Idle events are now emitted on ``seekeded`` events. This fix means that
+- Idle events are now emitted on ``seeked`` events. This fix means that
   clients relying on ``idle`` events now get notified about seeks.
   (Fixes: :issue:`1331` :issue:`1347`)
 
