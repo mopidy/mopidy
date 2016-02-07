@@ -621,12 +621,15 @@ class EventEmissionTest(BaseTest):
             listener_mock.send.mock_calls)
 
 
-class UnplayableURITest(BaseTest):
+class TestUnplayableURI(BaseTest):
+
+    tracks = [
+        Track(uri='unplayable://'),
+    ]
 
     def setUp(self):  # noqa: N802
-        super(UnplayableURITest, self).setUp()
-        self.core.tracklist.clear()
-        tl_tracks = self.core.tracklist.add([Track(uri='unplayable://')])
+        super(TestUnplayableURI, self).setUp()
+        tl_tracks = self.core.tracklist.get_tl_tracks()
         self.core.playback._set_current_tl_track(tl_tracks[0])
 
     def test_pause_changes_state_even_if_track_is_unplayable(self):
@@ -768,7 +771,7 @@ class TestStream(BaseTest):
         self.assertEqual(self.playback.get_stream_title(), None)
 
 
-class BackendSelectionTest(unittest.TestCase):
+class TestBackendSelection(unittest.TestCase):
 
     def setUp(self):  # noqa: N802
         config = {
@@ -917,7 +920,7 @@ class BackendSelectionTest(unittest.TestCase):
         self.playback2.get_time_position.assert_called_once_with()
 
 
-class CorePlaybackWithOldBackendTest(unittest.TestCase):
+class TestCorePlaybackWithOldBackend(unittest.TestCase):
 
     def test_type_error_from_old_backend_does_not_crash_core(self):
         config = {
@@ -940,7 +943,7 @@ class CorePlaybackWithOldBackendTest(unittest.TestCase):
         b.playback.play.assert_called_once_with()
 
 
-class Bug1177RegressionTest(unittest.TestCase):
+class TestBug1177Regression(unittest.TestCase):
     def test(self):
         config = {
             'core': {
