@@ -45,6 +45,9 @@ class PlaybackController(object):
         self._last_position = None
         self._previous = False
 
+        self._start_at_pos = None
+        self._start_paused = False
+
         if self._audio:
             self._audio.set_about_to_finish_callback(
                 self._on_about_to_finish_callback)
@@ -240,6 +243,13 @@ class PlaybackController(object):
             if self._pending_position is None:
                 self.set_state(PlaybackState.PLAYING)
                 self._trigger_track_playback_started()
+                seek_ok = False
+                if self._start_at_pos:
+                    seek_ok = self.seek(self._start_at_pos)
+                    self._start_at_pos = None
+                if not seek_ok and self._start_paused:
+                    self.pause()
+                    self._start_paused = False
             else:
                 self._seek(self._pending_position)
 
@@ -247,6 +257,9 @@ class PlaybackController(object):
         if self._pending_position == position:
             self._trigger_seeked(position)
             self._pending_position = None
+            if self._start_paused:
+                self._start_paused = False
+                self.pause()
 
     def _on_about_to_finish_callback(self):
         """Callback that performs a blocking actor call to the real callback.
@@ -586,7 +599,9 @@ class PlaybackController(object):
             if 'play-last' in coverage:
                 new_state = state.state
             if state.tlid is not None:
-                # TODO: restore to 'paused' state
-                if PlaybackState.PLAYING == new_state:
+                if PlaybackState.PAUSED == new_state:
+                    self._start_paused = True
+                if (PlaybackState.PLAYING == new_state or
+                        PlaybackState.PAUSED == new_state):
+                    self._start_at_pos = state.position
                     self.play(tlid=state.tlid)
-                    # TODO: seek to state.position?
