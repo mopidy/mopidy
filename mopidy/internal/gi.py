@@ -7,8 +7,7 @@ import textwrap
 try:
     import gi
     gi.require_version('Gst', '1.0')
-    gi.require_version('GstPbutils', '1.0')
-    from gi.repository import GLib, GObject, Gst, GstPbutils
+    from gi.repository import GLib, GObject, Gst
 except ImportError:
     print(textwrap.dedent("""
         ERROR: A GObject Python package was not found.
@@ -22,7 +21,9 @@ except ImportError:
     """))
     raise
 else:
-    Gst.is_initialized() or Gst.init()
+    Gst.init([])
+    gi.require_version('GstPbutils', '1.0')
+    from gi.repository import GstPbutils
 
 
 REQUIRED_GST_VERSION = (1, 2, 3)
