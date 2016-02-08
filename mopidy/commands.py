@@ -7,14 +7,13 @@ import logging
 import os
 import sys
 
-from gi.repository import GLib, GObject
-
 import pykka
 
 from mopidy import config as config_lib, exceptions
 from mopidy.audio import Audio
 from mopidy.core import Core
 from mopidy.internal import deps, process, timer, versioning
+from mopidy.internal.gi import GLib, GObject
 
 logger = logging.getLogger(__name__)
 

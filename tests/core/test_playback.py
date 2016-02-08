@@ -232,21 +232,6 @@ class TestPreviousHandling(BaseTest):
         self.assertIn(tl_tracks[1], self.core.tracklist.tl_tracks)
 
 
-class TestPlayUnknownHandling(BaseTest):
-
-    tracks = [Track(uri='unknown:a', length=1234),
-              Track(uri='dummy:b', length=1234)]
-
-    # TODO: move to UnplayableTest?
-    def test_play_skips_to_next_on_track_without_playback_backend(self):
-        self.core.playback.play()
-
-        self.replay_events()
-
-        current_track = self.core.playback.get_current_track()
-        self.assertEqual(current_track, self.tracks[1])
-
-
 class OnAboutToFinishTest(BaseTest):
 
     def test_on_about_to_finish_keeps_finished_track_in_tracklist(self):
@@ -622,13 +607,25 @@ class EventEmissionTest(BaseTest):
             listener_mock.send.mock_calls)
 
 
-class UnplayableURITest(BaseTest):
+class TestUnplayableURI(BaseTest):
+
+    tracks = [
+        Track(uri='unplayable://'),
+        Track(uri='dummy:b'),
+    ]
 
     def setUp(self):  # noqa: N802
-        super(UnplayableURITest, self).setUp()
-        self.core.tracklist.clear()
-        tl_tracks = self.core.tracklist.add([Track(uri='unplayable://')])
+        super(TestUnplayableURI, self).setUp()
+        tl_tracks = self.core.tracklist.get_tl_tracks()
         self.core.playback._set_current_tl_track(tl_tracks[0])
+
+    def test_play_skips_to_next_if_track_is_unplayable(self):
+        self.core.playback.play()
+
+        self.replay_events()
+
+        current_track = self.core.playback.get_current_track()
+        self.assertEqual(current_track, self.tracks[1])
 
     def test_pause_changes_state_even_if_track_is_unplayable(self):
         self.core.playback.pause()
@@ -769,7 +766,7 @@ class TestStream(BaseTest):
         self.assertEqual(self.playback.get_stream_title(), None)
 
 
-class BackendSelectionTest(unittest.TestCase):
+class TestBackendSelection(unittest.TestCase):
 
     def setUp(self):  # noqa: N802
         config = {
@@ -918,7 +915,7 @@ class BackendSelectionTest(unittest.TestCase):
         self.playback2.get_time_position.assert_called_once_with()
 
 
-class CorePlaybackWithOldBackendTest(unittest.TestCase):
+class TestCorePlaybackWithOldBackend(unittest.TestCase):
 
     def test_type_error_from_old_backend_does_not_crash_core(self):
         config = {
@@ -941,7 +938,7 @@ class CorePlaybackWithOldBackendTest(unittest.TestCase):
         b.playback.play.assert_called_once_with()
 
 
-class Bug1177RegressionTest(unittest.TestCase):
+class TestBug1177Regression(unittest.TestCase):
     def test(self):
         config = {
             'core': {

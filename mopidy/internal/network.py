@@ -7,11 +7,10 @@ import socket
 import sys
 import threading
 
-from gi.repository import GObject
-
 import pykka
 
 from mopidy.internal import encoding
+from mopidy.internal.gi import GObject
 
 
 logger = logging.getLogger(__name__)

@@ -7,10 +7,9 @@ import shutil
 import tempfile
 import unittest
 
-from gi.repository import GLib
-
 from mopidy import compat, exceptions
 from mopidy.internal import path
+from mopidy.internal.gi import GLib
 
 import tests
 

@@ -15,7 +15,6 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + '/../'))
 
 
 class Mock(object):
-
     def __init__(self, *args, **kwargs):
         pass
 
@@ -27,39 +26,21 @@ class Mock(object):
 
     @classmethod
     def __getattr__(self, name):
-        if name in ('__file__', '__path__'):
-            return '/dev/null'
-        elif name == 'get_system_config_dirs':
-            # glib.get_system_config_dirs()
-            return tuple
-        elif name == 'get_user_config_dir':
-            # glib.get_user_config_dir()
+        if name == 'get_system_config_dirs':  # GLib.get_system_config_dirs()
+            return list
+        elif name == 'get_user_config_dir':  # GLib.get_user_config_dir()
             return str
-        elif (name[0] == name[0].upper() and
-                # gst.Caps
-                not name.startswith('Caps') and
-                # gst.PadTemplate
-                not name.startswith('PadTemplate') and
-                # dbus.String()
-                not name == 'String'):
-            return type(name, (), {})
         else:
             return Mock()
+
 
 MOCK_MODULES = [
     'dbus',
     'dbus.mainloop',
     'dbus.mainloop.glib',
     'dbus.service',
-    'glib',
-    'gobject',
-    'gst',
-    'gst.pbutils',
-    'pygst',
+    'mopidy.internal.gi',
     'pykka',
-    'pykka.actor',
-    'pykka.future',
-    'pykka.registry',
 ]
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
