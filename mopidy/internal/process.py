@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
 import logging
-import signal
 import threading
 
 import pykka
@@ -12,20 +11,23 @@ from mopidy.compat import thread
 logger = logging.getLogger(__name__)
 
 
-SIGNALS = dict(
-    (k, v) for v, k in signal.__dict__.items()
-    if v.startswith('SIG') and not v.startswith('SIG_'))
-
-
 def exit_process():
     logger.debug('Interrupting main...')
     thread.interrupt_main()
     logger.debug('Interrupted main')
 
 
-def exit_handler(signum, frame):
-    """A :mod:`signal` handler which will exit the program on signal."""
-    logger.info('Got %s signal', SIGNALS[signum])
+def sigterm_handler(signum, frame):
+    """A :mod:`signal` handler which will exit the program on signal.
+
+    This function is not called when the process' main thread is running a GLib
+    mainloop. In that case, the GLib mainloop must listen for SIGTERM signals
+    and quit itself.
+
+    For Mopidy subcommands that does not run the GLib mainloop, this handler
+    ensures a proper shutdown of the process on SIGTERM.
+    """
+    logger.info('Got SIGTERM signal. Exiting...')
     exit_process()
 
 
