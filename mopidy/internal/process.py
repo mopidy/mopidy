@@ -49,28 +49,3 @@ def stop_remaining_actors():
         pykka.ActorRegistry.stop_all()
         num_actors = len(pykka.ActorRegistry.get_all())
     logger.debug('All actors stopped.')
-
-
-class BaseThread(threading.Thread):
-
-    def __init__(self):
-        super(BaseThread, self).__init__()
-        # No thread should block process from exiting
-        self.daemon = True
-
-    def run(self):
-        logger.debug('%s: Starting thread', self.name)
-        try:
-            self.run_inside_try()
-        except KeyboardInterrupt:
-            logger.info('Interrupted by user')
-        except ImportError as e:
-            logger.error(e)
-        except pykka.ActorDeadError as e:
-            logger.warning(e)
-        except Exception as e:
-            logger.exception(e)
-        logger.debug('%s: Exiting thread', self.name)
-
-    def run_inside_try(self):
-        raise NotImplementedError

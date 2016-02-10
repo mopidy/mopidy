@@ -129,6 +129,11 @@ Cleanups
 - Catch errors when loading :confval:`logging/config_file`.
   (Fixes: :issue:`1320`)
 
+- **Breaking:** Removed unused internal
+  :class:`mopidy.internal.process.BaseThread`. This breaks Mopidy-Spotify
+  1.4.0. Versions < 1.4.0 was already broken by Mopidy 1.1, while versions >=
+  2.0 doesn't use this class.
+
 Audio
 -----
 
