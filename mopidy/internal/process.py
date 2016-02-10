@@ -1,12 +1,11 @@
 from __future__ import absolute_import, unicode_literals
 
 import logging
+import os
 import signal
 import threading
 
 import pykka
-
-from mopidy.compat import thread
 
 
 logger = logging.getLogger(__name__)
@@ -19,7 +18,7 @@ SIGNALS = dict(
 
 def exit_process():
     logger.debug('Interrupting main...')
-    thread.interrupt_main()
+    os.kill(os.getpid(), signal.SIGINT)
     logger.debug('Interrupted main')
 
 
