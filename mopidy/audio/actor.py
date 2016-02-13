@@ -470,6 +470,11 @@ class Audio(pykka.ThreadingActor):
         # systems. So leave the default to play it safe.
         queue = Gst.ElementFactory.make('queue')
 
+        if self._config['audio']['buffer_time'] > 0:
+            queue.set_property(
+                'max-size-time',
+                self._config['audio']['buffer_time'] * Gst.MSECOND)
+
         audio_sink.add(queue)
         audio_sink.add(self._outputs)
 
