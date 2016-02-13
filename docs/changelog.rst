@@ -169,9 +169,9 @@ Audio
   This should be fixed properly together with :issue:`1222`. (Fixes:
   :issue:`1430`, PR: :issue:`1438`)
 
-- Add a new config option, buffer_time, for setting the buffer time of the
-  GStreamer queue. If you experience buffering before track changes, it may
-  help to increase this. Workaround for :issue:`1409`.
+- Add a new config option, :confval:`audio/buffer_time`, for setting the buffer
+  time of the GStreamer queue. If you experience buffering before track
+  changes, it may help to increase this. Workaround for :issue:`1409`.
 
 Gapless
 -------
