@@ -250,17 +250,16 @@ class PlaybackController(object):
         if self._state == PlaybackState.STOPPED:
             return
 
-        # TODO: check that we always have a current track
-        original_tl_track = self.get_current_tl_track()
-        next_tl_track = self.core.tracklist.eot_track(original_tl_track)
-
-        # TODO: only set pending if we have a backend that can play it?
-        # TODO: skip tracks that don't have a backend?
-        self._pending_tl_track = next_tl_track
-        backend = self._get_backend(next_tl_track)
-
-        if backend:
-            backend.playback.change_track(next_tl_track.track).get()
+        pending = self.core.tracklist.eot_track(self._current_tl_track)
+        while pending:
+            # TODO: Avoid infinite loops if all tracks are unplayable.
+            backend = self._get_backend(pending)
+            if backend and backend.playback.change_track(pending.track).get():
+                self._pending_tl_track = pending
+                break
+            else:
+                self.core.tracklist._mark_unplayable(pending)
+            pending = self.core.tracklist.eot_track(pending)
 
     def _on_tracklist_change(self):
         """
