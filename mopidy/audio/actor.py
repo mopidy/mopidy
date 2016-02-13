@@ -326,9 +326,19 @@ class _Handler(object):
     def on_tag(self, taglist):
         tags = tags_lib.convert_taglist(taglist)
         gst_logger.debug('Got TAG bus message: tags=%r', dict(tags))
-        self._audio._tags.update(tags)
-        logger.debug('Audio event: tags_changed(tags=%r)', tags.keys())
-        AudioListener.send('tags_changed', tags=tags.keys())
+
+        # TODO: Add proper tests for only emitting changed tags.
+        unique = object()
+        changed = []
+        for key, value in tags.items():
+            # Update any tags that changed, and store changed keys.
+            if self._audio._tags.get(key, unique) != value:
+                self._audio._tags[key] = value
+                changed.append(key)
+
+        if changed:
+            logger.debug('Audio event: tags_changed(tags=%r)', changed)
+            AudioListener.send('tags_changed', tags=changed)
 
     def on_missing_plugin(self, msg):
         desc = GstPbutils.missing_plugin_message_get_description(msg)
