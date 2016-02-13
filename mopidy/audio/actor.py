@@ -327,6 +327,11 @@ class _Handler(object):
         tags = tags_lib.convert_taglist(taglist)
         gst_logger.debug('Got TAG bus message: tags=%r', dict(tags))
 
+        # Postpone emitting tags until stream start.
+        if self._audio._pending_tags is not None:
+            self._audio._pending_tags.update(tags)
+            return
+
         # TODO: Add proper tests for only emitting changed tags.
         unique = object()
         changed = []
@@ -358,6 +363,14 @@ class _Handler(object):
         uri = self._audio._pending_uri
         logger.debug('Audio event: stream_changed(uri=%r)', uri)
         AudioListener.send('stream_changed', uri=uri)
+
+        # Emit any postponed tags that we got after about-to-finish.
+        tags, self._audio._pending_tags = self._audio._pending_tags, None
+        self._audio._tags = tags
+
+        if tags:
+            logger.debug('Audio event: tags_changed(tags=%r)', tags.keys())
+            AudioListener.send('tags_changed', tags=tags.keys())
 
     def on_segment(self, segment):
         gst_logger.debug(
@@ -396,6 +409,7 @@ class Audio(pykka.ThreadingActor):
         self._buffering = False
         self._tags = {}
         self._pending_uri = None
+        self._pending_tags = None
 
         self._playbin = None
         self._outputs = None
@@ -546,8 +560,8 @@ class Audio(pykka.ThreadingActor):
         else:
             current_volume = None
 
-        self._tags = {}  # TODO: add test for this somehow
         self._pending_uri = uri
+        self._pending_tags = {}
         self._playbin.set_property('uri', uri)
 
         if self.mixer is not None and current_volume is not None:
