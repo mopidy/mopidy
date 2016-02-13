@@ -165,6 +165,10 @@ Audio
   should prevent seeking in Mopidy-Spotify from glitching.
   (Fixes: :issue:`1404`)
 
+- Workaround crash caused by a race that does not seem to affect functionality.
+  This should be fixed properly together with :issue:`1222`. (Fixes:
+  :issue:`1430`, PR: :issue:`1438`)
+
 Gapless
 -------
 
