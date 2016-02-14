@@ -55,6 +55,9 @@ Local backend
 M3U backend
 -----------
 
+- Add :confval:`m3u/base_dir` for resolving relative paths in M3U
+  files. (Fixes: :issue:`1428`, PR: :issue:`1442`)
+
 - Derive track name from file name for non-extended M3U
   playlists. (Fixes: :issue:`1364`, PR: :issue:`1369`)
 
