@@ -10,13 +10,13 @@ def calculate_duration(num_samples, sample_rate):
     return Gst.util_uint64_scale(num_samples, Gst.SECOND, sample_rate)
 
 
-def create_buffer(data, capabilites=None, timestamp=None, duration=None):
+def create_buffer(data, timestamp=None, duration=None):
     """Create a new GStreamer buffer based on provided data.
 
     Mainly intended to keep gst imports out of non-audio modules.
 
-    .. versionchanged:: 1.2
-        ``capabilites`` argument is no longer in use
+    .. versionchanged:: 2.0
+        ``capabilites`` argument was removed.
     """
     if not data:
         raise ValueError('Cannot create buffer without data')

@@ -160,9 +160,9 @@ Audio
   If your Mopidy backend uses ``set_appsrc()``, please refer to GStreamer
   documentation for details on the new caps string format.
 
-- **Deprecated:** :func:`mopidy.audio.utils.create_buffer`'s ``capabilities``
-  argument is no longer in use and will be removed in the future. As far as we
-  know, this is only used by Mopidy-Spotify.
+- **Breaking:** :func:`mopidy.audio.utils.create_buffer`'s ``capabilities``
+  argument is no longer in use and has been removed. As far as we know, this
+  was only used by Mopidy-Spotify.
 
 - Duplicate seek events getting to ``appsrc`` based backends is now fixed. This
   should prevent seeking in Mopidy-Spotify from glitching. (Fixes:
