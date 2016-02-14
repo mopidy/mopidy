@@ -25,10 +25,19 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
             timeout=config['stream']['timeout'],
             proxy_config=config['proxy'])
 
-        self.library = StreamLibraryProvider(
-            backend=self, blacklist=config['stream']['metadata_blacklist'])
-        self.playback = StreamPlaybackProvider(
-            audio=audio, backend=self, config=config)
+        self._session = http.get_requests_session(
+            proxy_config=config['proxy'],
+            user_agent='%s/%s' % (
+                stream.Extension.dist_name, stream.Extension.version))
+
+        blacklist = config['stream']['metadata_blacklist']
+        self._blacklist_re = re.compile(
+            r'^(%s)$' % '|'.join(fnmatch.translate(u) for u in blacklist))
+
+        self._timeout = config['stream']['timeout']
+
+        self.library = StreamLibraryProvider(backend=self)
+        self.playback = StreamPlaybackProvider(audio=audio, backend=self)
         self.playlists = None
 
         self.uri_schemes = audio_lib.supported_uri_schemes(
@@ -43,23 +52,16 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
 
 
 class StreamLibraryProvider(backend.LibraryProvider):
-
-    def __init__(self, backend, blacklist):
-        super(StreamLibraryProvider, self).__init__(backend)
-        self._scanner = backend._scanner
-        self._blacklist_re = re.compile(
-            r'^(%s)$' % '|'.join(fnmatch.translate(u) for u in blacklist))
-
     def lookup(self, uri):
         if urllib.parse.urlsplit(uri).scheme not in self.backend.uri_schemes:
             return []
 
-        if self._blacklist_re.match(uri):
+        if self.backend._blacklist_re.match(uri):
             logger.debug('URI matched metadata lookup blacklist: %s', uri)
             return [Track(uri=uri)]
 
         try:
-            result = self._scanner.scan(uri)
+            result = self.backend._scanner.scan(uri)
             track = tags.convert_tags_to_track(result.tags).replace(
                 uri=uri, length=result.duration)
         except exceptions.ScannerError as e:
@@ -71,21 +73,12 @@ class StreamLibraryProvider(backend.LibraryProvider):
 
 class StreamPlaybackProvider(backend.PlaybackProvider):
 
-    def __init__(self, audio, backend, config):
-        super(StreamPlaybackProvider, self).__init__(audio, backend)
-        self._config = config
-        self._scanner = backend._scanner
-        self._session = http.get_requests_session(
-            proxy_config=config['proxy'],
-            user_agent='%s/%s' % (
-                stream.Extension.dist_name, stream.Extension.version))
-
     def translate_uri(self, uri):
         return _unwrap_stream(
             uri,
-            timeout=self._config['stream']['timeout'],
-            scanner=self._scanner,
-            requests_session=self._session)
+            timeout=self.backend._timeout,
+            scanner=self.backend._scanner,
+            requests_session=self.backend._session)
 
 
 def _unwrap_stream(uri, timeout, scanner, requests_session):
