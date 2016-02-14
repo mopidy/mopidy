@@ -1000,3 +1000,30 @@ class TestBug1177Regression(unittest.TestCase):
         c.playback.pause()
         c.playback.next()
         b.playback.change_track.assert_called_once_with(track2)
+
+
+class TestBug1352Regression(BaseTest):
+    tracks = [
+        Track(uri='dummy:a', length=40000),
+        Track(uri='dummy:b', length=40000),
+    ]
+
+    def test_next_when_paused_updates_history(self):
+        self.core.history._add_track = mock.Mock()
+        self.core.tracklist._mark_playing = mock.Mock()
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.playback.play()
+        self.replay_events()
+
+        self.core.history._add_track.assert_called_once_with(self.tracks[0])
+        self.core.tracklist._mark_playing.assert_called_once_with(tl_tracks[0])
+        self.core.history._add_track.reset_mock()
+        self.core.tracklist._mark_playing.reset_mock()
+
+        self.playback.pause()
+        self.playback.next()
+        self.replay_events()
+
+        self.core.history._add_track.assert_called_once_with(self.tracks[1])
+        self.core.tracklist._mark_playing.assert_called_once_with(tl_tracks[1])
