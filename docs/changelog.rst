@@ -13,14 +13,14 @@ Mopidy 2.0 is here!
 Since the release of 1.1, we've closed or merged approximately 80 issues and
 pull requests through about 350 commits by 14 extraordinary people, including
 10 newcomers. That's about the same amount of issues and commits as between 1.0
-and 1.1. The number of contributors is a bit lower, but we didn't have a real
-life sprint in this development cycle. Thanks to :ref:`everyone <authors>` who
-has :ref:`contributed <contributing>`!
+and 1.1. The number of contributors is a bit lower but we didn't have a real
+life sprint during this development cycle. Thanks to :ref:`everyone <authors>`
+who has :ref:`contributed <contributing>`!
 
 With the release of Mopidy 1.0 we promised that any extension working with
 Mopidy 1.0 should continue working with all Mopidy 1.x releases. Mopidy 2.0 is
-quite a friendly major release, and will only break a single extension that we
-know of: Mopidy-Spotify. To ensure that everything keeps on working, please
+quite a friendly major release and will only break a single extension that we
+know of: Mopidy-Spotify. To ensure that everything continues working, please
 upgrade to Mopidy 2.0 and Mopidy-Spotify 3.0 at the same time.
 
 No deprecated functionality has been removed in Mopidy 2.0.
@@ -29,13 +29,13 @@ The major features of Mopidy 2.0 are:
 
 - Gapless playback has been mostly implemented. It works as long as you don't
   change tracks in the middle of a track or use previous and next. In a future
-  release previous and next will also become gapless. It is now quite easy to
+  release, previous and next will also become gapless. It is now quite easy to
   have Mopidy streaming audio over the network using Icecast. See the updated
   :ref:`streaming` docs for details of how to set it up and workarounds for the
   remaining issues.
 
 - Mopidy has upgraded from GStreamer 0.10 to 1.x. This has been on our backlog
-  for more than three years. With this upgrade we're ridding ourselves with
+  for more than three years. With this upgrade we're ridding ourselves of
   years of GStreamer bugs that have been fixed in newer releases, we can get
   into Debian testing again, and we've removed the last major roadblock for
   running Mopidy on Python 3.
