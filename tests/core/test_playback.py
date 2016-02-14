@@ -24,6 +24,11 @@ class TestBackend(pykka.ThreadingActor, backend.Backend):
         super(TestBackend, self).__init__()
         self.playback = backend.PlaybackProvider(audio=audio, backend=self)
 
+    def translate_uri(self, uri):
+        if 'unplayable' in uri:
+            return None
+        return uri
+
 
 class BaseTest(unittest.TestCase):
     config = {'core': {'max_tracklist_length': 10000}}
@@ -652,6 +657,11 @@ class TestUnplayableURI(BaseTest):
         success = self.core.playback.seek(1000)
 
         self.assertFalse(success)
+
+
+class TestUnplayableByBackend(BaseTest):
+
+    pass  # TODO
 
 
 class SeekTest(BaseTest):
