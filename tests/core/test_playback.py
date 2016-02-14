@@ -13,6 +13,16 @@ from mopidy.models import Track
 from tests import dummy_audio
 
 
+class TestPlaybackProvider(backend.PlaybackProvider):
+    def translate_uri(self, uri):
+        if 'error' in uri:
+            raise Exception(uri)
+        elif 'unplayable' in uri:
+            return None
+        else:
+            return uri
+
+
 # TODO: Replace this with dummy_backend now that it uses a real
 # playbackprovider Since we rely on our DummyAudio to actually emit events we
 # need a "real" backend and not a mock so the right calls make it through to
@@ -22,7 +32,7 @@ class TestBackend(pykka.ThreadingActor, backend.Backend):
 
     def __init__(self, config, audio):
         super(TestBackend, self).__init__()
-        self.playback = backend.PlaybackProvider(audio=audio, backend=self)
+        self.playback = TestPlaybackProvider(audio=audio, backend=self)
 
 
 class BaseTest(unittest.TestCase):
@@ -196,6 +206,36 @@ class TestNextHandling(BaseTest):
 
         assert self.core.playback.get_current_tl_track() == tl_tracks[2]
 
+    def test_next_skips_over_change_track_error(self):
+        # Trigger an exception in translate_uri.
+        track = Track(uri='dummy:error', length=1234)
+        self.core.tracklist.add(tracks=[track], at_position=1)
+
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play()
+        self.replay_events()
+
+        self.core.playback.next()
+        self.replay_events()
+
+        assert self.core.playback.get_current_tl_track() == tl_tracks[2]
+
+    def test_next_skips_over_change_track_unplayable(self):
+        # Make translate_uri return None.
+        track = Track(uri='dummy:unplayable', length=1234)
+        self.core.tracklist.add(tracks=[track], at_position=1)
+
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play()
+        self.replay_events()
+
+        self.core.playback.next()
+        self.replay_events()
+
+        assert self.core.playback.get_current_tl_track() == tl_tracks[2]
+
 
 class TestPreviousHandling(BaseTest):
     # TODO Test previous() more
@@ -252,8 +292,38 @@ class TestPreviousHandling(BaseTest):
 
         assert self.core.playback.get_current_tl_track() == tl_tracks[0]
 
+    def test_previous_skips_over_change_track_error(self):
+        # Trigger an exception in translate_uri.
+        track = Track(uri='dummy:error', length=1234)
+        self.core.tracklist.add(tracks=[track], at_position=1)
 
-class OnAboutToFinishTest(BaseTest):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play(tl_tracks[2])
+        self.replay_events()
+
+        self.core.playback.previous()
+        self.replay_events()
+
+        assert self.core.playback.get_current_tl_track() == tl_tracks[0]
+
+    def test_previous_skips_over_change_track_unplayable(self):
+        # Makes translate_uri return None.
+        track = Track(uri='dummy:unplayable', length=1234)
+        self.core.tracklist.add(tracks=[track], at_position=1)
+
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play(tl_tracks[2])
+        self.replay_events()
+
+        self.core.playback.previous()
+        self.replay_events()
+
+        assert self.core.playback.get_current_tl_track() == tl_tracks[0]
+
+
+class TestOnAboutToFinish(BaseTest):
 
     def test_on_about_to_finish_keeps_finished_track_in_tracklist(self):
         tl_track = self.core.tracklist.get_tl_tracks()[0]
@@ -262,6 +332,34 @@ class OnAboutToFinishTest(BaseTest):
         self.trigger_about_to_finish()
 
         self.assertIn(tl_track, self.core.tracklist.tl_tracks)
+
+    def test_on_about_to_finish_skips_over_change_track_error(self):
+        # Trigger an exception in translate_uri.
+        track = Track(uri='dummy:error', length=1234)
+        self.core.tracklist.add(tracks=[track], at_position=1)
+
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play(tl_tracks[0])
+        self.replay_events()
+
+        self.trigger_about_to_finish()
+
+        assert self.core.playback.get_current_tl_track() == tl_tracks[2]
+
+    def test_on_about_to_finish_skips_over_change_track_unplayable(self):
+        # Makes translate_uri return None.
+        track = Track(uri='dummy:unplayable', length=1234)
+        self.core.tracklist.add(tracks=[track], at_position=1)
+
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play(tl_tracks[0])
+        self.replay_events()
+
+        self.trigger_about_to_finish()
+
+        assert self.core.playback.get_current_tl_track() == tl_tracks[2]
 
 
 class TestConsumeHandling(BaseTest):
