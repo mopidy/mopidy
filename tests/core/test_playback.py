@@ -185,6 +185,17 @@ class TestNextHandling(BaseTest):
 
         self.assertIn(tl_track, self.core.tracklist.tl_tracks)
 
+    def test_next_skips_over_unplayable_track(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.audio.trigger_fake_playback_failure(tl_tracks[1].track.uri)
+        self.core.playback.play(tl_tracks[0])
+        self.replay_events()
+
+        self.core.playback.next()
+        self.replay_events()
+
+        assert self.core.playback.get_current_tl_track() == tl_tracks[2]
+
 
 class TestPreviousHandling(BaseTest):
     # TODO Test previous() more
@@ -229,6 +240,17 @@ class TestPreviousHandling(BaseTest):
         self.replay_events()
 
         self.assertIn(tl_tracks[1], self.core.tracklist.tl_tracks)
+
+    def test_previous_skips_over_unplayable_track(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.audio.trigger_fake_playback_failure(tl_tracks[1].track.uri)
+        self.core.playback.play(tl_tracks[2])
+        self.replay_events()
+
+        self.core.playback.previous()
+        self.replay_events()
+
+        assert self.core.playback.get_current_tl_track() == tl_tracks[0]
 
 
 class OnAboutToFinishTest(BaseTest):
