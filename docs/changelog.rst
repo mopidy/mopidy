@@ -97,14 +97,14 @@ MPD frontend
 
 - Idle events are now emitted on ``seeked`` events. This fix means that
   clients relying on ``idle`` events now get notified about seeks.
-  (Fixes: :issue:`1331` :issue:`1347`)
+  (Fixes: :issue:`1331`, PR: :issue:`1347`)
 
 - Idle events are now emitted on ``playlists_loaded`` events. This fix means
   that clients relying on ``idle`` events now get notified about playlist loads.
-  (Fixes: :issue:`1331` PR: :issue:`1347`)
+  (Fixes: :issue:`1331`, PR: :issue:`1347`)
 
 - Event handler for ``playlist_deleted`` has been unbroken. This unreported bug
-  would cause the MPD Frontend to crash preventing any further communication
+  would cause the MPD frontend to crash preventing any further communication
   via the MPD protocol. (PR: :issue:`1347`)
 
 Zeroconf
@@ -164,9 +164,9 @@ Audio
   argument is no longer in use and will be removed in the future. As far as we
   know, this is only used by Mopidy-Spotify.
 
-- Duplicate seek events getting to AppSrc based backends is now fixed. This
-  should prevent seeking in Mopidy-Spotify from glitching.
-  (Fixes: :issue:`1404`)
+- Duplicate seek events getting to ``appsrc`` based backends is now fixed. This
+  should prevent seeking in Mopidy-Spotify from glitching. (Fixes:
+  :issue:`1404`)
 
 - Workaround crash caused by a race that does not seem to affect functionality.
   This should be fixed properly together with :issue:`1222`. (Fixes:
@@ -174,7 +174,7 @@ Audio
 
 - Add a new config option, :confval:`audio/buffer_time`, for setting the buffer
   time of the GStreamer queue. If you experience buffering before track
-  changes, it may help to increase this. Workaround for :issue:`1409`.
+  changes, it may help to increase this. (Workaround for :issue:`1409`)
 
 - ``tags_changed`` events are only emitted for fields that have changed.
   Previous behavior was to emit this for all fields received from GStreamer.
@@ -185,6 +185,9 @@ Gapless
 
 - Add partial support for gapless playback. Gapless now works as long as you
   don't change tracks or use next/previous. (PR: :issue:`1288`)
+
+  The :ref:`streaming` docs has been updated with the workarounds still needed
+  to properly stream Mopidy audio through Icecast.
 
 - Core playback has been refactored to better handle gapless, and async state
   changes.
