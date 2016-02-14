@@ -30,7 +30,7 @@ def config():
         'stream': {
             'timeout': TIMEOUT,
             'metadata_blacklist': [],
-            'protocols': ['file'],
+            'protocols': ['http'],
         },
         'file': {
             'enabled': False

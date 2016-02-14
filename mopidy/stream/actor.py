@@ -74,6 +74,13 @@ class StreamLibraryProvider(backend.LibraryProvider):
 class StreamPlaybackProvider(backend.PlaybackProvider):
 
     def translate_uri(self, uri):
+        if urllib.parse.urlsplit(uri).scheme not in self.backend.uri_schemes:
+            return None
+
+        if self.backend._blacklist_re.match(uri):
+            logger.debug('URI matched metadata lookup blacklist: %s', uri)
+            return uri
+
         return _unwrap_stream(
             uri,
             timeout=self.backend._timeout,
