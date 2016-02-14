@@ -60,12 +60,17 @@ class StreamLibraryProvider(backend.LibraryProvider):
             logger.debug('URI matched metadata lookup blacklist: %s', uri)
             return [Track(uri=uri)]
 
-        try:
-            result = self.backend._scanner.scan(uri)
+        result = _unwrap_stream(
+            uri,
+            timeout=self.backend._timeout,
+            scanner=self.backend._scanner,
+            requests_session=self.backend._session)[1]
+
+        if result:
             track = tags.convert_tags_to_track(result.tags).replace(
                 uri=uri, length=result.duration)
-        except exceptions.ScannerError as e:
-            logger.warning('Problem looking up %s: %s', uri, e)
+        else:
+            logger.warning('Problem looking up %s: %s', uri)
             track = Track(uri=uri)
 
         return [track]
@@ -85,9 +90,10 @@ class StreamPlaybackProvider(backend.PlaybackProvider):
             uri,
             timeout=self.backend._timeout,
             scanner=self.backend._scanner,
-            requests_session=self.backend._session)
+            requests_session=self.backend._session)[0]
 
 
+# TODO: cleanup the return value of this.
 def _unwrap_stream(uri, timeout, scanner, requests_session):
     """
     Get a stream URI from a playlist URI, ``uri``.
@@ -105,7 +111,7 @@ def _unwrap_stream(uri, timeout, scanner, requests_session):
             logger.info(
                 'Unwrapping stream from URI (%s) failed: '
                 'playlist referenced itself', uri)
-            return None
+            return None, None
         else:
             seen_uris.add(uri)
 
@@ -117,7 +123,7 @@ def _unwrap_stream(uri, timeout, scanner, requests_session):
                 logger.info(
                     'Unwrapping stream from URI (%s) failed: '
                     'timed out in %sms', uri, timeout)
-                return None
+                return None, None
             scan_result = scanner.scan(uri, timeout=scan_timeout)
         except exceptions.ScannerError as exc:
             logger.debug('GStreamer failed scanning URI (%s): %s', uri, exc)
@@ -130,14 +136,14 @@ def _unwrap_stream(uri, timeout, scanner, requests_session):
             ):
                 logger.debug(
                     'Unwrapped potential %s stream: %s', scan_result.mime, uri)
-                return uri
+                return uri, scan_result
 
         download_timeout = deadline - time.time()
         if download_timeout < 0:
             logger.info(
                 'Unwrapping stream from URI (%s) failed: timed out in %sms',
                 uri, timeout)
-            return None
+            return None, None
         content = http.download(
             requests_session, uri, timeout=download_timeout)
 
@@ -145,14 +151,14 @@ def _unwrap_stream(uri, timeout, scanner, requests_session):
             logger.info(
                 'Unwrapping stream from URI (%s) failed: '
                 'error downloading URI %s', original_uri, uri)
-            return None
+            return None, None
 
         uris = playlists.parse(content)
         if not uris:
             logger.debug(
                 'Failed parsing URI (%s) as playlist; found potential stream.',
                 uri)
-            return uri
+            return uri, None
 
         # TODO Test streams and return first that seems to be playable
         logger.debug(
