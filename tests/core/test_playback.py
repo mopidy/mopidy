@@ -333,6 +333,34 @@ class TestOnAboutToFinish(BaseTest):
 
         self.assertIn(tl_track, self.core.tracklist.tl_tracks)
 
+    def test_on_about_to_finish_skips_over_change_track_error(self):
+        # Trigger an exception in translate_uri.
+        track = Track(uri='dummy:error', length=1234)
+        self.core.tracklist.add(tracks=[track], at_position=1)
+
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play(tl_tracks[0])
+        self.replay_events()
+
+        self.trigger_about_to_finish()
+
+        assert self.core.playback.get_current_tl_track() == tl_tracks[2]
+
+    def test_on_about_to_finish_skips_over_change_track_unplayable(self):
+        # Makes translate_uri return None.
+        track = Track(uri='dummy:unplayable', length=1234)
+        self.core.tracklist.add(tracks=[track], at_position=1)
+
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play(tl_tracks[0])
+        self.replay_events()
+
+        self.trigger_about_to_finish()
+
+        assert self.core.playback.get_current_tl_track() == tl_tracks[2]
+
 
 class TestConsumeHandling(BaseTest):
 

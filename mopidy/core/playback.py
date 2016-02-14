@@ -254,13 +254,19 @@ class PlaybackController(object):
         pending = self.core.tracklist.eot_track(self._current_tl_track)
         while pending:
             # TODO: Avoid infinite loops if all tracks are unplayable.
-            # TODO: Wrap backend call in error handling.
             backend = self._get_backend(pending)
-            if backend and backend.playback.change_track(pending.track).get():
-                self._pending_tl_track = pending
-                break
-            else:
-                self.core.tracklist._mark_unplayable(pending)
+            if not backend:
+                continue
+
+            try:
+                if backend.playback.change_track(pending.track).get():
+                    self._pending_tl_track = pending
+                    break
+            except Exception:
+                logger.exception('%s backend caused an exception.',
+                                 backend.actor_ref.actor_class.__name__)
+
+            self.core.tracklist._mark_unplayable(pending)
             pending = self.core.tracklist.eot_track(pending)
 
     def _on_tracklist_change(self):
