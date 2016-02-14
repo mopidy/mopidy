@@ -135,6 +135,7 @@ class PlaybackController(object):
             return self._pending_position
         backend = self._get_backend(self.get_current_tl_track())
         if backend:
+            # TODO: Wrap backend call in error handling.
             return backend.playback.get_time_position().get()
         else:
             return 0
@@ -253,6 +254,7 @@ class PlaybackController(object):
         pending = self.core.tracklist.eot_track(self._current_tl_track)
         while pending:
             # TODO: Avoid infinite loops if all tracks are unplayable.
+            # TODO: Wrap backend call in error handling.
             backend = self._get_backend(pending)
             if backend and backend.playback.change_track(pending.track).get():
                 self._pending_tl_track = pending
@@ -299,6 +301,7 @@ class PlaybackController(object):
     def pause(self):
         """Pause playback."""
         backend = self._get_backend(self.get_current_tl_track())
+        # TODO: Wrap backend call in error handling.
         if not backend or backend.playback.pause().get():
             # TODO: switch to:
             # backend.track(pause)
@@ -366,10 +369,18 @@ class PlaybackController(object):
         if not backend:
             return False
 
+        # TODO: Wrap backend call in error handling.
         backend.playback.prepare_change()
-        if not backend.playback.change_track(pending_tl_track.track).get():
-            return False  # TODO: test for this path
 
+        try:
+            if not backend.playback.change_track(pending_tl_track.track).get():
+                return False
+        except Exception:
+            logger.exception('%s backend caused an exception.',
+                             backend.actor_ref.actor_class.__name__)
+            return False
+
+        # TODO: Wrap backend calls in error handling.
         if state == PlaybackState.PLAYING:
             try:
                 return backend.playback.play().get()
@@ -418,6 +429,7 @@ class PlaybackController(object):
         if self.get_state() != PlaybackState.PAUSED:
             return
         backend = self._get_backend(self.get_current_tl_track())
+        # TODO: Wrap backend call in error handling.
         if backend and backend.playback.resume().get():
             self.set_state(PlaybackState.PLAYING)
             # TODO: trigger via gst messages
@@ -475,6 +487,7 @@ class PlaybackController(object):
         backend = self._get_backend(self.get_current_tl_track())
         if not backend:
             return False
+        # TODO: Wrap backend call in error handling.
         return backend.playback.seek(time_position).get()
 
     def stop(self):
@@ -482,6 +495,7 @@ class PlaybackController(object):
         if self.get_state() != PlaybackState.STOPPED:
             self._last_position = self.get_time_position()
             backend = self._get_backend(self.get_current_tl_track())
+            # TODO: Wrap backend call in error handling.
             if not backend or backend.playback.stop().get():
                 self.set_state(PlaybackState.STOPPED)
 
