@@ -89,15 +89,6 @@ See :ref:`config` for general help on configuring Mopidy.
 
     Path to directory with local media files.
 
-.. confval:: local/data_dir
-
-    Path to directory to store local metadata such as libraries and playlists
-    in.
-
-.. confval:: local/playlists_dir
-
-    Path to playlists directory with m3u files for local media.
-
 .. confval:: local/scan_timeout
 
     Number of milliseconds before giving up scanning a file and moving on to
