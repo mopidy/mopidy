@@ -176,6 +176,10 @@ Audio
   time of the GStreamer queue. If you experience buffering before track
   changes, it may help to increase this. Workaround for :issue:`1409`.
 
+- ``tags_changed`` events are only emitted for fields that have changed.
+  Previous behavior was to emit this for all fields received from GStreamer.
+  (PR: :issue:`1439`)
+
 Gapless
 -------
 
