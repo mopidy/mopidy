@@ -4,6 +4,8 @@ import mock
 
 import pytest
 
+import requests.exceptions
+
 import responses
 
 from mopidy import exceptions
@@ -27,6 +29,11 @@ def config():
         'proxy': {},
         'stream': {
             'timeout': TIMEOUT,
+            'metadata_blacklist': [],
+            'protocols': ['file'],
+        },
+        'file': {
+            'enabled': False
         },
     }
 
@@ -36,24 +43,21 @@ def audio():
     return mock.Mock()
 
 
-@pytest.fixture
+@pytest.yield_fixture
 def scanner():
-    scan_mock = mock.Mock(spec=scan.Scanner)
-    scan_mock.scan.return_value = None
-    return scan_mock
+    patcher = mock.patch.object(scan, 'Scanner')
+    yield patcher.start()()
+    patcher.stop()
 
 
 @pytest.fixture
-def backend(scanner):
-    backend = mock.Mock()
-    backend.uri_schemes = ['file']
-    backend._scanner = scanner
-    return backend
+def backend(audio, config, scanner):
+    return actor.StreamBackend(audio=audio, config=config)
 
 
 @pytest.fixture
-def provider(audio, backend, config):
-    return actor.StreamPlaybackProvider(audio, backend, config)
+def provider(backend):
+    return backend.playback
 
 
 class TestTranslateURI(object):
@@ -184,13 +188,23 @@ class TestTranslateURI(object):
             % STREAM_URI in caplog.text())
         assert result == STREAM_URI
 
-    def test_failed_download_returns_none(self, provider, caplog):
-        with mock.patch.object(actor, 'http') as http_mock:
-            http_mock.download.return_value = None
+    @responses.activate
+    def test_failed_download_returns_none(self, scanner, provider, caplog):
+        scanner.scan.side_effect = [
+            mock.Mock(mime='text/foo', playable=False)
+        ]
 
-            result = provider.translate_uri(PLAYLIST_URI)
+        responses.add(
+            responses.GET, PLAYLIST_URI,
+            body=requests.exceptions.HTTPError('Kaboom'))
+
+        result = provider.translate_uri(PLAYLIST_URI)
 
         assert result is None
+
+        assert (
+            'Unwrapping stream from URI (%s) failed: '
+            'error downloading URI' % PLAYLIST_URI) in caplog.text()
 
     @responses.activate
     def test_playlist_references_itself(self, scanner, provider, caplog):
