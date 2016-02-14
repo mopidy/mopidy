@@ -25,8 +25,7 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
             timeout=config['stream']['timeout'],
             proxy_config=config['proxy'])
 
-        self.library = StreamLibraryProvider(
-            backend=self, blacklist=config['stream']['metadata_blacklist'])
+        self.library = StreamLibraryProvider(backend=self, config=config)
         self.playback = StreamPlaybackProvider(
             audio=audio, backend=self, config=config)
         self.playlists = None
@@ -44,11 +43,17 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
 
 class StreamLibraryProvider(backend.LibraryProvider):
 
-    def __init__(self, backend, blacklist):
+    def __init__(self, backend, config):
         super(StreamLibraryProvider, self).__init__(backend)
+        self._config = config
         self._scanner = backend._scanner
-        self._blacklist_re = re.compile(
-            r'^(%s)$' % '|'.join(fnmatch.translate(u) for u in blacklist))
+        self._session = http.get_requests_session(
+            proxy_config=config['proxy'],
+            user_agent='%s/%s' % (
+                stream.Extension.dist_name, stream.Extension.version))
+        self._blacklist_re = re.compile(r'^(%s)$' % '|'.join(
+            fnmatch.translate(u)
+            for u in config['stream']['metadata_blacklist']))
 
     def lookup(self, uri):
         if urllib.parse.urlsplit(uri).scheme not in self.backend.uri_schemes:
@@ -57,6 +62,12 @@ class StreamLibraryProvider(backend.LibraryProvider):
         if self._blacklist_re.match(uri):
             logger.debug('URI matched metadata lookup blacklist: %s', uri)
             return [Track(uri=uri)]
+
+        uri = _unwrap_stream(
+            uri,
+            timeout=self._config['stream']['timeout'],
+            scanner=self._scanner,
+            requests_session=self._session)
 
         try:
             result = self._scanner.scan(uri)
