@@ -34,7 +34,7 @@ The major features of Mopidy 2.0 are:
   :ref:`streaming` docs for details of how to set it up and workarounds for the
   remaining issues.
 
-- Mopidy has upgraded from GStreamer 0.10 to 1.x. This has been on our backlog
+- Mopidy has upgraded from GStreamer 0.10 to 1.x. This has been in our backlog
   for more than three years. With this upgrade we're ridding ourselves of
   years of GStreamer bugs that have been fixed in newer releases, we can get
   into Debian testing again, and we've removed the last major roadblock for
