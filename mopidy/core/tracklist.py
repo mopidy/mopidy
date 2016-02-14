@@ -621,6 +621,8 @@ class TracklistController(object):
     def _mark_unplayable(self, tl_track):
         """Internal method for :class:`mopidy.core.PlaybackController`."""
         logger.warning('Track is not playable: %s', tl_track.track.uri)
+        if self.get_consume() and tl_track is not None:
+            self.remove({'tlid': [tl_track.tlid]})
         if self.get_random() and tl_track in self._shuffled:
             self._shuffled.remove(tl_track)
 

@@ -346,7 +346,6 @@ class PlaybackController(object):
         pending = tl_track or current or self.core.tracklist.next_track(None)
 
         while pending:
-            # TODO: should we consume unplayable tracks in this loop?
             if self._change(pending, PlaybackState.PLAYING):
                 break
             else:
