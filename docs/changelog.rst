@@ -110,6 +110,12 @@ M3U backend
   - Improve reliability of playlist updates using the core playlist API by
     applying the write-replace pattern for file updates.
 
+Stream backend
+--------------
+
+- Make sure both lookup and playback correctly handle playlists and our
+  blacklist support. (Fixes: :issue:`1445`, PR: :issue:`1447`)
+
 MPD frontend
 ------------
 
