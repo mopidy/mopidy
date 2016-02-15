@@ -68,7 +68,7 @@ How to for Raspbian Jessie
 
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
    then you're ready to :doc:`run Mopidy </running>`. Alternatively you may
-   want to have Mopidy run as a :doc:`system service </debian>`, automatically
+   want to have Mopidy run as a :ref:`system service <service>`, automatically
    starting at boot.
 
 
