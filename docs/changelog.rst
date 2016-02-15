@@ -5,7 +5,7 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
-v2.0.0 (UNRELEASED)
+v2.0.0 (2016-02-15)
 ===================
 
 Mopidy 2.0 is here!
