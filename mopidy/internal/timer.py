@@ -4,13 +4,14 @@ import contextlib
 import logging
 import time
 
+from mopidy.internal import log
+
 
 logger = logging.getLogger(__name__)
-TRACE = logging.getLevelName('TRACE')
 
 
 @contextlib.contextmanager
-def time_logger(name, level=TRACE):
+def time_logger(name, level=log.TRACE_LOG_LEVEL):
     start = time.time()
     yield
     logger.log(level, '%s took %dms', name, (time.time() - start) * 1000)

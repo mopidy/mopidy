@@ -7,10 +7,9 @@ import shutil
 import tempfile
 import unittest
 
-import glib
-
 from mopidy import compat, exceptions
 from mopidy.internal import path
+from mopidy.internal.gi import GLib
 
 import tests
 
@@ -133,7 +132,7 @@ class GetOrCreateFileTest(unittest.TestCase):
         file_path = os.path.join(self.parent, b'test')
         created = path.get_or_create_file(file_path, content='foobaræøå')
         with open(created) as fh:
-            self.assertEqual(fh.read(), b'foobaræøå')
+            self.assertEqual(fh.read(), b'foobar\xc3\xa6\xc3\xb8\xc3\xa5')
 
 
 class PathToFileURITest(unittest.TestCase):
@@ -215,7 +214,7 @@ class ExpandPathTest(unittest.TestCase):
 
     def test_xdg_subsititution(self):
         self.assertEqual(
-            glib.get_user_data_dir() + b'/foo',
+            GLib.get_user_data_dir() + b'/foo',
             path.expand_path(b'$XDG_DATA_DIR/foo'))
 
     def test_xdg_subsititution_unknown(self):

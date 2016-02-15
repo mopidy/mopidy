@@ -112,7 +112,7 @@ class ImmutableObject(object):
         for key, value in kwargs.items():
             if not self._is_valid_field(key):
                 raise TypeError(
-                    'copy() got an unexpected keyword argument "%s"' % key)
+                    'replace() got an unexpected keyword argument "%s"' % key)
             other._set_field(key, value)
         return other
 

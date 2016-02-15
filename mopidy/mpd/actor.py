@@ -4,12 +4,29 @@ import logging
 
 import pykka
 
-from mopidy import exceptions, zeroconf
+from mopidy import exceptions, listener, zeroconf
 from mopidy.core import CoreListener
 from mopidy.internal import encoding, network, process
 from mopidy.mpd import session, uri_mapper
 
 logger = logging.getLogger(__name__)
+
+_CORE_EVENTS_TO_IDLE_SUBSYSTEMS = {
+    'track_playback_paused': None,
+    'track_playback_resumed': None,
+    'track_playback_started': None,
+    'track_playback_ended': None,
+    'playback_state_changed': 'player',
+    'tracklist_changed': 'playlist',
+    'playlists_loaded': 'stored_playlist',
+    'playlist_changed': 'stored_playlist',
+    'playlist_deleted': 'stored_playlist',
+    'options_changed': 'options',
+    'volume_changed': 'mixer',
+    'mute_changed': 'output',
+    'seeked': 'player',
+    'stream_title_changed': 'playlist',
+}
 
 
 class MpdFrontend(pykka.ThreadingActor, CoreListener):
@@ -24,6 +41,9 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
         self.zeroconf_name = config['mpd']['zeroconf']
         self.zeroconf_service = None
 
+        self._setup_server(config, core)
+
+    def _setup_server(self, config, core):
         try:
             network.Server(
                 self.hostname, self.port,
@@ -45,7 +65,8 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
     def on_start(self):
         if self.zeroconf_name:
             self.zeroconf_service = zeroconf.Zeroconf(
-                stype='_mpd._tcp', name=self.zeroconf_name,
+                name=self.zeroconf_name,
+                stype='_mpd._tcp',
                 port=self.port)
             self.zeroconf_service.publish()
 
@@ -55,28 +76,13 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
 
         process.stop_actors_by_class(session.MpdSession)
 
+    def on_event(self, event, **kwargs):
+        if event not in _CORE_EVENTS_TO_IDLE_SUBSYSTEMS:
+            logger.warning(
+                'Got unexpected event: %s(%s)', event, ', '.join(kwargs))
+        else:
+            self.send_idle(_CORE_EVENTS_TO_IDLE_SUBSYSTEMS[event])
+
     def send_idle(self, subsystem):
-        listeners = pykka.ActorRegistry.get_by_class(session.MpdSession)
-        for listener in listeners:
-            getattr(listener.proxy(), 'on_idle')(subsystem)
-
-    def playback_state_changed(self, old_state, new_state):
-        self.send_idle('player')
-
-    def tracklist_changed(self):
-        self.send_idle('playlist')
-
-    def options_changed(self):
-        self.send_idle('options')
-
-    def volume_changed(self, volume):
-        self.send_idle('mixer')
-
-    def mute_changed(self, mute):
-        self.send_idle('output')
-
-    def stream_title_changed(self, title):
-        self.send_idle('playlist')
-
-    def seeked(self, time_position):
-        self.send_idle('player')
+        if subsystem:
+            listener.send(session.MpdSession, subsystem)

@@ -118,7 +118,7 @@ To install, run::
 Mopidy-MusicBox-Webclient
 =========================
 
-https://github.com/woutervanwijk/Mopidy-MusicBox-Webclient
+https://github.com/pimusicbox/mopidy-musicbox-webclient
 
 The first web client for Mopidy, made with jQuery Mobile by Wouter van Wijk.
 Also the web client used for Wouter's popular `Pi Musicbox
@@ -183,7 +183,7 @@ To install, run::
 Mopidy-WebSettings
 ==================
 
-https://github.com/woutervanwijk/mopidy-websettings
+https://github.com/pimusicbox/mopidy-websettings
 
 A web extension for changing settings. Used by the Pi MusicBox distribution
 for Raspberry Pi, but also usable for other projects.

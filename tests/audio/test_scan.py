@@ -3,9 +3,6 @@ from __future__ import absolute_import, unicode_literals
 import os
 import unittest
 
-import gobject
-gobject.threads_init()
-
 from mopidy import exceptions
 from mopidy.audio import scan
 from mopidy.internal import path as path_lib

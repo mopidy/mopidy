@@ -4,11 +4,11 @@
 UPnP clients
 ************
 
-`UPnP <http://en.wikipedia.org/wiki/Universal_Plug_and_Play>`_ is a set of
+`UPnP <https://en.wikipedia.org/wiki/Universal_Plug_and_Play>`_ is a set of
 specifications for media sharing, playing, remote control, etc, across a home
 network. The specs are supported by a lot of consumer devices (like
 smartphones, TVs, Xbox, and PlayStation) that are often labeled as being `DLNA
-<http://en.wikipedia.org/wiki/DLNA>`_ compatible or certified.
+<https://en.wikipedia.org/wiki/DLNA>`_ compatible or certified.
 
 The DLNA guidelines and UPnP specifications defines several device roles, of
 which Mopidy may play two:
@@ -149,4 +149,4 @@ Other clients
 
 For a long list of UPnP clients for all possible platforms, see Wikipedia's
 `List of UPnP AV media servers and clients
-<http://en.wikipedia.org/wiki/List_of_UPnP_AV_media_servers_and_clients>`_.
+<https://en.wikipedia.org/wiki/List_of_UPnP_AV_media_servers_and_clients>`_.

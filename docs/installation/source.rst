@@ -37,36 +37,34 @@ please follow the directions :ref:`here <contributing>`.
        On Fedora Linux, you must replace ``pip`` with ``pip-python`` in the
        following steps.
 
-#. Then you'll need to install GStreamer 0.10 (>= 0.10.31, < 0.11), with Python
-   bindings. GStreamer is packaged for most popular Linux distributions. Search
-   for GStreamer in your package manager, and make sure to install the Python
+#. Then you'll need to install GStreamer >= 1.2.3, with Python bindings.
+   GStreamer is packaged for most popular Linux distributions. Search for
+   GStreamer in your package manager, and make sure to install the Python
    bindings, and the "good" and "ugly" plugin sets.
 
    If you use Debian/Ubuntu you can install GStreamer like this::
 
-       sudo apt-get install python-gst0.10 gstreamer0.10-plugins-good \
-           gstreamer0.10-plugins-ugly gstreamer0.10-tools
+       sudo apt-get install python-gst-1.0 \
+           gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 \
+           gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly \
+           gstreamer1.0-tools
 
    If you use Arch Linux, install the following packages from the official
    repository::
 
-       sudo pacman -S gstreamer0.10-python gstreamer0.10-good-plugins \
-           gstreamer0.10-ugly-plugins
+       sudo pacman -S gst-python2 gst-plugins-good gst-plugins-ugly
 
    If you use Fedora you can install GStreamer like this::
 
-       sudo yum install -y python-gst0.10 gstreamer0.10-plugins-good \
-           gstreamer0.10-plugins-ugly gstreamer0.10-tools
+       sudo yum install -y python-gstreamer1 gstreamer1-plugins-good \
+           gstreamer1-plugins-ugly
 
-   If you use Gentoo you need to be careful because GStreamer 0.10 is in a
-   different lower slot than 1.0, the default. Your emerge commands will need
-   to include the slot::
+   If you use Gentoo you can install GStreamer like this::
 
-       emerge -av gst-python gst-plugins-bad:0.10 gst-plugins-good:0.10 \
-           gst-plugins-ugly:0.10 gst-plugins-meta:0.10
+       emerge -av gst-python gst-plugins-meta
 
-   ``gst-plugins-meta:0.10`` is the one that actually pulls in the plugins you
-   want, so pay attention to the use flags, e.g. ``alsa``, ``mp3``, etc.
+   ``gst-plugins-meta`` is the one that actually pulls in the plugins you want,
+   so pay attention to the USE flags, e.g. ``alsa``, ``mp3``, etc.
 
 #. Install the latest release of Mopidy::
 
@@ -75,11 +73,6 @@ please follow the directions :ref:`here <contributing>`.
    This will use ``pip`` to install the latest release of `Mopidy from PyPI
    <https://pypi.python.org/pypi/Mopidy>`_. To upgrade Mopidy to future
    releases, just rerun this command.
-
-   Alternatively, if you want to track Mopidy development closer, you may
-   install a snapshot of Mopidy's ``develop`` Git branch using pip::
-
-       sudo pip install --allow-unverified=mopidy mopidy==dev
 
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
    then you're ready to :doc:`run Mopidy </running>`.

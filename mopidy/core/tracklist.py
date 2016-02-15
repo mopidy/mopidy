@@ -16,7 +16,7 @@ class TracklistController(object):
 
     def __init__(self, core):
         self.core = core
-        self._next_tlid = 0
+        self._next_tlid = 1
         self._tl_tracks = []
         self._version = 0
 
@@ -218,7 +218,7 @@ class TracklistController(object):
             The *tlid* parameter
         """
         tl_track is None or validation.check_instance(tl_track, TlTrack)
-        tlid is None or validation.check_integer(tlid, min=0)
+        tlid is None or validation.check_integer(tlid, min=1)
 
         if tl_track is None and tlid is None:
             tl_track = self.core.playback.get_current_tl_track()
@@ -318,10 +318,11 @@ class TracklistController(object):
                 return self._shuffled[0]
             return None
 
-        if tl_track is None:
+        next_index = self.index(tl_track)
+        if next_index is None:
             next_index = 0
         else:
-            next_index = self.index(tl_track) + 1
+            next_index += 1
 
         if self.get_repeat():
             next_index %= len(self._tl_tracks)
@@ -620,12 +621,14 @@ class TracklistController(object):
     def _mark_unplayable(self, tl_track):
         """Internal method for :class:`mopidy.core.PlaybackController`."""
         logger.warning('Track is not playable: %s', tl_track.track.uri)
+        if self.get_consume() and tl_track is not None:
+            self.remove({'tlid': [tl_track.tlid]})
         if self.get_random() and tl_track in self._shuffled:
             self._shuffled.remove(tl_track)
 
     def _mark_played(self, tl_track):
         """Internal method for :class:`mopidy.core.PlaybackController`."""
-        if self.consume and tl_track is not None:
+        if self.get_consume() and tl_track is not None:
             self.remove({'tlid': [tl_track.tlid]})
             return True
         return False

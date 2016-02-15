@@ -45,7 +45,6 @@ Items on this list will probably not be supported in the near future.
 The following items are currently not supported, but should be added in the
 near future:
 
-- Modifying stored playlists is not supported
 - ``tagtypes`` is not supported
 - Live update of the music database is not supported
 

@@ -6,7 +6,7 @@ import os
 import time
 
 from mopidy import commands, compat, exceptions
-from mopidy.audio import scan, utils
+from mopidy.audio import scan, tags
 from mopidy.internal import path
 from mopidy.local import translator
 
@@ -140,18 +140,18 @@ class ScanCommand(commands.Command):
                 relpath = translator.local_track_uri_to_path(uri, media_dir)
                 file_uri = path.path_to_uri(os.path.join(media_dir, relpath))
                 result = scanner.scan(file_uri)
-                tags, duration = result.tags, result.duration
                 if not result.playable:
                     logger.warning('Failed %s: No audio found in file.', uri)
-                elif duration < MIN_DURATION_MS:
+                elif result.duration < MIN_DURATION_MS:
                     logger.warning('Failed %s: Track shorter than %dms',
                                    uri, MIN_DURATION_MS)
                 else:
                     mtime = file_mtimes.get(os.path.join(media_dir, relpath))
-                    track = utils.convert_tags_to_track(tags).replace(
-                        uri=uri, length=duration, last_modified=mtime)
+                    track = tags.convert_tags_to_track(result.tags).replace(
+                        uri=uri, length=result.duration, last_modified=mtime)
                     if library.add_supports_tags_and_duration:
-                        library.add(track, tags=tags, duration=duration)
+                        library.add(
+                            track, tags=result.tags, duration=result.duration)
                     else:
                         library.add(track)
                     logger.debug('Added %s', track.uri)

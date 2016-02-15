@@ -4,6 +4,241 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+
+v2.0.0 (2016-02-15)
+===================
+
+Mopidy 2.0 is here!
+
+Since the release of 1.1, we've closed or merged approximately 80 issues and
+pull requests through about 350 commits by 14 extraordinary people, including
+10 newcomers. That's about the same amount of issues and commits as between 1.0
+and 1.1. The number of contributors is a bit lower but we didn't have a real
+life sprint during this development cycle. Thanks to :ref:`everyone <authors>`
+who has :ref:`contributed <contributing>`!
+
+With the release of Mopidy 1.0 we promised that any extension working with
+Mopidy 1.0 should continue working with all Mopidy 1.x releases. Mopidy 2.0 is
+quite a friendly major release and will only break a single extension that we
+know of: Mopidy-Spotify. To ensure that everything continues working, please
+upgrade to Mopidy 2.0 and Mopidy-Spotify 3.0 at the same time.
+
+No deprecated functionality has been removed in Mopidy 2.0.
+
+The major features of Mopidy 2.0 are:
+
+- Gapless playback has been mostly implemented. It works as long as you don't
+  change tracks in the middle of a track or use previous and next. In a future
+  release, previous and next will also become gapless. It is now quite easy to
+  have Mopidy streaming audio over the network using Icecast. See the updated
+  :ref:`streaming` docs for details of how to set it up and workarounds for the
+  remaining issues.
+
+- Mopidy has upgraded from GStreamer 0.10 to 1.x. This has been in our backlog
+  for more than three years. With this upgrade we're ridding ourselves of
+  years of GStreamer bugs that have been fixed in newer releases, we can get
+  into Debian testing again, and we've removed the last major roadblock for
+  running Mopidy on Python 3.
+
+Dependencies
+------------
+
+- Mopidy now requires GStreamer >= 1.2.3, as we've finally ported from
+  GStreamer 0.10. Since we're requiring a new major version of our major
+  dependency, we're upping the major version of Mopidy too. (Fixes:
+  :issue:`225`)
+
+Core API
+--------
+
+- Start ``tlid`` counting at 1 instead of 0 to keep in sync with MPD's
+  ``songid``.
+
+- :meth:`~mopidy.core.PlaybackController.get_time_position` now returns the
+  seek target while a seek is in progress.  This gives better results than just
+  failing the position query. (Fixes: :issue:`312` PR: :issue:`1346`)
+
+- Add :meth:`mopidy.core.PlaylistsController.get_uri_schemes`. (PR:
+  :issue:`1362`)
+
+- The ``track_playback_ended`` event now includes the correct ``tl_track``
+  reference when changing to the next track in consume mode. (Fixes:
+  :issue:`1402` PR: :issue:`1403` PR: :issue:`1406`)
+
+Models
+------
+
+- **Deprecated:** :attr:`mopidy.models.Album.images` is deprecated. Use
+  :meth:`mopidy.core.LibraryController.get_images` instead. (Fixes:
+  :issue:`1325`)
+
+Extension support
+-----------------
+
+- Log exception and continue if an extension crashes during setup. Previously,
+  we let Mopidy crash if an extension's setup crashed. (PR: :issue:`1337`)
+
+Local backend
+-------------
+
+- Made :confval:`local/data_dir` really deprecated. This change breaks older
+  versions of Mopidy-Local-SQLite and Mopidy-Local-Images.
+
+M3U backend
+-----------
+
+- Add :confval:`m3u/base_dir` for resolving relative paths in M3U
+  files. (Fixes: :issue:`1428`, PR: :issue:`1442`)
+
+- Derive track name from file name for non-extended M3U
+  playlists. (Fixes: :issue:`1364`, PR: :issue:`1369`)
+
+- Major refactoring of the M3U playlist extension. (Fixes:
+  :issue:`1370` PR: :issue:`1386`)
+
+  - Add :confval:`m3u/default_encoding` and :confval:`m3u/default_extension`
+    config values for improved text encoding support.
+
+  - No longer scan playlist directory and parse playlists at startup or refresh.
+    Similarly to the file extension, this now happens on request.
+
+  - Use :class:`mopidy.models.Ref` instances when reading and writing
+    playlists. Therefore, ``Track.length`` is no longer stored in
+    extended M3U playlists and ``#EXTINF`` runtime is always set to
+    -1.
+
+  - Improve reliability of playlist updates using the core playlist API by
+    applying the write-replace pattern for file updates.
+
+Stream backend
+--------------
+
+- Make sure both lookup and playback correctly handle playlists and our
+  blacklist support. (Fixes: :issue:`1445`, PR: :issue:`1447`)
+
+MPD frontend
+------------
+
+- Implemented commands for modifying stored playlists:
+
+  - ``playlistadd``
+  - ``playlistclear``
+  - ``playlistdelete``
+  - ``playlistmove``
+  - ``rename``
+  - ``rm``
+  - ``save``
+
+  (Fixes: :issue:`1014`, PR: :issue:`1187`, :issue:`1308`, :issue:`1322`)
+
+- Start ``songid`` counting at 1 instead of 0 to match the original MPD server.
+
+- Idle events are now emitted on ``seeked`` events. This fix means that
+  clients relying on ``idle`` events now get notified about seeks.
+  (Fixes: :issue:`1331`, PR: :issue:`1347`)
+
+- Idle events are now emitted on ``playlists_loaded`` events. This fix means
+  that clients relying on ``idle`` events now get notified about playlist loads.
+  (Fixes: :issue:`1331`, PR: :issue:`1347`)
+
+- Event handler for ``playlist_deleted`` has been unbroken. This unreported bug
+  would cause the MPD frontend to crash preventing any further communication
+  via the MPD protocol. (PR: :issue:`1347`)
+
+Zeroconf
+--------
+
+- Require ``stype`` argument to :class:`mopidy.zeroconf.Zeroconf`.
+
+- Use Avahi's interface selection by default. (Fixes: :issue:`1283`)
+
+- Use Avahi server's hostname instead of ``socket.getfqdn()`` in service
+  display name.
+
+Cleanups
+--------
+
+- Removed warning if :file:`~/.mopidy` exists. We stopped using this location
+  in 0.6, released in October 2011.
+
+- Removed warning if :file:`~/.config/mopidy/settings.py` exists. We stopped
+  using this settings file in 0.14, released in April 2013.
+
+- The ``on_event`` handler in our listener helper now catches exceptions. This
+  means that any errors in event handling won't crash the actor in question.
+
+- Catch errors when loading :confval:`logging/config_file`.
+  (Fixes: :issue:`1320`)
+
+- **Breaking:** Removed unused internal
+  :class:`mopidy.internal.process.BaseThread`. This breaks Mopidy-Spotify
+  1.4.0. Versions < 1.4.0 was already broken by Mopidy 1.1, while versions >=
+  2.0 doesn't use this class.
+
+Audio
+-----
+
+- **Breaking:** The audio scanner now returns ISO-8601 formatted strings
+  instead of :class:`~datetime.datetime` objects for dates found in tags.
+  Because of this change, we can now return years without months or days, which
+  matches the semantics of the date fields in our data models.
+
+- **Breaking:** :meth:`mopidy.audio.Audio.set_appsrc`'s ``caps`` argument has
+  changed format due to the upgrade from GStreamer 0.10 to GStreamer 1. As
+  far as we know, this is only used by Mopidy-Spotify. As an example, with
+  GStreamer 0.10 the Mopidy-Spotify caps was::
+
+      audio/x-raw-int, endianness=(int)1234, channels=(int)2, width=(int)16,
+      depth=(int)16, signed=(boolean)true, rate=(int)44100
+
+  With GStreamer 1 this changes to::
+
+      audio/x-raw,format=S16LE,rate=44100,channels=2,layout=interleaved
+
+  If your Mopidy backend uses ``set_appsrc()``, please refer to GStreamer
+  documentation for details on the new caps string format.
+
+- **Breaking:** :func:`mopidy.audio.utils.create_buffer`'s ``capabilities``
+  argument is no longer in use and has been removed. As far as we know, this
+  was only used by Mopidy-Spotify.
+
+- Duplicate seek events getting to ``appsrc`` based backends is now fixed. This
+  should prevent seeking in Mopidy-Spotify from glitching. (Fixes:
+  :issue:`1404`)
+
+- Workaround crash caused by a race that does not seem to affect functionality.
+  This should be fixed properly together with :issue:`1222`. (Fixes:
+  :issue:`1430`, PR: :issue:`1438`)
+
+- Add a new config option, :confval:`audio/buffer_time`, for setting the buffer
+  time of the GStreamer queue. If you experience buffering before track
+  changes, it may help to increase this. (Workaround for :issue:`1409`)
+
+- ``tags_changed`` events are only emitted for fields that have changed.
+  Previous behavior was to emit this for all fields received from GStreamer.
+  (PR: :issue:`1439`)
+
+Gapless
+-------
+
+- Add partial support for gapless playback. Gapless now works as long as you
+  don't change tracks or use next/previous. (PR: :issue:`1288`)
+
+  The :ref:`streaming` docs has been updated with the workarounds still needed
+  to properly stream Mopidy audio through Icecast.
+
+- Core playback has been refactored to better handle gapless, and async state
+  changes.
+
+- Tests have been updated to always use a core actor so async state changes
+  don't trip us up.
+
+- Seek events are now triggered when the seek completes. Previously the event
+  was emitted when the seek was requested, not when it completed. Further
+  changes have been made to make seek work correctly for gapless related corner
+  cases. (Fixes: :issue:`1305` PR: :issue:`1346`)
+
+
 v1.1.2 (2016-01-18)
 ===================
 
@@ -2064,7 +2299,7 @@ already have.
 
 - Mopidy.js now works both from browsers and from Node.js environments. This
   means that you now can make Mopidy clients in Node.js. Mopidy.js has been
-  published to the `npm registry <https://npmjs.org/package/mopidy>`_ for easy
+  published to the `npm registry <https://www.npmjs.com/package/mopidy>`_ for easy
   installation in Node.js projects.
 
 - Upgrade Mopidy.js' build system Grunt from 0.3 to 0.4.
@@ -2820,9 +3055,9 @@ Please note that 0.6.0 requires some updated dependencies, as listed under
   subsystems: player, playlist, options, and mixer. (Fixes: :issue:`32`)
 
 - A new frontend :mod:`mopidy.frontends.mpris` have been added. It exposes
-  Mopidy through the `MPRIS interface <http://www.mpris.org/>`_ over D-Bus. In
+  Mopidy through the `MPRIS interface <http://specifications.freedesktop.org/mpris-spec/latest/>`_ over D-Bus. In
   practice, this makes it possible to control Mopidy through the `Ubuntu Sound
-  Menu <https://wiki.ubuntu.com/SoundMenu>`_.
+  Menu <https://wiki.ubuntu.com/Sound#menu>`_.
 
 **Changes**
 

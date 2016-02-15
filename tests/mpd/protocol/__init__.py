@@ -10,7 +10,7 @@ from mopidy import core
 from mopidy.internal import deprecation
 from mopidy.mpd import session, uri_mapper
 
-from tests import dummy_backend, dummy_mixer
+from tests import dummy_audio, dummy_backend, dummy_mixer
 
 
 class MockConnection(mock.Mock):
@@ -36,6 +36,7 @@ class BaseTestCase(unittest.TestCase):
             },
             'mpd': {
                 'password': None,
+                'default_playlist_scheme': 'dummy',
             }
         }
 
@@ -44,11 +45,13 @@ class BaseTestCase(unittest.TestCase):
             self.mixer = dummy_mixer.create_proxy()
         else:
             self.mixer = None
-        self.backend = dummy_backend.create_proxy()
+        self.audio = dummy_audio.create_proxy()
+        self.backend = dummy_backend.create_proxy(audio=self.audio)
 
         with deprecation.ignore():
             self.core = core.Core.start(
                 self.get_config(),
+                audio=self.audio,
                 mixer=self.mixer,
                 backends=[self.backend]).proxy()
 

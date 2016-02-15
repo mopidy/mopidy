@@ -18,7 +18,7 @@ class CoreListener(listener.Listener):
     @staticmethod
     def send(event, **kwargs):
         """Helper to allow calling of core listener events"""
-        listener.send_async(CoreListener, event, **kwargs)
+        listener.send(CoreListener, event, **kwargs)
 
     def on_event(self, event, **kwargs):
         """
@@ -182,5 +182,8 @@ class CoreListener(listener.Listener):
         Called whenever the currently playing stream title changes.
 
         *MAY* be implemented by actor.
+
+        :param title: the new stream title
+        :type title: string
         """
         pass

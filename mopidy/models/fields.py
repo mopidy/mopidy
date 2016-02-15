@@ -1,5 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
+from mopidy import compat
+
 
 class Field(object):
 
@@ -69,7 +71,7 @@ class String(Field):
         # TODO: normalize to unicode?
         # TODO: only allow unicode?
         # TODO: disallow empty strings?
-        super(String, self).__init__(type=basestring, default=default)
+        super(String, self).__init__(type=compat.string_types, default=default)
 
 
 class Date(String):
@@ -93,7 +95,7 @@ class Identifier(String):
     :param default: default value for field
     """
     def validate(self, value):
-        return intern(str(super(Identifier, self).validate(value)))
+        return compat.intern(str(super(Identifier, self).validate(value)))
 
 
 class URI(Identifier):
@@ -119,7 +121,8 @@ class Integer(Field):
     def __init__(self, default=None, min=None, max=None):
         self._min = min
         self._max = max
-        super(Integer, self).__init__(type=(int, long), default=default)
+        super(Integer, self).__init__(
+            type=compat.integer_types, default=default)
 
     def validate(self, value):
         value = super(Integer, self).validate(value)
@@ -144,7 +147,7 @@ class Collection(Field):
         super(Collection, self).__init__(type=type, default=container())
 
     def validate(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, compat.string_types):
             raise TypeError('Expected %s to be a collection of %s, not %r'
                             % (self._name, self._type.__name__, value))
         for v in value:

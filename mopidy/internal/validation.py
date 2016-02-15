@@ -1,9 +1,9 @@
 from __future__ import absolute_import, unicode_literals
 
 import collections
-import urlparse
 
 from mopidy import compat, exceptions
+from mopidy.compat import urllib
 
 PLAYBACK_STATES = {'paused', 'stopped', 'playing'}
 
@@ -56,7 +56,7 @@ def check_instances(arg, cls, msg='Expected a list of {name}, not {arg!r}'):
 
 
 def check_integer(arg, min=None, max=None):
-    if not isinstance(arg, (int, long)):
+    if not isinstance(arg, compat.integer_types):
         raise exceptions.ValidationError('Expected an integer, not %r' % arg)
     elif min is not None and arg < min:
         raise exceptions.ValidationError(
@@ -96,7 +96,7 @@ def _check_query_value(key, arg, msg):
 def check_uri(arg, msg='Expected a valid URI, not {arg!r}'):
     if not isinstance(arg, compat.string_types):
         raise exceptions.ValidationError(msg.format(arg=arg))
-    elif urlparse.urlparse(arg).scheme == '':
+    elif urllib.parse.urlparse(arg).scheme == '':
         raise exceptions.ValidationError(msg.format(arg=arg))
 
 

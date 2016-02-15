@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+from mopidy import compat
 from mopidy.models import fields
 from mopidy.models.immutable import ImmutableObject, ValidatedImmutableObject
 from mopidy.models.serialize import ModelJSONEncoder, model_json_decoder
@@ -145,6 +146,10 @@ class Album(ValidatedImmutableObject):
     :type musicbrainz_id: string
     :param images: album image URIs
     :type images: list of strings
+
+    .. deprecated:: 1.2
+        The ``images`` field is deprecated.
+        Use :meth:`mopidy.core.LibraryController.get_images` instead.
     """
 
     #: The album URI. Read-only.
@@ -169,10 +174,10 @@ class Album(ValidatedImmutableObject):
     musicbrainz_id = fields.Identifier()
 
     #: The album image URIs. Read-only.
-    images = fields.Collection(type=basestring, container=frozenset)
-    # XXX If we want to keep the order of images we shouldn't use frozenset()
-    # as it doesn't preserve order. I'm deferring this issue until we got
-    # actual usage of this field with more than one image.
+    #:
+    #: .. deprecated:: 1.2
+    #:     Use :meth:`mopidy.core.LibraryController.get_images` instead.
+    images = fields.Collection(type=compat.string_types, container=frozenset)
 
 
 class Track(ValidatedImmutableObject):

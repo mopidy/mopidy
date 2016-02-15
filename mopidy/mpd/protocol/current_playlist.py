@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
-import urlparse
-
+from mopidy.compat import urllib
 from mopidy.internal import deprecation
 from mopidy.mpd import exceptions, protocol, translator
 
@@ -25,7 +24,7 @@ def add(context, uri):
 
     # If we have an URI just try and add it directly without bothering with
     # jumping through browse...
-    if urlparse.urlparse(uri).scheme != '':
+    if urllib.parse.urlparse(uri).scheme != '':
         if context.core.tracklist.add(uris=[uri]).get():
             return
 

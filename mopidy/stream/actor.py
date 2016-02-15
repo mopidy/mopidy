@@ -4,12 +4,12 @@ import fnmatch
 import logging
 import re
 import time
-import urlparse
 
 import pykka
 
 from mopidy import audio as audio_lib, backend, exceptions, stream
-from mopidy.audio import scan, utils
+from mopidy.audio import scan, tags
+from mopidy.compat import urllib
 from mopidy.internal import http, playlists
 from mopidy.models import Track
 
@@ -25,10 +25,19 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
             timeout=config['stream']['timeout'],
             proxy_config=config['proxy'])
 
-        self.library = StreamLibraryProvider(
-            backend=self, blacklist=config['stream']['metadata_blacklist'])
-        self.playback = StreamPlaybackProvider(
-            audio=audio, backend=self, config=config)
+        self._session = http.get_requests_session(
+            proxy_config=config['proxy'],
+            user_agent='%s/%s' % (
+                stream.Extension.dist_name, stream.Extension.version))
+
+        blacklist = config['stream']['metadata_blacklist']
+        self._blacklist_re = re.compile(
+            r'^(%s)$' % '|'.join(fnmatch.translate(u) for u in blacklist))
+
+        self._timeout = config['stream']['timeout']
+
+        self.library = StreamLibraryProvider(backend=self)
+        self.playback = StreamPlaybackProvider(audio=audio, backend=self)
         self.playlists = None
 
         self.uri_schemes = audio_lib.supported_uri_schemes(
@@ -43,27 +52,23 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
 
 
 class StreamLibraryProvider(backend.LibraryProvider):
-
-    def __init__(self, backend, blacklist):
-        super(StreamLibraryProvider, self).__init__(backend)
-        self._scanner = backend._scanner
-        self._blacklist_re = re.compile(
-            r'^(%s)$' % '|'.join(fnmatch.translate(u) for u in blacklist))
-
     def lookup(self, uri):
-        if urlparse.urlsplit(uri).scheme not in self.backend.uri_schemes:
+        if urllib.parse.urlsplit(uri).scheme not in self.backend.uri_schemes:
             return []
 
-        if self._blacklist_re.match(uri):
+        if self.backend._blacklist_re.match(uri):
             logger.debug('URI matched metadata lookup blacklist: %s', uri)
             return [Track(uri=uri)]
 
-        try:
-            result = self._scanner.scan(uri)
-            track = utils.convert_tags_to_track(result.tags).replace(
-                uri=uri, length=result.duration)
-        except exceptions.ScannerError as e:
-            logger.warning('Problem looking up %s: %s', uri, e)
+        _, scan_result = _unwrap_stream(
+            uri, timeout=self.backend._timeout, scanner=self.backend._scanner,
+            requests_session=self.backend._session)
+
+        if scan_result:
+            track = tags.convert_tags_to_track(scan_result.tags).replace(
+                uri=uri, length=scan_result.duration)
+        else:
+            logger.warning('Problem looking up %s: %s', uri)
             track = Track(uri=uri)
 
         return [track]
@@ -71,23 +76,21 @@ class StreamLibraryProvider(backend.LibraryProvider):
 
 class StreamPlaybackProvider(backend.PlaybackProvider):
 
-    def __init__(self, audio, backend, config):
-        super(StreamPlaybackProvider, self).__init__(audio, backend)
-        self._config = config
-        self._scanner = backend._scanner
-        self._session = http.get_requests_session(
-            proxy_config=config['proxy'],
-            user_agent='%s/%s' % (
-                stream.Extension.dist_name, stream.Extension.version))
-
     def translate_uri(self, uri):
-        return _unwrap_stream(
-            uri,
-            timeout=self._config['stream']['timeout'],
-            scanner=self._scanner,
-            requests_session=self._session)
+        if urllib.parse.urlsplit(uri).scheme not in self.backend.uri_schemes:
+            return None
+
+        if self.backend._blacklist_re.match(uri):
+            logger.debug('URI matched metadata lookup blacklist: %s', uri)
+            return uri
+
+        unwrapped_uri, _ = _unwrap_stream(
+            uri, timeout=self.backend._timeout, scanner=self.backend._scanner,
+            requests_session=self.backend._session)
+        return unwrapped_uri
 
 
+# TODO: cleanup the return value of this.
 def _unwrap_stream(uri, timeout, scanner, requests_session):
     """
     Get a stream URI from a playlist URI, ``uri``.
@@ -105,7 +108,7 @@ def _unwrap_stream(uri, timeout, scanner, requests_session):
             logger.info(
                 'Unwrapping stream from URI (%s) failed: '
                 'playlist referenced itself', uri)
-            return None
+            return None, None
         else:
             seen_uris.add(uri)
 
@@ -117,7 +120,7 @@ def _unwrap_stream(uri, timeout, scanner, requests_session):
                 logger.info(
                     'Unwrapping stream from URI (%s) failed: '
                     'timed out in %sms', uri, timeout)
-                return None
+                return None, None
             scan_result = scanner.scan(uri, timeout=scan_timeout)
         except exceptions.ScannerError as exc:
             logger.debug('GStreamer failed scanning URI (%s): %s', uri, exc)
@@ -130,14 +133,14 @@ def _unwrap_stream(uri, timeout, scanner, requests_session):
             ):
                 logger.debug(
                     'Unwrapped potential %s stream: %s', scan_result.mime, uri)
-                return uri
+                return uri, scan_result
 
         download_timeout = deadline - time.time()
         if download_timeout < 0:
             logger.info(
                 'Unwrapping stream from URI (%s) failed: timed out in %sms',
                 uri, timeout)
-            return None
+            return None, None
         content = http.download(
             requests_session, uri, timeout=download_timeout)
 
@@ -145,14 +148,14 @@ def _unwrap_stream(uri, timeout, scanner, requests_session):
             logger.info(
                 'Unwrapping stream from URI (%s) failed: '
                 'error downloading URI %s', original_uri, uri)
-            return None
+            return None, None
 
         uris = playlists.parse(content)
         if not uris:
             logger.debug(
                 'Failed parsing URI (%s) as playlist; found potential stream.',
                 uri)
-            return uri
+            return uri, None
 
         # TODO Test streams and return first that seems to be playable
         logger.debug(

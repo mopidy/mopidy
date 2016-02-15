@@ -15,6 +15,7 @@ def create_proxy(config=None, mixer=None):
     return DummyAudio.start(config, mixer).proxy()
 
 
+# TODO: reset position on track change?
 class DummyAudio(pykka.ThreadingActor):
 
     def __init__(self, config=None, mixer=None):
@@ -24,13 +25,15 @@ class DummyAudio(pykka.ThreadingActor):
         self._position = 0
         self._callback = None
         self._uri = None
-        self._state_change_result = True
+        self._stream_changed = False
         self._tags = {}
+        self._bad_uris = set()
 
     def set_uri(self, uri):
         assert self._uri is None, 'prepare change not called before set'
         self._tags = {}
         self._uri = uri
+        self._stream_changed = True
 
     def set_appsrc(self, *args, **kwargs):
         pass
@@ -88,12 +91,15 @@ class DummyAudio(pykka.ThreadingActor):
         if not self._uri:
             return False
 
-        if self.state == audio.PlaybackState.STOPPED and self._uri:
-            audio.AudioListener.send('position_changed', position=0)
-            audio.AudioListener.send('stream_changed', uri=self._uri)
-
-        if new_state == audio.PlaybackState.STOPPED:
+        if new_state == audio.PlaybackState.STOPPED and self._uri:
+            self._stream_changed = True
             self._uri = None
+
+        if self._uri is not None:
+            audio.AudioListener.send('position_changed', position=0)
+
+        if self._stream_changed:
+            self._stream_changed = False
             audio.AudioListener.send('stream_changed', uri=self._uri)
 
         old_state, self.state = self.state, new_state
@@ -105,10 +111,10 @@ class DummyAudio(pykka.ThreadingActor):
             self._tags['audio-codec'] = [u'fake info...']
             audio.AudioListener.send('tags_changed', tags=['audio-codec'])
 
-        return self._state_change_result
+        return self._uri not in self._bad_uris
 
-    def trigger_fake_playback_failure(self):
-        self._state_change_result = False
+    def trigger_fake_playback_failure(self, uri):
+        self._bad_uris.add(uri)
 
     def trigger_fake_tags_changed(self, tags):
         self._tags.update(tags)

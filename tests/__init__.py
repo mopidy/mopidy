@@ -32,6 +32,6 @@ class IsA(object):
         return str(self.klass)
 
 
-any_int = IsA((int, long))
-any_str = IsA(str)
+any_int = IsA(compat.integer_types)
+any_str = IsA(compat.string_types)
 any_unicode = IsA(compat.text_type)

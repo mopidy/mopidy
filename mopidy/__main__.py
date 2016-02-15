@@ -4,24 +4,8 @@ import logging
 import os
 import signal
 import sys
-import textwrap
 
-try:
-    import gobject   # noqa
-except ImportError:
-    print(textwrap.dedent("""
-        ERROR: The gobject Python package was not found.
-
-        Mopidy requires GStreamer (and GObject) to work. These are C libraries
-        with a number of dependencies themselves, and cannot be installed with
-        the regular Python tools like pip.
-
-        Please see http://docs.mopidy.com/en/latest/installation/ for
-        instructions on how to install the required dependencies.
-    """))
-    raise
-
-gobject.threads_init()
+from mopidy.internal.gi import Gst  # noqa: Import to initialize
 
 try:
     # Make GObject's mainloop the event loop for python-dbus
@@ -33,13 +17,6 @@ except ImportError:
 
 import pykka.debug
 
-
-# Extract any command line arguments. This needs to be done before GStreamer is
-# imported, so that GStreamer doesn't hijack e.g. ``--help``.
-mopidy_args = sys.argv[1:]
-sys.argv[1:] = []
-
-
 from mopidy import commands, config as config_lib, ext
 from mopidy.internal import encoding, log, path, process, versioning
 
@@ -50,7 +27,7 @@ def main():
     log.bootstrap_delayed_logging()
     logger.info('Starting Mopidy %s', versioning.get_version())
 
-    signal.signal(signal.SIGTERM, process.exit_handler)
+    signal.signal(signal.SIGTERM, process.sigterm_handler)
     # Windows does not have signal.SIGUSR1
     if hasattr(signal, 'SIGUSR1'):
         signal.signal(signal.SIGUSR1, pykka.debug.log_thread_tracebacks)
@@ -73,7 +50,7 @@ def main():
                 data.command.set(extension=data.extension)
                 root_cmd.add_child(data.extension.ext_name, data.command)
 
-        args = root_cmd.parse(mopidy_args)
+        args = root_cmd.parse(sys.argv[1:])
 
         config, config_errors = config_lib.load(
             args.config_files,
@@ -83,7 +60,6 @@ def main():
 
         create_core_dirs(config)
         create_initial_config_file(args, extensions_data)
-        check_old_locations()
 
         verbosity_level = args.base_verbosity_level
         if args.verbosity_level:
@@ -189,22 +165,6 @@ def create_initial_config_file(args, extensions_data):
         logger.warning(
             'Unable to initialize %s with default config: %s',
             config_file, encoding.locale_decode(error))
-
-
-def check_old_locations():
-    dot_mopidy_dir = path.expand_path(b'~/.mopidy')
-    if os.path.isdir(dot_mopidy_dir):
-        logger.warning(
-            'Old Mopidy dot dir found at %s. Please migrate your config to '
-            'the ini-file based config format. See release notes for further '
-            'instructions.', dot_mopidy_dir)
-
-    old_settings_file = path.expand_path(b'$XDG_CONFIG_DIR/mopidy/settings.py')
-    if os.path.isfile(old_settings_file):
-        logger.warning(
-            'Old Mopidy settings file found at %s. Please migrate your '
-            'config to the ini-file based config format. See release notes '
-            'for further instructions.', old_settings_file)
 
 
 def log_extension_info(all_extensions, enabled_extensions):

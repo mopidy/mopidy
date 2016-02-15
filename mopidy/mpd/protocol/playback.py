@@ -137,13 +137,13 @@ def pause(context, state=None):
 
         playback_state = context.core.playback.get_state().get()
         if (playback_state == PlaybackState.PLAYING):
-            context.core.playback.pause()
+            context.core.playback.pause().get()
         elif (playback_state == PlaybackState.PAUSED):
-            context.core.playback.resume()
+            context.core.playback.resume().get()
     elif state:
-        context.core.playback.pause()
+        context.core.playback.pause().get()
     else:
-        context.core.playback.resume()
+        context.core.playback.resume().get()
 
 
 @protocol.commands.add('play', songpos=protocol.INT)

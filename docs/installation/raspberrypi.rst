@@ -4,7 +4,7 @@
 Raspberry Pi
 ************
 
-Mopidy runs on all versions of `Raspberry Pi <http://www.raspberrypi.org/>`_.
+Mopidy runs on all versions of `Raspberry Pi <https://www.raspberrypi.org/>`_.
 However, note that Raspberry Pi 2 B's CPU is approximately six times as
 powerful as Raspberry Pi 1 and Raspberry Pi Zero, so Mopidy will be more joyful
 to use on a Raspberry Pi 2.

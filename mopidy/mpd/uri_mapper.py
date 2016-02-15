@@ -71,7 +71,7 @@ class MpdUriMapper(object):
         """
         Helper function to retrieve a playlist URI from its unique MPD name.
         """
-        if not self._uri_from_name:
+        if name not in self._uri_from_name:
             self.refresh_playlists_mapping()
         return self._uri_from_name.get(name)
 

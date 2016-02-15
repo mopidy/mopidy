@@ -347,13 +347,14 @@ class PlaylistsProvider(object):
         """
         Create a new empty playlist with the given name.
 
-        Returns a new playlist with the given name and an URI.
+        Returns a new playlist with the given name and an URI, or :class:`None`
+        on failure.
 
         *MUST be implemented by subclass.*
 
         :param name: name of the new playlist
         :type name: string
-        :rtype: :class:`mopidy.models.Playlist`
+        :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
         raise NotImplementedError
 
@@ -426,7 +427,7 @@ class BackendListener(listener.Listener):
     @staticmethod
     def send(event, **kwargs):
         """Helper to allow calling of backend listener events"""
-        listener.send_async(BackendListener, event, **kwargs)
+        listener.send(BackendListener, event, **kwargs)
 
     def playlists_loaded(self):
         """

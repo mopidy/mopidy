@@ -22,7 +22,10 @@ class DummyBackend(pykka.ThreadingActor, backend.Backend):
         super(DummyBackend, self).__init__()
 
         self.library = DummyLibraryProvider(backend=self)
-        self.playback = DummyPlaybackProvider(audio=audio, backend=self)
+        if audio:
+            self.playback = backend.PlaybackProvider(audio=audio, backend=self)
+        else:
+            self.playback = DummyPlaybackProvider(audio=audio, backend=self)
         self.playlists = DummyPlaylistsProvider(backend=self)
 
         self.uri_schemes = ['dummy']
