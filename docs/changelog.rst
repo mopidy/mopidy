@@ -13,6 +13,14 @@ Feature release.
 - Nothing yet.
 
 
+v2.0.1 (UNRELEASED)
+===================
+
+Bug fix release.
+
+- Nothing yet.
+
+
 v2.0.0 (2016-02-15)
 ===================
 
