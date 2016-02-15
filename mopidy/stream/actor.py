@@ -60,15 +60,13 @@ class StreamLibraryProvider(backend.LibraryProvider):
             logger.debug('URI matched metadata lookup blacklist: %s', uri)
             return [Track(uri=uri)]
 
-        result = _unwrap_stream(
-            uri,
-            timeout=self.backend._timeout,
-            scanner=self.backend._scanner,
-            requests_session=self.backend._session)[1]
+        _, scan_result = _unwrap_stream(
+            uri, timeout=self.backend._timeout, scanner=self.backend._scanner,
+            requests_session=self.backend._session)
 
-        if result:
-            track = tags.convert_tags_to_track(result.tags).replace(
-                uri=uri, length=result.duration)
+        if scan_result:
+            track = tags.convert_tags_to_track(scan_result.tags).replace(
+                uri=uri, length=scan_result.duration)
         else:
             logger.warning('Problem looking up %s: %s', uri)
             track = Track(uri=uri)
@@ -86,11 +84,10 @@ class StreamPlaybackProvider(backend.PlaybackProvider):
             logger.debug('URI matched metadata lookup blacklist: %s', uri)
             return uri
 
-        return _unwrap_stream(
-            uri,
-            timeout=self.backend._timeout,
-            scanner=self.backend._scanner,
-            requests_session=self.backend._session)[0]
+        unwrapped_uri, _ = _unwrap_stream(
+            uri, timeout=self.backend._timeout, scanner=self.backend._scanner,
+            requests_session=self.backend._session)
+        return unwrapped_uri
 
 
 # TODO: cleanup the return value of this.

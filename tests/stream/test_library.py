@@ -38,7 +38,7 @@ def track_uri():
 
 def test_lookup_ignores_unknown_scheme(audio, config):
     backend = actor.StreamBackend(audio=audio, config=config)
-    backend.library.lookup('http://example.com') == []
+    assert backend.library.lookup('http://example.com') == []
 
 
 def test_lookup_respects_blacklist(audio, config, track_uri):
