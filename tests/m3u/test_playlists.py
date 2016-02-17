@@ -24,6 +24,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
     config = {
         'm3u': {
             'enabled': True,
+            'base_dir': None,
             'default_encoding': 'latin-1',
             'default_extension': '.m3u',
             'playlists_dir': path_to_data_dir(''),
@@ -33,6 +34,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
         self.config['m3u']['playlists_dir'] = tempfile.mkdtemp()
         self.playlists_dir = self.config['m3u']['playlists_dir']
+        self.base_dir = self.config['m3u']['base_dir'] or self.playlists_dir
 
         audio = dummy_audio.create_proxy()
         backend = M3UBackend.start(
@@ -261,6 +263,32 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.assertEqual(playlist.name, result.name)
         self.assertEqual(track.uri, result.tracks[0].uri)
 
+    def test_playlist_with_absolute_path(self):
+        track = Track(uri='/tmp/test.mp3')
+        filepath = b'/tmp/test.mp3'
+        playlist = self.core.playlists.create('test')
+        playlist = playlist.replace(tracks=[track])
+        playlist = self.core.playlists.save(playlist)
+
+        self.assertEqual(len(self.core.playlists.as_list()), 1)
+        result = self.core.playlists.lookup('m3u:test.m3u')
+        self.assertEqual('m3u:test.m3u', result.uri)
+        self.assertEqual(playlist.name, result.name)
+        self.assertEqual('file://' + filepath, result.tracks[0].uri)
+
+    def test_playlist_with_relative_path(self):
+        track = Track(uri='test.mp3')
+        filepath = os.path.join(self.base_dir, b'test.mp3')
+        playlist = self.core.playlists.create('test')
+        playlist = playlist.replace(tracks=[track])
+        playlist = self.core.playlists.save(playlist)
+
+        self.assertEqual(len(self.core.playlists.as_list()), 1)
+        result = self.core.playlists.lookup('m3u:test.m3u')
+        self.assertEqual('m3u:test.m3u', result.uri)
+        self.assertEqual(playlist.name, result.name)
+        self.assertEqual('file://' + filepath, result.tracks[0].uri)
+
     def test_playlist_sort_order(self):
         def check_order(playlists, names):
             self.assertEqual(names, [playlist.name for playlist in playlists])
@@ -301,6 +329,13 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         item_refs = self.core.playlists.get_items('dummy:unknown')
 
         self.assertIsNone(item_refs)
+
+
+class M3UPlaylistsProviderBaseDirectoryTest(M3UPlaylistsProviderTest):
+
+    def setUp(self):  # noqa: N802
+        self.config['m3u']['base_dir'] = tempfile.mkdtemp()
+        super(M3UPlaylistsProviderBaseDirectoryTest, self).setUp()
 
 
 class DeprecatedM3UPlaylistsProviderTest(M3UPlaylistsProviderTest):

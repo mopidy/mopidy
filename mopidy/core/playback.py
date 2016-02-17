@@ -1,29 +1,13 @@
 from __future__ import absolute_import, unicode_literals
 
-import contextlib
 import logging
 
-from mopidy import exceptions
 from mopidy.audio import PlaybackState
 from mopidy.compat import urllib
 from mopidy.core import listener
 from mopidy.internal import deprecation, models, validation
 
 logger = logging.getLogger(__name__)
-
-
-@contextlib.contextmanager
-def _backend_error_handling(backend, reraise=None):
-    try:
-        yield
-    except exceptions.ValidationError as e:
-        logger.error('%s backend returned bad data: %s',
-                     backend.actor_ref.actor_class.__name__, e)
-    except Exception as e:
-        if reraise and isinstance(e, reraise):
-            raise
-        logger.exception('%s backend caused an exception.',
-                         backend.actor_ref.actor_class.__name__)
 
 
 class PlaybackController(object):
@@ -153,6 +137,7 @@ class PlaybackController(object):
             return self._pending_position
         backend = self._get_backend(self.get_current_tl_track())
         if backend:
+            # TODO: Wrap backend call in error handling.
             return backend.playback.get_time_position().get()
         else:
             return 0
@@ -278,18 +263,23 @@ class PlaybackController(object):
         if self._state == PlaybackState.STOPPED:
             return
 
-        # TODO: check that we always have a current track
-        original_tl_track = self.get_current_tl_track()
-        next_tl_track = self.core.tracklist.eot_track(original_tl_track)
+        pending = self.core.tracklist.eot_track(self._current_tl_track)
+        while pending:
+            # TODO: Avoid infinite loops if all tracks are unplayable.
+            backend = self._get_backend(pending)
+            if not backend:
+                continue
 
-        # TODO: only set pending if we have a backend that can play it?
-        # TODO: skip tracks that don't have a backend?
-        self._pending_tl_track = next_tl_track
-        backend = self._get_backend(next_tl_track)
+            try:
+                if backend.playback.change_track(pending.track).get():
+                    self._pending_tl_track = pending
+                    break
+            except Exception:
+                logger.exception('%s backend caused an exception.',
+                                 backend.actor_ref.actor_class.__name__)
 
-        if backend:
-            with _backend_error_handling(backend):
-                backend.playback.change_track(next_tl_track.track).get()
+            self.core.tracklist._mark_unplayable(pending)
+            pending = self.core.tracklist.eot_track(pending)
 
     def _on_tracklist_change(self):
         """
@@ -329,6 +319,7 @@ class PlaybackController(object):
     def pause(self):
         """Pause playback."""
         backend = self._get_backend(self.get_current_tl_track())
+        # TODO: Wrap backend call in error handling.
         if not backend or backend.playback.pause().get():
             # TODO: switch to:
             # backend.track(pause)
@@ -373,22 +364,14 @@ class PlaybackController(object):
 
         current = self._pending_tl_track or self._current_tl_track
         pending = tl_track or current or self.core.tracklist.next_track(None)
-        # avoid endless loop if 'repeat' is 'true' and no track is playable
-        # * 2 -> second run to get all playable track in a shuffled playlist
-        count = self.core.tracklist.get_length() * 2
 
         while pending:
-            # TODO: should we consume unplayable tracks in this loop?
             if self._change(pending, PlaybackState.PLAYING):
                 break
             else:
                 self.core.tracklist._mark_unplayable(pending)
             current = pending
             pending = self.core.tracklist.next_track(current)
-            count -= 1
-            if not count:
-                logger.info('No playable track in the list.')
-                break
 
         # TODO return result?
 
@@ -404,14 +387,18 @@ class PlaybackController(object):
         if not backend:
             return False
 
+        # TODO: Wrap backend call in error handling.
         backend.playback.prepare_change()
-        track_change_result = False
-        with _backend_error_handling(backend):
-            track_change_result = backend.playback.change_track(
-                pending_tl_track.track).get()
-        if not track_change_result:
-            return False  # TODO: test for this path
 
+        try:
+            if not backend.playback.change_track(pending_tl_track.track).get():
+                return False
+        except Exception:
+            logger.exception('%s backend caused an exception.',
+                             backend.actor_ref.actor_class.__name__)
+            return False
+
+        # TODO: Wrap backend calls in error handling.
         if state == PlaybackState.PLAYING:
             try:
                 return backend.playback.play().get()
@@ -460,6 +447,7 @@ class PlaybackController(object):
         if self.get_state() != PlaybackState.PAUSED:
             return
         backend = self._get_backend(self.get_current_tl_track())
+        # TODO: Wrap backend call in error handling.
         if backend and backend.playback.resume().get():
             self.set_state(PlaybackState.PLAYING)
             # TODO: trigger via gst messages
@@ -517,6 +505,7 @@ class PlaybackController(object):
         backend = self._get_backend(self.get_current_tl_track())
         if not backend:
             return False
+        # TODO: Wrap backend call in error handling.
         return backend.playback.seek(time_position).get()
 
     def stop(self):
@@ -524,6 +513,7 @@ class PlaybackController(object):
         if self.get_state() != PlaybackState.STOPPED:
             self._last_position = self.get_time_position()
             backend = self._get_backend(self.get_current_tl_track())
+            # TODO: Wrap backend call in error handling.
             if not backend or backend.playback.stop().get():
                 self.set_state(PlaybackState.STOPPED)
 

@@ -44,8 +44,10 @@ please follow the directions :ref:`here <contributing>`.
 
    If you use Debian/Ubuntu you can install GStreamer like this::
 
-       sudo apt-get install python-gst-1.0 gstreamer1.0-plugins-good \
-           gstreamer1.0-plugins-ugly gstreamer1.0-tools
+       sudo apt-get install python-gst-1.0 \
+           gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 \
+           gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly \
+           gstreamer1.0-tools
 
    If you use Arch Linux, install the following packages from the official
    repository::

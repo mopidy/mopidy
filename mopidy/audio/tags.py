@@ -58,6 +58,7 @@ gstreamer-GstTagList.html
                     log.TRACE_LOG_LEVEL,
                     'Ignoring unknown tag data: %r = %r', tag, value)
 
+    # TODO: dict(result) to not leak the defaultdict, or just use setdefault?
     return result
 
 

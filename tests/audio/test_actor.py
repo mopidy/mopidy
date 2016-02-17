@@ -22,6 +22,7 @@ from tests import dummy_audio, path_to_data_dir
 class BaseTest(unittest.TestCase):
     config = {
         'audio': {
+            'buffer_time': None,
             'mixer': 'fakemixer track_max_volume=65536',
             'mixer_track': None,
             'mixer_volume': None,
@@ -38,6 +39,7 @@ class BaseTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
         config = {
             'audio': {
+                'buffer_time': None,
                 'mixer': 'foomixer',
                 'mixer_volume': None,
                 'output': 'testoutput',

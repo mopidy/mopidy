@@ -39,7 +39,7 @@ class PlaylistsController(object):
 
         :rtype: list of string
 
-        .. versionadded:: 1.2
+        .. versionadded:: 2.0
         """
         return list(sorted(self.backends.with_playlists.keys()))
 

@@ -161,6 +161,17 @@ These are the available audio configurations. For specific use cases, see
     ``gst-inspect-1.0`` to see what output properties can be set on the sink.
     For example: ``gst-inspect-1.0 shout2send``
 
+.. confval:: audio/buffer_time
+
+    Buffer size in milliseconds.
+
+    Expects an integer above 0.
+
+    Sets the buffer size of the GStreamer queue. If you experience buffering
+    before track changes, it may help to increase this, possibly by at least a
+    few seconds. The default is letting GStreamer decide the size, which at the
+    time of this writing is 1000.
+
 
 Logging configuration
 =====================

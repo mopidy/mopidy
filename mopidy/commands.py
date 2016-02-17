@@ -5,6 +5,7 @@ import collections
 import contextlib
 import logging
 import os
+import signal
 import sys
 
 import pykka
@@ -13,7 +14,7 @@ from mopidy import config as config_lib, exceptions
 from mopidy.audio import Audio
 from mopidy.core import Core
 from mopidy.internal import deps, process, timer, versioning
-from mopidy.internal.gi import GLib, GObject
+from mopidy.internal.gi import GLib
 
 logger = logging.getLogger(__name__)
 
@@ -283,7 +284,13 @@ class RootCommand(Command):
             help='`section/key=value` values to override config options')
 
     def run(self, args, config):
-        loop = GObject.MainLoop()
+        def on_sigterm(loop):
+            logger.info('GLib mainloop got SIGTERM. Exiting...')
+            loop.quit()
+
+        loop = GLib.MainLoop()
+        GLib.unix_signal_add(
+            GLib.PRIORITY_DEFAULT, signal.SIGTERM, on_sigterm, loop)
 
         mixer_class = self.get_mixer_class(config, args.registry['mixer'])
         backend_classes = args.registry['backend']
@@ -301,6 +308,7 @@ class RootCommand(Command):
             backends = self.start_backends(config, backend_classes, audio)
             core = self.start_core(config, mixer, backends, audio)
             self.start_frontends(config, frontend_classes, core)
+            logger.info('Starting GLib mainloop')
             loop.run()
         except (exceptions.BackendError,
                 exceptions.FrontendError,
