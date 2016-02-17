@@ -295,6 +295,9 @@ class PlaybackController(object):
         """
         state = self.get_state()
         current = self._pending_tl_track or self._current_tl_track
+        # avoid endless loop if 'repeat' is 'true' and no track is playable
+        # * 2 -> second run to get all playable track in a shuffled playlist
+        count = self.core.tracklist.get_length() * 2
 
         while current:
             pending = self.core.tracklist.next_track(current)
@@ -306,6 +309,10 @@ class PlaybackController(object):
             # if current == pending:
             #     break
             current = pending
+            count -= 1
+            if not count:
+                logger.info('No playable track in the list.')
+                break
 
         # TODO return result?
 
@@ -428,6 +435,9 @@ class PlaybackController(object):
         self._previous = True
         state = self.get_state()
         current = self._pending_tl_track or self._current_tl_track
+        # avoid endless loop if 'repeat' is 'true' and no track is playable
+        # * 2 -> second run to get all playable track in a shuffled playlist
+        count = self.core.tracklist.get_length() * 2
 
         while current:
             pending = self.core.tracklist.previous_track(current)
@@ -439,6 +449,10 @@ class PlaybackController(object):
             # if current == pending:
             #     break
             current = pending
+            count -= 1
+            if not count:
+                logger.info('No playable track in the list.')
+                break
 
         # TODO: no return value?
 
