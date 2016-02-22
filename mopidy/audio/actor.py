@@ -21,6 +21,9 @@ logger = logging.getLogger(__name__)
 # set_state() on a pipeline.
 gst_logger = logging.getLogger('mopidy.audio.gst')
 
+_GST_PLAY_FLAGS_AUDIO = 0x02
+_GST_PLAY_FLAGS_SOFT_VOLUME = 0x10
+
 _GST_STATE_MAPPING = {
     Gst.State.PLAYING: PlaybackState.PLAYING,
     Gst.State.PAUSED: PlaybackState.PAUSED,
@@ -448,7 +451,8 @@ class Audio(pykka.ThreadingActor):
 
     def _setup_playbin(self):
         playbin = Gst.ElementFactory.make('playbin')
-        playbin.set_property('flags', 2)  # GST_PLAY_FLAG_AUDIO
+        playbin.set_property(
+            'flags', _GST_PLAY_FLAGS_AUDIO | _GST_PLAY_FLAGS_SOFT_VOLUME)
 
         # TODO: turn into config values...
         playbin.set_property('buffer-size', 5 << 20)  # 5MB
