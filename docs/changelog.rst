@@ -18,7 +18,10 @@ v2.0.1 (UNRELEASED)
 
 Bug fix release.
 
-- Nothing yet.
+- Audio: Set ``soft-volume`` flag on GStreamer's playbin element. This is the
+  playbin's default, but we managed to override it when configuring the playbin
+  to only process audio. This should fix the "Volume/mute is not available"
+  warning.
 
 
 v2.0.0 (2016-02-15)
