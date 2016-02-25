@@ -225,7 +225,10 @@ def _process(pipeline, timeout_ms):
         timeout -= now - previous
         previous = now
 
-    raise exceptions.ScannerError('Timeout after %dms' % timeout_ms)
+    if tags:
+        return tags, mime, have_audio
+    else:
+        raise exceptions.ScannerError('Timeout after %dms with no tags' % timeout_ms)
 
 
 if __name__ == '__main__':
