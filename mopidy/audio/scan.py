@@ -134,6 +134,10 @@ def _start_pipeline(pipeline):
     result = pipeline.set_state(Gst.State.PAUSED)
     if result == Gst.StateChangeReturn.NO_PREROLL:
         pipeline.set_state(Gst.State.PLAYING)
+    elif result == Gst.StateChangeReturn.ASYNC:
+        # TODO: should probably have error check here like
+        # https://cgit.freedesktop.org/gstreamer/gstreamer/tree/tools/gst-launch.c#n1075 ??
+        pipeline.set_state(Gst.State.PLAYING)
 
 
 def _query_duration(pipeline, timeout=100):
@@ -210,7 +214,7 @@ def _process(pipeline, timeout_ms):
         elif message.type == Gst.MessageType.EOS:
             return tags, mime, have_audio
         elif message.type == Gst.MessageType.ASYNC_DONE:
-            if message.src == pipeline:
+            if message.src == pipeline and tags:
                 return tags, mime, have_audio
         elif message.type == Gst.MessageType.TAG:
             taglist = message.parse_tag()
