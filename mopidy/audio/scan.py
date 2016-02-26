@@ -184,14 +184,6 @@ def _process(pipeline, timeout_ms):
 
     timeout = timeout_ms
     previous = int(time.time() * 1000)
-
-    # Note 1: Lines commented with "Note 1" are a workaround for upstream
-    # bug https://bugzilla.gnome.org/show_bug.cgi?id=762660 which causes
-    # gstreamer to not send tag data for some flac files when PAUSED.
-    # TODO: remove all lines tagged # Note 1 once upstream issue is fixed.
-
-    playing = False                                      # Note1
-
     while timeout > 0:
         message = bus.timed_pop_filtered(timeout * Gst.MSECOND, types)
 
@@ -218,13 +210,8 @@ def _process(pipeline, timeout_ms):
         elif message.type == Gst.MessageType.EOS:
             return tags, mime, have_audio
         elif message.type == Gst.MessageType.ASYNC_DONE:
-            if tags or playing:                          # Note 1
-                if playing:                              # Note 1
-                    pipeline.set_state(Gst.State.PAUSED) # Note 1
+            if message.src == pipeline:
                 return tags, mime, have_audio
-            else:                                        # Note 1
-                pipeline.set_state(Gst.State.PLAYING)    # Note 1
-                playing = True                           # Note 1
         elif message.type == Gst.MessageType.TAG:
             taglist = message.parse_tag()
             # Note that this will only keep the last tag.
