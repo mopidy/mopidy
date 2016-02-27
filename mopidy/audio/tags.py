@@ -53,6 +53,12 @@ gstreamer-GstTagList.html
                 result[tag].append(value.decode('utf-8', 'replace'))
             elif isinstance(value, (compat.text_type, bool, numbers.Number)):
                 result[tag].append(value)
+            elif isinstance(value, Gst.Sample):
+                buf = value.get_buffer()
+                (found, mapinfo) = buf.map(Gst.MapFlags.READ)
+                if found:
+                    result[tag].append(bytes(mapinfo.data))
+                    buf.unmap(mapinfo)
             else:
                 logger.log(
                     log.TRACE_LOG_LEVEL,
