@@ -57,8 +57,10 @@ gstreamer-GstTagList.html
                 buf = value.get_buffer()
                 (found, mapinfo) = buf.map(Gst.MapFlags.READ)
                 if found:
-                    result[tag].append(bytes(mapinfo.data))
-                    buf.unmap(mapinfo)
+                    try:
+                        result[tag].append(bytes(mapinfo.data))
+                    finally:
+                        buf.unmap(mapinfo)
             else:
                 logger.log(
                     log.TRACE_LOG_LEVEL,
