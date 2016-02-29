@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+import os
 import shutil
 import tempfile
 import unittest
@@ -9,7 +10,7 @@ import mock
 import pykka
 
 from mopidy.core import Core
-from mopidy.internal import versioning
+from mopidy.internal import storage, versioning
 
 
 class CoreActorTest(unittest.TestCase):
@@ -59,6 +60,8 @@ class CoreActorExportRestoreTest(unittest.TestCase):
             }
         }
 
+        os.mkdir(os.path.join(self.temp_dir, 'core'))
+
         self.core = Core.start(
             config=config, mixer=None, backends=[]).proxy()
 
@@ -67,9 +70,21 @@ class CoreActorExportRestoreTest(unittest.TestCase):
         shutil.rmtree(self.temp_dir)
 
     def test_export_state(self):
-        self.core.teardown()
+        self.core.teardown().get()
         # TODO: implement meaningful test
 
     def test_restore_state(self):
-        self.core.setup()
+        self.core.setup().get()
         # TODO: implement meaningful test
+
+    def test_delete_state_file_on_restore(self):
+        file_path = os.path.join(self.temp_dir, 'core', 'persistent.state')
+
+        data = {}
+        storage.save(file_path, data)
+        self.assertTrue(os.path.isfile(file_path), 'missing persistent file')
+
+        self.core.setup().get()
+
+        self.assertFalse(os.path.isfile(file_path),
+                         'persistent file has to be deleted')

@@ -209,6 +209,10 @@ class Core(
         logger.info('Load state from %s', file_name)
 
         data = storage.load(file_name)
+
+        # Try only once. If something goes wrong, the next start is clean.
+        os.remove(file_name)
+
         if 'state' in data:
             core_state = data['state']
             validation.check_instance(core_state, CoreState)
