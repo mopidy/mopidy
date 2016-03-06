@@ -4,9 +4,6 @@ from mopidy.internal import validation
 from mopidy.models import Ref, TlTrack, fields
 from mopidy.models.immutable import ValidatedImmutableObject
 
-_MODELS = ['HistoryTrack', 'HistoryState', 'MixerState', 'PlaybackState',
-           'TracklistState', 'CoreState']
-
 
 class HistoryTrack(ValidatedImmutableObject):
     """

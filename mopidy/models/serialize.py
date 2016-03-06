@@ -4,8 +4,6 @@ import json
 
 from mopidy.models import immutable
 
-_MODELS = ['Ref', 'Artist', 'Album', 'Track', 'TlTrack', 'Playlist']
-
 
 class ModelJSONEncoder(json.JSONEncoder):
 
@@ -40,11 +38,8 @@ def model_json_decoder(dct):
 
     """
     if '__model__' in dct:
-        from mopidy import models
         model_name = dct.pop('__model__')
-        if model_name in _MODELS:
-            return getattr(models, model_name)(**dct)
-        from mopidy import internal
-        if model_name in internal.models._MODELS:
-            return getattr(internal.models, model_name)(**dct)
+        if model_name in immutable._models:
+            cls = immutable._models[model_name]
+            return cls(**dct)
     return dct
