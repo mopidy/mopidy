@@ -46,8 +46,6 @@ with GPIO on the Raspberry Pi, and is used to control playback through a custom
 Mopidy extension. The cassettes have NFC tags used to select playlists from
 Spotify.
 
-A context view of mopidy can be seen [here](https://github.com/mokieyue/hallo/blob/master/Context%20view%20of%20Mopidy.pdf).
-
 To get started with Mopidy, check out
 `the installation docs <http://docs.mopidy.com/en/latest/installation/>`_.
 
