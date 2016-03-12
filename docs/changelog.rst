@@ -5,16 +5,67 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
-v2.0.0 (UNRELEASED)
+v2.1.0 (UNRELEASED)
 ===================
 
 Feature release.
+
+- Nothing yet.
+
+
+v2.0.1 (UNRELEASED)
+===================
+
+Bug fix release.
+
+- Audio: Set ``soft-volume`` flag on GStreamer's playbin element. This is the
+  playbin's default, but we managed to override it when configuring the playbin
+  to only process audio. This should fix the "Volume/mute is not available"
+  warning.
+
+
+v2.0.0 (2016-02-15)
+===================
+
+Mopidy 2.0 is here!
+
+Since the release of 1.1, we've closed or merged approximately 80 issues and
+pull requests through about 350 commits by 14 extraordinary people, including
+10 newcomers. That's about the same amount of issues and commits as between 1.0
+and 1.1. The number of contributors is a bit lower but we didn't have a real
+life sprint during this development cycle. Thanks to :ref:`everyone <authors>`
+who has :ref:`contributed <contributing>`!
+
+With the release of Mopidy 1.0 we promised that any extension working with
+Mopidy 1.0 should continue working with all Mopidy 1.x releases. Mopidy 2.0 is
+quite a friendly major release and will only break a single extension that we
+know of: Mopidy-Spotify. To ensure that everything continues working, please
+upgrade to Mopidy 2.0 and Mopidy-Spotify 3.0 at the same time.
+
+No deprecated functionality has been removed in Mopidy 2.0.
+
+The major features of Mopidy 2.0 are:
+
+- Gapless playback has been mostly implemented. It works as long as you don't
+  change tracks in the middle of a track or use previous and next. In a future
+  release, previous and next will also become gapless. It is now quite easy to
+  have Mopidy streaming audio over the network using Icecast. See the updated
+  :ref:`streaming` docs for details of how to set it up and workarounds for the
+  remaining issues.
+
+- Mopidy has upgraded from GStreamer 0.10 to 1.x. This has been in our backlog
+  for more than three years. With this upgrade we're ridding ourselves of
+  years of GStreamer bugs that have been fixed in newer releases, we can get
+  into Debian testing again, and we've removed the last major roadblock for
+  running Mopidy on Python 3.
 
 Dependencies
 ------------
 
 - Mopidy now requires GStreamer >= 1.2.3, as we've finally ported from
-  GStreamer 0.10.
+  GStreamer 0.10. Since we're requiring a new major version of our major
+  dependency, we're upping the major version of Mopidy too. (Fixes:
+  :issue:`225`)
 
 Core API
 --------
@@ -55,6 +106,9 @@ Local backend
 M3U backend
 -----------
 
+- Add :confval:`m3u/base_dir` for resolving relative paths in M3U
+  files. (Fixes: :issue:`1428`, PR: :issue:`1442`)
+
 - Derive track name from file name for non-extended M3U
   playlists. (Fixes: :issue:`1364`, PR: :issue:`1369`)
 
@@ -75,6 +129,12 @@ M3U backend
   - Improve reliability of playlist updates using the core playlist API by
     applying the write-replace pattern for file updates.
 
+Stream backend
+--------------
+
+- Make sure both lookup and playback correctly handle playlists and our
+  blacklist support. (Fixes: :issue:`1445`, PR: :issue:`1447`)
+
 MPD frontend
 ------------
 
@@ -94,14 +154,14 @@ MPD frontend
 
 - Idle events are now emitted on ``seeked`` events. This fix means that
   clients relying on ``idle`` events now get notified about seeks.
-  (Fixes: :issue:`1331` :issue:`1347`)
+  (Fixes: :issue:`1331`, PR: :issue:`1347`)
 
 - Idle events are now emitted on ``playlists_loaded`` events. This fix means
   that clients relying on ``idle`` events now get notified about playlist loads.
-  (Fixes: :issue:`1331` PR: :issue:`1347`)
+  (Fixes: :issue:`1331`, PR: :issue:`1347`)
 
 - Event handler for ``playlist_deleted`` has been unbroken. This unreported bug
-  would cause the MPD Frontend to crash preventing any further communication
+  would cause the MPD frontend to crash preventing any further communication
   via the MPD protocol. (PR: :issue:`1347`)
 
 Zeroconf
@@ -157,19 +217,34 @@ Audio
   If your Mopidy backend uses ``set_appsrc()``, please refer to GStreamer
   documentation for details on the new caps string format.
 
-- **Deprecated:** :func:`mopidy.audio.utils.create_buffer`'s ``capabilities``
-  argument is no longer in use and will be removed in the future. As far as we
-  know, this is only used by Mopidy-Spotify.
+- **Breaking:** :func:`mopidy.audio.utils.create_buffer`'s ``capabilities``
+  argument is no longer in use and has been removed. As far as we know, this
+  was only used by Mopidy-Spotify.
 
-- Duplicate seek events getting to AppSrc based backends is now fixed. This
-  should prevent seeking in Mopidy-Spotify from glitching.
-  (Fixes: :issue:`1404`)
+- Duplicate seek events getting to ``appsrc`` based backends is now fixed. This
+  should prevent seeking in Mopidy-Spotify from glitching. (Fixes:
+  :issue:`1404`)
+
+- Workaround crash caused by a race that does not seem to affect functionality.
+  This should be fixed properly together with :issue:`1222`. (Fixes:
+  :issue:`1430`, PR: :issue:`1438`)
+
+- Add a new config option, :confval:`audio/buffer_time`, for setting the buffer
+  time of the GStreamer queue. If you experience buffering before track
+  changes, it may help to increase this. (Workaround for :issue:`1409`)
+
+- ``tags_changed`` events are only emitted for fields that have changed.
+  Previous behavior was to emit this for all fields received from GStreamer.
+  (PR: :issue:`1439`)
 
 Gapless
 -------
 
 - Add partial support for gapless playback. Gapless now works as long as you
   don't change tracks or use next/previous. (PR: :issue:`1288`)
+
+  The :ref:`streaming` docs has been updated with the workarounds still needed
+  to properly stream Mopidy audio through Icecast.
 
 - Core playback has been refactored to better handle gapless, and async state
   changes.

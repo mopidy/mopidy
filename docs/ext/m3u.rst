@@ -55,6 +55,12 @@ See :ref:`config` for general help on configuring Mopidy.
     Path to directory with M3U files. Unset by default, in which case the
     extension's data dir is used to store playlists.
 
+.. confval:: m3u/base_dir
+
+    Path to base directory for resolving relative paths in M3U files.
+    If not set, relative paths are resolved based on the M3U file's
+    location.
+
 .. confval:: m3u/default_encoding
 
     Text encoding used for files with extension ``.m3u``.  Default is

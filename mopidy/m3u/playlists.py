@@ -60,6 +60,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             self._playlists_dir = Extension.get_data_dir(config)
         else:
             self._playlists_dir = ext_config['playlists_dir']
+        self._base_dir = ext_config['base_dir'] or self._playlists_dir
         self._default_encoding = ext_config['default_encoding']
         self._default_extension = ext_config['default_extension']
 
@@ -97,7 +98,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         path = translator.uri_to_path(uri)
         try:
             with self._open(path, 'r') as fp:
-                items = translator.load_items(fp, self._playlists_dir)
+                items = translator.load_items(fp, self._base_dir)
         except EnvironmentError as e:
             log_environment_error('Error reading playlist %s' % uri, e)
         else:
@@ -107,7 +108,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         path = translator.uri_to_path(uri)
         try:
             with self._open(path, 'r') as fp:
-                items = translator.load_items(fp, self._playlists_dir)
+                items = translator.load_items(fp, self._base_dir)
             mtime = os.path.getmtime(self._abspath(path))
         except EnvironmentError as e:
             log_environment_error('Error reading playlist %s' % uri, e)

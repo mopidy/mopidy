@@ -30,13 +30,16 @@ supported)" mode because the client tries to fetch all known metadata and do
 the search on the client side. The two other search modes works nicely, so this
 is not a problem.
 
-The library view is very slow when used together with Mopidy-Spotify. A
-workaround is to edit the ncmpcpp configuration file
+With ncmpcpp <= 0.5, the library view is very slow when used together with
+Mopidy-Spotify. A workaround is to edit the ncmpcpp configuration file
 (:file:`~/.ncmpcpp/config`) and set::
 
     media_library_display_date = "no"
 
 With this change ncmpcpp's library view will still be a bit slow, but usable.
+
+Note that this option was removed in ncmpcpp 0.6, but with this version, the
+library view works well without it.
 
 
 ncmpc

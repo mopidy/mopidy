@@ -21,6 +21,7 @@ class Extension(ext.Extension):
 
     def get_config_schema(self):
         schema = super(Extension, self).get_config_schema()
+        schema['base_dir'] = config.Path(optional=True)
         schema['default_encoding'] = config.String()
         schema['default_extension'] = config.String(choices=['.m3u', '.m3u8'])
         schema['playlists_dir'] = config.Path(optional=True)
