@@ -186,7 +186,7 @@ def _process(pipeline, timeout_ms):
                 done = True
             raise exceptions.ScannerError(error)
         elif message.type == Gst.MessageType.EOS:
-            return tags, mime, have_audio
+            done = True
         elif message.type == Gst.MessageType.ASYNC_DONE:
             success, duration = pipeline.query_duration(Gst.Format.TIME)
             if tags and duration > 0:
