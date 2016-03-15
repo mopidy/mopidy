@@ -208,6 +208,7 @@ def _process(pipeline, timeout_ms):
             pipeline.set_state(Gst.State.PAUSED)
 
     if done:
+        success, duration = pipeline.query_duration(Gst.Format.TIME)
         return tags, mime, have_audio, duration // Gst.MSECOND
     else:
         raise exceptions.ScannerError('Timeout after %dms' % timeout_ms)
