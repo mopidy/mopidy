@@ -197,8 +197,8 @@ def _process(pipeline, timeout_ms):
                     # https://bugzilla.gnome.org/show_bug.cgi?id=763553:
                     # try to start pipeline playing; if it doesn't then
                     # give up:
-                    ) or ( pipeline.set_state(Gst.State.PLAYING)
-                           == Gst.StateChangeReturn.FAILURE):
+                ) or (pipeline.set_state(Gst.State.PLAYING) ==
+                      Gst.StateChangeReturn.FAILURE):
                 return tags, mime, have_audio, duration
         elif message.type == Gst.MessageType.DURATION_CHANGED:
             # duration will be read after ASYNC_DONE received; for now
@@ -209,7 +209,7 @@ def _process(pipeline, timeout_ms):
             # Note that this will only keep the last tag.
             tags.update(tags_lib.convert_taglist(taglist))
 
-        timeout = timeout_ms - ( int(time.time() * 1000) - start )
+        timeout = timeout_ms - (int(time.time() * 1000) - start)
 
         # workaround for https://bugzilla.gnome.org/show_bug.cgi?id=763553:
         # if we got what we want then stop playing (and wait for ASYNC_DONE)
