@@ -210,8 +210,11 @@ def _process(pipeline, timeout_ms):
         elif message.type == Gst.MessageType.EOS:
             return tags, mime, have_audio
         elif message.type == Gst.MessageType.ASYNC_DONE:
-            if message.src == pipeline:
+            if tags:
                 return tags, mime, have_audio
+            else:
+                # workaround for https://bugzilla.gnome.org/show_bug.cgi?id=763553:
+                pipeline.set_state(Gst.State.PLAYING)
         elif message.type == Gst.MessageType.TAG:
             taglist = message.parse_tag()
             # Note that this will only keep the last tag.
@@ -220,6 +223,9 @@ def _process(pipeline, timeout_ms):
         now = int(time.time() * 1000)
         timeout -= now - previous
         previous = now
+        # workaround for https://bugzilla.gnome.org/show_bug.cgi?id=763553:
+        if tags:
+            pipeline.set_state(Gst.State.PAUSED)
 
     raise exceptions.ScannerError('Timeout after %dms' % timeout_ms)
 
