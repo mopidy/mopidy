@@ -192,7 +192,7 @@ def _process(pipeline, timeout_ms):
                 duration = duration // Gst.MSECOND
             else:
                 duration = None
-            if (tags and duration
+            if (tags and duration is not None
                     # workaround for
                     # https://bugzilla.gnome.org/show_bug.cgi?id=763553:
                     # try to start pipeline playing; if it doesn't then
@@ -213,7 +213,7 @@ def _process(pipeline, timeout_ms):
 
         # workaround for https://bugzilla.gnome.org/show_bug.cgi?id=763553:
         # if we got what we want then stop playing (and wait for ASYNC_DONE)
-        if tags and duration:
+        if tags and duration is not None:
             pipeline.set_state(Gst.State.PAUSED)
 
     raise exceptions.ScannerError('Timeout after %dms' % timeout_ms)
