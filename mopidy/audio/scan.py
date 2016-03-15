@@ -160,7 +160,7 @@ def _process(pipeline, timeout_ms):
     )
 
     timeout = timeout_ms
-    previous = int(time.time() * 1000)
+    start = int(time.time() * 1000)
     while timeout > 0:
         message = bus.timed_pop_filtered(timeout * Gst.MSECOND, types)
 
@@ -209,9 +209,7 @@ def _process(pipeline, timeout_ms):
             # Note that this will only keep the last tag.
             tags.update(tags_lib.convert_taglist(taglist))
 
-        now = int(time.time() * 1000)
-        timeout -= now - previous
-        previous = now
+        timeout = timeout_ms - ( int(time.time() * 1000) - start )
 
         # workaround for https://bugzilla.gnome.org/show_bug.cgi?id=763553:
         # if we got what we want then stop playing (and wait for ASYNC_DONE)
