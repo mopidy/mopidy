@@ -159,7 +159,7 @@ def _process(pipeline, timeout_ms):
     )
 
     timeout = timeout_ms
-    previous = int(time.time() * 1000)
+    start = int(time.time() * 1000)
     done = False
     while timeout > 0 and not done:
         message = bus.timed_pop_filtered(timeout * Gst.MSECOND, types)
@@ -200,10 +200,8 @@ def _process(pipeline, timeout_ms):
         elif message.type == Gst.MessageType.DURATION_CHANGED:
             success, duration = pipeline.query_duration(Gst.Format.TIME)
 
+        timeout = timeout_ms - ( int(time.time() * 1000) - start )
 
-        now = int(time.time() * 1000)
-        timeout -= now - previous
-        previous = now
         # workaround for https://bugzilla.gnome.org/show_bug.cgi?id=763553:
         if tags and duration > 0:
             pipeline.set_state(Gst.State.PAUSED)
