@@ -192,7 +192,8 @@ def _process(pipeline, timeout_ms):
             if tags and duration > 0:
                 done = True
             else:
-                # workaround for https://bugzilla.gnome.org/show_bug.cgi?id=763553:
+                # workaround for
+                # https://bugzilla.gnome.org/show_bug.cgi?id=763553:
                 pipeline.set_state(Gst.State.PLAYING)
         elif message.type == Gst.MessageType.TAG:
             taglist = message.parse_tag()
@@ -201,7 +202,8 @@ def _process(pipeline, timeout_ms):
         elif message.type == Gst.MessageType.DURATION_CHANGED:
             success, duration = pipeline.query_duration(Gst.Format.TIME)
 
-        timeout = timeout_ms - ( int(time.time() * 1000) - start )
+        timeout = timeout_ms - (
+                  int(time.time() * 1000) - start )
 
         # workaround for https://bugzilla.gnome.org/show_bug.cgi?id=763553:
         if tags and duration > 0:
