@@ -147,6 +147,7 @@ def _process(pipeline, timeout_ms):
     mime = None
     have_audio = False
     missing_message = None
+    duration = 0
 
     types = (
         Gst.MessageType.ELEMENT |
