@@ -192,14 +192,18 @@ def _process(pipeline, timeout_ms):
                 duration = duration // Gst.MSECOND
             else:
                 duration = None
-            if (tags and duration is not None
-                    # workaround for
-                    # https://bugzilla.gnome.org/show_bug.cgi?id=763553:
-                    # try to start pipeline playing; if it doesn't then
-                    # give up:
-                ) or (pipeline.set_state(Gst.State.PLAYING) ==
-                      Gst.StateChangeReturn.FAILURE):
+
+            if tags and duration is not None:
                 return tags, mime, have_audio, duration
+
+            # Workaround for upstream bug which causes tags/duration to arrive
+            # after pre-roll. We get around this by starting to play the track
+            # and then waiting for a duration change.
+            # https://bugzilla.gnome.org/show_bug.cgi?id=763553
+            result = pipeline.set_state(Gst.State.PLAYING)
+            if result == Gst.StateChangeReturn.FAILURE:
+                return tags, mime, have_audio, duration
+
         elif message.type == Gst.MessageType.DURATION_CHANGED:
             # duration will be read after ASYNC_DONE received; for now
             # just give it a non-None value to flag that we have a duration:
