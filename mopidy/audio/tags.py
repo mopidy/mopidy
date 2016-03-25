@@ -54,13 +54,9 @@ gstreamer-GstTagList.html
             elif isinstance(value, (compat.text_type, bool, numbers.Number)):
                 result[tag].append(value)
             elif isinstance(value, Gst.Sample):
-                buf = value.get_buffer()
-                (found, mapinfo) = buf.map(Gst.MapFlags.READ)
-                if found:
-                    try:
-                        result[tag].append(bytes(mapinfo.data))
-                    finally:
-                        buf.unmap(mapinfo)
+                data = _extract_sample_data(value)
+                if data:
+                    result[tag].append(data)
             else:
                 logger.log(
                     log.TRACE_LOG_LEVEL,
@@ -68,6 +64,19 @@ gstreamer-GstTagList.html
 
     # TODO: dict(result) to not leak the defaultdict, or just use setdefault?
     return result
+
+
+def _extract_sample_data(sample):
+    buf = sample.get_buffer()
+    if not buf:
+        return None
+    found, mapinfo = buf.map(Gst.MapFlags.READ)
+    if not found:
+        return None
+    try:
+        return bytes(mapinfo.data)
+    finally:
+        buf.unmap(mapinfo)
 
 
 # TODO: split based on "stream" and "track" based conversion? i.e. handle data
