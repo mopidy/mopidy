@@ -18,6 +18,11 @@ Bug fix release.
 - Audio: Fix buffer conversion. This fixes image extraction.
   (PR: :issue:`1472`)
 
+- Audio: Update scan logic to workaround GStreamer issue where tags and
+  duration might only be available after we start playing.
+  (Fixes: :issue:`935`, :issue:`1453`, :issue:`1474` and :issue:`1480`
+   PR: :issue:`1487`)
+
 
 v2.0.0 (2016-02-15)
 ===================
