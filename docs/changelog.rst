@@ -15,6 +15,9 @@ Bug fix release.
   to only process audio. This should fix the "Volume/mute is not available"
   warning.
 
+- Audio: Fix buffer conversion. This fixes image extraction.
+  (PR: :issue:`1472`)
+
 
 v2.0.0 (2016-02-15)
 ===================
