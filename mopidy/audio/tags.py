@@ -70,13 +70,7 @@ def _extract_sample_data(sample):
     buf = sample.get_buffer()
     if not buf:
         return None
-    found, mapinfo = buf.map(Gst.MapFlags.READ)
-    if not found:
-        return None
-    try:
-        return bytes(mapinfo.data)
-    finally:
-        buf.unmap(mapinfo)
+    return buf.extract_dup(0, buf.get_size())
 
 
 # TODO: split based on "stream" and "track" based conversion? i.e. handle data
