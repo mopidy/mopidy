@@ -252,22 +252,27 @@ class PlaybackController(object):
             return
 
         pending = self.core.tracklist.eot_track(self._current_tl_track)
-        while pending:
-            # TODO: Avoid infinite loops if all tracks are unplayable.
-            backend = self._get_backend(pending)
-            if not backend:
-                continue
+        # avoid endless loop if 'repeat' is 'true' and no track is playable
+        # * 2 -> second run to get all playable track in a shuffled playlist
+        count = self.core.tracklist.get_length() * 2
 
-            try:
-                if backend.playback.change_track(pending.track).get():
-                    self._pending_tl_track = pending
-                    break
-            except Exception:
-                logger.exception('%s backend caused an exception.',
-                                 backend.actor_ref.actor_class.__name__)
+        while pending:
+            backend = self._get_backend(pending)
+            if backend:
+                try:
+                    if backend.playback.change_track(pending.track).get():
+                        self._pending_tl_track = pending
+                        break
+                except Exception:
+                    logger.exception('%s backend caused an exception.',
+                                     backend.actor_ref.actor_class.__name__)
 
             self.core.tracklist._mark_unplayable(pending)
             pending = self.core.tracklist.eot_track(pending)
+            count -= 1
+            if not count:
+                logger.info('No playable track in the list.')
+                break
 
     def _on_tracklist_change(self):
         """
@@ -290,6 +295,9 @@ class PlaybackController(object):
         """
         state = self.get_state()
         current = self._pending_tl_track or self._current_tl_track
+        # avoid endless loop if 'repeat' is 'true' and no track is playable
+        # * 2 -> second run to get all playable track in a shuffled playlist
+        count = self.core.tracklist.get_length() * 2
 
         while current:
             pending = self.core.tracklist.next_track(current)
@@ -301,6 +309,10 @@ class PlaybackController(object):
             # if current == pending:
             #     break
             current = pending
+            count -= 1
+            if not count:
+                logger.info('No playable track in the list.')
+                break
 
         # TODO return result?
 
@@ -352,6 +364,9 @@ class PlaybackController(object):
 
         current = self._pending_tl_track or self._current_tl_track
         pending = tl_track or current or self.core.tracklist.next_track(None)
+        # avoid endless loop if 'repeat' is 'true' and no track is playable
+        # * 2 -> second run to get all playable track in a shuffled playlist
+        count = self.core.tracklist.get_length() * 2
 
         while pending:
             if self._change(pending, PlaybackState.PLAYING):
@@ -360,6 +375,10 @@ class PlaybackController(object):
                 self.core.tracklist._mark_unplayable(pending)
             current = pending
             pending = self.core.tracklist.next_track(current)
+            count -= 1
+            if not count:
+                logger.info('No playable track in the list.')
+                break
 
         # TODO return result?
 
@@ -416,6 +435,9 @@ class PlaybackController(object):
         self._previous = True
         state = self.get_state()
         current = self._pending_tl_track or self._current_tl_track
+        # avoid endless loop if 'repeat' is 'true' and no track is playable
+        # * 2 -> second run to get all playable track in a shuffled playlist
+        count = self.core.tracklist.get_length() * 2
 
         while current:
             pending = self.core.tracklist.previous_track(current)
@@ -427,6 +449,10 @@ class PlaybackController(object):
             # if current == pending:
             #     break
             current = pending
+            count -= 1
+            if not count:
+                logger.info('No playable track in the list.')
+                break
 
         # TODO: no return value?
 
