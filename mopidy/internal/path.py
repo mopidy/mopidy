@@ -196,6 +196,11 @@ def find_mtimes(root, follow=False):
 
 
 def is_path_inside_base_dir(path, base_path):
+    if not isinstance(path, bytes):
+        raise ValueError('path is not a bytestring')
+    if not isinstance(base_path, bytes):
+        raise ValueError('base_path is not a bytestring')
+
     if path.endswith(os.sep):
         raise ValueError('Path %s cannot end with a path separator'
                          % path)

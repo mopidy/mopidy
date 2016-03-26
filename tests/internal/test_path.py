@@ -7,6 +7,8 @@ import shutil
 import tempfile
 import unittest
 
+import pytest
+
 from mopidy import compat, exceptions
 from mopidy.internal import path
 from mopidy.internal.gi import GLib
@@ -390,6 +392,30 @@ class FindMTimesTest(unittest.TestCase):
         mtime, = result.values()
         self.assertEqual(mtime, 3141)
         self.assertEqual(errors, {})
+
+
+class TestIsPathInsideBaseDir(object):
+    def test_when_inside(self):
+        assert path.is_path_inside_base_dir(
+            '/æ/øå'.encode('utf-8'),
+            '/æ'.encode('utf-8'))
+
+    def test_when_outside(self):
+        assert not path.is_path_inside_base_dir(
+            '/æ/øå'.encode('utf-8'),
+            '/ø'.encode('utf-8'))
+
+    def test_byte_inside_str_fails(self):
+        with pytest.raises(ValueError):
+            path.is_path_inside_base_dir('/æ/øå'.encode('utf-8'), '/æ')
+
+    def test_str_inside_byte_fails(self):
+        with pytest.raises(ValueError):
+            path.is_path_inside_base_dir('/æ/øå', '/æ'.encode('utf-8'))
+
+    def test_str_inside_str_fails(self):
+        with pytest.raises(ValueError):
+            path.is_path_inside_base_dir('/æ/øå', '/æ')
 
 
 # TODO: kill this in favour of just os.path.getmtime + mocks
