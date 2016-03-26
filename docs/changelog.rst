@@ -31,6 +31,9 @@ Bug fix release.
   (Fixes: :issue:`935`, :issue:`1453`, :issue:`1474` and :issue:`1480`
    PR: :issue:`1487`)
 
+- Core: Avoid endless loop if all tracks in the tracklist are unplayable and
+  consume mode is off. (Fixes: :issue:`1221`, :issue:`1454`, PR: :issue:`1455`)
+
 
 v2.0.0 (2016-02-15)
 ===================
