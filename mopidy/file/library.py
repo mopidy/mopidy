@@ -132,5 +132,6 @@ class FileLibraryProvider(backend.LibraryProvider):
 
     def _is_in_basedir(self, local_path):
         return any(
-            path.is_path_inside_base_dir(local_path, media_dir['path'])
+            path.is_path_inside_base_dir(local_path.decode(FS_ENCODING),
+                                         media_dir['path'])
             for media_dir in self._media_dirs)
