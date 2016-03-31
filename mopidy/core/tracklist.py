@@ -649,7 +649,6 @@ class TracklistController(object):
         listener.CoreListener.send('options_changed')
 
     def _export_state(self):
-        """Internal method for :class:`mopidy.Core`."""
         return TracklistState(
             tl_tracks=self._tl_tracks,
             next_tlid=self._next_tlid,
@@ -659,7 +658,6 @@ class TracklistController(object):
             single=self.get_single())
 
     def _restore_state(self, state, coverage):
-        """Internal method for :class:`mopidy.Core`."""
         if state:
             if 'mode' in coverage:
                 self.set_consume(state.consume)

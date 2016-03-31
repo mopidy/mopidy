@@ -600,14 +600,12 @@ class PlaybackController(object):
         listener.CoreListener.send('seeked', time_position=time_position)
 
     def _export_state(self):
-        """Internal method for :class:`mopidy.Core`."""
         return models.PlaybackState(
             tlid=self.get_current_tlid(),
             position=self.get_time_position(),
             state=self.get_state())
 
     def _restore_state(self, state, coverage):
-        """Internal method for :class:`mopidy.Core`."""
         if state:
             new_state = None
             if 'play-always' in coverage:

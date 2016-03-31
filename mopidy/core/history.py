@@ -59,8 +59,6 @@ class HistoryController(object):
         return copy.copy(self._history)
 
     def _export_state(self):
-        """Internal method for :class:`mopidy.Core`."""
-
         # 500 tracks a 3 minutes -> 24 hours history
         count_max = 500
         count = 1
@@ -75,7 +73,6 @@ class HistoryController(object):
         return HistoryState(history=history_list)
 
     def _restore_state(self, state, coverage):
-        """Internal method for :class:`mopidy.Core`."""
         if state:
             if 'history' in coverage:
                 self._history = []

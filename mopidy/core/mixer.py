@@ -102,12 +102,10 @@ class MixerController(object):
         return False
 
     def _export_state(self):
-        """Internal method for :class:`mopidy.Core`."""
         return MixerState(volume=self.get_volume(),
                           mute=self.get_mute())
 
     def _restore_state(self, state, coverage):
-        """Internal method for :class:`mopidy.Core`."""
         if state:
             if 'mixer' in coverage:
                 if state.volume:
