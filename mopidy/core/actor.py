@@ -211,8 +211,11 @@ class Core(
 
         data = storage.load(file_name)
 
-        # Try only once. If something goes wrong, the next start is clean.
-        os.remove(file_name)
+        try:
+            # Try only once. If something goes wrong, the next start is clean.
+            os.remove(file_name)
+        except OSError:
+            logger.info('Failed to delete %s', file_name)
 
         if 'state' in data:
             core_state = data['state']
