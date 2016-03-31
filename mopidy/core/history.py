@@ -70,7 +70,7 @@ class HistoryController(object):
                                 timestamp=timestamp, track=track))
             count += 1
             if count_max < count:
-                logger.info('Limit history to %s tracks.', count_max)
+                logger.info('Limiting history to %s tracks.', count_max)
                 break
         return HistoryState(history=history_list)
 
@@ -79,5 +79,4 @@ class HistoryController(object):
         if state:
             if 'history' in coverage:
                 self._history = []
-                for htrack in state.history:
-                    self._history.append((htrack.timestamp, htrack.track))
+                self._history = [(h.timestamp, h.track) for h in state.history]

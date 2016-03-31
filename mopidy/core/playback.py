@@ -29,7 +29,7 @@ class PlaybackController(object):
         self._last_position = None
         self._previous = False
 
-        self._start_at_pos = None
+        self._start_at_position = None
         self._start_paused = False
 
         if self._audio:
@@ -229,9 +229,9 @@ class PlaybackController(object):
                 self.set_state(PlaybackState.PLAYING)
                 self._trigger_track_playback_started()
                 seek_ok = False
-                if self._start_at_pos:
-                    seek_ok = self.seek(self._start_at_pos)
-                    self._start_at_pos = None
+                if self._start_at_position:
+                    seek_ok = self.seek(self._start_at_position)
+                    self._start_at_position = None
                 if not seek_ok and self._start_paused:
                     self.pause()
                     self._start_paused = False
@@ -615,9 +615,8 @@ class PlaybackController(object):
             if 'play-last' in coverage:
                 new_state = state.state
             if state.tlid is not None:
-                if PlaybackState.PAUSED == new_state:
+                if new_state == PlaybackState.PAUSED:
                     self._start_paused = True
-                if (PlaybackState.PLAYING == new_state or
-                        PlaybackState.PAUSED == new_state):
-                    self._start_at_pos = state.position
+                if new_state in (PlaybackState.PLAYING, PlaybackState.PAUSED):
+                    self._start_at_position = state.position
                     self.play(tlid=state.tlid)
