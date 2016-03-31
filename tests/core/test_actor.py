@@ -81,7 +81,7 @@ class CoreActorExportRestoreTest(unittest.TestCase):
         file_path = os.path.join(self.temp_dir, 'core', 'state.json.gz')
 
         data = {}
-        storage.save(file_path, data)
+        storage.dump(file_path, data)
         self.assertTrue(os.path.isfile(file_path), 'missing persistent file')
 
         self.core.setup().get()

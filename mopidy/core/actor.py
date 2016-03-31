@@ -184,7 +184,7 @@ class Core(
             history=self.history._export_state(),
             playback=self.playback._export_state(),
             mixer=self.mixer._export_state())
-        storage.save(file_name, data)
+        storage.dump(file_name, data)
         logger.debug('Save state done.')
 
     def _load_state(self, coverage):

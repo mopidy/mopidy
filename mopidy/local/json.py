@@ -9,7 +9,7 @@ import sys
 import mopidy
 
 from mopidy import compat, local, models
-from mopidy import internal
+from mopidy.internal import storage as internal_storage
 from mopidy.internal import timer
 from mopidy.local import search, storage, translator
 
@@ -99,7 +99,7 @@ class JsonLibrary(local.Library):
                     self._json_file)
                 self._tracks = {}
             else:
-                library = internal.storage.load(self._json_file)
+                library = internal_storage.load(self._json_file)
                 self._tracks = dict((t.uri, t) for t in
                                     library.get('tracks', []))
         with timer.time_logger('Building browse cache'):
@@ -167,7 +167,7 @@ class JsonLibrary(local.Library):
         self._tracks.pop(uri, None)
 
     def close(self):
-        internal.storage.save(self._json_file,
+        internal_storage.dump(self._json_file,
                               {'version': mopidy.__version__,
                                'tracks': self._tracks.values()})
 

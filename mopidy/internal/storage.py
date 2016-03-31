@@ -35,7 +35,7 @@ def load(path):
         return {}
 
 
-def save(path, data):
+def dump(path, data):
     """
     Serialize data to file.
 
