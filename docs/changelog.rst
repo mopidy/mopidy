@@ -10,7 +10,8 @@ v2.1.0 (UNRELEASED)
 
 Feature release.
 
-- Nothing yet.
+- Core: Mopidy restores its last state when started. Can be enabled by setting
+  the config value :confval:`core/restore_state` to `true`.
 
 
 v2.0.1 (UNRELEASED)
@@ -94,9 +95,6 @@ Core API
 
 - Add :meth:`mopidy.core.PlaylistsController.get_uri_schemes`. (PR:
   :issue:`1362`)
-
-- Persist state between runs. The amount of data to persist can be
-  controlled by config value :confval:`core/restore_state`
 
 - The ``track_playback_ended`` event now includes the correct ``tl_track``
   reference when changing to the next track in consume mode. (Fixes:

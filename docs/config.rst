@@ -113,8 +113,9 @@ Core config section
 
 .. confval:: core/restore_state
 
-    When set to ``true``, Mopidy saves the state when it ends and 
-    restores the state at next start.
+    When set to ``true``, Mopidy restores its last state when started.
+    The restored state includes the tracklist, playback history,
+    the playback state, and the mixers volume and mute state.
 
     Default is ``false``.
 
