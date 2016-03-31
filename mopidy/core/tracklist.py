@@ -667,13 +667,7 @@ class TracklistController(object):
                 self.set_repeat(state.repeat)
                 self.set_single(state.single)
             if 'tracklist' in coverage:
-                if state.next_tlid > self._next_tlid:
-                    self._next_tlid = state.next_tlid
+                self._next_tlid = max(state.next_tlid, self._next_tlid)
                 self._tl_tracks = []
-                for track in state.tl_tracks:
-                    # TODO: check if any backend will play the track.
-                    # Could be an issue with music streaming services
-                    # (login), disabled extensions and automatically
-                    # generated playlists (pandora).
-                    self._tl_tracks.append(track)
+                self._tl_tracks.extend(state.tl_tracks)
                 self._increase_version()
