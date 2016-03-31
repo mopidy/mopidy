@@ -78,7 +78,7 @@ class CoreActorExportRestoreTest(unittest.TestCase):
         # TODO: implement meaningful test
 
     def test_delete_state_file_on_restore(self):
-        file_path = os.path.join(self.temp_dir, 'core', 'persistent.state')
+        file_path = os.path.join(self.temp_dir, 'core', 'state.json.gz')
 
         data = {}
         storage.save(file_path, data)
