@@ -35,10 +35,12 @@ class Zeroconf(ZeroconfInterface):
             self.name = string.Template(name).safe_substitute(
                 hostname=self.display_hostname, port=port)
 
-    def register_callback(self, sdRef, flags, errorCode, name, regtype, domain):
-        if errorCode == pybonjour.kDNSServiceErr_NoError:
+    def register_callback(self, sdref, flags, errorcode, name, regtype,
+                          domain):
+        if errorcode == pybonjour.kDNSServiceErr_NoError:
             logger.debug(
-                    '%s: Registered service: name = %s, regtype = %s, domain = %s', self, name, regtype, domain)
+                '%s: Registered service: name = %s, regtype = %s,'
+                'domain = %s', self, name, regtype, domain)
 
     def publish(self):
         """Publish the service.
@@ -55,7 +57,7 @@ class Zeroconf(ZeroconfInterface):
             logger.debug('%s: pybonjour not installed; publish failed.', self)
             return False
 
-        sdRef = pybonjour.DNSServiceRegister(
+        sdref = pybonjour.DNSServiceRegister(
             name=self.name,
             regtype=self.stype, port=self.port,
             domain=self.domain,
@@ -63,9 +65,9 @@ class Zeroconf(ZeroconfInterface):
 
         processed = False
         while not processed:
-            ready = select.select([sdRef], [], [])
-            if sdRef in ready[0]:
-                pybonjour.DNSServiceProcessResult(sdRef)
+            ready = select.select([sdref], [], [])
+            if sdref in ready[0]:
+                pybonjour.DNSServiceProcessResult(sdref)
                 processed = True
 
         logger.debug('%s: Published', self)
