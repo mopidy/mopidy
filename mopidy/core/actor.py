@@ -220,8 +220,8 @@ class Core(
             self.history._restore_state(core_state.history, coverage)
             self.tracklist._restore_state(core_state.tracklist, coverage)
             # playback after tracklist
-            self.playback._restore_state(core_state.playback, coverage)
             self.mixer._restore_state(core_state.mixer, coverage)
+            self.playback._restore_state(core_state.playback, coverage)
         logger.debug('Load state done.')
 
 
