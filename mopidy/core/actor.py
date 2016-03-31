@@ -146,7 +146,7 @@ class Core(
             coverage = []
             if self._config and 'restore_state' in self._config['core']:
                 if self._config['core']['restore_state']:
-                    coverage = ['tracklist', 'mode', 'play-last', 'volume',
+                    coverage = ['tracklist', 'mode', 'play-last', 'mixer',
                                 'history']
             if len(coverage):
                 self._load_state(coverage)
@@ -198,7 +198,7 @@ class Core(
             - 'tracklist' fill the tracklist
             - 'mode' set tracklist properties (consume, random, repeat, single)
             - 'autoplay' start playing ('tracklist' also required)
-            - 'volume' set mixer volume
+            - 'mixer' set mixer volume and mute state
             - 'history' restore history
 
         :param coverage: amount of data to restore

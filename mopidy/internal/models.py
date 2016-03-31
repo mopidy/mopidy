@@ -7,7 +7,7 @@ from mopidy.models.immutable import ValidatedImmutableObject
 
 class HistoryTrack(ValidatedImmutableObject):
     """
-    A history track. Wraps a :class:`Ref` and it's timestamp.
+    A history track. Wraps a :class:`Ref` and its timestamp.
 
     :param timestamp: the timestamp
     :type timestamp: int
@@ -42,10 +42,15 @@ class MixerState(ValidatedImmutableObject):
 
     :param volume: the volume
     :type volume: int
+    :param mute: the volume
+    :type mute: int
     """
 
     # The volume. Read-only.
     volume = fields.Integer(min=0, max=100)
+
+    # The mute state. Read-only.
+    mute = fields.Boolean(default=False)
 
 
 class PlaybackState(ValidatedImmutableObject):
@@ -85,9 +90,9 @@ class TracklistState(ValidatedImmutableObject):
     :type random: bool
     :param single: the single mode
     :type single: bool
-    :param next_tlid: the single mode
-    :type next_tlid: bool
-    :param tl_tracks: the single mode
+    :param next_tlid: the id of the next track to play
+    :type next_tlid: int
+    :param tl_tracks: the list of tracks
     :type tl_tracks: list of :class:`TlTrack`
     """
 
@@ -103,7 +108,7 @@ class TracklistState(ValidatedImmutableObject):
     # The single mode. Read-only.
     single = fields.Boolean()
 
-    # The repeat mode. Read-only.
+    # The id of the track to play. Read-only.
     next_tlid = fields.Integer(min=0)
 
     # The list of tracks. Read-only.

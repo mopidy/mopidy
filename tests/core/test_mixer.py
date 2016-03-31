@@ -163,10 +163,21 @@ class CoreMixerExportRestoreTest(unittest.TestCase):
         self.mixer = dummy_mixer.create_proxy()
         self.core = core.Core(mixer=self.mixer, backends=[])
 
-    def test_export(self):
+    def test_export_mute(self):
         volume = 32
-        target = MixerState(volume=volume)
+        mute = False
+        target = MixerState(volume=volume, mute=mute)
         self.core.mixer.set_volume(volume)
+        self.core.mixer.set_mute(mute)
+        value = self.core.mixer._export_state()
+        self.assertEqual(target, value)
+
+    def test_export_unmute(self):
+        volume = 33
+        mute = True
+        target = MixerState(volume=volume, mute=mute)
+        self.core.mixer.set_volume(volume)
+        self.core.mixer.set_mute(mute)
         value = self.core.mixer._export_state()
         self.assertEqual(target, value)
 
@@ -174,16 +185,34 @@ class CoreMixerExportRestoreTest(unittest.TestCase):
         self.core.mixer.set_volume(11)
         volume = 45
         target = MixerState(volume=volume)
-        coverage = ['volume']
+        coverage = ['mixer']
         self.core.mixer._restore_state(target, coverage)
         self.assertEqual(volume, self.core.mixer.get_volume())
 
     def test_import_not_covered(self):
         self.core.mixer.set_volume(21)
-        target = MixerState(volume=56)
+        self.core.mixer.set_mute(True)
+        target = MixerState(volume=56, mute=False)
         coverage = ['other']
         self.core.mixer._restore_state(target, coverage)
         self.assertEqual(21, self.core.mixer.get_volume())
+        self.assertEqual(True, self.core.mixer.get_mute())
+
+    def test_import_mute_on(self):
+        self.core.mixer.set_mute(False)
+        self.assertEqual(False, self.core.mixer.get_mute())
+        target = MixerState(mute=True)
+        coverage = ['mixer']
+        self.core.mixer._restore_state(target, coverage)
+        self.assertEqual(True, self.core.mixer.get_mute())
+
+    def test_import_mute_off(self):
+        self.core.mixer.set_mute(True)
+        self.assertEqual(True, self.core.mixer.get_mute())
+        target = MixerState(mute=False)
+        coverage = ['mixer']
+        self.core.mixer._restore_state(target, coverage)
+        self.assertEqual(False, self.core.mixer.get_mute())
 
     def test_import_invalid_type(self):
         with self.assertRaises(TypeError):
