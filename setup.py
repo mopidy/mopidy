@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import re
+import sys
 
 from setuptools import find_packages, setup
 
@@ -10,6 +11,24 @@ def get_version(filename):
         metadata = dict(re.findall("__([a-z]+)__ = '([^']+)'", fh.read()))
         return metadata['version']
 
+def get_install_requires():
+    base_requires=[
+        'Pykka >= 1.1',
+        'requests >= 2.0',
+        'setuptools',
+        'tornado >= 2.3'
+    ]
+
+    if sys.platform == 'darwin':
+        base_requires.append('pybonjour ==  1.1.1')
+
+    return base_requires
+
+def get_dependency_links():
+    if sys.platform == 'darwin':
+        return ['https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/pybonjour/pybonjour-1.1.1.tar.gz']
+    else:
+        return []
 
 setup(
     name='Mopidy',
@@ -23,12 +42,8 @@ setup(
     packages=find_packages(exclude=['tests', 'tests.*']),
     zip_safe=False,
     include_package_data=True,
-    install_requires=[
-        'Pykka >= 1.1',
-        'requests >= 2.0',
-        'setuptools',
-        'tornado >= 2.3',
-    ],
+    install_requires=get_install_requires(),
+    dependency_links=get_dependency_links(),
     extras_require={'http': []},
     entry_points={
         'console_scripts': [
