@@ -53,6 +53,10 @@ gstreamer-GstTagList.html
                 result[tag].append(value.decode('utf-8', 'replace'))
             elif isinstance(value, (compat.text_type, bool, numbers.Number)):
                 result[tag].append(value)
+            elif isinstance(value, Gst.Sample):
+                data = _extract_sample_data(value)
+                if data:
+                    result[tag].append(data)
             else:
                 logger.log(
                     log.TRACE_LOG_LEVEL,
@@ -60,6 +64,13 @@ gstreamer-GstTagList.html
 
     # TODO: dict(result) to not leak the defaultdict, or just use setdefault?
     return result
+
+
+def _extract_sample_data(sample):
+    buf = sample.get_buffer()
+    if not buf:
+        return None
+    return buf.extract_dup(0, buf.get_size())
 
 
 # TODO: split based on "stream" and "track" based conversion? i.e. handle data
