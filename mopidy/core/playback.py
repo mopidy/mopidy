@@ -602,7 +602,7 @@ class PlaybackController(object):
     def _export_state(self):
         return models.PlaybackState(
             tlid=self.get_current_tlid(),
-            position=self.get_time_position(),
+            time_position=self.get_time_position(),
             state=self.get_state())
 
     def _restore_state(self, state, coverage):
@@ -616,5 +616,5 @@ class PlaybackController(object):
                 if new_state == PlaybackState.PAUSED:
                     self._start_paused = True
                 if new_state in (PlaybackState.PLAYING, PlaybackState.PAUSED):
-                    self._start_at_position = state.position
+                    self._start_at_position = state.time_position
                     self.play(tlid=state.tlid)

@@ -78,16 +78,16 @@ class MixerStateTest(unittest.TestCase):
 class PlaybackStateTest(unittest.TestCase):
 
     def test_position(self):
-        position = 123456
-        result = PlaybackState(position=position)
-        self.assertEqual(result.position, position)
+        time_position = 123456
+        result = PlaybackState(time_position=time_position)
+        self.assertEqual(result.time_position, time_position)
         with self.assertRaises(AttributeError):
-            result.position = None
+            result.time_position = None
 
     def test_position_invalid(self):
-        position = -1
+        time_position = -1
         with self.assertRaises(ValueError):
-            PlaybackState(position=position)
+            PlaybackState(time_position=time_position)
 
     def test_tl_track(self):
         tlid = 42

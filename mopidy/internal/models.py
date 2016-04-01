@@ -60,8 +60,8 @@ class PlaybackState(ValidatedImmutableObject):
 
     :param tlid: current track tlid
     :type tlid: int
-    :param position: play position
-    :type position: int
+    :param time_position: play position
+    :type time_position: int
     :param state: playback state
     :type state: :class:`validation.PLAYBACK_STATES`
     """
@@ -70,7 +70,7 @@ class PlaybackState(ValidatedImmutableObject):
     tlid = fields.Integer(min=1)
 
     # The playback position. Read-only.
-    position = fields.Integer(min=0)
+    time_position = fields.Integer(min=0)
 
     # The playback state. Read-only.
     state = fields.Field(choices=validation.PLAYBACK_STATES)
