@@ -17,7 +17,7 @@ def load(path):
     Deserialize data from file.
 
     :param path: full path to import file
-    :type path: str
+    :type path: bytes
     :return: deserialized data
     :rtype: dict
     """
@@ -40,7 +40,7 @@ def dump(path, data):
     Serialize data to file.
 
     :param path: full path to export file
-    :type path: str
+    :type path: bytes
     :param data: dictionary containing data to save
     :type data: dict
     """

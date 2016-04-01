@@ -174,7 +174,7 @@ class Core(
         Save current state to disk.
         """
 
-        file_name = os.path.join(self._get_data_dir(), b'state.json.gz')
+        file_name = bytes(os.path.join(self._get_data_dir(), b'state.json.gz'))
         logger.info('Save state to %s', file_name)
 
         data = {}
@@ -206,7 +206,7 @@ class Core(
         :type coverage: list of string (see above)
         """
 
-        file_name = os.path.join(self._get_data_dir(), b'state.json.gz')
+        file_name = bytes(os.path.join(self._get_data_dir(), b'state.json.gz'))
         logger.info('Load state from %s', file_name)
 
         data = storage.load(file_name)
