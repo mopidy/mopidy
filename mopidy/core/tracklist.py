@@ -648,7 +648,7 @@ class TracklistController(object):
         logger.debug('Triggering options changed event')
         listener.CoreListener.send('options_changed')
 
-    def _export_state(self):
+    def _save_state(self):
         return TracklistState(
             tl_tracks=self._tl_tracks,
             next_tlid=self._next_tlid,
@@ -657,7 +657,7 @@ class TracklistController(object):
             repeat=self.get_repeat(),
             single=self.get_single())
 
-    def _restore_state(self, state, coverage):
+    def _load_state(self, state, coverage):
         if state:
             if 'mode' in coverage:
                 self.set_consume(state.consume)

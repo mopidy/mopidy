@@ -180,10 +180,10 @@ class Core(
         data = {}
         data['version'] = mopidy.__version__
         data['state'] = CoreState(
-            tracklist=self.tracklist._export_state(),
-            history=self.history._export_state(),
-            playback=self.playback._export_state(),
-            mixer=self.mixer._export_state())
+            tracklist=self.tracklist._save_state(),
+            history=self.history._save_state(),
+            playback=self.playback._save_state(),
+            mixer=self.mixer._save_state())
         storage.dump(file_name, data)
         logger.debug('Save state done.')
 
@@ -220,11 +220,11 @@ class Core(
         if 'state' in data:
             core_state = data['state']
             validation.check_instance(core_state, CoreState)
-            self.history._restore_state(core_state.history, coverage)
-            self.tracklist._restore_state(core_state.tracklist, coverage)
+            self.history._load_state(core_state.history, coverage)
+            self.tracklist._load_state(core_state.tracklist, coverage)
+            self.mixer._load_state(core_state.mixer, coverage)
             # playback after tracklist
-            self.mixer._restore_state(core_state.mixer, coverage)
-            self.playback._restore_state(core_state.playback, coverage)
+            self.playback._load_state(core_state.playback, coverage)
         logger.debug('Load state done.')
 
 

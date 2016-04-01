@@ -169,7 +169,7 @@ class CoreMixerExportRestoreTest(unittest.TestCase):
         target = MixerState(volume=volume, mute=mute)
         self.core.mixer.set_volume(volume)
         self.core.mixer.set_mute(mute)
-        value = self.core.mixer._export_state()
+        value = self.core.mixer._save_state()
         self.assertEqual(target, value)
 
     def test_export_unmute(self):
@@ -178,7 +178,7 @@ class CoreMixerExportRestoreTest(unittest.TestCase):
         target = MixerState(volume=volume, mute=mute)
         self.core.mixer.set_volume(volume)
         self.core.mixer.set_mute(mute)
-        value = self.core.mixer._export_state()
+        value = self.core.mixer._save_state()
         self.assertEqual(target, value)
 
     def test_import(self):
@@ -186,7 +186,7 @@ class CoreMixerExportRestoreTest(unittest.TestCase):
         volume = 45
         target = MixerState(volume=volume)
         coverage = ['mixer']
-        self.core.mixer._restore_state(target, coverage)
+        self.core.mixer._load_state(target, coverage)
         self.assertEqual(volume, self.core.mixer.get_volume())
 
     def test_import_not_covered(self):
@@ -194,7 +194,7 @@ class CoreMixerExportRestoreTest(unittest.TestCase):
         self.core.mixer.set_mute(True)
         target = MixerState(volume=56, mute=False)
         coverage = ['other']
-        self.core.mixer._restore_state(target, coverage)
+        self.core.mixer._load_state(target, coverage)
         self.assertEqual(21, self.core.mixer.get_volume())
         self.assertEqual(True, self.core.mixer.get_mute())
 
@@ -203,7 +203,7 @@ class CoreMixerExportRestoreTest(unittest.TestCase):
         self.assertEqual(False, self.core.mixer.get_mute())
         target = MixerState(mute=True)
         coverage = ['mixer']
-        self.core.mixer._restore_state(target, coverage)
+        self.core.mixer._load_state(target, coverage)
         self.assertEqual(True, self.core.mixer.get_mute())
 
     def test_import_mute_off(self):
@@ -211,12 +211,12 @@ class CoreMixerExportRestoreTest(unittest.TestCase):
         self.assertEqual(True, self.core.mixer.get_mute())
         target = MixerState(mute=False)
         coverage = ['mixer']
-        self.core.mixer._restore_state(target, coverage)
+        self.core.mixer._load_state(target, coverage)
         self.assertEqual(False, self.core.mixer.get_mute())
 
     def test_import_invalid_type(self):
         with self.assertRaises(TypeError):
-            self.core.mixer._restore_state(11, None)
+            self.core.mixer._load_state(11, None)
 
     def test_import_none(self):
-        self.core.mixer._restore_state(None, None)
+        self.core.mixer._load_state(None, None)

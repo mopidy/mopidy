@@ -101,11 +101,11 @@ class MixerController(object):
 
         return False
 
-    def _export_state(self):
+    def _save_state(self):
         return MixerState(volume=self.get_volume(),
                           mute=self.get_mute())
 
-    def _restore_state(self, state, coverage):
+    def _load_state(self, state, coverage):
         if state:
             if 'mixer' in coverage:
                 if state.volume:

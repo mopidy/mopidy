@@ -68,7 +68,7 @@ class CoreHistoryExportRestoreTest(unittest.TestCase):
         self.history._add_track(self.tracks[2])
         self.history._add_track(self.tracks[1])
 
-        value = self.history._export_state()
+        value = self.history._save_state()
 
         self.assertEqual(len(value.history), 2)
         # last in, first out
@@ -81,7 +81,7 @@ class CoreHistoryExportRestoreTest(unittest.TestCase):
             HistoryTrack(timestamp=45, track=self.refs[2]),
             HistoryTrack(timestamp=56, track=self.refs[1])])
         coverage = ['history']
-        self.history._restore_state(state, coverage)
+        self.history._load_state(state, coverage)
 
         hist = self.history.get_history()
         self.assertEqual(len(hist), 3)
@@ -100,7 +100,7 @@ class CoreHistoryExportRestoreTest(unittest.TestCase):
 
     def test_import_invalid_type(self):
         with self.assertRaises(TypeError):
-            self.history._restore_state(11, None)
+            self.history._load_state(11, None)
 
     def test_import_none(self):
-        self.history._restore_state(None, None)
+        self.history._load_state(None, None)

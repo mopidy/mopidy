@@ -58,7 +58,7 @@ class HistoryController(object):
         """
         return copy.copy(self._history)
 
-    def _export_state(self):
+    def _save_state(self):
         # 500 tracks a 3 minutes -> 24 hours history
         count_max = 500
         count = 1
@@ -72,7 +72,7 @@ class HistoryController(object):
                 break
         return HistoryState(history=history_list)
 
-    def _restore_state(self, state, coverage):
+    def _load_state(self, state, coverage):
         if state:
             if 'history' in coverage:
                 self._history = []

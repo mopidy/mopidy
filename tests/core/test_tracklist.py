@@ -223,7 +223,7 @@ class TracklistExportRestoreTest(unittest.TestCase):
                                 random=False,
                                 next_tlid=next_tlid,
                                 tl_tracks=tl_tracks)
-        value = self.core.tracklist._export_state()
+        value = self.core.tracklist._save_state()
         self.assertEqual(target, value)
 
     def test_import(self):
@@ -235,7 +235,7 @@ class TracklistExportRestoreTest(unittest.TestCase):
                                 next_tlid=12,
                                 tl_tracks=self.tl_tracks)
         coverage = ['mode', 'tracklist']
-        self.core.tracklist._restore_state(target, coverage)
+        self.core.tracklist._load_state(target, coverage)
         self.assertEqual(False, self.core.tracklist.get_consume())
         self.assertEqual(True, self.core.tracklist.get_repeat())
         self.assertEqual(True, self.core.tracklist.get_single())
@@ -259,7 +259,7 @@ class TracklistExportRestoreTest(unittest.TestCase):
                                 next_tlid=12,
                                 tl_tracks=self.tl_tracks)
         coverage = ['mode']
-        self.core.tracklist._restore_state(target, coverage)
+        self.core.tracklist._load_state(target, coverage)
         self.assertEqual(False, self.core.tracklist.get_consume())
         self.assertEqual(True, self.core.tracklist.get_repeat())
         self.assertEqual(True, self.core.tracklist.get_single())
@@ -278,7 +278,7 @@ class TracklistExportRestoreTest(unittest.TestCase):
                                 next_tlid=12,
                                 tl_tracks=self.tl_tracks)
         coverage = ['tracklist']
-        self.core.tracklist._restore_state(target, coverage)
+        self.core.tracklist._load_state(target, coverage)
         self.assertEqual(False, self.core.tracklist.get_consume())
         self.assertEqual(False, self.core.tracklist.get_repeat())
         self.assertEqual(False, self.core.tracklist.get_single())
@@ -290,7 +290,7 @@ class TracklistExportRestoreTest(unittest.TestCase):
 
     def test_import_invalid_type(self):
         with self.assertRaises(TypeError):
-            self.core.tracklist._restore_state(11, None)
+            self.core.tracklist._load_state(11, None)
 
     def test_import_none(self):
-        self.core.tracklist._restore_state(None, None)
+        self.core.tracklist._load_state(None, None)

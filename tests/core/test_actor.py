@@ -69,11 +69,11 @@ class CoreActorExportRestoreTest(unittest.TestCase):
         pykka.ActorRegistry.stop_all()
         shutil.rmtree(self.temp_dir)
 
-    def test_export_state(self):
+    def test_save_state(self):
         self.core.teardown().get()
         # TODO: implement meaningful test
 
-    def test_restore_state(self):
+    def test_load_state(self):
         self.core.setup().get()
         # TODO: implement meaningful test
 

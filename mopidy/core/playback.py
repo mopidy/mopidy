@@ -599,13 +599,13 @@ class PlaybackController(object):
         logger.debug('Triggering seeked event')
         listener.CoreListener.send('seeked', time_position=time_position)
 
-    def _export_state(self):
+    def _save_state(self):
         return models.PlaybackState(
             tlid=self.get_current_tlid(),
             time_position=self.get_time_position(),
             state=self.get_state())
 
-    def _restore_state(self, state, coverage):
+    def _load_state(self, state, coverage):
         if state:
             new_state = None
             if 'play-always' in coverage:

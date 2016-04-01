@@ -1142,7 +1142,7 @@ class TesetCorePlaybackExportRestore(BaseTest):
 
         state = PlaybackState(
             time_position=0, state='playing', tlid=tl_tracks[1].tlid)
-        value = self.core.playback._export_state()
+        value = self.core.playback._save_state()
 
         self.assertEqual(state, value)
 
@@ -1156,7 +1156,7 @@ class TesetCorePlaybackExportRestore(BaseTest):
         state = PlaybackState(
             time_position=0, state='playing', tlid=tl_tracks[2].tlid)
         coverage = ['play-always']
-        self.core.playback._restore_state(state, coverage)
+        self.core.playback._load_state(state, coverage)
         self.replay_events()
 
         self.assertEqual('playing', self.core.playback.get_state())
@@ -1173,7 +1173,7 @@ class TesetCorePlaybackExportRestore(BaseTest):
         state = PlaybackState(
             time_position=0, state='playing', tlid=tl_tracks[2].tlid)
         coverage = ['other']
-        self.core.playback._restore_state(state, coverage)
+        self.core.playback._load_state(state, coverage)
         self.replay_events()
 
         self.assertEqual('stopped', self.core.playback.get_state())
@@ -1182,10 +1182,10 @@ class TesetCorePlaybackExportRestore(BaseTest):
 
     def test_import_invalid_type(self):
         with self.assertRaises(TypeError):
-            self.core.playback._restore_state(11, None)
+            self.core.playback._load_state(11, None)
 
     def test_import_none(self):
-        self.core.playback._restore_state(None, None)
+        self.core.playback._load_state(None, None)
 
 
 class TestBug1352Regression(BaseTest):
