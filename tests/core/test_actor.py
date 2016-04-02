@@ -52,7 +52,7 @@ class CoreActorTest(unittest.TestCase):
         self.assertEqual(self.core.version, versioning.get_version())
 
 
-class CoreActorExportRestoreTest(unittest.TestCase):
+class CoreActorSaveLoadStateTest(unittest.TestCase):
 
     def setUp(self):
         self.temp_dir = tempfile.mkdtemp()

@@ -25,7 +25,7 @@ class HistoryTrack(ValidatedImmutableObject):
 class HistoryState(ValidatedImmutableObject):
     """
     State of the history controller.
-    Internally used for import/export of current state.
+    Internally used for save/load state.
 
     :param history: the track history
     :type history: list of :class:`HistoryTrack`
@@ -38,7 +38,7 @@ class HistoryState(ValidatedImmutableObject):
 class MixerState(ValidatedImmutableObject):
     """
     State of the mixer controller.
-    Internally used for import/export of current state.
+    Internally used for save/load state.
 
     :param volume: the volume
     :type volume: int
@@ -56,7 +56,7 @@ class MixerState(ValidatedImmutableObject):
 class PlaybackState(ValidatedImmutableObject):
     """
     State of the playback controller.
-    Internally used for import/export of current state.
+    Internally used for save/load state.
 
     :param tlid: current track tlid
     :type tlid: int
@@ -80,7 +80,7 @@ class TracklistState(ValidatedImmutableObject):
 
     """
     State of the tracklist controller.
-    Internally used for import/export of current state.
+    Internally used for save/load state.
 
     :param repeat: the repeat mode
     :type repeat: bool
@@ -119,7 +119,7 @@ class CoreState(ValidatedImmutableObject):
 
     """
     State of all Core controller.
-    Internally used for import/export of current state.
+    Internally used for save/load state.
 
     :param history: State of the history controller
     :type history: :class:`HistorState`

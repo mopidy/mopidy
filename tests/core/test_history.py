@@ -49,7 +49,7 @@ class PlaybackHistoryTest(unittest.TestCase):
             self.assertIn(artist.name, ref.name)
 
 
-class CoreHistoryExportRestoreTest(unittest.TestCase):
+class CoreHistorySaveLoadStateTest(unittest.TestCase):
 
     def setUp(self):  # noqa: N802
         self.tracks = [
@@ -64,7 +64,7 @@ class CoreHistoryExportRestoreTest(unittest.TestCase):
 
         self.history = HistoryController()
 
-    def test_export(self):
+    def test_save(self):
         self.history._add_track(self.tracks[2])
         self.history._add_track(self.tracks[1])
 
@@ -75,7 +75,7 @@ class CoreHistoryExportRestoreTest(unittest.TestCase):
         self.assertEqual(value.history[0].track, self.refs[1])
         self.assertEqual(value.history[1].track, self.refs[2])
 
-    def test_import(self):
+    def test_load(self):
         state = HistoryState(history=[
             HistoryTrack(timestamp=34, track=self.refs[0]),
             HistoryTrack(timestamp=45, track=self.refs[2]),
@@ -98,9 +98,9 @@ class CoreHistoryExportRestoreTest(unittest.TestCase):
         self.assertEqual(hist[2], (45, self.refs[2]))
         self.assertEqual(hist[3], (56, self.refs[1]))
 
-    def test_import_invalid_type(self):
+    def test_load_invalid_type(self):
         with self.assertRaises(TypeError):
             self.history._load_state(11, None)
 
-    def test_import_none(self):
+    def test_load_none(self):
         self.history._load_state(None, None)

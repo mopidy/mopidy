@@ -1132,9 +1132,9 @@ class TestBug1177Regression(unittest.TestCase):
         b.playback.change_track.assert_called_once_with(track2)
 
 
-class TesetCorePlaybackExportRestore(BaseTest):
+class TestCorePlaybackSaveLoadState(BaseTest):
 
-    def test_export(self):
+    def test_save(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
         self.core.playback.play(tl_tracks[1])
@@ -1146,7 +1146,7 @@ class TesetCorePlaybackExportRestore(BaseTest):
 
         self.assertEqual(state, value)
 
-    def test_import(self):
+    def test_load(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
         self.core.playback.stop()
@@ -1163,7 +1163,7 @@ class TesetCorePlaybackExportRestore(BaseTest):
         self.assertEqual(tl_tracks[2],
                          self.core.playback.get_current_tl_track())
 
-    def test_import_not_covered(self):
+    def test_load_not_covered(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
         self.core.playback.stop()
@@ -1180,11 +1180,11 @@ class TesetCorePlaybackExportRestore(BaseTest):
         self.assertEqual(None,
                          self.core.playback.get_current_tl_track())
 
-    def test_import_invalid_type(self):
+    def test_load_invalid_type(self):
         with self.assertRaises(TypeError):
             self.core.playback._load_state(11, None)
 
-    def test_import_none(self):
+    def test_load_none(self):
         self.core.playback._load_state(None, None)
 
 

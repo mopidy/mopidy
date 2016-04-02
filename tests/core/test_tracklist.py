@@ -180,7 +180,7 @@ class TracklistIndexTest(unittest.TestCase):
         self.assertEqual(2, self.core.tracklist.index())
 
 
-class TracklistExportRestoreTest(unittest.TestCase):
+class TracklistSaveLoadStateTest(unittest.TestCase):
 
     def setUp(self):  # noqa: N802
         config = {
@@ -211,7 +211,7 @@ class TracklistExportRestoreTest(unittest.TestCase):
 
         self.core.playback = mock.Mock(spec=core.PlaybackController)
 
-    def test_export(self):
+    def test_save(self):
         tl_tracks = self.core.tracklist.add(uris=[
             t.uri for t in self.tracks])
         consume = True
@@ -226,7 +226,7 @@ class TracklistExportRestoreTest(unittest.TestCase):
         value = self.core.tracklist._save_state()
         self.assertEqual(target, value)
 
-    def test_import(self):
+    def test_load(self):
         old_version = self.core.tracklist.get_version()
         target = TracklistState(consume=False,
                                 repeat=True,
@@ -245,12 +245,12 @@ class TracklistExportRestoreTest(unittest.TestCase):
         self.assertEqual(self.tl_tracks, self.core.tracklist.get_tl_tracks())
         self.assertGreater(self.core.tracklist.get_version(), old_version)
 
-        # after import, adding more tracks must be possible
+        # after load, adding more tracks must be possible
         self.core.tracklist.add(uris=[self.tracks[1].uri])
         self.assertEqual(13, self.core.tracklist._next_tlid)
         self.assertEqual(5, self.core.tracklist.get_length())
 
-    def test_import_mode_only(self):
+    def test_load_mode_only(self):
         old_version = self.core.tracklist.get_version()
         target = TracklistState(consume=False,
                                 repeat=True,
@@ -269,7 +269,7 @@ class TracklistExportRestoreTest(unittest.TestCase):
         self.assertEqual([], self.core.tracklist.get_tl_tracks())
         self.assertEqual(self.core.tracklist.get_version(), old_version)
 
-    def test_import_tracklist_only(self):
+    def test_load_tracklist_only(self):
         old_version = self.core.tracklist.get_version()
         target = TracklistState(consume=False,
                                 repeat=True,
@@ -288,9 +288,9 @@ class TracklistExportRestoreTest(unittest.TestCase):
         self.assertEqual(self.tl_tracks, self.core.tracklist.get_tl_tracks())
         self.assertGreater(self.core.tracklist.get_version(), old_version)
 
-    def test_import_invalid_type(self):
+    def test_load_invalid_type(self):
         with self.assertRaises(TypeError):
             self.core.tracklist._load_state(11, None)
 
-    def test_import_none(self):
+    def test_load_none(self):
         self.core.tracklist._load_state(None, None)
