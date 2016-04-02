@@ -606,13 +606,9 @@ class PlaybackController(object):
             state=self.get_state())
 
     def _load_state(self, state, coverage):
-        if state:
-            new_state = None
-            if 'play-last' in coverage:
-                new_state = state.state
-            if state.tlid is not None:
-                if new_state == PlaybackState.PAUSED:
-                    self._start_paused = True
-                if new_state in (PlaybackState.PLAYING, PlaybackState.PAUSED):
-                    self._start_at_position = state.time_position
-                    self.play(tlid=state.tlid)
+        if state and 'play-last' in coverage and state.tlid is not None:
+            if state.state == PlaybackState.PAUSED:
+                self._start_paused = True
+            if state.state in (PlaybackState.PLAYING, PlaybackState.PAUSED):
+                self._start_at_position = state.time_position
+                self.play(tlid=state.tlid)

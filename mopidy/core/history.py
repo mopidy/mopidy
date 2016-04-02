@@ -73,6 +73,5 @@ class HistoryController(object):
         return HistoryState(history=history_list)
 
     def _load_state(self, state, coverage):
-        if state:
-            if 'history' in coverage:
-                self._history = [(h.timestamp, h.track) for h in state.history]
+        if state and 'history' in coverage:
+            self._history = [(h.timestamp, h.track) for h in state.history]

@@ -106,8 +106,7 @@ class MixerController(object):
                           mute=self.get_mute())
 
     def _load_state(self, state, coverage):
-        if state:
-            if 'mixer' in coverage:
-                if state.volume:
-                    self.set_volume(state.volume)
-                self.set_mute(state.mute)
+        if state and 'mixer' in coverage:
+            self.set_mute(state.mute)
+            if state.volume:
+                self.set_volume(state.volume)
