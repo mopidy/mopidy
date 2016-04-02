@@ -1155,7 +1155,7 @@ class TesetCorePlaybackExportRestore(BaseTest):
 
         state = PlaybackState(
             time_position=0, state='playing', tlid=tl_tracks[2].tlid)
-        coverage = ['play-always']
+        coverage = ['play-last']
         self.core.playback._load_state(state, coverage)
         self.replay_events()
 

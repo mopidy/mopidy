@@ -608,8 +608,6 @@ class PlaybackController(object):
     def _load_state(self, state, coverage):
         if state:
             new_state = None
-            if 'play-always' in coverage:
-                new_state = PlaybackState.PLAYING
             if 'play-last' in coverage:
                 new_state = state.state
             if state.tlid is not None:

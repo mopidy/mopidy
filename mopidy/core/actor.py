@@ -198,7 +198,6 @@ class Core(
             - 'tracklist' fill the tracklist
             - 'mode' set tracklist properties (consume, random, repeat, single)
             - 'play-last' restore play state ('tracklist' also required)
-            - 'play-always' start playing ('tracklist' also required)
             - 'mixer' set mixer volume and mute state
             - 'history' restore history
 
