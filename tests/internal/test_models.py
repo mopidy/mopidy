@@ -68,6 +68,24 @@ class MixerStateTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             MixerState(volume=volume)
 
+    def test_mute_false(self):
+        mute = False
+        result = MixerState(mute=mute)
+        self.assertEqual(result.mute, mute)
+        with self.assertRaises(AttributeError):
+            result.mute = None
+
+    def test_mute_true(self):
+        mute = True
+        result = MixerState(mute=mute)
+        self.assertEqual(result.mute, mute)
+        with self.assertRaises(AttributeError):
+            result.mute = False
+
+    def test_mute_default(self):
+        result = MixerState()
+        self.assertEqual(result.mute, False)
+
     def test_to_json_and_back(self):
         result = MixerState(volume=77)
         serialized = json.dumps(result, cls=ModelJSONEncoder)
