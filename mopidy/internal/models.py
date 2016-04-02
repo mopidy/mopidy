@@ -90,7 +90,7 @@ class TracklistState(ValidatedImmutableObject):
     :type random: bool
     :param single: the single mode
     :type single: bool
-    :param next_tlid: the id of the next track to play
+    :param next_tlid: the id for the next added track
     :type next_tlid: int
     :param tl_tracks: the list of tracks
     :type tl_tracks: list of :class:`TlTrack`
