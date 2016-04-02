@@ -42,7 +42,7 @@ class MixerState(ValidatedImmutableObject):
 
     :param volume: the volume
     :type volume: int
-    :param mute: the volume
+    :param mute: the mute state
     :type mute: int
     """
 
