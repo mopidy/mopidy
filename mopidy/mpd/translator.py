@@ -58,6 +58,9 @@ def track_to_mpd_format(track, position=None, stream_title=None):
 
     if track.date:
         result.append(('Date', track.date))
+    else:
+        if track.album is not None and track.album.date:
+            result.append(('Date', track.album.date))
 
     if track.album is not None and track.album.num_tracks is not None:
         result.append(('Track', '%d/%d' % (
