@@ -1,6 +1,8 @@
 import logging
 import sys
 
+__all__ = ['Zeroconf']
+
 logger = logging.getLogger(__name__)
 
 
@@ -49,7 +51,8 @@ class ZeroconfInterface(object):
 
 
 if sys.platform == 'darwin':
-    logger.debug('Detected OSX, using alternative bonjour impl.')
+    logger.debug('Detected OSX, using pybonjour for Zeroconf.')
     from .pybonjour import Zeroconf
 else:
+    logger.debug('Assuming Linux, using Avahi via D-Bus for Zeroconf.')
     from .avahi import Zeroconf

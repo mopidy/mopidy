@@ -57,7 +57,7 @@ class Zeroconf(ZeroconfInterface):
             logger.debug('%s: pybonjour not installed; publish failed.', self)
             return False
 
-        sdref = pybonjour.DNSServiceRegister(
+        self.sdref = pybonjour.DNSServiceRegister(
             name=self.name,
             regtype=self.stype, port=self.port,
             domain=self.domain,
@@ -65,9 +65,9 @@ class Zeroconf(ZeroconfInterface):
 
         processed = False
         while not processed:
-            ready = select.select([sdref], [], [])
-            if sdref in ready[0]:
-                pybonjour.DNSServiceProcessResult(sdref)
+            ready = select.select([self.sdref], [], [])
+            if self.sdref in ready[0]:
+                pybonjour.DNSServiceProcessResult(self.sdref)
                 processed = True
 
         logger.debug('%s: Published', self)
@@ -78,5 +78,6 @@ class Zeroconf(ZeroconfInterface):
 
         Call when your service shuts down.
         """
+        self.sdref.close()
 
         logger.debug('%s: Unpublished', self)
