@@ -4,8 +4,8 @@ import logging
 import operator
 import os
 import sys
-import urllib2
 import re
+import urllib2
 
 from mopidy import backend, exceptions, models
 from mopidy.audio import scan, tags
