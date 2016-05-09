@@ -5,6 +5,7 @@ import operator
 import os
 import sys
 import urllib2
+import re
 
 from mopidy import backend, exceptions, models
 from mopidy.audio import scan, tags
@@ -54,6 +55,8 @@ class FileLibraryProvider(backend.LibraryProvider):
             return []
 
         for dir_entry in os.listdir(local_path):
+	    # replace non ascii chars with blanks in every dir_entry
+	    dir_entry = re.sub(r'[^\x00-\x7F]+', '', dir_entry)
             child_path = os.path.join(local_path, dir_entry)
             uri = path.path_to_uri(child_path)
 
