@@ -2,9 +2,9 @@ from __future__ import unicode_literals
 
 import logging
 import operator
+import re
 import os
 import sys
-import re
 import urllib2
 
 from mopidy import backend, exceptions, models
