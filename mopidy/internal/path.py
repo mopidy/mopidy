@@ -1,5 +1,10 @@
 from __future__ import absolute_import, unicode_literals
 
+# Fix unicode path
+import sys
+reload(sys)  # Reload does the trick!
+sys.setdefaultencoding('UTF8')
+
 import logging
 import os
 import stat
