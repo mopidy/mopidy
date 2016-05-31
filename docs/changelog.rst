@@ -38,6 +38,9 @@ Bug fix release.
   where a :confval:`file/media_dirs` path contained non-ASCII characters.
   (Fixes: :issue:`1345`, PR: :issue:`1493`)
 
+- MPD: Fix MPD protocol for ``replay_gain_status`` command. The actual command
+  remains unimplemented. (PR: :issue:`1520`)
+
 
 v2.0.0 (2016-02-15)
 ===================
