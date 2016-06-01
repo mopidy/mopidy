@@ -142,7 +142,7 @@ def _unwrap_stream(uri, timeout, scanner, requests_session):
                 uri, timeout)
             return None, None
         content = http.download(
-            requests_session, uri, timeout=download_timeout/1000)
+            requests_session, uri, timeout=download_timeout / 1000)
 
         if content is None:
             logger.info(
