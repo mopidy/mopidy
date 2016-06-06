@@ -48,9 +48,9 @@ class StatusHandlerTest(unittest.TestCase):
     def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
 
-    def set_tracklist(self, track):
-        self.backend.library.dummy_library = [track]
-        self.core.tracklist.add(uris=[track.uri]).get()
+    def set_tracklist(self, tracks):
+        self.backend.library.dummy_library = tracks
+        self.core.tracklist.add(uris=[track.uri for track in tracks]).get()
 
     def test_stats_method(self):
         result = status.stats(self.context)
@@ -154,22 +154,35 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(result['state'], 'pause')
 
     def test_status_method_when_playlist_loaded_contains_song(self):
-        self.set_tracklist(Track(uri='dummy:/a'))
-
+        self.set_tracklist([Track(uri='dummy:/a')])
         self.core.playback.play().get()
         result = dict(status.status(self.context))
         self.assertIn('song', result)
         self.assertGreaterEqual(int(result['song']), 0)
 
     def test_status_method_when_playlist_loaded_contains_tlid_as_songid(self):
-        self.set_tracklist(Track(uri='dummy:/a'))
+        self.set_tracklist([Track(uri='dummy:/a')])
         self.core.playback.play().get()
         result = dict(status.status(self.context))
         self.assertIn('songid', result)
         self.assertEqual(int(result['songid']), 1)
 
+    def test_status_method_when_playlist_loaded_contains_nextsong(self):
+        self.set_tracklist([Track(uri='dummy:/a'), Track(uri='dummy:/b')])
+        self.core.playback.play().get()
+        result = dict(status.status(self.context))
+        self.assertIn('nextsong', result)
+        self.assertGreaterEqual(int(result['nextsong']), 0)
+
+    def test_status_method_when_playlist_loaded_contains_nextsongid(self):
+        self.set_tracklist([Track(uri='dummy:/a'), Track(uri='dummy:/b')])
+        self.core.playback.play().get()
+        result = dict(status.status(self.context))
+        self.assertIn('nextsongid', result)
+        self.assertEqual(int(result['nextsongid']), 2)
+
     def test_status_method_when_playing_contains_time_with_no_length(self):
-        self.set_tracklist(Track(uri='dummy:/a', length=None))
+        self.set_tracklist([Track(uri='dummy:/a', length=None)])
         self.core.playback.play().get()
         result = dict(status.status(self.context))
         self.assertIn('time', result)
@@ -179,7 +192,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertLessEqual(position, total)
 
     def test_status_method_when_playing_contains_time_with_length(self):
-        self.set_tracklist(Track(uri='dummy:/a', length=10000))
+        self.set_tracklist([Track(uri='dummy:/a', length=10000)])
         self.core.playback.play()
         result = dict(status.status(self.context))
         self.assertIn('time', result)
@@ -189,7 +202,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertLessEqual(position, total)
 
     def test_status_method_when_playing_contains_elapsed(self):
-        self.set_tracklist(Track(uri='dummy:/a', length=60000))
+        self.set_tracklist([Track(uri='dummy:/a', length=60000)])
         self.core.playback.play().get()
         self.core.playback.pause()
         self.core.playback.seek(59123)
@@ -198,7 +211,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(result['elapsed'], '59.123')
 
     def test_status_method_when_starting_playing_contains_elapsed_zero(self):
-        self.set_tracklist(Track(uri='dummy:/a', length=10000))
+        self.set_tracklist([Track(uri='dummy:/a', length=10000)])
         self.core.playback.play().get()
         self.core.playback.pause()
         result = dict(status.status(self.context))
@@ -206,7 +219,7 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertEqual(result['elapsed'], '0.000')
 
     def test_status_method_when_playing_contains_bitrate(self):
-        self.set_tracklist(Track(uri='dummy:/a', bitrate=3200))
+        self.set_tracklist([Track(uri='dummy:/a', bitrate=3200)])
         self.core.playback.play().get()
         result = dict(status.status(self.context))
         self.assertIn('bitrate', result)
