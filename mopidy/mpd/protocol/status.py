@@ -173,6 +173,7 @@ def status(context):
           decimal places for millisecond precision.
     """
     tl_track = context.core.playback.get_current_tl_track()
+    next_tlid = context.core.tracklist.next_tlid()
 
     futures = {
         'tracklist.length': context.core.tracklist.get_length(),
@@ -185,6 +186,8 @@ def status(context):
         'playback.state': context.core.playback.get_state(),
         'playback.current_tl_track': tl_track,
         'tracklist.index': context.core.tracklist.index(tl_track.get()),
+        'tracklist.next_tlid': next_tlid,
+        'tracklist.next_index': context.core.tracklist.index(next_tlid.get()),
         'playback.time_position': context.core.playback.get_time_position(),
     }
     pykka.get_all(futures.values())
@@ -199,10 +202,12 @@ def status(context):
         ('xfade', _status_xfade(futures)),
         ('state', _status_state(futures)),
     ]
-    # TODO: add nextsong and nextsongid
     if futures['playback.current_tl_track'].get() is not None:
         result.append(('song', _status_songpos(futures)))
         result.append(('songid', _status_songid(futures)))
+    if futures['tracklist.next_tlid'].get() is not None:
+        result.append(('nextsong', _status_nextsongpos(futures)))
+        result.append(('nextsongid', _status_nextsongid(futures)))
     if futures['playback.state'].get() in (
             PlaybackState.PLAYING, PlaybackState.PAUSED):
         result.append(('time', _status_time(futures)))
@@ -247,6 +252,10 @@ def _status_single(futures):
     return int(futures['tracklist.single'].get())
 
 
+def _status_songpos(futures):
+    return futures['tracklist.index'].get()
+
+
 def _status_songid(futures):
     current_tl_track = futures['playback.current_tl_track'].get()
     if current_tl_track is not None:
@@ -255,8 +264,12 @@ def _status_songid(futures):
         return _status_songpos(futures)
 
 
-def _status_songpos(futures):
-    return futures['tracklist.index'].get()
+def _status_nextsongpos(futures):
+    return futures['tracklist.next_index'].get()
+
+
+def _status_nextsongid(futures):
+    return futures['tracklist.next_tlid'].get()
 
 
 def _status_state(futures):
