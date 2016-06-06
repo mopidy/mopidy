@@ -253,10 +253,6 @@ def _status_single(futures):
     return int(futures['tracklist.single'].get())
 
 
-def _status_songpos(futures):
-    return futures['tracklist.index'].get()
-
-
 def _status_songid(futures):
     current_tl_track = futures['playback.current_tl_track'].get()
     if current_tl_track is not None:
@@ -265,12 +261,16 @@ def _status_songid(futures):
         return _status_songpos(futures)
 
 
-def _status_nextsongpos(futures):
-    return futures['tracklist.next_index'].get()
+def _status_songpos(futures):
+    return futures['tracklist.index'].get()
 
 
 def _status_nextsongid(futures):
     return futures['tracklist.next_tlid'].get()
+
+
+def _status_nextsongpos(futures):
+    return futures['tracklist.next_index'].get()
 
 
 def _status_state(futures):
