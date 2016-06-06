@@ -173,7 +173,7 @@ def status(context):
           decimal places for millisecond precision.
     """
     tl_track = context.core.playback.get_current_tl_track()
-    next_tlid = context.core.tracklist.next_tlid()
+    next_tlid = context.core.tracklist.get_next_tlid()
 
     futures = {
         'tracklist.length': context.core.tracklist.get_length(),
@@ -187,7 +187,8 @@ def status(context):
         'playback.current_tl_track': tl_track,
         'tracklist.index': context.core.tracklist.index(tl_track.get()),
         'tracklist.next_tlid': next_tlid,
-        'tracklist.next_index': context.core.tracklist.index(next_tlid.get()),
+        'tracklist.next_index': context.core.tracklist.index(
+            tlid=next_tlid.get()),
         'playback.time_position': context.core.playback.get_time_position(),
     }
     pykka.get_all(futures.values())
