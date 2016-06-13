@@ -68,7 +68,7 @@ class StreamLibraryProvider(backend.LibraryProvider):
             track = tags.convert_tags_to_track(scan_result.tags).replace(
                 uri=uri, length=scan_result.duration)
         else:
-            logger.warning('Problem looking up %s: %s', uri)
+            logger.warning('Problem looking up %s', uri)
             track = Track(uri=uri)
 
         return [track]
@@ -142,7 +142,7 @@ def _unwrap_stream(uri, timeout, scanner, requests_session):
                 uri, timeout)
             return None, None
         content = http.download(
-            requests_session, uri, timeout=download_timeout)
+            requests_session, uri, timeout=download_timeout / 1000)
 
         if content is None:
             logger.info(
