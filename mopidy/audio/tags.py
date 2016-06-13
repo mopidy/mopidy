@@ -49,8 +49,7 @@ gstreamer-GstTagList.html
                         value.get_year(), value.get_month(), value.get_day())
                     result[tag].append(date.isoformat().decode('utf-8'))
                 except ValueError:
-                    logger.log(
-                        logging.DEBUG,
+                    logger.debug(
                         'Ignoring dodgy date value: %d-%d-%d',
                         value.get_year(), value.get_month(), value.get_day())
             elif isinstance(value, Gst.DateTime):
