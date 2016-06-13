@@ -734,6 +734,7 @@ class EventEmissionTest(BaseTest):
 
         self.core.playback.play(tl_tracks[0])
         self.trigger_about_to_finish(replay_until='stream_changed')
+        self.replay_events()
         listener_mock.reset_mock()
 
         self.core.playback.seek(1000)

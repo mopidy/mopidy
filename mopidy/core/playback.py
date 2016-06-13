@@ -230,8 +230,8 @@ class PlaybackController(object):
                 self._seek(self._pending_position)
 
     def _on_position_changed(self, position):
-        if self._pending_position == position:
-            self._trigger_seeked(position)
+        if self._pending_position is not None:
+            self._trigger_seeked(self._pending_position)
             self._pending_position = None
 
     def _on_about_to_finish_callback(self):
