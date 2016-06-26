@@ -41,6 +41,8 @@ Bug fix release.
 - MPD: Fix MPD protocol for ``replay_gain_status`` command. The actual command
   remains unimplemented. (PR: :issue:`1520`)
 
+- MPD: Add ``nextsong`` and ``nextsongid`` to the response of MPD ``status`` command.
+  (Fixes: :issue:`1133` :issue:`1516`, PR: :issue:`1523`)
 
 v2.0.0 (2016-02-15)
 ===================
