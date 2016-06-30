@@ -44,9 +44,12 @@ gstreamer-GstTagList.html
             value = taglist.get_value_index(tag, i)
 
             if isinstance(value, GLib.Date):
-                date = datetime.date(
-                    value.get_year(), value.get_month(), value.get_day())
-                result[tag].append(date.isoformat().decode('utf-8'))
+                try:
+                    date = datetime.date(
+                        value.get_year(), value.get_month(), value.get_day())
+                    result[tag].append(date.isoformat().decode('utf-8'))
+                except ValueError: # year is out of range
+                    pass
             if isinstance(value, Gst.DateTime):
                 result[tag].append(value.to_iso8601_string().decode('utf-8'))
             elif isinstance(value, bytes):
