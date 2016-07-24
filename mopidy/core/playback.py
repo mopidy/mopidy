@@ -253,6 +253,8 @@ class PlaybackController(object):
 
         # Unless overridden by other calls (e.g. next / previous / stop) this
         # will be the last position recorded until the track gets reassigned.
+        # TODO: Check if case when track.length isn't populated needs to be
+        # handled.
         self._last_position = self._current_tl_track.track.length
 
         pending = self.core.tracklist.eot_track(self._current_tl_track)
