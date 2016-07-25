@@ -42,7 +42,12 @@ Bug fix release.
   remains unimplemented. (PR: :issue:`1520`)
 
 - MPD: Add ``nextsong`` and ``nextsongid`` to the response of MPD ``status`` command.
-  (Fixes: :issue:`1133` :issue:`1516`, PR: :issue:`1523`)
+  (Fixes: :issue:`1133`, :issue:`1516`, PR: :issue:`1523`)
+
+- Core: Correctly record the last position of a track when switching to another
+  one. Particularly relevant for `mopidy-scrobbler` users, as before it was
+  essentially unusable. (Fixes: :issue:`1456`, PR: :issue:`1534`)
+
 
 v2.0.0 (2016-02-15)
 ===================
