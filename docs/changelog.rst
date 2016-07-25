@@ -23,12 +23,18 @@ Bug fix release.
   (Fixes: :issue:`935`, :issue:`1453`, :issue:`1474` and :issue:`1480`, PR:
   :issue:`1487`)
 
+- Audio: Better handling of seek when position does not match the expected
+  pending position. (Fixes: :issue:`1462` PR: :issue:`1496`)
+
 - Core: Avoid endless loop if all tracks in the tracklist are unplayable and
   consume mode is off. (Fixes: :issue:`1221`, :issue:`1454`, PR: :issue:`1455`)
 
 - File: Ensure path comparision is done between bytestrings only. Fixes crash
   where a :confval:`file/media_dirs` path contained non-ASCII characters.
   (Fixes: :issue:`1345`, PR: :issue:`1493`)
+
+- Stream: Fix milliseconds vs seconds mistake in timeout handling.
+  (Fixes: :issue:`1521` PR: :issue:`1522`)
 
 
 v2.0.0 (2016-02-15)
