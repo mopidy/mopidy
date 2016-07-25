@@ -24,7 +24,11 @@ Bug fix release.
   :issue:`1487`)
 
 - Audio: Better handling of seek when position does not match the expected
-  pending position. (Fixes: :issue:`1462` PR: :issue:`1496`)
+  pending position. (Fixes: :issue:`1462`, PR: :issue:`1496`)
+
+- Audio: Handle bad date tags from audio, thanks to Mario Lang and Tom Parker
+  who fixed this in parallel. (Fixes: :issue:`1506`, PR: :issue:`1525`,
+  :issue:`1517`)
 
 - Core: Avoid endless loop if all tracks in the tracklist are unplayable and
   consume mode is off. (Fixes: :issue:`1221`, :issue:`1454`, PR: :issue:`1455`)
@@ -38,7 +42,7 @@ Bug fix release.
   (Fixes: :issue:`1345`, PR: :issue:`1493`)
 
 - Stream: Fix milliseconds vs seconds mistake in timeout handling.
-  (Fixes: :issue:`1521` PR: :issue:`1522`)
+  (Fixes: :issue:`1521`, PR: :issue:`1522`)
 
 
 v2.0.0 (2016-02-15)
