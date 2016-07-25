@@ -9,11 +9,14 @@ import re
 from mopidy import compat
 from mopidy.compat import configparser
 from mopidy.config import keyring
-from mopidy.config.schemas import *  # noqa
-from mopidy.config.types import *  # noqa
+from mopidy.config.schemas import *
+from mopidy.config.types import *
 from mopidy.internal import path, versioning
 
 logger = logging.getLogger(__name__)
+
+# flake8: noqa:
+# TODO: Update this to be flake8 compliant
 
 _core_schema = ConfigSchema('core')
 _core_schema['cache_dir'] = Path()

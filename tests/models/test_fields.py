@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import unittest
 
-from mopidy.models.fields import *  # noqa: F403
+from mopidy.models.fields import Collection, Field, Integer, String
 
 
 def create_instance(field):
