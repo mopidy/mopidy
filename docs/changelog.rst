@@ -29,6 +29,10 @@ Bug fix release.
 - Core: Avoid endless loop if all tracks in the tracklist are unplayable and
   consume mode is off. (Fixes: :issue:`1221`, :issue:`1454`, PR: :issue:`1455`)
 
+- Core: Correctly record the last position of a track when switching to another
+  one. Particularly relevant for `mopidy-scrobbler` users, as before it was
+  essentially unusable. (Fixes: :issue:`1456`, PR: :issue:`1534`)
+
 - File: Ensure path comparision is done between bytestrings only. Fixes crash
   where a :confval:`file/media_dirs` path contained non-ASCII characters.
   (Fixes: :issue:`1345`, PR: :issue:`1493`)

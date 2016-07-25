@@ -251,6 +251,12 @@ class PlaybackController(object):
         if self._state == PlaybackState.STOPPED:
             return
 
+        # Unless overridden by other calls (e.g. next / previous / stop) this
+        # will be the last position recorded until the track gets reassigned.
+        # TODO: Check if case when track.length isn't populated needs to be
+        # handled.
+        self._last_position = self._current_tl_track.track.length
+
         pending = self.core.tracklist.eot_track(self._current_tl_track)
         # avoid endless loop if 'repeat' is 'true' and no track is playable
         # * 2 -> second run to get all playable track in a shuffled playlist
@@ -393,6 +399,10 @@ class PlaybackController(object):
         backend = self._get_backend(pending_tl_track)
         if not backend:
             return False
+
+        # This must happen before prepare_change gets called, otherwise the
+        # backend flushes the information of the track.
+        self._last_position = self.get_time_position()
 
         # TODO: Wrap backend call in error handling.
         backend.playback.prepare_change()
