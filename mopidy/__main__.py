@@ -5,7 +5,7 @@ import os
 import signal
 import sys
 
-from mopidy.internal.gi import Gst  # noqa: Import to initialize
+from mopidy.internal.gi import Gst  # noqa: F401
 
 try:
     # Make GObject's mainloop the event loop for python-dbus
