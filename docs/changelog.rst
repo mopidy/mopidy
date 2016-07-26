@@ -33,6 +33,8 @@ Bug fix release.
 - Audio: Make sure scanner handles streams without a duration.
   (Fixes: :issue:`1526`)
 
+- Audio: Ensure audio tags are never `None`. (Fixes: :issue:`1449`)
+
 - Core: Avoid endless loop if all tracks in the tracklist are unplayable and
   consume mode is off. (Fixes: :issue:`1221`, :issue:`1454`, PR: :issue:`1455`)
 

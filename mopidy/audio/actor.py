@@ -368,7 +368,7 @@ class _Handler(object):
 
         # Emit any postponed tags that we got after about-to-finish.
         tags, self._audio._pending_tags = self._audio._pending_tags, None
-        self._audio._tags = tags
+        self._audio._tags = tags or {}
 
         if tags:
             logger.debug('Audio event: tags_changed(tags=%r)', tags.keys())
