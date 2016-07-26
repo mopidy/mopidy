@@ -22,7 +22,6 @@ logger = logging.getLogger(__name__)
 gst_logger = logging.getLogger('mopidy.audio.gst')
 
 _GST_PLAY_FLAGS_AUDIO = 0x02
-_GST_PLAY_FLAGS_SOFT_VOLUME = 0x10
 
 _GST_STATE_MAPPING = {
     Gst.State.PLAYING: PlaybackState.PLAYING,
@@ -369,7 +368,7 @@ class _Handler(object):
 
         # Emit any postponed tags that we got after about-to-finish.
         tags, self._audio._pending_tags = self._audio._pending_tags, None
-        self._audio._tags = tags
+        self._audio._tags = tags or {}
 
         if tags:
             logger.debug('Audio event: tags_changed(tags=%r)', tags.keys())
@@ -451,8 +450,7 @@ class Audio(pykka.ThreadingActor):
 
     def _setup_playbin(self):
         playbin = Gst.ElementFactory.make('playbin')
-        playbin.set_property(
-            'flags', _GST_PLAY_FLAGS_AUDIO | _GST_PLAY_FLAGS_SOFT_VOLUME)
+        playbin.set_property('flags', _GST_PLAY_FLAGS_AUDIO)
 
         # TODO: turn into config values...
         playbin.set_property('buffer-size', 5 << 20)  # 5MB
@@ -489,15 +487,16 @@ class Audio(pykka.ThreadingActor):
 
     def _setup_audio_sink(self):
         audio_sink = Gst.ElementFactory.make('bin', 'audio-sink')
+        queue = Gst.ElementFactory.make('queue')
+        volume = Gst.ElementFactory.make('volume')
 
         # Queue element to buy us time between the about-to-finish event and
         # the actual switch, i.e. about to switch can block for longer thanks
         # to this queue.
+
         # TODO: See if settings should be set to minimize latency. Previous
         # setting breaks appsrc, and settings before that broke on a few
         # systems. So leave the default to play it safe.
-        queue = Gst.ElementFactory.make('queue')
-
         if self._config['audio']['buffer_time'] > 0:
             queue.set_property(
                 'max-size-time',
@@ -505,15 +504,13 @@ class Audio(pykka.ThreadingActor):
 
         audio_sink.add(queue)
         audio_sink.add(self._outputs)
+        audio_sink.add(volume)
+
+        queue.link(volume)
+        volume.link(self._outputs)
 
         if self.mixer:
-            volume = Gst.ElementFactory.make('volume')
-            audio_sink.add(volume)
-            queue.link(volume)
-            volume.link(self._outputs)
             self.mixer.setup(volume, self.actor_ref.proxy().mixer)
-        else:
-            queue.link(self._outputs)
 
         ghost_pad = Gst.GhostPad.new('sink', queue.get_static_pad('sink'))
         audio_sink.add_pad(ghost_pad)

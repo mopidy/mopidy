@@ -10,7 +10,11 @@ v2.1.0 (UNRELEASED)
 
 Feature release.
 
-- Nothing yet.
+- MPD: Fix MPD protocol for ``replay_gain_status`` command. The actual command
+  remains unimplemented. (PR: :issue:`1520`)
+
+- MPD: Add ``nextsong`` and ``nextsongid`` to the response of MPD ``status`` command.
+  (Fixes: :issue:`1133`, :issue:`1516`, PR: :issue:`1523`)
 
 
 v2.0.1 (UNRELEASED)
@@ -31,22 +35,31 @@ Bug fix release.
   (Fixes: :issue:`935`, :issue:`1453`, :issue:`1474` and :issue:`1480`, PR:
   :issue:`1487`)
 
+- Audio: Better handling of seek when position does not match the expected
+  pending position. (Fixes: :issue:`1462`, PR: :issue:`1496`)
+
+- Audio: Handle bad date tags from audio, thanks to Mario Lang and Tom Parker
+  who fixed this in parallel. (Fixes: :issue:`1506`, PR: :issue:`1525`,
+  :issue:`1517`)
+
+- Audio: Make sure scanner handles streams without a duration.
+  (Fixes: :issue:`1526`)
+
+- Audio: Ensure audio tags are never `None`. (Fixes: :issue:`1449`)
+
 - Core: Avoid endless loop if all tracks in the tracklist are unplayable and
   consume mode is off. (Fixes: :issue:`1221`, :issue:`1454`, PR: :issue:`1455`)
-
-- File: Ensure path comparision is done between bytestrings only. Fixes crash
-  where a :confval:`file/media_dirs` path contained non-ASCII characters.
-  (Fixes: :issue:`1345`, PR: :issue:`1493`)
-
-- MPD: Fix MPD protocol for ``replay_gain_status`` command. The actual command
-  remains unimplemented. (PR: :issue:`1520`)
-
-- MPD: Add ``nextsong`` and ``nextsongid`` to the response of MPD ``status`` command.
-  (Fixes: :issue:`1133`, :issue:`1516`, PR: :issue:`1523`)
 
 - Core: Correctly record the last position of a track when switching to another
   one. Particularly relevant for `mopidy-scrobbler` users, as before it was
   essentially unusable. (Fixes: :issue:`1456`, PR: :issue:`1534`)
+
+- File: Ensure path comparison is done between bytestrings only. Fixes crash
+  where a :confval:`file/media_dirs` path contained non-ASCII characters.
+  (Fixes: :issue:`1345`, PR: :issue:`1493`)
+
+- Stream: Fix milliseconds vs seconds mistake in timeout handling.
+  (Fixes: :issue:`1521`, PR: :issue:`1522`)
 
 
 v2.0.0 (2016-02-15)
