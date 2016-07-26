@@ -30,6 +30,9 @@ Bug fix release.
   who fixed this in parallel. (Fixes: :issue:`1506`, PR: :issue:`1525`,
   :issue:`1517`)
 
+- Audio: Make sure scanner handles streams without a duration.
+  (Fixes: :issue:`1526`)
+
 - Core: Avoid endless loop if all tracks in the tracklist are unplayable and
   consume mode is off. (Fixes: :issue:`1221`, :issue:`1454`, PR: :issue:`1455`)
 
