@@ -16,6 +16,8 @@ Feature release.
 - MPD: Add ``nextsong`` and ``nextsongid`` to the response of MPD ``status`` command.
   (Fixes: :issue:`1133`, :issue:`1516`, PR: :issue:`1523`)
 
+- Audio: Update scanner to handle sources such as RTSP. (Fixes: :issue:`1479`)
+
 
 v2.0.1 (UNRELEASED)
 ===================
