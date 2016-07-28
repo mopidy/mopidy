@@ -35,6 +35,9 @@ Bug fix release.
 
 - Audio: Ensure audio tags are never `None`. (Fixes: :issue:`1449`)
 
+- Audio: Update :meth:`mopidy.audio.Audio.set_metadata` to postpone sending
+  tags if there is a pending track change. (Fixes: :issue:`1357`)
+
 - Core: Avoid endless loop if all tracks in the tracklist are unplayable and
   consume mode is off. (Fixes: :issue:`1221`, :issue:`1454`, PR: :issue:`1455`)
 
