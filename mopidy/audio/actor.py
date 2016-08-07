@@ -805,11 +805,14 @@ class Audio(pykka.ThreadingActor):
         if track.album and track.album.name:
             set_value(Gst.TAG_ALBUM, track.album.name)
 
+        gst_logger.debug(
+            'Sending TAG event for track %r: %r',
+            track.uri, taglist.to_string())
         event = Gst.Event.new_tag(taglist)
-        if not self._pending_uri:
-            self._playbin.send_event(event)
-        else:
+        if self._pending_uri:
             self._pending_metadata = event
+        else:
+            self._playbin.send_event(event)
 
     def get_current_tags(self):
         """
