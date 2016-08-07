@@ -374,6 +374,10 @@ class _Handler(object):
             logger.debug('Audio event: tags_changed(tags=%r)', tags.keys())
             AudioListener.send('tags_changed', tags=tags.keys())
 
+        if self._audio._pending_metadata:
+            self._audio._playbin.send_event(self._audio._pending_metadata)
+            self._audio._pending_metadata = None
+
     def on_segment(self, segment):
         gst_logger.debug(
             'Got SEGMENT pad event: '
@@ -412,6 +416,7 @@ class Audio(pykka.ThreadingActor):
         self._tags = {}
         self._pending_uri = None
         self._pending_tags = None
+        self._pending_metadata = None
 
         self._playbin = None
         self._outputs = None
@@ -804,8 +809,10 @@ class Audio(pykka.ThreadingActor):
             'Sending TAG event for track %r: %r',
             track.uri, taglist.to_string())
         event = Gst.Event.new_tag(taglist)
-        # TODO: check if we get this back on our own bus?
-        self._playbin.send_event(event)
+        if self._pending_uri:
+            self._pending_metadata = event
+        else:
+            self._playbin.send_event(event)
 
     def get_current_tags(self):
         """
