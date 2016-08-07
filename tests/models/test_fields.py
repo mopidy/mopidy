@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 from __future__ import absolute_import, unicode_literals
 
 import unittest
@@ -145,6 +147,11 @@ class IdentifierTest(unittest.TestCase):
         instance = create_instance(Identifier())
         instance.attr = u'abc'
         self.assertEqual(u'abc', instance.attr)
+
+    def test_unicode_with_nonascii_allowed(self):
+        instance = create_instance(Identifier())
+        instance.attr = u'æøå'
+        self.assertEqual(u'æøå'.encode('utf-8'), instance.attr)
 
     def test_other_disallowed(self):
         instance = create_instance(Identifier())
