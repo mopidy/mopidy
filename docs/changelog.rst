@@ -20,7 +20,7 @@ Bug fix release.
 
 - Audio: Update scan logic to workaround GStreamer issue where tags and
   duration might only be available after we start playing.
-  (Fixes: :issue:`935`, :issue:`1453`, :issue:`1474` and :issue:`1480`, PR:
+  (Fixes: :issue:`935`, :issue:`1453`, :issue:`1474`, :issue:`1480`, PR:
   :issue:`1487`)
 
 - Audio: Better handling of seek when position does not match the expected
@@ -33,13 +33,13 @@ Bug fix release.
 - Audio: Make sure scanner handles streams without a duration.
   (Fixes: :issue:`1526`)
 
-- Audio: Ensure audio tags are never `None`. (Fixes: :issue:`1449`)
+- Audio: Ensure audio tags are never ``None``. (Fixes: :issue:`1449`)
 
 - Core: Avoid endless loop if all tracks in the tracklist are unplayable and
   consume mode is off. (Fixes: :issue:`1221`, :issue:`1454`, PR: :issue:`1455`)
 
 - Core: Correctly record the last position of a track when switching to another
-  one. Particularly relevant for `mopidy-scrobbler` users, as before it was
+  one. Particularly relevant for Mopidy-Scrobbler users, as before it was
   essentially unusable. (Fixes: :issue:`1456`, PR: :issue:`1534`)
 
 - File: Ensure path comparision is done between bytestrings only. Fixes crash
