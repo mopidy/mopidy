@@ -32,7 +32,7 @@ Bug fix release.
 
 - Audio: Update scan logic to workaround GStreamer issue where tags and
   duration might only be available after we start playing.
-  (Fixes: :issue:`935`, :issue:`1453`, :issue:`1474` and :issue:`1480`, PR:
+  (Fixes: :issue:`935`, :issue:`1453`, :issue:`1474`, :issue:`1480`, PR:
   :issue:`1487`)
 
 - Audio: Better handling of seek when position does not match the expected
@@ -45,13 +45,13 @@ Bug fix release.
 - Audio: Make sure scanner handles streams without a duration.
   (Fixes: :issue:`1526`)
 
-- Audio: Ensure audio tags are never `None`. (Fixes: :issue:`1449`)
+- Audio: Ensure audio tags are never ``None``. (Fixes: :issue:`1449`)
 
 - Core: Avoid endless loop if all tracks in the tracklist are unplayable and
   consume mode is off. (Fixes: :issue:`1221`, :issue:`1454`, PR: :issue:`1455`)
 
 - Core: Correctly record the last position of a track when switching to another
-  one. Particularly relevant for `mopidy-scrobbler` users, as before it was
+  one. Particularly relevant for Mopidy-Scrobbler users, as before it was
   essentially unusable. (Fixes: :issue:`1456`, PR: :issue:`1534`)
 
 - File: Ensure path comparison is done between bytestrings only. Fixes crash
@@ -60,6 +60,11 @@ Bug fix release.
 
 - Stream: Fix milliseconds vs seconds mistake in timeout handling.
   (Fixes: :issue:`1521`, PR: :issue:`1522`)
+
+- Docs: Fix the rendering of :class:`mopidy.core.Core` and
+  :class:`mopidy.audio.Audio` docs. This should also contribute towards making
+  the Mopidy Debian package build bit-by-bit reproducible. (Fixes:
+  :issue:`1500`)
 
 
 v2.0.0 (2016-02-15)
@@ -2103,10 +2108,10 @@ A release with a number of small and medium fixes, with no specific focus.
 - Converted from the optparse to the argparse library for handling command line
   options.
 
-- :option:`mopidy --show-config` will now take into consideration any
+- ``mopidy --show-config`` will now take into consideration any
   :option:`mopidy --option` arguments appearing later on the command line. This
   helps you see the effective configuration for runs with the same
-  :option:`mopidy --options` arguments.
+  ``mopidy --options`` arguments.
 
 **Audio**
 
@@ -2180,7 +2185,7 @@ v0.14.1 (2013-04-28)
 ====================
 
 This release addresses an issue in v0.14.0 where the new
-:option:`mopidy-convert-config` tool and the new :option:`mopidy --option`
+``mopidy-convert-config`` tool and the new :option:`mopidy --option`
 command line option was broken because some string operations inadvertently
 converted some byte strings to unicode.
 
@@ -2210,7 +2215,7 @@ one new.
 
   As part of this change we have cleaned up the naming of our config values.
 
-  To ease migration we've made a tool named :option:`mopidy-convert-config` for
+  To ease migration we've made a tool named ``mopidy-convert-config`` for
   automatically converting the old ``settings.py`` to a new ``mopidy.conf``
   file. This tool takes care of all the renamed config values as well. See
   ``mopidy-convert-config`` for details on how to use it.
@@ -2243,11 +2248,11 @@ one new.
 
 **Command line options**
 
-- The command option :option:`mopidy --list-settings` is now named
-  :option:`mopidy --show-config`.
+- The command option ``mopidy --list-settings`` is now named
+  ``mopidy --show-config``.
 
-- The command option :option:`mopidy --list-deps` is now named
-  :option:`mopidy --show-deps`.
+- The command option ``mopidy --list-deps`` is now named
+  ``mopidy --show-deps``.
 
 - What configuration files to use can now be specified through the command
   option :option:`mopidy --config`, multiple files can be specified using colon
@@ -2257,8 +2262,8 @@ one new.
   :option:`mopidy --option`. For example: ``mopidy --option
   spotify/enabled=false``.
 
-- The GStreamer command line options, :option:`mopidy --gst-*` and
-  :option:`mopidy --help-gst` are no longer supported. To set GStreamer debug
+- The GStreamer command line options, ``mopidy --gst-*`` and
+  ``mopidy --help-gst`` are no longer supported. To set GStreamer debug
   flags, you can use environment variables such as :envvar:`GST_DEBUG`. Refer
   to GStreamer's documentation for details.
 
@@ -2307,7 +2312,7 @@ already have.
 **Core**
 
 - Removed the :attr:`mopidy.settings.DEBUG_THREAD` setting and the
-  :option:`--debug-thread` command line option. Sending SIGUSR1 to
+  ``mopidy --debug-thread`` command line option. Sending SIGUSR1 to
   the Mopidy process will now always make it log tracebacks for all alive
   threads.
 
@@ -2588,9 +2593,8 @@ We've added an HTTP frontend for those wanting to build web clients for Mopidy!
 - Make ``mopidy-scan`` ignore invalid dates, e.g. dates in years outside the
   range 1-9999.
 
-- Make ``mopidy-scan`` accept :option:`-q`/:option:`--quiet` and
-  :option:`-v`/:option:`--verbose` options to control the amount of logging
-  output when scanning.
+- Make ``mopidy-scan`` accept ``-q``/``--quiet`` and ``-v``/``--verbose``
+  options to control the amount of logging output when scanning.
 
 - The scanner can now handle files with other encodings than UTF-8. Rebuild
   your tag cache with ``mopidy-scan`` to include tracks that may have been
@@ -2715,7 +2719,7 @@ long time been our most requested feature. Finally, it's here!
 **Developer support**
 
 - Added optional background thread for debugging deadlocks. When the feature is
-  enabled via the ``--debug-thread`` option or
+  enabled via the ``mopidy --debug-thread`` option or
   :attr:`mopidy.settings.DEBUG_THREAD` setting a ``SIGUSR1`` signal will dump
   the traceback for all running threads.
 
@@ -2927,9 +2931,9 @@ resolved a bunch of related issues.
   known setting, and suggests to the user what we think the setting should have
   been.
 
-- Added :option:`--list-deps` option to the ``mopidy`` command that lists
-  required and optional dependencies, their current versions, and some other
-  information useful for debugging. (Fixes: :issue:`74`)
+- Added ``mopidy --list-deps`` option that lists required and optional
+  dependencies, their current versions, and some other information useful for
+  debugging. (Fixes: :issue:`74`)
 
 - Added ``tools/debug-proxy.py`` to tee client requests to two backends and
   diff responses. Intended as a developer tool for checking for MPD protocol
@@ -3209,12 +3213,12 @@ Please note that 0.5.0 requires some updated dependencies, as listed under
 
 - Command line usage:
 
-  - Support passing options to GStreamer. See :option:`--help-gst` for a list
+  - Support passing options to GStreamer. See ``mopidy --help-gst`` for a list
     of available options. (Fixes: :issue:`95`)
 
-  - Improve :option:`--list-settings` output. (Fixes: :issue:`91`)
+  - Improve ``mopidy --list-settings`` output. (Fixes: :issue:`91`)
 
-  - Added :option:`--interactive` for reading missing local settings from
+  - Added ``mopidy --interactive`` for reading missing local settings from
     ``stdin``. (Fixes: :issue:`96`)
 
   - Improve shutdown procedure at CTRL+C. Add signal handler for ``SIGTERM``,
@@ -3357,8 +3361,8 @@ loading from Mopidy 0.3.0 is still present.
 
 - Settings:
 
-  - Fix crash on ``--list-settings`` on clean installation. Thanks to Martins
-    Grunskis for the bug report and patch. (Fixes: :issue:`63`)
+  - Fix crash on ``mopidy --list-settings`` on clean installation. Thanks to
+    Martins Grunskis for the bug report and patch. (Fixes: :issue:`63`)
 
 - Packaging:
 
@@ -3586,11 +3590,11 @@ to Valentin David.
   - Simplify the default log format,
     :attr:`mopidy.settings.CONSOLE_LOG_FORMAT`. From a user's point of view:
     Less noise, more information.
-  - Rename the :option:`--dump` command line option to
-    :option:`--save-debug-log`.
+  - Rename the ``mopidy --dump`` command line option to
+    :option:`mopidy --save-debug-log`.
   - Rename setting :attr:`mopidy.settings.DUMP_LOG_FORMAT` to
-    :attr:`mopidy.settings.DEBUG_LOG_FORMAT` and use it for :option:`--verbose`
-    too.
+    :attr:`mopidy.settings.DEBUG_LOG_FORMAT` and use it for
+    :option:`mopidy --verbose` too.
   - Rename setting :attr:`mopidy.settings.DUMP_LOG_FILENAME` to
     :attr:`mopidy.settings.DEBUG_LOG_FILENAME`.
 
@@ -3656,7 +3660,7 @@ fixing the OS X issues for a future release. You can track the progress at
 - Exit early if not Python >= 2.6, < 3.
 - Validate settings at startup and print useful error messages if the settings
   has not been updated or anything is misspelled.
-- Add command line option :option:`--list-settings` to print the currently
+- Add command line option ``mopidy --list-settings`` to print the currently
   active settings.
 - Include Sphinx scripts for building docs, pylintrc, tests and test data in
   the packages created by ``setup.py`` for i.e. PyPI.
@@ -3838,7 +3842,7 @@ the established pace of at least a release per month.
 
 - Improvements to MPD protocol handling, making Mopidy work much better with a
   group of clients, including ncmpc, MPoD, and Theremin.
-- New command line flag :option:`--dump` for dumping debug log to ``dump.log``
+- New command line flag ``mopidy --dump`` for dumping debug log to ``dump.log``
   in the current directory.
 - New setting :attr:`mopidy.settings.MIXER_ALSA_CONTROL` for forcing what ALSA
   control :class:`mopidy.mixers.alsa.AlsaMixer` should use.
