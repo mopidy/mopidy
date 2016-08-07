@@ -24,7 +24,7 @@ Bug fix release.
   :issue:`1487`)
 
 - Audio: Better handling of seek when position does not match the expected
-  pending position. (Fixes: :issue:`1462`, PR: :issue:`1496`)
+  pending position. (Fixes: :issue:`1462`, :issue:`1505`, PR: :issue:`1496`)
 
 - Audio: Handle bad date tags from audio, thanks to Mario Lang and Tom Parker
   who fixed this in parallel. (Fixes: :issue:`1506`, PR: :issue:`1525`,
