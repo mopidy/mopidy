@@ -36,7 +36,7 @@ Bug fix release.
   :issue:`1487`)
 
 - Audio: Better handling of seek when position does not match the expected
-  pending position. (Fixes: :issue:`1462`, PR: :issue:`1496`)
+  pending position. (Fixes: :issue:`1462`, :issue:`1505`, PR: :issue:`1496`)
 
 - Audio: Handle bad date tags from audio, thanks to Mario Lang and Tom Parker
   who fixed this in parallel. (Fixes: :issue:`1506`, PR: :issue:`1525`,
@@ -46,6 +46,10 @@ Bug fix release.
   (Fixes: :issue:`1526`)
 
 - Audio: Ensure audio tags are never ``None``. (Fixes: :issue:`1449`)
+
+- Audio: Update :meth:`mopidy.audio.Audio.set_metadata` to postpone sending
+  tags if there is a pending track change. (Fixes: :issue:`1357`, PR:
+  :issue:`1538`)
 
 - Core: Avoid endless loop if all tracks in the tracklist are unplayable and
   consume mode is off. (Fixes: :issue:`1221`, :issue:`1454`, PR: :issue:`1455`)
