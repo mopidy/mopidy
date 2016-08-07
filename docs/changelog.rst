@@ -49,6 +49,11 @@ Bug fix release.
 - Stream: Fix milliseconds vs seconds mistake in timeout handling.
   (Fixes: :issue:`1521`, PR: :issue:`1522`)
 
+- Docs: Fix the rendering of :class:`mopidy.core.Core` and
+  :class:`mopidy.audio.Audio` docs. This should also contribute towards making
+  the Mopidy Debian package build bit-by-bit reproducible. (Fixes:
+  :issue:`1500`)
+
 
 v2.0.0 (2016-02-15)
 ===================
