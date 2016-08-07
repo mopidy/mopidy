@@ -136,12 +136,11 @@ def convert_tags_to_track(tags):
     return Track(**track_kwargs)
 
 
-def _artists(
-        tags, artist_name, artist_id=None, artist_sortname=None):
-
+def _artists(tags, artist_name, artist_id=None, artist_sortname=None):
     # Name missing, don't set artist
     if not tags.get(artist_name):
         return None
+
     # One artist name and either id or sortname, include all available fields
     if len(tags[artist_name]) == 1 and \
             (artist_id in tags or artist_sortname in tags):
