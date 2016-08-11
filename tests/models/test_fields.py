@@ -1,8 +1,10 @@
+# encoding: utf-8
+
 from __future__ import absolute_import, unicode_literals
 
 import unittest
 
-from mopidy.models.fields import Collection, Field, Integer, String
+from mopidy.models.fields import Collection, Field, Identifier, Integer, String
 
 
 def create_instance(field):
@@ -122,6 +124,42 @@ class StringTest(unittest.TestCase):
 
     def test_empty_string(self):
         instance = create_instance(String())
+        instance.attr = ''
+        self.assertEqual('', instance.attr)
+
+
+class IdentifierTest(unittest.TestCase):
+    def test_default_handling(self):
+        instance = create_instance(Identifier(default='abc'))
+        self.assertEqual('abc', instance.attr)
+
+    def test_native_str_allowed(self):
+        instance = create_instance(Identifier())
+        instance.attr = str('abc')
+        self.assertEqual('abc', instance.attr)
+
+    def test_bytes_allowed(self):
+        instance = create_instance(Identifier())
+        instance.attr = b'abc'
+        self.assertEqual(b'abc', instance.attr)
+
+    def test_unicode_allowed(self):
+        instance = create_instance(Identifier())
+        instance.attr = u'abc'
+        self.assertEqual(u'abc', instance.attr)
+
+    def test_unicode_with_nonascii_allowed(self):
+        instance = create_instance(Identifier())
+        instance.attr = u'æøå'
+        self.assertEqual(u'æøå'.encode('utf-8'), instance.attr)
+
+    def test_other_disallowed(self):
+        instance = create_instance(Identifier())
+        with self.assertRaises(TypeError):
+            instance.attr = 1234
+
+    def test_empty_string(self):
+        instance = create_instance(Identifier())
         instance.attr = ''
         self.assertEqual('', instance.attr)
 
