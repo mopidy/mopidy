@@ -50,7 +50,7 @@ Bug fix release.
   fields, like the ``musicbrainz_id`` model fields, contained non-ASCII Unicode
   data. (Fixes: :issue:`1508`, PR: :issue:`1546`)
 
-- File: Ensure path comparision is done between bytestrings only. Fixes crash
+- File: Ensure path comparison is done between bytestrings only. Fixes crash
   where a :confval:`file/media_dirs` path contained non-ASCII characters.
   (Fixes: :issue:`1345`, PR: :issue:`1493`)
 
@@ -401,7 +401,7 @@ Bug fix release.
   proceed startup. (Fixes: :issue:`1248`, PR: :issue:`1254`)
 
 - Stream: Fix bug in new playlist parser. A non-ASCII char in an urilist
-  comment would cause a crash while parsing due to comparision of a non-ASCII
+  comment would cause a crash while parsing due to comparison of a non-ASCII
   bytestring with a Unicode string. (Fixes: :issue:`1265`)
 
 - File: Adjust log levels when failing to expand ``$XDG_MUSIC_DIR`` into a real
