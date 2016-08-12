@@ -13,8 +13,7 @@ Creating releases
 
 #. Update changelog and commit it.
 
-#. Bump the version number in ``mopidy/__init__.py``. Remember to update the
-   test case in ``tests/test_version.py``.
+#. Bump the version number in ``mopidy/__init__.py``.
 
 #. Merge the release branch (``develop`` in the example) into master::
 

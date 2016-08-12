@@ -14,4 +14,4 @@ if not (2, 7) <= sys.version_info < (3,):
 warnings.filterwarnings('ignore', 'could not open display')
 
 
-__version__ = '2.0.0'
+__version__ = '2.0.1'
