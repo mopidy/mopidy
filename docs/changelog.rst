@@ -17,7 +17,7 @@ Feature release.
   (Fixes: :issue:`1133`, :issue:`1516`, PR: :issue:`1523`)
 
 
-v2.0.1 (UNRELEASED)
+v2.0.1 (2016-08-16)
 ===================
 
 Bug fix release.
