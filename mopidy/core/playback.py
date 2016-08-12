@@ -230,8 +230,8 @@ class PlaybackController(object):
                 self._seek(self._pending_position)
 
     def _on_position_changed(self, position):
-        if self._pending_position == position:
-            self._trigger_seeked(position)
+        if self._pending_position is not None:
+            self._trigger_seeked(self._pending_position)
             self._pending_position = None
 
     def _on_about_to_finish_callback(self):
@@ -251,23 +251,34 @@ class PlaybackController(object):
         if self._state == PlaybackState.STOPPED:
             return
 
-        pending = self.core.tracklist.eot_track(self._current_tl_track)
-        while pending:
-            # TODO: Avoid infinite loops if all tracks are unplayable.
-            backend = self._get_backend(pending)
-            if not backend:
-                continue
+        # Unless overridden by other calls (e.g. next / previous / stop) this
+        # will be the last position recorded until the track gets reassigned.
+        # TODO: Check if case when track.length isn't populated needs to be
+        # handled.
+        self._last_position = self._current_tl_track.track.length
 
-            try:
-                if backend.playback.change_track(pending.track).get():
-                    self._pending_tl_track = pending
-                    break
-            except Exception:
-                logger.exception('%s backend caused an exception.',
-                                 backend.actor_ref.actor_class.__name__)
+        pending = self.core.tracklist.eot_track(self._current_tl_track)
+        # avoid endless loop if 'repeat' is 'true' and no track is playable
+        # * 2 -> second run to get all playable track in a shuffled playlist
+        count = self.core.tracklist.get_length() * 2
+
+        while pending:
+            backend = self._get_backend(pending)
+            if backend:
+                try:
+                    if backend.playback.change_track(pending.track).get():
+                        self._pending_tl_track = pending
+                        break
+                except Exception:
+                    logger.exception('%s backend caused an exception.',
+                                     backend.actor_ref.actor_class.__name__)
 
             self.core.tracklist._mark_unplayable(pending)
             pending = self.core.tracklist.eot_track(pending)
+            count -= 1
+            if not count:
+                logger.info('No playable track in the list.')
+                break
 
     def _on_tracklist_change(self):
         """
@@ -290,6 +301,9 @@ class PlaybackController(object):
         """
         state = self.get_state()
         current = self._pending_tl_track or self._current_tl_track
+        # avoid endless loop if 'repeat' is 'true' and no track is playable
+        # * 2 -> second run to get all playable track in a shuffled playlist
+        count = self.core.tracklist.get_length() * 2
 
         while current:
             pending = self.core.tracklist.next_track(current)
@@ -301,6 +315,10 @@ class PlaybackController(object):
             # if current == pending:
             #     break
             current = pending
+            count -= 1
+            if not count:
+                logger.info('No playable track in the list.')
+                break
 
         # TODO return result?
 
@@ -352,6 +370,9 @@ class PlaybackController(object):
 
         current = self._pending_tl_track or self._current_tl_track
         pending = tl_track or current or self.core.tracklist.next_track(None)
+        # avoid endless loop if 'repeat' is 'true' and no track is playable
+        # * 2 -> second run to get all playable track in a shuffled playlist
+        count = self.core.tracklist.get_length() * 2
 
         while pending:
             if self._change(pending, PlaybackState.PLAYING):
@@ -360,6 +381,10 @@ class PlaybackController(object):
                 self.core.tracklist._mark_unplayable(pending)
             current = pending
             pending = self.core.tracklist.next_track(current)
+            count -= 1
+            if not count:
+                logger.info('No playable track in the list.')
+                break
 
         # TODO return result?
 
@@ -374,6 +399,10 @@ class PlaybackController(object):
         backend = self._get_backend(pending_tl_track)
         if not backend:
             return False
+
+        # This must happen before prepare_change gets called, otherwise the
+        # backend flushes the information of the track.
+        self._last_position = self.get_time_position()
 
         # TODO: Wrap backend call in error handling.
         backend.playback.prepare_change()
@@ -416,6 +445,9 @@ class PlaybackController(object):
         self._previous = True
         state = self.get_state()
         current = self._pending_tl_track or self._current_tl_track
+        # avoid endless loop if 'repeat' is 'true' and no track is playable
+        # * 2 -> second run to get all playable track in a shuffled playlist
+        count = self.core.tracklist.get_length() * 2
 
         while current:
             pending = self.core.tracklist.previous_track(current)
@@ -427,6 +459,10 @@ class PlaybackController(object):
             # if current == pending:
             #     break
             current = pending
+            count -= 1
+            if not count:
+                logger.info('No playable track in the list.')
+                break
 
         # TODO: no return value?
 

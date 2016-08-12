@@ -61,8 +61,7 @@ class Scanner(object):
 
         try:
             _start_pipeline(pipeline)
-            tags, mime, have_audio = _process(pipeline, timeout)
-            duration = _query_duration(pipeline)
+            tags, mime, have_audio, duration = _process(pipeline, timeout)
             seekable = _query_seekable(pipeline)
         finally:
             signals.clear()
@@ -136,28 +135,15 @@ def _start_pipeline(pipeline):
         pipeline.set_state(Gst.State.PLAYING)
 
 
-def _query_duration(pipeline, timeout=100):
-    # 1. Try and get a duration, return if success.
-    # 2. Some formats need to play some buffers before duration is found.
-    # 3. Wait for a duration change event.
-    # 4. Try and get a duration again.
-
+def _query_duration(pipeline):
     success, duration = pipeline.query_duration(Gst.Format.TIME)
-    if success and duration >= 0:
-        return duration // Gst.MSECOND
-
-    result = pipeline.set_state(Gst.State.PLAYING)
-    if result == Gst.StateChangeReturn.FAILURE:
-        return None
-
-    gst_timeout = timeout * Gst.MSECOND
-    bus = pipeline.get_bus()
-    bus.timed_pop_filtered(gst_timeout, Gst.MessageType.DURATION_CHANGED)
-
-    success, duration = pipeline.query_duration(Gst.Format.TIME)
-    if success and duration >= 0:
-        return duration // Gst.MSECOND
-    return None
+    if not success:
+        duration = None  # Make sure error case preserves None.
+    elif duration < 0:
+        duration = None  # Stream without duration.
+    else:
+        duration = duration // Gst.MSECOND
+    return success, duration
 
 
 def _query_seekable(pipeline):
@@ -172,6 +158,7 @@ def _process(pipeline, timeout_ms):
     mime = None
     have_audio = False
     missing_message = None
+    duration = None
 
     types = (
         Gst.MessageType.ELEMENT |
@@ -179,11 +166,12 @@ def _process(pipeline, timeout_ms):
         Gst.MessageType.ERROR |
         Gst.MessageType.EOS |
         Gst.MessageType.ASYNC_DONE |
+        Gst.MessageType.DURATION_CHANGED |
         Gst.MessageType.TAG
     )
 
     timeout = timeout_ms
-    previous = int(time.time() * 1000)
+    start = int(time.time() * 1000)
     while timeout > 0:
         message = bus.timed_pop_filtered(timeout * Gst.MSECOND, types)
 
@@ -197,7 +185,7 @@ def _process(pipeline, timeout_ms):
                 mime = message.get_structure().get_value('caps').get_name()
                 if mime and (
                         mime.startswith('text/') or mime == 'application/xml'):
-                    return tags, mime, have_audio
+                    return tags, mime, have_audio, duration
             elif message.get_structure().get_name() == 'have-audio':
                 have_audio = True
         elif message.type == Gst.MessageType.ERROR:
@@ -205,21 +193,38 @@ def _process(pipeline, timeout_ms):
             if missing_message and not mime:
                 caps = missing_message.get_structure().get_value('detail')
                 mime = caps.get_structure(0).get_name()
-                return tags, mime, have_audio
+                return tags, mime, have_audio, duration
             raise exceptions.ScannerError(error)
         elif message.type == Gst.MessageType.EOS:
-            return tags, mime, have_audio
+            return tags, mime, have_audio, duration
         elif message.type == Gst.MessageType.ASYNC_DONE:
-            if message.src == pipeline:
-                return tags, mime, have_audio
+            success, duration = _query_duration(pipeline)
+            if tags and success:
+                return tags, mime, have_audio, duration
+
+            # Workaround for upstream bug which causes tags/duration to arrive
+            # after pre-roll. We get around this by starting to play the track
+            # and then waiting for a duration change.
+            # https://bugzilla.gnome.org/show_bug.cgi?id=763553
+            result = pipeline.set_state(Gst.State.PLAYING)
+            if result == Gst.StateChangeReturn.FAILURE:
+                return tags, mime, have_audio, duration
+
+        elif message.type == Gst.MessageType.DURATION_CHANGED:
+            # duration will be read after ASYNC_DONE received; for now
+            # just give it a non-None value to flag that we have a duration:
+            duration = 0
         elif message.type == Gst.MessageType.TAG:
             taglist = message.parse_tag()
             # Note that this will only keep the last tag.
             tags.update(tags_lib.convert_taglist(taglist))
 
-        now = int(time.time() * 1000)
-        timeout -= now - previous
-        previous = now
+        timeout = timeout_ms - (int(time.time() * 1000) - start)
+
+        # workaround for https://bugzilla.gnome.org/show_bug.cgi?id=763553:
+        # if we got what we want then stop playing (and wait for ASYNC_DONE)
+        if tags and duration is not None:
+            pipeline.set_state(Gst.State.PAUSED)
 
     raise exceptions.ScannerError('Timeout after %dms' % timeout_ms)
 

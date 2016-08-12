@@ -14,11 +14,42 @@ from tests import dummy_audio
 
 
 class TestPlaybackProvider(backend.PlaybackProvider):
+
+    def __init__(self, audio, backend):
+        super(TestPlaybackProvider, self).__init__(audio, backend)
+        self._call_limit = 10
+        self._call_count = 0
+        self._call_onetime = False
+
+    def reset_call_limit(self):
+        self._call_count = 0
+        self._call_onetime = False
+
+    def is_call_limit_reached(self):
+        return self._call_count > self._call_limit
+
+    def _translate_uri_call_limit(self, uri):
+        self._call_count += 1
+        if self._call_count > self._call_limit:
+            # return any url (not 'None') to stop the endless loop
+            return 'assert: call limit reached'
+        if 'limit_never' in uri:
+            # unplayable
+            return None
+        elif 'limit_one' in uri:
+            # one time playable
+            if self._call_onetime:
+                return None
+            self._call_onetime = True
+        return uri
+
     def translate_uri(self, uri):
         if 'error' in uri:
             raise Exception(uri)
         elif 'unplayable' in uri:
             return None
+        elif 'limit' in uri:
+            return self._translate_uri_call_limit(uri)
         else:
             return uri
 
@@ -703,6 +734,7 @@ class EventEmissionTest(BaseTest):
 
         self.core.playback.play(tl_tracks[0])
         self.trigger_about_to_finish(replay_until='stream_changed')
+        self.replay_events()
         listener_mock.reset_mock()
 
         self.core.playback.seek(1000)
@@ -1125,3 +1157,77 @@ class TestBug1352Regression(BaseTest):
 
         self.core.history._add_track.assert_called_once_with(self.tracks[1])
         self.core.tracklist._mark_playing.assert_called_once_with(tl_tracks[1])
+
+
+class TestEndlessLoop(BaseTest):
+
+    tracks_play = [
+        Track(uri='dummy:limit_never:a'),
+        Track(uri='dummy:limit_never:b')
+    ]
+
+    tracks_other = [
+        Track(uri='dummy:limit_never:a'),
+        Track(uri='dummy:limit_one'),
+        Track(uri='dummy:limit_never:b')
+    ]
+
+    def test_play(self):
+        self.core.tracklist.clear()
+        self.core.tracklist.add(self.tracks_play)
+
+        self.backend.playback.reset_call_limit().get()
+        self.core.tracklist.set_repeat(True)
+
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.playback.play(tl_tracks[0])
+        self.replay_events()
+
+        self.assertFalse(self.backend.playback.is_call_limit_reached().get())
+
+    def test_next(self):
+        self.core.tracklist.clear()
+        self.core.tracklist.add(self.tracks_other)
+
+        self.backend.playback.reset_call_limit().get()
+        self.core.tracklist.set_repeat(True)
+
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.playback.play(tl_tracks[1])
+        self.replay_events()
+
+        self.core.playback.next()
+        self.replay_events()
+
+        self.assertFalse(self.backend.playback.is_call_limit_reached().get())
+
+    def test_previous(self):
+        self.core.tracklist.clear()
+        self.core.tracklist.add(self.tracks_other)
+
+        self.backend.playback.reset_call_limit().get()
+        self.core.tracklist.set_repeat(True)
+
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.playback.play(tl_tracks[1])
+        self.replay_events()
+
+        self.core.playback.previous()
+        self.replay_events()
+
+        self.assertFalse(self.backend.playback.is_call_limit_reached().get())
+
+    def test_on_about_to_finish(self):
+        self.core.tracklist.clear()
+        self.core.tracklist.add(self.tracks_other)
+
+        self.backend.playback.reset_call_limit().get()
+        self.core.tracklist.set_repeat(True)
+
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.playback.play(tl_tracks[1])
+        self.replay_events()
+
+        self.trigger_about_to_finish()
+
+        self.assertFalse(self.backend.playback.is_call_limit_reached().get())
