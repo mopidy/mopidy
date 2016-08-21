@@ -325,7 +325,12 @@ class TracklistController(object):
             next_index += 1
 
         if self.get_repeat():
-            next_index %= len(self._tl_tracks)
+            # Fix for bug 1512
+            # Return None if consume mode and there is only one track (left) in the list
+            if self.get_consume() and len(self._tl_tracks) == 1:
+                return None
+            else:
+                next_index %= len(self._tl_tracks)
         elif next_index >= len(self._tl_tracks):
             return None
 
