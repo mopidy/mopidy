@@ -326,7 +326,8 @@ class TracklistController(object):
 
         if self.get_repeat():
             # Fix for bug 1512
-            # Return None if consume mode and there is only one track (left) in the list
+            # Return None if consume mode and there is only one track (left)
+            # in the list
             if self.get_consume() and len(self._tl_tracks) == 1:
                 return None
             else:

@@ -442,7 +442,7 @@ class TestConsumeHandling(BaseTest):
             self.core.playback.next()
             self.replay_events()
 
-        # Try repeat, player state should remain as stopped (all tracks consumed)
+        # Try repeat, player state remain stopped (all tracks consumed)
         self.core.playback.next()
         self.replay_events()
 
