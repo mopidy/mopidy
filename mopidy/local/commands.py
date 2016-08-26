@@ -118,7 +118,7 @@ class ScanCommand(commands.Command):
             relpath = os.path.relpath(abspath, media_dir)
             uri = translator.path_to_local_track_uri(relpath)
 
-            if b'/.' in relpath:
+            if b'/.' in relpath or relpath.startswith(b'.'):
                 logger.debug('Skipped %s: Hidden directory/file.', uri)
             elif relpath.lower().endswith(excluded_file_extensions):
                 logger.debug('Skipped %s: File extension excluded.', uri)
