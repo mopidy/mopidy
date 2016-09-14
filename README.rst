@@ -61,10 +61,6 @@ To get started with Mopidy, check out
     :target: https://pypi.python.org/pypi/Mopidy/
     :alt: Latest PyPI version
 
-.. image:: https://img.shields.io/pypi/dm/Mopidy.svg?style=flat
-    :target: https://pypi.python.org/pypi/Mopidy/
-    :alt: Number of PyPI downloads
-
 .. image:: https://img.shields.io/travis/mopidy/mopidy/develop.svg?style=flat
     :target: https://travis-ci.org/mopidy/mopidy
     :alt: Travis CI build status

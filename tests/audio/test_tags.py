@@ -44,6 +44,14 @@ class TestConvertTaglist(object):
         assert isinstance(result[Gst.TAG_DATE][0], compat.text_type)
         assert result[Gst.TAG_DATE][0] == '2014-01-07'
 
+    def test_date_tag_bad_value(self):
+        date = GLib.Date.new_dmy(7, 1, 10000)
+        taglist = self.make_taglist(Gst.TAG_DATE, [date])
+
+        result = tags.convert_taglist(taglist)
+
+        assert len(result[Gst.TAG_DATE]) == 0
+
     def test_date_time_tag(self):
         taglist = self.make_taglist(Gst.TAG_DATE_TIME, [
             Gst.DateTime.new_from_iso8601_string(b'2014-01-07 14:13:12')

@@ -88,14 +88,17 @@ class Date(String):
 
 class Identifier(String):
     """
-    :class:`Field` for storing ASCII values such as GUIDs or other identifiers.
+    :class:`Field` for storing values such as GUIDs or other identifiers.
 
     Values will be interned.
 
     :param default: default value for field
     """
     def validate(self, value):
-        return compat.intern(str(super(Identifier, self).validate(value)))
+        value = super(Identifier, self).validate(value)
+        if isinstance(value, compat.text_type):
+            value = value.encode('utf-8')
+        return compat.intern(value)
 
 
 class URI(Identifier):

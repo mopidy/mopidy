@@ -44,10 +44,15 @@ gstreamer-GstTagList.html
             value = taglist.get_value_index(tag, i)
 
             if isinstance(value, GLib.Date):
-                date = datetime.date(
-                    value.get_year(), value.get_month(), value.get_day())
-                result[tag].append(date.isoformat().decode('utf-8'))
-            if isinstance(value, Gst.DateTime):
+                try:
+                    date = datetime.date(
+                        value.get_year(), value.get_month(), value.get_day())
+                    result[tag].append(date.isoformat().decode('utf-8'))
+                except ValueError:
+                    logger.debug(
+                        'Ignoring dodgy date value: %d-%d-%d',
+                        value.get_year(), value.get_month(), value.get_day())
+            elif isinstance(value, Gst.DateTime):
                 result[tag].append(value.to_iso8601_string().decode('utf-8'))
             elif isinstance(value, bytes):
                 result[tag].append(value.decode('utf-8', 'replace'))
@@ -131,12 +136,11 @@ def convert_tags_to_track(tags):
     return Track(**track_kwargs)
 
 
-def _artists(
-        tags, artist_name, artist_id=None, artist_sortname=None):
-
+def _artists(tags, artist_name, artist_id=None, artist_sortname=None):
     # Name missing, don't set artist
     if not tags.get(artist_name):
         return None
+
     # One artist name and either id or sortname, include all available fields
     if len(tags[artist_name]) == 1 and \
             (artist_id in tags or artist_sortname in tags):

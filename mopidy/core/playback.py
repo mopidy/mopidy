@@ -239,8 +239,8 @@ class PlaybackController(object):
                 self._seek(self._pending_position)
 
     def _on_position_changed(self, position):
-        if self._pending_position == position:
-            self._trigger_seeked(position)
+        if self._pending_position is not None:
+            self._trigger_seeked(self._pending_position)
             self._pending_position = None
             if self._start_paused:
                 self._start_paused = False
@@ -262,6 +262,12 @@ class PlaybackController(object):
     def _on_about_to_finish(self):
         if self._state == PlaybackState.STOPPED:
             return
+
+        # Unless overridden by other calls (e.g. next / previous / stop) this
+        # will be the last position recorded until the track gets reassigned.
+        # TODO: Check if case when track.length isn't populated needs to be
+        # handled.
+        self._last_position = self._current_tl_track.track.length
 
         pending = self.core.tracklist.eot_track(self._current_tl_track)
         # avoid endless loop if 'repeat' is 'true' and no track is playable
@@ -405,6 +411,10 @@ class PlaybackController(object):
         backend = self._get_backend(pending_tl_track)
         if not backend:
             return False
+
+        # This must happen before prepare_change gets called, otherwise the
+        # backend flushes the information of the track.
+        self._last_position = self.get_time_position()
 
         # TODO: Wrap backend call in error handling.
         backend.playback.prepare_change()

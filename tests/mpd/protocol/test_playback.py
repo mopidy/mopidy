@@ -115,7 +115,7 @@ class PlaybackOptionsHandlerTest(protocol.BaseTestCase):
     def test_replay_gain_status_default(self):
         self.send_request('replay_gain_status')
         self.assertInResponse('OK')
-        self.assertInResponse('off')
+        self.assertInResponse('replay_gain_mode: off')
 
     def test_mixrampdb(self):
         self.send_request('mixrampdb "10"')

@@ -1,2 +1,4 @@
 Sphinx >= 1.0
 pygraphviz
+Pykka >= 1.1
+sphinx_rtd_theme

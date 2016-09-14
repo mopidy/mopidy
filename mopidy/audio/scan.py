@@ -135,6 +135,17 @@ def _start_pipeline(pipeline):
         pipeline.set_state(Gst.State.PLAYING)
 
 
+def _query_duration(pipeline):
+    success, duration = pipeline.query_duration(Gst.Format.TIME)
+    if not success:
+        duration = None  # Make sure error case preserves None.
+    elif duration < 0:
+        duration = None  # Stream without duration.
+    else:
+        duration = duration // Gst.MSECOND
+    return success, duration
+
+
 def _query_seekable(pipeline):
     query = Gst.Query.new_seeking(Gst.Format.TIME)
     pipeline.query(query)
@@ -187,13 +198,8 @@ def _process(pipeline, timeout_ms):
         elif message.type == Gst.MessageType.EOS:
             return tags, mime, have_audio, duration
         elif message.type == Gst.MessageType.ASYNC_DONE:
-            success, duration = pipeline.query_duration(Gst.Format.TIME)
-            if success:
-                duration = duration // Gst.MSECOND
-            else:
-                duration = None
-
-            if tags and duration is not None:
+            success, duration = _query_duration(pipeline)
+            if tags and success:
                 return tags, mime, have_audio, duration
 
             # Workaround for upstream bug which causes tags/duration to arrive
