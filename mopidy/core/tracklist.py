@@ -666,6 +666,5 @@ class TracklistController(object):
                 self.set_single(state.single)
             if 'tracklist' in coverage:
                 self._next_tlid = max(state.next_tlid, self._next_tlid)
-                self._tl_tracks = []
-                self._tl_tracks.extend(state.tl_tracks)
+                self._tl_tracks = list(state.tl_tracks)
                 self._increase_version()
