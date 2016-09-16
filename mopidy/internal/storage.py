@@ -23,7 +23,7 @@ def load(path):
     """
     # Todo: raise an exception in case of error?
     if not os.path.isfile(path):
-        logger.info('File does not exist: %s.', path)
+        logger.info('File does not exist: %s', path)
         return {}
     try:
         with gzip.open(path, 'rb') as fp:

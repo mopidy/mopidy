@@ -141,7 +141,7 @@ class Core(
             CoreListener.send('stream_title_changed', title=title)
 
     def setup(self):
-        """ Do not call this function. It is for internal use at startup."""
+        """Do not call this function. It is for internal use at startup."""
         try:
             coverage = []
             if self._config and 'restore_state' in self._config['core']:
@@ -154,7 +154,7 @@ class Core(
             logger.warn('Restore state: Unexpected error: %s', str(e))
 
     def teardown(self):
-        """ Do not call this function. It is for internal use at shutdown."""
+        """Do not call this function. It is for internal use at shutdown."""
         try:
             if self._config and 'restore_state' in self._config['core']:
                 if self._config['core']['restore_state']:
@@ -164,8 +164,7 @@ class Core(
 
     def _get_data_dir(self):
         # get or create data director for core
-        data_dir_path = bytes(
-            os.path.join(self._config['core']['data_dir'], 'core'))
+        data_dir_path = os.path.join(self._config['core']['data_dir'], b'core')
         path.get_or_create_dir(data_dir_path)
         return data_dir_path
 
@@ -174,8 +173,8 @@ class Core(
         Save current state to disk.
         """
 
-        file_name = bytes(os.path.join(self._get_data_dir(), b'state.json.gz'))
-        logger.info('Save state to %s', file_name)
+        file_name = os.path.join(self._get_data_dir(), b'state.json.gz')
+        logger.info('Saveing state to %s', file_name)
 
         data = {}
         data['version'] = mopidy.__version__
@@ -185,15 +184,15 @@ class Core(
             playback=self.playback._save_state(),
             mixer=self.mixer._save_state())
         storage.dump(file_name, data)
-        logger.debug('Save state done.')
+        logger.debug('Saveing state done')
 
     def _load_state(self, coverage):
         """
         Restore state from disk.
 
-        Load state from disk and restore it. Parameter `coverage`
-        limits the amount data to restore. Possible
-        values for `coverage` (list of one or more of):
+        Load state from disk and restore it. Parameter ``coverage``
+        limits the amount of data to restore. Possible
+        values for ``coverage`` (list of one or more of):
 
             - 'tracklist' fill the tracklist
             - 'mode' set tracklist properties (consume, random, repeat, single)
@@ -202,11 +201,11 @@ class Core(
             - 'history' restore history
 
         :param coverage: amount of data to restore
-        :type coverage: list of string (see above)
+        :type coverage: list of strings
         """
 
-        file_name = bytes(os.path.join(self._get_data_dir(), b'state.json.gz'))
-        logger.info('Load state from %s', file_name)
+        file_name = os.path.join(self._get_data_dir(), b'state.json.gz')
+        logger.info('Loading state from %s', file_name)
 
         data = storage.load(file_name)
 
@@ -224,7 +223,7 @@ class Core(
             self.mixer._load_state(core_state.mixer, coverage)
             # playback after tracklist
             self.playback._load_state(core_state.playback, coverage)
-        logger.debug('Load state done.')
+        logger.debug('Loading state done')
 
 
 class Backends(list):

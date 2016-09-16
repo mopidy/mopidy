@@ -64,11 +64,11 @@ class HistoryController(object):
         count = 1
         history_list = []
         for timestamp, track in self._history:
-            history_list.append(HistoryTrack(
-                                timestamp=timestamp, track=track))
+            history_list.append(
+                HistoryTrack(timestamp=timestamp, track=track))
             count += 1
             if count_max < count:
-                logger.info('Limiting history to %s tracks.', count_max)
+                logger.info('Limiting history to %s tracks', count_max)
                 break
         return HistoryState(history=history_list)
 

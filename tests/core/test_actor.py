@@ -56,7 +56,8 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
 
     def setUp(self):
         self.temp_dir = tempfile.mkdtemp()
-        self.state_file = os.path.join(self.temp_dir, 'core', 'state.json.gz')
+        self.state_file = os.path.join(self.temp_dir,
+                                       b'core', b'state.json.gz')
 
         config = {
             'core': {
@@ -66,7 +67,7 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
             }
         }
 
-        os.mkdir(os.path.join(self.temp_dir, 'core'))
+        os.mkdir(os.path.join(self.temp_dir, b'core'))
 
         self.mixer = dummy_mixer.create_proxy()
         self.core = Core(

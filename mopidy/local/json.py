@@ -167,9 +167,10 @@ class JsonLibrary(local.Library):
         self._tracks.pop(uri, None)
 
     def close(self):
-        internal_storage.dump(self._json_file,
-                              {'version': mopidy.__version__,
-                               'tracks': self._tracks.values()})
+        internal_storage.dump(self._json_file, {
+            'version': mopidy.__version__,
+            'tracks': self._tracks.values()
+        })
 
     def clear(self):
         try:

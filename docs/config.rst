@@ -115,7 +115,7 @@ Core config section
 
     When set to ``true``, Mopidy restores its last state when started.
     The restored state includes the tracklist, playback history,
-    the playback state, and the mixers volume and mute state.
+    the playback state, the volume, and mute state.
 
     Default is ``false``.
 
