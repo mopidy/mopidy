@@ -10,6 +10,9 @@ v2.1.0 (UNRELEASED)
 
 Feature release.
 
+- Core: Mopidy restores its last state when started. Can be enabled by setting
+  the config value :confval:`core/restore_state` to ``true``.
+
 - MPD: Fix MPD protocol for ``replay_gain_status`` command. The actual command
   remains unimplemented. (PR: :issue:`1520`)
 

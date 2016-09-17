@@ -8,6 +8,10 @@ from mopidy.internal import deprecation
 from mopidy.models.fields import Field
 
 
+# Registered models for automatic deserialization
+_models = {}
+
+
 class ImmutableObject(object):
     """
     Superclass for immutable objects whose fields can only be modified via the
@@ -150,8 +154,13 @@ class _ValidatedImmutableObjectMeta(type):
         attrs['_instances'] = weakref.WeakValueDictionary()
         attrs['__slots__'] = list(attrs.get('__slots__', [])) + fields.values()
 
-        return super(_ValidatedImmutableObjectMeta, cls).__new__(
+        clsc = super(_ValidatedImmutableObjectMeta, cls).__new__(
             cls, name, bases, attrs)
+
+        if clsc.__name__ != 'ValidatedImmutableObject':
+            _models[clsc.__name__] = clsc
+
+        return clsc
 
     def __call__(cls, *args, **kwargs):  # noqa: N805
         instance = super(_ValidatedImmutableObjectMeta, cls).__call__(

@@ -4,7 +4,8 @@ from __future__ import absolute_import, unicode_literals
 
 import unittest
 
-from mopidy.models.fields import Collection, Field, Identifier, Integer, String
+from mopidy.models.fields import (Boolean, Collection, Field, Identifier,
+                                  Integer, String)
 
 
 def create_instance(field):
@@ -209,6 +210,27 @@ class IntegerTest(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             instance.attr = 11
+
+
+class BooleanTest(unittest.TestCase):
+    def test_default_handling(self):
+        instance = create_instance(Boolean(default=True))
+        self.assertEqual(True, instance.attr)
+
+    def test_true_allowed(self):
+        instance = create_instance(Boolean())
+        instance.attr = True
+        self.assertEqual(True, instance.attr)
+
+    def test_false_allowed(self):
+        instance = create_instance(Boolean())
+        instance.attr = False
+        self.assertEqual(False, instance.attr)
+
+    def test_int_forbidden(self):
+        instance = create_instance(Boolean())
+        with self.assertRaises(TypeError):
+            instance.attr = 1
 
 
 class CollectionTest(unittest.TestCase):

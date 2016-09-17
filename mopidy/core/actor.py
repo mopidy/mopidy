@@ -3,8 +3,11 @@ from __future__ import absolute_import, unicode_literals
 import collections
 import itertools
 import logging
+import os
 
 import pykka
+
+import mopidy
 
 from mopidy import audio, backend, mixer
 from mopidy.audio import PlaybackState
@@ -15,8 +18,9 @@ from mopidy.core.mixer import MixerController
 from mopidy.core.playback import PlaybackController
 from mopidy.core.playlists import PlaylistsController
 from mopidy.core.tracklist import TracklistController
-from mopidy.internal import versioning
+from mopidy.internal import path, storage, validation, versioning
 from mopidy.internal.deprecation import deprecated_property
+from mopidy.internal.models import CoreState
 
 
 logger = logging.getLogger(__name__)
@@ -135,6 +139,91 @@ class Core(
             title = tags['title'][0]
             self.playback._stream_title = title
             CoreListener.send('stream_title_changed', title=title)
+
+    def setup(self):
+        """Do not call this function. It is for internal use at startup."""
+        try:
+            coverage = []
+            if self._config and 'restore_state' in self._config['core']:
+                if self._config['core']['restore_state']:
+                    coverage = ['tracklist', 'mode', 'play-last', 'mixer',
+                                'history']
+            if len(coverage):
+                self._load_state(coverage)
+        except Exception as e:
+            logger.warn('Restore state: Unexpected error: %s', str(e))
+
+    def teardown(self):
+        """Do not call this function. It is for internal use at shutdown."""
+        try:
+            if self._config and 'restore_state' in self._config['core']:
+                if self._config['core']['restore_state']:
+                    self._save_state()
+        except Exception as e:
+            logger.warn('Unexpected error while saving state: %s', str(e))
+
+    def _get_data_dir(self):
+        # get or create data director for core
+        data_dir_path = os.path.join(self._config['core']['data_dir'], b'core')
+        path.get_or_create_dir(data_dir_path)
+        return data_dir_path
+
+    def _save_state(self):
+        """
+        Save current state to disk.
+        """
+
+        file_name = os.path.join(self._get_data_dir(), b'state.json.gz')
+        logger.info('Saving state to %s', file_name)
+
+        data = {}
+        data['version'] = mopidy.__version__
+        data['state'] = CoreState(
+            tracklist=self.tracklist._save_state(),
+            history=self.history._save_state(),
+            playback=self.playback._save_state(),
+            mixer=self.mixer._save_state())
+        storage.dump(file_name, data)
+        logger.debug('Saving state done')
+
+    def _load_state(self, coverage):
+        """
+        Restore state from disk.
+
+        Load state from disk and restore it. Parameter ``coverage``
+        limits the amount of data to restore. Possible
+        values for ``coverage`` (list of one or more of):
+
+            - 'tracklist' fill the tracklist
+            - 'mode' set tracklist properties (consume, random, repeat, single)
+            - 'play-last' restore play state ('tracklist' also required)
+            - 'mixer' set mixer volume and mute state
+            - 'history' restore history
+
+        :param coverage: amount of data to restore
+        :type coverage: list of strings
+        """
+
+        file_name = os.path.join(self._get_data_dir(), b'state.json.gz')
+        logger.info('Loading state from %s', file_name)
+
+        data = storage.load(file_name)
+
+        try:
+            # Try only once. If something goes wrong, the next start is clean.
+            os.remove(file_name)
+        except OSError:
+            logger.info('Failed to delete %s', file_name)
+
+        if 'state' in data:
+            core_state = data['state']
+            validation.check_instance(core_state, CoreState)
+            self.history._load_state(core_state.history, coverage)
+            self.tracklist._load_state(core_state.tracklist, coverage)
+            self.mixer._load_state(core_state.mixer, coverage)
+            # playback after tracklist
+            self.playback._load_state(core_state.playback, coverage)
+        logger.debug('Loading state done')
 
 
 class Backends(list):
