@@ -174,7 +174,7 @@ class Core(
         """
 
         file_name = os.path.join(self._get_data_dir(), b'state.json.gz')
-        logger.info('Saveing state to %s', file_name)
+        logger.info('Saving state to %s', file_name)
 
         data = {}
         data['version'] = mopidy.__version__
@@ -184,7 +184,7 @@ class Core(
             playback=self.playback._save_state(),
             mixer=self.mixer._save_state())
         storage.dump(file_name, data)
-        logger.debug('Saveing state done')
+        logger.debug('Saving state done')
 
     def _load_state(self, coverage):
         """
