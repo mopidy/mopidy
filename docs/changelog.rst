@@ -19,6 +19,9 @@ Feature release.
 - MPD: Add ``nextsong`` and ``nextsongid`` to the response of MPD ``status`` command.
   (Fixes: :issue:`1133`, :issue:`1516`, PR: :issue:`1523`)
 
+- Audio: The scanner set the date to :attr:`mopidy.models.Track.date` and
+  :attr:`mopidy.models.Album.date`
+  (Fixes: :issue:`1741`)
 
 v2.0.1 (2016-08-16)
 ===================
