@@ -18,6 +18,9 @@ Feature release.
 
 - MPD: Add ``nextsong`` and ``nextsongid`` to the response of MPD ``status`` command.
   (Fixes: :issue:`1133`, :issue:`1516`, PR: :issue:`1523`)
+  
+- Local: Skip hidden directories directly in ``media_dir``.
+  (Fixes: :issue:`1559`, PR: :issue:`1555`)
 
 
 v2.0.1 (2016-08-16)
