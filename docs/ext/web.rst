@@ -222,11 +222,11 @@ To install, run::
 Other web clients
 =================
 
-There's also some other web clients for Mopidy that use the :ref:`http-api`,
-but isn't installable using ``pip``:
+There are also some other web clients for Mopidy that use the :ref:`http-api`
+but are not installable using ``pip``:
 
 - `Apollo Player <https://github.com/samcreate/Apollo-Player>`_
 
-In addition, there's several web based MPD clients, which doesn't use the
+In addition, there are several web based MPD clients, which doesn't use the
 :ref:`ext-http` frontend at all, but connect to Mopidy through our
 :ref:`ext-mpd` frontend. For a list of those, see :ref:`mpd-web-clients`.
