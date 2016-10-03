@@ -204,6 +204,21 @@ Bootstrap by Wojciech Wnętrzak.
 To use, just visit http://mopster.cowbell-labs.com/.
 
 
+Mopidy-Jukepi
+=============
+
+https://github.com/meantimeit/jukepi
+
+A Mopidy web client built with Backbone by connrs.
+
+.. image:: /ext/mopidy_jukepi.png
+    :width: 1260
+    :height: 961
+
+To install, run::
+
+    pip install Mopidy-Jukepi
+
 Other web clients
 =================
 
@@ -211,7 +226,6 @@ There's also some other web clients for Mopidy that use the :ref:`http-api`,
 but isn't installable using ``pip``:
 
 - `Apollo Player <https://github.com/samcreate/Apollo-Player>`_
-- `JukePi <https://github.com/meantimeit/jukepi>`_
 
 In addition, there's several web based MPD clients, which doesn't use the
 :ref:`ext-http` frontend at all, but connect to Mopidy through our
