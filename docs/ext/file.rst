@@ -36,7 +36,7 @@ See :ref:`config` for general help on configuring Mopidy.
 
 .. confval:: file/follow_symlinks
 
-    Whether to follow symbolic links found in :confval:`files/media_dir`.
+    Whether to follow symbolic links found in :confval:`file/media_dirs`.
     Directories and files that are outside the configured directories will not be shown.
     Default is false.
 
