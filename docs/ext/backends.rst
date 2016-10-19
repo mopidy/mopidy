@@ -70,14 +70,6 @@ Mopidy-File
 
 Bundled with Mopidy. See :ref:`ext-file`.
 
-Mopidy-Grooveshark
-==================
-
-https://github.com/camilonova/mopidy-grooveshark
-
-Provides a backend for playing music from `Grooveshark
-<http://grooveshark.im/>`_.
-
 
 Mopidy-GMusic
 =============
