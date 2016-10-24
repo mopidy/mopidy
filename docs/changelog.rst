@@ -19,6 +19,8 @@ Feature release.
   :attr:`mopidy.models.Album.date`
   (Fixes: :issue:`1741`)
 
+- File: Add new config value :confval:`file/excluded_file_extensions`.
+
 - Local: Skip hidden directories directly in ``media_dir``.
   (Fixes: :issue:`1559`, PR: :issue:`1555`)
 
