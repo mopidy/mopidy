@@ -30,6 +30,9 @@ Feature release.
 - MPD: Add ``nextsong`` and ``nextsongid`` to the response of MPD ``status``
   command. (Fixes: :issue:`1133`, :issue:`1516`, PR: :issue:`1523`)
 
+- MPD: Fix inconsistent playlist state after playlist is emptied with repeat
+  and consume mode turned on. (Fixes: :issue:`1512`, PR: :issue:`1549`)
+
 
 v2.0.1 (2016-08-16)
 ===================
