@@ -14,8 +14,6 @@ to use on a Raspberry Pi 2.
     :height: 363
 
 
-.. _raspi-wheezy:
-
 How to for Raspbian Jessie
 ==========================
 
