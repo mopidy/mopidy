@@ -22,6 +22,8 @@ Feature release.
 - Local: Skip hidden directories directly in ``media_dir``.
   (Fixes: :issue:`1559`, PR: :issue:`1555`)
 
+- Audio: Update scanner to handle sources such as RTSP. (Fixes: :issue:`1479`)
+
 - Audio: The scanner set the date to :attr:`mopidy.models.Track.date` and
   :attr:`mopidy.models.Album.date`
   (Fixes: :issue:`1741`)

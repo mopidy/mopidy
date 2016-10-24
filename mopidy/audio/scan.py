@@ -78,24 +78,51 @@ def _setup_pipeline(uri, proxy_config=None):
     if not src:
         raise exceptions.ScannerError('GStreamer can not open: %s' % uri)
 
-    typefind = Gst.ElementFactory.make('typefind')
-    decodebin = Gst.ElementFactory.make('decodebin')
-
-    pipeline = Gst.ElementFactory.make('pipeline')
-    for e in (src, typefind, decodebin):
-        pipeline.add(e)
-    src.link(typefind)
-    typefind.link(decodebin)
-
     if proxy_config:
         utils.setup_proxy(src, proxy_config)
 
     signals = utils.Signals()
+    pipeline = Gst.ElementFactory.make('pipeline')
+    pipeline.add(src)
+
+    if _has_src_pads(src):
+        _setup_decodebin(src, src.get_static_pad('src'), pipeline, signals)
+    elif _has_dynamic_src_pad(src):
+        signals.connect(src, 'pad-added', _setup_decodebin, pipeline, signals)
+    else:
+        raise exceptions.ScannerError('No pads found in source element.')
+
+    return pipeline, signals
+
+
+def _has_src_pads(element):
+    pads = []
+    element.iterate_src_pads().foreach(pads.append)
+    return bool(pads)
+
+
+def _has_dynamic_src_pad(element):
+    for template in element.get_pad_template_list():
+        if template.direction == Gst.PadDirection.SRC:
+            if template.presence == Gst.PadPresence.SOMETIMES:
+                return True
+    return False
+
+
+def _setup_decodebin(element, pad, pipeline, signals):
+    typefind = Gst.ElementFactory.make('typefind')
+    decodebin = Gst.ElementFactory.make('decodebin')
+
+    for element in (typefind, decodebin):
+        pipeline.add(element)
+        element.sync_state_with_parent()
+
+    pad.link(typefind.get_static_pad('sink'))
+    typefind.link(decodebin)
+
     signals.connect(typefind, 'have-type', _have_type, decodebin)
     signals.connect(decodebin, 'pad-added', _pad_added, pipeline)
     signals.connect(decodebin, 'autoplug-select', _autoplug_select)
-
-    return pipeline, signals
 
 
 def _have_type(element, probability, caps, decodebin):
