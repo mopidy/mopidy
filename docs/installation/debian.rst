@@ -16,8 +16,6 @@ from scratch, we have a guide for installing Debian/Raspbian and Mopidy. See
 
 The packages are built for:
 
-- Debian wheezy (oldstable), which also works for Raspbian wheezy and Ubuntu
-  12.04 LTS.
 - Debian jessie (stable), which also works for Raspbian jessie and Ubuntu 14.04
   LTS and newer.
 
@@ -35,11 +33,7 @@ and armhf (compatible with Raspberry Pi 1 and 2).
 
        wget -q -O - https://apt.mopidy.com/mopidy.gpg | sudo apt-key add -
 
-#. If you run Debian wheezy or Ubuntu 12.04 LTS::
-
-       sudo wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/wheezy.list
-
-   Or, if you run any newer Debian/Ubuntu distro::
+#. Add the APT repo to your package sources::
 
        sudo wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/jessie.list
 

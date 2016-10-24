@@ -16,8 +16,8 @@ Feature release.
 - MPD: Fix MPD protocol for ``replay_gain_status`` command. The actual command
   remains unimplemented. (PR: :issue:`1520`)
 
-- MPD: Add ``nextsong`` and ``nextsongid`` to the response of MPD ``status`` command.
-  (Fixes: :issue:`1133`, :issue:`1516`, PR: :issue:`1523`)
+- MPD: Add ``nextsong`` and ``nextsongid`` to the response of MPD ``status``
+  command. (Fixes: :issue:`1133`, :issue:`1516`, PR: :issue:`1523`)
 
 - Local: Skip hidden directories directly in ``media_dir``.
   (Fixes: :issue:`1559`, PR: :issue:`1555`)
@@ -27,6 +27,7 @@ Feature release.
 - Audio: The scanner set the date to :attr:`mopidy.models.Track.date` and
   :attr:`mopidy.models.Album.date`
   (Fixes: :issue:`1741`)
+
 
 v2.0.1 (2016-08-16)
 ===================
