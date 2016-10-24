@@ -431,6 +431,24 @@ class TestConsumeHandling(BaseTest):
 
         self.assertNotIn(tl_track, self.core.tracklist.get_tl_tracks())
 
+    def test_next_in_consume_and_repeat_mode_returns_none_on_last_track(self):
+        # Testing for bug 1512
+        self.core.playback.play()
+        self.core.tracklist.set_consume(True)
+        self.core.tracklist.set_repeat(True)
+        self.replay_events()
+
+        # Play through the list
+        for track in self.core.tracklist.get_tl_tracks():
+            self.core.playback.next()
+            self.replay_events()
+
+        # Try repeat, player state remain stopped (all tracks consumed)
+        self.core.playback.next()
+        self.replay_events()
+
+        self.assertEqual(self.playback.get_state(), 'stopped')
+
 
 class TestCurrentAndPendingTlTrack(BaseTest):
 
