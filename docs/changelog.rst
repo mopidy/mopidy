@@ -13,20 +13,22 @@ Feature release.
 - Core: Mopidy restores its last state when started. Can be enabled by setting
   the config value :confval:`core/restore_state` to ``true``.
 
-- MPD: Fix MPD protocol for ``replay_gain_status`` command. The actual command
-  remains unimplemented. (PR: :issue:`1520`)
-
-- MPD: Add ``nextsong`` and ``nextsongid`` to the response of MPD ``status``
-  command. (Fixes: :issue:`1133`, :issue:`1516`, PR: :issue:`1523`)
-
-- Local: Skip hidden directories directly in ``media_dir``.
-  (Fixes: :issue:`1559`, PR: :issue:`1555`)
-
 - Audio: Update scanner to handle sources such as RTSP. (Fixes: :issue:`1479`)
 
 - Audio: The scanner set the date to :attr:`mopidy.models.Track.date` and
   :attr:`mopidy.models.Album.date`
   (Fixes: :issue:`1741`)
+
+- File: Add new config value :confval:`file/excluded_file_extensions`.
+
+- Local: Skip hidden directories directly in ``media_dir``.
+  (Fixes: :issue:`1559`, PR: :issue:`1555`)
+
+- MPD: Fix MPD protocol for ``replay_gain_status`` command. The actual command
+  remains unimplemented. (PR: :issue:`1520`)
+
+- MPD: Add ``nextsong`` and ``nextsongid`` to the response of MPD ``status``
+  command. (Fixes: :issue:`1133`, :issue:`1516`, PR: :issue:`1523`)
 
 
 v2.0.1 (2016-08-16)
