@@ -70,14 +70,6 @@ Mopidy-File
 
 Bundled with Mopidy. See :ref:`ext-file`.
 
-Mopidy-Grooveshark
-==================
-
-https://github.com/camilonova/mopidy-grooveshark
-
-Provides a backend for playing music from `Grooveshark
-<http://grooveshark.im/>`_.
-
 
 Mopidy-GMusic
 =============
@@ -95,15 +87,6 @@ https://github.com/tkem/mopidy-internetarchive
 
 Extension for playing music and audio from the `Internet Archive
 <https://archive.org/>`_.
-
-
-Mopidy-LeftAsRain
-=================
-
-https://github.com/naglis/mopidy-leftasrain
-
-Extension for playing music from the `leftasrain.com
-<http://leftasrain.com/>`_ music blog.
 
 
 Mopidy-Local

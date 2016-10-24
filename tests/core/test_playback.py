@@ -8,6 +8,7 @@ import pykka
 
 from mopidy import backend, core
 from mopidy.internal import deprecation
+from mopidy.internal.models import PlaybackState
 from mopidy.models import Track
 
 from tests import dummy_audio
@@ -1130,6 +1131,62 @@ class TestBug1177Regression(unittest.TestCase):
         c.playback.pause()
         c.playback.next()
         b.playback.change_track.assert_called_once_with(track2)
+
+
+class TestCorePlaybackSaveLoadState(BaseTest):
+
+    def test_save(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play(tl_tracks[1])
+        self.replay_events()
+
+        state = PlaybackState(
+            time_position=0, state='playing', tlid=tl_tracks[1].tlid)
+        value = self.core.playback._save_state()
+
+        self.assertEqual(state, value)
+
+    def test_load(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.stop()
+        self.replay_events()
+        self.assertEqual('stopped', self.core.playback.get_state())
+
+        state = PlaybackState(
+            time_position=0, state='playing', tlid=tl_tracks[2].tlid)
+        coverage = ['play-last']
+        self.core.playback._load_state(state, coverage)
+        self.replay_events()
+
+        self.assertEqual('playing', self.core.playback.get_state())
+        self.assertEqual(tl_tracks[2],
+                         self.core.playback.get_current_tl_track())
+
+    def test_load_not_covered(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.stop()
+        self.replay_events()
+        self.assertEqual('stopped', self.core.playback.get_state())
+
+        state = PlaybackState(
+            time_position=0, state='playing', tlid=tl_tracks[2].tlid)
+        coverage = ['other']
+        self.core.playback._load_state(state, coverage)
+        self.replay_events()
+
+        self.assertEqual('stopped', self.core.playback.get_state())
+        self.assertEqual(None,
+                         self.core.playback.get_current_tl_track())
+
+    def test_load_invalid_type(self):
+        with self.assertRaises(TypeError):
+            self.core.playback._load_state(11, None)
+
+    def test_load_none(self):
+        self.core.playback._load_state(None, None)
 
 
 class TestBug1352Regression(BaseTest):

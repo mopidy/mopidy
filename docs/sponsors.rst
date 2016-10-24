@@ -31,10 +31,3 @@ accelerate requests to all Mopidy services, including:
 
 - https://dl.mopidy.com/pimusicbox/, which is used to distribute Pi Musicbox
   images.
-
-
-GlobalSign
-==========
-
-`GlobalSign <https://www.globalsign.com/>`_ provides Mopidy with a free SSL
-certificate for mopidy.com, which we use to secure access to all our web sites.

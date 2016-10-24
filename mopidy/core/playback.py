@@ -2,11 +2,10 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
-from mopidy import models
 from mopidy.audio import PlaybackState
 from mopidy.compat import urllib
 from mopidy.core import listener
-from mopidy.internal import deprecation, validation
+from mopidy.internal import deprecation, models, validation
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +28,9 @@ class PlaybackController(object):
         self._pending_position = None
         self._last_position = None
         self._previous = False
+
+        self._start_at_position = None
+        self._start_paused = False
 
         if self._audio:
             self._audio.set_about_to_finish_callback(
@@ -226,6 +228,13 @@ class PlaybackController(object):
             if self._pending_position is None:
                 self.set_state(PlaybackState.PLAYING)
                 self._trigger_track_playback_started()
+                seek_ok = False
+                if self._start_at_position:
+                    seek_ok = self.seek(self._start_at_position)
+                    self._start_at_position = None
+                if not seek_ok and self._start_paused:
+                    self.pause()
+                    self._start_paused = False
             else:
                 self._seek(self._pending_position)
 
@@ -233,6 +242,9 @@ class PlaybackController(object):
         if self._pending_position is not None:
             self._trigger_seeked(self._pending_position)
             self._pending_position = None
+            if self._start_paused:
+                self._start_paused = False
+                self.pause()
 
     def _on_about_to_finish_callback(self):
         """Callback that performs a blocking actor call to the real callback.
@@ -596,3 +608,17 @@ class PlaybackController(object):
         # TODO: Trigger this from audio events?
         logger.debug('Triggering seeked event')
         listener.CoreListener.send('seeked', time_position=time_position)
+
+    def _save_state(self):
+        return models.PlaybackState(
+            tlid=self.get_current_tlid(),
+            time_position=self.get_time_position(),
+            state=self.get_state())
+
+    def _load_state(self, state, coverage):
+        if state and 'play-last' in coverage and state.tlid is not None:
+            if state.state == PlaybackState.PAUSED:
+                self._start_paused = True
+            if state.state in (PlaybackState.PLAYING, PlaybackState.PAUSED):
+                self._start_at_position = state.time_position
+                self.play(tlid=state.tlid)

@@ -88,14 +88,17 @@ class Date(String):
 
 class Identifier(String):
     """
-    :class:`Field` for storing ASCII values such as GUIDs or other identifiers.
+    :class:`Field` for storing values such as GUIDs or other identifiers.
 
     Values will be interned.
 
     :param default: default value for field
     """
     def validate(self, value):
-        return compat.intern(str(super(Identifier, self).validate(value)))
+        value = super(Identifier, self).validate(value)
+        if isinstance(value, compat.text_type):
+            value = value.encode('utf-8')
+        return compat.intern(value)
 
 
 class URI(Identifier):
@@ -133,6 +136,17 @@ class Integer(Field):
             raise ValueError('Expected %s to be at most %d, not %d' %
                              (self._name, self._max, value))
         return value
+
+
+class Boolean(Field):
+    """
+    :class:`Field` for storing boolean values
+
+    :param default: default value for field
+    """
+
+    def __init__(self, default=None):
+        super(Boolean, self).__init__(type=bool, default=default)
 
 
 class Collection(Field):
