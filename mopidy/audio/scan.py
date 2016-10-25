@@ -194,13 +194,14 @@ def _process(pipeline, timeout_ms):
     missing_message = None
     duration = None
 
+    # TODO: Turn this into a callback table to cleanup code.
     types = (
-        Gst.MessageType.ELEMENT |
         Gst.MessageType.APPLICATION |
-        Gst.MessageType.ERROR |
-        Gst.MessageType.EOS |
-        Gst.MessageType.ASYNC_DONE |
         Gst.MessageType.DURATION_CHANGED |
+        Gst.MessageType.ELEMENT |
+        Gst.MessageType.EOS |
+        Gst.MessageType.ERROR |
+        Gst.MessageType.STATE_CHANGED |
         Gst.MessageType.TAG
     )
 
@@ -235,25 +236,25 @@ def _process(pipeline, timeout_ms):
             raise exceptions.ScannerError(error)
         elif msg.type == Gst.MessageType.EOS:
             return tags, mime, have_audio, duration
-        elif msg.type == Gst.MessageType.ASYNC_DONE:
-            success, duration = _query_duration(pipeline)
-            if tags and success:
-                return tags, mime, have_audio, duration
+        elif msg.type == Gst.MessageType.STATE_CHANGED and msg.src == pipeline:
+            old_state, new_state, pending = msg.parse_state_changed()
 
-            # Workaround for upstream bug which causes tags/duration to arrive
-            # after pre-roll. We get around this by starting to play the track
-            # and then waiting for a duration change.
-            # https://bugzilla.gnome.org/show_bug.cgi?id=763553
-            logger.debug('Using workaround for duration missing before play.')
-            result = pipeline.set_state(Gst.State.PLAYING)
-            if result == Gst.StateChangeReturn.FAILURE:
-                return tags, mime, have_audio, duration
+            if pending == Gst.State.VOID_PENDING:
+                success, duration = _query_duration(pipeline)
+                if tags and success:
+                    return tags, mime, have_audio, duration
 
-            # Try again to get duration since we changed without async, then
-            # just give up as there is nothing more that can happen.
-            if result == Gst.StateChangeReturn.SUCCESS:
-                _, duration = _query_duration(pipeline)
-                return tags, mime, have_audio, duration
+                if new_state == Gst.State.PAUSED:
+                    # Workaround for upstream bug which causes tags/duration to
+                    # arrive after pre-roll. We get around this by starting to
+                    # play the track and then waiting for a duration change.
+                    # https://bugzilla.gnome.org/show_bug.cgi?id=763553
+                    logger.debug('Using workaround for duration missing.')
+                    result = pipeline.set_state(Gst.State.PLAYING)
+                    if result == Gst.StateChangeReturn.FAILURE:
+                        return tags, mime, have_audio, duration
+                else:
+                    return tags, mime, have_audio, duration
 
         elif msg.type == Gst.MessageType.DURATION_CHANGED:
             # duration will be read after ASYNC_DONE received; for now
