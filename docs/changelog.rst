@@ -10,6 +10,11 @@ v2.1.0 (UNRELEASED)
 
 Feature release.
 
+- Dependencies: Drop support for Tornado < 3.2. Though strictly a breaking
+  change, this shouldn't have any effect on what systems we support, as Tornado
+  3.2 or newer is available from the distros that include GStreamer >= 1.2.3,
+  which we already require.
+
 - Core: Mopidy restores its last state when started. Can be enabled by setting
   the config value :confval:`core/restore_state` to ``true``.
 
