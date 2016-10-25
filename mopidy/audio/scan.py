@@ -249,6 +249,12 @@ def _process(pipeline, timeout_ms):
             if result == Gst.StateChangeReturn.FAILURE:
                 return tags, mime, have_audio, duration
 
+            # Try again to get duration since we changed without async, then
+            # just give up as there is nothing more that can happen.
+            if result == Gst.StateChangeReturn.SUCCESS:
+                _, duration = _query_duration(pipeline)
+                return tags, mime, have_audio, duration
+
         elif msg.type == Gst.MessageType.DURATION_CHANGED:
             # duration will be read after ASYNC_DONE received; for now
             # just give it a non-None value to flag that we have a duration:
