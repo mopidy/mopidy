@@ -242,6 +242,10 @@ def _process(pipeline, timeout_ms):
             if tags and success:
                 return tags, mime, have_audio, duration
 
+            # Don't try workaround for non-seekable sources such as mmssrc:
+            if not _query_seekable(pipeline):
+                return tags, mime, have_audio, duration
+
             # Workaround for upstream bug which causes tags/duration to arrive
             # after pre-roll. We get around this by starting to play the track
             # and then waiting for a duration change.
