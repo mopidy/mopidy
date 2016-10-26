@@ -212,8 +212,10 @@ def _process(pipeline, timeout_ms):
             break
 
         if logger.isEnabledFor(log.TRACE_LOG_LEVEL) and msg.get_structure():
-            _trace('element %s: %s', msg.src.get_name(),
-                   msg.get_structure().to_string())
+            debug_text = msg.get_structure().to_string()
+            if len(debug_text) > 77:
+                debug_text = debug_text[:77] + '...'
+            _trace('element %s: %s', msg.src.get_name(), debug_text)
 
         if msg.type == Gst.MessageType.ELEMENT:
             if GstPbutils.is_missing_plugin_message(msg):
@@ -287,6 +289,9 @@ if __name__ == '__main__':
                 print('%-20s   %s' % (key, getattr(result, key)))
             print('tags')
             for tag, value in result.tags.items():
-                print('%-20s   %s' % (tag, value))
+                line = '%-20s   %s' % (tag, value)
+                if len(line) > 77:
+                    line = line[:77] + '...'
+                print(line)
         except exceptions.ScannerError as error:
             print('%s: %s' % (uri, error))
