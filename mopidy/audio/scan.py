@@ -251,21 +251,19 @@ def _process(pipeline, timeout_ms):
             if result == Gst.StateChangeReturn.FAILURE:
                 return tags, mime, have_audio, duration
 
-        elif msg.type == Gst.MessageType.DURATION_CHANGED:
-            # duration will be read after ASYNC_DONE received; for now
-            # just give it a non-None value to flag that we have a duration:
-            duration = 0
+        elif msg.type == Gst.MessageType.DURATION_CHANGED and tags:
+            # VBR formats sometimes seem to not have a duration by the time we
+            # go back to paused. So just try to get it right away.
+            success, duration = _query_duration(pipeline)
+            pipeline.set_state(Gst.State.PAUSED)
+            if success:
+                return tags, mime, have_audio, duration
         elif msg.type == Gst.MessageType.TAG:
             taglist = msg.parse_tag()
             # Note that this will only keep the last tag.
             tags.update(tags_lib.convert_taglist(taglist))
 
         timeout = timeout_ms - (int(time.time() * 1000) - start)
-
-        # workaround for https://bugzilla.gnome.org/show_bug.cgi?id=763553:
-        # if we got what we want then stop playing (and wait for ASYNC_DONE)
-        if tags and duration is not None:
-            pipeline.set_state(Gst.State.PAUSED)
 
     raise exceptions.ScannerError('Timeout after %dms' % timeout_ms)
 
