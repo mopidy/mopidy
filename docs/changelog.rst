@@ -38,9 +38,9 @@ Feature release.
 - MPD: Fix inconsistent playlist state after playlist is emptied with repeat
   and consume mode turned on. (Fixes: :issue:`1512`, PR: :issue:`1549`)
 
-- Audio: Fix handling of MMS (and any other streams) that can't switch to
-  playing ``ASYNC``. Previously we would time out trying to get a duration from
-  these. (Fixes: :issue:`1553`, PR :issue:`1575`, :issue:`1576`)
+- Audio: Improve handling of duration in scanning. VBR tracks should fail less
+  frequently and MMS works again. (Fixes: :issue:`1553`, PR :issue:`1575`,
+  :issue:`1576`, :issue:`1577`)
 
 
 v2.0.1 (2016-08-16)
