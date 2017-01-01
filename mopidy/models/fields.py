@@ -138,6 +138,17 @@ class Integer(Field):
         return value
 
 
+class Boolean(Field):
+    """
+    :class:`Field` for storing boolean values
+
+    :param default: default value for field
+    """
+
+    def __init__(self, default=None):
+        super(Boolean, self).__init__(type=bool, default=default)
+
+
 class Collection(Field):
     """
     :class:`Field` for storing collections of a given type.

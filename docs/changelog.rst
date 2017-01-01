@@ -10,11 +10,37 @@ v2.1.0 (UNRELEASED)
 
 Feature release.
 
+- Dependencies: Drop support for Tornado < 3.2. Though strictly a breaking
+  change, this shouldn't have any effect on what systems we support, as Tornado
+  3.2 or newer is available from the distros that include GStreamer >= 1.2.3,
+  which we already require.
+
+- Core: Mopidy restores its last state when started. Can be enabled by setting
+  the config value :confval:`core/restore_state` to ``true``.
+
+- Audio: Update scanner to handle sources such as RTSP. (Fixes: :issue:`1479`)
+
+- Audio: The scanner set the date to :attr:`mopidy.models.Track.date` and
+  :attr:`mopidy.models.Album.date`
+  (Fixes: :issue:`1741`)
+
+- File: Add new config value :confval:`file/excluded_file_extensions`.
+
+- Local: Skip hidden directories directly in ``media_dir``.
+  (Fixes: :issue:`1559`, PR: :issue:`1555`)
+
 - MPD: Fix MPD protocol for ``replay_gain_status`` command. The actual command
   remains unimplemented. (PR: :issue:`1520`)
 
-- MPD: Add ``nextsong`` and ``nextsongid`` to the response of MPD ``status`` command.
-  (Fixes: :issue:`1133`, :issue:`1516`, PR: :issue:`1523`)
+- MPD: Add ``nextsong`` and ``nextsongid`` to the response of MPD ``status``
+  command. (Fixes: :issue:`1133`, :issue:`1516`, PR: :issue:`1523`)
+
+- MPD: Fix inconsistent playlist state after playlist is emptied with repeat
+  and consume mode turned on. (Fixes: :issue:`1512`, PR: :issue:`1549`)
+
+- Audio: Improve handling of duration in scanning. VBR tracks should fail less
+  frequently and MMS works again. (Fixes: :issue:`1553`, PR :issue:`1575`,
+  :issue:`1576`, :issue:`1577`)
 
 
 v2.0.1 (2016-08-16)

@@ -6,6 +6,7 @@ import mock
 
 from mopidy import backend, core
 from mopidy.internal import deprecation
+from mopidy.internal.models import TracklistState
 from mopidy.models import TlTrack, Track
 
 
@@ -177,3 +178,119 @@ class TracklistIndexTest(unittest.TestCase):
         self.assertEqual(0, self.core.tracklist.index())
         self.assertEqual(1, self.core.tracklist.index())
         self.assertEqual(2, self.core.tracklist.index())
+
+
+class TracklistSaveLoadStateTest(unittest.TestCase):
+
+    def setUp(self):  # noqa: N802
+        config = {
+            'core': {
+                'max_tracklist_length': 10000,
+            }
+        }
+
+        self.tracks = [
+            Track(uri='dummy1:a', name='foo'),
+            Track(uri='dummy1:b', name='foo'),
+            Track(uri='dummy1:c', name='bar'),
+        ]
+
+        self.tl_tracks = [
+            TlTrack(tlid=4, track=Track(uri='first', name='First')),
+            TlTrack(tlid=5, track=Track(uri='second', name='Second')),
+            TlTrack(tlid=6, track=Track(uri='third', name='Third')),
+            TlTrack(tlid=8, track=Track(uri='last', name='Last'))
+        ]
+
+        def lookup(uris):
+            return {u: [t for t in self.tracks if t.uri == u] for u in uris}
+
+        self.core = core.Core(config, mixer=None, backends=[])
+        self.core.library = mock.Mock(spec=core.LibraryController)
+        self.core.library.lookup.side_effect = lookup
+
+        self.core.playback = mock.Mock(spec=core.PlaybackController)
+
+    def test_save(self):
+        tl_tracks = self.core.tracklist.add(uris=[
+            t.uri for t in self.tracks])
+        consume = True
+        next_tlid = len(tl_tracks) + 1
+        self.core.tracklist.set_consume(consume)
+        target = TracklistState(consume=consume,
+                                repeat=False,
+                                single=False,
+                                random=False,
+                                next_tlid=next_tlid,
+                                tl_tracks=tl_tracks)
+        value = self.core.tracklist._save_state()
+        self.assertEqual(target, value)
+
+    def test_load(self):
+        old_version = self.core.tracklist.get_version()
+        target = TracklistState(consume=False,
+                                repeat=True,
+                                single=True,
+                                random=False,
+                                next_tlid=12,
+                                tl_tracks=self.tl_tracks)
+        coverage = ['mode', 'tracklist']
+        self.core.tracklist._load_state(target, coverage)
+        self.assertEqual(False, self.core.tracklist.get_consume())
+        self.assertEqual(True, self.core.tracklist.get_repeat())
+        self.assertEqual(True, self.core.tracklist.get_single())
+        self.assertEqual(False, self.core.tracklist.get_random())
+        self.assertEqual(12, self.core.tracklist._next_tlid)
+        self.assertEqual(4, self.core.tracklist.get_length())
+        self.assertEqual(self.tl_tracks, self.core.tracklist.get_tl_tracks())
+        self.assertGreater(self.core.tracklist.get_version(), old_version)
+
+        # after load, adding more tracks must be possible
+        self.core.tracklist.add(uris=[self.tracks[1].uri])
+        self.assertEqual(13, self.core.tracklist._next_tlid)
+        self.assertEqual(5, self.core.tracklist.get_length())
+
+    def test_load_mode_only(self):
+        old_version = self.core.tracklist.get_version()
+        target = TracklistState(consume=False,
+                                repeat=True,
+                                single=True,
+                                random=False,
+                                next_tlid=12,
+                                tl_tracks=self.tl_tracks)
+        coverage = ['mode']
+        self.core.tracklist._load_state(target, coverage)
+        self.assertEqual(False, self.core.tracklist.get_consume())
+        self.assertEqual(True, self.core.tracklist.get_repeat())
+        self.assertEqual(True, self.core.tracklist.get_single())
+        self.assertEqual(False, self.core.tracklist.get_random())
+        self.assertEqual(1, self.core.tracklist._next_tlid)
+        self.assertEqual(0, self.core.tracklist.get_length())
+        self.assertEqual([], self.core.tracklist.get_tl_tracks())
+        self.assertEqual(self.core.tracklist.get_version(), old_version)
+
+    def test_load_tracklist_only(self):
+        old_version = self.core.tracklist.get_version()
+        target = TracklistState(consume=False,
+                                repeat=True,
+                                single=True,
+                                random=False,
+                                next_tlid=12,
+                                tl_tracks=self.tl_tracks)
+        coverage = ['tracklist']
+        self.core.tracklist._load_state(target, coverage)
+        self.assertEqual(False, self.core.tracklist.get_consume())
+        self.assertEqual(False, self.core.tracklist.get_repeat())
+        self.assertEqual(False, self.core.tracklist.get_single())
+        self.assertEqual(False, self.core.tracklist.get_random())
+        self.assertEqual(12, self.core.tracklist._next_tlid)
+        self.assertEqual(4, self.core.tracklist.get_length())
+        self.assertEqual(self.tl_tracks, self.core.tracklist.get_tl_tracks())
+        self.assertGreater(self.core.tracklist.get_version(), old_version)
+
+    def test_load_invalid_type(self):
+        with self.assertRaises(TypeError):
+            self.core.tracklist._load_state(11, None)
+
+    def test_load_none(self):
+        self.core.tracklist._load_state(None, None)

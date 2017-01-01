@@ -2,11 +2,12 @@ from __future__ import (
     absolute_import, division, print_function, unicode_literals)
 
 import collections
+import logging
 import time
 
 from mopidy import exceptions
 from mopidy.audio import tags as tags_lib, utils
-from mopidy.internal import encoding
+from mopidy.internal import encoding, log
 from mopidy.internal.gi import Gst, GstPbutils
 
 # GST_ELEMENT_FACTORY_LIST:
@@ -22,6 +23,12 @@ _SELECT_EXPOSE = 1
 
 _Result = collections.namedtuple(
     'Result', ('uri', 'tags', 'duration', 'seekable', 'mime', 'playable'))
+
+logger = logging.getLogger(__name__)
+
+
+def _trace(*args, **kwargs):
+    logger.log(log.TRACE_LOG_LEVEL, *args, **kwargs)
 
 
 # TODO: replace with a scan(uri, timeout=1000, proxy_config=None)?
@@ -78,24 +85,51 @@ def _setup_pipeline(uri, proxy_config=None):
     if not src:
         raise exceptions.ScannerError('GStreamer can not open: %s' % uri)
 
-    typefind = Gst.ElementFactory.make('typefind')
-    decodebin = Gst.ElementFactory.make('decodebin')
-
-    pipeline = Gst.ElementFactory.make('pipeline')
-    for e in (src, typefind, decodebin):
-        pipeline.add(e)
-    src.link(typefind)
-    typefind.link(decodebin)
-
     if proxy_config:
         utils.setup_proxy(src, proxy_config)
 
     signals = utils.Signals()
+    pipeline = Gst.ElementFactory.make('pipeline')
+    pipeline.add(src)
+
+    if _has_src_pads(src):
+        _setup_decodebin(src, src.get_static_pad('src'), pipeline, signals)
+    elif _has_dynamic_src_pad(src):
+        signals.connect(src, 'pad-added', _setup_decodebin, pipeline, signals)
+    else:
+        raise exceptions.ScannerError('No pads found in source element.')
+
+    return pipeline, signals
+
+
+def _has_src_pads(element):
+    pads = []
+    element.iterate_src_pads().foreach(pads.append)
+    return bool(pads)
+
+
+def _has_dynamic_src_pad(element):
+    for template in element.get_pad_template_list():
+        if template.direction == Gst.PadDirection.SRC:
+            if template.presence == Gst.PadPresence.SOMETIMES:
+                return True
+    return False
+
+
+def _setup_decodebin(element, pad, pipeline, signals):
+    typefind = Gst.ElementFactory.make('typefind')
+    decodebin = Gst.ElementFactory.make('decodebin')
+
+    for element in (typefind, decodebin):
+        pipeline.add(element)
+        element.sync_state_with_parent()
+
+    pad.link(typefind.get_static_pad('sink'))
+    typefind.link(decodebin)
+
     signals.connect(typefind, 'have-type', _have_type, decodebin)
     signals.connect(decodebin, 'pad-added', _pad_added, pipeline)
     signals.connect(decodebin, 'autoplug-select', _autoplug_select)
-
-    return pipeline, signals
 
 
 def _have_type(element, probability, caps, decodebin):
@@ -173,58 +207,67 @@ def _process(pipeline, timeout_ms):
     timeout = timeout_ms
     start = int(time.time() * 1000)
     while timeout > 0:
-        message = bus.timed_pop_filtered(timeout * Gst.MSECOND, types)
-
-        if message is None:
+        msg = bus.timed_pop_filtered(timeout * Gst.MSECOND, types)
+        if msg is None:
             break
-        elif message.type == Gst.MessageType.ELEMENT:
-            if GstPbutils.is_missing_plugin_message(message):
-                missing_message = message
-        elif message.type == Gst.MessageType.APPLICATION:
-            if message.get_structure().get_name() == 'have-type':
-                mime = message.get_structure().get_value('caps').get_name()
+
+        if logger.isEnabledFor(log.TRACE_LOG_LEVEL) and msg.get_structure():
+            debug_text = msg.get_structure().to_string()
+            if len(debug_text) > 77:
+                debug_text = debug_text[:77] + '...'
+            _trace('element %s: %s', msg.src.get_name(), debug_text)
+
+        if msg.type == Gst.MessageType.ELEMENT:
+            if GstPbutils.is_missing_plugin_message(msg):
+                missing_message = msg
+        elif msg.type == Gst.MessageType.APPLICATION:
+            if msg.get_structure().get_name() == 'have-type':
+                mime = msg.get_structure().get_value('caps').get_name()
                 if mime and (
                         mime.startswith('text/') or mime == 'application/xml'):
                     return tags, mime, have_audio, duration
-            elif message.get_structure().get_name() == 'have-audio':
+            elif msg.get_structure().get_name() == 'have-audio':
                 have_audio = True
-        elif message.type == Gst.MessageType.ERROR:
-            error = encoding.locale_decode(message.parse_error()[0])
+        elif msg.type == Gst.MessageType.ERROR:
+            error = encoding.locale_decode(msg.parse_error()[0])
             if missing_message and not mime:
                 caps = missing_message.get_structure().get_value('detail')
                 mime = caps.get_structure(0).get_name()
                 return tags, mime, have_audio, duration
             raise exceptions.ScannerError(error)
-        elif message.type == Gst.MessageType.EOS:
+        elif msg.type == Gst.MessageType.EOS:
             return tags, mime, have_audio, duration
-        elif message.type == Gst.MessageType.ASYNC_DONE:
+        elif msg.type == Gst.MessageType.ASYNC_DONE:
             success, duration = _query_duration(pipeline)
             if tags and success:
+                return tags, mime, have_audio, duration
+
+            # Don't try workaround for non-seekable sources such as mmssrc:
+            if not _query_seekable(pipeline):
                 return tags, mime, have_audio, duration
 
             # Workaround for upstream bug which causes tags/duration to arrive
             # after pre-roll. We get around this by starting to play the track
             # and then waiting for a duration change.
             # https://bugzilla.gnome.org/show_bug.cgi?id=763553
+            logger.debug('Using workaround for duration missing before play.')
             result = pipeline.set_state(Gst.State.PLAYING)
             if result == Gst.StateChangeReturn.FAILURE:
                 return tags, mime, have_audio, duration
 
-        elif message.type == Gst.MessageType.DURATION_CHANGED:
-            # duration will be read after ASYNC_DONE received; for now
-            # just give it a non-None value to flag that we have a duration:
-            duration = 0
-        elif message.type == Gst.MessageType.TAG:
-            taglist = message.parse_tag()
+        elif msg.type == Gst.MessageType.DURATION_CHANGED and tags:
+            # VBR formats sometimes seem to not have a duration by the time we
+            # go back to paused. So just try to get it right away.
+            success, duration = _query_duration(pipeline)
+            pipeline.set_state(Gst.State.PAUSED)
+            if success:
+                return tags, mime, have_audio, duration
+        elif msg.type == Gst.MessageType.TAG:
+            taglist = msg.parse_tag()
             # Note that this will only keep the last tag.
             tags.update(tags_lib.convert_taglist(taglist))
 
         timeout = timeout_ms - (int(time.time() * 1000) - start)
-
-        # workaround for https://bugzilla.gnome.org/show_bug.cgi?id=763553:
-        # if we got what we want then stop playing (and wait for ASYNC_DONE)
-        if tags and duration is not None:
-            pipeline.set_state(Gst.State.PAUSED)
 
     raise exceptions.ScannerError('Timeout after %dms' % timeout_ms)
 
@@ -234,6 +277,9 @@ if __name__ == '__main__':
     import sys
 
     from mopidy.internal import path
+
+    logging.basicConfig(format='%(asctime)-15s %(levelname)s %(message)s',
+                        level=log.TRACE_LOG_LEVEL)
 
     scanner = Scanner(5000)
     for uri in sys.argv[1:]:
@@ -245,6 +291,9 @@ if __name__ == '__main__':
                 print('%-20s   %s' % (key, getattr(result, key)))
             print('tags')
             for tag, value in result.tags.items():
-                print('%-20s   %s' % (tag, value))
+                line = '%-20s   %s' % (tag, value)
+                if len(line) > 77:
+                    line = line[:77] + '...'
+                print(line)
         except exceptions.ScannerError as error:
             print('%s: %s' % (uri, error))

@@ -27,18 +27,24 @@ See :ref:`config` for general help on configuring Mopidy.
 .. confval:: file/media_dirs
 
     A list of directories to be browsable.
-    Optionally the path can be followed by ``|`` and a name that will be shown for that path.
+    Optionally the path can be followed by ``|`` and a name that will be shown
+    for that path.
 
 .. confval:: file/show_dotfiles
 
     Whether to show hidden files and directories that start with a dot.
     Default is false.
 
+.. confval:: file/excluded_file_extensions
+
+    File extensions to exclude when scanning the media directory. Values
+    should be separated by either comma or newline.
+
 .. confval:: file/follow_symlinks
 
-    Whether to follow symbolic links found in :confval:`files/media_dir`.
-    Directories and files that are outside the configured directories will not be shown.
-    Default is false.
+    Whether to follow symbolic links found in :confval:`file/media_dirs`.
+    Directories and files that are outside the configured directories will not
+    be shown. Default is false.
 
 .. confval:: file/metadata_timeout
 
