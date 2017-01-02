@@ -4,8 +4,8 @@ import json
 import unittest
 
 from mopidy.models import (
-    Album, Artist, Image, ModelJSONEncoder, Playlist, Ref, SearchResult,
-    TlTrack, Track, model_json_decoder)
+    Album, Artist, Image, ModelJSONEncoder, Playlist,
+    Ref, SearchResult, TlTrack, Track, model_json_decoder)
 
 
 class InheritanceTest(unittest.TestCase):

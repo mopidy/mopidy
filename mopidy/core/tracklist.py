@@ -6,6 +6,7 @@ import random
 from mopidy import exceptions
 from mopidy.core import listener
 from mopidy.internal import deprecation, validation
+from mopidy.internal.models import TracklistState
 from mopidy.models import TlTrack, Track
 
 logger = logging.getLogger(__name__)
@@ -325,7 +326,10 @@ class TracklistController(object):
             next_index += 1
 
         if self.get_repeat():
-            next_index %= len(self._tl_tracks)
+            if self.get_consume() and len(self._tl_tracks) == 1:
+                return None
+            else:
+                next_index %= len(self._tl_tracks)
         elif next_index >= len(self._tl_tracks):
             return None
 
@@ -646,3 +650,24 @@ class TracklistController(object):
     def _trigger_options_changed(self):
         logger.debug('Triggering options changed event')
         listener.CoreListener.send('options_changed')
+
+    def _save_state(self):
+        return TracklistState(
+            tl_tracks=self._tl_tracks,
+            next_tlid=self._next_tlid,
+            consume=self.get_consume(),
+            random=self.get_random(),
+            repeat=self.get_repeat(),
+            single=self.get_single())
+
+    def _load_state(self, state, coverage):
+        if state:
+            if 'mode' in coverage:
+                self.set_consume(state.consume)
+                self.set_random(state.random)
+                self.set_repeat(state.repeat)
+                self.set_single(state.single)
+            if 'tracklist' in coverage:
+                self._next_tlid = max(state.next_tlid, self._next_tlid)
+                self._tl_tracks = list(state.tl_tracks)
+                self._increase_version()

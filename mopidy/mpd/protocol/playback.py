@@ -325,7 +325,7 @@ def replay_gain_status(context):
         Prints replay gain options. Currently, only the variable
         ``replay_gain_mode`` is returned.
     """
-    return 'off'  # TODO
+    return 'replay_gain_mode: off'  # TODO
 
 
 @protocol.commands.add('seek', songpos=protocol.UINT, seconds=protocol.UINT)

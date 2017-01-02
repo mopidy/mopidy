@@ -89,16 +89,12 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
     @classmethod
     def broadcast(cls, msg):
-        if hasattr(tornado.ioloop.IOLoop, 'current'):
-            loop = tornado.ioloop.IOLoop.current()
-        else:
-            loop = tornado.ioloop.IOLoop.instance()  # Fallback for pre 3.0
+        loop = tornado.ioloop.IOLoop.current()
 
         # This can be called from outside the Tornado ioloop, so we need to
         # safely cross the thread boundary by adding a callback to the loop.
         for client in cls.clients:
             # One callback per client to keep time we hold up the loop short
-            # NOTE: Pre 3.0 does not support *args or **kwargs...
             loop.add_callback(functools.partial(_send_broadcast, client, msg))
 
     def initialize(self, core):
@@ -139,10 +135,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         except Exception as e:
             error_msg = encoding.locale_decode(e)
             logger.error('WebSocket request error: %s', error_msg)
-            if self.ws_connection:
-                # Tornado 3.2+ checks if self.ws_connection is None before
-                # using it, but not older versions.
-                self.close()
+            self.close()
 
     def check_origin(self, origin):
         # Allow cross-origin WebSocket connections, like Tornado before 4.0

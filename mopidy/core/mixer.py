@@ -5,6 +5,7 @@ import logging
 
 from mopidy import exceptions
 from mopidy.internal import validation
+from mopidy.internal.models import MixerState
 
 
 logger = logging.getLogger(__name__)
@@ -99,3 +100,13 @@ class MixerController(object):
             return result
 
         return False
+
+    def _save_state(self):
+        return MixerState(volume=self.get_volume(),
+                          mute=self.get_mute())
+
+    def _load_state(self, state, coverage):
+        if state and 'mixer' in coverage:
+            self.set_mute(state.mute)
+            if state.volume:
+                self.set_volume(state.volume)

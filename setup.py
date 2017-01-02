@@ -27,7 +27,7 @@ setup(
         'Pykka >= 1.1',
         'requests >= 2.0',
         'setuptools',
-        'tornado >= 2.3',
+        'tornado >= 3.2',
     ],
     extras_require={'http': []},
     entry_points={

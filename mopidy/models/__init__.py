@@ -192,9 +192,9 @@ class Track(ValidatedImmutableObject):
     :param album: track album
     :type album: :class:`Album`
     :param composers: track composers
-    :type composers: string
+    :type composers: list of :class:`Artist`
     :param performers: track performers
-    :type performers: string
+    :type performers: list of :class:`Artist`
     :param genre: track genre
     :type genre: string
     :param track_no: track number in album

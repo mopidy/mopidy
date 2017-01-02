@@ -124,6 +124,7 @@ def convert_tags_to_track(tags):
         datetime = tags.get(Gst.TAG_DATE_TIME, [None])[0]
         if datetime is not None:
             album_kwargs['date'] = datetime.split('T')[0]
+    track_kwargs['date'] = album_kwargs['date']
 
     # Clear out any empty values we found
     track_kwargs = {k: v for k, v in track_kwargs.items() if v}
