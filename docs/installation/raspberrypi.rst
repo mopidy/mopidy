@@ -32,12 +32,15 @@ How to for Raspbian Jessie
 #. If you connect a monitor and a keyboard, you'll see that the Pi boots right
    into the ``raspi-config`` tool.
 
-   If you boot with only a network cable connected, you'll have to find the IP
-   address of the Pi yourself, e.g. by looking in the client list on your
-   router/DHCP server. When you have found the Pi's IP address, you can SSH to
-   the IP address and login with the user ``pi`` and password ``raspberry``.
-   Once logged in, run ``sudo raspi-config`` to start the config tool as the
-   ``root`` user.
+   If you boot with only a network cable connected, you need to enable SSH first by
+   creating a ``ssh`` file (can be blank) on the ``boot`` partition. As of December 2016,
+   SSH is disabled on default for security reasons.
+   
+   Next, you'll have to find the IP address of the Pi yourself, e.g. by looking
+   in the client list on your router/DHCP server. When you have found the Pi's
+   IP address, you can SSH to the IP address and login with the user ``pi`` and
+   password ``raspberry``. Once logged in, run ``sudo raspi-config`` to start
+   the config tool as the ``root`` user.
 
 #. Use the ``raspi-config`` tool to setup the basics of your Pi. You might want
    to do one or more of the following:
