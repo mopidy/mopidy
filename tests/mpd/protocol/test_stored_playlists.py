@@ -46,6 +46,10 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_listplaylistinfo(self):
+        tracks = [
+            Track(uri='dummy:a', name='Track A', length=5000),
+        ]
+        self.backend.library.dummy_library = tracks
         self.backend.playlists.set_dummy_playlists([
             Playlist(
                 name='name', uri='dummy:name', tracks=[Track(uri='dummy:a')])])
@@ -53,14 +57,20 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.send_request('listplaylistinfo "name"')
 
         self.assertInResponse('file: dummy:a')
+        self.assertInResponse('Title: Track A')
+        self.assertInResponse('Time: 5')
         self.assertNotInResponse('Track: 0')
         self.assertNotInResponse('Pos: 0')
         self.assertInResponse('OK')
 
     def test_listplaylistinfo_without_quotes(self):
+        tracks = [
+            Track(uri='dummy:a'),
+        ]
+        self.backend.library.dummy_library = tracks
         self.backend.playlists.set_dummy_playlists([
             Playlist(
-                name='name', uri='dummy:name', tracks=[Track(uri='dummy:a')])])
+                name='name', uri='dummy:name', tracks=tracks)])
 
         self.send_request('listplaylistinfo name')
 
@@ -76,13 +86,18 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
             'ACK [50@0] {listplaylistinfo} No such playlist')
 
     def test_listplaylistinfo_duplicate(self):
-        playlist1 = Playlist(name='a', uri='dummy:a1', tracks=[Track(uri='b')])
-        playlist2 = Playlist(name='a', uri='dummy:a2', tracks=[Track(uri='c')])
+        tracks = [
+            Track(uri='dummy:b'),
+            Track(uri='dummy:c'),
+        ]
+        self.backend.library.dummy_library = tracks
+        playlist1 = Playlist(name='a', uri='dummy:a1', tracks=tracks[:1])
+        playlist2 = Playlist(name='a', uri='dummy:a2', tracks=tracks[1:])
         self.backend.playlists.set_dummy_playlists([playlist1, playlist2])
 
         self.send_request('listplaylistinfo "a [2]"')
 
-        self.assertInResponse('file: c')
+        self.assertInResponse('file: dummy:c')
         self.assertNotInResponse('Track: 0')
         self.assertNotInResponse('Pos: 0')
         self.assertInResponse('OK')
@@ -235,6 +250,25 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         # No invalid name check for load.
         self.send_request('load "unknown/playlist"')
         self.assertEqualResponse('ACK [50@0] {load} No such playlist')
+
+    def test_load_full_track_metadata(self):
+        tracks = [
+            Track(uri='dummy:a', name='Track A', length=5000),
+        ]
+        self.backend.library.dummy_library = tracks
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(
+                name='A-list', uri='dummy:a1', tracks=[Track(uri='dummy:a')])])
+
+        self.send_request('load "A-list"')
+
+        tracks = self.core.tracklist.tracks.get()
+        self.assertEqual(1, len(tracks))
+        self.assertEqual('dummy:a', tracks[0].uri)
+        self.assertEqual('Track A', tracks[0].name)
+        self.assertEqual(5000,      tracks[0].length)
+
+        self.assertInResponse('OK')
 
     def test_playlistadd(self):
         tracks = [

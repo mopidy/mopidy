@@ -3,7 +3,6 @@ from __future__ import absolute_import, division, unicode_literals
 import datetime
 import logging
 import re
-import warnings
 
 from mopidy.compat import urllib
 from mopidy.mpd import exceptions, protocol, translator
@@ -14,6 +13,16 @@ logger = logging.getLogger(__name__)
 def _check_playlist_name(name):
     if re.search('[/\n\r]', name):
         raise exceptions.MpdInvalidPlaylistName()
+
+
+def _get_playlist(context, name, must_exist=True):
+    playlist = None
+    uri = context.lookup_playlist_uri_from_name(name)
+    if uri:
+        playlist = context.core.playlists.lookup(uri).get()
+    if must_exist and not playlist:
+        raise exceptions.MpdNoExistError('No such playlist')
+    return playlist
 
 
 @protocol.commands.add('listplaylist')
@@ -31,10 +40,7 @@ def listplaylist(context, name):
         file: relative/path/to/file2.ogg
         file: relative/path/to/file3.mp3
     """
-    uri = context.lookup_playlist_uri_from_name(name)
-    playlist = uri is not None and context.core.playlists.lookup(uri).get()
-    if not playlist:
-        raise exceptions.MpdNoExistError('No such playlist')
+    playlist = _get_playlist(context, name)
     return ['file: %s' % t.uri for t in playlist.tracks]
 
 
@@ -52,10 +58,13 @@ def listplaylistinfo(context, name):
         Standard track listing, with fields: file, Time, Title, Date,
         Album, Artist, Track
     """
-    uri = context.lookup_playlist_uri_from_name(name)
-    playlist = uri is not None and context.core.playlists.lookup(uri).get()
-    if not playlist:
-        raise exceptions.MpdNoExistError('No such playlist')
+    playlist = _get_playlist(context, name)
+    track_uris = [track.uri for track in playlist.tracks]
+    tracks_map = context.core.library.lookup(uris=track_uris).get()
+    tracks = []
+    for uri in track_uris:
+        tracks.extend(tracks_map[uri])
+    playlist = playlist.replace(tracks=tracks)
     return translator.playlist_to_mpd_format(playlist)
 
 
@@ -134,14 +143,9 @@ def load(context, name, playlist_slice=slice(0, None)):
     - MPD 0.17.1 does not fail if the specified range is outside the playlist,
       in either or both ends.
     """
-    uri = context.lookup_playlist_uri_from_name(name)
-    playlist = uri is not None and context.core.playlists.lookup(uri).get()
-    if not playlist:
-        raise exceptions.MpdNoExistError('No such playlist')
-
-    with warnings.catch_warnings():
-        warnings.filterwarnings('ignore', 'tracklist.add.*"tracks".*')
-        context.core.tracklist.add(playlist.tracks[playlist_slice]).get()
+    playlist = _get_playlist(context, name)
+    track_uris = [track.uri for track in playlist.tracks[playlist_slice]]
+    context.core.tracklist.add(uris=track_uris).get()
 
 
 @protocol.commands.add('playlistadd')
@@ -156,8 +160,7 @@ def playlistadd(context, name, track_uri):
         ``NAME.m3u`` will be created if it does not exist.
     """
     _check_playlist_name(name)
-    uri = context.lookup_playlist_uri_from_name(name)
-    old_playlist = uri is not None and context.core.playlists.lookup(uri).get()
+    old_playlist = _get_playlist(context, name, must_exist=False)
     if not old_playlist:
         # Create new playlist with this single track
         lookup_res = context.core.library.lookup(uris=[track_uri]).get()
@@ -249,10 +252,7 @@ def playlistdelete(context, name, songpos):
         Deletes ``SONGPOS`` from the playlist ``NAME.m3u``.
     """
     _check_playlist_name(name)
-    uri = context.lookup_playlist_uri_from_name(name)
-    playlist = uri is not None and context.core.playlists.lookup(uri).get()
-    if not playlist:
-        raise exceptions.MpdNoExistError('No such playlist')
+    playlist = _get_playlist(context, name)
 
     try:
         # Convert tracks to list and remove requested
@@ -290,10 +290,7 @@ def playlistmove(context, name, from_pos, to_pos):
         return
 
     _check_playlist_name(name)
-    uri = context.lookup_playlist_uri_from_name(name)
-    playlist = uri is not None and context.core.playlists.lookup(uri).get()
-    if not playlist:
-        raise exceptions.MpdNoExistError('No such playlist')
+    playlist = _get_playlist(context, name)
     if from_pos == to_pos:
         return  # Nothing to do
 
@@ -325,21 +322,14 @@ def rename(context, old_name, new_name):
     _check_playlist_name(old_name)
     _check_playlist_name(new_name)
 
-    old_uri = context.lookup_playlist_uri_from_name(old_name)
-    if not old_uri:
-        raise exceptions.MpdNoExistError('No such playlist')
+    old_playlist = _get_playlist(context, old_name)
 
-    old_playlist = context.core.playlists.lookup(old_uri).get()
-    if not old_playlist:
-        raise exceptions.MpdNoExistError('No such playlist')
-
-    new_uri = context.lookup_playlist_uri_from_name(new_name)
-    if new_uri and context.core.playlists.lookup(new_uri).get():
+    if _get_playlist(context, new_name, must_exist=False):
         raise exceptions.MpdExistError('Playlist already exists')
     # TODO: should we purge the mapping in an else?
 
     # Create copy of the playlist and remove original
-    uri_scheme = urllib.parse.urlparse(old_uri).scheme
+    uri_scheme = urllib.parse.urlparse(old_playlist.uri).scheme
     new_playlist = context.core.playlists.create(new_name, uri_scheme).get()
     new_playlist = new_playlist.replace(tracks=old_playlist.tracks)
     saved_playlist = context.core.playlists.save(new_playlist).get()
@@ -377,8 +367,7 @@ def save(context, name):
     """
     _check_playlist_name(name)
     tracks = context.core.tracklist.get_tracks().get()
-    uri = context.lookup_playlist_uri_from_name(name)
-    playlist = uri is not None and context.core.playlists.lookup(uri).get()
+    playlist = _get_playlist(context, name, must_exist=False)
     if not playlist:
         # Create new playlist
         _create_playlist(context, name, tracks)
@@ -388,4 +377,4 @@ def save(context, name):
         saved_playlist = context.core.playlists.save(new_playlist).get()
         if saved_playlist is None:
             raise exceptions.MpdFailedToSavePlaylist(
-                urllib.parse.urlparse(uri).scheme)
+                urllib.parse.urlparse(playlist.uri).scheme)
