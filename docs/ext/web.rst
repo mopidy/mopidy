@@ -164,12 +164,12 @@ To install, run::
     pip install Mopidy-Simple-Webclient
 
 
-Mopidy-Spotmop
+Mopidy-Iris (formerly Mopidy-Spotmop)
 ==============
 
-https://github.com/jaedb/spotmop
+https://github.com/jaedb/iris
 
-A client targeted at Spotify users. Made by James Barnsley.
+A comprehensive client designed for Spotify users, with support for a variety of other backends. Built using React and Redux. Made by James Barnsley.
 
 .. image:: /ext/spotmop.jpg
     :width: 720
@@ -177,7 +177,7 @@ A client targeted at Spotify users. Made by James Barnsley.
 
 To install, run::
 
-    pip install Mopidy-Spotmop
+    pip install Mopidy-Iris
 
 
 Mopidy-WebSettings
