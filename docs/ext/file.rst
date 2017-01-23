@@ -51,3 +51,16 @@ See :ref:`config` for general help on configuring Mopidy.
     Number of milliseconds before giving up scanning a file and moving on to
     the next file. Reducing the value might speed up the directory listing,
     but can lead to some tracks not being shown.
+
+.. confval:: file/sort_order
+
+    Sort the files and directories in the given order.
+    Options are:
+
+    ``DirectoriesFirst``
+
+    ``FilesFirst``
+
+    ``Mixed``
+
+    Default is ``DirectoriesFirst``
