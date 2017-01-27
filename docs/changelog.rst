@@ -4,6 +4,13 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+v2.1.1 (unreleased)
+===================
+
+Bug fix release.
+
+- MPD: Added Idle to the list of commands in Mopidy like the list in MPD (Fixes: :issue:`1593`, PR: :issue:`1597`)
+
 
 v2.1.0 (2017-01-02)
 ===================
