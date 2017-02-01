@@ -26,7 +26,6 @@ class Extension(ext.Extension):
         schema['show_dotfiles'] = config.Boolean(optional=True)
         schema['follow_symlinks'] = config.Boolean(optional=True)
         schema['metadata_timeout'] = config.Integer(optional=True)
-        schema['sort_order'] = config.String(optional=True)
         return schema
 
     def setup(self, registry):

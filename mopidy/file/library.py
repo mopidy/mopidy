@@ -43,19 +43,9 @@ class FileLibraryProvider(backend.LibraryProvider):
         self._scanner = scan.Scanner(
             timeout=config['file']['metadata_timeout'])
 
-        self._sort_order = config['file']['sort_order']
-        logger.info('File browing sort order is: %s', self._sort_order)
-
-        self._sort_files_first = (self._sort_order == 'FilesFirst')
-        self._sort_directories_first = (self._sort_order ==
-                                        'DirectoriesFirst')
-        self._sort_mixed = (self._sort_order == 'Mixed')
-
     def browse(self, uri):
         logger.debug('Browsing files at: %s', uri)
         result = []
-        result_directories = []
-        result_files = []
         local_path = path.uri_to_path(uri)
 
         if local_path == 'root':
@@ -88,23 +78,17 @@ class FileLibraryProvider(backend.LibraryProvider):
 
             name = dir_entry.decode(FS_ENCODING, 'replace')
             if os.path.isdir(child_path):
-                result_directories.append(models.Ref.directory(name=name,
-                                                               uri=uri))
+                result.append(models.Ref.directory(name=name, uri=uri))
             elif os.path.isfile(child_path):
-                result_files.append(models.Ref.track(name=name, uri=uri))
+                result.append(models.Ref.track(name=name, uri=uri))
 
-        if not self._sort_mixed:
-            result_directories.sort(key=operator.attrgetter('name'))
-            result_files.sort(key=operator.attrgetter('name'))
+        sort_funcs = [operator.attrgetter('name'),
+                      lambda item: 0 if item.type == models.Ref.DIRECTORY
+                      else 1]
+        logger.debug('sort_funcs %s', sort_funcs)
 
-        if self._sort_mixed or self._sort_directories_first:
-            result = result_directories + result_files
-
-        if self._sort_files_first:
-            result = result_files + result_directories
-
-        if self._sort_mixed:
-            result.sort(key=operator.attrgetter('name'))
+        for key_func in sort_funcs:
+            result.sort(key=key_func)
 
         return result
 
