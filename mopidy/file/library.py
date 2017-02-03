@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import logging
-import operator
 import os
 import sys
 import urllib2
@@ -82,13 +81,9 @@ class FileLibraryProvider(backend.LibraryProvider):
             elif os.path.isfile(child_path):
                 result.append(models.Ref.track(name=name, uri=uri))
 
-        sort_funcs = [operator.attrgetter('name'),
-                      lambda item: 0 if item.type == models.Ref.DIRECTORY
-                      else 1]
-        logger.debug('sort_funcs %s', sort_funcs)
-
-        for key_func in sort_funcs:
-            result.sort(key=key_func)
+        def order(item):
+            return (item.type != models.Ref.DIRECTORY, item.name)
+        result.sort(key=order)
 
         return result
 
