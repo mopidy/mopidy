@@ -125,8 +125,8 @@ Also the web client used for Wouter's popular `Pi Musicbox
 <http://www.pimusicbox.com/>`_ image for Raspberry Pi.
 
 .. image:: /ext/musicbox_webclient.png
-    :width: 1275
-    :height: 600
+    :width: 1312
+    :height: 723
 
 To install, run::
 
