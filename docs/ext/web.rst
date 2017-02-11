@@ -31,7 +31,7 @@ To install, run::
 
 
 Mopidy-Iris (formerly Mopidy-Spotmop)
-==============
+=====================================
 
 https://github.com/jaedb/iris
 
