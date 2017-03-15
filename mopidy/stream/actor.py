@@ -7,7 +7,8 @@ import time
 
 import pykka
 
-from mopidy import audio as audio_lib, backend, exceptions, stream
+from mopidy import audio as audio_lib
+from mopidy import backend, exceptions, stream
 from mopidy.audio import scan, tags
 from mopidy.compat import urllib
 from mopidy.internal import http, playlists
@@ -17,7 +18,9 @@ logger = logging.getLogger(__name__)
 
 
 class StreamBackend(pykka.ThreadingActor, backend.Backend):
-
+   """
+   Class for handling stream backend
+   """
     def __init__(self, config, audio):
         super(StreamBackend, self).__init__()
 
@@ -52,6 +55,9 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
 
 
 class StreamLibraryProvider(backend.LibraryProvider):
+    """
+    Class for library provider
+    """
     def lookup(self, uri):
         if urllib.parse.urlsplit(uri).scheme not in self.backend.uri_schemes:
             return []
@@ -156,7 +162,7 @@ def _unwrap_stream(uri, timeout, scanner, requests_session):
                 'Failed parsing URI (%s) as playlist; found potential stream.',
                 uri)
             return uri, None
-
+w
         # TODO Test streams and return first that seems to be playable
         logger.debug(
             'Parsed playlist (%s) and found new URI: %s', uri, uris[0])
