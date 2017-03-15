@@ -162,7 +162,7 @@ def _unwrap_stream(uri, timeout, scanner, requests_session):
                 'Failed parsing URI (%s) as playlist; found potential stream.',
                 uri)
             return uri, None
-w
+
         # TODO Test streams and return first that seems to be playable
         logger.debug(
             'Parsed playlist (%s) and found new URI: %s', uri, uris[0])
