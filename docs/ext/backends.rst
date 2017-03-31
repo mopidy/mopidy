@@ -65,6 +65,15 @@ https://github.com/tkem/mopidy-dleyna
 Provides a backend for playing music from Digital Media Servers using
 the `dLeyna <https://01.org/dleyna>`_ D-Bus interface.
 
+
+Mopidy-Emby
+===========
+
+https://github.com/xsteadfastx/mopidy-emby
+
+Provides a backend for playing music from `Emby Media Servers <https://emby.media>`_. 
+
+
 Mopidy-File
 ===========
 
