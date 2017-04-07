@@ -39,7 +39,7 @@ block in the Pi Musicbox integrated audio jukebox system for Raspberry Pi.
 
 **Mopidy is hackable**
 
-Mopidy's extension support and Python, JSON-RPC, and JavaScript APIs makes
+Mopidy's extension support and Python, JSON-RPC, and JavaScript APIs make
 Mopidy perfect for building your own hacks. In one project, a Raspberry Pi was
 embedded in an old cassette player. The buttons and volume control are wired up
 with GPIO on the Raspberry Pi, and is used to control playback through a custom
