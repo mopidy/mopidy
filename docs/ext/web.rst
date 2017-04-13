@@ -30,6 +30,24 @@ To install, run::
     pip install Mopidy-API-Explorer
 
 
+Mopidy-Iris (formerly Mopidy-Spotmop)
+=====================================
+
+https://github.com/jaedb/iris
+
+A comprehensive client designed for Spotify users, with support for a
+variety of other backends. Built using React and Redux. Made by James 
+Barnsley.
+
+.. image:: /ext/iris.jpg
+    :width: 720
+    :height: 455
+
+To install, run::
+
+    pip install Mopidy-Iris
+
+
 Mopidy-Local-Images
 ===================
 
@@ -125,8 +143,8 @@ Also the web client used for Wouter's popular `Pi Musicbox
 <http://www.pimusicbox.com/>`_ image for Raspberry Pi.
 
 .. image:: /ext/musicbox_webclient.png
-    :width: 1275
-    :height: 600
+    :width: 1312
+    :height: 723
 
 To install, run::
 
@@ -162,22 +180,6 @@ Bootstrap by Peter Odding.
 To install, run::
 
     pip install Mopidy-Simple-Webclient
-
-
-Mopidy-Spotmop
-==============
-
-https://github.com/jaedb/spotmop
-
-A client targeted at Spotify users. Made by James Barnsley.
-
-.. image:: /ext/spotmop.jpg
-    :width: 720
-    :height: 455
-
-To install, run::
-
-    pip install Mopidy-Spotmop
 
 
 Mopidy-WebSettings

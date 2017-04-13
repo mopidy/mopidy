@@ -42,7 +42,7 @@ def currentsong(context):
             tl_track, position=position, stream_title=stream_title)
 
 
-@protocol.commands.add('idle', list_command=False)
+@protocol.commands.add('idle')
 def idle(context, *subsystems):
     """
     *musicpd.org, status section:*

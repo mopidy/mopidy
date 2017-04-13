@@ -5,10 +5,33 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
-v2.1.0 (UNRELEASED)
+v2.1.1 (UNRELEASED)
 ===================
 
-Feature release.
+Bug fix release.
+
+- MPD: Added ``idle`` to the list of available commands.
+  (Fixes: :issue:`1593`, PR: :issue:`1597`)
+
+
+v2.1.0 (2017-01-02)
+===================
+
+Mopidy 2.1.0, a feature release, is finally out!
+
+Since the release of 2.0.0, it has been quiet times in Mopidy circles. This is
+mainly caused by core developers moving from the enterprise to startups or into
+positions with more responsibility, and getting more kids. Of course, this has
+greatly decreased the amount of spare time available for open source work. But
+fear not, Mopidy is not dead. We've returned from year long periods with close
+to no activity before, and will hopefully do so again.
+
+Despite all, we've closed or merged approximately 18 issues and pull requests
+through about 170 commits since the release of v2.0.1 back in August.
+
+The major new feature in Mopidy 2.1 is support for restoring playback state and
+the current playlist after a restart. This feature was contributed by `Jens
+Lütjen <https://github.com/dublok>`_.
 
 - Dependencies: Drop support for Tornado < 3.2. Though strictly a breaking
   change, this shouldn't have any effect on what systems we support, as Tornado

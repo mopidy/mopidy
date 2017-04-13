@@ -29,6 +29,11 @@ How to for Raspbian Jessie
    <https://www.raspberrypi.org/documentation/installation/installing-images/README.md>`_
    for instructions.
 
+   You'll need to enable SSH if you are not connecting a monitor and a keyboard.
+   As of the November 2016 release, Raspbian has the SSH server disabled by
+   default. SSH can be enabled by placing a file named 'ssh', without any
+   extension, onto the boot partition of the SD card.
+
 #. If you connect a monitor and a keyboard, you'll see that the Pi boots right
    into the ``raspi-config`` tool.
 

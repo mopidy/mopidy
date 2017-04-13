@@ -17,10 +17,9 @@ If you are running OS X, you can install everything needed with Homebrew.
 #. If you are already using Homebrew, make sure your installation is up to
    date before you continue::
 
-       brew update
-       brew upgrade --all
+       brew upgrade
 
-   Notice that this will upgrade all software on your system that have been
+   Note that this will upgrade all software on your system that have been
    installed with Homebrew.
 
 #. Mopidy works out of box if you have installed Python from Homebrew::
