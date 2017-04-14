@@ -367,16 +367,20 @@ class TracklistController(object):
         deprecation.warn('core.tracklist.previous_track', pending=True)
         tl_track is None or validation.check_instance(tl_track, TlTrack)
 
-        if self.get_repeat() or self.get_consume() or self.get_random():
-            return tl_track
-
         position = self.index(tl_track)
 
-        if position in (None, 0):
+        if position is None:
             return None
 
-        # Since we know we are not at zero we have to be somewhere in the range
-        # 1 - len(tracks) Thus 'position - 1' will always be within the list.
+        if self.get_consume() or self.get_random():
+            return self._tl_tracks[position]
+
+        if position == 0:
+            if self.get_repeat():
+                return self._tl_tracks[-1]
+            else:
+                return self._tl_tracks[0]
+
         return self._tl_tracks[position - 1]
 
     def add(self, tracks=None, at_position=None, uri=None, uris=None):
