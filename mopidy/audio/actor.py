@@ -678,6 +678,19 @@ class Audio(pykka.ThreadingActor):
             Gst.Format.TIME, Gst.SeekFlags.FLUSH, gst_position)
         return result
 
+    def get_length(self):
+        """
+        Get total track duration in miliseconds
+
+        :rtype: int
+        """
+        try:
+            gst_duration = self._playbin.query_duration(gst.FORMAT_TIME)[0]
+            return utils.clocktime_to_millisecond(gst_duration)
+        except gst.QueryError:
+            logger.debug('Duration query failed')
+            return 0
+
     def start_playback(self):
         """
         Notify GStreamer that it should start playback.

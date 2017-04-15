@@ -148,6 +148,15 @@ class PlaybackController(object):
         Use :meth:`get_time_position` instead.
     """
 
+    def get_track_length(self):
+        if self.audio:
+            return self.audio.get_length()
+        if self.current_tl_track:
+            return self.current_tl_track.track.length
+
+    track_length = property(get_track_length)
+    """Track known duration in miliseconds"""
+
     def get_volume(self):
         """
         .. deprecated:: 1.0
