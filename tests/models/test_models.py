@@ -564,6 +564,11 @@ class TrackTest(unittest.TestCase):
         with self.assertRaises(AttributeError):
             track.uri = None
 
+    def test_serialize_falsy_values(self):
+        with self.assertRaises(ValueError) as e:
+            Track(uri='')
+        assert e.exception.message == 'Field "uri" must not be empty.'
+
     def test_name(self):
         name = 'a name'
         track = Track(name=name)
