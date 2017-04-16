@@ -11,7 +11,7 @@ if not (2, 7) <= sys.version_info < (3,):
         platform.python_version())
 
 
-warnings.filterwarnings('ignore', 'could not open display')
+warnings.filterwarnings('ignore', 'could not open display', 'without X11 $DISPLAY')
 
 
 __version__ = '2.1.0'
