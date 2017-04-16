@@ -66,6 +66,21 @@ please follow the directions :ref:`here <contributing>`.
    ``gst-plugins-meta`` is the one that actually pulls in the plugins you want,
    so pay attention to the USE flags, e.g. ``alsa``, ``mp3``, etc.
 
+   If you are running OS X, you need to install a few things
+
+    #. Install Xcode command line developer tools. Do this even if you already have Xcode installed::
+      
+        xcode-select --install
+
+    #. Install `XQuartz <http://xquartz.macosforge.org/>`_ as GStreamer depends on it.
+
+    #. Make sure you have `Homebrew <http://brew.sh/>`_ installed. This is used to install Gstreamer.
+
+    #. You need to run ``brew tap homebrew/versions`` and then run the following commands::
+
+        brew install gst-python010 gst-plugins-good010
+        brew install gst-plugins-ugly --with-mad
+
 #. Install the latest release of Mopidy::
 
        sudo pip install -U mopidy
