@@ -379,7 +379,7 @@ class TracklistController(object):
             if self.get_repeat():
                 return self._tl_tracks[-1]
             else:
-                return self._tl_tracks[0]
+                return None
 
         return self._tl_tracks[position - 1]
 
