@@ -15,7 +15,7 @@ def test(path=None, coverage=False, watch=False, warn=False):
     if watch:
         return watcher(test, path=path, coverage=coverage)
     path = path or 'tests/'
-    cmd = 'py.test'
+    cmd = 'pytest'
     if coverage:
         cmd += ' --cov=mopidy --cov-report=term-missing'
     cmd += ' %s' % path

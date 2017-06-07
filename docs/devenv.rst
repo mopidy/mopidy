@@ -271,31 +271,31 @@ Running unit tests
 Under the hood, ``tox -e py27`` will use `pytest <http://pytest.org/>`_ as the
 test runner. We can also use it directly to run all tests::
 
-    py.test
+    pytest
 
-py.test has lots of possibilities, so you'll have to dive into their docs and
+pytest has lots of possibilities, so you'll have to dive into their docs and
 plugins to get full benefit from it. To get you interested, here are some
 examples.
 
 We can limit to just tests in a single directory to save time::
 
-    py.test tests/http/
+    pytest tests/http/
 
 With the help of the pytest-xdist plugin, we can run tests with four Python
 processes in parallel, which usually cuts the test time in half or more::
 
-    py.test -n 4
+    pytest -n 4
 
 Another useful feature from pytest-xdist, is the possiblity to stop on the
 first test failure, watch the file system for changes, and then rerun the
 tests. This makes for a very quick code-test cycle::
 
-    py.test -f    # or --looponfail
+    pytest -f    # or --looponfail
 
 With the help of the pytest-cov plugin, we can get a report on what parts of
 the given module, ``mopidy`` in this example, are covered by the test suite::
 
-    py.test --cov=mopidy --cov-report=term-missing
+    pytest --cov=mopidy --cov-report=term-missing
 
 .. note::
 
@@ -305,9 +305,9 @@ the given module, ``mopidy`` in this example, are covered by the test suite::
 If we want to speed up the test suite, we can even get a list of the ten
 slowest tests::
 
-    py.test --durations=10
+    pytest --durations=10
 
-By now, you should be convinced that running py.test directly during
+By now, you should be convinced that running pytest directly during
 development can be very useful.
 
 
@@ -402,7 +402,7 @@ Working on extensions
 Much of the above also applies to Mopidy extensions, though they're often a bit
 simpler. They don't have documentation sites and their test suites are either
 small and fast, or sadly missing entirely. Most of them use tox and flake8, and
-py.test can be used to run their test suites.
+pytest can be used to run their test suites.
 
 .. contents::
    :local:
