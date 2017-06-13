@@ -154,6 +154,13 @@ class SoftwareMixer(object):
     def setup(self, element, mixer_ref):
         self._element = element
         self._mixer.setup(mixer_ref)
+        self._signals.connect(element, 'notify', self.on_element_notify)
+
+    def on_element_notify(self, element, param):
+        if param.name == 'mute':
+            self._mixer.trigger_mute_changed(self.get_mute())
+        elif param.name == 'volume':
+            self._mixer.trigger_volume_changed(self.get_volume())
 
     def teardown(self):
         self._signals.clear()
@@ -164,14 +171,12 @@ class SoftwareMixer(object):
 
     def set_volume(self, volume):
         self._element.set_property('volume', volume / 100.0)
-        self._mixer.trigger_volume_changed(self.get_volume())
 
     def get_mute(self):
         return self._element.get_property('mute')
 
     def set_mute(self, mute):
         self._element.set_property('mute', bool(mute))
-        self._mixer.trigger_mute_changed(self.get_mute())
 
 
 class _Handler(object):
