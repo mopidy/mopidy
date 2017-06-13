@@ -515,6 +515,12 @@ class Audio(pykka.ThreadingActor):
         volume.link(self._outputs)
 
         if self.mixer:
+            output_volume = self._outputs.get_by_interface(
+                GObject.GType.from_name('GstStreamVolume'))
+
+            if output_volume and self._config['audio']['output_volume']:
+                volume = output_volume
+
             self.mixer.setup(volume, self.actor_ref.proxy().mixer)
 
         ghost_pad = Gst.GhostPad.new('sink', queue.get_static_pad('sink'))
