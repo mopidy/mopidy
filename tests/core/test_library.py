@@ -148,6 +148,9 @@ class CoreLibraryTest(BaseCoreLibraryTest):
             Ref.track(uri='dummy1:track:/foo/baz.mp3', name='Baz'),
         ])
 
+    def test_lookup_returns_empty_dict_for_no_uris(self):
+        self.assertEqual({}, self.core.library.lookup(uris=[]))
+
     def test_lookup_fails_with_uri_and_uris_set(self):
         with self.assertRaises(ValueError):
             self.core.library.lookup('dummy1:a', ['dummy2:a'])
