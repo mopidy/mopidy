@@ -266,7 +266,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertEqual(1, len(tracks))
         self.assertEqual('dummy:a', tracks[0].uri)
         self.assertEqual('Track A', tracks[0].name)
-        self.assertEqual(5000,      tracks[0].length)
+        self.assertEqual(5000, tracks[0].length)
 
         self.assertInResponse('OK')
 
@@ -320,6 +320,13 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
         self.assertIsNotNone(self.backend.playlists.lookup('dummy:name').get())
 
+    def test_playlistclear_creates_playlist_save_fails(self):
+        self.backend.playlists.set_allow_save(False)
+        self.send_request('playlistclear "name"')
+
+        self.assertInResponse('ACK [0@0] {playlistclear} Backend with '
+                              'scheme "dummy" failed to save playlist')
+
     def test_playlistclear_invalid_name_acks(self):
         self.send_request('playlistclear "foo/bar"')
         self.assertInResponse('ACK [2@0] {playlistclear} playlist name is '
@@ -341,6 +348,22 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
         self.assertEqual(
             2, len(self.backend.playlists.get_items('dummy:a1').get()))
+
+    def test_playlistdelete_save_fails(self):
+        tracks = [
+            Track(uri='dummy:a'),
+            Track(uri='dummy:b'),
+            Track(uri='dummy:c'),
+        ]   # len() == 3
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(
+                name='name', uri='dummy:a1', tracks=tracks)])
+        self.backend.playlists.set_allow_save(False)
+
+        self.send_request('playlistdelete "name" "2"')
+
+        self.assertInResponse('ACK [0@0] {playlistdelete} Backend with '
+                              'scheme "dummy" failed to save playlist')
 
     def test_playlistdelete_invalid_name_acks(self):
         self.send_request('playlistdelete "foo/bar" "0"')
@@ -373,6 +396,22 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertEqual(
             "dummy:c",
             self.backend.playlists.get_items('dummy:a1').get()[0].uri)
+
+    def test_playlistmove_save_falis(self):
+        tracks = [
+            Track(uri='dummy:a'),
+            Track(uri='dummy:b'),
+            Track(uri='dummy:c')    # this one is getting moved to top
+        ]
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(
+                name='name', uri='dummy:a1', tracks=tracks)])
+        self.backend.playlists.set_allow_save(False)
+
+        self.send_request('playlistmove "name" "2" "0"')
+
+        self.assertInResponse('ACK [0@0] {playlistmove} Backend with '
+                              'scheme "dummy" failed to save playlist')
 
     def test_playlistmove_invalid_name_acks(self):
         self.send_request('playlistmove "foo/bar" "0" "1"')
@@ -420,6 +459,17 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
         self.assertIsNotNone(
             self.backend.playlists.lookup('dummy:new_name').get())
+
+    def test_rename_save_fails(self):
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(
+                name='old_name', uri='dummy:a1', tracks=[Track(uri='b')])])
+        self.backend.playlists.set_allow_save(False)
+
+        self.send_request('rename "old_name" "new_name"')
+
+        self.assertInResponse('ACK [0@0] {rename} Backend with '
+                              'scheme "dummy" failed to save playlist')
 
     def test_rename_unknown_playlist_acks(self):
         self.send_request('rename "foo" "bar"')
@@ -471,6 +521,13 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
         self.assertInResponse('OK')
         self.assertIsNotNone(self.backend.playlists.lookup('dummy:name').get())
+
+    def test_save_fails(self):
+        self.backend.playlists.set_allow_save(False)
+        self.send_request('save "name"')
+
+        self.assertInResponse('ACK [0@0] {save} Backend with '
+                              'scheme "dummy" failed to save playlist')
 
     def test_save_invalid_name_acks(self):
         self.send_request('save "foo/bar"')

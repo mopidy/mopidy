@@ -230,8 +230,7 @@ def playlistclear(context, name):
     The playlist will be created if it does not exist.
     """
     _check_playlist_name(name)
-    uri = context.lookup_playlist_uri_from_name(name)
-    playlist = uri is not None and context.core.playlists.lookup(uri).get()
+    playlist = _get_playlist(context, name, must_exist=False)
     if not playlist:
         playlist = context.core.playlists.create(name).get()
 
@@ -239,7 +238,7 @@ def playlistclear(context, name):
     playlist = playlist.replace(tracks=[])
     if context.core.playlists.save(playlist).get() is None:
         raise exceptions.MpdFailedToSavePlaylist(
-            urllib.parse.urlparse(uri).scheme)
+            urllib.parse.urlparse(playlist.uri).scheme)
 
 
 @protocol.commands.add('playlistdelete', songpos=protocol.UINT)
@@ -266,7 +265,7 @@ def playlistdelete(context, name, songpos):
     saved_playlist = context.core.playlists.save(playlist).get()
     if saved_playlist is None:
         raise exceptions.MpdFailedToSavePlaylist(
-            urllib.parse.urlparse(uri).scheme)
+            urllib.parse.urlparse(playlist.uri).scheme)
 
 
 @protocol.commands.add(
@@ -307,7 +306,7 @@ def playlistmove(context, name, from_pos, to_pos):
     saved_playlist = context.core.playlists.save(playlist).get()
     if saved_playlist is None:
         raise exceptions.MpdFailedToSavePlaylist(
-            urllib.parse.urlparse(uri).scheme)
+            urllib.parse.urlparse(playlist.uri).scheme)
 
 
 @protocol.commands.add('rename')
