@@ -20,7 +20,7 @@ When it is enabled it starts a web server at the port specified by the
     authorization. Anyone able to access the web server can use the full core
     API of Mopidy. Thus, you probably only want to make the web server
     available from your local network or place it behind a web proxy which
-    takes care or user authentication. You have been warned.
+    takes care of user authentication. You have been warned.
 
 
 Hosting web clients
