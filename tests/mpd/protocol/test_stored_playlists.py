@@ -263,10 +263,10 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.send_request('load "A-list"')
 
         tracks = self.core.tracklist.tracks.get()
-        self.assertEqual(1, len(tracks))
-        self.assertEqual('dummy:a', tracks[0].uri)
-        self.assertEqual('Track A', tracks[0].name)
-        self.assertEqual(5000, tracks[0].length)
+        self.assertEqual(len(tracks), 1)
+        self.assertEqual(tracks[0].uri, 'dummy:a')
+        self.assertEqual(tracks[0].name, 'Track A')
+        self.assertEqual(tracks[0].length, 5000)
 
         self.assertInResponse('OK')
 
@@ -397,7 +397,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
             "dummy:c",
             self.backend.playlists.get_items('dummy:a1').get()[0].uri)
 
-    def test_playlistmove_save_falis(self):
+    def test_playlistmove_save_fails(self):
         tracks = [
             Track(uri='dummy:a'),
             Track(uri='dummy:b'),

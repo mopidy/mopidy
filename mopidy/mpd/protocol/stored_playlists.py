@@ -20,7 +20,7 @@ def _get_playlist(context, name, must_exist=True):
     uri = context.lookup_playlist_uri_from_name(name)
     if uri:
         playlist = context.core.playlists.lookup(uri).get()
-    if must_exist and not playlist:
+    if must_exist and playlist is None:
         raise exceptions.MpdNoExistError('No such playlist')
     return playlist
 
