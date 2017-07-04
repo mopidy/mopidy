@@ -64,6 +64,7 @@ See :ref:`config` for general help on configuring Mopidy.
 .. confval:: mpd/hostname
 
     Which address the MPD server should bind to.
+    This can be a network address or a file path.
 
     ``127.0.0.1``
         Listens only on the IPv4 loopback interface
@@ -73,6 +74,8 @@ See :ref:`config` for general help on configuring Mopidy.
         Listens on all IPv4 interfaces
     ``::``
         Listens on all interfaces, both IPv4 and IPv6
+    ``~/.mopidy/socket``
+        Listen on the socket in your configuration directory
 
 .. confval:: mpd/port
 
