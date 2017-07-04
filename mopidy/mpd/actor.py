@@ -2,8 +2,9 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
-import pykka
 import socket
+
+import pykka
 
 from mopidy import exceptions, listener, zeroconf
 from mopidy.core import CoreListener
@@ -64,7 +65,10 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
         if server.server_socket.type == socket.AF_UNIX:
             logger.info('MPD server running at %s', self.hostname)
         else:
-            logger.info('MPD server running at [%s]:%s', self.hostname, self.port)
+            logger.info(
+                'MPD server running at [%s]:%s',
+                self.hostname,
+                self.port)
 
         return server
 

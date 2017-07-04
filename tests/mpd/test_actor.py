@@ -43,6 +43,7 @@ def test_idle_hooked_up_correctly(event, expected):
     else:
         send_mock.assert_called_once_with(mock.ANY, expected)
 
+
 @pytest.mark.parametrize("event,expected", [
     (['track_playback_paused', 'tl_track', 'time_position'], None),
     (['track_playback_resumed', 'tl_track', 'time_position'], None),

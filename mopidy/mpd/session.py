@@ -30,7 +30,10 @@ class MpdSession(network.LineProtocol):
         if self.connection.sock.type == socket.AF_UNIX:
             logger.info('New MPD connection from %s', self.host)
         else:
-            logger.info('New MPD connection from [%s]:%s', self.host, self.port)
+            logger.info(
+                'New MPD connection from [%s]:%s',
+                self.host,
+                self.port)
         self.send_lines(['OK MPD %s' % protocol.VERSION])
 
     def on_line_received(self, line):

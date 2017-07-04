@@ -80,7 +80,7 @@ class Server(object):
         self.watcher = self.register_server_socket(self.server_socket.fileno())
 
     def create_server_socket(self, host, port):
-        if re.search('/', host): # host is a path so use unix socket
+        if re.search('/', host):  # host is a path so use unix socket
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             sock.setblocking(False)
             sock.bind(host)
@@ -102,11 +102,15 @@ class Server(object):
         self.server_socket.shutdown(socket.SHUT_RDWR)
         self.server_socket.close()
 
-        if name: # clean up the socket file
+        # clean up the socket file
+        if name:
             os.unlink(name)
 
     def register_server_socket(self, fileno):
-        return GObject.io_add_watch(fileno, GObject.IO_IN, self.handle_connection)
+        return GObject.io_add_watch(
+            fileno,
+            GObject.IO_IN,
+            self.handle_connection)
 
     def handle_connection(self, fd, flags):
         try:
