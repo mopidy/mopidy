@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import errno
 import logging
+import os
 import re
 import socket
 import sys
@@ -76,17 +77,36 @@ class Server(object):
         self.timeout = timeout
         self.server_socket = self.create_server_socket(host, port)
 
-        self.register_server_socket(self.server_socket.fileno())
+        self.watcher = self.register_server_socket(self.server_socket.fileno())
 
     def create_server_socket(self, host, port):
-        sock = create_socket()
-        sock.setblocking(False)
-        sock.bind((host, port))
+        if re.search('/', host): # host is a path so use unix socket
+            sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            sock.setblocking(False)
+            sock.bind(host)
+        else:
+            sock = create_socket()
+            sock.setblocking(False)
+            sock.bind((host, port))
+
         sock.listen(1)
         return sock
 
+    def stop(self):
+        GObject.source_remove(self.watcher)
+        if self.server_socket.type == socket.AF_UNIX:
+            name = self.server_socket.getsockname()
+        else:
+            name = None
+
+        self.server_socket.shutdown(socket.SHUT_RDWR)
+        self.server_socket.close()
+
+        if name: # clean up the socket file
+            os.unlink(name)
+
     def register_server_socket(self, fileno):
-        GObject.io_add_watch(fileno, GObject.IO_IN, self.handle_connection)
+        return GObject.io_add_watch(fileno, GObject.IO_IN, self.handle_connection)
 
     def handle_connection(self, fd, flags):
         try:
@@ -140,7 +160,11 @@ class Connection(object):
     def __init__(self, protocol, protocol_kwargs, sock, addr, timeout):
         sock.setblocking(False)
 
-        self.host, self.port = addr[:2]  # IPv6 has larger addr
+        if (sock.type == socket.AF_UNIX):
+            self.host = sock.getsockname()
+            self.port = None
+        else:
+            self.host, self.port = addr[:2]  # IPv6 has larger addr
 
         self.sock = sock
         self.protocol = protocol

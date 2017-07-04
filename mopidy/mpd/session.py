@@ -2,6 +2,8 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
+import socket
+
 from mopidy.internal import formatting, network
 from mopidy.mpd import dispatcher, protocol
 
@@ -25,7 +27,10 @@ class MpdSession(network.LineProtocol):
             session=self, config=config, core=core, uri_map=uri_map)
 
     def on_start(self):
-        logger.info('New MPD connection from [%s]:%s', self.host, self.port)
+        if self.connection.sock.type == socket.AF_UNIX:
+            logger.info('New MPD connection from %s', self.host)
+        else:
+            logger.info('New MPD connection from [%s]:%s', self.host, self.port)
         self.send_lines(['OK MPD %s' % protocol.VERSION])
 
     def on_line_received(self, line):

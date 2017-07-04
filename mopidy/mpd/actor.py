@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import logging
 
 import pykka
+import socket
 
 from mopidy import exceptions, listener, zeroconf
 from mopidy.core import CoreListener
@@ -41,11 +42,11 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
         self.zeroconf_name = config['mpd']['zeroconf']
         self.zeroconf_service = None
 
-        self._setup_server(config, core)
+        self.server = self._setup_server(config, core)
 
     def _setup_server(self, config, core):
         try:
-            network.Server(
+            server = network.Server(
                 self.hostname, self.port,
                 protocol=session.MpdSession,
                 protocol_kwargs={
@@ -60,7 +61,12 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
                 'MPD server startup failed: %s' %
                 encoding.locale_decode(error))
 
-        logger.info('MPD server running at [%s]:%s', self.hostname, self.port)
+        if server.server_socket.type == socket.AF_UNIX:
+            logger.info('MPD server running at %s', self.hostname)
+        else:
+            logger.info('MPD server running at [%s]:%s', self.hostname, self.port)
+
+        return server
 
     def on_start(self):
         if self.zeroconf_name:
@@ -75,6 +81,7 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
             self.zeroconf_service.unpublish()
 
         process.stop_actors_by_class(session.MpdSession)
+        self.server.stop()
 
     def on_event(self, event, **kwargs):
         if event not in _CORE_EVENTS_TO_IDLE_SUBSYSTEMS:
