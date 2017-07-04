@@ -22,6 +22,7 @@ class ServerTest(unittest.TestCase):
             self.mock, sentinel.host, sentinel.port, sentinel.protocol)
         self.mock.create_server_socket.assert_called_once_with(
             sentinel.host, sentinel.port)
+        self.mock.stop()
 
     def test_init_calls_register_server(self):
         sock = Mock(spec=socket.SocketType)
@@ -60,9 +61,9 @@ class ServerTest(unittest.TestCase):
         sock = create_socket.return_value
 
         network.Server.create_server_socket(
-            self.mock, sentinel.host, sentinel.port)
+            self.mock, str(sentinel.host), sentinel.port)
         sock.setblocking.assert_called_once_with(False)
-        sock.bind.assert_called_once_with((sentinel.host, sentinel.port))
+        sock.bind.assert_called_once_with((str(sentinel.host), sentinel.port))
         sock.listen.assert_called_once_with(any_int)
 
     @patch.object(network, 'create_socket', new=Mock())
@@ -70,7 +71,7 @@ class ServerTest(unittest.TestCase):
         network.create_socket.side_effect = socket.error
         with self.assertRaises(socket.error):
             network.Server.create_server_socket(
-                self.mock, sentinel.host, sentinel.port)
+                self.mock, str(sentinel.host), sentinel.port)
 
     @patch.object(network, 'create_socket', new=Mock())
     def test_create_server_bind_fails(self):
@@ -79,7 +80,7 @@ class ServerTest(unittest.TestCase):
 
         with self.assertRaises(socket.error):
             network.Server.create_server_socket(
-                self.mock, sentinel.host, sentinel.port)
+                self.mock, str(sentinel.host), sentinel.port)
 
     @patch.object(network, 'create_socket', new=Mock())
     def test_create_server_listen_fails(self):
@@ -88,7 +89,7 @@ class ServerTest(unittest.TestCase):
 
         with self.assertRaises(socket.error):
             network.Server.create_server_socket(
-                self.mock, sentinel.host, sentinel.port)
+                self.mock, str(sentinel.host), sentinel.port)
 
     @patch.object(GObject, 'io_add_watch', new=Mock())
     def test_register_server_socket_sets_up_io_watch(self):

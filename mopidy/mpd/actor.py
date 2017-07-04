@@ -36,7 +36,7 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
         super(MpdFrontend, self).__init__()
 
         self.hostname = network.format_hostname(config['mpd']['hostname'])
-        self.port = config['mpd']['port']
+        self.port = config['mpd']['port'] if 'port' in config['mpd'] else None
         self.uri_map = uri_mapper.MpdUriMapper(core)
 
         self.zeroconf_name = config['mpd']['zeroconf']

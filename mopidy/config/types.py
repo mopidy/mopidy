@@ -258,6 +258,8 @@ class Hostname(ConfigValue):
         validators.validate_required(value, self._required)
         if not value.strip():
             return None
+        if re.search('/', value):
+            return path.expand_path(value)
         try:
             socket.getaddrinfo(value, None)
         except socket.error:
