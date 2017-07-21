@@ -14,6 +14,22 @@ to show up here, follow the :ref:`guide on creating extensions <extensiondev>`.
 
 .. _http-explore-extension:
 
+Mopidy-Auto
+===========
+
+https://github.com/gotling/mopidy-auto
+
+Mopidy extension to automate music playback based on time of day.
+
+.. image:: /ext/auto.png
+    :width: 533
+    :height: 370
+
+To install, run::
+
+    pip install Mopidy-Auto
+
+
 Mopidy-API-Explorer
 ===================
 
