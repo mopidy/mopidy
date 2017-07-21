@@ -13,6 +13,9 @@ Bug fix release.
 - MPD: Added ``idle`` to the list of available commands.
   (Fixes: :issue:`1593`, PR: :issue:`1597`)
 
+- Audio: Add a new config value :confval:`audio/output_volume` to enable
+  native sink volume control.
+
 
 v2.1.0 (2017-01-02)
 ===================

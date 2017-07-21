@@ -162,6 +162,11 @@ These are the available audio configurations. For specific use cases, see
     ``gst-inspect-1.0`` to see what output properties can be set on the sink.
     For example: ``gst-inspect-1.0 shout2send``
 
+.. confval:: audio/output_volume
+
+    Use native sink volume control when applicable. (eg. when using
+    ``pulsesink``) Defaults to ``false``.
+
 .. confval:: audio/buffer_time
 
     Buffer size in milliseconds.
