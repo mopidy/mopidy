@@ -14,6 +14,22 @@ to show up here, follow the :ref:`guide on creating extensions <extensiondev>`.
 
 .. _http-explore-extension:
 
+Mopidy-API-Explorer
+===================
+
+https://github.com/dz0ny/mopidy-api-explorer
+
+Web extension for browsing the Mopidy HTTP API.
+
+.. image:: /ext/api_explorer.png
+    :width: 1176
+    :height: 713
+
+To install, run::
+
+    pip install Mopidy-API-Explorer
+
+
 Mopidy-Auto
 ===========
 
@@ -30,22 +46,6 @@ Mopidy extension to automate music playback based on time of day.
 To install, run::
 
     pip install Mopidy-Auto
-
-
-Mopidy-API-Explorer
-===================
-
-https://github.com/dz0ny/mopidy-api-explorer
-
-Web extension for browsing the Mopidy HTTP API.
-
-.. image:: /ext/api_explorer.png
-    :width: 1176
-    :height: 713
-
-To install, run::
-
-    pip install Mopidy-API-Explorer
 
 
 Mopidy-Iris (formerly Mopidy-Spotmop)
