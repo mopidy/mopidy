@@ -30,6 +30,27 @@ To install, run::
     pip install Mopidy-API-Explorer
 
 
+Mopidy-Auto
+===========
+
+https://github.com/gotling/mopidy-auto
+
+Mopidy extension to automate music playback based on time of day.
+
+.. warning::
+    This extension reacts to the events ``tracklist_changed``, ``track_playback_ended``, and
+    ``track_playback_resumed`` to accomplish its goals. Other web extensions will not work
+    as expected when this extension is installed.
+
+.. image:: /ext/auto.png
+    :width: 533
+    :height: 370
+
+To install, run::
+
+    pip install Mopidy-Auto
+
+
 Mopidy-Iris (formerly Mopidy-Spotmop)
 =====================================
 
