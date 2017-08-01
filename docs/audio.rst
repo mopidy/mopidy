@@ -84,6 +84,16 @@ simultaneously. To use the Icecast output, do the following:
 
        [audio]
        output = audioresample ! audioconvert ! vorbisenc ! oggmux ! shout2send mount=mopidy ip=127.0.0.1 port=8000 password=hackme
+    
+    Example for dual-audio output: Outputs to autoaudiosink as well as to icecast mp3 stream
+    
+    .. code-block:: ini
+        
+        [audio]
+        output = tee name=t ! queue ! audioresample ! autoaudiosink t. ! queue  ! lamemp3enc ! shout2send mount=mopidy ip=127.0.0.1 port=8000 password=hackme
+
+    
+        
 
 Other advanced setups are also possible for outputs. Basically, anything you
 can use with the ``gst-launch-1.0`` command can be plugged into
