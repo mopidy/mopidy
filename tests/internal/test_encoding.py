@@ -43,3 +43,11 @@ class LocaleDecodeTest(unittest.TestCase):
         encoding.locale_decode('abc')
 
         self.assertFalse(mock.called)
+
+    def test_failed_decoding(self, mock):
+        # Checks that local_decode() can handle ascii locale
+        mock.return_value = 'ascii'
+
+        bytestr = b'\xc3'
+        expected = u'\ufffd'
+        self.assertEqual(expected, encoding.locale_decode(bytestr))
