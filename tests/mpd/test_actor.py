@@ -61,7 +61,8 @@ def test_idle_hooked_up_correctly(event, expected):
     (['stream_title_changed', 'title'], 'playlist'),
 ])
 def test_idle_hooked_up_correctly_with_unix_socket(event, expected):
-    config = {'mpd': {'hostname': '/foobar',
+    config = {'mpd': {'hostname': 'unix:foobar',
+                      'port': None,
                       'zeroconf': None,
                       'max_connections': None,
                       'connection_timeout': None}}

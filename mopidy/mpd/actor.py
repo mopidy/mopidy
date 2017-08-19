@@ -2,6 +2,8 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
+import socket
+
 import pykka
 
 from mopidy import exceptions, listener, zeroconf
@@ -35,7 +37,7 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
         super(MpdFrontend, self).__init__()
 
         self.hostname = network.format_hostname(config['mpd']['hostname'])
-        self.port = config['mpd']['port'] if 'port' in config['mpd'] else None
+        self.port = config['mpd']['port']
         self.uri_map = uri_mapper.MpdUriMapper(core)
 
         self.zeroconf_name = config['mpd']['zeroconf']
@@ -67,7 +69,8 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
         return server
 
     def on_start(self):
-        if self.zeroconf_name:
+        if (self.zeroconf_name and
+                self.server.server_socket.family != socket.AF_UNIX):
             self.zeroconf_service = zeroconf.Zeroconf(
                 name=self.zeroconf_name,
                 stype='_mpd._tcp',
