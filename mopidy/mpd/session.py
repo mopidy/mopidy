@@ -27,24 +27,18 @@ class MpdSession(network.LineProtocol):
             session=self, config=config, core=core, uri_map=uri_map)
 
     def on_start(self):
-        if self.connection.sock.type == socket.AF_UNIX:
-            logger.info('New MPD connection from %s', self.host)
-        else:
-            logger.info(
-                'New MPD connection from [%s]:%s',
-                self.host,
-                self.port)
+        logger.info('New MPD connection from %s', network.format_socket_connection_string(self.connection.sock))
         self.send_lines(['OK MPD %s' % protocol.VERSION])
 
     def on_line_received(self, line):
-        logger.debug('Request from [%s]:%s: %s', self.host, self.port, line)
+        logger.debug('Request from [%s]: %s', network.format_socket_connection_string(self.connection.sock), line)
 
         response = self.dispatcher.handle_request(line)
         if not response:
             return
 
         logger.debug(
-            'Response to [%s]:%s: %s', self.host, self.port,
+            'Response to [%s]: %s', network.format_socket_connection_string(self.connection.sock),
             formatting.indent(self.terminator.join(response)))
 
         self.send_lines(response)

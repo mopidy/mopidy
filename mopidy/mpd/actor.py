@@ -62,13 +62,7 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
                 'MPD server startup failed: %s' %
                 encoding.locale_decode(error))
 
-        if server.server_socket.type == socket.AF_UNIX:
-            logger.info('MPD server running at %s', self.hostname)
-        else:
-            logger.info(
-                'MPD server running at [%s]:%s',
-                self.hostname,
-                self.port)
+        logger.info('MPD server running at %s', network.format_socket_connection_string(server.server_socket))
 
         return server
 

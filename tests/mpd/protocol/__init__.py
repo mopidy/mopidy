@@ -25,6 +25,9 @@ class MockConnection(mock.Mock):
         lines = (line for line in data.split('\n') if line)
         self.response.extend(lines)
 
+    def getsockname(self):
+        return (None, None)
+
 
 class BaseTestCase(unittest.TestCase):
     enable_mixer = True

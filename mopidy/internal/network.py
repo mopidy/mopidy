@@ -62,6 +62,12 @@ def create_unix_socket():
     """Create a Unix domain socket"""
     return socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
+def format_socket_connection_string(sock):
+    """Format the connection string for the given socket"""
+    if sock.family == socket.AF_UNIX:
+        return '%s' % sock.getsockname()
+    else:
+        return '[%s]:%s' % sock.getsockname()[:2]
 
 def format_hostname(hostname):
     """Format hostname for display."""
@@ -99,7 +105,7 @@ class Server(object):
 
     def stop(self):
         GObject.source_remove(self.watcher)
-        if self.server_socket.type == socket.AF_UNIX:
+        if self.server_socket.family == socket.AF_UNIX:
             name = self.server_socket.getsockname()
         else:
             name = None
@@ -146,7 +152,7 @@ class Server(object):
 
     def reject_connection(self, sock, addr):
         # FIXME provide more context in logging?
-        logger.warning('Rejected connection from [%s]:%s', addr[0], addr[1])
+        logger.warning('Rejected connection from %s', format_socket_connection_string(sock))
         try:
             sock.close()
         except socket.error:
@@ -169,7 +175,7 @@ class Connection(object):
     def __init__(self, protocol, protocol_kwargs, sock, addr, timeout):
         sock.setblocking(False)
 
-        if (sock.type == socket.AF_UNIX):
+        if (sock.family == socket.AF_UNIX):
             self.host = sock.getsockname()
             self.port = None
         else:
