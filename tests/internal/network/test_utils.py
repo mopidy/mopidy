@@ -46,14 +46,14 @@ class CreateSocketTest(unittest.TestCase):
     @patch('mopidy.internal.network.has_ipv6', False)
     @patch('socket.socket')
     def test_ipv4_socket(self, socket_mock):
-        network.create_socket()
+        network.create_tcp_socket()
         self.assertEqual(
             socket_mock.call_args[0], (socket.AF_INET, socket.SOCK_STREAM))
 
     @patch('mopidy.internal.network.has_ipv6', True)
     @patch('socket.socket')
     def test_ipv6_socket(self, socket_mock):
-        network.create_socket()
+        network.create_tcp_socket()
         self.assertEqual(
             socket_mock.call_args[0], (socket.AF_INET6, socket.SOCK_STREAM))
 

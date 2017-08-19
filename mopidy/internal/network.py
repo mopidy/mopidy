@@ -41,7 +41,7 @@ def try_ipv6_socket():
 has_ipv6 = try_ipv6_socket()
 
 
-def create_socket():
+def create_tcp_socket():
     """Create a TCP socket with or without IPv6 depending on system support"""
     if has_ipv6:
         sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
@@ -56,6 +56,11 @@ def create_socket():
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     return sock
+
+
+def create_unix_socket():
+    """Create a Unix domain socket"""
+    return socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
 
 def format_hostname(hostname):
@@ -80,15 +85,15 @@ class Server(object):
         self.watcher = self.register_server_socket(self.server_socket.fileno())
 
     def create_server_socket(self, host, port):
-        if re.search('/', host):  # host is a path so use unix socket
-            sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-            sock.setblocking(False)
-            sock.bind(host)
+        match = re.search('^unix:(.*)', host)
+        if match:  # host is a path so use unix socket
+            sock = create_unix_socket()
+            sock.bind(match.group(1))
         else:
-            sock = create_socket()
-            sock.setblocking(False)
+            sock = create_tcp_socket()
             sock.bind((host, port))
 
+        sock.setblocking(False)
         sock.listen(1)
         return sock
 

@@ -56,40 +56,77 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(sentinel.timeout, self.mock.timeout)
         self.assertEqual(sock, self.mock.server_socket)
 
-    @patch.object(network, 'create_socket', spec=socket.SocketType)
-    def test_create_server_socket_sets_up_listener(self, create_socket):
-        sock = create_socket.return_value
+    @patch.object(network, 'create_tcp_socket', spec=socket.SocketType)
+    def test_create_server_socket_sets_up_listener(self, create_tcp_socket):
+        sock = create_tcp_socket.return_value
 
         network.Server.create_server_socket(
             self.mock, str(sentinel.host), sentinel.port)
         sock.setblocking.assert_called_once_with(False)
         sock.bind.assert_called_once_with((str(sentinel.host), sentinel.port))
         sock.listen.assert_called_once_with(any_int)
+        create_tcp_socket.assert_called_once()
 
-    @patch.object(network, 'create_socket', new=Mock())
+    @patch.object(network, 'create_unix_socket', spec=socket.SocketType)
+    def test_create_server_socket_sets_up_listener_unix(self, create_unix_socket):
+        sock = create_unix_socket.return_value
+
+        network.Server.create_server_socket(
+            self.mock, 'unix:'+str(sentinel.host), sentinel.port)
+        sock.setblocking.assert_called_once_with(False)
+        sock.bind.assert_called_once_with(str(sentinel.host))
+        sock.listen.assert_called_once_with(any_int)
+        create_unix_socket.assert_called_once()
+
+    @patch.object(network, 'create_tcp_socket', new=Mock())
     def test_create_server_socket_fails(self):
-        network.create_socket.side_effect = socket.error
+        network.create_tcp_socket.side_effect = socket.error
         with self.assertRaises(socket.error):
             network.Server.create_server_socket(
                 self.mock, str(sentinel.host), sentinel.port)
 
-    @patch.object(network, 'create_socket', new=Mock())
+    @patch.object(network, 'create_unix_socket', new=Mock())
+    def test_create_server_socket_fails_unix(self):
+        network.create_unix_socket.side_effect = socket.error
+        with self.assertRaises(socket.error):
+            network.Server.create_server_socket(
+                self.mock, 'unix:'+str(sentinel.host), sentinel.port)
+
+    @patch.object(network, 'create_tcp_socket', new=Mock())
     def test_create_server_bind_fails(self):
-        sock = network.create_socket.return_value
+        sock = network.create_tcp_socket.return_value
         sock.bind.side_effect = socket.error
 
         with self.assertRaises(socket.error):
             network.Server.create_server_socket(
                 self.mock, str(sentinel.host), sentinel.port)
 
-    @patch.object(network, 'create_socket', new=Mock())
+    @patch.object(network, 'create_unix_socket', new=Mock())
+    def test_create_server_bind_fails_unix(self):
+        sock = network.create_unix_socket.return_value
+        sock.bind.side_effect = socket.error
+
+        with self.assertRaises(socket.error):
+            network.Server.create_server_socket(
+                self.mock, 'unix:' + str(sentinel.host), sentinel.port)
+
+    @patch.object(network, 'create_tcp_socket', new=Mock())
     def test_create_server_listen_fails(self):
-        sock = network.create_socket.return_value
+        sock = network.create_tcp_socket.return_value
         sock.listen.side_effect = socket.error
 
         with self.assertRaises(socket.error):
             network.Server.create_server_socket(
                 self.mock, str(sentinel.host), sentinel.port)
+
+    @patch.object(network, 'create_unix_socket', new=Mock())
+    def test_create_server_listen_fails_unix(self):
+        sock = network.create_unix_socket.return_value
+        sock.listen.side_effect = socket.error
+
+        with self.assertRaises(socket.error):
+            network.Server.create_server_socket(
+                self.mock, 'unix:' + str(sentinel.host), sentinel.port)
 
     @patch.object(GObject, 'io_add_watch', new=Mock())
     def test_register_server_socket_sets_up_io_watch(self):
