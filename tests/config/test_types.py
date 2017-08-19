@@ -344,6 +344,12 @@ class HostnameTest(unittest.TestCase):
         self.assertIsNone(value.deserialize(' '))
         self.assertEqual(0, getaddrinfo_mock.call_count)
 
+    @mock.patch('mopidy.internal.path.expand_path')
+    def test_deserialize_with_unix_socket(self, expand_path_mock):
+        value = types.Hostname()
+        self.assertIsNotNone(value.deserialize('unix:/tmp/mopidy.socket'))
+        expand_path_mock.assert_called_once_with('/tmp/mopidy.socket')
+
 
 class PortTest(unittest.TestCase):
 

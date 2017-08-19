@@ -258,8 +258,9 @@ class Hostname(ConfigValue):
         validators.validate_required(value, self._required)
         if not value.strip():
             return None
-        if re.search('/', value):
-            return path.expand_path(value)
+        match = re.search('^unix:(.*)', value)
+        if match:
+            return 'unix:' + path.expand_path(match.group(1))
         try:
             socket.getaddrinfo(value, None)
         except socket.error:
