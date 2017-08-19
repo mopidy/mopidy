@@ -62,12 +62,14 @@ def create_unix_socket():
     """Create a Unix domain socket"""
     return socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
+
 def format_socket_connection_string(sock):
     """Format the connection string for the given socket"""
     if sock.family == socket.AF_UNIX:
         return '%s' % sock.getsockname()
     else:
         return '[%s]:%s' % sock.getsockname()[:2]
+
 
 def format_hostname(hostname):
     """Format hostname for display."""
@@ -152,7 +154,9 @@ class Server(object):
 
     def reject_connection(self, sock, addr):
         # FIXME provide more context in logging?
-        logger.warning('Rejected connection from %s', format_socket_connection_string(sock))
+        logger.warning(
+            'Rejected connection from %s',
+            format_socket_connection_string(sock))
         try:
             sock.close()
         except socket.error:

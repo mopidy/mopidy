@@ -28,13 +28,17 @@ class FormatSocketConnectionTest(unittest.TestCase):
         sock = Mock(spec=socket.SocketType)
         sock.family = socket.AF_INET
         sock.getsockname.return_value = (sentinel.ip, sentinel.port)
-        self.assertEqual(network.format_socket_connection_string(sock), '[%s]:%s' % (sentinel.ip, sentinel.port))
+        self.assertEqual(
+            network.format_socket_connection_string(sock),
+            '[%s]:%s' % (sentinel.ip, sentinel.port))
 
     def test_format_socket_connection_unix(self):
         sock = Mock(spec=socket.SocketType)
         sock.family = socket.AF_UNIX
         sock.getsockname.return_value = sentinel.sockname
-        self.assertEqual(network.format_socket_connection_string(sock), str(sentinel.sockname))
+        self.assertEqual(
+            network.format_socket_connection_string(sock),
+            str(sentinel.sockname))
 
 
 class TryIPv6SocketTest(unittest.TestCase):

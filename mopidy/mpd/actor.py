@@ -2,8 +2,6 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
-import socket
-
 import pykka
 
 from mopidy import exceptions, listener, zeroconf
@@ -62,7 +60,9 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
                 'MPD server startup failed: %s' %
                 encoding.locale_decode(error))
 
-        logger.info('MPD server running at %s', network.format_socket_connection_string(server.server_socket))
+        logger.info(
+            'MPD server running at %s',
+            network.format_socket_connection_string(server.server_socket))
 
         return server
 

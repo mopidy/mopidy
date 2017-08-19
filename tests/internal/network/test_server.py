@@ -68,11 +68,13 @@ class ServerTest(unittest.TestCase):
         create_tcp_socket.assert_called_once()
 
     @patch.object(network, 'create_unix_socket', spec=socket.SocketType)
-    def test_create_server_socket_sets_up_listener_unix(self, create_unix_socket):
+    def test_create_server_socket_sets_up_listener_unix(
+            self,
+            create_unix_socket):
         sock = create_unix_socket.return_value
 
         network.Server.create_server_socket(
-            self.mock, 'unix:'+str(sentinel.host), sentinel.port)
+            self.mock, 'unix:' + str(sentinel.host), sentinel.port)
         sock.setblocking.assert_called_once_with(False)
         sock.bind.assert_called_once_with(str(sentinel.host))
         sock.listen.assert_called_once_with(any_int)
@@ -90,7 +92,7 @@ class ServerTest(unittest.TestCase):
         network.create_unix_socket.side_effect = socket.error
         with self.assertRaises(socket.error):
             network.Server.create_server_socket(
-                self.mock, 'unix:'+str(sentinel.host), sentinel.port)
+                self.mock, 'unix:' + str(sentinel.host), sentinel.port)
 
     @patch.object(network, 'create_tcp_socket', new=Mock())
     def test_create_server_bind_fails(self):
