@@ -51,18 +51,17 @@ To install, run::
     pip install Mopidy-Auto
 
 
-Mopidy-Iris (formerly Mopidy-Spotmop)
-=====================================
+Mopidy-Iris
+===========
 
 https://github.com/jaedb/iris
 
-A comprehensive client designed for Spotify users, with support for a
-variety of other backends. Built using React and Redux. Made by James 
-Barnsley.
+A comprehensive and mobile-friendly client that presents your library and extensions in a 
+user-friendly and intuitive interface. Built using React and Redux. Made by James Barnsley.
 
 .. image:: /ext/iris.jpg
-    :width: 720
-    :height: 455
+    :width: 888
+    :height: 646
 
 To install, run::
 
