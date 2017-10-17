@@ -59,7 +59,7 @@ https://github.com/jaedb/iris
 A comprehensive and mobile-friendly client that presents your library and extensions in a 
 user-friendly and intuitive interface. Built using React and Redux. Made by James Barnsley.
 
-.. image:: https://raw.githubusercontent.com/jaedb/iris/master/screenshot.jpg
+.. image:: /ext/iris.png
     :width: 888
     :height: 646
 
