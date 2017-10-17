@@ -219,6 +219,15 @@ Extension for providing the browse feature of `Spotify
 releases.
 
 
+Mopidy-Deezer
+=====================
+
+https://github.com/rusty-dev/mopidy-deezer
+
+Extension for playing music from the `Deezer <http://www.deezer.com/>`_ music
+streaming service.
+
+
 Mopidy-Stream
 =============
 
