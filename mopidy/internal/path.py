@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 import os
+import re
 import stat
 import string
 import threading
@@ -45,6 +46,13 @@ def get_or_create_file(file_path, mkdir=True, content=None):
             if content is not None:
                 fh.write(content)
     return file_path
+
+
+def get_unix_socket_path(socket_path):
+    match = re.search('^unix:(.*)', socket_path)
+    if match:
+        return match.group(1)
+    return None
 
 
 def path_to_uri(path):

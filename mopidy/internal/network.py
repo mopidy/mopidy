@@ -10,7 +10,7 @@ import threading
 
 import pykka
 
-from mopidy.internal import encoding
+from mopidy.internal import encoding, path
 from mopidy.internal.gi import GObject
 
 
@@ -93,10 +93,10 @@ class Server(object):
         self.watcher = self.register_server_socket(self.server_socket.fileno())
 
     def create_server_socket(self, host, port):
-        match = re.search('^unix:(.*)', host)
-        if match:  # host is a path so use unix socket
+        socket_path = path.get_unix_socket_path(host)
+        if socket_path:  # host is a path so use unix socket
             sock = create_unix_socket()
-            sock.bind(match.group(1))
+            sock.bind(socket_path)
         else:
             sock = create_tcp_socket()
             sock.bind((host, port))
