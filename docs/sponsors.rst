@@ -16,7 +16,7 @@ for free. We use their services for the following sites:
 
 - Hosting of the APT package repository at https://apt.mopidy.com.
 
-- Hosting of the Discourse forum at https://discuss.mopidy.com.
+- Hosting of the Discourse forum at https://discourse.mopidy.com.
 
 - Mailgun for sending emails from the Discourse forum.
 
