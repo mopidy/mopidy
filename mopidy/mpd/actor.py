@@ -2,8 +2,6 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
-import socket
-
 import pykka
 
 from mopidy import exceptions, listener, zeroconf
@@ -69,8 +67,8 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
         return server
 
     def on_start(self):
-        if (self.zeroconf_name and
-                self.server.server_socket.family != socket.AF_UNIX):
+        if (self.zeroconf_name and not
+                network.is_unix_socket(self.server.server_socket)):
             self.zeroconf_service = zeroconf.Zeroconf(
                 name=self.zeroconf_name,
                 stype='_mpd._tcp',

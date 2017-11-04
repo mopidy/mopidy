@@ -175,12 +175,25 @@ class ServerTest(unittest.TestCase):
 
     def test_accept_connection(self):
         sock = Mock(spec=socket.SocketType)
-        sock.accept.return_value = (sentinel.sock, sentinel.addr)
+        connected_sock = Mock(spec=socket.SocketType)
+        sock.accept.return_value = (connected_sock, sentinel.addr)
         self.mock.server_socket = sock
 
         sock, addr = network.Server.accept_connection(self.mock)
-        self.assertEqual(sentinel.sock, sock)
+        self.assertEqual(connected_sock, sock)
         self.assertEqual(sentinel.addr, addr)
+
+    def test_accept_connection_unix(self):
+        sock = Mock(spec=socket.SocketType)
+        connected_sock = Mock(spec=socket.SocketType)
+        connected_sock.family = socket.AF_UNIX
+        connected_sock.getsockname.return_value = sentinel.sockname
+        sock.accept.return_value = (connected_sock, sentinel.addr)
+        self.mock.server_socket = sock
+
+        sock, addr = network.Server.accept_connection(self.mock)
+        self.assertEqual(connected_sock, sock)
+        self.assertEqual((sentinel.sockname, None), addr)
 
     def test_accept_connection_recoverable_error(self):
         sock = Mock(spec=socket.SocketType)

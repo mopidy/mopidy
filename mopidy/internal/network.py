@@ -17,6 +17,13 @@ from mopidy.internal.gi import GObject
 logger = logging.getLogger(__name__)
 
 
+def is_unix_socket(sock):
+    """Check if the provided socket is a Unix domain socket"""
+    if hasattr(socket, 'AF_UNIX'):
+        return sock.family == socket.AF_UNIX
+    return False
+
+
 class ShouldRetrySocketCall(Exception):
 
     """Indicate that attempted socket call should be retried"""
@@ -65,7 +72,7 @@ def create_unix_socket():
 
 def format_socket_name(sock):
     """Format the connection string for the given socket"""
-    if sock.family == socket.AF_UNIX:
+    if is_unix_socket(sock):
         return '%s' % sock.getsockname()
     else:
         return '[%s]:%s' % sock.getsockname()[:2]
@@ -107,7 +114,7 @@ class Server(object):
 
     def stop(self):
         GObject.source_remove(self.watcher)
-        if self.server_socket.family == socket.AF_UNIX:
+        if is_unix_socket(self.server_socket):
             unix_socket_path = self.server_socket.getsockname()
         else:
             unix_socket_path = None
@@ -139,7 +146,10 @@ class Server(object):
 
     def accept_connection(self):
         try:
-            return self.server_socket.accept()
+            sock, addr = self.server_socket.accept()
+            if is_unix_socket(sock):
+                addr = (sock.getsockname(), None)
+            return sock, addr
         except socket.error as e:
             if e.errno in (errno.EAGAIN, errno.EINTR):
                 raise ShouldRetrySocketCall
@@ -179,7 +189,7 @@ class Connection(object):
     def __init__(self, protocol, protocol_kwargs, sock, addr, timeout):
         sock.setblocking(False)
 
-        if (sock.family == socket.AF_UNIX):
+        if is_unix_socket(sock):
             self.host = sock.getsockname()
             self.port = None
         else:
