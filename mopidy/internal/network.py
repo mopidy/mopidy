@@ -189,11 +189,7 @@ class Connection(object):
     def __init__(self, protocol, protocol_kwargs, sock, addr, timeout):
         sock.setblocking(False)
 
-        if is_unix_socket(sock):
-            self.host = sock.getsockname()
-            self.port = None
-        else:
-            self.host, self.port = addr[:2]  # IPv6 has larger addr
+        self.host, self.port = addr[:2]  # IPv6 has larger addr
 
         self._sock = sock
         self.protocol = protocol
