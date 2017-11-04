@@ -34,7 +34,7 @@ def replace(path, mode='w+b', encoding=None, errors=None):
         (fd, tempname) = tempfile.mkstemp(dir=os.path.dirname(path))
     try:
         fp = io.open(fd, mode, encoding=encoding, errors=errors)
-    except:
+    except Exception:
         os.remove(tempname)
         os.close(fd)
         raise
@@ -43,7 +43,7 @@ def replace(path, mode='w+b', encoding=None, errors=None):
         fp.flush()
         os.fsync(fd)
         os.rename(tempname, path)
-    except:
+    except Exception:
         os.remove(tempname)
         raise
     finally:
