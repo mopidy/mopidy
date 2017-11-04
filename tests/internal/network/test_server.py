@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import errno
+import os
 import socket
 import unittest
 
@@ -129,6 +130,16 @@ class ServerTest(unittest.TestCase):
         with self.assertRaises(socket.error):
             network.Server.create_server_socket(
                 self.mock, 'unix:' + str(sentinel.host), sentinel.port)
+
+    @patch.object(os, 'unlink', new=Mock())
+    @patch.object(GObject, 'source_remove', new=Mock())
+    def test_stop_server_cleans_unix_socket(self):
+        self.mock.watcher = Mock()
+        sock = Mock()
+        sock.family = socket.AF_UNIX
+        self.mock.server_socket = sock
+        network.Server.stop(self.mock)
+        os.unlink.assert_called_once_with(sock.getsockname())
 
     @patch.object(GObject, 'io_add_watch', new=Mock())
     def test_register_server_socket_sets_up_io_watch(self):

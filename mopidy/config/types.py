@@ -259,8 +259,8 @@ class Hostname(ConfigValue):
         if not value.strip():
             return None
         socket_path = path.get_unix_socket_path(value)
-        if socket_path:
-            return Path(not self._required).deserialize(socket_path)
+        if socket_path is not None:
+            return 'unix:' + Path(not self._required).deserialize(socket_path)
         try:
             socket.getaddrinfo(value, None)
         except socket.error:

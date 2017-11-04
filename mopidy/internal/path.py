@@ -50,9 +50,9 @@ def get_or_create_file(file_path, mkdir=True, content=None):
 
 def get_unix_socket_path(socket_path):
     match = re.search('^unix:(.*)', socket_path)
-    if match:
-        return match.group(1)
-    return None
+    if not match:
+        return None
+    return match.group(1)
 
 
 def path_to_uri(path):

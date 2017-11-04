@@ -94,7 +94,7 @@ class Server(object):
 
     def create_server_socket(self, host, port):
         socket_path = path.get_unix_socket_path(host)
-        if socket_path:  # host is a path so use unix socket
+        if socket_path is not None:  # host is a path so use unix socket
             sock = create_unix_socket()
             sock.bind(socket_path)
         else:
@@ -108,16 +108,16 @@ class Server(object):
     def stop(self):
         GObject.source_remove(self.watcher)
         if self.server_socket.family == socket.AF_UNIX:
-            name = self.server_socket.getsockname()
+            unix_socket_path = self.server_socket.getsockname()
         else:
-            name = None
+            unix_socket_path = None
 
         self.server_socket.shutdown(socket.SHUT_RDWR)
         self.server_socket.close()
 
         # clean up the socket file
-        if name:
-            os.unlink(name)
+        if unix_socket_path is not None:
+            os.unlink(unix_socket_path)
 
     def register_server_socket(self, fileno):
         return GObject.io_add_watch(
