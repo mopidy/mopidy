@@ -5,6 +5,10 @@ import os
 import signal
 import sys
 
+import pykka.debug
+
+from mopidy import commands, config as config_lib, ext
+from mopidy.internal import encoding, log, path, process, versioning
 from mopidy.internal.gi import Gst  # noqa: F401
 
 try:
@@ -14,11 +18,6 @@ try:
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 except ImportError:
     pass
-
-import pykka.debug
-
-from mopidy import commands, config as config_lib, ext
-from mopidy.internal import encoding, log, path, process, versioning
 
 logger = logging.getLogger(__name__)
 
