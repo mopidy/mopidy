@@ -233,7 +233,7 @@ class ServerTest(unittest.TestCase):
             sentinel.protocol, {}, sentinel.sock, sentinel.addr,
             sentinel.timeout)
 
-    @patch.object(network, 'format_socket_connection_string', new=Mock())
+    @patch.object(network, 'format_socket_name', new=Mock())
     def test_reject_connection(self):
         sock = Mock(spec=socket.SocketType)
 
@@ -241,7 +241,7 @@ class ServerTest(unittest.TestCase):
             self.mock, sock, (sentinel.host, sentinel.port))
         sock.close.assert_called_once_with()
 
-    @patch.object(network, 'format_socket_connection_string', new=Mock())
+    @patch.object(network, 'format_socket_name', new=Mock())
     def test_reject_connection_error(self):
         sock = Mock(spec=socket.SocketType)
         sock.close.side_effect = socket.error

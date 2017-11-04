@@ -64,7 +64,7 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
 
         logger.info(
             'MPD server running at %s',
-            network.format_socket_connection_string(server.server_socket))
+            network.format_socket_name(server.server_socket))
 
         return server
 

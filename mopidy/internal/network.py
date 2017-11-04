@@ -63,7 +63,7 @@ def create_unix_socket():
     return socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
 
-def format_socket_connection_string(sock):
+def format_socket_name(sock):
     """Format the connection string for the given socket"""
     if sock.family == socket.AF_UNIX:
         return '%s' % sock.getsockname()
@@ -156,7 +156,7 @@ class Server(object):
         # FIXME provide more context in logging?
         logger.warning(
             'Rejected connection from %s',
-            format_socket_connection_string(sock))
+            format_socket_name(sock))
         try:
             sock.close()
         except socket.error:
@@ -185,7 +185,7 @@ class Connection(object):
         else:
             self.host, self.port = addr[:2]  # IPv6 has larger addr
 
-        self.sock = sock
+        self._sock = sock
         self.protocol = protocol
         self.protocol_kwargs = protocol_kwargs
         self.timeout = timeout
@@ -223,7 +223,7 @@ class Connection(object):
         self.disable_send()
 
         try:
-            self.sock.close()
+            self._sock.close()
         except socket.error:
             pass
 
@@ -238,7 +238,7 @@ class Connection(object):
     def send(self, data):
         """Send data to client, return any unsent data."""
         try:
-            sent = self.sock.send(data)
+            sent = self._sock.send(data)
             return data[sent:]
         except socket.error as e:
             if e.errno in (errno.EWOULDBLOCK, errno.EINTR):
@@ -269,7 +269,7 @@ class Connection(object):
 
         try:
             self.recv_id = GObject.io_add_watch(
-                self.sock.fileno(),
+                self._sock.fileno(),
                 GObject.IO_IN | GObject.IO_ERR | GObject.IO_HUP,
                 self.recv_callback)
         except socket.error as e:
@@ -287,7 +287,7 @@ class Connection(object):
 
         try:
             self.send_id = GObject.io_add_watch(
-                self.sock.fileno(),
+                self._sock.fileno(),
                 GObject.IO_OUT | GObject.IO_ERR | GObject.IO_HUP,
                 self.send_callback)
         except socket.error as e:
@@ -306,7 +306,7 @@ class Connection(object):
             return True
 
         try:
-            data = self.sock.recv(4096)
+            data = self._sock.recv(4096)
         except socket.error as e:
             if e.errno not in (errno.EWOULDBLOCK, errno.EINTR):
                 self.stop('Unexpected client error: %s' % e)
@@ -346,6 +346,9 @@ class Connection(object):
     def timeout_callback(self):
         self.stop('Client inactive for %ds; closing connection' % self.timeout)
         return False
+
+    def __str__(self):
+        return format_socket_name(self._sock)
 
 
 class LineProtocol(pykka.ThreadingActor):
