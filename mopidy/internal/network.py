@@ -10,7 +10,7 @@ import threading
 
 import pykka
 
-from mopidy.internal import encoding, path
+from mopidy.internal import encoding, path, validation
 from mopidy.internal.gi import GObject
 
 
@@ -105,6 +105,8 @@ class Server(object):
             sock = create_unix_socket()
             sock.bind(socket_path)
         else:
+            # ensure the port is supplied
+            validation.check_integer(port)
             sock = create_tcp_socket()
             sock.bind((host, port))
 
