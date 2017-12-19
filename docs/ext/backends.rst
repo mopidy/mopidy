@@ -181,6 +181,13 @@ Extension for listening to Internet radio stations and podcasts listed at
 `radio.de <http://www.radio.de/>`_, `radio.net <http://www.radio.net/>`_,
 `radio.fr <http://www.radio.fr/>`_, and `radio.at <http://www.radio.at/>`_.
 
+Mopidy-RNZ
+==========
+
+https://github.com/danbrough/mopidy-rnz
+
+Extension for playing `Radio New Zealands <http://www.radionz.co.nz>`_ podcasts,live streams and latest news bulletin.
+
 
 Mopidy-SomaFM
 =============
