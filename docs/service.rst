@@ -132,6 +132,6 @@ If you are not running any X server, run ``pulseaudio --start`` instead of
 
 If you don't want to hard code the output in your Mopidy config, you can
 instead of adding any config to Mopidy add this to
-:file:`~mopidy/.pulse/client.conf`::
+:file:`~/.config/.pulse/client.conf`::
 
     default-server=127.0.0.1
