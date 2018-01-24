@@ -48,15 +48,6 @@ Provides a backend for playing music from your `Beets
 <http://beets.radbox.org/>`_ music library through Beets' web extension.
 
 
-Mopidy-Deezer
-=============
-
-https://github.com/rusty-dev/mopidy-deezer
-
-Extension for playing music from the `Deezer <http://www.deezer.com/>`_ music
-streaming service.
-
-
 Mopidy-Dirble
 =============
 
