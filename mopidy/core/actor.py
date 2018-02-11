@@ -8,7 +8,6 @@ import os
 import pykka
 
 import mopidy
-
 from mopidy import audio, backend, mixer
 from mopidy.audio import PlaybackState
 from mopidy.core.history import HistoryController

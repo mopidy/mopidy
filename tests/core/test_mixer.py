@@ -8,6 +8,7 @@ import pykka
 
 from mopidy import core, mixer
 from mopidy.internal.models import MixerState
+
 from tests import dummy_mixer
 
 
