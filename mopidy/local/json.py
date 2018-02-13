@@ -7,7 +7,6 @@ import re
 import sys
 
 import mopidy
-
 from mopidy import compat, local, models
 from mopidy.internal import storage as internal_storage
 from mopidy.internal import timer

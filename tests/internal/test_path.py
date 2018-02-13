@@ -137,6 +137,18 @@ class GetOrCreateFileTest(unittest.TestCase):
             self.assertEqual(fh.read(), b'foobar\xc3\xa6\xc3\xb8\xc3\xa5')
 
 
+class GetUnixSocketPathTest(unittest.TestCase):
+
+    def test_correctly_matched_socket_path(self):
+        self.assertEqual(
+            path.get_unix_socket_path('unix:/tmp/mopidy.socket'),
+            '/tmp/mopidy.socket'
+        )
+
+    def test_correctly_no_match_socket_path(self):
+        self.assertIsNone(path.get_unix_socket_path('127.0.0.1'))
+
+
 class PathToFileURITest(unittest.TestCase):
 
     def test_simple_path(self):

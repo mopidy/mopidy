@@ -63,7 +63,8 @@ See :ref:`config` for general help on configuring Mopidy.
 
 .. confval:: mpd/hostname
 
-    Which address the MPD server should bind to.
+    Which address the MPD server should bind to. This can be a network address
+    or the path to a Unix socket.
 
     ``127.0.0.1``
         Listens only on the IPv4 loopback interface
@@ -73,6 +74,9 @@ See :ref:`config` for general help on configuring Mopidy.
         Listens on all IPv4 interfaces
     ``::``
         Listens on all interfaces, both IPv4 and IPv6
+    ``unix:/path/to/unix/socket.sock``
+        Listen on the Unix socket at the specified path. Must be prefixed with
+        ``unix:``
 
 .. confval:: mpd/port
 

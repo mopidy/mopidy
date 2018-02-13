@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import errno
 import logging
+import os
 import re
 import socket
 import sys
@@ -9,11 +10,18 @@ import threading
 
 import pykka
 
-from mopidy.internal import encoding
+from mopidy.internal import encoding, path, validation
 from mopidy.internal.gi import GObject
 
 
 logger = logging.getLogger(__name__)
+
+
+def is_unix_socket(sock):
+    """Check if the provided socket is a Unix domain socket"""
+    if hasattr(socket, 'AF_UNIX'):
+        return sock.family == socket.AF_UNIX
+    return False
 
 
 class ShouldRetrySocketCall(Exception):
@@ -40,7 +48,7 @@ def try_ipv6_socket():
 has_ipv6 = try_ipv6_socket()
 
 
-def create_socket():
+def create_tcp_socket():
     """Create a TCP socket with or without IPv6 depending on system support"""
     if has_ipv6:
         sock = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
@@ -55,6 +63,19 @@ def create_socket():
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     return sock
+
+
+def create_unix_socket():
+    """Create a Unix domain socket"""
+    return socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+
+
+def format_socket_name(sock):
+    """Format the connection string for the given socket"""
+    if is_unix_socket(sock):
+        return '%s' % sock.getsockname()
+    else:
+        return '[%s]:%s' % sock.getsockname()[:2]
 
 
 def format_hostname(hostname):
@@ -76,17 +97,42 @@ class Server(object):
         self.timeout = timeout
         self.server_socket = self.create_server_socket(host, port)
 
-        self.register_server_socket(self.server_socket.fileno())
+        self.watcher = self.register_server_socket(self.server_socket.fileno())
 
     def create_server_socket(self, host, port):
-        sock = create_socket()
+        socket_path = path.get_unix_socket_path(host)
+        if socket_path is not None:  # host is a path so use unix socket
+            sock = create_unix_socket()
+            sock.bind(socket_path)
+        else:
+            # ensure the port is supplied
+            validation.check_integer(port)
+            sock = create_tcp_socket()
+            sock.bind((host, port))
+
         sock.setblocking(False)
-        sock.bind((host, port))
         sock.listen(1)
         return sock
 
+    def stop(self):
+        GObject.source_remove(self.watcher)
+        if is_unix_socket(self.server_socket):
+            unix_socket_path = self.server_socket.getsockname()
+        else:
+            unix_socket_path = None
+
+        self.server_socket.shutdown(socket.SHUT_RDWR)
+        self.server_socket.close()
+
+        # clean up the socket file
+        if unix_socket_path is not None:
+            os.unlink(unix_socket_path)
+
     def register_server_socket(self, fileno):
-        GObject.io_add_watch(fileno, GObject.IO_IN, self.handle_connection)
+        return GObject.io_add_watch(
+            fileno,
+            GObject.IO_IN,
+            self.handle_connection)
 
     def handle_connection(self, fd, flags):
         try:
@@ -102,7 +148,10 @@ class Server(object):
 
     def accept_connection(self):
         try:
-            return self.server_socket.accept()
+            sock, addr = self.server_socket.accept()
+            if is_unix_socket(sock):
+                addr = (sock.getsockname(), None)
+            return sock, addr
         except socket.error as e:
             if e.errno in (errno.EAGAIN, errno.EINTR):
                 raise ShouldRetrySocketCall
@@ -117,7 +166,9 @@ class Server(object):
 
     def reject_connection(self, sock, addr):
         # FIXME provide more context in logging?
-        logger.warning('Rejected connection from [%s]:%s', addr[0], addr[1])
+        logger.warning(
+            'Rejected connection from %s',
+            format_socket_name(sock))
         try:
             sock.close()
         except socket.error:
@@ -142,7 +193,7 @@ class Connection(object):
 
         self.host, self.port = addr[:2]  # IPv6 has larger addr
 
-        self.sock = sock
+        self._sock = sock
         self.protocol = protocol
         self.protocol_kwargs = protocol_kwargs
         self.timeout = timeout
@@ -180,7 +231,7 @@ class Connection(object):
         self.disable_send()
 
         try:
-            self.sock.close()
+            self._sock.close()
         except socket.error:
             pass
 
@@ -195,7 +246,7 @@ class Connection(object):
     def send(self, data):
         """Send data to client, return any unsent data."""
         try:
-            sent = self.sock.send(data)
+            sent = self._sock.send(data)
             return data[sent:]
         except socket.error as e:
             if e.errno in (errno.EWOULDBLOCK, errno.EINTR):
@@ -226,7 +277,7 @@ class Connection(object):
 
         try:
             self.recv_id = GObject.io_add_watch(
-                self.sock.fileno(),
+                self._sock.fileno(),
                 GObject.IO_IN | GObject.IO_ERR | GObject.IO_HUP,
                 self.recv_callback)
         except socket.error as e:
@@ -244,7 +295,7 @@ class Connection(object):
 
         try:
             self.send_id = GObject.io_add_watch(
-                self.sock.fileno(),
+                self._sock.fileno(),
                 GObject.IO_OUT | GObject.IO_ERR | GObject.IO_HUP,
                 self.send_callback)
         except socket.error as e:
@@ -263,7 +314,7 @@ class Connection(object):
             return True
 
         try:
-            data = self.sock.recv(4096)
+            data = self._sock.recv(4096)
         except socket.error as e:
             if e.errno not in (errno.EWOULDBLOCK, errno.EINTR):
                 self.stop('Unexpected client error: %s' % e)
@@ -303,6 +354,9 @@ class Connection(object):
     def timeout_callback(self):
         self.stop('Client inactive for %ds; closing connection' % self.timeout)
         return False
+
+    def __str__(self):
+        return format_socket_name(self._sock)
 
 
 class LineProtocol(pykka.ThreadingActor):
