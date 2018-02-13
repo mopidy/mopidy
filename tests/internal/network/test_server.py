@@ -21,9 +21,9 @@ class ServerTest(unittest.TestCase):
 
     def test_init_calls_create_server_socket(self):
         network.Server.__init__(
-            self.mock, sentinel.host, 1234, sentinel.protocol)
+            self.mock, sentinel.host, sentinel.port, sentinel.protocol)
         self.mock.create_server_socket.assert_called_once_with(
-            sentinel.host, 1234)
+            sentinel.host, sentinel.port)
         self.mock.stop()
 
     def test_init_calls_register_server(self):
@@ -32,7 +32,7 @@ class ServerTest(unittest.TestCase):
         self.mock.create_server_socket.return_value = sock
 
         network.Server.__init__(
-            self.mock, sentinel.host, 1234, sentinel.protocol)
+            self.mock, sentinel.host, sentinel.port, sentinel.protocol)
         self.mock.register_server_socket.assert_called_once_with(
             sentinel.fileno)
 
@@ -43,7 +43,7 @@ class ServerTest(unittest.TestCase):
 
         with self.assertRaises(socket.error):
             network.Server.__init__(
-                self.mock, sentinel.host, 1234, sentinel.protocol)
+                self.mock, sentinel.host, sentinel.port, sentinel.protocol)
 
     def test_init_stores_values_in_attributes(self):
         # This need to be a mock and no a sentinel as fileno() is called on it
@@ -51,7 +51,7 @@ class ServerTest(unittest.TestCase):
         self.mock.create_server_socket.return_value = sock
 
         network.Server.__init__(
-            self.mock, sentinel.host, 1234, sentinel.protocol,
+            self.mock, sentinel.host, sentinel.port, sentinel.protocol,
             max_connections=sentinel.max_connections, timeout=sentinel.timeout)
         self.assertEqual(sentinel.protocol, self.mock.protocol)
         self.assertEqual(sentinel.max_connections, self.mock.max_connections)
@@ -86,7 +86,7 @@ class ServerTest(unittest.TestCase):
         sock = create_unix_socket.return_value
 
         network.Server.create_server_socket(
-            self.mock, 'unix:' + str(sentinel.host), 1234)
+            self.mock, 'unix:' + str(sentinel.host), sentinel.port)
         sock.setblocking.assert_called_once_with(False)
         sock.bind.assert_called_once_with(str(sentinel.host))
         sock.listen.assert_called_once_with(any_int)
@@ -104,7 +104,7 @@ class ServerTest(unittest.TestCase):
         network.create_unix_socket.side_effect = socket.error
         with self.assertRaises(socket.error):
             network.Server.create_server_socket(
-                self.mock, 'unix:' + str(sentinel.host), 1234)
+                self.mock, 'unix:' + str(sentinel.host), sentinel.port)
 
     @patch.object(network, 'create_tcp_socket', new=Mock())
     def test_create_server_bind_fails(self):
@@ -122,7 +122,7 @@ class ServerTest(unittest.TestCase):
 
         with self.assertRaises(socket.error):
             network.Server.create_server_socket(
-                self.mock, 'unix:' + str(sentinel.host), 1234)
+                self.mock, 'unix:' + str(sentinel.host), sentinel.port)
 
     @patch.object(network, 'create_tcp_socket', new=Mock())
     def test_create_server_listen_fails(self):
@@ -140,7 +140,7 @@ class ServerTest(unittest.TestCase):
 
         with self.assertRaises(socket.error):
             network.Server.create_server_socket(
-                self.mock, 'unix:' + str(sentinel.host), 1234)
+                self.mock, 'unix:' + str(sentinel.host), sentinel.port)
 
     @patch.object(os, 'unlink', new=Mock())
     @patch.object(GObject, 'source_remove', new=Mock())
@@ -262,7 +262,7 @@ class ServerTest(unittest.TestCase):
         sock = Mock(spec=socket.SocketType)
 
         network.Server.reject_connection(
-            self.mock, sock, (sentinel.host, 1234))
+            self.mock, sock, (sentinel.host, sentinel.port))
         sock.close.assert_called_once_with()
 
     @patch.object(network, 'format_socket_name', new=Mock())
@@ -271,5 +271,5 @@ class ServerTest(unittest.TestCase):
         sock.close.side_effect = socket.error
 
         network.Server.reject_connection(
-            self.mock, sock, (sentinel.host, 1234))
+            self.mock, sock, (sentinel.host, sentinel.port))
         sock.close.assert_called_once_with()
