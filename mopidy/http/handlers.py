@@ -11,20 +11,24 @@ import tornado.websocket
 
 import mopidy
 from mopidy import core, models
+from mopidy.compat import urllib
 from mopidy.internal import encoding, jsonrpc
-
 
 logger = logging.getLogger(__name__)
 
 
 def make_mopidy_app_factory(apps, statics):
     def mopidy_app_factory(config, core):
+        origin_whitelist = {
+            x.lower() for x in config['http']['allowed_origins'] if x
+        }
         return [
             (r'/ws/?', WebSocketHandler, {
                 'core': core,
             }),
             (r'/rpc', JsonRpcHandler, {
                 'core': core,
+                'origin_whitelist': origin_whitelist,
             }),
             (r'/(.+)', StaticFileHandler, {
                 'path': os.path.join(os.path.dirname(__file__), 'data'),
@@ -143,16 +147,31 @@ def set_mopidy_headers(request_handler):
         'X-Mopidy-Version', mopidy.__version__.encode('utf-8'))
 
 
+def check_origin(origin, request_headers, origin_whitelist):
+    if origin is None:
+        logger.debug('Origin was not set')
+        return False
+    origin_whitelist.add(request_headers.get('Host', None))
+    parsed_origin = urllib.parse.urlparse(origin).netloc.lower()
+    return parsed_origin and parsed_origin in origin_whitelist
+
+
 class JsonRpcHandler(tornado.web.RequestHandler):
 
-    def initialize(self, core):
+    def initialize(self, core, origin_whitelist):
         self.jsonrpc = make_jsonrpc_wrapper(core)
+        self.origin_whitelist = origin_whitelist
 
     def head(self):
         self.set_extra_headers()
         self.finish()
 
     def post(self):
+        content_type = self.request.headers.get("Content-Type", '')
+        if content_type != 'application/json':
+            self.set_status(406, 'Content-Type must be application/json')
+            return
+
         data = self.request.body
         if not data:
             return
@@ -176,6 +195,18 @@ class JsonRpcHandler(tornado.web.RequestHandler):
         set_mopidy_headers(self)
         self.set_header('Accept', 'application/json')
         self.set_header('Content-Type', 'application/json; utf-8')
+
+    def options(self):
+        origin = self.request.headers.get('Origin', None)
+        if not check_origin(origin, self.request.headers, 
+                                self.origin_whitelist):
+            self.set_status(403, 'Access denied for origin %s' % origin)
+            return
+
+        self.set_header("Access-Control-Allow-Origin", "%s" % origin)
+        self.set_header("Access-Control-Allow-Headers", "Content-Type")
+        self.set_status(204)
+        self.finish()
 
 
 class ClientListHandler(tornado.web.RequestHandler):
