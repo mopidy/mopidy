@@ -6,6 +6,7 @@ After=network.target
 After=nss-lookup.target
 After=pulseaudio.service
 After=remote-fs.target
+After=snapserver.service
 After=sound.target
 
 [Service]
