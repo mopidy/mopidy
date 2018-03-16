@@ -48,6 +48,15 @@ Provides a backend for playing music from your `Beets
 <http://beets.radbox.org/>`_ music library through Beets' web extension.
 
 
+Mopidy-Deezer
+=============
+
+https://github.com/rusty-dev/mopidy-deezer
+
+Extension for playing music from the `Deezer <http://www.deezer.com/>`_ music
+streaming service.
+
+
 Mopidy-Dirble
 =============
 
@@ -64,6 +73,15 @@ https://github.com/tkem/mopidy-dleyna
 
 Provides a backend for playing music from Digital Media Servers using
 the `dLeyna <https://01.org/dleyna>`_ D-Bus interface.
+
+
+Mopidy-Emby
+===========
+
+https://github.com/xsteadfastx/mopidy-emby
+
+Provides a backend for playing music from `Emby Media Servers <https://emby.media>`_. 
+
 
 Mopidy-File
 ===========

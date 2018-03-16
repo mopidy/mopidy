@@ -50,7 +50,7 @@ To get started with Mopidy, check out
 `the installation docs <http://docs.mopidy.com/en/latest/installation/>`_.
 
 - `Documentation <https://docs.mopidy.com/>`_
-- `Discussion forum <https://discuss.mopidy.com/>`_
+- `Discussion forum <https://discourse.mopidy.com/>`_
 - `Source code <https://github.com/mopidy/mopidy>`_
 - `Issue tracker <https://github.com/mopidy/mopidy/issues>`_
 - IRC: ``#mopidy`` at `irc.freenode.net <http://freenode.net/>`_

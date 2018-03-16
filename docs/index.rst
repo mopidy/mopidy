@@ -59,9 +59,9 @@ To get started with Mopidy, start by reading :ref:`installation`.
 **Getting help**
 
 If you get stuck, you can get help at the `Mopidy discussion forum
-<https://discuss.mopidy.com/>`_. We also hang around at IRC on the ``#mopidy``
-channel at `irc.freenode.net <http://freenode.net/>`_. The IRC channel has
-`public searchable logs <https://botbot.me/freenode/mopidy/>`_.
+<https://discourse.mopidy.com/>`_. We also hang around at IRC on the
+``#mopidy`` channel at `irc.freenode.net <http://freenode.net/>`_. The IRC
+channel has `public searchable logs <https://botbot.me/freenode/mopidy/>`_.
 
 If you stumble into a bug or have a feature request, please create an issue in
 the `issue tracker <https://github.com/mopidy/mopidy/issues>`_. If you're

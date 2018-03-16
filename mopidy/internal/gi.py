@@ -25,6 +25,8 @@ else:
     gi.require_version('GstPbutils', '1.0')
     from gi.repository import GstPbutils
 
+GLib.set_prgname('mopidy')
+GLib.set_application_name('Mopidy')
 
 REQUIRED_GST_VERSION = (1, 2, 3)
 

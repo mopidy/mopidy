@@ -10,10 +10,10 @@ import mock
 import pykka
 
 import mopidy
-
 from mopidy.core import Core
 from mopidy.internal import models, storage, versioning
 from mopidy.models import Track
+
 from tests import dummy_mixer
 
 

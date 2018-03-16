@@ -12,7 +12,8 @@ Bug fix release.
 
 - MPD: Added ``idle`` to the list of available commands.
   (Fixes: :issue:`1593`, PR: :issue:`1597`)
-
+- MPD: Added Unix domain sockets for binding MPD to.
+  (Fixes: :issue:`1531`, PR: :issue:`1629`)
 - Audio: Add a new config value :confval:`audio/output_volume` to enable
   native sink volume control.
 

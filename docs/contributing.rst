@@ -15,7 +15,7 @@ Asking questions
 Please get in touch with us in one of these ways when requesting help with
 Mopidy and its extensions:
 
-- Our discussion forum: `discuss.mopidy.com <https://discuss.mopidy.com>`_.
+- Our discussion forum: `discourse.mopidy.com <https://discourse.mopidy.com>`_.
   Just sign in and fire away.
 
 - Our IRC channel: `#mopidy <https://webchat.freenode.net/?channels=#mopidy>`_
@@ -51,8 +51,8 @@ Issue guidelines
    tracker is not a support forum.
 
 #. If you are not sure if what you're experiencing is a bug or not, post in the
-   `discussion forum <https://discuss.mopidy.com>`__ first to verify that it's
-   a bug.
+   `discussion forum <https://discourse.mopidy.com>`__ first to verify that
+   it's a bug.
 
 #. If you are sure that you've found a bug or have a feature request, check if
    there's already an issue in the `issue tracker
