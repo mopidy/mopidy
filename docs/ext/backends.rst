@@ -71,7 +71,7 @@ Mopidy-Emby
 
 https://github.com/xsteadfastx/mopidy-emby
 
-Provides a backend for playing music from `Emby Media Servers <https://emby.media>`_. 
+Provides a backend for playing music from `Emby Media Servers <https://emby.media>`_.
 
 
 Mopidy-File
@@ -172,12 +172,14 @@ Extension for listening to Internet radio stations and podcasts listed at
 `radio.de <http://www.radio.de/>`_, `radio.net <http://www.radio.net/>`_,
 `radio.fr <http://www.radio.fr/>`_, and `radio.at <http://www.radio.at/>`_.
 
+
 Mopidy-RNZ
 ==========
 
 https://github.com/danbrough/mopidy-rnz
 
-Extension for playing `Radio New Zealands <http://www.radionz.co.nz>`_ podcasts,live streams and latest news bulletin.
+Extension for playing `Radio New Zealands <http://www.radionz.co.nz>`_
+podcasts,live streams and latest news bulletin.
 
 
 Mopidy-SomaFM
