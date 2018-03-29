@@ -5,10 +5,14 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
-v2.1.1 (UNRELEASED)
+v2.2.0 (UNRELEASED)
 ===================
 
-Bug fix release.
+Feature release.
+
+- Dependencies: Drop support for Tornado < 4.4. Though strictly a breaking
+  change, this shouldn't affect any supported systems as even Debian stable
+  includes Tornado >= 4.4.
 
 - MPD: Added ``idle`` to the list of available commands.
   (Fixes: :issue:`1593`, PR: :issue:`1597`)
