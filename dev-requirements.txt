@@ -13,7 +13,7 @@ mock
 responses
 
 # Test runners
-pytest
+pytest<3.3.0
 pytest-capturelog
 pytest-cov
 pytest-xdist
