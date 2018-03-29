@@ -7,6 +7,7 @@
 .coverage
 .idea
 .noseids
+.pytest_cache/
 .tox
 MANIFEST
 build/
