@@ -151,6 +151,9 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.assertEqual(playlist.name, result.name)
         self.assertEqual(track.uri, result.tracks[0].uri)
 
+    @unittest.skipIf(
+        platform.system() == 'Darwin',
+        'macOS 10.13 raises IOError "Illegal byte sequence" on open.')
     def test_load_playlist_with_nonfilesystem_encoding_of_filename(self):
         path = os.path.join(self.playlists_dir, 'øæå.m3u'.encode('latin-1'))
         with open(path, 'wb+') as f:
@@ -160,10 +163,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
         self.assertEqual(len(self.core.playlists.as_list()), 1)
         result = self.core.playlists.as_list()
-        if platform.system() == 'Darwin':
-            self.assertEqual('%F8%E6%E5', result[0].name)
-        else:
-            self.assertEqual('\ufffd\ufffd\ufffd', result[0].name)
+        self.assertEqual('\ufffd\ufffd\ufffd', result[0].name)
 
     @unittest.SkipTest
     def test_playlists_dir_is_created(self):
