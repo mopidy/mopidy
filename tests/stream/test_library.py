@@ -60,4 +60,8 @@ def test_lookup_converts_uri_metadata_to_track(audio, config, track_uri):
     backend = actor.StreamBackend(audio=audio, config=config)
 
     result = backend.library.lookup(track_uri)
-    assert result == [Track(length=4406, uri=track_uri)]
+
+    assert len(result) == 1
+    track = result[0]
+    assert track.uri == track_uri
+    assert track.length == 4406
