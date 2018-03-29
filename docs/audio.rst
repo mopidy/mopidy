@@ -84,7 +84,7 @@ simultaneously. To use the Icecast output, do the following:
 
        [audio]
        output = audioresample ! audioconvert ! vorbisenc ! oggmux ! shout2send mount=mopidy ip=127.0.0.1 port=8000 password=hackme
-    
+
    Example for MP3 streaming and local audio (multiple outputs):
 
    .. code-block:: ini
