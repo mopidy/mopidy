@@ -15,7 +15,7 @@ try:
 except ImportError:
     pass
 
-import pykka.debug
+import pykka.debug  # noqa: I100
 
 from mopidy import commands, config as config_lib, ext
 from mopidy.internal import encoding, log, path, process, versioning
