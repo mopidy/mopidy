@@ -43,3 +43,10 @@ class LocaleDecodeTest(unittest.TestCase):
         encoding.locale_decode(b'abc')
 
         self.assertFalse(mock.called)
+
+    def test_replaces_unknown_bytes_instead_of_crashing(self, mock):
+        mock.return_value = 'US-ASCII'
+
+        result = encoding.locale_decode(b'abc\xc3def')
+
+        assert result == 'abc\ufffddef'

@@ -22,6 +22,10 @@ Feature release.
 - MPD: Added Unix domain sockets for binding MPD to.
   (Fixes: :issue:`1531`, PR: :issue:`1629`)
 
+- Ensure that decoding of OS errors with unknown encoding never crashes, but
+  instead replaces unknown bytes with a replacement marker. (Fixes:
+  :issue:`1599`)
+
 
 v2.1.0 (2017-01-02)
 ===================

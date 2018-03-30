@@ -9,4 +9,4 @@ def locale_decode(bytestr):
     try:
         return compat.text_type(bytestr)
     except UnicodeError:
-        return bytes(bytestr).decode(locale.getpreferredencoding())
+        return bytes(bytestr).decode(locale.getpreferredencoding(), 'replace')
