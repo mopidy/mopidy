@@ -14,6 +14,8 @@ Feature release.
   change, this shouldn't affect any supported systems as even Debian stable
   includes Tornado >= 4.4.
 
+- File: Fix extraneous encoding of path. (PR: :issue:`1611`)
+
 - MPD: Added ``idle`` to the list of available commands.
   (Fixes: :issue:`1593`, PR: :issue:`1597`)
 
