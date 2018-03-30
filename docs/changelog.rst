@@ -14,6 +14,12 @@ Feature release.
   change, this shouldn't affect any supported systems as even Debian stable
   includes Tornado >= 4.4.
 
+- Core: Fix crash on `library.lookup(uris=[])`. (Fixes: :issue:`1619`, PR:
+  :issue:`1620`)
+
+- File: Change default ordering to show directories first, then files. (PR:
+  :issue:`1595`)
+
 - File: Fix extraneous encoding of path. (PR: :issue:`1611`)
 
 - MPD: Added ``idle`` to the list of available commands.
@@ -25,6 +31,9 @@ Feature release.
 - Ensure that decoding of OS errors with unknown encoding never crashes, but
   instead replaces unknown bytes with a replacement marker. (Fixes:
   :issue:`1599`)
+
+- Set GLib program and application name, so that we show up as "Mopidy" in
+  PulseAudio instead of "python ...". (PR: :issue:`1626`)
 
 
 v2.1.0 (2017-01-02)
