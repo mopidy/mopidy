@@ -13,8 +13,7 @@ mock
 responses
 
 # Test runners
-pytest<3.3.0
-pytest-capturelog
+pytest>=3.3.0
 pytest-cov
 pytest-xdist
 tox

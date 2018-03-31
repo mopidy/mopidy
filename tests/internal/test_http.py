@@ -33,7 +33,7 @@ def test_download_on_server_side_error(session, caplog):
     result = http.download(session, URI)
 
     assert result is None
-    assert 'Problem downloading' in caplog.text()
+    assert 'Problem downloading' in caplog.text
 
 
 def test_download_times_out_if_connection_times_out(session_mock, caplog):
@@ -45,7 +45,7 @@ def test_download_times_out_if_connection_times_out(session_mock, caplog):
     assert result is None
     assert (
         'Download of %r failed due to connection timeout after 1.000s' % URI
-        in caplog.text())
+        in caplog.text)
 
 
 @responses.activate
@@ -60,4 +60,4 @@ def test_download_times_out_if_download_is_slow(session, caplog):
     assert result is None
     assert (
         'Download of %r failed due to download taking more than 1.000s' % URI
-        in caplog.text())
+        in caplog.text)

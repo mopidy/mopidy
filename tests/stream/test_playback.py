@@ -1,5 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
+import logging
+
 import mock
 
 import pytest
@@ -92,6 +94,7 @@ class TestTranslateURI(object):
     def test_text_playlist_with_mpeg_stream(
             self, scanner, provider, caplog):
 
+        caplog.set_level(logging.DEBUG)
         scanner.scan.side_effect = [
             # Scanning playlist
             mock.Mock(mime='text/foo', playable=False),
@@ -112,11 +115,11 @@ class TestTranslateURI(object):
 
         # Check logging to ensure debuggability
         assert 'Unwrapping stream from URI: %s' % PLAYLIST_URI
-        assert 'Parsed playlist (%s)' % PLAYLIST_URI in caplog.text()
+        assert 'Parsed playlist (%s)' % PLAYLIST_URI in caplog.text
         assert 'Unwrapping stream from URI: %s' % STREAM_URI
         assert (
             'Unwrapped potential audio/mpeg stream: %s' % STREAM_URI
-            in caplog.text())
+            in caplog.text)
 
         # Check proper Requests session setup
         assert responses.calls[0].request.headers['User-Agent'].startswith(
@@ -146,6 +149,7 @@ class TestTranslateURI(object):
     def test_scan_fails_but_playlist_parsing_succeeds(
             self, scanner, provider, caplog):
 
+        caplog.set_level(logging.DEBUG)
         scanner.scan.side_effect = [
             # Scanning playlist
             exceptions.ScannerError('some failure'),
@@ -160,18 +164,18 @@ class TestTranslateURI(object):
 
         assert 'Unwrapping stream from URI: %s' % PLAYLIST_URI
         assert (
-            'GStreamer failed scanning URI (%s)' % PLAYLIST_URI
-            in caplog.text())
-        assert 'Parsed playlist (%s)' % PLAYLIST_URI in caplog.text()
+            'GStreamer failed scanning URI (%s)' % PLAYLIST_URI in caplog.text)
+        assert 'Parsed playlist (%s)' % PLAYLIST_URI in caplog.text
         assert (
             'Unwrapped potential audio/mpeg stream: %s' % STREAM_URI
-            in caplog.text())
+            in caplog.text)
         assert result == STREAM_URI
 
     @responses.activate
     def test_scan_fails_and_playlist_parsing_fails(
             self, scanner, provider, caplog):
 
+        caplog.set_level(logging.DEBUG)
         scanner.scan.side_effect = exceptions.ScannerError('some failure')
         responses.add(
             responses.GET, STREAM_URI,
@@ -181,15 +185,15 @@ class TestTranslateURI(object):
 
         assert 'Unwrapping stream from URI: %s' % STREAM_URI
         assert (
-            'GStreamer failed scanning URI (%s)' % STREAM_URI
-            in caplog.text())
+            'GStreamer failed scanning URI (%s)' % STREAM_URI in caplog.text)
         assert (
             'Failed parsing URI (%s) as playlist; found potential stream.'
-            % STREAM_URI in caplog.text())
+            % STREAM_URI in caplog.text)
         assert result == STREAM_URI
 
     @responses.activate
     def test_failed_download_returns_none(self, scanner, provider, caplog):
+        caplog.set_level(logging.DEBUG)
         scanner.scan.side_effect = [
             mock.Mock(mime='text/foo', playable=False)
         ]
@@ -204,10 +208,11 @@ class TestTranslateURI(object):
 
         assert (
             'Unwrapping stream from URI (%s) failed: '
-            'error downloading URI' % PLAYLIST_URI) in caplog.text()
+            'error downloading URI' % PLAYLIST_URI) in caplog.text
 
     @responses.activate
     def test_playlist_references_itself(self, scanner, provider, caplog):
+        caplog.set_level(logging.DEBUG)
         scanner.scan.side_effect = [
             mock.Mock(mime='text/foo', playable=False)
         ]
@@ -218,11 +223,11 @@ class TestTranslateURI(object):
 
         result = provider.translate_uri(PLAYLIST_URI)
 
-        assert 'Unwrapping stream from URI: %s' % PLAYLIST_URI in caplog.text()
+        assert 'Unwrapping stream from URI: %s' % PLAYLIST_URI in caplog.text
         assert (
             'Parsed playlist (%s) and found new URI: %s'
-            % (PLAYLIST_URI, PLAYLIST_URI)) in caplog.text()
+            % (PLAYLIST_URI, PLAYLIST_URI)) in caplog.text
         assert (
             'Unwrapping stream from URI (%s) failed: '
-            'playlist referenced itself' % PLAYLIST_URI) in caplog.text()
+            'playlist referenced itself' % PLAYLIST_URI) in caplog.text
         assert result is None
