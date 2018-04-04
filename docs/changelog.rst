@@ -35,6 +35,8 @@ Feature release.
 - Set GLib program and application name, so that we show up as "Mopidy" in
   PulseAudio instead of "python ...". (PR: :issue:`1626`)
 
+- Remove limitation of 10000 tracks in playlists. (PR: :issue:`1600`) 
+
 
 v2.1.0 (2017-01-02)
 ===================
