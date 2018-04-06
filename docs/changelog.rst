@@ -14,6 +14,11 @@ Feature release.
   change, this shouldn't affect any supported systems as even Debian stable
   includes Tornado >= 4.4.
 
+- Core: Remove upper limit of 10000 tracks in tracklist. 10000 tracks is still
+  the default limit as some MPD clients crash if the tracklist is longer, but
+  it is now possible to set the :confval:`core/max_tracklist_length` config
+  value as high as you want to. (Fixes: :issue:`1600`, PR: :issue:`1666`)
+
 - Core: Fix crash on `library.lookup(uris=[])`. (Fixes: :issue:`1619`, PR:
   :issue:`1620`)
 
@@ -34,8 +39,6 @@ Feature release.
 
 - Set GLib program and application name, so that we show up as "Mopidy" in
   PulseAudio instead of "python ...". (PR: :issue:`1626`)
-
-- Remove limitation of 10000 tracks in playlists. (PR: :issue:`1600`) 
 
 
 v2.1.0 (2017-01-02)
