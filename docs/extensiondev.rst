@@ -586,7 +586,7 @@ Test cases for checking the definition of the extension should ensure that:
 
 An example of what these tests could look like is provided below::
 
-    def test_get_default_config(self):
+    def test_get_default_config():
         ext = Extension()
         config = ext.get_default_config()
 
@@ -596,7 +596,7 @@ An example of what these tests could look like is provided below::
         assert 'param_2 = value_2' in config
         assert 'param_n = value_n' in config
 
-    def test_get_config_schema(self):
+    def test_get_config_schema():
         ext = Extension()
         schema = ext.get_config_schema()
 
@@ -605,7 +605,7 @@ An example of what these tests could look like is provided below::
         assert 'param_2' in schema
         assert 'param_n' in schema
 
-    def test_setup(self):
+    def test_setup():
         registry = mock.Mock()
 
         ext = Extension()
