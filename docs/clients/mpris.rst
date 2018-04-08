@@ -48,10 +48,9 @@ Under normal use, if Mopidy isn't running and you open the menu and click on
 Mopidy. If Mopidy is already running, you'll see that Mopidy is marked with an
 arrow to the left of its name, like in the screen shot above, and the player
 controls will be visible. Mopidy doesn't support the MPRIS spec's optional
-playlist interface yet, so you'll not be able to select what track to play from
-the sound menu. If you use an MPD client to queue a playlist, you can use the
-sound menu to check what you're currently playing, pause, resume, and skip to
-the next and previous track.
+tracklist interface yet, so you'll not be able to select what track to play
+from the sound menu. You can use the sound menu to check what you're currently
+playing, pause, resume, and skip to the next and previous track.
 
 In summary, Mopidy's sound menu integration is currently not a full featured
 client, but it's a convenient addition to an MPD client since it's always
