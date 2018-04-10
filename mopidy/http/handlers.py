@@ -14,6 +14,7 @@ from mopidy import core, models
 from mopidy.compat import urllib
 from mopidy.internal import encoding, jsonrpc
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -167,9 +168,9 @@ class JsonRpcHandler(tornado.web.RequestHandler):
         self.finish()
 
     def post(self):
-        content_type = self.request.headers.get("Content-Type", '')
+        content_type = self.request.headers.get('Content-Type', '')
         if content_type != 'application/json':
-            self.set_status(406, 'Content-Type must be application/json')
+            self.set_status(415, 'Content-Type must be application/json')
             return
 
         data = self.request.body
@@ -198,13 +199,13 @@ class JsonRpcHandler(tornado.web.RequestHandler):
 
     def options(self):
         origin = self.request.headers.get('Origin', None)
-        if not check_origin(origin, self.request.headers, 
-                                self.origin_whitelist):
+        if not check_origin(
+                origin, self.request.headers, self.origin_whitelist):
             self.set_status(403, 'Access denied for origin %s' % origin)
             return
 
-        self.set_header("Access-Control-Allow-Origin", "%s" % origin)
-        self.set_header("Access-Control-Allow-Headers", "Content-Type")
+        self.set_header('Access-Control-Allow-Origin', '%s' % origin)
+        self.set_header('Access-Control-Allow-Headers', 'Content-Type')
         self.set_status(204)
         self.finish()
 
