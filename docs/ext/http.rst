@@ -98,3 +98,11 @@ See :ref:`config` for general help on configuring Mopidy.
     be published.
 
     Set to an empty string to disable Zeroconf for HTTP.
+
+.. confval:: http/allowed_origins
+
+    A whitelist of domains allowed to perform Cross-Origin Resource Sharing
+    (CORS) requests. Entries must be in the format ``hostname``:``port``.
+    
+    If you want to access Mopidy's web server from a different web server, you
+    will need to add an entry for that server in this list.
