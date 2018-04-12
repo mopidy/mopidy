@@ -26,6 +26,7 @@ def make_mopidy_app_factory(apps, statics):
         return [
             (r'/ws/?', WebSocketHandler, {
                 'core': core,
+                'allowed_origins': allowed_origins,
             }),
             (r'/rpc', JsonRpcHandler, {
                 'core': core,
@@ -101,8 +102,9 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             # One callback per client to keep time we hold up the loop short
             loop.add_callback(functools.partial(_send_broadcast, client, msg))
 
-    def initialize(self, core):
+    def initialize(self, core, allowed_origins):
         self.jsonrpc = make_jsonrpc_wrapper(core)
+        self.allowed_origins = allowed_origins
 
     def open(self):
         self.set_nodelay(True)
@@ -137,9 +139,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             self.close()
 
     def check_origin(self, origin):
-        # Allow cross-origin WebSocket connections, like Tornado before 4.0
-        # defaulted to.
-        return True
+        return check_origin(origin, self.request.headers, self.allowed_origins)
 
 
 def set_mopidy_headers(request_handler):
