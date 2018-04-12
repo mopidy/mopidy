@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 def make_mopidy_app_factory(apps, statics):
     def mopidy_app_factory(config, core):
-        origin_whitelist = {
+        allowed_origins = {
             x.lower() for x in config['http']['allowed_origins'] if x
         }
         return [
@@ -29,7 +29,7 @@ def make_mopidy_app_factory(apps, statics):
             }),
             (r'/rpc', JsonRpcHandler, {
                 'core': core,
-                'origin_whitelist': origin_whitelist,
+                'allowed_origins': allowed_origins,
             }),
             (r'/(.+)', StaticFileHandler, {
                 'path': os.path.join(os.path.dirname(__file__), 'data'),
@@ -148,20 +148,20 @@ def set_mopidy_headers(request_handler):
         'X-Mopidy-Version', mopidy.__version__.encode('utf-8'))
 
 
-def check_origin(origin, request_headers, origin_whitelist):
+def check_origin(origin, request_headers, allowed_origins):
     if origin is None:
         logger.debug('Origin was not set')
         return False
-    origin_whitelist.add(request_headers.get('Host', None))
+    allowed_origins.add(request_headers.get('Host'))
     parsed_origin = urllib.parse.urlparse(origin).netloc.lower()
-    return parsed_origin and parsed_origin in origin_whitelist
+    return parsed_origin and parsed_origin in allowed_origins
 
 
 class JsonRpcHandler(tornado.web.RequestHandler):
 
-    def initialize(self, core, origin_whitelist):
+    def initialize(self, core, allowed_origins):
         self.jsonrpc = make_jsonrpc_wrapper(core)
-        self.origin_whitelist = origin_whitelist
+        self.allowed_origins = allowed_origins
 
     def head(self):
         self.set_extra_headers()
@@ -198,9 +198,9 @@ class JsonRpcHandler(tornado.web.RequestHandler):
         self.set_header('Content-Type', 'application/json; utf-8')
 
     def options(self):
-        origin = self.request.headers.get('Origin', None)
+        origin = self.request.headers.get('Origin')
         if not check_origin(
-                origin, self.request.headers, self.origin_whitelist):
+                origin, self.request.headers, self.allowed_origins):
             self.set_status(403, 'Access denied for origin %s' % origin)
             return
 
