@@ -46,7 +46,9 @@ class WebSocketHandlerTest(tornado.testing.AsyncHTTPTestCase):
     def get_app(self):
         self.core = mock.Mock()
         return tornado.web.Application([
-            (r'/ws/?', handlers.WebSocketHandler, {'core': self.core})
+            (r'/ws/?', handlers.WebSocketHandler, {
+                'core': self.core, 'allowed_origins': []
+            })
         ])
 
     def connection(self):

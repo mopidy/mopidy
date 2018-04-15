@@ -20,6 +20,7 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
                 'port': 6680,
                 'static_dir': None,
                 'zeroconf': '',
+                'allowed_origins': [],
             }
         }
 
@@ -128,7 +129,8 @@ class MopidyRPCHandlerTest(HttpServerTest):
     def test_should_return_rpc_error(self):
         cmd = tornado.escape.json_encode({'action': 'get_version'})
 
-        response = self.fetch('/mopidy/rpc', method='POST', body=cmd)
+        response = self.fetch('/mopidy/rpc', method='POST', body=cmd, headers={
+            'Content-Type': 'application/json'})
 
         self.assertEqual(
             {'jsonrpc': '2.0', 'id': None, 'error':
@@ -139,7 +141,8 @@ class MopidyRPCHandlerTest(HttpServerTest):
     def test_should_return_parse_error(self):
         cmd = '{[[[]}'
 
-        response = self.fetch('/mopidy/rpc', method='POST', body=cmd)
+        response = self.fetch('/mopidy/rpc', method='POST', body=cmd, headers={
+            'Content-Type': 'application/json'})
 
         self.assertEqual(
             {'jsonrpc': '2.0', 'id': None, 'error':
@@ -154,7 +157,8 @@ class MopidyRPCHandlerTest(HttpServerTest):
             'id': 1,
         })
 
-        response = self.fetch('/mopidy/rpc', method='POST', body=cmd)
+        response = self.fetch('/mopidy/rpc', method='POST', body=cmd, headers={
+            'Content-Type': 'application/json'})
 
         self.assertEqual(
             {'jsonrpc': '2.0', 'id': 1, 'result': mopidy.__version__},
@@ -167,6 +171,38 @@ class MopidyRPCHandlerTest(HttpServerTest):
         self.assertIn('X-Mopidy-Version', response.headers)
         self.assertIn('Cache-Control', response.headers)
         self.assertIn('Content-Type', response.headers)
+
+    def test_should_require_correct_content_type(self):
+        cmd = tornado.escape.json_encode({
+            'method': 'core.get_version',
+            'params': [],
+            'jsonrpc': '2.0',
+            'id': 1,
+        })
+
+        response = self.fetch('/mopidy/rpc', method='POST', body=cmd, headers={
+            'Content-Type': 'text/plain'})
+
+        self.assertEqual(response.code, 415)
+        self.assertEqual(
+            response.reason, 'Content-Type must be application/json')
+
+    def test_different_origin_returns_access_denied(self):
+        response = self.fetch('/mopidy/rpc', method='OPTIONS', headers={
+            'Host': 'me:6680', 'Origin': 'http://evil:666'})
+
+        self.assertEqual(response.code, 403)
+        self.assertEqual(
+            response.reason, 'Access denied for origin http://evil:666')
+
+    def test_same_origin_returns_cors_headers(self):
+        response = self.fetch('/mopidy/rpc', method='OPTIONS', headers={
+            'Host': 'me:6680', 'Origin': 'http://me:6680'})
+
+        self.assertEqual(
+            response.headers['Access-Control-Allow-Origin'], 'http://me:6680')
+        self.assertEqual(
+            response.headers['Access-Control-Allow-Headers'], 'Content-Type')
 
 
 class HttpServerWithStaticFilesTest(tornado.testing.AsyncHTTPTestCase):

@@ -98,3 +98,15 @@ See :ref:`config` for general help on configuring Mopidy.
     be published.
 
     Set to an empty string to disable Zeroconf for HTTP.
+
+.. confval:: http/allowed_origins
+
+    A list of domains allowed to perform Cross-Origin Resource Sharing (CORS)
+    requests. This applies to both JSON-RPC and Websocket requests. Values
+    should be in the format ``hostname:port`` and separated by either a comma or
+    newline.
+    
+    Same-origin requests (i.e. requests from Mopidy's web server) are always
+    allowed and so you don't need an entry for those. However, if your requests
+    originate from a different web server, you will need to add an entry for
+    that server in this list.
