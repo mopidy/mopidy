@@ -27,11 +27,12 @@ Feature release.
 
 - File: Fix extraneous encoding of path. (PR: :issue:`1611`)
 
-- HTTP: Protect RPC and Websocket interfaces against CSRF by blocking requests
-  that originiate from servers other than those specified in the new config
+- HTTP: Protect RPC and WebSocket interfaces against CSRF by blocking requests
+  that originate from servers other than those specified in the new config
   value :confval:`http/allowed_origins`. An artifact of this is that all
   JSON-RPC requests must now always set the header
-  ``Content-Type: application/json``. (PR:1668 :issue:`1659`)
+  ``Content-Type: application/json``.
+  (Partly fixes: :issue:`1659`, PR: :issue:`1668`)
 
 - MPD: Added ``idle`` to the list of available commands.
   (Fixes: :issue:`1593`, PR: :issue:`1597`)
