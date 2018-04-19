@@ -102,10 +102,14 @@ class DummyPlaylistsProvider(backend.PlaylistsProvider):
     def __init__(self, backend):
         super(DummyPlaylistsProvider, self).__init__(backend)
         self._playlists = []
+        self._allow_save = True
 
     def set_dummy_playlists(self, playlists):
         """For tests using the dummy provider through an actor proxy."""
         self._playlists = playlists
+
+    def set_allow_save(self, enabled):
+        self._allow_save = enabled
 
     def as_list(self):
         return [
@@ -137,6 +141,9 @@ class DummyPlaylistsProvider(backend.PlaylistsProvider):
             self._playlists.remove(playlist)
 
     def save(self, playlist):
+        if not self._allow_save:
+            return None
+
         old_playlist = self.lookup(playlist.uri)
 
         if old_playlist is not None:
