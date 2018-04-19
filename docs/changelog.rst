@@ -41,7 +41,7 @@ Feature release.
   (Fixes: :issue:`1531`, PR: :issue:`1629`)
 
 - MPD: Lookup track metadata for MPD ``load`` and ``listplaylistinfo``.
-  (PR:1621 :issue:`1511`)
+  (Fixes: :issue:`1511`, PR: :issue:`1621`)
 
 - Ensure that decoding of OS errors with unknown encoding never crashes, but
   instead replaces unknown bytes with a replacement marker. (Fixes:
