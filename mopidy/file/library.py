@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 import urllib2
+import random
 
 from mopidy import backend, exceptions, models
 from mopidy.audio import scan, tags
@@ -85,7 +86,13 @@ class FileLibraryProvider(backend.LibraryProvider):
             return (item.type != models.Ref.DIRECTORY, item.name)
         result.sort(key=order)
 
-        return result
+        size = len(result)
+        at = random.randint(0, size)
+        arr = [None] * size
+        for x in range(0, size):
+            arr[(x + at) % size] = result[x]
+
+        return arr
 
     def lookup(self, uri):
         logger.debug('Looking up file URI: %s', uri)
