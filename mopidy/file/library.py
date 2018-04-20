@@ -2,9 +2,9 @@ from __future__ import unicode_literals
 
 import logging
 import os
+import random
 import sys
 import urllib2
-import random
 
 from mopidy import backend, exceptions, models
 from mopidy.audio import scan, tags
