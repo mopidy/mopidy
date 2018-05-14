@@ -170,7 +170,7 @@ Rompr
     :width: 557
     :height: 600
 
-`Rompr <http://sourceforge.net/projects/rompr/>`_ is a web based MPD client.
+`Rompr <https://fatg3erman.github.io/RompR/>`_ is a web based MPD client.
 `mrvanes <https://github.com/mrvanes>`_, a Mopidy and Rompr user, said: "These
 projects are a real match made in heaven."
 
