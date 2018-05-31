@@ -403,7 +403,7 @@ class PlaybackController(object):
                 logger.info('No playable track in the list.')
                 break
 
-        self._try_continue_playback(pending)
+        self._try_continue_playback(pending.track)
 
         # TODO return result?
 
@@ -454,9 +454,24 @@ class PlaybackController(object):
 
         raise Exception('Unknown state: %s' % state)
 
-    def _try_continue_playback(self, tl_track):
+    def _try_continue_playback(self, track):
+        if not self.core._config['core']['continue_playback_types']:
+            return False
+
+        enabled_types = self.core._config['core']['continue_playback_types']
+        enabled_types = enabled_types.split(',')
+
+        logger.info(track.uri[:20])
+        # Only try to continue playback if track is of a valid type
+        # as specified in core/continue_playback_types config,
+        # e.g. "podcast"
+        if not track.uri.startswith(tuple(enabled_types)):
+            return False
+
+        # If we have a playback position from earlier,
+        # resume playback at that point
         try:
-            position = self.playback_tracker.positions[tl_track.track.uri]
+            position = self.playback_tracker.positions[track.uri]
         except KeyError:
             pass
         else:
