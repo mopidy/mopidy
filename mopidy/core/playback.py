@@ -403,13 +403,7 @@ class PlaybackController(object):
                 logger.info('No playable track in the list.')
                 break
 
-        try:
-            position = self.playback_tracker.positions[pending.track.uri]
-        except IndexError:
-            pass
-        else:
-            logger.info('Starting playback at %ss.' % position/1000)
-            self._start_at_position = position
+        self._try_continue_playback(pending)
 
         # TODO return result?
 
@@ -459,6 +453,15 @@ class PlaybackController(object):
             return True
 
         raise Exception('Unknown state: %s' % state)
+
+    def _try_continue_playback(self, tl_track):
+        try:
+            position = self.playback_tracker.positions[tl_track.track.uri]
+        except KeyError:
+            pass
+        else:
+            logger.debug("Starting playback at %ss.", float(position)/1000)
+            self._start_at_position = position
 
     def previous(self):
         """
