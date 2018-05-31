@@ -23,14 +23,12 @@ class PlaybackTracker(object):
         self.save_position()
 
     def save_position(self):
-        try:
-            track = self.playback_controller.get_current_track()
-            time_position = self.playback_controller.get_time_position()
+        track = self.playback_controller.get_current_track()
+        time_position = self.playback_controller.get_time_position()
+        if type(time_position) is 'int':
             self.positions[track.uri] = time_position
             logger.debug("Saving playback position for %s at %dms"
                          % (track.name, time_position))
-        except AttributeError:
-            pass
 
     def start(self):
         if not self.is_running:
