@@ -6,7 +6,7 @@ from mopidy.audio import PlaybackState
 from mopidy.compat import urllib
 from mopidy.core import listener
 from mopidy.internal import deprecation, models, validation
-from mopidy.tracker import PlaybackTracker
+from mopidy.internal.tracker import PlaybackTracker
 
 logger = logging.getLogger(__name__)
 
