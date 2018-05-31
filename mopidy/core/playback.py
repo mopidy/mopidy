@@ -6,6 +6,7 @@ from mopidy.audio import PlaybackState
 from mopidy.compat import urllib
 from mopidy.core import listener
 from mopidy.internal import deprecation, models, validation
+from mopidy.tracker import PlaybackTracker
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +19,7 @@ class PlaybackController(object):
         self.backends = backends
         self.core = core
         self._audio = audio
+        self.playback_tracker = PlaybackTracker(self)
 
         self._stream_title = None
         self._state = PlaybackState.STOPPED
@@ -209,6 +211,7 @@ class PlaybackController(object):
         if self._current_tl_track:
             self._trigger_track_playback_ended(self.get_time_position())
         self._set_current_tl_track(None)
+        self.playback_tracker.stop()
 
     def _on_stream_changed(self, uri):
         if self._last_position is None:
@@ -240,6 +243,7 @@ class PlaybackController(object):
 
     def _on_position_changed(self, position):
         if self._pending_position is not None:
+            self.playback_tracker.save_position()
             self._trigger_seeked(self._pending_position)
             self._pending_position = None
             if self._start_paused:
@@ -337,6 +341,7 @@ class PlaybackController(object):
     def pause(self):
         """Pause playback."""
         backend = self._get_backend(self.get_current_tl_track())
+        self.playback_tracker.save_position()
         # TODO: Wrap backend call in error handling.
         if not backend or backend.playback.pause().get():
             # TODO: switch to:
@@ -397,6 +402,14 @@ class PlaybackController(object):
             if not count:
                 logger.info('No playable track in the list.')
                 break
+
+        try:
+            position = self.playback_tracker.positions[pending.track.uri]
+        except IndexError:
+            pass
+        else:
+            logger.info('Starting playback at %ss.' % position/1000)
+            self._start_at_position = position
 
         # TODO return result?
 
