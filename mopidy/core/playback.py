@@ -476,11 +476,8 @@ class PlaybackController(object):
 
         # If we have a playback position from earlier,
         # resume playback at that point
-        try:
-            position = self.playback_tracker.positions[track.uri]
-        except KeyError:
-            pass
-        else:
+        position = self.playback_tracker.get_last_position(track.uri)
+        if position:
             logger.debug("Starting playback at %ss.", float(position)/1000)
             self._start_at_position = position
 
