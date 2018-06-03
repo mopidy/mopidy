@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+import sqlite3
 from threading import Timer
 
 import logging
@@ -8,20 +9,51 @@ logger = logging.getLogger(__name__)
 
 
 class PlaybackTracker(object):
+    DB_PATH = "tracker.db"
     positions = {}
 
-    def __init__(self, playback_controller, *args, **kwargs):
+    def __init__(self, playback_controller, config, *args, **kwargs):
         self._timer = None
         self.interval = 5  # save position every x seconds
         self.playback_controller = playback_controller
         self.is_running = False
         self.start()
 
+        # Get enabled types from core config
+        try:
+            enabled_types = config['core']['continue_playback_types']
+            self.types = tuple(enabled_types.split(','))
+        except KeyError:
+            self.types = ()
+
+    def _setup_db(self):
+        return self._execute_db_query('''
+            CREATE TABLE playback_position
+            (id integer primary key autoincrement,
+            uri text not null unique,
+            position int)
+            ''')
+
+    def _execute_db_query(self, *args):
+        con = sqlite3.connect(self.DB_PATH)
+        c = con.cursor()
+        try:
+            result = c.execute(*args).fetchone()
+        except sqlite3.OperationalError:
+            # If the db isn't set up yet, do this first, then try again
+            self._setup_db()
+            result = c.execute(*args).fetchone()
+        con.commit()
+        con.close()
+
+        return result
+
     def _run(self):
         self.is_running = False
         self.start()
         self.save_position()
 
+    # Start the tracker, i.e. periodically saving the playback position
     def start(self):
         if not self.is_running:
             self._timer = Timer(self.interval, self._run)
@@ -29,20 +61,36 @@ class PlaybackTracker(object):
             self._timer.start()
             self.is_running = True
 
+    # Stop the tracker
     def stop(self):
         self._timer.cancel()
         self.is_running = False
 
+    # Save the current playback position in ms to a Sqlite3 DB
     def save_position(self):
         track = self.playback_controller.get_current_track()
         time_position = self.playback_controller.get_time_position()
         if track and isinstance(time_position, (int, long)):
-            self.positions[track.uri] = time_position
+            self._execute_db_query('''
+                INSERT OR REPLACE INTO playback_position
+                (uri, position) VALUES (?, ?)''',
+                (track.uri, time_position))
             logger.debug("Saving playback position for %s at %dms"
                          % (track.name, time_position))
 
+    # Try to retrieve a previous playback positoin from the DB
     def get_last_position(self, track_uri):
         try:
-            return self.positions[track_uri]
-        except KeyError:
-            return None
+            result = self._execute_db_query('''
+                SELECT position FROM playback_position
+                WHERE uri = ?''', (track_uri,))
+            position = result[0]
+        except TypeError:
+            position = None
+        return position
+
+    # Check if the file's "type" is enabled to be able to be continued
+    # We do this by checking the track's uri's prefix to be checked
+    # against a list given in the config
+    def is_track_enabled_for_tracking(self, track):
+        return track.uri.startswith(self.types)

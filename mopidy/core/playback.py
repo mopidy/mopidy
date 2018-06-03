@@ -19,7 +19,7 @@ class PlaybackController(object):
         self.backends = backends
         self.core = core
         self._audio = audio
-        self.playback_tracker = PlaybackTracker(self)
+        self.playback_tracker = PlaybackTracker(self, self.core._config)
 
         self._stream_title = None
         self._state = PlaybackState.STOPPED
@@ -460,18 +460,10 @@ class PlaybackController(object):
         except AttributeError:
             return False
 
-        try:
-            enabled_types = self.core._config['core']['continue_playback_types']
-        except KeyError:
-            return False
-
-        enabled_types = enabled_types.split(',')
-
-        logger.info(track.uri[:20])
         # Only try to continue playback if track is of a valid type
         # as specified in core/continue_playback_types config,
         # e.g. "podcast"
-        if not track.uri.startswith(tuple(enabled_types)):
+        if not self.playback_tracker.is_track_enabled_for_tracking(track):
             return False
 
         # If we have a playback position from earlier,
