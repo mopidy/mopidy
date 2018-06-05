@@ -470,7 +470,7 @@ class PlaybackController(object):
         # resume playback at that point
         position = self.playback_tracker.get_last_position(track.uri)
         if position:
-            logger.debug("Starting playback at %ss.", float(position)/1000)
+            logger.debug("Starting playback at %ss.", float(position) / 1000)
             self._start_at_position = position
 
     def previous(self):

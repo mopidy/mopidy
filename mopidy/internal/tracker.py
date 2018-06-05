@@ -1,9 +1,9 @@
 from __future__ import absolute_import, unicode_literals
 
-import sqlite3
-import os
-from threading import Timer
 import logging
+import os
+import sqlite3
+from threading import Timer
 
 from mopidy.internal import path
 
@@ -21,7 +21,8 @@ class PlaybackTracker(object):
         self.interval = 5  # save position every x seconds
         self.is_running = False
         self.start()
-        self.db_path = os.path.join(self._get_data_dir(), "playback_positions.db")
+        self.db_path = os.path.join(self._get_data_dir(),
+                                    "playback_positions.db")
 
         # Get enabled types from core config
         try:
@@ -76,9 +77,9 @@ class PlaybackTracker(object):
         time_position = self.playback_controller.get_time_position()
         if track and isinstance(time_position, (int, long)):
             self._execute_db_query('''
-                INSERT OR REPLACE INTO playback_position
-                (uri, position) VALUES (?, ?)''',
-                (track.uri, time_position))
+                                   INSERT OR REPLACE INTO playback_position
+                                   (uri, position) VALUES (?, ?)''',
+                                   (track.uri, time_position))
             logger.debug("Saving playback position for %s at %dms"
                          % (track.name, time_position))
 
