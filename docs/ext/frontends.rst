@@ -41,14 +41,6 @@ Extension for controlling Mopidy through the `MPRIS <http://www.mpris.org/>`_
 D-Bus interface, for example using the Ubuntu Sound Menu.
 
 
-Mopidy-Notifier
-===============
-
-https://github.com/sauberfred/mopidy-notifier
-
-Extension for displaying track info as User Notifications in Mac OS X.
-
-
 Mopidy-Scrobbler
 ================
 
