@@ -1,27 +1,31 @@
 from __future__ import absolute_import, unicode_literals
 
 import sqlite3
+import os
 from threading import Timer
-
 import logging
+
+from mopidy.internal import path
 
 logger = logging.getLogger(__name__)
 
 
 class PlaybackTracker(object):
-    DB_PATH = "tracker.db"
     positions = {}
 
     def __init__(self, playback_controller, config, *args, **kwargs):
+        self.playback_controller = playback_controller
+        self.config = config
+
         self._timer = None
         self.interval = 5  # save position every x seconds
-        self.playback_controller = playback_controller
         self.is_running = False
         self.start()
+        self.db_path = os.path.join(self._get_data_dir(), "playback_positions.db")
 
         # Get enabled types from core config
         try:
-            enabled_types = config['core']['continue_playback_types']
+            enabled_types = self.config['core']['continue_playback_types']
             self.types = tuple(enabled_types.split(','))
         except KeyError:
             self.types = ()
@@ -35,7 +39,7 @@ class PlaybackTracker(object):
             ''')
 
     def _execute_db_query(self, *args):
-        con = sqlite3.connect(self.DB_PATH)
+        con = sqlite3.connect(self.db_path)
         c = con.cursor()
         try:
             result = c.execute(*args).fetchone()
@@ -94,3 +98,9 @@ class PlaybackTracker(object):
     # against a list given in the config
     def is_track_enabled_for_tracking(self, track):
         return track.uri.startswith(self.types)
+
+    # TODO: refactor this as it's a duplicate of core.actor._get_data_dir
+    def _get_data_dir(self):
+        data_dir_path = os.path.join(self.config['core']['data_dir'], b'core')
+        path.get_or_create_dir(data_dir_path)
+        return data_dir_path
