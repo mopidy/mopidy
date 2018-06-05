@@ -17,19 +17,26 @@ class PlaybackTracker(object):
         self.playback_controller = playback_controller
         self.config = config
 
+        self.enabled = True
         self._timer = None
         self.interval = 5  # save position every x seconds
         self.is_running = False
-        self.start()
-        self.db_path = os.path.join(self._get_data_dir(),
-                                    "playback_positions.db")
+        try:
+            self.db_path = os.path.join(self._get_data_dir(),
+                                        b'playback_positions.db')
+        except (KeyError, TypeError):
+            self.enabled = False
 
         # Get enabled types from core config
         try:
             enabled_types = self.config['core']['continue_playback_types']
             self.types = tuple(enabled_types.split(','))
-        except KeyError:
+        except (KeyError, TypeError):
             self.types = ()
+            self.enabled = False
+
+        if self.enabled:
+            self.start()
 
     def _setup_db(self):
         return self._execute_db_query('''
@@ -60,7 +67,7 @@ class PlaybackTracker(object):
 
     # Start the tracker, i.e. periodically saving the playback position
     def start(self):
-        if not self.is_running:
+        if self.enabled and not self.is_running:
             self._timer = Timer(self.interval, self._run)
             self._timer.daemon = True
             self._timer.start()
@@ -68,12 +75,19 @@ class PlaybackTracker(object):
 
     # Stop the tracker
     def stop(self):
-        self._timer.cancel()
+        if self._timer:
+            self._timer.cancel()
         self.is_running = False
 
     # Save the current playback position in ms to a Sqlite3 DB
     def save_position(self):
-        track = self.playback_controller.get_current_track()
+        if not self.enabled:
+            return False
+
+        try:
+            track = self.playback_controller.get_current_track()
+        except AttributeError:
+            return False
         time_position = self.playback_controller.get_time_position()
         if track and isinstance(time_position, (int, long)):
             self._execute_db_query('''
@@ -82,9 +96,13 @@ class PlaybackTracker(object):
                                    (track.uri, time_position))
             logger.debug("Saving playback position for %s at %dms"
                          % (track.name, time_position))
+            return True
 
     # Try to retrieve a previous playback positoin from the DB
     def get_last_position(self, track_uri):
+        if not self.enabled:
+            return None
+
         try:
             result = self._execute_db_query('''
                 SELECT position FROM playback_position
