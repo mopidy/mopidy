@@ -5,6 +5,8 @@ import os
 import sqlite3
 from threading import Timer
 
+import pykka
+
 from mopidy.internal import path
 
 logger = logging.getLogger(__name__)
@@ -84,11 +86,11 @@ class PlaybackTracker(object):
         if not self.enabled:
             return False
 
+        track = self.playback_controller.get_current_track()
         try:
-            track = self.playback_controller.get_current_track()
-        except AttributeError:
+            time_position = self.playback_controller.get_time_position()
+        except pykka.ActorDeadError:
             return False
-        time_position = self.playback_controller.get_time_position()
         if track and isinstance(time_position, (int, long)):
             self._execute_db_query('''
                                    INSERT OR REPLACE INTO playback_position

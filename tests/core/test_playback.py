@@ -1,5 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
+import os
+import tempfile
 import unittest
 
 import mock
@@ -9,6 +11,7 @@ import pykka
 from mopidy import backend, core
 from mopidy.internal import deprecation
 from mopidy.internal.models import PlaybackState
+from mopidy.internal.tracker import PlaybackTracker
 from mopidy.models import Track
 
 from tests import dummy_audio
@@ -68,7 +71,13 @@ class TestBackend(pykka.ThreadingActor, backend.Backend):
 
 
 class BaseTest(unittest.TestCase):
-    config = {'core': {'max_tracklist_length': 10000}}
+    config = {
+        'core': {
+            'max_tracklist_length': 10000,
+            # 'data_dir': tempfile.gettempdir(),
+            # 'continue_playback_types': 'podcast,dummy',
+        }
+    }
     tracks = [Track(uri='dummy:a', length=1234),
               Track(uri='dummy:b', length=1234),
               Track(uri='dummy:c', length=1234)]
@@ -182,6 +191,65 @@ class TestPlayHandling(BaseTest):
 
         current_tl_track = self.core.playback.get_current_tl_track()
         self.assertEqual(tl_tracks[1], current_tl_track)
+
+
+class TestTracker(BaseTest):
+    def setUp(self, *args, **kwargs):
+        super(TestTracker, self).setUp(*args, **kwargs)
+
+        config = {
+            'core': {
+                'max_tracklist_length': 10000,
+                'data_dir': tempfile.gettempdir(),
+                'continue_playback_types': 'podcast,dummy',
+            }
+        }
+        self.playback.playback_tracker = PlaybackTracker(self.playback, config)
+        self.tracker = self.core.playback.playback_tracker
+        self.tl_tracks = self.core.tracklist.get_tl_tracks()
+
+    def test_setup_tracker_db(self):
+        tracker_db = os.path.join(self.tracker.config['core']['data_dir'],
+                                  b'core/playback_positions.db')
+
+        os.remove(tracker_db)
+
+        self.core.playback.play(self.tl_tracks[0])
+        self.replay_events()
+        self.tracker.save_position()
+
+        pos = self.tracker.get_last_position(
+            self.tl_tracks[0].track.uri)
+        self.assertEqual(pos, 0)
+
+    def test_continue_playback(self):
+        test_timepos = 571
+
+        self.core.playback.play(self.tl_tracks[0])
+        self.replay_events()
+
+        self.core.playback.seek(test_timepos)
+        self.tracker.save_position()
+
+        self.core.playback.play(self.tl_tracks[1])
+        self.replay_events()
+
+        self.core.playback.play(self.tl_tracks[0])
+        self.replay_events()
+
+        self.assertEqual(self.core.playback.get_time_position(), test_timepos)
+
+    def test_not_enabled_return_no_position(self):
+        track = self.tl_tracks[0].track.uri
+        self.tracker.enabled = False
+
+        pos = self.tracker.get_last_position(track)
+        self.assertEqual(pos, None)
+
+    def test_tracker_stopping(self):
+        self.assertEqual(self.tracker.is_running, True)
+        self.tracker.stop()
+        self.assertEqual(self.tracker.is_running, False)
 
 
 class TestNextHandling(BaseTest):
