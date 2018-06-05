@@ -16,11 +16,11 @@ from scratch, we have a guide for installing Debian/Raspbian and Mopidy. See
 
 The packages are built for:
 
-- Debian jessie (stable), which also works for Raspbian jessie and Ubuntu 14.04
-  LTS and newer.
+- Debian stretch (stable), which also works for Raspbian stretch and Ubuntu
+  16.04 LTS and newer.
 
 The packages are available for multiple CPU architectures: i386, amd64, armel,
-and armhf (compatible with Raspberry Pi 1 and 2).
+and armhf (compatible with all Raspberry Pi models).
 
 .. note::
 
@@ -35,16 +35,17 @@ and armhf (compatible with Raspberry Pi 1 and 2).
 
 #. Add the APT repo to your package sources::
 
-       sudo wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/jessie.list
+       sudo wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/stretch.list
 
 #. Install Mopidy and all dependencies::
 
        sudo apt-get update
        sudo apt-get install mopidy
 
-#. Finally, you need to set a couple of :doc:`config values </config>`, and then
-   you're ready to :doc:`run Mopidy </running>` or run Mopidy as a
-   :ref:`service <service>`.
+#. Finally, you need to set a couple of :doc:`config values </config>`, and
+   then you're ready to :doc:`run Mopidy </running>`. Alternatively you may
+   want to have Mopidy run as a :ref:`system service <service>`, automatically
+   starting at boot.
 
 When a new release of Mopidy is out, and you can't wait for you system to
 figure it out for itself, run the following to upgrade right away::
