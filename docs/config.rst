@@ -119,6 +119,22 @@ Core config section
 
     Default is ``false``.
 
+.. confval:: core/continue_playback_types
+
+    Takes a comma-separated list of track types for which it will try
+    and remember at which position playback ends.
+    When playing the track again, it will automatically start at
+    that position.
+
+    Usually you want only longer tracks that you want to listen to
+    in multiple sittings, e.g. podcasts or audio books, to appear here.
+
+    The entries in this list should be URI schemes, compare :ref:`backend-api`.
+
+    Default is ``podcast``.
+    This means playback is only continued for tracks provided by the
+    Mopidy-Podcast backend.
+
 .. _audio-config:
 
 Audio configuration

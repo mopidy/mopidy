@@ -6,6 +6,7 @@ from mopidy.audio import PlaybackState
 from mopidy.compat import urllib
 from mopidy.core import listener
 from mopidy.internal import deprecation, models, validation
+from mopidy.internal.tracker import PlaybackTracker
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +19,7 @@ class PlaybackController(object):
         self.backends = backends
         self.core = core
         self._audio = audio
+        self.playback_tracker = PlaybackTracker(self, self.core._config)
 
         self._stream_title = None
         self._state = PlaybackState.STOPPED
@@ -209,6 +211,7 @@ class PlaybackController(object):
         if self._current_tl_track:
             self._trigger_track_playback_ended(self.get_time_position())
         self._set_current_tl_track(None)
+        self.playback_tracker.stop()
 
     def _on_stream_changed(self, uri):
         if self._last_position is None:
@@ -240,6 +243,7 @@ class PlaybackController(object):
 
     def _on_position_changed(self, position):
         if self._pending_position is not None:
+            self.playback_tracker.save_position()
             self._trigger_seeked(self._pending_position)
             self._pending_position = None
             if self._start_paused:
@@ -337,6 +341,7 @@ class PlaybackController(object):
     def pause(self):
         """Pause playback."""
         backend = self._get_backend(self.get_current_tl_track())
+        self.playback_tracker.save_position()
         # TODO: Wrap backend call in error handling.
         if not backend or backend.playback.pause().get():
             # TODO: switch to:
@@ -398,6 +403,8 @@ class PlaybackController(object):
                 logger.info('No playable track in the list.')
                 break
 
+        self._try_continue_playback(pending)
+
         # TODO return result?
 
     def _change(self, pending_tl_track, state):
@@ -446,6 +453,25 @@ class PlaybackController(object):
             return True
 
         raise Exception('Unknown state: %s' % state)
+
+    def _try_continue_playback(self, tl_track):
+        try:
+            track = tl_track.track
+        except AttributeError:
+            return False
+
+        # Only try to continue playback if track is of a valid type
+        # as specified in core/continue_playback_types config,
+        # e.g. "podcast"
+        if not self.playback_tracker.is_track_enabled_for_tracking(track):
+            return False
+
+        # If we have a playback position from earlier,
+        # resume playback at that point
+        position = self.playback_tracker.get_last_position(track.uri)
+        if position:
+            logger.debug("Starting playback at %ss.", float(position) / 1000)
+            self._start_at_position = position
 
     def previous(self):
         """
