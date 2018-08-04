@@ -464,6 +464,7 @@ class TracklistController(object):
 
         Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
         """
+        self.core.playback.stop()
         self._tl_tracks = []
         self._increase_version()
 
@@ -566,8 +567,19 @@ class TracklistController(object):
 
         tl_tracks = self.filter(criteria or kwargs)
         for tl_track in tl_tracks:
-            position = self._tl_tracks.index(tl_track)
-            del self._tl_tracks[position]
+            if tl_track.tlid == self.core.playback.get_current_tlid():
+                # We must stop playback if we are removing the currently
+                # playing track, otherwise GStreamer keeps playing it
+                self.core.playback.stop()
+
+            try:
+                # If consume is enabled, core.playback.stop() will remove
+                # the track and the index() method below raises an excpetion
+                position = self._tl_tracks.index(tl_track)
+                del self._tl_tracks[position]
+            except:
+                logger.debug("Removed track not found. Probably consumed")
+
         self._increase_version()
         return tl_tracks
 
