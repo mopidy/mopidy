@@ -568,7 +568,11 @@ class TracklistController(object):
         tl_tracks = self.filter(criteria or kwargs)
         for tl_track in tl_tracks:
             if tl_track.tlid == self.core.playback.get_current_tlid():
-                self.core.playback.stop()
+                if self.get_consume() and self.next_track(tl_track) is not None:
+                    #pass
+                    logger.debug("Removing current track with consume enaled")
+                else:
+                    self.core.playback.stop()
             position = self._tl_tracks.index(tl_track)
             del self._tl_tracks[position]
         self._increase_version()
