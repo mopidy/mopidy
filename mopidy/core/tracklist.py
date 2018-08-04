@@ -568,13 +568,18 @@ class TracklistController(object):
         tl_tracks = self.filter(criteria or kwargs)
         for tl_track in tl_tracks:
             if tl_track.tlid == self.core.playback.get_current_tlid():
-                if self.get_consume() and self.next_track(tl_track) is not None:
-                    #pass
-                    logger.debug("Removing current track with consume enaled")
-                else:
-                    self.core.playback.stop()
-            position = self._tl_tracks.index(tl_track)
-            del self._tl_tracks[position]
+                # We must stop playback if we are removing the currently
+                # playing track, otherwise GStreamer keeps playing it
+                self.core.playback.stop()
+
+            try:
+                # If consume is enabled, core.playback.stop() will remove
+                # the track and the index() method below raises an excpetion
+                position = self._tl_tracks.index(tl_track)
+                del self._tl_tracks[position]
+            except:
+                logger.debug("Removed track not found. Probably consumed")
+
         self._increase_version()
         return tl_tracks
 
