@@ -287,11 +287,17 @@ class _Handler(object):
                 return  # Live sources stall in paused.
 
         level = logging.getLevelName('TRACE')
-        if percent < 10 and not self._audio._buffering:
+        # GStreamer sends a buffering message with a percent of 0 when a
+        # stream is stopped. If we act on that it changes the playback state
+        # from STOPPED to PAUSED, which is not correct and leaves us stuck in
+        # a buffering state. Also, if consume is enabled, we're then in PAUSE
+        # with no current tl_track and the playbin gets stuck playing the
+        # stream
+        if percent > 0 and percent < 10 and not self._audio._buffering:
             self._audio._playbin.set_state(Gst.State.PAUSED)
             self._audio._buffering = True
             level = logging.DEBUG
-        if percent == 100:
+        if percent >= 30:
             self._audio._buffering = False
             if self._audio._target_state == Gst.State.PLAYING:
                 self._audio._playbin.set_state(Gst.State.PLAYING)

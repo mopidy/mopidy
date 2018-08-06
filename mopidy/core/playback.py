@@ -27,10 +27,11 @@ class PlaybackController(object):
 
         self._pending_position = None
         self._last_position = None
-        self._previous = False
 
         self._start_at_position = None
         self._start_paused = False
+
+        self._last_track = None
 
         if self._audio:
             self._audio.set_about_to_finish_callback(
@@ -205,9 +206,11 @@ class PlaybackController(object):
     # Methods
 
     def _on_end_of_stream(self):
+        self._last_track = None
         self.set_state(PlaybackState.STOPPED)
         if self._current_tl_track:
             self._trigger_track_playback_ended(self.get_time_position())
+            self.core.tracklist._mark_played(self._current_tl_track)
         self._set_current_tl_track(None)
 
     def _on_stream_changed(self, uri):
@@ -454,7 +457,6 @@ class PlaybackController(object):
         The current playback state will be kept. If it was playing, playing
         will continue. If it was paused, it will still be paused, etc.
         """
-        self._previous = True
         state = self.get_state()
         current = self._pending_tl_track or self._current_tl_track
         # avoid endless loop if 'repeat' is 'true' and no track is playable
@@ -548,10 +550,14 @@ class PlaybackController(object):
         """Stop playing."""
         if self.get_state() != PlaybackState.STOPPED:
             self._last_position = self.get_time_position()
-            backend = self._get_backend(self.get_current_tl_track())
+            tl_track = self.get_current_tl_track()
+            backend = self._get_backend(tl_track)
             # TODO: Wrap backend call in error handling.
             if not backend or backend.playback.stop().get():
                 self.set_state(PlaybackState.STOPPED)
+                if tl_track is not None:
+                    self.core.tracklist._mark_played(tl_track)
+                self._last_track = None
 
     def _trigger_track_playback_paused(self):
         logger.debug('Triggering track playback paused event')
@@ -580,6 +586,11 @@ class PlaybackController(object):
         self.core.tracklist._mark_playing(tl_track)
         self.core.history._add_track(tl_track.track)
         listener.CoreListener.send('track_playback_started', tl_track=tl_track)
+        if self._last_track is not None:
+            if self._last_track.tlid != tl_track.tlid:
+                self.core.tracklist._mark_played(self._last_track)
+        self._last_track = tl_track
+
 
     def _trigger_track_playback_ended(self, time_position_before_stop):
         tl_track = self.get_current_tl_track()
@@ -587,10 +598,6 @@ class PlaybackController(object):
             return
 
         logger.debug('Triggering track playback ended event')
-
-        if not self._previous:
-            self.core.tracklist._mark_played(self._current_tl_track)
-        self._previous = False
 
         # TODO: Use the lowest of track duration and position.
         listener.CoreListener.send(
