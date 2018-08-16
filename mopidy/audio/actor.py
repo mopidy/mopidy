@@ -297,7 +297,7 @@ class _Handler(object):
             self._audio._playbin.set_state(Gst.State.PAUSED)
             self._audio._buffering = True
             level = logging.DEBUG
-        if percent >= 30:
+        if percent >= 50:
             self._audio._buffering = False
             if self._audio._target_state == Gst.State.PLAYING:
                 self._audio._playbin.set_state(Gst.State.PLAYING)
