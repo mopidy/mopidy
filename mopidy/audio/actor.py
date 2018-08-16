@@ -293,11 +293,11 @@ class _Handler(object):
         # a buffering state. Also, if consume is enabled, we're then in PAUSE
         # with no current tl_track and the playbin gets stuck playing the
         # stream
-        if percent > 0 and percent < 50 and not self._audio._buffering:
+        if percent > 0 and percent < 10 and not self._audio._buffering:
             self._audio._playbin.set_state(Gst.State.PAUSED)
             self._audio._buffering = True
             level = logging.DEBUG
-        if percent >= 50:
+        if percent == 100:
             self._audio._buffering = False
             if self._audio._target_state == Gst.State.PLAYING:
                 self._audio._playbin.set_state(Gst.State.PLAYING)
