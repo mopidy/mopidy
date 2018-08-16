@@ -294,17 +294,19 @@ class _Handler(object):
         # from STOPPED to PAUSED, which is not correct and leaves us stuck in
         # a buffering state. Also, if consume is enabled, we're then in PAUSE
         # with no current tl_track and the playbin gets stuck playing the
-        # stream. The _starting flag is there so that we do act on the buffering
-        # messages at the beginning of the stream
-        if (self._starting or (percent > 0 and percent < 10)) and not self._audio._buffering:
+        # stream. The _starting flag is there so that we always act on the
+        # buffering messages at the beginning of the stream. _starting
+        # is reset to True on stream_changed
+        if self._audio._buffering:
+            if percent == 100:
+                self._audio._buffering = False
+                if self._audio._target_state == Gst.State.PLAYING:
+                    self._audio._playbin.set_state(Gst.State.PLAYING)
+                level = logging.DEBUG
+        elif self._starting or (percent > 0 and percent < 15):
             self._starting = False
             self._audio._playbin.set_state(Gst.State.PAUSED)
             self._audio._buffering = True
-            level = logging.DEBUG
-        if percent == 100:
-            self._audio._buffering = False
-            if self._audio._target_state == Gst.State.PLAYING:
-                self._audio._playbin.set_state(Gst.State.PLAYING)
             level = logging.DEBUG
 
         gst_logger.log(
