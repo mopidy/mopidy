@@ -182,6 +182,7 @@ class _Handler(object):
         self._pad = None
         self._message_handler_id = None
         self._event_handler_id = None
+        self._starting = True
 
     def setup_message_handling(self, element):
         self._element = element
@@ -273,6 +274,7 @@ class _Handler(object):
                            new_state=new_state, target_state=target_state)
         if new_state == PlaybackState.STOPPED:
             logger.debug('Audio event: stream_changed(uri=None)')
+            self._starting = True
             AudioListener.send('stream_changed', uri=None)
 
         if 'GST_DEBUG_DUMP_DOT_DIR' in os.environ:
@@ -292,8 +294,10 @@ class _Handler(object):
         # from STOPPED to PAUSED, which is not correct and leaves us stuck in
         # a buffering state. Also, if consume is enabled, we're then in PAUSE
         # with no current tl_track and the playbin gets stuck playing the
-        # stream
-        if percent > 0 and percent < 10 and not self._audio._buffering:
+        # stream. The _starting flag is there so that we do act on the buffering
+        # messages at the beginning of the stream
+        if (self._starting or (percent > 0 and percent < 10)) and not self._audio._buffering:
+            self._starting = False
             self._audio._playbin.set_state(Gst.State.PAUSED)
             self._audio._buffering = True
             level = logging.DEBUG
