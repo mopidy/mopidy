@@ -182,7 +182,6 @@ class _Handler(object):
         self._pad = None
         self._message_handler_id = None
         self._event_handler_id = None
-        self._starting = True
 
     def setup_message_handling(self, element):
         self._element = element
@@ -239,7 +238,7 @@ class _Handler(object):
         return Gst.PadProbeReturn.OK
 
     def on_playbin_state_changed(self, old_state, new_state, pending_state):
-        gst_logger.debug(
+        gst_logger.info(
             'Got STATE_CHANGED bus message: old=%s new=%s pending=%s',
             old_state.value_name, new_state.value_name,
             pending_state.value_name)
@@ -274,7 +273,6 @@ class _Handler(object):
                            new_state=new_state, target_state=target_state)
         if new_state == PlaybackState.STOPPED:
             logger.debug('Audio event: stream_changed(uri=None)')
-            self._starting = True
             AudioListener.send('stream_changed', uri=None)
 
         if 'GST_DEBUG_DUMP_DOT_DIR' in os.environ:
@@ -282,10 +280,12 @@ class _Handler(object):
                 self._audio._playbin, Gst.DebugGraphDetails.ALL, 'mopidy')
 
     def on_buffering(self, percent, structure=None):
+        logger.info("BUFFERING, percent is %d", percent)
         if structure is not None and structure.has_field('buffering-mode'):
             buffering_mode = structure.get_enum(
                 'buffering-mode', Gst.BufferingMode)
             if buffering_mode == Gst.BufferingMode.LIVE:
+                logger.info("  Ignoring due to LIVE mode")
                 return  # Live sources stall in paused.
 
         level = logging.getLevelName('TRACE')
@@ -294,18 +294,18 @@ class _Handler(object):
         # from STOPPED to PAUSED, which is not correct and leaves us stuck in
         # a buffering state. Also, if consume is enabled, we're then in PAUSE
         # with no current tl_track and the playbin gets stuck playing the
-        # stream. The _starting flag is there so that we always act on the
-        # buffering messages at the beginning of the stream. _starting
-        # is reset to True on stream_changed
-
+        # stream. Hence check the audio target state and don't pause if
+        # we're stopping.
+        logger.info("  Audio target state is %s",self._audio._target_state.value_name)
         if self._audio._buffering:
+            logger.info("  Currently in buffering state")
             if percent == 100:
                 self._audio._buffering = False
                 if self._audio._target_state == Gst.State.PLAYING:
                     self._audio._playbin.set_state(Gst.State.PLAYING)
                 level = logging.DEBUG
-        elif self._starting or (percent > 0 and percent < 15):
-            self._starting = False
+        elif percent < 10 and self._audio._target_state != Gst.State.NULL:
+            logger.info("  Pausing while waiting for buffer to fill")
             self._audio._playbin.set_state(Gst.State.PAUSED)
             self._audio._buffering = True
             level = logging.DEBUG
@@ -315,7 +315,7 @@ class _Handler(object):
 
     def on_end_of_stream(self):
         gst_logger.debug('Got EOS (end of stream) bus message.')
-        logger.debug('Audio event: reached_end_of_stream()')
+        logger.info('Audio event: reached_end_of_stream()')
         self._audio._tags = {}
         AudioListener.send('reached_end_of_stream')
 
@@ -376,7 +376,7 @@ class _Handler(object):
     def on_stream_start(self):
         gst_logger.debug('Got STREAM_START bus message')
         uri = self._audio._pending_uri
-        logger.debug('Audio event: stream_changed(uri=%r)', uri)
+        logger.info('Audio event: stream_changed(uri=%r)', uri)
         AudioListener.send('stream_changed', uri=uri)
 
         # Emit any postponed tags that we got after about-to-finish.

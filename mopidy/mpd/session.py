@@ -25,7 +25,9 @@ class MpdSession(network.LineProtocol):
             session=self, config=config, core=core, uri_map=uri_map)
 
     def on_start(self):
-        logger.info('New MPD connection from %s', self.connection)
+        # Changed from info to debug to prevent spamming syslog when
+        # running as a service
+        logger.debug('New MPD connection from %s', self.connection)
         self.send_lines(['OK MPD %s' % protocol.VERSION])
 
     def on_line_received(self, line):
