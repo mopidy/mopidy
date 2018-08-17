@@ -297,6 +297,7 @@ class _Handler(object):
         # stream. The _starting flag is there so that we always act on the
         # buffering messages at the beginning of the stream. _starting
         # is reset to True on stream_changed
+
         if self._audio._buffering:
             if percent == 100:
                 self._audio._buffering = False
