@@ -206,6 +206,7 @@ class PlaybackController(object):
     # Methods
 
     def _on_end_of_stream(self):
+        logger.info("Got End Of Stream")
         self._last_track = None
         self.set_state(PlaybackState.STOPPED)
         if self._current_tl_track:
