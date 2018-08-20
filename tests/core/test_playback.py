@@ -213,6 +213,33 @@ class TestNextHandling(BaseTest):
         current_track = self.core.playback.get_current_track()
         assert current_track == self.tracks[1]
 
+    @pytest.mark.parametrize(
+        'repeat, random, single, consume, index, result', [
+            (False, False, False, False, 0, 1),
+            (False, False, False, False, 2, None),
+            (True, False, False, False, 0, 1),
+            (True, False, False, False, 2, 0),
+        ])
+    def test_next_all_modes(
+            self, repeat, random, single, consume, index, result):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play(tl_tracks[index])
+        self.replay_events()
+        self.core.tracklist.set_repeat(repeat)
+        self.core.tracklist.set_random(random)
+        self.core.tracklist.set_single(single)
+        self.core.tracklist.set_consume(consume)
+
+        self.core.playback.next()
+        self.replay_events()
+
+        if result is None:
+            assert self.core.playback.get_current_tl_track() is None
+        else:
+            assert (
+                self.core.playback.get_current_tl_track() == tl_tracks[result])
+
     def test_next_keeps_finished_track_in_tracklist(self):
         tl_track = self.core.tracklist.get_tl_tracks()[0]
 
@@ -285,6 +312,32 @@ class TestPreviousHandling(BaseTest):
         self.replay_events()
 
         assert self.core.playback.get_current_track() == self.tracks[0]
+
+    @pytest.mark.parametrize(
+        'repeat, random, single, consume, index, result', [
+            (False, False, False, False, 0, None),
+            (False, False, False, False, 1, 0),
+            (True, False, False, False, 0, 0),  # FIXME: #1694
+            (True, False, False, False, 1, 1),  # FIXME: #1694
+        ])
+    def test_previous_all_modes(
+            self, repeat, random, single, consume, index, result):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play(tl_tracks[index])
+        self.core.tracklist.set_repeat(repeat)
+        self.core.tracklist.set_random(random)
+        self.core.tracklist.set_single(single)
+        self.core.tracklist.set_consume(consume)
+
+        self.core.playback.previous()
+        self.replay_events()
+
+        if result is None:
+            assert self.core.playback.get_current_tl_track() is None
+        else:
+            assert (
+                self.core.playback.get_current_tl_track() == tl_tracks[result])
 
     def test_previous_keeps_finished_track_in_tracklist(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
