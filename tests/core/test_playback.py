@@ -415,9 +415,12 @@ class TestConsumeHandling(BaseTest):
 
         self.core.playback.play(last_playable_tl_track)
         self.core.tracklist.set_consume(True)
+        self.replay_events()
 
         self.core.playback.next()
         self.replay_events()
+
+        self.assertEqual(self.playback.get_state(), 'playing')
 
         self.assertNotIn(
             unplayable_tl_track, self.core.tracklist.get_tl_tracks())
