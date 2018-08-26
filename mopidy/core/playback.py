@@ -206,7 +206,6 @@ class PlaybackController(object):
     # Methods
 
     def _on_end_of_stream(self):
-        logger.info("Got End Of Stream")
         self._last_track = None
         self.set_state(PlaybackState.STOPPED)
         if self._current_tl_track:
@@ -326,7 +325,14 @@ class PlaybackController(object):
             if self._change(pending, state):
                 break
             else:
+                # mark_unplayable removes pending from the tracklist
+                # which makes the next iteration of this loop look up
+                # next_track based on a non-existent one and it returns
+                # the first track in the tracklist. So reset pending
+                # to current
+                newpending = current
                 self.core.tracklist._mark_unplayable(pending)
+                pending = newpending
             # TODO: this could be needed to prevent a loop in rare cases
             # if current == pending:
             #     break
@@ -394,9 +400,13 @@ class PlaybackController(object):
             if self._change(pending, PlaybackState.PLAYING):
                 break
             else:
+                # Need to get next_track before removing pending from
+                # the tracklist, otherwise next_track returns the first
+                # track in the tracklist
+                newpending = self.core.tracklist.next_track(pending)
                 self.core.tracklist._mark_unplayable(pending)
+                pending = newpending
             current = pending
-            pending = self.core.tracklist.next_track(current)
             count -= 1
             if not count:
                 logger.info('No playable track in the list.')
@@ -591,7 +601,6 @@ class PlaybackController(object):
             if self._last_track.tlid != tl_track.tlid:
                 self.core.tracklist._mark_played(self._last_track)
         self._last_track = tl_track
-
 
     def _trigger_track_playback_ended(self, time_position_before_stop):
         tl_track = self.get_current_tl_track()

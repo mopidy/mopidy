@@ -577,7 +577,7 @@ class TracklistController(object):
                 # the track and the index() method below raises an exception
                 position = self._tl_tracks.index(tl_track)
                 del self._tl_tracks[position]
-            except:
+            except ValueError:
                 logger.debug("Removed track not found. Probably consumed")
 
         self._increase_version()

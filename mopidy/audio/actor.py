@@ -280,12 +280,10 @@ class _Handler(object):
                 self._audio._playbin, Gst.DebugGraphDetails.ALL, 'mopidy')
 
     def on_buffering(self, percent, structure=None):
-        logger.info("BUFFERING, percent is %d", percent)
         if structure is not None and structure.has_field('buffering-mode'):
             buffering_mode = structure.get_enum(
                 'buffering-mode', Gst.BufferingMode)
             if buffering_mode == Gst.BufferingMode.LIVE:
-                logger.info("  Ignoring due to LIVE mode")
                 return  # Live sources stall in paused.
 
         level = logging.getLevelName('TRACE')
@@ -296,16 +294,13 @@ class _Handler(object):
         # with no current tl_track and the playbin gets stuck playing the
         # stream. Hence check the audio target state and don't pause if
         # we're stopping.
-        logger.info("  Audio target state is %s",self._audio._target_state.value_name)
         if self._audio._buffering:
-            logger.info("  Currently in buffering state")
             if percent == 100:
                 self._audio._buffering = False
                 if self._audio._target_state == Gst.State.PLAYING:
                     self._audio._playbin.set_state(Gst.State.PLAYING)
                 level = logging.DEBUG
         elif percent < 10 and self._audio._target_state != Gst.State.NULL:
-            logger.info("  Pausing while waiting for buffer to fill")
             self._audio._playbin.set_state(Gst.State.PAUSED)
             self._audio._buffering = True
             level = logging.DEBUG
@@ -315,7 +310,6 @@ class _Handler(object):
 
     def on_end_of_stream(self):
         gst_logger.debug('Got EOS (end of stream) bus message.')
-        logger.info('Audio event: reached_end_of_stream()')
         self._audio._tags = {}
         AudioListener.send('reached_end_of_stream')
 
@@ -376,7 +370,7 @@ class _Handler(object):
     def on_stream_start(self):
         gst_logger.debug('Got STREAM_START bus message')
         uri = self._audio._pending_uri
-        logger.info('Audio event: stream_changed(uri=%r)', uri)
+        logger.debug('Audio event: stream_changed(uri=%r)', uri)
         AudioListener.send('stream_changed', uri=uri)
 
         # Emit any postponed tags that we got after about-to-finish.

@@ -675,15 +675,15 @@ class EventEmissionTest(BaseTest):
         self.assertListEqual(
             [
                 mock.call(
-                    'tracklist_changed'),
-                mock.call(
                     'track_playback_ended',
-                    tl_track=tl_tracks[0], time_position=mock.ANY),
+                    tl_track=tl_tracks[0], time_position=1000),
                 mock.call(
                     'playback_state_changed',
                     old_state='playing', new_state='playing'),
                 mock.call(
                     'track_playback_started', tl_track=tl_tracks[1]),
+                mock.call(
+                    'tracklist_changed')
             ],
             listener_mock.send.mock_calls)
 
