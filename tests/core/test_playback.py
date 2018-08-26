@@ -409,8 +409,8 @@ class TestConsumeHandling(BaseTest):
         self.assertNotIn(tl_track, self.core.tracklist.get_tl_tracks())
 
     def test_next_in_consume_mode_removes_unplayable_track(self):
-        last_playable_tl_track = self.core.tracklist.get_tl_tracks()[-2]
-        unplayable_tl_track = self.core.tracklist.get_tl_tracks()[-1]
+        last_playable_tl_track = self.core.tracklist.get_tl_tracks()[0]
+        unplayable_tl_track = self.core.tracklist.get_tl_tracks()[1]
         self.audio.trigger_fake_playback_failure(unplayable_tl_track.track.uri)
 
         self.core.playback.play(last_playable_tl_track)

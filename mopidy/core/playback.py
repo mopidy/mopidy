@@ -325,18 +325,20 @@ class PlaybackController(object):
             if self._change(pending, state):
                 break
             else:
-                # mark_unplayable removes pending from the tracklist
-                # which makes the next iteration of this loop look up
-                # next_track based on a non-existent one and it returns
+                # mark_unplayable removes pending from the tracklist if
+                # consume is on, which makes the next iteration of this loop
+                # look up next_track based on a non-existent one and it returns
                 # the first track in the tracklist. So reset pending
                 # to current
-                newpending = current
+                if self.core.tracklist.get_consume():
+                    newpending = current
+                else:
+                    newpending = pending
                 self.core.tracklist._mark_unplayable(pending)
-                pending = newpending
             # TODO: this could be needed to prevent a loop in rare cases
             # if current == pending:
             #     break
-            current = pending
+            current = newpending
             count -= 1
             if not count:
                 logger.info('No playable track in the list.')
