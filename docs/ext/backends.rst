@@ -252,6 +252,15 @@ Provides a backend for playing music from the `VKontakte social network
 <http://vk.com/>`_.
 
 
+Mopidy-YDisk
+============
+
+https://github.com/vonZeppelin/mopidy-ydisk
+
+Provides a backend for playing music from `Yandex.Disk cloud storage
+<https://disk.yandex.ru/>`_.
+
+
 Mopidy-YouTube
 ==============
 
