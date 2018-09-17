@@ -94,7 +94,8 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.assertEqual(uri, playlist.uri)
         self.assertTrue(os.path.exists(path))
 
-        self.core.playlists.delete(playlist.uri)
+        success = self.core.playlists.delete(playlist.uri)
+        self.assertTrue(success)
         self.assertFalse(os.path.exists(path))
 
     def test_playlist_contents_is_written_to_disk(self):

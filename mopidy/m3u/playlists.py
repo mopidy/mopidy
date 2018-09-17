@@ -93,6 +93,9 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             os.remove(self._abspath(path))
         except EnvironmentError as e:
             log_environment_error('Error deleting playlist %s' % uri, e)
+            return False
+        else:
+            return True
 
     def get_items(self, uri):
         path = translator.uri_to_path(uri)

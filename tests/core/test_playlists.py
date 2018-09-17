@@ -141,26 +141,30 @@ class PlaylistTest(BasePlaylistsTest):
         self.assertFalse(self.sp2.create.called)
 
     def test_delete_selects_the_dummy1_backend(self):
-        self.core.playlists.delete('dummy1:a')
+        success = self.core.playlists.delete('dummy1:a')
 
+        self.assertTrue(success)
         self.sp1.delete.assert_called_once_with('dummy1:a')
         self.assertFalse(self.sp2.delete.called)
 
     def test_delete_selects_the_dummy2_backend(self):
-        self.core.playlists.delete('dummy2:a')
+        success = self.core.playlists.delete('dummy2:a')
 
+        self.assertTrue(success)
         self.assertFalse(self.sp1.delete.called)
         self.sp2.delete.assert_called_once_with('dummy2:a')
 
     def test_delete_with_unknown_uri_scheme_does_nothing(self):
-        self.core.playlists.delete('unknown:a')
+        success = self.core.playlists.delete('unknown:a')
 
+        self.assertFalse(success)
         self.assertFalse(self.sp1.delete.called)
         self.assertFalse(self.sp2.delete.called)
 
     def test_delete_ignores_backend_without_playlist_support(self):
-        self.core.playlists.delete('dummy3:a')
+        success = self.core.playlists.delete('dummy3:a')
 
+        self.assertFalse(success)
         self.assertFalse(self.sp1.delete.called)
         self.assertFalse(self.sp2.delete.called)
 
@@ -377,7 +381,7 @@ class DeleteBadBackendsTest(MockBackendCorePlaylistsBase):
 
     def test_backend_raises_exception(self, logger):
         self.playlists.delete.return_value.get.side_effect = Exception
-        self.assertIsNone(self.core.playlists.delete('dummy:/1'))
+        self.assertFalse(self.core.playlists.delete('dummy:/1'))
         logger.exception.assert_called_with(mock.ANY, 'DummyBackend')
 
 
