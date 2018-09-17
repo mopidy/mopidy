@@ -254,8 +254,8 @@ class LocalTracklistProviderTest(unittest.TestCase):
             self.controller.move(2, 1, 0).get()
 
     def test_tracks_attribute_is_immutable(self):
-        tracks1 = self.controller.tracks.get()
-        tracks2 = self.controller.tracks.get()
+        tracks1 = self.controller.get_tracks().get()
+        tracks2 = self.controller.get_tracks().get()
         self.assertNotEqual(id(tracks1), id(tracks2))
 
     @populate_tracklist
