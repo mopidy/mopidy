@@ -249,7 +249,7 @@ class TestNextHandling(BaseTest):
         self.core.playback.next()
         self.replay_events()
 
-        assert tl_track in self.core.tracklist.tl_tracks
+        assert tl_track in self.core.tracklist.get_tl_tracks()
 
     def test_next_skips_over_unplayable_track(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -347,18 +347,18 @@ class TestPreviousHandling(BaseTest):
         self.core.playback.previous()
         self.replay_events()
 
-        assert tl_tracks[1] in self.core.tracklist.tl_tracks
+        assert tl_tracks[1] in self.core.tracklist.get_tl_tracks()
 
     def test_previous_keeps_finished_track_even_in_consume_mode(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
         self.core.playback.play(tl_tracks[1])
-        self.core.tracklist.consume = True
+        self.core.tracklist.set_consume(True)
 
         self.core.playback.previous()
         self.replay_events()
 
-        assert tl_tracks[1] in self.core.tracklist.tl_tracks
+        assert tl_tracks[1] in self.core.tracklist.get_tl_tracks()
 
     def test_previous_skips_over_unplayable_track(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -410,7 +410,7 @@ class TestOnAboutToFinish(BaseTest):
         self.core.playback.play(tl_track)
         self.trigger_about_to_finish()
 
-        assert tl_track in self.core.tracklist.tl_tracks
+        assert tl_track in self.core.tracklist.get_tl_tracks()
 
     def test_on_about_to_finish_skips_over_change_track_error(self):
         # Trigger an exception in translate_uri.
@@ -472,7 +472,7 @@ class TestConsumeHandling(BaseTest):
         tl_track = self.core.tracklist.get_tl_tracks()[0]
 
         self.core.playback.play(tl_track)
-        self.core.tracklist.consume = True
+        self.core.tracklist.set_consume(True)
         self.trigger_about_to_finish()
 
         assert tl_track not in self.core.tracklist.get_tl_tracks()
@@ -521,13 +521,13 @@ class TestCurrentAndPendingTlTrack(BaseTest):
         self.core.playback.play()
         self.replay_events()
         self.trigger_about_to_finish(replay_until='stream_changed')
-        assert self.playback.current_tl_track.track.uri == 'dummy:a'
+        assert self.playback.get_current_track().uri == 'dummy:a'
 
     def test_current_tl_track_after_stream_changed(self):
         self.core.playback.play()
         self.replay_events()
         self.trigger_about_to_finish()
-        assert self.playback.current_tl_track.track.uri == 'dummy:b'
+        assert self.playback.get_current_track().uri == 'dummy:b'
 
     def test_current_tl_track_after_end_of_stream(self):
         self.core.playback.play()
@@ -535,7 +535,7 @@ class TestCurrentAndPendingTlTrack(BaseTest):
         self.trigger_about_to_finish()
         self.trigger_about_to_finish()
         self.trigger_about_to_finish()  # EOS
-        assert self.playback.current_tl_track is None
+        assert self.playback.get_current_tl_track() is None
 
 
 @mock.patch(
@@ -782,7 +782,7 @@ class EventEmissionTest(BaseTest):
         self.replay_events()
 
         # When we trigger seek after an about to finish the other code that
-        # emits track stopped/started and playback state changed events gets
+        # emits track stopped/started and playback_state_changed events gets
         # triggered as we have to switch back to the previous track.
         # The correct behavior would be to only emit seeked.
         assert listener_mock.send.mock_calls == [
@@ -833,27 +833,27 @@ class TestUnplayableURI(BaseTest):
 
     def test_pause_changes_state_even_if_track_is_unplayable(self):
         self.core.playback.pause()
-        assert self.core.playback.state == core.PlaybackState.PAUSED
+        assert self.core.playback.get_state() == core.PlaybackState.PAUSED
 
     def test_resume_does_nothing_if_track_is_unplayable(self):
-        self.core.playback.state = core.PlaybackState.PAUSED
+        self.core.playback.set_state(core.PlaybackState.PAUSED)
         self.core.playback.resume()
 
-        assert self.core.playback.state == core.PlaybackState.PAUSED
+        assert self.core.playback.get_state() == core.PlaybackState.PAUSED
 
     def test_stop_changes_state_even_if_track_is_unplayable(self):
-        self.core.playback.state = core.PlaybackState.PAUSED
+        self.core.playback.set_state(core.PlaybackState.PAUSED)
         self.core.playback.stop()
 
-        assert self.core.playback.state == core.PlaybackState.STOPPED
+        assert self.core.playback.get_state() == core.PlaybackState.STOPPED
 
     def test_time_position_returns_0_if_track_is_unplayable(self):
-        result = self.core.playback.time_position
+        result = self.core.playback.get_time_position()
 
         assert result == 0
 
     def test_seek_fails_for_unplayable_track(self):
-        self.core.playback.state = core.PlaybackState.PLAYING
+        self.core.playback.set_state(core.PlaybackState.PLAYING)
         success = self.core.playback.seek(1000)
 
         assert not success
@@ -888,7 +888,7 @@ class SeekTest(BaseTest):
         self.replay_events()
 
         self.core.playback.seek(1000)
-        assert self.core.playback.state == core.PlaybackState.PLAYING
+        assert self.core.playback.get_state() == core.PlaybackState.PLAYING
 
     def test_seek_paused_stay_paused(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -900,7 +900,7 @@ class SeekTest(BaseTest):
         self.replay_events()
 
         self.core.playback.seek(1000)
-        assert self.core.playback.state == core.PlaybackState.PAUSED
+        assert self.core.playback.get_state() == core.PlaybackState.PAUSED
 
     def test_seek_race_condition_after_about_to_finish(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -1104,7 +1104,7 @@ class TestBackendSelection(object):
         self.core.playback.play(self.tl_tracks[0])
         self.trigger_stream_changed()
 
-        self.core.playback.time_position
+        self.core.playback.get_time_position()
 
         self.playback1.get_time_position.assert_called_once_with()
         assert not self.playback2.get_time_position.called
@@ -1113,7 +1113,7 @@ class TestBackendSelection(object):
         self.core.playback.play(self.tl_tracks[1])
         self.trigger_stream_changed()
 
-        self.core.playback.time_position
+        self.core.playback.get_time_position()
 
         assert not self.playback1.get_time_position.called
         self.playback2.get_time_position.assert_called_once_with()

@@ -238,7 +238,7 @@ class PlaylistsController(object):
         validation.check_query(
             criteria, validation.PLAYLIST_FIELDS, list_values=False)
 
-        matches = self.playlists  # TODO: stop using self playlists
+        matches = self.get_playlists()
         for (key, value) in criteria.iteritems():
             matches = filter(lambda p: getattr(p, key) == value, matches)
         return matches

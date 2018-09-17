@@ -301,10 +301,11 @@ class PlaybackController(object):
 
         Used by :class:`mopidy.core.TracklistController`.
         """
-        if not self.core.tracklist.tl_tracks:
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        if not tl_tracks:
             self.stop()
             self._set_current_tl_track(None)
-        elif self.get_current_tl_track() not in self.core.tracklist.tl_tracks:
+        elif self.get_current_tl_track() not in tl_tracks:
             self._set_current_tl_track(None)
 
     def next(self):
@@ -511,7 +512,7 @@ class PlaybackController(object):
                 'Client seeked to negative position. Seeking to zero.')
             time_position = 0
 
-        if not self.core.tracklist.tracks:
+        if not self.core.tracklist.get_length():
             return False
 
         if self.get_state() == PlaybackState.STOPPED:
@@ -558,7 +559,7 @@ class PlaybackController(object):
 
     def _trigger_track_playback_paused(self):
         logger.debug('Triggering track playback paused event')
-        if self.current_track is None:
+        if self.get_current_tl_track() is None:
             return
         listener.CoreListener.send(
             'track_playback_paused',
@@ -567,7 +568,7 @@ class PlaybackController(object):
 
     def _trigger_track_playback_resumed(self):
         logger.debug('Triggering track playback resumed event')
-        if self.current_track is None:
+        if self.get_current_tl_track() is None:
             return
         listener.CoreListener.send(
             'track_playback_resumed',
