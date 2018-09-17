@@ -23,37 +23,17 @@ class TracklistController(object):
 
         self._shuffled = []
 
-    # Properties
-
     def get_tl_tracks(self):
         """Get tracklist as list of :class:`mopidy.models.TlTrack`."""
         return self._tl_tracks[:]
-
-    tl_tracks = deprecation.deprecated_property(get_tl_tracks)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`get_tl_tracks` instead.
-    """
 
     def get_tracks(self):
         """Get tracklist as list of :class:`mopidy.models.Track`."""
         return [tl_track.track for tl_track in self._tl_tracks]
 
-    tracks = deprecation.deprecated_property(get_tracks)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`get_tracks` instead.
-    """
-
     def get_length(self):
         """Get length of the tracklist."""
         return len(self._tl_tracks)
-
-    length = deprecation.deprecated_property(get_length)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`get_length` instead.
-    """
 
     def get_version(self):
         """
@@ -68,12 +48,6 @@ class TracklistController(object):
         self._version += 1
         self.core.playback._on_tracklist_change()
         self._trigger_tracklist_changed()
-
-    version = deprecation.deprecated_property(get_version)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`get_version` instead.
-    """
 
     def get_consume(self):
         """Get consume mode.
@@ -97,12 +71,6 @@ class TracklistController(object):
         if self.get_consume() != value:
             self._trigger_options_changed()
         return setattr(self, '_consume', value)
-
-    consume = deprecation.deprecated_property(get_consume, set_consume)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`get_consume` and :meth:`set_consume` instead.
-    """
 
     def get_random(self):
         """Get random mode.
@@ -129,12 +97,6 @@ class TracklistController(object):
             self._shuffled = self.get_tl_tracks()
             random.shuffle(self._shuffled)
         return setattr(self, '_random', value)
-
-    random = deprecation.deprecated_property(get_random, set_random)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`get_random` and :meth:`set_random` instead.
-    """
 
     def get_repeat(self):
         """
@@ -163,12 +125,6 @@ class TracklistController(object):
             self._trigger_options_changed()
         return setattr(self, '_repeat', value)
 
-    repeat = deprecation.deprecated_property(get_repeat, set_repeat)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`get_repeat` and :meth:`set_repeat` instead.
-    """
-
     def get_single(self):
         """
         Get single mode.
@@ -193,14 +149,6 @@ class TracklistController(object):
         if self.get_single() != value:
             self._trigger_options_changed()
         return setattr(self, '_single', value)
-
-    single = deprecation.deprecated_property(get_single, set_single)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`get_single` and :meth:`set_single` instead.
-    """
-
-    # Methods
 
     def index(self, tl_track=None, tlid=None):
         """

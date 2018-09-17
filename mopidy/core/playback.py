@@ -44,8 +44,6 @@ class PlaybackController(object):
         uri_scheme = urllib.parse.urlparse(tl_track.track.uri).scheme
         return self.backends.with_playback.get(uri_scheme, None)
 
-    # Properties
-
     def get_current_tl_track(self):
         """Get the currently playing or selected track.
 
@@ -60,12 +58,6 @@ class PlaybackController(object):
         """
         self._current_tl_track = value
 
-    current_tl_track = deprecation.deprecated_property(get_current_tl_track)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`get_current_tl_track` instead.
-    """
-
     def get_current_track(self):
         """
         Get the currently playing or selected track.
@@ -75,12 +67,6 @@ class PlaybackController(object):
         Returns a :class:`mopidy.models.Track` or :class:`None`.
         """
         return getattr(self.get_current_tl_track(), 'track', None)
-
-    current_track = deprecation.deprecated_property(get_current_track)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`get_current_track` instead.
-    """
 
     def get_current_tlid(self):
         """
@@ -127,12 +113,6 @@ class PlaybackController(object):
 
         self._trigger_playback_state_changed(old_state, new_state)
 
-    state = deprecation.deprecated_property(get_state, set_state)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`get_state` and :meth:`set_state` instead.
-    """
-
     def get_time_position(self):
         """Get time position in milliseconds."""
         if self._pending_position is not None:
@@ -143,12 +123,6 @@ class PlaybackController(object):
             return backend.playback.get_time_position().get()
         else:
             return 0
-
-    time_position = deprecation.deprecated_property(get_time_position)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`get_time_position` instead.
-    """
 
     def get_volume(self):
         """
@@ -168,15 +142,6 @@ class PlaybackController(object):
         deprecation.warn('core.playback.set_volume')
         return self.core.mixer.set_volume(volume)
 
-    volume = deprecation.deprecated_property(get_volume, set_volume)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`core.mixer.get_volume()
-        <mopidy.core.MixerController.get_volume>` and
-        :meth:`core.mixer.set_volume()
-        <mopidy.core.MixerController.set_volume>` instead.
-    """
-
     def get_mute(self):
         """
         .. deprecated:: 1.0
@@ -194,17 +159,6 @@ class PlaybackController(object):
         """
         deprecation.warn('core.playback.set_mute')
         return self.core.mixer.set_mute(mute)
-
-    mute = deprecation.deprecated_property(get_mute, set_mute)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`core.mixer.get_mute()
-        <mopidy.core.MixerController.get_mute>` and
-        :meth:`core.mixer.set_mute()
-        <mopidy.core.MixerController.set_mute>` instead.
-    """
-
-    # Methods
 
     def _on_end_of_stream(self):
         self.set_state(PlaybackState.STOPPED)

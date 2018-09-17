@@ -23,7 +23,26 @@ Dependencies
 Core API
 --------
 
-- (no changes yet)
+- Removed properties that has been deprecated since 1.0, released in 2015.
+  Everything removed has corresponding methods that should be used instead.
+
+  - :attr:`mopidy.core.Core.uri_schemes`
+  - :attr:`mopidy.core.Core.version`
+  - :attr:`mopidy.core.PlaybackController.current_tl_track`
+  - :attr:`mopidy.core.PlaybackController.current_track`
+  - :attr:`mopidy.core.PlaybackController.state`
+  - :attr:`mopidy.core.PlaybackController.time_position`
+  - :attr:`mopidy.core.PlaybackController.volume`
+  - :attr:`mopidy.core.PlaybackController.mute`
+  - :attr:`mopidy.core.PlaylistController.playlists`
+  - :attr:`mopidy.core.TracklistController.tl_tracks`
+  - :attr:`mopidy.core.TracklistController.tracks`
+  - :attr:`mopidy.core.TracklistController.length`
+  - :attr:`mopidy.core.TracklistController.version`
+  - :attr:`mopidy.core.TracklistController.consume`
+  - :attr:`mopidy.core.TracklistController.random`
+  - :attr:`mopidy.core.TracklistController.repeat`
+  - :attr:`mopidy.core.TracklistController.single`
 
 Backend API
 -----------

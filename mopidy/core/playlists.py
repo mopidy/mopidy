@@ -133,12 +133,6 @@ class PlaylistsController(object):
             return [
                 Playlist(uri=r.uri, name=r.name) for r in playlist_refs]
 
-    playlists = deprecation.deprecated_property(get_playlists)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`as_list` and :meth:`get_items` instead.
-    """
-
     def create(self, name, uri_scheme=None):
         """
         Create a new playlist.

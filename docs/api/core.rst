@@ -208,37 +208,11 @@ Deprecated API features
   Though these features still work, they are slated to go away in the next
   major Mopidy release.
 
-Core
-----
-
-.. autoattribute:: mopidy.core.Core.version
-.. autoattribute:: mopidy.core.Core.uri_schemes
-
-TracklistController
--------------------
-
-.. autoattribute:: mopidy.core.TracklistController.tl_tracks
-.. autoattribute:: mopidy.core.TracklistController.tracks
-.. autoattribute:: mopidy.core.TracklistController.version
-.. autoattribute:: mopidy.core.TracklistController.length
-
-.. autoattribute:: mopidy.core.TracklistController.consume
-.. autoattribute:: mopidy.core.TracklistController.random
-.. autoattribute:: mopidy.core.TracklistController.repeat
-.. autoattribute:: mopidy.core.TracklistController.single
-
 PlaybackController
 ------------------
 
 .. automethod:: mopidy.core.PlaybackController.get_mute
 .. automethod:: mopidy.core.PlaybackController.get_volume
-
-.. autoattribute:: mopidy.core.PlaybackController.current_tl_track
-.. autoattribute:: mopidy.core.PlaybackController.current_track
-.. autoattribute:: mopidy.core.PlaybackController.state
-.. autoattribute:: mopidy.core.PlaybackController.time_position
-.. autoattribute:: mopidy.core.PlaybackController.mute
-.. autoattribute:: mopidy.core.PlaybackController.volume
 
 LibraryController
 -----------------
@@ -250,5 +224,3 @@ PlaylistsController
 
 .. automethod:: mopidy.core.PlaylistsController.filter
 .. automethod:: mopidy.core.PlaylistsController.get_playlists
-
-.. autoattribute:: mopidy.core.PlaylistsController.playlists
