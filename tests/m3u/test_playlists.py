@@ -122,7 +122,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
     def test_latin1_playlist_contents_is_written_to_disk(self):
         track = Track(uri=generate_song(1), name='Test\x9f', length=60000)
         playlist = self.core.playlists.create('test')
-        playlist = self.core.playlists.save(playlist.copy(tracks=[track]))
+        playlist = self.core.playlists.save(playlist.replace(tracks=[track]))
         path = os.path.join(self.playlists_dir, b'test.m3u')
 
         with open(path, 'rb') as f:
@@ -132,7 +132,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
     def test_utf8_playlist_contents_is_replaced_and_written_to_disk(self):
         track = Track(uri=generate_song(1), name='Test\u07b4', length=60000)
         playlist = self.core.playlists.create('test')
-        playlist = self.core.playlists.save(playlist.copy(tracks=[track]))
+        playlist = self.core.playlists.save(playlist.replace(tracks=[track]))
         path = os.path.join(self.playlists_dir, b'test.m3u')
 
         with open(path, 'rb') as f:
