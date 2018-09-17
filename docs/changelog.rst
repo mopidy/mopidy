@@ -25,6 +25,9 @@ Feature release.
 - Core: Define return value of `playlists.delete()` to be a bool, :class:`True`
   on success, :class:`False` otherwise. (PR: :issue:`1702`)
 
+- M3U: Ignore all attempts at accessing files outside the
+  :confval:`m3u/playlist_dir`. (Partly fixes: :issue:`1659`, PR: :issue:`1702`)
+
 - File: Change default ordering to show directories first, then files. (PR:
   :issue:`1595`)
 

@@ -9,6 +9,7 @@ import os
 import tempfile
 
 from mopidy import backend
+from mopidy.internal import path
 
 from . import Extension, translator
 
@@ -89,6 +90,9 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
 
     def delete(self, uri):
         path = translator.uri_to_path(uri)
+        if not self._is_in_basedir(path):
+            logger.debug('Ignoring path outside playlist dir: %s', uri)
+            return False
         try:
             os.remove(self._abspath(path))
         except EnvironmentError as e:
@@ -99,6 +103,9 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
 
     def get_items(self, uri):
         path = translator.uri_to_path(uri)
+        if not self._is_in_basedir(path):
+            logger.debug('Ignoring path outside playlist dir: %s', uri)
+            return None
         try:
             with self._open(path, 'r') as fp:
                 items = translator.load_items(fp, self._base_dir)
@@ -109,6 +116,9 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
 
     def lookup(self, uri):
         path = translator.uri_to_path(uri)
+        if not self._is_in_basedir(path):
+            logger.debug('Ignoring path outside playlist dir: %s', uri)
+            return None
         try:
             with self._open(path, 'r') as fp:
                 items = translator.load_items(fp, self._base_dir)
@@ -123,6 +133,10 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
 
     def save(self, playlist):
         path = translator.uri_to_path(playlist.uri)
+        if not self._is_in_basedir(path):
+            logger.debug(
+                'Ignoring path outside playlist dir: %s', playlist.uri)
+            return None
         name = translator.name_from_path(path)
         try:
             with self._open(path, 'w') as fp:
@@ -140,6 +154,11 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
     def _abspath(self, path):
         return os.path.join(self._playlists_dir, path)
 
+    def _is_in_basedir(self, local_path):
+        if not os.path.isabs(local_path):
+            local_path = os.path.join(self._playlists_dir, local_path)
+        return path.is_path_inside_base_dir(local_path, self._playlists_dir)
+
     def _open(self, path, mode='r'):
         if path.endswith(b'.m3u8'):
             encoding = 'utf-8'
@@ -147,6 +166,10 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             encoding = self._default_encoding
         if not os.path.isabs(path):
             path = os.path.join(self._playlists_dir, path)
+        if not self._is_in_basedir(path):
+            raise Exception(
+                'Path (%s) is not inside playlist_dir (%s)'
+                % (path, self._playlists_dir))
         if 'w' in mode:
             return replace(path, mode, encoding=encoding, errors='replace')
         else:
