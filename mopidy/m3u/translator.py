@@ -110,7 +110,9 @@ def dump_items(items, fp):
             print(item.uri, file=fp)
 
 
-def playlist(path, items=[], mtime=None):
+def playlist(path, items=None, mtime=None):
+    if items is None:
+        items = []
     return models.Playlist(
         uri=path_to_uri(path),
         name=name_from_path(path),
