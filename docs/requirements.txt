@@ -1,4 +1,4 @@
-Sphinx >= 1.0
+Sphinx >= 1.0, != 1.8.0
 pygraphviz
 Pykka >= 1.1
 # Require newer requests than what Travis/Debian has to work around linkcheck crash
