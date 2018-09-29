@@ -5,10 +5,20 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
-v2.2.0 (UNRELEASED)
+v2.2.0 (2018-09-30)
 ===================
 
-Feature release.
+Mopidy 2.2.0, a feature release, is out. It is a quite small release, featuring
+mostly minor fixes and improvements.
+
+Most notably, this release introduces CSRF protection for both the HTTP and
+WebSocket RPC interfaces, and improves the file path checking in the M3U
+backend. The CSRF protection should stop attacks against local Mopidy servers
+from malicious websites, like what was demonstrated by Josef Gajdusek in
+:issue:`1659`.
+
+Since the release of 2.1.0, we've closed approximately 21 issues and pull
+requests through 133 commits by 22 authors.
 
 - Dependencies: Drop support for Tornado < 4.4. Though strictly a breaking
   change, this shouldn't affect any supported systems as even Debian stable
@@ -19,10 +29,10 @@ Feature release.
   it is now possible to set the :confval:`core/max_tracklist_length` config
   value as high as you want to. (Fixes: :issue:`1600`, PR: :issue:`1666`)
 
-- Core: Fix crash on `library.lookup(uris=[])`. (Fixes: :issue:`1619`, PR:
+- Core: Fix crash on ``library.lookup(uris=[])``. (Fixes: :issue:`1619`, PR:
   :issue:`1620`)
 
-- Core: Define return value of `playlists.delete()` to be a bool, :class:`True`
+- Core: Define return value of ``playlists.delete()`` to be a bool, :class:`True`
   on success, :class:`False` otherwise. (PR: :issue:`1702`)
 
 - M3U: Ignore all attempts at accessing files outside the
