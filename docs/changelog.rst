@@ -5,6 +5,14 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v3.0.0 (UNRELEASED)
+===================
+
+Backwards incompatible release.
+
+- (no changes yet)
+
+
 v2.2.0 (2018-09-30)
 ===================
 
