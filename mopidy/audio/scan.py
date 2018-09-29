@@ -176,7 +176,7 @@ def _query_duration(pipeline):
     elif duration < 0:
         duration = None  # Stream without duration.
     else:
-        duration = duration // Gst.MSECOND
+        duration = int(duration // Gst.MSECOND)
     return success, duration
 
 

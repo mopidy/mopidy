@@ -25,6 +25,7 @@ class Extension(ext.Extension):
         schema['port'] = config_lib.Port()
         schema['static_dir'] = config_lib.Path(optional=True)
         schema['zeroconf'] = config_lib.String(optional=True)
+        schema['allowed_origins'] = config_lib.List(optional=True)
         return schema
 
     def validate_environment(self):

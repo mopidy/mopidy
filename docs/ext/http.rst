@@ -20,7 +20,7 @@ When it is enabled it starts a web server at the port specified by the
     authorization. Anyone able to access the web server can use the full core
     API of Mopidy. Thus, you probably only want to make the web server
     available from your local network or place it behind a web proxy which
-    takes care or user authentication. You have been warned.
+    takes care of user authentication. You have been warned.
 
 
 Hosting web clients
@@ -98,3 +98,15 @@ See :ref:`config` for general help on configuring Mopidy.
     be published.
 
     Set to an empty string to disable Zeroconf for HTTP.
+
+.. confval:: http/allowed_origins
+
+    A list of domains allowed to perform Cross-Origin Resource Sharing (CORS)
+    requests. This applies to both JSON-RPC and Websocket requests. Values
+    should be in the format ``hostname:port`` and separated by either a comma or
+    newline.
+    
+    Same-origin requests (i.e. requests from Mopidy's web server) are always
+    allowed and so you don't need an entry for those. However, if your requests
+    originate from a different web server, you will need to add an entry for
+    that server in this list.

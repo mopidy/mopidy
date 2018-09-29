@@ -23,4 +23,3 @@ def test_core_schema_has_max_tracklist_length():
     max_tracklist_length_schema = config._core_schema['max_tracklist_length']
     assert isinstance(max_tracklist_length_schema, config.Integer)
     assert max_tracklist_length_schema._minimum == 1
-    assert max_tracklist_length_schema._maximum == 10000

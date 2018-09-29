@@ -6,7 +6,7 @@ from mopidy.models.immutable import ImmutableObject, ValidatedImmutableObject
 from mopidy.models.serialize import ModelJSONEncoder, model_json_decoder
 
 __all__ = [
-    'ImmutableObject', 'Ref', 'Image', 'Artist', 'Album', 'track', 'TlTrack',
+    'ImmutableObject', 'Ref', 'Image', 'Artist', 'Album', 'Track', 'TlTrack',
     'Playlist', 'SearchResult', 'model_json_decoder', 'ModelJSONEncoder',
     'ValidatedImmutableObject']
 

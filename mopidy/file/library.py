@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import logging
-import operator
 import os
 import sys
 import urllib2
@@ -82,7 +81,10 @@ class FileLibraryProvider(backend.LibraryProvider):
             elif os.path.isfile(child_path):
                 result.append(models.Ref.track(name=name, uri=uri))
 
-        result.sort(key=operator.attrgetter('name'))
+        def order(item):
+            return (item.type != models.Ref.DIRECTORY, item.name)
+        result.sort(key=order)
+
         return result
 
     def lookup(self, uri):
@@ -140,6 +142,5 @@ class FileLibraryProvider(backend.LibraryProvider):
 
     def _is_in_basedir(self, local_path):
         return any(
-            path.is_path_inside_base_dir(
-                local_path, media_dir['path'].encode('utf-8'))
+            path.is_path_inside_base_dir(local_path, media_dir['path'])
             for media_dir in self._media_dirs)

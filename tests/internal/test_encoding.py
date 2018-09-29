@@ -40,6 +40,13 @@ class LocaleDecodeTest(unittest.TestCase):
     def test_does_not_use_locale_to_decode_ascii_bytestrings(self, mock):
         mock.return_value = 'UTF-8'
 
-        encoding.locale_decode('abc')
+        encoding.locale_decode(b'abc')
 
         self.assertFalse(mock.called)
+
+    def test_replaces_unknown_bytes_instead_of_crashing(self, mock):
+        mock.return_value = 'US-ASCII'
+
+        result = encoding.locale_decode(b'abc\xc3def')
+
+        assert result == 'abc\ufffddef'

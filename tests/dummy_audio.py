@@ -31,9 +31,10 @@ class DummyAudio(pykka.ThreadingActor):
 
     def set_uri(self, uri):
         assert self._uri is None, 'prepare change not called before set'
-        self._tags = {}
+        self._position = 0
         self._uri = uri
         self._stream_changed = True
+        self._tags = {}
 
     def set_appsrc(self, *args, **kwargs):
         pass

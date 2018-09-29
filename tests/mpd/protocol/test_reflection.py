@@ -23,7 +23,7 @@ class ReflectionHandlerTest(protocol.BaseTestCase):
         self.assertNotInResponse('command: command_list_begin')
         self.assertNotInResponse('command: command_list_ok_begin')
         self.assertNotInResponse('command: command_list_end')
-        self.assertNotInResponse('command: idle')
+        self.assertInResponse('command: idle')
         self.assertNotInResponse('command: noidle')
         self.assertNotInResponse('command: sticker')
         self.assertInResponse('OK')

@@ -3,7 +3,6 @@ from __future__ import absolute_import, unicode_literals
 import functools
 import logging
 import os
-import socket
 
 import tornado.escape
 import tornado.ioloop
@@ -12,6 +11,7 @@ import tornado.websocket
 
 import mopidy
 from mopidy import core, models
+from mopidy.compat import urllib
 from mopidy.internal import encoding, jsonrpc
 
 
@@ -20,12 +20,17 @@ logger = logging.getLogger(__name__)
 
 def make_mopidy_app_factory(apps, statics):
     def mopidy_app_factory(config, core):
+        allowed_origins = {
+            x.lower() for x in config['http']['allowed_origins'] if x
+        }
         return [
             (r'/ws/?', WebSocketHandler, {
                 'core': core,
+                'allowed_origins': allowed_origins,
             }),
             (r'/rpc', JsonRpcHandler, {
                 'core': core,
+                'allowed_origins': allowed_origins,
             }),
             (r'/(.+)', StaticFileHandler, {
                 'path': os.path.join(os.path.dirname(__file__), 'data'),
@@ -97,16 +102,12 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             # One callback per client to keep time we hold up the loop short
             loop.add_callback(functools.partial(_send_broadcast, client, msg))
 
-    def initialize(self, core):
+    def initialize(self, core, allowed_origins):
         self.jsonrpc = make_jsonrpc_wrapper(core)
+        self.allowed_origins = allowed_origins
 
     def open(self):
-        if hasattr(self, 'set_nodelay'):
-            # New in Tornado 3.1
-            self.set_nodelay(True)
-        else:
-            self.stream.socket.setsockopt(
-                socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        self.set_nodelay(True)
         self.clients.add(self)
         logger.debug(
             'New WebSocket connection from %s', self.request.remote_ip)
@@ -138,9 +139,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             self.close()
 
     def check_origin(self, origin):
-        # Allow cross-origin WebSocket connections, like Tornado before 4.0
-        # defaulted to.
-        return True
+        return check_origin(origin, self.request.headers, self.allowed_origins)
 
 
 def set_mopidy_headers(request_handler):
@@ -149,16 +148,31 @@ def set_mopidy_headers(request_handler):
         'X-Mopidy-Version', mopidy.__version__.encode('utf-8'))
 
 
+def check_origin(origin, request_headers, allowed_origins):
+    if origin is None:
+        logger.debug('Origin was not set')
+        return False
+    allowed_origins.add(request_headers.get('Host'))
+    parsed_origin = urllib.parse.urlparse(origin).netloc.lower()
+    return parsed_origin and parsed_origin in allowed_origins
+
+
 class JsonRpcHandler(tornado.web.RequestHandler):
 
-    def initialize(self, core):
+    def initialize(self, core, allowed_origins):
         self.jsonrpc = make_jsonrpc_wrapper(core)
+        self.allowed_origins = allowed_origins
 
     def head(self):
         self.set_extra_headers()
         self.finish()
 
     def post(self):
+        content_type = self.request.headers.get('Content-Type', '')
+        if content_type != 'application/json':
+            self.set_status(415, 'Content-Type must be application/json')
+            return
+
         data = self.request.body
         if not data:
             return
@@ -182,6 +196,18 @@ class JsonRpcHandler(tornado.web.RequestHandler):
         set_mopidy_headers(self)
         self.set_header('Accept', 'application/json')
         self.set_header('Content-Type', 'application/json; utf-8')
+
+    def options(self):
+        origin = self.request.headers.get('Origin')
+        if not check_origin(
+                origin, self.request.headers, self.allowed_origins):
+            self.set_status(403, 'Access denied for origin %s' % origin)
+            return
+
+        self.set_header('Access-Control-Allow-Origin', '%s' % origin)
+        self.set_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.set_status(204)
+        self.finish()
 
 
 class ClientListHandler(tornado.web.RequestHandler):

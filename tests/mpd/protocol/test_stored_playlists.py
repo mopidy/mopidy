@@ -46,6 +46,10 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_listplaylistinfo(self):
+        tracks = [
+            Track(uri='dummy:a', name='Track A', length=5000),
+        ]
+        self.backend.library.dummy_library = tracks
         self.backend.playlists.set_dummy_playlists([
             Playlist(
                 name='name', uri='dummy:name', tracks=[Track(uri='dummy:a')])])
@@ -53,14 +57,20 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.send_request('listplaylistinfo "name"')
 
         self.assertInResponse('file: dummy:a')
+        self.assertInResponse('Title: Track A')
+        self.assertInResponse('Time: 5')
         self.assertNotInResponse('Track: 0')
         self.assertNotInResponse('Pos: 0')
         self.assertInResponse('OK')
 
     def test_listplaylistinfo_without_quotes(self):
+        tracks = [
+            Track(uri='dummy:a'),
+        ]
+        self.backend.library.dummy_library = tracks
         self.backend.playlists.set_dummy_playlists([
             Playlist(
-                name='name', uri='dummy:name', tracks=[Track(uri='dummy:a')])])
+                name='name', uri='dummy:name', tracks=tracks)])
 
         self.send_request('listplaylistinfo name')
 
@@ -76,13 +86,18 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
             'ACK [50@0] {listplaylistinfo} No such playlist')
 
     def test_listplaylistinfo_duplicate(self):
-        playlist1 = Playlist(name='a', uri='dummy:a1', tracks=[Track(uri='b')])
-        playlist2 = Playlist(name='a', uri='dummy:a2', tracks=[Track(uri='c')])
+        tracks = [
+            Track(uri='dummy:b'),
+            Track(uri='dummy:c'),
+        ]
+        self.backend.library.dummy_library = tracks
+        playlist1 = Playlist(name='a', uri='dummy:a1', tracks=tracks[:1])
+        playlist2 = Playlist(name='a', uri='dummy:a2', tracks=tracks[1:])
         self.backend.playlists.set_dummy_playlists([playlist1, playlist2])
 
         self.send_request('listplaylistinfo "a [2]"')
 
-        self.assertInResponse('file: c')
+        self.assertInResponse('file: dummy:c')
         self.assertNotInResponse('Track: 0')
         self.assertNotInResponse('Pos: 0')
         self.assertInResponse('OK')
@@ -236,6 +251,25 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.send_request('load "unknown/playlist"')
         self.assertEqualResponse('ACK [50@0] {load} No such playlist')
 
+    def test_load_full_track_metadata(self):
+        tracks = [
+            Track(uri='dummy:a', name='Track A', length=5000),
+        ]
+        self.backend.library.dummy_library = tracks
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(
+                name='A-list', uri='dummy:a1', tracks=[Track(uri='dummy:a')])])
+
+        self.send_request('load "A-list"')
+
+        tracks = self.core.tracklist.tracks.get()
+        self.assertEqual(len(tracks), 1)
+        self.assertEqual(tracks[0].uri, 'dummy:a')
+        self.assertEqual(tracks[0].name, 'Track A')
+        self.assertEqual(tracks[0].length, 5000)
+
+        self.assertInResponse('OK')
+
     def test_playlistadd(self):
         tracks = [
             Track(uri='dummy:a'),
@@ -286,6 +320,13 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
         self.assertIsNotNone(self.backend.playlists.lookup('dummy:name').get())
 
+    def test_playlistclear_creates_playlist_save_fails(self):
+        self.backend.playlists.set_allow_save(False)
+        self.send_request('playlistclear "name"')
+
+        self.assertInResponse('ACK [0@0] {playlistclear} Backend with '
+                              'scheme "dummy" failed to save playlist')
+
     def test_playlistclear_invalid_name_acks(self):
         self.send_request('playlistclear "foo/bar"')
         self.assertInResponse('ACK [2@0] {playlistclear} playlist name is '
@@ -307,6 +348,22 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
         self.assertEqual(
             2, len(self.backend.playlists.get_items('dummy:a1').get()))
+
+    def test_playlistdelete_save_fails(self):
+        tracks = [
+            Track(uri='dummy:a'),
+            Track(uri='dummy:b'),
+            Track(uri='dummy:c'),
+        ]   # len() == 3
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(
+                name='name', uri='dummy:a1', tracks=tracks)])
+        self.backend.playlists.set_allow_save(False)
+
+        self.send_request('playlistdelete "name" "2"')
+
+        self.assertInResponse('ACK [0@0] {playlistdelete} Backend with '
+                              'scheme "dummy" failed to save playlist')
 
     def test_playlistdelete_invalid_name_acks(self):
         self.send_request('playlistdelete "foo/bar" "0"')
@@ -339,6 +396,22 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertEqual(
             "dummy:c",
             self.backend.playlists.get_items('dummy:a1').get()[0].uri)
+
+    def test_playlistmove_save_fails(self):
+        tracks = [
+            Track(uri='dummy:a'),
+            Track(uri='dummy:b'),
+            Track(uri='dummy:c')    # this one is getting moved to top
+        ]
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(
+                name='name', uri='dummy:a1', tracks=tracks)])
+        self.backend.playlists.set_allow_save(False)
+
+        self.send_request('playlistmove "name" "2" "0"')
+
+        self.assertInResponse('ACK [0@0] {playlistmove} Backend with '
+                              'scheme "dummy" failed to save playlist')
 
     def test_playlistmove_invalid_name_acks(self):
         self.send_request('playlistmove "foo/bar" "0" "1"')
@@ -386,6 +459,17 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
         self.assertIsNotNone(
             self.backend.playlists.lookup('dummy:new_name').get())
+
+    def test_rename_save_fails(self):
+        self.backend.playlists.set_dummy_playlists([
+            Playlist(
+                name='old_name', uri='dummy:a1', tracks=[Track(uri='b')])])
+        self.backend.playlists.set_allow_save(False)
+
+        self.send_request('rename "old_name" "new_name"')
+
+        self.assertInResponse('ACK [0@0] {rename} Backend with '
+                              'scheme "dummy" failed to save playlist')
 
     def test_rename_unknown_playlist_acks(self):
         self.send_request('rename "foo" "bar"')
@@ -437,6 +521,13 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
         self.assertInResponse('OK')
         self.assertIsNotNone(self.backend.playlists.lookup('dummy:name').get())
+
+    def test_save_fails(self):
+        self.backend.playlists.set_allow_save(False)
+        self.send_request('save "name"')
+
+        self.assertInResponse('ACK [0@0] {save} Backend with '
+                              'scheme "dummy" failed to save playlist')
 
     def test_save_invalid_name_acks(self):
         self.send_request('save "foo/bar"')

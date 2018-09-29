@@ -23,11 +23,12 @@ setup(
     packages=find_packages(exclude=['tests', 'tests.*']),
     zip_safe=False,
     include_package_data=True,
+    python_requires='>= 2.7, < 3',
     install_requires=[
         'Pykka >= 1.1',
         'requests >= 2.0',
         'setuptools',
-        'tornado >= 3.2, < 5',  # Tornado 5 requires Python >= 2.7.9
+        'tornado >= 4.4, < 5',  # Tornado 5 requires Python >= 2.7.9
     ],
     extras_require={'http': []},
     entry_points={

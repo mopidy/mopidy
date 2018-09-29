@@ -228,8 +228,9 @@ class LibraryController(object):
 
         # TODO: lookup(uris) to backend APIs
         for backend, backend_uris in self._get_backends_to_uris(uris).items():
-            for u in backend_uris:
-                futures[(backend, u)] = backend.library.lookup(u)
+            if backend_uris:
+                for u in backend_uris:
+                    futures[(backend, u)] = backend.library.lookup(u)
 
         for (backend, u), future in futures.items():
             with _backend_error_handling(backend):

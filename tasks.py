@@ -4,18 +4,18 @@ from invoke import run, task
 
 
 @task
-def docs(watch=False, warn=False):
+def docs(ctx, watch=False, warn=False):
     if watch:
         return watcher(docs)
     run('make -C docs/ html', warn=warn)
 
 
 @task
-def test(path=None, coverage=False, watch=False, warn=False):
+def test(ctx, path=None, coverage=False, watch=False, warn=False):
     if watch:
         return watcher(test, path=path, coverage=coverage)
     path = path or 'tests/'
-    cmd = 'py.test'
+    cmd = 'pytest'
     if coverage:
         cmd += ' --cov=mopidy --cov-report=term-missing'
     cmd += ' %s' % path
@@ -23,14 +23,14 @@ def test(path=None, coverage=False, watch=False, warn=False):
 
 
 @task
-def lint(watch=False, warn=False):
+def lint(ctx, watch=False, warn=False):
     if watch:
         return watcher(lint)
     run('flake8', warn=warn)
 
 
 @task
-def update_authors():
+def update_authors(ctx):
     # Keep authors in the order of appearance and use awk to filter out dupes
     run("git log --format='- %aN <%aE>' --reverse | awk '!x[$0]++' > AUTHORS")
 

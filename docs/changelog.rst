@@ -5,6 +5,68 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v2.2.0 (2018-09-30)
+===================
+
+Mopidy 2.2.0, a feature release, is out. It is a quite small release, featuring
+mostly minor fixes and improvements.
+
+Most notably, this release introduces CSRF protection for both the HTTP and
+WebSocket RPC interfaces, and improves the file path checking in the M3U
+backend. The CSRF protection should stop attacks against local Mopidy servers
+from malicious websites, like what was demonstrated by Josef Gajdusek in
+:issue:`1659`.
+
+Since the release of 2.1.0, we've closed approximately 21 issues and pull
+requests through 133 commits by 22 authors.
+
+- Dependencies: Drop support for Tornado < 4.4. Though strictly a breaking
+  change, this shouldn't affect any supported systems as even Debian stable
+  includes Tornado >= 4.4.
+
+- Core: Remove upper limit of 10000 tracks in tracklist. 10000 tracks is still
+  the default limit as some MPD clients crash if the tracklist is longer, but
+  it is now possible to set the :confval:`core/max_tracklist_length` config
+  value as high as you want to. (Fixes: :issue:`1600`, PR: :issue:`1666`)
+
+- Core: Fix crash on ``library.lookup(uris=[])``. (Fixes: :issue:`1619`, PR:
+  :issue:`1620`)
+
+- Core: Define return value of ``playlists.delete()`` to be a bool, :class:`True`
+  on success, :class:`False` otherwise. (PR: :issue:`1702`)
+
+- M3U: Ignore all attempts at accessing files outside the
+  :confval:`m3u/playlist_dir`. (Partly fixes: :issue:`1659`, PR: :issue:`1702`)
+
+- File: Change default ordering to show directories first, then files. (PR:
+  :issue:`1595`)
+
+- File: Fix extraneous encoding of path. (PR: :issue:`1611`)
+
+- HTTP: Protect RPC and WebSocket interfaces against CSRF by blocking requests
+  that originate from servers other than those specified in the new config
+  value :confval:`http/allowed_origins`. An artifact of this is that all
+  JSON-RPC requests must now always set the header
+  ``Content-Type: application/json``.
+  (Partly fixes: :issue:`1659`, PR: :issue:`1668`)
+
+- MPD: Added ``idle`` to the list of available commands.
+  (Fixes: :issue:`1593`, PR: :issue:`1597`)
+
+- MPD: Added Unix domain sockets for binding MPD to.
+  (Fixes: :issue:`1531`, PR: :issue:`1629`)
+
+- MPD: Lookup track metadata for MPD ``load`` and ``listplaylistinfo``.
+  (Fixes: :issue:`1511`, PR: :issue:`1621`)
+
+- Ensure that decoding of OS errors with unknown encoding never crashes, but
+  instead replaces unknown bytes with a replacement marker. (Fixes:
+  :issue:`1599`)
+
+- Set GLib program and application name, so that we show up as "Mopidy" in
+  PulseAudio instead of "python ...". (PR: :issue:`1626`)
+
+
 v2.1.0 (2017-01-02)
 ===================
 

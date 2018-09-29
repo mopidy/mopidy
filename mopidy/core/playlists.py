@@ -180,22 +180,35 @@ class PlaylistsController(object):
         If the URI doesn't match the URI schemes handled by the current
         backends, nothing happens.
 
+        Returns :class:`True` if deleted, :class:`False` otherwise.
+
         :param uri: URI of the playlist to delete
         :type uri: string
+        :rtype: :class:`bool`
+
+        .. versionchanged:: 2.2
+            Return type defined.
         """
         validation.check_uri(uri)
 
         uri_scheme = urllib.parse.urlparse(uri).scheme
         backend = self.backends.with_playlists.get(uri_scheme, None)
         if not backend:
-            return None  # TODO: error reporting to user
+            return False
 
+        success = False
         with _backend_error_handling(backend):
-            backend.playlists.delete(uri).get()
-            # TODO: error detection and reporting to user
+            success = backend.playlists.delete(uri).get()
+
+        if success is None:
+            # Return type was defined in Mopidy 2.2. Assume everything went
+            # well if the backend doesn't report otherwise.
+            success = True
+
+        if success:
             listener.CoreListener.send('playlist_deleted', uri=uri)
 
-        # TODO: return value?
+        return success
 
     def filter(self, criteria=None, **kwargs):
         """

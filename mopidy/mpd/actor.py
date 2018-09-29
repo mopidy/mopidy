@@ -41,11 +41,11 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
         self.zeroconf_name = config['mpd']['zeroconf']
         self.zeroconf_service = None
 
-        self._setup_server(config, core)
+        self.server = self._setup_server(config, core)
 
     def _setup_server(self, config, core):
         try:
-            network.Server(
+            server = network.Server(
                 self.hostname, self.port,
                 protocol=session.MpdSession,
                 protocol_kwargs={
@@ -60,10 +60,15 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
                 'MPD server startup failed: %s' %
                 encoding.locale_decode(error))
 
-        logger.info('MPD server running at [%s]:%s', self.hostname, self.port)
+        logger.info(
+            'MPD server running at %s',
+            network.format_socket_name(server.server_socket))
+
+        return server
 
     def on_start(self):
-        if self.zeroconf_name:
+        if (self.zeroconf_name and not
+                network.is_unix_socket(self.server.server_socket)):
             self.zeroconf_service = zeroconf.Zeroconf(
                 name=self.zeroconf_name,
                 stype='_mpd._tcp',
@@ -75,6 +80,7 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
             self.zeroconf_service.unpublish()
 
         process.stop_actors_by_class(session.MpdSession)
+        self.server.stop()
 
     def on_event(self, event, **kwargs):
         if event not in _CORE_EVENTS_TO_IDLE_SUBSYSTEMS:
