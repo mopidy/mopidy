@@ -16,9 +16,6 @@ _MESSAGES = {
     'mpd.protocol.current_playlist.playlist':
         'Do not use this, instead use playlistinfo',
 
-    # Deprecated features in audio:
-    'audio.emit_end_of_stream': 'audio.emit_end_of_stream() is deprecated',
-
     # Deprecated features in core libary:
     'core.library.find_exact': 'library.find_exact() is deprecated',
     'core.library.lookup:uri_arg':
