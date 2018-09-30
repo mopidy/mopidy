@@ -10,6 +10,64 @@ v3.0.0 (UNRELEASED)
 
 Backwards incompatible release.
 
+Dependencies
+------------
+
+- (no changes yet)
+
+Core API
+--------
+
+- (no changes yet)
+
+Backend API
+-----------
+
+- (no changes yet)
+
+Models
+------
+
+- (no changes yet)
+
+Extension support
+-----------------
+
+- (no changes yet)
+
+HTTP frontend
+-------------
+
+- (no changes yet)
+
+MPD frontend
+------------
+
+- (no changes yet)
+
+File backend
+------------
+
+- (no changes yet)
+
+Local backend
+-------------
+
+- (no changes yet)
+
+M3U backend
+-----------
+
+- (no changes yet)
+
+Stream backend
+--------------
+
+- (no changes yet)
+
+Audio
+-----
+
 - (no changes yet)
 
 
