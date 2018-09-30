@@ -305,29 +305,27 @@ event listeners, and delete the object like this:
 Example to get started with
 ===========================
 
-1. Make sure that you've installed all dependencies required by
-   :ref:`ext-http`.
+1. Follow :ref:`devenv` to get a Mopidy and Mopidy extension development
+   environment up and running.
 
-2. Create an empty directory for your web client.
+2. Follow :ref:`extensiondev` to create a new empty Mopidy extension.
 
-3. Change the :confval:`http/static_dir` config value to point to your new
-   directory.
+3. Use the :ref:`http-server-api` to serve a directory containing your
+   extension's static HTML, CSS, and JavaScript.
 
-4. Start/restart Mopidy.
+4. Create a file in your extension's static files directory named
+   ``index.html`` containing the text "Hello, world!".
 
-5. Create a file in the directory named ``index.html`` containing e.g. "Hello,
-   world!".
+5. Visit http://localhost:6680/ and browse to your extension to confirm that
+   you can view your new HTML file there.
 
-6. Visit http://localhost:6680/ to confirm that you can view your new HTML file
-   there.
-
-7. Include Mopidy.js in your web page:
+6. Include Mopidy.js in your web page:
 
    .. code-block:: html
 
        <script type="text/javascript" src="/mopidy/mopidy.min.js"></script>
 
-8. Add one of the following Mopidy.js examples of how to queue and start
+7. Add one of the following Mopidy.js examples of how to queue and start
    playback of your first playlist either to your web page or a JavaScript file
    that you include in your web page.
 
@@ -422,6 +420,6 @@ Example to get started with
         mopidy.on(console.log.bind(console));  // Log all events
         mopidy.on("state:online", queueAndPlay);
 
-9. The web page should now queue and play your first playlist every time you
+8. The web page should now queue and play your first playlist every time you
    load it. See the browser's console for output from the function, any errors,
    and all events that are emitted.
