@@ -38,7 +38,9 @@ Extension support
 HTTP frontend
 -------------
 
-- (no changes yet)
+- Remove support for serving arbitrary files over HTTP through the use of
+  :confval:`http/static_dir`, which has been deprecated since 1.0. (Fixes:
+  :issue:`1463`)
 
 MPD frontend
 ------------

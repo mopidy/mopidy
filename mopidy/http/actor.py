@@ -2,7 +2,6 @@ from __future__ import absolute_import, unicode_literals
 
 import json
 import logging
-import os
 import threading
 
 import pykka
@@ -167,23 +166,7 @@ class HttpServer(threading.Thread):
         return result
 
     def _get_mopidy_request_handlers(self):
-        # Either default Mopidy or user defined path to files
-
-        static_dir = self.config['http']['static_dir']
-
-        if static_dir and not os.path.exists(static_dir):
-            logger.warning(
-                'Configured http/static_dir %s does not exist. '
-                'Falling back to default HTTP handler.', static_dir)
-            static_dir = None
-
-        if static_dir:
-            return [(r'/(.*)', handlers.StaticFileHandler, {
-                'path': self.config['http']['static_dir'],
-                'default_filename': 'index.html',
-            })]
-        else:
-            return [(r'/', tornado.web.RedirectHandler, {
-                'url': '/mopidy/',
-                'permanent': False,
-            })]
+        return [(r'/', tornado.web.RedirectHandler, {
+            'url': '/mopidy/',
+            'permanent': False,
+        })]

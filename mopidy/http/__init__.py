@@ -23,7 +23,7 @@ class Extension(ext.Extension):
         schema = super(Extension, self).get_config_schema()
         schema['hostname'] = config_lib.Hostname()
         schema['port'] = config_lib.Port()
-        schema['static_dir'] = config_lib.Path(optional=True)
+        schema['static_dir'] = config_lib.Deprecated()
         schema['zeroconf'] = config_lib.String(optional=True)
         schema['allowed_origins'] = config_lib.List(optional=True)
         return schema
