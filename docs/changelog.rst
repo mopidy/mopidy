@@ -40,7 +40,7 @@ HTTP frontend
 
 - Remove support for serving arbitrary files over HTTP through the use of
   :confval:`http/static_dir`, which has been deprecated since 1.0. (Fixes:
-  :issue:`1463`)
+  :issue:`1463`, PR: :issue:`1706`)
 
 MPD frontend
 ------------
@@ -71,7 +71,7 @@ Audio
 -----
 
 - Remove the method :meth:`mopidy.audio.Audio.emit_end_of_stream`, which has
-  been deprecated since 1.0. (Fixes: :issue:`1465`)
+  been deprecated since 1.0. (Fixes: :issue:`1465`, PR: :issue:`1705`)
 
 
 v2.2.0 (2018-09-30)
