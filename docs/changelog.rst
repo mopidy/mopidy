@@ -68,7 +68,8 @@ Stream backend
 Audio
 -----
 
-- (no changes yet)
+- Remove the method :meth:`mopidy.audio.Audio.emit_end_of_stream`, which has
+  been deprecated since 1.0. (Fixes: :issue:`1465`)
 
 
 v2.2.0 (2018-09-30)
