@@ -73,10 +73,10 @@ class MopidyAppTest(HttpServerTest):
         self.assertEqual(response.headers['Location'], '/mopidy/')
 
     def test_should_return_static_files(self):
-        response = self.fetch('/mopidy/mopidy.js', method='GET')
+        response = self.fetch('/mopidy/mopidy.css', method='GET')
 
         self.assertIn(
-            'function Mopidy',
+            'html {',
             tornado.escape.to_unicode(response.body))
         self.assertEqual(
             response.headers['X-Mopidy-Version'], mopidy.__version__)

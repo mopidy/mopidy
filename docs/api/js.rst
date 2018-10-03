@@ -12,28 +12,9 @@ instead of figuring out how to communicate with Mopidy.
 Getting the library for browser use
 ===================================
 
-Regular and minified versions of Mopidy.js, ready for use, is installed
-together with Mopidy. When the HTTP extension is enabled, the files are
-available at:
-
-- http://localhost:6680/mopidy/mopidy.js
-- http://localhost:6680/mopidy/mopidy.min.js
-
-You may need to adjust hostname and port for your local setup.
-
-Thus, if you use Mopidy to host your web client, like described in
-:ref:`static-web-client`, you can load the latest version of Mopidy.js by
-adding the following script tag to your HTML file:
-
-.. code-block:: html
-
-    <script type="text/javascript" src="/mopidy/mopidy.min.js"></script>
-
-If you don't use Mopidy to host your web client, you can find the JS files in
-the Git repo at:
-
-- ``mopidy/http/data/mopidy.js``
-- ``mopidy/http/data/mopidy.min.js``
+Regular and minified versions of Mopidy.js, ready for use, is available from
+the project's
+`GitHub release page <https://github.com/mopidy/mopidy.js/releases>`_.
 
 
 Getting the library for Node.js or Browserify use
