@@ -38,6 +38,11 @@ Extension support
 HTTP frontend
 -------------
 
+- Stop bundling Mopidy.js and serving it at ``/mopidy/mopidy.js`` and
+  ``/mopidy/mopidy.min.js``. All Mopidy web clients must use Mopidy.js from npm
+  or vendor their own copy of the library.
+  (Fixes: :issue:`1460`, PR: :issue:`1708`)
+
 - Remove support for serving arbitrary files over HTTP through the use of
   :confval:`http/static_dir`, which has been deprecated since 1.0. (Fixes:
   :issue:`1463`, PR: :issue:`1706`)
