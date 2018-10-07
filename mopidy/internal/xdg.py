@@ -2,8 +2,12 @@ from __future__ import absolute_import, unicode_literals
 
 import io
 import os
+import sys
 
 from mopidy.compat import configparser
+
+
+FS_ENCODING = sys.getfilesystemencoding()
 
 
 def get_dirs():
@@ -63,5 +67,5 @@ def _get_user_dirs(xdg_config_dir):
     config.readfp(io.StringIO(data))
 
     return {
-        k.upper(): os.path.abspath(v)
+        k.upper(): os.path.abspath(v.encode(FS_ENCODING))
         for k, v in config.items('XDG_USER_DIRS') if v is not None}
