@@ -150,11 +150,18 @@ def set_mopidy_headers(request_handler):
 
 def check_origin(origin, request_headers, allowed_origins):
     if origin is None:
-        logger.debug('Origin was not set')
+        logger.warn('HTTP request denied for missing Origin header')
         return False
     allowed_origins.add(request_headers.get('Host'))
     parsed_origin = urllib.parse.urlparse(origin).netloc.lower()
-    return parsed_origin and parsed_origin in allowed_origins
+    # Some frameworks (e.g. Apache Cordova) use local files. Requests from
+    # these files don't really have a sensible Origin so the browser sets the
+    # header to something like 'file://' or 'null'. This results here in an
+    # empty parsed_origin which we choose to allow.
+    if parsed_origin and parsed_origin not in allowed_origins:
+        logger.warn('HTTP request denied for Origin "%s"', origin)
+        return False
+    return True
 
 
 class JsonRpcHandler(tornado.web.RequestHandler):
