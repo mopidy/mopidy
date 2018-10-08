@@ -19,7 +19,8 @@ HTTP POST API
 
 The Mopidy web server accepts HTTP requests with the POST method to
 http://localhost:6680/mopidy/rpc, where the ``localhost:6680`` part will vary
-with your local setup. The HTTP POST endpoint gives you access to Mopidy's
+with your local setup. Your requests must also set the Content-Type header to
+application/json. The HTTP POST endpoint gives you access to Mopidy's 
 full core API, but does not give you notification on events. If you need
 to listen to events, you should probably use the WebSocket API instead.
 
