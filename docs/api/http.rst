@@ -19,14 +19,14 @@ HTTP POST API
 
 The Mopidy web server accepts HTTP requests with the POST method to
 http://localhost:6680/mopidy/rpc, where the ``localhost:6680`` part will vary
-with your local setup. Your requests must also set the Content-Type header to
-application/json. The HTTP POST endpoint gives you access to Mopidy's 
+with your local setup. Your requests must also set the ``Content-Type`` header
+to ``application/json``. The HTTP POST endpoint gives you access to Mopidy's
 full core API, but does not give you notification on events. If you need
 to listen to events, you should probably use the WebSocket API instead.
 
 Example usage from the command line::
 
-    $ curl -d '{"jsonrpc": "2.0", "id": 1, "method": "core.playback.get_state"}' http://localhost:6680/mopidy/rpc -H 'Content-Type: application/json'
+    $ curl -d '{"jsonrpc": "2.0", "id": 1, "method": "core.playback.get_state"}' -H 'Content-Type: application/json' http://localhost:6680/mopidy/rpc
     {"jsonrpc": "2.0", "id": 1, "result": "stopped"}
 
 For details on the request and response format, see :ref:`json-rpc`.
