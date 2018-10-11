@@ -48,7 +48,8 @@ class WebSocketHandlerTest(tornado.testing.AsyncHTTPTestCase):
         self.core = mock.Mock()
         return tornado.web.Application([
             (r'/ws/?', handlers.WebSocketHandler, {
-                'core': self.core, 'allowed_origins': []
+                'core': self.core, 'allowed_origins': [],
+                'csrf_protection': True
             })
         ])
 
