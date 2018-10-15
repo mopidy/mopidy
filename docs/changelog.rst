@@ -12,6 +12,13 @@ v2.2.1 (UNRELEASED)
   header is empty, such as websocket connections originating from local files.
   (Fixes: :issue:`1711`, PR: :issue:`1712`)
 
+- HTTP: Add new config value :confval:`http/csrf_protection` which enables all
+  CSRF protections introduced in Mopidy 2.2.0. It is enabled by default and
+  should only be disabled by those users who are unable to set a
+  ``Content-Type: application/json`` request header or cannot utilise the
+  :confval:`http/allowed_origins` config value. (Fixes: :issue:`1713`, PR:
+  :issue:`1714`)
+
 
 v2.2.0 (2018-09-30)
 ===================

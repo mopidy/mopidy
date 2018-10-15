@@ -20,6 +20,9 @@ logger = logging.getLogger(__name__)
 
 def make_mopidy_app_factory(apps, statics):
     def mopidy_app_factory(config, core):
+        if not config['http']['csrf_protection']:
+            logger.warn(
+                'HTTP Cross-Site Request Forgery protection is disabled')
         allowed_origins = {
             x.lower() for x in config['http']['allowed_origins'] if x
         }
@@ -27,10 +30,12 @@ def make_mopidy_app_factory(apps, statics):
             (r'/ws/?', WebSocketHandler, {
                 'core': core,
                 'allowed_origins': allowed_origins,
+                'csrf_protection': config['http']['csrf_protection'],
             }),
             (r'/rpc', JsonRpcHandler, {
                 'core': core,
                 'allowed_origins': allowed_origins,
+                'csrf_protection': config['http']['csrf_protection'],
             }),
             (r'/(.+)', StaticFileHandler, {
                 'path': os.path.join(os.path.dirname(__file__), 'data'),
@@ -102,9 +107,10 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             # One callback per client to keep time we hold up the loop short
             loop.add_callback(functools.partial(_send_broadcast, client, msg))
 
-    def initialize(self, core, allowed_origins):
+    def initialize(self, core, allowed_origins, csrf_protection):
         self.jsonrpc = make_jsonrpc_wrapper(core)
         self.allowed_origins = allowed_origins
+        self.csrf_protection = csrf_protection
 
     def open(self):
         self.set_nodelay(True)
@@ -139,6 +145,8 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             self.close()
 
     def check_origin(self, origin):
+        if not self.csrf_protection:
+            return True
         return check_origin(origin, self.request.headers, self.allowed_origins)
 
 
@@ -166,19 +174,21 @@ def check_origin(origin, request_headers, allowed_origins):
 
 class JsonRpcHandler(tornado.web.RequestHandler):
 
-    def initialize(self, core, allowed_origins):
+    def initialize(self, core, allowed_origins, csrf_protection):
         self.jsonrpc = make_jsonrpc_wrapper(core)
         self.allowed_origins = allowed_origins
+        self.csrf_protection = csrf_protection
 
     def head(self):
         self.set_extra_headers()
         self.finish()
 
     def post(self):
-        content_type = self.request.headers.get('Content-Type', '')
-        if content_type != 'application/json':
-            self.set_status(415, 'Content-Type must be application/json')
-            return
+        if self.csrf_protection:
+            content_type = self.request.headers.get('Content-Type', '')
+            if content_type != 'application/json':
+                self.set_status(415, 'Content-Type must be application/json')
+                return
 
         data = self.request.body
         if not data:
@@ -205,14 +215,16 @@ class JsonRpcHandler(tornado.web.RequestHandler):
         self.set_header('Content-Type', 'application/json; utf-8')
 
     def options(self):
-        origin = self.request.headers.get('Origin')
-        if not check_origin(
-                origin, self.request.headers, self.allowed_origins):
-            self.set_status(403, 'Access denied for origin %s' % origin)
-            return
+        if self.csrf_protection:
+            origin = self.request.headers.get('Origin')
+            if not check_origin(origin, self.request.headers,
+                                self.allowed_origins):
+                self.set_status(403, 'Access denied for origin %s' % origin)
+                return
 
-        self.set_header('Access-Control-Allow-Origin', '%s' % origin)
-        self.set_header('Access-Control-Allow-Headers', 'Content-Type')
+            self.set_header('Access-Control-Allow-Origin', '%s' % origin)
+            self.set_header('Access-Control-Allow-Headers', 'Content-Type')
+
         self.set_status(204)
         self.finish()
 
