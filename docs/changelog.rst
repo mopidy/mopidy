@@ -79,6 +79,23 @@ Audio
   been deprecated since 1.0. (Fixes: :issue:`1465`, PR: :issue:`1705`)
 
 
+v2.2.1 (2018-10-15)
+===================
+
+Bug fix release.
+
+- HTTP: Stop blocking connections where the network location part of the
+  ``Origin`` header is empty, such as WebSocket connections originating from
+  local files. (Fixes: :issue:`1711`, PR: :issue:`1712`)
+
+- HTTP: Add new config value :confval:`http/csrf_protection` which enables all
+  CSRF protections introduced in Mopidy 2.2.0. It is enabled by default and
+  should only be disabled by those users who are unable to set a
+  ``Content-Type: application/json`` request header or cannot utilise the
+  :confval:`http/allowed_origins` config value. (Fixes: :issue:`1713`, PR:
+  :issue:`1714`)
+
+
 v2.2.0 (2018-09-30)
 ===================
 

@@ -84,7 +84,7 @@ See :ref:`config` for general help on configuring Mopidy.
 .. confval:: http/allowed_origins
 
     A list of domains allowed to perform Cross-Origin Resource Sharing (CORS)
-    requests. This applies to both JSON-RPC and Websocket requests. Values
+    requests. This applies to both JSON-RPC and WebSocket requests. Values
     should be in the format ``hostname:port`` and separated by either a comma or
     newline.
     
@@ -92,3 +92,17 @@ See :ref:`config` for general help on configuring Mopidy.
     allowed and so you don't need an entry for those. However, if your requests
     originate from a different web server, you will need to add an entry for
     that server in this list.
+
+.. confval:: http/csrf_protection
+
+    Enable the HTTP server's protection against Cross-Site Request Forgery
+    (CSRF) from both JSON-RPC and WebSocket requests.
+
+    Disabling this will remove the requirement to set a ``Content-Type: application/json``
+    header for JSON-RPC POST requests. It will also disable all same-origin
+    checks, effectively ignoring the :confval:`http/allowed_origins` config
+    since requests from any origin will be allowed. Lastly, all
+    ``Access-Control-Allow-*`` response headers will be suppressed.
+
+    This config should only be disabled if you understand the security implications
+    and require the HTTP server's old behaviour.

@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import os
+import unittest
 
 import mock
 
@@ -47,7 +48,8 @@ class WebSocketHandlerTest(tornado.testing.AsyncHTTPTestCase):
         self.core = mock.Mock()
         return tornado.web.Application([
             (r'/ws/?', handlers.WebSocketHandler, {
-                'core': self.core, 'allowed_origins': []
+                'core': self.core, 'allowed_origins': [],
+                'csrf_protection': True
             })
         ])
 
@@ -86,3 +88,42 @@ class WebSocketHandlerTest(tornado.testing.AsyncHTTPTestCase):
         for client in handlers.WebSocketHandler.clients:
             client.ws_connection = None
         handlers.WebSocketHandler.broadcast('message')
+
+
+class CheckOriginTests(unittest.TestCase):
+
+    def setUp(self):
+        self.headers = {'Host': 'localhost:6680'}
+        self.allowed = set()
+
+    def test_missing_origin_blocked(self):
+        self.assertFalse(handlers.check_origin(
+            None, self.headers, self.allowed))
+
+    def test_empty_origin_allowed(self):
+        self.assertTrue(handlers.check_origin('', self.headers, self.allowed))
+
+    def test_chrome_file_origin_allowed(self):
+        self.assertTrue(handlers.check_origin(
+            'file://', self.headers, self.allowed))
+
+    def test_firefox_null_origin_allowed(self):
+        self.assertTrue(handlers.check_origin(
+            'null', self.headers, self.allowed))
+
+    def test_same_host_origin_allowed(self):
+        self.assertTrue(handlers.check_origin(
+            'http://localhost:6680', self.headers, self.allowed))
+
+    def test_different_host_origin_blocked(self):
+        self.assertFalse(handlers.check_origin(
+            'http://other:6680', self.headers, self.allowed))
+
+    def test_different_port_blocked(self):
+        self.assertFalse(handlers.check_origin(
+            'http://localhost:80', self.headers, self.allowed))
+
+    def test_extra_origin_allowed(self):
+        self.allowed.add('other:6680')
+        self.assertTrue(handlers.check_origin(
+            'http://other:6680', self.headers, self.allowed))
