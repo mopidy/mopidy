@@ -5,12 +5,14 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
-v2.2.1 (UNRELEASED)
+v2.2.1 (2018-10-15)
 ===================
 
-- HTTP: Stop blocking connections where the network location part of the Origin
-  header is empty, such as websocket connections originating from local files.
-  (Fixes: :issue:`1711`, PR: :issue:`1712`)
+Bug fix release.
+
+- HTTP: Stop blocking connections where the network location part of the
+  ``Origin`` header is empty, such as WebSocket connections originating from
+  local files. (Fixes: :issue:`1711`, PR: :issue:`1712`)
 
 - HTTP: Add new config value :confval:`http/csrf_protection` which enables all
   CSRF protections introduced in Mopidy 2.2.0. It is enabled by default and
