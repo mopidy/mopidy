@@ -100,20 +100,21 @@ class HttpServer(threading.Thread):
 
         self.app = None
         self.server = None
+        self.io_loop = None
 
     def run(self):
         self.app = tornado.web.Application(self._get_request_handlers())
         self.server = tornado.httpserver.HTTPServer(self.app)
         self.server.add_sockets(self.sockets)
 
-        tornado.ioloop.IOLoop.instance().start()
+        self.io_loop = tornado.ioloop.IOLoop.current()
+        self.io_loop.start()
 
         logger.debug('Stopped HTTP server')
 
     def stop(self):
         logger.debug('Stopping HTTP server')
-        tornado.ioloop.IOLoop.instance().add_callback(
-            tornado.ioloop.IOLoop.instance().stop)
+        self.io_loop.add_callback(self.io_loop.stop)
 
     def _get_request_handlers(self):
         request_handlers = []

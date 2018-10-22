@@ -5,6 +5,13 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
+v2.2.2 (UNRELEASED)
+===================
+
+- HTTP: Fix hang on exit due to change in Tornado v5.0 IOLoop. (Fixes:
+  :issue:`1715`, PR: :issue:`1716`)
+
+
 v2.2.1 (2018-10-15)
 ===================
 
