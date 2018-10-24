@@ -10,6 +10,7 @@ import mock
 
 from mopidy import compat
 from mopidy.config import types
+from mopidy.internal import log
 
 # TODO: DecodeTest and EncodeTest
 
@@ -293,6 +294,7 @@ class LogLevelTest(unittest.TestCase):
         'warning': logging.WARNING,
         'info': logging.INFO,
         'debug': logging.DEBUG,
+        'trace': log.TRACE_LOG_LEVEL,
         'all': logging.NOTSET,
     }
 
