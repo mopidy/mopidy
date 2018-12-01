@@ -161,7 +161,7 @@ class IssueGH69RegressionTest(protocol.BaseTestCase):
 
 class IssueGH113RegressionTest(protocol.BaseTestCase):
 
-    """
+    r"""
     The issue: https://github.com/mopidy/mopidy/issues/113
 
     How to reproduce:
@@ -174,11 +174,11 @@ class IssueGH113RegressionTest(protocol.BaseTestCase):
 
     def test(self):
         self.core.playlists.create(
-            u'all lart spotify:track:\w\{22\} pastes')
+            r'all lart spotify:track:\w\{22\} pastes')
 
         self.send_request('lsinfo "/"')
         self.assertInResponse(
-            u'playlist: all lart spotify:track:\w\{22\} pastes')
+            r'playlist: all lart spotify:track:\w\{22\} pastes')
 
         self.send_request(
             r'listplaylistinfo "all lart spotify:track:\\w\\{22\\} pastes"')
