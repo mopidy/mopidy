@@ -233,6 +233,7 @@ class LogLevel(ConfigValue):
         b'warning': logging.WARNING,
         b'info': logging.INFO,
         b'debug': logging.DEBUG,
+        b'trace': log.TRACE_LOG_LEVEL,
         b'all': logging.NOTSET,
     }
 
