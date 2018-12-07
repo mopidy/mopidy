@@ -37,8 +37,8 @@ There are two ways Mopidy can be made available as an UPnP MediaRenderer:
 Using Mopidy-MPRIS and Rygel, or using Mopidy-MPD and upmpdcli.
 
 
-upmpdcli
---------
+Mopidy-MPD and upmpdcli
+-----------------------
 
 `upmpdcli <http://www.lesbonscomptes.com/upmpdcli/>`_ is recommended, since it
 is easier to setup, and offers `OpenHome 
@@ -66,46 +66,11 @@ MediaRenderer to the network, while using the MPD protocol to control Mopidy.
 4. A UPnP renderer should be available now.
 
 
-Rygel
------
+Mopidy-MPRIS and Rygel
+----------------------
 
-With the help of `the Rygel project <https://live.gnome.org/Rygel>`_ Mopidy can
-be made available as an UPnP MediaRenderer. Rygel will interface with the MPRIS
-interface provided by the `Mopidy-MPRIS extension
-<https://github.com/mopidy/mopidy-mpris>`_, and make Mopidy available as a
-MediaRenderer on the local network. Since this depends on the MPRIS frontend,
-which again depends on D-Bus being available, this will only work on Linux, and
-not OS X. MPRIS/D-Bus is only available to other applications on the same
-host, so Rygel must be running on the same machine as Mopidy.
-
-1. Start Mopidy and make sure the MPRIS frontend is working. It is activated
-   by default when the Mopidy-MPRIS extension is installed, but you may miss
-   dependencies or be using OS X, in which case it will not work. Check the
-   console output when Mopidy is started for any errors related to the MPRIS
-   frontend. If you're unsure it is working, there are instructions for how to
-   test it in the `Mopidy-MPRIS readme
-   <https://github.com/mopidy/mopidy-mpris>`_.
-
-2. Install Rygel. On Debian/Ubuntu::
-
-       sudo apt-get install rygel
-
-3. Enable Rygel's MPRIS plugin. On Debian/Ubuntu, edit ``/etc/rygel.conf``,
-   find the ``[MPRIS]`` section, and change ``enabled=false`` to
-   ``enabled=true``.
-
-4. Start Rygel by running::
-
-       rygel
-
-   Example output::
-
-       $ rygel
-       Rygel-Message: New plugin 'MediaExport' available
-       Rygel-Message: New plugin 'org.mpris.MediaPlayer2.mopidy' available
-
-   In the above example, you can see that Rygel found Mopidy, and it is now
-   making Mopidy available through Rygel.
+See the `Mopidy-MPRIS <https://github.com/mopidy/mopidy-mpris>`_ documentation
+for how to setup Rygel to make Mopidy an UPnP MediaRenderer.
 
 
 The UPnP-Inspector client
