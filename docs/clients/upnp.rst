@@ -73,44 +73,8 @@ See the `Mopidy-MPRIS <https://github.com/mopidy/mopidy-mpris>`_ documentation
 for how to setup Rygel to make Mopidy an UPnP MediaRenderer.
 
 
-The UPnP-Inspector client
-=========================
-
-`UPnP-Inspector <http://coherence.beebits.net/wiki/UPnP-Inspector>`_ is a
-graphical analyzer and debugging tool for UPnP services. It will detect any
-UPnP devices on your network, and show these in a tree structure. This is not a
-tool for your everyday music listening while relaxing on the couch, but it may
-be of use for testing that your setup works correctly.
-
-1. Install UPnP-Inspector. On Debian/Ubuntu::
-
-       sudo apt-get install upnp-inspector
-
-2. Run it::
-
-       upnp-inspector
-
-3. Assuming that Mopidy is running with a working MPRIS frontend, and that
-   Rygel is running on the same machine, Mopidy should now appear in
-   UPnP-Inspector's device list.
-
-4. If you expand the tree item saying ``Mopidy
-   (MediaRenderer:2)`` or similiar, and then the sub element named
-   ``AVTransport:2`` or similar, you'll find a list of commands you can invoke.
-   E.g. if you double-click the ``Pause`` command, you'll get a new window
-   where you can press an ``Invoke`` button, and then Mopidy should be paused.
-
-Note that if you have a firewall on the host running Mopidy and Rygel, and you
-want this to be exposed to the rest of your local network, you need to open up
-your firewall for UPnP traffic. UPnP use UDP port 1900 as well as some
-dynamically assigned ports. I've only verified that this procedure works across
-the network by temporarily disabling the firewall on the the two hosts
-involved, so I'll leave any firewall configuration as an exercise to the
-reader.
-
-
-Other clients
-=============
+Clients
+=======
 
 For a long list of UPnP clients for all possible platforms, see Wikipedia's
 `List of UPnP AV media servers and clients
