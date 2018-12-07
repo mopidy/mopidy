@@ -103,13 +103,16 @@ See :ref:`config` for general help on configuring Mopidy.
 
     A list of domains allowed to perform Cross-Origin Resource Sharing (CORS)
     requests. This applies to both JSON-RPC and WebSocket requests. Values
-    should be in the format ``hostname:port`` and separated by either a comma or
-    newline.
-    
+    should be in the format ``hostname:port``, should not specify any scheme and
+    be separated by either a comma or newline. Additionally, the ``port`` should
+    not be specified if it is the default (80 for http, 443 for https).
+
     Same-origin requests (i.e. requests from Mopidy's web server) are always
     allowed and so you don't need an entry for those. However, if your requests
     originate from a different web server, you will need to add an entry for
-    that server in this list.
+    that server in this list. For example, to allow requests from a web server
+    at 'http://www.my.web-client.com' you would specify the entry
+    'www.my.web-client.com'.
 
 .. confval:: http/csrf_protection
 

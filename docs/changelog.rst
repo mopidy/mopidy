@@ -4,6 +4,14 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
+v2.2.2 (UNRELEASED)
+===================
+
+Bug fix release.
+
+- Files: Fix crash due to mix of text and bytes in paths that come from
+  ``$XDG_CONFIG_HOME/user-dirs.dirs``. (Fixes: :issue:`1676`, :issue:`1725`)
+
 
 v2.2.2 (UNRELEASED)
 ===================
