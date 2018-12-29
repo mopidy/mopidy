@@ -79,7 +79,7 @@ Audio
   been deprecated since 1.0. (Fixes: :issue:`1465`, PR: :issue:`1705`)
 
 
-v2.2.2 (UNRELEASED)
+v2.2.2 (2018-12-29)
 ===================
 
 Bug fix release.
