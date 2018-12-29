@@ -90,6 +90,8 @@ Bug fix release.
 - Files: Fix crash due to mix of text and bytes in paths that come from
   ``$XDG_CONFIG_HOME/user-dirs.dirs``. (Fixes: :issue:`1676`, :issue:`1725`)
 
+- Docs: update OSX Homebrew installation instructions.
+
 
 v2.2.1 (2018-10-15)
 ===================
