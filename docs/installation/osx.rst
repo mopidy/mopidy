@@ -59,7 +59,7 @@ If you are running OS X, you can install everything needed with Homebrew.
             brew uninstall --ignore-dependencies gst-python pygobject3
 
 
-       These dependencies will be re-installed automatically when mopidy is
+       These dependencies will be re-installed automatically when Mopidy is
        installed.
 
 #. To install Mopidy, run::
