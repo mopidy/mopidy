@@ -9,9 +9,6 @@ If you are running OS X, you can install everything needed with Homebrew.
 
        xcode-select --install
 
-#. Install `XQuartz <http://xquartz.macosforge.org/>`_. This is needed by
-   GStreamer which Mopidy use heavily.
-
 #. Install `Homebrew <https://github.com/Homebrew/homebrew>`_.
 
 #. If you are already using Homebrew, make sure your installation is up to
@@ -51,6 +48,18 @@ If you are running OS X, you can install everything needed with Homebrew.
    Homebrew tap, run::
 
        brew tap mopidy/mopidy
+
+   .. note::
+
+       Mopidy currently requires that a few of its dependencies be built with
+       Python 2 support via the ``--with-python@2`` build option. To ensure
+       that this is done for your installation, it is recommended to
+       uninstall the dependencies first with::
+
+            brew uninstall --ignore-dependencies gst-python pygobject3
+
+       These dependencies will be re-installed automatically when Mopidy is
+       installed.
 
 #. To install Mopidy, run::
 
