@@ -8,8 +8,11 @@ include LICENSE
 include MANIFEST.in
 include tox.ini
 
+recursive-include .github *
+
 recursive-include docs *
 prune docs/_build
+prune docs/.doctrees
 
 recursive-include extra *
 

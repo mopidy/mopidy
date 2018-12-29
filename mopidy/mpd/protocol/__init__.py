@@ -38,7 +38,7 @@ def load_protocol_modules():
 
 
 def INT(value):  # noqa: N802
-    """Converts a value that matches [+-]?\d+ into and integer."""
+    r"""Converts a value that matches [+-]?\d+ into and integer."""
     if value is None:
         raise ValueError('None is not a valid integer')
     # TODO: check for whitespace via value != value.strip()?
@@ -46,7 +46,7 @@ def INT(value):  # noqa: N802
 
 
 def UINT(value):  # noqa: N802
-    """Converts a value that matches \d+ into an integer."""
+    r"""Converts a value that matches \d+ into an integer."""
     if value is None:
         raise ValueError('None is not a valid integer')
     if not value.isdigit():

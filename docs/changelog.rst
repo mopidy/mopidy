@@ -4,10 +4,14 @@ Changelog
 
 This changelog is used to track all major changes to Mopidy.
 
-v2.2.2 (UNRELEASED)
+
+v2.2.2 (2018-12-29)
 ===================
 
 Bug fix release.
+
+- HTTP: Fix hang on exit due to change in Tornado v5.0 IOLoop. (Fixes:
+  :issue:`1715`, PR: :issue:`1716`)
 
 - Files: Fix crash due to mix of text and bytes in paths that come from
   ``$XDG_CONFIG_HOME/user-dirs.dirs``. (Fixes: :issue:`1676`, :issue:`1725`)
