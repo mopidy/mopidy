@@ -210,8 +210,6 @@ class _Handler(object):
                 return
             old_state, new_state, pending_state = msg.parse_state_changed()
             self.on_playbin_state_changed(old_state, new_state, pending_state)
-        elif msg.type == Gst.MessageType.BUFFERING:
-            self.on_buffering(msg.parse_buffering(), msg.get_structure())
         elif msg.type == Gst.MessageType.EOS:
             self.on_end_of_stream()
         elif msg.type == Gst.MessageType.ERROR:
@@ -278,27 +276,6 @@ class _Handler(object):
         if 'GST_DEBUG_DUMP_DOT_DIR' in os.environ:
             Gst.debug_bin_to_dot_file(
                 self._audio._playbin, Gst.DebugGraphDetails.ALL, 'mopidy')
-
-    def on_buffering(self, percent, structure=None):
-        if structure is not None and structure.has_field('buffering-mode'):
-            buffering_mode = structure.get_enum(
-                'buffering-mode', Gst.BufferingMode)
-            if buffering_mode == Gst.BufferingMode.LIVE:
-                return  # Live sources stall in paused.
-
-        level = logging.getLevelName('TRACE')
-        if percent < 10 and not self._audio._buffering:
-            self._audio._playbin.set_state(Gst.State.PAUSED)
-            self._audio._buffering = True
-            level = logging.DEBUG
-        if percent == 100:
-            self._audio._buffering = False
-            if self._audio._target_state == Gst.State.PLAYING:
-                self._audio._playbin.set_state(Gst.State.PLAYING)
-            level = logging.DEBUG
-
-        gst_logger.log(
-            level, 'Got BUFFERING bus message: percent=%d%%', percent)
 
     def on_end_of_stream(self):
         gst_logger.debug('Got EOS (end of stream) bus message.')
@@ -412,7 +389,6 @@ class Audio(pykka.ThreadingActor):
 
         self._config = config
         self._target_state = Gst.State.NULL
-        self._buffering = False
         self._tags = {}
         self._pending_uri = None
         self._pending_tags = None
@@ -697,7 +673,6 @@ class Audio(pykka.ThreadingActor):
 
         :rtype: :class:`True` if successfull, else :class:`False`
         """
-        self._buffering = False
         return self._set_state(Gst.State.NULL)
 
     def wait_for_state_change(self):
