@@ -114,12 +114,6 @@ class _Outputs(Gst.Bin):
         ghost_pad = Gst.GhostPad.new('sink', self._tee.get_static_pad('sink'))
         self.add_pad(ghost_pad)
 
-        # Add an always connected fakesink which respects the clock so the tee
-        # doesn't fail even if we don't have any outputs.
-        fakesink = Gst.ElementFactory.make('fakesink')
-        fakesink.set_property('sync', True)
-        self._add(fakesink)
-
     def add_output(self, description):
         # XXX This only works for pipelines not in use until #790 gets done.
         try:
