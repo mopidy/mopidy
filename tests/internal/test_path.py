@@ -237,7 +237,7 @@ class ExpandPathTest(unittest.TestCase):
 
 
 class FindMTimesTest(unittest.TestCase):
-    maxDiff = None
+    maxDiff = None  # noqa: N815
 
     def setUp(self):  # noqa: N802
         self.tmpdir = tempfile.mkdtemp(b'.mopidy-tests')
