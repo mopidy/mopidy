@@ -542,7 +542,7 @@ class TestCurrentAndPendingTlTrack(BaseTest):
     'mopidy.core.playback.listener.CoreListener', spec=core.CoreListener)
 class EventEmissionTest(BaseTest):
 
-    maxDiff = None
+    maxDiff = None  # noqa: N815
 
     def test_play_when_stopped_emits_events(self, listener_mock):
         tl_tracks = self.core.tracklist.get_tl_tracks()
