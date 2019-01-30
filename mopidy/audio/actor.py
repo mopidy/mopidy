@@ -274,6 +274,10 @@ class _Handler(object):
                 self._audio._playbin, Gst.DebugGraphDetails.ALL, 'mopidy')
 
     def on_buffering(self, percent, structure=None):
+        if self._audio._target_state < Gst.State.PAUSED:
+            gst_logger.debug('Skip buffering during track change.')
+            return
+
         if structure is not None and structure.has_field('buffering-mode'):
             buffering_mode = structure.get_enum(
                 'buffering-mode', Gst.BufferingMode)
@@ -705,7 +709,6 @@ class Audio(pykka.ThreadingActor):
 
         :rtype: :class:`True` if successfull, else :class:`False`
         """
-        self._buffering = False
         return self._set_state(Gst.State.NULL)
 
     def wait_for_state_change(self):
@@ -748,6 +751,9 @@ class Audio(pykka.ThreadingActor):
         :type state: :class:`Gst.State`
         :rtype: :class:`True` if successfull, else :class:`False`
         """
+        if state < Gst.State.PAUSED:
+            self._buffering = False
+
         self._target_state = state
         result = self._playbin.set_state(state)
         gst_logger.debug(
