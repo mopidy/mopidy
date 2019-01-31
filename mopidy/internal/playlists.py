@@ -6,9 +6,9 @@ from mopidy.compat import configparser
 from mopidy.internal import validation
 
 try:
-    import xml.etree.cElementTree as elementtree
+    import xml.etree.cElementTree as elementtree  # noqa: N813
 except ImportError:
-    import xml.etree.ElementTree as elementtree
+    import xml.etree.ElementTree as elementtree  # noqa: N813
 
 
 def parse(data):
