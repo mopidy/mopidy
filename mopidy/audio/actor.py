@@ -256,7 +256,7 @@ class _Handler(object):
         target_state = _GST_STATE_MAPPING.get(self._audio._target_state)
         if target_state is None:
             # XXX: Workaround for #1430, to be fixed properly by #1222.
-            logger.debug('Race condition happened. See #1222 and #1430.')
+            logger.warn('Race condition happened. See #1222 and #1430.')
             return
         if target_state == new_state:
             target_state = None
