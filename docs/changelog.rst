@@ -78,6 +78,22 @@ Audio
 - Remove the method :meth:`mopidy.audio.Audio.emit_end_of_stream`, which has
   been deprecated since 1.0. (Fixes: :issue:`1465`, PR: :issue:`1705`)
 
+v2.2.3 (UNRELEASED)
+===================
+
+Bug fix release.
+
+- Audio: Fix switching between tracks with different sample rates. (Fixes:
+  :issue:`1528`, PR: :issue:`1735`)
+
+- Audio: Prevent buffering handling interfering with track changes. (Fixes:
+  :issue:`1722`, PR: :issue:`1740`)
+
+- Local: Add .pdf and .zip to the default
+  confval:`local/excluded_file_extensions` config value. (PR: :issue:`1737`)
+
+- File: Synchronised the default confval:`file/excluded_file_extensions` config
+  values with confval:`local/excluded_file_extensions`. (PR: :issue:`1743`)
 
 v2.2.2 (2018-12-29)
 ===================
