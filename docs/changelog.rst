@@ -13,6 +13,9 @@ Bug fix release.
 - Audio: Fix switching between tracks with different sample rates. (Fixes:
   :issue:`1528`, PR: :issue:`1735`)
 
+- Audio: Prevent buffering handling interfering with track changes. (Fixes:
+  :issue:`1722`, PR: :issue:`1740`)
+
 v2.2.2 (2018-12-29)
 ===================
 
