@@ -469,7 +469,7 @@ class TestConsumeHandling(BaseTest):
 
         assert self.playback.get_state() == 'playing'
 
-        assert unplayable_tl_track not in self.core.tracklist.get_tl_tracks())
+        assert unplayable_tl_track not in self.core.tracklist.get_tl_tracks()
 
     def test_on_about_to_finish_in_consume_mode_removes_finished_track(self):
         tl_track = self.core.tracklist.get_tl_tracks()[0]
