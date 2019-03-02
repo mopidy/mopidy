@@ -467,10 +467,9 @@ class TestConsumeHandling(BaseTest):
         self.core.playback.next()
         self.replay_events()
 
-        self.assertEqual(self.playback.get_state(), 'playing')
+        seert self.playback.get_state() == 'playing'
 
-        self.assertNotIn(
-            unplayable_tl_track, self.core.tracklist.get_tl_tracks())
+        assert unplayable_tl_track not in self.core.tracklist.get_tl_tracks())
 
     def test_on_about_to_finish_in_consume_mode_removes_finished_track(self):
         tl_track = self.core.tracklist.get_tl_tracks()[0]
@@ -707,9 +706,8 @@ class EventEmissionTest(BaseTest):
         self.core.playback.next()
         self.replay_events()
 
-        self.assertListEqual(
-            [
-                mock.call(
+        assert listener_mock.send.mock_calls == [
+            mock.call(
                     'track_playback_ended',
                     tl_track=tl_tracks[0], time_position=1000),
                 mock.call(
@@ -719,10 +717,8 @@ class EventEmissionTest(BaseTest):
                     'track_playback_started', tl_track=tl_tracks[1]),
                 mock.call(
                     'tracklist_changed')
-            ],
-            listener_mock.send.mock_calls)
+            ]
 
-        
     def test_gapless_track_change_emits_events(self, listener_mock):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
