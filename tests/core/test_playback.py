@@ -708,16 +708,16 @@ class EventEmissionTest(BaseTest):
 
         assert listener_mock.send.mock_calls == [
             mock.call(
-                    'track_playback_ended',
-                    tl_track=tl_tracks[0], time_position=1000),
-                mock.call(
-                    'playback_state_changed',
-                    old_state='playing', new_state='playing'),
-                mock.call(
-                    'track_playback_started', tl_track=tl_tracks[1]),
-                mock.call(
-                    'tracklist_changed')
-            ]
+                'track_playback_ended',
+                tl_track=tl_tracks[0], time_position=1000),
+            mock.call(
+                'playback_state_changed',
+                old_state='playing', new_state='playing'),
+            mock.call(
+                'track_playback_started', tl_track=tl_tracks[1]),
+            mock.call(
+                'tracklist_changed')
+        ]
 
     def test_gapless_track_change_emits_events(self, listener_mock):
         tl_tracks = self.core.tracklist.get_tl_tracks()
