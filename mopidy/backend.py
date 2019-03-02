@@ -362,10 +362,16 @@ class PlaylistsProvider(object):
         """
         Delete playlist identified by the URI.
 
+        Returns :class:`True` if deleted, :class:`False` otherwise.
+
         *MUST be implemented by subclass.*
 
         :param uri: URI of the playlist to delete
         :type uri: string
+        :rtype: :class:`bool`
+
+        .. versionchanged:: 2.2
+            Return type defined.
         """
         raise NotImplementedError
 

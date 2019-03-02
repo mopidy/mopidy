@@ -42,9 +42,6 @@ class DummyAudio(pykka.ThreadingActor):
     def emit_data(self, buffer_):
         pass
 
-    def emit_end_of_stream(self):
-        pass
-
     def get_position(self):
         return self._position
 

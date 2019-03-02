@@ -18,9 +18,9 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
             'http': {
                 'hostname': '127.0.0.1',
                 'port': 6680,
-                'static_dir': None,
                 'zeroconf': '',
                 'allowed_origins': [],
+                'csrf_protection': True,
             }
         }
 
@@ -53,29 +53,6 @@ class RootRedirectTest(HttpServerTest):
         self.assertEqual(response.headers['Location'], '/mopidy/')
 
 
-class LegacyStaticDirAppTest(HttpServerTest):
-
-    def get_config(self):
-        config = super(LegacyStaticDirAppTest, self).get_config()
-        config['http']['static_dir'] = os.path.dirname(__file__)
-        return config
-
-    def test_should_return_index(self):
-        response = self.fetch('/', method='GET', follow_redirects=False)
-
-        self.assertEqual(response.code, 404, 'No index.html in this dir')
-
-    def test_should_return_static_files(self):
-        response = self.fetch('/test_server.py', method='GET')
-
-        self.assertIn(
-            'test_should_return_static_files',
-            tornado.escape.to_unicode(response.body))
-        self.assertEqual(
-            response.headers['X-Mopidy-Version'], mopidy.__version__)
-        self.assertEqual(response.headers['Cache-Control'], 'no-cache')
-
-
 class MopidyAppTest(HttpServerTest):
 
     def test_should_return_index(self):
@@ -97,10 +74,10 @@ class MopidyAppTest(HttpServerTest):
         self.assertEqual(response.headers['Location'], '/mopidy/')
 
     def test_should_return_static_files(self):
-        response = self.fetch('/mopidy/mopidy.js', method='GET')
+        response = self.fetch('/mopidy/mopidy.css', method='GET')
 
         self.assertIn(
-            'function Mopidy',
+            'html {',
             tornado.escape.to_unicode(response.body))
         self.assertEqual(
             response.headers['X-Mopidy-Version'], mopidy.__version__)
@@ -205,6 +182,48 @@ class MopidyRPCHandlerTest(HttpServerTest):
             response.headers['Access-Control-Allow-Headers'], 'Content-Type')
 
 
+class MopidyRPCHandlerNoCSRFProtectionTest(HttpServerTest):
+
+    def get_config(self):
+        config = super(MopidyRPCHandlerNoCSRFProtectionTest, self).get_config()
+        config['http']['csrf_protection'] = False
+        return config
+
+    def get_cmd(self):
+        return tornado.escape.json_encode({
+            'method': 'core.get_version',
+            'params': [],
+            'jsonrpc': '2.0',
+            'id': 1,
+        })
+
+    def test_should_ignore_incorrect_content_type(self):
+        response = self.fetch(
+            '/mopidy/rpc', method='POST', body=self.get_cmd(),
+            headers={'Content-Type': 'text/plain'})
+
+        self.assertEqual(response.code, 200)
+
+    def test_should_ignore_missing_content_type(self):
+        response = self.fetch(
+            '/mopidy/rpc', method='POST', body=self.get_cmd(), headers={})
+
+        self.assertEqual(response.code, 200)
+
+    def test_different_origin_returns_allowed(self):
+        response = self.fetch('/mopidy/rpc', method='OPTIONS', headers={
+            'Host': 'me:6680', 'Origin': 'http://evil:666'})
+
+        self.assertEqual(response.code, 204)
+
+    def test_should_not_return_cors_headers(self):
+        response = self.fetch('/mopidy/rpc', method='OPTIONS', headers={
+            'Host': 'me:6680', 'Origin': 'http://me:6680'})
+
+        self.assertNotIn('Access-Control-Allow-Origin', response.headers)
+        self.assertNotIn('Access-Control-Allow-Headers', response.headers)
+
+
 class HttpServerWithStaticFilesTest(tornado.testing.AsyncHTTPTestCase):
 
     def get_app(self):
@@ -212,7 +231,6 @@ class HttpServerWithStaticFilesTest(tornado.testing.AsyncHTTPTestCase):
             'http': {
                 'hostname': '127.0.0.1',
                 'port': 6680,
-                'static_dir': None,
                 'zeroconf': '',
             }
         }
@@ -263,7 +281,6 @@ class HttpServerWithWsgiAppTest(tornado.testing.AsyncHTTPTestCase):
             'http': {
                 'hostname': '127.0.0.1',
                 'port': 6680,
-                'static_dir': None,
                 'zeroconf': '',
             }
         }

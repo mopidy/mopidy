@@ -42,7 +42,7 @@ def watcher(task, *args, **kwargs):
         task(*args, **kwargs)
         try:
             run(
-                'inotifywait -q -e create -e modify -e delete '
-                '--exclude ".*\.(pyc|sw.)" -r docs/ mopidy/ tests/')
+                r'inotifywait -q -e create -e modify -e delete '
+                r'--exclude ".*\.(pyc|sw.)" -r docs/ mopidy/ tests/')
         except KeyboardInterrupt:
             sys.exit()

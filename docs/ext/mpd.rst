@@ -20,7 +20,7 @@ Mopidy and enabled by default.
     local network. You have been warned.
 
 MPD stands for Music Player Daemon, which is also the name of the `original MPD
-server project <http://mpd.wikia.com/>`_. Mopidy does not depend on the
+server project <https://www.musicpd.org/>`_. Mopidy does not depend on the
 original MPD server, but implements the MPD protocol itself, and is thus
 compatible with clients for the original MPD server.
 

@@ -45,6 +45,9 @@ class ScannerTest(unittest.TestCase):
 
     def test_tags_is_set(self):
         self.scan(self.find('scanner/simple'))
+
+        self.check_if_missing_plugin()
+
         self.assert_(self.result.values()[0].tags)
 
     def test_errors_is_not_set(self):

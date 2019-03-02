@@ -164,7 +164,7 @@ __HASH10__ = foo # = should all be treated as a comment."""
 
 
 class PreProcessorTest(unittest.TestCase):
-    maxDiff = None  # Show entire diff.
+    maxDiff = None  # Show entire diff.  # noqa: N815
 
     def test_empty_config(self):
         result = config._preprocess('')
@@ -230,7 +230,7 @@ class PreProcessorTest(unittest.TestCase):
 
 
 class PostProcessorTest(unittest.TestCase):
-    maxDiff = None  # Show entire diff.
+    maxDiff = None  # Show entire diff.  # noqa: N815
 
     def test_empty_config(self):
         result = config._postprocess('[__COMMENTS__]')

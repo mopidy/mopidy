@@ -9,7 +9,7 @@ from tests import path_to_data_dir
 
 
 class BrowseCacheTest(unittest.TestCase):
-    maxDiff = None
+    maxDiff = None  # noqa: N815
 
     def setUp(self):  # noqa: N802
         self.uris = ['local:track:foo/bar/song1',

@@ -5,10 +5,139 @@ Changelog
 This changelog is used to track all major changes to Mopidy.
 
 
-v2.2.0 (UNRELEASED)
+v3.0.0 (UNRELEASED)
 ===================
 
-Feature release.
+Backwards incompatible release.
+
+Dependencies
+------------
+
+- (no changes yet)
+
+Core API
+--------
+
+- (no changes yet)
+
+Backend API
+-----------
+
+- (no changes yet)
+
+Models
+------
+
+- (no changes yet)
+
+Extension support
+-----------------
+
+- (no changes yet)
+
+HTTP frontend
+-------------
+
+- Stop bundling Mopidy.js and serving it at ``/mopidy/mopidy.js`` and
+  ``/mopidy/mopidy.min.js``. All Mopidy web clients must use Mopidy.js from npm
+  or vendor their own copy of the library.
+  (Fixes: :issue:`1460`, PR: :issue:`1708`)
+
+- Remove support for serving arbitrary files over HTTP through the use of
+  :confval:`http/static_dir`, which has been deprecated since 1.0. (Fixes:
+  :issue:`1463`, PR: :issue:`1706`)
+
+MPD frontend
+------------
+
+- (no changes yet)
+
+File backend
+------------
+
+- (no changes yet)
+
+Local backend
+-------------
+
+- (no changes yet)
+
+M3U backend
+-----------
+
+- (no changes yet)
+
+Stream backend
+--------------
+
+- (no changes yet)
+
+Audio
+-----
+
+- Remove the method :meth:`mopidy.audio.Audio.emit_end_of_stream`, which has
+  been deprecated since 1.0. (Fixes: :issue:`1465`, PR: :issue:`1705`)
+
+v2.2.3 (UNRELEASED)
+===================
+
+Bug fix release.
+
+- Audio: Fix switching between tracks with different sample rates. (Fixes:
+  :issue:`1528`, PR: :issue:`1735`)
+
+- Audio: Prevent buffering handling interfering with track changes. (Fixes:
+  :issue:`1722`, PR: :issue:`1740`)
+
+- Local: Add .pdf and .zip to the default
+  confval:`local/excluded_file_extensions` config value. (PR: :issue:`1737`)
+
+- File: Synchronised the default confval:`file/excluded_file_extensions` config
+  values with confval:`local/excluded_file_extensions`. (PR: :issue:`1743`)
+
+v2.2.2 (2018-12-29)
+===================
+
+Bug fix release.
+
+- HTTP: Fix hang on exit due to change in Tornado v5.0 IOLoop. (Fixes:
+  :issue:`1715`, PR: :issue:`1716`)
+
+- Files: Fix crash due to mix of text and bytes in paths that come from
+  ``$XDG_CONFIG_HOME/user-dirs.dirs``. (Fixes: :issue:`1676`, :issue:`1725`)
+
+
+v2.2.1 (2018-10-15)
+===================
+
+Bug fix release.
+
+- HTTP: Stop blocking connections where the network location part of the
+  ``Origin`` header is empty, such as WebSocket connections originating from
+  local files. (Fixes: :issue:`1711`, PR: :issue:`1712`)
+
+- HTTP: Add new config value :confval:`http/csrf_protection` which enables all
+  CSRF protections introduced in Mopidy 2.2.0. It is enabled by default and
+  should only be disabled by those users who are unable to set a
+  ``Content-Type: application/json`` request header or cannot utilise the
+  :confval:`http/allowed_origins` config value. (Fixes: :issue:`1713`, PR:
+  :issue:`1714`)
+
+
+v2.2.0 (2018-09-30)
+===================
+
+Mopidy 2.2.0, a feature release, is out. It is a quite small release, featuring
+mostly minor fixes and improvements.
+
+Most notably, this release introduces CSRF protection for both the HTTP and
+WebSocket RPC interfaces, and improves the file path checking in the M3U
+backend. The CSRF protection should stop attacks against local Mopidy servers
+from malicious websites, like what was demonstrated by Josef Gajdusek in
+:issue:`1659`.
+
+Since the release of 2.1.0, we've closed approximately 21 issues and pull
+requests through 133 commits by 22 authors.
 
 - Dependencies: Drop support for Tornado < 4.4. Though strictly a breaking
   change, this shouldn't affect any supported systems as even Debian stable
@@ -19,8 +148,14 @@ Feature release.
   it is now possible to set the :confval:`core/max_tracklist_length` config
   value as high as you want to. (Fixes: :issue:`1600`, PR: :issue:`1666`)
 
-- Core: Fix crash on `library.lookup(uris=[])`. (Fixes: :issue:`1619`, PR:
+- Core: Fix crash on ``library.lookup(uris=[])``. (Fixes: :issue:`1619`, PR:
   :issue:`1620`)
+
+- Core: Define return value of ``playlists.delete()`` to be a bool, :class:`True`
+  on success, :class:`False` otherwise. (PR: :issue:`1702`)
+
+- M3U: Ignore all attempts at accessing files outside the
+  :confval:`m3u/playlist_dir`. (Partly fixes: :issue:`1659`, PR: :issue:`1702`)
 
 - File: Change default ordering to show directories first, then files. (PR:
   :issue:`1595`)

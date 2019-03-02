@@ -10,7 +10,7 @@ from mopidy import exceptions
 from mopidy.audio import tags as tags_lib, utils
 from mopidy.audio.constants import PlaybackState
 from mopidy.audio.listener import AudioListener
-from mopidy.internal import deprecation, process
+from mopidy.internal import process
 from mopidy.internal.gi import GObject, Gst, GstPbutils
 
 
@@ -113,12 +113,6 @@ class _Outputs(Gst.Bin):
 
         ghost_pad = Gst.GhostPad.new('sink', self._tee.get_static_pad('sink'))
         self.add_pad(ghost_pad)
-
-        # Add an always connected fakesink which respects the clock so the tee
-        # doesn't fail even if we don't have any outputs.
-        fakesink = Gst.ElementFactory.make('fakesink')
-        fakesink.set_property('sync', True)
-        self._add(fakesink)
 
     def add_output(self, description):
         # XXX This only works for pipelines not in use until #790 gets done.
@@ -262,7 +256,7 @@ class _Handler(object):
         target_state = _GST_STATE_MAPPING.get(self._audio._target_state)
         if target_state is None:
             # XXX: Workaround for #1430, to be fixed properly by #1222.
-            logger.debug('Race condition happened. See #1222 and #1430.')
+            logger.warn('Race condition happened. See #1222 and #1430.')
             return
         if target_state == new_state:
             target_state = None
@@ -280,6 +274,10 @@ class _Handler(object):
                 self._audio._playbin, Gst.DebugGraphDetails.ALL, 'mopidy')
 
     def on_buffering(self, percent, structure=None):
+        if self._audio._target_state < Gst.State.PAUSED:
+            gst_logger.debug('Skip buffering during track change.')
+            return
+
         if structure is not None and structure.has_field('buffering-mode'):
             buffering_mode = structure.get_enum(
                 'buffering-mode', Gst.BufferingMode)
@@ -622,20 +620,6 @@ class Audio(pykka.ThreadingActor):
         """
         return self._appsrc.push(buffer_)
 
-    def emit_end_of_stream(self):
-        """
-        Put an end-of-stream token on the playbin. This is typically used in
-        combination with :meth:`emit_data`.
-
-        We will get a GStreamer message when the stream playback reaches the
-        token, and can then do any end-of-stream related tasks.
-
-        .. deprecated:: 1.0
-            Use :meth:`emit_data` with a :class:`None` buffer instead.
-        """
-        deprecation.warn('audio.emit_end_of_stream')
-        self._appsrc.push(None)
-
     def set_about_to_finish_callback(self, callback):
         """
         Configure audio to use an about-to-finish callback.
@@ -718,7 +702,6 @@ class Audio(pykka.ThreadingActor):
 
         :rtype: :class:`True` if successfull, else :class:`False`
         """
-        self._buffering = False
         return self._set_state(Gst.State.NULL)
 
     def wait_for_state_change(self):
@@ -761,6 +744,9 @@ class Audio(pykka.ThreadingActor):
         :type state: :class:`Gst.State`
         :rtype: :class:`True` if successfull, else :class:`False`
         """
+        if state < Gst.State.PAUSED:
+            self._buffering = False
+
         self._target_state = state
         result = self._playbin.set_state(state)
         gst_logger.debug(

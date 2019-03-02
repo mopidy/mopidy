@@ -2,7 +2,6 @@ from __future__ import absolute_import, unicode_literals
 
 import json
 import logging
-import os
 import threading
 
 import pykka
@@ -100,20 +99,21 @@ class HttpServer(threading.Thread):
 
         self.app = None
         self.server = None
+        self.io_loop = None
 
     def run(self):
         self.app = tornado.web.Application(self._get_request_handlers())
         self.server = tornado.httpserver.HTTPServer(self.app)
         self.server.add_sockets(self.sockets)
 
-        tornado.ioloop.IOLoop.instance().start()
+        self.io_loop = tornado.ioloop.IOLoop.current()
+        self.io_loop.start()
 
         logger.debug('Stopped HTTP server')
 
     def stop(self):
         logger.debug('Stopping HTTP server')
-        tornado.ioloop.IOLoop.instance().add_callback(
-            tornado.ioloop.IOLoop.instance().stop)
+        self.io_loop.add_callback(self.io_loop.stop)
 
     def _get_request_handlers(self):
         request_handlers = []
@@ -167,23 +167,7 @@ class HttpServer(threading.Thread):
         return result
 
     def _get_mopidy_request_handlers(self):
-        # Either default Mopidy or user defined path to files
-
-        static_dir = self.config['http']['static_dir']
-
-        if static_dir and not os.path.exists(static_dir):
-            logger.warning(
-                'Configured http/static_dir %s does not exist. '
-                'Falling back to default HTTP handler.', static_dir)
-            static_dir = None
-
-        if static_dir:
-            return [(r'/(.*)', handlers.StaticFileHandler, {
-                'path': self.config['http']['static_dir'],
-                'default_filename': 'index.html',
-            })]
-        else:
-            return [(r'/', tornado.web.RedirectHandler, {
-                'url': '/mopidy/',
-                'permanent': False,
-            })]
+        return [(r'/', tornado.web.RedirectHandler, {
+            'url': '/mopidy/',
+            'permanent': False,
+        })]

@@ -71,24 +71,6 @@ See :ref:`config` for general help on configuring Mopidy.
 
     Which TCP port the HTTP server should listen to.
 
-.. confval:: http/static_dir
-
-    **Deprecated:** This config is deprecated and will be removed in a future
-    version of Mopidy.
-
-    Which directory the HTTP server should serve at "/"
-
-    Change this to have Mopidy serve e.g. files for your JavaScript client.
-    "/mopidy" will continue to work as usual even if you change this setting,
-    but any other Mopidy webclient installed with pip to be served at
-    "/ext_name" will stop working if you set this config.
-
-    You're strongly encouraged to make Mopidy extensions which use the the
-    :ref:`http-server-api` to host static files on Mopidy's web server instead
-    of using :confval:`http/static_dir`. That way, installation of your web
-    client will be a lot easier for your end users, and multiple web clients
-    can easily share the same web server.
-
 .. confval:: http/zeroconf
 
     Name of the HTTP service when published through Zeroconf. The variables
@@ -102,11 +84,28 @@ See :ref:`config` for general help on configuring Mopidy.
 .. confval:: http/allowed_origins
 
     A list of domains allowed to perform Cross-Origin Resource Sharing (CORS)
-    requests. This applies to both JSON-RPC and Websocket requests. Values
-    should be in the format ``hostname:port`` and separated by either a comma or
-    newline.
-    
+    requests. This applies to both JSON-RPC and WebSocket requests. Values
+    should be in the format ``hostname:port``, should not specify any scheme and
+    be separated by either a comma or newline. Additionally, the ``port`` should
+    not be specified if it is the default (80 for http, 443 for https).
+
     Same-origin requests (i.e. requests from Mopidy's web server) are always
     allowed and so you don't need an entry for those. However, if your requests
     originate from a different web server, you will need to add an entry for
-    that server in this list.
+    that server in this list. For example, to allow requests from a web server
+    at 'http://www.my.web-client.com' you would specify the entry
+    'www.my.web-client.com'.
+
+.. confval:: http/csrf_protection
+
+    Enable the HTTP server's protection against Cross-Site Request Forgery
+    (CSRF) from both JSON-RPC and WebSocket requests.
+
+    Disabling this will remove the requirement to set a ``Content-Type: application/json``
+    header for JSON-RPC POST requests. It will also disable all same-origin
+    checks, effectively ignoring the :confval:`http/allowed_origins` config
+    since requests from any origin will be allowed. Lastly, all
+    ``Access-Control-Allow-*`` response headers will be suppressed.
+
+    This config should only be disabled if you understand the security implications
+    and require the HTTP server's old behaviour.
