@@ -193,7 +193,7 @@ class StatusHandlerTest(unittest.TestCase):
 
     def test_status_method_when_playing_contains_time_with_length(self):
         self.set_tracklist([Track(uri='dummy:/a', length=10000)])
-        self.core.playback.play()
+        self.core.playback.play().get()
         result = dict(status.status(self.context))
         self.assertIn('time', result)
         (position, total) = result['time'].split(':')
