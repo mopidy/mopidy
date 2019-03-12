@@ -69,7 +69,7 @@ class TestBackend(pykka.ThreadingActor, backend.Backend):
 
 class BaseTest(unittest.TestCase):
     config = {'core': {'max_tracklist_length': 10000}}
-    tracks = [Track(uri='dummy:a', length=1234),
+    tracks = [Track(uri='dummy:a', length=1234, name='foo'),
               Track(uri='dummy:b', length=1234),
               Track(uri='dummy:c', length=1234)]
 
@@ -906,15 +906,20 @@ class TestStream(BaseTest):
 
     def test_get_stream_title_during_playback_with_tags_change(self):
         self.core.playback.play()
-        self.audio.trigger_fake_tags_changed({'organization': ['baz']})
         self.audio.trigger_fake_tags_changed({'title': ['foobar']}).get()
         self.replay_events()
 
         self.assertEqual(self.playback.get_stream_title(), 'foobar')
 
+    def test_get_stream_title_during_playback_with_tags_unchanged(self):
+        self.core.playback.play()
+        self.audio.trigger_fake_tags_changed({'title': ['foo']}).get()
+        self.replay_events()
+
+        assert self.playback.get_stream_title() is None
+
     def test_get_stream_title_after_next(self):
         self.core.playback.play()
-        self.audio.trigger_fake_tags_changed({'organization': ['baz']})
         self.audio.trigger_fake_tags_changed({'title': ['foobar']}).get()
         self.replay_events()
 
@@ -925,12 +930,10 @@ class TestStream(BaseTest):
 
     def test_get_stream_title_after_next_with_tags_change(self):
         self.core.playback.play()
-        self.audio.trigger_fake_tags_changed({'organization': ['baz']})
         self.audio.trigger_fake_tags_changed({'title': ['foo']}).get()
         self.replay_events()
 
         self.core.playback.next()
-        self.audio.trigger_fake_tags_changed({'organization': ['baz']})
         self.audio.trigger_fake_tags_changed({'title': ['bar']}).get()
         self.replay_events()
 
@@ -938,7 +941,6 @@ class TestStream(BaseTest):
 
     def test_get_stream_title_after_stop(self):
         self.core.playback.play()
-        self.audio.trigger_fake_tags_changed({'organization': ['baz']})
         self.audio.trigger_fake_tags_changed({'title': ['foobar']}).get()
         self.replay_events()
 
