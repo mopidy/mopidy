@@ -236,7 +236,7 @@ class ServerTest(unittest.TestCase):
         self.assertFalse(
             network.Server.maximum_connections_exceeded(self.mock))
 
-    @patch('pykka.registry.ActorRegistry.get_by_class')
+    @patch('pykka.ActorRegistry.get_by_class')
     def test_number_of_connections(self, get_by_class):
         self.mock.protocol = sentinel.protocol
 
