@@ -135,20 +135,20 @@ class StatusHandlerTest(unittest.TestCase):
         self.assertGreaterEqual(int(result['xfade']), 0)
 
     def test_status_method_contains_state_is_play(self):
-        self.core.playback.state = PLAYING
+        self.core.playback.set_state(PLAYING)
         result = dict(status.status(self.context))
         self.assertIn('state', result)
         self.assertEqual(result['state'], 'play')
 
     def test_status_method_contains_state_is_stop(self):
-        self.core.playback.state = STOPPED
+        self.core.playback.set_state(STOPPED)
         result = dict(status.status(self.context))
         self.assertIn('state', result)
         self.assertEqual(result['state'], 'stop')
 
     def test_status_method_contains_state_is_pause(self):
-        self.core.playback.state = PLAYING
-        self.core.playback.state = PAUSED
+        self.core.playback.set_state(PLAYING)
+        self.core.playback.set_state(PAUSED)
         result = dict(status.status(self.context))
         self.assertIn('state', result)
         self.assertEqual(result['state'], 'pause')
