@@ -13,7 +13,7 @@ Backwards incompatible release.
 Dependencies
 ------------
 
-- (no changes yet)
+- Pykka >= 2.0 is now required.
 
 Core API
 --------

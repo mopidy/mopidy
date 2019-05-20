@@ -1,6 +1,6 @@
 Sphinx >= 1.0, != 1.8.0
 pygraphviz
-Pykka >= 1.1
+Pykka >= 2.0
 # Require newer requests than what Travis/Debian has to work around linkcheck crash
 requests > 2.4.3
 sphinx_rtd_theme
