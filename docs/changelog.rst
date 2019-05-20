@@ -83,8 +83,8 @@ requests through 133 commits by 22 authors.
 - Core: Fix crash on ``library.lookup(uris=[])``. (Fixes: :issue:`1619`, PR:
   :issue:`1620`)
 
-- Core: Define return value of ``playlists.delete()`` to be a bool, :class:`True`
-  on success, :class:`False` otherwise. (PR: :issue:`1702`)
+- Core: Define return value of ``playlists.delete()`` to be a bool,
+  :class:`True` on success, :class:`False` otherwise. (PR: :issue:`1702`)
 
 - M3U: Ignore all attempts at accessing files outside the
   :confval:`m3u/playlist_dir`. (Partly fixes: :issue:`1659`, PR: :issue:`1702`)
@@ -322,8 +322,8 @@ M3U backend
   - Add :confval:`m3u/default_encoding` and :confval:`m3u/default_extension`
     config values for improved text encoding support.
 
-  - No longer scan playlist directory and parse playlists at startup or refresh.
-    Similarly to the file extension, this now happens on request.
+  - No longer scan playlist directory and parse playlists at startup or
+    refresh. Similarly tothe file extension, this now happens on request.
 
   - Use :class:`mopidy.models.Ref` instances when reading and writing
     playlists. Therefore, ``Track.length`` is no longer stored in
@@ -361,7 +361,8 @@ MPD frontend
   (Fixes: :issue:`1331`, PR: :issue:`1347`)
 
 - Idle events are now emitted on ``playlists_loaded`` events. This fix means
-  that clients relying on ``idle`` events now get notified about playlist loads.
+  that clients relying on ``idle`` events now get notified about playlist
+  loads.
   (Fixes: :issue:`1331`, PR: :issue:`1347`)
 
 - Event handler for ``playlist_deleted`` has been unbroken. This unreported bug
@@ -881,8 +882,8 @@ Bug fix release.
 
 - Audio: Follow-up fix for :issue:`1097` still exhibits issues for certain
   setups. We are giving this get an other go by setting the buffer size to
-  maximum 100ms instead of a fixed number of buffers. (Addresses: :issue:`1147`,
-  PR: :issue:`1154`)
+  maximum 100ms instead of a fixed number of buffers. (Addresses:
+  :issue:`1147`,  PR: :issue:`1154`)
 
 
 v1.0.2 (2015-04-27)
@@ -1094,9 +1095,9 @@ Backend API
 
 In the API implemented by all backends there have been way fewer but somewhat
 more drastic changes with some methods removed and new ones being required for
-certain functionality to continue working. Most backends were already updated to
-be compatible with Mopidy 1.0 before the release. New versions of the backends
-will be released shortly after Mopidy itself.
+certain functionality to continue working. Most backends were already updated
+to be compatible with Mopidy 1.0 before the release. New versions of the
+backends will be released shortly after Mopidy itself.
 
 Backend library providers
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1179,7 +1180,8 @@ Configuration
   This can be used to show absolutely all log records, including those at
   custom levels below ``DEBUG``.
 
-- Add debug logging of unknown sections. (Fixes: :issue:`694`, PR: :issue:`1002`)
+- Add debug logging of unknown sections. (Fixes: :issue:`694`, PR:
+  :issue:`1002`)
 
 Logging
 -------
@@ -1255,9 +1257,9 @@ MPD frontend
 ------------
 
 - Add support for blacklisting MPD commands. This is used to prevent clients
-  from using ``listall`` and ``listallinfo`` which recursively lookup the entire
-  "database". If you insist on using a client that needs these commands change
-  :confval:`mpd/command_blacklist`.
+  from using ``listall`` and ``listallinfo`` which recursively lookup the
+  entire "database". If you insist on using a client that needs these commands
+  change :confval:`mpd/command_blacklist`.
 
 - Start setting the ``Name`` field with the stream title when listening to
   radio streams. (Fixes: :issue:`944`, PR: :issue:`1030`)
@@ -1272,8 +1274,8 @@ MPD frontend
 - In stored playlist names, replace "/", which are illegal, with "|" instead of
   a whitespace. Pipes are more similar to forward slash.
 
-- Share a single mapping between names and URIs across all MPD sessions. (Fixes:
-  :issue:`934`, PR: :issue:`968`)
+- Share a single mapping between names and URIs across all MPD sessions.
+  (Fixes: :issue:`934`, PR: :issue:`968`)
 
 - Add support for ``toggleoutput`` command. (PR: :issue:`1015`)
 
@@ -1488,8 +1490,8 @@ v0.19.2 (2014-07-26)
 Bug fix release, directly from the Mopidy development sprint at EuroPython 2014
 in Berlin.
 
-- Audio: Make :confval:`audio/mixer_volume` work on the software mixer again. This
-  was broken with the mixer changes in 0.19.0. (Fixes: :issue:`791`)
+- Audio: Make :confval:`audio/mixer_volume` work on the software mixer again.
+  This was broken with the mixer changes in 0.19.0. (Fixes: :issue:`791`)
 
 - HTTP frontend: When using Tornado 4.0, allow WebSocket requests from other
   hosts. (Fixes: :issue:`788`)
