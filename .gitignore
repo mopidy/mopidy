@@ -6,6 +6,7 @@
 .cache/
 .coverage
 .idea
+.mypy_cache/
 .noseids
 .pytest_cache/
 .tox
@@ -14,8 +15,8 @@ build/
 cover/
 coverage.xml
 dist/
-docs/_build/
 docs/.doctrees/
+docs/_build/
 mopidy.log*
 nosetests.xml
 tmp/
