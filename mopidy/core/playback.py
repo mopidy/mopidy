@@ -2,6 +2,8 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
+from pykka.messages import ProxyCall
+
 from mopidy.audio import PlaybackState
 from mopidy.compat import urllib
 from mopidy.core import listener
@@ -254,10 +256,11 @@ class PlaybackController(object):
         there is no unsafe access of state in core. This must block until
         we get a response.
         """
-        self.core.actor_ref.ask({
-            'command': 'pykka_call', 'args': tuple(), 'kwargs': {},
-            'attr_path': ('playback', '_on_about_to_finish'),
-        })
+        self.core.actor_ref.ask(ProxyCall(
+            attr_path=['playback', '_on_about_to_finish'],
+            args=[],
+            kwargs={},
+        ))
 
     def _on_about_to_finish(self):
         if self._state == PlaybackState.STOPPED:
