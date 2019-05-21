@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 from __future__ import absolute_import, unicode_literals
 
 from mopidy.internal import deprecation
@@ -12,11 +14,13 @@ class AddCommandsTest(protocol.BaseTestCase):
         super(AddCommandsTest, self).setUp()
 
         self.tracks = [Track(uri='dummy:/a', name='a'),
-                       Track(uri='dummy:/foo/b', name='b')]
+                       Track(uri='dummy:/foo/b', name='b'),
+                       Track(uri='dummy:/foo/ǂ', name='ǂ')]
 
         self.refs = {'/a': Ref.track(uri='dummy:/a', name='a'),
                      '/foo': Ref.directory(uri='dummy:/foo', name='foo'),
-                     '/foo/b': Ref.track(uri='dummy:/foo/b', name='b')}
+                     '/foo/b': Ref.track(uri='dummy:/foo/b', name='b'),
+                     '/foo/ǂ': Ref.track(uri='dummy:/foo/ǂ', name='ǂ')}
 
         self.backend.library.dummy_library = self.tracks
 
@@ -26,6 +30,14 @@ class AddCommandsTest(protocol.BaseTestCase):
 
         self.assertEqual(len(self.core.tracklist.tracks.get()), 3)
         self.assertEqual(self.core.tracklist.tracks.get()[2], self.tracks[1])
+        self.assertEqualResponse('OK')
+
+    def test_add_unicode(self):
+        for track in [self.tracks[0], self.tracks[1], self.tracks[2]]:
+            self.send_request('add "%s"' % track.uri.decode('utf-8'))
+
+        self.assertEqual(len(self.core.tracklist.tracks.get()), 3)
+        self.assertEqual(self.core.tracklist.tracks.get()[2], self.tracks[2])
         self.assertEqualResponse('OK')
 
     def test_add_with_uri_not_found_in_library_should_ack(self):
@@ -44,7 +56,7 @@ class AddCommandsTest(protocol.BaseTestCase):
     def test_add_with_library_should_recurse(self):
         self.backend.library.dummy_browse_result = {
             'dummy:/': [self.refs['/a'], self.refs['/foo']],
-            'dummy:/foo': [self.refs['/foo/b']]}
+            'dummy:/foo': [self.refs['/foo/b'], self.refs['/foo/ǂ']]}
 
         self.send_request('add "/dummy"')
         self.assertEqual(self.core.tracklist.tracks.get(), self.tracks)
@@ -96,7 +108,7 @@ class BasePopulatedTracklistTestCase(protocol.BaseTestCase):
 
     def setUp(self):  # noqa: N802
         super(BasePopulatedTracklistTestCase, self).setUp()
-        tracks = [Track(uri='dummy:/%s' % x, name=x) for x in 'abcdef']
+        tracks = [Track(uri='dummy:/%s' % x, name=x) for x in 'abcdeǂ']
         self.backend.library.dummy_library = tracks
         self.core.tracklist.add(uris=[t.uri for t in tracks])
 
@@ -162,25 +174,25 @@ class MoveCommandsTest(BasePopulatedTracklistTestCase):
     def test_move_songpos(self):
         self.send_request('move "1" "0"')
         result = [t.name for t in self.core.tracklist.tracks.get()]
-        self.assertEqual(result, ['b', 'a', 'c', 'd', 'e', 'f'])
+        self.assertEqual(result, ['b', 'a', 'c', 'd', 'e', 'ǂ'])
         self.assertInResponse('OK')
 
     def test_move_open_range(self):
         self.send_request('move "2:" "0"')
         result = [t.name for t in self.core.tracklist.tracks.get()]
-        self.assertEqual(result, ['c', 'd', 'e', 'f', 'a', 'b'])
+        self.assertEqual(result, ['c', 'd', 'e', 'ǂ', 'a', 'b'])
         self.assertInResponse('OK')
 
     def test_move_closed_range(self):
         self.send_request('move "1:3" "0"')
         result = [t.name for t in self.core.tracklist.tracks.get()]
-        self.assertEqual(result, ['b', 'c', 'a', 'd', 'e', 'f'])
+        self.assertEqual(result, ['b', 'c', 'a', 'd', 'e', 'ǂ'])
         self.assertInResponse('OK')
 
     def test_moveid(self):
         self.send_request('moveid "5" "2"')
         result = [t.name for t in self.core.tracklist.tracks.get()]
-        self.assertEqual(result, ['a', 'b', 'e', 'c', 'd', 'f'])
+        self.assertEqual(result, ['a', 'b', 'e', 'c', 'd', 'ǂ'])
         self.assertInResponse('OK')
 
     def test_moveid_with_tlid_not_found_in_tracklist_should_ack(self):
@@ -257,7 +269,7 @@ class PlaylistInfoCommandTest(BasePopulatedTracklistTestCase):
         self.assertInResponse('Pos: 3')
         self.assertInResponse('Title: e')
         self.assertInResponse('Pos: 4')
-        self.assertInResponse('Title: f')
+        self.assertInResponse('Title: ǂ')
         self.assertInResponse('Pos: 5')
         self.assertInResponse('OK')
 
@@ -276,7 +288,7 @@ class PlaylistInfoCommandTest(BasePopulatedTracklistTestCase):
         self.assertNotInResponse('Pos: 3')
         self.assertInResponse('Title: e')
         self.assertInResponse('Pos: 4')
-        self.assertNotInResponse('Title: f')
+        self.assertNotInResponse('Title: ǂ')
         self.assertNotInResponse('Pos: 5')
         self.assertInResponse('OK')
 
@@ -297,7 +309,7 @@ class PlaylistInfoCommandTest(BasePopulatedTracklistTestCase):
         self.assertInResponse('Pos: 3')
         self.assertInResponse('Title: e')
         self.assertInResponse('Pos: 4')
-        self.assertInResponse('Title: f')
+        self.assertInResponse('Title: ǂ')
         self.assertInResponse('Pos: 5')
         self.assertInResponse('OK')
 
@@ -308,7 +320,7 @@ class PlaylistInfoCommandTest(BasePopulatedTracklistTestCase):
         self.assertInResponse('Title: c')
         self.assertInResponse('Title: d')
         self.assertNotInResponse('Title: e')
-        self.assertNotInResponse('Title: f')
+        self.assertNotInResponse('Title: ǂ')
         self.assertInResponse('OK')
 
     def test_playlistinfo_with_too_high_start_of_range_returns_arg_error(self):
@@ -432,7 +444,7 @@ class ShuffleCommandTest(BasePopulatedTracklistTestCase):
 
         result = [t.name for t in self.core.tracklist.tracks.get()]
         self.assertEqual(result[:1], ['a'])
-        self.assertEqual(result[3:], ['d', 'e', 'f'])
+        self.assertEqual(result[3:], ['d', 'e', 'ǂ'])
         self.assertInResponse('OK')
 
 
@@ -441,13 +453,13 @@ class SwapCommandTest(BasePopulatedTracklistTestCase):
     def test_swap(self):
         self.send_request('swap "1" "4"')
         result = [t.name for t in self.core.tracklist.tracks.get()]
-        self.assertEqual(result, ['a', 'e', 'c', 'd', 'b', 'f'])
+        self.assertEqual(result, ['a', 'e', 'c', 'd', 'b', 'ǂ'])
         self.assertInResponse('OK')
 
     def test_swapid(self):
         self.send_request('swapid "2" "5"')
         result = [t.name for t in self.core.tracklist.tracks.get()]
-        self.assertEqual(result, ['a', 'e', 'c', 'd', 'b', 'f'])
+        self.assertEqual(result, ['a', 'e', 'c', 'd', 'b', 'ǂ'])
         self.assertInResponse('OK')
 
     def test_swapid_with_first_id_unknown_should_ack(self):
