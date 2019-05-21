@@ -38,7 +38,9 @@ Models
 Extension support
 -----------------
 
-- (no changes yet)
+- Mopidy no longer sets up GLib's mainloop as the event loop for python-dbus.
+  Since Mopidy-MPRIS 2.0 ported to python-pydbus in December 2018, there are no
+  longer any extensions known to use python-dbus.
 
 HTTP frontend
 -------------
