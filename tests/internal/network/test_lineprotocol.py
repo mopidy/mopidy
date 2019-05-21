@@ -121,6 +121,12 @@ class LineProtocolTest(unittest.TestCase):
             self.mock, {'received': 'line1\nline2\n'})
         self.assertEqual(2, self.mock.on_line_received.call_count)
 
+    def test_on_failure_calls_stop(self):
+        self.mock.connection = Mock(spec=network.Connection)
+
+        network.LineProtocol.on_failure(self.mock, None, None, None)
+        self.mock.connection.stop.assert_called_once_with('Actor failed.')
+
     def test_parse_lines_emtpy_buffer(self):
         self.mock.delimiter = re.compile(r'\n')
         self.mock.recv_buffer = ''
