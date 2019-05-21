@@ -10,7 +10,7 @@ try:
     from gi.repository import GLib, GObject, Gst
 except ImportError:
     print(textwrap.dedent("""
-        ERROR: A GObject Python package was not found.
+        ERROR: A GObject based library was not found.
 
         Mopidy requires GStreamer to work. GStreamer is a C library with a
         number of dependencies itself, and cannot be installed with the regular

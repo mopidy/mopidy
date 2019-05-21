@@ -11,7 +11,7 @@ from mopidy.audio import tags as tags_lib, utils
 from mopidy.audio.constants import PlaybackState
 from mopidy.audio.listener import AudioListener
 from mopidy.internal import process
-from mopidy.internal.gi import GObject, Gst, GstPbutils
+from mopidy.internal.gi import GLib, GObject, Gst, GstPbutils
 
 
 logger = logging.getLogger(__name__)
@@ -119,7 +119,7 @@ class _Outputs(Gst.Bin):
         try:
             output = Gst.parse_bin_from_description(
                 description, ghost_unlinked_pads=True)
-        except GObject.GError as ex:
+        except GLib.GError as ex:
             logger.error(
                 'Failed to create audio output "%s": %s', description, ex)
             raise exceptions.AudioException(bytes(ex))
@@ -435,7 +435,7 @@ class Audio(pykka.ThreadingActor):
             self._setup_playbin()
             self._setup_outputs()
             self._setup_audio_sink()
-        except GObject.GError as ex:
+        except GLib.GError as ex:
             logger.exception(ex)
             process.exit_process()
 

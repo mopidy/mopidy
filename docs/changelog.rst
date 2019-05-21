@@ -15,6 +15,11 @@ Dependencies
 
 - Pykka >= 2.0 is now required.
 
+- We now use a number of constants and functions from ``GLib`` instead of their
+  deprecated equivalents in ``GObject``. The exact version of PyGObject and
+  GLib that makes these constants and functions available in the new location
+  is not known, but is believed to have been released in 2015 or earlier.
+
 Core API
 --------
 

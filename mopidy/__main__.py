@@ -12,7 +12,7 @@ from mopidy.internal import encoding, log, path, process, versioning
 from mopidy.internal.gi import Gst  # noqa: F401
 
 try:
-    # Make GObject's mainloop the event loop for python-dbus
+    # Make GLib's mainloop the event loop for python-dbus
     import dbus.mainloop.glib
     dbus.mainloop.glib.threads_init()
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)

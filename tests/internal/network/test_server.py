@@ -9,7 +9,7 @@ from mock import Mock, patch, sentinel
 
 from mopidy import exceptions
 from mopidy.internal import network
-from mopidy.internal.gi import GObject
+from mopidy.internal.gi import GLib
 
 from tests import any_int
 
@@ -143,7 +143,7 @@ class ServerTest(unittest.TestCase):
                 self.mock, 'unix:' + str(sentinel.host), sentinel.port)
 
     @patch.object(os, 'unlink', new=Mock())
-    @patch.object(GObject, 'source_remove', new=Mock())
+    @patch.object(GLib, 'source_remove', new=Mock())
     def test_stop_server_cleans_unix_socket(self):
         self.mock.watcher = Mock()
         sock = Mock()
@@ -152,11 +152,11 @@ class ServerTest(unittest.TestCase):
         network.Server.stop(self.mock)
         os.unlink.assert_called_once_with(sock.getsockname())
 
-    @patch.object(GObject, 'io_add_watch', new=Mock())
+    @patch.object(GLib, 'io_add_watch', new=Mock())
     def test_register_server_socket_sets_up_io_watch(self):
         network.Server.register_server_socket(self.mock, sentinel.fileno)
-        GObject.io_add_watch.assert_called_once_with(
-            sentinel.fileno, GObject.IO_IN, self.mock.handle_connection)
+        GLib.io_add_watch.assert_called_once_with(
+            sentinel.fileno, GLib.IO_IN, self.mock.handle_connection)
 
     def test_handle_connection(self):
         self.mock.accept_connection.return_value = (
@@ -164,7 +164,7 @@ class ServerTest(unittest.TestCase):
         self.mock.maximum_connections_exceeded.return_value = False
 
         self.assertTrue(network.Server.handle_connection(
-            self.mock, sentinel.fileno, GObject.IO_IN))
+            self.mock, sentinel.fileno, GLib.IO_IN))
         self.mock.accept_connection.assert_called_once_with()
         self.mock.maximum_connections_exceeded.assert_called_once_with()
         self.mock.init_connection.assert_called_once_with(
@@ -177,7 +177,7 @@ class ServerTest(unittest.TestCase):
         self.mock.maximum_connections_exceeded.return_value = True
 
         self.assertTrue(network.Server.handle_connection(
-            self.mock, sentinel.fileno, GObject.IO_IN))
+            self.mock, sentinel.fileno, GLib.IO_IN))
         self.mock.accept_connection.assert_called_once_with()
         self.mock.maximum_connections_exceeded.assert_called_once_with()
         self.mock.reject_connection.assert_called_once_with(
