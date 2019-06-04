@@ -200,16 +200,3 @@ Core events
 
 .. autoclass:: mopidy.core.CoreListener
     :members:
-
-Deprecated API features
-=======================
-
-.. warning::
-  Though these features still work, they are slated to go away in the next
-  major Mopidy release.
-
-PlaylistsController
--------------------
-
-.. automethod:: mopidy.core.PlaylistsController.filter
-.. automethod:: mopidy.core.PlaylistsController.get_playlists

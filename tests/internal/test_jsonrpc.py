@@ -650,9 +650,9 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
         self.assertIn('core.playback.next', methods)
         self.assertEqual(len(methods['core.playback.next']['params']), 0)
 
-        self.assertIn('core.playlists.get_playlists', methods)
+        self.assertIn('core.playlists.as_list', methods)
         self.assertEqual(
-            len(methods['core.playlists.get_playlists']['params']), 1)
+            len(methods['core.playlists.as_list']['params']), 0)
 
         self.assertIn('core.tracklist.filter', methods.keys())
         self.assertEqual(

@@ -29,10 +29,6 @@ _MESSAGES = {
         'playback.play() with "tl_track" argument is pending deprecation use '
         '"tlid" instead',
 
-    # Deprecated features in core playlists:
-    'core.playlists.filter': 'playlists.filter() is deprecated',
-    'core.playlists.get_playlists': 'playlists.get_playlists() is deprecated',
-
     # Deprecated features in core tracklist:
     'core.tracklist.add:tracks_arg':
         'tracklist.add() "tracks" argument is deprecated',

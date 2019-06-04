@@ -63,6 +63,15 @@ Core API
   - Removed :meth:`mopidy.core.PlaybackController.set_volume`,
     use :meth:`mopidy.core.MixerController.set_volume`.
 
+- Removed deprecated methods from the playlists controller:
+
+  - Removed :meth:`mopidy.core.PlaylistsController.filter`,
+    use :meth:`~mopidy.core.PlaylistsController.as_list` and filter yourself.
+
+  - Removed :meth:`mopidy.core.PlaylistsController.get_playlists`,
+    use :meth:`~mopidy.core.PlaylistsController.as_list` and
+    :meth:`~mopidy.core.PlaylistsController.get_items`.
+
 Backend API
 -----------
 

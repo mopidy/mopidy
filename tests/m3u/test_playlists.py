@@ -11,7 +11,6 @@ import unittest
 import pykka
 
 from mopidy import core
-from mopidy.internal import deprecation
 from mopidy.m3u.backend import M3UBackend
 from mopidy.models import Playlist, Track
 
@@ -356,36 +355,3 @@ class M3UPlaylistsProviderBaseDirectoryTest(M3UPlaylistsProviderTest):
     def setUp(self):  # noqa: N802
         self.config['m3u']['base_dir'] = tempfile.mkdtemp()
         super(M3UPlaylistsProviderBaseDirectoryTest, self).setUp()
-
-
-class DeprecatedM3UPlaylistsProviderTest(M3UPlaylistsProviderTest):
-
-    def run(self, result=None):
-        with deprecation.ignore(ids=['core.playlists.filter',
-                                     'core.playlists.filter:kwargs_criteria',
-                                     'core.playlists.get_playlists']):
-            return super(DeprecatedM3UPlaylistsProviderTest, self).run(result)
-
-    def test_filter_without_criteria(self):
-        self.assertEqual(self.core.playlists.get_playlists(),
-                         self.core.playlists.filter())
-
-    def test_filter_with_wrong_criteria(self):
-        self.assertEqual([], self.core.playlists.filter(name='foo'))
-
-    def test_filter_with_right_criteria(self):
-        playlist = self.core.playlists.create('test')
-        playlists = self.core.playlists.filter(name='test')
-        self.assertEqual([playlist], playlists)
-
-    def test_filter_by_name_returns_single_match(self):
-        self.core.playlists.create('a')
-        playlist = self.core.playlists.create('b')
-
-        self.assertEqual([playlist], self.core.playlists.filter(name='b'))
-
-    def test_filter_by_name_returns_no_matches(self):
-        self.core.playlists.create('a')
-        self.core.playlists.create('b')
-
-        self.assertEqual([], self.core.playlists.filter(name='c'))
