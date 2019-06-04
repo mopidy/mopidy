@@ -26,10 +26,6 @@ _MESSAGES = {
         'library.search() with empty "query" argument deprecated',
 
     # Deprecated features in core playback:
-    'core.playback.get_mute': 'playback.get_mute() is deprecated',
-    'core.playback.set_mute': 'playback.set_mute() is deprecated',
-    'core.playback.get_volume': 'playback.get_volume() is deprecated',
-    'core.playback.set_volume': 'playback.set_volume() is deprecated',
     'core.playback.play:tl_track_kwargs':
         'playback.play() with "tl_track" argument is pending deprecation use '
         '"tlid" instead',

@@ -208,12 +208,6 @@ Deprecated API features
   Though these features still work, they are slated to go away in the next
   major Mopidy release.
 
-PlaybackController
-------------------
-
-.. automethod:: mopidy.core.PlaybackController.get_mute
-.. automethod:: mopidy.core.PlaybackController.get_volume
-
 LibraryController
 -----------------
 

@@ -44,6 +44,20 @@ Core API
   - :attr:`mopidy.core.TracklistController.repeat`
   - :attr:`mopidy.core.TracklistController.single`
 
+- Removed deprecated methods from the playback controller:
+
+  - Removed :meth:`mopidy.core.PlaybackController.get_mute`,
+    use :meth:`mopidy.core.MixerController.get_mute`.
+
+  - Removed :meth:`mopidy.core.PlaybackController.get_volume`,
+    use :meth:`mopidy.core.MixerController.get_volume`.
+
+  - Removed :meth:`mopidy.core.PlaybackController.set_mute`,
+    use :meth:`mopidy.core.MixerController.set_mute`.
+
+  - Removed :meth:`mopidy.core.PlaybackController.set_volume`,
+    use :meth:`mopidy.core.MixerController.set_volume`.
+
 Backend API
 -----------
 
