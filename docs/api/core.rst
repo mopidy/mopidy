@@ -208,11 +208,6 @@ Deprecated API features
   Though these features still work, they are slated to go away in the next
   major Mopidy release.
 
-LibraryController
------------------
-
-.. automethod:: mopidy.core.LibraryController.find_exact
-
 PlaylistsController
 -------------------
 

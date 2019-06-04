@@ -44,6 +44,11 @@ Core API
   - :attr:`mopidy.core.TracklistController.repeat`
   - :attr:`mopidy.core.TracklistController.single`
 
+- Removed the deprecated method
+  :meth:`mopidy.core.LibraryController.find_exact`.
+  Use :meth:`~mopidy.core.LibraryController.search`
+  with the keyword argument ``exact=True`` instead.
+
 - Removed deprecated methods from the playback controller:
 
   - Removed :meth:`mopidy.core.PlaybackController.get_mute`,

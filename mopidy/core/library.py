@@ -182,15 +182,6 @@ class LibraryController(object):
                     results[uri] += tuple(images)
         return results
 
-    def find_exact(self, query=None, uris=None, **kwargs):
-        """Search the library for tracks where ``field`` is ``values``.
-
-        .. deprecated:: 1.0
-            Use :meth:`search` with ``exact`` set.
-        """
-        deprecation.warn('core.library.find_exact')
-        return self.search(query=query, uris=uris, exact=True, **kwargs)
-
     def lookup(self, uri=None, uris=None):
         """
         Lookup the given URIs.
@@ -308,7 +299,7 @@ class LibraryController(object):
         :rtype: list of :class:`mopidy.models.SearchResult`
 
         .. versionadded:: 1.0
-            The ``exact`` keyword argument, which replaces :meth:`find_exact`.
+            The ``exact`` keyword argument.
 
         .. deprecated:: 1.0
             Previously, if the query was empty, and the backend could support
