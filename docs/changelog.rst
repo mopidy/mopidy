@@ -25,6 +25,7 @@ Core API
 
 - Removed properties that has been deprecated since 1.0, released in 2015.
   Everything removed has corresponding methods that should be used instead.
+  (Fixes: :issue:`1461`, PR: :issue:`1768`)
 
   - :attr:`mopidy.core.Core.uri_schemes`
   - :attr:`mopidy.core.Core.version`
@@ -48,8 +49,10 @@ Core API
   :meth:`mopidy.core.LibraryController.find_exact`.
   Use :meth:`~mopidy.core.LibraryController.search`
   with the keyword argument ``exact=True`` instead.
+  (Fixes: :issue:`1461`, PR: :issue:`1769`)
 
-- Removed deprecated methods from the playback controller:
+- Removed deprecated methods from the playback controller.
+  (Fixes: :issue:`1461`, PR: :issue:`1769`)
 
   - Removed :meth:`mopidy.core.PlaybackController.get_mute`,
     use :meth:`mopidy.core.MixerController.get_mute`.
@@ -63,7 +66,8 @@ Core API
   - Removed :meth:`mopidy.core.PlaybackController.set_volume`,
     use :meth:`mopidy.core.MixerController.set_volume`.
 
-- Removed deprecated methods from the playlists controller:
+- Removed deprecated methods from the playlists controller.
+  (Fixes: :issue:`1461`, PR: :issue:`1769`)
 
   - Removed :meth:`mopidy.core.PlaylistsController.filter`,
     use :meth:`~mopidy.core.PlaylistsController.as_list` and filter yourself.
