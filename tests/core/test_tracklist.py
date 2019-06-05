@@ -50,7 +50,7 @@ class TracklistTest(unittest.TestCase):
         self.library.lookup.assert_called_once_with('dummy1:a')
         self.assertEqual(1, len(tl_tracks))
         self.assertEqual(self.tracks[0], tl_tracks[0].track)
-        self.assertEqual(tl_tracks, self.core.tracklist.tl_tracks[-1:])
+        self.assertEqual(tl_tracks, self.core.tracklist.get_tl_tracks()[-1:])
 
     def test_add_by_uris_looks_up_uris_in_library(self):
         self.library.lookup.reset_mock()
@@ -68,7 +68,7 @@ class TracklistTest(unittest.TestCase):
         self.assertEqual(self.tracks[1], tl_tracks[1].track)
         self.assertEqual(self.tracks[2], tl_tracks[2].track)
         self.assertEqual(
-            tl_tracks, self.core.tracklist.tl_tracks[-len(tl_tracks):])
+            tl_tracks, self.core.tracklist.get_tl_tracks()[-len(tl_tracks):])
 
     def test_remove_removes_tl_tracks_matching_query(self):
         tl_tracks = self.core.tracklist.remove({'name': ['foo']})
@@ -76,8 +76,9 @@ class TracklistTest(unittest.TestCase):
         self.assertEqual(2, len(tl_tracks))
         self.assertListEqual(self.tl_tracks[:2], tl_tracks)
 
-        self.assertEqual(1, self.core.tracklist.length)
-        self.assertListEqual(self.tl_tracks[2:], self.core.tracklist.tl_tracks)
+        self.assertEqual(1, self.core.tracklist.get_length())
+        self.assertListEqual(
+            self.tl_tracks[2:], self.core.tracklist.get_tl_tracks())
 
     def test_remove_works_with_dict_instead_of_kwargs(self):
         tl_tracks = self.core.tracklist.remove({'name': ['foo']})
@@ -85,8 +86,9 @@ class TracklistTest(unittest.TestCase):
         self.assertEqual(2, len(tl_tracks))
         self.assertListEqual(self.tl_tracks[:2], tl_tracks)
 
-        self.assertEqual(1, self.core.tracklist.length)
-        self.assertListEqual(self.tl_tracks[2:], self.core.tracklist.tl_tracks)
+        self.assertEqual(1, self.core.tracklist.get_length())
+        self.assertListEqual(
+            self.tl_tracks[2:], self.core.tracklist.get_tl_tracks())
 
     def test_filter_returns_tl_tracks_matching_query(self):
         tl_tracks = self.core.tracklist.filter({'name': ['foo']})

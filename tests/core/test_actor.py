@@ -34,7 +34,7 @@ class CoreActorTest(unittest.TestCase):
         pykka.ActorRegistry.stop_all()
 
     def test_uri_schemes_has_uris_from_all_backends(self):
-        result = self.core.uri_schemes
+        result = self.core.get_uri_schemes()
 
         self.assertIn('dummy1', result)
         self.assertIn('dummy2', result)
@@ -49,7 +49,7 @@ class CoreActorTest(unittest.TestCase):
             Core, mixer=None, backends=[self.backend1, self.backend2])
 
     def test_version(self):
-        self.assertEqual(self.core.version, versioning.get_version())
+        self.assertEqual(self.core.get_version(), versioning.get_version())
 
 
 class CoreActorSaveLoadStateTest(unittest.TestCase):

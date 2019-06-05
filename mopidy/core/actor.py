@@ -18,7 +18,6 @@ from mopidy.core.playback import PlaybackController
 from mopidy.core.playlists import PlaylistsController
 from mopidy.core.tracklist import TracklistController
 from mopidy.internal import path, storage, validation, versioning
-from mopidy.internal.deprecation import deprecated_property
 from mopidy.internal.models import CoreState
 
 
@@ -71,21 +70,9 @@ class Core(
         uri_schemes = itertools.chain(*results)
         return sorted(uri_schemes)
 
-    uri_schemes = deprecated_property(get_uri_schemes)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`get_uri_schemes` instead.
-    """
-
     def get_version(self):
         """Get version of the Mopidy core API"""
         return versioning.get_version()
-
-    version = deprecated_property(get_version)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`get_version` instead.
-    """
 
     def reached_end_of_stream(self):
         self.playback._on_end_of_stream()

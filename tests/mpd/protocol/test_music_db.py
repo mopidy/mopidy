@@ -94,23 +94,25 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
     def test_findadd(self):
         self.backend.library.dummy_find_exact_result = SearchResult(
             tracks=[Track(uri='dummy:a', name='A')])
-        self.assertEqual(self.core.tracklist.length.get(), 0)
+        self.assertEqual(self.core.tracklist.get_length().get(), 0)
 
         self.send_request('findadd "title" "A"')
 
-        self.assertEqual(self.core.tracklist.length.get(), 1)
-        self.assertEqual(self.core.tracklist.tracks.get()[0].uri, 'dummy:a')
+        self.assertEqual(self.core.tracklist.get_length().get(), 1)
+        self.assertEqual(
+            self.core.tracklist.get_tracks().get()[0].uri, 'dummy:a')
         self.assertInResponse('OK')
 
     def test_searchadd(self):
         self.backend.library.dummy_search_result = SearchResult(
             tracks=[Track(uri='dummy:a', name='A')])
-        self.assertEqual(self.core.tracklist.length.get(), 0)
+        self.assertEqual(self.core.tracklist.get_length().get(), 0)
 
         self.send_request('searchadd "title" "a"')
 
-        self.assertEqual(self.core.tracklist.length.get(), 1)
-        self.assertEqual(self.core.tracklist.tracks.get()[0].uri, 'dummy:a')
+        self.assertEqual(self.core.tracklist.get_length().get(), 1)
+        self.assertEqual(
+            self.core.tracklist.get_tracks().get()[0].uri, 'dummy:a')
         self.assertInResponse('OK')
 
     def test_searchaddpl_appends_to_existing_playlist(self):

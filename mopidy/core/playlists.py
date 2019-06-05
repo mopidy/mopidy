@@ -133,12 +133,6 @@ class PlaylistsController(object):
             return [
                 Playlist(uri=r.uri, name=r.name) for r in playlist_refs]
 
-    playlists = deprecation.deprecated_property(get_playlists)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`as_list` and :meth:`get_items` instead.
-    """
-
     def create(self, name, uri_scheme=None):
         """
         Create a new playlist.
@@ -238,7 +232,7 @@ class PlaylistsController(object):
         validation.check_query(
             criteria, validation.PLAYLIST_FIELDS, list_values=False)
 
-        matches = self.playlists  # TODO: stop using self playlists
+        matches = self.get_playlists()
         for (key, value) in criteria.iteritems():
             matches = filter(lambda p: getattr(p, key) == value, matches)
         return matches
