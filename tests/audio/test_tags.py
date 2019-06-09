@@ -27,8 +27,6 @@ class TestConvertTaglist(object):
             elif isinstance(value, int):
                 gobject_value.init(GObject.TYPE_UINT)
                 gobject_value.set_uint(value)
-                gobject_value.init(GObject.TYPE_VALUE)
-                gobject_value.set_value(value)
             else:
                 raise TypeError
             taglist.add_value(Gst.TagMergeMode.APPEND, tag, gobject_value)
