@@ -19,8 +19,6 @@ _MESSAGES = {
     # Deprecated features in core libary:
     'core.library.search:kwargs_query':
         'library.search() with "kwargs" as query is deprecated',
-    'core.library.search:empty_query':
-        'library.search() with empty "query" argument deprecated',
 
     # Deprecated features in core playback:
     'core.playback.play:tl_track_kwargs':

@@ -242,9 +242,10 @@ class LibraryController(object):
     def search(self, query=None, uris=None, exact=False, **kwargs):
         """
         Search the library for tracks where ``field`` contains ``values``.
+
         ``field`` can be one of ``uri``, ``track_name``, ``album``, ``artist``,
         ``albumartist``, ``composer``, ``performer``, ``track_no``, ``genre``,
-        ``date``, ``comment`` or ``any``.
+        ``date``, ``comment``, or ``any``.
 
         If ``uris`` is given, the search is limited to results from within the
         URI roots. For example passing ``uris=['file:']`` will limit the search
@@ -280,12 +281,6 @@ class LibraryController(object):
         .. versionadded:: 1.0
             The ``exact`` keyword argument.
 
-        .. deprecated:: 1.0
-            Previously, if the query was empty, and the backend could support
-            it, all available tracks were returned. This has not changed, but
-            it is strongly discouraged. No new code should rely on this
-            behavior.
-
         .. deprecated:: 1.1
             Providing the search query via ``kwargs`` is no longer supported.
         """
@@ -299,7 +294,7 @@ class LibraryController(object):
             deprecation.warn('core.library.search:kwargs_query')
 
         if not query:
-            deprecation.warn('core.library.search:empty_query')
+            return []
 
         futures = {}
         for backend, backend_uris in self._get_backends_to_uris(uris).items():

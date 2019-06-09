@@ -54,6 +54,11 @@ Library controller
   :meth:`mopidy.core.LibraryController.lookup`.
   Use the ``uris`` argument instead.
 
+- :meth:`mopidy.core.LibraryController.search` now returns an empty result
+  if there is no ``query``. Previously, it returned the full music library.
+  This does not work with online music services,
+  and have thus been deprecated since 1.0.
+
 History controller
 ^^^^^^^^^^^^^^^^^^
 

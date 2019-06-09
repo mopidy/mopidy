@@ -141,8 +141,7 @@ def find(context, *args):
     except ValueError:
         return
 
-    with deprecation.ignore('core.library.search:empty_query'):
-        results = context.core.library.search(query=query, exact=True).get()
+    results = context.core.library.search(query=query, exact=True).get()
     result_tracks = []
     if ('artist' not in query and
             'albumartist' not in query and
@@ -439,8 +438,7 @@ def search(context, *args):
         query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
         return
-    with deprecation.ignore('core.library.search:empty_query'):
-        results = context.core.library.search(query).get()
+    results = context.core.library.search(query).get()
     artists = [_artist_as_track(a) for a in _get_artists(results)]
     albums = [_album_as_track(a) for a in _get_albums(results)]
     tracks = _get_tracks(results)
