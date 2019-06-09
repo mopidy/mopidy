@@ -179,7 +179,8 @@ HTTP frontend
 MPD frontend
 ------------
 
-- (no changes yet)
+- Improved the ``swap`` command to swap the tracks without rebuilding
+  the full tracklist.
 
 File backend
 ------------
