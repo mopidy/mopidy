@@ -60,10 +60,10 @@ MPD graphical clients
 =====================
 
 Cantata
-----
+-------
 
-`Cantata <https://github.com/CDrummond/cantata>`_ is a graphical MPD client with support for
-Qt4, Qt5, KDE, Linux, MacOSX, Windows, and Ubuntu Touch.
+`Cantata <https://github.com/CDrummond/cantata>`_ is a graphical MPD client
+with support for Linux, mac OS, and Windows.
 
 .. image:: mpd-client-cantata.png
     :width: 1232
