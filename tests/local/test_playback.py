@@ -9,7 +9,6 @@ import pykka
 
 from mopidy import core
 from mopidy.core import PlaybackState
-from mopidy.internal import deprecation
 from mopidy.local import actor
 from mopidy.models import TlTrack, Track
 
@@ -48,10 +47,6 @@ class LocalPlaybackProviderTest(unittest.TestCase):
 
         callback = self.audio.get_about_to_finish_callback().get()
         callback()
-
-    def run(self, result=None):
-        with deprecation.ignore('core.tracklist.add:tracks_arg'):
-            return super(LocalPlaybackProviderTest, self).run(result)
 
     def setUp(self):  # noqa: N802
         self.audio = dummy_audio.create_proxy()
