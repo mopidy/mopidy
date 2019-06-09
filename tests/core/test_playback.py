@@ -68,8 +68,7 @@ class BaseTest(object):
               Track(uri='dummy:c', length=1234)]
 
     def setup_method(self, method):
-        # TODO: use create_proxy helpers.
-        self.audio = dummy_audio.DummyAudio.start().proxy()
+        self.audio = dummy_audio.create_proxy(config=self.config, mixer=None)
         self.backend = MyTestBackend.start(
             audio=self.audio, config=self.config).proxy()
         self.core = core.Core(
