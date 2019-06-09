@@ -3,7 +3,6 @@ from __future__ import absolute_import, unicode_literals
 import functools
 import itertools
 
-from mopidy.internal import deprecation
 from mopidy.models import Track
 from mopidy.mpd import exceptions, protocol, translator
 
@@ -171,10 +170,9 @@ def findadd(context, *args):
 
     results = context.core.library.search(query=query, exact=True).get()
 
-    with deprecation.ignore('core.tracklist.add:tracks_arg'):
-        # TODO: for now just use tracks as other wise we have to lookup the
-        # tracks we just got from the search.
-        context.core.tracklist.add(tracks=_get_tracks(results)).get()
+    context.core.tracklist.add(
+        uris=[track.uri for track in _get_tracks(results)]
+    ).get()
 
 
 @protocol.commands.add('list')
@@ -465,10 +463,9 @@ def searchadd(context, *args):
 
     results = context.core.library.search(query).get()
 
-    with deprecation.ignore('core.tracklist.add:tracks_arg'):
-        # TODO: for now just use tracks as other wise we have to lookup the
-        # tracks we just got from the search.
-        context.core.tracklist.add(_get_tracks(results)).get()
+    context.core.tracklist.add(
+        uris=[track.uri for track in _get_tracks(results)]
+    ).get()
 
 
 @protocol.commands.add('searchaddpl')

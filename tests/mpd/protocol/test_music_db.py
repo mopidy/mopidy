@@ -92,8 +92,10 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_findadd(self):
+        track = Track(uri='dummy:a', name='A')
+        self.backend.library.dummy_library = [track]
         self.backend.library.dummy_find_exact_result = SearchResult(
-            tracks=[Track(uri='dummy:a', name='A')])
+            tracks=[track])
         self.assertEqual(self.core.tracklist.get_length().get(), 0)
 
         self.send_request('findadd "title" "A"')
@@ -104,8 +106,10 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_searchadd(self):
+        track = Track(uri='dummy:a', name='A')
+        self.backend.library.dummy_library = [track]
         self.backend.library.dummy_search_result = SearchResult(
-            tracks=[Track(uri='dummy:a', name='A')])
+            tracks=[track])
         self.assertEqual(self.core.tracklist.get_length().get(), 0)
 
         self.send_request('searchadd "title" "a"')
