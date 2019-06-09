@@ -46,8 +46,8 @@ class LibraryController(object):
                 if backend is not None:
                     backends_to_uris[backend].append(uri)
         else:
-            backends_to_uris = dict([
-                (b, None) for b in self.backends.with_library.values()])
+            backends_to_uris = {
+                b: None for b in self.backends.with_library.values()}
         return backends_to_uris
 
     def browse(self, uri):

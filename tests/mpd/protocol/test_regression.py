@@ -197,8 +197,8 @@ class IssueGH137RegressionTest(protocol.BaseTestCase):
 
     def test(self):
         self.send_request(
-            u'list Date Artist "Anita Ward" '
-            u'Album "This Is Remixed Hits - Mashups & Rare 12" Mixes"')
+            'list Date Artist "Anita Ward" '
+            'Album "This Is Remixed Hits - Mashups & Rare 12" Mixes"')
 
         self.assertInResponse('ACK [2@0] {list} Invalid unquoted character')
 

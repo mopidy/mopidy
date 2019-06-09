@@ -201,7 +201,7 @@ def load_extensions():
         try:
             extension_class = entry_point.load(require=False)
         except Exception as e:
-            logger.exception("Failed to load extension %s: %s" % (
+            logger.exception("Failed to load extension {}: {}".format(
                 entry_point.name, e))
             continue
 

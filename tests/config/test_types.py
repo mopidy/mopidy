@@ -86,7 +86,7 @@ class StringTest(unittest.TestCase):
 
     def test_deserialize_decode_failure(self):
         value = types.String()
-        incorrectly_encoded_bytes = u'æøå'.encode('iso-8859-1')
+        incorrectly_encoded_bytes = 'æøå'.encode('iso-8859-1')
         self.assertRaises(
             ValueError, value.deserialize, incorrectly_encoded_bytes)
 

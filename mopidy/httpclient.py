@@ -44,9 +44,13 @@ def format_user_agent(name=None):
 
     .. versionadded:: 1.1
     """
-    parts = ['Mopidy/%s' % (mopidy.__version__),
-             '%s/%s' % (platform.python_implementation(),
-                        platform.python_version())]
+    parts = [
+        'Mopidy/%s' % (mopidy.__version__),
+        '{}/{}'.format(
+            platform.python_implementation(),
+            platform.python_version()
+        )
+    ]
     if name:
         parts.insert(0, name)
     return ' '.join(parts)

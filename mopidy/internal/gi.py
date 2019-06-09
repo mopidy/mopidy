@@ -32,7 +32,7 @@ REQUIRED_GST_VERSION = (1, 2, 3)
 
 if Gst.version() < REQUIRED_GST_VERSION:
     sys.exit(
-        'ERROR: Mopidy requires GStreamer >= %s, but found %s.' % (
+        'ERROR: Mopidy requires GStreamer >= {}, but found {}.'.format(
             '.'.join(map(str, REQUIRED_GST_VERSION)), Gst.version_string()))
 
 

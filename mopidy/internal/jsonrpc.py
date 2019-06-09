@@ -211,7 +211,7 @@ class JsonRpcWrapper(object):
             return getattr(obj, method_name)
         except AttributeError:
             raise JsonRpcMethodNotFoundError(
-                data='Object mounted at "%s" has no member "%s"' % (
+                data='Object mounted at "{}" has no member "{}"'.format(
                     mount, method_name))
 
     def _is_notification(self, request):
@@ -332,7 +332,7 @@ class JsonRpcInspector(object):
                 obj_methods = self._get_methods(obj)
                 for name, description in obj_methods.items():
                     if mount:
-                        name = '%s.%s' % (mount, name)
+                        name = '{}.{}'.format(mount, name)
                     methods[name] = description
         return methods
 

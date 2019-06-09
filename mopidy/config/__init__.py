@@ -110,7 +110,7 @@ def format_initial(extensions_data):
     extensions_data = sorted(
         extensions_data, key=lambda d: d.extension.dist_name)
     for data in extensions_data:
-        versions.append('%s %s' % (
+        versions.append('{} {}'.format(
             data.extension.dist_name, data.extension.version))
 
     header = _INITIAL_HELP.strip() % {'versions': '\n#   '.join(versions)}
@@ -267,10 +267,10 @@ def _postprocess(config_string):
     """Converts a preprocessed config back to original form."""
     flags = re.IGNORECASE | re.MULTILINE
     result = re.sub(r'^\[__COMMENTS__\](\n|$)', '', config_string, flags=flags)
-    result = re.sub(r'\n__INLINE\d+__ =(.*)$', ' ;\g<1>', result, flags=flags)
-    result = re.sub(r'^__HASH\d+__ =(.*)$', '#\g<1>', result, flags=flags)
-    result = re.sub(r'^__SEMICOLON\d+__ =(.*)$', ';\g<1>', result, flags=flags)
-    result = re.sub(r'\n__SECTION\d+__ =(.*)$', '\g<1>', result, flags=flags)
+    result = re.sub(r'\n__INLINE\d+__ =(.*)$', r' ;\g<1>', result, flags=flags)
+    result = re.sub(r'^__HASH\d+__ =(.*)$', r'#\g<1>', result, flags=flags)
+    result = re.sub(r'^__SEMICOLON\d+__ =(.*)$', r';\g<1>', result, flags=flags)
+    result = re.sub(r'\n__SECTION\d+__ =(.*)$', r'\g<1>', result, flags=flags)
     result = re.sub(r'^__BLANK\d+__ =$', '', result, flags=flags)
     return result
 

@@ -115,8 +115,8 @@ class StringTest(unittest.TestCase):
 
     def test_unicode_allowed(self):
         instance = create_instance(String())
-        instance.attr = u'abc'
-        self.assertEqual(u'abc', instance.attr)
+        instance.attr = 'abc'
+        self.assertEqual('abc', instance.attr)
 
     def test_other_disallowed(self):
         instance = create_instance(String())
@@ -146,13 +146,13 @@ class IdentifierTest(unittest.TestCase):
 
     def test_unicode_allowed(self):
         instance = create_instance(Identifier())
-        instance.attr = u'abc'
-        self.assertEqual(u'abc', instance.attr)
+        instance.attr = 'abc'
+        self.assertEqual('abc', instance.attr)
 
     def test_unicode_with_nonascii_allowed(self):
         instance = create_instance(Identifier())
-        instance.attr = u'æøå'
-        self.assertEqual(u'æøå'.encode('utf-8'), instance.attr)
+        instance.attr = 'æøå'
+        self.assertEqual('æøå'.encode('utf-8'), instance.attr)
 
     def test_other_disallowed(self):
         instance = create_instance(Identifier())

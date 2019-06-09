@@ -124,7 +124,7 @@ class HttpServer(threading.Thread):
         logger.debug(
             'HTTP routes from extensions: %s',
             formatting.indent('\n'.join(
-                '%r: %r' % (r[0], r[1]) for r in request_handlers)))
+                '{!r}: {!r}'.format(r[0], r[1]) for r in request_handlers)))
 
         return request_handlers
 
@@ -143,7 +143,7 @@ class HttpServer(threading.Thread):
             ))
             for handler in request_handlers:
                 handler = list(handler)
-                handler[0] = '/%s%s' % (app['name'], handler[0])
+                handler[0] = '/{}{}'.format(app['name'], handler[0])
                 result.append(tuple(handler))
             logger.debug('Loaded HTTP extension: %s', app['name'])
         return result

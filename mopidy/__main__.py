@@ -161,8 +161,8 @@ def create_initial_config_file(args, extensions_data):
 
 def log_extension_info(all_extensions, enabled_extensions):
     # TODO: distinguish disabled vs blocked by env?
-    enabled_names = set(e.ext_name for e in enabled_extensions)
-    disabled_names = set(e.ext_name for e in all_extensions) - enabled_names
+    enabled_names = {e.ext_name for e in enabled_extensions}
+    disabled_names = {e.ext_name for e in all_extensions} - enabled_names
     logger.info(
         'Enabled extensions: %s', ', '.join(enabled_names) or 'none')
     logger.info(
@@ -175,7 +175,7 @@ def check_config_errors(config, errors, extensions):
     all_extension_names = set()
 
     for state in extensions:
-        extension_names[state] = set(e.ext_name for e in extensions[state])
+        extension_names[state] = {e.ext_name for e in extensions[state]}
         all_extension_names.update(extension_names[state])
 
     for section in sorted(errors):

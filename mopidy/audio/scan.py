@@ -288,12 +288,12 @@ if __name__ == '__main__':
         try:
             result = scanner.scan(uri)
             for key in ('uri', 'mime', 'duration', 'playable', 'seekable'):
-                print('%-20s   %s' % (key, getattr(result, key)))
+                print('{:<20}   {}'.format(key, getattr(result, key)))
             print('tags')
             for tag, value in result.tags.items():
-                line = '%-20s   %s' % (tag, value)
+                line = '{:<20}   {}'.format(tag, value)
                 if len(line) > 77:
                     line = line[:77] + '...'
                 print(line)
         except exceptions.ScannerError as error:
-            print('%s: %s' % (uri, error))
+            print('{}: {}'.format(uri, error))

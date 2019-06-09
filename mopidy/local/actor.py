@@ -24,7 +24,7 @@ class LocalBackend(pykka.ThreadingActor, backend.Backend):
 
         storage.check_dirs_and_files(config)
 
-        libraries = dict((l.name, l) for l in self.libraries)
+        libraries = {l.name: l for l in self.libraries}
         library_name = config['local']['library']
 
         if library_name in libraries:

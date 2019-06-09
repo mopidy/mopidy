@@ -242,7 +242,7 @@ class LogLevel(ConfigValue):
         return self.levels.get(value.lower())
 
     def serialize(self, value, display=False):
-        lookup = dict((v, k) for k, v in self.levels.items())
+        lookup = {v: k for k, v in self.levels.items()}
         if value in lookup:
             return lookup[value]
         return b''

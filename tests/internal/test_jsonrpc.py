@@ -302,7 +302,7 @@ class JsonRpcBatchTest(JsonRpcTestBase):
 
         self.assertEqual(len(response), 3)
 
-        response = dict((row['id'], row) for row in response)
+        response = {row['id']: row for row in response}
         self.assertEqual(response[1]['result'], False)
         self.assertEqual(response[2]['result'], True)
         self.assertEqual(response[3]['result'], False)
@@ -319,7 +319,7 @@ class JsonRpcBatchTest(JsonRpcTestBase):
 
         self.assertEqual(len(response), 2)
 
-        response = dict((row['id'], row) for row in response)
+        response = {row['id']: row for row in response}
         self.assertNotIn(1, response)
         self.assertEqual(response[2]['result'], True)
         self.assertEqual(response[3]['result'], False)
@@ -566,7 +566,7 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
         response = self.jrw.handle_data(request)
 
         self.assertEqual(len(response), 5)
-        response = dict((row['id'], row) for row in response)
+        response = {row['id']: row for row in response}
         self.assertEqual(response['1']['result'], False)
         self.assertEqual(response['2']['result'], None)
         self.assertEqual(response[None]['error']['code'], -32600)

@@ -99,8 +99,8 @@ class JsonLibrary(local.Library):
                 self._tracks = {}
             else:
                 library = internal_storage.load(self._json_file)
-                self._tracks = dict((t.uri, t) for t in
-                                    library.get('tracks', []))
+                self._tracks = {
+                    t.uri: t for t in library.get('tracks', [])}
         with timer.time_logger('Building browse cache'):
             self._browse_cache = _BrowseCache(sorted(self._tracks.keys()))
         return len(self._tracks)

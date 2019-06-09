@@ -17,7 +17,7 @@ MIN_DURATION_MS = 100  # Shortest length of track to include.
 
 
 def _get_library(args, config):
-    libraries = dict((l.name, l) for l in args.registry['local:library'])
+    libraries = {l.name: l for l in args.registry['local:library']}
     library_name = config['local']['library']
 
     if library_name not in libraries:

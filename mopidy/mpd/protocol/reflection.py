@@ -74,7 +74,7 @@ def notcommands(context):
 
         Shows which commands the current user does not have access to.
     """
-    command_names = set(['config', 'kill'])  # No permission to use
+    command_names = {'config', 'kill'}  # No permission to use
     for name, handler in protocol.commands.handlers.items():
         if not handler.list_command:
             continue

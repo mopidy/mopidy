@@ -68,11 +68,11 @@ class ImmutableObject(object):
                 if not value:
                     continue
                 value = list(value)
-            kwarg_pairs.append('%s=%s' % (key, repr(value)))
-        return '%(classname)s(%(kwargs)s)' % {
-            'classname': self.__class__.__name__,
-            'kwargs': ', '.join(kwarg_pairs),
-        }
+            kwarg_pairs.append('{}={}'.format(key, repr(value)))
+        return '{classname}({kwargs})'.format(
+            classname=self.__class__.__name__,
+            kwargs=', '.join(kwarg_pairs),
+        )
 
     def __hash__(self):
         hash_sum = 0

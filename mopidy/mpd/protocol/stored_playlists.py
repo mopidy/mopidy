@@ -190,7 +190,7 @@ def _create_playlist(context, name, tracks):
     """
     Creates new playlist using backend appropriate for the given tracks
     """
-    uri_schemes = set([urllib.parse.urlparse(t.uri).scheme for t in tracks])
+    uri_schemes = {urllib.parse.urlparse(t.uri).scheme for t in tracks}
     for scheme in uri_schemes:
         new_playlist = context.core.playlists.create(name, scheme).get()
         if new_playlist is None:
