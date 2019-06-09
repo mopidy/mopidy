@@ -5,7 +5,6 @@ import unittest
 import mock
 
 from mopidy import backend, core
-from mopidy.internal import deprecation
 from mopidy.models import Playlist, Ref, Track
 
 
@@ -255,55 +254,6 @@ class PlaylistTest(BasePlaylistsTest):
     def test_get_uri_schemes(self):
         result = self.core.playlists.get_uri_schemes()
         self.assertEquals(result, ['dummy1', 'dummy2'])
-
-
-class DeprecatedFilterPlaylistsTest(BasePlaylistsTest):
-
-    def run(self, result=None):
-        with deprecation.ignore(ids=['core.playlists.filter',
-                                     'core.playlists.get_playlists']):
-            return super(DeprecatedFilterPlaylistsTest, self).run(result)
-
-    def test_filter_returns_matching_playlists(self):
-        result = self.core.playlists.filter({'name': 'A'})
-
-        self.assertEqual(2, len(result))
-
-    def test_filter_accepts_dict_instead_of_kwargs(self):
-        result = self.core.playlists.filter({'name': 'A'})
-
-        self.assertEqual(2, len(result))
-
-
-class DeprecatedGetPlaylistsTest(BasePlaylistsTest):
-
-    def run(self, result=None):
-        with deprecation.ignore('core.playlists.get_playlists'):
-            return super(DeprecatedGetPlaylistsTest, self).run(result)
-
-    def test_get_playlists_combines_result_from_backends(self):
-        result = self.core.playlists.get_playlists()
-
-        self.assertIn(self.pl1a, result)
-        self.assertIn(self.pl1b, result)
-        self.assertIn(self.pl2a, result)
-        self.assertIn(self.pl2b, result)
-
-    def test_get_playlists_includes_tracks_by_default(self):
-        result = self.core.playlists.get_playlists()
-
-        self.assertEqual(result[0].name, 'A')
-        self.assertEqual(len(result[0].tracks), 1)
-        self.assertEqual(result[1].name, 'B')
-        self.assertEqual(len(result[1].tracks), 1)
-
-    def test_get_playlist_can_strip_tracks_from_returned_playlists(self):
-        result = self.core.playlists.get_playlists(include_tracks=False)
-
-        self.assertEqual(result[0].name, 'A')
-        self.assertEqual(len(result[0].tracks), 0)
-        self.assertEqual(result[1].name, 'B')
-        self.assertEqual(len(result[1].tracks), 0)
 
 
 class MockBackendCorePlaylistsBase(unittest.TestCase):

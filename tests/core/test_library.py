@@ -280,88 +280,6 @@ class CoreLibraryTest(BaseCoreLibraryTest):
             query={'any': ['foobar']}, uris=None, exact=False)
 
 
-class DeprecatedFindExactCoreLibraryTest(BaseCoreLibraryTest):
-
-    def run(self, result=None):
-        with deprecation.ignore('core.library.find_exact'):
-            return super(DeprecatedFindExactCoreLibraryTest, self).run(result)
-
-    def test_find_exact_combines_results_from_all_backends(self):
-        track1 = Track(uri='dummy1:a')
-        track2 = Track(uri='dummy2:a')
-        result1 = SearchResult(tracks=[track1])
-        result2 = SearchResult(tracks=[track2])
-
-        self.library1.search.return_value.get.return_value = result1
-        self.library2.search.return_value.get.return_value = result2
-
-        result = self.core.library.find_exact({'any': ['a']})
-
-        self.assertIn(result1, result)
-        self.assertIn(result2, result)
-        self.library1.search.assert_called_once_with(
-            query=dict(any=['a']), uris=None, exact=True)
-        self.library2.search.assert_called_once_with(
-            query=dict(any=['a']), uris=None, exact=True)
-
-    def test_find_exact_with_uris_selects_dummy1_backend(self):
-        self.core.library.find_exact(
-            query={'any': ['a']}, uris=['dummy1:', 'dummy1:foo', 'dummy3:'])
-
-        self.library1.search.assert_called_once_with(
-            query={'any': ['a']}, uris=['dummy1:', 'dummy1:foo'], exact=True)
-        self.assertFalse(self.library2.search.called)
-
-    def test_find_exact_with_uris_selects_both_backends(self):
-        self.core.library.find_exact(
-            query={'any': ['a']}, uris=['dummy1:', 'dummy1:foo', 'dummy2:'])
-
-        self.library1.search.assert_called_once_with(
-            query={'any': ['a']}, uris=['dummy1:', 'dummy1:foo'], exact=True)
-        self.library2.search.assert_called_once_with(
-            query={'any': ['a']}, uris=['dummy2:'], exact=True)
-
-    def test_find_exact_filters_out_none(self):
-        track1 = Track(uri='dummy1:a')
-        result1 = SearchResult(tracks=[track1])
-
-        self.library1.search.return_value.get.return_value = result1
-        self.library2.search.return_value.get.return_value = None
-
-        result = self.core.library.find_exact({'any': ['a']})
-
-        self.assertIn(result1, result)
-        self.assertNotIn(None, result)
-        self.library1.search.assert_called_once_with(
-            query={'any': ['a']}, uris=None, exact=True)
-        self.library2.search.assert_called_once_with(
-            query={'any': ['a']}, uris=None, exact=True)
-
-    def test_find_accepts_query_dict_instead_of_kwargs(self):
-        track1 = Track(uri='dummy1:a')
-        track2 = Track(uri='dummy2:a')
-        result1 = SearchResult(tracks=[track1])
-        result2 = SearchResult(tracks=[track2])
-
-        self.library1.search.return_value.get.return_value = result1
-        self.library2.search.return_value.get.return_value = result2
-
-        result = self.core.library.find_exact({'any': ['a']})
-
-        self.assertIn(result1, result)
-        self.assertIn(result2, result)
-        self.library1.search.assert_called_once_with(
-            query={'any': ['a']}, uris=None, exact=True)
-        self.library2.search.assert_called_once_with(
-            query={'any': ['a']}, uris=None, exact=True)
-
-    def test_find_exact_normalises_bad_queries(self):
-        self.core.library.find_exact({'any': 'foobar'})
-
-        self.library1.search.assert_called_once_with(
-            query={'any': ['foobar']}, uris=None, exact=True)
-
-
 class DeprecatedLookupCoreLibraryTest(BaseCoreLibraryTest):
 
     def run(self, result=None):
@@ -392,26 +310,12 @@ class DeprecatedLookupCoreLibraryTest(BaseCoreLibraryTest):
 
 class LegacyFindExactToSearchLibraryTest(unittest.TestCase):
 
-    def run(self, result=None):
-        with deprecation.ignore('core.library.find_exact'):
-            return super(LegacyFindExactToSearchLibraryTest, self).run(result)
-
     def setUp(self):  # noqa: N802
         self.backend = mock.Mock()
         self.backend.actor_ref.actor_class.__name__ = 'DummyBackend'
         self.backend.uri_schemes.get.return_value = ['dummy']
         self.backend.library = mock.Mock(spec=backend.LibraryProvider)
         self.core = core.Core(mixer=None, backends=[self.backend])
-
-    def test_core_find_exact_calls_backend_search_with_exact(self):
-        self.core.library.find_exact(query={'any': ['a']})
-        self.backend.library.search.assert_called_once_with(
-            query=dict(any=['a']), uris=None, exact=True)
-
-    def test_core_find_exact_handles_legacy_backend(self):
-        self.backend.library.search.return_value.get.side_effect = TypeError
-        self.core.library.find_exact(query={'any': ['a']})
-        # We are just testing that this doesn't fail.
 
     def test_core_search_call_backend_search_with_exact(self):
         self.core.library.search(query={'any': ['a']})

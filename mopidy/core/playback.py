@@ -124,42 +124,6 @@ class PlaybackController(object):
         else:
             return 0
 
-    def get_volume(self):
-        """
-        .. deprecated:: 1.0
-            Use :meth:`core.mixer.get_volume()
-            <mopidy.core.MixerController.get_volume>` instead.
-        """
-        deprecation.warn('core.playback.get_volume')
-        return self.core.mixer.get_volume()
-
-    def set_volume(self, volume):
-        """
-        .. deprecated:: 1.0
-            Use :meth:`core.mixer.set_volume()
-            <mopidy.core.MixerController.set_volume>` instead.
-        """
-        deprecation.warn('core.playback.set_volume')
-        return self.core.mixer.set_volume(volume)
-
-    def get_mute(self):
-        """
-        .. deprecated:: 1.0
-            Use :meth:`core.mixer.get_mute()
-            <mopidy.core.MixerController.get_mute>` instead.
-        """
-        deprecation.warn('core.playback.get_mute')
-        return self.core.mixer.get_mute()
-
-    def set_mute(self, mute):
-        """
-        .. deprecated:: 1.0
-            Use :meth:`core.mixer.set_mute()
-            <mopidy.core.MixerController.set_mute>` instead.
-        """
-        deprecation.warn('core.playback.set_mute')
-        return self.core.mixer.set_mute(mute)
-
     def _on_end_of_stream(self):
         self.set_state(PlaybackState.STOPPED)
         if self._current_tl_track:

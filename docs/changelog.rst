@@ -23,18 +23,91 @@ Dependencies
 Core API
 --------
 
-- Removed properties that has been deprecated since 1.0, released in 2015.
-  Everything removed has corresponding methods that should be used instead.
+- Removed properties and methods that has been deprecated since 1.0, released
+  in 2015. Everything removed have replacements that should be used instead.
+  See below for a full list of removals and replacements.
+  (Fixes: :issue:`1083`, :issue:`1461`, PR: :issue:`1768`, :issue:`1769`)
+
+Root object
+^^^^^^^^^^^
+
+- Removed properties, use getter/setter instead:
 
   - :attr:`mopidy.core.Core.uri_schemes`
   - :attr:`mopidy.core.Core.version`
+
+Library controller
+^^^^^^^^^^^^^^^^^^
+
+- Removed methods:
+
+  - :meth:`mopidy.core.LibraryController.find_exact`:
+    Use :meth:`~mopidy.core.LibraryController.search`
+    with the keyword argument ``exact=True`` instead.
+
+History controller
+^^^^^^^^^^^^^^^^^^
+
+- (no changes yet)
+
+Mixer controller
+^^^^^^^^^^^^^^^^
+
+- (no changes yet)
+
+Playback controller
+^^^^^^^^^^^^^^^^^^^
+
+- Removed properties, use getter/setter instead:
+
   - :attr:`mopidy.core.PlaybackController.current_tl_track`
   - :attr:`mopidy.core.PlaybackController.current_track`
   - :attr:`mopidy.core.PlaybackController.state`
   - :attr:`mopidy.core.PlaybackController.time_position`
-  - :attr:`mopidy.core.PlaybackController.volume`
-  - :attr:`mopidy.core.PlaybackController.mute`
+
+- Moved to the mixer controller:
+
+  - :meth:`mopidy.core.PlaybackController.get_mute`:
+    Use :meth:`~mopidy.core.MixerController.get_mute`.
+
+  - :meth:`mopidy.core.PlaybackController.get_volume`:
+    Use :meth:`~mopidy.core.MixerController.get_volume`.
+
+  - :meth:`mopidy.core.PlaybackController.set_mute`:
+    Use :meth:`~mopidy.core.MixerController.set_mute`.
+
+  - :meth:`mopidy.core.PlaybackController.set_volume`:
+    Use :meth:`~mopidy.core.MixerController.set_volume`.
+
+  - :attr:`mopidy.core.PlaybackController.mute`:
+    Use :meth:`~mopidy.core.MixerController.get_mute`
+    and :meth:`~mopidy.core.MixerController.set_mute`.
+
+  - :attr:`mopidy.core.PlaybackController.volume`:
+    Use :meth:`~mopidy.core.MixerController.get_volume`
+    and :meth:`~mopidy.core.MixerController.set_volume`.
+
+Playlist controller
+^^^^^^^^^^^^^^^^^^^
+
+- Removed properties, use getter/setter instead:
+
   - :attr:`mopidy.core.PlaylistController.playlists`
+
+- Removed methods:
+
+  - :meth:`mopidy.core.PlaylistsController.filter`:
+    Use :meth:`~mopidy.core.PlaylistsController.as_list` and filter yourself.
+
+  - :meth:`mopidy.core.PlaylistsController.get_playlists`:
+    Use :meth:`~mopidy.core.PlaylistsController.as_list` and
+    :meth:`~mopidy.core.PlaylistsController.get_items`.
+
+Tracklist controller
+^^^^^^^^^^^^^^^^^^^^
+
+- Removed properties, use getter/setter instead:
+
   - :attr:`mopidy.core.TracklistController.tl_tracks`
   - :attr:`mopidy.core.TracklistController.tracks`
   - :attr:`mopidy.core.TracklistController.length`
@@ -67,7 +140,7 @@ HTTP frontend
 - Stop bundling Mopidy.js and serving it at ``/mopidy/mopidy.js`` and
   ``/mopidy/mopidy.min.js``. All Mopidy web clients must use Mopidy.js from npm
   or vendor their own copy of the library.
-  (Fixes: :issue:`1460`, PR: :issue:`1708`)
+  (Fixes: :issue:`1083`, :issue:`1460`, PR: :issue:`1708`)
 
 - Remove support for serving arbitrary files over HTTP through the use of
   :confval:`http/static_dir`, which has been deprecated since 1.0. (Fixes:
@@ -1084,7 +1157,7 @@ the API as those parts will be removed in Mopidy 2.0.
   mute. (Fixes: :issue:`962`)
 
 Core library controller
-~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
 
 - **Deprecated:** :meth:`mopidy.core.LibraryController.find_exact`. Use
   :meth:`mopidy.core.LibraryController.search` with the ``exact`` keyword
@@ -1113,7 +1186,7 @@ Core library controller
   :issue:`981`, :issue:`992` and :issue:`1013`)
 
 Core playlist controller
-~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 - **Deprecated:** :meth:`mopidy.core.PlaylistsController.get_playlists`. Use
   :meth:`~mopidy.core.PlaylistsController.as_list` and
@@ -1130,7 +1203,7 @@ Core playlist controller
   PR: :issue:`1075`)
 
 Core tracklist controller
-~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - **Removed:** The following methods were documented as internal. They are now
   fully private and unavailable outside the core actor. (Fixes: :issue:`1058`,
@@ -1145,7 +1218,7 @@ Core tracklist controller
   :issue:`1060`, PR: :issue:`1065`)
 
 Core playback controller
-~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 - **Removed:** Remove several internal parts that were leaking into the public
   API and was never intended to be used externally. (Fixes: :issue:`1070`, PR:
@@ -1194,7 +1267,7 @@ to be compatible with Mopidy 1.0 before the release. New versions of the
 backends will be released shortly after Mopidy itself.
 
 Backend library providers
-~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - **Removed:** Remove :meth:`mopidy.backend.LibraryProvider.find_exact`.
 
@@ -1203,7 +1276,7 @@ Backend library providers
   :meth:`~mopidy.backend.LibraryProvider.find_exact` method.
 
 Backend playlist providers
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - **Removed:** Remove default implementation of
   :attr:`mopidy.backend.PlaylistsProvider.playlists`. This is potentially
@@ -1220,7 +1293,7 @@ Backend playlist providers
   - Remove :attr:`mopidy.backend.PlaylistsProvider.playlists` property.
 
 Backend playback providers
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - Changed the API for :class:`mopidy.backend.PlaybackProvider`. Note that this
   change is **not** backwards compatible for certain backends. These changes
@@ -1315,7 +1388,7 @@ Local backend
   use and can be removed from your config.
 
 Local library API
-~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^
 
 - Implementors of :meth:`mopidy.local.Library.lookup` should now return a list
   of :class:`~mopidy.models.Track` instead of a single track, just like the

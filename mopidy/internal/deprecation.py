@@ -17,7 +17,6 @@ _MESSAGES = {
         'Do not use this, instead use playlistinfo',
 
     # Deprecated features in core libary:
-    'core.library.find_exact': 'library.find_exact() is deprecated',
     'core.library.lookup:uri_arg':
         'library.lookup() "uri" argument is deprecated',
     'core.library.search:kwargs_query':
@@ -26,17 +25,9 @@ _MESSAGES = {
         'library.search() with empty "query" argument deprecated',
 
     # Deprecated features in core playback:
-    'core.playback.get_mute': 'playback.get_mute() is deprecated',
-    'core.playback.set_mute': 'playback.set_mute() is deprecated',
-    'core.playback.get_volume': 'playback.get_volume() is deprecated',
-    'core.playback.set_volume': 'playback.set_volume() is deprecated',
     'core.playback.play:tl_track_kwargs':
         'playback.play() with "tl_track" argument is pending deprecation use '
         '"tlid" instead',
-
-    # Deprecated features in core playlists:
-    'core.playlists.filter': 'playlists.filter() is deprecated',
-    'core.playlists.get_playlists': 'playlists.get_playlists() is deprecated',
 
     # Deprecated features in core tracklist:
     'core.tracklist.add:tracks_arg':
