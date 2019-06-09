@@ -17,8 +17,6 @@ _MESSAGES = {
         'Do not use this, instead use playlistinfo',
 
     # Deprecated features in core libary:
-    'core.library.lookup:uri_arg':
-        'library.lookup() "uri" argument is deprecated',
     'core.library.search:kwargs_query':
         'library.search() with "kwargs" as query is deprecated',
     'core.library.search:empty_query':

@@ -182,37 +182,18 @@ class LibraryController(object):
                     results[uri] += tuple(images)
         return results
 
-    def lookup(self, uri=None, uris=None):
+    def lookup(self, uris):
         """
         Lookup the given URIs.
 
         If the URI expands to multiple tracks, the returned list will contain
         them all.
 
-        :param uri: track URI
-        :type uri: string or :class:`None`
         :param uris: track URIs
-        :type uris: list of string or :class:`None`
-        :rtype: list of :class:`mopidy.models.Track` if uri was set or
-            {uri: list of :class:`mopidy.models.Track`} if uris was set.
-
-        .. versionadded:: 1.0
-            The ``uris`` argument.
-
-        .. deprecated:: 1.0
-            The ``uri`` argument. Use ``uris`` instead.
+        :type uris: list of string
+        :rtype: {uri: list of :class:`mopidy.models.Track`}
         """
-        if sum(o is not None for o in [uri, uris]) != 1:
-            raise ValueError('Exactly one of "uri" or "uris" must be set')
-
-        uris is None or validation.check_uris(uris)
-        uri is None or validation.check_uri(uri)
-
-        if uri:
-            deprecation.warn('core.library.lookup:uri_arg')
-
-        if uri is not None:
-            uris = [uri]
+        validation.check_uris(uris)
 
         futures = {}
         results = {u: [] for u in uris}
@@ -232,8 +213,6 @@ class LibraryController(object):
                     # then remove this filtering of tracks without URIs.
                     results[u] = [r for r in result if r.uri]
 
-        if uri:
-            return results[uri]
         return results
 
     def refresh(self, uri=None):

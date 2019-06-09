@@ -50,6 +50,10 @@ Library controller
     Use :meth:`~mopidy.core.LibraryController.search`
     with the keyword argument ``exact=True`` instead.
 
+- Removed the ``uri`` argument to
+  :meth:`mopidy.core.LibraryController.lookup`.
+  Use the ``uris`` argument instead.
+
 History controller
 ^^^^^^^^^^^^^^^^^^
 

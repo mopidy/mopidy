@@ -645,7 +645,7 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
 
         self.assertIn('core.library.lookup', methods)
         self.assertEqual(
-            methods['core.library.lookup']['params'][0]['name'], 'uri')
+            methods['core.library.lookup']['params'][0]['name'], 'uris')
 
         self.assertIn('core.playback.next', methods)
         self.assertEqual(len(methods['core.playback.next']['params']), 0)
