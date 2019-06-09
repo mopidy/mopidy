@@ -121,8 +121,9 @@ announcements related to Mopidy and Mopidy extensions.
 
     authors
     sponsors
-    changelog
     versioning
+    changelog
+    history/index
 
 
 .. toctree::
