@@ -59,6 +59,16 @@ Mopidy.
 MPD graphical clients
 =====================
 
+Cantata
+-------
+
+`Cantata <https://github.com/CDrummond/cantata>`_ is a graphical MPD client
+with support for Linux, mac OS, and Windows.
+
+.. image:: mpd-client-cantata.png
+    :width: 1232
+    :height: 710
+
 GMPC
 ----
 
