@@ -5,7 +5,6 @@ import unittest
 import mock
 
 from mopidy import backend, core
-from mopidy.internal import deprecation
 from mopidy.internal.models import TracklistState
 from mopidy.models import TlTrack, Track
 
@@ -44,8 +43,7 @@ class TracklistTest(unittest.TestCase):
         self.library.lookup.reset_mock()
         self.core.tracklist.clear()
 
-        with deprecation.ignore('core.tracklist.add:uri_arg'):
-            tl_tracks = self.core.tracklist.add(uris=['dummy1:a'])
+        tl_tracks = self.core.tracklist.add(uris=['dummy1:a'])
 
         self.library.lookup.assert_called_once_with('dummy1:a')
         self.assertEqual(1, len(tl_tracks))

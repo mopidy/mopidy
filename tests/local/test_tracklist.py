@@ -7,7 +7,6 @@ import pykka
 
 from mopidy import core
 from mopidy.core import PlaybackState
-from mopidy.internal import deprecation
 from mopidy.local import actor
 from mopidy.models import Playlist, Track
 
@@ -29,10 +28,6 @@ class LocalTracklistProviderTest(unittest.TestCase):
     }
     tracks = [
         Track(uri=generate_song(i), length=4464) for i in range(1, 4)]
-
-    def run(self, result=None):
-        with deprecation.ignore('core.tracklist.add:tracks_arg'):
-            return super(LocalTracklistProviderTest, self).run(result)
 
     def setUp(self):  # noqa: N802
         self.audio = dummy_audio.create_proxy()

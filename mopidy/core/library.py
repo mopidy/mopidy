@@ -7,7 +7,7 @@ import operator
 
 from mopidy import compat, exceptions, models
 from mopidy.compat import urllib
-from mopidy.internal import deprecation, validation
+from mopidy.internal import validation
 
 
 logger = logging.getLogger(__name__)
@@ -182,37 +182,18 @@ class LibraryController(object):
                     results[uri] += tuple(images)
         return results
 
-    def lookup(self, uri=None, uris=None):
+    def lookup(self, uris):
         """
         Lookup the given URIs.
 
         If the URI expands to multiple tracks, the returned list will contain
         them all.
 
-        :param uri: track URI
-        :type uri: string or :class:`None`
         :param uris: track URIs
-        :type uris: list of string or :class:`None`
-        :rtype: list of :class:`mopidy.models.Track` if uri was set or
-            {uri: list of :class:`mopidy.models.Track`} if uris was set.
-
-        .. versionadded:: 1.0
-            The ``uris`` argument.
-
-        .. deprecated:: 1.0
-            The ``uri`` argument. Use ``uris`` instead.
+        :type uris: list of string
+        :rtype: {uri: list of :class:`mopidy.models.Track`}
         """
-        if sum(o is not None for o in [uri, uris]) != 1:
-            raise ValueError('Exactly one of "uri" or "uris" must be set')
-
-        uris is None or validation.check_uris(uris)
-        uri is None or validation.check_uri(uri)
-
-        if uri:
-            deprecation.warn('core.library.lookup:uri_arg')
-
-        if uri is not None:
-            uris = [uri]
+        validation.check_uris(uris)
 
         futures = {}
         results = {u: [] for u in uris}
@@ -232,8 +213,6 @@ class LibraryController(object):
                     # then remove this filtering of tracks without URIs.
                     results[u] = [r for r in result if r.uri]
 
-        if uri:
-            return results[uri]
         return results
 
     def refresh(self, uri=None):
@@ -260,12 +239,13 @@ class LibraryController(object):
             with _backend_error_handling(backend):
                 future.get()
 
-    def search(self, query=None, uris=None, exact=False, **kwargs):
+    def search(self, query, uris=None, exact=False):
         """
         Search the library for tracks where ``field`` contains ``values``.
+
         ``field`` can be one of ``uri``, ``track_name``, ``album``, ``artist``,
         ``albumartist``, ``composer``, ``performer``, ``track_no``, ``genre``,
-        ``date``, ``comment`` or ``any``.
+        ``date``, ``comment``, or ``any``.
 
         If ``uris`` is given, the search is limited to results from within the
         URI roots. For example passing ``uris=['file:']`` will limit the search
@@ -300,27 +280,15 @@ class LibraryController(object):
 
         .. versionadded:: 1.0
             The ``exact`` keyword argument.
-
-        .. deprecated:: 1.0
-            Previously, if the query was empty, and the backend could support
-            it, all available tracks were returned. This has not changed, but
-            it is strongly discouraged. No new code should rely on this
-            behavior.
-
-        .. deprecated:: 1.1
-            Providing the search query via ``kwargs`` is no longer supported.
         """
-        query = _normalize_query(query or kwargs)
+        query = _normalize_query(query)
 
         uris is None or validation.check_uris(uris)
-        query is None or validation.check_query(query)
+        validation.check_query(query)
         validation.check_boolean(exact)
 
-        if kwargs:
-            deprecation.warn('core.library.search:kwargs_query')
-
         if not query:
-            deprecation.warn('core.library.search:empty_query')
+            return []
 
         futures = {}
         for backend, backend_uris in self._get_backends_to_uris(uris).items():

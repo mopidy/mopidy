@@ -445,6 +445,12 @@ class SwapCommandTest(BasePopulatedTracklistTestCase):
         self.assertEqual(result, ['a', 'e', 'c', 'd', 'b', 'f'])
         self.assertInResponse('OK')
 
+    def test_swap_highest_position_first(self):
+        self.send_request('swap "4" "1"')
+        result = [t.name for t in self.core.tracklist.get_tracks().get()]
+        self.assertEqual(result, ['a', 'e', 'c', 'd', 'b', 'f'])
+        self.assertInResponse('OK')
+
     def test_swapid(self):
         self.send_request('swapid "2" "5"')
         result = [t.name for t in self.core.tracklist.get_tracks().get()]

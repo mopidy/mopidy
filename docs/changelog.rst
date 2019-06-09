@@ -27,8 +27,9 @@ Dependencies
 Core API
 --------
 
-- Removed properties and methods that has been deprecated since 1.0, released
-  in 2015. Everything removed have replacements that should be used instead.
+- Removed properties, methods, and arguments that have been deprecated since
+  1.0, released in 2015.
+  Everything removed have replacements that should be used instead.
   See below for a full list of removals and replacements.
   (Fixes: :issue:`1083`, :issue:`1461`, PR: :issue:`1768`, :issue:`1769`)
 
@@ -48,6 +49,19 @@ Library controller
   - :meth:`mopidy.core.LibraryController.find_exact`:
     Use :meth:`~mopidy.core.LibraryController.search`
     with the keyword argument ``exact=True`` instead.
+
+- Removed the ``uri`` argument to
+  :meth:`mopidy.core.LibraryController.lookup`.
+  Use the ``uris`` argument instead.
+
+- Removed the support for passing the search query as keyword arguments to
+  :meth:`mopidy.core.LibraryController.search`.
+  Use the ``query`` argument instead.
+
+- :meth:`mopidy.core.LibraryController.search` now returns an empty result
+  if there is no ``query``. Previously, it returned the full music library.
+  This does not work with online music services,
+  and have thus been deprecated since 1.0.
 
 History controller
 ^^^^^^^^^^^^^^^^^^
@@ -121,6 +135,18 @@ Tracklist controller
   - :attr:`mopidy.core.TracklistController.repeat`
   - :attr:`mopidy.core.TracklistController.single`
 
+- Removed the ``uri`` argument to
+  :meth:`mopidy.core.TracklistController.add`.
+  Use the ``uris`` argument instead.
+
+- Removed the support for passing filter criterias as keyword arguments to
+  :meth:`mopidy.core.TracklistController.filter`.
+  Use the ``criteria`` argument instead.
+
+- Removed the support for passing filter criterias as keyword arguments to
+  :meth:`mopidy.core.TracklistController.remove`.
+  Use the ``criteria`` argument instead.
+
 Backend API
 -----------
 
@@ -153,7 +179,8 @@ HTTP frontend
 MPD frontend
 ------------
 
-- (no changes yet)
+- Improved the ``swap`` command to swap the tracks without rebuilding
+  the full tracklist.
 
 File backend
 ------------

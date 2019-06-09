@@ -327,14 +327,11 @@ class TracklistController(object):
         # 1 - len(tracks) Thus 'position - 1' will always be within the list.
         return self._tl_tracks[position - 1]
 
-    def add(self, tracks=None, at_position=None, uri=None, uris=None):
+    def add(self, tracks=None, at_position=None, uris=None):
         """
         Add tracks to the tracklist.
 
-        If ``uri`` is given instead of ``tracks``, the URI is looked up in the
-        library and the resulting tracks are added to the tracklist.
-
-        If ``uris`` is given instead of ``uri`` or ``tracks``, the URIs are
+        If ``uris`` is given instead of ``tracks``, the URIs are
         looked up in the library and the resulting tracks are added to the
         tracklist.
 
@@ -348,8 +345,6 @@ class TracklistController(object):
         :type tracks: list of :class:`mopidy.models.Track` or :class:`None`
         :param at_position: position in tracklist to add tracks
         :type at_position: int or :class:`None`
-        :param uri: URI for tracks to add
-        :type uri: string or :class:`None`
         :param uris: list of URIs for tracks to add
         :type uris: list of string or :class:`None`
         :rtype: list of :class:`mopidy.models.TlTrack`
@@ -358,27 +353,20 @@ class TracklistController(object):
             The ``uris`` argument.
 
         .. deprecated:: 1.0
-            The ``tracks`` and ``uri`` arguments. Use ``uris``.
+            The ``tracks`` argument. Use ``uris``.
         """
-        if sum(o is not None for o in [tracks, uri, uris]) != 1:
+        if sum(o is not None for o in [tracks, uris]) != 1:
             raise ValueError(
-                'Exactly one of "tracks", "uri" or "uris" must be set')
+                'Exactly one of "tracks" or "uris" must be set')
 
         tracks is None or validation.check_instances(tracks, Track)
-        uri is None or validation.check_uri(uri)
         uris is None or validation.check_uris(uris)
         validation.check_integer(at_position or 0)
 
         if tracks:
             deprecation.warn('core.tracklist.add:tracks_arg')
 
-        if uri:
-            deprecation.warn('core.tracklist.add:uri_arg')
-
         if tracks is None:
-            if uri is not None:
-                uris = [uri]
-
             tracks = []
             track_map = self.core.library.lookup(uris=uris)
             for uri in uris:
@@ -415,7 +403,7 @@ class TracklistController(object):
         self._tl_tracks = []
         self._increase_version()
 
-    def filter(self, criteria=None, **kwargs):
+    def filter(self, criteria):
         """
         Filter the tracklist by the given criterias.
 
@@ -440,14 +428,7 @@ class TracklistController(object):
         :param criteria: on or more criteria to match by
         :type criteria: dict, of (string, list) pairs
         :rtype: list of :class:`mopidy.models.TlTrack`
-
-        .. deprecated:: 1.1
-            Providing the criteria via ``kwargs``.
         """
-        if kwargs:
-            deprecation.warn('core.tracklist.filter:kwargs_criteria')
-
-        criteria = criteria or kwargs
         tlids = criteria.pop('tlid', [])
         validation.check_query(criteria, validation.TRACKLIST_FIELDS)
         validation.check_instances(tlids, int)
@@ -494,7 +475,7 @@ class TracklistController(object):
         self._tl_tracks = new_tl_tracks
         self._increase_version()
 
-    def remove(self, criteria=None, **kwargs):
+    def remove(self, criteria):
         """
         Remove the matching tracks from the tracklist.
 
@@ -505,14 +486,8 @@ class TracklistController(object):
         :param criteria: on or more criteria to match by
         :type criteria: dict
         :rtype: list of :class:`mopidy.models.TlTrack` that was removed
-
-        .. deprecated:: 1.1
-            Providing the criteria  via ``kwargs``.
         """
-        if kwargs:
-            deprecation.warn('core.tracklist.remove:kwargs_criteria')
-
-        tl_tracks = self.filter(criteria or kwargs)
+        tl_tracks = self.filter(criteria)
         for tl_track in tl_tracks:
             position = self._tl_tracks.index(tl_track)
             del self._tl_tracks[position]

@@ -16,14 +16,6 @@ _MESSAGES = {
     'mpd.protocol.current_playlist.playlist':
         'Do not use this, instead use playlistinfo',
 
-    # Deprecated features in core libary:
-    'core.library.lookup:uri_arg':
-        'library.lookup() "uri" argument is deprecated',
-    'core.library.search:kwargs_query':
-        'library.search() with "kwargs" as query is deprecated',
-    'core.library.search:empty_query':
-        'library.search() with empty "query" argument deprecated',
-
     # Deprecated features in core playback:
     'core.playback.play:tl_track_kwargs':
         'playback.play() with "tl_track" argument is pending deprecation use '
@@ -32,12 +24,6 @@ _MESSAGES = {
     # Deprecated features in core tracklist:
     'core.tracklist.add:tracks_arg':
         'tracklist.add() "tracks" argument is deprecated',
-    'core.tracklist.add:uri_arg':
-        'tracklist.add() "uri" argument is deprecated',
-    'core.tracklist.filter:kwargs_criteria':
-        'tracklist.filter() with "kwargs" as criteria is deprecated',
-    'core.tracklist.remove:kwargs_criteria':
-        'tracklist.remove() with "kwargs" as criteria is deprecated',
 
     'core.tracklist.eot_track':
         'tracklist.eot_track() is pending deprecation, use '
@@ -49,6 +35,7 @@ _MESSAGES = {
         'tracklist.previous_track() is pending deprecation, use '
         'tracklist.get_previous_tlid()',
 
+    # Deprecated features in the models
     'models.immutable.copy':
         'ImmutableObject.copy() is deprecated, use ImmutableObject.replace()',
 }
