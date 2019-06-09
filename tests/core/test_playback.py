@@ -11,7 +11,7 @@ from mopidy.internal import deprecation
 from mopidy.internal.models import PlaybackState
 from mopidy.models import Track
 
-from tests import dummy_audio
+from tests import dummy_audio, dummy_backend
 
 
 class MyTestPlaybackProvider(backend.PlaybackProvider):
@@ -55,15 +55,9 @@ class MyTestPlaybackProvider(backend.PlaybackProvider):
             return uri
 
 
-# TODO: Replace this with dummy_backend now that it uses a real
-# playbackprovider Since we rely on our DummyAudio to actually emit events we
-# need a "real" backend and not a mock so the right calls make it through to
-# audio.
-class MyTestBackend(pykka.ThreadingActor, backend.Backend):
-    uri_schemes = ['dummy']
-
+class MyTestBackend(dummy_backend.DummyBackend):
     def __init__(self, config, audio):
-        super(MyTestBackend, self).__init__()
+        super(MyTestBackend, self).__init__(config, audio)
         self.playback = MyTestPlaybackProvider(audio=audio, backend=self)
 
 
