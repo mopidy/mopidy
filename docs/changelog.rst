@@ -54,6 +54,10 @@ Library controller
   :meth:`mopidy.core.LibraryController.lookup`.
   Use the ``uris`` argument instead.
 
+- Removed the support for passing the search query as keyword arguments to
+  :meth:`mopidy.core.LibraryController.search`.
+  Use the ``query`` argument instead.
+
 - :meth:`mopidy.core.LibraryController.search` now returns an empty result
   if there is no ``query``. Previously, it returned the full music library.
   This does not work with online music services,

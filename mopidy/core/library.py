@@ -7,7 +7,7 @@ import operator
 
 from mopidy import compat, exceptions, models
 from mopidy.compat import urllib
-from mopidy.internal import deprecation, validation
+from mopidy.internal import validation
 
 
 logger = logging.getLogger(__name__)
@@ -239,7 +239,7 @@ class LibraryController(object):
             with _backend_error_handling(backend):
                 future.get()
 
-    def search(self, query=None, uris=None, exact=False, **kwargs):
+    def search(self, query, uris=None, exact=False):
         """
         Search the library for tracks where ``field`` contains ``values``.
 
@@ -280,18 +280,12 @@ class LibraryController(object):
 
         .. versionadded:: 1.0
             The ``exact`` keyword argument.
-
-        .. deprecated:: 1.1
-            Providing the search query via ``kwargs`` is no longer supported.
         """
-        query = _normalize_query(query or kwargs)
+        query = _normalize_query(query)
 
         uris is None or validation.check_uris(uris)
-        query is None or validation.check_query(query)
+        validation.check_query(query)
         validation.check_boolean(exact)
-
-        if kwargs:
-            deprecation.warn('core.library.search:kwargs_query')
 
         if not query:
             return []

@@ -16,10 +16,6 @@ _MESSAGES = {
     'mpd.protocol.current_playlist.playlist':
         'Do not use this, instead use playlistinfo',
 
-    # Deprecated features in core libary:
-    'core.library.search:kwargs_query':
-        'library.search() with "kwargs" as query is deprecated',
-
     # Deprecated features in core playback:
     'core.playback.play:tl_track_kwargs':
         'playback.play() with "tl_track" argument is pending deprecation use '
@@ -39,6 +35,7 @@ _MESSAGES = {
         'tracklist.previous_track() is pending deprecation, use '
         'tracklist.get_previous_tlid()',
 
+    # Deprecated features in the models
     'models.immutable.copy':
         'ImmutableObject.copy() is deprecated, use ImmutableObject.replace()',
 }
