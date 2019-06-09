@@ -27,8 +27,9 @@ Dependencies
 Core API
 --------
 
-- Removed properties and methods that has been deprecated since 1.0, released
-  in 2015. Everything removed have replacements that should be used instead.
+- Removed properties, methods, and arguments that have been deprecated since
+  1.0, released in 2015.
+  Everything removed have replacements that should be used instead.
   See below for a full list of removals and replacements.
   (Fixes: :issue:`1083`, :issue:`1461`, PR: :issue:`1768`, :issue:`1769`)
 
@@ -120,6 +121,10 @@ Tracklist controller
   - :attr:`mopidy.core.TracklistController.random`
   - :attr:`mopidy.core.TracklistController.repeat`
   - :attr:`mopidy.core.TracklistController.single`
+
+- Removed the ``uri`` argument to
+  :meth:`mopidy.core.TracklistController.add`.
+  Use the ``uris`` argument instead.
 
 Backend API
 -----------
