@@ -126,6 +126,11 @@ Tracklist controller
   :meth:`mopidy.core.TracklistController.add`.
   Use the ``uris`` argument instead.
 
+- Removed the support for passing filter criterias as keyword arguments to
+  :meth:`mopidy.core.TracklistController.filter`.
+  Use the ``criteria`` argument instead.
+
+
 Backend API
 -----------
 

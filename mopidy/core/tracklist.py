@@ -403,7 +403,7 @@ class TracklistController(object):
         self._tl_tracks = []
         self._increase_version()
 
-    def filter(self, criteria=None, **kwargs):
+    def filter(self, criteria):
         """
         Filter the tracklist by the given criterias.
 
@@ -428,14 +428,7 @@ class TracklistController(object):
         :param criteria: on or more criteria to match by
         :type criteria: dict, of (string, list) pairs
         :rtype: list of :class:`mopidy.models.TlTrack`
-
-        .. deprecated:: 1.1
-            Providing the criteria via ``kwargs``.
         """
-        if kwargs:
-            deprecation.warn('core.tracklist.filter:kwargs_criteria')
-
-        criteria = criteria or kwargs
         tlids = criteria.pop('tlid', [])
         validation.check_query(criteria, validation.TRACKLIST_FIELDS)
         validation.check_instances(tlids, int)
