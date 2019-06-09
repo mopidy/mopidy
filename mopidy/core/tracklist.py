@@ -475,7 +475,7 @@ class TracklistController(object):
         self._tl_tracks = new_tl_tracks
         self._increase_version()
 
-    def remove(self, criteria=None, **kwargs):
+    def remove(self, criteria):
         """
         Remove the matching tracks from the tracklist.
 
@@ -486,14 +486,8 @@ class TracklistController(object):
         :param criteria: on or more criteria to match by
         :type criteria: dict
         :rtype: list of :class:`mopidy.models.TlTrack` that was removed
-
-        .. deprecated:: 1.1
-            Providing the criteria  via ``kwargs``.
         """
-        if kwargs:
-            deprecation.warn('core.tracklist.remove:kwargs_criteria')
-
-        tl_tracks = self.filter(criteria or kwargs)
+        tl_tracks = self.filter(criteria)
         for tl_track in tl_tracks:
             position = self._tl_tracks.index(tl_track)
             del self._tl_tracks[position]

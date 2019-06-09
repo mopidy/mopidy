@@ -32,8 +32,6 @@ _MESSAGES = {
     # Deprecated features in core tracklist:
     'core.tracklist.add:tracks_arg':
         'tracklist.add() "tracks" argument is deprecated',
-    'core.tracklist.remove:kwargs_criteria':
-        'tracklist.remove() with "kwargs" as criteria is deprecated',
 
     'core.tracklist.eot_track':
         'tracklist.eot_track() is pending deprecation, use '
