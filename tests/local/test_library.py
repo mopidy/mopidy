@@ -602,29 +602,11 @@ class LocalLibraryProviderTest(unittest.TestCase):
         result = self.library.get_images([track.uri for track in self.tracks])
         self.assertEqual(result, {track.uri: tuple() for track in self.tracks})
 
-    @mock.patch.object(json.JsonLibrary, 'lookup')
-    def test_default_get_images_impl_album_images(self, mock_lookup):
+    def test_default_get_images_impl(self):
         library = actor.LocalBackend(config=self.config, audio=None).library
 
-        image = Image(uri='imageuri')
-        album = Album(images=[image.uri])
-        track = Track(uri='trackuri', album=album)
-        mock_lookup.return_value = [track]
-
-        result = library.get_images([track.uri])
-        self.assertEqual(result, {track.uri: [image]})
-
-    @mock.patch.object(json.JsonLibrary, 'lookup')
-    def test_default_get_images_impl_single_track(self, mock_lookup):
-        library = actor.LocalBackend(config=self.config, audio=None).library
-
-        image = Image(uri='imageuri')
-        album = Album(images=[image.uri])
-        track = Track(uri='trackuri', album=album)
-        mock_lookup.return_value = track
-
-        result = library.get_images([track.uri])
-        self.assertEqual(result, {track.uri: [image]})
+        result = library.get_images(['trackuri'])
+        self.assertEqual(result, {})
 
     @mock.patch.object(json.JsonLibrary, 'get_images')
     def test_local_library_get_images(self, mock_get_images):

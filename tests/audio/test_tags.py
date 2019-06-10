@@ -248,8 +248,7 @@ class TagsToTrackTest(unittest.TestCase):
 
     def test_missing_album_musicbrainz_id(self):
         del self.tags['musicbrainz-albumid']
-        album = self.track.album.replace(musicbrainz_id=None,
-                                         images=[])
+        album = self.track.album.replace(musicbrainz_id=None)
         self.check(self.track.replace(album=album))
 
     def test_multiple_album_musicbrainz_id(self):
