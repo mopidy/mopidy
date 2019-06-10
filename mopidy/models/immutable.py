@@ -4,7 +4,6 @@ import copy
 import itertools
 import weakref
 
-from mopidy.internal import deprecation
 from mopidy.models.fields import Field
 
 
@@ -88,14 +87,6 @@ class ImmutableObject(object):
 
     def __ne__(self, other):
         return not self.__eq__(other)
-
-    def copy(self, **values):
-        """
-        .. deprecated:: 1.1
-            Use :meth:`replace` instead.
-        """
-        deprecation.warn('model.immutable.copy')
-        return self.replace(**values)
 
     def replace(self, **kwargs):
         """
