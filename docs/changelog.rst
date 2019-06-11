@@ -155,7 +155,14 @@ Backend API
 Models
 ------
 
-- (no changes yet)
+- Remove ``.copy()`` method on all model classes.
+  Use the ``.replace()`` method instead.
+  (Fixes: :issue:`1464`, PR: :issue:`1774`)
+
+- Remove :attr:`mopidy.models.Album.images`.
+  Clients should use :meth:`mopidy.core.LibraryController.get_images` instead.
+  Backends should implement :meth:`mopidy.backend.LibraryProvider.get_images`.
+  (Fixes: :issue:`1464`, PR: :issue:`1774`)
 
 Extension support
 -----------------

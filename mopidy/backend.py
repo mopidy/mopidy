@@ -2,7 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
-from mopidy import listener, models
+from mopidy import listener
 
 
 logger = logging.getLogger(__name__)
@@ -120,18 +120,9 @@ class LibraryProvider(object):
 
         *MAY be implemented by subclass.*
 
-        Default implementation will simply call lookup and try and use the
-        album art for any tracks returned. Most extensions should replace this
-        with something smarter or simply return an empty dictionary.
+        Default implementation will simply return an empty dictionary.
         """
-        result = {}
-        for uri in uris:
-            image_uris = set()
-            for track in self.lookup(uri):
-                if track.album and track.album.images:
-                    image_uris.update(track.album.images)
-            result[uri] = [models.Image(uri=u) for u in image_uris]
-        return result
+        return {}
 
     def lookup(self, uri):
         """

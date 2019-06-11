@@ -34,10 +34,6 @@ _MESSAGES = {
     'core.tracklist.previous_track':
         'tracklist.previous_track() is pending deprecation, use '
         'tracklist.get_previous_tlid()',
-
-    # Deprecated features in the models
-    'models.immutable.copy':
-        'ImmutableObject.copy() is deprecated, use ImmutableObject.replace()',
 }
 
 
