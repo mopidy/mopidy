@@ -31,11 +31,11 @@ file:///tmp/baz
 
 PLS = b"""[Playlist]
 NumberOfEntries=3
-File1=file:///tmp/foo
+File1="file:///tmp/foo"
 Title1=Sample Title
 Length1=123
 
-File2=file:///tmp/bar
+File2='file:///tmp/bar'
 Title2=Example \xc5\xa7\xc5\x95
 Length2=321
 File3=file:///tmp/baz

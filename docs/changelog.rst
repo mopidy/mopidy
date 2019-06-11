@@ -226,11 +226,15 @@ Bug fix release.
 - Audio: Prevent buffering handling interfering with track changes. (Fixes:
   :issue:`1722`, PR: :issue:`1740`)
 
-- Local: Add .pdf and .zip to the default
+- Local: Add ``.pdf`` and ``.zip`` to the default
   confval:`local/excluded_file_extensions` config value. (PR: :issue:`1737`)
 
 - File: Synchronised the default confval:`file/excluded_file_extensions` config
   values with confval:`local/excluded_file_extensions`. (PR: :issue:`1743`)
+
+- Stream: Fix error when playing stream from `.pls` playlist with quoted URLs.
+  (Fixes: :issue:`1770`, PR: :issue:`1771`)
+
 
 v2.2.2 (2018-12-29)
 ===================
