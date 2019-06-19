@@ -4,7 +4,7 @@
 Versioning
 **********
 
-Mopidy follows `Semantic Versioning <http://semver.org/>`_. In summary this
+Mopidy follows `Semantic Versioning <https://semver.org/>`_. In summary this
 means that our version numbers have three parts, MAJOR.MINOR.PATCH, which
 change according to the following rules:
 

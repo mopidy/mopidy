@@ -18,7 +18,7 @@ Sharing config and log output
 =============================
 
 If you're getting help at IRC, we recommend that you use a pastebin, like
-`pastebin.com <http://pastebin.com/>`_ or `GitHub Gist
+`pastebin.com <https://pastebin.com/>`_ or `GitHub Gist
 <https://gist.github.com/>`_, to share your configuration and log output.
 Pasting more than a couple of lines on IRC is generally frowned upon. On the
 mailing list or when reporting an issue, somewhat longer text dumps are
@@ -79,7 +79,7 @@ Debugging GStreamer
 
 If you really want to dig in and debug GStreamer behaviour, then check out the
 `Debugging section
-<http://gstreamer.freedesktop.org/data/doc/gstreamer/head/manual/html/section-checklist-debug.html>`_
+<https://gstreamer.freedesktop.org/documentation/application-development/appendix/checklist-element.html?gi-language=python>`_
 of GStreamer's documentation for your options. Note that Mopidy does not
 support the GStreamer command line options, like ``--gst-debug-level=3``, but
 setting GStreamer environment variables, like :envvar:`GST_DEBUG`, works with

@@ -32,7 +32,7 @@ named Soundspot to Mopidy, you would name your extension's Python package
 ``mopidy_soundspot``.
 
 The extension must be shipped with a ``setup.py`` file and be registered on
-`PyPI <https://pypi.python.org/>`_.  The name of the distribution on PyPI would
+`PyPI <https://pypi.org/>`_.  The name of the distribution on PyPI would
 be something like "Mopidy-Soundspot". Make sure to include the name "Mopidy"
 somewhere in that name and that you check the capitalization. This is the name
 users will use when they install your extension from PyPI.
@@ -61,7 +61,7 @@ Example content for the most important files follows below.
 cookiecutter project template
 =============================
 
-We've also made a `cookiecutter <http://cookiecutter.readthedocs.org/>`_
+We've also made a `cookiecutter <https://cookiecutter.readthedocs.io/>`_
 project template for `creating new Mopidy extensions
 <https://github.com/mopidy/cookiecutter-mopidy-ext>`_. If you install
 cookiecutter and run a single command, you're asked a few questions about the
@@ -215,7 +215,7 @@ file::
 
 For details on the ``MANIFEST.in`` file format, check out the `distutils docs
 <https://docs.python.org/2/distutils/sourcedist.html#manifest-template>`_.
-`check-manifest <https://pypi.python.org/pypi/check-manifest>`_ is a very
+`check-manifest <https://pypi.org/project/check-manifest>`_ is a very
 useful tool to check your ``MANIFEST.in`` file for completeness.
 
 
@@ -485,7 +485,7 @@ If you make HTTP requests please make sure to respect the :ref:`proxy configs
 configured by the Mopidy user. To make this easier for extension developers,
 the helper function :func:`mopidy.httpclient.format_proxy` was added in Mopidy
 1.1. This function returns the proxy settings `formatted the way Requests
-expects <http://www.python-requests.org/en/latest/user/advanced/#proxies>`__.
+expects <https://2.python-requests.org/en/master/user/advanced/#proxies>`__.
 
 User-Agent strings
 ------------------
@@ -505,7 +505,7 @@ Example using Requests sessions
 -------------------------------
 
 Most Mopidy extensions that make HTTP requests use the `Requests
-<http://www.python-requests.org/>`_ library to do so. When using Requests, the
+<https://2.python-requests.org/>`_ library to do so. When using Requests, the
 most convenient way to make sure the proxy and User-Agent header is set
 properly is to create a Requests session object and use that object to make all
 your HTTP requests::
@@ -541,7 +541,7 @@ your HTTP requests::
     # ``session`` object.
 
 For further details, see Requests' docs on `session objects
-<http://www.python-requests.org/en/latest/user/advanced/#session-objects>`__.
+<https://2.python-requests.org/en/master/user/advanced/#session-objects>`__.
 
 Testing extensions
 ==================
@@ -554,8 +554,8 @@ extension in some unanticipated way.
 Before getting started, it is important to familiarize yourself with the
 Python `mock library <https://docs.python.org/dev/library/unittest.mock.html>`_.
 When it comes to running tests, Mopidy typically makes use of testing tools
-like `tox <https://tox.readthedocs.org/en/latest/>`_ and
-`pytest <http://pytest.org/latest/>`_.
+like `tox <https://tox.readthedocs.io/>`_ and
+`pytest <https://docs.pytest.org/>`_.
 
 Testing approach
 ----------------
@@ -646,9 +646,9 @@ file, and mocking the audio actor::
 The following libraries might be useful for mocking any HTTP requests that
 your extension makes:
 
-- `responses <https://pypi.python.org/pypi/responses>`_ - A utility library for
+- `responses <https://pypi.org/project/responses>`_ - A utility library for
   mocking out the requests Python library.
-- `vcrpy <https://pypi.python.org/pypi/vcrpy>`_ - Automatically mock your HTTP
+- `vcrpy <https://pypi.org/project/vcrpy>`_ - Automatically mock your HTTP
   interactions to simplify and speed up testing.
 
 At the very least, you'll probably want to patch ``requests`` or any other web

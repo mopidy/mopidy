@@ -9,7 +9,7 @@ If you are running OS X, you can install everything needed with Homebrew.
 
        xcode-select --install
 
-#. Install `Homebrew <https://github.com/Homebrew/homebrew>`_.
+#. Install `Homebrew <https://brew.sh/>`_.
 
 #. If you are already using Homebrew, make sure your installation is up to
    date before you continue::

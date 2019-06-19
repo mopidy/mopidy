@@ -71,7 +71,7 @@ please follow the directions :ref:`here <contributing>`.
        sudo pip install -U mopidy
 
    This will use ``pip`` to install the latest release of `Mopidy from PyPI
-   <https://pypi.python.org/pypi/Mopidy>`_. To upgrade Mopidy to future
+   <https://pypi.org/project/Mopidy>`_. To upgrade Mopidy to future
    releases, just rerun this command.
 
 #. Finally, you need to set a couple of :doc:`config values </config>`, and

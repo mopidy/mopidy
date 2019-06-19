@@ -45,7 +45,7 @@ Mopidy-Beets
 https://github.com/mopidy/mopidy-beets
 
 Provides a backend for playing music from your `Beets
-<http://beets.radbox.org/>`_ music library through Beets' web extension.
+<https://beets.io/>`_ music library through Beets' web extension.
 
 
 Mopidy-Dirble
@@ -151,7 +151,7 @@ Mopidy-Podcast-gpodder
 https://github.com/tkem/mopidy-podcast-gpodder
 
 Extension for Mopidy-Podcast that lets you search and browse podcasts from the
-`gpodder <http://gpodder.org/>`_ web site.
+`gpodder <https://gpodder.github.io/>`_ web site.
 
 
 Mopidy-Podcast-iTunes
@@ -169,8 +169,8 @@ Mopidy-radio-de
 https://github.com/hechtus/mopidy-radio-de
 
 Extension for listening to Internet radio stations and podcasts listed at
-`radio.de <http://www.radio.de/>`_, `radio.net <http://www.radio.net/>`_,
-`radio.fr <http://www.radio.fr/>`_, and `radio.at <http://www.radio.at/>`_.
+`radio.de <https://www.radio.de/>`_, `radio.net <https://www.radio.net/>`_,
+`radio.fr <https://www.radio.fr/>`_, and `radio.at <https://www.radio.at/>`_.
 
 
 Mopidy-RNZ
@@ -178,7 +178,7 @@ Mopidy-RNZ
 
 https://github.com/danbrough/mopidy-rnz
 
-Extension for playing `Radio New Zealands <http://www.radionz.co.nz>`_
+Extension for playing `Radio New Zealands <https://www.rnz.co.nz>`_
 podcasts,live streams and latest news bulletin.
 
 
@@ -240,7 +240,7 @@ Mopidy-TuneIn
 https://github.com/kingosticks/mopidy-tunein
 
 Provides a backend for playing music from the `TuneIn
-<http://tunein.com/>`_ online radio service.
+<https://tunein.com/>`_ online radio service.
 
 
 Mopidy-VKontakte

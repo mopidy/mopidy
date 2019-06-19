@@ -55,7 +55,7 @@ Mopidy-Touchscreen
 https://github.com/9and3r/mopidy-touchscreen
 
 Extension for displaying track info and controlling Mopidy from a touch screen
-using `PyGame <http://www.pygame.org/>`_/SDL.
+using `PyGame <https://www.pygame.org/>`_/SDL.
 
 
 Mopidy-TtsGpio
