@@ -18,7 +18,7 @@ How to for Raspbian
 ===================
 
 #. Download the latest Raspbian Desktop or Lite disk image from
-   http://www.raspberrypi.org/downloads/raspbian/.
+   https://www.raspberrypi.org/downloads/raspbian/.
 
    Unless you need a full graphical desktop the Lite image is preferable since
    it's much smaller.
@@ -88,5 +88,5 @@ You can test sound output independent of Mopidy by running::
 
 If you hear a voice saying "Front Center", then your sound is working.
 
-If you want to change your audio output setting, simply rerun ``sudo 
+If you want to change your audio output setting, simply rerun ``sudo
 raspi-config``.

@@ -19,9 +19,8 @@ Mopidy and its extensions:
   Just sign in and fire away.
 
 - Our IRC channel: `#mopidy <https://webchat.freenode.net/?channels=#mopidy>`_
-  on `irc.freenode.net <http://freenode.net>`_,
-  with public `searchable logs <https://botbot.me/freenode/mopidy/>`_. Be
-  prepared to hang around for a while, as we're not always around to answer
+  on `irc.freenode.net <http://freenode.net>`_.
+  Be prepared to hang around for a while, as we're not always around to answer
   straight away.
 
 Before asking for help, it might be worth your time to read the
@@ -119,13 +118,13 @@ Pull request guidelines
      <http://365git.tumblr.com/post/3308646748/writing-git-commit-messages>`_
 
    - `A Note About Git Commit Messages
-     <http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html>`_
+     <https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html>`_
 
    - `On commit messages
      <http://who-t.blogspot.ch/2009/12/on-commit-messages.html>`_
 
 #. Send a pull request to the ``develop`` branch. See the `GitHub pull request
-   docs <https://help.github.com/articles/using-pull-requests>`_ for help.
+   docs <https://help.github.com/en/articles/about-pull-requests>`_ for help.
 
 .. note::
 

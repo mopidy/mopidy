@@ -40,9 +40,9 @@ Using Mopidy-MPRIS and Rygel, or using Mopidy-MPD and upmpdcli.
 Mopidy-MPD and upmpdcli
 -----------------------
 
-`upmpdcli <http://www.lesbonscomptes.com/upmpdcli/>`_ is recommended, since it
-is easier to setup, and offers `OpenHome 
-<http://www.openhome.org/wiki/OhMedia>`_ compatibility. upmpdcli exposes a UPnP
+`upmpdcli <https://www.lesbonscomptes.com/upmpdcli/>`_ is recommended, since it
+is easier to setup, and offers `OpenHome
+<http://wiki.openhome.org/wiki/OhMedia>`_ compatibility. upmpdcli exposes a UPnP
 MediaRenderer to the network, while using the MPD protocol to control Mopidy.
 
 1. Install upmpdcli. On Debian/Ubuntu::

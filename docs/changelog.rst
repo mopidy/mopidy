@@ -215,7 +215,8 @@ Audio
 - Remove the method :meth:`mopidy.audio.Audio.emit_end_of_stream`, which has
   been deprecated since 1.0. (Fixes: :issue:`1465`, PR: :issue:`1705`)
 
-v2.2.3 (UNRELEASED)
+
+v2.2.3 (2019-06-20)
 ===================
 
 Bug fix release.
@@ -227,13 +228,19 @@ Bug fix release.
   :issue:`1722`, PR: :issue:`1740`)
 
 - Local: Add ``.pdf`` and ``.zip`` to the default
-  confval:`local/excluded_file_extensions` config value. (PR: :issue:`1737`)
+  :confval:`local/excluded_file_extensions` config value. (PR: :issue:`1737`)
 
-- File: Synchronised the default confval:`file/excluded_file_extensions` config
-  values with confval:`local/excluded_file_extensions`. (PR: :issue:`1743`)
+- File: Synchronised the default :confval:`file/excluded_file_extensions`
+  config values with :confval:`local/excluded_file_extensions`. (PR:
+  :issue:`1743`)
 
-- Stream: Fix error when playing stream from `.pls` playlist with quoted URLs.
-  (Fixes: :issue:`1770`, PR: :issue:`1771`)
+- Stream: Fix error when playing stream from ``.pls`` playlist with quoted
+  URLs. (Fixes: :issue:`1770`, PR: :issue:`1771`)
+
+- Docs: Resize and compress images, reducing the release tarball size from 3.5
+  to 1.1 MB.
+
+- Docs: Fix broken links.
 
 
 v2.2.2 (2018-12-29)

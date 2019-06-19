@@ -396,7 +396,7 @@ class _Handler(object):
 class Audio(pykka.ThreadingActor):
 
     """
-    Audio output through `GStreamer <http://gstreamer.freedesktop.org/>`_.
+    Audio output through `GStreamer <https://gstreamer.freedesktop.org/>`_.
     """
 
     #: The GStreamer state mapped to :class:`mopidy.audio.PlaybackState`

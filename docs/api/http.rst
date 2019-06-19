@@ -61,7 +61,7 @@ JSON-RPC 2.0 messages
 JSON-RPC 2.0 messages can be recognized by checking for the key named
 ``jsonrpc`` with the string value ``2.0``. For details on the messaging format,
 please refer to the `JSON-RPC 2.0 spec
-<http://www.jsonrpc.org/specification>`_.
+<https://www.jsonrpc.org/specification>`_.
 
 All methods in the :ref:`core-api` is made available through JSON-RPC calls
 over the WebSocket. For example, :meth:`mopidy.core.PlaybackController.play` is

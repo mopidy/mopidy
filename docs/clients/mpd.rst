@@ -6,7 +6,7 @@ MPD clients
 
 This is a list of MPD clients we either know works well with Mopidy, or that we
 know won't work well. For a more exhaustive list of MPD clients, see
-http://mpd.wikia.com/wiki/Clients.
+https://mpd.fandom.com/wiki/Clients.
 
 .. contents:: Contents
     :local:
@@ -65,19 +65,19 @@ Cantata
 `Cantata <https://github.com/CDrummond/cantata>`_ is a graphical MPD client
 with support for Linux, mac OS, and Windows.
 
-.. image:: mpd-client-cantata.png
-    :width: 1232
-    :height: 710
+.. image:: mpd-client-cantata.jpg
+    :width: 696
+    :height: 401
 
 GMPC
 ----
 
-`GMPC <http://gmpc.wikia.com/wiki/Gnome_Music_Player_Client>`_ is a graphical MPD client (GTK+) which works
+`GMPC <https://gmpc.fandom.com/wiki/Gnome_Music_Player_Client>`_ is a graphical MPD client (GTK+) which works
 well with Mopidy.
 
-.. image:: mpd-client-gmpc.png
-    :width: 1000
-    :height: 565
+.. image:: mpd-client-gmpc.jpg
+    :width: 696
+    :height: 393
 
 GMPC may sometimes requests a lot of meta data of related albums, artists, etc.
 This takes more time with Mopidy, which needs to query Spotify for the data,
@@ -100,7 +100,7 @@ Sonata
 `Sonata <https://github.com/multani/sonata>`_ is a graphical MPD client (GTK+).
 It generally works well with Mopidy, except for search.
 
-.. image:: mpd-client-sonata.png
+.. image:: mpd-client-sonata.jpg
     :width: 475
     :height: 424
 
@@ -176,9 +176,9 @@ other web clients, see :ref:`http-clients`.
 Rompr
 -----
 
-.. image:: rompr.png
-    :width: 557
-    :height: 600
+.. image:: rompr.jpg
+    :width: 696
+    :height: 545
 
 `Rompr <https://fatg3erman.github.io/RompR/>`_ is a web based MPD client.
 `mrvanes <https://github.com/mrvanes>`_, a Mopidy and Rompr user, said: "These

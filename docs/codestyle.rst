@@ -21,7 +21,7 @@ Code style
     bar = 'I am a bytestring, but was it intentional?'
 
 - Follow :pep:`8` unless otherwise noted. `flake8
-  <https://pypi.python.org/pypi/flake8>`_  should be used to check your code
+  <https://pypi.org/project/flake8>`_  should be used to check your code
   against the guidelines.
 
 - Use four spaces for indentation, *never* tabs.

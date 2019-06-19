@@ -21,9 +21,9 @@ https://github.com/dz0ny/mopidy-api-explorer
 
 Web extension for browsing the Mopidy HTTP API.
 
-.. image:: /ext/api_explorer.png
-    :width: 1176
-    :height: 713
+.. image:: /ext/api_explorer.jpg
+    :width: 696
+    :height: 422
 
 To install, run::
 
@@ -43,7 +43,7 @@ Mopidy extension to automate music playback based on time of day.
     goals. Other web extensions will not work as expected when this extension
     is installed.
 
-.. image:: /ext/auto.png
+.. image:: /ext/auto.jpg
     :width: 533
     :height: 370
 
@@ -62,8 +62,8 @@ extensions in a user-friendly and intuitive interface. Built using React and
 Redux. Made by James Barnsley.
 
 .. image:: /ext/iris.jpg
-    :width: 888
-    :height: 646
+    :width: 696
+    :height: 506
 
 To install, run::
 
@@ -95,9 +95,9 @@ https://github.com/matgallacher/mopidy-material-webclient
 
 A Mopidy web client with an Android Material design feel.
 
-.. image:: /ext/material_webclient.png
-   :width: 960
-   :height: 520
+.. image:: /ext/material_webclient.jpg
+   :width: 696
+   :height: 377
 
 To install, run::
 
@@ -112,9 +112,9 @@ https://github.com/tkem/mopidy-mobile
 A Mopidy web client extension and hybrid mobile app, made with Ionic,
 AngularJS and Apache Cordova by Thomas Kemmer.
 
-.. image:: /ext/mobile.png
-    :width: 1024
-    :height: 606
+.. image:: /ext/mobile.jpg
+    :width: 696
+    :height: 412
 
 To install, run::
 
@@ -128,9 +128,9 @@ https://github.com/martijnboland/moped
 
 A Mopidy web client made with AngularJS by Martijn Boland.
 
-.. image:: /ext/moped.png
-    :width: 720
-    :height: 450
+.. image:: /ext/moped.jpg
+    :width: 696
+    :height: 435
 
 To install, run::
 
@@ -147,8 +147,8 @@ a more "complete" Spotify music experience. It's currently targeted at people
 using Spotify through Mopidy. Made by Dirk Groenen.
 
 .. image:: /ext/mopify.jpg
-    :width: 800
-    :height: 416
+    :width: 696
+    :height: 362
 
 To install, run::
 
@@ -162,11 +162,11 @@ https://github.com/pimusicbox/mopidy-musicbox-webclient
 
 The first web client for Mopidy, made with jQuery Mobile by Wouter van Wijk.
 Also the web client used for Wouter's popular `Pi Musicbox
-<http://www.pimusicbox.com/>`_ image for Raspberry Pi.
+<https://www.pimusicbox.com/>`_ image for Raspberry Pi.
 
-.. image:: /ext/musicbox_webclient.png
-    :width: 1312
-    :height: 723
+.. image:: /ext/musicbox_webclient.jpg
+    :width: 696
+    :height: 384
 
 To install, run::
 
@@ -180,7 +180,7 @@ https://github.com/Lesterpig/mopidy-party
 
 Minimal web client designed for collaborative music management during parties.
 
-.. image:: /ext/mopidy_party.png
+.. image:: /ext/mopidy_party.jpg
 
 To install, run::
 
@@ -195,7 +195,7 @@ https://github.com/xolox/mopidy-simple-webclient
 A minimalistic web client targeted for mobile devices. Made with jQuery and
 Bootstrap by Peter Odding.
 
-.. image:: /ext/simple_webclient.png
+.. image:: /ext/simple_webclient.jpg
     :width: 473
     :height: 373
 
@@ -221,11 +221,11 @@ https://github.com/cowbell/mopster
 Simple web client hosted online written in Ember.js and styled using basic
 Bootstrap by Wojciech Wnętrzak.
 
-.. image:: /ext/mopster.png
-    :width: 1275
-    :height: 628
+.. image:: /ext/mopster.jpg
+    :width: 696
+    :height: 343
 
-To use, just visit http://mopster.cowbell-labs.com/.
+To use, just visit http://mopster.urizen.pl/.
 
 
 Mopidy-Jukepi
@@ -235,9 +235,9 @@ https://github.com/meantimeit/jukepi
 
 A Mopidy web client built with Backbone by connrs.
 
-.. image:: /ext/mopidy_jukepi.png
-    :width: 1260
-    :height: 961
+.. image:: /ext/mopidy_jukepi.jpg
+    :width: 696
+    :height: 531
 
 To install, run::
 

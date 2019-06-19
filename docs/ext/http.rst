@@ -93,8 +93,8 @@ See :ref:`config` for general help on configuring Mopidy.
     allowed and so you don't need an entry for those. However, if your requests
     originate from a different web server, you will need to add an entry for
     that server in this list. For example, to allow requests from a web server
-    at 'http://www.my.web-client.com' you would specify the entry
-    'www.my.web-client.com'.
+    at 'http://my-web-client.example.com' you would specify the entry
+    'my-web-client.example.com'.
 
 .. confval:: http/csrf_protection
 
