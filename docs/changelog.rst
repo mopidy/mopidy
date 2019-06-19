@@ -30,6 +30,9 @@ Bug fix release.
 - Stream: Fix error when playing stream from ``.pls`` playlist with quoted
   URLs. (Fixes: :issue:`1770`, PR: :issue:`1771`)
 
+- Docs: Resize and compress images, reducing the release tarball size from 3.5
+  to 1.1 MB.
+
 
 v2.2.2 (2018-12-29)
 ===================
