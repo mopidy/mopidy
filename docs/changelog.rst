@@ -33,6 +33,8 @@ Bug fix release.
 - Docs: Resize and compress images, reducing the release tarball size from 3.5
   to 1.1 MB.
 
+- Docs: Fix broken links.
+
 
 v2.2.2 (2018-12-29)
 ===================

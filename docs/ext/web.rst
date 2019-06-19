@@ -162,7 +162,7 @@ https://github.com/pimusicbox/mopidy-musicbox-webclient
 
 The first web client for Mopidy, made with jQuery Mobile by Wouter van Wijk.
 Also the web client used for Wouter's popular `Pi Musicbox
-<http://www.pimusicbox.com/>`_ image for Raspberry Pi.
+<https://www.pimusicbox.com/>`_ image for Raspberry Pi.
 
 .. image:: /ext/musicbox_webclient.jpg
     :width: 696
@@ -225,7 +225,7 @@ Bootstrap by Wojciech Wnętrzak.
     :width: 696
     :height: 343
 
-To use, just visit http://mopster.cowbell-labs.com/.
+To use, just visit http://mopster.urizen.pl/.
 
 
 Mopidy-Jukepi

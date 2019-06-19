@@ -6,7 +6,7 @@ MPD clients
 
 This is a list of MPD clients we either know works well with Mopidy, or that we
 know won't work well. For a more exhaustive list of MPD clients, see
-http://mpd.wikia.com/wiki/Clients.
+https://mpd.fandom.com/wiki/Clients.
 
 .. contents:: Contents
     :local:
@@ -72,7 +72,7 @@ with support for Linux, mac OS, and Windows.
 GMPC
 ----
 
-`GMPC <http://gmpc.wikia.com/wiki/Gnome_Music_Player_Client>`_ is a graphical MPD client (GTK+) which works
+`GMPC <https://gmpc.fandom.com/wiki/Gnome_Music_Player_Client>`_ is a graphical MPD client (GTK+) which works
 well with Mopidy.
 
 .. image:: mpd-client-gmpc.jpg

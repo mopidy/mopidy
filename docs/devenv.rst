@@ -54,7 +54,7 @@ your regular Mopidy install, which you set up in the first step, is unaffected
 by your hacking and will always be working.
 
 Most of us use the `virtualenvwrapper
-<https://virtualenvwrapper.readthedocs.org/>`_ to ease working with
+<https://virtualenvwrapper.readthedocs.io/>`_ to ease working with
 virtualenvs, so that's what we'll be using for the examples here. First,
 install and setup virtualenvwrapper as described in their docs.
 
@@ -262,14 +262,14 @@ environments using the ``-e`` option, e.g. to run just unit tests::
 
     tox -e py27
 
-To learn more, see the `tox documentation <http://tox.readthedocs.org/>`_ .
+To learn more, see the `tox documentation <https://tox.readthedocs.io/>`_ .
 
 
 Running unit tests
 ------------------
 
-Under the hood, ``tox -e py27`` will use `pytest <http://pytest.org/>`_ as the
-test runner. We can also use it directly to run all tests::
+Under the hood, ``tox -e py27`` will use `pytest <https://docs.pytest.org/>`_
+as the test runner. We can also use it directly to run all tests::
 
     pytest
 
@@ -335,7 +335,7 @@ We're quite pedantic about :ref:`codestyle` and try hard to keep the Mopidy
 code base a very clean and nice place to work in.
 
 Luckily, you can get very far by using the `flake8
-<http://flake8.readthedocs.org/>`_ linter to check your code for issues before
+<http://flake8.readthedocs.io/>`_ linter to check your code for issues before
 submitting a pull request. Mopidy passes all of flake8's checks, with only a
 very few exceptions configured in :file:`setup.cfg`. You can either run the
 ``flake8`` tox environment, like Travis CI will do on your pull request::
@@ -362,8 +362,8 @@ If successful, the command will not print anything at all.
 Writing documentation
 =====================
 
-To write documentation, we use `Sphinx <http://sphinx-doc.org/>`_. See their
-site for lots of documentation on how to use Sphinx.
+To write documentation, we use `Sphinx <http://www.sphinx-doc.org/>`_. See
+their site for lots of documentation on how to use Sphinx.
 
 .. note::
 
@@ -509,7 +509,7 @@ For clarity, we can rename the ``origin`` remote to ``upstream``::
     upstream        https://github.com/mopidy/mopidy.git (push)
 
 If you haven't already, `fork the repository
-<https://help.github.com/articles/fork-a-repo/>`_ to your own GitHub account.
+<https://help.github.com/en/articles/fork-a-repo>`_ to your own GitHub account.
 
 Then, add the new fork as a remote to your local clone::
 
@@ -553,7 +553,7 @@ When everything is done and committed, push the branch to your fork on GitHub::
 
 Go to the repository on GitHub where you want the change merged, in this case
 https://github.com/mopidy/mopidy, and `create a pull request
-<https://help.github.com/articles/creating-a-pull-request/>`_.
+<https://help.github.com/en/articles/creating-a-pull-request>`_.
 
 
 Updating a pull request
