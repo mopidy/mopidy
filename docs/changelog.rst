@@ -9,6 +9,15 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
+v2.2.4 (UNRELEASED)
+===================
+
+Bug fix release.
+
+- Network: Close connection following an exception in the protocol handler.
+  (Fixes: :issue:`1762`, PR: :issue:`1765`)
+
+
 v2.2.3 (2019-06-20)
 ===================
 
