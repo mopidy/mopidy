@@ -87,7 +87,7 @@ class TestLoadExtensions(object):
 
     def test_load_extensions(self, iter_entry_points_mock):
         mock_entry_point = mock.Mock()
-        mock_entry_point.load.return_value = DummyExtension
+        mock_entry_point.resolve.return_value = DummyExtension
 
         iter_entry_points_mock.return_value = [mock_entry_point]
 
@@ -103,7 +103,7 @@ class TestLoadExtensions(object):
             pass
 
         mock_entry_point = mock.Mock()
-        mock_entry_point.load.return_value = WrongClass
+        mock_entry_point.resolve.return_value = WrongClass
 
         iter_entry_points_mock.return_value = [mock_entry_point]
 
@@ -111,7 +111,7 @@ class TestLoadExtensions(object):
 
     def test_gets_instance(self, iter_entry_points_mock):
         mock_entry_point = mock.Mock()
-        mock_entry_point.load.return_value = DummyExtension()
+        mock_entry_point.resolve.return_value = DummyExtension()
 
         iter_entry_points_mock.return_value = [mock_entry_point]
 
@@ -122,7 +122,7 @@ class TestLoadExtensions(object):
         mock_extension.side_effect = Exception
 
         mock_entry_point = mock.Mock()
-        mock_entry_point.load.return_value = mock_extension
+        mock_entry_point.resolve.return_value = mock_extension
 
         iter_entry_points_mock.return_value = [mock_entry_point]
 
@@ -130,7 +130,7 @@ class TestLoadExtensions(object):
 
     def test_get_config_schema_fails(self, iter_entry_points_mock):
         mock_entry_point = mock.Mock()
-        mock_entry_point.load.return_value = DummyExtension
+        mock_entry_point.resolve.return_value = DummyExtension
 
         iter_entry_points_mock.return_value = [mock_entry_point]
 
@@ -142,7 +142,7 @@ class TestLoadExtensions(object):
 
     def test_get_default_config_fails(self, iter_entry_points_mock):
         mock_entry_point = mock.Mock()
-        mock_entry_point.load.return_value = DummyExtension
+        mock_entry_point.resolve.return_value = DummyExtension
 
         iter_entry_points_mock.return_value = [mock_entry_point]
 
@@ -154,7 +154,7 @@ class TestLoadExtensions(object):
 
     def test_get_command_fails(self, iter_entry_points_mock):
         mock_entry_point = mock.Mock()
-        mock_entry_point.load.return_value = DummyExtension
+        mock_entry_point.resolve.return_value = DummyExtension
 
         iter_entry_points_mock.return_value = [mock_entry_point]
 
