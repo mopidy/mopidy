@@ -62,6 +62,11 @@ might be complicated. As an alternative, you can set the configuration
 :confval:`logging/verbosity` to ``4`` instead of passing ``-vvvv`` on the
 command line.
 
+If you run Mopidy as a system service and are using journald,
+like most modern Linux systems, you can view the Mopidy log by running
+``sudo journalctl -u mopidy``. To save the output to a file for sharing, run
+``sudo journalctl -u mopidy | tee mopidy.log``.
+
 If you want to reduce the logging for some component, see the
 docs for the :confval:`loglevels/*` config section.
 
