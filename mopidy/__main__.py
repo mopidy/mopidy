@@ -65,7 +65,7 @@ def main():
         if args.verbosity_level:
             verbosity_level += args.verbosity_level
 
-        log.setup_logging(config, verbosity_level, args.save_debug_log)
+        log.setup_logging(config, verbosity_level)
 
         extensions = {
             'validate': [], 'config': [], 'disabled': [], 'enabled': []}

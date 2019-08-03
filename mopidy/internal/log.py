@@ -49,8 +49,7 @@ def bootstrap_delayed_logging():
     root.addHandler(_delayed_handler)
 
 
-def setup_logging(config, verbosity_level, save_debug_log):
-
+def setup_logging(config, verbosity_level):
     logging.captureWarnings(True)
 
     if config['logging']['config_file']:
@@ -63,14 +62,6 @@ def setup_logging(config, verbosity_level, save_debug_log):
             # Catch everything as logging does not specify what can go wrong.
             logger.error('Loading logging config %r failed. %s', path, e)
 
-    setup_console_logging(config, verbosity_level)
-    if save_debug_log:
-        setup_debug_logging_to_file(config)
-
-    _delayed_handler.release()
-
-
-def setup_console_logging(config, verbosity_level):
     if verbosity_level < min(LOG_LEVELS.keys()):
         verbosity_level = min(LOG_LEVELS.keys())
     if verbosity_level > max(LOG_LEVELS.keys()):
@@ -97,14 +88,7 @@ def setup_console_logging(config, verbosity_level):
 
     logging.getLogger('').addHandler(handler)
 
-
-def setup_debug_logging_to_file(config):
-    formatter = logging.Formatter(config['logging']['debug_format'])
-    handler = logging.handlers.RotatingFileHandler(
-        config['logging']['debug_file'], maxBytes=10485760, backupCount=3)
-    handler.setFormatter(formatter)
-
-    logging.getLogger('').addHandler(handler)
+    _delayed_handler.release()
 
 
 class VerbosityFilter(logging.Filter):

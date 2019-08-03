@@ -54,9 +54,8 @@ All four options will give you debug level output from Mopidy and extensions,
 while ``-vv``, ``-vvv``, and ``-vvvv`` will give you more log output
 from their dependencies as well.
 
-If you run :option:`mopidy --save-debug-log`, it will save the log equivalent
-with ``-vvv`` to the file ``mopidy.log`` in the directory you ran the command
-from.
+To save a debug log to file for sharing with others, you can run
+``mopidy -vvvv | tee mopidy.log``.
 
 If you want to reduce the logging for some component, see the
 docs for the :confval:`loglevels/*` config section.

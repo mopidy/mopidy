@@ -24,6 +24,14 @@ Dependencies
   GLib that makes these constants and functions available in the new location
   is not known, but is believed to have been released in 2015 or earlier.
 
+Logging
+-------
+
+- The command line option :option:`mopidy --save-debug-log` and the
+  configuration :confval:`logging/debug_file` have been removed.
+  To save a debug log for sharing, run ``mopidy -vvvv | tee mopidy.log``
+  or equivalent.
+
 Core API
 --------
 

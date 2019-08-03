@@ -8,8 +8,8 @@ Synopsis
 ========
 
 mopidy
-    [-h] [--version] [-q] [-v] [--save-debug-log] [--config CONFIG_FILES]
-    [-o CONFIG_OVERRIDES] [COMMAND] ...
+    [-h] [--version] [-q] [-v] [--config CONFIG_FILES] [-o CONFIG_OVERRIDES]
+    [COMMAND] ...
 
 
 Description
@@ -44,11 +44,6 @@ Options
 .. cmdoption:: --verbose, -v
 
     Show more output. Repeat up to four times for even more.
-
-.. cmdoption:: --save-debug-log
-
-    Save debug log to the file specified in the :confval:`logging/debug_file`
-    config value, typically ``./mopidy.log``.
 
 .. cmdoption:: --config <file|directory>
 

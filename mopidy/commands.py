@@ -269,10 +269,6 @@ class RootCommand(Command):
             action='count', dest='verbosity_level', default=0,
             help='more output (repeat up to 4 times for even more)')
         self.add_argument(
-            '--save-debug-log',
-            action='store_true', dest='save_debug_log',
-            help='save debug log to "./mopidy.log"')
-        self.add_argument(
             '--config',
             action='store', dest='config_files', type=config_files_type,
             default=DEFAULT_CONFIG, metavar='FILES',

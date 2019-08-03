@@ -194,11 +194,6 @@ Logging configuration
 
     See `the Python logging docs`_ for details on the format.
 
-.. confval:: logging/debug_file
-
-    The file to dump debug log data to when Mopidy is run with the
-    :option:`mopidy --save-debug-log` option.
-
 .. confval:: logging/config_file
 
     Config file that overrides all logging config values, see `the Python
