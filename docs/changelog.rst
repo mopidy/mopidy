@@ -30,16 +30,18 @@ Logging
 - The command line option :option:`mopidy --save-debug-log` and the
   configuration :confval:`logging/debug_file` have been removed.
   To save a debug log for sharing, run ``mopidy -vvvv | tee mopidy.log``
-  or equivalent.
+  or equivalent. (Fixes: :issue:`1452`, PR: :issue:`1783`)
 
 - Replaced the configurations :confval:`logging/console_format`
   and :confval:`logging/debug_format` with
   the single configuration :confval:`logging/format`.
   It defaults to the same format as the old debug format.
+  (Fixes: :issue:`1452`, PR: :issue:`1783`)
 
 - Added configuration :confval:`logging/verbosity` to be able to control
   logging verbosity from the configuration file,
   in addition to passing ``-q`` or ``-v`` on the command line.
+  (Fixes: :issue:`1452`, PR: :issue:`1783`)
 
 Core API
 --------
