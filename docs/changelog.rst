@@ -216,6 +216,18 @@ Audio
   been deprecated since 1.0. (Fixes: :issue:`1465`, PR: :issue:`1705`)
 
 
+v2.2.4 (UNRELEASED)
+===================
+
+Bug fix release.
+
+- Fix `PkgResourcesDeprecationWarning` on startup when a recent release
+  of setuptools is installed. (Fixes: :issue:`1778`, PR: :issue:`1780`)
+
+- Network: Close connection following an exception in the protocol handler.
+  (Fixes: :issue:`1762`, PR: :issue:`1765`)
+
+
 v2.2.3 (2019-06-20)
 ===================
 

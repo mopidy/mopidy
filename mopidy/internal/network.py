@@ -425,8 +425,12 @@ class LineProtocol(pykka.ThreadingActor):
         if not self.prevent_timeout:
             self.connection.enable_timeout()
 
+    def on_failure(self, exception_type, exception_value, traceback):
+        """Clean up connection resouces when actor fails."""
+        self.connection.stop('Actor failed.')
+
     def on_stop(self):
-        """Ensure that cleanup when actor stops."""
+        """Clean up connection resouces when actor stops."""
         self.connection.stop('Actor is shutting down.')
 
     def parse_lines(self):
