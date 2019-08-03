@@ -177,6 +177,20 @@ These are the available audio configurations. For specific use cases, see
 Logging configuration
 =====================
 
+.. confval:: logging/verbosity
+
+    Controls the detail level of the logging.
+
+    Ranges from ``-1`` to ``4``. Defaults to ``0``.
+    Higher value is more verbose.
+
+    - ``-1`` is equivalent to :command:`mopidy -q`.
+    - ``0`` is equivalent to :command:`mopidy`.
+    - ``1`` is equivalent to :command:`mopidy -v`.
+    - ``2`` is equivalent to :command:`mopidy -vv`.
+    - ``3`` is equivalent to :command:`mopidy -vvv`.
+    - ``4`` is equivalent to :command:`mopidy -vvvv`.
+
 .. confval:: logging/color
 
     Whether or not to colorize the console log based on log level. Defaults to

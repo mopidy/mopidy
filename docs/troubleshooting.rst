@@ -57,6 +57,11 @@ from their dependencies as well.
 To save a debug log to file for sharing with others, you can run
 ``mopidy -vvvv | tee mopidy.log``.
 
+If you run Mopidy as a system service, adding arguments on the command line
+might be complicated. As an alternative, you can set the configuration
+:confval:`logging/verbosity` to ``4`` instead of passing ``-vvvv`` on the
+command line.
+
 If you want to reduce the logging for some component, see the
 docs for the :confval:`loglevels/*` config section.
 

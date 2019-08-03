@@ -37,6 +37,10 @@ Logging
   the single configuration :confval:`logging/format`.
   It defaults to the same format as the old debug format.
 
+- Added configuration :confval:`logging/verbosity` to be able to control
+  logging verbosity from the configuration file,
+  in addition to passing ``-q`` or ``-v`` on the command line.
+
 Core API
 --------
 

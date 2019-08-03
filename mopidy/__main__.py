@@ -61,11 +61,8 @@ def main():
         create_core_dirs(config)
         create_initial_config_file(args, extensions_data)
 
-        verbosity_level = args.base_verbosity_level
-        if args.verbosity_level:
-            verbosity_level += args.verbosity_level
-
-        log.setup_logging(config, verbosity_level)
+        log.setup_logging(
+            config, args.base_verbosity_level, args.verbosity_level)
 
         extensions = {
             'validate': [], 'config': [], 'disabled': [], 'enabled': []}

@@ -49,7 +49,7 @@ def bootstrap_delayed_logging():
     root.addHandler(_delayed_handler)
 
 
-def setup_logging(config, verbosity_level):
+def setup_logging(config, base_verbosity_level, args_verbosity_level):
     logging.captureWarnings(True)
 
     if config['logging']['config_file']:
@@ -62,13 +62,10 @@ def setup_logging(config, verbosity_level):
             # Catch everything as logging does not specify what can go wrong.
             logger.error('Loading logging config %r failed. %s', path, e)
 
-    if verbosity_level < min(LOG_LEVELS.keys()):
-        verbosity_level = min(LOG_LEVELS.keys())
-    if verbosity_level > max(LOG_LEVELS.keys()):
-        verbosity_level = max(LOG_LEVELS.keys())
-
     loglevels = config.get('loglevels', {})
 
+    verbosity_level = get_verbosity_level(
+        config, base_verbosity_level, args_verbosity_level)
     verbosity_filter = VerbosityFilter(verbosity_level, loglevels)
 
     formatter = logging.Formatter(config['logging']['format'])
@@ -83,6 +80,20 @@ def setup_logging(config, verbosity_level):
     logging.getLogger('').addHandler(handler)
 
     _delayed_handler.release()
+
+
+def get_verbosity_level(config, base_verbosity_level, args_verbosity_level):
+    if args_verbosity_level:
+        result = base_verbosity_level + args_verbosity_level
+    else:
+        result = base_verbosity_level + config['logging']['verbosity']
+
+    if result < min(LOG_LEVELS.keys()):
+        result = min(LOG_LEVELS.keys())
+    if result > max(LOG_LEVELS.keys()):
+        result = max(LOG_LEVELS.keys())
+
+    return result
 
 
 class VerbosityFilter(logging.Filter):
