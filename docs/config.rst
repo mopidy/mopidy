@@ -182,12 +182,6 @@ Logging configuration
     Whether or not to colorize the console log based on log level. Defaults to
     ``true``.
 
-.. confval:: logging/console_format
-
-    The log format used for informational logging.
-
-    See `the Python logging docs`_ for details on the format.
-
 .. confval:: logging/debug_format
 
     The log format used for debug logging.

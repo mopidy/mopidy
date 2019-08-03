@@ -32,6 +32,8 @@ Logging
   To save a debug log for sharing, run ``mopidy -vvvv | tee mopidy.log``
   or equivalent.
 
+- Removed the configuration :confval:`logging/console_format`.
+
 Core API
 --------
 

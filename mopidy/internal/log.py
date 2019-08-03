@@ -68,15 +68,10 @@ def setup_logging(config, verbosity_level):
         verbosity_level = max(LOG_LEVELS.keys())
 
     loglevels = config.get('loglevels', {})
-    has_debug_loglevels = any([
-        level < logging.INFO for level in loglevels.values()])
 
     verbosity_filter = VerbosityFilter(verbosity_level, loglevels)
 
-    if verbosity_level < 1 and not has_debug_loglevels:
-        log_format = config['logging']['console_format']
-    else:
-        log_format = config['logging']['debug_format']
+    log_format = config['logging']['debug_format']
     formatter = logging.Formatter(log_format)
 
     if config['logging']['color']:
