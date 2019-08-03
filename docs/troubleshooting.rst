@@ -48,10 +48,11 @@ your system.
 Debug logging
 =============
 
-If you run :option:`mopidy -v` or ``mopidy -vv`` or ``mopidy -vvv`` Mopidy will
-print more and more debug log to stdout. All three options will give you debug
-level output from Mopidy and extensions, while ``-vv`` and ``-vvv`` will give
-you more log output from their dependencies as well.
+If you run :option:`mopidy -v` or ``mopidy -vv``, ``mopidy -vvv``,
+or ``mopidy -vvvv`` Mopidy will print more and more debug log to stdout.
+All four options will give you debug level output from Mopidy and extensions,
+while ``-vv``, ``-vvv``, and ``-vvvv`` will give you more log output
+from their dependencies as well.
 
 If you run :option:`mopidy --save-debug-log`, it will save the log equivalent
 with ``-vvv`` to the file ``mopidy.log`` in the directory you ran the command
