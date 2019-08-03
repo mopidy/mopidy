@@ -71,8 +71,7 @@ def setup_logging(config, verbosity_level):
 
     verbosity_filter = VerbosityFilter(verbosity_level, loglevels)
 
-    log_format = config['logging']['debug_format']
-    formatter = logging.Formatter(log_format)
+    formatter = logging.Formatter(config['logging']['format'])
 
     if config['logging']['color']:
         handler = ColorizingStreamHandler(config.get('logcolors', {}))

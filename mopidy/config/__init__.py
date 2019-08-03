@@ -27,9 +27,10 @@ _core_schema['max_tracklist_length'] = Integer(minimum=1)
 _core_schema['restore_state'] = Boolean(optional=True)
 
 _logging_schema = ConfigSchema('logging')
+_logging_schema['format'] = String()
 _logging_schema['color'] = Boolean()
 _logging_schema['console_format'] = Deprecated()
-_logging_schema['debug_format'] = String()
+_logging_schema['debug_format'] = Deprecated()
 _logging_schema['debug_file'] = Deprecated()
 _logging_schema['config_file'] = Path(optional=True)
 
