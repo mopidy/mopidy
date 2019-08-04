@@ -16,7 +16,8 @@ accept connections by any MPD client. Check out our non-exhaustive
 Updating the library
 ====================
 
-To update the library, e.g. after audio files have changed, run::
+If you have Mopidy-Local installed, to update the library, e.g. after audio
+files have changed, run::
 
     mopidy local scan
 

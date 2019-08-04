@@ -159,13 +159,13 @@ class Registry(collections.Mapping):
 
     - ``backend`` is used for Mopidy backend classes.
     - ``frontend`` is used for Mopidy frontend classes.
-    - ``local:library`` is used for Mopidy-Local libraries.
 
     Extensions can use the registry for allow other to extend the extension
-    itself. For example the ``Mopidy-Local`` use the ``local:library`` key to
-    allow other extensions to register library providers for ``Mopidy-Local``
-    to use. Extensions should namespace custom keys with the extension's
-    :attr:`~Extension.ext_name`, e.g. ``local:foo`` or ``http:bar``.
+    itself. For example the ``Mopidy-Local`` historically used the
+    ``local:library`` key to allow other extensions to register library
+    providers for ``Mopidy-Local`` to use. Extensions should namespace
+    custom keys with the extension's :attr:`~Extension.ext_name`,
+    e.g. ``local:foo`` or ``http:bar``.
     """
 
     def __init__(self):
