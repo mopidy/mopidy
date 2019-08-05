@@ -25,6 +25,5 @@ class HelpTest(unittest.TestCase):
         self.assertIn('--help', output)
         self.assertIn('--quiet', output)
         self.assertIn('--verbose', output)
-        self.assertIn('--save-debug-log', output)
         self.assertIn('--config', output)
         self.assertIn('--option', output)

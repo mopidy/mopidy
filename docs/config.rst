@@ -177,27 +177,30 @@ These are the available audio configurations. For specific use cases, see
 Logging configuration
 =====================
 
+.. confval:: logging/verbosity
+
+    Controls the detail level of the logging.
+
+    Ranges from ``-1`` to ``4``. Defaults to ``0``.
+    Higher value is more verbose.
+
+    - ``-1`` is equivalent to :command:`mopidy -q`.
+    - ``0`` is equivalent to :command:`mopidy`.
+    - ``1`` is equivalent to :command:`mopidy -v`.
+    - ``2`` is equivalent to :command:`mopidy -vv`.
+    - ``3`` is equivalent to :command:`mopidy -vvv`.
+    - ``4`` is equivalent to :command:`mopidy -vvvv`.
+
 .. confval:: logging/color
 
     Whether or not to colorize the console log based on log level. Defaults to
     ``true``.
 
-.. confval:: logging/console_format
+.. confval:: logging/format
 
-    The log format used for informational logging.
-
-    See `the Python logging docs`_ for details on the format.
-
-.. confval:: logging/debug_format
-
-    The log format used for debug logging.
+    The message format used for logging.
 
     See `the Python logging docs`_ for details on the format.
-
-.. confval:: logging/debug_file
-
-    The file to dump debug log data to when Mopidy is run with the
-    :option:`mopidy --save-debug-log` option.
 
 .. confval:: logging/config_file
 

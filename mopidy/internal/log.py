@@ -49,8 +49,7 @@ def bootstrap_delayed_logging():
     root.addHandler(_delayed_handler)
 
 
-def setup_logging(config, verbosity_level, save_debug_log):
-
+def setup_logging(config, base_verbosity_level, args_verbosity_level):
     logging.captureWarnings(True)
 
     if config['logging']['config_file']:
@@ -63,30 +62,13 @@ def setup_logging(config, verbosity_level, save_debug_log):
             # Catch everything as logging does not specify what can go wrong.
             logger.error('Loading logging config %r failed. %s', path, e)
 
-    setup_console_logging(config, verbosity_level)
-    if save_debug_log:
-        setup_debug_logging_to_file(config)
-
-    _delayed_handler.release()
-
-
-def setup_console_logging(config, verbosity_level):
-    if verbosity_level < min(LOG_LEVELS.keys()):
-        verbosity_level = min(LOG_LEVELS.keys())
-    if verbosity_level > max(LOG_LEVELS.keys()):
-        verbosity_level = max(LOG_LEVELS.keys())
-
     loglevels = config.get('loglevels', {})
-    has_debug_loglevels = any([
-        level < logging.INFO for level in loglevels.values()])
 
+    verbosity_level = get_verbosity_level(
+        config, base_verbosity_level, args_verbosity_level)
     verbosity_filter = VerbosityFilter(verbosity_level, loglevels)
 
-    if verbosity_level < 1 and not has_debug_loglevels:
-        log_format = config['logging']['console_format']
-    else:
-        log_format = config['logging']['debug_format']
-    formatter = logging.Formatter(log_format)
+    formatter = logging.Formatter(config['logging']['format'])
 
     if config['logging']['color']:
         handler = ColorizingStreamHandler(config.get('logcolors', {}))
@@ -97,14 +79,21 @@ def setup_console_logging(config, verbosity_level):
 
     logging.getLogger('').addHandler(handler)
 
+    _delayed_handler.release()
 
-def setup_debug_logging_to_file(config):
-    formatter = logging.Formatter(config['logging']['debug_format'])
-    handler = logging.handlers.RotatingFileHandler(
-        config['logging']['debug_file'], maxBytes=10485760, backupCount=3)
-    handler.setFormatter(formatter)
 
-    logging.getLogger('').addHandler(handler)
+def get_verbosity_level(config, base_verbosity_level, args_verbosity_level):
+    if args_verbosity_level:
+        result = base_verbosity_level + args_verbosity_level
+    else:
+        result = base_verbosity_level + config['logging']['verbosity']
+
+    if result < min(LOG_LEVELS.keys()):
+        result = min(LOG_LEVELS.keys())
+    if result > max(LOG_LEVELS.keys()):
+        result = max(LOG_LEVELS.keys())
+
+    return result
 
 
 class VerbosityFilter(logging.Filter):
