@@ -405,13 +405,13 @@ class TracklistController(object):
 
     def filter(self, criteria):
         """
-        Filter the tracklist by the given criterias.
+        Filter the tracklist by the given criteria.
 
-        A criteria consists of a model field to check and a list of values to
-        compare it against. If the model field matches one of the values, it
+        Each rule in the criteria consists of a model field and a list of values to
+        compare it against. If the model field matches any of the values, it
         may be returned.
 
-        Only tracks that matches all the given criterias are returned.
+        Only tracks that match all the given criteria are returned.
 
         Examples::
 
@@ -425,7 +425,7 @@ class TracklistController(object):
             # matching URI ('xyz' or 'abc')
             filter({'tlid': [1, 3, 6], 'uri': ['xyz', 'abc']})
 
-        :param criteria: on or more criteria to match by
+        :param criteria: one or more rules to match by
         :type criteria: dict, of (string, list) pairs
         :rtype: list of :class:`mopidy.models.TlTrack`
         """
@@ -483,9 +483,9 @@ class TracklistController(object):
 
         Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
 
-        :param criteria: on or more criteria to match by
-        :type criteria: dict
-        :rtype: list of :class:`mopidy.models.TlTrack` that was removed
+        :param criteria: one or more rules to match by
+        :type criteria: dict, of (string, list) pairs
+        :rtype: list of :class:`mopidy.models.TlTrack` that were removed
         """
         tl_tracks = self.filter(criteria)
         for tl_track in tl_tracks:
