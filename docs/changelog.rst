@@ -48,7 +48,7 @@ Core API
 
 - Removed properties, methods, and arguments that have been deprecated since
   1.0, released in 2015.
-  Everything removed have replacements that should be used instead.
+  Everything removed already has a replacement, that should be used instead.
   See below for a full list of removals and replacements.
   (Fixes: :issue:`1083`, :issue:`1461`, PR: :issue:`1768`, :issue:`1769`)
 
