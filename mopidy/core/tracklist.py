@@ -407,9 +407,9 @@ class TracklistController(object):
         """
         Filter the tracklist by the given criteria.
 
-        Each rule in the criteria consists of a model field and a list of values to
-        compare it against. If the model field matches any of the values, it
-        may be returned.
+        Each rule in the criteria consists of a model field and a list of
+        values to compare it against. If the model field matches any of the
+        values, it may be returned.
 
         Only tracks that match all the given criteria are returned.
 
