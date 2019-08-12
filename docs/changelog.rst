@@ -214,7 +214,10 @@ File backend
 Local backend
 -------------
 
-- (no changes yet)
+- The Mopidy-Local backend is no longer bundled with Mopidy, and has been moved
+  to its own `Git repo <https://github.com/mopidy/mopidy-local>`__ and
+  `PyPI project <https://pypi.org/project/Mopidy-Local>`__.
+  (Fixes: :issue:`1003`)
 
 M3U backend
 -----------
