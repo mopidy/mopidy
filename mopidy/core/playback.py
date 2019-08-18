@@ -287,7 +287,7 @@ class PlaybackController:
         tlid is None or validation.check_integer(tlid, min=1)
 
         if tl_track:
-            deprecation.warn("core.playback.play:tl_track_kwarg", pending=True)
+            deprecation.warn("core.playback.play:tl_track_kwarg")
 
         if tl_track is None and tlid is not None:
             for tl_track in self.core.tracklist.get_tl_tracks():
