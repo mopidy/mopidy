@@ -207,7 +207,7 @@ class TracklistController(object):
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
-        deprecation.warn('core.tracklist.eot_track', pending=True)
+        deprecation.warn('core.tracklist.eot_track')
         tl_track is None or validation.check_instance(tl_track, TlTrack)
         if self.get_single() and self.get_repeat():
             return tl_track
@@ -250,7 +250,7 @@ class TracklistController(object):
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
-        deprecation.warn('core.tracklist.next_track', pending=True)
+        deprecation.warn('core.tracklist.next_track')
         tl_track is None or validation.check_instance(tl_track, TlTrack)
 
         if not self._tl_tracks:
@@ -312,7 +312,7 @@ class TracklistController(object):
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
-        deprecation.warn('core.tracklist.previous_track', pending=True)
+        deprecation.warn('core.tracklist.previous_track')
         tl_track is None or validation.check_instance(tl_track, TlTrack)
 
         if self.get_repeat() or self.get_consume() or self.get_random():
