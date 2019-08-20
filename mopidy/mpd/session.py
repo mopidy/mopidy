@@ -29,14 +29,14 @@ class MpdSession(network.LineProtocol):
         self.send_lines(['OK MPD %s' % protocol.VERSION])
 
     def on_line_received(self, line):
-        logger.debug('Request from [%s]: %s', self.connection, line)
+        logger.debug('Request from %s: %s', self.connection, line)
 
         response = self.dispatcher.handle_request(line)
         if not response:
             return
 
         logger.debug(
-            'Response to [%s]: %s',
+            'Response to %s: %s',
             self.connection,
             formatting.indent(self.terminator.join(response)))
 
