@@ -171,6 +171,7 @@ class HttpServer(threading.Thread):
         # Either default Mopidy or user defined path to files
 
         static_dir = self.config['http']['static_dir']
+        root_redirection = "mopidy" if self.config['http']['root_redirection'] is None else self.config['http']['root_redirection'] 
 
         if static_dir and not os.path.exists(static_dir):
             logger.warning(
@@ -185,6 +186,6 @@ class HttpServer(threading.Thread):
             })]
         else:
             return [(r'/', tornado.web.RedirectHandler, {
-                'url': '/mopidy/',
+                'url': '/{}/'.format(root_redirection),
                 'permanent': False,
             })]
