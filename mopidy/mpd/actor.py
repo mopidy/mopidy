@@ -61,8 +61,7 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
                 encoding.locale_decode(error))
 
         logger.info(
-            'MPD server running at %s',
-            network.format_socket_name(server.server_socket))
+            'MPD server running at %s', network.format_address(server.address))
 
         return server
 
