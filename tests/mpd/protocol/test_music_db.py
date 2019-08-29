@@ -92,25 +92,31 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.assertInResponse('OK')
 
     def test_findadd(self):
+        track = Track(uri='dummy:a', name='A')
+        self.backend.library.dummy_library = [track]
         self.backend.library.dummy_find_exact_result = SearchResult(
-            tracks=[Track(uri='dummy:a', name='A')])
-        self.assertEqual(self.core.tracklist.length.get(), 0)
+            tracks=[track])
+        self.assertEqual(self.core.tracklist.get_length().get(), 0)
 
         self.send_request('findadd "title" "A"')
 
-        self.assertEqual(self.core.tracklist.length.get(), 1)
-        self.assertEqual(self.core.tracklist.tracks.get()[0].uri, 'dummy:a')
+        self.assertEqual(self.core.tracklist.get_length().get(), 1)
+        self.assertEqual(
+            self.core.tracklist.get_tracks().get()[0].uri, 'dummy:a')
         self.assertInResponse('OK')
 
     def test_searchadd(self):
+        track = Track(uri='dummy:a', name='A')
+        self.backend.library.dummy_library = [track]
         self.backend.library.dummy_search_result = SearchResult(
-            tracks=[Track(uri='dummy:a', name='A')])
-        self.assertEqual(self.core.tracklist.length.get(), 0)
+            tracks=[track])
+        self.assertEqual(self.core.tracklist.get_length().get(), 0)
 
         self.send_request('searchadd "title" "a"')
 
-        self.assertEqual(self.core.tracklist.length.get(), 1)
-        self.assertEqual(self.core.tracklist.tracks.get()[0].uri, 'dummy:a')
+        self.assertEqual(self.core.tracklist.get_length().get(), 1)
+        self.assertEqual(
+            self.core.tracklist.get_tracks().get()[0].uri, 'dummy:a')
         self.assertInResponse('OK')
 
     def test_searchaddpl_appends_to_existing_playlist(self):
@@ -651,7 +657,7 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
 
     def test_list(self):
         self.backend.library.dummy_get_distinct_result = {
-            'artist': set(['A Artist'])}
+            'artist': {'A Artist'}}
         self.send_request('list "artist" "artist" "foo"')
 
         self.assertInResponse('Artist: A Artist')
@@ -932,7 +938,7 @@ class MusicDatabaseListTest(protocol.BaseTestCase):
 
     def test_list_album_with_artist_name(self):
         self.backend.library.dummy_get_distinct_result = {
-            'album': set(['foo'])}
+            'album': {'foo'}}
 
         self.send_request('list "album" "anartist"')
         self.assertInResponse('Album: foo')

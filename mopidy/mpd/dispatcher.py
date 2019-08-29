@@ -204,10 +204,11 @@ class MpdDispatcher(object):
 
     def _format_lines(self, line):
         if isinstance(line, dict):
-            return ['%s: %s' % (key, value) for (key, value) in line.items()]
+            return [
+                '{}: {}'.format(key, value) for (key, value) in line.items()]
         if isinstance(line, tuple):
             (key, value) = line
-            return ['%s: %s' % (key, value)]
+            return ['{}: {}'.format(key, value)]
         return [line]
 
 

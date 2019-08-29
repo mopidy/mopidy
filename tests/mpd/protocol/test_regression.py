@@ -39,21 +39,21 @@ class IssueGH17RegressionTest(protocol.BaseTestCase):
 
         self.send_request('play')
         self.assertEqual(
-            'dummy:a', self.core.playback.current_track.get().uri)
+            'dummy:a', self.core.playback.get_current_track().get().uri)
         self.send_request('random "1"')
         self.send_request('next')
         self.assertEqual(
-            'dummy:b', self.core.playback.current_track.get().uri)
+            'dummy:b', self.core.playback.get_current_track().get().uri)
         self.send_request('next')
         # Should now be at track 'c', but playback fails and it skips ahead
         self.assertEqual(
-            'dummy:f', self.core.playback.current_track.get().uri)
+            'dummy:f', self.core.playback.get_current_track().get().uri)
         self.send_request('next')
         self.assertEqual(
-            'dummy:d', self.core.playback.current_track.get().uri)
+            'dummy:d', self.core.playback.get_current_track().get().uri)
         self.send_request('next')
         self.assertEqual(
-            'dummy:e', self.core.playback.current_track.get().uri)
+            'dummy:e', self.core.playback.get_current_track().get().uri)
 
 
 class IssueGH18RegressionTest(protocol.BaseTestCase):
@@ -85,11 +85,11 @@ class IssueGH18RegressionTest(protocol.BaseTestCase):
         self.send_request('next')
 
         self.send_request('next')
-        tl_track_1 = self.core.playback.current_tl_track.get()
+        tl_track_1 = self.core.playback.get_current_tl_track().get()
         self.send_request('next')
-        tl_track_2 = self.core.playback.current_tl_track.get()
+        tl_track_2 = self.core.playback.get_current_tl_track().get()
         self.send_request('next')
-        tl_track_3 = self.core.playback.current_tl_track.get()
+        tl_track_3 = self.core.playback.get_current_tl_track().get()
 
         self.assertNotEqual(tl_track_1, tl_track_2)
         self.assertNotEqual(tl_track_2, tl_track_3)
@@ -197,8 +197,8 @@ class IssueGH137RegressionTest(protocol.BaseTestCase):
 
     def test(self):
         self.send_request(
-            u'list Date Artist "Anita Ward" '
-            u'Album "This Is Remixed Hits - Mashups & Rare 12" Mixes"')
+            'list Date Artist "Anita Ward" '
+            'Album "This Is Remixed Hits - Mashups & Rare 12" Mixes"')
 
         self.assertInResponse('ACK [2@0] {list} Invalid unquoted character')
 

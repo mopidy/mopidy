@@ -18,7 +18,6 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
             'http': {
                 'hostname': '127.0.0.1',
                 'port': 6680,
-                'static_dir': None,
                 'zeroconf': '',
                 'allowed_origins': [],
                 'csrf_protection': True,
@@ -54,29 +53,6 @@ class RootRedirectTest(HttpServerTest):
         self.assertEqual(response.headers['Location'], '/mopidy/')
 
 
-class LegacyStaticDirAppTest(HttpServerTest):
-
-    def get_config(self):
-        config = super(LegacyStaticDirAppTest, self).get_config()
-        config['http']['static_dir'] = os.path.dirname(__file__)
-        return config
-
-    def test_should_return_index(self):
-        response = self.fetch('/', method='GET', follow_redirects=False)
-
-        self.assertEqual(response.code, 404, 'No index.html in this dir')
-
-    def test_should_return_static_files(self):
-        response = self.fetch('/test_server.py', method='GET')
-
-        self.assertIn(
-            'test_should_return_static_files',
-            tornado.escape.to_unicode(response.body))
-        self.assertEqual(
-            response.headers['X-Mopidy-Version'], mopidy.__version__)
-        self.assertEqual(response.headers['Cache-Control'], 'no-cache')
-
-
 class MopidyAppTest(HttpServerTest):
 
     def test_should_return_index(self):
@@ -98,10 +74,10 @@ class MopidyAppTest(HttpServerTest):
         self.assertEqual(response.headers['Location'], '/mopidy/')
 
     def test_should_return_static_files(self):
-        response = self.fetch('/mopidy/mopidy.js', method='GET')
+        response = self.fetch('/mopidy/mopidy.css', method='GET')
 
         self.assertIn(
-            'function Mopidy',
+            'html {',
             tornado.escape.to_unicode(response.body))
         self.assertEqual(
             response.headers['X-Mopidy-Version'], mopidy.__version__)
@@ -255,7 +231,6 @@ class HttpServerWithStaticFilesTest(tornado.testing.AsyncHTTPTestCase):
             'http': {
                 'hostname': '127.0.0.1',
                 'port': 6680,
-                'static_dir': None,
                 'zeroconf': '',
             }
         }
@@ -306,7 +281,6 @@ class HttpServerWithWsgiAppTest(tornado.testing.AsyncHTTPTestCase):
             'http': {
                 'hostname': '127.0.0.1',
                 'port': 6680,
-                'static_dir': None,
                 'zeroconf': '',
             }
         }

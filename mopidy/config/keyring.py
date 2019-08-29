@@ -100,7 +100,7 @@ def set(section, key, value):
     session = service.OpenSession('plain', EMPTY_STRING)[1]
     secret = dbus.Struct((session, '', dbus.ByteArray(value),
                           'plain/text; charset=utf8'))
-    label = 'mopidy: %s/%s' % (section, key)
+    label = 'mopidy: {}/{}'.format(section, key)
     attributes = {'service': 'mopidy', 'section': section, 'key': key}
     properties = {'org.freedesktop.Secret.Item.Label': label,
                   'org.freedesktop.Secret.Item.Attributes': attributes}
@@ -163,7 +163,7 @@ def _prompt(bus, path):
 def _item_attributes(bus, path):
     item = _interface(bus, path, 'org.freedesktop.DBus.Properties')
     result = item.Get('org.freedesktop.Secret.Item', 'Attributes')
-    return dict((bytes(k), bytes(v)) for k, v in result.items())
+    return {bytes(k): bytes(v) for k, v in result.items()}
 
 
 def _interface(bus, path, interface):

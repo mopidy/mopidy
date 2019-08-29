@@ -1897,8 +1897,7 @@ Please note that 0.6.0 requires some updated dependencies, as listed under
   subsystems: player, playlist, options, and mixer. (Fixes: :issue:`32`)
 
 - A new frontend :mod:`mopidy.frontends.mpris` have been added. It exposes
-  Mopidy through the `MPRIS interface
-  <https://specifications.freedesktop.org/mpris-spec/latest/>`_ over D-Bus. In
+  Mopidy through the `MPRIS interface <http://specifications.freedesktop.org/mpris-spec/latest/>`_ over D-Bus. In
   practice, this makes it possible to control Mopidy through the `Ubuntu Sound
   Menu <https://wiki.ubuntu.com/Sound#menu>`_.
 
@@ -2081,7 +2080,7 @@ loading from Mopidy 0.3.0 is still present.
 
 **Important changes**
 
-- Mopidy now depends on `Pykka <https://www.pykka.org/>`_ >=0.12. If you
+- Mopidy now depends on `Pykka <http://pykka.readthedocs.org/>`_ >=0.12. If you
   install from APT, Pykka will automatically be installed. If you are not
   installing from APT, you may install Pykka from PyPI::
 
@@ -2230,7 +2229,7 @@ to this problem.
 
   - Add :command:`mopidy-scan` command to generate ``tag_cache`` files without
     any help from the original MPD server. See
-    :ref:`generating-a-local-library` for instructions on how to use it.
+    "Generating a local library" for instructions on how to use it.
 
   - Fix support for UTF-8 encoding in tag caches.
 
@@ -2341,11 +2340,11 @@ This is a maintenance release without any new features.
 v0.2.0 (2010-10-24)
 ===================
 
-In Mopidy 0.2.0 we've added a `Last.fm <https://www.last.fm/>`_ scrobbling
+In Mopidy 0.2.0 we've added a `Last.fm <http://www.last.fm/>`_ scrobbling
 support, which means that Mopidy now can submit meta data about the tracks you
 play to your Last.fm profile. See :mod:`mopidy.frontends.lastfm` for
 details on new dependencies and settings. If you use Mopidy's Last.fm support,
-please join the `Mopidy group at Last.fm <https://www.last.fm/group/Mopidy>`_.
+please join the `Mopidy group at Last.fm <http://www.last.fm/group/Mopidy>`_.
 
 With the exception of the work on the Last.fm scrobbler, there has been a
 couple of quiet months in the Mopidy camp. About the only thing going on, has

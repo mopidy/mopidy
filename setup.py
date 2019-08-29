@@ -25,7 +25,7 @@ setup(
     include_package_data=True,
     python_requires='>= 2.7, < 3',
     install_requires=[
-        'Pykka >= 1.1',
+        'Pykka >= 2.0',
         'requests >= 2.0',
         'setuptools',
         'tornado >= 4.4, < 5',  # Tornado 5 requires Python >= 2.7.9
@@ -37,7 +37,6 @@ setup(
         ],
         'mopidy.ext': [
             'http = mopidy.http:Extension',
-            'local = mopidy.local:Extension',
             'file = mopidy.file:Extension',
             'm3u = mopidy.m3u:Extension',
             'mpd = mopidy.mpd:Extension',

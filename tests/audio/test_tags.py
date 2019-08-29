@@ -27,8 +27,6 @@ class TestConvertTaglist(object):
             elif isinstance(value, int):
                 gobject_value.init(GObject.TYPE_UINT)
                 gobject_value.set_uint(value)
-                gobject_value.init(GObject.TYPE_VALUE)
-                gobject_value.set_value(value)
             else:
                 raise TypeError
             taglist.add_value(Gst.TagMergeMode.APPEND, tag, gobject_value)
@@ -250,8 +248,7 @@ class TagsToTrackTest(unittest.TestCase):
 
     def test_missing_album_musicbrainz_id(self):
         del self.tags['musicbrainz-albumid']
-        album = self.track.album.replace(musicbrainz_id=None,
-                                         images=[])
+        album = self.track.album.replace(musicbrainz_id=None)
         self.check(self.track.replace(album=album))
 
     def test_multiple_album_musicbrainz_id(self):

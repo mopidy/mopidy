@@ -10,8 +10,8 @@ from mopidy import exceptions
 from mopidy.audio import tags as tags_lib, utils
 from mopidy.audio.constants import PlaybackState
 from mopidy.audio.listener import AudioListener
-from mopidy.internal import deprecation, process
-from mopidy.internal.gi import GObject, Gst, GstPbutils
+from mopidy.internal import process
+from mopidy.internal.gi import GLib, GObject, Gst, GstPbutils
 
 
 logger = logging.getLogger(__name__)
@@ -119,7 +119,7 @@ class _Outputs(Gst.Bin):
         try:
             output = Gst.parse_bin_from_description(
                 description, ghost_unlinked_pads=True)
-        except GObject.GError as ex:
+        except GLib.GError as ex:
             logger.error(
                 'Failed to create audio output "%s": %s', description, ex)
             raise exceptions.AudioException(bytes(ex))
@@ -435,7 +435,7 @@ class Audio(pykka.ThreadingActor):
             self._setup_playbin()
             self._setup_outputs()
             self._setup_audio_sink()
-        except GObject.GError as ex:
+        except GLib.GError as ex:
             logger.exception(ex)
             process.exit_process()
 
@@ -612,20 +612,6 @@ class Audio(pykka.ThreadingActor):
         :rtype: boolean
         """
         return self._appsrc.push(buffer_)
-
-    def emit_end_of_stream(self):
-        """
-        Put an end-of-stream token on the playbin. This is typically used in
-        combination with :meth:`emit_data`.
-
-        We will get a GStreamer message when the stream playback reaches the
-        token, and can then do any end-of-stream related tasks.
-
-        .. deprecated:: 1.0
-            Use :meth:`emit_data` with a :class:`None` buffer instead.
-        """
-        deprecation.warn('audio.emit_end_of_stream')
-        self._appsrc.push(None)
 
     def set_about_to_finish_callback(self, callback):
         """

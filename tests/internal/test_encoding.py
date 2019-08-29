@@ -27,7 +27,7 @@ class LocaleDecodeTest(unittest.TestCase):
 
         self.assertEqual(
             expected, result,
-            '%r decoded to %r does not match expected %r' % (
+            '{!r} decoded to {!r} does not match expected {!r}'.format(
                 error, result, expected))
 
     def test_does_not_use_locale_to_decode_unicode_strings(self, mock):

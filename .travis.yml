@@ -15,7 +15,7 @@ env:
 
 before_install:
   - "sudo apt-get update -qq"
-  - "sudo apt-get install -y gir1.2-gst-plugins-base-1.0 gir1.2-gstreamer-1.0 graphviz-dev gstreamer1.0-plugins-good gstreamer1.0-plugins-bad python-gst-1.0"
+  - "sudo apt-get install -y gir1.2-gst-plugins-base-1.0 gir1.2-gstreamer-1.0 graphviz-dev gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly python-gst-1.0"
 
 install:
   - "pip install tox"

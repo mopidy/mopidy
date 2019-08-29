@@ -10,6 +10,7 @@ import mock
 
 from mopidy import compat
 from mopidy.config import types
+from mopidy.internal import log
 
 # TODO: DecodeTest and EncodeTest
 
@@ -85,7 +86,7 @@ class StringTest(unittest.TestCase):
 
     def test_deserialize_decode_failure(self):
         value = types.String()
-        incorrectly_encoded_bytes = u'æøå'.encode('iso-8859-1')
+        incorrectly_encoded_bytes = 'æøå'.encode('iso-8859-1')
         self.assertRaises(
             ValueError, value.deserialize, incorrectly_encoded_bytes)
 
@@ -293,6 +294,7 @@ class LogLevelTest(unittest.TestCase):
         'warning': logging.WARNING,
         'info': logging.INFO,
         'debug': logging.DEBUG,
+        'trace': log.TRACE_LOG_LEVEL,
         'all': logging.NOTSET,
     }
 

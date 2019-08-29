@@ -396,16 +396,6 @@ class AlbumTest(unittest.TestCase):
         with self.assertRaises(AttributeError):
             album.musicbrainz_id = None
 
-    def test_images(self):
-        image = 'data:foobar'
-        album = Album(images=[image])
-        self.assertIn(image, album.images)
-        with self.assertRaises(AttributeError):
-            album.images = None
-
-    def test_images_none(self):
-        self.assertEqual(set(), Album(images=None).images)
-
     def test_invalid_kwarg(self):
         with self.assertRaises(TypeError):
             Album(foo='baz')
@@ -431,13 +421,6 @@ class AlbumTest(unittest.TestCase):
             {'__model__': 'Album', 'uri': 'uri', 'name': 'name',
                 'artists': [artist.serialize()]},
             Album(uri='uri', name='name', artists=[artist]).serialize())
-
-    def test_serialize_with_images(self):
-        image = 'data:foobar'
-        self.assertDictEqual(
-            {'__model__': 'Album', 'uri': 'uri', 'name': 'name',
-                'images': [image]},
-            Album(uri='uri', name='name', images=[image]).serialize())
 
     def test_to_json_and_back(self):
         album1 = Album(uri='uri', name='name', artists=[Artist(name='foo')])

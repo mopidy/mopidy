@@ -39,8 +39,8 @@ You should instead run the following to inspect the service's configuration::
 
     sudo mopidyctl config
 
-The same applies to scanning your local music collection. Where you'll normally
-run::
+The same applies to scanning your local music collection with Mopidy-Local.
+Where you'll normallyrun::
 
     mopidy local scan
 

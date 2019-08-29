@@ -302,7 +302,7 @@ class JsonRpcBatchTest(JsonRpcTestBase):
 
         self.assertEqual(len(response), 3)
 
-        response = dict((row['id'], row) for row in response)
+        response = {row['id']: row for row in response}
         self.assertEqual(response[1]['result'], False)
         self.assertEqual(response[2]['result'], True)
         self.assertEqual(response[3]['result'], False)
@@ -319,7 +319,7 @@ class JsonRpcBatchTest(JsonRpcTestBase):
 
         self.assertEqual(len(response), 2)
 
-        response = dict((row['id'], row) for row in response)
+        response = {row['id']: row for row in response}
         self.assertNotIn(1, response)
         self.assertEqual(response[2]['result'], True)
         self.assertEqual(response[3]['result'], False)
@@ -566,7 +566,7 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
         response = self.jrw.handle_data(request)
 
         self.assertEqual(len(response), 5)
-        response = dict((row['id'], row) for row in response)
+        response = {row['id']: row for row in response}
         self.assertEqual(response['1']['result'], False)
         self.assertEqual(response['2']['result'], None)
         self.assertEqual(response[None]['error']['code'], -32600)
@@ -643,21 +643,17 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
         self.assertIn('core.get_uri_schemes', methods)
         self.assertEqual(len(methods['core.get_uri_schemes']['params']), 0)
 
-        self.assertIn('core.library.lookup', methods.keys())
+        self.assertIn('core.library.lookup', methods)
         self.assertEqual(
-            methods['core.library.lookup']['params'][0]['name'], 'uri')
+            methods['core.library.lookup']['params'][0]['name'], 'uris')
 
         self.assertIn('core.playback.next', methods)
         self.assertEqual(len(methods['core.playback.next']['params']), 0)
 
-        self.assertIn('core.playlists.get_playlists', methods)
+        self.assertIn('core.playlists.as_list', methods)
         self.assertEqual(
-            len(methods['core.playlists.get_playlists']['params']), 1)
+            len(methods['core.playlists.as_list']['params']), 0)
 
-        self.assertIn('core.tracklist.filter', methods.keys())
+        self.assertIn('core.tracklist.filter', methods)
         self.assertEqual(
             methods['core.tracklist.filter']['params'][0]['name'], 'criteria')
-        self.assertEqual(
-            methods['core.tracklist.filter']['params'][1]['name'], 'kwargs')
-        self.assertEqual(
-            methods['core.tracklist.filter']['params'][1]['kwargs'], True)

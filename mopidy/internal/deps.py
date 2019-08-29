@@ -13,10 +13,10 @@ from mopidy.internal.gi import Gst, gi
 
 def format_dependency_list(adapters=None):
     if adapters is None:
-        dist_names = set([
+        dist_names = {
             ep.dist.project_name for ep in
             pkg_resources.iter_entry_points('mopidy.ext')
-            if ep.dist.project_name != 'Mopidy'])
+            if ep.dist.project_name != 'Mopidy'}
         dist_infos = [
             functools.partial(pkg_info, dist_name)
             for dist_name in dist_names]
@@ -43,7 +43,7 @@ def _format_dependency(dep_info):
             source = ' from %s' % dep_info['path']
         else:
             source = ''
-        lines.append('%s: %s%s' % (
+        lines.append('{}: {}{}'.format(
             dep_info['name'],
             dep_info['version'],
             source,
@@ -79,7 +79,7 @@ def platform_info():
 def python_info():
     return {
         'name': 'Python',
-        'version': '%s %s' % (
+        'version': '{} {}'.format(
             platform.python_implementation(), platform.python_version()),
         'path': os.path.dirname(platform.__file__),
     }

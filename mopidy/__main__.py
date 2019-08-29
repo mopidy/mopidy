@@ -12,7 +12,7 @@ from mopidy.internal import encoding, log, path, process, versioning
 from mopidy.internal.gi import Gst  # noqa: F401
 
 try:
-    # Make GObject's mainloop the event loop for python-dbus
+    # Make GLib's mainloop the event loop for python-dbus
     import dbus.mainloop.glib
     dbus.mainloop.glib.threads_init()
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
@@ -61,11 +61,8 @@ def main():
         create_core_dirs(config)
         create_initial_config_file(args, extensions_data)
 
-        verbosity_level = args.base_verbosity_level
-        if args.verbosity_level:
-            verbosity_level += args.verbosity_level
-
-        log.setup_logging(config, verbosity_level, args.save_debug_log)
+        log.setup_logging(
+            config, args.base_verbosity_level, args.verbosity_level)
 
         extensions = {
             'validate': [], 'config': [], 'disabled': [], 'enabled': []}
@@ -169,8 +166,8 @@ def create_initial_config_file(args, extensions_data):
 
 def log_extension_info(all_extensions, enabled_extensions):
     # TODO: distinguish disabled vs blocked by env?
-    enabled_names = set(e.ext_name for e in enabled_extensions)
-    disabled_names = set(e.ext_name for e in all_extensions) - enabled_names
+    enabled_names = {e.ext_name for e in enabled_extensions}
+    disabled_names = {e.ext_name for e in all_extensions} - enabled_names
     logger.info(
         'Enabled extensions: %s', ', '.join(enabled_names) or 'none')
     logger.info(
@@ -183,7 +180,7 @@ def check_config_errors(config, errors, extensions):
     all_extension_names = set()
 
     for state in extensions:
-        extension_names[state] = set(e.ext_name for e in extensions[state])
+        extension_names[state] = {e.ext_name for e in extensions[state]}
         all_extension_names.update(extension_names[state])
 
     for section in sorted(errors):

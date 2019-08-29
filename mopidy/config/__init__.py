@@ -27,10 +27,12 @@ _core_schema['max_tracklist_length'] = Integer(minimum=1)
 _core_schema['restore_state'] = Boolean(optional=True)
 
 _logging_schema = ConfigSchema('logging')
+_logging_schema['verbosity'] = Integer(minimum=-1, maximum=4)
+_logging_schema['format'] = String()
 _logging_schema['color'] = Boolean()
-_logging_schema['console_format'] = String()
-_logging_schema['debug_format'] = String()
-_logging_schema['debug_file'] = Path()
+_logging_schema['console_format'] = Deprecated()
+_logging_schema['debug_format'] = Deprecated()
+_logging_schema['debug_file'] = Deprecated()
 _logging_schema['config_file'] = Path(optional=True)
 
 _loglevels_schema = MapConfigSchema('loglevels', LogLevel())
@@ -110,7 +112,7 @@ def format_initial(extensions_data):
     extensions_data = sorted(
         extensions_data, key=lambda d: d.extension.dist_name)
     for data in extensions_data:
-        versions.append('%s %s' % (
+        versions.append('{} {}'.format(
             data.extension.dist_name, data.extension.version))
 
     header = _INITIAL_HELP.strip() % {'versions': '\n#   '.join(versions)}
@@ -267,10 +269,10 @@ def _postprocess(config_string):
     """Converts a preprocessed config back to original form."""
     flags = re.IGNORECASE | re.MULTILINE
     result = re.sub(r'^\[__COMMENTS__\](\n|$)', '', config_string, flags=flags)
-    result = re.sub(r'\n__INLINE\d+__ =(.*)$', ' ;\g<1>', result, flags=flags)
-    result = re.sub(r'^__HASH\d+__ =(.*)$', '#\g<1>', result, flags=flags)
-    result = re.sub(r'^__SEMICOLON\d+__ =(.*)$', ';\g<1>', result, flags=flags)
-    result = re.sub(r'\n__SECTION\d+__ =(.*)$', '\g<1>', result, flags=flags)
+    result = re.sub(r'\n__INLINE\d+__ =(.*)$', r' ;\g<1>', result, flags=flags)
+    result = re.sub(r'^__HASH\d+__ =(.*)$', r'#\g<1>', result, flags=flags)
+    result = re.sub(r'^__SEMICOLON\d+__ =(.*)$', r';\g<1>', result, flags=flags)
+    result = re.sub(r'\n__SECTION\d+__ =(.*)$', r'\g<1>', result, flags=flags)
     result = re.sub(r'^__BLANK\d+__ =$', '', result, flags=flags)
     return result
 

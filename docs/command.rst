@@ -8,8 +8,8 @@ Synopsis
 ========
 
 mopidy
-    [-h] [--version] [-q] [-v] [--save-debug-log] [--config CONFIG_FILES]
-    [-o CONFIG_OVERRIDES] [COMMAND] ...
+    [-h] [--version] [-q] [-v] [--config CONFIG_FILES] [-o CONFIG_OVERRIDES]
+    [COMMAND] ...
 
 
 Description
@@ -45,11 +45,6 @@ Options
 
     Show more output. Repeat up to four times for even more.
 
-.. cmdoption:: --save-debug-log
-
-    Save debug log to the file specified in the :confval:`logging/debug_file`
-    config value, typically ``./mopidy.log``.
-
 .. cmdoption:: --config <file|directory>
 
     Specify config files and directories to use. To use multiple config files
@@ -83,14 +78,6 @@ Extension commands
 Additionally, extensions can provide extra commands. Run `mopidy --help`
 for a list of what is available on your system and command-specific help.
 Commands for disabled extensions will be listed, but can not be run.
-
-.. describe:: local clear
-
-    Clear local media files from the local library.
-
-.. describe:: local scan
-
-    Scan local media files present in your library.
 
 
 Files

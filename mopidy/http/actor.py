@@ -2,7 +2,6 @@ from __future__ import absolute_import, unicode_literals
 
 import json
 import logging
-import os
 import threading
 
 import pykka
@@ -125,7 +124,7 @@ class HttpServer(threading.Thread):
         logger.debug(
             'HTTP routes from extensions: %s',
             formatting.indent('\n'.join(
-                '%r: %r' % (r[0], r[1]) for r in request_handlers)))
+                '{!r}: {!r}'.format(r[0], r[1]) for r in request_handlers)))
 
         return request_handlers
 
@@ -144,7 +143,7 @@ class HttpServer(threading.Thread):
             ))
             for handler in request_handlers:
                 handler = list(handler)
-                handler[0] = '/%s%s' % (app['name'], handler[0])
+                handler[0] = '/{}{}'.format(app['name'], handler[0])
                 result.append(tuple(handler))
             logger.debug('Loaded HTTP extension: %s', app['name'])
         return result
@@ -168,24 +167,9 @@ class HttpServer(threading.Thread):
         return result
 
     def _get_mopidy_request_handlers(self):
-        # Either default Mopidy or user defined path to files
-
-        static_dir = self.config['http']['static_dir']
         root_redirection = "mopidy" if self.config['http']['root_redirection'] is None else self.config['http']['root_redirection'] 
-
-        if static_dir and not os.path.exists(static_dir):
-            logger.warning(
-                'Configured http/static_dir %s does not exist. '
-                'Falling back to default HTTP handler.', static_dir)
-            static_dir = None
-
-        if static_dir:
-            return [(r'/(.*)', handlers.StaticFileHandler, {
-                'path': self.config['http']['static_dir'],
-                'default_filename': 'index.html',
-            })]
-        else:
-            return [(r'/', tornado.web.RedirectHandler, {
-                'url': '/{}/'.format(root_redirection),
-                'permanent': False,
-            })]
+        
+        return [(r'/', tornado.web.RedirectHandler, {
+            'url': '/{}/'.format(root_redirection),
+            'permanent': False,
+        })]

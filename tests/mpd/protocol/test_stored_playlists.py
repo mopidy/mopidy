@@ -177,13 +177,13 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.backend.library.dummy_library = tracks
         self.core.tracklist.add(uris=['dummy:a', 'dummy:b']).get()
 
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
+        self.assertEqual(len(self.core.tracklist.get_tracks().get()), 2)
         self.backend.playlists.set_dummy_playlists([
             Playlist(name='A-list', uri='dummy:A-list', tracks=tracks[2:])])
 
         self.send_request('load "A-list"')
 
-        tracks = self.core.tracklist.tracks.get()
+        tracks = self.core.tracklist.get_tracks().get()
         self.assertEqual(5, len(tracks))
         self.assertEqual('dummy:a', tracks[0].uri)
         self.assertEqual('dummy:b', tracks[1].uri)
@@ -203,13 +203,13 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.backend.library.dummy_library = tracks
         self.core.tracklist.add(uris=['dummy:a', 'dummy:b']).get()
 
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
+        self.assertEqual(len(self.core.tracklist.get_tracks().get()), 2)
         self.backend.playlists.set_dummy_playlists([
             Playlist(name='A-list', uri='dummy:A-list', tracks=tracks[2:])])
 
         self.send_request('load "A-list" "1:2"')
 
-        tracks = self.core.tracklist.tracks.get()
+        tracks = self.core.tracklist.get_tracks().get()
         self.assertEqual(3, len(tracks))
         self.assertEqual('dummy:a', tracks[0].uri)
         self.assertEqual('dummy:b', tracks[1].uri)
@@ -227,13 +227,13 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.backend.library.dummy_library = tracks
         self.core.tracklist.add(uris=['dummy:a', 'dummy:b']).get()
 
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 2)
+        self.assertEqual(len(self.core.tracklist.get_tracks().get()), 2)
         self.backend.playlists.set_dummy_playlists([
             Playlist(name='A-list', uri='dummy:A-list', tracks=tracks[2:])])
 
         self.send_request('load "A-list" "1:"')
 
-        tracks = self.core.tracklist.tracks.get()
+        tracks = self.core.tracklist.get_tracks().get()
         self.assertEqual(4, len(tracks))
         self.assertEqual('dummy:a', tracks[0].uri)
         self.assertEqual('dummy:b', tracks[1].uri)
@@ -244,7 +244,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
     def test_load_unknown_playlist_acks(self):
         self.send_request('load "unknown playlist"')
 
-        self.assertEqual(0, len(self.core.tracklist.tracks.get()))
+        self.assertEqual(0, len(self.core.tracklist.get_tracks().get()))
         self.assertEqualResponse('ACK [50@0] {load} No such playlist')
 
         # No invalid name check for load.
@@ -262,7 +262,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
 
         self.send_request('load "A-list"')
 
-        tracks = self.core.tracklist.tracks.get()
+        tracks = self.core.tracklist.get_tracks().get()
         self.assertEqual(len(tracks), 1)
         self.assertEqual(tracks[0].uri, 'dummy:a')
         self.assertEqual(tracks[0].name, 'Track A')

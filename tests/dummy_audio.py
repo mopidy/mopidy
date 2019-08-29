@@ -42,9 +42,6 @@ class DummyAudio(pykka.ThreadingActor):
     def emit_data(self, buffer_):
         pass
 
-    def emit_end_of_stream(self):
-        pass
-
     def get_position(self):
         return self._position
 
@@ -109,7 +106,7 @@ class DummyAudio(pykka.ThreadingActor):
             old_state=old_state, new_state=new_state, target_state=None)
 
         if new_state == audio.PlaybackState.PLAYING:
-            self._tags['audio-codec'] = [u'fake info...']
+            self._tags['audio-codec'] = ['fake info...']
             audio.AudioListener.send('tags_changed', tags=['audio-codec'])
 
         return self._uri not in self._bad_uris

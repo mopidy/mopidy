@@ -24,8 +24,9 @@ class AddCommandsTest(protocol.BaseTestCase):
         for track in [self.tracks[0], self.tracks[0], self.tracks[1]]:
             self.send_request('add "%s"' % track.uri)
 
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 3)
-        self.assertEqual(self.core.tracklist.tracks.get()[2], self.tracks[1])
+        self.assertEqual(len(self.core.tracklist.get_tracks().get()), 3)
+        self.assertEqual(
+            self.core.tracklist.get_tracks().get()[2], self.tracks[1])
         self.assertEqualResponse('OK')
 
     def test_add_with_uri_not_found_in_library_should_ack(self):
@@ -38,7 +39,7 @@ class AddCommandsTest(protocol.BaseTestCase):
             'dummy:/': [self.refs['/a']]}
 
         self.send_request('add ""')
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 0)
+        self.assertEqual(len(self.core.tracklist.get_tracks().get()), 0)
         self.assertInResponse('OK')
 
     def test_add_with_library_should_recurse(self):
@@ -47,7 +48,7 @@ class AddCommandsTest(protocol.BaseTestCase):
             'dummy:/foo': [self.refs['/foo/b']]}
 
         self.send_request('add "/dummy"')
-        self.assertEqual(self.core.tracklist.tracks.get(), self.tracks)
+        self.assertEqual(self.core.tracklist.get_tracks().get(), self.tracks)
         self.assertInResponse('OK')
 
     def test_add_root_should_not_add_anything_and_ok(self):
@@ -55,13 +56,13 @@ class AddCommandsTest(protocol.BaseTestCase):
             'dummy:/': [self.refs['/a']]}
 
         self.send_request('add "/"')
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 0)
+        self.assertEqual(len(self.core.tracklist.get_tracks().get()), 0)
         self.assertInResponse('OK')
 
     def test_addid_without_songpos(self):
         for track in [self.tracks[0], self.tracks[0], self.tracks[1]]:
             self.send_request('addid "%s"' % track.uri)
-        tl_tracks = self.core.tracklist.tl_tracks.get()
+        tl_tracks = self.core.tracklist.get_tl_tracks().get()
 
         self.assertEqual(len(tl_tracks), 3)
         self.assertEqual(tl_tracks[2].track, self.tracks[1])
@@ -72,7 +73,7 @@ class AddCommandsTest(protocol.BaseTestCase):
         for track in [self.tracks[0], self.tracks[0]]:
             self.send_request('add "%s"' % track.uri)
         self.send_request('addid "%s" "1"' % self.tracks[1].uri)
-        tl_tracks = self.core.tracklist.tl_tracks.get()
+        tl_tracks = self.core.tracklist.get_tl_tracks().get()
 
         self.assertEqual(len(tl_tracks), 3)
         self.assertEqual(tl_tracks[1].track, self.tracks[1])
@@ -105,55 +106,55 @@ class DeleteCommandsTest(BasePopulatedTracklistTestCase):
 
     def test_clear(self):
         self.send_request('clear')
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 0)
-        self.assertEqual(self.core.playback.current_track.get(), None)
+        self.assertEqual(len(self.core.tracklist.get_tracks().get()), 0)
+        self.assertEqual(self.core.playback.get_current_track().get(), None)
         self.assertInResponse('OK')
 
     def test_delete_songpos(self):
-        tl_tracks = self.core.tracklist.tl_tracks.get()
+        tl_tracks = self.core.tracklist.get_tl_tracks().get()
         self.send_request('delete "%d"' % tl_tracks[1].tlid)
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
+        self.assertEqual(len(self.core.tracklist.get_tracks().get()), 5)
         self.assertInResponse('OK')
 
     def test_delete_songpos_out_of_bounds(self):
         self.send_request('delete "8"')
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 6)
+        self.assertEqual(len(self.core.tracklist.get_tracks().get()), 6)
         self.assertEqualResponse('ACK [2@0] {delete} Bad song index')
 
     def test_delete_open_range(self):
         self.send_request('delete "1:"')
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 1)
+        self.assertEqual(len(self.core.tracklist.get_tracks().get()), 1)
         self.assertInResponse('OK')
 
     # TODO: check how this should work.
     # def test_delete_open_upper_range(self):
     #     self.send_request('delete ":8"')
-    #     self.assertEqual(len(self.core.tracklist.tracks.get()), 0)
+    #     self.assertEqual(len(self.core.tracklist.get_tracks().get()), 0)
     #     self.assertInResponse('OK')
 
     def test_delete_closed_range(self):
         self.send_request('delete "1:3"')
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 4)
+        self.assertEqual(len(self.core.tracklist.get_tracks().get()), 4)
         self.assertInResponse('OK')
 
     def test_delete_entire_range_out_of_bounds(self):
         self.send_request('delete "8:9"')
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 6)
+        self.assertEqual(len(self.core.tracklist.get_tracks().get()), 6)
         self.assertEqualResponse('ACK [2@0] {delete} Bad song index')
 
     def test_delete_upper_range_out_of_bounds(self):
         self.send_request('delete "5:9"')
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
+        self.assertEqual(len(self.core.tracklist.get_tracks().get()), 5)
         self.assertEqualResponse('OK')
 
     def test_deleteid(self):
         self.send_request('deleteid "1"')
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 5)
+        self.assertEqual(len(self.core.tracklist.get_tracks().get()), 5)
         self.assertInResponse('OK')
 
     def test_deleteid_does_not_exist(self):
         self.send_request('deleteid "12345"')
-        self.assertEqual(len(self.core.tracklist.tracks.get()), 6)
+        self.assertEqual(len(self.core.tracklist.get_tracks().get()), 6)
         self.assertEqualResponse('ACK [50@0] {deleteid} No such song')
 
 
@@ -161,25 +162,25 @@ class MoveCommandsTest(BasePopulatedTracklistTestCase):
 
     def test_move_songpos(self):
         self.send_request('move "1" "0"')
-        result = [t.name for t in self.core.tracklist.tracks.get()]
+        result = [t.name for t in self.core.tracklist.get_tracks().get()]
         self.assertEqual(result, ['b', 'a', 'c', 'd', 'e', 'f'])
         self.assertInResponse('OK')
 
     def test_move_open_range(self):
         self.send_request('move "2:" "0"')
-        result = [t.name for t in self.core.tracklist.tracks.get()]
+        result = [t.name for t in self.core.tracklist.get_tracks().get()]
         self.assertEqual(result, ['c', 'd', 'e', 'f', 'a', 'b'])
         self.assertInResponse('OK')
 
     def test_move_closed_range(self):
         self.send_request('move "1:3" "0"')
-        result = [t.name for t in self.core.tracklist.tracks.get()]
+        result = [t.name for t in self.core.tracklist.get_tracks().get()]
         self.assertEqual(result, ['b', 'c', 'a', 'd', 'e', 'f'])
         self.assertInResponse('OK')
 
     def test_moveid(self):
         self.send_request('moveid "5" "2"')
-        result = [t.name for t in self.core.tracklist.tracks.get()]
+        result = [t.name for t in self.core.tracklist.get_tracks().get()]
         self.assertEqual(result, ['a', 'b', 'e', 'c', 'd', 'f'])
         self.assertInResponse('OK')
 
@@ -345,7 +346,7 @@ class PlChangeCommandTest(BasePopulatedTracklistTestCase):
         self.assertInResponse('OK')
 
     def test_plchanges_with_equal_version_returns_nothing(self):
-        self.assertEqual(self.core.tracklist.version.get(), 1)
+        self.assertEqual(self.core.tracklist.get_version().get(), 1)
         self.send_request('plchanges "1"')
         self.assertNotInResponse('Title: a')
         self.assertNotInResponse('Title: b')
@@ -353,7 +354,7 @@ class PlChangeCommandTest(BasePopulatedTracklistTestCase):
         self.assertInResponse('OK')
 
     def test_plchanges_with_greater_version_returns_nothing(self):
-        self.assertEqual(self.core.tracklist.version.get(), 1)
+        self.assertEqual(self.core.tracklist.get_version().get(), 1)
         self.send_request('plchanges "2"')
         self.assertNotInResponse('Title: a')
         self.assertNotInResponse('Title: b')
@@ -376,7 +377,7 @@ class PlChangeCommandTest(BasePopulatedTracklistTestCase):
 
     def test_plchangesposid(self):
         self.send_request('plchangesposid "0"')
-        tl_tracks = self.core.tracklist.tl_tracks.get()
+        tl_tracks = self.core.tracklist.get_tl_tracks().get()
         self.assertInResponse('cpos: 0')
         self.assertInResponse('Id: %d' % tl_tracks[0].tlid)
         self.assertInResponse('cpos: 2')
@@ -408,29 +409,29 @@ class RangeIdCommandTest(protocol.BaseTestCase):
 class ShuffleCommandTest(BasePopulatedTracklistTestCase):
 
     def test_shuffle_without_range(self):
-        version = self.core.tracklist.version.get()
+        version = self.core.tracklist.get_version().get()
 
         self.send_request('shuffle')
-        self.assertLess(version, self.core.tracklist.version.get())
+        self.assertLess(version, self.core.tracklist.get_version().get())
         self.assertInResponse('OK')
 
     def test_shuffle_with_open_range(self):
-        version = self.core.tracklist.version.get()
+        version = self.core.tracklist.get_version().get()
 
         self.send_request('shuffle "4:"')
-        self.assertLess(version, self.core.tracklist.version.get())
+        self.assertLess(version, self.core.tracklist.get_version().get())
 
-        result = [t.name for t in self.core.tracklist.tracks.get()]
+        result = [t.name for t in self.core.tracklist.get_tracks().get()]
         self.assertEqual(result[:4], ['a', 'b', 'c', 'd'])
         self.assertInResponse('OK')
 
     def test_shuffle_with_closed_range(self):
-        version = self.core.tracklist.version.get()
+        version = self.core.tracklist.get_version().get()
 
         self.send_request('shuffle "1:3"')
-        self.assertLess(version, self.core.tracklist.version.get())
+        self.assertLess(version, self.core.tracklist.get_version().get())
 
-        result = [t.name for t in self.core.tracklist.tracks.get()]
+        result = [t.name for t in self.core.tracklist.get_tracks().get()]
         self.assertEqual(result[:1], ['a'])
         self.assertEqual(result[3:], ['d', 'e', 'f'])
         self.assertInResponse('OK')
@@ -440,13 +441,19 @@ class SwapCommandTest(BasePopulatedTracklistTestCase):
 
     def test_swap(self):
         self.send_request('swap "1" "4"')
-        result = [t.name for t in self.core.tracklist.tracks.get()]
+        result = [t.name for t in self.core.tracklist.get_tracks().get()]
+        self.assertEqual(result, ['a', 'e', 'c', 'd', 'b', 'f'])
+        self.assertInResponse('OK')
+
+    def test_swap_highest_position_first(self):
+        self.send_request('swap "4" "1"')
+        result = [t.name for t in self.core.tracklist.get_tracks().get()]
         self.assertEqual(result, ['a', 'e', 'c', 'd', 'b', 'f'])
         self.assertInResponse('OK')
 
     def test_swapid(self):
         self.send_request('swapid "2" "5"')
-        result = [t.name for t in self.core.tracklist.tracks.get()]
+        result = [t.name for t in self.core.tracklist.get_tracks().get()]
         self.assertEqual(result, ['a', 'e', 'c', 'd', 'b', 'f'])
         self.assertInResponse('OK')
 

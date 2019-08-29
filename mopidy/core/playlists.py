@@ -6,7 +6,7 @@ import logging
 from mopidy import exceptions
 from mopidy.compat import urllib
 from mopidy.core import listener
-from mopidy.internal import deprecation, validation
+from mopidy.internal import validation
 from mopidy.models import Playlist, Ref
 
 logger = logging.getLogger(__name__)
@@ -104,41 +104,6 @@ class PlaylistsController(object):
 
         return None
 
-    def get_playlists(self, include_tracks=True):
-        """
-        Get the available playlists.
-
-        :rtype: list of :class:`mopidy.models.Playlist`
-
-        .. versionchanged:: 1.0
-            If you call the method with ``include_tracks=False``, the
-            :attr:`~mopidy.models.Playlist.last_modified` field of the returned
-            playlists is no longer set.
-
-        .. deprecated:: 1.0
-            Use :meth:`as_list` and :meth:`get_items` instead.
-        """
-        deprecation.warn('core.playlists.get_playlists')
-
-        playlist_refs = self.as_list()
-
-        if include_tracks:
-            playlists = {r.uri: self.lookup(r.uri) for r in playlist_refs}
-            # Use the playlist name from as_list() because it knows about any
-            # playlist folder hierarchy, which lookup() does not.
-            return [
-                playlists[r.uri].replace(name=r.name)
-                for r in playlist_refs if playlists[r.uri] is not None]
-        else:
-            return [
-                Playlist(uri=r.uri, name=r.name) for r in playlist_refs]
-
-    playlists = deprecation.deprecated_property(get_playlists)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`as_list` and :meth:`get_items` instead.
-    """
-
     def create(self, name, uri_scheme=None):
         """
         Create a new playlist.
@@ -209,39 +174,6 @@ class PlaylistsController(object):
             listener.CoreListener.send('playlist_deleted', uri=uri)
 
         return success
-
-    def filter(self, criteria=None, **kwargs):
-        """
-        Filter playlists by the given criterias.
-
-        Examples::
-
-            # Returns track with name 'a'
-            filter({'name': 'a'})
-
-            # Returns track with URI 'xyz'
-            filter({'uri': 'xyz'})
-
-            # Returns track with name 'a' and URI 'xyz'
-            filter({'name': 'a', 'uri': 'xyz'})
-
-        :param criteria: one or more criteria to match by
-        :type criteria: dict
-        :rtype: list of :class:`mopidy.models.Playlist`
-
-        .. deprecated:: 1.0
-            Use :meth:`as_list` and filter yourself.
-        """
-        deprecation.warn('core.playlists.filter')
-
-        criteria = criteria or kwargs
-        validation.check_query(
-            criteria, validation.PLAYLIST_FIELDS, list_values=False)
-
-        matches = self.playlists  # TODO: stop using self playlists
-        for (key, value) in criteria.iteritems():
-            matches = filter(lambda p: getattr(p, key) == value, matches)
-        return matches
 
     def lookup(self, uri):
         """

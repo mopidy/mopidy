@@ -71,24 +71,6 @@ See :ref:`config` for general help on configuring Mopidy.
 
     Which TCP port the HTTP server should listen to.
 
-.. confval:: http/static_dir
-
-    **Deprecated:** This config is deprecated and will be removed in a future
-    version of Mopidy.
-
-    Which directory the HTTP server should serve at "/"
-
-    Change this to have Mopidy serve e.g. files for your JavaScript client.
-    "/mopidy" will continue to work as usual even if you change this setting,
-    but any other Mopidy webclient installed with pip to be served at
-    "/ext_name" will stop working if you set this config.
-
-    You're strongly encouraged to make Mopidy extensions which use the the
-    :ref:`http-server-api` to host static files on Mopidy's web server instead
-    of using :confval:`http/static_dir`. That way, installation of your web
-    client will be a lot easier for your end users, and multiple web clients
-    can easily share the same web server.
-
 .. confval:: http/zeroconf
 
     Name of the HTTP service when published through Zeroconf. The variables

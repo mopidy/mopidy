@@ -4,7 +4,6 @@ import copy
 import itertools
 import weakref
 
-from mopidy.internal import deprecation
 from mopidy.models.fields import Field
 
 
@@ -68,11 +67,11 @@ class ImmutableObject(object):
                 if not value:
                     continue
                 value = list(value)
-            kwarg_pairs.append('%s=%s' % (key, repr(value)))
-        return '%(classname)s(%(kwargs)s)' % {
-            'classname': self.__class__.__name__,
-            'kwargs': ', '.join(kwarg_pairs),
-        }
+            kwarg_pairs.append('{}={}'.format(key, repr(value)))
+        return '{classname}({kwargs})'.format(
+            classname=self.__class__.__name__,
+            kwargs=', '.join(kwarg_pairs),
+        )
 
     def __hash__(self):
         hash_sum = 0
@@ -88,14 +87,6 @@ class ImmutableObject(object):
 
     def __ne__(self, other):
         return not self.__eq__(other)
-
-    def copy(self, **values):
-        """
-        .. deprecated:: 1.1
-            Use :meth:`replace` instead.
-        """
-        deprecation.warn('model.immutable.copy')
-        return self.replace(**values)
 
     def replace(self, **kwargs):
         """

@@ -392,19 +392,10 @@ def swap(context, songpos1, songpos2):
 
         Swaps the positions of ``SONG1`` and ``SONG2``.
     """
-    tracks = context.core.tracklist.get_tracks().get()
-    song1 = tracks[songpos1]
-    song2 = tracks[songpos2]
-    del tracks[songpos1]
-    tracks.insert(songpos1, song2)
-    del tracks[songpos2]
-    tracks.insert(songpos2, song1)
-
-    # TODO: do we need a tracklist.replace()
-    context.core.tracklist.clear()
-
-    with deprecation.ignore('core.tracklist.add:tracks_arg'):
-        context.core.tracklist.add(tracks=tracks).get()
+    if songpos2 < songpos1:
+        songpos1, songpos2 = songpos2, songpos1
+    context.core.tracklist.move(songpos1, songpos1 + 1, songpos2)
+    context.core.tracklist.move(songpos2 - 1, songpos2, songpos1)
 
 
 @protocol.commands.add('swapid', tlid1=protocol.UINT, tlid2=protocol.UINT)

@@ -101,7 +101,11 @@ Extension for playing music and audio from the `Internet Archive
 Mopidy-Local
 ============
 
-Bundled with Mopidy. See :ref:`ext-local`.
+https://github.com/mopidy/mopidy-local
+
+Extension for playing music from your local music archive. In contrast to
+Mopidy-File, Mopidy-Local builds an index of your archive's metadata ahead of
+time, and can thus provide additional features like search.
 
 
 Mopidy-Local-Images

@@ -9,6 +9,245 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
+v3.0.0 (UNRELEASED)
+===================
+
+Backwards incompatible release.
+
+Dependencies
+------------
+
+- Pykka >= 2.0 is now required.
+
+- We now use a number of constants and functions from ``GLib`` instead of their
+  deprecated equivalents in ``GObject``. The exact version of PyGObject and
+  GLib that makes these constants and functions available in the new location
+  is not known, but is believed to have been released in 2015 or earlier.
+
+Logging
+-------
+
+- The command line option :option:`mopidy --save-debug-log` and the
+  configuration :confval:`logging/debug_file` have been removed.
+  To save a debug log for sharing, run ``mopidy -vvvv | tee mopidy.log``
+  or equivalent. (Fixes: :issue:`1452`, PR: :issue:`1783`)
+
+- Replaced the configurations :confval:`logging/console_format`
+  and :confval:`logging/debug_format` with
+  the single configuration :confval:`logging/format`.
+  It defaults to the same format as the old debug format.
+  (Fixes: :issue:`1452`, PR: :issue:`1783`)
+
+- Added configuration :confval:`logging/verbosity` to be able to control
+  logging verbosity from the configuration file,
+  in addition to passing ``-q`` or ``-v`` on the command line.
+  (Fixes: :issue:`1452`, PR: :issue:`1783`)
+
+Core API
+--------
+
+- Removed properties, methods, and arguments that have been deprecated since
+  1.0, released in 2015.
+  Everything removed already has a replacement, that should be used instead.
+  See below for a full list of removals and replacements.
+  (Fixes: :issue:`1083`, :issue:`1461`, PR: :issue:`1768`, :issue:`1769`)
+
+Root object
+^^^^^^^^^^^
+
+- Removed properties, use getter/setter instead:
+
+  - :attr:`mopidy.core.Core.uri_schemes`
+  - :attr:`mopidy.core.Core.version`
+
+Library controller
+^^^^^^^^^^^^^^^^^^
+
+- Removed methods:
+
+  - :meth:`mopidy.core.LibraryController.find_exact`:
+    Use :meth:`~mopidy.core.LibraryController.search`
+    with the keyword argument ``exact=True`` instead.
+
+- Removed the ``uri`` argument to
+  :meth:`mopidy.core.LibraryController.lookup`.
+  Use the ``uris`` argument instead.
+
+- Removed the support for passing the search query as keyword arguments to
+  :meth:`mopidy.core.LibraryController.search`.
+  Use the ``query`` argument instead.
+
+- :meth:`mopidy.core.LibraryController.search` now returns an empty result
+  if there is no ``query``. Previously, it returned the full music library.
+  This does not work with online music services,
+  and have thus been deprecated since 1.0.
+
+History controller
+^^^^^^^^^^^^^^^^^^
+
+- (no changes yet)
+
+Mixer controller
+^^^^^^^^^^^^^^^^
+
+- (no changes yet)
+
+Playback controller
+^^^^^^^^^^^^^^^^^^^
+
+- Removed properties, use getter/setter instead:
+
+  - :attr:`mopidy.core.PlaybackController.current_tl_track`
+  - :attr:`mopidy.core.PlaybackController.current_track`
+  - :attr:`mopidy.core.PlaybackController.state`
+  - :attr:`mopidy.core.PlaybackController.time_position`
+
+- Moved to the mixer controller:
+
+  - :meth:`mopidy.core.PlaybackController.get_mute`:
+    Use :meth:`~mopidy.core.MixerController.get_mute`.
+
+  - :meth:`mopidy.core.PlaybackController.get_volume`:
+    Use :meth:`~mopidy.core.MixerController.get_volume`.
+
+  - :meth:`mopidy.core.PlaybackController.set_mute`:
+    Use :meth:`~mopidy.core.MixerController.set_mute`.
+
+  - :meth:`mopidy.core.PlaybackController.set_volume`:
+    Use :meth:`~mopidy.core.MixerController.set_volume`.
+
+  - :attr:`mopidy.core.PlaybackController.mute`:
+    Use :meth:`~mopidy.core.MixerController.get_mute`
+    and :meth:`~mopidy.core.MixerController.set_mute`.
+
+  - :attr:`mopidy.core.PlaybackController.volume`:
+    Use :meth:`~mopidy.core.MixerController.get_volume`
+    and :meth:`~mopidy.core.MixerController.set_volume`.
+
+Playlist controller
+^^^^^^^^^^^^^^^^^^^
+
+- Removed properties, use getter/setter instead:
+
+  - :attr:`mopidy.core.PlaylistController.playlists`
+
+- Removed methods:
+
+  - :meth:`mopidy.core.PlaylistsController.filter`:
+    Use :meth:`~mopidy.core.PlaylistsController.as_list` and filter yourself.
+
+  - :meth:`mopidy.core.PlaylistsController.get_playlists`:
+    Use :meth:`~mopidy.core.PlaylistsController.as_list` and
+    :meth:`~mopidy.core.PlaylistsController.get_items`.
+
+Tracklist controller
+^^^^^^^^^^^^^^^^^^^^
+
+- Removed properties, use getter/setter instead:
+
+  - :attr:`mopidy.core.TracklistController.tl_tracks`
+  - :attr:`mopidy.core.TracklistController.tracks`
+  - :attr:`mopidy.core.TracklistController.length`
+  - :attr:`mopidy.core.TracklistController.version`
+  - :attr:`mopidy.core.TracklistController.consume`
+  - :attr:`mopidy.core.TracklistController.random`
+  - :attr:`mopidy.core.TracklistController.repeat`
+  - :attr:`mopidy.core.TracklistController.single`
+
+- Removed the ``uri`` argument to
+  :meth:`mopidy.core.TracklistController.add`.
+  Use the ``uris`` argument instead.
+
+- Removed the support for passing filter criterias as keyword arguments to
+  :meth:`mopidy.core.TracklistController.filter`.
+  Use the ``criteria`` argument instead.
+
+- Removed the support for passing filter criterias as keyword arguments to
+  :meth:`mopidy.core.TracklistController.remove`.
+  Use the ``criteria`` argument instead.
+
+Backend API
+-----------
+
+- (no changes yet)
+
+Models
+------
+
+- Remove ``.copy()`` method on all model classes.
+  Use the ``.replace()`` method instead.
+  (Fixes: :issue:`1464`, PR: :issue:`1774`)
+
+- Remove :attr:`mopidy.models.Album.images`.
+  Clients should use :meth:`mopidy.core.LibraryController.get_images` instead.
+  Backends should implement :meth:`mopidy.backend.LibraryProvider.get_images`.
+  (Fixes: :issue:`1464`, PR: :issue:`1774`)
+
+Extension support
+-----------------
+
+- (no changes yet)
+
+HTTP frontend
+-------------
+
+- Stop bundling Mopidy.js and serving it at ``/mopidy/mopidy.js`` and
+  ``/mopidy/mopidy.min.js``. All Mopidy web clients must use Mopidy.js from npm
+  or vendor their own copy of the library.
+  (Fixes: :issue:`1083`, :issue:`1460`, PR: :issue:`1708`)
+
+- Remove support for serving arbitrary files over HTTP through the use of
+  :confval:`http/static_dir`, which has been deprecated since 1.0. (Fixes:
+  :issue:`1463`, PR: :issue:`1706`)
+
+MPD frontend
+------------
+
+- Improved the ``swap`` command to swap the tracks without rebuilding
+  the full tracklist.
+
+File backend
+------------
+
+- (no changes yet)
+
+Local backend
+-------------
+
+- The Mopidy-Local backend is no longer bundled with Mopidy, and has been moved
+  to its own `Git repo <https://github.com/mopidy/mopidy-local>`__ and
+  `PyPI project <https://pypi.org/project/Mopidy-Local>`__.
+  (Fixes: :issue:`1003`)
+
+M3U backend
+-----------
+
+- (no changes yet)
+
+Stream backend
+--------------
+
+- (no changes yet)
+
+Audio
+-----
+
+- Remove the method :meth:`mopidy.audio.Audio.emit_end_of_stream`, which has
+  been deprecated since 1.0. (Fixes: :issue:`1465`, PR: :issue:`1705`)
+
+
+v2.2.4 (UNRELEASED)
+===================
+
+Bug fix release.
+
+- Fix `PkgResourcesDeprecationWarning` on startup when a recent release
+  of setuptools is installed. (Fixes: :issue:`1778`, PR: :issue:`1780`)
+
+- Network: Close connection following an exception in the protocol handler.
+  (Fixes: :issue:`1762`, PR: :issue:`1765`)
+
+
 v2.2.3 (2019-06-20)
 ===================
 

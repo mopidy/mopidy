@@ -30,7 +30,7 @@ class FormatSocketConnectionTest(unittest.TestCase):
         sock.getsockname.return_value = (sentinel.ip, sentinel.port)
         self.assertEqual(
             network.format_socket_name(sock),
-            '[%s]:%s' % (sentinel.ip, sentinel.port))
+            '[{}]:{}'.format(sentinel.ip, sentinel.port))
 
     def test_format_socket_name_unix(self):
         sock = Mock(spec=socket.SocketType)

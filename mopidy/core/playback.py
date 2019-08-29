@@ -2,6 +2,8 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 
+from pykka.messages import ProxyCall
+
 from mopidy.audio import PlaybackState
 from mopidy.compat import urllib
 from mopidy.core import listener
@@ -42,8 +44,6 @@ class PlaybackController(object):
         uri_scheme = urllib.parse.urlparse(tl_track.track.uri).scheme
         return self.backends.with_playback.get(uri_scheme, None)
 
-    # Properties
-
     def get_current_tl_track(self):
         """Get the currently playing or selected track.
 
@@ -58,12 +58,6 @@ class PlaybackController(object):
         """
         self._current_tl_track = value
 
-    current_tl_track = deprecation.deprecated_property(get_current_tl_track)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`get_current_tl_track` instead.
-    """
-
     def get_current_track(self):
         """
         Get the currently playing or selected track.
@@ -73,12 +67,6 @@ class PlaybackController(object):
         Returns a :class:`mopidy.models.Track` or :class:`None`.
         """
         return getattr(self.get_current_tl_track(), 'track', None)
-
-    current_track = deprecation.deprecated_property(get_current_track)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`get_current_track` instead.
-    """
 
     def get_current_tlid(self):
         """
@@ -125,12 +113,6 @@ class PlaybackController(object):
 
         self._trigger_playback_state_changed(old_state, new_state)
 
-    state = deprecation.deprecated_property(get_state, set_state)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`get_state` and :meth:`set_state` instead.
-    """
-
     def get_time_position(self):
         """Get time position in milliseconds."""
         if self._pending_position is not None:
@@ -141,68 +123,6 @@ class PlaybackController(object):
             return backend.playback.get_time_position().get()
         else:
             return 0
-
-    time_position = deprecation.deprecated_property(get_time_position)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`get_time_position` instead.
-    """
-
-    def get_volume(self):
-        """
-        .. deprecated:: 1.0
-            Use :meth:`core.mixer.get_volume()
-            <mopidy.core.MixerController.get_volume>` instead.
-        """
-        deprecation.warn('core.playback.get_volume')
-        return self.core.mixer.get_volume()
-
-    def set_volume(self, volume):
-        """
-        .. deprecated:: 1.0
-            Use :meth:`core.mixer.set_volume()
-            <mopidy.core.MixerController.set_volume>` instead.
-        """
-        deprecation.warn('core.playback.set_volume')
-        return self.core.mixer.set_volume(volume)
-
-    volume = deprecation.deprecated_property(get_volume, set_volume)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`core.mixer.get_volume()
-        <mopidy.core.MixerController.get_volume>` and
-        :meth:`core.mixer.set_volume()
-        <mopidy.core.MixerController.set_volume>` instead.
-    """
-
-    def get_mute(self):
-        """
-        .. deprecated:: 1.0
-            Use :meth:`core.mixer.get_mute()
-            <mopidy.core.MixerController.get_mute>` instead.
-        """
-        deprecation.warn('core.playback.get_mute')
-        return self.core.mixer.get_mute()
-
-    def set_mute(self, mute):
-        """
-        .. deprecated:: 1.0
-            Use :meth:`core.mixer.set_mute()
-            <mopidy.core.MixerController.set_mute>` instead.
-        """
-        deprecation.warn('core.playback.set_mute')
-        return self.core.mixer.set_mute(mute)
-
-    mute = deprecation.deprecated_property(get_mute, set_mute)
-    """
-    .. deprecated:: 1.0
-        Use :meth:`core.mixer.get_mute()
-        <mopidy.core.MixerController.get_mute>` and
-        :meth:`core.mixer.set_mute()
-        <mopidy.core.MixerController.set_mute>` instead.
-    """
-
-    # Methods
 
     def _on_end_of_stream(self):
         self.set_state(PlaybackState.STOPPED)
@@ -254,10 +174,11 @@ class PlaybackController(object):
         there is no unsafe access of state in core. This must block until
         we get a response.
         """
-        self.core.actor_ref.ask({
-            'command': 'pykka_call', 'args': tuple(), 'kwargs': {},
-            'attr_path': ('playback', '_on_about_to_finish'),
-        })
+        self.core.actor_ref.ask(ProxyCall(
+            attr_path=['playback', '_on_about_to_finish'],
+            args=[],
+            kwargs={},
+        ))
 
     def _on_about_to_finish(self):
         if self._state == PlaybackState.STOPPED:
@@ -298,10 +219,11 @@ class PlaybackController(object):
 
         Used by :class:`mopidy.core.TracklistController`.
         """
-        if not self.core.tracklist.tl_tracks:
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        if not tl_tracks:
             self.stop()
             self._set_current_tl_track(None)
-        elif self.get_current_tl_track() not in self.core.tracklist.tl_tracks:
+        elif self.get_current_tl_track() not in tl_tracks:
             self._set_current_tl_track(None)
 
     def next(self):
@@ -508,7 +430,7 @@ class PlaybackController(object):
                 'Client seeked to negative position. Seeking to zero.')
             time_position = 0
 
-        if not self.core.tracklist.tracks:
+        if not self.core.tracklist.get_length():
             return False
 
         if self.get_state() == PlaybackState.STOPPED:
@@ -555,7 +477,7 @@ class PlaybackController(object):
 
     def _trigger_track_playback_paused(self):
         logger.debug('Triggering track playback paused event')
-        if self.current_track is None:
+        if self.get_current_tl_track() is None:
             return
         listener.CoreListener.send(
             'track_playback_paused',
@@ -564,7 +486,7 @@ class PlaybackController(object):
 
     def _trigger_track_playback_resumed(self):
         logger.debug('Triggering track playback resumed event')
-        if self.current_track is None:
+        if self.get_current_tl_track() is None:
             return
         listener.CoreListener.send(
             'track_playback_resumed',

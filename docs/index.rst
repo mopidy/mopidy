@@ -10,7 +10,7 @@ of MPD and web clients.
 
 **Stream music from the cloud**
 
-Vanilla Mopidy only plays music from your :ref:`local disk <ext-local>` and
+Vanilla Mopidy only plays music from your :ref:`local disk <ext-file>` and
 :ref:`radio streams <ext-stream>`. Through :ref:`extensions <ext-backends>`,
 Mopidy can play music from cloud services like Spotify, SoundCloud, and Google
 Play Music. With Mopidy's extension support, backends for new music sources can
@@ -91,7 +91,6 @@ announcements related to Mopidy and Mopidy extensions.
     :caption: Extensions
     :maxdepth: 2
 
-    ext/local
     ext/file
     ext/m3u
     ext/stream

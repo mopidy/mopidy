@@ -30,7 +30,7 @@ class AuthenticationActiveTest(protocol.BaseTestCase):
         self.send_request('any request at all')
         self.assertFalse(self.dispatcher.authenticated)
         self.assertEqualResponse(
-            u'ACK [4@0] {any} you don\'t have permission for "any"')
+            'ACK [4@0] {any} you don\'t have permission for "any"')
 
     def test_close_is_allowed_without_authentication(self):
         self.send_request('close')
