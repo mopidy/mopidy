@@ -173,7 +173,8 @@ class LibraryController(object):
             with _backend_error_handling(backend):
                 if future.get() is None:
                     continue
-                validation.check_instance(future.get(), collections.Mapping)
+                validation.check_instance(
+                    future.get(), compat.collections_abc.Mapping)
                 for uri, images in future.get().items():
                     if uri not in uris:
                         raise exceptions.ValidationError(

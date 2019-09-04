@@ -280,7 +280,7 @@ def _postprocess(config_string):
     return result
 
 
-class Proxy(collections.Mapping):
+class Proxy(compat.collections_abc.Mapping):
 
     def __init__(self, data):
         self._data = data

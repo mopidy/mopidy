@@ -6,6 +6,7 @@ PY2 = sys.version_info[0] == 2
 PY3 = sys.version_info[0] == 3
 
 if PY2:
+    import collections as collections_abc  # noqa
     import ConfigParser as configparser  # noqa
     import Queue as queue  # noqa
     import thread  # noqa
@@ -41,6 +42,7 @@ if PY2:
         return iter(dct.itervalues(**kwargs))
 
 else:
+    import collections.abc as collections_abc  # noqa
     import configparser  # noqa
     import queue  # noqa
     import _thread as thread  # noqa
