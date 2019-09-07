@@ -10,7 +10,8 @@ import mock
 import pykka
 
 import mopidy
-from mopidy.core import Core
+from mopidy.audio import PlaybackState
+from mopidy.core import Core, CoreListener
 from mopidy.internal import models, storage, versioning
 from mopidy.models import Track
 
@@ -50,6 +51,17 @@ class CoreActorTest(unittest.TestCase):
 
     def test_version(self):
         self.assertEqual(self.core.get_version(), versioning.get_version())
+
+    @mock.patch(
+        'mopidy.core.playback.listener.CoreListener', spec=CoreListener)
+    def test_state_changed(self, listener_mock):
+        self.core.state_changed(None, PlaybackState.PAUSED, None)
+
+        assert listener_mock.send.mock_calls == [
+            mock.call(
+                'playback_state_changed',
+                old_state='stopped', new_state='paused'),
+        ]
 
 
 class CoreActorSaveLoadStateTest(unittest.TestCase):
