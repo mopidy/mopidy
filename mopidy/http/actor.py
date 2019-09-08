@@ -75,14 +75,14 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         self.server.stop()
 
     def on_event(self, name, **data):
-        on_event(name, **data)
+        on_event(name, self.server.io_loop, **data)
 
 
-def on_event(name, **data):
+def on_event(name, ioloop, **data):
     event = data
     event['event'] = name
     message = json.dumps(event, cls=models.ModelJSONEncoder)
-    handlers.WebSocketHandler.broadcast(message)
+    handlers.WebSocketHandler.broadcast(ioloop, message)
 
 
 class HttpServer(threading.Thread):
