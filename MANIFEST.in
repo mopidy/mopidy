@@ -8,6 +8,7 @@ include LICENSE
 include MANIFEST.in
 include tox.ini
 
+recursive-include .circleci *
 recursive-include .github *
 
 recursive-include docs *
