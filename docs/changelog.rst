@@ -247,6 +247,10 @@ Bug fix release.
 - Network: Close connection following an exception in the protocol handler.
   (Fixes: :issue:`1762`, PR: :issue:`1765`)
 
+- Network: Log client's connection details instead of server's. This fixed a
+  regression introduced as part of PR: :issue:`1629`. (Fixes: :issue:`1788`,
+  PR: :issue:`1792`)
+
 
 v2.2.3 (2019-06-20)
 ===================
