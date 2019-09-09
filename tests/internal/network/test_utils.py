@@ -27,7 +27,7 @@ class FormatAddressTest(unittest.TestCase):
     def test_format_address_ipv4(self):
         address = (sentinel.host, sentinel.port)
         self.assertEqual(
-            network.format_socket_name(sock),
+            network.format_address(address),
             '[{}]:{}'.format(sentinel.host, sentinel.port))
 
     def test_format_address_ipv6(self):
