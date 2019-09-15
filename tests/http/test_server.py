@@ -21,6 +21,7 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
                 'zeroconf': '',
                 'allowed_origins': [],
                 'csrf_protection': True,
+                'root_redirection':'mopidy'
             }
         }
 
