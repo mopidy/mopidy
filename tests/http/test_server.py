@@ -233,6 +233,7 @@ class HttpServerWithStaticFilesTest(tornado.testing.AsyncHTTPTestCase):
                 'hostname': '127.0.0.1',
                 'port': 6680,
                 'zeroconf': '',
+                'root_redirection':'mopidy'
             }
         }
         core = mock.Mock()
@@ -283,6 +284,7 @@ class HttpServerWithWsgiAppTest(tornado.testing.AsyncHTTPTestCase):
                 'hostname': '127.0.0.1',
                 'port': 6680,
                 'zeroconf': '',
+                'root_redirection':'mopidy'
             }
         }
         core = mock.Mock()
