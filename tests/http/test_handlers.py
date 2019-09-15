@@ -55,7 +55,7 @@ class WebSocketHandlerTest(tornado.testing.AsyncHTTPTestCase):
 
     def connection(self):
         url = self.get_url('/ws').replace('http', 'ws')
-        return tornado.websocket.websocket_connect(url, self.io_loop)
+        return tornado.websocket.websocket_connect(url)
 
     @tornado.testing.gen_test
     def test_invalid_json_rpc_request_doesnt_crash_handler(self):
@@ -69,7 +69,7 @@ class WebSocketHandlerTest(tornado.testing.AsyncHTTPTestCase):
     @tornado.testing.gen_test
     def test_broadcast_makes_it_to_client(self):
         conn = yield self.connection()
-        handlers.WebSocketHandler.broadcast('message')
+        handlers.WebSocketHandler.broadcast('message', self.io_loop)
         message = yield conn.read_message()
         self.assertEqual(message, 'message')
 
@@ -77,7 +77,7 @@ class WebSocketHandlerTest(tornado.testing.AsyncHTTPTestCase):
     def test_broadcast_to_client_that_just_closed_connection(self):
         conn = yield self.connection()
         conn.stream.close()
-        handlers.WebSocketHandler.broadcast('message')
+        handlers.WebSocketHandler.broadcast('message', self.io_loop)
 
     @tornado.testing.gen_test
     def test_broadcast_to_client_without_ws_connection_present(self):
@@ -87,7 +87,7 @@ class WebSocketHandlerTest(tornado.testing.AsyncHTTPTestCase):
         # this has happened but we have not yet been removed from clients.
         for client in handlers.WebSocketHandler.clients:
             client.ws_connection = None
-        handlers.WebSocketHandler.broadcast('message')
+        handlers.WebSocketHandler.broadcast('message', self.io_loop)
 
 
 class CheckOriginTests(unittest.TestCase):

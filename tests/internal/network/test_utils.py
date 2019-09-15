@@ -22,23 +22,40 @@ class FormatHostnameTest(unittest.TestCase):
         self.assertEqual(network.format_hostname('0.0.0.0'), '0.0.0.0')
 
 
-class FormatSocketConnectionTest(unittest.TestCase):
+class FormatAddressTest(unittest.TestCase):
 
-    def test_format_socket_name(self):
-        sock = Mock(spec=socket.SocketType)
-        sock.family = socket.AF_INET
-        sock.getsockname.return_value = (sentinel.ip, sentinel.port)
+    def test_format_address_ipv4(self):
+        address = (sentinel.host, sentinel.port)
         self.assertEqual(
-            network.format_socket_name(sock),
-            '[{}]:{}'.format(sentinel.ip, sentinel.port))
+            network.format_address(address),
+            '[{}]:{}'.format(sentinel.host, sentinel.port))
 
-    def test_format_socket_name_unix(self):
-        sock = Mock(spec=socket.SocketType)
-        sock.family = socket.AF_UNIX
-        sock.getsockname.return_value = sentinel.sockname
+    def test_format_address_ipv6(self):
+        address = (sentinel.host, sentinel.port, sentinel.flow, sentinel.scope)
         self.assertEqual(
-            network.format_socket_name(sock),
-            str(sentinel.sockname))
+            network.format_address(address),
+            '[%s]:%s' % (sentinel.host, sentinel.port))
+
+    def test_format_address_unix(self):
+        address = (sentinel.path, None)
+        self.assertEqual(
+            network.format_address(address),
+            '[%s]' % (sentinel.path))
+
+
+class GetSocketAddress(unittest.TestCase):
+
+    def test_get_socket_address(self):
+        host = str(sentinel.host)
+        port = sentinel.port
+        self.assertEqual(
+            network.get_socket_address(host, port), (host, port))
+
+    def test_get_socket_address_unix(self):
+        host = str(sentinel.host)
+        port = sentinel.port
+        self.assertEqual(
+            network.get_socket_address('unix:' + host, port), (host, None))
 
 
 class TryIPv6SocketTest(unittest.TestCase):

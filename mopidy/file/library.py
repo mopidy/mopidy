@@ -93,7 +93,7 @@ class FileLibraryProvider(backend.LibraryProvider):
 
         try:
             result = self._scanner.scan(uri)
-            track = tags.convert_tags_to_track(result.tags).copy(
+            track = tags.convert_tags_to_track(result.tags).replace(
                 uri=uri, length=result.duration)
         except exceptions.ScannerError as e:
             logger.warning('Failed looking up %s: %s', uri, e)
@@ -102,7 +102,7 @@ class FileLibraryProvider(backend.LibraryProvider):
         if not track.name:
             filename = os.path.basename(local_path)
             name = urllib2.unquote(filename).decode(FS_ENCODING, 'replace')
-            track = track.copy(name=name)
+            track = track.replace(name=name)
 
         return [track]
 

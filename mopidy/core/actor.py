@@ -94,8 +94,8 @@ class Core(
         # We ignore cases when target state is set as this is buffering
         # updates (at least for now) and we need to get #234 fixed...
         if (new_state == PlaybackState.PAUSED and not target_state and
-                self.playback.state != PlaybackState.PAUSED):
-            self.playback.state = new_state
+                self.playback.get_state() != PlaybackState.PAUSED):
+            self.playback.set_state(new_state)
             self.playback._trigger_track_playback_paused()
 
     def playlists_loaded(self):
