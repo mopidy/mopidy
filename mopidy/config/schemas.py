@@ -59,7 +59,7 @@ class ConfigSchema(collections.OrderedDict):
         Returns a tuple with cleaned values and errors.
         """
         errors = {}
-        result = {}
+        result = collections.OrderedDict()
 
         for key, value in values.items():
             try:
@@ -110,7 +110,7 @@ class MapConfigSchema(object):
 
     def deserialize(self, values):
         errors = {}
-        result = {}
+        result = collections.OrderedDict()
 
         for key, value in values.items():
             try:
