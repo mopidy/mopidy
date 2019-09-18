@@ -353,7 +353,7 @@ class HttpServerWithAppDefaultWebClient(tornado.testing.AsyncHTTPTestCase):
 
         self.assertEqual(200, response.code)
         self.assertIn(
-            'Hello from default webapp', 
+            'Hello from default webapp',
             tornado.escape.to_unicode(response.body)
         )
 
