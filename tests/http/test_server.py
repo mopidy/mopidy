@@ -356,4 +356,3 @@ class HttpServerWithAppDefaultWebClient(tornado.testing.AsyncHTTPTestCase):
             'Hello from default webapp',
             tornado.escape.to_unicode(response.body)
         )
-

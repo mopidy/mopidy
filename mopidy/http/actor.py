@@ -173,9 +173,9 @@ class HttpServer(threading.Thread):
         default_webclient = self.config['http']['default_webclient']
         if default_webclient not in sites:
             logger.warning(
-                'Invalid default_webclient %s, using mopidy', 
+                'Invalid default_webclient %s, using mopidy',
                 default_webclient)
-                
+
             default_webclient = 'mopidy'
         logger.debug('Default webclient is %s', default_webclient)
 
