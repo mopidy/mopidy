@@ -333,7 +333,9 @@ class HttpServerWithAppDefaultWebClient(tornado.testing.AsyncHTTPTestCase):
         }
         core = mock.Mock()
 
-        apps = [dict(name='default_webclient', factory=default_webapp_factory)]
+        apps = [
+            dict(name='default_webclient', factory=default_webapp_factory)
+        ]
 
         http_server = actor.HttpServer(
             config=config, core=core, sockets=[], apps=apps, statics=[])
@@ -346,8 +348,12 @@ class HttpServerWithAppDefaultWebClient(tornado.testing.AsyncHTTPTestCase):
         self.assertEqual(response.code, 302)
         self.assertEqual(response.headers['Location'], '/default_webclient/')
 
-        response = self.fetch('/default_webclient/', method='GET', follow_redirects=True)
+        response = self.fetch(
+            '/default_webclient/', method='GET', follow_redirects=True)
 
         self.assertEqual(200, response.code)
-        self.assertIn('Hello from default webapp', tornado.escape.to_unicode(response.body))
+        self.assertIn(
+            'Hello from default webapp', 
+            tornado.escape.to_unicode(response.body)
+        )
 
