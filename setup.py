@@ -29,7 +29,6 @@ setup(
         'requests >= 2.0',
         'setuptools',
         'tornado >= 4.4, < 5',  # Tornado 5 requires Python >= 2.7.9
-        'bcrypt'
     ],
     extras_require={'http': []},
     entry_points={

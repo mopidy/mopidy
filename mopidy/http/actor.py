@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import json
 import logging
 import threading
-import bcrypt
+
 import pykka
 
 import tornado.httpserver
@@ -102,7 +102,7 @@ class HttpServer(threading.Thread):
         self.io_loop = None
 
     def run(self):
-        self.app = tornado.web.Application(self._get_request_handlers(), cookie_secret=bcrypt.gensalt())
+        self.app = tornado.web.Application(self._get_request_handlers())
         self.server = tornado.httpserver.HTTPServer(self.app)
         self.server.add_sockets(self.sockets)
 
