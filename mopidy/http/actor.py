@@ -1,8 +1,8 @@
 from __future__ import absolute_import, unicode_literals
 
+import binascii
 import json
 import logging
-import binascii
 import os
 import threading
 
