@@ -114,7 +114,7 @@ class TestTranslateURI(object):
         assert result == STREAM_URI
 
         # Check logging to ensure debuggability
-        assert 'Unwrapping stream from URI: %s' % PLAYLIST_URI
+        assert 'Unwrapping stream from URI: %s' % PLAYLIST_URI in caplog.text
         assert 'Parsed playlist (%s)' % PLAYLIST_URI in caplog.text
         assert 'Unwrapping stream from URI: %s' % STREAM_URI
         assert (
@@ -162,7 +162,7 @@ class TestTranslateURI(object):
 
         result = provider.translate_uri(PLAYLIST_URI)
 
-        assert 'Unwrapping stream from URI: %s' % PLAYLIST_URI
+        assert 'Unwrapping stream from URI: %s' % PLAYLIST_URI in caplog.text
         assert (
             'GStreamer failed scanning URI (%s)' % PLAYLIST_URI in caplog.text)
         assert 'Parsed playlist (%s)' % PLAYLIST_URI in caplog.text
@@ -183,7 +183,7 @@ class TestTranslateURI(object):
 
         result = provider.translate_uri(STREAM_URI)
 
-        assert 'Unwrapping stream from URI: %s' % STREAM_URI
+        assert 'Unwrapping stream from URI: %s' % STREAM_URI in caplog.text
         assert (
             'GStreamer failed scanning URI (%s)' % STREAM_URI in caplog.text)
         assert (
