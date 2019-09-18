@@ -311,3 +311,43 @@ class HttpServerWithWsgiAppTest(tornado.testing.AsyncHTTPTestCase):
         self.assertEqual(200, response.code)
         self.assertIn(
             'Hello, world!', tornado.escape.to_unicode(response.body))
+
+
+def default_webapp_factory(config, core):
+    class MainHandler(tornado.web.RequestHandler):
+        def get(self):
+            self.write("Hello from default webapp")
+
+    return [('/', MainHandler, {})]
+
+
+class HttpServerWithAppDefaultWebClient(tornado.testing.AsyncHTTPTestCase):
+    def get_app(self):
+        config = {
+            'http': {
+                'hostname': '127.0.0.1',
+                'port': 6680,
+                'zeroconf': '',
+                'default_webclient': 'default_webclient'
+            }
+        }
+        core = mock.Mock()
+
+        apps = [dict(name='default_webclient', factory=default_webapp_factory)]
+
+        http_server = actor.HttpServer(
+            config=config, core=core, sockets=[], apps=apps, statics=[])
+
+        return tornado.web.Application(http_server._get_request_handlers())
+
+    def test_without_slash_should_redirect(self):
+        response = self.fetch('/', method='GET', follow_redirects=False)
+
+        self.assertEqual(response.code, 302)
+        self.assertEqual(response.headers['Location'], '/default_webclient/')
+
+        response = self.fetch('/default_webclient/', method='GET', follow_redirects=True)
+
+        self.assertEqual(200, response.code)
+        self.assertIn('Hello from default webapp', tornado.escape.to_unicode(response.body))
+
