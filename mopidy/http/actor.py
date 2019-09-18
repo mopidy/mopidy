@@ -3,6 +3,8 @@ from __future__ import absolute_import, unicode_literals
 import json
 import logging
 import threading
+import os
+import binascii
 
 import pykka
 
@@ -102,7 +104,11 @@ class HttpServer(threading.Thread):
         self.io_loop = None
 
     def run(self):
-        self.app = tornado.web.Application(self._get_request_handlers())
+        #TODO Py3: Move to secrets
+        cookie_secret = binascii.hexlify(os.urandom(32))
+        
+        self.app = tornado.web.Application(self._get_request_handlers(),
+            cookie_secret=cookie_secret)
         self.server = tornado.httpserver.HTTPServer(self.app)
         self.server.add_sockets(self.sockets)
 
