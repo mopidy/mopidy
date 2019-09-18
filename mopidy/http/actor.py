@@ -16,8 +16,8 @@ import tornado.websocket
 
 from mopidy import exceptions, models, zeroconf
 from mopidy.core import CoreListener
-from mopidy.http import handlers
-from mopidy.internal import encoding, formatting, network
+from mopidy.http import handlers, Extension
+from mopidy.internal import encoding, formatting, network, storage
 
 
 logger = logging.getLogger(__name__)
@@ -104,11 +104,8 @@ class HttpServer(threading.Thread):
         self.io_loop = None
 
     def run(self):
-        #TODO Py3: Move to secrets
-        cookie_secret = binascii.hexlify(os.urandom(32))
-        
         self.app = tornado.web.Application(self._get_request_handlers(),
-            cookie_secret=cookie_secret)
+            cookie_secret=self._get_cookie_secret())
         self.server = tornado.httpserver.HTTPServer(self.app)
         self.server.add_sockets(self.sockets)
 
@@ -177,3 +174,22 @@ class HttpServer(threading.Thread):
             'url': '/mopidy/',
             'permanent': False,
         })]
+
+
+    def _get_cookie_secret(self):
+        data_path = os.path.join(Extension.get_data_dir(self.config),
+            b'data.json.gz')
+
+        if not os.path.isfile(data_path):
+            #TODO Py3: Move to secrets
+            cookie_secret = binascii.hexlify(os.urandom(32))
+            storage.dump(data_path, {'cookie_secret':cookie_secret})
+
+        else:
+            data = storage.load(data_path)
+            try:
+                cookie_secret = data['cookie_secret']
+            except KeyError:
+                raise exceptions.FrontendError('data is corrupted')
+
+        return cookie_secret
