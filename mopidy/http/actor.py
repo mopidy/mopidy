@@ -188,9 +188,9 @@ class HttpServer(threading.Thread):
 
         else:
             data = storage.load(data_path)
-            try:
-                cookie_secret = data['cookie_secret']
-            except KeyError:
-                raise exceptions.FrontendError('data is corrupted')
+            cookie_secret = data.get('cookie_secret', '').strip()
+            if not cookie_secret:
+                logging.error('Missing cookie_secret in %s',
+                              encoding.locale_decode(data_path))
 
         return cookie_secret
