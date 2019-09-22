@@ -7,7 +7,7 @@ import stat
 import string
 import threading
 
-from mopidy import compat, exceptions
+from mopidy import compat, exceptions, posix_normpath
 from mopidy.compat import queue, urllib
 from mopidy.internal import encoding, xdg
 
@@ -67,6 +67,7 @@ def path_to_uri(path):
     """
     if isinstance(path, compat.text_type):
         path = path.encode('utf-8')
+    path = posix_normpath(path)
     path = urllib.parse.quote(path)
     return urllib.parse.urlunsplit((b'file', b'', path, b'', b''))
 
