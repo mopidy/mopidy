@@ -138,9 +138,15 @@ class Server(object):
         if unix_socket_path is not None:
             os.unlink(unix_socket_path)
 
-    def register_server_socket(self, fileno):
+    def register_server_socket(self, sock):
+        # GLib wants socket for win32, file-num for others
+        if sys.platform == 'win32':
+            chan = sock
+        else:
+            chan = sock.fileno()
         return GObject.io_add_watch(
-            fileno,
+            chan,
+            1,  # priority?
             GObject.IO_IN,
             self.handle_connection)
 
@@ -282,10 +288,15 @@ class Connection(object):
     def enable_recv(self):
         if self.recv_id is not None:
             return
+        if sys.platform == 'win32':
+            chan = self._sock
+        else:
+            chan = self._sock.fileno()
 
         try:
             self.recv_id = GObject.io_add_watch(
-                self._sock.fileno(),
+                chan,
+                1,  # priority?
                 GObject.IO_IN | GObject.IO_ERR | GObject.IO_HUP,
                 self.recv_callback)
         except socket.error as e:

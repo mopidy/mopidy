@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import sys
 import os
 
 import mock
@@ -50,6 +51,7 @@ def test_data_dir_from_env(environ):
     assert type(xdg.get_dirs()['XDG_DATA_DIR']) == bytes
 
 
+@pytest.mark.skipif(sys.platform == 'win32', reason="needs different test for win32")
 def test_user_dirs(environ, tmpdir):
     os.environ['XDG_CONFIG_HOME'] = str(tmpdir)
 

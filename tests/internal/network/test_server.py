@@ -1,9 +1,11 @@
 from __future__ import absolute_import, unicode_literals
 
+import sys
 import errno
 import os
 import socket
 import unittest
+import pytest
 
 from mock import Mock, patch, sentinel
 
@@ -44,9 +46,10 @@ class ServerTest(unittest.TestCase):
 
         network.Server.__init__(
             self.mock, sentinel.host, sentinel.port, sentinel.protocol)
-        self.mock.register_server_socket.assert_called_once_with(
-            sentinel.fileno)
+        res = sock if sys.platform == 'win32' else sentinel.fileno
+        self.mock.register_server_socket.assert_called_once_with(res)
 
+    @pytest.mark.skipif(sys.platform == 'win32', reason="fileno not used with win32")
     @patch.object(network, 'get_socket_address', new=Mock())
     def test_init_fails_on_fileno_call(self):
         sock = Mock(spec=socket.SocketType)
@@ -156,6 +159,7 @@ class ServerTest(unittest.TestCase):
             network.Server.create_server_socket(
                 self.mock, 'unix:' + str(sentinel.host), sentinel.port)
 
+    @pytest.mark.skipif(sys.platform == 'win32', reason="unix only")
     @patch.object(os, 'unlink', new=Mock())
     @patch.object(GObject, 'source_remove', new=Mock())
     def test_stop_server_cleans_unix_socket(self):
@@ -168,9 +172,12 @@ class ServerTest(unittest.TestCase):
 
     @patch.object(GObject, 'io_add_watch', new=Mock())
     def test_register_server_socket_sets_up_io_watch(self):
-        network.Server.register_server_socket(self.mock, sentinel.fileno)
+        sock = Mock()
+        # sock.family = socket.AF_UNIX
+        self.mock.server_socket = sock
+        network.Server.register_server_socket(self.mock, self.mock.server_socket)
         GObject.io_add_watch.assert_called_once_with(
-            sentinel.fileno, GObject.IO_IN, self.mock.handle_connection)
+            self.mock.server_socket, 1, GObject.IO_IN, self.mock.handle_connection)
 
     def test_handle_connection(self):
         self.mock.accept_connection.return_value = (
@@ -208,6 +215,7 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(connected_sock, sock)
         self.assertEqual(sentinel.addr, addr)
 
+    @pytest.mark.skipif(sys.platform == 'win32', reason="unix only")
     def test_accept_connection_unix(self):
         sock = Mock(spec=socket.SocketType)
         connected_sock = Mock(spec=socket.SocketType)
