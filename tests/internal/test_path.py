@@ -230,9 +230,8 @@ class ExpandPathTest(unittest.TestCase):
     def test_abspath(self):
         self.assertEqual(posix_normpath(os.path.abspath(b'./foo')), path.expand_path(b'./foo'))
 
+    @pytest.mark.skipif(sys.platform == 'win32', reason="don't understand this yet")
     def test_xdg_subsititution(self):
-        if sys.platform == 'win32':
-            pytest.skip("don't understand this yet")
         self.assertEqual(
             posix_normpath(GLib.get_user_data_dir()) + b'/foo',
             path.expand_path(b'$XDG_DATA_DIR/foo'))
@@ -322,11 +321,9 @@ class FindMTimesTest(unittest.TestCase):
         self.assertEqual({target: tests.any_int}, result)
         self.assertEqual({}, errors)
 
+    @pytest.mark.skipif(sys.platform == 'win32', reason="chmod on win32 only sets read-permission")
     def test_missing_permission_to_directory(self):
         """Missing permissions to a directory is an error"""
-        if sys.platform == 'win32':
-            pytest.skip("chmod on win32 only sets read-permission")
-
         directory = self.mkdir('no-permission')
         os.chmod(directory, 0)
 
@@ -336,11 +333,9 @@ class FindMTimesTest(unittest.TestCase):
         self.assertEqual({}, result)
         self.assertEqual({directory: tests.IsA(exceptions.FindError)}, errors)
 
+    @pytest.mark.skipif(sys.platform == 'win32', reason="symlinks not supported by 2.7 os module")
     def test_symlinks_are_ignored(self):
         """By default symlinks should be treated as an error"""
-        if sys.platform == 'win32':
-            pytest.skip("symlinks not supported by 2.7 os module")
-
         target = self.touch('target')
         link = posix_normpath(os.path.join(self.tmpdir, 'link'))
         os.symlink(target, link)
@@ -349,11 +344,9 @@ class FindMTimesTest(unittest.TestCase):
         self.assertEqual(result, {target: tests.any_int})
         self.assertEqual(errors, {link: tests.IsA(exceptions.FindError)})
 
+    @pytest.mark.skipif(sys.platform == 'win32', reason="symlinks not supported by 2.7 os module")
     def test_symlink_to_file_as_root_is_followed(self):
         """Passing a symlink as the root should be followed when follow=True"""
-        if sys.platform == 'win32':
-            pytest.skip("symlinks not supported by 2.7 os module")
-
         target = self.touch('target')
         link = posix_normpath(os.path.join(self.tmpdir, 'link'))
         os.symlink(target, link)
@@ -365,11 +358,9 @@ class FindMTimesTest(unittest.TestCase):
     def test_symlink_to_directory_is_followed(self):
         pass
 
+    @pytest.mark.skipif(sys.platform == 'win32', reason="symlinks not supported by 2.7 os module")
     def test_symlink_pointing_at_itself_fails(self):
         """Symlink pointing at itself should give as an OS error"""
-        if sys.platform == 'win32':
-            pytest.skip("symlinks not supported by 2.7 os module")
-
         link = posix_normpath(os.path.join(self.tmpdir, 'link'))
         os.symlink(link, link)
 
@@ -377,11 +368,9 @@ class FindMTimesTest(unittest.TestCase):
         self.assertEqual({}, result)
         self.assertEqual({link: tests.IsA(exceptions.FindError)}, errors)
 
+    @pytest.mark.skipif(sys.platform == 'win32', reason="symlinks not supported by 2.7 os module")
     def test_symlink_pointing_at_parent_fails(self):
         """We should detect a loop via the parent and give up on the branch"""
-        if sys.platform == 'win32':
-            pytest.skip("symlinks not supported by 2.7 os module")
-
         os.symlink(self.tmpdir, posix_normpath(os.path.join(self.tmpdir, 'link')))
 
         result, errors = path.find_mtimes(self.tmpdir, follow=True)
@@ -389,11 +378,9 @@ class FindMTimesTest(unittest.TestCase):
         self.assertEqual(1, len(errors))
         self.assertEqual(tests.IsA(Exception), errors.values()[0])
 
+    @pytest.mark.skipif(sys.platform == 'win32', reason="symlinks not supported by 2.7 os module")
     def test_indirect_symlink_loop(self):
         """More indirect loops should also be detected"""
-        if sys.platform == 'win32':
-            pytest.skip("symlinks not supported by 2.7 os module")
-
         # Setup tmpdir/directory/loop where loop points to tmpdir
         directory = posix_normpath(os.path.join(self.tmpdir, b'directory'))
         loop = posix_normpath(os.path.join(directory, b'loop'))
@@ -405,11 +392,9 @@ class FindMTimesTest(unittest.TestCase):
         self.assertEqual({}, result)
         self.assertEqual({loop: tests.IsA(Exception)}, errors)
 
+    @pytest.mark.skipif(sys.platform == 'win32', reason="symlinks not supported by 2.7 os module")
     def test_symlink_branches_are_not_excluded(self):
         """Using symlinks to make a file show up multiple times should work"""
-        if sys.platform == 'win32':
-            pytest.skip("symlinks not supported by 2.7 os module")
-
         self.mkdir('directory')
         target = self.touch('directory', 'target')
         link1 = posix_normpath(os.path.join(self.tmpdir, b'link1'))
