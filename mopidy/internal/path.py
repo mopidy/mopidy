@@ -14,6 +14,7 @@ from mopidy.internal import encoding, xdg
 
 logger = logging.getLogger(__name__)
 
+MAX_RECURSE = 100
 
 XDG_DIRS = xdg.get_dirs()
 
@@ -146,7 +147,8 @@ def _find_worker(relative, follow, done, work, results, errors):
                 errors[path] = exceptions.FindError('Sym/hardlink loop found.')
                 continue
 
-            if len(parents) > 100:
+            # backstop to prevent infinite recursion
+            if len(parents) > MAX_RECURSE:
                 errors[path] = exceptions.FindError('Overly deep dir recursion found.')
                 continue
 
