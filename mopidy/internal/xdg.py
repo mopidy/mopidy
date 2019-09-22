@@ -4,7 +4,6 @@ import io
 import os
 
 from mopidy.compat import configparser
-from mopidy import posix_normpath
 
 
 def get_dirs():
