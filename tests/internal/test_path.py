@@ -325,12 +325,14 @@ class FindMTimesTest(unittest.TestCase):
     def test_missing_permission_to_directory(self):
         """Missing permissions to a directory is an error"""
         if sys.platform == 'win32':
-            pytest.skip("chmod not supported by 2.7 os module")
+            pytest.skip("chmod on win32 only sets read-permission")
 
         directory = self.mkdir('no-permission')
         os.chmod(directory, 0)
 
         result, errors = path.find_mtimes(self.tmpdir)
+        print(result)
+        print(errors)
         self.assertEqual({}, result)
         self.assertEqual({directory: tests.IsA(exceptions.FindError)}, errors)
 
