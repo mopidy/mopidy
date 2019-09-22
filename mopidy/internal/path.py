@@ -22,6 +22,7 @@ def get_or_create_dir(dir_path):
     if not isinstance(dir_path, bytes):
         raise ValueError('Path is not a bytestring.')
     dir_path = expand_path(dir_path)
+    print('dir_path 1 {}'.format(dir_path))
     if os.path.isfile(dir_path):
         raise OSError(
             'A file with the same name as the desired dir, '
@@ -129,9 +130,9 @@ def _find_worker(relative, follow, done, work, results, errors):
             continue
 
         if relative:
-            path = os.path.relpath(entry, relative)
+            path = posix_normpath(os.path.relpath(entry, relative))
         else:
-            path = entry
+            path = posix_normpath(entry)
 
         try:
             if follow:
