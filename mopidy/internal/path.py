@@ -109,7 +109,7 @@ def expand_path(path):
         return None
     path = os.path.expanduser(path)
     path = os.path.abspath(path)
-    return path
+    return posix_normpath(path)
 
 
 def _find_worker(relative, follow, done, work, results, errors):
