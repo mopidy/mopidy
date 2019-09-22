@@ -4,6 +4,7 @@ import io
 import os
 
 from mopidy.compat import configparser
+from mopidy import posix_normpath
 
 
 def get_dirs():
@@ -22,13 +23,13 @@ def get_dirs():
     dirs = {
         'XDG_CACHE_DIR': (
             os.environ.get('XDG_CACHE_HOME') or
-            os.path.expanduser(b'~/.cache')),
+            os.path.normpath(os.path.expanduser(b'~/.cache')).encode('utf-8')),
         'XDG_CONFIG_DIR': (
             os.environ.get('XDG_CONFIG_HOME') or
-            os.path.expanduser(b'~/.config')),
+            os.path.normpath(os.path.expanduser(b'~/.config')).encode('utf-8')),
         'XDG_DATA_DIR': (
             os.environ.get('XDG_DATA_HOME') or
-            os.path.expanduser(b'~/.local/share')),
+            os.path.normpath(os.path.expanduser(b'~/.local/share')).encode('utf-8'))
     }
 
     dirs.update(_get_user_dirs(dirs['XDG_CONFIG_DIR']))
@@ -56,7 +57,7 @@ def _get_user_dirs(xdg_config_dir):
         data = fh.read()
 
     data = b'[XDG_USER_DIRS]\n' + data
-    data = data.replace(b'$HOME', os.path.expanduser(b'~'))
+    data = data.replace(b'$HOME', os.path.normpath(os.path.expanduser(b'~')).encode('utf-8'))
     data = data.replace(b'"', b'')
 
     config = configparser.RawConfigParser()

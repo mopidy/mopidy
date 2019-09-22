@@ -8,7 +8,7 @@ import operator
 import os
 import tempfile
 
-from mopidy import backend
+from mopidy import backend, posix_normpath
 from mopidy.internal import path
 
 from . import Extension, translator
@@ -67,6 +67,8 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
 
     def as_list(self):
         result = []
+        # print("playlists_dir {} ".format(self._playlists_dir))
+        # for entry in os.listdir(os.path.normpath(self._playlists_dir)):
         for entry in os.listdir(self._playlists_dir):
             if not entry.endswith((b'.m3u', b'.m3u8')):
                 continue
@@ -152,11 +154,11 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             return translator.playlist(path, playlist.tracks, mtime)
 
     def _abspath(self, path):
-        return os.path.join(self._playlists_dir, path)
+        return posix_normpath(os.path.join(self._playlists_dir, path))
 
     def _is_in_basedir(self, local_path):
         if not os.path.isabs(local_path):
-            local_path = os.path.join(self._playlists_dir, local_path)
+            local_path = posix_normpath(os.path.join(self._playlists_dir, local_path))
         return path.is_path_inside_base_dir(local_path, self._playlists_dir)
 
     def _open(self, path, mode='r'):
@@ -165,7 +167,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         else:
             encoding = self._default_encoding
         if not os.path.isabs(path):
-            path = os.path.join(self._playlists_dir, path)
+            path = posix_normpath(os.path.join(self._playlists_dir, path))
         if not self._is_in_basedir(path):
             raise Exception(
                 'Path (%s) is not inside playlist_dir (%s)'

@@ -8,6 +8,7 @@ import mock
 import pytest
 
 from mopidy.internal import xdg
+from mopidy import posix_normpath
 
 
 @pytest.yield_fixture
@@ -18,7 +19,10 @@ def environ():
 
 
 def test_cache_dir_default(environ):
-    assert xdg.get_dirs()['XDG_CACHE_DIR'] == os.path.expanduser(b'~/.cache')
+    os.environ['HOMEDRIVE'] = 'J:'
+    os.environ['HOMEPATH'] = "\\Users\\Bugsbunny"
+    assert xdg.get_dirs()['XDG_CACHE_DIR'] == os.path.expanduser(
+        os.path.normpath('~/.cache'))
 
 
 def test_cache_dir_from_env(environ):
@@ -29,7 +33,10 @@ def test_cache_dir_from_env(environ):
 
 
 def test_config_dir_default(environ):
-    assert xdg.get_dirs()['XDG_CONFIG_DIR'] == os.path.expanduser(b'~/.config')
+    os.environ['HOMEDRIVE'] = 'J:'
+    os.environ['HOMEPATH'] = "\\Users\\Bugsbunny"
+    assert xdg.get_dirs()['XDG_CONFIG_DIR'] == os.path.expanduser(
+        os.path.normpath('~/.config'))
 
 
 def test_config_dir_from_env(environ):
@@ -40,8 +47,10 @@ def test_config_dir_from_env(environ):
 
 
 def test_data_dir_default(environ):
+    os.environ['HOMEDRIVE'] = 'J:'
+    os.environ['HOMEPATH'] = "\\Users\\Bugsbunny"
     assert xdg.get_dirs()['XDG_DATA_DIR'] == os.path.expanduser(
-        b'~/.local/share')
+        os.path.normpath('~/.local/share'))
 
 
 def test_data_dir_from_env(environ):
@@ -51,9 +60,10 @@ def test_data_dir_from_env(environ):
     assert type(xdg.get_dirs()['XDG_DATA_DIR']) == bytes
 
 
-@pytest.mark.skipif(sys.platform == 'win32', reason="needs different test for win32")
 def test_user_dirs(environ, tmpdir):
     os.environ['XDG_CONFIG_HOME'] = str(tmpdir)
+    os.environ['HOMEDRIVE'] = 'J:'
+    os.environ['HOMEPATH'] = "\\Users\\Bugsbunny"
 
     with open(os.path.join(str(tmpdir), 'user-dirs.dirs'), 'wb') as fh:
         fh.write(b'# Some comments\n')
@@ -61,7 +71,7 @@ def test_user_dirs(environ, tmpdir):
 
     result = xdg.get_dirs()
 
-    assert result['XDG_MUSIC_DIR'] == os.path.expanduser(b'~/Music2')
+    assert result['XDG_MUSIC_DIR'] == os.path.expanduser(os.path.normpath('~/Music2'))
     assert type(result['XDG_MUSIC_DIR']) == bytes
     assert 'XDG_DOWNLOAD_DIR' not in result
 
