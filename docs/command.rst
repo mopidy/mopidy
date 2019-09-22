@@ -53,7 +53,7 @@ Options
 .. cmdoption:: --config <file|directory>
 
     Specify config files and directories to use. To use multiple config files
-    or directories, separate them with a colon. The later files override the
+    or directories, separate them with a semicolon. The later files override the
     earlier ones if there's a conflict. When specifying a directory, all files
     ending in .conf in the directory are used.
 
