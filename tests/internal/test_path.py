@@ -3,13 +3,14 @@
 from __future__ import absolute_import, unicode_literals
 
 import os
+import sys
 import shutil
 import tempfile
 import unittest
 
 import pytest
 
-from mopidy import compat, exceptions
+from mopidy import compat, exceptions, posix_normpath
 from mopidy.internal import path
 from mopidy.internal.gi import GLib
 
@@ -19,14 +20,15 @@ import tests
 class GetOrCreateDirTest(unittest.TestCase):
 
     def setUp(self):  # noqa: N802
-        self.parent = tempfile.mkdtemp()
+        data_dir = tests.path_to_data_dir('temp')
+        self.parent = posix_normpath(tempfile.mkdtemp(dir=data_dir))
 
     def tearDown(self):  # noqa: N802
         if os.path.isdir(self.parent):
             shutil.rmtree(self.parent)
 
     def test_creating_dir(self):
-        dir_path = os.path.join(self.parent, b'test')
+        dir_path = posix_normpath(os.path.join(self.parent, b'test'))
         self.assert_(not os.path.exists(dir_path))
         created = path.get_or_create_dir(dir_path)
         self.assert_(os.path.exists(dir_path))
@@ -34,8 +36,8 @@ class GetOrCreateDirTest(unittest.TestCase):
         self.assertEqual(created, dir_path)
 
     def test_creating_nested_dirs(self):
-        level2_dir = os.path.join(self.parent, b'test')
-        level3_dir = os.path.join(self.parent, b'test', b'test')
+        level2_dir = posix_normpath(os.path.join(self.parent, b'test'))
+        level3_dir = posix_normpath(os.path.join(self.parent, b'test', b'test'))
         self.assert_(not os.path.exists(level2_dir))
         self.assert_(not os.path.exists(level3_dir))
         created = path.get_or_create_dir(level3_dir)
@@ -52,15 +54,15 @@ class GetOrCreateDirTest(unittest.TestCase):
         self.assertEqual(created, self.parent)
 
     def test_create_dir_with_name_of_existing_file_throws_oserror(self):
-        conflicting_file = os.path.join(self.parent, b'test')
+        conflicting_file = posix_normpath(os.path.join(self.parent, b'test'))
         open(conflicting_file, 'w').close()
-        dir_path = os.path.join(self.parent, b'test')
+        dir_path = posix_normpath(os.path.join(self.parent, b'test'))
         with self.assertRaises(OSError):
             path.get_or_create_dir(dir_path)
 
     def test_create_dir_with_unicode(self):
         with self.assertRaises(ValueError):
-            dir_path = compat.text_type(os.path.join(self.parent, b'test'))
+            dir_path = compat.text_type(posix_normpath(os.path.join(self.parent, b'test')))
             path.get_or_create_dir(dir_path)
 
     def test_create_dir_with_none(self):
@@ -71,14 +73,16 @@ class GetOrCreateDirTest(unittest.TestCase):
 class GetOrCreateFileTest(unittest.TestCase):
 
     def setUp(self):  # noqa: N802
-        self.parent = tempfile.mkdtemp()
+        data_dir = tests.path_to_data_dir('temp')
+        self.parent = posix_normpath(tempfile.mkdtemp(dir=data_dir))
+        # self.parent = tempfile.mkdtemp()
 
     def tearDown(self):  # noqa: N802
         if os.path.isdir(self.parent):
             shutil.rmtree(self.parent)
 
     def test_creating_file(self):
-        file_path = os.path.join(self.parent, b'test')
+        file_path = posix_normpath(os.path.join(self.parent, b'test'))
         self.assert_(not os.path.exists(file_path))
         created = path.get_or_create_file(file_path)
         self.assert_(os.path.exists(file_path))
@@ -86,8 +90,8 @@ class GetOrCreateFileTest(unittest.TestCase):
         self.assertEqual(created, file_path)
 
     def test_creating_nested_file(self):
-        level2_dir = os.path.join(self.parent, b'test')
-        file_path = os.path.join(self.parent, b'test', b'test')
+        level2_dir = posix_normpath(os.path.join(self.parent, b'test'))
+        file_path = posix_normpath(os.path.join(self.parent, b'test', b'test'))
         self.assert_(not os.path.exists(level2_dir))
         self.assert_(not os.path.exists(file_path))
         created = path.get_or_create_file(file_path)
@@ -98,7 +102,7 @@ class GetOrCreateFileTest(unittest.TestCase):
         self.assertEqual(created, file_path)
 
     def test_creating_existing_file(self):
-        file_path = os.path.join(self.parent, b'test')
+        file_path = posix_normpath(os.path.join(self.parent, b'test'))
         path.get_or_create_file(file_path)
         created = path.get_or_create_file(file_path)
         self.assert_(os.path.exists(file_path))
@@ -106,13 +110,13 @@ class GetOrCreateFileTest(unittest.TestCase):
         self.assertEqual(created, file_path)
 
     def test_create_file_with_name_of_existing_dir_throws_ioerror(self):
-        conflicting_dir = os.path.join(self.parent)
+        conflicting_dir = posix_normpath(os.path.join(self.parent))
         with self.assertRaises(IOError):
             path.get_or_create_file(conflicting_dir)
 
     def test_create_dir_with_unicode_filename_throws_value_error(self):
         with self.assertRaises(ValueError):
-            file_path = compat.text_type(os.path.join(self.parent, b'test'))
+            file_path = compat.text_type(posix_normpath(os.path.join(self.parent, b'test')))
             path.get_or_create_file(file_path)
 
     def test_create_file_with_none_filename_throws_value_error(self):
@@ -120,18 +124,18 @@ class GetOrCreateFileTest(unittest.TestCase):
             path.get_or_create_file(None)
 
     def test_create_dir_without_mkdir(self):
-        file_path = os.path.join(self.parent, b'foo', b'bar')
+        file_path = posix_normpath(os.path.join(self.parent, b'foo', b'bar'))
         with self.assertRaises(IOError):
             path.get_or_create_file(file_path, mkdir=False)
 
     def test_create_dir_with_bytes_content(self):
-        file_path = os.path.join(self.parent, b'test')
+        file_path = posix_normpath(os.path.join(self.parent, b'test'))
         created = path.get_or_create_file(file_path, content=b'foobar')
         with open(created) as fh:
             self.assertEqual(fh.read(), b'foobar')
 
     def test_create_dir_with_unicode_content(self):
-        file_path = os.path.join(self.parent, b'test')
+        file_path = posix_normpath(os.path.join(self.parent, b'test'))
         created = path.get_or_create_file(file_path, content='foobaræøå')
         with open(created) as fh:
             self.assertEqual(fh.read(), b'foobar\xc3\xa6\xc3\xb8\xc3\xa5')
@@ -214,21 +218,23 @@ class ExpandPathTest(unittest.TestCase):
     # TODO: test via mocks?
 
     def test_empty_path(self):
-        self.assertEqual(os.path.abspath(b'.'), path.expand_path(b''))
+        self.assertEqual(posix_normpath(os.path.abspath(b'.')), path.expand_path(b''))
 
     def test_absolute_path(self):
         self.assertEqual(b'/tmp/foo', path.expand_path(b'/tmp/foo'))
 
     def test_home_dir_expansion(self):
         self.assertEqual(
-            os.path.expanduser(b'~/foo'), path.expand_path(b'~/foo'))
+            posix_normpath(os.path.expanduser(b'~/foo')), path.expand_path(b'~/foo'))
 
     def test_abspath(self):
-        self.assertEqual(os.path.abspath(b'./foo'), path.expand_path(b'./foo'))
+        self.assertEqual(posix_normpath(os.path.abspath(b'./foo')), path.expand_path(b'./foo'))
 
     def test_xdg_subsititution(self):
+        if sys.platform == 'win32':
+            pytest.skip("don't understand this yet")
         self.assertEqual(
-            GLib.get_user_data_dir() + b'/foo',
+            posix_normpath(GLib.get_user_data_dir()) + b'/foo',
             path.expand_path(b'$XDG_DATA_DIR/foo'))
 
     def test_xdg_subsititution_unknown(self):
@@ -240,18 +246,21 @@ class FindMTimesTest(unittest.TestCase):
     maxDiff = None  # noqa: N815
 
     def setUp(self):  # noqa: N802
-        self.tmpdir = tempfile.mkdtemp(b'.mopidy-tests')
+        data_dir = tests.path_to_data_dir('temp')
+        self.tmpdir = posix_normpath(tempfile.mkdtemp(b'.mopidy-tests', dir=data_dir))
+        print('tmpdir {}'.format(self.tmpdir))
+        # self.tmpdir = tempfile.mkdtemp(b'.mopidy-tests')
 
     def tearDown(self):  # noqa: N802
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def mkdir(self, *args):
-        name = os.path.join(self.tmpdir, *[bytes(a) for a in args])
+        name = posix_normpath(os.path.join(self.tmpdir, *[bytes(a) for a in args]))
         os.mkdir(name)
         return name
 
     def touch(self, *args):
-        name = os.path.join(self.tmpdir, *[bytes(a) for a in args])
+        name = posix_normpath(os.path.join(self.tmpdir, *[bytes(a) for a in args]))
         open(name, 'w').close()
         return name
 
@@ -263,7 +272,7 @@ class FindMTimesTest(unittest.TestCase):
 
     def test_nonexistent_dir(self):
         """Non existent search roots are an error"""
-        missing = os.path.join(self.tmpdir, 'does-not-exist')
+        missing = posix_normpath(os.path.join(self.tmpdir, 'does-not-exist'))
         result, errors = path.find_mtimes(missing)
         self.assertEqual(result, {})
         self.assertEqual(errors, {missing: tests.IsA(exceptions.FindError)})
@@ -280,6 +289,7 @@ class FindMTimesTest(unittest.TestCase):
         """Specifying a file as the root should just return the file"""
         single = self.touch('single')
 
+        print('single {}'.format(single))
         result, errors = path.find_mtimes(single)
         self.assertEqual(result, {single: tests.any_int})
         self.assertEqual(errors, {})
@@ -314,6 +324,9 @@ class FindMTimesTest(unittest.TestCase):
 
     def test_missing_permission_to_directory(self):
         """Missing permissions to a directory is an error"""
+        if sys.platform == 'win32':
+            pytest.skip("chmod not supported by 2.7 os module")
+
         directory = self.mkdir('no-permission')
         os.chmod(directory, 0)
 
@@ -323,8 +336,11 @@ class FindMTimesTest(unittest.TestCase):
 
     def test_symlinks_are_ignored(self):
         """By default symlinks should be treated as an error"""
+        if sys.platform == 'win32':
+            pytest.skip("symlinks not supported by 2.7 os module")
+
         target = self.touch('target')
-        link = os.path.join(self.tmpdir, 'link')
+        link = posix_normpath(os.path.join(self.tmpdir, 'link'))
         os.symlink(target, link)
 
         result, errors = path.find_mtimes(self.tmpdir)
@@ -333,8 +349,11 @@ class FindMTimesTest(unittest.TestCase):
 
     def test_symlink_to_file_as_root_is_followed(self):
         """Passing a symlink as the root should be followed when follow=True"""
+        if sys.platform == 'win32':
+            pytest.skip("symlinks not supported by 2.7 os module")
+
         target = self.touch('target')
-        link = os.path.join(self.tmpdir, 'link')
+        link = posix_normpath(os.path.join(self.tmpdir, 'link'))
         os.symlink(target, link)
 
         result, errors = path.find_mtimes(link, follow=True)
@@ -346,7 +365,10 @@ class FindMTimesTest(unittest.TestCase):
 
     def test_symlink_pointing_at_itself_fails(self):
         """Symlink pointing at itself should give as an OS error"""
-        link = os.path.join(self.tmpdir, 'link')
+        if sys.platform == 'win32':
+            pytest.skip("symlinks not supported by 2.7 os module")
+
+        link = posix_normpath(os.path.join(self.tmpdir, 'link'))
         os.symlink(link, link)
 
         result, errors = path.find_mtimes(link, follow=True)
@@ -355,7 +377,10 @@ class FindMTimesTest(unittest.TestCase):
 
     def test_symlink_pointing_at_parent_fails(self):
         """We should detect a loop via the parent and give up on the branch"""
-        os.symlink(self.tmpdir, os.path.join(self.tmpdir, 'link'))
+        if sys.platform == 'win32':
+            pytest.skip("symlinks not supported by 2.7 os module")
+
+        os.symlink(self.tmpdir, posix_normpath(os.path.join(self.tmpdir, 'link')))
 
         result, errors = path.find_mtimes(self.tmpdir, follow=True)
         self.assertEqual({}, result)
@@ -364,9 +389,12 @@ class FindMTimesTest(unittest.TestCase):
 
     def test_indirect_symlink_loop(self):
         """More indirect loops should also be detected"""
+        if sys.platform == 'win32':
+            pytest.skip("symlinks not supported by 2.7 os module")
+
         # Setup tmpdir/directory/loop where loop points to tmpdir
-        directory = os.path.join(self.tmpdir, b'directory')
-        loop = os.path.join(directory, b'loop')
+        directory = posix_normpath(os.path.join(self.tmpdir, b'directory'))
+        loop = posix_normpath(os.path.join(directory, b'loop'))
 
         os.mkdir(directory)
         os.symlink(self.tmpdir, loop)
@@ -377,10 +405,13 @@ class FindMTimesTest(unittest.TestCase):
 
     def test_symlink_branches_are_not_excluded(self):
         """Using symlinks to make a file show up multiple times should work"""
+        if sys.platform == 'win32':
+            pytest.skip("symlinks not supported by 2.7 os module")
+
         self.mkdir('directory')
         target = self.touch('directory', 'target')
-        link1 = os.path.join(self.tmpdir, b'link1')
-        link2 = os.path.join(self.tmpdir, b'link2')
+        link1 = posix_normpath(os.path.join(self.tmpdir, b'link1'))
+        link2 = posix_normpath(os.path.join(self.tmpdir, b'link2'))
 
         os.symlink(target, link1)
         os.symlink(target, link2)
