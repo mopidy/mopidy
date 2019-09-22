@@ -25,7 +25,7 @@ DEFAULT_CONFIG = b':'.join(_default_config)
 
 
 def config_files_type(value):
-    return value.split(b':')
+    return value.split(b';')  # win32 uses : for drive-name indicator
 
 
 def config_override_type(value):
@@ -272,7 +272,7 @@ class RootCommand(Command):
             '--config',
             action='store', dest='config_files', type=config_files_type,
             default=DEFAULT_CONFIG, metavar='FILES',
-            help='config files to use, colon seperated, later files override')
+            help='config files to use, semicolon separated, later files override')
         self.add_argument(
             '-o', '--option',
             action='append', dest='config_overrides',
