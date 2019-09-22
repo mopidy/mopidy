@@ -147,6 +147,7 @@ class Server(object):
             chan = sock.fileno()
         return GLib.io_add_watch(
             chan,
+            1,  # priority?
             GLib.IO_IN,
             self.handle_connection)
 
@@ -298,6 +299,7 @@ class Connection(object):
         try:
             self.recv_id = GLib.io_add_watch(
                 chan,
+                1,  # priority?
                 GLib.IO_IN | GLib.IO_ERR | GLib.IO_HUP,
                 self.recv_callback)
         except socket.error as e:

@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+import sys
 import errno
 import logging
 import socket
@@ -170,7 +171,8 @@ class ConnectionTest(unittest.TestCase):
 
         network.Connection.enable_recv(self.mock)
         GLib.io_add_watch.assert_called_once_with(
-            sentinel.fileno,
+            self.mock._sock if sys.platform == 'win32' else sentinel.fileno,
+            1,
             GLib.IO_IN | GLib.IO_ERR | GLib.IO_HUP,
             self.mock.recv_callback)
         self.assertEqual(sentinel.tag, self.mock.recv_id)
