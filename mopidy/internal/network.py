@@ -107,7 +107,8 @@ class Server(object):
         self.server_socket = self.create_server_socket(host, port)
         self.address = get_socket_address(host, port)
 
-        self.watcher = self.register_server_socket(self.server_socket.fileno())
+        # GLib wants to get actual socket on win32, so we pass the socket
+        self.watcher = self.register_server_socket(self.server_socket)
 
     def create_server_socket(self, host, port):
         socket_path = path.get_unix_socket_path(host)
@@ -138,9 +139,14 @@ class Server(object):
         if unix_socket_path is not None:
             os.unlink(unix_socket_path)
 
-    def register_server_socket(self, fileno):
+    def register_server_socket(self, sock):
+        # GLib wants socket for win32, file-num for others
+        if sys.platform == 'win32':
+            chan = sock
+        else:
+            chan = sock.fileno()
         return GLib.io_add_watch(
-            fileno,
+            chan,
             GLib.IO_IN,
             self.handle_connection)
 
@@ -283,9 +289,15 @@ class Connection(object):
         if self.recv_id is not None:
             return
 
+        # GLib wants to see actual socket passed on win32
+        if sys.platform == 'win32':
+            chan = self._sock
+        else:
+            chan = self._sock.fileno()
+
         try:
             self.recv_id = GLib.io_add_watch(
-                self._sock.fileno(),
+                chan,
                 GLib.IO_IN | GLib.IO_ERR | GLib.IO_HUP,
                 self.recv_callback)
         except socket.error as e:
