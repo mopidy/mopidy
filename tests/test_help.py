@@ -13,12 +13,25 @@ class HelpTest(unittest.TestCase):
     def test_help_has_mopidy_options(self):
         mopidy_dir = os.path.dirname(mopidy.__file__)
         args = [sys.executable, mopidy_dir, '--help']
+
+        # win32 requires env elements to be strings
+        if sys.platform == 'win32':
+            temp_env = {
+                str('PYTHONPATH'): str(':'.join([
+                    os.path.join(mopidy_dir, '..'),
+                    os.environ.get('PYTHONPATH', '')])),
+                str('SystemRoot'): str(os.environ.get('SystemRoot'))
+            }
+        else:
+            temp_env = {
+                'PYTHONPATH': ':'.join([
+                    os.path.join(mopidy_dir, '..'),
+                    os.environ.get('PYTHONPATH', '')])
+            }
+
         process = subprocess.Popen(
             args,
-            env={'PYTHONPATH': ':'.join([
-                os.path.join(mopidy_dir, '..'),
-                os.environ.get('PYTHONPATH', '')
-            ])},
+            env = temp_env,
             stdout=subprocess.PIPE)
         output = process.communicate()[0]
         self.assertIn('--version', output)

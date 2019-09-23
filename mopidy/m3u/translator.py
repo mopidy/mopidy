@@ -1,8 +1,8 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
-import os
+import os, posixpath
 
-from mopidy import models
+from mopidy import models, posix_normpath
 
 from . import Extension
 
@@ -43,7 +43,8 @@ except ImportError:
 def path_to_uri(path, scheme=Extension.ext_name):
     """Convert file path to URI."""
     assert isinstance(path, bytes), 'Mopidy paths should be bytes'
-    uripath = quote_from_bytes(os.path.normpath(path))
+    path = os.path.normpath(path)
+    uripath = quote_from_bytes(posix_normpath(path))
     return urlunsplit((scheme, None, uripath, None, None))
 
 
@@ -65,9 +66,9 @@ def name_from_path(path):
 def path_from_name(name, ext=None, sep='|'):
     """Convert name with optional extension to file path."""
     if ext:
-        return fsencode(name.replace(os.sep, sep) + ext)
+        return fsencode(name.replace(posixpath.sep, sep) + ext)
     else:
-        return fsencode(name.replace(os.sep, sep))
+        return fsencode(name.replace(posixpath.sep, sep))
 
 
 def path_to_ref(path):
@@ -86,7 +87,7 @@ def load_items(fp, basedir):
                 name = line.partition(',')[2]
             continue
         elif not urlsplit(line).scheme:
-            path = os.path.join(basedir, fsencode(line))
+            path = posix_normpath(os.path.join(basedir, fsencode(line)))
             if not name:
                 name = name_from_path(path)
             uri = path_to_uri(path, scheme='file')
