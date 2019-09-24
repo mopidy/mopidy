@@ -18,8 +18,11 @@ warnings.filterwarnings('ignore', 'could not open display')
 __version__ = '3.0.0a1'
 
 
-def posix_normpath(path):
+def posix_normpath(*paths):
     """if path has win32 backslashes, convert to forward slashes"""
-    drive, path = os.path.splitdrive(path)
-    path_parts = path.split(os.path.sep)
-    return posixpath.sep.join(path_parts)
+    drive, path = os.path.splitdrive(paths[0])
+    res = path.split(os.path.sep)
+    for path in paths[1:]:
+        path_parts = path.split(os.path.sep)
+        res.extend(path_parts)
+    return posixpath.sep.join(res)
