@@ -63,10 +63,20 @@ def name_from_path(path):
         return None
 
 
+def sanitize_name(name):
+    """remove bad char choices from name"""
+    excluded = '\\/:*?"<>|'+''.join([chr(i) for i in range(32)]) \
+        if sys.platform == 'win32' else '/'+chr(0)
+    name = "".join(i for i in name if i not in excluded)
+    return name
+
+
 def path_from_name(name, ext=None, sep='|'):
     """Convert name with optional extension to file path."""
+    name = sanitize_name(name.replace(posixpath.sep, sep))
     if ext:
-        return fsencode(name.replace(posixpath.sep, sep) + ext)
+        ext = sanitize_name(ext)
+        return fsencode(name + ext)
     else:
         return fsencode(name.replace(posixpath.sep, sep))
 

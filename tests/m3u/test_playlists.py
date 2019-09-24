@@ -2,11 +2,13 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import sys
 import os
 import platform
 import shutil
 import tempfile
 import unittest
+import pytest
 
 import pykka
 
@@ -26,12 +28,14 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
             'base_dir': None,
             'default_encoding': 'latin-1',
             'default_extension': '.m3u',
-            'playlists_dir': path_to_data_dir(''),
+            'playlists_dir': path_to_data_dir('temp'),
         }
     }
 
     def setUp(self):  # noqa: N802
-        self.config['m3u']['playlists_dir'] = posix_normpath(tempfile.mkdtemp())
+        data_dir = path_to_data_dir('temp')
+        tmpdir = posix_normpath(tempfile.mkdtemp(dir=data_dir))
+        self.config['m3u']['playlists_dir'] = tmpdir
         self.playlists_dir = self.config['m3u']['playlists_dir']
         self.base_dir = self.config['m3u']['base_dir'] or self.playlists_dir
 
@@ -57,9 +61,12 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.assertTrue(os.path.exists(path))
 
     def test_create_sanitizes_playlist_name(self):
-        playlist = self.core.playlists.create('  ../../test FOO baR ')
-        self.assertEqual('..|..|test FOO baR', playlist.name)
-        path = posix_normpath(os.path.join(self.playlists_dir, b'..|..|test FOO baR.m3u'))
+        test_name = '  ../../test FOO baR '
+        playlist = self.core.playlists.create(test_name)
+        # self.assertEqual('..|..|test FOO baR', playlist.name)
+        self.assertEqual('....test FOO baR', playlist.name)
+        path = posix_normpath(os.path.join(self.playlists_dir,
+                (test_name.strip()+'.m3u').replace('/','').encode('utf-8')))
         self.assertEqual(self.playlists_dir, os.path.dirname(path))
         self.assertTrue(os.path.exists(path))
 
@@ -157,8 +164,9 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.assertEqual(track.uri, result.tracks[0].uri)
 
     @unittest.skipIf(
-        platform.system() == 'Darwin',
-        'macOS 10.13 raises IOError "Illegal byte sequence" on open.')
+        platform.system() == 'Darwin' or sys.platform == 'win32',
+        'macOS 10.13 raises IOError "Illegal byte sequence" on open. '
+        'Unicode is ok in win32.')
     def test_load_playlist_with_nonfilesystem_encoding_of_filename(self):
         path = posix_normpath(os.path.join(self.playlists_dir, 'øæå.m3u'.encode('latin-1')))
         with open(path, 'wb+') as f:
@@ -353,5 +361,8 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 class M3UPlaylistsProviderBaseDirectoryTest(M3UPlaylistsProviderTest):
 
     def setUp(self):  # noqa: N802
-        self.config['m3u']['base_dir'] = tempfile.mkdtemp()
+        data_dir = path_to_data_dir('temp')
+        tmpdir = posix_normpath(tempfile.mkdtemp(dir=data_dir))
+        self.config['m3u']['base_dir'] = posix_normpath(tmpdir)
+        # self.config['m3u']['base_dir'] = tempfile.mkdtemp()
         super(M3UPlaylistsProviderBaseDirectoryTest, self).setUp()
