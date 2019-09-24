@@ -26,28 +26,40 @@ def log_environment_error(message, error):
 
 @contextlib.contextmanager
 def replace(path, mode='w+b', encoding=None, errors=None):
+    print('>>>replace 0 --> {}'.format(path))
     try:
         (fd, tempname) = tempfile.mkstemp(dir=os.path.dirname(path))
     except TypeError:
         # Python 3 requires dir to be of type str until v3.5
         import sys
         path = path.decode(sys.getfilesystemencoding())
+        print('>>>replace 1 --> {}'.format(path))
         (fd, tempname) = tempfile.mkstemp(dir=os.path.dirname(path))
     try:
+        print('>>>replace 2 --> {}  {}'.format(path, tempname))
         fp = io.open(fd, mode, encoding=encoding, errors=errors)
     except Exception:
         os.remove(tempname)
         os.close(fd)
         raise
     try:
+        print('>>>replace 3 --> {}  {}'.format(path, tempname))
         yield fp
         fp.flush()
+        print('>>>replace 3.1 --> {}  {}'.format(path, tempname))
         os.fsync(fd)
+        print('>>>replace 3.2 --> {}  {}'.format(path, tempname))
+        fp.close()  # win32 needs files closed before renaming or removing
+        # win32 will not overwrite with os.rename, so delete first
+        if os.path.isfile(path):
+            os.remove(path)
         os.rename(tempname, path)
     except Exception:
+        print('>>>replace 3e --> {}  {}'.format(path, tempname))
         os.remove(tempname)
         raise
     finally:
+        print('>>>replace F --> {}  {}'.format(path, tempname))
         fp.close()
 
 
@@ -84,7 +96,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
                 pass
             mtime = os.path.getmtime(self._abspath(path))
         except EnvironmentError as e:
-            log_environment_error('Error creating playlist %s' % name, e)
+            log_environment_error('Error creating playlist %s > %s' % (self._playlists_dir, self._abspath(path)), e)
         else:
             return translator.playlist(path, [], mtime)
 
@@ -133,17 +145,23 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
 
     def save(self, playlist):
         path = translator.uri_to_path(playlist.uri)
+        print("path from uri {}  {}".format(path, playlist.uri))
         if not self._is_in_basedir(path):
             logger.debug(
                 'Ignoring path outside playlist dir: %s', playlist.uri)
             return None
         name = translator.name_from_path(path)
         try:
+            print("save _open {}".format(path))
             with self._open(path, 'w') as fp:
                 translator.dump_items(playlist.tracks, fp)
             if playlist.name and playlist.name != name:
                 opath, ext = os.path.splitext(path)
                 path = translator.path_from_name(playlist.name.strip()) + ext
+                print("path {} > opath {} > ext {}".format(path, opath, ext))
+                # win32 wont overwrite, so delete first
+                if os.path.isfile(self._abspath(path)):
+                    os.remove(self._abspath(path))
                 os.rename(self._abspath(opath + ext), self._abspath(path))
             mtime = os.path.getmtime(self._abspath(path))
         except EnvironmentError as e:
@@ -170,6 +188,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             raise Exception(
                 'Path (%s) is not inside playlist_dir (%s)'
                 % (path, self._playlists_dir))
+        print("_open {}".format(path))
         if 'w' in mode:
             return replace(path, mode, encoding=encoding, errors='replace')
         else:

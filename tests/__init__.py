@@ -5,13 +5,16 @@ import os
 from mopidy import compat, posix_normpath
 
 
-def path_to_data_dir(name):
+def path_to_data_dir(name=None):
 
-    name = os.path.normpath(name) # sets slashes to platform norm
-    if not isinstance(name, bytes):
-        name = name.encode('utf-8')
     path = os.path.dirname(__file__)
-    path = os.path.join(path, b'data', name)
+    if name is None:
+        path = os.path.join(path, b'data')
+    else:
+        name = os.path.normpath(name) # sets slashes to platform norm
+        if not isinstance(name, bytes):
+            name = name.encode('utf-8')
+        path = os.path.join(path, b'data', name)
 
     return posix_normpath(path)  # sets slashes to posix norm, strips drive
 
