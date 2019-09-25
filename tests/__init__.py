@@ -16,6 +16,8 @@ def path_to_data_dir(name=None):
             name = name.encode('utf-8')
         path = os.path.join(path, b'data', name)
 
+    # maybe needs abspath() call?
+
     return posix_normpath(path)  # sets slashes to posix norm, strips drive
 
 

@@ -247,7 +247,6 @@ class FindMTimesTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
         data_dir = tests.path_to_data_dir('temp')
         self.tmpdir = posix_normpath(tempfile.mkdtemp(b'.mopidy-tests', dir=data_dir))
-        print('tmpdir {}'.format(self.tmpdir))
         # self.tmpdir = tempfile.mkdtemp(b'.mopidy-tests')
 
     def tearDown(self):  # noqa: N802
@@ -288,7 +287,6 @@ class FindMTimesTest(unittest.TestCase):
         """Specifying a file as the root should just return the file"""
         single = self.touch('single')
 
-        print('single {}'.format(single))
         result, errors = path.find_mtimes(single)
         self.assertEqual(result, {single: tests.any_int})
         self.assertEqual(errors, {})
@@ -328,8 +326,6 @@ class FindMTimesTest(unittest.TestCase):
         os.chmod(directory, 0)
 
         result, errors = path.find_mtimes(self.tmpdir)
-        print(result)
-        print(errors)
         self.assertEqual({}, result)
         self.assertEqual({directory: tests.IsA(exceptions.FindError)}, errors)
 
