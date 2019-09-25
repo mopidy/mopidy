@@ -24,6 +24,10 @@ Bug fix release.
   regression introduced as part of PR: :issue:`1629`. (Fixes: :issue:`1788`,
   PR: :issue:`1792`)
 
+- Core: Trigger :meth:`mopidy.core.CoreListener.stream_title_changed` event
+  on recieving a ``title`` audio tag that differs from the current track's
+  :attr:`mopidy.models.Track.name`. (Fixes: :issue:`1746`, PR: :issue:`1751`)
+
 
 v2.2.3 (2019-06-20)
 ===================
