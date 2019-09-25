@@ -28,6 +28,9 @@ Bug fix release.
   on recieving a ``title`` audio tag that differs from the current track's
   :attr:`mopidy.models.Track.name`. (Fixes: :issue:`1746`, PR: :issue:`1751`)
 
+- Stream: Support playlists containing relative URIs. (Fixes: :issue:`1785`,
+  PR: :issue:`1802`)
+
 
 v2.2.3 (2019-06-20)
 ===================
