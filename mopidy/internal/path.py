@@ -14,7 +14,7 @@ from mopidy.internal import encoding, xdg
 
 logger = logging.getLogger(__name__)
 
-MAX_RECURSE = 100
+MAX_RECURSE = 25
 
 XDG_DIRS = xdg.get_dirs()
 
@@ -23,7 +23,6 @@ def get_or_create_dir(dir_path):
     if not isinstance(dir_path, bytes):
         raise ValueError('Path is not a bytestring.')
     dir_path = expand_path(dir_path)
-    print('dir_path 1 {}'.format(dir_path))
     if os.path.isfile(dir_path):
         raise OSError(
             'A file with the same name as the desired dir, '
