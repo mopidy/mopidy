@@ -124,6 +124,7 @@ class DummyPlaylistsProvider(backend.PlaylistsProvider):
             Ref.track(uri=t.uri, name=t.name) for t in playlist.tracks]
 
     def lookup(self, uri):
+        uri = Ref.playlist(uri=uri).uri
         for playlist in self._playlists:
             if playlist.uri == uri:
                 return playlist
