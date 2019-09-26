@@ -74,7 +74,6 @@ class GetOrCreateFileTest(unittest.TestCase):
 
     def setUp(self):  # noqa: N802
         self.parent = posix_normpath(tempfile.mkdtemp())
-        print("parent {}  dir {}".format(self.parent, 1))
 
     def tearDown(self):  # noqa: N802
         if os.path.isdir(self.parent):
