@@ -20,8 +20,8 @@ __version__ = '3.0.0a1'
 
 def posix_normpath(*paths):
     """if path has win32 backslashes, convert to forward slashes"""
-    drive, path = os.path.splitdrive(paths[0])
-    res = path.split(os.path.sep)
+    # drive, path = os.path.splitdrive(paths[0])
+    res = paths[0].split(os.path.sep)
     for path in paths[1:]:
         path_parts = path.split(os.path.sep)
         res.extend(path_parts)
