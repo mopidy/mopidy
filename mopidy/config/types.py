@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+import os
 import logging
 import re
 import socket
@@ -309,6 +310,7 @@ class Path(ConfigValue):
         validators.validate_required(expanded, self._required)
         if not value or expanded is None:
             return None
+        _, expanded = os.path.splitdrive(expanded)
         return ExpandedPath(value, expanded)
 
     def serialize(self, value, display=False):

@@ -4,11 +4,11 @@ from __future__ import absolute_import, unicode_literals
 
 import sys
 import os
+import posixpath
 import platform
 import shutil
 import tempfile
 import unittest
-import pytest
 
 import pykka
 
@@ -53,7 +53,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
     def test_created_playlist_is_persisted(self):
         uri = 'm3u:test.m3u'
-        path = os.path.join(self.playlists_dir, b'test.m3u')
+        path = posixpath.join(self.playlists_dir, b'test.m3u')
         self.assertFalse(os.path.exists(path))
 
         playlist = self.core.playlists.create('test')
@@ -75,8 +75,8 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         uri1 = 'm3u:test1.m3u'
         uri2 = 'm3u:test2.m3u'
 
-        path1 = os.path.join(self.playlists_dir, b'test1.m3u')
-        path2 = os.path.join(self.playlists_dir, b'test2.m3u')
+        path1 = posixpath.join(self.playlists_dir, b'test1.m3u')
+        path2 = posixpath.join(self.playlists_dir, b'test2.m3u')
 
         playlist = self.core.playlists.create('test1')
         self.assertEqual('test1', playlist.name)
@@ -92,7 +92,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
     def test_deleted_playlist_is_removed(self):
         uri = 'm3u:test.m3u'
-        path = os.path.join(self.playlists_dir, b'test.m3u')
+        path = posixpath.join(self.playlists_dir, b'test.m3u')
 
         self.assertFalse(os.path.exists(path))
 
@@ -114,7 +114,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         track = Track(uri=generate_song(1))
         playlist = self.core.playlists.create('test')
         playlist = self.core.playlists.save(playlist.replace(tracks=[track]))
-        path = os.path.join(self.playlists_dir, b'test.m3u')
+        path = posixpath.join(self.playlists_dir, b'test.m3u')
 
         with open(path) as f:
             contents = f.read()
@@ -125,7 +125,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         track = Track(uri=generate_song(1), name='Test', length=60000)
         playlist = self.core.playlists.create('test')
         playlist = self.core.playlists.save(playlist.replace(tracks=[track]))
-        path = os.path.join(self.playlists_dir, b'test.m3u')
+        path = posixpath.join(self.playlists_dir, b'test.m3u')
 
         with open(path) as f:
             m3u = f.read().splitlines()
@@ -136,7 +136,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         track = Track(uri=generate_song(1), name='Test\x9f', length=60000)
         playlist = self.core.playlists.create('test')
         playlist = self.core.playlists.save(playlist.replace(tracks=[track]))
-        path = os.path.join(self.playlists_dir, b'test.m3u')
+        path = posixpath.join(self.playlists_dir, b'test.m3u')
 
         with open(path, 'rb') as f:
             m3u = f.read().splitlines()
@@ -146,7 +146,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         track = Track(uri=generate_song(1), name='Test\u07b4', length=60000)
         playlist = self.core.playlists.create('test')
         playlist = self.core.playlists.save(playlist.replace(tracks=[track]))
-        path = os.path.join(self.playlists_dir, b'test.m3u')
+        path = posixpath.join(self.playlists_dir, b'test.m3u')
 
         with open(path, 'rb') as f:
             m3u = f.read().splitlines()
@@ -169,7 +169,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         'macOS 10.13 raises IOError "Illegal byte sequence" on open. '
         'Unicode is ok in win32.')
     def test_load_playlist_with_nonfilesystem_encoding_of_filename(self):
-        path = os.path.join(self.playlists_dir, 'øæå.m3u'.encode('latin-1'))
+        path = posixpath.join(self.playlists_dir, 'øæå.m3u'.encode('latin-1'))
         with open(path, 'wb+') as f:
             f.write(b'#EXTM3U\n')
 
@@ -214,7 +214,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         playlist = self.core.playlists.create('test')
         self.assertEqual(playlist, self.core.playlists.lookup(playlist.uri))
 
-        path = os.path.join(self.playlists_dir, b'test.m3u')
+        path = posixpath.join(self.playlists_dir, b'test.m3u')
         self.assertTrue(os.path.exists(path))
 
         os.remove(path)
@@ -267,7 +267,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
     def test_save_playlist_with_new_uri(self):
         uri = 'm3u:test.m3u'
         self.core.playlists.save(Playlist(uri=uri))
-        path = os.path.join(self.playlists_dir, b'test.m3u')
+        path = posixpath.join(self.playlists_dir, b'test.m3u')
         self.assertTrue(os.path.exists(path))
 
     def test_save_on_path_outside_playlist_dir_returns_none(self):
@@ -301,7 +301,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
     def test_playlist_with_relative_path(self):
         track = Track(uri='test.mp3')
-        filepath = os.path.join(self.base_dir, b'test.mp3')
+        filepath = posixpath.join(self.base_dir, b'test.mp3')
         playlist = self.core.playlists.create('test')
         playlist = playlist.replace(tracks=[track])
         playlist = self.core.playlists.save(playlist)

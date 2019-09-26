@@ -11,7 +11,6 @@ from mopidy import compat, exceptions, posix_normpath
 from mopidy.compat import queue, urllib
 from mopidy.internal import encoding, xdg
 
-
 logger = logging.getLogger(__name__)
 
 MAX_RECURSE = 25
@@ -68,7 +67,7 @@ def path_to_uri(path):
     """
     if isinstance(path, compat.text_type):
         path = path.encode('utf-8')
-    path = posix_normpath(path)
+    path = posix_normpath(os.path.splitdrive(path)[1])
     path = urllib.parse.quote(path)
     return urllib.parse.urlunsplit((b'file', b'', path, b'', b''))
 
@@ -205,8 +204,8 @@ def _find(root, thread_count=10, relative=False, follow=False):
     return results, errors
 
 
-def find_mtimes(root, follow=False):
-    results, errors = _find(root, relative=False, follow=follow)
+def find_mtimes(root, follow=False, relative=False):
+    results, errors = _find(root, relative=relative, follow=follow)
     # return the mtimes as integer milliseconds
     mtimes = {f: int(st.st_mtime * 1000) for f, st in results.items()}
     return mtimes, errors

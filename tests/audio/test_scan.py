@@ -16,11 +16,11 @@ class ScannerTest(unittest.TestCase):
         self.errors = {}
         self.result = {}
 
-    def find(self, path):
+    def find(self, path, relative=False):
         media_dir = path_to_data_dir(path)
-        result, errors = path_lib.find_mtimes(media_dir)
+        result, errors = path_lib.find_mtimes(media_dir, relative=relative)
         for path in result:
-            yield os.path.join(media_dir, path)
+            yield path  # os.path.join(media_dir, path)
 
     def scan(self, paths):
         scanner = scan.Scanner()
@@ -34,9 +34,7 @@ class ScannerTest(unittest.TestCase):
 
     def check(self, name, key, value):
         name = path_to_data_dir(name)
-        uri = path_lib.path_to_uri(name)
-        uri_key = uri[len('file://'):]
-        self.assertEqual(self.result[uri_key].tags[key], value)
+        self.assertEqual(self.result[name].tags[key], value)
 
     def check_if_missing_plugin(self):
         for path, result in self.result.items():

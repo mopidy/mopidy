@@ -97,7 +97,7 @@ def load_items(fp, basedir):
                 name = line.partition(',')[2]
             continue
         elif not urlsplit(line).scheme:
-            path = posix_normpath(os.path.join(basedir, fsencode(line)))
+            path = posixpath.join(basedir, fsencode(line))
             if not name:
                 name = name_from_path(path)
             uri = path_to_uri(path, scheme='file')

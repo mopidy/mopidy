@@ -49,7 +49,7 @@ def test_lookup_respects_blacklist(audio, config, track_uri):
 
 
 def test_lookup_respects_blacklist_globbing(audio, config, track_uri):
-    blacklist_glob = path.path_to_uri(path_to_data_dir()) + '*'
+    blacklist_glob = path.path_to_uri(path_to_data_dir('')) + '*'
     config['stream']['metadata_blacklist'].append(blacklist_glob)
     backend = actor.StreamBackend(audio=audio, config=config)
 
