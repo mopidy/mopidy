@@ -8,19 +8,19 @@ import mock
 import pytest
 
 from mopidy.internal import xdg
-from mopidy import posix_normpath
 
 
 @pytest.yield_fixture
 def environ():
-    patcher = mock.patch.dict(os.environ, clear=True)
+    patcher = mock.patch.dict(os.environ,
+                              { 'HOMEDRIVE': 'J:',  # necessary for win32
+                                'HOMEPATH': "\\Users\\Bugsbunny" },
+                              clear=True)
     yield patcher.start()
     patcher.stop()
 
 
 def test_cache_dir_default(environ):
-    os.environ['HOMEDRIVE'] = 'J:'
-    os.environ['HOMEPATH'] = "\\Users\\Bugsbunny"
     assert xdg.get_dirs()['XDG_CACHE_DIR'] == os.path.expanduser(
         os.path.normpath('~/.cache'))
 
@@ -33,8 +33,6 @@ def test_cache_dir_from_env(environ):
 
 
 def test_config_dir_default(environ):
-    os.environ['HOMEDRIVE'] = 'J:'
-    os.environ['HOMEPATH'] = "\\Users\\Bugsbunny"
     assert xdg.get_dirs()['XDG_CONFIG_DIR'] == os.path.expanduser(
         os.path.normpath('~/.config'))
 
@@ -47,8 +45,6 @@ def test_config_dir_from_env(environ):
 
 
 def test_data_dir_default(environ):
-    os.environ['HOMEDRIVE'] = 'J:'
-    os.environ['HOMEPATH'] = "\\Users\\Bugsbunny"
     assert xdg.get_dirs()['XDG_DATA_DIR'] == os.path.expanduser(
         os.path.normpath('~/.local/share'))
 
@@ -62,8 +58,6 @@ def test_data_dir_from_env(environ):
 
 def test_user_dirs(environ, tmpdir):
     os.environ['XDG_CONFIG_HOME'] = str(tmpdir)
-    os.environ['HOMEDRIVE'] = 'J:'
-    os.environ['HOMEPATH'] = "\\Users\\Bugsbunny"
 
     with open(os.path.join(str(tmpdir), 'user-dirs.dirs'), 'wb') as fh:
         fh.write(b'# Some comments\n')
