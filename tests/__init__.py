@@ -11,7 +11,7 @@ def path_to_data_dir(name):
     path = os.path.dirname(__file__)
     path = os.path.join(path, b'data')
     path = os.path.abspath(path)
-    _, path = os.path.splitdrive(path)
+    # _, path = os.path.splitdrive(path)
     return posix_normpath(path, name)
 
 

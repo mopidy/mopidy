@@ -43,8 +43,11 @@ except ImportError:
 def path_to_uri(path, scheme=Extension.ext_name):
     """Convert file path to URI."""
     assert isinstance(path, bytes), 'Mopidy paths should be bytes'
+    drive, path = os.path.splitdrive(path)
     path = os.path.normpath(path)
     uripath = quote_from_bytes(posix_normpath(path))
+    if drive:
+        uripath = posixpath.sep.join([b'', drive])+uripath
     return urlunsplit((scheme, None, uripath, None, None))
 
 
