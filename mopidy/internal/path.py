@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import logging
 import os
+import posixpath
 import re
 import stat
 import string
@@ -67,8 +68,10 @@ def path_to_uri(path):
     """
     if isinstance(path, compat.text_type):
         path = path.encode('utf-8')
-    path = posix_normpath(os.path.splitdrive(path)[1])
+    drive, path = os.path.splitdrive(path)
     path = urllib.parse.quote(path)
+    if drive:
+        path = posixpath.sep.join([b'', drive])+path
     return urllib.parse.urlunsplit((b'file', b'', path, b'', b''))
 
 

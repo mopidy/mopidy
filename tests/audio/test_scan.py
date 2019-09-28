@@ -26,14 +26,19 @@ class ScannerTest(unittest.TestCase):
         scanner = scan.Scanner()
         for path in paths:
             uri = path_lib.path_to_uri(path)
-            key = uri[len('file://'):]
+            key = path_lib.uri_to_path(uri)
             try:
                 self.result[key] = scanner.scan(uri)
             except exceptions.ScannerError as error:
                 self.errors[key] = error
+        print(self.errors)
+
+    def _normalize_key(self, name):
+        return path_lib.uri_to_path(path_lib.path_to_uri(path_to_data_dir(name)))
 
     def check(self, name, key, value):
-        name = path_to_data_dir(name)
+        name = self._normalize_key(name)
+        print(self.result.keys())
         self.assertEqual(self.result[name].tags[key], value)
 
     def check_if_missing_plugin(self):
@@ -62,8 +67,8 @@ class ScannerTest(unittest.TestCase):
 
         self.check_if_missing_plugin()
 
-        ogg = path_to_data_dir('scanner/simple/song1.ogg')
-        mp3 = path_to_data_dir('scanner/simple/song1.mp3')
+        ogg = self._normalize_key('scanner/simple/song1.ogg')
+        mp3 = self._normalize_key('scanner/simple/song1.mp3')
         self.assertEqual(self.result[mp3].duration, 4680)
         self.assertEqual(self.result[ogg].duration, 4680)
 
@@ -104,24 +109,26 @@ class ScannerTest(unittest.TestCase):
 
         self.check_if_missing_plugin()
 
-        log = path_to_data_dir('scanner/example.log')
+        log = self._normalize_key('scanner/example.log')
         self.assertLess(self.result[log].duration, 100)
 
     def test_empty_wav_file(self):
         self.scan([path_to_data_dir('scanner/empty.wav')])
-        wav = path_to_data_dir('scanner/empty.wav')
+        wav = self._normalize_key('scanner/empty.wav')
         self.assertEqual(self.result[wav].duration, 0)
 
     def test_uri_list(self):
-        path = path_to_data_dir('scanner/playlist.m3u')
+        name = 'scanner/playlist.m3u'
+        path = path_to_data_dir(name)
         self.scan([path])
-        self.assertEqual(self.result[path].mime, 'text/uri-list')
+        self.assertEqual(self.result[self._normalize_key(name)].mime, 'text/uri-list')
 
     def test_text_plain(self):
         # GStreamer decode bin hardcodes bad handling of text plain :/
-        path = path_to_data_dir('scanner/plain.txt')
+        name = 'scanner/plain.txt'
+        path = path_to_data_dir(name)
         self.scan([path])
-        self.assertIn(path, self.errors)
+        self.assertIn(self._normalize_key(name), self.errors)
 
     @unittest.SkipTest
     def test_song_without_time_is_handeled(self):

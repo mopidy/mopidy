@@ -16,6 +16,7 @@ from mopidy import core, posix_normpath
 from mopidy.internal import deprecation
 from mopidy.m3u.backend import M3UBackend
 from mopidy.models import Playlist, Track
+from mopidy.internal import path as path_lib
 
 from tests import dummy_audio, path_to_data_dir
 from tests.m3u import generate_song
@@ -310,7 +311,8 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         result = self.core.playlists.lookup('m3u:test.m3u')
         self.assertEqual('m3u:test.m3u', result.uri)
         self.assertEqual(playlist.name, result.name)
-        self.assertEqual('file://' + filepath, result.tracks[0].uri)
+        filepath = path_lib.path_to_uri(filepath)
+        self.assertEqual(filepath, result.tracks[0].uri)
 
     def test_playlist_sort_order(self):
         def check_order(playlists, names):
