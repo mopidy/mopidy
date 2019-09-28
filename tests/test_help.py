@@ -15,6 +15,7 @@ class HelpTest(unittest.TestCase):
         args = [sys.executable, mopidy_dir, '--help']
 
         # win32 requires env elements to be strings
+        #  SystemRoot variable is needed by urandom on win32
         if sys.platform == 'win32':
             temp_env = {
                 str('PYTHONPATH'): str(':'.join([

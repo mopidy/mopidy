@@ -12,13 +12,17 @@ from mopidy.internal import xdg
 
 @pytest.yield_fixture
 def environ():
-    patcher = mock.patch.dict(os.environ, clear=True)
+    patcher = mock.patch.dict(os.environ,
+                              { 'HOMEDRIVE': 'J:',  # necessary for win32
+                                'HOMEPATH': "\\Users\\Bugsbunny" },
+                              clear=True)
     yield patcher.start()
     patcher.stop()
 
 
 def test_cache_dir_default(environ):
-    assert xdg.get_dirs()['XDG_CACHE_DIR'] == os.path.expanduser(b'~/.cache')
+    assert xdg.get_dirs()['XDG_CACHE_DIR'] == os.path.expanduser(
+        os.path.normpath('~/.cache'))
 
 
 def test_cache_dir_from_env(environ):
@@ -29,7 +33,8 @@ def test_cache_dir_from_env(environ):
 
 
 def test_config_dir_default(environ):
-    assert xdg.get_dirs()['XDG_CONFIG_DIR'] == os.path.expanduser(b'~/.config')
+    assert xdg.get_dirs()['XDG_CONFIG_DIR'] == os.path.expanduser(
+        os.path.normpath('~/.config'))
 
 
 def test_config_dir_from_env(environ):
