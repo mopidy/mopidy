@@ -311,7 +311,7 @@ class Path(ConfigValue):
         validators.validate_required(expanded, self._required)
         if not value or expanded is None:
             return None
-        _, expanded = os.path.splitdrive(expanded)
+        # _, expanded = os.path.splitdrive(expanded)
         return ExpandedPath(value, expanded)
 
     def serialize(self, value, display=False):

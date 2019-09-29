@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import os
 import logging
 import socket
 import unittest
@@ -393,7 +394,7 @@ class PathTest(unittest.TestCase):
 
     def test_deserialize_conversion_success(self):
         result = types.Path().deserialize(b'/foo')
-        self.assertEqual('/foo', result)
+        self.assertEqual('/foo', os.path.splitdrive(result)[1])
         self.assertIsInstance(result, types.ExpandedPath)
         self.assertIsInstance(result, bytes)
 
