@@ -9,12 +9,17 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
-v2.2.4 (UNRELEASED)
+v2.3.0 (UNRELEASED)
 ===================
 
-Bug fix release.
+Mopidy 2.3.0 is mostly a bug fix release. Because we're requiring a new major
+version of Tornado, we're doing a minor version bump of Mopidy.
 
-- Fix `PkgResourcesDeprecationWarning` on startup when a recent release
+- Dependencies: Support and require Tornado >=, < 6, as that is the latest
+  version support Python 2.7 and currently the oldest version shipped by Debian
+  and Arch. (Fixes: :issue:`1798`, PR: :issue:`1796`)
+
+- Fix ``PkgResourcesDeprecationWarning`` on startup when a recent release
   of setuptools is installed. (Fixes: :issue:`1778`, PR: :issue:`1780`)
 
 - Network: Close connection following an exception in the protocol handler.
