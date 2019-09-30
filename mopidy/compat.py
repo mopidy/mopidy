@@ -21,6 +21,7 @@ if PY2:
         urllib.parse.quote = py2_urllib.quote
         urllib.parse.unquote = py2_urllib.unquote
 
+        urllib.parse.urljoin = py2_urlparse.urljoin
         urllib.parse.urlparse = py2_urlparse.urlparse
         urllib.parse.urlsplit = py2_urlparse.urlsplit
         urllib.parse.urlunsplit = py2_urlparse.urlunsplit

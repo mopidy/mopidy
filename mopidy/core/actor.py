@@ -118,13 +118,15 @@ class Core(
         if not tags:
             return
 
-        # TODO: this limits us to only streams that set organization, this is
-        # a hack to make sure we don't emit stream title changes for plain
-        # tracks. We need a better way to decide if something is a stream.
-        if 'title' in tags and tags['title'] and 'organization' in tags:
+        # TODO: this is a hack to make sure we don't emit stream title changes
+        # for plain tracks. We need a better way to decide if something is a
+        # stream.
+        if 'title' in tags and tags['title']:
             title = tags['title'][0]
-            self.playback._stream_title = title
-            CoreListener.send('stream_title_changed', title=title)
+            current_track = self.playback.get_current_track()
+            if current_track is not None and current_track.name != title:
+                self.playback._stream_title = title
+                CoreListener.send('stream_title_changed', title=title)
 
     def setup(self):
         """Do not call this function. It is for internal use at startup."""

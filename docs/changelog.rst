@@ -236,12 +236,17 @@ Audio
   been deprecated since 1.0. (Fixes: :issue:`1465`, PR: :issue:`1705`)
 
 
-v2.2.4 (UNRELEASED)
+v2.3.0 (UNRELEASED)
 ===================
 
-Bug fix release.
+Mopidy 2.3.0 is mostly a bug fix release. Because we're requiring a new major
+version of Tornado, we're doing a minor version bump of Mopidy.
 
-- Fix `PkgResourcesDeprecationWarning` on startup when a recent release
+- Dependencies: Support and require Tornado >=, < 6, as that is the latest
+  version support Python 2.7 and currently the oldest version shipped by Debian
+  and Arch. (Fixes: :issue:`1798`, PR: :issue:`1796`)
+
+- Fix ``PkgResourcesDeprecationWarning`` on startup when a recent release
   of setuptools is installed. (Fixes: :issue:`1778`, PR: :issue:`1780`)
 
 - Network: Close connection following an exception in the protocol handler.
@@ -250,6 +255,13 @@ Bug fix release.
 - Network: Log client's connection details instead of server's. This fixed a
   regression introduced as part of PR: :issue:`1629`. (Fixes: :issue:`1788`,
   PR: :issue:`1792`)
+
+- Core: Trigger :meth:`mopidy.core.CoreListener.stream_title_changed` event
+  on recieving a ``title`` audio tag that differs from the current track's
+  :attr:`mopidy.models.Track.name`. (Fixes: :issue:`1746`, PR: :issue:`1751`)
+
+- Stream: Support playlists containing relative URIs. (Fixes: :issue:`1785`,
+  PR: :issue:`1802`)
 
 
 v2.2.3 (2019-06-20)

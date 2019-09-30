@@ -160,4 +160,4 @@ def _unwrap_stream(uri, timeout, scanner, requests_session):
         # TODO Test streams and return first that seems to be playable
         logger.debug(
             'Parsed playlist (%s) and found new URI: %s', uri, uris[0])
-        uri = uris[0]
+        uri = urllib.parse.urljoin(uri, uris[0])
