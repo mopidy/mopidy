@@ -36,6 +36,9 @@ version of Tornado, we're doing a minor version bump of Mopidy.
 - Stream: Support playlists containing relative URIs. (Fixes: :issue:`1785`,
   PR: :issue:`1802`)
 
+- Stream: Fix crash when unwrapping stream without MIME type. (Fixes:
+  :issue:`1760`, PR: :issue:`1800`)
+
 
 v2.2.3 (2019-06-20)
 ===================
