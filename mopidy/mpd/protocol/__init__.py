@@ -38,7 +38,7 @@ def load_protocol_modules():
 
 
 def INT(value):  # noqa: N802
-    r"""Converts a value that matches [+-]?\d+ into and integer."""
+    r"""Converts a value that matches [+-]?\d+ into an integer."""
     if value is None:
         raise ValueError('None is not a valid integer')
     # TODO: check for whitespace via value != value.strip()?
@@ -52,6 +52,23 @@ def UINT(value):  # noqa: N802
     if not value.isdigit():
         raise ValueError('Only positive numbers are allowed')
     return int(value)
+
+
+def FLOAT(value):  # noqa: N802
+    r"""Converts a value that matches [+-]\d+(.\d+)? into a float."""
+    if value is None:
+        raise ValueError('None is not a valid float')
+    return float(value)
+
+
+def UFLOAT(value):  # noqa: N802
+    r"""Converts a value that matches \d+(.\d+)? into a float."""
+    if value is None:
+        raise ValueError('None is not a valid float')
+    value = float(value)
+    if value < 0:
+        raise ValueError('Only positive numbers are allowed')
+    return value
 
 
 def BOOL(value):  # noqa: N802
