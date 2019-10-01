@@ -364,6 +364,14 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
             self.core.playback.time_position.get(), 30000)
         self.assertInResponse('OK')
 
+    def test_seek_with_float(self):
+        self.core.playback.play()
+
+        self.send_request('seek "0" "30.1"')
+        self.assertGreaterEqual(
+            self.core.playback.time_position.get(), 30100)
+        self.assertInResponse('OK')
+
     def test_seekid_in_current_track(self):
         self.core.playback.play()
 
@@ -383,6 +391,17 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         current_tl_track = self.core.playback.current_tl_track.get()
         self.assertEqual(current_tl_track.tlid, 2)
         self.assertEqual(current_tl_track.track, self.tracks[1])
+        self.assertInResponse('OK')
+
+    def test_seekid_with_float(self):
+        self.core.playback.play()
+
+        self.send_request('seekid "1" "30.1"')
+
+        current_track = self.core.playback.current_track.get()
+        self.assertEqual(current_track, self.tracks[0])
+        self.assertGreaterEqual(
+            self.core.playback.time_position.get(), 30100)
         self.assertInResponse('OK')
 
     def test_seekcur_absolute_value(self):
@@ -411,6 +430,24 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
         self.send_request('seekcur "-20"')
 
         self.assertLessEqual(self.core.playback.time_position.get(), 15000)
+        self.assertInResponse('OK')
+
+    def test_seekcur_absolute_float(self):
+        self.core.playback.play().get()
+
+        self.send_request('seekcur "30.1"')
+
+        self.assertGreaterEqual(self.core.playback.time_position.get(), 30100)
+        self.assertInResponse('OK')
+
+    def test_seekcur_negative_float(self):
+        self.core.playback.play().get()
+        self.core.playback.seek(30000)
+        self.assertGreaterEqual(self.core.playback.time_position.get(), 30000)
+
+        self.send_request('seekcur "-20.1"')
+
+        self.assertLessEqual(self.core.playback.time_position.get(), 10000)
         self.assertInResponse('OK')
 
     def test_stop(self):
