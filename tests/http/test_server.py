@@ -342,7 +342,7 @@ class HttpServerWithAppDefaultWebClient(tornado.testing.AsyncHTTPTestCase):
 
         return tornado.web.Application(http_server._get_request_handlers())
 
-    def test_without_slash_should_redirect(self):
+    def test_should_redirect_to_default_webclient(self):
         response = self.fetch('/', method='GET', follow_redirects=False)
 
         self.assertEqual(response.code, 302)
