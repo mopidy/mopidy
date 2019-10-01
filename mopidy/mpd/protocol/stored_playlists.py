@@ -41,7 +41,7 @@ def listplaylist(context, name):
         file: relative/path/to/file3.mp3
     """
     playlist = _get_playlist(context, name)
-    return ['file: %s' % t.uri for t in playlist.tracks]
+    return [translator.uri_to_mpd_format(t.uri) for t in playlist.tracks]
 
 
 @protocol.commands.add('listplaylistinfo')
