@@ -385,3 +385,29 @@ class HttpServerWithStaticDefaultWebClient(tornado.testing.AsyncHTTPTestCase):
 
         self.assertEqual(response.code, 302)
         self.assertEqual(response.headers['Location'], '/default_webclient/')
+
+
+class HttpServerWithInvalidDefaultWebClient(HttpServerTest):
+
+    def get_config(self):
+        config = super(
+            HttpServerWithInvalidDefaultWebClient, self).get_config()
+        config['http']['default_webclient'] = 'invalid_webclient'
+        return config
+
+    def test_should_redirect_to_clients_list(self):
+        response = self.fetch('/', method='GET', follow_redirects=False)
+
+        self.assertEqual(response.code, 302)
+        self.assertEqual(response.headers['Location'], '/mopidy/')
+
+        response = self.fetch('/', method='GET')
+        body = tornado.escape.to_unicode(response.body)
+
+        self.assertIn(
+            'This web server is a part of the Mopidy music server.', body)
+        self.assertIn('testapp', body)
+        self.assertIn('teststatic', body)
+        self.assertEqual(
+            response.headers['X-Mopidy-Version'], mopidy.__version__)
+        self.assertEqual(response.headers['Cache-Control'], 'no-cache')
