@@ -42,6 +42,9 @@ version of Tornado, we're doing a minor version bump of Mopidy.
 - MPD: Add support for seeking to time positions with float point precision.
   (Fixes: :issue:`1756`, PR: :issue:`1801`)
 
+- MPD: Handle URIs containing non-ASCII characters. (Fixes: :issue:`1759`,
+  PR: :issue:`1805`, :issue:`1808`)
+
 
 v2.2.3 (2019-06-20)
 ===================
