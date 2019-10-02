@@ -236,7 +236,7 @@ Audio
   been deprecated since 1.0. (Fixes: :issue:`1465`, PR: :issue:`1705`)
 
 
-v2.3.0 (UNRELEASED)
+v2.3.0 (2019-10-02)
 ===================
 
 Mopidy 2.3.0 is mostly a bug fix release. Because we're requiring a new major
@@ -268,6 +268,9 @@ version of Tornado, we're doing a minor version bump of Mopidy.
 
 - MPD: Add support for seeking to time positions with float point precision.
   (Fixes: :issue:`1756`, PR: :issue:`1801`)
+
+- MPD: Handle URIs containing non-ASCII characters. (Fixes: :issue:`1759`,
+  PR: :issue:`1805`, :issue:`1808`)
 
 
 v2.2.3 (2019-06-20)

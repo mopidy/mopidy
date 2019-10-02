@@ -22,7 +22,7 @@ def normalize_path(path, relative=False):
 
 
 def uri_to_mpd_format(uri):
-    return ('file', uri.decode('utf-8'))
+    return uri.decode('utf-8')
 
 
 def track_to_mpd_format(track, position=None, stream_title=None):
@@ -47,7 +47,7 @@ def track_to_mpd_format(track, position=None, stream_title=None):
         return []
 
     result = [
-        uri_to_mpd_format(track.uri),
+        ('file', uri_to_mpd_format(track.uri)),
         ('Time', track.length and (track.length // 1000) or 0),
         ('Artist', concat_multi_values(track.artists, 'name')),
         ('Album', track.album and track.album.name or ''),
@@ -110,7 +110,7 @@ def track_to_mpd_format(track, position=None, stream_title=None):
         result.append(('MUSICBRAINZ_TRACKID', track.musicbrainz_id))
 
     if track.album and track.album.uri:
-        result.append(('X-AlbumUri', track.album.uri))
+        result.append(('X-AlbumUri', uri_to_mpd_format(track.album.uri)))
 
     result = [element for element in result if _has_value(*element)]
 

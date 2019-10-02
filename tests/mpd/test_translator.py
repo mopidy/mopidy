@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 from __future__ import absolute_import, unicode_literals
 
 import unittest
@@ -9,13 +11,13 @@ from mopidy.mpd import translator
 
 class TrackMpdFormatTest(unittest.TestCase):
     track = Track(
-        uri='a uri',
+        uri='à uri',
         artists=[Artist(name='an artist')],
-        name='a name',
+        name='a nàme',
         album=Album(
             name='an album', num_tracks=13,
             artists=[Artist(name='an other artist')],
-            uri='urischeme:album:12345'),
+            uri='urischeme:àlbum:12345'),
         track_no=7,
         composers=[Artist(name='a composer')],
         performers=[Artist(name='a performer')],
@@ -63,10 +65,10 @@ class TrackMpdFormatTest(unittest.TestCase):
     def test_track_to_mpd_format_for_nonempty_track(self):
         result = translator.track_to_mpd_format(
             TlTrack(122, self.track), position=9)
-        self.assertIn(('file', 'a uri'), result)
+        self.assertIn(('file', 'à uri'), result)
         self.assertIn(('Time', 137), result)
         self.assertIn(('Artist', 'an artist'), result)
-        self.assertIn(('Title', 'a name'), result)
+        self.assertIn(('Title', 'a nàme'), result)
         self.assertIn(('Album', 'an album'), result)
         self.assertIn(('AlbumArtist', 'an other artist'), result)
         self.assertIn(('Composer', 'a composer'), result)
@@ -77,7 +79,7 @@ class TrackMpdFormatTest(unittest.TestCase):
         self.assertIn(('Disc', 1), result)
         self.assertIn(('Pos', 9), result)
         self.assertIn(('Id', 122), result)
-        self.assertIn(('X-AlbumUri', 'urischeme:album:12345'), result)
+        self.assertIn(('X-AlbumUri', 'urischeme:àlbum:12345'), result)
         self.assertNotIn(('Comment', 'a comment'), result)
         self.assertEqual(len(result), 15)
 
@@ -133,12 +135,12 @@ class TrackMpdFormatTest(unittest.TestCase):
 
     def test_track_to_mpd_format_with_stream_title(self):
         result = translator.track_to_mpd_format(self.track, stream_title='foo')
-        self.assertIn(('Name', 'a name'), result)
+        self.assertIn(('Name', 'a nàme'), result)
         self.assertIn(('Title', 'foo'), result)
 
     def test_track_to_mpd_format_with_empty_stream_title(self):
         result = translator.track_to_mpd_format(self.track, stream_title='')
-        self.assertIn(('Name', 'a name'), result)
+        self.assertIn(('Name', 'a nàme'), result)
         self.assertNotIn(('Title', ''), result)
 
     def test_track_to_mpd_format_with_stream_and_no_track_name(self):
@@ -153,7 +155,7 @@ class PlaylistMpdFormatTest(unittest.TestCase):
     def test_mpd_format(self):
         playlist = Playlist(tracks=[
             Track(uri='foo', track_no=1),
-            Track(uri='bar', track_no=2),
+            Track(uri='bàr', track_no=2),
             Track(uri='baz', track_no=3)])
         result = translator.playlist_to_mpd_format(playlist)
         self.assertEqual(len(result), 3)
@@ -161,7 +163,7 @@ class PlaylistMpdFormatTest(unittest.TestCase):
     def test_mpd_format_with_range(self):
         playlist = Playlist(tracks=[
             Track(uri='foo', track_no=1),
-            Track(uri='bar', track_no=2),
+            Track(uri='bàr', track_no=2),
             Track(uri='baz', track_no=3)])
         result = translator.playlist_to_mpd_format(playlist, 1, 2)
         self.assertEqual(len(result), 1)
