@@ -24,6 +24,14 @@ def is_unix_socket(sock):
     return False
 
 
+def get_socket_address(host, port):
+    unix_socket_path = path.get_unix_socket_path(host)
+    if unix_socket_path is not None:
+        return (unix_socket_path, None)
+    else:
+        return (host, port)
+
+
 class ShouldRetrySocketCall(Exception):
 
     """Indicate that attempted socket call should be retried"""
@@ -70,12 +78,13 @@ def create_unix_socket():
     return socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
 
-def format_socket_name(sock):
-    """Format the connection string for the given socket"""
-    if is_unix_socket(sock):
-        return '%s' % sock.getsockname()
+def format_address(address):
+    """Format socket address for display."""
+    host, port = address[:2]
+    if port is not None:
+        return '[%s]:%s' % (host, port)
     else:
-        return '[%s]:%s' % sock.getsockname()[:2]
+        return '[%s]' % host
 
 
 def format_hostname(hostname):
@@ -96,6 +105,7 @@ class Server(object):
         self.max_connections = max_connections
         self.timeout = timeout
         self.server_socket = self.create_server_socket(host, port)
+        self.address = get_socket_address(host, port)
 
         self.watcher = self.register_server_socket(self.server_socket.fileno())
 
@@ -166,9 +176,7 @@ class Server(object):
 
     def reject_connection(self, sock, addr):
         # FIXME provide more context in logging?
-        logger.warning(
-            'Rejected connection from %s',
-            format_socket_name(sock))
+        logger.warning('Rejected connection from %s', format_address(addr))
         try:
             sock.close()
         except socket.error:
@@ -356,7 +364,7 @@ class Connection(object):
         return False
 
     def __str__(self):
-        return format_socket_name(self._sock)
+        return format_address((self.host, self.port))
 
 
 class LineProtocol(pykka.ThreadingActor):
@@ -425,8 +433,12 @@ class LineProtocol(pykka.ThreadingActor):
         if not self.prevent_timeout:
             self.connection.enable_timeout()
 
+    def on_failure(self, exception_type, exception_value, traceback):
+        """Clean up connection resouces when actor fails."""
+        self.connection.stop('Actor failed.')
+
     def on_stop(self):
-        """Ensure that cleanup when actor stops."""
+        """Clean up connection resouces when actor stops."""
         self.connection.stop('Actor is shutting down.')
 
     def parse_lines(self):

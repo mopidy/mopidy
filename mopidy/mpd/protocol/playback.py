@@ -329,7 +329,7 @@ def replay_gain_status(context):
     return 'replay_gain_mode: off'  # TODO
 
 
-@protocol.commands.add('seek', songpos=protocol.UINT, seconds=protocol.UINT)
+@protocol.commands.add('seek', songpos=protocol.UINT, seconds=protocol.UFLOAT)
 def seek(context, songpos, seconds):
     """
     *musicpd.org, playback section:*
@@ -346,10 +346,10 @@ def seek(context, songpos, seconds):
     tl_track = context.core.playback.get_current_tl_track().get()
     if context.core.tracklist.index(tl_track).get() != songpos:
         play(context, songpos)
-    context.core.playback.seek(seconds * 1000).get()
+    context.core.playback.seek(int(seconds * 1000)).get()
 
 
-@protocol.commands.add('seekid', tlid=protocol.UINT, seconds=protocol.UINT)
+@protocol.commands.add('seekid', tlid=protocol.UINT, seconds=protocol.UFLOAT)
 def seekid(context, tlid, seconds):
     """
     *musicpd.org, playback section:*
@@ -361,7 +361,7 @@ def seekid(context, tlid, seconds):
     tl_track = context.core.playback.get_current_tl_track().get()
     if not tl_track or tl_track.tlid != tlid:
         playid(context, tlid)
-    context.core.playback.seek(seconds * 1000).get()
+    context.core.playback.seek(int(seconds * 1000)).get()
 
 
 @protocol.commands.add('seekcur')
@@ -376,10 +376,10 @@ def seekcur(context, time):
     """
     if time.startswith(('+', '-')):
         position = context.core.playback.get_time_position().get()
-        position += protocol.INT(time) * 1000
+        position += int(protocol.FLOAT(time) * 1000)
         context.core.playback.seek(position).get()
     else:
-        position = protocol.UINT(time) * 1000
+        position = int(protocol.UFLOAT(time) * 1000)
         context.core.playback.seek(position).get()
 
 

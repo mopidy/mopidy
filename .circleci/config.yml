@@ -1,0 +1,53 @@
+version: 2.1
+
+orbs:
+  codecov: codecov/codecov@1.0.5
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - py27
+      #- py37
+      #- black
+      #- check-manifest
+      - docs
+      - flake8
+
+jobs:
+  py37: &test-template
+    docker:
+      - image: mopidy/ci-python:3.7
+    steps:
+      - checkout
+      - restore_cache:
+          name: Restoring tox cache
+          keys:
+            - tox-v1-{{ .Environment.CIRCLE_JOB }}-{{ checksum "setup.py" }}
+            - tox-v1-{{ .Environment.CIRCLE_JOB }}
+      - run:
+          name: Run tests
+          command: |
+            tox -e $CIRCLE_JOB -- \
+              --junit-xml=test-results/pytest/results.xml \
+              --cov-report=xml
+      - save_cache:
+          name: Saving tox cache
+          key: tox-v1-{{ .Environment.CIRCLE_JOB }}-{{ checksum "setup.py" }}
+          paths:
+            - ./.tox
+            - ~/.cache/pip
+      - codecov/upload:
+          file: coverage.xml
+      - store_test_results:
+          path: test-results
+
+  py27: *test-template
+
+  black: *test-template
+
+  check-manifest: *test-template
+
+  docs: *test-template
+
+  flake8: *test-template

@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import logging
+import os
 
 import mock
 
@@ -231,3 +232,31 @@ class TestTranslateURI(object):
             'Unwrapping stream from URI (%s) failed: '
             'playlist referenced itself' % PLAYLIST_URI) in caplog.text
         assert result is None
+
+    @responses.activate
+    def test_playlist_with_relative_mpeg_stream(
+            self, scanner, provider, caplog):
+        caplog.set_level(logging.DEBUG)
+        scanner.scan.side_effect = [
+            # Scanning playlist
+            mock.Mock(mime='text/foo', playable=False),
+            # Scanning stream
+            mock.Mock(mime='audio/mpeg', playable=True),
+        ]
+        responses.add(
+            responses.GET, PLAYLIST_URI,
+            body=BODY.replace(STREAM_URI, os.path.basename(STREAM_URI)),
+            content_type='audio/x-mpegurl')
+
+        result = provider.translate_uri(PLAYLIST_URI)
+
+        assert scanner.scan.mock_calls == [
+            mock.call(PLAYLIST_URI, timeout=mock.ANY),
+            mock.call(STREAM_URI, timeout=mock.ANY),
+        ]
+        assert result == STREAM_URI
+
+        assert (
+            'Parsed playlist (%s) and found new URI: %s'
+            % (PLAYLIST_URI, os.path.basename(STREAM_URI))) in caplog.text
+        assert 'Unwrapping stream from URI: %s' % STREAM_URI in caplog.text

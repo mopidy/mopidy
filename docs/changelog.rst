@@ -9,6 +9,43 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
+v2.3.0 (2019-10-02)
+===================
+
+Mopidy 2.3.0 is mostly a bug fix release. Because we're requiring a new major
+version of Tornado, we're doing a minor version bump of Mopidy.
+
+- Dependencies: Support and require Tornado >=, < 6, as that is the latest
+  version support Python 2.7 and currently the oldest version shipped by Debian
+  and Arch. (Fixes: :issue:`1798`, PR: :issue:`1796`)
+
+- Fix ``PkgResourcesDeprecationWarning`` on startup when a recent release
+  of setuptools is installed. (Fixes: :issue:`1778`, PR: :issue:`1780`)
+
+- Network: Close connection following an exception in the protocol handler.
+  (Fixes: :issue:`1762`, PR: :issue:`1765`)
+
+- Network: Log client's connection details instead of server's. This fixed a
+  regression introduced as part of PR: :issue:`1629`. (Fixes: :issue:`1788`,
+  PR: :issue:`1792`)
+
+- Core: Trigger :meth:`mopidy.core.CoreListener.stream_title_changed` event
+  on recieving a ``title`` audio tag that differs from the current track's
+  :attr:`mopidy.models.Track.name`. (Fixes: :issue:`1746`, PR: :issue:`1751`)
+
+- Stream: Support playlists containing relative URIs. (Fixes: :issue:`1785`,
+  PR: :issue:`1802`)
+
+- Stream: Fix crash when unwrapping stream without MIME type. (Fixes:
+  :issue:`1760`, PR: :issue:`1800`)
+
+- MPD: Add support for seeking to time positions with float point precision.
+  (Fixes: :issue:`1756`, PR: :issue:`1801`)
+
+- MPD: Handle URIs containing non-ASCII characters. (Fixes: :issue:`1759`,
+  PR: :issue:`1805`, :issue:`1808`)
+
+
 v2.2.3 (2019-06-20)
 ===================
 

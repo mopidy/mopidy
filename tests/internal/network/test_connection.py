@@ -557,3 +557,15 @@ class ConnectionTest(unittest.TestCase):
 
         self.assertFalse(network.Connection.timeout_callback(self.mock))
         self.mock.stop.assert_called_once_with(any_unicode)
+
+    def test_str(self):
+        self.mock.host = 'foo'
+        self.mock.port = 999
+
+        self.assertEqual('[foo]:999', network.Connection.__str__(self.mock))
+
+    def test_str_without_port(self):
+        self.mock.host = 'foo'
+        self.mock.port = None
+
+        self.assertEqual('[foo]', network.Connection.__str__(self.mock))

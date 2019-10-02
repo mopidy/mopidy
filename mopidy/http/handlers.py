@@ -98,14 +98,13 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     clients = set()
 
     @classmethod
-    def broadcast(cls, msg):
-        loop = tornado.ioloop.IOLoop.current()
-
+    def broadcast(cls, msg, io_loop):
         # This can be called from outside the Tornado ioloop, so we need to
         # safely cross the thread boundary by adding a callback to the loop.
         for client in cls.clients:
             # One callback per client to keep time we hold up the loop short
-            loop.add_callback(functools.partial(_send_broadcast, client, msg))
+            io_loop.add_callback(
+                functools.partial(_send_broadcast, client, msg))
 
     def initialize(self, core, allowed_origins, csrf_protection):
         self.jsonrpc = make_jsonrpc_wrapper(core)

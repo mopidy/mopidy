@@ -127,10 +127,12 @@ def _unwrap_stream(uri, timeout, scanner, requests_session):
             scan_result = None
 
         if scan_result is not None:
-            if scan_result.playable or (
+            has_interesting_mime = (
+                scan_result.mime is not None and
                 not scan_result.mime.startswith('text/') and
                 not scan_result.mime.startswith('application/')
-            ):
+            )
+            if scan_result.playable or has_interesting_mime:
                 logger.debug(
                     'Unwrapped potential %s stream: %s', scan_result.mime, uri)
                 return uri, scan_result
@@ -160,4 +162,4 @@ def _unwrap_stream(uri, timeout, scanner, requests_session):
         # TODO Test streams and return first that seems to be playable
         logger.debug(
             'Parsed playlist (%s) and found new URI: %s', uri, uris[0])
-        uri = uris[0]
+        uri = urllib.parse.urljoin(uri, uris[0])
