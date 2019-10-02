@@ -15,7 +15,7 @@ v2.3.0 (2019-10-02)
 Mopidy 2.3.0 is mostly a bug fix release. Because we're requiring a new major
 version of Tornado, we're doing a minor version bump of Mopidy.
 
-- Dependencies: Support and require Tornado >=, < 6, as that is the latest
+- Dependencies: Support and require Tornado >= 5, < 6, as that is the latest
   version support Python 2.7 and currently the oldest version shipped by Debian
   and Arch. (Fixes: :issue:`1798`, PR: :issue:`1796`)
 
