@@ -46,14 +46,14 @@ class ScannerTest(unittest.TestCase):
     def test_tags_is_set(self):
         self.scan(self.find('scanner/simple'))
 
-        self.assert_(self.result.values()[0].tags)
+        self.assertTrue(self.result.values()[0].tags)
 
     def test_errors_is_not_set(self):
         self.scan(self.find('scanner/simple'))
 
         self.check_if_missing_plugin()
 
-        self.assert_(not self.errors)
+        self.assertTrue(not self.errors)
 
     def test_duration_is_set(self):
         self.scan(self.find('scanner/simple'))
@@ -91,7 +91,7 @@ class ScannerTest(unittest.TestCase):
 
     def test_nonexistant_dir_does_not_fail(self):
         self.scan(self.find('scanner/does-not-exist'))
-        self.assert_(not self.errors)
+        self.assertTrue(not self.errors)
 
     def test_other_media_is_ignored(self):
         self.scan(self.find('scanner/image'))

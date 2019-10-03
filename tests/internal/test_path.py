@@ -29,28 +29,28 @@ class GetOrCreateDirTest(unittest.TestCase):
 
     def test_creating_dir(self):
         dir_path = os.path.join(self.parent, b'test')
-        self.assert_(not os.path.exists(dir_path))
+        self.assertTrue(not os.path.exists(dir_path))
         created = path.get_or_create_dir(dir_path)
-        self.assert_(os.path.exists(dir_path))
-        self.assert_(os.path.isdir(dir_path))
+        self.assertTrue(os.path.exists(dir_path))
+        self.assertTrue(os.path.isdir(dir_path))
         self.assertEqual(created, dir_path)
 
     def test_creating_nested_dirs(self):
         level2_dir = os.path.join(self.parent, b'test')
         level3_dir = os.path.join(self.parent, b'test', b'test')
-        self.assert_(not os.path.exists(level2_dir))
-        self.assert_(not os.path.exists(level3_dir))
+        self.assertTrue(not os.path.exists(level2_dir))
+        self.assertTrue(not os.path.exists(level3_dir))
         created = path.get_or_create_dir(level3_dir)
-        self.assert_(os.path.exists(level2_dir))
-        self.assert_(os.path.isdir(level2_dir))
-        self.assert_(os.path.exists(level3_dir))
-        self.assert_(os.path.isdir(level3_dir))
+        self.assertTrue(os.path.exists(level2_dir))
+        self.assertTrue(os.path.isdir(level2_dir))
+        self.assertTrue(os.path.exists(level3_dir))
+        self.assertTrue(os.path.isdir(level3_dir))
         self.assertEqual(created, level3_dir)
 
     def test_creating_existing_dir(self):
         created = path.get_or_create_dir(self.parent)
-        self.assert_(os.path.exists(self.parent))
-        self.assert_(os.path.isdir(self.parent))
+        self.assertTrue(os.path.exists(self.parent))
+        self.assertTrue(os.path.isdir(self.parent))
         self.assertEqual(created, self.parent)
 
     def test_create_dir_with_name_of_existing_file_throws_oserror(self):
@@ -83,30 +83,30 @@ class GetOrCreateFileTest(unittest.TestCase):
 
     def test_creating_file(self):
         file_path = os.path.join(self.parent, b'test')
-        self.assert_(not os.path.exists(file_path))
+        self.assertTrue(not os.path.exists(file_path))
         created = path.get_or_create_file(file_path)
-        self.assert_(os.path.exists(file_path))
-        self.assert_(os.path.isfile(file_path))
+        self.assertTrue(os.path.exists(file_path))
+        self.assertTrue(os.path.isfile(file_path))
         self.assertEqual(created, file_path)
 
     def test_creating_nested_file(self):
         level2_dir = os.path.join(self.parent, b'test')
         file_path = os.path.join(self.parent, b'test', b'test')
-        self.assert_(not os.path.exists(level2_dir))
-        self.assert_(not os.path.exists(file_path))
+        self.assertTrue(not os.path.exists(level2_dir))
+        self.assertTrue(not os.path.exists(file_path))
         created = path.get_or_create_file(file_path)
-        self.assert_(os.path.exists(level2_dir))
-        self.assert_(os.path.isdir(level2_dir))
-        self.assert_(os.path.exists(file_path))
-        self.assert_(os.path.isfile(file_path))
+        self.assertTrue(os.path.exists(level2_dir))
+        self.assertTrue(os.path.isdir(level2_dir))
+        self.assertTrue(os.path.exists(file_path))
+        self.assertTrue(os.path.isfile(file_path))
         self.assertEqual(created, file_path)
 
     def test_creating_existing_file(self):
         file_path = os.path.join(self.parent, b'test')
         path.get_or_create_file(file_path)
         created = path.get_or_create_file(file_path)
-        self.assert_(os.path.exists(file_path))
-        self.assert_(os.path.isfile(file_path))
+        self.assertTrue(os.path.exists(file_path))
+        self.assertTrue(os.path.isfile(file_path))
         self.assertEqual(created, file_path)
 
     def test_create_file_with_name_of_existing_dir_throws_ioerror(self):
