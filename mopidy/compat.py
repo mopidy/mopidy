@@ -41,6 +41,8 @@ if PY2:
     def itervalues(dct, **kwargs):
         return iter(dct.itervalues(**kwargs))
 
+    from itertools import izip_longest as zip_longest  # noqa
+
 else:
     import collections.abc as collections_abc  # noqa
     import configparser  # noqa
@@ -57,6 +59,8 @@ else:
 
     def itervalues(dct, **kwargs):
         return iter(dct.values(**kwargs))
+
+    from itertools import zip_longest  # noqa
 
 
 def add_metaclass(metaclass):

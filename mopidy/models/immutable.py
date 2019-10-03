@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
 import copy
-import itertools
 import weakref
 
 from mopidy import compat
@@ -83,7 +82,7 @@ class ImmutableObject(object):
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
             return False
-        return all(a == b for a, b in itertools.izip_longest(
+        return all(a == b for a, b in compat.zip_longest(
             self._items(), other._items(), fillvalue=object()))
 
     def __ne__(self, other):
