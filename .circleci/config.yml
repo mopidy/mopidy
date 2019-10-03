@@ -8,7 +8,7 @@ workflows:
   test:
     jobs:
       - py27
-      #- py37
+      - py37
       #- black
       #- check-manifest
       - docs
