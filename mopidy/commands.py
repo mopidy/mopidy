@@ -289,8 +289,11 @@ class RootCommand(Command):
             loop.quit()
 
         loop = GLib.MainLoop()
-        GLib.unix_signal_add(
-            GLib.PRIORITY_DEFAULT, signal.SIGTERM, on_sigterm, loop)
+        # unix_signal_add allows for terminating GStreamer on closing
+        #  not critical, and not supported by win32 lib
+        if sys.platform != 'win32':
+            GLib.unix_signal_add(
+                GLib.PRIORITY_DEFAULT, signal.SIGTERM, on_sigterm, loop)
 
         mixer_class = self.get_mixer_class(config, args.registry['mixer'])
         backend_classes = args.registry['backend']
