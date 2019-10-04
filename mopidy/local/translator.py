@@ -1,7 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import logging
-import os
+import posixpath
 import urllib
 
 from mopidy import compat
@@ -23,7 +23,7 @@ def local_uri_to_path(uri, media_dir):
             not uri.startswith('local:track:')):
         raise ValueError('Invalid URI.')
     file_path = path.uri_to_path(uri).split(b':', 1)[1]
-    return os.path.join(media_dir, file_path)
+    return posixpath.join(media_dir, file_path)
 
 
 def local_track_uri_to_path(uri, media_dir):

@@ -7,6 +7,7 @@ import mock
 
 import pytest
 
+from mopidy import posix_normpath
 from mopidy.internal import xdg
 
 
@@ -21,8 +22,8 @@ def environ():
 
 
 def test_cache_dir_default(environ):
-    assert xdg.get_dirs()['XDG_CACHE_DIR'] == os.path.expanduser(
-        os.path.normpath('~/.cache'))
+    assert xdg.get_dirs()['XDG_CACHE_DIR'] == posix_normpath(
+        os.path.expanduser(os.path.normpath('~/.cache')))
 
 
 def test_cache_dir_from_env(environ):
@@ -33,8 +34,8 @@ def test_cache_dir_from_env(environ):
 
 
 def test_config_dir_default(environ):
-    assert xdg.get_dirs()['XDG_CONFIG_DIR'] == os.path.expanduser(
-        os.path.normpath('~/.config'))
+    assert xdg.get_dirs()['XDG_CONFIG_DIR'] == posix_normpath(
+        os.path.expanduser('~/.config'))
 
 
 def test_config_dir_from_env(environ):
@@ -45,8 +46,8 @@ def test_config_dir_from_env(environ):
 
 
 def test_data_dir_default(environ):
-    assert xdg.get_dirs()['XDG_DATA_DIR'] == os.path.expanduser(
-        b'~/.local/share')
+    assert xdg.get_dirs()['XDG_DATA_DIR'] == posix_normpath(
+           os.path.expanduser(b'~/.local/share'))
 
 
 def test_data_dir_from_env(environ):

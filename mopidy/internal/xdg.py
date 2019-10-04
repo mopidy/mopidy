@@ -2,7 +2,9 @@ from __future__ import absolute_import, unicode_literals
 
 import io
 import os
+import posixpath
 
+from mopidy import posix_normpath
 from mopidy.compat import configparser
 
 
@@ -22,13 +24,13 @@ def get_dirs():
     dirs = {
         'XDG_CACHE_DIR': (
             os.environ.get('XDG_CACHE_HOME') or
-            os.path.expanduser(b'~/.cache')),
+            posix_normpath(os.path.expanduser(b'~/.cache'))),
         'XDG_CONFIG_DIR': (
             os.environ.get('XDG_CONFIG_HOME') or
-            os.path.expanduser(b'~/.config')),
+            posix_normpath(os.path.expanduser(b'~/.config'))),
         'XDG_DATA_DIR': (
             os.environ.get('XDG_DATA_HOME') or
-            os.path.expanduser(b'~/.local/share')),
+            posix_normpath(os.path.expanduser(b'~/.local/share'))),
     }
 
     dirs.update(_get_user_dirs(dirs['XDG_CONFIG_DIR']))
@@ -63,6 +65,6 @@ def _get_user_dirs(xdg_config_dir):
     config.readfp(io.BytesIO(data))
 
     return {
-        k.upper().decode('utf-8'): os.path.abspath(v)
+        k.upper().decode('utf-8'): posixpath.abspath(v)
         for k, v in config.items('XDG_USER_DIRS') if v is not None
     }
