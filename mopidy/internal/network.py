@@ -147,7 +147,7 @@ class Server(object):
         return GObject.io_add_watch(
             chan,
             1,  # priority?
-            GObject.IO_IN,
+            GLib.IO_IN,
             self.handle_connection)
 
     def handle_connection(self, fd, flags):
@@ -297,7 +297,7 @@ class Connection(object):
             self.recv_id = GObject.io_add_watch(
                 chan,
                 1,  # priority?
-                GObject.IO_IN | GObject.IO_ERR | GObject.IO_HUP,
+                GLib.IO_IN | GLib.IO_ERR | GLib.IO_HUP,
                 self.recv_callback)
         except socket.error as e:
             self.stop('Problem with connection: %s' % e)
@@ -315,7 +315,7 @@ class Connection(object):
         try:
             self.send_id = GObject.io_add_watch(
                 self._sock.fileno(),
-                GObject.IO_OUT | GObject.IO_ERR | GObject.IO_HUP,
+                GLib.IO_OUT | GLib.IO_ERR | GLib.IO_HUP,
                 self.send_callback)
         except socket.error as e:
             self.stop('Problem with connection: %s' % e)
@@ -328,7 +328,7 @@ class Connection(object):
         self.send_id = None
 
     def recv_callback(self, fd, flags):
-        if flags & (GObject.IO_ERR | GObject.IO_HUP):
+        if flags & (GLib.IO_ERR | GLib.IO_HUP):
             self.stop('Bad client flags: %s' % flags)
             return True
 
@@ -352,7 +352,7 @@ class Connection(object):
         return True
 
     def send_callback(self, fd, flags):
-        if flags & (GObject.IO_ERR | GObject.IO_HUP):
+        if flags & (GLib.IO_ERR | GLib.IO_HUP):
             self.stop('Bad client flags: %s' % flags)
             return True
 

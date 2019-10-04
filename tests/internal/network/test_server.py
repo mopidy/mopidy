@@ -177,7 +177,7 @@ class ServerTest(unittest.TestCase):
         self.mock.server_socket = sock
         network.Server.register_server_socket(self.mock, self.mock.server_socket)
         GObject.io_add_watch.assert_called_once_with(
-            self.mock.server_socket, 1, GObject.IO_IN, self.mock.handle_connection)
+            self.mock.server_socket, 1, GLib.IO_IN, self.mock.handle_connection)
 
     def test_handle_connection(self):
         self.mock.accept_connection.return_value = (
@@ -185,7 +185,7 @@ class ServerTest(unittest.TestCase):
         self.mock.maximum_connections_exceeded.return_value = False
 
         self.assertTrue(network.Server.handle_connection(
-            self.mock, sentinel.fileno, GObject.IO_IN))
+            self.mock, sentinel.fileno, GLib.IO_IN))
         self.mock.accept_connection.assert_called_once_with()
         self.mock.maximum_connections_exceeded.assert_called_once_with()
         self.mock.init_connection.assert_called_once_with(
@@ -198,7 +198,7 @@ class ServerTest(unittest.TestCase):
         self.mock.maximum_connections_exceeded.return_value = True
 
         self.assertTrue(network.Server.handle_connection(
-            self.mock, sentinel.fileno, GObject.IO_IN))
+            self.mock, sentinel.fileno, GLib.IO_IN))
         self.mock.accept_connection.assert_called_once_with()
         self.mock.maximum_connections_exceeded.assert_called_once_with()
         self.mock.reject_connection.assert_called_once_with(
