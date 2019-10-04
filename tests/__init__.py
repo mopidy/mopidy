@@ -2,16 +2,18 @@ from __future__ import absolute_import, unicode_literals
 
 import os
 
-from mopidy import compat
+from mopidy import compat, posix_normpath
 
 
 def path_to_data_dir(name):
+
+    name = os.path.normpath(name) # sets slashes to platform norm
     if not isinstance(name, bytes):
         name = name.encode('utf-8')
     path = os.path.dirname(__file__)
-    path = os.path.join(path, b'data')
-    path = os.path.abspath(path)
-    return os.path.join(path, name)
+    path = os.path.join(path, b'data', name)
+
+    return posix_normpath(path)  # sets slashes to posix norm, strips drive
 
 
 class IsA(object):

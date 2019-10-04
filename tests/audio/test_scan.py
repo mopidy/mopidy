@@ -34,7 +34,9 @@ class ScannerTest(unittest.TestCase):
 
     def check(self, name, key, value):
         name = path_to_data_dir(name)
-        self.assertEqual(self.result[name].tags[key], value)
+        uri = path_lib.path_to_uri(name)
+        uri_key = uri[len('file://'):]
+        self.assertEqual(self.result[uri_key].tags[key], value)
 
     def check_if_missing_plugin(self):
         for path, result in self.result.items():
