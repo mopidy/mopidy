@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-import sys
 import os
 
 import mock
@@ -13,8 +12,8 @@ from mopidy.internal import xdg
 @pytest.yield_fixture
 def environ():
     patcher = mock.patch.dict(os.environ,
-                              { 'HOMEDRIVE': 'J:',  # necessary for win32
-                                'HOMEPATH': "\\Users\\Bugsbunny" },
+                              {'HOMEDRIVE': 'J:',  # necessary for win32
+                               'HOMEPATH': "\\Users\\Bugsbunny"},
                               clear=True)
     yield patcher.start()
     patcher.stop()
@@ -65,7 +64,8 @@ def test_user_dirs(environ, tmpdir):
 
     result = xdg.get_dirs()
 
-    assert result['XDG_MUSIC_DIR'] == os.path.expanduser(os.path.normpath('~/Music2'))
+    assert result['XDG_MUSIC_DIR'] == os.path.expanduser(
+        os.path.normpath('~/Music2'))
     assert type(result['XDG_MUSIC_DIR']) == bytes
     assert 'XDG_DOWNLOAD_DIR' not in result
 

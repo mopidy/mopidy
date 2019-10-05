@@ -1,13 +1,14 @@
 from __future__ import absolute_import, unicode_literals
 
-import sys
 import errno
 import os
 import socket
+import sys
 import unittest
-import pytest
 
 from mock import Mock, patch, sentinel
+
+import pytest
 
 from mopidy import exceptions
 from mopidy.internal import network
@@ -49,7 +50,8 @@ class ServerTest(unittest.TestCase):
         res = sock if sys.platform == 'win32' else sentinel.fileno
         self.mock.register_server_socket.assert_called_once_with(res)
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="fileno not used with win32")
+    @pytest.mark.skipif(sys.platform == 'win32',
+                        reason="fileno not used with win32")
     @patch.object(network, 'get_socket_address', new=Mock())
     def test_init_fails_on_fileno_call(self):
         sock = Mock(spec=socket.SocketType)
@@ -175,9 +177,11 @@ class ServerTest(unittest.TestCase):
         sock = Mock()
         # sock.family = socket.AF_UNIX
         self.mock.server_socket = sock
-        network.Server.register_server_socket(self.mock, self.mock.server_socket)
+        network.Server.register_server_socket(self.mock,
+                                              self.mock.server_socket)
         GLib.io_add_watch.assert_called_once_with(
-            self.mock.server_socket, 1, GLib.IO_IN, self.mock.handle_connection)
+            self.mock.server_socket, 1, GLib.IO_IN,
+            self.mock.handle_connection)
 
     def test_handle_connection(self):
         self.mock.accept_connection.return_value = (

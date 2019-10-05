@@ -32,7 +32,7 @@ class HelpTest(unittest.TestCase):
 
         process = subprocess.Popen(
             args,
-            env = temp_env,
+            env=temp_env,
             stdout=subprocess.PIPE)
         output = process.communicate()[0]
         self.assertIn('--version', output)

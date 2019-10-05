@@ -1,9 +1,9 @@
 from __future__ import absolute_import, unicode_literals
 
-import sys
 import errno
 import logging
 import socket
+import sys
 import unittest
 
 from mock import Mock, call, patch, sentinel

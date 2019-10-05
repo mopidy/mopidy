@@ -4,8 +4,8 @@ from __future__ import absolute_import, unicode_literals
 
 import os
 import posixpath
-import sys
 import shutil
+import sys
 import tempfile
 import unittest
 
@@ -216,24 +216,32 @@ class ExpandPathTest(unittest.TestCase):
     # TODO: test via mocks?
 
     def test_empty_path(self):
-        self.assertEqual(posix_normpath(os.path.abspath(b'.')), path.expand_path(b''))
+        self.assertEqual(posix_normpath(os.path.abspath(b'.')),
+                         path.expand_path(b''))
 
-    @unittest.skipIf(sys.platform == 'win32', 'win32 absolute paths include drive')
+    @unittest.skipIf(sys.platform == 'win32',
+                     'win32 absolute paths include drive')
     def test_absolute_path(self):
         self.assertEqual(b'/tmp/foo', path.expand_path(b'/tmp/foo'))
 
-    @unittest.skipUnless(sys.platform == 'win32', 'win32 absolute paths include drive')
+    @unittest.skipUnless(sys.platform == 'win32',
+                         'win32 absolute paths include drive')
     def test_absolute_path_win32(self):
-        self.assertEqual(b'k:/tmp/foo', path.expand_path(b'k:/tmp/foo'))
+        self.assertEqual(b'k:/tmp/foo',
+                         path.expand_path(b'k:/tmp/foo'))
 
     def test_home_dir_expansion(self):
         self.assertEqual(
-            posix_normpath(os.path.expanduser(b'~/foo')), path.expand_path(b'~/foo'))
+            posix_normpath(os.path.expanduser(b'~/foo')),
+            path.expand_path(b'~/foo'))
 
     def test_abspath(self):
-        self.assertEqual(posix_normpath(os.path.abspath(b'./foo')), path.expand_path(b'./foo'))
+        self.assertEqual(posix_normpath(os.path.abspath(b'./foo')),
+                         path.expand_path(b'./foo'))
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="don't understand this yet")
+    @pytest.mark.skipif(sys.platform == 'win32',
+                        reason="don't understand this yet")
+    #
     def test_xdg_subsititution(self):
         self.assertEqual(
             posix_normpath(GLib.get_user_data_dir()) + b'/foo',
@@ -255,12 +263,12 @@ class FindMTimesTest(unittest.TestCase):
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def mkdir(self, *args):
-        name = posix_normpath(os.path.join(self.tmpdir, *[bytes(a) for a in args]))
+        name = posix_normpath(self.tmpdir, *[bytes(a) for a in args])
         os.mkdir(name)
         return name
 
     def touch(self, *args):
-        name = posix_normpath(os.path.join(self.tmpdir, *[bytes(a) for a in args]))
+        name = posix_normpath(self.tmpdir, *[bytes(a) for a in args])
         open(name, 'w').close()
         return name
 
@@ -321,7 +329,8 @@ class FindMTimesTest(unittest.TestCase):
         self.assertEqual({target: tests.any_int}, result)
         self.assertEqual({}, errors)
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="chmod on win32 only sets read-permission")
+    @pytest.mark.skipif(sys.platform == 'win32',
+                        reason="chmod on win32 only sets read-permission")
     def test_missing_permission_to_directory(self):
         """Missing permissions to a directory is an error"""
         directory = self.mkdir('no-permission')
@@ -331,7 +340,8 @@ class FindMTimesTest(unittest.TestCase):
         self.assertEqual({}, result)
         self.assertEqual({directory: tests.IsA(exceptions.FindError)}, errors)
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="symlinks not supported by 2.7 os module")
+    @pytest.mark.skipif(sys.platform == 'win32',
+                        reason="symlinks not supported by 2.7 os module")
     def test_symlinks_are_ignored(self):
         """By default symlinks should be treated as an error"""
         target = self.touch('target')
@@ -342,7 +352,8 @@ class FindMTimesTest(unittest.TestCase):
         self.assertEqual(result, {target: tests.any_int})
         self.assertEqual(errors, {link: tests.IsA(exceptions.FindError)})
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="symlinks not supported by 2.7 os module")
+    @pytest.mark.skipif(sys.platform == 'win32',
+                        reason="symlinks not supported by 2.7 os module")
     def test_symlink_to_file_as_root_is_followed(self):
         """Passing a symlink as the root should be followed when follow=True"""
         target = self.touch('target')
@@ -356,7 +367,8 @@ class FindMTimesTest(unittest.TestCase):
     def test_symlink_to_directory_is_followed(self):
         pass
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="symlinks not supported by 2.7 os module")
+    @pytest.mark.skipif(sys.platform == 'win32',
+                        reason="symlinks not supported by 2.7 os module")
     def test_symlink_pointing_at_itself_fails(self):
         """Symlink pointing at itself should give as an OS error"""
         link = posixpath.join(self.tmpdir, 'link')
@@ -366,7 +378,8 @@ class FindMTimesTest(unittest.TestCase):
         self.assertEqual({}, result)
         self.assertEqual({link: tests.IsA(exceptions.FindError)}, errors)
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="symlinks not supported by 2.7 os module")
+    @pytest.mark.skipif(sys.platform == 'win32',
+                        reason="symlinks not supported by 2.7 os module")
     def test_symlink_pointing_at_parent_fails(self):
         """We should detect a loop via the parent and give up on the branch"""
         os.symlink(self.tmpdir, posixpath.join(self.tmpdir, 'link'))
@@ -376,7 +389,8 @@ class FindMTimesTest(unittest.TestCase):
         self.assertEqual(1, len(errors))
         self.assertEqual(tests.IsA(Exception), errors.values()[0])
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="symlinks not supported by 2.7 os module")
+    @pytest.mark.skipif(sys.platform == 'win32',
+                        reason="symlinks not supported by 2.7 os module")
     def test_indirect_symlink_loop(self):
         """More indirect loops should also be detected"""
         # Setup tmpdir/directory/loop where loop points to tmpdir
@@ -390,7 +404,8 @@ class FindMTimesTest(unittest.TestCase):
         self.assertEqual({}, result)
         self.assertEqual({loop: tests.IsA(Exception)}, errors)
 
-    @pytest.mark.skipif(sys.platform == 'win32', reason="symlinks not supported by 2.7 os module")
+    @pytest.mark.skipif(sys.platform == 'win32',
+                        reason="symlinks not supported by 2.7 os module")
     def test_symlink_branches_are_not_excluded(self):
         """Using symlinks to make a file show up multiple times should work"""
         self.mkdir('directory')
