@@ -1,6 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import os
 import unittest
 
 from mopidy import exceptions
@@ -34,7 +33,8 @@ class ScannerTest(unittest.TestCase):
         print(self.errors)
 
     def _normalize_key(self, name):
-        return path_lib.uri_to_path(path_lib.path_to_uri(path_to_data_dir(name)))
+        return path_lib.uri_to_path(
+            path_lib.path_to_uri(path_to_data_dir(name)))
 
     def check(self, name, key, value):
         name = self._normalize_key(name)
@@ -121,7 +121,8 @@ class ScannerTest(unittest.TestCase):
         name = 'scanner/playlist.m3u'
         path = path_to_data_dir(name)
         self.scan([path])
-        self.assertEqual(self.result[self._normalize_key(name)].mime, 'text/uri-list')
+        self.assertEqual(self.result[self._normalize_key(name)].mime,
+                         'text/uri-list')
 
     def test_text_plain(self):
         # GStreamer decode bin hardcodes bad handling of text plain :/

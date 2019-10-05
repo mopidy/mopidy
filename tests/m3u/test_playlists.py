@@ -2,21 +2,20 @@
 
 from __future__ import absolute_import, unicode_literals
 
-import sys
 import os
-import posixpath
 import platform
+import posixpath
 import shutil
+import sys
 import tempfile
 import unittest
 
 import pykka
 
 from mopidy import core, posix_normpath
-from mopidy.internal import deprecation
+from mopidy.internal import deprecation, path as path_lib
 from mopidy.m3u.backend import M3UBackend
 from mopidy.models import Playlist, Track
-from mopidy.internal import path as path_lib
 
 from tests import dummy_audio, path_to_data_dir
 from tests.m3u import generate_song
@@ -61,25 +60,25 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.assertEqual(uri, playlist.uri)
         self.assertTrue(os.path.exists(path))
 
-    @unittest.skipIf(sys.platform == 'win32', reason="| not valid filename char in win32")
+    @unittest.skipIf(sys.platform == 'win32',
+                     reason="| not valid filename char in win32")
     def test_create_sanitizes_playlist_name(self):
         test_name = '  ../../test FOO baR '
         playlist = self.core.playlists.create(test_name)
         self.assertEqual('..|..|test FOO baR', playlist.name)
-        # self.assertEqual('....test FOO baR', playlist.name)
-        path = posix_normpath(os.path.join(self.playlists_dir,
-                (test_name.strip()+'.m3u').replace('/','|').encode('utf-8')))
+        path = posix_normpath(self.playlists_dir,
+            (test_name.strip() + '.m3u').replace('/', '|').encode('utf-8'))
         self.assertEqual(self.playlists_dir, os.path.dirname(path))
         self.assertTrue(os.path.exists(path))
 
-    @unittest.skipIf(sys.platform != 'win32', reason="| not valid filename char in win32")
+    @unittest.skipIf(sys.platform != 'win32',
+                     reason="| not valid filename char in win32")
     def test_create_sanitizes_playlist_name_win32(self):
         test_name = '  ../../test FOO baR '
         playlist = self.core.playlists.create(test_name)
-        # self.assertEqual('..|..|test FOO baR', playlist.name)
         self.assertEqual('....test FOO baR', playlist.name)
-        path = posix_normpath(os.path.join(self.playlists_dir,
-                (test_name.strip()+'.m3u').replace('/','').encode('utf-8')))
+        path = posix_normpath(self.playlists_dir,
+            (test_name.strip() + '.m3u').replace('/', '').encode('utf-8'))
         self.assertEqual(self.playlists_dir, os.path.dirname(path))
         self.assertTrue(os.path.exists(path))
 

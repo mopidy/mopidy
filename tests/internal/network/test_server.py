@@ -1,13 +1,14 @@
 from __future__ import absolute_import, unicode_literals
 
-import sys
 import errno
 import os
 import socket
+import sys
 import unittest
-import pytest
 
 from mock import Mock, patch, sentinel
+
+import pytest
 
 from mopidy import exceptions
 from mopidy.internal import network
@@ -174,8 +175,10 @@ class ServerTest(unittest.TestCase):
         sock = Mock()
         # sock.family = socket.AF_UNIX
         self.mock.server_socket = sock
-        network.Server.register_server_socket(self.mock, self.mock.server_socket)
-        res = self.mock.server_socket if sys.platform == 'win32' else self.mock.server_socket.fileno()
+        network.Server.register_server_socket(self.mock,
+                                              self.mock.server_socket)
+        res = self.mock.server_socket if sys.platform == 'win32' \
+            else self.mock.server_socket.fileno()
         GObject.io_add_watch.assert_called_once_with(
             res, 1, GObject.IO_IN, self.mock.handle_connection)
 

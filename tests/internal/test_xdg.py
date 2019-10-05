@@ -1,7 +1,8 @@
 from __future__ import unicode_literals
 
-import sys
 import os
+import sys
+import unittest
 
 import mock
 
@@ -14,8 +15,8 @@ from mopidy.internal import xdg
 @pytest.yield_fixture
 def environ():
     patcher = mock.patch.dict(os.environ,
-                              { 'HOMEDRIVE': 'J:',  # necessary for win32
-                                'HOMEPATH': "\\Users\\Bugsbunny" },
+                              {'HOMEDRIVE': 'J:',  # necessary for win32
+                               'HOMEPATH': "\\Users\\Bugsbunny"},
                               clear=True)
     yield patcher.start()
     patcher.stop()
@@ -47,7 +48,7 @@ def test_config_dir_from_env(environ):
 
 def test_data_dir_default(environ):
     assert xdg.get_dirs()['XDG_DATA_DIR'] == posix_normpath(
-           os.path.expanduser(b'~/.local/share'))
+        os.path.expanduser(b'~/.local/share'))
 
 
 def test_data_dir_from_env(environ):
@@ -57,7 +58,8 @@ def test_data_dir_from_env(environ):
     assert type(xdg.get_dirs()['XDG_DATA_DIR']) == bytes
 
 
-@pytest.mark.skipif(sys.platform == 'win32', reason="needs different test for win32")
+@unittest.skipIf(sys.platform == 'win32',
+                 reason="needs different test for win32")
 def test_user_dirs(environ, tmpdir):
     os.environ['XDG_CONFIG_HOME'] = str(tmpdir)
 
