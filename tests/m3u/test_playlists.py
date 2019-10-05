@@ -35,8 +35,8 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
     }
 
     def setUp(self):  # noqa: N802
-        data_dir = path_to_data_dir('temp')
-        tmpdir = posix_normpath(tempfile.mkdtemp(dir=data_dir))
+        # data_dir = path_to_data_dir('temp')
+        tmpdir = posix_normpath(tempfile.mkdtemp())  # dir=data_dir))
         self.config['m3u']['playlists_dir'] = tmpdir
         self.playlists_dir = self.config['m3u']['playlists_dir']
         self.base_dir = self.config['m3u']['base_dir'] or self.playlists_dir
@@ -65,10 +65,11 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
     def test_create_sanitizes_playlist_name(self):
         test_name = '  ../../test FOO baR '
         playlist = self.core.playlists.create(test_name)
-        # self.assertEqual('..|..|test FOO baR', playlist.name)
-        self.assertEqual('....test FOO baR', playlist.name)
+        self.assertEqual('..|..|test FOO baR', playlist.name)
+        # self.assertEqual('....test FOO baR', playlist.name)
         path = posix_normpath(os.path.join(self.playlists_dir,
-                (test_name.strip()+'.m3u').replace('/','').encode('utf-8')))
+                (test_name.strip()+'.m3u').replace('/','|').encode('utf-8')))
+	print('path is {}'.format(path))
         self.assertEqual(self.playlists_dir, os.path.dirname(path))
         self.assertTrue(os.path.exists(path))
 
@@ -364,8 +365,8 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 class M3UPlaylistsProviderBaseDirectoryTest(M3UPlaylistsProviderTest):
 
     def setUp(self):  # noqa: N802
-        data_dir = path_to_data_dir('temp')
-        tmpdir = posix_normpath(tempfile.mkdtemp(dir=data_dir))
+        # data_dir = path_to_data_dir('temp')
+        tmpdir = posix_normpath(tempfile.mkdtemp())  # dir=data_dir))
         self.config['m3u']['base_dir'] = posix_normpath(tmpdir)
         # self.config['m3u']['base_dir'] = tempfile.mkdtemp()
         super(M3UPlaylistsProviderBaseDirectoryTest, self).setUp()

@@ -288,12 +288,13 @@ class Connection(object):
     def enable_recv(self):
         if self.recv_id is not None:
             return
-        if sys.platform == 'win32':
-            chan = self._sock
-        else:
-            chan = self._sock.fileno()
 
-        try:
+	try:
+            if sys.platform == 'win32':
+                chan = self._sock
+	    else:
+                chan = self._sock.fileno()
+
             self.recv_id = GObject.io_add_watch(
                 chan,
                 1,  # priority?
