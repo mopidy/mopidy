@@ -60,25 +60,18 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.assertEqual(uri, playlist.uri)
         self.assertTrue(os.path.exists(path))
 
-    @unittest.skipIf(sys.platform == 'win32',
-                     reason="| not valid filename char in win32")
     def test_create_sanitizes_playlist_name(self):
         test_name = '  ../../test FOO baR '
         playlist = self.core.playlists.create(test_name)
-        self.assertEqual('..|..|test FOO baR', playlist.name)
-        path = posix_normpath(self.playlists_dir,
-            (test_name.strip() + '.m3u').replace('/', '|').encode('utf-8'))
-        self.assertEqual(self.playlists_dir, os.path.dirname(path))
-        self.assertTrue(os.path.exists(path))
 
-    @unittest.skipUnless(sys.platform == 'win32',
-                         reason="| not valid filename char in win32")
-    def test_create_sanitizes_playlist_name_win32(self):
-        test_name = '  ../../test FOO baR '
-        playlist = self.core.playlists.create(test_name)
-        self.assertEqual('....test FOO baR', playlist.name)
-        path = posix_normpath(self.playlists_dir,
-            (test_name.strip() + '.m3u').replace('/', '').encode('utf-8'))
+        ref_sep = '' if sys.platform == 'win32' else '|'
+        ref_plname = test_name.strip().replace('/', ref_sep)
+        self.assertEqual(ref_plname, playlist.name)
+
+        ref_filename = (test_name.strip() + '.m3u')\
+            .replace('/', ref_sep).encode('utf-8')
+
+        path = posix_normpath(self.playlists_dir, ref_filename)
         self.assertEqual(self.playlists_dir, os.path.dirname(path))
         self.assertTrue(os.path.exists(path))
 
