@@ -1,9 +1,10 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
+import os
 import platform
+import posixpath
 import sys
 import warnings
-import os, posixpath
 
 
 if not (2, 7) <= sys.version_info < (3,):

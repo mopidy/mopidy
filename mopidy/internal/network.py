@@ -289,10 +289,10 @@ class Connection(object):
         if self.recv_id is not None:
             return
 
-	try:
+        try:
             if sys.platform == 'win32':
                 chan = self._sock
-	    else:
+            else:
                 chan = self._sock.fileno()
 
             self.recv_id = GObject.io_add_watch(

@@ -1,6 +1,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
-import os, posixpath
+import os
+import posixpath
 
 from mopidy import models, posix_normpath
 
@@ -47,7 +48,7 @@ def path_to_uri(path, scheme=Extension.ext_name):
     path = os.path.normpath(path)
     uripath = quote_from_bytes(posix_normpath(path))
     if drive:
-        uripath = posixpath.sep.join([b'', drive])+uripath
+        uripath = posixpath.sep.join([b'', drive]) + uripath
     return urlunsplit((scheme, None, uripath, None, None))
 
 
@@ -68,8 +69,8 @@ def name_from_path(path):
 
 def sanitize_name(name):
     """remove bad char choices from name"""
-    excluded = '\\/:*?"<>|'+''.join([chr(i) for i in range(32)]) \
-        if sys.platform == 'win32' else '/'+chr(0)
+    excluded = '\\/:*?"<>|' + ''.join([chr(i) for i in range(32)]) \
+        if sys.platform == 'win32' else '/' + chr(0)
     name = "".join(i for i in name if i not in excluded)
     return name
 

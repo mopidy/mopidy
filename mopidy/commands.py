@@ -276,7 +276,8 @@ class RootCommand(Command):
             '--config',
             action='store', dest='config_files', type=config_files_type,
             default=DEFAULT_CONFIG, metavar='FILES',
-            help='config files to use, semicolon separated, later files override')
+            help='config files to use, semicolon separated, '
+                 'later files override')
         self.add_argument(
             '-o', '--option',
             action='append', dest='config_overrides',
