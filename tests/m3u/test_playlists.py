@@ -71,8 +71,8 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         self.assertEqual(self.playlists_dir, os.path.dirname(path))
         self.assertTrue(os.path.exists(path))
 
-    @unittest.skipIf(sys.platform != 'win32',
-                     reason="| not valid filename char in win32")
+    @unittest.skipUnless(sys.platform == 'win32',
+                         reason="| not valid filename char in win32")
     def test_create_sanitizes_playlist_name_win32(self):
         test_name = '  ../../test FOO baR '
         playlist = self.core.playlists.create(test_name)
