@@ -60,45 +60,23 @@ def path_to_uri(path):
 
     Returns a file:// URI as an unicode string.
     """
-    if isinstance(path, compat.text_type):
-        path = path.encode('utf-8')
-    if compat.PY2:
-        path = urllib.parse.quote(path)
-    else:
-        path = urllib.parse.quote_from_bytes(path)
-    return urllib.parse.urlunsplit(('file', '', path, '', ''))
+    return pathlib.Path(path).as_uri()
 
 
 def uri_to_path(uri):
     """
     Convert an URI to a OS specific path.
-
-    Returns a bytestring, since the file path can contain chars with other
-    encoding than UTF-8.
-
-    If we had returned these paths as unicode strings, you wouldn't be able to
-    look up the matching dir or file on your file system because the exact path
-    would be lost by ignoring its encoding.
     """
     if compat.PY2:
         if isinstance(uri, compat.text_type):
             uri = uri.encode('utf-8')
-        return urllib.parse.unquote(urllib.parse.urlsplit(uri).path)
+        bytes_path = urllib.parse.unquote(urllib.parse.urlsplit(uri).path)
+        return pathlib.Path(bytes_path)
     else:
-        return urllib.parse.unquote_to_bytes(urllib.parse.urlsplit(uri).path)
-
-
-def split_path(path):
-    if not isinstance(path, bytes):
-        raise TypeError('path is not a bytestring: %r' % path)
-    parts = []
-    while True:
-        path, part = os.path.split(path)
-        if part:
-            parts.insert(0, part)
-        if not path or path == b'/':
-            break
-    return parts
+        bytes_path = urllib.parse.unquote_to_bytes(
+            urllib.parse.urlsplit(uri).path)
+        unicode_path = bytes_path.decode('utf-8', 'surrogateescape')
+        return pathlib.Path(unicode_path)
 
 
 def expand_path(path):

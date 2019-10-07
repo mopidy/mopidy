@@ -149,66 +149,41 @@ class PathToFileURITest(unittest.TestCase):
 
     def test_simple_path(self):
         result = path.path_to_uri('/etc/fstab')
-        self.assertEqual(result, 'file:///etc/fstab')
+
+        assert result == 'file:///etc/fstab'
 
     def test_space_in_path(self):
         result = path.path_to_uri('/tmp/test this')
-        self.assertEqual(result, 'file:///tmp/test%20this')
+
+        assert result == 'file:///tmp/test%20this'
 
     def test_unicode_in_path(self):
         result = path.path_to_uri('/tmp/æøå')
-        self.assertEqual(result, 'file:///tmp/%C3%A6%C3%B8%C3%A5')
 
-    def test_utf8_in_path(self):
-        result = path.path_to_uri('/tmp/æøå'.encode('utf-8'))
-        self.assertEqual(result, 'file:///tmp/%C3%A6%C3%B8%C3%A5')
-
-    def test_latin1_in_path(self):
-        result = path.path_to_uri('/tmp/æøå'.encode('latin-1'))
-        self.assertEqual(result, 'file:///tmp/%E6%F8%E5')
+        assert result == 'file:///tmp/%C3%A6%C3%B8%C3%A5'
 
 
 class UriToPathTest(unittest.TestCase):
 
     def test_simple_uri(self):
         result = path.uri_to_path('file:///etc/fstab')
-        self.assertEqual(result, '/etc/fstab'.encode('utf-8'))
+
+        assert result == pathlib.Path('/etc/fstab')
 
     def test_space_in_uri(self):
         result = path.uri_to_path('file:///tmp/test%20this')
-        self.assertEqual(result, '/tmp/test this'.encode('utf-8'))
+
+        assert result == pathlib.Path('/tmp/test this')
 
     def test_unicode_in_uri(self):
         result = path.uri_to_path('file:///tmp/%C3%A6%C3%B8%C3%A5')
-        self.assertEqual(result, '/tmp/æøå'.encode('utf-8'))
+
+        assert result == pathlib.Path('/tmp/æøå')
 
     def test_latin1_in_uri(self):
         result = path.uri_to_path('file:///tmp/%E6%F8%E5')
-        self.assertEqual(result, '/tmp/æøå'.encode('latin-1'))
 
-
-class SplitPathTest(unittest.TestCase):
-
-    def test_empty_path(self):
-        self.assertEqual([], path.split_path(b''))
-
-    def test_single_dir(self):
-        self.assertEqual([b'foo'], path.split_path(b'foo'))
-
-    def test_dirs(self):
-        self.assertEqual(
-            [b'foo', b'bar', b'baz'], path.split_path(b'foo/bar/baz'))
-
-    def test_initial_slash_is_ignored(self):
-        self.assertEqual(
-            [b'foo', b'bar', b'baz'], path.split_path(b'/foo/bar/baz'))
-
-    def test_only_slash(self):
-        self.assertEqual([], path.split_path(b'/'))
-
-    def test_fails_on_unicode_strings(self):
-        with self.assertRaises(TypeError):
-            path.split_path('/')
+        assert bytes(result) == b'/tmp/\xe6\xf8\xe5'
 
 
 class ExpandPathTest(unittest.TestCase):
