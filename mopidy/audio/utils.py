@@ -98,5 +98,5 @@ class Signals(object):
 
     def clear(self):
         """Clear all registered signal handlers."""
-        for element, event in self._ids.keys():
+        for element, event in list(self._ids):
             element.disconnect(self._ids.pop((element, event)))
