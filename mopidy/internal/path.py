@@ -209,24 +209,3 @@ def is_path_inside_base_dir(path, base_path):
     # Check if dir of file is the base path or a subdir
     common_prefix = os.path.commonprefix([real_base_path, real_path])
     return common_prefix == real_base_path
-
-
-# FIXME replace with mock usage in tests.
-class Mtime(object):
-
-    def __init__(self):
-        self.fake = None
-
-    def __call__(self, path):
-        if self.fake is not None:
-            return self.fake
-        return int(os.stat(path).st_mtime)
-
-    def set_fake_time(self, time):
-        self.fake = time
-
-    def undo_fake(self):
-        self.fake = None
-
-
-mtime = Mtime()

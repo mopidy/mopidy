@@ -411,18 +411,3 @@ class TestIsPathInsideBaseDir(object):
     def test_str_inside_str_fails(self):
         with pytest.raises(TypeError):
             path.is_path_inside_base_dir('/æ/øå', '/æ')
-
-
-# TODO: kill this in favour of just os.path.getmtime + mocks
-class MtimeTest(unittest.TestCase):
-
-    def tearDown(self):  # noqa: N802
-        path.mtime.undo_fake()
-
-    def test_mtime_of_current_dir(self):
-        mtime_dir = int(os.stat('.').st_mtime)
-        self.assertEqual(mtime_dir, path.mtime('.'))
-
-    def test_fake_time_is_returned(self):
-        path.mtime.set_fake_time(123456)
-        self.assertEqual(path.mtime('.'), 123456)
