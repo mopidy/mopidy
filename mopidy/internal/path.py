@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
 import logging
-import os
 import re
 
 
@@ -91,30 +90,25 @@ def expand_path(path):
 
 
 def is_path_inside_base_dir(path, base_path):
-    if not isinstance(path, bytes):
-        raise TypeError('path is not a bytestring')
-    if not isinstance(base_path, bytes):
-        raise TypeError('base_path is not a bytestring')
+    if compat.PY3:
+        if isinstance(path, bytes):
+            path = path.decode('utf-8', 'surrogateescape')
+        if isinstance(base_path, bytes):
+            base_path = base_path.decode('utf-8', 'surrogateescape')
 
-    if compat.PY2:
-        path_separator = os.sep
-    else:
-        path_separator = os.sep.encode()
+    path = pathlib.Path(path).resolve()
+    base_path = pathlib.Path(base_path).resolve()
 
-    if path.endswith(path_separator):
-        raise ValueError(
-            'path %r cannot end with a path separator' % path)
-
-    # Expand symlinks
-    real_base_path = os.path.realpath(base_path)
-    real_path = os.path.realpath(path)
-
-    if os.path.isfile(path):
+    if path.is_file():
         # Use dir of file for prefix comparision, so we don't accept
         # /tmp/foo.m3u as being inside /tmp/foo, simply because they have a
         # common prefix, /tmp/foo, which matches the base path, /tmp/foo.
-        real_path = os.path.dirname(real_path)
+        path = path.parent
 
     # Check if dir of file is the base path or a subdir
-    common_prefix = os.path.commonprefix([real_base_path, real_path])
-    return common_prefix == real_base_path
+    try:
+        path.relative_to(base_path)
+    except ValueError:
+        return False
+    else:
+        return True

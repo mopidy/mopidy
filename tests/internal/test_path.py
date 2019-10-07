@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import, unicode_literals
 
-import os
 import shutil
 import tempfile
 import unittest
@@ -218,23 +217,20 @@ class ExpandPathTest(unittest.TestCase):
 
 class TestIsPathInsideBaseDir(object):
     def test_when_inside(self):
-        assert path.is_path_inside_base_dir(
-            '/æ/øå'.encode('utf-8'),
-            '/æ'.encode('utf-8'))
+        assert path.is_path_inside_base_dir('/æ/øå', '/æ')
 
     def test_when_outside(self):
-        assert not path.is_path_inside_base_dir(
-            '/æ/øå'.encode('utf-8'),
-            '/ø'.encode('utf-8'))
+        assert not path.is_path_inside_base_dir('/æ/øå', '/ø')
 
-    def test_byte_inside_str_fails(self):
-        with pytest.raises(TypeError):
-            path.is_path_inside_base_dir('/æ/øå'.encode('utf-8'), '/æ')
+    def test_byte_inside_str_does_not_fail(self):
+        assert path.is_path_inside_base_dir('/æ/øå'.encode('utf-8'), '/æ')
 
-    def test_str_inside_byte_fails(self):
-        with pytest.raises(TypeError):
-            path.is_path_inside_base_dir('/æ/øå', '/æ'.encode('utf-8'))
+    def test_str_inside_byte_does_not_fail(self):
+        assert path.is_path_inside_base_dir('/æ/øå', '/æ'.encode('utf-8'))
 
-    def test_str_inside_str_fails(self):
-        with pytest.raises(TypeError):
-            path.is_path_inside_base_dir('/æ/øå', '/æ')
+    def test_str_inside_str_fails_does_not_fail(self):
+        assert path.is_path_inside_base_dir('/æ/øå', '/æ')
+
+    def test_bytes_inside_bytes_fails_does_not_fail(self):
+        assert path.is_path_inside_base_dir(
+            '/æ/øå'.encode('utf-8'), '/æ'.encode('utf-8'))
