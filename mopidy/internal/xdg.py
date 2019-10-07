@@ -4,7 +4,7 @@ import io
 import os
 
 from mopidy import compat
-from mopidy.compat import configparser
+from mopidy.compat import configparser, pathlib
 
 
 def get_dirs():
@@ -21,27 +21,20 @@ def get_dirs():
     """
 
     dirs = {
-        'XDG_CACHE_DIR': (
-            _get_environ('XDG_CACHE_HOME') or
-            os.path.expanduser(b'~/.cache')),
-        'XDG_CONFIG_DIR': (
-            _get_environ('XDG_CONFIG_HOME') or
-            os.path.expanduser(b'~/.config')),
-        'XDG_DATA_DIR': (
-            _get_environ('XDG_DATA_HOME') or
-            os.path.expanduser(b'~/.local/share')),
+        'XDG_CACHE_DIR': pathlib.Path(
+            os.getenv('XDG_CACHE_HOME', '~/.cache')
+        ).expanduser(),
+        'XDG_CONFIG_DIR': pathlib.Path(
+            os.getenv('XDG_CONFIG_HOME', '~/.config')
+        ).expanduser(),
+        'XDG_DATA_DIR': pathlib.Path(
+            os.getenv('XDG_DATA_HOME', '~/.local/share')
+        ).expanduser(),
     }
 
     dirs.update(_get_user_dirs(dirs['XDG_CONFIG_DIR']))
 
     return dirs
-
-
-def _get_environ(var):
-    result = os.environ.get(var)
-    if isinstance(result, compat.text_type):
-        result = result.encode('utf-8')
-    return result
 
 
 def _get_user_dirs(xdg_config_dir):
@@ -55,16 +48,14 @@ def _get_user_dirs(xdg_config_dir):
     disabled, and thus no :mod:`glib` available.
     """
 
-    dirs_file = os.path.join(xdg_config_dir, b'user-dirs.dirs')
+    dirs_file = xdg_config_dir / 'user-dirs.dirs'
 
-    if not os.path.exists(dirs_file):
+    if not dirs_file.exists():
         return {}
 
-    with open(dirs_file, 'rb') as fh:
-        data = fh.read()
-
+    data = dirs_file.read_bytes()
     data = b'[XDG_USER_DIRS]\n' + data
-    data = data.replace(b'$HOME', os.path.expanduser(b'~'))
+    data = data.replace(b'$HOME', bytes(pathlib.Path.home()))
     data = data.replace(b'"', b'')
 
     config = configparser.RawConfigParser()
@@ -79,6 +70,6 @@ def _get_user_dirs(xdg_config_dir):
             continue
         if isinstance(k, bytes):
             k = k.decode('utf-8')
-        result[k.upper()] = os.path.abspath(v).encode('utf-8')
+        result[k.upper()] = pathlib.Path(v).resolve()
 
     return result

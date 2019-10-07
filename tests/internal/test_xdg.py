@@ -6,6 +6,7 @@ import mock
 
 import pytest
 
+from mopidy.compat import pathlib
 from mopidy.internal import xdg
 
 
@@ -17,37 +18,39 @@ def environ():
 
 
 def test_cache_dir_default(environ):
-    assert xdg.get_dirs()['XDG_CACHE_DIR'] == os.path.expanduser(b'~/.cache')
+    assert xdg.get_dirs()['XDG_CACHE_DIR'] == (
+        pathlib.Path('~/.cache').expanduser()
+    )
 
 
 def test_cache_dir_from_env(environ):
     os.environ['XDG_CACHE_HOME'] = '/foo/bar'
 
-    assert xdg.get_dirs()['XDG_CACHE_DIR'] == b'/foo/bar'
-    assert type(xdg.get_dirs()['XDG_CACHE_DIR']) == bytes
+    assert xdg.get_dirs()['XDG_CACHE_DIR'] == pathlib.Path('/foo/bar')
 
 
 def test_config_dir_default(environ):
-    assert xdg.get_dirs()['XDG_CONFIG_DIR'] == os.path.expanduser(b'~/.config')
+    assert xdg.get_dirs()['XDG_CONFIG_DIR'] == (
+        pathlib.Path('~/.config').expanduser()
+    )
 
 
 def test_config_dir_from_env(environ):
     os.environ['XDG_CONFIG_HOME'] = '/foo/bar'
 
-    assert xdg.get_dirs()['XDG_CONFIG_DIR'] == b'/foo/bar'
-    assert type(xdg.get_dirs()['XDG_CONFIG_DIR']) == bytes
+    assert xdg.get_dirs()['XDG_CONFIG_DIR'] == pathlib.Path('/foo/bar')
 
 
 def test_data_dir_default(environ):
-    assert xdg.get_dirs()['XDG_DATA_DIR'] == os.path.expanduser(
-        b'~/.local/share')
+    assert xdg.get_dirs()['XDG_DATA_DIR'] == (
+        pathlib.Path('~/.local/share').expanduser()
+    )
 
 
 def test_data_dir_from_env(environ):
     os.environ['XDG_DATA_HOME'] = '/foo/bar'
 
-    assert xdg.get_dirs()['XDG_DATA_DIR'] == b'/foo/bar'
-    assert type(xdg.get_dirs()['XDG_DATA_DIR']) == bytes
+    assert xdg.get_dirs()['XDG_DATA_DIR'] == pathlib.Path('/foo/bar')
 
 
 def test_user_dirs(environ, tmpdir):
@@ -59,8 +62,7 @@ def test_user_dirs(environ, tmpdir):
 
     result = xdg.get_dirs()
 
-    assert result['XDG_MUSIC_DIR'] == os.path.expanduser(b'~/Music2')
-    assert type(result['XDG_MUSIC_DIR']) == bytes
+    assert result['XDG_MUSIC_DIR'] == pathlib.Path('~/Music2').expanduser()
     assert 'XDG_DOWNLOAD_DIR' not in result
 
 
