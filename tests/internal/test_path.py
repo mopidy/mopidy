@@ -10,6 +10,7 @@ import unittest
 import pytest
 
 from mopidy import compat, exceptions
+from mopidy.compat import pathlib
 from mopidy.internal import path
 from mopidy.internal.gi import GLib
 
@@ -19,126 +20,117 @@ import tests
 class GetOrCreateDirTest(unittest.TestCase):
 
     def setUp(self):  # noqa: N802
-        self.parent = tempfile.mkdtemp()
-        if compat.PY3:
-            self.parent = self.parent.encode()
+        self.parent = pathlib.Path(tempfile.mkdtemp())
 
     def tearDown(self):  # noqa: N802
-        if os.path.isdir(self.parent):
-            shutil.rmtree(self.parent)
+        if self.parent.is_dir():
+            shutil.rmtree(str(self.parent))
 
     def test_creating_dir(self):
-        dir_path = os.path.join(self.parent, b'test')
-        self.assertTrue(not os.path.exists(dir_path))
-        created = path.get_or_create_dir(dir_path)
-        self.assertTrue(os.path.exists(dir_path))
-        self.assertTrue(os.path.isdir(dir_path))
-        self.assertEqual(created, dir_path)
+        dir_path = self.parent / 'test'
+        assert not dir_path.exists()
+
+        created = path.get_or_create_dir(str(dir_path))
+
+        assert dir_path.is_dir()
+        assert created == dir_path
 
     def test_creating_nested_dirs(self):
-        level2_dir = os.path.join(self.parent, b'test')
-        level3_dir = os.path.join(self.parent, b'test', b'test')
-        self.assertTrue(not os.path.exists(level2_dir))
-        self.assertTrue(not os.path.exists(level3_dir))
-        created = path.get_or_create_dir(level3_dir)
-        self.assertTrue(os.path.exists(level2_dir))
-        self.assertTrue(os.path.isdir(level2_dir))
-        self.assertTrue(os.path.exists(level3_dir))
-        self.assertTrue(os.path.isdir(level3_dir))
-        self.assertEqual(created, level3_dir)
+        level2_dir = self.parent / 'test'
+        level3_dir = self.parent / 'test' / 'test'
+        assert not level2_dir.exists()
+        assert not level3_dir.exists()
+
+        created = path.get_or_create_dir(str(level3_dir))
+
+        assert level2_dir.is_dir()
+        assert level3_dir.is_dir()
+        assert created == level3_dir
 
     def test_creating_existing_dir(self):
-        created = path.get_or_create_dir(self.parent)
-        self.assertTrue(os.path.exists(self.parent))
-        self.assertTrue(os.path.isdir(self.parent))
-        self.assertEqual(created, self.parent)
+        created = path.get_or_create_dir(str(self.parent))
+
+        assert self.parent.is_dir()
+        assert created == self.parent
 
     def test_create_dir_with_name_of_existing_file_throws_oserror(self):
-        conflicting_file = os.path.join(self.parent, b'test')
-        open(conflicting_file, 'w').close()
-        dir_path = os.path.join(self.parent, b'test')
-        with self.assertRaises(OSError):
-            path.get_or_create_dir(dir_path)
+        conflicting_file = self.parent / 'test'
+        conflicting_file.touch()
+        dir_path = self.parent / 'test'
 
-    def test_create_dir_with_unicode(self):
-        with self.assertRaises(TypeError):
-            dir_path = compat.text_type(os.path.join(self.parent, b'test'))
-            path.get_or_create_dir(dir_path)
+        with pytest.raises(OSError):
+            path.get_or_create_dir(str(dir_path))
 
     def test_create_dir_with_none(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             path.get_or_create_dir(None)
 
 
 class GetOrCreateFileTest(unittest.TestCase):
 
     def setUp(self):  # noqa: N802
-        self.parent = tempfile.mkdtemp()
-        if compat.PY3:
-            self.parent = self.parent.encode()
+        self.parent = pathlib.Path(tempfile.mkdtemp())
 
     def tearDown(self):  # noqa: N802
-        if os.path.isdir(self.parent):
-            shutil.rmtree(self.parent)
+        if self.parent.is_dir():
+            shutil.rmtree(str(self.parent))
 
     def test_creating_file(self):
-        file_path = os.path.join(self.parent, b'test')
-        self.assertTrue(not os.path.exists(file_path))
-        created = path.get_or_create_file(file_path)
-        self.assertTrue(os.path.exists(file_path))
-        self.assertTrue(os.path.isfile(file_path))
-        self.assertEqual(created, file_path)
+        file_path = self.parent / 'test'
+        assert not file_path.exists()
+
+        created = path.get_or_create_file(str(file_path))
+
+        assert file_path.is_file()
+        assert created == file_path
 
     def test_creating_nested_file(self):
-        level2_dir = os.path.join(self.parent, b'test')
-        file_path = os.path.join(self.parent, b'test', b'test')
-        self.assertTrue(not os.path.exists(level2_dir))
-        self.assertTrue(not os.path.exists(file_path))
-        created = path.get_or_create_file(file_path)
-        self.assertTrue(os.path.exists(level2_dir))
-        self.assertTrue(os.path.isdir(level2_dir))
-        self.assertTrue(os.path.exists(file_path))
-        self.assertTrue(os.path.isfile(file_path))
-        self.assertEqual(created, file_path)
+        level2_dir = self.parent / 'test'
+        file_path = self.parent / 'test' / 'test'
+        assert not level2_dir.exists()
+        assert not file_path.exists()
+
+        created = path.get_or_create_file(str(file_path))
+
+        assert level2_dir.is_dir()
+        assert file_path.is_file()
+        assert created == file_path
 
     def test_creating_existing_file(self):
-        file_path = os.path.join(self.parent, b'test')
-        path.get_or_create_file(file_path)
-        created = path.get_or_create_file(file_path)
-        self.assertTrue(os.path.exists(file_path))
-        self.assertTrue(os.path.isfile(file_path))
-        self.assertEqual(created, file_path)
+        file_path = self.parent / 'test'
+        path.get_or_create_file(str(file_path))
 
-    def test_create_file_with_name_of_existing_dir_throws_ioerror(self):
-        conflicting_dir = os.path.join(self.parent)
-        with self.assertRaises(IOError):
-            path.get_or_create_file(conflicting_dir)
+        created = path.get_or_create_file(str(file_path))
 
-    def test_create_dir_with_unicode_filename_throws_type_error(self):
-        with self.assertRaises(TypeError):
-            file_path = compat.text_type(os.path.join(self.parent, b'test'))
-            path.get_or_create_file(file_path)
+        assert file_path.is_file()
+        assert created == file_path
+
+    def test_create_file_with_name_of_existing_dir_throws_error(self):
+        with pytest.raises(OSError):
+            path.get_or_create_file(self.parent)
 
     def test_create_file_with_none_filename_throws_type_error(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             path.get_or_create_file(None)
 
     def test_create_dir_without_mkdir(self):
-        file_path = os.path.join(self.parent, b'foo', b'bar')
-        with self.assertRaises(IOError):
+        file_path = self.parent / 'foo' / 'bar'
+
+        with pytest.raises(OSError):
             path.get_or_create_file(file_path, mkdir=False)
 
     def test_create_dir_with_bytes_content(self):
-        file_path = os.path.join(self.parent, b'test')
-        created = path.get_or_create_file(file_path, content=b'foobar')
-        with open(created, 'rb') as fh:
-            self.assertEqual(fh.read(), b'foobar')
+        file_path = self.parent / 'test'
+
+        created = path.get_or_create_file(str(file_path), content=b'foobar')
+
+        assert created.read_bytes() == b'foobar'
 
     def test_create_dir_with_unicode_content(self):
-        file_path = os.path.join(self.parent, b'test')
-        created = path.get_or_create_file(file_path, content='foobaræøå')
-        with open(created, 'rb') as fh:
-            self.assertEqual(fh.read(), b'foobar\xc3\xa6\xc3\xb8\xc3\xa5')
+        file_path = self.parent / 'test'
+
+        created = path.get_or_create_file(str(file_path), content='foobaræøå')
+        assert created.read_bytes() == b'foobar\xc3\xa6\xc3\xb8\xc3\xa5'
 
 
 class GetUnixSocketPathTest(unittest.TestCase):
@@ -220,29 +212,36 @@ class SplitPathTest(unittest.TestCase):
 
 
 class ExpandPathTest(unittest.TestCase):
-    # TODO: test via mocks?
-
     def test_empty_path(self):
-        self.assertEqual(os.path.abspath(b'.'), path.expand_path(b''))
+        result = path.expand_path('')
+
+        assert result == pathlib.Path('.').resolve()
 
     def test_absolute_path(self):
-        self.assertEqual(b'/tmp/foo', path.expand_path(b'/tmp/foo'))
+        result = path.expand_path('/tmp/foo')
+
+        assert result == pathlib.Path('/tmp/foo')
 
     def test_home_dir_expansion(self):
-        self.assertEqual(
-            os.path.expanduser(b'~/foo'), path.expand_path(b'~/foo'))
+        result = path.expand_path('~/foo')
+
+        assert result == pathlib.Path('~/foo').expanduser()
 
     def test_abspath(self):
-        self.assertEqual(os.path.abspath(b'./foo'), path.expand_path(b'./foo'))
+        result = path.expand_path('./foo')
+
+        assert result == pathlib.Path('./foo').resolve()
 
     def test_xdg_subsititution(self):
-        self.assertEqual(
-            GLib.get_user_data_dir().encode('utf-8') + b'/foo',
-            path.expand_path(b'$XDG_DATA_DIR/foo'))
+        expected = GLib.get_user_data_dir() + '/foo'
+        result = path.expand_path('$XDG_DATA_DIR/foo')
+
+        assert str(result) == expected
 
     def test_xdg_subsititution_unknown(self):
-        self.assertIsNone(
-            path.expand_path(b'/tmp/$XDG_INVALID_DIR/foo'))
+        result = path.expand_path('/tmp/$XDG_INVALID_DIR/foo')
+
+        assert result is None
 
 
 class FindMTimesTest(unittest.TestCase):

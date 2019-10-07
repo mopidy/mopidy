@@ -7,7 +7,7 @@ import stat
 import threading
 
 from mopidy import compat, exceptions
-from mopidy.compat import queue, urllib
+from mopidy.compat import pathlib, queue, urllib
 from mopidy.internal import encoding, xdg
 
 
@@ -18,32 +18,28 @@ XDG_DIRS = xdg.get_dirs()
 
 
 def get_or_create_dir(dir_path):
-    if not isinstance(dir_path, bytes):
-        raise TypeError('dir_path is not a bytestring: %r' % dir_path)
     dir_path = expand_path(dir_path)
-    if os.path.isfile(dir_path):
+    if dir_path.is_file():
         raise OSError(
             'A file with the same name as the desired dir, '
             '"%s", already exists.' % dir_path)
-    elif not os.path.isdir(dir_path):
+    elif not dir_path.is_dir():
         logger.info('Creating dir %s', dir_path)
-        os.makedirs(dir_path, 0o755)
+        dir_path.mkdir(mode=0o755, parents=True)
     return dir_path
 
 
 def get_or_create_file(file_path, mkdir=True, content=None):
-    if not isinstance(file_path, bytes):
-        raise TypeError('file_path is not a bytestring: %r' % file_path)
     file_path = expand_path(file_path)
     if isinstance(content, compat.text_type):
         content = content.encode('utf-8')
     if mkdir:
-        get_or_create_dir(os.path.dirname(file_path))
-    if not os.path.isfile(file_path):
+        get_or_create_dir(file_path.parent)
+    if not file_path.is_file():
         logger.info('Creating file %s', file_path)
-        with open(file_path, 'wb') as fh:
-            if content is not None:
-                fh.write(content)
+        file_path.touch(exist_ok=False)
+        if content is not None:
+            file_path.write_bytes(content)
     return file_path
 
 
@@ -106,17 +102,13 @@ def split_path(path):
 
 
 def expand_path(path):
-    # TODO: document as we want people to use this.
-    if not isinstance(path, bytes):
-        raise TypeError('path is not a bytestring: %r' % path)
+    path = str(pathlib.Path(path))
     for xdg_var, xdg_dir in XDG_DIRS.items():
-        var = ('$' + xdg_var).encode('utf-8')
-        path = path.replace(var, xdg_dir)
-    if b'$' in path:
+        # py-compat: First str() is to get native strings on both Py2/Py3
+        path = path.replace(str('$' + xdg_var), str(xdg_dir))
+    if '$' in path:
         return None
-    path = os.path.expanduser(path)
-    path = os.path.abspath(path)
-    return path
+    return pathlib.Path(path).expanduser().resolve()
 
 
 def _find_worker(relative, follow, done, work, results, errors):
