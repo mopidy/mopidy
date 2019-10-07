@@ -180,7 +180,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
     def test_create_returns_playlist_with_uri_set(self):
         playlist = self.core.playlists.create('test')
-        self.assert_(playlist.uri)
+        self.assertTrue(playlist.uri)
 
     def test_create_adds_playlist_to_playlists_collection(self):
         playlist = self.core.playlists.create('test')

@@ -14,6 +14,7 @@ from __future__ import absolute_import, unicode_literals
 
 import inspect
 
+from mopidy import compat
 from mopidy.mpd import exceptions
 
 #: The MPD protocol uses UTF-8 for encoding all data.
@@ -138,24 +139,33 @@ class Commands(object):
             if name in self.handlers:
                 raise ValueError('%s already registered' % name)
 
-            args, varargs, keywords, defaults = inspect.getargspec(func)
-            defaults = dict(zip(args[-len(defaults or []):], defaults or []))
+            if compat.PY2:
+                spec = inspect.getargspec(func)
+            else:
+                spec = inspect.getfullargspec(func)
+            defaults = dict(
+                zip(spec.args[-len(spec.defaults or []):], spec.defaults or [])
+            )
 
-            if not args and not varargs:
+            if not spec.args and not spec.varargs:
                 raise TypeError('Handler must accept at least one argument.')
 
-            if len(args) > 1 and varargs:
+            if len(spec.args) > 1 and spec.varargs:
                 raise TypeError(
                     '*args may not be combined with regular arguments')
 
-            if not set(validators.keys()).issubset(args):
+            if not set(validators.keys()).issubset(spec.args):
                 raise TypeError('Validator for non-existent arg passed')
 
-            if keywords:
-                raise TypeError('**kwargs are not permitted')
+            if compat.PY2:
+                if spec.keywords:
+                    raise TypeError('Keyword arguments are not permitted')
+            else:
+                if spec.varkw or spec.kwonlyargs:
+                    raise TypeError('Keyword arguments are not permitted')
 
             def validate(*args, **kwargs):
-                if varargs:
+                if spec.varargs:
                     return func(*args, **kwargs)
 
                 try:

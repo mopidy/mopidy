@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import io
 import os
 
+from mopidy import compat
 from mopidy.compat import configparser
 
 
@@ -21,19 +22,26 @@ def get_dirs():
 
     dirs = {
         'XDG_CACHE_DIR': (
-            os.environ.get('XDG_CACHE_HOME') or
+            _get_environ('XDG_CACHE_HOME') or
             os.path.expanduser(b'~/.cache')),
         'XDG_CONFIG_DIR': (
-            os.environ.get('XDG_CONFIG_HOME') or
+            _get_environ('XDG_CONFIG_HOME') or
             os.path.expanduser(b'~/.config')),
         'XDG_DATA_DIR': (
-            os.environ.get('XDG_DATA_HOME') or
+            _get_environ('XDG_DATA_HOME') or
             os.path.expanduser(b'~/.local/share')),
     }
 
     dirs.update(_get_user_dirs(dirs['XDG_CONFIG_DIR']))
 
     return dirs
+
+
+def _get_environ(var):
+    result = os.environ.get(var)
+    if isinstance(result, compat.text_type):
+        result = result.encode('utf-8')
+    return result
 
 
 def _get_user_dirs(xdg_config_dir):
@@ -60,9 +68,17 @@ def _get_user_dirs(xdg_config_dir):
     data = data.replace(b'"', b'')
 
     config = configparser.RawConfigParser()
-    config.readfp(io.BytesIO(data))
+    if compat.PY2:
+        config.readfp(io.BytesIO(data))
+    else:
+        config.read_string(data.decode())
 
-    return {
-        k.upper().decode('utf-8'): os.path.abspath(v)
-        for k, v in config.items('XDG_USER_DIRS') if v is not None
-    }
+    result = {}
+    for k, v in config.items('XDG_USER_DIRS'):
+        if v is None:
+            continue
+        if isinstance(k, bytes):
+            k = k.decode('utf-8')
+        result[k.upper()] = os.path.abspath(v).encode('utf-8')
+
+    return result

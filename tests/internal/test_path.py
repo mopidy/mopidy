@@ -20,6 +20,8 @@ class GetOrCreateDirTest(unittest.TestCase):
 
     def setUp(self):  # noqa: N802
         self.parent = tempfile.mkdtemp()
+        if compat.PY3:
+            self.parent = self.parent.encode()
 
     def tearDown(self):  # noqa: N802
         if os.path.isdir(self.parent):
@@ -27,28 +29,28 @@ class GetOrCreateDirTest(unittest.TestCase):
 
     def test_creating_dir(self):
         dir_path = os.path.join(self.parent, b'test')
-        self.assert_(not os.path.exists(dir_path))
+        self.assertTrue(not os.path.exists(dir_path))
         created = path.get_or_create_dir(dir_path)
-        self.assert_(os.path.exists(dir_path))
-        self.assert_(os.path.isdir(dir_path))
+        self.assertTrue(os.path.exists(dir_path))
+        self.assertTrue(os.path.isdir(dir_path))
         self.assertEqual(created, dir_path)
 
     def test_creating_nested_dirs(self):
         level2_dir = os.path.join(self.parent, b'test')
         level3_dir = os.path.join(self.parent, b'test', b'test')
-        self.assert_(not os.path.exists(level2_dir))
-        self.assert_(not os.path.exists(level3_dir))
+        self.assertTrue(not os.path.exists(level2_dir))
+        self.assertTrue(not os.path.exists(level3_dir))
         created = path.get_or_create_dir(level3_dir)
-        self.assert_(os.path.exists(level2_dir))
-        self.assert_(os.path.isdir(level2_dir))
-        self.assert_(os.path.exists(level3_dir))
-        self.assert_(os.path.isdir(level3_dir))
+        self.assertTrue(os.path.exists(level2_dir))
+        self.assertTrue(os.path.isdir(level2_dir))
+        self.assertTrue(os.path.exists(level3_dir))
+        self.assertTrue(os.path.isdir(level3_dir))
         self.assertEqual(created, level3_dir)
 
     def test_creating_existing_dir(self):
         created = path.get_or_create_dir(self.parent)
-        self.assert_(os.path.exists(self.parent))
-        self.assert_(os.path.isdir(self.parent))
+        self.assertTrue(os.path.exists(self.parent))
+        self.assertTrue(os.path.isdir(self.parent))
         self.assertEqual(created, self.parent)
 
     def test_create_dir_with_name_of_existing_file_throws_oserror(self):
@@ -59,12 +61,12 @@ class GetOrCreateDirTest(unittest.TestCase):
             path.get_or_create_dir(dir_path)
 
     def test_create_dir_with_unicode(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             dir_path = compat.text_type(os.path.join(self.parent, b'test'))
             path.get_or_create_dir(dir_path)
 
     def test_create_dir_with_none(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             path.get_or_create_dir(None)
 
 
@@ -72,6 +74,8 @@ class GetOrCreateFileTest(unittest.TestCase):
 
     def setUp(self):  # noqa: N802
         self.parent = tempfile.mkdtemp()
+        if compat.PY3:
+            self.parent = self.parent.encode()
 
     def tearDown(self):  # noqa: N802
         if os.path.isdir(self.parent):
@@ -79,30 +83,30 @@ class GetOrCreateFileTest(unittest.TestCase):
 
     def test_creating_file(self):
         file_path = os.path.join(self.parent, b'test')
-        self.assert_(not os.path.exists(file_path))
+        self.assertTrue(not os.path.exists(file_path))
         created = path.get_or_create_file(file_path)
-        self.assert_(os.path.exists(file_path))
-        self.assert_(os.path.isfile(file_path))
+        self.assertTrue(os.path.exists(file_path))
+        self.assertTrue(os.path.isfile(file_path))
         self.assertEqual(created, file_path)
 
     def test_creating_nested_file(self):
         level2_dir = os.path.join(self.parent, b'test')
         file_path = os.path.join(self.parent, b'test', b'test')
-        self.assert_(not os.path.exists(level2_dir))
-        self.assert_(not os.path.exists(file_path))
+        self.assertTrue(not os.path.exists(level2_dir))
+        self.assertTrue(not os.path.exists(file_path))
         created = path.get_or_create_file(file_path)
-        self.assert_(os.path.exists(level2_dir))
-        self.assert_(os.path.isdir(level2_dir))
-        self.assert_(os.path.exists(file_path))
-        self.assert_(os.path.isfile(file_path))
+        self.assertTrue(os.path.exists(level2_dir))
+        self.assertTrue(os.path.isdir(level2_dir))
+        self.assertTrue(os.path.exists(file_path))
+        self.assertTrue(os.path.isfile(file_path))
         self.assertEqual(created, file_path)
 
     def test_creating_existing_file(self):
         file_path = os.path.join(self.parent, b'test')
         path.get_or_create_file(file_path)
         created = path.get_or_create_file(file_path)
-        self.assert_(os.path.exists(file_path))
-        self.assert_(os.path.isfile(file_path))
+        self.assertTrue(os.path.exists(file_path))
+        self.assertTrue(os.path.isfile(file_path))
         self.assertEqual(created, file_path)
 
     def test_create_file_with_name_of_existing_dir_throws_ioerror(self):
@@ -110,13 +114,13 @@ class GetOrCreateFileTest(unittest.TestCase):
         with self.assertRaises(IOError):
             path.get_or_create_file(conflicting_dir)
 
-    def test_create_dir_with_unicode_filename_throws_value_error(self):
-        with self.assertRaises(ValueError):
+    def test_create_dir_with_unicode_filename_throws_type_error(self):
+        with self.assertRaises(TypeError):
             file_path = compat.text_type(os.path.join(self.parent, b'test'))
             path.get_or_create_file(file_path)
 
-    def test_create_file_with_none_filename_throws_value_error(self):
-        with self.assertRaises(ValueError):
+    def test_create_file_with_none_filename_throws_type_error(self):
+        with self.assertRaises(TypeError):
             path.get_or_create_file(None)
 
     def test_create_dir_without_mkdir(self):
@@ -127,13 +131,13 @@ class GetOrCreateFileTest(unittest.TestCase):
     def test_create_dir_with_bytes_content(self):
         file_path = os.path.join(self.parent, b'test')
         created = path.get_or_create_file(file_path, content=b'foobar')
-        with open(created) as fh:
+        with open(created, 'rb') as fh:
             self.assertEqual(fh.read(), b'foobar')
 
     def test_create_dir_with_unicode_content(self):
         file_path = os.path.join(self.parent, b'test')
         created = path.get_or_create_file(file_path, content='foobaræøå')
-        with open(created) as fh:
+        with open(created, 'rb') as fh:
             self.assertEqual(fh.read(), b'foobar\xc3\xa6\xc3\xb8\xc3\xa5')
 
 
@@ -194,20 +198,25 @@ class UriToPathTest(unittest.TestCase):
 class SplitPathTest(unittest.TestCase):
 
     def test_empty_path(self):
-        self.assertEqual([], path.split_path(''))
+        self.assertEqual([], path.split_path(b''))
 
     def test_single_dir(self):
-        self.assertEqual(['foo'], path.split_path('foo'))
+        self.assertEqual([b'foo'], path.split_path(b'foo'))
 
     def test_dirs(self):
-        self.assertEqual(['foo', 'bar', 'baz'], path.split_path('foo/bar/baz'))
+        self.assertEqual(
+            [b'foo', b'bar', b'baz'], path.split_path(b'foo/bar/baz'))
 
     def test_initial_slash_is_ignored(self):
         self.assertEqual(
-            ['foo', 'bar', 'baz'], path.split_path('/foo/bar/baz'))
+            [b'foo', b'bar', b'baz'], path.split_path(b'/foo/bar/baz'))
 
     def test_only_slash(self):
-        self.assertEqual([], path.split_path('/'))
+        self.assertEqual([], path.split_path(b'/'))
+
+    def test_fails_on_unicode_strings(self):
+        with self.assertRaises(TypeError):
+            path.split_path('/')
 
 
 class ExpandPathTest(unittest.TestCase):
@@ -228,7 +237,7 @@ class ExpandPathTest(unittest.TestCase):
 
     def test_xdg_subsititution(self):
         self.assertEqual(
-            GLib.get_user_data_dir() + b'/foo',
+            GLib.get_user_data_dir().encode('utf-8') + b'/foo',
             path.expand_path(b'$XDG_DATA_DIR/foo'))
 
     def test_xdg_subsititution_unknown(self):
@@ -240,30 +249,30 @@ class FindMTimesTest(unittest.TestCase):
     maxDiff = None  # noqa: N815
 
     def setUp(self):  # noqa: N802
-        self.tmpdir = tempfile.mkdtemp(b'.mopidy-tests')
+        self.tmpdir = tempfile.mkdtemp('.mopidy-tests').encode('utf-8')
 
     def tearDown(self):  # noqa: N802
         shutil.rmtree(self.tmpdir, ignore_errors=True)
 
     def mkdir(self, *args):
-        name = os.path.join(self.tmpdir, *[bytes(a) for a in args])
+        name = os.path.join(self.tmpdir, *[a.encode('utf-8') for a in args])
         os.mkdir(name)
         return name
 
     def touch(self, *args):
-        name = os.path.join(self.tmpdir, *[bytes(a) for a in args])
+        name = os.path.join(self.tmpdir, *[a.encode('utf-8') for a in args])
         open(name, 'w').close()
         return name
 
     def test_names_are_bytestrings(self):
         """We shouldn't be mixing in unicode for paths."""
         result, errors = path.find_mtimes(tests.path_to_data_dir(''))
-        for name in result.keys() + errors.keys():
+        for name in list(result.keys()) + list(errors.keys()):
             self.assertEqual(name, tests.IsA(bytes))
 
     def test_nonexistent_dir(self):
         """Non existent search roots are an error"""
-        missing = os.path.join(self.tmpdir, 'does-not-exist')
+        missing = os.path.join(self.tmpdir, b'does-not-exist')
         result, errors = path.find_mtimes(missing)
         self.assertEqual(result, {})
         self.assertEqual(errors, {missing: tests.IsA(exceptions.FindError)})
@@ -324,7 +333,7 @@ class FindMTimesTest(unittest.TestCase):
     def test_symlinks_are_ignored(self):
         """By default symlinks should be treated as an error"""
         target = self.touch('target')
-        link = os.path.join(self.tmpdir, 'link')
+        link = os.path.join(self.tmpdir, b'link')
         os.symlink(target, link)
 
         result, errors = path.find_mtimes(self.tmpdir)
@@ -334,7 +343,7 @@ class FindMTimesTest(unittest.TestCase):
     def test_symlink_to_file_as_root_is_followed(self):
         """Passing a symlink as the root should be followed when follow=True"""
         target = self.touch('target')
-        link = os.path.join(self.tmpdir, 'link')
+        link = os.path.join(self.tmpdir, b'link')
         os.symlink(target, link)
 
         result, errors = path.find_mtimes(link, follow=True)
@@ -346,7 +355,7 @@ class FindMTimesTest(unittest.TestCase):
 
     def test_symlink_pointing_at_itself_fails(self):
         """Symlink pointing at itself should give as an OS error"""
-        link = os.path.join(self.tmpdir, 'link')
+        link = os.path.join(self.tmpdir, b'link')
         os.symlink(link, link)
 
         result, errors = path.find_mtimes(link, follow=True)
@@ -355,12 +364,12 @@ class FindMTimesTest(unittest.TestCase):
 
     def test_symlink_pointing_at_parent_fails(self):
         """We should detect a loop via the parent and give up on the branch"""
-        os.symlink(self.tmpdir, os.path.join(self.tmpdir, 'link'))
+        os.symlink(self.tmpdir, os.path.join(self.tmpdir, b'link'))
 
         result, errors = path.find_mtimes(self.tmpdir, follow=True)
         self.assertEqual({}, result)
         self.assertEqual(1, len(errors))
-        self.assertEqual(tests.IsA(Exception), errors.values()[0])
+        self.assertEqual(tests.IsA(Exception), list(errors.values())[0])
 
     def test_indirect_symlink_loop(self):
         """More indirect loops should also be detected"""
@@ -418,15 +427,15 @@ class TestIsPathInsideBaseDir(object):
             '/ø'.encode('utf-8'))
 
     def test_byte_inside_str_fails(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             path.is_path_inside_base_dir('/æ/øå'.encode('utf-8'), '/æ')
 
     def test_str_inside_byte_fails(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             path.is_path_inside_base_dir('/æ/øå', '/æ'.encode('utf-8'))
 
     def test_str_inside_str_fails(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(TypeError):
             path.is_path_inside_base_dir('/æ/øå', '/æ')
 
 

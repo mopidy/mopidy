@@ -1,7 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import collections
-
 from mopidy import compat, exceptions
 from mopidy.compat import urllib
 
@@ -26,7 +24,7 @@ def _check_iterable(arg, msg, **kwargs):
     """Ensure we have an iterable which is not a string or an iterator"""
     if isinstance(arg, compat.string_types):
         raise exceptions.ValidationError(msg.format(arg=arg, **kwargs))
-    elif not isinstance(arg, collections.Iterable):
+    elif not isinstance(arg, compat.collections_abc.Iterable):
         raise exceptions.ValidationError(msg.format(arg=arg, **kwargs))
     elif iter(arg) is iter(arg):
         raise exceptions.ValidationError(msg.format(arg=arg, **kwargs))
@@ -72,7 +70,7 @@ def check_query(arg, fields=SEARCH_FIELDS, list_values=True):
     # TODO: normalize blank -> [] or just remove field?
     # TODO: remove list_values?
 
-    if not isinstance(arg, collections.Mapping):
+    if not isinstance(arg, compat.collections_abc.Mapping):
         raise exceptions.ValidationError(
             'Expected a query dictionary, not {arg!r}'.format(arg=arg))
 

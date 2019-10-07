@@ -1,9 +1,9 @@
 from __future__ import absolute_import, unicode_literals
 
 import copy
-import itertools
 import weakref
 
+from mopidy import compat
 from mopidy.models.fields import Field
 
 
@@ -82,7 +82,7 @@ class ImmutableObject(object):
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
             return False
-        return all(a == b for a, b in itertools.izip_longest(
+        return all(a == b for a, b in compat.zip_longest(
             self._items(), other._items(), fillvalue=object()))
 
     def __ne__(self, other):
@@ -143,7 +143,8 @@ class _ValidatedImmutableObjectMeta(type):
 
         attrs['_fields'] = fields
         attrs['_instances'] = weakref.WeakValueDictionary()
-        attrs['__slots__'] = list(attrs.get('__slots__', [])) + fields.values()
+        attrs['__slots__'] = (
+            list(attrs.get('__slots__', [])) + list(fields.values()))
 
         clsc = super(_ValidatedImmutableObjectMeta, cls).__new__(
             cls, name, bases, attrs)
@@ -159,6 +160,7 @@ class _ValidatedImmutableObjectMeta(type):
         return cls._instances.setdefault(weakref.ref(instance), instance)
 
 
+@compat.add_metaclass(_ValidatedImmutableObjectMeta)
 class ValidatedImmutableObject(ImmutableObject):
     """
     Superclass for immutable objects whose fields can only be modified via the
@@ -170,7 +172,6 @@ class ValidatedImmutableObject(ImmutableObject):
     give you the same instance twice.
     """
 
-    __metaclass__ = _ValidatedImmutableObjectMeta
     __slots__ = ['_hash']
 
     def __hash__(self):

@@ -96,8 +96,12 @@ class Identifier(String):
     """
     def validate(self, value):
         value = super(Identifier, self).validate(value)
-        if isinstance(value, compat.text_type):
-            value = value.encode('utf-8')
+        if compat.PY2:
+            if isinstance(value, unicode):
+                value = value.encode('utf-8')
+        else:
+            if isinstance(value, bytes):
+                value = value.decode('utf-8')
         return compat.intern(value)
 
 

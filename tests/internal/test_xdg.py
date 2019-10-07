@@ -21,7 +21,7 @@ def test_cache_dir_default(environ):
 
 
 def test_cache_dir_from_env(environ):
-    os.environ['XDG_CACHE_HOME'] = b'/foo/bar'
+    os.environ['XDG_CACHE_HOME'] = '/foo/bar'
 
     assert xdg.get_dirs()['XDG_CACHE_DIR'] == b'/foo/bar'
     assert type(xdg.get_dirs()['XDG_CACHE_DIR']) == bytes
@@ -32,7 +32,7 @@ def test_config_dir_default(environ):
 
 
 def test_config_dir_from_env(environ):
-    os.environ['XDG_CONFIG_HOME'] = b'/foo/bar'
+    os.environ['XDG_CONFIG_HOME'] = '/foo/bar'
 
     assert xdg.get_dirs()['XDG_CONFIG_DIR'] == b'/foo/bar'
     assert type(xdg.get_dirs()['XDG_CONFIG_DIR']) == bytes
@@ -44,7 +44,7 @@ def test_data_dir_default(environ):
 
 
 def test_data_dir_from_env(environ):
-    os.environ['XDG_DATA_HOME'] = b'/foo/bar'
+    os.environ['XDG_DATA_HOME'] = '/foo/bar'
 
     assert xdg.get_dirs()['XDG_DATA_DIR'] == b'/foo/bar'
     assert type(xdg.get_dirs()['XDG_DATA_DIR']) == bytes

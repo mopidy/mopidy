@@ -6,6 +6,7 @@ PY2 = sys.version_info[0] == 2
 PY3 = sys.version_info[0] == 3
 
 if PY2:
+    import collections as collections_abc  # noqa
     import ConfigParser as configparser  # noqa
     import Queue as queue  # noqa
     import thread  # noqa
@@ -40,7 +41,10 @@ if PY2:
     def itervalues(dct, **kwargs):
         return iter(dct.itervalues(**kwargs))
 
+    from itertools import izip_longest as zip_longest  # noqa
+
 else:
+    import collections.abc as collections_abc  # noqa
     import configparser  # noqa
     import queue  # noqa
     import _thread as thread  # noqa
@@ -55,3 +59,23 @@ else:
 
     def itervalues(dct, **kwargs):
         return iter(dct.values(**kwargs))
+
+    from itertools import zip_longest  # noqa
+
+
+def add_metaclass(metaclass):
+    """Class decorator for creating a class with a metaclass."""
+    def wrapper(cls):
+        orig_vars = cls.__dict__.copy()
+        slots = orig_vars.get('__slots__')
+        if slots is not None:
+            if isinstance(slots, str):
+                slots = [slots]
+            for slots_var in slots:
+                orig_vars.pop(slots_var)
+        orig_vars.pop('__dict__', None)
+        orig_vars.pop('__weakref__', None)
+        if hasattr(cls, '__qualname__'):
+            orig_vars['__qualname__'] = cls.__qualname__
+        return metaclass(cls.__name__, cls.__bases__, orig_vars)
+    return wrapper

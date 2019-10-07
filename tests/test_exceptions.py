@@ -14,15 +14,15 @@ class ExceptionsTest(unittest.TestCase):
         self.assertEqual(str(exc), 'foo')
 
     def test_backend_error_is_a_mopidy_exception(self):
-        self.assert_(issubclass(
+        self.assertTrue(issubclass(
             exceptions.BackendError, exceptions.MopidyException))
 
     def test_extension_error_is_a_mopidy_exception(self):
-        self.assert_(issubclass(
+        self.assertTrue(issubclass(
             exceptions.ExtensionError, exceptions.MopidyException))
 
     def test_find_error_is_a_mopidy_exception(self):
-        self.assert_(issubclass(
+        self.assertTrue(issubclass(
             exceptions.FindError, exceptions.MopidyException))
 
     def test_find_error_can_store_an_errno(self):
@@ -32,17 +32,17 @@ class ExceptionsTest(unittest.TestCase):
         self.assertEqual(exc.errno, 1234)
 
     def test_frontend_error_is_a_mopidy_exception(self):
-        self.assert_(issubclass(
+        self.assertTrue(issubclass(
             exceptions.FrontendError, exceptions.MopidyException))
 
     def test_mixer_error_is_a_mopidy_exception(self):
-        self.assert_(issubclass(
+        self.assertTrue(issubclass(
             exceptions.MixerError, exceptions.MopidyException))
 
     def test_scanner_error_is_a_mopidy_exception(self):
-        self.assert_(issubclass(
+        self.assertTrue(issubclass(
             exceptions.ScannerError, exceptions.MopidyException))
 
     def test_audio_error_is_a_mopidy_exception(self):
-        self.assert_(issubclass(
+        self.assertTrue(issubclass(
             exceptions.AudioException, exceptions.MopidyException))
