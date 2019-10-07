@@ -33,7 +33,10 @@ setup(
         'setuptools',
         'tornado >= 4.4, < 6',  # Tornado 6 requires Python 3
     ],
-    extras_require={'http': []},
+    extras_require={
+        'http': [],  # Keep for backwards compat
+        ':python_version<"3.2"': ['pathlib2'],
+    },
     entry_points={
         'console_scripts': [
             'mopidy = mopidy.__main__:main',

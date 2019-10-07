@@ -8,6 +8,7 @@ PY3 = sys.version_info[0] == 3
 if PY2:
     import collections as collections_abc  # noqa
     import ConfigParser as configparser  # noqa
+    import pathlib2 as pathlib  # noqa
     import Queue as queue  # noqa
     import thread  # noqa
 
@@ -47,6 +48,7 @@ if PY2:
 else:
     import collections.abc as collections_abc  # noqa
     import configparser  # noqa
+    import pathlib  # noqa
     import queue  # noqa
     import _thread as thread  # noqa
     import urllib  # noqa
