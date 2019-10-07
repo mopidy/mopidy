@@ -71,7 +71,7 @@ def path_to_uri(path):
     drive, path = os.path.splitdrive(path)
     path = urllib.parse.quote(path)
     if drive:
-        path = posixpath.sep.join([b'', drive])+path
+        path = posixpath.sep.join([b'', drive]) + path
     return urllib.parse.urlunsplit((b'file', b'', path, b'', b''))
 
 
@@ -144,13 +144,14 @@ def _find_worker(relative, follow, done, work, results, errors):
 
             # st_dev and st_ino are always 0 on win32
             signature = (st.st_dev, st.st_ino)
-            if signature != (0,0) and signature in parents:
+            if signature != (0, 0) and signature in parents:
                 errors[path] = exceptions.FindError('Sym/hardlink loop found.')
                 continue
 
             # backstop to prevent infinite recursion
             if len(parents) > MAX_RECURSE:
-                errors[path] = exceptions.FindError('Overly deep dir recursion found.')
+                errors[path] = exceptions.FindError('Overly deep dir '
+                                                    'recursion found.')
                 continue
 
             parents = parents + [signature]

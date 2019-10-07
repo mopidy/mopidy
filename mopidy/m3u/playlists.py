@@ -9,7 +9,7 @@ import os
 import posixpath
 import tempfile
 
-from mopidy import backend, posix_normpath
+from mopidy import backend
 from mopidy.internal import path
 
 from . import Extension, translator
@@ -89,7 +89,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
                 pass
             mtime = os.path.getmtime(self._abspath(path))
         except EnvironmentError as e:
-            log_environment_error('Error creating playlist %s > %s' % (self._playlists_dir, self._abspath(path)), e)
+            log_environment_error('Error creating playlist %s' % name, e)
         else:
             return translator.playlist(path, [], mtime)
 

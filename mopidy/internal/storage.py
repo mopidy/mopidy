@@ -50,7 +50,8 @@ def dump(path, data):
     try:
         with tempfile.NamedTemporaryFile(
                 prefix=basename + '.', dir=directory, delete=False) as tmp:
-            with gzip.GzipFile(fileobj=tmp, mode='wb', filename=basename[:-3]) as fp:
+            with gzip.GzipFile(fileobj=tmp, mode='wb',
+                               filename=basename[:-3]) as fp:
                 json.dump(data, fp, cls=models.ModelJSONEncoder,
                           indent=2, separators=(',', ': '))
         if os.path.exists(path):

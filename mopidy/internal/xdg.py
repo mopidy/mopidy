@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import io
 import os
 
+from mopidy import posix_normpath
 from mopidy.compat import configparser
 
 
@@ -25,10 +26,12 @@ def get_dirs():
             os.path.normpath(os.path.expanduser(b'~/.cache')).encode('utf-8')),
         'XDG_CONFIG_DIR': (
             os.environ.get('XDG_CONFIG_HOME') or
-            os.path.normpath(os.path.expanduser(b'~/.config')).encode('utf-8')),
+            os.path.normpath(
+                os.path.expanduser(b'~/.config')).encode('utf-8')),
         'XDG_DATA_DIR': (
             os.environ.get('XDG_DATA_HOME') or
-            os.path.normpath(os.path.expanduser(b'~/.local/share')).encode('utf-8'))
+            os.path.normpath(
+                os.path.expanduser(b'~/.local/share')).encode('utf-8'))
     }
 
     dirs.update(_get_user_dirs(dirs['XDG_CONFIG_DIR']))
@@ -56,7 +59,8 @@ def _get_user_dirs(xdg_config_dir):
         data = fh.read()
 
     data = b'[XDG_USER_DIRS]\n' + data
-    data = data.replace(b'$HOME', os.path.normpath(os.path.expanduser(b'~')).encode('utf-8'))
+    user_path = os.path.normpath(os.path.expanduser(b'~')).encode('utf-8')
+    data = data.replace(b'$HOME', user_path)
     data = data.replace(b'"', b'')
 
     config = configparser.RawConfigParser()
