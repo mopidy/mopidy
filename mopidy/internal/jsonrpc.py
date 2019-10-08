@@ -355,7 +355,7 @@ class JsonRpcInspector(object):
         }
 
     def _describe_params(self, method):
-        argspec = inspect.getargspec(method)
+        argspec = compat.getargspec(method)
 
         defaults = argspec.defaults and list(argspec.defaults) or []
         num_args_without_default = len(argspec.args) - len(defaults)

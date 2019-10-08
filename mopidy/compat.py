@@ -41,6 +41,7 @@ if PY2:
     def itervalues(dct, **kwargs):
         return iter(dct.itervalues(**kwargs))
 
+    from inspect import getargspec  # noqa
     from itertools import izip_longest as zip_longest  # noqa
 
 else:
@@ -61,6 +62,13 @@ else:
         return iter(dct.values(**kwargs))
 
     from itertools import zip_longest  # noqa
+
+    import inspect  # noqa
+
+    def getargspec(func):
+        spec = inspect.getfullargspec(func)
+        return inspect.ArgSpec(
+            spec.args, spec.varargs, spec.varkw, spec.defaults)
 
 
 def add_metaclass(metaclass):
