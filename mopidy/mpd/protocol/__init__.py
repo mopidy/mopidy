@@ -12,8 +12,6 @@ implement our own MPD server which is compatible with the numerous existing
 
 from __future__ import absolute_import, unicode_literals
 
-import inspect
-
 from mopidy import compat
 from mopidy.mpd import exceptions
 
@@ -162,7 +160,7 @@ class Commands(object):
                     return func(*args, **kwargs)
 
                 try:
-                    callargs = inspect.getcallargs(func, *args, **kwargs)
+                    callargs = compat.getcallargs(func, *args, **kwargs)
                 except TypeError:
                     raise exceptions.MpdArgError(
                         'wrong number of arguments for "%s"' % name)
