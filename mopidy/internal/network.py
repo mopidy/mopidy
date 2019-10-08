@@ -290,16 +290,16 @@ class Connection(object):
         if self.recv_id is not None:
             return
 
-        # GLib wants to see actual socket passed on win32
-        if sys.platform == 'win32':
-            chan = self._sock
-        else:
-            chan = self._sock.fileno()
-
         try:
+            # GLib wants to see actual socket passed on win32
+            if sys.platform == 'win32':
+                chan = self._sock
+            else:
+                chan = self._sock.fileno()
+
             self.recv_id = GLib.io_add_watch(
                 chan,
-                1,  # priority?
+                1,  # priority
                 GLib.IO_IN | GLib.IO_ERR | GLib.IO_HUP,
                 self.recv_callback)
         except socket.error as e:

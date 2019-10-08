@@ -47,11 +47,9 @@ class ServerTest(unittest.TestCase):
 
         network.Server.__init__(
             self.mock, sentinel.host, sentinel.port, sentinel.protocol)
-        res = sock if sys.platform == 'win32' else sentinel.fileno
-        self.mock.register_server_socket.assert_called_once_with(res)
+        self.mock.register_server_socket.assert_called_once_with(sock)
 
-    @pytest.mark.skipif(sys.platform == 'win32',
-                        reason="fileno not used with win32")
+    @pytest.mark.skip(reason="fileno not called by Server.__init__")
     @patch.object(network, 'get_socket_address', new=Mock())
     def test_init_fails_on_fileno_call(self):
         sock = Mock(spec=socket.SocketType)
@@ -179,9 +177,10 @@ class ServerTest(unittest.TestCase):
         self.mock.server_socket = sock
         network.Server.register_server_socket(self.mock,
                                               self.mock.server_socket)
+        result = self.mock.server_socket if sys.platform == 'win32' \
+            else self.mock.server_socket.fileno()
         GLib.io_add_watch.assert_called_once_with(
-            self.mock.server_socket, 1, GLib.IO_IN,
-            self.mock.handle_connection)
+            result, 1, GLib.IO_IN, self.mock.handle_connection)
 
     def test_handle_connection(self):
         self.mock.accept_connection.return_value = (
