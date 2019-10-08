@@ -1,7 +1,6 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
-import os
 import signal
 import sys
 
@@ -151,7 +150,7 @@ def create_initial_config_file(args, extensions_data):
 
     config_file = args.config_files[-1]
 
-    if os.path.exists(path.expand_path(config_file)):
+    if path.expand_path(config_file).exists():
         return
 
     try:
