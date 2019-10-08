@@ -1,20 +1,12 @@
 from __future__ import absolute_import, unicode_literals
 
-import os
-
 from mopidy import compat
+from mopidy.compat import pathlib
 
 
 def path_to_data_dir(name):
-    if not isinstance(name, bytes):
-        name = name.encode('utf-8')
-    if compat.PY2:
-        path = os.path.dirname(__file__)
-    else:
-        path = os.path.dirname(__file__.encode('utf-8'))
-    path = os.path.join(path, b'data')
-    path = os.path.abspath(path)
-    return os.path.join(path, name)
+    path = pathlib.Path(__file__).parent / 'data' / name
+    return path.resolve()
 
 
 class IsA(object):
