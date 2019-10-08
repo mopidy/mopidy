@@ -139,10 +139,7 @@ class Commands(object):
             if name in self.handlers:
                 raise ValueError('%s already registered' % name)
 
-            if compat.PY2:
-                spec = inspect.getargspec(func)
-            else:
-                spec = inspect.getfullargspec(func)
+            spec = compat.getargspec(func)
             defaults = dict(
                 zip(spec.args[-len(spec.defaults or []):], spec.defaults or [])
             )
@@ -157,12 +154,8 @@ class Commands(object):
             if not set(validators.keys()).issubset(spec.args):
                 raise TypeError('Validator for non-existent arg passed')
 
-            if compat.PY2:
-                if spec.keywords:
-                    raise TypeError('Keyword arguments are not permitted')
-            else:
-                if spec.varkw or spec.kwonlyargs:
-                    raise TypeError('Keyword arguments are not permitted')
+            if spec.keywords:
+                raise TypeError('Keyword arguments are not permitted')
 
             def validate(*args, **kwargs):
                 if spec.varargs:
