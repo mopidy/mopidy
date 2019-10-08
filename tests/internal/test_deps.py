@@ -63,7 +63,7 @@ class DepsTest(unittest.TestCase):
         self.assertEqual('Python', result['name'])
         self.assertIn(platform.python_implementation(), result['version'])
         self.assertIn(platform.python_version(), result['version'])
-        self.assertIn('python', result['path'])
+        self.assertIn('python', result['path'].lower())
         self.assertNotIn('platform.py', result['path'])
 
     def test_gstreamer_info(self):
