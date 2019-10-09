@@ -61,4 +61,3 @@ def dump(path, data):
         if os.path.exists(tmp.name):
             tmp.close()
             os.remove(tmp.name)
-
