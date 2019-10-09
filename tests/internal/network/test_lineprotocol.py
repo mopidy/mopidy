@@ -27,7 +27,7 @@ class LineProtocolTest(unittest.TestCase):
         delimiter = re.compile(network.LineProtocol.terminator)
         network.LineProtocol.__init__(self.mock, sentinel.connection)
         self.assertEqual(sentinel.connection, self.mock.connection)
-        self.assertEqual('', self.mock.recv_buffer)
+        self.assertEqual(b'', self.mock.recv_buffer)
         self.assertEqual(delimiter, self.mock.delimiter)
         self.assertFalse(self.mock.prevent_timeout)
 
@@ -128,98 +128,107 @@ class LineProtocolTest(unittest.TestCase):
         self.mock.connection.stop.assert_called_once_with('Actor failed.')
 
     def test_parse_lines_emtpy_buffer(self):
+        self.mock.terminator = '\n'
         self.mock.delimiter = re.compile(r'\n')
         self.mock.recv_buffer = ''
 
         lines = network.LineProtocol.parse_lines(self.mock)
         with self.assertRaises(StopIteration):
-            lines.next()
+            next(lines)
 
     def test_parse_lines_no_terminator(self):
+        self.mock.terminator = '\n'
         self.mock.delimiter = re.compile(r'\n')
         self.mock.recv_buffer = 'data'
 
         lines = network.LineProtocol.parse_lines(self.mock)
         with self.assertRaises(StopIteration):
-            lines.next()
+            next(lines)
 
-    def test_parse_lines_termintor(self):
+    def test_parse_lines_terminator(self):
+        self.mock.terminator = '\n'
         self.mock.delimiter = re.compile(r'\n')
         self.mock.recv_buffer = 'data\n'
 
         lines = network.LineProtocol.parse_lines(self.mock)
-        self.assertEqual('data', lines.next())
+        self.assertEqual('data', next(lines))
         with self.assertRaises(StopIteration):
-            lines.next()
+            next(lines)
         self.assertEqual('', self.mock.recv_buffer)
 
-    def test_parse_lines_termintor_with_carriage_return(self):
+    def test_parse_lines_terminator_with_carriage_return(self):
+        self.mock.terminator = '\n'
         self.mock.delimiter = re.compile(r'\r?\n')
         self.mock.recv_buffer = 'data\r\n'
 
         lines = network.LineProtocol.parse_lines(self.mock)
-        self.assertEqual('data', lines.next())
+        self.assertEqual('data', next(lines))
         with self.assertRaises(StopIteration):
-            lines.next()
+            next(lines)
         self.assertEqual('', self.mock.recv_buffer)
 
     def test_parse_lines_no_data_before_terminator(self):
+        self.mock.terminator = '\n'
         self.mock.delimiter = re.compile(r'\n')
         self.mock.recv_buffer = '\n'
 
         lines = network.LineProtocol.parse_lines(self.mock)
-        self.assertEqual('', lines.next())
+        self.assertEqual('', next(lines))
         with self.assertRaises(StopIteration):
-            lines.next()
+            next(lines)
         self.assertEqual('', self.mock.recv_buffer)
 
     def test_parse_lines_extra_data_after_terminator(self):
+        self.mock.terminator = '\n'
         self.mock.delimiter = re.compile(r'\n')
         self.mock.recv_buffer = 'data1\ndata2'
 
         lines = network.LineProtocol.parse_lines(self.mock)
-        self.assertEqual('data1', lines.next())
+        self.assertEqual('data1', next(lines))
         with self.assertRaises(StopIteration):
-            lines.next()
+            next(lines)
         self.assertEqual('data2', self.mock.recv_buffer)
 
-    def test_parse_lines_unicode(self):
-        self.mock.delimiter = re.compile(r'\n')
+    def test_parse_lines_non_ascii(self):
+        self.mock.terminator = b'\n'
+        self.mock.delimiter = re.compile(br'\n')
         self.mock.recv_buffer = 'æøå\n'.encode('utf-8')
 
         lines = network.LineProtocol.parse_lines(self.mock)
-        self.assertEqual('æøå'.encode('utf-8'), lines.next())
+        self.assertEqual('æøå'.encode('utf-8'), next(lines))
         with self.assertRaises(StopIteration):
-            lines.next()
-        self.assertEqual('', self.mock.recv_buffer)
+            next(lines)
+        self.assertEqual(b'', self.mock.recv_buffer)
 
     def test_parse_lines_multiple_lines(self):
+        self.mock.terminator = '\n'
         self.mock.delimiter = re.compile(r'\n')
         self.mock.recv_buffer = 'abc\ndef\nghi\njkl'
 
         lines = network.LineProtocol.parse_lines(self.mock)
-        self.assertEqual('abc', lines.next())
-        self.assertEqual('def', lines.next())
-        self.assertEqual('ghi', lines.next())
+        self.assertEqual('abc', next(lines))
+        self.assertEqual('def', next(lines))
+        self.assertEqual('ghi', next(lines))
         with self.assertRaises(StopIteration):
-            lines.next()
+            next(lines)
         self.assertEqual('jkl', self.mock.recv_buffer)
 
     def test_parse_lines_multiple_calls(self):
+        self.mock.terminator = '\n'
         self.mock.delimiter = re.compile(r'\n')
         self.mock.recv_buffer = 'data1'
 
         lines = network.LineProtocol.parse_lines(self.mock)
         with self.assertRaises(StopIteration):
-            lines.next()
+            next(lines)
         self.assertEqual('data1', self.mock.recv_buffer)
 
         self.mock.recv_buffer += '\ndata2'
 
         lines = network.LineProtocol.parse_lines(self.mock)
-        self.assertEqual('data1', lines.next())
+        self.assertEqual('data1', next(lines))
         with self.assertRaises(StopIteration):
-            lines.next()
+            next(lines)
         self.assertEqual('data2', self.mock.recv_buffer)
 
     def test_send_lines_called_with_no_lines(self):
@@ -255,6 +264,7 @@ class LineProtocolTest(unittest.TestCase):
         self.assertEqual('', network.LineProtocol.join_lines(self.mock, []))
 
     def test_join_lines_returns_joined_lines(self):
+        self.mock.decode.return_value = '\n'
         self.assertEqual('1\n2\n', network.LineProtocol.join_lines(
             self.mock, ['1', '2']))
 
@@ -265,7 +275,7 @@ class LineProtocolTest(unittest.TestCase):
         string.decode.assert_called_once_with(self.mock.encoding)
 
     def test_decode_plain_ascii(self):
-        result = network.LineProtocol.decode(self.mock, 'abc')
+        result = network.LineProtocol.decode(self.mock, b'abc')
         self.assertEqual('abc', result)
         self.assertEqual(compat.text_type, type(result))
 
@@ -290,13 +300,13 @@ class LineProtocolTest(unittest.TestCase):
 
     def test_encode_plain_ascii(self):
         result = network.LineProtocol.encode(self.mock, 'abc')
-        self.assertEqual('abc', result)
-        self.assertEqual(str, type(result))
+        self.assertEqual(b'abc', result)
+        self.assertEqual(bytes, type(result))
 
     def test_encode_utf8(self):
         result = network.LineProtocol.encode(self.mock, 'æøå')
         self.assertEqual('æøå'.encode('utf-8'), result)
-        self.assertEqual(str, type(result))
+        self.assertEqual(bytes, type(result))
 
     def test_encode_invalid_data(self):
         string = Mock()
