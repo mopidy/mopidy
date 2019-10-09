@@ -46,17 +46,19 @@ def dump(path, data):
     """
     directory, basename = os.path.split(path)
 
-    # TODO: cleanup directory/basename.* files.
+    tmp = tempfile.NamedTemporaryFile(prefix=basename + '.',
+                                      dir=directory, delete=False)
     try:
-        with tempfile.NamedTemporaryFile(
-                prefix=basename + '.', dir=directory, delete=False) as tmp:
-            with gzip.GzipFile(fileobj=tmp, mode='wb',
-                               filename=basename[:-3]) as fp:
-                json.dump(data, fp, cls=models.ModelJSONEncoder,
-                          indent=2, separators=(',', ': '))
+        with gzip.GzipFile(fileobj=tmp, mode='wb',
+                           filename=basename[:-3]) as fp:
+            json.dump(data, fp, cls=models.ModelJSONEncoder,
+                      indent=2, separators=(',', ': '))
+        tmp.close()
         if os.path.exists(path):
             os.remove(path)
         os.rename(tmp.name, path)
     finally:
         if os.path.exists(tmp.name):
+            tmp.close()
             os.remove(tmp.name)
+

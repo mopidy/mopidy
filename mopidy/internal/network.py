@@ -107,7 +107,6 @@ class Server(object):
         self.server_socket = self.create_server_socket(host, port)
         self.address = get_socket_address(host, port)
 
-        # GLib wants to get actual socket on win32, so we pass the socket
         self.watcher = self.register_server_socket(self.server_socket)
 
     def create_server_socket(self, host, port):
