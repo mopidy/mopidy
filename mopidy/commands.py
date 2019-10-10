@@ -21,11 +21,11 @@ logger = logging.getLogger(__name__)
 _default_config = []
 for base in GLib.get_system_config_dirs() + [GLib.get_user_config_dir()]:
     _default_config.append(os.path.join(base, b'mopidy', b'mopidy.conf'))
-DEFAULT_CONFIG = b';'.join(_default_config)
+DEFAULT_CONFIG = b':'.join(_default_config)
 
 
 def config_files_type(value):
-    return value.split(b';')  # win32 uses : for drive-name indicator
+    return value.split(b':')
 
 
 def config_override_type(value):
