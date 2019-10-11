@@ -22,9 +22,7 @@ jobs:
       - checkout
       - restore_cache:
           name: Restoring tox cache
-          keys:
-            - tox-v1-{{ .Environment.CIRCLE_JOB }}-{{ checksum "setup.py" }}
-            - tox-v1-{{ .Environment.CIRCLE_JOB }}
+          keys: tox-v1-{{ .Environment.CIRCLE_JOB }}-{{ checksum "setup.py" }}
       - run:
           name: Run tests
           command: |
