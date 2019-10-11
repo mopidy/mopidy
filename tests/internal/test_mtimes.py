@@ -1,179 +1,206 @@
 import os
 import shutil
-import tempfile
-import unittest
+
+import pytest
 
 from mopidy import exceptions
+from mopidy.compat import pathlib
 from mopidy.internal import mtimes
 
 import tests
 
 
-class FindMTimesTest(unittest.TestCase):
-    maxDiff = None  # noqa: N815
+@pytest.fixture
+def tmp_dir_path(tmp_path):
+    yield tmp_path
+    if tmp_path.is_dir():
+        shutil.rmtree(str(tmp_path))
 
-    def setUp(self):  # noqa: N802
-        self.tmpdir = tempfile.mkdtemp('.mopidy-tests').encode('utf-8')
 
-    def tearDown(self):  # noqa: N802
-        shutil.rmtree(self.tmpdir, ignore_errors=True)
+def test_names_are_pathlib_objects():
+    result, errors = mtimes.find_mtimes(str(tests.path_to_data_dir('')))
 
-    def mkdir(self, *args):
-        name = os.path.join(self.tmpdir, *[a.encode('utf-8') for a in args])
-        os.mkdir(name)
-        return name
+    for name in list(result.keys()) + list(errors.keys()):
+        assert isinstance(name, pathlib.Path)
 
-    def touch(self, *args):
-        name = os.path.join(self.tmpdir, *[a.encode('utf-8') for a in args])
-        open(name, 'w').close()
-        return name
 
-    def test_names_are_native_strings(self):
-        """We shouldn't be mixing in unicode for paths."""
-        result, errors = mtimes.find_mtimes(str(tests.path_to_data_dir('')))
-        for name in list(result.keys()) + list(errors.keys()):
-            self.assertEqual(name, tests.IsA(str))
+def test_nonexistent_dir_is_an_error(tmp_dir_path):
+    missing_path = tmp_dir_path / 'does-not-exist'
 
-    def test_nonexistent_dir(self):
-        """Non existent search roots are an error"""
-        missing = os.path.join(self.tmpdir, b'does-not-exist')
-        result, errors = mtimes.find_mtimes(missing)
-        self.assertEqual(result, {})
-        self.assertEqual(errors, {missing: tests.IsA(exceptions.FindError)})
+    result, errors = mtimes.find_mtimes(missing_path)
 
-    def test_empty_dir(self):
-        """Empty directories should not show up in results"""
-        self.mkdir('empty')
+    assert result == {}
+    assert errors == {missing_path: tests.IsA(exceptions.FindError)}
 
-        result, errors = mtimes.find_mtimes(self.tmpdir)
-        self.assertEqual(result, {})
-        self.assertEqual(errors, {})
 
-    def test_file_as_the_root(self):
-        """Specifying a file as the root should just return the file"""
-        single = self.touch('single')
+def test_empty_dirs_are_not_in_the_result(tmp_dir_path):
+    """Empty directories should not show up in results"""
+    dir_path = (tmp_dir_path / 'empty')
+    dir_path.mkdir()
 
-        result, errors = mtimes.find_mtimes(single)
-        self.assertEqual(result, {single: tests.any_int})
-        self.assertEqual(errors, {})
+    result, errors = mtimes.find_mtimes(dir_path)
 
-    def test_nested_directories(self):
-        """Searching nested directories should find all files"""
+    assert result == {}
+    assert errors == {}
 
-        # Setup foo/bar and baz directories
-        self.mkdir('foo')
-        self.mkdir('foo', 'bar')
-        self.mkdir('baz')
 
-        # Touch foo/file foo/bar/file and baz/file
-        foo_file = self.touch('foo', 'file')
-        foo_bar_file = self.touch('foo', 'bar', 'file')
-        baz_file = self.touch('baz', 'file')
+def test_file_as_the_root_just_returns_the_file(tmp_dir_path):
+    file_path = tmp_dir_path / 'single'
+    file_path.touch()
 
-        result, errors = mtimes.find_mtimes(self.tmpdir)
-        self.assertEqual(result, {foo_file: tests.any_int,
-                                  foo_bar_file: tests.any_int,
-                                  baz_file: tests.any_int})
-        self.assertEqual(errors, {})
+    result, errors = mtimes.find_mtimes(file_path)
 
-    def test_missing_permission_to_file(self):
-        """Missing permissions to a file is not a search error"""
-        target = self.touch('no-permission')
-        os.chmod(target, 0)
+    assert result == {file_path: tests.any_int}
+    assert errors == {}
 
-        result, errors = mtimes.find_mtimes(self.tmpdir)
-        self.assertEqual({target: tests.any_int}, result)
-        self.assertEqual({}, errors)
 
-    def test_missing_permission_to_directory(self):
-        """Missing permissions to a directory is an error"""
-        directory = self.mkdir('no-permission')
-        os.chmod(directory, 0)
+def test_nested_directories(tmp_dir_path):
+    # Setup foo/bar and baz directories
+    foo_path = tmp_dir_path / 'foo' / 'file'
+    foo_path.parent.mkdir()
+    foo_path.touch()
+    foo_bar_path = tmp_dir_path / 'foo' / 'bar' / 'filee'
+    foo_bar_path.parent.mkdir()
+    foo_bar_path.touch()
+    baz_path = tmp_dir_path / 'baz' / 'file'
+    baz_path.parent.mkdir()
+    baz_path.touch()
 
-        result, errors = mtimes.find_mtimes(self.tmpdir)
-        self.assertEqual({}, result)
-        self.assertEqual({directory: tests.IsA(exceptions.FindError)}, errors)
+    result, errors = mtimes.find_mtimes(tmp_dir_path)
 
-    def test_symlinks_are_ignored(self):
-        """By default symlinks should be treated as an error"""
-        target = self.touch('target')
-        link = os.path.join(self.tmpdir, b'link')
-        os.symlink(target, link)
+    assert result == {
+        foo_path: tests.any_int,
+        foo_bar_path: tests.any_int,
+        baz_path: tests.any_int,
+    }
+    assert errors == {}
 
-        result, errors = mtimes.find_mtimes(self.tmpdir)
-        self.assertEqual(result, {target: tests.any_int})
-        self.assertEqual(errors, {link: tests.IsA(exceptions.FindError)})
 
-    def test_symlink_to_file_as_root_is_followed(self):
-        """Passing a symlink as the root should be followed when follow=True"""
-        target = self.touch('target')
-        link = os.path.join(self.tmpdir, b'link')
-        os.symlink(target, link)
+def test_missing_permission_to_file_is_not_an_error(tmp_dir_path):
+    """Missing permissions to a file is not a search error"""
+    file_path = tmp_dir_path / 'file'
+    file_path.touch(mode=0o000)
 
-        result, errors = mtimes.find_mtimes(link, follow=True)
-        self.assertEqual({link: tests.any_int}, result)
-        self.assertEqual({}, errors)
+    result, errors = mtimes.find_mtimes(tmp_dir_path)
 
-    def test_symlink_to_directory_is_followed(self):
-        pass
+    assert result == {file_path: tests.any_int}
+    assert errors == {}
 
-    def test_symlink_pointing_at_itself_fails(self):
-        """Symlink pointing at itself should give as an OS error"""
-        link = os.path.join(self.tmpdir, b'link')
-        os.symlink(link, link)
+    file_path.chmod(0o644)
 
-        result, errors = mtimes.find_mtimes(link, follow=True)
-        self.assertEqual({}, result)
-        self.assertEqual({link: tests.IsA(exceptions.FindError)}, errors)
 
-    def test_symlink_pointing_at_parent_fails(self):
-        """We should detect a loop via the parent and give up on the branch"""
-        os.symlink(self.tmpdir, os.path.join(self.tmpdir, b'link'))
+def test_missing_permission_to_directory_is_an_error(tmp_dir_path):
+    dir_path = tmp_dir_path / 'dir'
+    dir_path.mkdir(mode=0o000)
 
-        result, errors = mtimes.find_mtimes(self.tmpdir, follow=True)
-        self.assertEqual({}, result)
-        self.assertEqual(1, len(errors))
-        self.assertEqual(tests.IsA(Exception), list(errors.values())[0])
+    result, errors = mtimes.find_mtimes(tmp_dir_path)
 
-    def test_indirect_symlink_loop(self):
-        """More indirect loops should also be detected"""
-        # Setup tmpdir/directory/loop where loop points to tmpdir
-        directory = os.path.join(self.tmpdir, b'directory')
-        loop = os.path.join(directory, b'loop')
+    assert result == {}
+    assert errors == {dir_path: tests.IsA(exceptions.FindError)}
 
-        os.mkdir(directory)
-        os.symlink(self.tmpdir, loop)
+    dir_path.chmod(0o755)
 
-        result, errors = mtimes.find_mtimes(self.tmpdir, follow=True)
-        self.assertEqual({}, result)
-        self.assertEqual({loop: tests.IsA(Exception)}, errors)
 
-    def test_symlink_branches_are_not_excluded(self):
-        """Using symlinks to make a file show up multiple times should work"""
-        self.mkdir('directory')
-        target = self.touch('directory', 'target')
-        link1 = os.path.join(self.tmpdir, b'link1')
-        link2 = os.path.join(self.tmpdir, b'link2')
+def test_symlinks_are_by_default_an_error(tmp_dir_path):
+    """By default symlinks should be treated as an error"""
+    file_path = tmp_dir_path / 'file'
+    file_path.touch()
+    link_path = tmp_dir_path / 'link'
+    link_path.symlink_to(file_path)
 
-        os.symlink(target, link1)
-        os.symlink(target, link2)
+    result, errors = mtimes.find_mtimes(tmp_dir_path)
 
-        expected = {target: tests.any_int,
-                    link1: tests.any_int,
-                    link2: tests.any_int}
+    assert result == {file_path: tests.any_int}
+    assert errors == {link_path: tests.IsA(exceptions.FindError)}
 
-        result, errors = mtimes.find_mtimes(self.tmpdir, follow=True)
-        self.assertEqual(expected, result)
-        self.assertEqual({}, errors)
 
-    def test_gives_mtime_in_milliseconds(self):
-        fname = self.touch('foobar')
+def test_with_follow_symlink_to_file_as_root_is_followed(tmp_dir_path):
+    file_path = tmp_dir_path / 'file'
+    file_path.touch()
+    link_path = tmp_dir_path / 'link'
+    link_path.symlink_to(file_path)
 
-        os.utime(fname, (1, 3.14159265))
+    result, errors = mtimes.find_mtimes(link_path, follow=True)
 
-        result, errors = mtimes.find_mtimes(fname)
+    assert result == {file_path: tests.any_int}
+    assert errors == {}
 
-        self.assertEqual(len(result), 1)
-        mtime, = result.values()
-        self.assertEqual(mtime, 3141)
-        self.assertEqual(errors, {})
+
+def test_symlink_to_directory_is_followed(tmp_dir_path):
+    file_path = tmp_dir_path / 'dir' / 'file'
+    file_path.parent.mkdir()
+    file_path.touch()
+    link_path = tmp_dir_path / 'link'
+    link_path.symlink_to(file_path.parent, target_is_directory=True)
+
+    result, errors = mtimes.find_mtimes(link_path, follow=True)
+
+    assert result == {file_path: tests.any_int}
+    assert errors == {}
+
+
+def test_symlink_pointing_at_itself_fails(tmp_dir_path):
+    link_path = tmp_dir_path / 'link'
+    link_path.symlink_to(link_path)
+
+    result, errors = mtimes.find_mtimes(tmp_dir_path, follow=True)
+
+    assert result == {}
+    assert errors == {link_path: tests.IsA(exceptions.FindError)}
+
+
+def test_symlink_pointing_at_parent_fails(tmp_dir_path):
+    """We should detect a loop via the parent and give up on the branch"""
+
+    link_path = tmp_dir_path / 'link'
+    link_path.symlink_to(tmp_dir_path, target_is_directory=True)
+
+    result, errors = mtimes.find_mtimes(tmp_dir_path, follow=True)
+
+    assert result == {}
+    assert errors == {link_path: tests.IsA(Exception)}
+
+
+def test_indirect_symlink_loop(tmp_dir_path):
+    """More indirect loops should also be detected"""
+    # Setup tmpdir/directory/loop where loop points to tmpdir
+    link_path = tmp_dir_path / 'dir' / 'link'
+    link_path.parent.mkdir()
+    link_path.symlink_to(tmp_dir_path, target_is_directory=True)
+
+    result, errors = mtimes.find_mtimes(tmp_dir_path, follow=True)
+
+    assert result == {}
+    assert errors == {link_path: tests.IsA(Exception)}
+
+
+def test_symlink_branches_are_not_excluded(tmp_dir_path):
+    """Using symlinks to make a file show up multiple times should work"""
+    file_path = tmp_dir_path / 'dir' / 'file'
+    file_path.parent.mkdir()
+    file_path.touch()
+    link1_path = tmp_dir_path / 'link1'
+    link1_path.symlink_to(file_path)
+    link2_path = tmp_dir_path / 'link2'
+    link2_path.symlink_to(file_path)
+
+    result, errors = mtimes.find_mtimes(tmp_dir_path, follow=True)
+
+    assert result == {
+        file_path: tests.any_int,
+        link1_path: tests.any_int,
+        link2_path: tests.any_int,
+    }
+    assert errors == {}
+
+
+def test_gives_mtime_in_milliseconds(tmp_dir_path):
+    file_path = tmp_dir_path / 'file'
+    file_path.touch()
+
+    os.utime(str(file_path), (1, 3.14159265))
+
+    result, errors = mtimes.find_mtimes(tmp_dir_path)
+
+    assert result == {file_path: 3141}
+    assert errors == {}
