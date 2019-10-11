@@ -17,7 +17,7 @@ Backwards incompatible release.
 Dependencies
 ------------
 
-- Pykka >= 2.0 is now required.
+- Pykka >= 2.0.1 is now required.
 
 - We now use a number of constants and functions from ``GLib`` instead of their
   deprecated equivalents in ``GObject``. The exact version of PyGObject and

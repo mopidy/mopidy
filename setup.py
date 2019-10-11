@@ -28,7 +28,7 @@ setup(
         '!= 3.0.*, != 3.1.*, != 3.2.*, != 3.3.*, != 3.4.*, != 3.5.*, != 3.6.*'
     ),
     install_requires=[
-        'Pykka >= 2.0',
+        'Pykka >= 2.0.1',
         'requests >= 2.0',
         'setuptools',
         'tornado >= 5, < 6',  # Tornado 6 requires Python 3
