@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 from __future__ import absolute_import, unicode_literals
 
 import unittest
@@ -19,12 +21,13 @@ class TracklistTest(unittest.TestCase):
         }
 
         self.tracks = [
-            Track(uri='dummy1:a', name='foo'),
+            Track(uri='dummy1:ȁ', name='foo'),
             Track(uri='dummy1:b', name='foo'),
             Track(uri='dummy1:c', name='bar'),
         ]
 
         def lookup(uri):
+            uri = Track(uri=uri).uri
             future = mock.Mock()
             future.get.return_value = [t for t in self.tracks if t.uri == uri]
             return future
@@ -43,9 +46,9 @@ class TracklistTest(unittest.TestCase):
         self.library.lookup.reset_mock()
         self.core.tracklist.clear()
 
-        tl_tracks = self.core.tracklist.add(uris=['dummy1:a'])
+        tl_tracks = self.core.tracklist.add(uris=['dummy1:ȁ'])
 
-        self.library.lookup.assert_called_once_with('dummy1:a')
+        self.library.lookup.assert_called_once_with('dummy1:ȁ')
         self.assertEqual(1, len(tl_tracks))
         self.assertEqual(self.tracks[0], tl_tracks[0].track)
         self.assertEqual(tl_tracks, self.core.tracklist.get_tl_tracks()[-1:])
@@ -57,9 +60,9 @@ class TracklistTest(unittest.TestCase):
         tl_tracks = self.core.tracklist.add(uris=[t.uri for t in self.tracks])
 
         self.library.lookup.assert_has_calls([
-            mock.call('dummy1:a'),
-            mock.call('dummy1:b'),
-            mock.call('dummy1:c'),
+            mock.call(self.tracks[0].uri),
+            mock.call(self.tracks[1].uri),
+            mock.call(self.tracks[2].uri),
         ])
         self.assertEqual(3, len(tl_tracks))
         self.assertEqual(self.tracks[0], tl_tracks[0].track)
@@ -106,7 +109,20 @@ class TracklistTest(unittest.TestCase):
 
     def test_filter_fails_if_values_is_a_string(self):
         with self.assertRaises(ValueError):
-            self.core.tracklist.filter({'uri': 'a'})
+            self.core.tracklist.filter({'uri': 'ȁ'})
+
+    def test_mark_unplayable(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.tracklist._mark_unplayable(tl_tracks[0])
+        self.assertListEqual(
+            tl_tracks, self.core.tracklist.get_tl_tracks())
+
+    def test_mark_unplayable_consume(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.tracklist.set_consume(True)
+        self.core.tracklist._mark_unplayable(tl_tracks[0])
+        self.assertListEqual(
+            tl_tracks[1:], self.core.tracklist.get_tl_tracks())
 
     # TODO Extract tracklist tests from the local backend tests
 

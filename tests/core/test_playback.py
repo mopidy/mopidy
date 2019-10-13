@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 from __future__ import absolute_import, unicode_literals
 
 import mock
@@ -45,11 +47,11 @@ class MyTestPlaybackProvider(backend.PlaybackProvider):
         return uri
 
     def translate_uri(self, uri):
-        if 'error' in uri:
+        if str('error') in uri:
             raise Exception(uri)
-        elif 'unplayable' in uri:
+        elif str('unplayable') in uri:
             return None
-        elif 'limit' in uri:
+        elif str('limit') in uri:
             return self._translate_uri_call_limit(uri)
         else:
             return uri
@@ -63,7 +65,7 @@ class MyTestBackend(dummy_backend.DummyBackend):
 
 class BaseTest(object):
     config = {'core': {'max_tracklist_length': 10000}}
-    tracks = [Track(uri='dummy:a', length=1234, name='foo'),
+    tracks = [Track(uri='dummy:ȁ', length=1234, name='foȍ'),
               Track(uri='dummy:b', length=1234),
               Track(uri='dummy:c', length=1234)]
 
@@ -500,27 +502,30 @@ class TestCurrentAndPendingTlTrack(BaseTest):
         assert self.playback._pending_tl_track is None
 
     def test_pending_tl_track_after_about_to_finish(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
         self.core.playback.play()
         self.replay_events()
 
         self.trigger_about_to_finish(replay_until='stream_changed')
-        assert self.playback._pending_tl_track.track.uri == 'dummy:b'
+        assert self.playback._pending_tl_track == tl_tracks[1]
 
     def test_pending_tl_track_after_stream_changed(self):
         self.trigger_about_to_finish()
         assert self.playback._pending_tl_track is None
 
     def test_current_tl_track_after_about_to_finish(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
         self.core.playback.play()
         self.replay_events()
         self.trigger_about_to_finish(replay_until='stream_changed')
-        assert self.playback.get_current_track().uri == 'dummy:a'
+        assert self.playback.get_current_track() == tl_tracks[0].track
 
     def test_current_tl_track_after_stream_changed(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
         self.core.playback.play()
         self.replay_events()
         self.trigger_about_to_finish()
-        assert self.playback.get_current_track().uri == 'dummy:b'
+        assert self.playback.get_current_track() == tl_tracks[1].track
 
     def test_current_tl_track_after_end_of_stream(self):
         self.core.playback.play()
@@ -807,7 +812,7 @@ class EventEmissionTest(BaseTest):
 class TestUnplayableURI(BaseTest):
 
     tracks = [
-        Track(uri='unplayable://'),
+        Track(uri='unplayable://fȍȍ'),
         Track(uri='dummy:b'),
     ]
 
@@ -922,21 +927,21 @@ class TestStream(BaseTest):
 
     def test_get_stream_title_during_playback_with_tags_change(self):
         self.core.playback.play()
-        self.audio.trigger_fake_tags_changed({'title': ['foobar']}).get()
+        self.audio.trigger_fake_tags_changed({'title': ['foȍbar']}).get()
         self.replay_events()
 
-        assert self.playback.get_stream_title() == 'foobar'
+        assert self.playback.get_stream_title() == 'foȍbar'
 
     def test_get_stream_title_during_playback_with_tags_unchanged(self):
         self.core.playback.play()
-        self.audio.trigger_fake_tags_changed({'title': ['foo']}).get()
+        self.audio.trigger_fake_tags_changed({'title': ['foȍ']}).get()
         self.replay_events()
 
         assert self.playback.get_stream_title() is None
 
     def test_get_stream_title_after_next(self):
         self.core.playback.play()
-        self.audio.trigger_fake_tags_changed({'title': ['foobar']}).get()
+        self.audio.trigger_fake_tags_changed({'title': ['foȍbar']}).get()
         self.replay_events()
 
         self.core.playback.next()
@@ -946,7 +951,7 @@ class TestStream(BaseTest):
 
     def test_get_stream_title_after_next_with_tags_change(self):
         self.core.playback.play()
-        self.audio.trigger_fake_tags_changed({'title': ['foo']}).get()
+        self.audio.trigger_fake_tags_changed({'title': ['foȍ']}).get()
         self.replay_events()
 
         self.core.playback.next()
@@ -957,7 +962,7 @@ class TestStream(BaseTest):
 
     def test_get_stream_title_after_stop(self):
         self.core.playback.play()
-        self.audio.trigger_fake_tags_changed({'title': ['foobar']}).get()
+        self.audio.trigger_fake_tags_changed({'title': ['foȍbar']}).get()
         self.replay_events()
 
         self.core.playback.stop()
@@ -985,8 +990,8 @@ class TestBackendSelection(object):
         self.backend2.playback = self.playback2
 
         self.tracks = [
-            Track(uri='dummy1:a', length=40000),
-            Track(uri='dummy2:a', length=40000),
+            Track(uri='dummy1:ȁ', length=40000),
+            Track(uri='dummy2:ȁ', length=40000),
         ]
 
         self.core = core.Core(config, mixer=None, backends=[
