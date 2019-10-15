@@ -50,11 +50,10 @@ To get started with Mopidy, check out
 `the installation docs <http://docs.mopidy.com/en/latest/installation/>`_.
 
 - `Documentation <https://docs.mopidy.com/>`_
-- `Discussion forum <https://discourse.mopidy.com/>`_
+- `Discourse forum <https://discourse.mopidy.com/>`_
+- `Zulip chat <https://mopidy.zulipchat.com/>`_
 - `Source code <https://github.com/mopidy/mopidy>`_
 - `Issue tracker <https://github.com/mopidy/mopidy/issues>`_
-- IRC: ``#mopidy`` at `irc.freenode.net <http://freenode.net/>`_
-- Twitter: `@mopidy <https://twitter.com/mopidy/>`_
 
 .. image:: https://img.shields.io/pypi/v/Mopidy.svg?style=flat
     :target: https://pypi.python.org/pypi/Mopidy/
@@ -71,3 +70,7 @@ To get started with Mopidy, check out
 .. image:: https://img.shields.io/codecov/c/github/mopidy/mopidy/develop.svg
    :target: https://codecov.io/gh/mopidy/mopidy
    :alt: Test coverage
+
+.. image:: https://img.shields.io/badge/chat-on%20zulip-brightgreen
+   :target: https://mopidy.zulipchat.com/
+   :alt: Chat on Zulip

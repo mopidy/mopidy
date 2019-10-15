@@ -4,25 +4,17 @@
 Troubleshooting
 ***************
 
-If you run into problems with Mopidy, we usually hang around at ``#mopidy`` on
-`irc.freenode.net <http://freenode.net/>`_ and also have a `discussion forum
-<https://discourse.mopidy.com/c/mopidy>`_.
+If you get stuck, you can get help at the our `Discourse forum
+<https://discourse.mopidy.com/>`_ or in the ``#mopidy-users`` stream on `Zulip
+chat <https://mopidy.zulipchat.com/>`_.
+
 If you stumble into a bug or have a feature request, please create an issue in
-the `issue tracker <https://github.com/mopidy/mopidy/issues>`_.
+the `issue tracker <https://github.com/mopidy/mopidy/issues>`_. If you're
+unsure if it's a bug or not, ask for help in the forum or the chat first. The
+`source code <https://github.com/mopidy/mopidy>`_ may also be of help.
 
 When you're debugging yourself or asking for help, there are some tools built
 into Mopidy that you should know about.
-
-
-Sharing config and log output
-=============================
-
-If you're getting help at IRC, we recommend that you use a pastebin, like
-`pastebin.com <https://pastebin.com/>`_ or `GitHub Gist
-<https://gist.github.com/>`_, to share your configuration and log output.
-Pasting more than a couple of lines on IRC is generally frowned upon. On the
-mailing list or when reporting an issue, somewhat longer text dumps are
-accepted, but large logs should still be shared through a pastebin.
 
 
 Show effective configuration
