@@ -31,7 +31,7 @@ setup(
         'Pykka >= 2.0.1',
         'requests >= 2.0',
         'setuptools',
-        'tornado >= 5, < 6',  # Tornado 6 requires Python 3
+        'tornado >= 4.4, < 6',  # Tornado 6 requires Python 3
     ],
     extras_require={'http': []},
     entry_points={

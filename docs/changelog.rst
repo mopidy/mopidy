@@ -236,6 +236,16 @@ Audio
   been deprecated since 1.0. (Fixes: :issue:`1465`, PR: :issue:`1705`)
 
 
+v2.3.1 (2019-10-15)
+===================
+
+Bug fix release.
+
+- Dependencies: Lower requirement for Tornado from ``>= 5, < 6`` to ``>= 4.4, <
+  6``. Our HTTP server implementation works with Tornado 4 as well, which is
+  the latest version that is packaged on Ubuntu 18.04 LTS.
+
+
 v2.3.0 (2019-10-02)
 ===================
 
