@@ -9,6 +9,16 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
+v2.3.1 (UNRELEASED)
+===================
+
+Bug fix release.
+
+- Dependencies: Lower requirement for Tornado from ``>= 5, < 6`` to ``>= 4.4, <
+  6``. Our HTTP server implementation works with Tornado 4 as well, which is
+  the latest version that is packaged on Ubuntu 18.04 LTS.
+
+
 v2.3.0 (2019-10-02)
 ===================
 
