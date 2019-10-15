@@ -58,19 +58,19 @@ To get started with Mopidy, start by reading :ref:`installation`.
 
 **Getting help**
 
-If you get stuck, you can get help at the `Mopidy discussion forum
-<https://discourse.mopidy.com/>`_. We also hang around at IRC on the
-``#mopidy`` channel at `irc.freenode.net <http://freenode.net/>`_.
+If you get stuck, you can get help at the our `Discourse forum
+<https://discourse.mopidy.com/>`_ or in the ``#mopidy-users`` stream on `Zulip
+chat <https://mopidy.zulipchat.com/>`_.
 
 If you stumble into a bug or have a feature request, please create an issue in
 the `issue tracker <https://github.com/mopidy/mopidy/issues>`_. If you're
-unsure if it's a bug or not, ask for help in the forum or at IRC first. The
+unsure if it's a bug or not, ask for help in the forum or the chat first. The
 `source code <https://github.com/mopidy/mopidy>`_ may also be of help.
 
-If you want to stay up to date on Mopidy developments, you can follow `@mopidy
-<https://twitter.com/mopidy/>`_ on Twitter. There's also a `mailing list
-<https://groups.google.com/forum/?fromgroups=#!forum/mopidy>`_ used for
-announcements related to Mopidy and Mopidy extensions.
+If you want to stay up to date on Mopidy developments, you can follow the
+``#mopidy-dev`` stream on `Zulip chat <https://mopidy.zulipchat.com/>`__ or
+watch out for announcements on the `Discourse forum
+<https://discourse.mopidy.com/>`__.
 
 
 .. toctree::

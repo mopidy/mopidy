@@ -59,8 +59,8 @@ Creating releases
 #. Make sure the new tag is built by Read the Docs, and that the ``latest``
    version shows the newly released version.
 
-#. Spread the word through the topic on #mopidy on IRC, @mopidy on Twitter, and
-   on the mailing list.
+#. Spread the word through an announcement post on the `Discourse forum
+   <https://discourse.mopidy.com/>`_.
 
 #. Notify distribution packagers, including but not limited to: Debian, Arch
    Linux, Homebrew.
