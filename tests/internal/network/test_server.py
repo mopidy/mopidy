@@ -38,7 +38,7 @@ class ServerTest(unittest.TestCase):
 
     @patch.object(network, 'get_socket_address', new=Mock())
     def test_init_calls_register_server(self):
-        sock = Mock(spec=socket.SocketType)
+        sock = Mock(spec=socket.socket)
         sock.fileno.return_value = sentinel.fileno
         self.mock.create_server_socket.return_value = sock
 
@@ -49,7 +49,7 @@ class ServerTest(unittest.TestCase):
 
     @patch.object(network, 'get_socket_address', new=Mock())
     def test_init_fails_on_fileno_call(self):
-        sock = Mock(spec=socket.SocketType)
+        sock = Mock(spec=socket.socket)
         sock.fileno.side_effect = socket.error
         self.mock.create_server_socket.return_value = sock
 
@@ -59,7 +59,7 @@ class ServerTest(unittest.TestCase):
 
     def test_init_stores_values_in_attributes(self):
         # This need to be a mock and no a sentinel as fileno() is called on it
-        sock = Mock(spec=socket.SocketType)
+        sock = Mock(spec=socket.socket)
         self.mock.create_server_socket.return_value = sock
 
         network.Server.__init__(
@@ -82,7 +82,7 @@ class ServerTest(unittest.TestCase):
             network.Server.create_server_socket(
                 self.mock, str(sentinel.host), str(sentinel.port))
 
-    @patch.object(network, 'create_tcp_socket', spec=socket.SocketType)
+    @patch.object(network, 'create_tcp_socket', spec=socket.socket)
     def test_create_server_socket_sets_up_listener(self, create_tcp_socket):
         sock = create_tcp_socket.return_value
 
@@ -93,7 +93,7 @@ class ServerTest(unittest.TestCase):
         sock.listen.assert_called_once_with(any_int)
         create_tcp_socket.assert_called_once()
 
-    @patch.object(network, 'create_unix_socket', spec=socket.SocketType)
+    @patch.object(network, 'create_unix_socket', spec=socket.socket)
     def test_create_server_socket_sets_up_listener_unix(
             self,
             create_unix_socket):
@@ -199,8 +199,8 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(0, self.mock.init_connection.call_count)
 
     def test_accept_connection(self):
-        sock = Mock(spec=socket.SocketType)
-        connected_sock = Mock(spec=socket.SocketType)
+        sock = Mock(spec=socket.socket)
+        connected_sock = Mock(spec=socket.socket)
         sock.accept.return_value = (connected_sock, sentinel.addr)
         self.mock.server_socket = sock
 
@@ -209,8 +209,8 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(sentinel.addr, addr)
 
     def test_accept_connection_unix(self):
-        sock = Mock(spec=socket.SocketType)
-        connected_sock = Mock(spec=socket.SocketType)
+        sock = Mock(spec=socket.socket)
+        connected_sock = Mock(spec=socket.socket)
         connected_sock.family = socket.AF_UNIX
         connected_sock.getsockname.return_value = sentinel.sockname
         sock.accept.return_value = (connected_sock, sentinel.addr)
@@ -221,7 +221,7 @@ class ServerTest(unittest.TestCase):
         self.assertEqual((sentinel.sockname, None), addr)
 
     def test_accept_connection_recoverable_error(self):
-        sock = Mock(spec=socket.SocketType)
+        sock = Mock(spec=socket.socket)
         self.mock.server_socket = sock
 
         for error in (errno.EAGAIN, errno.EINTR):
@@ -231,7 +231,7 @@ class ServerTest(unittest.TestCase):
 
     # FIXME decide if this should be allowed to propegate
     def test_accept_connection_unrecoverable_error(self):
-        sock = Mock(spec=socket.SocketType)
+        sock = Mock(spec=socket.socket)
         self.mock.server_socket = sock
         sock.accept.side_effect = socket.error
         with self.assertRaises(socket.error):
@@ -272,7 +272,7 @@ class ServerTest(unittest.TestCase):
             sentinel.timeout)
 
     def test_reject_connection(self):
-        sock = Mock(spec=socket.SocketType)
+        sock = Mock(spec=socket.socket)
 
         network.Server.reject_connection(
             self.mock, sock, (sentinel.host, sentinel.port))
@@ -281,7 +281,7 @@ class ServerTest(unittest.TestCase):
     @patch.object(network, 'format_address', new=Mock())
     @patch.object(network.logger, 'warning', new=Mock())
     def test_reject_connection_message(self):
-        sock = Mock(spec=socket.SocketType)
+        sock = Mock(spec=socket.socket)
         network.format_address.return_value = sentinel.formatted
 
         network.Server.reject_connection(
@@ -292,7 +292,7 @@ class ServerTest(unittest.TestCase):
             'Rejected connection from %s', sentinel.formatted)
 
     def test_reject_connection_error(self):
-        sock = Mock(spec=socket.SocketType)
+        sock = Mock(spec=socket.socket)
         sock.close.side_effect = socket.error
 
         network.Server.reject_connection(
