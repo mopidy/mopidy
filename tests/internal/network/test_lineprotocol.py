@@ -23,6 +23,11 @@ class LineProtocolTest(unittest.TestCase):
         self.mock.delimiter = network.LineProtocol.delimiter
         self.mock.prevent_timeout = False
 
+    def prepare_on_receive_test(self, return_value=None):
+        self.mock.connection = Mock(spec=network.Connection)
+        self.mock.recv_buffer = b''
+        self.mock.parse_lines.return_value = return_value or []
+
     def test_init_stores_values_in_attributes(self):
         delimiter = re.compile(network.LineProtocol.terminator)
         network.LineProtocol.__init__(self.mock, sentinel.connection)
@@ -39,86 +44,68 @@ class LineProtocolTest(unittest.TestCase):
         self.assertEqual(delimiter, self.mock.delimiter)
 
     def test_on_receive_close_calls_stop(self):
-        self.mock.connection = Mock(spec=network.Connection)
-        self.mock.recv_buffer = ''
-        self.mock.parse_lines.return_value = []
+        self.prepare_on_receive_test()
 
         network.LineProtocol.on_receive(self.mock, {'close': True})
         self.mock.connection.stop.assert_called_once_with(any_unicode)
 
     def test_on_receive_no_new_lines_adds_to_recv_buffer(self):
-        self.mock.connection = Mock(spec=network.Connection)
-        self.mock.recv_buffer = ''
-        self.mock.parse_lines.return_value = []
+        self.prepare_on_receive_test()
 
-        network.LineProtocol.on_receive(self.mock, {'received': 'data'})
-        self.assertEqual('data', self.mock.recv_buffer)
+        network.LineProtocol.on_receive(self.mock, {'received': b'data'})
+        self.assertEqual(b'data', self.mock.recv_buffer)
         self.mock.parse_lines.assert_called_once_with()
         self.assertEqual(0, self.mock.on_line_received.call_count)
 
     def test_on_receive_toggles_timeout(self):
-        self.mock.connection = Mock(spec=network.Connection)
-        self.mock.recv_buffer = ''
-        self.mock.parse_lines.return_value = []
+        self.prepare_on_receive_test()
 
-        network.LineProtocol.on_receive(self.mock, {'received': 'data'})
+        network.LineProtocol.on_receive(self.mock, {'received': b'data'})
         self.mock.connection.disable_timeout.assert_called_once_with()
         self.mock.connection.enable_timeout.assert_called_once_with()
 
     def test_on_receive_toggles_unless_prevent_timeout_is_set(self):
-        self.mock.connection = Mock(spec=network.Connection)
-        self.mock.recv_buffer = ''
-        self.mock.parse_lines.return_value = []
+        self.prepare_on_receive_test()
         self.mock.prevent_timeout = True
 
-        network.LineProtocol.on_receive(self.mock, {'received': 'data'})
+        network.LineProtocol.on_receive(self.mock, {'received': b'data'})
         self.mock.connection.disable_timeout.assert_called_once_with()
         self.assertEqual(0, self.mock.connection.enable_timeout.call_count)
 
     def test_on_receive_no_new_lines_calls_parse_lines(self):
-        self.mock.connection = Mock(spec=network.Connection)
-        self.mock.recv_buffer = ''
-        self.mock.parse_lines.return_value = []
+        self.prepare_on_receive_test()
 
-        network.LineProtocol.on_receive(self.mock, {'received': 'data'})
+        network.LineProtocol.on_receive(self.mock, {'received': b'data'})
         self.mock.parse_lines.assert_called_once_with()
         self.assertEqual(0, self.mock.on_line_received.call_count)
 
     def test_on_receive_with_new_line_calls_decode(self):
-        self.mock.connection = Mock(spec=network.Connection)
-        self.mock.recv_buffer = ''
-        self.mock.parse_lines.return_value = [sentinel.line]
+        self.prepare_on_receive_test([sentinel.line])
 
-        network.LineProtocol.on_receive(self.mock, {'received': 'data\n'})
+        network.LineProtocol.on_receive(self.mock, {'received': b'data\n'})
         self.mock.parse_lines.assert_called_once_with()
         self.mock.decode.assert_called_once_with(sentinel.line)
 
     def test_on_receive_with_new_line_calls_on_recieve(self):
-        self.mock.connection = Mock(spec=network.Connection)
-        self.mock.recv_buffer = ''
-        self.mock.parse_lines.return_value = [sentinel.line]
+        self.prepare_on_receive_test([sentinel.line])
         self.mock.decode.return_value = sentinel.decoded
 
-        network.LineProtocol.on_receive(self.mock, {'received': 'data\n'})
+        network.LineProtocol.on_receive(self.mock, {'received': b'data\n'})
         self.mock.on_line_received.assert_called_once_with(sentinel.decoded)
 
     def test_on_receive_with_new_line_with_failed_decode(self):
-        self.mock.connection = Mock(spec=network.Connection)
-        self.mock.recv_buffer = ''
-        self.mock.parse_lines.return_value = [sentinel.line]
+        self.prepare_on_receive_test([sentinel.line])
         self.mock.decode.return_value = None
 
-        network.LineProtocol.on_receive(self.mock, {'received': 'data\n'})
+        network.LineProtocol.on_receive(self.mock, {'received': b'data\n'})
         self.assertEqual(0, self.mock.on_line_received.call_count)
 
     def test_on_receive_with_new_lines_calls_on_recieve(self):
-        self.mock.connection = Mock(spec=network.Connection)
-        self.mock.recv_buffer = ''
-        self.mock.parse_lines.return_value = ['line1', 'line2']
+        self.prepare_on_receive_test(['line1', 'line2'])
         self.mock.decode.return_value = sentinel.decoded
 
         network.LineProtocol.on_receive(
-            self.mock, {'received': 'line1\nline2\n'})
+            self.mock, {'received': b'line1\nline2\n'})
         self.assertEqual(2, self.mock.on_line_received.call_count)
 
     def test_on_failure_calls_stop(self):
@@ -127,72 +114,64 @@ class LineProtocolTest(unittest.TestCase):
         network.LineProtocol.on_failure(self.mock, None, None, None)
         self.mock.connection.stop.assert_called_once_with('Actor failed.')
 
+    def prepare_parse_lines_test(self, recv_data=''):
+        self.mock.terminator = b'\n'
+        self.mock.delimiter = re.compile(br'\n')
+        self.mock.recv_buffer = recv_data.encode('utf-8')
+
     def test_parse_lines_emtpy_buffer(self):
-        self.mock.terminator = '\n'
-        self.mock.delimiter = re.compile(r'\n')
-        self.mock.recv_buffer = ''
+        self.prepare_parse_lines_test()
 
         lines = network.LineProtocol.parse_lines(self.mock)
         with self.assertRaises(StopIteration):
             next(lines)
 
     def test_parse_lines_no_terminator(self):
-        self.mock.terminator = '\n'
-        self.mock.delimiter = re.compile(r'\n')
-        self.mock.recv_buffer = 'data'
+        self.prepare_parse_lines_test('data')
 
         lines = network.LineProtocol.parse_lines(self.mock)
         with self.assertRaises(StopIteration):
             next(lines)
 
     def test_parse_lines_terminator(self):
-        self.mock.terminator = '\n'
-        self.mock.delimiter = re.compile(r'\n')
-        self.mock.recv_buffer = 'data\n'
+        self.prepare_parse_lines_test('data\n')
 
         lines = network.LineProtocol.parse_lines(self.mock)
-        self.assertEqual('data', next(lines))
+        self.assertEqual(b'data', next(lines))
         with self.assertRaises(StopIteration):
             next(lines)
-        self.assertEqual('', self.mock.recv_buffer)
+        self.assertEqual(b'', self.mock.recv_buffer)
 
     def test_parse_lines_terminator_with_carriage_return(self):
-        self.mock.terminator = '\n'
-        self.mock.delimiter = re.compile(r'\r?\n')
-        self.mock.recv_buffer = 'data\r\n'
+        self.prepare_parse_lines_test('data\r\n')
+        self.mock.delimiter = re.compile(br'\r?\n')
 
         lines = network.LineProtocol.parse_lines(self.mock)
-        self.assertEqual('data', next(lines))
+        self.assertEqual(b'data', next(lines))
         with self.assertRaises(StopIteration):
             next(lines)
-        self.assertEqual('', self.mock.recv_buffer)
+        self.assertEqual(b'', self.mock.recv_buffer)
 
     def test_parse_lines_no_data_before_terminator(self):
-        self.mock.terminator = '\n'
-        self.mock.delimiter = re.compile(r'\n')
-        self.mock.recv_buffer = '\n'
+        self.prepare_parse_lines_test('\n')
 
         lines = network.LineProtocol.parse_lines(self.mock)
-        self.assertEqual('', next(lines))
+        self.assertEqual(b'', next(lines))
         with self.assertRaises(StopIteration):
             next(lines)
-        self.assertEqual('', self.mock.recv_buffer)
+        self.assertEqual(b'', self.mock.recv_buffer)
 
     def test_parse_lines_extra_data_after_terminator(self):
-        self.mock.terminator = '\n'
-        self.mock.delimiter = re.compile(r'\n')
-        self.mock.recv_buffer = 'data1\ndata2'
+        self.prepare_parse_lines_test('data1\ndata2')
 
         lines = network.LineProtocol.parse_lines(self.mock)
-        self.assertEqual('data1', next(lines))
+        self.assertEqual(b'data1', next(lines))
         with self.assertRaises(StopIteration):
             next(lines)
-        self.assertEqual('data2', self.mock.recv_buffer)
+        self.assertEqual(b'data2', self.mock.recv_buffer)
 
     def test_parse_lines_non_ascii(self):
-        self.mock.terminator = b'\n'
-        self.mock.delimiter = re.compile(br'\n')
-        self.mock.recv_buffer = 'æøå\n'.encode('utf-8')
+        self.prepare_parse_lines_test('æøå\n')
 
         lines = network.LineProtocol.parse_lines(self.mock)
         self.assertEqual('æøå'.encode('utf-8'), next(lines))
@@ -201,35 +180,31 @@ class LineProtocolTest(unittest.TestCase):
         self.assertEqual(b'', self.mock.recv_buffer)
 
     def test_parse_lines_multiple_lines(self):
-        self.mock.terminator = '\n'
-        self.mock.delimiter = re.compile(r'\n')
-        self.mock.recv_buffer = 'abc\ndef\nghi\njkl'
+        self.prepare_parse_lines_test('abc\ndef\nghi\njkl')
 
         lines = network.LineProtocol.parse_lines(self.mock)
-        self.assertEqual('abc', next(lines))
-        self.assertEqual('def', next(lines))
-        self.assertEqual('ghi', next(lines))
+        self.assertEqual(b'abc', next(lines))
+        self.assertEqual(b'def', next(lines))
+        self.assertEqual(b'ghi', next(lines))
         with self.assertRaises(StopIteration):
             next(lines)
-        self.assertEqual('jkl', self.mock.recv_buffer)
+        self.assertEqual(b'jkl', self.mock.recv_buffer)
 
     def test_parse_lines_multiple_calls(self):
-        self.mock.terminator = '\n'
-        self.mock.delimiter = re.compile(r'\n')
-        self.mock.recv_buffer = 'data1'
+        self.prepare_parse_lines_test('data1')
 
         lines = network.LineProtocol.parse_lines(self.mock)
         with self.assertRaises(StopIteration):
             next(lines)
-        self.assertEqual('data1', self.mock.recv_buffer)
+        self.assertEqual(b'data1', self.mock.recv_buffer)
 
-        self.mock.recv_buffer += '\ndata2'
+        self.mock.recv_buffer += b'\ndata2'
 
         lines = network.LineProtocol.parse_lines(self.mock)
-        self.assertEqual('data1', next(lines))
+        self.assertEqual(b'data1', next(lines))
         with self.assertRaises(StopIteration):
             next(lines)
-        self.assertEqual('data2', self.mock.recv_buffer)
+        self.assertEqual(b'data2', self.mock.recv_buffer)
 
     def test_send_lines_called_with_no_lines(self):
         self.mock.connection = Mock(spec=network.Connection)
