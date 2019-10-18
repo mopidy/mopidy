@@ -41,16 +41,24 @@ def check_boolean(arg, msg='Expected a boolean, not {arg!r}'):
 
 
 def check_instance(arg, cls, msg='Expected a {name} instance, not {arg!r}'):
+    if cls == compat.string_types:
+        name = 'string'
+    else:
+        name = cls.__name__
     if not isinstance(arg, cls):
         raise exceptions.ValidationError(
-            msg.format(arg=arg, name=cls.__name__))
+            msg.format(arg=arg, name=name))
 
 
 def check_instances(arg, cls, msg='Expected a list of {name}, not {arg!r}'):
-    _check_iterable(arg, msg, name=cls.__name__)
+    if cls == compat.string_types:
+        name = 'string'
+    else:
+        name = cls.__name__
+    _check_iterable(arg, msg, name=name)
     if not all(isinstance(instance, cls) for instance in arg):
         raise exceptions.ValidationError(
-            msg.format(arg=arg, name=cls.__name__))
+            msg.format(arg=arg, name=name))
 
 
 def check_integer(arg, min=None, max=None):
