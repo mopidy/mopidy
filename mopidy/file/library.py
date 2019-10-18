@@ -2,16 +2,13 @@ from __future__ import unicode_literals
 
 import logging
 import os
-import sys
 
 from mopidy import backend, exceptions, models
 from mopidy.audio import scan, tags
-from mopidy.compat import urllib
 from mopidy.internal import path
 
 
 logger = logging.getLogger(__name__)
-FS_ENCODING = sys.getfilesystemencoding()
 
 
 class FileLibraryProvider(backend.LibraryProvider):
@@ -35,7 +32,7 @@ class FileLibraryProvider(backend.LibraryProvider):
         self._media_dirs = list(self._get_media_dirs(config))
         self._show_dotfiles = config['file']['show_dotfiles']
         self._excluded_file_extensions = tuple(
-            bytes(file_ext.lower())
+            file_ext.lower()
             for file_ext in config['file']['excluded_file_extensions'])
         self._follow_symlinks = config['file']['follow_symlinks']
 
@@ -47,38 +44,39 @@ class FileLibraryProvider(backend.LibraryProvider):
         result = []
         local_path = path.uri_to_path(uri)
 
-        if local_path == 'root':
+        # py-compat: Use str() to get a native string on both Py2/3
+        if str(local_path) == str('root'):
             return list(self._get_media_dirs_refs())
 
-        if not self._is_in_basedir(os.path.realpath(local_path)):
+        if not self._is_in_basedir(local_path):
             logger.warning(
                 'Rejected attempt to browse path (%s) outside dirs defined '
                 'in file/media_dirs config.', uri)
             return []
 
-        for dir_entry in os.listdir(local_path):
-            child_path = os.path.join(local_path, dir_entry)
+        for dir_entry in local_path.iterdir():
+            child_path = dir_entry.resolve()
             uri = path.path_to_uri(child_path)
 
-            if not self._show_dotfiles and dir_entry.startswith(b'.'):
+            if not self._show_dotfiles and dir_entry.name.startswith(str('.')):
                 continue
 
             if (self._excluded_file_extensions and
-                    dir_entry.endswith(self._excluded_file_extensions)):
+                    dir_entry.suffix in self._excluded_file_extensions):
                 continue
 
-            if os.path.islink(child_path) and not self._follow_symlinks:
+            if child_path.is_symlink() and not self._follow_symlinks:
                 logger.debug('Ignoring symlink: %s', uri)
                 continue
 
-            if not self._is_in_basedir(os.path.realpath(child_path)):
+            if not self._is_in_basedir(child_path):
                 logger.debug('Ignoring symlink to outside base dir: %s', uri)
                 continue
 
-            name = dir_entry.decode(FS_ENCODING, 'replace')
-            if os.path.isdir(child_path):
+            name = self._get_path_for_display(dir_entry.name)
+            if child_path.is_dir():
                 result.append(models.Ref.directory(name=name, uri=uri))
-            elif os.path.isfile(child_path):
+            elif child_path.is_file():
                 result.append(models.Ref.track(name=name, uri=uri))
 
         def order(item):
@@ -100,9 +98,7 @@ class FileLibraryProvider(backend.LibraryProvider):
             track = models.Track(uri=uri)
 
         if not track.name:
-            filename = os.path.basename(local_path)
-            name = (
-                urllib.parse.unquote(filename).decode(FS_ENCODING, 'replace'))
+            name = self._get_path_for_display(local_path.name)
             track = track.replace(name=name)
 
         return [track]
@@ -111,16 +107,15 @@ class FileLibraryProvider(backend.LibraryProvider):
         for entry in config['file']['media_dirs']:
             media_dir = {}
             media_dir_split = entry.split('|', 1)
-            local_path = path.expand_path(
-                media_dir_split[0].encode(FS_ENCODING))
+            local_path = path.expand_path(media_dir_split[0])
 
-            if not local_path:
+            if local_path is None:
                 logger.debug(
                     'Failed expanding path (%s) from file/media_dirs config '
                     'value.',
                     media_dir_split[0])
                 continue
-            elif not os.path.isdir(local_path):
+            elif not local_path.is_dir():
                 logger.warning(
                     '%s is not a directory. Please create the directory or '
                     'update the file/media_dirs config value.', local_path)
@@ -145,3 +140,6 @@ class FileLibraryProvider(backend.LibraryProvider):
         return any(
             path.is_path_inside_base_dir(local_path, media_dir['path'])
             for media_dir in self._media_dirs)
+
+    def _get_path_for_display(self, path):
+        return bytes(path).decode('utf-8', 'replace')

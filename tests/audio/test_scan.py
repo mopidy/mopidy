@@ -1,6 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import os
 import unittest
 
 from mopidy import exceptions
@@ -18,19 +17,18 @@ class ScannerTest(unittest.TestCase):
 
     def find(self, path):
         media_dir = path_to_data_dir(path)
-        result, errors = path_lib.find_mtimes(media_dir)
+        result, errors = path_lib.find_mtimes(str(media_dir))
         for path in result:
-            yield os.path.join(media_dir, path)
+            yield media_dir / path
 
     def scan(self, paths):
         scanner = scan.Scanner()
         for path in paths:
             uri = path_lib.path_to_uri(path)
-            key = uri[len('file://'):]
             try:
-                self.result[key] = scanner.scan(uri)
+                self.result[path] = scanner.scan(uri)
             except exceptions.ScannerError as error:
-                self.errors[key] = error
+                self.errors[path] = error
 
     def check(self, name, key, value):
         name = path_to_data_dir(name)
@@ -38,7 +36,8 @@ class ScannerTest(unittest.TestCase):
 
     def check_if_missing_plugin(self):
         for path, result in self.result.items():
-            if not path.endswith('.mp3'):
+            # py-compat: Use str() to get a native string on both Py2/3
+            if path.suffix != str('.mp3'):
                 continue
             if not result.playable and result.mime == 'audio/mpeg':
                 raise unittest.SkipTest('Missing MP3 support?')

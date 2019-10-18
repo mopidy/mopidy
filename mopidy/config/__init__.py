@@ -7,7 +7,7 @@ import os.path
 import re
 
 from mopidy import compat
-from mopidy.compat import configparser
+from mopidy.compat import configparser, pathlib
 from mopidy.config import keyring
 from mopidy.config.schemas import *
 from mopidy.config.types import *
@@ -76,13 +76,13 @@ _INITIAL_HELP = """
 
 def read(config_file):
     """Helper to load config defaults in same way across core and extensions"""
-    with io.open(config_file, 'rb') as filehandle:
+    with io.open(str(config_file), 'rb') as filehandle:
         return filehandle.read()
 
 
 def load(files, ext_schemas, ext_defaults, overrides):
-    config_dir = os.path.dirname(__file__)
-    defaults = [read(os.path.join(config_dir, 'default.conf'))]
+    config_dir = pathlib.Path(__file__).parent
+    defaults = [read(config_dir / 'default.conf')]
     defaults.extend(ext_defaults)
     raw_config = _load(files, defaults, keyring.fetch() + (overrides or []))
 
@@ -98,8 +98,8 @@ def format(config, ext_schemas, comments=None, display=True):
 
 
 def format_initial(extensions_data):
-    config_dir = os.path.dirname(__file__)
-    defaults = [read(os.path.join(config_dir, 'default.conf'))]
+    config_dir = pathlib.Path(__file__).parent
+    defaults = [read(config_dir / 'default.conf')]
     defaults.extend(d.extension.get_default_config() for d in extensions_data)
     raw_config = _load([], defaults, [])
 
@@ -137,15 +137,15 @@ def _load(files, defaults, overrides):
             parser.read_string(default.decode())
 
     # Load config from a series of config files
-    files = [path.expand_path(f) for f in files]
-    for name in files:
-        if os.path.isdir(name):
-            for filename in os.listdir(name):
-                filename = os.path.join(name, filename)
-                if os.path.isfile(filename) and filename.endswith('.conf'):
-                    _load_file(parser, filename)
+    for f in files:
+        f = path.expand_path(f)
+        if f.is_dir():
+            for g in f.iterdir():
+                # py-compat: Use str() to get a native string on both Py2/3
+                if g.is_file() and g.suffix == str('.conf'):
+                    _load_file(parser, g.resolve())
         else:
-            _load_file(parser, name)
+            _load_file(parser, f.resolve())
 
     # If there have been parse errors there is a python bug that causes the
     # values to be lists, this little trick coerces these into strings.
@@ -162,32 +162,35 @@ def _load(files, defaults, overrides):
     return raw_config
 
 
-def _load_file(parser, filename):
-    if not os.path.exists(filename):
+def _load_file(parser, file_path):
+    if not file_path.exists():
         logger.debug(
-            'Loading config from %s failed; it does not exist', filename)
+            'Loading config from %r failed; it does not exist',
+            file_path.as_uri())
         return
-    if not os.access(filename, os.R_OK):
+    if not os.access(str(file_path), os.R_OK):
         logger.warning(
-            'Loading config from %s failed; read permission missing',
-            filename)
+            'Loading config from %r failed; read permission missing',
+            file_path.as_uri())
         return
 
     try:
-        logger.info('Loading config from %s', filename)
-        with io.open(filename, 'rb') as filehandle:
-            parser.readfp(filehandle)
+        logger.info('Loading config from %r', file_path.as_uri())
+        with file_path.open('rb') as fh:
+            parser.readfp(fh)
     except configparser.MissingSectionHeaderError as e:
-        logger.warning('%s does not have a config section, not loaded.',
-                       filename)
+        logger.warning(
+            'Loading config from %r failed; it does not have a config section',
+            file_path.as_uri())
     except configparser.ParsingError as e:
         linenos = ', '.join(str(lineno) for lineno, line in e.errors)
         logger.warning(
-            '%s has errors, line %s has been ignored.', filename, linenos)
+            'Config file %r has errors; line %s has been ignored',
+            file_path.as_uri(), linenos)
     except IOError:
         # TODO: if this is the initial load of logging config we might not
         # have a logger at this point, we might want to handle this better.
-        logger.debug('Config file %s not found; skipping', filename)
+        logger.debug('Config file %r not found; skipping', file_path.as_uri())
 
 
 def _validate(raw_config, schemas):

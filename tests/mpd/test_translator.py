@@ -4,9 +4,10 @@ from __future__ import absolute_import, unicode_literals
 
 import unittest
 
-from mopidy.internal import path
 from mopidy.models import Album, Artist, Playlist, TlTrack, Track
 from mopidy.mpd import translator
+
+from tests import path_utils
 
 
 class TrackMpdFormatTest(unittest.TestCase):
@@ -30,10 +31,10 @@ class TrackMpdFormatTest(unittest.TestCase):
 
     def setUp(self):  # noqa: N802
         self.media_dir = '/dir/subdir'
-        path.mtime.set_fake_time(1234567)
+        path_utils.mtime.set_fake_time(1234567)
 
     def tearDown(self):  # noqa: N802
-        path.mtime.undo_fake()
+        path_utils.mtime.undo_fake()
 
     def test_track_to_mpd_format_for_empty_track(self):
         result = translator.track_to_mpd_format(
