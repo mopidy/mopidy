@@ -265,7 +265,7 @@ class Connection(object):
 
     def enable_timeout(self):
         """Reactivate timeout mechanism."""
-        if self.timeout <= 0:
+        if self.timeout is None or self.timeout <= 0:
             return
 
         self.disable_timeout()
@@ -377,7 +377,7 @@ class LineProtocol(pykka.ThreadingActor):
     """
 
     #: Line terminator to use for outputed lines.
-    terminator = '\n'
+    terminator = b'\n'
 
     #: Regex to use for spliting lines, will be set compiled version of its
     #: own value, or to ``terminator``s value if it is not set itself.
@@ -481,7 +481,8 @@ class LineProtocol(pykka.ThreadingActor):
     def join_lines(self, lines):
         if not lines:
             return ''
-        return self.terminator.join(lines) + self.terminator
+        line_terminator = self.decode(self.terminator)
+        return line_terminator.join(lines) + line_terminator
 
     def send_lines(self, lines):
         """

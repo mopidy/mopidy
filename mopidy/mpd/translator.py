@@ -4,6 +4,7 @@ import datetime
 import logging
 import re
 
+from mopidy import compat
 from mopidy.models import TlTrack
 from mopidy.mpd.protocol import tagtype_list
 
@@ -22,7 +23,10 @@ def normalize_path(path, relative=False):
 
 
 def uri_to_mpd_format(uri):
-    return uri.decode('utf-8')
+    if compat.PY2:
+        return uri.decode('utf-8')
+    else:
+        return uri
 
 
 def track_to_mpd_format(track, position=None, stream_title=None):
