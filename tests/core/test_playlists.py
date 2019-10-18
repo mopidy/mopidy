@@ -253,7 +253,7 @@ class PlaylistTest(BasePlaylistsTest):
 
     def test_get_uri_schemes(self):
         result = self.core.playlists.get_uri_schemes()
-        self.assertEquals(result, ['dummy1', 'dummy2'])
+        self.assertEqual(result, ['dummy1', 'dummy2'])
 
 
 class MockBackendCorePlaylistsBase(unittest.TestCase):
