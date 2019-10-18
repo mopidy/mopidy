@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import io
 
+from mopidy import compat
 from mopidy.compat import configparser
 from mopidy.internal import validation
 
@@ -21,7 +22,7 @@ def parse(data):
     for detector, parser in handlers.items():
         if detector(data):
             return list(parser(data))
-    return parse_urilist(data)  # Fallback
+    return list(parse_urilist(data))  # Fallback
 
 
 def detect_extm3u_header(data):
@@ -68,15 +69,26 @@ def parse_extm3u(data):
             found_header = True
         else:
             continue
-        if not line.startswith(b'#') and line.strip():
-            yield line.strip()
+
+        if not line.strip() or line.startswith(b'#'):
+            continue
+
+        try:
+            line = line.decode('utf-8')
+        except UnicodeDecodeError:
+            continue
+
+        yield line.strip()
 
 
 def parse_pls(data):
     # TODO: convert non URIs to file URIs.
     try:
         cp = configparser.RawConfigParser()
-        cp.readfp(io.BytesIO(data))
+        if compat.PY2:
+            cp.readfp(io.BytesIO(data))
+        else:
+            cp.read_string(data.decode())
     except configparser.Error:
         return
 
@@ -117,13 +129,18 @@ def parse_asx(data):
 
 
 def parse_urilist(data):
-    result = []
     for line in data.splitlines():
         if not line.strip() or line.startswith(b'#'):
             continue
+
+        try:
+            line = line.decode('utf-8')
+        except UnicodeDecodeError:
+            continue
+
         try:
             validation.check_uri(line)
         except ValueError:
-            return []
-        result.append(line)
-    return result
+            continue
+
+        yield line.strip()
