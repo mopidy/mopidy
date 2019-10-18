@@ -265,7 +265,7 @@ def wsgi_app_factory(config, core):
         status = '200 OK'
         response_headers = [('Content-type', 'text/plain')]
         start_response(status, response_headers)
-        return ['Hello, world!\n']
+        return [b'Hello, world!\n']
 
     return [
         ('(.*)', tornado.web.FallbackHandler, {

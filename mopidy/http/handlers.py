@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 def make_mopidy_app_factory(apps, statics):
     def mopidy_app_factory(config, core):
         if not config['http']['csrf_protection']:
-            logger.warn(
+            logger.warning(
                 'HTTP Cross-Site Request Forgery protection is disabled')
         allowed_origins = {
             x.lower() for x in config['http']['allowed_origins'] if x
@@ -157,7 +157,7 @@ def set_mopidy_headers(request_handler):
 
 def check_origin(origin, request_headers, allowed_origins):
     if origin is None:
-        logger.warn('HTTP request denied for missing Origin header')
+        logger.warning('HTTP request denied for missing Origin header')
         return False
     allowed_origins.add(request_headers.get('Host'))
     parsed_origin = urllib.parse.urlparse(origin).netloc.lower()
@@ -166,7 +166,7 @@ def check_origin(origin, request_headers, allowed_origins):
     # header to something like 'file://' or 'null'. This results here in an
     # empty parsed_origin which we choose to allow.
     if parsed_origin and parsed_origin not in allowed_origins:
-        logger.warn('HTTP request denied for Origin "%s"', origin)
+        logger.warning('HTTP request denied for Origin "%s"', origin)
         return False
     return True
 
