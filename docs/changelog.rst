@@ -186,7 +186,13 @@ Models
 Extension support
 -----------------
 
-- (no changes yet)
+- The following methods now return :class:`pathlib.Path` objects instead of strings:
+
+  - :meth:`mopidy.ext.Extension.get_cache_dir`
+  - :meth:`mopidy.ext.Extension.get_config_dir`
+  - :meth:`mopidy.ext.Extension.get_data_dir`
+
+  This makes it easier to support arbitrary encoding in file names.
 
 HTTP frontend
 -------------

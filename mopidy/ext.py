@@ -2,7 +2,6 @@ from __future__ import absolute_import, unicode_literals
 
 import collections
 import logging
-import os
 
 import pkg_resources
 
@@ -67,11 +66,12 @@ class Extension(object):
         Use this directory to cache data that can safely be thrown away.
 
         :param config: the Mopidy config object
-        :return: string
+        :return: pathlib.Path
         """
         assert cls.ext_name is not None
-        cache_dir_path = bytes(os.path.join(config['core']['cache_dir'],
-                                            cls.ext_name))
+        cache_dir_path = (
+            path.expand_path(config['core']['cache_dir']) / cls.ext_name
+        )
         path.get_or_create_dir(cache_dir_path)
         return cache_dir_path
 
@@ -80,11 +80,12 @@ class Extension(object):
         """Get or create configuration directory for the extension.
 
         :param config: the Mopidy config object
-        :return: string
+        :return: pathlib.Path
         """
         assert cls.ext_name is not None
-        config_dir_path = bytes(os.path.join(config['core']['config_dir'],
-                                             cls.ext_name))
+        config_dir_path = (
+            path.expand_path(config['core']['config_dir']) / cls.ext_name
+        )
         path.get_or_create_dir(config_dir_path)
         return config_dir_path
 
@@ -95,11 +96,12 @@ class Extension(object):
         Use this directory to store data that should be persistent.
 
         :param config: the Mopidy config object
-        :returns: string
+        :returns: pathlib.Path
         """
         assert cls.ext_name is not None
-        data_dir_path = bytes(os.path.join(config['core']['data_dir'],
-                                           cls.ext_name))
+        data_dir_path = (
+            path.expand_path(config['core']['data_dir']) / cls.ext_name
+        )
         path.get_or_create_dir(data_dir_path)
         return data_dir_path
 

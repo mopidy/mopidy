@@ -1,7 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import os
-
 import mock
 
 import pkg_resources
@@ -9,6 +7,7 @@ import pkg_resources
 import pytest
 
 from mopidy import config, exceptions, ext
+from mopidy.compat import pathlib
 
 from tests import IsA, any_unicode
 
@@ -247,7 +246,7 @@ class TestValidateExtensionData(object):
         with mock.patch.object(ext.path, 'get_or_create_dir'):
             cache_dir = extension.get_cache_dir(config)
 
-        expected = os.path.join(core_cache_dir, extension.ext_name)
+        expected = pathlib.Path(core_cache_dir) / extension.ext_name
         assert cache_dir == expected
 
     def test_get_config_dir(self, ext_data):
@@ -258,7 +257,7 @@ class TestValidateExtensionData(object):
         with mock.patch.object(ext.path, 'get_or_create_dir'):
             config_dir = extension.get_config_dir(config)
 
-        expected = os.path.join(core_config_dir, extension.ext_name)
+        expected = pathlib.Path(core_config_dir) / extension.ext_name
         assert config_dir == expected
 
     def test_get_data_dir(self, ext_data):
@@ -269,5 +268,5 @@ class TestValidateExtensionData(object):
         with mock.patch.object(ext.path, 'get_or_create_dir'):
             data_dir = extension.get_data_dir(config)
 
-        expected = os.path.join(core_data_dir, extension.ext_name)
+        expected = pathlib.Path(core_data_dir) / extension.ext_name
         assert data_dir == expected
