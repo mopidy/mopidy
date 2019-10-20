@@ -79,7 +79,7 @@ def test_check_instances_with_invalid_values():
 def test_check_instances_error_message():
     with raises(exceptions.ValidationError) as excinfo:
         validation.check_instances([1], compat.string_types)
-    assert 'Expected a list of basestring, not [1]' == str(excinfo.value)
+    assert 'Expected a list of string, not [1]' == str(excinfo.value)
 
 
 def test_check_query_valid_values():
@@ -138,8 +138,9 @@ def test_check_uri_with_invalid_values():
 
 def test_check_uri_error_message():
     with raises(exceptions.ValidationError) as excinfo:
-        validation.check_uri('testing')
-    assert "Expected a valid URI, not u'testing'" == str(excinfo.value)
+        # py-compat: Using str() to get a native string on both Py2/3
+        validation.check_uri(str('testing'))
+    assert "Expected a valid URI, not 'testing'" == str(excinfo.value)
 
 
 def test_check_uris_with_valid_values():
@@ -163,5 +164,6 @@ def test_check_uris_with_invalid_values():
 
 def test_check_uris_error_message():
     with raises(exceptions.ValidationError) as excinfo:
-        validation.check_uris('testing')
-    assert "Expected a list of URIs, not u'testing'" == str(excinfo.value)
+        # py-compat: Using str() to get a native string on both Py2/3
+        validation.check_uris(str('testing'))
+    assert "Expected a list of URIs, not 'testing'" == str(excinfo.value)
