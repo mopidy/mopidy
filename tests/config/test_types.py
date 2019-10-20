@@ -52,11 +52,12 @@ def test_encode_decode_invalid_utf8():
 
 class TestConfigValue(object):
 
-    def test_deserialize_passes_through(self):
+    def test_deserialize_decodes_bytes(self):
         cv = types.ConfigValue()
-        sentinel = object()
 
-        assert cv.deserialize(sentinel) == sentinel
+        result = cv.deserialize(b'abc')
+
+        assert isinstance(result, compat.text_type)
 
     def test_serialize_conversion_to_string(self):
         cv = types.ConfigValue()

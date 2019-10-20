@@ -63,7 +63,7 @@ class ConfigValue(object):
 
     def deserialize(self, value):
         """Cast raw string to appropriate type."""
-        return value
+        return decode(value)
 
     def serialize(self, value, display=False):
         """Convert value back to string for saving."""
@@ -140,6 +140,7 @@ class Integer(ConfigValue):
         self._choices = choices
 
     def deserialize(self, value):
+        value = decode(value)
         validators.validate_required(value, self._required)
         if not value:
             return None
@@ -167,6 +168,7 @@ class Boolean(ConfigValue):
         self._required = not optional
 
     def deserialize(self, value):
+        value = decode(value)
         validators.validate_required(value, self._required)
         if not value:
             return None
@@ -241,6 +243,7 @@ class LogLevel(ConfigValue):
     }
 
     def deserialize(self, value):
+        value = decode(value)
         validators.validate_choice(value.lower(), self.levels.keys())
         return self.levels.get(value.lower())
 
@@ -258,7 +261,7 @@ class Hostname(ConfigValue):
         self._required = not optional
 
     def deserialize(self, value, display=False):
-        value = value.strip()
+        value = decode(value).strip()
         validators.validate_required(value, self._required)
         if not value:
             return None
@@ -313,7 +316,7 @@ class Path(ConfigValue):
         self._required = not optional
 
     def deserialize(self, value):
-        value = value.strip()
+        value = decode(value).strip()
         expanded = path.expand_path(value)
         validators.validate_required(value, self._required)
         validators.validate_required(expanded, self._required)
