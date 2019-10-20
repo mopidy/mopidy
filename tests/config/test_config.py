@@ -36,7 +36,7 @@ class LoadConfigTest(unittest.TestCase):
 
     def test_unicode_default(self):
         default = '[foo]\nbar = æøå'
-        expected = {'foo': {'bar': 'æøå'.encode('utf-8')}}
+        expected = {'foo': {'bar': 'æøå'}}
         result = config._load([], [default], [])
         self.assertEqual(expected, result)
 
@@ -86,7 +86,7 @@ class LoadConfigTest(unittest.TestCase):
         self.assertEqual(expected, result)
 
     def test_load_file_with_utf8(self):
-        expected = {'foo': {'bar': 'æøå'.encode('utf-8')}}
+        expected = {'foo': {'bar': 'æøå'}}
         result = config._load([path_to_data_dir('file3.conf')], [], [])
         self.assertEqual(expected, result)
 
