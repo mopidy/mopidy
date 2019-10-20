@@ -35,12 +35,16 @@ if PY2:
     integer_types = (int, long)  # noqa
     string_types = basestring  # noqa
     text_type = unicode  # noqa
+    text_prefix = 'u'  # noqa
 
     input = raw_input  # noqa
     intern = intern  # noqa
 
     def itervalues(dct, **kwargs):
         return iter(dct.itervalues(**kwargs))
+
+    def iteritems(dct, **kwargs):
+        return iter(dct.iteritems(**kwargs))
 
     from inspect import getargspec, getcallargs  # noqa
     from itertools import izip_longest as zip_longest  # noqa
@@ -56,12 +60,16 @@ else:
     integer_types = (int,)
     string_types = (str,)
     text_type = str
+    text_prefix = ''  # noqa
 
     input = input
     intern = sys.intern
 
     def itervalues(dct, **kwargs):
         return iter(dct.values(**kwargs))
+
+    def iteritems(dct, **kwargs):
+        return iter(dct.items(**kwargs))
 
     from itertools import zip_longest  # noqa
 

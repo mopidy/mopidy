@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import json
 import unittest
 
+from mopidy import compat
 from mopidy.models import (
     Album, Artist, Image, ModelJSONEncoder, Playlist,
     Ref, SearchResult, TlTrack, Track, model_json_decoder)
@@ -133,7 +134,7 @@ class RefTest(unittest.TestCase):
 
     def test_repr_without_results(self):
         self.assertEqual(
-            "Ref(name=u'foo', type='artist', uri='uri')",
+            "Ref(name=%s'foo', type='artist', uri='uri')" % compat.text_prefix,
             repr(Ref(uri='uri', name='foo', type='artist')))
 
     def test_serialize_without_results(self):
@@ -247,7 +248,7 @@ class ArtistTest(unittest.TestCase):
 
     def test_repr(self):
         self.assertEqual(
-            "Artist(name=u'name', uri='uri')",
+            "Artist(name=%s'name', uri='uri')" % compat.text_prefix,
             repr(Artist(uri='uri', name='name')))
 
     def test_serialize(self):
@@ -402,12 +403,13 @@ class AlbumTest(unittest.TestCase):
 
     def test_repr_without_artists(self):
         self.assertEqual(
-            "Album(name=u'name', uri='uri')",
+            "Album(name=%s'name', uri='uri')" % compat.text_prefix,
             repr(Album(uri='uri', name='name')))
 
     def test_repr_with_artists(self):
         self.assertEqual(
-            "Album(artists=[Artist(name=u'foo')], name=u'name', uri='uri')",
+            "Album(artists=[Artist(name=%s'foo')], name=%s'name', uri='uri')"
+            % (compat.text_prefix, compat.text_prefix),
             repr(Album(uri='uri', name='name', artists=[Artist(name='foo')])))
 
     def test_serialize_without_artists(self):
@@ -639,12 +641,13 @@ class TrackTest(unittest.TestCase):
 
     def test_repr_without_artists(self):
         self.assertEqual(
-            "Track(name=u'name', uri='uri')",
+            "Track(name=%s'name', uri='uri')" % compat.text_prefix,
             repr(Track(uri='uri', name='name')))
 
     def test_repr_with_artists(self):
         self.assertEqual(
-            "Track(artists=[Artist(name=u'foo')], name=u'name', uri='uri')",
+            "Track(artists=[Artist(name=%s'foo')], name=%s'name', uri='uri')"
+            % (compat.text_prefix, compat.text_prefix),
             repr(Track(uri='uri', name='name', artists=[Artist(name='foo')])))
 
     def test_serialize_without_artists(self):
@@ -1007,12 +1010,13 @@ class PlaylistTest(unittest.TestCase):
 
     def test_repr_without_tracks(self):
         self.assertEqual(
-            "Playlist(name=u'name', uri='uri')",
+            "Playlist(name=%s'name', uri='uri')" % compat.text_prefix,
             repr(Playlist(uri='uri', name='name')))
 
     def test_repr_with_tracks(self):
         self.assertEqual(
-            "Playlist(name=u'name', tracks=[Track(name=u'foo')], uri='uri')",
+            "Playlist(name=%s'name', tracks=[Track(name=%s'foo')], uri='uri')"
+            % (compat.text_prefix, compat.text_prefix),
             repr(Playlist(uri='uri', name='name', tracks=[Track(name='foo')])))
 
     def test_serialize_without_tracks(self):
