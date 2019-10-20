@@ -68,8 +68,8 @@ class ConfigValue(object):
     def serialize(self, value, display=False):
         """Convert value back to string for saving."""
         if value is None:
-            return str('')
-        return str(value)
+            return b''
+        return encode(str(value))
 
 
 class Deprecated(ConfigValue):
@@ -247,7 +247,7 @@ class LogLevel(ConfigValue):
     def serialize(self, value, display=False):
         lookup = {v: k for k, v in self.levels.items()}
         if value in lookup:
-            return lookup[value]
+            return encode(lookup[value])
         return b''
 
 

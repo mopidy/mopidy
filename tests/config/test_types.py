@@ -63,22 +63,22 @@ class TestConfigValue(object):
 
         result = cv.serialize(object())
 
-        assert isinstance(result, str)
+        assert isinstance(result, bytes)
 
     def test_serialize_none(self):
         cv = types.ConfigValue()
 
         result = cv.serialize(None)
 
-        assert isinstance(result, str)
-        assert result == ''
+        assert isinstance(result, bytes)
+        assert result == b''
 
     def test_serialize_supports_display(self):
         cv = types.ConfigValue()
 
         result = cv.serialize(object(), display=True)
 
-        assert isinstance(result, str)
+        assert isinstance(result, bytes)
 
 
 class TestDeprecated(object):
