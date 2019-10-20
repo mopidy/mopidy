@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 
 import unittest
 
+from mopidy import compat
 from mopidy.models import ImmutableObject
 
 
@@ -86,12 +87,14 @@ class ModelTest(unittest.TestCase):
 
     def test_repr_without_models(self):
         self.assertEqual(
-            "Model(name=u'name', uri=u'uri')",
+            "Model(name=%s'name', uri=%s'uri')"
+            % (compat.text_prefix, compat.text_prefix),
             repr(Model(uri='uri', name='name')))
 
     def test_repr_with_models(self):
         self.assertEqual(
-            "Model(models=[SubModel(name=123)], name=u'name', uri=u'uri')",
+            "Model(models=[SubModel(name=123)], name=%s'name', uri=%s'uri')"
+            % (compat.text_prefix, compat.text_prefix),
             repr(Model(uri='uri', name='name', models=[SubModel(name=123)])))
 
     def test_serialize_without_models(self):

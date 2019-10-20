@@ -4,6 +4,7 @@ from __future__ import absolute_import, unicode_literals
 
 import unittest
 
+from mopidy import compat
 from mopidy.models.fields import (Boolean, Collection, Field, Identifier,
                                   Integer, String)
 
@@ -108,11 +109,6 @@ class StringTest(unittest.TestCase):
         instance.attr = str('abc')
         self.assertEqual('abc', instance.attr)
 
-    def test_bytes_allowed(self):
-        instance = create_instance(String())
-        instance.attr = b'abc'
-        self.assertEqual(b'abc', instance.attr)
-
     def test_unicode_allowed(self):
         instance = create_instance(String())
         instance.attr = 'abc'
@@ -139,11 +135,6 @@ class IdentifierTest(unittest.TestCase):
         instance.attr = str('abc')
         self.assertEqual('abc', instance.attr)
 
-    def test_bytes_allowed(self):
-        instance = create_instance(Identifier())
-        instance.attr = b'abc'
-        self.assertEqual(b'abc', instance.attr)
-
     def test_unicode_allowed(self):
         instance = create_instance(Identifier())
         instance.attr = 'abc'
@@ -152,7 +143,10 @@ class IdentifierTest(unittest.TestCase):
     def test_unicode_with_nonascii_allowed(self):
         instance = create_instance(Identifier())
         instance.attr = 'æøå'
-        self.assertEqual('æøå'.encode('utf-8'), instance.attr)
+        if compat.PY2:
+            self.assertEqual('æøå'.encode('utf-8'), instance.attr)
+        else:
+            self.assertEqual('æøå', instance.attr)
 
     def test_other_disallowed(self):
         instance = create_instance(Identifier())
@@ -173,11 +167,6 @@ class IntegerTest(unittest.TestCase):
     def test_int_allowed(self):
         instance = create_instance(Integer())
         instance.attr = int(123)
-        self.assertEqual(123, instance.attr)
-
-    def test_long_allowed(self):
-        instance = create_instance(Integer())
-        instance.attr = long(123)
         self.assertEqual(123, instance.attr)
 
     def test_float_disallowed(self):
