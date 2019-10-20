@@ -80,12 +80,16 @@ def uri_to_path(uri):
 
 
 def expand_path(path):
+    if not compat.PY2 and isinstance(path, bytes):
+        path = path.decode('utf-8', 'surrogateescape')
     path = str(pathlib.Path(path))
+
     for xdg_var, xdg_dir in XDG_DIRS.items():
         # py-compat: First str() is to get native strings on both Py2/Py3
         path = path.replace(str('$' + xdg_var), str(xdg_dir))
     if '$' in path:
         return None
+
     return pathlib.Path(path).expanduser().resolve()
 
 

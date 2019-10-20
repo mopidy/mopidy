@@ -5,6 +5,8 @@ import logging.config
 import logging.handlers
 import platform
 
+from mopidy import compat
+
 
 LOG_LEVELS = {
     -1: dict(root=logging.ERROR, mopidy=logging.WARNING),
@@ -115,8 +117,16 @@ class VerbosityFilter(logging.Filter):
 
 
 #: Available log colors.
-COLORS = [b'black', b'red', b'green', b'yellow', b'blue', b'magenta', b'cyan',
-          b'white']
+COLORS = [
+    'black',
+    'red',
+    'green',
+    'yellow',
+    'blue',
+    'magenta',
+    'cyan',
+    'white',
+]
 
 
 class ColorizingStreamHandler(logging.StreamHandler):
@@ -172,7 +182,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
         message = logging.StreamHandler.format(self, record)
         if not self.is_tty or self.is_windows:
             return message
-        for name, color in self.logger_map.iteritems():
+        for name, color in compat.iteritems(self.logger_map):
             if record.name.startswith(name):
                 return self.colorize(message, fg=color)
         if record.levelno in self.level_map:

@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 import io
 import itertools
 import logging
-import os.path
+import os
 import re
 
 from mopidy import compat
@@ -129,12 +129,12 @@ def _load(files, defaults, overrides):
     # all in the same way?
     logger.info('Loading config from builtin defaults')
     for default in defaults:
-        if isinstance(default, compat.text_type):
-            default = default.encode('utf-8')
+        if isinstance(default, bytes):
+            default = default.decode('utf-8')
         if compat.PY2:
-            parser.readfp(io.BytesIO(default))
+            parser.readfp(io.StringIO(default))
         else:
-            parser.read_string(default.decode())
+            parser.read_string(default)
 
     # Load config from a series of config files
     for f in files:
@@ -147,9 +147,10 @@ def _load(files, defaults, overrides):
         else:
             _load_file(parser, f.resolve())
 
-    # If there have been parse errors there is a python bug that causes the
-    # values to be lists, this little trick coerces these into strings.
-    parser.readfp(io.BytesIO())
+    if compat.PY2:
+        # If there have been parse errors there is a python bug that causes the
+        # values to be lists, this little trick coerces these into strings.
+        parser.readfp(io.BytesIO())
 
     raw_config = {}
     for section in parser.sections():
@@ -176,8 +177,12 @@ def _load_file(parser, file_path):
 
     try:
         logger.info('Loading config from %r', file_path.as_uri())
-        with file_path.open('rb') as fh:
-            parser.readfp(fh)
+        if compat.PY2:
+            with file_path.open('r', encoding='utf-8') as fh:
+                parser.readfp(fh)
+        else:
+            with file_path.open('r') as fh:
+                parser.read_file(fh)
     except configparser.MissingSectionHeaderError as e:
         logger.warning(
             'Loading config from %r failed; it does not have a config section',
@@ -220,20 +225,24 @@ def _format(config, comments, schemas, display, disable):
             config.get(schema.name, {}), display=display)
         if not serialized:
             continue
-        output.append(b'[%s]' % bytes(schema.name))
+        output.append('[%s]' % schema.name)
         for key, value in serialized.items():
             if isinstance(value, types.DeprecatedValue):
                 continue
-            comment = bytes(comments.get(schema.name, {}).get(key, ''))
-            output.append(b'%s =' % bytes(key))
+            comment = comments.get(schema.name, {}).get(key, '')
+            output.append('%s =' % key)
             if value is not None:
-                output[-1] += b' ' + value
+                if isinstance(value, bytes):
+                    # py-compat: TODO: Change ConfigValue.serialize() to return
+                    # unicode and remove the step decode() here.
+                    value = value.decode('utf-8')
+                output[-1] += ' ' + value
             if comment:
-                output[-1] += b'  ; ' + comment.capitalize()
+                output[-1] += '  ; ' + comment.capitalize()
             if disable:
-                output[-1] = re.sub(r'^', b'#', output[-1], flags=re.M)
-        output.append(b'')
-    return b'\n'.join(output).strip()
+                output[-1] = re.sub(r'^', '#', output[-1], flags=re.M)
+        output.append('')
+    return '\n'.join(output).strip().encode('utf-8')
 
 
 def _preprocess(config_string):

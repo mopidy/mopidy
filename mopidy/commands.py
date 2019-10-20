@@ -12,21 +12,22 @@ import pykka
 
 from mopidy import config as config_lib, exceptions
 from mopidy.audio import Audio
+from mopidy.compat import pathlib
 from mopidy.core import Core
 from mopidy.internal import deps, process, timer, versioning
 from mopidy.internal.gi import GLib
 
 logger = logging.getLogger(__name__)
 
-_default_config = []
-for base in GLib.get_system_config_dirs() + [GLib.get_user_config_dir()]:
-    base = base.encode('utf-8')
-    _default_config.append(os.path.join(base, b'mopidy', b'mopidy.conf'))
-DEFAULT_CONFIG = b':'.join(_default_config)
+_default_config = [
+    (pathlib.Path(base) / 'mopidy' / 'mopidy.conf').resolve()
+    for base in GLib.get_system_config_dirs() + [GLib.get_user_config_dir()]
+]
+DEFAULT_CONFIG = ':'.join(map(str, _default_config))
 
 
 def config_files_type(value):
-    return value.split(b':')
+    return value.split(':')
 
 
 def config_override_type(value):
