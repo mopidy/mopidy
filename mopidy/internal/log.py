@@ -115,8 +115,16 @@ class VerbosityFilter(logging.Filter):
 
 
 #: Available log colors.
-COLORS = [b'black', b'red', b'green', b'yellow', b'blue', b'magenta', b'cyan',
-          b'white']
+COLORS = [
+    'black',
+    'red',
+    'green',
+    'yellow',
+    'blue',
+    'magenta',
+    'cyan',
+    'white',
+]
 
 
 class ColorizingStreamHandler(logging.StreamHandler):
