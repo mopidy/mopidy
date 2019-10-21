@@ -500,10 +500,9 @@ class Audio(pykka.ThreadingActor):
         # TODO: See if settings should be set to minimize latency. Previous
         # setting breaks appsrc, and settings before that broke on a few
         # systems. So leave the default to play it safe.
-        if self._config['audio']['buffer_time'] > 0:
-            queue.set_property(
-                'max-size-time',
-                self._config['audio']['buffer_time'] * Gst.MSECOND)
+        buffer_time = self._config['audio']['buffer_time']
+        if buffer_time is not None and buffer_time > 0:
+            queue.set_property('max-size-time', buffer_time * Gst.MSECOND)
 
         audio_sink.add(queue)
         audio_sink.add(self._outputs)
