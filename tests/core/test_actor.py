@@ -1,6 +1,5 @@
 from __future__ import absolute_import, unicode_literals
 
-import os
 import shutil
 import tempfile
 import unittest
@@ -11,6 +10,7 @@ import pykka
 
 import mopidy
 from mopidy.audio import PlaybackState
+from mopidy.compat import pathlib
 from mopidy.core import Core, CoreListener
 from mopidy.internal import models, storage, versioning
 from mopidy.models import Track
@@ -23,11 +23,11 @@ class CoreActorTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ['dummy1']
-        self.backend1.actor_ref.actor_class.__name__ = b'B1'
+        self.backend1.actor_ref.actor_class.__name__ = 'B1'
 
         self.backend2 = mock.Mock()
         self.backend2.uri_schemes.get.return_value = ['dummy2']
-        self.backend2.actor_ref.actor_class.__name__ = b'B2'
+        self.backend2.actor_ref.actor_class.__name__ = 'B2'
 
         self.core = Core(mixer=None, backends=[self.backend1, self.backend2])
 
@@ -68,8 +68,10 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
 
     def setUp(self):
         self.temp_dir = tempfile.mkdtemp()
-        self.state_file = os.path.join(self.temp_dir,
-                                       b'core', b'state.json.gz')
+        self.state_file = (
+            pathlib.Path(self.temp_dir) / 'core' / 'state.json.gz'
+        )
+        self.state_file.parent.mkdir()
 
         config = {
             'core': {
@@ -78,8 +80,6 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
                 'data_dir': self.temp_dir,
             }
         }
-
-        os.mkdir(os.path.join(self.temp_dir, b'core'))
 
         self.mixer = dummy_mixer.create_proxy()
         self.core = Core(
@@ -92,7 +92,7 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
     def test_save_state(self):
         self.core.teardown()
 
-        assert os.path.isfile(self.state_file)
+        assert self.state_file.is_file()
         reload_data = storage.load(self.state_file)
         data = {}
         data['version'] = mopidy.__version__
@@ -160,8 +160,8 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
     def test_delete_state_file_on_restore(self):
         data = {}
         storage.dump(self.state_file, data)
-        assert os.path.isfile(self.state_file)
+        assert self.state_file.is_file()
 
         self.core.setup()
 
-        assert not os.path.isfile(self.state_file)
+        assert not self.state_file.exists()
