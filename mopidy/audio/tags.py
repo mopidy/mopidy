@@ -47,13 +47,13 @@ gstreamer-GstTagList.html
                 try:
                     date = datetime.date(
                         value.get_year(), value.get_month(), value.get_day())
-                    result[tag].append(date.isoformat().decode('utf-8'))
+                    result[tag].append(date.isoformat())
                 except ValueError:
                     logger.debug(
                         'Ignoring dodgy date value: %d-%d-%d',
                         value.get_year(), value.get_month(), value.get_day())
             elif isinstance(value, Gst.DateTime):
-                result[tag].append(value.to_iso8601_string().decode('utf-8'))
+                result[tag].append(value.to_iso8601_string())
             elif isinstance(value, bytes):
                 result[tag].append(value.decode('utf-8', 'replace'))
             elif isinstance(value, (compat.text_type, bool, numbers.Number)):
