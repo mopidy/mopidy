@@ -10,6 +10,10 @@ from mopidy.mpd.protocol import stored_playlists
 from tests.mpd import protocol
 
 
+def mock_shuffle(foo):
+    foo[:] = [foo[1], foo[2], foo[5], foo[3], foo[4], foo[0]]
+
+
 class IssueGH17RegressionTest(protocol.BaseTestCase):
 
     """
@@ -22,6 +26,8 @@ class IssueGH17RegressionTest(protocol.BaseTestCase):
     - Press next until you get to the unplayable track
     """
 
+    @mock.patch.object(
+        protocol.core.tracklist.random, 'shuffle', mock_shuffle)
     def test(self):
         tracks = [
             Track(uri='dummy:a'),
@@ -35,7 +41,7 @@ class IssueGH17RegressionTest(protocol.BaseTestCase):
         self.backend.library.dummy_library = tracks
         self.core.tracklist.add(uris=[t.uri for t in tracks]).get()
 
-        random.seed(1)  # Playlist order: abcfde
+        # Playlist order: abcfde
 
         self.send_request('play')
         self.assertEqual(
