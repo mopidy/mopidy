@@ -103,9 +103,10 @@ def count(context, *args):
         raise exceptions.MpdArgError('incorrect arguments')
     results = context.core.library.search(query=query, exact=True).get()
     result_tracks = _get_tracks(results)
+    total_length = sum(t.length for t in result_tracks if t.length)
     return [
         ('songs', len(result_tracks)),
-        ('playtime', sum(t.length for t in result_tracks if t.length) / 1000),
+        ('playtime', int(total_length / 1000)),
     ]
 
 

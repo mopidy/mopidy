@@ -342,7 +342,8 @@ class PlaybackControlHandlerTest(protocol.BaseTestCase):
 
         current_track = self.core.playback.get_current_track().get()
         self.assertEqual(current_track, self.tracks[0])
-        self.assertGreaterEqual(self.core.playback.get_time_position(), 30000)
+        self.assertGreaterEqual(
+            self.core.playback.get_time_position().get(), 30000)
         self.assertInResponse('OK')
 
     def test_seek_in_another_track(self):
