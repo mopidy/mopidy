@@ -572,6 +572,10 @@ class Audio(pykka.ThreadingActor):
         else:
             self._appsrc.reset()
 
+        if source.__class__.__name__ == 'GstSoupHTTPSrc':
+            gst_logger.debug('HTTP Src - setting live mode')
+            source.set_live(True)
+
         utils.setup_proxy(source, self._config["proxy"])
 
     def set_uri(self, uri):
