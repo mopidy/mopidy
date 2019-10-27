@@ -176,5 +176,4 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         if 'w' in mode:
             return replace(path, mode, encoding=encoding, errors='replace')
         else:
-            return io.open(
-                str(path), mode, encoding=encoding, errors='replace')
+            return path.open(mode, encoding=encoding, errors='replace')
