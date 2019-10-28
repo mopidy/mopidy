@@ -8,18 +8,6 @@ from mopidy.internal import path
 
 from . import Extension
 
-try:
-    from os import fsencode, fsdecode
-except ImportError:
-    import sys
-
-    # no 'surrogateescape' in Python 2; 'replace' for backward compatibility
-    def fsencode(filename, encoding=sys.getfilesystemencoding()):
-        return filename.encode(encoding, 'replace')
-
-    def fsdecode(filename, encoding=sys.getfilesystemencoding()):
-        return filename.decode(encoding, 'replace')
-
 
 def path_to_uri(path, scheme=Extension.ext_name):
     """Convert file path to URI."""
@@ -38,8 +26,9 @@ def uri_to_path(uri):
 
 def name_from_path(path):
     """Extract name from file path."""
+    name = bytes(pathlib.Path(path.stem))
     try:
-        return fsdecode(path.stem)
+        return name.decode('utf-8', 'replace')
     except UnicodeError:
         return None
 
