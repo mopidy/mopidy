@@ -69,14 +69,22 @@ How to for Raspbian
    raspi-config``.
 
 
-#. Install Mopidy and any Mopidy extensions you want, as described in
-   :ref:`debian-install`.
-
 .. note::
 
-   If you used the Raspbian *Desktop* image you may also need to add the
-   ``mopidy`` user to the ``video`` group. Run ``sudo adduser mopidy video``
-   to do this.
+   If you used the Raspbian *Desktop* image you will need to add the
+   ``mopidy`` user to the ``video`` group::
+
+       sudo adduser mopidy video
+
+   Also, if you are *not* using HDMI audio you must set Mopidy's
+   ``audio/output`` config value to ``alsasink``. To do this, add the following
+   snippet to your :doc:`config </config>` file::
+
+       [audio]
+       output = alsasink
+
+   Be sure to edit the correct config file if you are
+   :doc:`running Mopidy as a service </service>`.
 
 
 Testing sound output
