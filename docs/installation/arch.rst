@@ -8,13 +8,13 @@ If you are running Arch Linux, you can install Mopidy using the
 `mopidy <https://aur.archlinux.org/packages/mopidy/>`_ package found in AUR.
 
 #. To install Mopidy with all dependencies, you can use
-   for example `yaourt <https://wiki.archlinux.org/index.php/yaourt>`_::
+   for example `yay <https://wiki.archlinux.org/index.php/yay>`_ or some other helper from https://wiki.archlinux.org/index.php/AUR_helpers .::
 
-       yaourt -S mopidy
+       yay -S mopidy
 
    To upgrade Mopidy to future releases, just upgrade your system using::
 
-       yaourt -Syu
+       yay -Syu
 
 #. Optional: If you want to use any Mopidy extensions, like Spotify support or
    Last.fm scrobbling, AUR also has `packages for several Mopidy extensions
