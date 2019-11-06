@@ -67,6 +67,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
     def as_list(self):
         result = []
         for entry in self._playlists_dir.iterdir():
+            # py-compat: Use str() to get a native string on both Py2/3
             if entry.suffix not in [str('.m3u'), str('.m3u8')]:
                 continue
             elif not entry.is_file():
@@ -163,6 +164,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         return path.is_path_inside_base_dir(local_path, self._playlists_dir)
 
     def _open(self, path, mode='r'):
+        # py-compat: Use str() to get a native string on both Py2/3
         if path.suffix == str('.m3u8'):
             encoding = 'utf-8'
         else:
