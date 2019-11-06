@@ -17,6 +17,9 @@ Backwards incompatible release.
 Dependencies
 ------------
 
+- Python 3.7 is now supported. Before the final release of Mopidy 3.0,
+  we'll remove the support for Python 2.7 and add support for Python 3.8.
+
 - Pykka >= 2.0.1 is now required.
 
 - We now use a number of constants and functions from ``GLib`` instead of their
