@@ -79,7 +79,7 @@ class BaseTest(object):
         self.audio.set_about_to_finish_callback(
             self.playback._on_about_to_finish)
 
-        with deprecation.ignore('core.tracklist.add:tracks_arg'):
+        with deprecation.ignore():
             self.core.tracklist.add(self.tracks)
 
         self.events = []
@@ -258,7 +258,8 @@ class TestNextHandling(BaseTest):
     def test_next_skips_over_change_track_error(self):
         # Trigger an exception in translate_uri.
         track = Track(uri='dummy:error', length=1234)
-        self.core.tracklist.add(tracks=[track], at_position=1)
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=[track], at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -273,7 +274,8 @@ class TestNextHandling(BaseTest):
     def test_next_skips_over_change_track_unplayable(self):
         # Make translate_uri return None.
         track = Track(uri='dummy:unplayable', length=1234)
-        self.core.tracklist.add(tracks=[track], at_position=1)
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=[track], at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -367,7 +369,8 @@ class TestPreviousHandling(BaseTest):
     def test_previous_skips_over_change_track_error(self):
         # Trigger an exception in translate_uri.
         track = Track(uri='dummy:error', length=1234)
-        self.core.tracklist.add(tracks=[track], at_position=1)
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=[track], at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -382,7 +385,8 @@ class TestPreviousHandling(BaseTest):
     def test_previous_skips_over_change_track_unplayable(self):
         # Makes translate_uri return None.
         track = Track(uri='dummy:unplayable', length=1234)
-        self.core.tracklist.add(tracks=[track], at_position=1)
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=[track], at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -408,7 +412,8 @@ class TestOnAboutToFinish(BaseTest):
     def test_on_about_to_finish_skips_over_change_track_error(self):
         # Trigger an exception in translate_uri.
         track = Track(uri='dummy:error', length=1234)
-        self.core.tracklist.add(tracks=[track], at_position=1)
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=[track], at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -422,7 +427,8 @@ class TestOnAboutToFinish(BaseTest):
     def test_on_about_to_finish_skips_over_change_track_unplayable(self):
         # Makes translate_uri return None.
         track = Track(uri='dummy:unplayable', length=1234)
-        self.core.tracklist.add(tracks=[track], at_position=1)
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=[track], at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -866,7 +872,8 @@ class SeekTest(BaseTest):
     def test_seek_fails_for_track_without_duration(self):
         track = self.tracks[0].replace(length=None)
         self.core.tracklist.clear()
-        self.core.tracklist.add([track])
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=[track])
 
         self.core.playback.play()
         self.replay_events()
@@ -992,7 +999,8 @@ class TestBackendSelection(object):
         self.core = core.Core(config, mixer=None, backends=[
             self.backend1, self.backend2])
 
-        self.tl_tracks = self.core.tracklist.add(self.tracks)
+        with deprecation.ignore():
+            self.tl_tracks = self.core.tracklist.add(tracks=self.tracks)
 
     def trigger_stream_changed(self):
         pending = self.core.playback._pending_tl_track
@@ -1155,7 +1163,8 @@ class TestBug1177Regression(object):
         track2 = Track(uri='dummy:b', length=40000)
 
         c = core.Core(config, mixer=None, backends=[b])
-        c.tracklist.add([track1, track2])
+        with deprecation.ignore():
+            c.tracklist.add(tracks=[track1, track2])
 
         c.playback.play()
         b.playback.change_track.assert_called_once_with(track1)
@@ -1262,7 +1271,8 @@ class TestEndlessLoop(BaseTest):
 
     def test_play(self):
         self.core.tracklist.clear()
-        self.core.tracklist.add(self.tracks_play)
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=self.tracks_play)
 
         self.backend.playback.reset_call_limit().get()
         self.core.tracklist.set_repeat(True)
@@ -1275,7 +1285,8 @@ class TestEndlessLoop(BaseTest):
 
     def test_next(self):
         self.core.tracklist.clear()
-        self.core.tracklist.add(self.tracks_other)
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=self.tracks_other)
 
         self.backend.playback.reset_call_limit().get()
         self.core.tracklist.set_repeat(True)
@@ -1291,7 +1302,8 @@ class TestEndlessLoop(BaseTest):
 
     def test_previous(self):
         self.core.tracklist.clear()
-        self.core.tracklist.add(self.tracks_other)
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=self.tracks_other)
 
         self.backend.playback.reset_call_limit().get()
         self.core.tracklist.set_repeat(True)
@@ -1307,7 +1319,8 @@ class TestEndlessLoop(BaseTest):
 
     def test_on_about_to_finish(self):
         self.core.tracklist.clear()
-        self.core.tracklist.add(self.tracks_other)
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=self.tracks_other)
 
         self.backend.playback.reset_call_limit().get()
         self.core.tracklist.set_repeat(True)
