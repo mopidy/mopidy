@@ -17,4 +17,4 @@ if not (compatible_py2 or compatible_py3):
 warnings.filterwarnings('ignore', 'could not open display')
 
 
-__version__ = '3.0.0a1'
+__version__ = '3.0.0a2'
