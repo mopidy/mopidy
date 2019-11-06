@@ -9,6 +9,7 @@ import os
 import tempfile
 
 from mopidy import backend
+from mopidy.compat import pathlib
 from mopidy.internal import path
 
 from . import Extension, translator
@@ -26,26 +27,21 @@ def log_environment_error(message, error):
 
 @contextlib.contextmanager
 def replace(path, mode='w+b', encoding=None, errors=None):
-    try:
-        (fd, tempname) = tempfile.mkstemp(dir=os.path.dirname(path))
-    except TypeError:
-        # Python 3 requires dir to be of type str until v3.5
-        import sys
-        path = path.decode(sys.getfilesystemencoding())
-        (fd, tempname) = tempfile.mkstemp(dir=os.path.dirname(path))
+    (fd, tempname) = tempfile.mkstemp(dir=str(path.parent))
+    tempname = pathlib.Path(tempname)
     try:
         fp = io.open(fd, mode, encoding=encoding, errors=errors)
     except Exception:
-        os.remove(tempname)
+        tempname.unlink()
         os.close(fd)
         raise
     try:
         yield fp
         fp.flush()
         os.fsync(fd)
-        os.rename(tempname, path)
+        tempname.rename(path)
     except Exception:
-        os.remove(tempname)
+        tempname.unlink()
         raise
     finally:
         fp.close()
@@ -60,20 +56,24 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         if ext_config['playlists_dir'] is None:
             self._playlists_dir = Extension.get_data_dir(config)
         else:
-            self._playlists_dir = ext_config['playlists_dir']
-        self._base_dir = ext_config['base_dir'] or self._playlists_dir
+            self._playlists_dir = path.expand_path(ext_config['playlists_dir'])
+        if ext_config['base_dir'] is None:
+            self._base_dir = self._playlists_dir
+        else:
+            self._base_dir = path.expand_path(ext_config['base_dir'])
         self._default_encoding = ext_config['default_encoding']
         self._default_extension = ext_config['default_extension']
 
     def as_list(self):
         result = []
-        for entry in os.listdir(self._playlists_dir):
-            if not entry.endswith((b'.m3u', b'.m3u8')):
+        for entry in self._playlists_dir.iterdir():
+            if entry.suffix not in [str('.m3u'), str('.m3u8')]:
                 continue
-            elif not os.path.isfile(self._abspath(entry)):
+            elif not entry.is_file():
                 continue
             else:
-                result.append(translator.path_to_ref(entry))
+                playlist_path = entry.relative_to(self._playlists_dir)
+                result.append(translator.path_to_ref(playlist_path))
         result.sort(key=operator.attrgetter('name'))
         return result
 
@@ -82,7 +82,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         try:
             with self._open(path, 'w'):
                 pass
-            mtime = os.path.getmtime(self._abspath(path))
+            mtime = self._abspath(path).stat().st_mtime
         except EnvironmentError as e:
             log_environment_error('Error creating playlist %s' % name, e)
         else:
@@ -94,7 +94,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             logger.debug('Ignoring path outside playlist dir: %s', uri)
             return False
         try:
-            os.remove(self._abspath(path))
+            self._abspath(path).unlink()
         except EnvironmentError as e:
             log_environment_error('Error deleting playlist %s' % uri, e)
             return False
@@ -122,7 +122,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         try:
             with self._open(path, 'r') as fp:
                 items = translator.load_items(fp, self._base_dir)
-            mtime = os.path.getmtime(self._abspath(path))
+            mtime = self._abspath(path).stat().st_mtime
         except EnvironmentError as e:
             log_environment_error('Error reading playlist %s' % uri, e)
         else:
@@ -142,30 +142,33 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             with self._open(path, 'w') as fp:
                 translator.dump_items(playlist.tracks, fp)
             if playlist.name and playlist.name != name:
-                opath, ext = os.path.splitext(path)
-                path = translator.path_from_name(playlist.name.strip()) + ext
-                os.rename(self._abspath(opath + ext), self._abspath(path))
-            mtime = os.path.getmtime(self._abspath(path))
+                orig_path = path
+                path = translator.path_from_name(playlist.name.strip())
+                path = path.with_suffix(orig_path.suffix)
+                self._abspath(orig_path).rename(self._abspath(path))
+            mtime = self._abspath(path).stat().st_mtime
         except EnvironmentError as e:
             log_environment_error('Error saving playlist %s' % playlist.uri, e)
         else:
             return translator.playlist(path, playlist.tracks, mtime)
 
     def _abspath(self, path):
-        return os.path.join(self._playlists_dir, path)
+        if not path.is_absolute():
+            return self._playlists_dir / path
+        else:
+            return path
 
     def _is_in_basedir(self, local_path):
-        if not os.path.isabs(local_path):
-            local_path = os.path.join(self._playlists_dir, local_path)
+        local_path = self._abspath(local_path)
         return path.is_path_inside_base_dir(local_path, self._playlists_dir)
 
     def _open(self, path, mode='r'):
-        if path.endswith(b'.m3u8'):
+        if path.suffix == str('.m3u8'):
             encoding = 'utf-8'
         else:
             encoding = self._default_encoding
-        if not os.path.isabs(path):
-            path = os.path.join(self._playlists_dir, path)
+        if not path.is_absolute():
+            path = self._abspath(path)
         if not self._is_in_basedir(path):
             raise Exception(
                 'Path (%s) is not inside playlist_dir (%s)'
@@ -173,4 +176,4 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         if 'w' in mode:
             return replace(path, mode, encoding=encoding, errors='replace')
         else:
-            return io.open(path, mode, encoding=encoding, errors='replace')
+            return path.open(mode, encoding=encoding, errors='replace')

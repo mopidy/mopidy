@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import, unicode_literals
 
-import os
 import platform
 import shutil
 import tempfile
@@ -10,7 +9,8 @@ import unittest
 
 import pykka
 
-from mopidy import core
+from mopidy import compat, core
+from mopidy.compat import pathlib
 from mopidy.m3u.backend import M3UBackend
 from mopidy.models import Playlist, Track
 
@@ -31,7 +31,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
     }
 
     def setUp(self):  # noqa: N802
-        self.config['m3u']['playlists_dir'] = tempfile.mkdtemp()
+        self.config['m3u']['playlists_dir'] = pathlib.Path(tempfile.mkdtemp())
         self.playlists_dir = self.config['m3u']['playlists_dir']
         self.base_dir = self.config['m3u']['base_dir'] or self.playlists_dir
 
@@ -43,59 +43,59 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
     def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
 
-        if os.path.exists(self.playlists_dir):
-            shutil.rmtree(self.playlists_dir)
+        if self.playlists_dir.exists():
+            shutil.rmtree(str(self.playlists_dir))
 
     def test_created_playlist_is_persisted(self):
         uri = 'm3u:test.m3u'
-        path = os.path.join(self.playlists_dir, b'test.m3u')
-        self.assertFalse(os.path.exists(path))
+        path = self.playlists_dir / 'test.m3u'
+        self.assertFalse(path.exists())
 
         playlist = self.core.playlists.create('test')
         self.assertEqual('test', playlist.name)
         self.assertEqual(uri, playlist.uri)
-        self.assertTrue(os.path.exists(path))
+        self.assertTrue(path.exists())
 
     def test_create_sanitizes_playlist_name(self):
         playlist = self.core.playlists.create('  ../../test FOO baR ')
         self.assertEqual('..|..|test FOO baR', playlist.name)
-        path = os.path.join(self.playlists_dir, b'..|..|test FOO baR.m3u')
-        self.assertEqual(self.playlists_dir, os.path.dirname(path))
-        self.assertTrue(os.path.exists(path))
+        path = self.playlists_dir / '..|..|test FOO baR.m3u'
+        self.assertEqual(self.playlists_dir, path.parent)
+        self.assertTrue(path.exists())
 
     def test_saved_playlist_is_persisted(self):
         uri1 = 'm3u:test1.m3u'
         uri2 = 'm3u:test2.m3u'
 
-        path1 = os.path.join(self.playlists_dir, b'test1.m3u')
-        path2 = os.path.join(self.playlists_dir, b'test2.m3u')
+        path1 = self.playlists_dir / 'test1.m3u'
+        path2 = self.playlists_dir / 'test2.m3u'
 
         playlist = self.core.playlists.create('test1')
         self.assertEqual('test1', playlist.name)
         self.assertEqual(uri1, playlist.uri)
-        self.assertTrue(os.path.exists(path1))
-        self.assertFalse(os.path.exists(path2))
+        self.assertTrue(path1.exists())
+        self.assertFalse(path2.exists())
 
         playlist = self.core.playlists.save(playlist.replace(name='test2'))
         self.assertEqual('test2', playlist.name)
         self.assertEqual(uri2, playlist.uri)
-        self.assertFalse(os.path.exists(path1))
-        self.assertTrue(os.path.exists(path2))
+        self.assertFalse(path1.exists())
+        self.assertTrue(path2.exists())
 
     def test_deleted_playlist_is_removed(self):
         uri = 'm3u:test.m3u'
-        path = os.path.join(self.playlists_dir, b'test.m3u')
+        path = self.playlists_dir / 'test.m3u'
 
-        self.assertFalse(os.path.exists(path))
+        self.assertFalse(path.exists())
 
         playlist = self.core.playlists.create('test')
         self.assertEqual('test', playlist.name)
         self.assertEqual(uri, playlist.uri)
-        self.assertTrue(os.path.exists(path))
+        self.assertTrue(path.exists())
 
         success = self.core.playlists.delete(playlist.uri)
         self.assertTrue(success)
-        self.assertFalse(os.path.exists(path))
+        self.assertFalse(path.exists())
 
     def test_delete_on_path_outside_playlist_dir_returns_none(self):
         success = self.core.playlists.delete('m3u:///etc/passwd')
@@ -106,10 +106,9 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         track = Track(uri=generate_song(1))
         playlist = self.core.playlists.create('test')
         playlist = self.core.playlists.save(playlist.replace(tracks=[track]))
-        path = os.path.join(self.playlists_dir, b'test.m3u')
+        path = self.playlists_dir / 'test.m3u'
 
-        with open(path) as f:
-            contents = f.read()
+        contents = path.read_text()
 
         self.assertEqual(track.uri, contents.strip())
 
@@ -117,10 +116,9 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         track = Track(uri=generate_song(1), name='Test', length=60000)
         playlist = self.core.playlists.create('test')
         playlist = self.core.playlists.save(playlist.replace(tracks=[track]))
-        path = os.path.join(self.playlists_dir, b'test.m3u')
+        path = self.playlists_dir / 'test.m3u'
 
-        with open(path) as f:
-            m3u = f.read().splitlines()
+        m3u = path.read_text().splitlines()
 
         self.assertEqual(['#EXTM3U', '#EXTINF:-1,Test', track.uri], m3u)
 
@@ -128,21 +126,27 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         track = Track(uri=generate_song(1), name='Test\x9f', length=60000)
         playlist = self.core.playlists.create('test')
         playlist = self.core.playlists.save(playlist.replace(tracks=[track]))
-        path = os.path.join(self.playlists_dir, b'test.m3u')
+        path = self.playlists_dir / 'test.m3u'
 
-        with open(path, 'rb') as f:
-            m3u = f.read().splitlines()
-        self.assertEqual([b'#EXTM3U', b'#EXTINF:-1,Test\x9f', track.uri], m3u)
+        m3u = path.read_bytes().splitlines()
+
+        track_uri = track.uri
+        if not isinstance(track_uri, bytes):
+            track_uri = track.uri.encode('utf-8')
+        self.assertEqual([b'#EXTM3U', b'#EXTINF:-1,Test\x9f', track_uri], m3u)
 
     def test_utf8_playlist_contents_is_replaced_and_written_to_disk(self):
         track = Track(uri=generate_song(1), name='Test\u07b4', length=60000)
         playlist = self.core.playlists.create('test')
         playlist = self.core.playlists.save(playlist.replace(tracks=[track]))
-        path = os.path.join(self.playlists_dir, b'test.m3u')
+        path = self.playlists_dir / 'test.m3u'
 
-        with open(path, 'rb') as f:
-            m3u = f.read().splitlines()
-        self.assertEqual([b'#EXTM3U', b'#EXTINF:-1,Test?', track.uri], m3u)
+        m3u = path.read_bytes().splitlines()
+
+        track_uri = track.uri
+        if not isinstance(track_uri, bytes):
+            track_uri = track.uri.encode('utf-8')
+        self.assertEqual([b'#EXTM3U', b'#EXTINF:-1,Test?', track_uri], m3u)
 
     def test_playlists_are_loaded_at_startup(self):
         track = Track(uri='dummy:track:path2')
@@ -160,9 +164,11 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         platform.system() == 'Darwin',
         'macOS 10.13 raises IOError "Illegal byte sequence" on open.')
     def test_load_playlist_with_nonfilesystem_encoding_of_filename(self):
-        path = os.path.join(self.playlists_dir, 'øæå.m3u'.encode('latin-1'))
-        with open(path, 'wb+') as f:
-            f.write(b'#EXTM3U\n')
+        playlist_name = 'øæå.m3u'.encode('latin-1')
+        if compat.PY3:
+            playlist_name = playlist_name.decode('utf-8', 'surrogateescape')
+        path = self.playlists_dir / playlist_name
+        path.write_bytes(b'#EXTM3U\n')
 
         self.core.playlists.refresh()
 
@@ -190,6 +196,15 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
     def test_as_list_empty_to_start_with(self):
         self.assertEqual(len(self.core.playlists.as_list()), 0)
 
+    def test_as_list_ignores_non_playlists(self):
+        path = self.playlists_dir / 'test.foo'
+        path.touch()
+        self.assertTrue(path.exists())
+
+        self.core.playlists.refresh()
+
+        self.assertEqual(len(self.core.playlists.as_list()), 0)
+
     def test_delete_non_existant_playlist(self):
         self.core.playlists.delete('m3u:unknown')
 
@@ -205,11 +220,11 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         playlist = self.core.playlists.create('test')
         self.assertEqual(playlist, self.core.playlists.lookup(playlist.uri))
 
-        path = os.path.join(self.playlists_dir, b'test.m3u')
-        self.assertTrue(os.path.exists(path))
+        path = self.playlists_dir / 'test.m3u'
+        self.assertTrue(path.exists())
 
-        os.remove(path)
-        self.assertFalse(os.path.exists(path))
+        path.unlink()
+        self.assertFalse(path.exists())
 
         self.core.playlists.delete(playlist.uri)
         self.assertIsNone(self.core.playlists.lookup(playlist.uri))
@@ -258,8 +273,8 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
     def test_save_playlist_with_new_uri(self):
         uri = 'm3u:test.m3u'
         self.core.playlists.save(Playlist(uri=uri))
-        path = os.path.join(self.playlists_dir, b'test.m3u')
-        self.assertTrue(os.path.exists(path))
+        path = self.playlists_dir / 'test.m3u'
+        self.assertTrue(path.exists())
 
     def test_save_on_path_outside_playlist_dir_returns_none(self):
         result = self.core.playlists.save(Playlist(uri='m3u:///tmp/test.m3u'))
@@ -279,7 +294,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
     def test_playlist_with_absolute_path(self):
         track = Track(uri='/tmp/test.mp3')
-        filepath = b'/tmp/test.mp3'
+        filepath = pathlib.Path('/tmp/test.mp3')
         playlist = self.core.playlists.create('test')
         playlist = playlist.replace(tracks=[track])
         playlist = self.core.playlists.save(playlist)
@@ -288,11 +303,11 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         result = self.core.playlists.lookup('m3u:test.m3u')
         self.assertEqual('m3u:test.m3u', result.uri)
         self.assertEqual(playlist.name, result.name)
-        self.assertEqual('file://' + filepath, result.tracks[0].uri)
+        self.assertEqual(filepath.as_uri(), result.tracks[0].uri)
 
     def test_playlist_with_relative_path(self):
         track = Track(uri='test.mp3')
-        filepath = os.path.join(self.base_dir, b'test.mp3')
+        filepath = self.base_dir / 'test.mp3'
         playlist = self.core.playlists.create('test')
         playlist = playlist.replace(tracks=[track])
         playlist = self.core.playlists.save(playlist)
@@ -301,7 +316,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         result = self.core.playlists.lookup('m3u:test.m3u')
         self.assertEqual('m3u:test.m3u', result.uri)
         self.assertEqual(playlist.name, result.name)
-        self.assertEqual('file://' + filepath, result.tracks[0].uri)
+        self.assertEqual(filepath.as_uri(), result.tracks[0].uri)
 
     def test_playlist_sort_order(self):
         def check_order(playlists, names):
@@ -353,5 +368,5 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 class M3UPlaylistsProviderBaseDirectoryTest(M3UPlaylistsProviderTest):
 
     def setUp(self):  # noqa: N802
-        self.config['m3u']['base_dir'] = tempfile.mkdtemp()
+        self.config['m3u']['base_dir'] = pathlib.Path(tempfile.mkdtemp())
         super(M3UPlaylistsProviderBaseDirectoryTest, self).setUp()

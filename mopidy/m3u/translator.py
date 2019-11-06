@@ -2,62 +2,33 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 
-from mopidy import models
+from mopidy import compat, models
+from mopidy.compat import pathlib, urllib
+from mopidy.internal import path
 
 from . import Extension
-
-try:
-    from urllib.parse import quote_from_bytes, unquote_to_bytes
-except ImportError:
-    import urllib
-
-    def quote_from_bytes(bytes, safe=b'/'):
-        # Python 3 returns Unicode string
-        return urllib.quote(bytes, safe).decode('utf-8')
-
-    def unquote_to_bytes(string):
-        if isinstance(string, bytes):
-            return urllib.unquote(string)
-        else:
-            return urllib.unquote(string.encode('utf-8'))
-
-try:
-    from urllib.parse import urlsplit, urlunsplit
-except ImportError:
-    from urlparse import urlsplit, urlunsplit
-
-
-try:
-    from os import fsencode, fsdecode
-except ImportError:
-    import sys
-
-    # no 'surrogateescape' in Python 2; 'replace' for backward compatibility
-    def fsencode(filename, encoding=sys.getfilesystemencoding()):
-        return filename.encode(encoding, 'replace')
-
-    def fsdecode(filename, encoding=sys.getfilesystemencoding()):
-        return filename.decode(encoding, 'replace')
 
 
 def path_to_uri(path, scheme=Extension.ext_name):
     """Convert file path to URI."""
-    assert isinstance(path, bytes), 'Mopidy paths should be bytes'
-    uripath = quote_from_bytes(os.path.normpath(path))
-    return urlunsplit((scheme, None, uripath, None, None))
+    bytes_path = os.path.normpath(bytes(path))
+    if compat.PY2:
+        uripath = urllib.parse.quote(bytes_path).decode('utf-8')
+    else:
+        uripath = urllib.parse.quote_from_bytes(bytes_path)
+    return urllib.parse.urlunsplit((scheme, None, uripath, None, None))
 
 
 def uri_to_path(uri):
     """Convert URI to file path."""
-    # TODO: decide on Unicode vs. bytes for URIs
-    return unquote_to_bytes(urlsplit(uri).path)
+    return path.uri_to_path(uri)
 
 
 def name_from_path(path):
     """Extract name from file path."""
-    name, _ = os.path.splitext(os.path.basename(path))
+    name = bytes(pathlib.Path(path.stem))
     try:
-        return fsdecode(name)
+        return name.decode('utf-8', 'replace')
     except UnicodeError:
         return None
 
@@ -65,9 +36,10 @@ def name_from_path(path):
 def path_from_name(name, ext=None, sep='|'):
     """Convert name with optional extension to file path."""
     if ext:
-        return fsencode(name.replace(os.sep, sep) + ext)
+        name = name.replace(os.sep, sep) + ext
     else:
-        return fsencode(name.replace(os.sep, sep))
+        name = name.replace(os.sep, sep)
+    return pathlib.Path(name)
 
 
 def path_to_ref(path):
@@ -85,12 +57,13 @@ def load_items(fp, basedir):
             if line.startswith('#EXTINF:'):
                 name = line.partition(',')[2]
             continue
-        elif not urlsplit(line).scheme:
-            path = os.path.join(basedir, fsencode(line))
+        elif not urllib.parse.urlsplit(line).scheme:
+            path = basedir / line
             if not name:
                 name = name_from_path(path)
             uri = path_to_uri(path, scheme='file')
         else:
+            # TODO: ensure this is urlencoded
             uri = line  # do *not* extract name from (stream?) URI path
         refs.append(models.Ref.track(uri=uri, name=name))
         name = None
