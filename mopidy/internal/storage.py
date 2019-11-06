@@ -3,10 +3,10 @@ from __future__ import absolute_import, unicode_literals
 import gzip
 import json
 import logging
-import os
 import tempfile
 
 from mopidy import models
+from mopidy.compat import pathlib
 from mopidy.internal import encoding
 
 logger = logging.getLogger(__name__)
@@ -17,16 +17,17 @@ def load(path):
     Deserialize data from file.
 
     :param path: full path to import file
-    :type path: bytes
+    :type path: pathlib.Path
     :return: deserialized data
     :rtype: dict
     """
-    # Todo: raise an exception in case of error?
-    if not os.path.isfile(path):
+
+    # TODO: raise an exception in case of error?
+    if not path.is_file():
         logger.info('File does not exist: %s', path)
         return {}
     try:
-        with gzip.open(path, 'rb') as fp:
+        with gzip.open(str(path), 'rb') as fp:
             return json.load(fp, object_hook=models.model_json_decoder)
     except (IOError, ValueError) as error:
         logger.warning(
@@ -40,21 +41,23 @@ def dump(path, data):
     Serialize data to file.
 
     :param path: full path to export file
-    :type path: bytes
+    :type path: pathlib.Path
     :param data: dictionary containing data to save
     :type data: dict
     """
-    directory, basename = os.path.split(path)
 
     # TODO: cleanup directory/basename.* files.
     tmp = tempfile.NamedTemporaryFile(
-        prefix=basename + '.', dir=directory, delete=False)
+        prefix=path.name + '.', dir=str(path.parent), delete=False)
+    tmp_path = pathlib.Path(tmp.name)
 
     try:
+        data_string = json.dumps(
+            data, cls=models.ModelJSONEncoder, indent=2, separators=(',', ': ')
+        )
         with gzip.GzipFile(fileobj=tmp, mode='wb') as fp:
-            json.dump(data, fp, cls=models.ModelJSONEncoder,
-                      indent=2, separators=(',', ': '))
-        os.rename(tmp.name, path)
+            fp.write(data_string.encode('utf-8'))
+        tmp_path.rename(path)
     finally:
-        if os.path.exists(tmp.name):
-            os.remove(tmp.name)
+        if tmp_path.exists():
+            tmp_path.unlink()

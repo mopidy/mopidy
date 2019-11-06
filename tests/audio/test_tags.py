@@ -23,6 +23,9 @@ class TestConvertTaglist(object):
             gobject_value = GObject.Value()
             if isinstance(value, bytes):
                 gobject_value.init(GObject.TYPE_STRING)
+                gobject_value.set_string(value.decode('utf-8'))
+            elif isinstance(value, compat.text_type):
+                gobject_value.init(GObject.TYPE_STRING)
                 gobject_value.set_string(value)
             elif isinstance(value, int):
                 gobject_value.init(GObject.TYPE_UINT)
@@ -39,7 +42,8 @@ class TestConvertTaglist(object):
 
         result = tags.convert_taglist(taglist)
 
-        assert isinstance(result[Gst.TAG_DATE][0], compat.text_type)
+        # py-compat: str used to represent Py2/3 native string
+        assert isinstance(result[Gst.TAG_DATE][0], str)
         assert result[Gst.TAG_DATE][0] == '2014-01-07'
 
     def test_date_tag_bad_value(self):
@@ -52,12 +56,13 @@ class TestConvertTaglist(object):
 
     def test_date_time_tag(self):
         taglist = self.make_taglist(Gst.TAG_DATE_TIME, [
-            Gst.DateTime.new_from_iso8601_string(b'2014-01-07 14:13:12')
+            Gst.DateTime.new_from_iso8601_string('2014-01-07 14:13:12')
         ])
 
         result = tags.convert_taglist(taglist)
 
-        assert isinstance(result[Gst.TAG_DATE_TIME][0], compat.text_type)
+        # py-compat: str used to represent Py2/3 native string
+        assert isinstance(result[Gst.TAG_DATE_TIME][0], str)
         assert result[Gst.TAG_DATE_TIME][0] == '2014-01-07T14:13:12Z'
 
     def test_string_tag(self):

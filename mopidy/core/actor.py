@@ -3,7 +3,6 @@ from __future__ import absolute_import, unicode_literals
 import collections
 import itertools
 import logging
-import os
 
 import pykka
 
@@ -152,17 +151,22 @@ class Core(
 
     def _get_data_dir(self):
         # get or create data director for core
-        data_dir_path = os.path.join(self._config['core']['data_dir'], b'core')
+        data_dir_path = (
+            path.expand_path(self._config['core']['data_dir']) / 'core'
+        )
         path.get_or_create_dir(data_dir_path)
         return data_dir_path
+
+    def _get_state_file(self):
+        return self._get_data_dir() / 'state.json.gz'
 
     def _save_state(self):
         """
         Save current state to disk.
         """
 
-        file_name = os.path.join(self._get_data_dir(), b'state.json.gz')
-        logger.info('Saving state to %s', file_name)
+        state_file = self._get_state_file()
+        logger.info('Saving state to %s', state_file)
 
         data = {}
         data['version'] = mopidy.__version__
@@ -171,7 +175,7 @@ class Core(
             history=self.history._save_state(),
             playback=self.playback._save_state(),
             mixer=self.mixer._save_state())
-        storage.dump(file_name, data)
+        storage.dump(state_file, data)
         logger.debug('Saving state done')
 
     def _load_state(self, coverage):
@@ -192,16 +196,16 @@ class Core(
         :type coverage: list of strings
         """
 
-        file_name = os.path.join(self._get_data_dir(), b'state.json.gz')
-        logger.info('Loading state from %s', file_name)
+        state_file = self._get_state_file()
+        logger.info('Loading state from %s', state_file)
 
-        data = storage.load(file_name)
+        data = storage.load(state_file)
 
         try:
             # Try only once. If something goes wrong, the next start is clean.
-            os.remove(file_name)
+            state_file.unlink()
         except OSError:
-            logger.info('Failed to delete %s', file_name)
+            logger.info('Failed to delete %s', state_file)
 
         if 'state' in data:
             core_state = data['state']

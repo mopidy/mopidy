@@ -45,7 +45,7 @@ class ScannerTest(unittest.TestCase):
     def test_tags_is_set(self):
         self.scan(self.find('scanner/simple'))
 
-        self.assertTrue(self.result.values()[0].tags)
+        self.assertTrue(list(self.result.values())[0].tags)
 
     def test_errors_is_not_set(self):
         self.scan(self.find('scanner/simple'))
@@ -94,7 +94,7 @@ class ScannerTest(unittest.TestCase):
 
     def test_other_media_is_ignored(self):
         self.scan(self.find('scanner/image'))
-        self.assertFalse(self.result.values()[0].playable)
+        self.assertFalse(list(self.result.values())[0].playable)
 
     def test_log_file_that_gst_thinks_is_mpeg_1_is_ignored(self):
         self.scan([path_to_data_dir('scanner/example.log')])
@@ -102,7 +102,7 @@ class ScannerTest(unittest.TestCase):
         self.check_if_missing_plugin()
 
         log = path_to_data_dir('scanner/example.log')
-        self.assertLess(self.result[log].duration, 100)
+        self.assertIsNone(self.result[log].duration)
 
     def test_empty_wav_file(self):
         self.scan([path_to_data_dir('scanner/empty.wav')])

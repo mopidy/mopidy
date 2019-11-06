@@ -73,11 +73,11 @@ class FileLibraryProvider(backend.LibraryProvider):
                 logger.debug('Ignoring symlink to outside base dir: %s', uri)
                 continue
 
-            name = self._get_name_for_display(dir_entry)
             if child_path.is_dir():
-                result.append(models.Ref.directory(name=name, uri=uri))
+                result.append(
+                    models.Ref.directory(name=dir_entry.name, uri=uri))
             elif child_path.is_file():
-                result.append(models.Ref.track(name=name, uri=uri))
+                result.append(models.Ref.track(name=dir_entry.name, uri=uri))
 
         def order(item):
             return (item.type != models.Ref.DIRECTORY, item.name)
@@ -98,8 +98,7 @@ class FileLibraryProvider(backend.LibraryProvider):
             track = models.Track(uri=uri)
 
         if not track.name:
-            name = self._get_name_for_display(local_path)
-            track = track.replace(name=name)
+            track = track.replace(name=local_path.name)
 
         return [track]
 
@@ -140,7 +139,3 @@ class FileLibraryProvider(backend.LibraryProvider):
         return any(
             path.is_path_inside_base_dir(local_path, media_dir['path'])
             for media_dir in self._media_dirs)
-
-    def _get_name_for_display(self, path):
-        for_display = bytes(path).decode('utf-8', 'replace')
-        return os.path.basename(for_display)
