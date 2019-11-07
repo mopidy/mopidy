@@ -11,29 +11,33 @@ from mopidy import compat
 # them easily when ignoring warnings.
 _MESSAGES = {
     # Deprecated features mpd:
-    'mpd.protocol.playback.pause:state_arg':
-        'The use of pause command w/o the PAUSE argument is deprecated.',
-    'mpd.protocol.current_playlist.playlist':
-        'Do not use this, instead use playlistinfo',
-
+    "mpd.protocol.playback.pause:state_arg": (
+        "The use of pause command w/o the PAUSE argument is deprecated."
+    ),
+    "mpd.protocol.current_playlist.playlist": (
+        "Do not use this, instead use playlistinfo"
+    ),
     # Deprecated features in core playback:
-    'core.playback.play:tl_track_kwargs':
+    "core.playback.play:tl_track_kwargs": (
         'playback.play() with "tl_track" argument is pending deprecation use '
-        '"tlid" instead',
-
+        '"tlid" instead'
+    ),
     # Deprecated features in core tracklist:
-    'core.tracklist.add:tracks_arg':
-        'tracklist.add() "tracks" argument is deprecated',
-
-    'core.tracklist.eot_track':
-        'tracklist.eot_track() is pending deprecation, use '
-        'tracklist.get_eot_tlid()',
-    'core.tracklist.next_track':
-        'tracklist.next_track() is pending deprecation, use '
-        'tracklist.get_next_tlid()',
-    'core.tracklist.previous_track':
-        'tracklist.previous_track() is pending deprecation, use '
-        'tracklist.get_previous_tlid()',
+    "core.tracklist.add:tracks_arg": (
+        'tracklist.add() "tracks" argument is deprecated'
+    ),
+    "core.tracklist.eot_track": (
+        "tracklist.eot_track() is pending deprecation, use "
+        "tracklist.get_eot_tlid()"
+    ),
+    "core.tracklist.next_track": (
+        "tracklist.next_track() is pending deprecation, use "
+        "tracklist.get_next_tlid()"
+    ),
+    "core.tracklist.previous_track": (
+        "tracklist.previous_track() is pending deprecation, use "
+        "tracklist.get_previous_tlid()"
+    ),
 }
 
 
@@ -54,7 +58,7 @@ def ignore(ids=None):
         if ids:
             for msg_id in ids:
                 msg = re.escape(_MESSAGES.get(msg_id, msg_id))
-                warnings.filterwarnings('ignore', msg, DeprecationWarning)
+                warnings.filterwarnings("ignore", msg, DeprecationWarning)
         else:
-            warnings.filterwarnings('ignore', category=DeprecationWarning)
+            warnings.filterwarnings("ignore", category=DeprecationWarning)
         yield

@@ -8,10 +8,10 @@ class PlaybackState(object):
     """
 
     #: Constant representing the paused state.
-    PAUSED = 'paused'
+    PAUSED = "paused"
 
     #: Constant representing the playing state.
-    PLAYING = 'playing'
+    PLAYING = "playing"
 
     #: Constant representing the stopped state.
-    STOPPED = 'stopped'
+    STOPPED = "stopped"

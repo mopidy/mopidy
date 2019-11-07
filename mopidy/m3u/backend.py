@@ -8,7 +8,7 @@ from . import playlists
 
 
 class M3UBackend(pykka.ThreadingActor, backend.Backend):
-    uri_schemes = ['m3u']
+    uri_schemes = ["m3u"]
 
     def __init__(self, config, audio):
         super(M3UBackend, self).__init__()

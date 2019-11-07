@@ -33,17 +33,21 @@ class Field(object):
     def validate(self, value):
         """Validate and possibly modify the field value before assignment"""
         if self._type and not isinstance(value, self._type):
-            raise TypeError('Expected %s to be a %s, not %r' %
-                            (self._name, self._type, value))
+            raise TypeError(
+                "Expected %s to be a %s, not %r"
+                % (self._name, self._type, value)
+            )
         if self._choices and value not in self._choices:
-            raise TypeError('Expected %s to be a one of %s, not %r' %
-                            (self._name, self._choices, value))
+            raise TypeError(
+                "Expected %s to be a one of %s, not %r"
+                % (self._name, self._choices, value)
+            )
         return value
 
     def __get__(self, instance, owner):
         if not instance:
             return self
-        return getattr(instance, '_' + self._name, self._default)
+        return getattr(instance, "_" + self._name, self._default)
 
     def __set__(self, instance, value):
         if value is not None:
@@ -52,11 +56,11 @@ class Field(object):
         if value is None or value == self._default:
             self.__delete__(instance)
         else:
-            setattr(instance, '_' + self._name, value)
+            setattr(instance, "_" + self._name, value)
 
     def __delete__(self, instance):
-        if hasattr(instance, '_' + self._name):
-            delattr(instance, '_' + self._name)
+        if hasattr(instance, "_" + self._name):
+            delattr(instance, "_" + self._name)
 
 
 class String(Field):
@@ -83,6 +87,7 @@ class Date(String):
 
     :param default: default value for field
     """
+
     pass  # TODO: make this check for YYYY-MM-DD, YYYY-MM, YYYY using strptime.
 
 
@@ -94,14 +99,15 @@ class Identifier(String):
 
     :param default: default value for field
     """
+
     def validate(self, value):
         value = super(Identifier, self).validate(value)
         if compat.PY2:
             if isinstance(value, compat.text_type):
-                value = value.encode('utf-8')
+                value = value.encode("utf-8")
         else:
             if isinstance(value, bytes):
-                value = value.decode('utf-8')
+                value = value.decode("utf-8")
         return compat.intern(value)
 
 
@@ -113,6 +119,7 @@ class URI(Identifier):
 
     :param default: default value for field
     """
+
     pass  # TODO: validate URIs?
 
 
@@ -129,16 +136,21 @@ class Integer(Field):
         self._min = min
         self._max = max
         super(Integer, self).__init__(
-            type=compat.integer_types, default=default)
+            type=compat.integer_types, default=default
+        )
 
     def validate(self, value):
         value = super(Integer, self).validate(value)
         if self._min is not None and value < self._min:
-            raise ValueError('Expected %s to be at least %d, not %d' %
-                             (self._name, self._min, value))
+            raise ValueError(
+                "Expected %s to be at least %d, not %d"
+                % (self._name, self._min, value)
+            )
         if self._max is not None and value > self._max:
-            raise ValueError('Expected %s to be at most %d, not %d' %
-                             (self._name, self._max, value))
+            raise ValueError(
+                "Expected %s to be at most %d, not %d"
+                % (self._name, self._max, value)
+            )
         return value
 
 
@@ -166,10 +178,14 @@ class Collection(Field):
 
     def validate(self, value):
         if isinstance(value, compat.string_types):
-            raise TypeError('Expected %s to be a collection of %s, not %r'
-                            % (self._name, self._type.__name__, value))
+            raise TypeError(
+                "Expected %s to be a collection of %s, not %r"
+                % (self._name, self._type.__name__, value)
+            )
         for v in value:
             if not isinstance(v, self._type):
-                raise TypeError('Expected %s to be a collection of %s, not %r'
-                                % (self._name, self._type.__name__, value))
+                raise TypeError(
+                    "Expected %s to be a collection of %s, not %r"
+                    % (self._name, self._type.__name__, value)
+                )
         return self._default.__class__(value) or None

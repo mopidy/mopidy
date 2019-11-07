@@ -7,54 +7,50 @@ from setuptools import find_packages, setup
 
 def get_version(filename):
     with open(filename) as fh:
-        metadata = dict(re.findall("__([a-z]+)__ = '([^']+)'", fh.read()))
-        return metadata['version']
+        metadata = dict(re.findall('__([a-z]+)__ = "([^"]+)"', fh.read()))
+        return metadata["version"]
 
 
 setup(
-    name='Mopidy',
-    version=get_version('mopidy/__init__.py'),
-    url='http://www.mopidy.com/',
-    license='Apache License, Version 2.0',
-    author='Stein Magnus Jodal',
-    author_email='stein.magnus@jodal.no',
-    description='Music server with MPD and Spotify support',
-    long_description=open('README.rst').read(),
-    packages=find_packages(exclude=['tests', 'tests.*']),
+    name="Mopidy",
+    version=get_version("mopidy/__init__.py"),
+    url="http://www.mopidy.com/",
+    license="Apache License, Version 2.0",
+    author="Stein Magnus Jodal",
+    author_email="stein.magnus@jodal.no",
+    description="Music server with MPD and Spotify support",
+    long_description=open("README.rst").read(),
+    packages=find_packages(exclude=["tests", "tests.*"]),
     zip_safe=False,
     include_package_data=True,
-    python_requires='>= 3.7',
+    python_requires=">= 3.7",
     install_requires=[
-        'Pykka >= 2.0.1',
-        'requests >= 2.0',
-        'setuptools',
-        'tornado >= 4.4, < 6',  # Tornado 6 requires Python 3
+        "Pykka >= 2.0.1",
+        "requests >= 2.0",
+        "setuptools",
+        "tornado >= 4.4, < 6",  # Tornado 6 requires Python 3
     ],
-    extras_require={
-        'http': [],  # Keep for backwards compat
-    },
+    extras_require={"http": []},  # Keep for backwards compat
     entry_points={
-        'console_scripts': [
-            'mopidy = mopidy.__main__:main',
-        ],
-        'mopidy.ext': [
-            'http = mopidy.http:Extension',
-            'file = mopidy.file:Extension',
-            'm3u = mopidy.m3u:Extension',
-            'mpd = mopidy.mpd:Extension',
-            'softwaremixer = mopidy.softwaremixer:Extension',
-            'stream = mopidy.stream:Extension',
+        "console_scripts": ["mopidy = mopidy.__main__:main"],
+        "mopidy.ext": [
+            "http = mopidy.http:Extension",
+            "file = mopidy.file:Extension",
+            "m3u = mopidy.m3u:Extension",
+            "mpd = mopidy.mpd:Extension",
+            "softwaremixer = mopidy.softwaremixer:Extension",
+            "stream = mopidy.stream:Extension",
         ],
     },
     classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Environment :: No Input/Output (Daemon)',
-        'Intended Audience :: End Users/Desktop',
-        'License :: OSI Approved :: Apache Software License',
-        'Operating System :: MacOS :: MacOS X',
-        'Operating System :: POSIX :: Linux',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.7',
-        'Topic :: Multimedia :: Sound/Audio :: Players',
+        "Development Status :: 5 - Production/Stable",
+        "Environment :: No Input/Output (Daemon)",
+        "Intended Audience :: End Users/Desktop",
+        "License :: OSI Approved :: Apache Software License",
+        "Operating System :: MacOS :: MacOS X",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.7",
+        "Topic :: Multimedia :: Sound/Audio :: Players",
     ],
 )

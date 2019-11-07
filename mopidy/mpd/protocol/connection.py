@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from mopidy.mpd import exceptions, protocol
 
 
-@protocol.commands.add('close', auth_required=False)
+@protocol.commands.add("close", auth_required=False)
 def close(context):
     """
     *musicpd.org, connection section:*
@@ -15,7 +15,7 @@ def close(context):
     context.session.close()
 
 
-@protocol.commands.add('kill', list_command=False)
+@protocol.commands.add("kill", list_command=False)
 def kill(context):
     """
     *musicpd.org, connection section:*
@@ -24,10 +24,10 @@ def kill(context):
 
         Kills MPD.
     """
-    raise exceptions.MpdPermissionError(command='kill')
+    raise exceptions.MpdPermissionError(command="kill")
 
 
-@protocol.commands.add('password', auth_required=False)
+@protocol.commands.add("password", auth_required=False)
 def password(context, password):
     """
     *musicpd.org, connection section:*
@@ -40,10 +40,10 @@ def password(context, password):
     if password == context.password:
         context.dispatcher.authenticated = True
     else:
-        raise exceptions.MpdPasswordError('incorrect password')
+        raise exceptions.MpdPasswordError("incorrect password")
 
 
-@protocol.commands.add('ping', auth_required=False)
+@protocol.commands.add("ping", auth_required=False)
 def ping(context):
     """
     *musicpd.org, connection section:*

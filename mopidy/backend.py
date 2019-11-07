@@ -235,8 +235,7 @@ class PlaybackProvider(object):
         """
         uri = self.translate_uri(track.uri)
         if uri != track.uri:
-            logger.debug(
-                'Backend translated URI from %s to %s', track.uri, uri)
+            logger.debug("Backend translated URI from %s to %s", track.uri, uri)
         if not uri:
             return False
         self.audio.set_uri(uri).get()

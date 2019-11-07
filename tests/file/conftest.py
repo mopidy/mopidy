@@ -5,10 +5,7 @@ import pytest
 
 @pytest.fixture
 def file_config():
-    return {
-        'file': {
-        }
-    }
+    return {"file": {}}
 
 
 @pytest.fixture

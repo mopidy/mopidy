@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from mopidy.mpd import exceptions, protocol
 
 
-@protocol.commands.add('subscribe')
+@protocol.commands.add("subscribe")
 def subscribe(context, channel):
     """
     *musicpd.org, client to client section:*
@@ -18,7 +18,7 @@ def subscribe(context, channel):
     raise exceptions.MpdNotImplemented  # TODO
 
 
-@protocol.commands.add('unsubscribe')
+@protocol.commands.add("unsubscribe")
 def unsubscribe(context, channel):
     """
     *musicpd.org, client to client section:*
@@ -31,7 +31,7 @@ def unsubscribe(context, channel):
     raise exceptions.MpdNotImplemented  # TODO
 
 
-@protocol.commands.add('channels')
+@protocol.commands.add("channels")
 def channels(context):
     """
     *musicpd.org, client to client section:*
@@ -44,7 +44,7 @@ def channels(context):
     raise exceptions.MpdNotImplemented  # TODO
 
 
-@protocol.commands.add('readmessages')
+@protocol.commands.add("readmessages")
 def readmessages(context):
     """
     *musicpd.org, client to client section:*
@@ -57,7 +57,7 @@ def readmessages(context):
     raise exceptions.MpdNotImplemented  # TODO
 
 
-@protocol.commands.add('sendmessage')
+@protocol.commands.add("sendmessage")
 def sendmessage(context, channel, text):
     """
     *musicpd.org, client to client section:*

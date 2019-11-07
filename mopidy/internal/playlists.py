@@ -26,22 +26,22 @@ def parse(data):
 
 
 def detect_extm3u_header(data):
-    return data[0:7].upper() == b'#EXTM3U'
+    return data[0:7].upper() == b"#EXTM3U"
 
 
 def detect_pls_header(data):
-    return data[0:10].lower() == b'[playlist]'
+    return data[0:10].lower() == b"[playlist]"
 
 
 def detect_xspf_header(data):
     data = data[0:150]
-    if b'xspf' not in data.lower():
+    if b"xspf" not in data.lower():
         return False
 
     try:
         data = io.BytesIO(data)
-        for event, element in elementtree.iterparse(data, events=(b'start',)):
-            return element.tag.lower() == '{http://xspf.org/ns/0/}playlist'
+        for event, element in elementtree.iterparse(data, events=(b"start",)):
+            return element.tag.lower() == "{http://xspf.org/ns/0/}playlist"
     except elementtree.ParseError:
         pass
     return False
@@ -49,13 +49,13 @@ def detect_xspf_header(data):
 
 def detect_asx_header(data):
     data = data[0:50]
-    if b'asx' not in data.lower():
+    if b"asx" not in data.lower():
         return False
 
     try:
         data = io.BytesIO(data)
-        for event, element in elementtree.iterparse(data, events=(b'start',)):
-            return element.tag.lower() == 'asx'
+        for event, element in elementtree.iterparse(data, events=(b"start",)):
+            return element.tag.lower() == "asx"
     except elementtree.ParseError:
         pass
     return False
@@ -65,16 +65,16 @@ def parse_extm3u(data):
     # TODO: convert non URIs to file URIs.
     found_header = False
     for line in data.splitlines():
-        if found_header or line.startswith(b'#EXTM3U'):
+        if found_header or line.startswith(b"#EXTM3U"):
             found_header = True
         else:
             continue
 
-        if not line.strip() or line.startswith(b'#'):
+        if not line.strip() or line.startswith(b"#"):
             continue
 
         try:
-            line = line.decode('utf-8')
+            line = line.decode("utf-8")
         except UnicodeDecodeError:
             continue
 
@@ -93,10 +93,10 @@ def parse_pls(data):
         return
 
     for section in cp.sections():
-        if section.lower() != 'playlist':
+        if section.lower() != "playlist":
             continue
-        for i in range(cp.getint(section, 'numberofentries')):
-            yield cp.get(section, 'file%d' % (i + 1)).strip('\"\'')
+        for i in range(cp.getint(section, "numberofentries")):
+            yield cp.get(section, "file%d" % (i + 1)).strip("\"'")
 
 
 def parse_xspf(data):
@@ -107,10 +107,10 @@ def parse_xspf(data):
     except elementtree.ParseError:
         return
 
-    ns = 'http://xspf.org/ns/0/'
-    path = '{{{}}}tracklist/{{{}}}track'.format(ns, ns)
+    ns = "http://xspf.org/ns/0/"
+    path = "{{{}}}tracklist/{{{}}}track".format(ns, ns)
     for track in element.iterfind(path):
-        yield track.findtext('{{{}}}location'.format(ns))
+        yield track.findtext("{{{}}}location".format(ns))
 
 
 def parse_asx(data):
@@ -121,20 +121,20 @@ def parse_asx(data):
     except elementtree.ParseError:
         return
 
-    for ref in element.findall('entry/ref[@href]'):
-        yield ref.get('href', '').strip()
+    for ref in element.findall("entry/ref[@href]"):
+        yield ref.get("href", "").strip()
 
-    for entry in element.findall('entry[@href]'):
-        yield entry.get('href', '').strip()
+    for entry in element.findall("entry[@href]"):
+        yield entry.get("href", "").strip()
 
 
 def parse_urilist(data):
     for line in data.splitlines():
-        if not line.strip() or line.startswith(b'#'):
+        if not line.strip() or line.startswith(b"#"):
             continue
 
         try:
-            line = line.decode('utf-8')
+            line = line.decode("utf-8")
         except UnicodeDecodeError:
             continue
 

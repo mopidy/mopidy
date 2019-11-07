@@ -7,39 +7,42 @@ from mopidy.models import Track
 from mopidy.mpd import exceptions, protocol, translator
 
 _SEARCH_MAPPING = {
-    'album': 'album',
-    'albumartist': 'albumartist',
-    'any': 'any',
-    'artist': 'artist',
-    'comment': 'comment',
-    'composer': 'composer',
-    'date': 'date',
-    'file': 'uri',
-    'filename': 'uri',
-    'genre': 'genre',
-    'performer': 'performer',
-    'title': 'track_name',
-    'track': 'track_no'}
+    "album": "album",
+    "albumartist": "albumartist",
+    "any": "any",
+    "artist": "artist",
+    "comment": "comment",
+    "composer": "composer",
+    "date": "date",
+    "file": "uri",
+    "filename": "uri",
+    "genre": "genre",
+    "performer": "performer",
+    "title": "track_name",
+    "track": "track_no",
+}
 
 _LIST_MAPPING = {
-    'title': 'track',
-    'album': 'album',
-    'albumartist': 'albumartist',
-    'artist': 'artist',
-    'composer': 'composer',
-    'date': 'date',
-    'genre': 'genre',
-    'performer': 'performer'}
+    "title": "track",
+    "album": "album",
+    "albumartist": "albumartist",
+    "artist": "artist",
+    "composer": "composer",
+    "date": "date",
+    "genre": "genre",
+    "performer": "performer",
+}
 
 _LIST_NAME_MAPPING = {
-    'track': 'Title',
-    'album': 'Album',
-    'albumartist': 'AlbumArtist',
-    'artist': 'Artist',
-    'composer': 'Composer',
-    'date': 'Date',
-    'genre': 'Genre',
-    'performer': 'Performer'}
+    "track": "Title",
+    "album": "Album",
+    "albumartist": "AlbumArtist",
+    "artist": "Artist",
+    "composer": "Composer",
+    "date": "Date",
+    "genre": "Genre",
+    "performer": "Performer",
+}
 
 
 def _query_from_mpd_search_parameters(parameters, mapping):
@@ -49,7 +52,7 @@ def _query_from_mpd_search_parameters(parameters, mapping):
         # TODO: does it matter that this is now case insensitive
         field = mapping.get(parameters.pop(0).lower())
         if not field:
-            raise exceptions.MpdArgError('incorrect arguments')
+            raise exceptions.MpdArgError("incorrect arguments")
         if not parameters:
             raise ValueError
         value = parameters.pop(0)
@@ -62,28 +65,28 @@ def _get_field(field, search_results):
     return list(itertools.chain(*[getattr(r, field) for r in search_results]))
 
 
-_get_albums = functools.partial(_get_field, 'albums')
-_get_artists = functools.partial(_get_field, 'artists')
-_get_tracks = functools.partial(_get_field, 'tracks')
+_get_albums = functools.partial(_get_field, "albums")
+_get_artists = functools.partial(_get_field, "artists")
+_get_tracks = functools.partial(_get_field, "tracks")
 
 
 def _album_as_track(album):
     return Track(
         uri=album.uri,
-        name='Album: ' + album.name,
+        name="Album: " + album.name,
         artists=album.artists,
         album=album,
-        date=album.date)
+        date=album.date,
+    )
 
 
 def _artist_as_track(artist):
     return Track(
-        uri=artist.uri,
-        name='Artist: ' + artist.name,
-        artists=[artist])
+        uri=artist.uri, name="Artist: " + artist.name, artists=[artist]
+    )
 
 
-@protocol.commands.add('count')
+@protocol.commands.add("count")
 def count(context, *args):
     """
     *musicpd.org, music database section:*
@@ -100,17 +103,17 @@ def count(context, *args):
     try:
         query = _query_from_mpd_search_parameters(args, _SEARCH_MAPPING)
     except ValueError:
-        raise exceptions.MpdArgError('incorrect arguments')
+        raise exceptions.MpdArgError("incorrect arguments")
     results = context.core.library.search(query=query, exact=True).get()
     result_tracks = _get_tracks(results)
     total_length = sum(t.length for t in result_tracks if t.length)
     return [
-        ('songs', len(result_tracks)),
-        ('playtime', int(total_length / 1000)),
+        ("songs", len(result_tracks)),
+        ("playtime", int(total_length / 1000)),
     ]
 
 
-@protocol.commands.add('find')
+@protocol.commands.add("find")
 def find(context, *args):
     """
     *musicpd.org, music database section:*
@@ -143,18 +146,20 @@ def find(context, *args):
 
     results = context.core.library.search(query=query, exact=True).get()
     result_tracks = []
-    if ('artist' not in query and
-            'albumartist' not in query and
-            'composer' not in query and
-            'performer' not in query):
+    if (
+        "artist" not in query
+        and "albumartist" not in query
+        and "composer" not in query
+        and "performer" not in query
+    ):
         result_tracks += [_artist_as_track(a) for a in _get_artists(results)]
-    if 'album' not in query:
+    if "album" not in query:
         result_tracks += [_album_as_track(a) for a in _get_albums(results)]
     result_tracks += _get_tracks(results)
     return translator.tracks_to_mpd_format(result_tracks)
 
 
-@protocol.commands.add('findadd')
+@protocol.commands.add("findadd")
 def findadd(context, *args):
     """
     *musicpd.org, music database section:*
@@ -176,7 +181,7 @@ def findadd(context, *args):
     ).get()
 
 
-@protocol.commands.add('list')
+@protocol.commands.add("list")
 def list_(context, *args):
     """
     *musicpd.org, music database section:*
@@ -256,24 +261,24 @@ def list_(context, *args):
     """
     params = list(args)
     if not params:
-        raise exceptions.MpdArgError('incorrect arguments')
+        raise exceptions.MpdArgError("incorrect arguments")
 
     field = params.pop(0).lower()
     field = _LIST_MAPPING.get(field)
     if field is None:
-        raise exceptions.MpdArgError('incorrect arguments')
+        raise exceptions.MpdArgError("incorrect arguments")
 
     query = None
     if len(params) == 1:
-        if field != 'album':
+        if field != "album":
             raise exceptions.MpdArgError('should be "Album" for 3 arguments')
         if params[0].strip():
-            query = {'artist': params}
+            query = {"artist": params}
     else:
         try:
             query = _query_from_mpd_search_parameters(params, _LIST_MAPPING)
         except exceptions.MpdArgError as e:
-            e.message = 'not able to parse args'
+            e.message = "not able to parse args"
             raise
         except ValueError:
             return
@@ -283,7 +288,7 @@ def list_(context, *args):
     return [(name, value) for value in result.get()]
 
 
-@protocol.commands.add('listall')
+@protocol.commands.add("listall")
 def listall(context, uri=None):
     """
     *musicpd.org, music database section:*
@@ -302,16 +307,16 @@ def listall(context, uri=None):
     result = []
     for path, track_ref in context.browse(uri, lookup=False):
         if not track_ref:
-            result.append(('directory', path))
+            result.append(("directory", path))
         else:
-            result.append(('file', track_ref.uri))
+            result.append(("file", track_ref.uri))
 
     if not result:
-        raise exceptions.MpdNoExistError('Not found')
+        raise exceptions.MpdNoExistError("Not found")
     return result
 
 
-@protocol.commands.add('listallinfo')
+@protocol.commands.add("listallinfo")
 def listallinfo(context, uri=None):
     """
     *musicpd.org, music database section:*
@@ -331,7 +336,7 @@ def listallinfo(context, uri=None):
     result = []
     for path, lookup_future in context.browse(uri):
         if not lookup_future:
-            result.append(('directory', path))
+            result.append(("directory", path))
         else:
             for tracks in lookup_future.get().values():
                 for track in tracks:
@@ -339,7 +344,7 @@ def listallinfo(context, uri=None):
     return result
 
 
-@protocol.commands.add('listfiles')
+@protocol.commands.add("listfiles")
 def listfiles(context, uri=None):
     """
     *musicpd.org, music database section:*
@@ -363,7 +368,7 @@ def listfiles(context, uri=None):
     raise exceptions.MpdNotImplemented  # TODO
 
 
-@protocol.commands.add('lsinfo')
+@protocol.commands.add("lsinfo")
 def lsinfo(context, uri=None):
     """
     *musicpd.org, music database section:*
@@ -383,19 +388,19 @@ def lsinfo(context, uri=None):
     result = []
     for path, lookup_future in context.browse(uri, recursive=False):
         if not lookup_future:
-            result.append(('directory', path.lstrip('/')))
+            result.append(("directory", path.lstrip("/")))
         else:
             for tracks in lookup_future.get().values():
                 if tracks:
                     result.extend(translator.track_to_mpd_format(tracks[0]))
 
-    if uri in (None, '', '/'):
+    if uri in (None, "", "/"):
         result.extend(protocol.stored_playlists.listplaylists(context))
 
     return result
 
 
-@protocol.commands.add('rescan')
+@protocol.commands.add("rescan")
 def rescan(context, uri=None):
     """
     *musicpd.org, music database section:*
@@ -404,10 +409,10 @@ def rescan(context, uri=None):
 
         Same as ``update``, but also rescans unmodified files.
     """
-    return {'updating_db': 0}  # TODO
+    return {"updating_db": 0}  # TODO
 
 
-@protocol.commands.add('search')
+@protocol.commands.add("search")
 def search(context, *args):
     """
     *musicpd.org, music database section:*
@@ -444,7 +449,7 @@ def search(context, *args):
     return translator.tracks_to_mpd_format(artists + albums + tracks)
 
 
-@protocol.commands.add('searchadd')
+@protocol.commands.add("searchadd")
 def searchadd(context, *args):
     """
     *musicpd.org, music database section:*
@@ -469,7 +474,7 @@ def searchadd(context, *args):
     ).get()
 
 
-@protocol.commands.add('searchaddpl')
+@protocol.commands.add("searchaddpl")
 def searchaddpl(context, *args):
     """
     *musicpd.org, music database section:*
@@ -486,7 +491,7 @@ def searchaddpl(context, *args):
     """
     parameters = list(args)
     if not parameters:
-        raise exceptions.MpdArgError('incorrect arguments')
+        raise exceptions.MpdArgError("incorrect arguments")
     playlist_name = parameters.pop(0)
     try:
         query = _query_from_mpd_search_parameters(parameters, _SEARCH_MAPPING)
@@ -503,7 +508,7 @@ def searchaddpl(context, *args):
     context.core.playlists.save(playlist)
 
 
-@protocol.commands.add('update')
+@protocol.commands.add("update")
 def update(context, uri=None):
     """
     *musicpd.org, music database section:*
@@ -520,7 +525,7 @@ def update(context, uri=None):
         identifying the update job. You can read the current job id in the
         ``status`` response.
     """
-    return {'updating_db': 0}  # TODO
+    return {"updating_db": 0}  # TODO
 
 
 # TODO: add at least reflection tests before adding NotImplemented version

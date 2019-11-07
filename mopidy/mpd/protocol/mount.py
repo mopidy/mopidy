@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from mopidy.mpd import exceptions, protocol
 
 
-@protocol.commands.add('mount')
+@protocol.commands.add("mount")
 def mount(context, path, uri):
     """
     *musicpd.org, mounts and neighbors section:*
@@ -20,7 +20,7 @@ def mount(context, path, uri):
     raise exceptions.MpdNotImplemented  # TODO
 
 
-@protocol.commands.add('unmount')
+@protocol.commands.add("unmount")
 def unmount(context, path):
     """
     *musicpd.org, mounts and neighbors section:*
@@ -37,7 +37,7 @@ def unmount(context, path):
     raise exceptions.MpdNotImplemented  # TODO
 
 
-@protocol.commands.add('listmounts')
+@protocol.commands.add("listmounts")
 def listmounts(context):
     """
     *musicpd.org, mounts and neighbors section:*
@@ -60,7 +60,7 @@ def listmounts(context):
     raise exceptions.MpdNotImplemented  # TODO
 
 
-@protocol.commands.add('listneighbors')
+@protocol.commands.add("listneighbors")
 def listneighbors(context):
     """
     *musicpd.org, mounts and neighbors section:*

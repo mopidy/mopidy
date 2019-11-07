@@ -13,7 +13,6 @@ from tests import dummy_mixer
 
 
 class CoreMixerTest(unittest.TestCase):
-
     def setUp(self):  # noqa: N802
         self.mixer = mock.Mock(spec=mixer.Mixer)
         self.core = core.Core(mixer=self.mixer, backends=[])
@@ -44,7 +43,6 @@ class CoreMixerTest(unittest.TestCase):
 
 
 class CoreNoneMixerTest(unittest.TestCase):
-
     def setUp(self):  # noqa: N802
         self.core = core.Core(mixer=None, backends=[])
 
@@ -61,9 +59,8 @@ class CoreNoneMixerTest(unittest.TestCase):
         self.assertEqual(self.core.mixer.set_mute(True), False)
 
 
-@mock.patch.object(mixer.MixerListener, 'send')
+@mock.patch.object(mixer.MixerListener, "send")
 class CoreMixerListenerTest(unittest.TestCase):
-
     def setUp(self):  # noqa: N802
         self.mixer = dummy_mixer.create_proxy()
         self.core = core.Core(mixer=self.mixer, backends=[])
@@ -73,19 +70,18 @@ class CoreMixerListenerTest(unittest.TestCase):
 
     def test_forwards_mixer_volume_changed_event_to_frontends(self, send):
         self.assertEqual(self.core.mixer.set_volume(volume=60), True)
-        self.assertEqual(send.call_args[0][0], 'volume_changed')
-        self.assertEqual(send.call_args[1]['volume'], 60)
+        self.assertEqual(send.call_args[0][0], "volume_changed")
+        self.assertEqual(send.call_args[1]["volume"], 60)
 
     def test_forwards_mixer_mute_changed_event_to_frontends(self, send):
         self.core.mixer.set_mute(mute=True)
 
-        self.assertEqual(send.call_args[0][0], 'mute_changed')
-        self.assertEqual(send.call_args[1]['mute'], True)
+        self.assertEqual(send.call_args[0][0], "mute_changed")
+        self.assertEqual(send.call_args[1]["mute"], True)
 
 
-@mock.patch.object(mixer.MixerListener, 'send')
+@mock.patch.object(mixer.MixerListener, "send")
 class CoreNoneMixerListenerTest(unittest.TestCase):
-
     def setUp(self):  # noqa: N802
         self.core = core.Core(mixer=None, backends=[])
 
@@ -99,15 +95,13 @@ class CoreNoneMixerListenerTest(unittest.TestCase):
 
 
 class MockBackendCoreMixerBase(unittest.TestCase):
-
     def setUp(self):  # noqa: N802
         self.mixer = mock.Mock()
-        self.mixer.actor_ref.actor_class.__name__ = 'DummyMixer'
+        self.mixer.actor_ref.actor_class.__name__ = "DummyMixer"
         self.core = core.Core(mixer=self.mixer, backends=[])
 
 
 class GetVolumeBadBackendTest(MockBackendCoreMixerBase):
-
     def test_backend_raises_exception(self):
         self.mixer.get_volume.return_value.get.side_effect = Exception
         self.assertEqual(self.core.mixer.get_volume(), None)
@@ -121,45 +115,41 @@ class GetVolumeBadBackendTest(MockBackendCoreMixerBase):
         self.assertEqual(self.core.mixer.get_volume(), None)
 
     def test_backend_returns_wrong_type(self):
-        self.mixer.get_volume.return_value.get.return_value = '12'
+        self.mixer.get_volume.return_value.get.return_value = "12"
         self.assertEqual(self.core.mixer.get_volume(), None)
 
 
 class SetVolumeBadBackendTest(MockBackendCoreMixerBase):
-
     def test_backend_raises_exception(self):
         self.mixer.set_volume.return_value.get.side_effect = Exception
         self.assertFalse(self.core.mixer.set_volume(30))
 
     def test_backend_returns_wrong_type(self):
-        self.mixer.set_volume.return_value.get.return_value = 'done'
+        self.mixer.set_volume.return_value.get.return_value = "done"
         self.assertFalse(self.core.mixer.set_volume(30))
 
 
 class GetMuteBadBackendTest(MockBackendCoreMixerBase):
-
     def test_backend_raises_exception(self):
         self.mixer.get_mute.return_value.get.side_effect = Exception
         self.assertEqual(self.core.mixer.get_mute(), None)
 
     def test_backend_returns_wrong_type(self):
-        self.mixer.get_mute.return_value.get.return_value = '12'
+        self.mixer.get_mute.return_value.get.return_value = "12"
         self.assertEqual(self.core.mixer.get_mute(), None)
 
 
 class SetMuteBadBackendTest(MockBackendCoreMixerBase):
-
     def test_backend_raises_exception(self):
         self.mixer.set_mute.return_value.get.side_effect = Exception
         self.assertFalse(self.core.mixer.set_mute(True))
 
     def test_backend_returns_wrong_type(self):
-        self.mixer.set_mute.return_value.get.return_value = 'done'
+        self.mixer.set_mute.return_value.get.return_value = "done"
         self.assertFalse(self.core.mixer.set_mute(True))
 
 
 class CoreMixerSaveLoadStateTest(unittest.TestCase):
-
     def setUp(self):  # noqa: N802
         self.mixer = dummy_mixer.create_proxy()
         self.core = core.Core(mixer=self.mixer, backends=[])
@@ -186,7 +176,7 @@ class CoreMixerSaveLoadStateTest(unittest.TestCase):
         self.core.mixer.set_volume(11)
         volume = 45
         target = MixerState(volume=volume)
-        coverage = ['mixer']
+        coverage = ["mixer"]
         self.core.mixer._load_state(target, coverage)
         self.assertEqual(volume, self.core.mixer.get_volume())
 
@@ -194,7 +184,7 @@ class CoreMixerSaveLoadStateTest(unittest.TestCase):
         self.core.mixer.set_volume(21)
         self.core.mixer.set_mute(True)
         target = MixerState(volume=56, mute=False)
-        coverage = ['other']
+        coverage = ["other"]
         self.core.mixer._load_state(target, coverage)
         self.assertEqual(21, self.core.mixer.get_volume())
         self.assertEqual(True, self.core.mixer.get_mute())
@@ -203,7 +193,7 @@ class CoreMixerSaveLoadStateTest(unittest.TestCase):
         self.core.mixer.set_mute(False)
         self.assertEqual(False, self.core.mixer.get_mute())
         target = MixerState(mute=True)
-        coverage = ['mixer']
+        coverage = ["mixer"]
         self.core.mixer._load_state(target, coverage)
         self.assertEqual(True, self.core.mixer.get_mute())
 
@@ -211,7 +201,7 @@ class CoreMixerSaveLoadStateTest(unittest.TestCase):
         self.core.mixer.set_mute(True)
         self.assertEqual(True, self.core.mixer.get_mute())
         target = MixerState(mute=False)
-        coverage = ['mixer']
+        coverage = ["mixer"]
         self.core.mixer._load_state(target, coverage)
         self.assertEqual(False, self.core.mixer.get_mute())
 

@@ -15,8 +15,8 @@ class MpdUriMapper(object):
     #: The Mopidy core API. An instance of :class:`mopidy.core.Core`.
     core = None
 
-    _invalid_browse_chars = re.compile(r'[\n\r]')
-    _invalid_playlist_chars = re.compile(r'[/]')
+    _invalid_browse_chars = re.compile(r"[\n\r]")
+    _invalid_playlist_chars = re.compile(r"[/]")
 
     def __init__(self, core=None):
         self.core = core
@@ -25,13 +25,13 @@ class MpdUriMapper(object):
         self._playlist_name_from_uri = {}
 
     def _create_unique_name(self, name, uri):
-        stripped_name = self._invalid_browse_chars.sub(' ', name)
+        stripped_name = self._invalid_browse_chars.sub(" ", name)
         name = stripped_name
         i = 2
         while name in self._uri_from_name:
             if self._uri_from_name[name] == uri:
                 return name
-            name = '%s [%d]' % (stripped_name, i)
+            name = "%s [%d]" % (stripped_name, i)
             i += 1
         return name
 
@@ -64,7 +64,7 @@ class MpdUriMapper(object):
         for playlist_ref in self.core.playlists.as_list().get():
             if not playlist_ref.name:
                 continue
-            name = self._invalid_playlist_chars.sub('|', playlist_ref.name)
+            name = self._invalid_playlist_chars.sub("|", playlist_ref.name)
             self.insert(name, playlist_ref.uri, playlist=True)
 
     def playlist_uri_from_name(self, name):

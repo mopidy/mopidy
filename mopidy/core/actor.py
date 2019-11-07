@@ -24,8 +24,11 @@ logger = logging.getLogger(__name__)
 
 
 class Core(
-        pykka.ThreadingActor, audio.AudioListener, backend.BackendListener,
-        mixer.MixerListener):
+    pykka.ThreadingActor,
+    audio.AudioListener,
+    backend.BackendListener,
+    mixer.MixerListener,
+):
 
     library = None
     """An instance of :class:`~mopidy.core.LibraryController`"""
@@ -56,7 +59,8 @@ class Core(
         self.history = HistoryController()
         self.mixer = MixerController(mixer=mixer)
         self.playback = PlaybackController(
-            audio=audio, backends=self.backends, core=self)
+            audio=audio, backends=self.backends, core=self
+        )
         self.playlists = PlaylistsController(backends=self.backends, core=self)
         self.tracklist = TracklistController(core=self)
 
@@ -92,25 +96,28 @@ class Core(
 
         # We ignore cases when target state is set as this is buffering
         # updates (at least for now) and we need to get #234 fixed...
-        if (new_state == PlaybackState.PAUSED and not target_state and
-                self.playback.get_state() != PlaybackState.PAUSED):
+        if (
+            new_state == PlaybackState.PAUSED
+            and not target_state
+            and self.playback.get_state() != PlaybackState.PAUSED
+        ):
             self.playback.set_state(new_state)
             self.playback._trigger_track_playback_paused()
 
     def playlists_loaded(self):
         # Forward event from backend to frontends
-        CoreListener.send('playlists_loaded')
+        CoreListener.send("playlists_loaded")
 
     def volume_changed(self, volume):
         # Forward event from mixer to frontends
-        CoreListener.send('volume_changed', volume=volume)
+        CoreListener.send("volume_changed", volume=volume)
 
     def mute_changed(self, mute):
         # Forward event from mixer to frontends
-        CoreListener.send('mute_changed', mute=mute)
+        CoreListener.send("mute_changed", mute=mute)
 
     def tags_changed(self, tags):
-        if not self.audio or 'title' not in tags:
+        if not self.audio or "title" not in tags:
             return
 
         tags = self.audio.get_current_tags().get()
@@ -120,45 +127,50 @@ class Core(
         # TODO: this is a hack to make sure we don't emit stream title changes
         # for plain tracks. We need a better way to decide if something is a
         # stream.
-        if 'title' in tags and tags['title']:
-            title = tags['title'][0]
+        if "title" in tags and tags["title"]:
+            title = tags["title"][0]
             current_track = self.playback.get_current_track()
             if current_track is not None and current_track.name != title:
                 self.playback._stream_title = title
-                CoreListener.send('stream_title_changed', title=title)
+                CoreListener.send("stream_title_changed", title=title)
 
     def setup(self):
         """Do not call this function. It is for internal use at startup."""
         try:
             coverage = []
-            if self._config and 'restore_state' in self._config['core']:
-                if self._config['core']['restore_state']:
-                    coverage = ['tracklist', 'mode', 'play-last', 'mixer',
-                                'history']
+            if self._config and "restore_state" in self._config["core"]:
+                if self._config["core"]["restore_state"]:
+                    coverage = [
+                        "tracklist",
+                        "mode",
+                        "play-last",
+                        "mixer",
+                        "history",
+                    ]
             if len(coverage):
                 self._load_state(coverage)
         except Exception as e:
-            logger.warn('Restore state: Unexpected error: %s', str(e))
+            logger.warn("Restore state: Unexpected error: %s", str(e))
 
     def teardown(self):
         """Do not call this function. It is for internal use at shutdown."""
         try:
-            if self._config and 'restore_state' in self._config['core']:
-                if self._config['core']['restore_state']:
+            if self._config and "restore_state" in self._config["core"]:
+                if self._config["core"]["restore_state"]:
                     self._save_state()
         except Exception as e:
-            logger.warn('Unexpected error while saving state: %s', str(e))
+            logger.warn("Unexpected error while saving state: %s", str(e))
 
     def _get_data_dir(self):
         # get or create data director for core
         data_dir_path = (
-            path.expand_path(self._config['core']['data_dir']) / 'core'
+            path.expand_path(self._config["core"]["data_dir"]) / "core"
         )
         path.get_or_create_dir(data_dir_path)
         return data_dir_path
 
     def _get_state_file(self):
-        return self._get_data_dir() / 'state.json.gz'
+        return self._get_data_dir() / "state.json.gz"
 
     def _save_state(self):
         """
@@ -166,17 +178,18 @@ class Core(
         """
 
         state_file = self._get_state_file()
-        logger.info('Saving state to %s', state_file)
+        logger.info("Saving state to %s", state_file)
 
         data = {}
-        data['version'] = mopidy.__version__
-        data['state'] = CoreState(
+        data["version"] = mopidy.__version__
+        data["state"] = CoreState(
             tracklist=self.tracklist._save_state(),
             history=self.history._save_state(),
             playback=self.playback._save_state(),
-            mixer=self.mixer._save_state())
+            mixer=self.mixer._save_state(),
+        )
         storage.dump(state_file, data)
-        logger.debug('Saving state done')
+        logger.debug("Saving state done")
 
     def _load_state(self, coverage):
         """
@@ -197,7 +210,7 @@ class Core(
         """
 
         state_file = self._get_state_file()
-        logger.info('Loading state from %s', state_file)
+        logger.info("Loading state from %s", state_file)
 
         data = storage.load(state_file)
 
@@ -205,21 +218,20 @@ class Core(
             # Try only once. If something goes wrong, the next start is clean.
             state_file.unlink()
         except OSError:
-            logger.info('Failed to delete %s', state_file)
+            logger.info("Failed to delete %s", state_file)
 
-        if 'state' in data:
-            core_state = data['state']
+        if "state" in data:
+            core_state = data["state"]
             validation.check_instance(core_state, CoreState)
             self.history._load_state(core_state.history, coverage)
             self.tracklist._load_state(core_state.tracklist, coverage)
             self.mixer._load_state(core_state.mixer, coverage)
             # playback after tracklist
             self.playback._load_state(core_state.playback, coverage)
-        logger.debug('Loading state done')
+        logger.debug("Loading state done")
 
 
 class Backends(list):
-
     def __init__(self, backends):
         super(Backends, self).__init__(backends)
 
@@ -241,13 +253,15 @@ class Backends(list):
                 has_playlists = b.has_playlists().get()
             except Exception:
                 self.remove(b)
-                logger.exception('Fetching backend info for %s failed',
-                                 b.actor_ref.actor_class.__name__)
+                logger.exception(
+                    "Fetching backend info for %s failed",
+                    b.actor_ref.actor_class.__name__,
+                )
 
             for scheme in b.uri_schemes.get():
                 assert scheme not in backends_by_scheme, (
                     'Cannot add URI scheme "%s" for %s, '
-                    'it is already handled by %s'
+                    "it is already handled by %s"
                 ) % (scheme, name(b), name(backends_by_scheme[scheme]))
                 backends_by_scheme[scheme] = b
 

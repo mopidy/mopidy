@@ -22,7 +22,7 @@ class MpdAckError(MopidyException):
 
     error_code = 0
 
-    def __init__(self, message='', index=0, command=None):
+    def __init__(self, message="", index=0, command=None):
         super(MpdAckError, self).__init__(message, index, command)
         self.message = message
         self.index = index
@@ -34,8 +34,12 @@ class MpdAckError(MopidyException):
 
             ACK [%(error_code)i@%(index)i] {%(command)s} description
         """
-        return 'ACK [%i@%i] {%s} %s' % (
-            self.__class__.error_code, self.index, self.command, self.message)
+        return "ACK [%i@%i] {%s} %s" % (
+            self.__class__.error_code,
+            self.index,
+            self.command,
+            self.message,
+        )
 
 
 class MpdArgError(MpdAckError):
@@ -51,7 +55,7 @@ class MpdPermissionError(MpdAckError):
 
     def __init__(self, *args, **kwargs):
         super(MpdPermissionError, self).__init__(*args, **kwargs)
-        assert self.command is not None, 'command must be given explicitly'
+        assert self.command is not None, "command must be given explicitly"
         self.message = 'you don\'t have permission for "%s"' % self.command
 
 
@@ -60,20 +64,18 @@ class MpdUnknownError(MpdAckError):
 
 
 class MpdUnknownCommand(MpdUnknownError):
-
     def __init__(self, *args, **kwargs):
         super(MpdUnknownCommand, self).__init__(*args, **kwargs)
-        assert self.command is not None, 'command must be given explicitly'
+        assert self.command is not None, "command must be given explicitly"
         self.message = 'unknown command "%s"' % self.command
-        self.command = ''
+        self.command = ""
 
 
 class MpdNoCommand(MpdUnknownCommand):
-
     def __init__(self, *args, **kwargs):
-        kwargs['command'] = ''
+        kwargs["command"] = ""
         super(MpdNoCommand, self).__init__(*args, **kwargs)
-        self.message = 'No command given'
+        self.message = "No command given"
 
 
 class MpdNoExistError(MpdAckError):
@@ -93,8 +95,10 @@ class MpdInvalidPlaylistName(MpdAckError):
 
     def __init__(self, *args, **kwargs):
         super(MpdInvalidPlaylistName, self).__init__(*args, **kwargs)
-        self.message = ('playlist name is invalid: playlist names may not '
-                        'contain slashes, newlines or carriage returns')
+        self.message = (
+            "playlist name is invalid: playlist names may not "
+            "contain slashes, newlines or carriage returns"
+        )
 
 
 class MpdNotImplemented(MpdAckError):
@@ -102,7 +106,7 @@ class MpdNotImplemented(MpdAckError):
 
     def __init__(self, *args, **kwargs):
         super(MpdNotImplemented, self).__init__(*args, **kwargs)
-        self.message = 'Not implemented'
+        self.message = "Not implemented"
 
 
 class MpdInvalidTrackForPlaylist(MpdAckError):
@@ -112,8 +116,9 @@ class MpdInvalidTrackForPlaylist(MpdAckError):
     def __init__(self, playlist_scheme, track_scheme, *args, **kwargs):
         super(MpdInvalidTrackForPlaylist, self).__init__(*args, **kwargs)
         self.message = (
-            'Playlist with scheme "%s" can\'t store track scheme "%s"' %
-            (playlist_scheme, track_scheme))
+            'Playlist with scheme "%s" can\'t store track scheme "%s"'
+            % (playlist_scheme, track_scheme)
+        )
 
 
 class MpdFailedToSavePlaylist(MpdAckError):
@@ -123,7 +128,8 @@ class MpdFailedToSavePlaylist(MpdAckError):
     def __init__(self, backend_scheme, *args, **kwargs):
         super(MpdFailedToSavePlaylist, self).__init__(*args, **kwargs)
         self.message = 'Backend with scheme "%s" failed to save playlist' % (
-            backend_scheme)
+            backend_scheme
+        )
 
 
 class MpdDisabled(MpdAckError):
@@ -132,5 +138,5 @@ class MpdDisabled(MpdAckError):
 
     def __init__(self, *args, **kwargs):
         super(MpdDisabled, self).__init__(*args, **kwargs)
-        assert self.command is not None, 'command must be given explicitly'
+        assert self.command is not None, "command must be given explicitly"
         self.message = '"%s" has been disabled in the server' % self.command

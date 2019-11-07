@@ -8,15 +8,13 @@ from tests import dummy_backend
 
 
 class LibraryTest(unittest.TestCase):
-
     def test_default_get_images_impl(self):
         library = dummy_backend.DummyLibraryProvider(backend=None)
 
-        self.assertEqual(library.get_images(['trackuri']), {})
+        self.assertEqual(library.get_images(["trackuri"]), {})
 
 
 class PlaylistsTest(unittest.TestCase):
-
     def setUp(self):  # noqa: N802
         self.provider = backend.PlaylistsProvider(backend=None)
 
@@ -26,4 +24,4 @@ class PlaylistsTest(unittest.TestCase):
 
     def test_get_items_default_impl(self):
         with self.assertRaises(NotImplementedError):
-            self.provider.get_items('some uri')
+            self.provider.get_items("some uri")

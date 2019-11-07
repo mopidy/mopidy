@@ -7,7 +7,7 @@ import pytest
 from mopidy.internal import playlists
 
 
-BAD = b'foobarbaz'
+BAD = b"foobarbaz"
 
 EXTM3U = b"""#EXTM3U
 #EXTINF:123, Sample artist - Sample title
@@ -85,62 +85,67 @@ XSPF = b"""<?xml version="1.0" encoding="UTF-8"?>
 </playlist>
 """
 
-EXPECTED = ['file:///tmp/foo', 'file:///tmp/bar', 'file:///tmp/baz']
+EXPECTED = ["file:///tmp/foo", "file:///tmp/bar", "file:///tmp/baz"]
 
 
-@pytest.mark.parametrize('detect_fn, data', [
-    (playlists.detect_extm3u_header, EXTM3U),
-    (playlists.detect_pls_header, PLS),
-    (playlists.detect_asx_header, ASX),
-    (playlists.detect_asx_header, SIMPLE_ASX),
-    (playlists.detect_xspf_header, XSPF),
-])
+@pytest.mark.parametrize(
+    "detect_fn, data",
+    [
+        (playlists.detect_extm3u_header, EXTM3U),
+        (playlists.detect_pls_header, PLS),
+        (playlists.detect_asx_header, ASX),
+        (playlists.detect_asx_header, SIMPLE_ASX),
+        (playlists.detect_xspf_header, XSPF),
+    ],
+)
 def test_detect_from_valid_header(detect_fn, data):
     assert detect_fn(data) is True
 
 
-@pytest.mark.parametrize('detect_fn', [
-    playlists.detect_extm3u_header,
-    playlists.detect_pls_header,
-    playlists.detect_asx_header,
-    playlists.detect_asx_header,
-    playlists.detect_xspf_header,
-])
+@pytest.mark.parametrize(
+    "detect_fn",
+    [
+        playlists.detect_extm3u_header,
+        playlists.detect_pls_header,
+        playlists.detect_asx_header,
+        playlists.detect_asx_header,
+        playlists.detect_xspf_header,
+    ],
+)
 def test_detect_from_invalid_header(detect_fn):
     assert detect_fn(BAD) is False
 
 
-@pytest.mark.parametrize('parse_fn, data', [
-    (playlists.parse_extm3u, EXTM3U),
-    (playlists.parse_pls, PLS),
-    (playlists.parse_asx, ASX),
-    (playlists.parse_asx, SIMPLE_ASX),
-    (playlists.parse_xspf, XSPF),
-    (playlists.parse_urilist, URILIST)
-])
+@pytest.mark.parametrize(
+    "parse_fn, data",
+    [
+        (playlists.parse_extm3u, EXTM3U),
+        (playlists.parse_pls, PLS),
+        (playlists.parse_asx, ASX),
+        (playlists.parse_asx, SIMPLE_ASX),
+        (playlists.parse_xspf, XSPF),
+        (playlists.parse_urilist, URILIST),
+    ],
+)
 def test_parse_given_format_from_valid_data(parse_fn, data):
     assert list(parse_fn(data)) == EXPECTED
 
 
-@pytest.mark.parametrize('parse_fn', [
-    playlists.parse_extm3u,
-    playlists.parse_pls,
-    playlists.parse_asx,
-    playlists.parse_xspf,
-    playlists.parse_urilist,
-])
+@pytest.mark.parametrize(
+    "parse_fn",
+    [
+        playlists.parse_extm3u,
+        playlists.parse_pls,
+        playlists.parse_asx,
+        playlists.parse_xspf,
+        playlists.parse_urilist,
+    ],
+)
 def test_parse_given_format_from_invalid_data(parse_fn):
     assert list(parse_fn(BAD)) == []
 
 
-@pytest.mark.parametrize('data', [
-    URILIST,
-    EXTM3U,
-    PLS,
-    ASX,
-    SIMPLE_ASX,
-    XSPF,
-])
+@pytest.mark.parametrize("data", [URILIST, EXTM3U, PLS, ASX, SIMPLE_ASX, XSPF])
 def test_parse_any_format_from_valid_data(data):
     assert playlists.parse(data) == EXPECTED
 

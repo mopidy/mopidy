@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from mopidy.mpd import exceptions, protocol
 
 
-@protocol.commands.add('disableoutput', outputid=protocol.UINT)
+@protocol.commands.add("disableoutput", outputid=protocol.UINT)
 def disableoutput(context, outputid):
     """
     *musicpd.org, audio output section:*
@@ -15,12 +15,12 @@ def disableoutput(context, outputid):
     if outputid == 0:
         success = context.core.mixer.set_mute(False).get()
         if not success:
-            raise exceptions.MpdSystemError('problems disabling output')
+            raise exceptions.MpdSystemError("problems disabling output")
     else:
-        raise exceptions.MpdNoExistError('No such audio output')
+        raise exceptions.MpdNoExistError("No such audio output")
 
 
-@protocol.commands.add('enableoutput', outputid=protocol.UINT)
+@protocol.commands.add("enableoutput", outputid=protocol.UINT)
 def enableoutput(context, outputid):
     """
     *musicpd.org, audio output section:*
@@ -32,12 +32,12 @@ def enableoutput(context, outputid):
     if outputid == 0:
         success = context.core.mixer.set_mute(True).get()
         if not success:
-            raise exceptions.MpdSystemError('problems enabling output')
+            raise exceptions.MpdSystemError("problems enabling output")
     else:
-        raise exceptions.MpdNoExistError('No such audio output')
+        raise exceptions.MpdNoExistError("No such audio output")
 
 
-@protocol.commands.add('toggleoutput', outputid=protocol.UINT)
+@protocol.commands.add("toggleoutput", outputid=protocol.UINT)
 def toggleoutput(context, outputid):
     """
     *musicpd.org, audio output section:*
@@ -50,12 +50,12 @@ def toggleoutput(context, outputid):
         mute_status = context.core.mixer.get_mute().get()
         success = context.core.mixer.set_mute(not mute_status)
         if not success:
-            raise exceptions.MpdSystemError('problems toggling output')
+            raise exceptions.MpdSystemError("problems toggling output")
     else:
-        raise exceptions.MpdNoExistError('No such audio output')
+        raise exceptions.MpdNoExistError("No such audio output")
 
 
-@protocol.commands.add('outputs')
+@protocol.commands.add("outputs")
 def outputs(context):
     """
     *musicpd.org, audio output section:*
@@ -66,7 +66,7 @@ def outputs(context):
     """
     muted = 1 if context.core.mixer.get_mute().get() else 0
     return [
-        ('outputid', 0),
-        ('outputname', 'Mute'),
-        ('outputenabled', muted),
+        ("outputid", 0),
+        ("outputname", "Mute"),
+        ("outputenabled", muted),
     ]

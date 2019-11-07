@@ -26,40 +26,44 @@ class IssueGH17RegressionTest(protocol.BaseTestCase):
     - Press next until you get to the unplayable track
     """
 
-    @mock.patch.object(
-        protocol.core.tracklist.random, 'shuffle', mock_shuffle)
+    @mock.patch.object(protocol.core.tracklist.random, "shuffle", mock_shuffle)
     def test(self):
         tracks = [
-            Track(uri='dummy:a'),
-            Track(uri='dummy:b'),
-            Track(uri='dummy:error'),
-            Track(uri='dummy:d'),
-            Track(uri='dummy:e'),
-            Track(uri='dummy:f'),
+            Track(uri="dummy:a"),
+            Track(uri="dummy:b"),
+            Track(uri="dummy:error"),
+            Track(uri="dummy:d"),
+            Track(uri="dummy:e"),
+            Track(uri="dummy:f"),
         ]
-        self.audio.trigger_fake_playback_failure('dummy:error')
+        self.audio.trigger_fake_playback_failure("dummy:error")
         self.backend.library.dummy_library = tracks
         self.core.tracklist.add(uris=[t.uri for t in tracks]).get()
 
         # Playlist order: abcfde
 
-        self.send_request('play')
+        self.send_request("play")
         self.assertEqual(
-            'dummy:a', self.core.playback.get_current_track().get().uri)
+            "dummy:a", self.core.playback.get_current_track().get().uri
+        )
         self.send_request('random "1"')
-        self.send_request('next')
+        self.send_request("next")
         self.assertEqual(
-            'dummy:b', self.core.playback.get_current_track().get().uri)
-        self.send_request('next')
+            "dummy:b", self.core.playback.get_current_track().get().uri
+        )
+        self.send_request("next")
         # Should now be at track 'c', but playback fails and it skips ahead
         self.assertEqual(
-            'dummy:f', self.core.playback.get_current_track().get().uri)
-        self.send_request('next')
+            "dummy:f", self.core.playback.get_current_track().get().uri
+        )
+        self.send_request("next")
         self.assertEqual(
-            'dummy:d', self.core.playback.get_current_track().get().uri)
-        self.send_request('next')
+            "dummy:d", self.core.playback.get_current_track().get().uri
+        )
+        self.send_request("next")
         self.assertEqual(
-            'dummy:e', self.core.playback.get_current_track().get().uri)
+            "dummy:e", self.core.playback.get_current_track().get().uri
+        )
 
 
 class IssueGH18RegressionTest(protocol.BaseTestCase):
@@ -76,25 +80,29 @@ class IssueGH18RegressionTest(protocol.BaseTestCase):
 
     def test(self):
         tracks = [
-            Track(uri='dummy:a'), Track(uri='dummy:b'), Track(uri='dummy:c'),
-            Track(uri='dummy:d'), Track(uri='dummy:e'), Track(uri='dummy:f'),
+            Track(uri="dummy:a"),
+            Track(uri="dummy:b"),
+            Track(uri="dummy:c"),
+            Track(uri="dummy:d"),
+            Track(uri="dummy:e"),
+            Track(uri="dummy:f"),
         ]
         self.backend.library.dummy_library = tracks
         self.core.tracklist.add(uris=[t.uri for t in tracks]).get()
 
         random.seed(1)
 
-        self.send_request('play')
+        self.send_request("play")
         self.send_request('random "1"')
-        self.send_request('next')
+        self.send_request("next")
         self.send_request('random "0"')
-        self.send_request('next')
+        self.send_request("next")
 
-        self.send_request('next')
+        self.send_request("next")
         tl_track_1 = self.core.playback.get_current_tl_track().get()
-        self.send_request('next')
+        self.send_request("next")
         tl_track_2 = self.core.playback.get_current_tl_track().get()
-        self.send_request('next')
+        self.send_request("next")
         tl_track_3 = self.core.playback.get_current_tl_track().get()
 
         self.assertNotEqual(tl_track_1, tl_track_2)
@@ -117,15 +125,19 @@ class IssueGH22RegressionTest(protocol.BaseTestCase):
 
     def test(self):
         tracks = [
-            Track(uri='dummy:a'), Track(uri='dummy:b'), Track(uri='dummy:c'),
-            Track(uri='dummy:d'), Track(uri='dummy:e'), Track(uri='dummy:f'),
+            Track(uri="dummy:a"),
+            Track(uri="dummy:b"),
+            Track(uri="dummy:c"),
+            Track(uri="dummy:d"),
+            Track(uri="dummy:e"),
+            Track(uri="dummy:f"),
         ]
         self.backend.library.dummy_library = tracks
         self.core.tracklist.add(uris=[t.uri for t in tracks]).get()
 
         random.seed(1)
 
-        self.send_request('play')
+        self.send_request("play")
         self.send_request('random "1"')
         self.send_request('deleteid "1"')
         self.send_request('deleteid "2"')
@@ -133,7 +145,7 @@ class IssueGH22RegressionTest(protocol.BaseTestCase):
         self.send_request('deleteid "4"')
         self.send_request('deleteid "5"')
         self.send_request('deleteid "6"')
-        self.send_request('status')
+        self.send_request("status")
 
 
 class IssueGH69RegressionTest(protocol.BaseTestCase):
@@ -149,20 +161,24 @@ class IssueGH69RegressionTest(protocol.BaseTestCase):
     """
 
     def test(self):
-        self.core.playlists.create('foo')
+        self.core.playlists.create("foo")
 
         tracks = [
-            Track(uri='dummy:a'), Track(uri='dummy:b'), Track(uri='dummy:c'),
-            Track(uri='dummy:d'), Track(uri='dummy:e'), Track(uri='dummy:f'),
+            Track(uri="dummy:a"),
+            Track(uri="dummy:b"),
+            Track(uri="dummy:c"),
+            Track(uri="dummy:d"),
+            Track(uri="dummy:e"),
+            Track(uri="dummy:f"),
         ]
         self.backend.library.dummy_library = tracks
         self.core.tracklist.add(uris=[t.uri for t in tracks]).get()
 
-        self.send_request('play')
-        self.send_request('stop')
-        self.send_request('clear')
+        self.send_request("play")
+        self.send_request("stop")
+        self.send_request("clear")
         self.send_request('load "foo"')
-        self.assertNotInResponse('song: None')
+        self.assertNotInResponse("song: None")
 
 
 class IssueGH113RegressionTest(protocol.BaseTestCase):
@@ -179,16 +195,17 @@ class IssueGH113RegressionTest(protocol.BaseTestCase):
     """
 
     def test(self):
-        self.core.playlists.create(
-            r'all lart spotify:track:\w\{22\} pastes')
+        self.core.playlists.create(r"all lart spotify:track:\w\{22\} pastes")
 
         self.send_request('lsinfo "/"')
         self.assertInResponse(
-            r'playlist: all lart spotify:track:\w\{22\} pastes')
+            r"playlist: all lart spotify:track:\w\{22\} pastes"
+        )
 
         self.send_request(
-            r'listplaylistinfo "all lart spotify:track:\\w\\{22\\} pastes"')
-        self.assertInResponse('OK')
+            r'listplaylistinfo "all lart spotify:track:\\w\\{22\\} pastes"'
+        )
+        self.assertInResponse("OK")
 
 
 class IssueGH137RegressionTest(protocol.BaseTestCase):
@@ -204,9 +221,10 @@ class IssueGH137RegressionTest(protocol.BaseTestCase):
     def test(self):
         self.send_request(
             'list Date Artist "Anita Ward" '
-            'Album "This Is Remixed Hits - Mashups & Rare 12" Mixes"')
+            'Album "This Is Remixed Hits - Mashups & Rare 12" Mixes"'
+        )
 
-        self.assertInResponse('ACK [2@0] {list} Invalid unquoted character')
+        self.assertInResponse("ACK [2@0] {list} Invalid unquoted character")
 
 
 class IssueGH1120RegressionTest(protocol.BaseTestCase):
@@ -224,15 +242,15 @@ class IssueGH1120RegressionTest(protocol.BaseTestCase):
 
     """
 
-    @mock.patch.object(stored_playlists, '_get_last_modified')
+    @mock.patch.object(stored_playlists, "_get_last_modified")
     def test(self, last_modified_mock):
-        last_modified_mock.return_value = '2015-08-05T22:51:06Z'
+        last_modified_mock.return_value = "2015-08-05T22:51:06Z"
         self.backend.library.dummy_browse_result = {
-            'dummy:/': [Ref.playlist(name='Top 100 tracks', uri='dummy:/1')],
+            "dummy:/": [Ref.playlist(name="Top 100 tracks", uri="dummy:/1")],
         }
-        self.backend.playlists.set_dummy_playlists([
-            Playlist(name='Top 100 tracks', uri='dummy:/1'),
-        ])
+        self.backend.playlists.set_dummy_playlists(
+            [Playlist(name="Top 100 tracks", uri="dummy:/1")]
+        )
 
         response1 = self.send_request('lsinfo "/"')
         self.send_request('lsinfo "/dummy"')
@@ -248,15 +266,15 @@ class IssueGH1348RegressionTest(protocol.BaseTestCase):
     """
 
     def test(self):
-        self.backend.library.dummy_library = [Track(uri='dummy:a')]
+        self.backend.library.dummy_library = [Track(uri="dummy:a")]
 
         # Create a dummy playlist and trigger population of mapping
         self.send_request('playlistadd "testing1" "dummy:a"')
-        self.send_request('listplaylists')
+        self.send_request("listplaylists")
 
         # Create an other playlist which isn't in the map
         self.send_request('playlistadd "testing2" "dummy:a"')
-        self.assertEqual(['OK'], self.send_request('rm "testing2"'))
+        self.assertEqual(["OK"], self.send_request('rm "testing2"'))
 
         playlists = self.backend.playlists.as_list().get()
-        self.assertEqual(['testing1'], [ref.name for ref in playlists])
+        self.assertEqual(["testing1"], [ref.name for ref in playlists])

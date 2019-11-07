@@ -4,7 +4,7 @@ from mopidy.mpd import exceptions, protocol
 from mopidy.mpd.protocol import tagtype_list
 
 
-@protocol.commands.add('config', list_command=False)
+@protocol.commands.add("config", list_command=False)
 def config(context):
     """
     *musicpd.org, reflection section:*
@@ -15,10 +15,10 @@ def config(context):
         command is only permitted to "local" clients (connected via UNIX domain
         socket).
     """
-    raise exceptions.MpdPermissionError(command='config')
+    raise exceptions.MpdPermissionError(command="config")
 
 
-@protocol.commands.add('commands', auth_required=False)
+@protocol.commands.add("commands", auth_required=False)
 def commands(context):
     """
     *musicpd.org, reflection section:*
@@ -34,11 +34,10 @@ def commands(context):
         if context.dispatcher.authenticated or not handler.auth_required:
             command_names.add(name)
 
-    return [
-        ('command', command_name) for command_name in sorted(command_names)]
+    return [("command", command_name) for command_name in sorted(command_names)]
 
 
-@protocol.commands.add('decoders')
+@protocol.commands.add("decoders")
 def decoders(context):
     """
     *musicpd.org, reflection section:*
@@ -65,7 +64,7 @@ def decoders(context):
     return  # TODO
 
 
-@protocol.commands.add('notcommands', auth_required=False)
+@protocol.commands.add("notcommands", auth_required=False)
 def notcommands(context):
     """
     *musicpd.org, reflection section:*
@@ -74,18 +73,17 @@ def notcommands(context):
 
         Shows which commands the current user does not have access to.
     """
-    command_names = {'config', 'kill'}  # No permission to use
+    command_names = {"config", "kill"}  # No permission to use
     for name, handler in protocol.commands.handlers.items():
         if not handler.list_command:
             continue
         if not context.dispatcher.authenticated and handler.auth_required:
             command_names.add(name)
 
-    return [
-        ('command', command_name) for command_name in sorted(command_names)]
+    return [("command", command_name) for command_name in sorted(command_names)]
 
 
-@protocol.commands.add('tagtypes')
+@protocol.commands.add("tagtypes")
 def tagtypes(context):
     """
     *musicpd.org, reflection section:*
@@ -94,12 +92,10 @@ def tagtypes(context):
 
         Shows a list of available song metadata.
     """
-    return [
-        ('tagtype', tagtype) for tagtype in tagtype_list.TAGTYPE_LIST
-    ]
+    return [("tagtype", tagtype) for tagtype in tagtype_list.TAGTYPE_LIST]
 
 
-@protocol.commands.add('urlhandlers')
+@protocol.commands.add("urlhandlers")
 def urlhandlers(context):
     """
     *musicpd.org, reflection section:*
@@ -109,5 +105,6 @@ def urlhandlers(context):
         Gets a list of available URL handlers.
     """
     return [
-        ('handler', uri_scheme)
-        for uri_scheme in context.core.get_uri_schemes().get()]
+        ("handler", uri_scheme)
+        for uri_scheme in context.core.get_uri_schemes().get()
+    ]
