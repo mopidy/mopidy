@@ -6,6 +6,7 @@ sphinx
 
 # Check code style, errors, etc
 flake8
+flake8-bugbear
 flake8-import-order
 
 # Mock dependencies in tests
