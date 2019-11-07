@@ -30,7 +30,7 @@ Dependencies
 Logging
 -------
 
-- The command line option :option:`mopidy --save-debug-log` and the
+- The command line option ``mopidy --save-debug-log`` and the
   configuration :confval:`logging/debug_file` have been removed.
   To save a debug log for sharing, run ``mopidy -vvvv | tee mopidy.log``
   or equivalent. (Fixes: :issue:`1452`, PR: :issue:`1783`)
