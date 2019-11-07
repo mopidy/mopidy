@@ -4,6 +4,9 @@ invoke
 # Build documentation
 sphinx
 
+# Format code
+black
+
 # Check code style, errors, etc
 flake8
 flake8-bugbear
