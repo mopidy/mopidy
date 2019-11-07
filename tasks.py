@@ -7,18 +7,18 @@ from invoke import run, task
 def docs(ctx, watch=False, warn=False):
     if watch:
         return watcher(docs)
-    run('make -C docs/ html', warn=warn)
+    run("make -C docs/ html", warn=warn)
 
 
 @task
 def test(ctx, path=None, coverage=False, watch=False, warn=False):
     if watch:
         return watcher(test, path=path, coverage=coverage)
-    path = path or 'tests/'
-    cmd = 'pytest'
+    path = path or "tests/"
+    cmd = "pytest"
     if coverage:
-        cmd += ' --cov=mopidy --cov-report=term-missing'
-    cmd += ' %s' % path
+        cmd += " --cov=mopidy --cov-report=term-missing"
+    cmd += " %s" % path
     run(cmd, pty=True, warn=warn)
 
 
@@ -26,7 +26,7 @@ def test(ctx, path=None, coverage=False, watch=False, warn=False):
 def lint(ctx, watch=False, warn=False):
     if watch:
         return watcher(lint)
-    run('flake8', warn=warn)
+    run("flake8", warn=warn)
 
 
 @task
@@ -37,12 +37,13 @@ def update_authors(ctx):
 
 def watcher(task, *args, **kwargs):
     while True:
-        run('clear')
-        kwargs['warn'] = True
+        run("clear")
+        kwargs["warn"] = True
         task(*args, **kwargs)
         try:
             run(
-                r'inotifywait -q -e create -e modify -e delete '
-                r'--exclude ".*\.(pyc|sw.)" -r docs/ mopidy/ tests/')
+                r"inotifywait -q -e create -e modify -e delete "
+                r'--exclude ".*\.(pyc|sw.)" -r docs/ mopidy/ tests/'
+            )
         except KeyboardInterrupt:
             sys.exit()

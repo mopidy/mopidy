@@ -18,4 +18,4 @@ def locale_decode(value):
     try:
         return value.decode()
     except UnicodeDecodeError:
-        return value.decode(locale.getpreferredencoding(), 'replace')
+        return value.decode(locale.getpreferredencoding(), "replace")

@@ -21,18 +21,18 @@ def get_dirs():
     """
 
     dirs = {
-        'XDG_CACHE_DIR': pathlib.Path(
-            os.getenv('XDG_CACHE_HOME', '~/.cache')
+        "XDG_CACHE_DIR": pathlib.Path(
+            os.getenv("XDG_CACHE_HOME", "~/.cache")
         ).expanduser(),
-        'XDG_CONFIG_DIR': pathlib.Path(
-            os.getenv('XDG_CONFIG_HOME', '~/.config')
+        "XDG_CONFIG_DIR": pathlib.Path(
+            os.getenv("XDG_CONFIG_HOME", "~/.config")
         ).expanduser(),
-        'XDG_DATA_DIR': pathlib.Path(
-            os.getenv('XDG_DATA_HOME', '~/.local/share')
+        "XDG_DATA_DIR": pathlib.Path(
+            os.getenv("XDG_DATA_HOME", "~/.local/share")
         ).expanduser(),
     }
 
-    dirs.update(_get_user_dirs(dirs['XDG_CONFIG_DIR']))
+    dirs.update(_get_user_dirs(dirs["XDG_CONFIG_DIR"]))
 
     return dirs
 
@@ -48,15 +48,15 @@ def _get_user_dirs(xdg_config_dir):
     disabled, and thus no :mod:`glib` available.
     """
 
-    dirs_file = xdg_config_dir / 'user-dirs.dirs'
+    dirs_file = xdg_config_dir / "user-dirs.dirs"
 
     if not dirs_file.exists():
         return {}
 
     data = dirs_file.read_bytes()
-    data = b'[XDG_USER_DIRS]\n' + data
-    data = data.replace(b'$HOME', bytes(pathlib.Path.home()))
-    data = data.replace(b'"', b'')
+    data = b"[XDG_USER_DIRS]\n" + data
+    data = data.replace(b"$HOME", bytes(pathlib.Path.home()))
+    data = data.replace(b'"', b"")
 
     config = configparser.RawConfigParser()
     if compat.PY2:
@@ -65,11 +65,11 @@ def _get_user_dirs(xdg_config_dir):
         config.read_string(data.decode())
 
     result = {}
-    for k, v in config.items('XDG_USER_DIRS'):
+    for k, v in config.items("XDG_USER_DIRS"):
         if v is None:
             continue
         if isinstance(k, bytes):
-            k = k.decode('utf-8')
+            k = k.decode("utf-8")
         result[k.upper()] = pathlib.Path(v).resolve()
 
     return result

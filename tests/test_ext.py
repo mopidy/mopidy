@@ -13,19 +13,18 @@ from tests import IsA, any_unicode
 
 
 class DummyExtension(ext.Extension):
-    dist_name = 'Mopidy-Foobar'
-    ext_name = 'foobar'
-    version = '1.2.3'
+    dist_name = "Mopidy-Foobar"
+    ext_name = "foobar"
+    version = "1.2.3"
 
     def get_default_config(self):
-        return '[foobar]\nenabled = true'
+        return "[foobar]\nenabled = true"
 
 
 any_testextension = IsA(DummyExtension)
 
 
 class TestExtension(object):
-
     @pytest.fixture
     def extension(self):
         return ext.Extension()
@@ -45,7 +44,7 @@ class TestExtension(object):
 
     def test_get_config_schema_returns_extension_schema(self, extension):
         schema = extension.get_config_schema()
-        assert isinstance(schema['enabled'], config.Boolean)
+        assert isinstance(schema["enabled"], config.Boolean)
 
     def test_validate_environment_does_nothing_by_default(self, extension):
         assert extension.validate_environment() is None
@@ -55,26 +54,25 @@ class TestExtension(object):
             extension.setup(None)
 
     def test_get_cache_dir_raises_assertion_error(self, extension):
-        config = {'core': {'cache_dir': '/tmp'}}
+        config = {"core": {"cache_dir": "/tmp"}}
         with pytest.raises(AssertionError):  # ext_name not set
             ext.Extension.get_cache_dir(config)
 
     def test_get_config_dir_raises_assertion_error(self, extension):
-        config = {'core': {'config_dir': '/tmp'}}
+        config = {"core": {"config_dir": "/tmp"}}
         with pytest.raises(AssertionError):  # ext_name not set
             ext.Extension.get_config_dir(config)
 
     def test_get_data_dir_raises_assertion_error(self, extension):
-        config = {'core': {'data_dir': '/tmp'}}
+        config = {"core": {"data_dir": "/tmp"}}
         with pytest.raises(AssertionError):  # ext_name not set
             ext.Extension.get_data_dir(config)
 
 
 class TestLoadExtensions(object):
-
     @pytest.yield_fixture
     def iter_entry_points_mock(self, request):
-        patcher = mock.patch('pkg_resources.iter_entry_points')
+        patcher = mock.patch("pkg_resources.iter_entry_points")
         iter_entry_points = patcher.start()
         iter_entry_points.return_value = []
         yield iter_entry_points
@@ -91,13 +89,16 @@ class TestLoadExtensions(object):
         iter_entry_points_mock.return_value = [mock_entry_point]
 
         expected = ext.ExtensionData(
-            any_testextension, mock_entry_point, IsA(config.ConfigSchema),
-            any_unicode, None)
+            any_testextension,
+            mock_entry_point,
+            IsA(config.ConfigSchema),
+            any_unicode,
+            None,
+        )
 
         assert ext.load_extensions() == [expected]
 
     def test_gets_wrong_class(self, iter_entry_points_mock):
-
         class WrongClass(object):
             pass
 
@@ -133,7 +134,7 @@ class TestLoadExtensions(object):
 
         iter_entry_points_mock.return_value = [mock_entry_point]
 
-        with mock.patch.object(DummyExtension, 'get_config_schema') as get:
+        with mock.patch.object(DummyExtension, "get_config_schema") as get:
             get.side_effect = Exception
 
             assert ext.load_extensions() == []
@@ -145,7 +146,7 @@ class TestLoadExtensions(object):
 
         iter_entry_points_mock.return_value = [mock_entry_point]
 
-        with mock.patch.object(DummyExtension, 'get_default_config') as get:
+        with mock.patch.object(DummyExtension, "get_default_config") as get:
             get.side_effect = Exception
 
             assert ext.load_extensions() == []
@@ -157,7 +158,7 @@ class TestLoadExtensions(object):
 
         iter_entry_points_mock.return_value = [mock_entry_point]
 
-        with mock.patch.object(DummyExtension, 'get_command') as get:
+        with mock.patch.object(DummyExtension, "get_command") as get:
             get.side_effect = Exception
 
             assert ext.load_extensions() == []
@@ -165,7 +166,6 @@ class TestLoadExtensions(object):
 
 
 class TestValidateExtensionData(object):
-
     @pytest.fixture
     def ext_data(self):
         extension = DummyExtension()
@@ -178,10 +178,11 @@ class TestValidateExtensionData(object):
         command = extension.get_command()
 
         return ext.ExtensionData(
-            extension, entry_point, schema, defaults, command)
+            extension, entry_point, schema, defaults, command
+        )
 
     def test_name_mismatch(self, ext_data):
-        ext_data.entry_point.name = 'barfoo'
+        ext_data.entry_point.name = "barfoo"
         assert not ext.validate_extension_data(ext_data)
 
     def test_distribution_not_found(self, ext_data):
@@ -203,15 +204,15 @@ class TestValidateExtensionData(object):
 
     def test_extenions_validate_environment_error(self, ext_data):
         extension = ext_data.extension
-        with mock.patch.object(extension, 'validate_environment') as validate:
-            validate.side_effect = exceptions.ExtensionError('error')
+        with mock.patch.object(extension, "validate_environment") as validate:
+            validate.side_effect = exceptions.ExtensionError("error")
 
             assert not ext.validate_extension_data(ext_data)
             validate.assert_called_once_with()
 
     def test_extenions_validate_environment_exception(self, ext_data):
         extension = ext_data.extension
-        with mock.patch.object(extension, 'validate_environment') as validate:
+        with mock.patch.object(extension, "validate_environment") as validate:
             validate.side_effect = Exception
 
             assert not ext.validate_extension_data(ext_data)
@@ -222,16 +223,16 @@ class TestValidateExtensionData(object):
         assert not ext.validate_extension_data(ext_data)
 
     def test_schema_that_is_missing_enabled(self, ext_data):
-        del ext_data.config_schema['enabled']
-        ext_data.config_schema['baz'] = config.String()
+        del ext_data.config_schema["enabled"]
+        ext_data.config_schema["baz"] = config.String()
         assert not ext.validate_extension_data(ext_data)
 
     def test_schema_with_wrong_types(self, ext_data):
-        ext_data.config_schema['enabled'] = 123
+        ext_data.config_schema["enabled"] = 123
         assert not ext.validate_extension_data(ext_data)
 
     def test_schema_with_invalid_type(self, ext_data):
-        ext_data.config_schema['baz'] = 123
+        ext_data.config_schema["baz"] = 123
         assert not ext.validate_extension_data(ext_data)
 
     def test_no_default_config(self, ext_data):
@@ -239,33 +240,33 @@ class TestValidateExtensionData(object):
         assert not ext.validate_extension_data(ext_data)
 
     def test_get_cache_dir(self, ext_data):
-        core_cache_dir = '/tmp'
-        config = {'core': {'cache_dir': core_cache_dir}}
+        core_cache_dir = "/tmp"
+        config = {"core": {"cache_dir": core_cache_dir}}
         extension = ext_data.extension
 
-        with mock.patch.object(ext.path, 'get_or_create_dir'):
+        with mock.patch.object(ext.path, "get_or_create_dir"):
             cache_dir = extension.get_cache_dir(config)
 
         expected = pathlib.Path(core_cache_dir) / extension.ext_name
         assert cache_dir == expected
 
     def test_get_config_dir(self, ext_data):
-        core_config_dir = '/tmp'
-        config = {'core': {'config_dir': core_config_dir}}
+        core_config_dir = "/tmp"
+        config = {"core": {"config_dir": core_config_dir}}
         extension = ext_data.extension
 
-        with mock.patch.object(ext.path, 'get_or_create_dir'):
+        with mock.patch.object(ext.path, "get_or_create_dir"):
             config_dir = extension.get_config_dir(config)
 
         expected = pathlib.Path(core_config_dir) / extension.ext_name
         assert config_dir == expected
 
     def test_get_data_dir(self, ext_data):
-        core_data_dir = '/tmp'
-        config = {'core': {'data_dir': core_data_dir}}
+        core_data_dir = "/tmp"
+        config = {"core": {"data_dir": core_data_dir}}
         extension = ext_data.extension
 
-        with mock.patch.object(ext.path, 'get_or_create_dir'):
+        with mock.patch.object(ext.path, "get_or_create_dir"):
             data_dir = extension.get_data_dir(config)
 
         expected = pathlib.Path(core_data_dir) / extension.ext_name

@@ -20,7 +20,7 @@ class MpdDispatcher(object):
     back to the MPD session.
     """
 
-    _noidle = re.compile(r'^noidle$')
+    _noidle = re.compile(r"^noidle$")
 
     def __init__(self, session=None, config=None, core=None, uri_map=None):
         self.config = config
@@ -30,7 +30,8 @@ class MpdDispatcher(object):
         self.command_list = []
         self.command_list_index = None
         self.context = MpdContext(
-            self, session=session, config=config, core=core, uri_map=uri_map)
+            self, session=session, config=config, core=core, uri_map=uri_map
+        )
 
     def handle_request(self, request, current_command_list_index=None):
         """Dispatch incoming requests to the correct handler."""
@@ -51,14 +52,15 @@ class MpdDispatcher(object):
         self.context.events.add(subsystem)
 
         subsystems = self.context.subscriptions.intersection(
-            self.context.events)
+            self.context.events
+        )
         if not subsystems:
             return
 
         response = []
         for subsystem in subsystems:
-            response.append('changed: %s' % subsystem)
-        response.append('OK')
+            response.append("changed: %s" % subsystem)
+        response.append("OK")
         self.context.subscriptions = set()
         self.context.events = set()
         self.context.session.send_lines(response)
@@ -85,11 +87,11 @@ class MpdDispatcher(object):
     def _authenticate_filter(self, request, response, filter_chain):
         if self.authenticated:
             return self._call_next_filter(request, response, filter_chain)
-        elif self.config['mpd']['password'] is None:
+        elif self.config["mpd"]["password"] is None:
             self.authenticated = True
             return self._call_next_filter(request, response, filter_chain)
         else:
-            command_name = request.split(' ')[0]
+            command_name = request.split(" ")[0]
             command = protocol.commands.handlers.get(command_name)
             if command and not command.auth_required:
                 return self._call_next_filter(request, response, filter_chain)
@@ -104,28 +106,32 @@ class MpdDispatcher(object):
             return []
         else:
             response = self._call_next_filter(request, response, filter_chain)
-            if (self._is_receiving_command_list(request) or
-                    self._is_processing_command_list(request)):
-                if response and response[-1] == 'OK':
+            if self._is_receiving_command_list(
+                request
+            ) or self._is_processing_command_list(request):
+                if response and response[-1] == "OK":
                     response = response[:-1]
             return response
 
     def _is_receiving_command_list(self, request):
-        return (
-            self.command_list_receiving and request != 'command_list_end')
+        return self.command_list_receiving and request != "command_list_end"
 
     def _is_processing_command_list(self, request):
         return (
-            self.command_list_index is not None and
-            request != 'command_list_end')
+            self.command_list_index is not None
+            and request != "command_list_end"
+        )
 
     # Filter: idle
 
     def _idle_filter(self, request, response, filter_chain):
         if self._is_currently_idle() and not self._noidle.match(request):
             logger.debug(
-                'Client sent us %s, only %s is allowed while in '
-                'the idle state', repr(request), repr('noidle'))
+                "Client sent us %s, only %s is allowed while in "
+                "the idle state",
+                repr(request),
+                repr("noidle"),
+            )
             self.context.session.close()
             return []
 
@@ -147,11 +153,11 @@ class MpdDispatcher(object):
     def _add_ok_filter(self, request, response, filter_chain):
         response = self._call_next_filter(request, response, filter_chain)
         if not self._has_error(response):
-            response.append('OK')
+            response.append("OK")
         return response
 
     def _has_error(self, response):
-        return response and response[-1].startswith('ACK')
+        return response and response[-1].startswith("ACK")
 
     # Filter: call handler
 
@@ -160,16 +166,15 @@ class MpdDispatcher(object):
             response = self._format_response(self._call_handler(request))
             return self._call_next_filter(request, response, filter_chain)
         except pykka.ActorDeadError as e:
-            logger.warning('Tried to communicate with dead actor.')
+            logger.warning("Tried to communicate with dead actor.")
             raise exceptions.MpdSystemError(e)
 
     def _call_handler(self, request):
         tokens = tokenize.split(request)
         # TODO: check that blacklist items are valid commands?
-        blacklist = self.config['mpd'].get('command_blacklist', [])
+        blacklist = self.config["mpd"].get("command_blacklist", [])
         if tokens and tokens[0] in blacklist:
-            logger.warning(
-                'MPD client used blacklisted command: %s', tokens[0])
+            logger.warning("MPD client used blacklisted command: %s", tokens[0])
             raise exceptions.MpdDisabled(command=tokens[0])
         try:
             return protocol.commands.call(tokens, context=self.context)
@@ -205,10 +210,11 @@ class MpdDispatcher(object):
     def _format_lines(self, line):
         if isinstance(line, dict):
             return [
-                '{}: {}'.format(key, value) for (key, value) in line.items()]
+                "{}: {}".format(key, value) for (key, value) in line.items()
+            ]
         if isinstance(line, tuple):
             (key, value) = line
-            return ['{}: {}'.format(key, value)]
+            return ["{}: {}".format(key, value)]
         return [line]
 
 
@@ -239,12 +245,13 @@ class MpdContext(object):
 
     _uri_map = None
 
-    def __init__(self, dispatcher, session=None, config=None, core=None,
-                 uri_map=None):
+    def __init__(
+        self, dispatcher, session=None, config=None, core=None, uri_map=None
+    ):
         self.dispatcher = dispatcher
         self.session = session
         if config is not None:
-            self.password = config['mpd']['password']
+            self.password = config["mpd"]["password"]
         self.core = core
         self.events = set()
         self.subscriptions = set()
@@ -281,8 +288,8 @@ class MpdContext(object):
         :class:`None`.
         """
 
-        path_parts = re.findall(r'[^/]+', path or '')
-        root_path = '/'.join([''] + path_parts)
+        path_parts = re.findall(r"[^/]+", path or "")
+        root_path = "/".join([""] + path_parts)
 
         uri = self._uri_map.uri_from_name(root_path)
         if uri is None:
@@ -292,7 +299,7 @@ class MpdContext(object):
                         uri = ref.uri
                         break
                 else:
-                    raise exceptions.MpdNoExistError('Not found')
+                    raise exceptions.MpdNoExistError("Not found")
             root_path = self._uri_map.insert(root_path, uri)
 
         if recursive:
@@ -302,7 +309,7 @@ class MpdContext(object):
         while path_and_futures:
             base_path, future = path_and_futures.pop()
             for ref in future.get():
-                path = '/'.join([base_path, ref.name.replace('/', '')])
+                path = "/".join([base_path, ref.name.replace("/", "")])
                 path = self._uri_map.insert(path, ref.uri)
 
                 if ref.type == ref.TRACK:
@@ -315,4 +322,5 @@ class MpdContext(object):
                     yield (path, None)
                     if recursive:
                         path_and_futures.append(
-                            (path, self.core.library.browse(ref.uri)))
+                            (path, self.core.library.browse(ref.uri))
+                        )

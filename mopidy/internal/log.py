@@ -19,13 +19,12 @@ LOG_LEVELS = {
 
 # Custom log level which has even lower priority than DEBUG
 TRACE_LOG_LEVEL = 5
-logging.addLevelName(TRACE_LOG_LEVEL, 'TRACE')
+logging.addLevelName(TRACE_LOG_LEVEL, "TRACE")
 
 logger = logging.getLogger(__name__)
 
 
 class DelayedHandler(logging.Handler):
-
     def __init__(self):
         logging.Handler.__init__(self)
         self._released = False
@@ -37,7 +36,7 @@ class DelayedHandler(logging.Handler):
 
     def release(self):
         self._released = True
-        root = logging.getLogger('')
+        root = logging.getLogger("")
         while self._buffer:
             root.handle(self._buffer.pop(0))
 
@@ -46,7 +45,7 @@ _delayed_handler = DelayedHandler()
 
 
 def bootstrap_delayed_logging():
-    root = logging.getLogger('')
+    root = logging.getLogger("")
     root.setLevel(logging.NOTSET)
     root.addHandler(_delayed_handler)
 
@@ -54,32 +53,33 @@ def bootstrap_delayed_logging():
 def setup_logging(config, base_verbosity_level, args_verbosity_level):
     logging.captureWarnings(True)
 
-    if config['logging']['config_file']:
+    if config["logging"]["config_file"]:
         # Logging config from file must be read before other handlers are
         # added. If not, the other handlers will have no effect.
         try:
-            path = config['logging']['config_file']
+            path = config["logging"]["config_file"]
             logging.config.fileConfig(path, disable_existing_loggers=False)
         except Exception as e:
             # Catch everything as logging does not specify what can go wrong.
-            logger.error('Loading logging config %r failed. %s', path, e)
+            logger.error("Loading logging config %r failed. %s", path, e)
 
-    loglevels = config.get('loglevels', {})
+    loglevels = config.get("loglevels", {})
 
     verbosity_level = get_verbosity_level(
-        config, base_verbosity_level, args_verbosity_level)
+        config, base_verbosity_level, args_verbosity_level
+    )
     verbosity_filter = VerbosityFilter(verbosity_level, loglevels)
 
-    formatter = logging.Formatter(config['logging']['format'])
+    formatter = logging.Formatter(config["logging"]["format"])
 
-    if config['logging']['color']:
-        handler = ColorizingStreamHandler(config.get('logcolors', {}))
+    if config["logging"]["color"]:
+        handler = ColorizingStreamHandler(config.get("logcolors", {}))
     else:
         handler = logging.StreamHandler()
     handler.addFilter(verbosity_filter)
     handler.setFormatter(formatter)
 
-    logging.getLogger('').addHandler(handler)
+    logging.getLogger("").addHandler(handler)
 
     _delayed_handler.release()
 
@@ -88,7 +88,7 @@ def get_verbosity_level(config, base_verbosity_level, args_verbosity_level):
     if args_verbosity_level:
         result = base_verbosity_level + args_verbosity_level
     else:
-        result = base_verbosity_level + config['logging']['verbosity']
+        result = base_verbosity_level + config["logging"]["verbosity"]
 
     if result < min(LOG_LEVELS.keys()):
         result = min(LOG_LEVELS.keys())
@@ -99,33 +99,32 @@ def get_verbosity_level(config, base_verbosity_level, args_verbosity_level):
 
 
 class VerbosityFilter(logging.Filter):
-
     def __init__(self, verbosity_level, loglevels):
         self.verbosity_level = verbosity_level
         self.loglevels = loglevels
 
     def filter(self, record):
         for name, required_log_level in self.loglevels.items():
-            if record.name == name or record.name.startswith(name + '.'):
+            if record.name == name or record.name.startswith(name + "."):
                 return record.levelno >= required_log_level
 
-        if record.name.startswith('mopidy'):
-            required_log_level = LOG_LEVELS[self.verbosity_level]['mopidy']
+        if record.name.startswith("mopidy"):
+            required_log_level = LOG_LEVELS[self.verbosity_level]["mopidy"]
         else:
-            required_log_level = LOG_LEVELS[self.verbosity_level]['root']
+            required_log_level = LOG_LEVELS[self.verbosity_level]["root"]
         return record.levelno >= required_log_level
 
 
 #: Available log colors.
 COLORS = [
-    'black',
-    'red',
-    'green',
-    'yellow',
-    'blue',
-    'magenta',
-    'cyan',
-    'white',
+    "black",
+    "red",
+    "green",
+    "yellow",
+    "blue",
+    "magenta",
+    "cyan",
+    "white",
 ]
 
 
@@ -145,20 +144,20 @@ class ColorizingStreamHandler(logging.StreamHandler):
 
     # Map logging levels to (background, foreground, bold/intense)
     level_map = {
-        TRACE_LOG_LEVEL: (None, 'blue', False),
-        logging.DEBUG: (None, 'blue', False),
-        logging.INFO: (None, 'white', False),
-        logging.WARNING: (None, 'yellow', False),
-        logging.ERROR: (None, 'red', False),
-        logging.CRITICAL: ('red', 'white', True),
+        TRACE_LOG_LEVEL: (None, "blue", False),
+        logging.DEBUG: (None, "blue", False),
+        logging.INFO: (None, "white", False),
+        logging.WARNING: (None, "yellow", False),
+        logging.ERROR: (None, "red", False),
+        logging.CRITICAL: ("red", "white", True),
     }
     # Map logger name to foreground colors
     logger_map = {}
 
-    csi = '\x1b['
-    reset = '\x1b[0m'
+    csi = "\x1b["
+    reset = "\x1b[0m"
 
-    is_windows = platform.system() == 'Windows'
+    is_windows = platform.system() == "Windows"
 
     def __init__(self, logger_colors):
         super(ColorizingStreamHandler, self).__init__()
@@ -166,14 +165,14 @@ class ColorizingStreamHandler(logging.StreamHandler):
 
     @property
     def is_tty(self):
-        isatty = getattr(self.stream, 'isatty', None)
+        isatty = getattr(self.stream, "isatty", None)
         return isatty and isatty()
 
     def emit(self, record):
         try:
             message = self.format(record)
             self.stream.write(message)
-            self.stream.write(getattr(self, 'terminator', '\n'))
+            self.stream.write(getattr(self, "terminator", "\n"))
             self.flush()
         except Exception:
             self.handleError(record)
@@ -197,8 +196,9 @@ class ColorizingStreamHandler(logging.StreamHandler):
         if fg in COLORS:
             params.append(str(COLORS.index(fg) + 30))
         if bold:
-            params.append('1')
+            params.append("1")
         if params:
-            message = ''.join((
-                self.csi, ';'.join(params), 'm', message, self.reset))
+            message = "".join(
+                (self.csi, ";".join(params), "m", message, self.reset)
+            )
         return message

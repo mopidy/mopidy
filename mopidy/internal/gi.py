@@ -6,10 +6,13 @@ import textwrap
 
 try:
     import gi
-    gi.require_version('Gst', '1.0')
+
+    gi.require_version("Gst", "1.0")
     from gi.repository import GLib, GObject, Gst
 except ImportError:
-    print(textwrap.dedent("""
+    print(
+        textwrap.dedent(
+            """
         ERROR: A GObject based library was not found.
 
         Mopidy requires GStreamer to work. GStreamer is a C library with a
@@ -18,28 +21,32 @@ except ImportError:
 
         Please see http://docs.mopidy.com/en/latest/installation/ for
         instructions on how to install the required dependencies.
-    """))
+    """
+        )
+    )
     raise
 else:
     Gst.init([])
-    gi.require_version('GstPbutils', '1.0')
+    gi.require_version("GstPbutils", "1.0")
     from gi.repository import GstPbutils
 
-GLib.set_prgname('mopidy')
-GLib.set_application_name('Mopidy')
+GLib.set_prgname("mopidy")
+GLib.set_application_name("Mopidy")
 
 REQUIRED_GST_VERSION = (1, 2, 3)
 
 if Gst.version() < REQUIRED_GST_VERSION:
     sys.exit(
-        'ERROR: Mopidy requires GStreamer >= {}, but found {}.'.format(
-            '.'.join(map(str, REQUIRED_GST_VERSION)), Gst.version_string()))
+        "ERROR: Mopidy requires GStreamer >= {}, but found {}.".format(
+            ".".join(map(str, REQUIRED_GST_VERSION)), Gst.version_string()
+        )
+    )
 
 
 __all__ = [
-    'GLib',
-    'GObject',
-    'Gst',
-    'GstPbutils',
-    'gi',
+    "GLib",
+    "GObject",
+    "Gst",
+    "GstPbutils",
+    "gi",
 ]

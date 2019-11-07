@@ -5,12 +5,11 @@ from mopidy.compat import pathlib
 
 
 def path_to_data_dir(name):
-    path = pathlib.Path(__file__).parent / 'data' / name
+    path = pathlib.Path(__file__).parent / "data" / name
     return path.resolve()
 
 
 class IsA(object):
-
     def __init__(self, klass):
         self.klass = klass
 

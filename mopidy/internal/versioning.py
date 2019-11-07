@@ -15,13 +15,17 @@ def get_version():
 
 def get_git_version():
     project_dir = os.path.abspath(
-        os.path.join(os.path.dirname(mopidy.__file__), '..'))
+        os.path.join(os.path.dirname(mopidy.__file__), "..")
+    )
     process = subprocess.Popen(
-        ['git', 'describe'],
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=project_dir)
+        ["git", "describe"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        cwd=project_dir,
+    )
     if process.wait() != 0:
         raise EnvironmentError('Execution of "git describe" failed')
-    version = process.stdout.read().strip().decode('utf-8')
-    if version.startswith('v'):
+    version = process.stdout.read().strip().decode("utf-8")
+    if version.startswith("v"):
         version = version[1:]
     return version

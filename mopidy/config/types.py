@@ -12,13 +12,14 @@ from mopidy.internal import log, path
 def decode(value):
     if isinstance(value, bytes):
         if compat.PY2:
-            value = value.decode('utf-8')
+            value = value.decode("utf-8")
         else:
-            value = value.decode('utf-8', 'surrogateescape')
+            value = value.decode("utf-8", "surrogateescape")
 
-    for char in ('\\', '\n', '\t'):
+    for char in ("\\", "\n", "\t"):
         value = value.replace(
-            char.encode('unicode-escape').decode('utf-8'), char)
+            char.encode("unicode-escape").decode("utf-8"), char
+        )
 
     return value
 
@@ -26,18 +27,19 @@ def decode(value):
 def encode(value):
     if isinstance(value, bytes):
         if compat.PY2:
-            value = value.decode('utf-8')
+            value = value.decode("utf-8")
         else:
-            value = value.decode('utf-8', 'surrogateescape')
+            value = value.decode("utf-8", "surrogateescape")
 
-    for char in ('\\', '\n', '\t'):
+    for char in ("\\", "\n", "\t"):
         value = value.replace(
-            char, char.encode('unicode-escape').decode('utf-8'))
+            char, char.encode("unicode-escape").decode("utf-8")
+        )
 
     if compat.PY2:
-        return value.encode('utf-8')
+        return value.encode("utf-8")
     else:
-        return value.encode('utf-8', 'surrogateescape')
+        return value.encode("utf-8", "surrogateescape")
 
 
 class DeprecatedValue(object):
@@ -68,7 +70,7 @@ class ConfigValue(object):
     def serialize(self, value, display=False):
         """Convert value back to string for saving."""
         if value is None:
-            return b''
+            return b""
         return encode(str(value))
 
 
@@ -106,7 +108,7 @@ class String(ConfigValue):
 
     def serialize(self, value, display=False):
         if value is None:
-            return b''
+            return b""
         return encode(value)
 
 
@@ -125,7 +127,7 @@ class Secret(String):
 
     def serialize(self, value, display=False):
         if value is not None and display:
-            return b'********'
+            return b"********"
         return super(Secret, self).serialize(value, display)
 
 
@@ -133,7 +135,8 @@ class Integer(ConfigValue):
     """Integer value."""
 
     def __init__(
-            self, minimum=None, maximum=None, choices=None, optional=False):
+        self, minimum=None, maximum=None, choices=None, optional=False
+    ):
         self._required = not optional
         self._minimum = minimum
         self._maximum = maximum
@@ -161,8 +164,8 @@ class Boolean(ConfigValue):
     :class:`False`.
     """
 
-    true_values = ('1', 'yes', 'true', 'on')
-    false_values = ('0', 'no', 'false', 'off')
+    true_values = ("1", "yes", "true", "on")
+    false_values = ("0", "no", "false", "off")
 
     def __init__(self, optional=False):
         self._required = not optional
@@ -176,15 +179,15 @@ class Boolean(ConfigValue):
             return True
         elif value.lower() in self.false_values:
             return False
-        raise ValueError('invalid value for boolean: %r' % value)
+        raise ValueError("invalid value for boolean: %r" % value)
 
     def serialize(self, value, display=False):
         if value is True:
-            return b'true'
+            return b"true"
         elif value in (False, None):
-            return b'false'
+            return b"false"
         else:
-            raise ValueError('%r is not a boolean' % value)
+            raise ValueError("%r is not a boolean" % value)
 
 
 class List(ConfigValue):
@@ -199,18 +202,18 @@ class List(ConfigValue):
 
     def deserialize(self, value):
         value = decode(value)
-        if '\n' in value:
-            values = re.split(r'\s*\n\s*', value)
+        if "\n" in value:
+            values = re.split(r"\s*\n\s*", value)
         else:
-            values = re.split(r'\s*,\s*', value)
+            values = re.split(r"\s*,\s*", value)
         values = tuple(v.strip() for v in values if v.strip())
         validators.validate_required(values, self._required)
         return tuple(values)
 
     def serialize(self, value, display=False):
         if not value:
-            return b''
-        return b'\n  ' + b'\n  '.join(encode(v) for v in value if v)
+            return b""
+        return b"\n  " + b"\n  ".join(encode(v) for v in value if v)
 
 
 class LogColor(ConfigValue):
@@ -222,7 +225,7 @@ class LogColor(ConfigValue):
     def serialize(self, value, display=False):
         if value.lower() in log.COLORS:
             return encode(value.lower())
-        return b''
+        return b""
 
 
 class LogLevel(ConfigValue):
@@ -233,13 +236,13 @@ class LogLevel(ConfigValue):
     """
 
     levels = {
-        'critical': logging.CRITICAL,
-        'error': logging.ERROR,
-        'warning': logging.WARNING,
-        'info': logging.INFO,
-        'debug': logging.DEBUG,
-        'trace': log.TRACE_LOG_LEVEL,
-        'all': logging.NOTSET,
+        "critical": logging.CRITICAL,
+        "error": logging.ERROR,
+        "warning": logging.WARNING,
+        "info": logging.INFO,
+        "debug": logging.DEBUG,
+        "trace": log.TRACE_LOG_LEVEL,
+        "all": logging.NOTSET,
     }
 
     def deserialize(self, value):
@@ -251,7 +254,7 @@ class LogLevel(ConfigValue):
         lookup = {v: k for k, v in self.levels.items()}
         if value in lookup:
             return encode(lookup[value])
-        return b''
+        return b""
 
 
 class Hostname(ConfigValue):
@@ -268,13 +271,14 @@ class Hostname(ConfigValue):
 
         socket_path = path.get_unix_socket_path(value)
         if socket_path is not None:
-            return 'unix:%s' % (
-                Path(not self._required).deserialize(socket_path))
+            return "unix:%s" % (
+                Path(not self._required).deserialize(socket_path)
+            )
 
         try:
             socket.getaddrinfo(value, None)
         except socket.error:
-            raise ValueError('must be a resolveable hostname or valid IP')
+            raise ValueError("must be a resolveable hostname or valid IP")
 
         return value
 
@@ -288,11 +292,11 @@ class Port(Integer):
 
     def __init__(self, choices=None, optional=False):
         super(Port, self).__init__(
-            minimum=0, maximum=2 ** 16 - 1, choices=choices, optional=optional)
+            minimum=0, maximum=2 ** 16 - 1, choices=choices, optional=optional
+        )
 
 
 class _ExpandedPath(str):
-
     def __new__(cls, original, expanded):
         return super(_ExpandedPath, cls).__new__(cls, expanded)
 
@@ -328,5 +332,5 @@ class Path(ConfigValue):
         if isinstance(value, _ExpandedPath):
             value = value.original
         if isinstance(value, compat.text_type):
-            value = value.encode('utf-8')
+            value = value.encode("utf-8")
         return value

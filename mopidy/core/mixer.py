@@ -16,11 +16,16 @@ def _mixer_error_handling(mixer):
     try:
         yield
     except exceptions.ValidationError as e:
-        logger.error('%s mixer returned bad data: %s',
-                     mixer.actor_ref.actor_class.__name__, e)
+        logger.error(
+            "%s mixer returned bad data: %s",
+            mixer.actor_ref.actor_class.__name__,
+            e,
+        )
     except Exception:
-        logger.exception('%s mixer caused an exception.',
-                         mixer.actor_ref.actor_class.__name__)
+        logger.exception(
+            "%s mixer caused an exception.",
+            mixer.actor_ref.actor_class.__name__,
+        )
 
 
 class MixerController(object):
@@ -102,11 +107,10 @@ class MixerController(object):
         return False
 
     def _save_state(self):
-        return MixerState(volume=self.get_volume(),
-                          mute=self.get_mute())
+        return MixerState(volume=self.get_volume(), mute=self.get_mute())
 
     def _load_state(self, state, coverage):
-        if state and 'mixer' in coverage:
+        if state and "mixer" in coverage:
             self.set_mute(state.mute)
             if state.volume:
                 self.set_volume(state.volume)

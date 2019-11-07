@@ -37,8 +37,8 @@ def model_json_decoder(dct):
         {u'a_track': Track(artists=[], name=u'name')}
 
     """
-    if '__model__' in dct:
-        model_name = dct.pop('__model__')
+    if "__model__" in dct:
+        model_name = dct.pop("__model__")
         if model_name in immutable._models:
             cls = immutable._models[model_name]
             return cls(**dct)

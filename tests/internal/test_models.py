@@ -4,13 +4,22 @@ import json
 import unittest
 
 from mopidy.internal.models import (
-    HistoryState, HistoryTrack, MixerState, PlaybackState, TracklistState)
+    HistoryState,
+    HistoryTrack,
+    MixerState,
+    PlaybackState,
+    TracklistState,
+)
 from mopidy.models import (
-    ModelJSONEncoder, Ref, TlTrack, Track, model_json_decoder)
+    ModelJSONEncoder,
+    Ref,
+    TlTrack,
+    Track,
+    model_json_decoder,
+)
 
 
 class HistoryTrackTest(unittest.TestCase):
-
     def test_track(self):
         track = Ref.track()
         result = HistoryTrack(track=track)
@@ -33,17 +42,15 @@ class HistoryTrackTest(unittest.TestCase):
 
 
 class HistoryStateTest(unittest.TestCase):
-
     def test_history_list(self):
-        history = (HistoryTrack(),
-                   HistoryTrack())
+        history = (HistoryTrack(), HistoryTrack())
         result = HistoryState(history=history)
         self.assertEqual(result.history, history)
         with self.assertRaises(AttributeError):
             result.history = None
 
     def test_history_string_fail(self):
-        history = 'not_a_valid_history'
+        history = "not_a_valid_history"
         with self.assertRaises(TypeError):
             HistoryState(history=history)
 
@@ -55,7 +62,6 @@ class HistoryStateTest(unittest.TestCase):
 
 
 class MixerStateTest(unittest.TestCase):
-
     def test_volume(self):
         volume = 37
         result = MixerState(volume=volume)
@@ -94,7 +100,6 @@ class MixerStateTest(unittest.TestCase):
 
 
 class PlaybackStateTest(unittest.TestCase):
-
     def test_position(self):
         time_position = 123456
         result = PlaybackState(time_position=time_position)
@@ -127,26 +132,25 @@ class PlaybackStateTest(unittest.TestCase):
             PlaybackState(tlid=tl_track)
 
     def test_state(self):
-        state = 'playing'
+        state = "playing"
         result = PlaybackState(state=state)
         self.assertEqual(result.state, state)
         with self.assertRaises(AttributeError):
             result.state = None
 
     def test_state_invalid(self):
-        state = 'not_a_state'
+        state = "not_a_state"
         with self.assertRaises(TypeError):
             PlaybackState(state=state)
 
     def test_to_json_and_back(self):
-        result = PlaybackState(state='playing', tlid=4321)
+        result = PlaybackState(state="playing", tlid=4321)
         serialized = json.dumps(result, cls=ModelJSONEncoder)
         deserialized = json.loads(serialized, object_hook=model_json_decoder)
         self.assertEqual(result, deserialized)
 
 
 class TracklistStateTest(unittest.TestCase):
-
     def test_repeat_true(self):
         repeat = True
         result = TracklistState(repeat=repeat)

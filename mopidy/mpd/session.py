@@ -17,28 +17,30 @@ class MpdSession(network.LineProtocol):
 
     terminator = protocol.LINE_TERMINATOR
     encoding = protocol.ENCODING
-    delimiter = br'\r?\n'
+    delimiter = br"\r?\n"
 
     def __init__(self, connection, config=None, core=None, uri_map=None):
         super(MpdSession, self).__init__(connection)
         self.dispatcher = dispatcher.MpdDispatcher(
-            session=self, config=config, core=core, uri_map=uri_map)
+            session=self, config=config, core=core, uri_map=uri_map
+        )
 
     def on_start(self):
-        logger.info('New MPD connection from %s', self.connection)
-        self.send_lines(['OK MPD %s' % protocol.VERSION])
+        logger.info("New MPD connection from %s", self.connection)
+        self.send_lines(["OK MPD %s" % protocol.VERSION])
 
     def on_line_received(self, line):
-        logger.debug('Request from %s: %s', self.connection, line)
+        logger.debug("Request from %s: %s", self.connection, line)
 
         response = self.dispatcher.handle_request(line)
         if not response:
             return
 
         logger.debug(
-            'Response to %s: %s',
+            "Response to %s: %s",
             self.connection,
-            formatting.indent(self.decode(self.terminator).join(response)))
+            formatting.indent(self.decode(self.terminator).join(response)),
+        )
 
         self.send_lines(response)
 
@@ -50,8 +52,9 @@ class MpdSession(network.LineProtocol):
             return super(MpdSession, self).decode(line)
         except ValueError:
             logger.warning(
-                'Stopping actor due to unescaping error, data '
-                'supplied by client was not valid.')
+                "Stopping actor due to unescaping error, data "
+                "supplied by client was not valid."
+            )
             self.stop()
 
     def close(self):

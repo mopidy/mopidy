@@ -18,48 +18,54 @@ logger = logging.getLogger(__name__)
 # flake8: noqa:
 # TODO: Update this to be flake8 compliant
 
-_core_schema = ConfigSchema('core')
-_core_schema['cache_dir'] = Path()
-_core_schema['config_dir'] = Path()
-_core_schema['data_dir'] = Path()
+_core_schema = ConfigSchema("core")
+_core_schema["cache_dir"] = Path()
+_core_schema["config_dir"] = Path()
+_core_schema["data_dir"] = Path()
 # MPD supports at most 10k tracks, some clients segfault when this is exceeded.
-_core_schema['max_tracklist_length'] = Integer(minimum=1)
-_core_schema['restore_state'] = Boolean(optional=True)
+_core_schema["max_tracklist_length"] = Integer(minimum=1)
+_core_schema["restore_state"] = Boolean(optional=True)
 
-_logging_schema = ConfigSchema('logging')
-_logging_schema['verbosity'] = Integer(minimum=-1, maximum=4)
-_logging_schema['format'] = String()
-_logging_schema['color'] = Boolean()
-_logging_schema['console_format'] = Deprecated()
-_logging_schema['debug_format'] = Deprecated()
-_logging_schema['debug_file'] = Deprecated()
-_logging_schema['config_file'] = Path(optional=True)
+_logging_schema = ConfigSchema("logging")
+_logging_schema["verbosity"] = Integer(minimum=-1, maximum=4)
+_logging_schema["format"] = String()
+_logging_schema["color"] = Boolean()
+_logging_schema["console_format"] = Deprecated()
+_logging_schema["debug_format"] = Deprecated()
+_logging_schema["debug_file"] = Deprecated()
+_logging_schema["config_file"] = Path(optional=True)
 
-_loglevels_schema = MapConfigSchema('loglevels', LogLevel())
-_logcolors_schema = MapConfigSchema('logcolors', LogColor())
+_loglevels_schema = MapConfigSchema("loglevels", LogLevel())
+_logcolors_schema = MapConfigSchema("logcolors", LogColor())
 
-_audio_schema = ConfigSchema('audio')
-_audio_schema['mixer'] = String()
-_audio_schema['mixer_track'] = Deprecated()
-_audio_schema['mixer_volume'] = Integer(optional=True, minimum=0, maximum=100)
-_audio_schema['output'] = String()
-_audio_schema['visualizer'] = Deprecated()
-_audio_schema['buffer_time'] = Integer(optional=True, minimum=1)
+_audio_schema = ConfigSchema("audio")
+_audio_schema["mixer"] = String()
+_audio_schema["mixer_track"] = Deprecated()
+_audio_schema["mixer_volume"] = Integer(optional=True, minimum=0, maximum=100)
+_audio_schema["output"] = String()
+_audio_schema["visualizer"] = Deprecated()
+_audio_schema["buffer_time"] = Integer(optional=True, minimum=1)
 
-_proxy_schema = ConfigSchema('proxy')
-_proxy_schema['scheme'] = String(optional=True,
-                                 choices=['http', 'https', 'socks4', 'socks5'])
-_proxy_schema['hostname'] = Hostname(optional=True)
-_proxy_schema['port'] = Port(optional=True)
-_proxy_schema['username'] = String(optional=True)
-_proxy_schema['password'] = Secret(optional=True)
+_proxy_schema = ConfigSchema("proxy")
+_proxy_schema["scheme"] = String(
+    optional=True, choices=["http", "https", "socks4", "socks5"]
+)
+_proxy_schema["hostname"] = Hostname(optional=True)
+_proxy_schema["port"] = Port(optional=True)
+_proxy_schema["username"] = String(optional=True)
+_proxy_schema["password"] = Secret(optional=True)
 
 # NOTE: if multiple outputs ever comes something like LogLevelConfigSchema
 # _outputs_schema = config.AudioOutputConfigSchema()
 
 _schemas = [
-    _core_schema, _logging_schema, _loglevels_schema, _logcolors_schema,
-    _audio_schema, _proxy_schema]
+    _core_schema,
+    _logging_schema,
+    _loglevels_schema,
+    _logcolors_schema,
+    _audio_schema,
+    _proxy_schema,
+]
 
 _INITIAL_HELP = """
 # For further information about options in this file see:
@@ -76,13 +82,13 @@ _INITIAL_HELP = """
 
 def read(config_file):
     """Helper to load config defaults in same way across core and extensions"""
-    with io.open(str(config_file), 'rb') as filehandle:
+    with io.open(str(config_file), "rb") as filehandle:
         return filehandle.read()
 
 
 def load(files, ext_schemas, ext_defaults, overrides):
     config_dir = pathlib.Path(__file__).parent
-    defaults = [read(config_dir / 'default.conf')]
+    defaults = [read(config_dir / "default.conf")]
     defaults.extend(ext_defaults)
     raw_config = _load(files, defaults, keyring.fetch() + (overrides or []))
 
@@ -99,7 +105,7 @@ def format(config, ext_schemas, comments=None, display=True):
 
 def format_initial(extensions_data):
     config_dir = pathlib.Path(__file__).parent
-    defaults = [read(config_dir / 'default.conf')]
+    defaults = [read(config_dir / "default.conf")]
     defaults.extend(d.extension.get_default_config() for d in extensions_data)
     raw_config = _load([], defaults, [])
 
@@ -108,18 +114,20 @@ def format_initial(extensions_data):
 
     config, errors = _validate(raw_config, schemas)
 
-    versions = ['Mopidy %s' % versioning.get_version()]
+    versions = ["Mopidy %s" % versioning.get_version()]
     extensions_data = sorted(
-        extensions_data, key=lambda d: d.extension.dist_name)
+        extensions_data, key=lambda d: d.extension.dist_name
+    )
     for data in extensions_data:
-        versions.append('{} {}'.format(
-            data.extension.dist_name, data.extension.version))
+        versions.append(
+            "{} {}".format(data.extension.dist_name, data.extension.version)
+        )
 
-    header = _INITIAL_HELP.strip() % {'versions': '\n#   '.join(versions)}
+    header = _INITIAL_HELP.strip() % {"versions": "\n#   ".join(versions)}
     formatted_config = _format(
-        config=config, comments={}, schemas=schemas,
-        display=False, disable=True).decode('utf-8')
-    return header + '\n\n' + formatted_config
+        config=config, comments={}, schemas=schemas, display=False, disable=True
+    ).decode("utf-8")
+    return header + "\n\n" + formatted_config
 
 
 def _load(files, defaults, overrides):
@@ -127,10 +135,10 @@ def _load(files, defaults, overrides):
 
     # TODO: simply return path to config file for defaults so we can load it
     # all in the same way?
-    logger.info('Loading config from builtin defaults')
+    logger.info("Loading config from builtin defaults")
     for default in defaults:
         if isinstance(default, bytes):
-            default = default.decode('utf-8')
+            default = default.decode("utf-8")
         if compat.PY2:
             parser.readfp(io.StringIO(default))
         else:
@@ -142,7 +150,7 @@ def _load(files, defaults, overrides):
         if f.is_dir():
             for g in f.iterdir():
                 # py-compat: Use str() to get a native string on both Py2/3
-                if g.is_file() and g.suffix == str('.conf'):
+                if g.is_file() and g.suffix == str(".conf"):
                     _load_file(parser, g.resolve())
         else:
             _load_file(parser, f.resolve())
@@ -156,7 +164,7 @@ def _load(files, defaults, overrides):
     for section in parser.sections():
         raw_config[section] = dict(parser.items(section))
 
-    logger.info('Loading config from command line options')
+    logger.info("Loading config from command line options")
     for section, key, value in overrides:
         raw_config.setdefault(section, {})[key] = value
 
@@ -166,36 +174,41 @@ def _load(files, defaults, overrides):
 def _load_file(parser, file_path):
     if not file_path.exists():
         logger.debug(
-            'Loading config from %r failed; it does not exist',
-            file_path.as_uri())
+            "Loading config from %r failed; it does not exist",
+            file_path.as_uri(),
+        )
         return
     if not os.access(str(file_path), os.R_OK):
         logger.warning(
-            'Loading config from %r failed; read permission missing',
-            file_path.as_uri())
+            "Loading config from %r failed; read permission missing",
+            file_path.as_uri(),
+        )
         return
 
     try:
-        logger.info('Loading config from %r', file_path.as_uri())
+        logger.info("Loading config from %r", file_path.as_uri())
         if compat.PY2:
-            with file_path.open('r', encoding='utf-8') as fh:
+            with file_path.open("r", encoding="utf-8") as fh:
                 parser.readfp(fh)
         else:
-            with file_path.open('r') as fh:
+            with file_path.open("r") as fh:
                 parser.read_file(fh)
     except configparser.MissingSectionHeaderError as e:
         logger.warning(
-            'Loading config from %r failed; it does not have a config section',
-            file_path.as_uri())
+            "Loading config from %r failed; it does not have a config section",
+            file_path.as_uri(),
+        )
     except configparser.ParsingError as e:
-        linenos = ', '.join(str(lineno) for lineno, line in e.errors)
+        linenos = ", ".join(str(lineno) for lineno, line in e.errors)
         logger.warning(
-            'Config file %r has errors; line %s has been ignored',
-            file_path.as_uri(), linenos)
+            "Config file %r has errors; line %s has been ignored",
+            file_path.as_uri(),
+            linenos,
+        )
     except IOError:
         # TODO: if this is the initial load of logging config we might not
         # have a logger at this point, we might want to handle this better.
-        logger.debug('Config file %r not found; skipping', file_path.as_uri())
+        logger.debug("Config file %r not found; skipping", file_path.as_uri())
 
 
 def _validate(raw_config, schemas):
@@ -213,7 +226,7 @@ def _validate(raw_config, schemas):
             config[schema.name] = result
 
     for section in sections:
-        logger.debug('Ignoring unknown config section: %s', section)
+        logger.debug("Ignoring unknown config section: %s", section)
 
     return config, errors
 
@@ -222,54 +235,58 @@ def _format(config, comments, schemas, display, disable):
     output = []
     for schema in schemas:
         serialized = schema.serialize(
-            config.get(schema.name, {}), display=display)
+            config.get(schema.name, {}), display=display
+        )
         if not serialized:
             continue
-        output.append('[%s]' % schema.name)
+        output.append("[%s]" % schema.name)
         for key, value in serialized.items():
             if isinstance(value, types.DeprecatedValue):
                 continue
-            comment = comments.get(schema.name, {}).get(key, '')
-            output.append('%s =' % key)
+            comment = comments.get(schema.name, {}).get(key, "")
+            output.append("%s =" % key)
             if value is not None:
                 if isinstance(value, bytes):
                     # py-compat: TODO: Change ConfigValue.serialize() to return
                     # unicode and remove the step decode() here.
-                    value = value.decode('utf-8')
-                output[-1] += ' ' + value
+                    value = value.decode("utf-8")
+                output[-1] += " " + value
             if comment:
-                output[-1] += '  ; ' + comment.capitalize()
+                output[-1] += "  ; " + comment.capitalize()
             if disable:
-                output[-1] = re.sub(r'^', '#', output[-1], flags=re.M)
-        output.append('')
-    return '\n'.join(output).strip().encode('utf-8')
+                output[-1] = re.sub(r"^", "#", output[-1], flags=re.M)
+        output.append("")
+    return "\n".join(output).strip().encode("utf-8")
 
 
 def _preprocess(config_string):
     """Convert a raw config into a form that preserves comments etc."""
-    results = ['[__COMMENTS__]']
+    results = ["[__COMMENTS__]"]
     counter = itertools.count(0)
 
-    section_re = re.compile(r'^(\[[^\]]+\])\s*(.+)$')
-    blank_line_re = re.compile(r'^\s*$')
-    comment_re = re.compile(r'^(#|;)')
-    inline_comment_re = re.compile(r' ;')
+    section_re = re.compile(r"^(\[[^\]]+\])\s*(.+)$")
+    blank_line_re = re.compile(r"^\s*$")
+    comment_re = re.compile(r"^(#|;)")
+    inline_comment_re = re.compile(r" ;")
 
     def newlines(match):
-        return '__BLANK%d__ =' % next(counter)
+        return "__BLANK%d__ =" % next(counter)
 
     def comments(match):
-        if match.group(1) == '#':
-            return '__HASH%d__ =' % next(counter)
-        elif match.group(1) == ';':
-            return '__SEMICOLON%d__ =' % next(counter)
+        if match.group(1) == "#":
+            return "__HASH%d__ =" % next(counter)
+        elif match.group(1) == ";":
+            return "__SEMICOLON%d__ =" % next(counter)
 
     def inlinecomments(match):
-        return '\n__INLINE%d__ =' % next(counter)
+        return "\n__INLINE%d__ =" % next(counter)
 
     def sections(match):
-        return '%s\n__SECTION%d__ = %s' % (
-            match.group(1), next(counter), match.group(2))
+        return "%s\n__SECTION%d__ = %s" % (
+            match.group(1),
+            next(counter),
+            match.group(2),
+        )
 
     for line in config_string.splitlines():
         line = blank_line_re.sub(newlines, line)
@@ -277,23 +294,22 @@ def _preprocess(config_string):
         line = comment_re.sub(comments, line)
         line = inline_comment_re.sub(inlinecomments, line)
         results.append(line)
-    return '\n'.join(results)
+    return "\n".join(results)
 
 
 def _postprocess(config_string):
     """Converts a preprocessed config back to original form."""
     flags = re.IGNORECASE | re.MULTILINE
-    result = re.sub(r'^\[__COMMENTS__\](\n|$)', '', config_string, flags=flags)
-    result = re.sub(r'\n__INLINE\d+__ =(.*)$', r' ;\g<1>', result, flags=flags)
-    result = re.sub(r'^__HASH\d+__ =(.*)$', r'#\g<1>', result, flags=flags)
-    result = re.sub(r'^__SEMICOLON\d+__ =(.*)$', r';\g<1>', result, flags=flags)
-    result = re.sub(r'\n__SECTION\d+__ =(.*)$', r'\g<1>', result, flags=flags)
-    result = re.sub(r'^__BLANK\d+__ =$', '', result, flags=flags)
+    result = re.sub(r"^\[__COMMENTS__\](\n|$)", "", config_string, flags=flags)
+    result = re.sub(r"\n__INLINE\d+__ =(.*)$", r" ;\g<1>", result, flags=flags)
+    result = re.sub(r"^__HASH\d+__ =(.*)$", r"#\g<1>", result, flags=flags)
+    result = re.sub(r"^__SEMICOLON\d+__ =(.*)$", r";\g<1>", result, flags=flags)
+    result = re.sub(r"\n__SECTION\d+__ =(.*)$", r"\g<1>", result, flags=flags)
+    result = re.sub(r"^__BLANK\d+__ =$", "", result, flags=flags)
     return result
 
 
 class Proxy(compat.collections_abc.Mapping):
-
     def __init__(self, data):
         self._data = data
 
@@ -310,4 +326,4 @@ class Proxy(compat.collections_abc.Mapping):
         return self._data.__len__()
 
     def __repr__(self):
-        return b'Proxy(%r)' % self._data
+        return b"Proxy(%r)" % self._data

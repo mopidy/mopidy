@@ -1,0 +1,7 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+
+
+[tool.black]
+target-version = ["py37", "py38"]
+line-length = 80

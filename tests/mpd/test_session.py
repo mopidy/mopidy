@@ -14,7 +14,7 @@ def test_on_start_logged(caplog):
 
     session.MpdSession(connection).on_start()
 
-    assert 'New MPD connection from %s' % connection in caplog.text
+    assert "New MPD connection from %s" % connection in caplog.text
 
 
 def test_on_line_received_logged(caplog):
@@ -26,5 +26,5 @@ def test_on_line_received_logged(caplog):
 
     mpd_session.on_line_received(sentinel.line)
 
-    assert 'Request from %s: %s' % (connection, sentinel.line) in caplog.text
-    assert 'Response to %s:' % (connection,) in caplog.text
+    assert "Request from %s: %s" % (connection, sentinel.line) in caplog.text
+    assert "Response to %s:" % (connection,) in caplog.text

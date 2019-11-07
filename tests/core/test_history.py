@@ -9,13 +9,15 @@ from mopidy.models import Artist, Ref, Track
 
 
 class PlaybackHistoryTest(unittest.TestCase):
-
     def setUp(self):  # noqa: N802
         self.tracks = [
-            Track(uri='dummy1:a', name='foo',
-                  artists=[Artist(name='foober'), Artist(name='barber')]),
-            Track(uri='dummy2:a', name='foo'),
-            Track(uri='dummy3:a', name='bar')
+            Track(
+                uri="dummy1:a",
+                name="foo",
+                artists=[Artist(name="foober"), Artist(name="barber")],
+            ),
+            Track(uri="dummy2:a", name="foo"),
+            Track(uri="dummy3:a", name="bar"),
         ]
         self.history = HistoryController()
 
@@ -50,12 +52,11 @@ class PlaybackHistoryTest(unittest.TestCase):
 
 
 class CoreHistorySaveLoadStateTest(unittest.TestCase):
-
     def setUp(self):  # noqa: N802
         self.tracks = [
-            Track(uri='dummy1:a', name='foober'),
-            Track(uri='dummy2:a', name='foo'),
-            Track(uri='dummy3:a', name='bar')
+            Track(uri="dummy1:a", name="foober"),
+            Track(uri="dummy2:a", name="foo"),
+            Track(uri="dummy3:a", name="bar"),
         ]
 
         self.refs = []
@@ -76,11 +77,14 @@ class CoreHistorySaveLoadStateTest(unittest.TestCase):
         self.assertEqual(value.history[1].track, self.refs[2])
 
     def test_load(self):
-        state = HistoryState(history=[
-            HistoryTrack(timestamp=34, track=self.refs[0]),
-            HistoryTrack(timestamp=45, track=self.refs[2]),
-            HistoryTrack(timestamp=56, track=self.refs[1])])
-        coverage = ['history']
+        state = HistoryState(
+            history=[
+                HistoryTrack(timestamp=34, track=self.refs[0]),
+                HistoryTrack(timestamp=45, track=self.refs[2]),
+                HistoryTrack(timestamp=56, track=self.refs[1]),
+            ]
+        )
+        coverage = ["history"]
         self.history._load_state(state, coverage)
 
         hist = self.history.get_history()

@@ -13,13 +13,13 @@ from tests import path_to_data_dir
 @pytest.fixture
 def config():
     return {
-        'proxy': {},
-        'file': {
-            'show_dotfiles': False,
-            'media_dirs': [],
-            'excluded_file_extensions': [],
-            'follow_symlinks': False,
-            'metadata_timeout': 1000
+        "proxy": {},
+        "file": {
+            "show_dotfiles": False,
+            "media_dirs": [],
+            "excluded_file_extensions": [],
+            "follow_symlinks": False,
+            "metadata_timeout": 1000,
         },
     }
 
@@ -31,7 +31,7 @@ def audio():
 
 @pytest.fixture
 def track_uri():
-    return path.path_to_uri(path_to_data_dir('song1.wav'))
+    return path.path_to_uri(path_to_data_dir("song1.wav"))
 
 
 def test_lookup(config, audio, track_uri):
@@ -43,4 +43,4 @@ def test_lookup(config, audio, track_uri):
     track = result[0]
     assert track.uri == track_uri
     assert track.length == 4406
-    assert track.name == 'song1.wav'
+    assert track.name == "song1.wav"

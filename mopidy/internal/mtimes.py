@@ -80,7 +80,7 @@ def _find_worker(root, follow, done, work, results, errors):
                 st = entry.lstat()
 
             if (st.st_dev, st.st_ino) in parents:
-                errors[path] = exceptions.FindError('Sym/hardlink loop found.')
+                errors[path] = exceptions.FindError("Sym/hardlink loop found.")
                 continue
 
             if stat.S_ISDIR(st.st_mode):
@@ -89,12 +89,13 @@ def _find_worker(root, follow, done, work, results, errors):
             elif stat.S_ISREG(st.st_mode):
                 results[path] = st
             elif stat.S_ISLNK(st.st_mode):
-                errors[path] = exceptions.FindError('Not following symlinks.')
+                errors[path] = exceptions.FindError("Not following symlinks.")
             else:
-                errors[path] = exceptions.FindError('Not a file or directory.')
+                errors[path] = exceptions.FindError("Not a file or directory.")
 
         except OSError as e:
             errors[path] = exceptions.FindError(
-                encoding.locale_decode(e.strerror), e.errno)
+                encoding.locale_decode(e.strerror), e.errno
+            )
         finally:
             work.task_done()

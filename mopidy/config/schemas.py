@@ -65,10 +65,10 @@ class ConfigSchema(collections.OrderedDict):
             try:
                 result[key] = self[key].deserialize(value)
             except KeyError:  # not in our schema
-                errors[key] = 'unknown config key.'
+                errors[key] = "unknown config key."
                 suggestion = _did_you_mean(key, self.keys())
                 if suggestion:
-                    errors[key] += ' Did you mean %s?' % suggestion
+                    errors[key] += " Did you mean %s?" % suggestion
             except ValueError as e:  # deserialization failed
                 result[key] = None
                 errors[key] = str(e)
@@ -78,7 +78,7 @@ class ConfigSchema(collections.OrderedDict):
                 result.pop(key, None)
             elif key not in result and key not in errors:
                 result[key] = None
-                errors[key] = 'config key not found.'
+                errors[key] = "config key not found."
 
         return result, errors
 

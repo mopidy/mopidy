@@ -5,7 +5,6 @@ import os
 
 # FIXME replace with mock usage in tests.
 class Mtime(object):
-
     def __init__(self):
         self.fake = None
 

@@ -14,7 +14,6 @@ from tests import dummy_audio, dummy_backend, dummy_mixer
 
 
 class MockConnection(mock.Mock):
-
     def __init__(self, *args, **kwargs):
         super(MockConnection, self).__init__(*args, **kwargs)
         self.host = mock.sentinel.host
@@ -22,8 +21,8 @@ class MockConnection(mock.Mock):
         self.response = []
 
     def queue_send(self, data):
-        data = data.decode('utf-8')
-        lines = (line for line in data.split('\n') if line)
+        data = data.decode("utf-8")
+        lines = (line for line in data.split("\n") if line)
         self.response.extend(lines)
 
 
@@ -32,13 +31,8 @@ class BaseTestCase(unittest.TestCase):
 
     def get_config(self):
         return {
-            'core': {
-                'max_tracklist_length': 10000
-            },
-            'mpd': {
-                'password': None,
-                'default_playlist_scheme': 'dummy',
-            }
+            "core": {"max_tracklist_length": 10000},
+            "mpd": {"password": None, "default_playlist_scheme": "dummy"},
         }
 
     def setUp(self):  # noqa: N802
@@ -54,13 +48,17 @@ class BaseTestCase(unittest.TestCase):
                 self.get_config(),
                 audio=self.audio,
                 mixer=self.mixer,
-                backends=[self.backend]).proxy()
+                backends=[self.backend],
+            ).proxy()
 
         self.uri_map = uri_mapper.MpdUriMapper(self.core)
         self.connection = MockConnection()
         self.session = session.MpdSession(
-            self.connection, config=self.get_config(), core=self.core,
-            uri_map=self.uri_map)
+            self.connection,
+            config=self.get_config(),
+            core=self.core,
+            uri_map=self.uri_map,
+        )
         self.dispatcher = self.session.dispatcher
         self.context = self.dispatcher.context
 
@@ -69,8 +67,8 @@ class BaseTestCase(unittest.TestCase):
 
     def send_request(self, request):
         self.connection.response = []
-        request = ('%s\n' % request).encode('utf-8')
-        self.session.on_receive({'received': request})
+        request = ("%s\n" % request).encode("utf-8")
+        self.session.on_receive({"received": request})
         return self.connection.response
 
     def assertNoResponse(self):  # noqa: N802
@@ -78,22 +76,31 @@ class BaseTestCase(unittest.TestCase):
 
     def assertInResponse(self, value):  # noqa: N802
         self.assertIn(
-            value, self.connection.response,
-            'Did not find {} in {}'.format(
-                repr(value), repr(self.connection.response)))
+            value,
+            self.connection.response,
+            "Did not find {} in {}".format(
+                repr(value), repr(self.connection.response)
+            ),
+        )
 
     def assertOnceInResponse(self, value):  # noqa: N802
         matched = len([r for r in self.connection.response if r == value])
         self.assertEqual(
-            1, matched,
-            'Expected to find {} once in {}'.format(
-                repr(value), repr(self.connection.response)))
+            1,
+            matched,
+            "Expected to find {} once in {}".format(
+                repr(value), repr(self.connection.response)
+            ),
+        )
 
     def assertNotInResponse(self, value):  # noqa: N802
         self.assertNotIn(
-            value, self.connection.response,
-            'Found {} in {}'.format(
-                repr(value), repr(self.connection.response)))
+            value,
+            self.connection.response,
+            "Found {} in {}".format(
+                repr(value), repr(self.connection.response)
+            ),
+        )
 
     def assertEqualResponse(self, value):  # noqa: N802
         self.assertEqual(1, len(self.connection.response))

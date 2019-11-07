@@ -24,15 +24,13 @@ def load(path):
 
     # TODO: raise an exception in case of error?
     if not path.is_file():
-        logger.info('File does not exist: %s', path)
+        logger.info("File does not exist: %s", path)
         return {}
     try:
-        with gzip.open(str(path), 'rb') as fp:
+        with gzip.open(str(path), "rb") as fp:
             return json.load(fp, object_hook=models.model_json_decoder)
     except (IOError, ValueError) as error:
-        logger.warning(
-            'Loading JSON failed: %s',
-            encoding.locale_decode(error))
+        logger.warning("Loading JSON failed: %s", encoding.locale_decode(error))
         return {}
 
 
@@ -48,15 +46,16 @@ def dump(path, data):
 
     # TODO: cleanup directory/basename.* files.
     tmp = tempfile.NamedTemporaryFile(
-        prefix=path.name + '.', dir=str(path.parent), delete=False)
+        prefix=path.name + ".", dir=str(path.parent), delete=False
+    )
     tmp_path = pathlib.Path(tmp.name)
 
     try:
         data_string = json.dumps(
-            data, cls=models.ModelJSONEncoder, indent=2, separators=(',', ': ')
+            data, cls=models.ModelJSONEncoder, indent=2, separators=(",", ": ")
         )
-        with gzip.GzipFile(fileobj=tmp, mode='wb') as fp:
-            fp.write(data_string.encode('utf-8'))
+        with gzip.GzipFile(fileobj=tmp, mode="wb") as fp:
+            fp.write(data_string.encode("utf-8"))
         tmp_path.rename(path)
     finally:
         if tmp_path.exists():
