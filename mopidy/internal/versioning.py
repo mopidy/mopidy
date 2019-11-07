@@ -21,7 +21,7 @@ def get_git_version():
         stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=project_dir)
     if process.wait() != 0:
         raise EnvironmentError('Execution of "git describe" failed')
-    version = process.stdout.read().strip()
-    if version.startswith(b'v'):
+    version = process.stdout.read().strip().decode('utf-8')
+    if version.startswith('v'):
         version = version[1:]
     return version
