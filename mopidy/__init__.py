@@ -5,12 +5,9 @@ import sys
 import warnings
 
 
-compatible_py2 = (2, 7) <= sys.version_info < (3,)
-compatible_py3 = (3, 7) <= sys.version_info
-
-if not (compatible_py2 or compatible_py3):
+if not sys.version_info >= (3, 7):
     sys.exit(
-        'ERROR: Mopidy requires Python 2.7 or >=3.7, but found %s.' %
+        'ERROR: Mopidy requires Python >= 3.7, but found %s.' %
         platform.python_version())
 
 
