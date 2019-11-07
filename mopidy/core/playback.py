@@ -1,9 +1,9 @@
 import logging
+import urllib
 
 from pykka.messages import ProxyCall
 
 from mopidy.audio import PlaybackState
-from mopidy.compat import urllib
 from mopidy.core import listener
 from mopidy.internal import deprecation, models, validation
 

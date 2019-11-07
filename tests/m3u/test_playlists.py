@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-
+import pathlib
 import platform
 import shutil
 import tempfile
@@ -9,7 +9,6 @@ import unittest
 import pykka
 
 from mopidy import compat, core
-from mopidy.compat import pathlib
 from mopidy.m3u.backend import M3UBackend
 from mopidy.models import Playlist, Track
 

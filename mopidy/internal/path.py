@@ -1,9 +1,9 @@
 import logging
+import pathlib
 import re
-
+import urllib
 
 from mopidy import compat
-from mopidy.compat import pathlib, urllib
 from mopidy.internal import xdg
 
 # Reexport in old location for Mopidy-Local's use

@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-
+import pathlib
 import shutil
 import tempfile
 import unittest
@@ -8,7 +8,6 @@ import unittest
 import pytest
 
 from mopidy import compat
-from mopidy.compat import pathlib
 from mopidy.internal import path
 from mopidy.internal.gi import GLib
 

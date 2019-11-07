@@ -1,11 +1,11 @@
-import mock
+import pathlib
+from unittest import mock
 
 import pkg_resources
 
 import pytest
 
 from mopidy import config, exceptions, ext
-from mopidy.compat import pathlib
 
 from tests import IsA, any_unicode
 

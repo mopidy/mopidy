@@ -1,7 +1,7 @@
+import configparser
 import io
 
 from mopidy import compat
-from mopidy.compat import configparser
 from mopidy.internal import validation
 
 try:

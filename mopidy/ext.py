@@ -1,9 +1,10 @@
 import collections
 import logging
+from collections.abc import Mapping
 
 import pkg_resources
 
-from mopidy import compat, config as config_lib, exceptions
+from mopidy import config as config_lib, exceptions
 from mopidy.internal import path
 
 
@@ -154,7 +155,7 @@ class Extension(object):
         raise NotImplementedError
 
 
-class Registry(compat.collections_abc.Mapping):
+class Registry(Mapping):
 
     """Registry of components provided by Mopidy extensions.
 

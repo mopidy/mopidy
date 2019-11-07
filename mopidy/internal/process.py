@@ -1,9 +1,8 @@
 import logging
 import threading
+import _thread
 
 import pykka
-
-from mopidy.compat import thread
 
 
 logger = logging.getLogger(__name__)
@@ -11,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 def exit_process():
     logger.debug("Interrupting main...")
-    thread.interrupt_main()
+    _thread.interrupt_main()
     logger.debug("Interrupted main")
 
 

@@ -1,10 +1,10 @@
 import os
+import pathlib
 
 import mock
 
 import pytest
 
-from mopidy.compat import pathlib
 from mopidy.internal import xdg
 
 

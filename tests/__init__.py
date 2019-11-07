@@ -1,5 +1,6 @@
+import pathlib
+
 from mopidy import compat
-from mopidy.compat import pathlib
 
 
 def path_to_data_dir(name):

@@ -1,3 +1,4 @@
+import pathlib
 import shutil
 import tempfile
 import unittest
@@ -8,7 +9,6 @@ import pykka
 
 import mopidy
 from mopidy.audio import PlaybackState
-from mopidy.compat import pathlib
 from mopidy.core import Core, CoreListener
 from mopidy.internal import models, storage, versioning
 from mopidy.models import Track

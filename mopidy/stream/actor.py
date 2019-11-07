@@ -2,12 +2,12 @@ import fnmatch
 import logging
 import re
 import time
+import urllib
 
 import pykka
 
 from mopidy import audio as audio_lib, backend, exceptions, stream
 from mopidy.audio import scan, tags
-from mopidy.compat import urllib
 from mopidy.internal import http, playlists
 from mopidy.models import Track
 

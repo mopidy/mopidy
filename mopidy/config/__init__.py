@@ -1,11 +1,13 @@
+import configparser
 import io
 import itertools
 import logging
 import os
+import pathlib
 import re
+from collections.abc import Mapping
 
 from mopidy import compat
-from mopidy.compat import configparser, pathlib
 from mopidy.config import keyring
 from mopidy.config.schemas import *
 from mopidy.config.types import *
@@ -307,7 +309,7 @@ def _postprocess(config_string):
     return result
 
 
-class Proxy(compat.collections_abc.Mapping):
+class Proxy(Mapping):
     def __init__(self, data):
         self._data = data
 

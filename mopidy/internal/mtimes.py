@@ -1,8 +1,9 @@
+import pathlib
+import queue
 import stat
 import threading
 
 from mopidy import exceptions
-from mopidy.compat import pathlib, queue
 from mopidy.internal import encoding
 
 

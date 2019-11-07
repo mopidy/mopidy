@@ -1,6 +1,7 @@
 import argparse
 import collections
 import contextlib
+import pathlib
 import logging
 import os
 import signal
@@ -10,7 +11,6 @@ import pykka
 
 from mopidy import config as config_lib, exceptions
 from mopidy.audio import Audio
-from mopidy.compat import pathlib
 from mopidy.core import Core
 from mopidy.internal import deps, process, timer, versioning
 from mopidy.internal.gi import GLib

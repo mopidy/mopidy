@@ -1,14 +1,8 @@
+import inspect
 import sys
 
 PY2 = sys.version_info[0] == 2
 PY3 = sys.version_info[0] == 3
-
-import collections.abc as collections_abc  # noqa
-import configparser  # noqa
-import pathlib  # noqa
-import queue  # noqa
-import _thread as thread  # noqa
-import urllib  # noqa
 
 integer_types = (int,)
 string_types = (str,)
@@ -25,11 +19,6 @@ def itervalues(dct, **kwargs):
 
 def iteritems(dct, **kwargs):
     return iter(dct.items(**kwargs))
-
-
-from itertools import zip_longest  # noqa
-
-import inspect  # noqa
 
 
 def getargspec(func):

@@ -1,8 +1,8 @@
 import contextlib
 import logging
+import urllib
 
 from mopidy import exceptions
-from mopidy.compat import urllib
 from mopidy.core import listener
 from mopidy.internal import validation
 from mopidy.models import Playlist, Ref

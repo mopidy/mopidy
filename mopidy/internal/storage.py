@@ -1,10 +1,10 @@
 import gzip
 import json
 import logging
+import pathlib
 import tempfile
 
 from mopidy import models
-from mopidy.compat import pathlib
 from mopidy.internal import encoding
 
 logger = logging.getLogger(__name__)

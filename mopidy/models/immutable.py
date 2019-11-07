@@ -1,4 +1,5 @@
 import copy
+import itertools
 import weakref
 
 from mopidy import compat
@@ -82,7 +83,7 @@ class ImmutableObject(object):
             return False
         return all(
             a == b
-            for a, b in compat.zip_longest(
+            for a, b in itertools.zip_longest(
                 self._items(), other._items(), fillvalue=object()
             )
         )

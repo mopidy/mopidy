@@ -1,8 +1,8 @@
 import datetime
 import logging
 import re
+import urllib
 
-from mopidy.compat import urllib
 from mopidy.mpd import exceptions, protocol, translator
 
 logger = logging.getLogger(__name__)

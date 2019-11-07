@@ -1,8 +1,9 @@
+import configparser
 import io
 import os
+import pathlib
 
 from mopidy import compat
-from mopidy.compat import configparser, pathlib
 
 
 def get_dirs():

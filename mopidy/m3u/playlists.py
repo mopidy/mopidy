@@ -4,10 +4,10 @@ import locale
 import logging
 import operator
 import os
+import pathlib
 import tempfile
 
 from mopidy import backend
-from mopidy.compat import pathlib
 from mopidy.internal import path
 
 from . import Extension, translator

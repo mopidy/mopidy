@@ -1,6 +1,7 @@
 import functools
 import logging
 import os
+import urllib
 
 import tornado.escape
 import tornado.ioloop
@@ -9,7 +10,6 @@ import tornado.websocket
 
 import mopidy
 from mopidy import core, models
-from mopidy.compat import urllib
 from mopidy.internal import encoding, jsonrpc
 
 

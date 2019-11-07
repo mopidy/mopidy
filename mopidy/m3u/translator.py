@@ -1,7 +1,8 @@
 import os
+import pathlib
+import urllib
 
 from mopidy import compat, models
-from mopidy.compat import pathlib, urllib
 from mopidy.internal import path
 
 from . import Extension
