@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import pykka
 
 from mopidy import mixer

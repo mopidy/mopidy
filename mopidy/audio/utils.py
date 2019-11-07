@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 from mopidy import httpclient
 from mopidy.internal.gi import Gst
 

@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, unicode_literals
-
 import datetime
 import logging
 import re

@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 from mopidy import compat, exceptions
 from mopidy.compat import urllib
 

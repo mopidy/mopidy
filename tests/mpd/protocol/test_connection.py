@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 from mock import patch
 
 from tests.mpd import protocol

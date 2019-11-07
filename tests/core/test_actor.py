@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import shutil
 import tempfile
 import unittest

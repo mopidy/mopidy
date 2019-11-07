@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 from pytest import raises
 
 from mopidy import compat, exceptions

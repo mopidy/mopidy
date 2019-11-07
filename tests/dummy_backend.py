@@ -4,7 +4,6 @@ This backend implements the backend API in the simplest way possible.  It is
 used in tests of the frontends.
 """
 
-from __future__ import absolute_import, unicode_literals
 
 import pykka
 

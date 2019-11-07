@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import re
 
 # TOOD: refactor this into a generic mapper that does not know about browse

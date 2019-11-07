@@ -10,7 +10,6 @@ implement our own MPD server which is compatible with the numerous existing
 `MPD clients <https://mpd.fandom.com/wiki/Clients>`_.
 """
 
-from __future__ import absolute_import, unicode_literals
 
 from mopidy import compat
 from mopidy.mpd import exceptions
