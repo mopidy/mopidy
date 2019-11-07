@@ -23,10 +23,7 @@ setup(
     packages=find_packages(exclude=['tests', 'tests.*']),
     zip_safe=False,
     include_package_data=True,
-    python_requires=(
-        '>= 2.7, '
-        '!= 3.0.*, != 3.1.*, != 3.2.*, != 3.3.*, != 3.4.*, != 3.5.*, != 3.6.*'
-    ),
+    python_requires='>= 3.7',
     install_requires=[
         'Pykka >= 2.0.1',
         'requests >= 2.0',
@@ -35,7 +32,6 @@ setup(
     ],
     extras_require={
         'http': [],  # Keep for backwards compat
-        ':python_version<"3.2"': ['pathlib2'],
     },
     entry_points={
         'console_scripts': [
@@ -57,7 +53,6 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: POSIX :: Linux',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
         'Topic :: Multimedia :: Sound/Audio :: Players',
