@@ -3,86 +3,44 @@ import sys
 PY2 = sys.version_info[0] == 2
 PY3 = sys.version_info[0] == 3
 
-if PY2:
-    import collections as collections_abc  # noqa
-    import ConfigParser as configparser  # noqa
-    import pathlib2 as pathlib  # noqa
-    import Queue as queue  # noqa
-    import thread  # noqa
+import collections.abc as collections_abc  # noqa
+import configparser  # noqa
+import pathlib  # noqa
+import queue  # noqa
+import _thread as thread  # noqa
+import urllib  # noqa
 
-    def fake_python3_urllib_module():
-        import types
-        import urllib as py2_urllib
-        import urlparse as py2_urlparse
+integer_types = (int,)
+string_types = (str,)
+text_type = str
+text_prefix = ""  # noqa
 
-        urllib = types.ModuleType(b"urllib")  # noqa
-        urllib.parse = types.ModuleType(b"urlib.parse")
+input = input
+intern = sys.intern
 
-        urllib.parse.quote = py2_urllib.quote
-        urllib.parse.unquote = py2_urllib.unquote
 
-        urllib.parse.urljoin = py2_urlparse.urljoin
-        urllib.parse.urlparse = py2_urlparse.urlparse
-        urllib.parse.urlsplit = py2_urlparse.urlsplit
-        urllib.parse.urlunsplit = py2_urlparse.urlunsplit
+def itervalues(dct, **kwargs):
+    return iter(dct.values(**kwargs))
 
-        return urllib
 
-    urllib = fake_python3_urllib_module()
+def iteritems(dct, **kwargs):
+    return iter(dct.items(**kwargs))
 
-    integer_types = (int, long)  # noqa
-    string_types = basestring  # noqa
-    text_type = unicode  # noqa
-    text_prefix = "u"  # noqa
 
-    input = raw_input  # noqa
-    intern = intern  # noqa
+from itertools import zip_longest  # noqa
 
-    def itervalues(dct, **kwargs):
-        return iter(dct.itervalues(**kwargs))
+import inspect  # noqa
 
-    def iteritems(dct, **kwargs):
-        return iter(dct.iteritems(**kwargs))
 
-    from inspect import getargspec, getcallargs  # noqa
-    from itertools import izip_longest as zip_longest  # noqa
+def getargspec(func):
+    spec = inspect.getfullargspec(func)
+    return inspect.ArgSpec(spec.args, spec.varargs, spec.varkw, spec.defaults)
 
-else:
-    import collections.abc as collections_abc  # noqa
-    import configparser  # noqa
-    import pathlib  # noqa
-    import queue  # noqa
-    import _thread as thread  # noqa
-    import urllib  # noqa
 
-    integer_types = (int,)
-    string_types = (str,)
-    text_type = str
-    text_prefix = ""  # noqa
-
-    input = input
-    intern = sys.intern
-
-    def itervalues(dct, **kwargs):
-        return iter(dct.values(**kwargs))
-
-    def iteritems(dct, **kwargs):
-        return iter(dct.items(**kwargs))
-
-    from itertools import zip_longest  # noqa
-
-    import inspect  # noqa
-
-    def getargspec(func):
-        spec = inspect.getfullargspec(func)
-        return inspect.ArgSpec(
-            spec.args, spec.varargs, spec.varkw, spec.defaults
-        )
-
-    def getcallargs(func, *args, **kwargs):
-        ba = inspect.signature(func).bind(*args, **kwargs)
-        ba.apply_defaults()
-        return ba.arguments
+def getcallargs(func, *args, **kwargs):
+    ba = inspect.signature(func).bind(*args, **kwargs)
+    ba.apply_defaults()
+    return ba.arguments
 
 
 def add_metaclass(metaclass):
