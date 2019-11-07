@@ -8,7 +8,7 @@ workflows:
   test:
     jobs:
       - py37
-      #- black
+      - black
       #- check-manifest
       - docs
       - flake8
