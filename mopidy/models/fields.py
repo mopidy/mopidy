@@ -97,7 +97,7 @@ class Identifier(String):
     def validate(self, value):
         value = super(Identifier, self).validate(value)
         if compat.PY2:
-            if isinstance(value, unicode):
+            if isinstance(value, compat.text_type):
                 value = value.encode('utf-8')
         else:
             if isinstance(value, bytes):

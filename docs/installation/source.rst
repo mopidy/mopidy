@@ -11,31 +11,26 @@ from PyPI using the ``pip`` installer.
 If you are looking to contribute or wish to install from source using ``git``
 please follow the directions :ref:`here <contributing>`.
 
-#. First of all, you need Python 2.7. Check if you have Python and what
-   version by running::
+#. First of all, you need Python 3.7 or newer. Check if you have Python and
+   what version by running::
 
-       python --version
+       python3 --version
 
 #. You need to make sure you have ``pip``, the Python package installer. You'll
-   also need a C compiler and the Python development headers to build pyspotify
-   later.
+   also need a C compiler and the Python development headers to install some
+   Mopidy extensions, like Mopidy-Spotify.
 
    This is how you install it on Debian/Ubuntu::
 
-       sudo apt-get install build-essential python-dev python-pip
+       sudo apt install build-essential python3-dev python3-pip
 
    And on Arch Linux from the official repository::
 
-       sudo pacman -S base-devel python2-pip
+       sudo pacman -S base-devel python-pip
 
    And on Fedora Linux from the official repositories::
 
-       sudo yum install -y gcc python-devel python-pip
-
-   .. note::
-
-       On Fedora Linux, you must replace ``pip`` with ``pip-python`` in the
-       following steps.
+       sudo yum install -y gcc python3-devel python3-pip
 
 #. Then you'll need to install GStreamer >= 1.2.3, with Python bindings.
    GStreamer is packaged for most popular Linux distributions. Search for
@@ -44,7 +39,7 @@ please follow the directions :ref:`here <contributing>`.
 
    If you use Debian/Ubuntu you can install GStreamer like this::
 
-       sudo apt-get install python-gst-1.0 \
+       sudo apt install python3-gst-1.0 \
            gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 \
            gstreamer1.0-plugins-good gstreamer1.0-plugins-ugly \
            gstreamer1.0-tools
@@ -52,11 +47,11 @@ please follow the directions :ref:`here <contributing>`.
    If you use Arch Linux, install the following packages from the official
    repository::
 
-       sudo pacman -S gst-python2 gst-plugins-good gst-plugins-ugly
+       sudo pacman -S gst-python gst-plugins-good gst-plugins-ugly
 
    If you use Fedora you can install GStreamer like this::
 
-       sudo yum install -y python-gstreamer1 gstreamer1-plugins-good \
+       sudo yum install -y python3-gstreamer1 gstreamer1-plugins-good \
            gstreamer1-plugins-ugly
 
    If you use Gentoo you can install GStreamer like this::
@@ -68,7 +63,7 @@ please follow the directions :ref:`here <contributing>`.
 
 #. Install the latest release of Mopidy::
 
-       sudo pip install -U mopidy
+       sudo python3 -m pip install -U mopidy
 
    This will use ``pip`` to install the latest release of `Mopidy from PyPI
    <https://pypi.org/project/Mopidy>`_. To upgrade Mopidy to future
@@ -87,7 +82,7 @@ scrobbling, you need to install additional Mopidy extensions.
 You can install any Mopidy extension directly from PyPI with ``pip``. To list
 all the extensions available from PyPI, run::
 
-    pip search mopidy
+    python3 -m pip search mopidy
 
 Note that extensions installed from PyPI will only automatically install Python
 dependencies. Please refer to the extension's documentation for information
