@@ -7,7 +7,6 @@ workflows:
   version: 2
   test:
     jobs:
-      - py27
       - py37
       #- black
       #- check-manifest
@@ -39,8 +38,6 @@ jobs:
           file: coverage.xml
       - store_test_results:
           path: test-results
-
-  py27: *test-template
 
   black: *test-template
 
