@@ -25,7 +25,7 @@ class Mock(object):
         return Mock()
 
     @classmethod
-    def __getattr__(self, name):
+    def __getattr__(cls, name):
         if name == "get_system_config_dirs":  # GLib.get_system_config_dirs()
             return list
         elif name == "get_user_config_dir":  # GLib.get_user_config_dir()
