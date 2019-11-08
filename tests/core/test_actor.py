@@ -40,7 +40,7 @@ class CoreActorTest(unittest.TestCase):
     def test_backends_with_colliding_uri_schemes_fails(self):
         self.backend2.uri_schemes.get.return_value = ["dummy1", "dummy2"]
 
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             AssertionError,
             'Cannot add URI scheme "dummy1" for B2, '
             "it is already handled by B1",
