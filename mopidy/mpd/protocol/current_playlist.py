@@ -32,8 +32,10 @@ def add(context, uri):
         for path, ref in context.browse(uri, lookup=False):
             if ref:
                 uris.append(ref.uri)
-    except exceptions.MpdNoExistError as e:
-        e.message = "directory or file not found"
+    except exceptions.MpdNoExistError as exc:
+        exc.message = (  # noqa B306: Our own exception
+            "directory or file not found"
+        )
         raise
 
     if not uris:

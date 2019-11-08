@@ -271,16 +271,16 @@ def validate_extension_data(data):
 
     try:
         data.entry_point.require()
-    except pkg_resources.DistributionNotFound as ex:
+    except pkg_resources.DistributionNotFound as exc:
         logger.info(
             "Disabled extension %s: Dependency %s not found",
             data.extension.ext_name,
-            ex,
+            exc,
         )
         return False
-    except pkg_resources.VersionConflict as ex:
-        if len(ex.args) == 2:
-            found, required = ex.args
+    except pkg_resources.VersionConflict as exc:
+        if len(exc.args) == 2:
+            found, required = exc.args
             logger.info(
                 "Disabled extension %s: %s required, but found %s at %s",
                 data.extension.ext_name,
@@ -290,16 +290,14 @@ def validate_extension_data(data):
             )
         else:
             logger.info(
-                "Disabled extension %s: %s", data.extension.ext_name, ex
+                "Disabled extension %s: %s", data.extension.ext_name, exc
             )
         return False
 
     try:
         data.extension.validate_environment()
-    except exceptions.ExtensionError as ex:
-        logger.info(
-            "Disabled extension %s: %s", data.extension.ext_name, ex.message
-        )
+    except exceptions.ExtensionError as exc:
+        logger.info("Disabled extension %s: %s", data.extension.ext_name, exc)
         return False
     except Exception:
         logger.exception(
