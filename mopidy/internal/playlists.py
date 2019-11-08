@@ -37,7 +37,7 @@ def detect_xspf_header(data):
 
     try:
         data = io.BytesIO(data)
-        for event, element in elementtree.iterparse(data, events=(b"start",)):
+        for _event, element in elementtree.iterparse(data, events=(b"start",)):
             return element.tag.lower() == "{http://xspf.org/ns/0/}playlist"
     except elementtree.ParseError:
         pass
@@ -51,7 +51,7 @@ def detect_asx_header(data):
 
     try:
         data = io.BytesIO(data)
-        for event, element in elementtree.iterparse(data, events=(b"start",)):
+        for _event, element in elementtree.iterparse(data, events=(b"start",)):
             return element.tag.lower() == "asx"
     except elementtree.ParseError:
         pass
@@ -96,7 +96,7 @@ def parse_pls(data):
 def parse_xspf(data):
     try:
         # Last element will be root.
-        for event, element in elementtree.iterparse(io.BytesIO(data)):
+        for _event, element in elementtree.iterparse(io.BytesIO(data)):
             element.tag = element.tag.lower()  # normalize
     except elementtree.ParseError:
         return
@@ -110,7 +110,7 @@ def parse_xspf(data):
 def parse_asx(data):
     try:
         # Last element will be root.
-        for event, element in elementtree.iterparse(io.BytesIO(data)):
+        for _event, element in elementtree.iterparse(io.BytesIO(data)):
             element.tag = element.tag.lower()  # normalize
     except elementtree.ParseError:
         return

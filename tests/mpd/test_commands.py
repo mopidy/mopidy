@@ -96,7 +96,7 @@ class TestCommands(unittest.TestCase):
     def test_function_has_varargs_succeeds(self):
         sentinel, args = object(), []
         self.commands.add("bar")(lambda context, *args: sentinel)
-        for i in range(10):
+        for _ in range(10):
             self.assertEqual(sentinel, self.commands.call(["bar"] + args))
             args.append("test")
 

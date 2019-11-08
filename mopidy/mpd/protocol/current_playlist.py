@@ -29,7 +29,7 @@ def add(context, uri):
 
     try:
         uris = []
-        for path, ref in context.browse(uri, lookup=False):
+        for _path, ref in context.browse(uri, lookup=False):
             if ref:
                 uris.append(ref.uri)
     except exceptions.MpdNoExistError as exc:

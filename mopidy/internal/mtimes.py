@@ -40,7 +40,7 @@ def _find(root, thread_count=10, relative=False, follow=False):
         root = None
 
     args = (root, follow, done, work, results, errors)
-    for i in range(thread_count):
+    for _ in range(thread_count):
         t = threading.Thread(target=_find_worker, args=args)
         t.daemon = True
         t.start()
