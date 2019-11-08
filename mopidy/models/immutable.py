@@ -2,7 +2,6 @@ import copy
 import itertools
 import weakref
 
-from mopidy import compat
 from mopidy.models.fields import Field
 
 
@@ -168,8 +167,9 @@ class _ValidatedImmutableObjectMeta(type):
         return cls._instances.setdefault(weakref.ref(instance), instance)
 
 
-@compat.add_metaclass(_ValidatedImmutableObjectMeta)
-class ValidatedImmutableObject(ImmutableObject):
+class ValidatedImmutableObject(
+    ImmutableObject, metaclass=_ValidatedImmutableObjectMeta
+):
     """
     Superclass for immutable objects whose fields can only be modified via the
     constructor. Fields should be :class:`Field` instances to ensure type
