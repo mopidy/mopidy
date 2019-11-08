@@ -4,21 +4,7 @@
 Code style
 **********
 
-- Always import ``unicode_literals`` and use unicode literals for everything
-  except where you're explicitly working with bytes, which are marked with the
-  ``b`` prefix.
-
-  Do this::
-
-    from __future__ import unicode_literals
-
-    foo = 'I am a unicode string, which is a sane default'
-    bar = b'I am a bytestring'
-
-  Not this::
-
-    foo = u'I am a unicode string'
-    bar = 'I am a bytestring, but was it intentional?'
+- Format with `Black <https://black.readthedocs.io/>`_.
 
 - Follow :pep:`8` unless otherwise noted. `flake8
   <https://pypi.org/project/flake8>`_  should be used to check your code
