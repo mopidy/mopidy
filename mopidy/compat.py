@@ -1,14 +1,6 @@
 import inspect
 
 
-def itervalues(dct, **kwargs):
-    return iter(dct.values(**kwargs))
-
-
-def iteritems(dct, **kwargs):
-    return iter(dct.items(**kwargs))
-
-
 def getargspec(func):
     spec = inspect.getfullargspec(func)
     return inspect.ArgSpec(spec.args, spec.varargs, spec.varkw, spec.defaults)

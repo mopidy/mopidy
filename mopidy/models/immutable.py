@@ -58,7 +58,7 @@ class ImmutableObject(object):
             self.__dict__[name] = value
 
     def _items(self):
-        return compat.iteritems(self.__dict__)
+        return self.__dict__.items()
 
     def __repr__(self):
         kwarg_pairs = []
