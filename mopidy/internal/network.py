@@ -81,7 +81,7 @@ def format_address(address):
     """Format socket address for display."""
     host, port = address[:2]
     if port is not None:
-        return "[{}]:{}".format(host, port)
+        return f"[{host}]:{port}"
     else:
         return "[%s]" % host
 

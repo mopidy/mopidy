@@ -292,9 +292,9 @@ if __name__ == "__main__":
                 print("{:<20}   {}".format(key, getattr(result, key)))
             print("tags")
             for tag, value in result.tags.items():
-                line = "{:<20}   {}".format(tag, value)
+                line = f"{tag:<20}   {value}"
                 if len(line) > 77:
                     line = line[:77] + "..."
                 print(line)
         except exceptions.ScannerError as error:
-            print("{}: {}".format(uri, error))
+            print(f"{uri}: {error}")

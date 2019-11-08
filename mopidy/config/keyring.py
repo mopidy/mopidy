@@ -102,7 +102,7 @@ def set(section, key, value):
     secret = dbus.Struct(
         (session, "", dbus.ByteArray(value), "plain/text; charset=utf8")
     )
-    label = "mopidy: {}/{}".format(section, key)
+    label = f"mopidy: {section}/{key}"
     attributes = {"service": "mopidy", "section": section, "key": key}
     properties = {
         "org.freedesktop.Secret.Item.Label": label,

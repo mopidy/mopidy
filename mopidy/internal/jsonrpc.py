@@ -340,7 +340,7 @@ class JsonRpcInspector:
                 obj_methods = self._get_methods(obj)
                 for name, description in obj_methods.items():
                     if mount:
-                        name = "{}.{}".format(mount, name)
+                        name = f"{mount}.{name}"
                     methods[name] = description
         return methods
 

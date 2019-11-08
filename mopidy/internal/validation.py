@@ -98,7 +98,7 @@ def check_query(arg, fields=SEARCH_FIELDS, list_values=True):
 
     if not isinstance(arg, Mapping):
         raise exceptions.ValidationError(
-            "Expected a query dictionary, not {arg!r}".format(arg=arg)
+            f"Expected a query dictionary, not {arg!r}"
         )
 
     for key, value in arg.items():

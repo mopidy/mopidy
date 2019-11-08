@@ -118,9 +118,7 @@ def format_initial(extensions_data):
         extensions_data, key=lambda d: d.extension.dist_name
     )
     for data in extensions_data:
-        versions.append(
-            "{} {}".format(data.extension.dist_name, data.extension.version)
-        )
+        versions.append(f"{data.extension.dist_name} {data.extension.version}")
 
     header = _INITIAL_HELP.strip() % {"versions": "\n#   ".join(versions)}
     formatted_config = _format(

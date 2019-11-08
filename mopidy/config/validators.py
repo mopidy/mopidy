@@ -18,7 +18,7 @@ def validate_choice(value, choices):
     """
     if choices is not None and value not in choices:
         names = ", ".join(repr(c) for c in choices)
-        raise ValueError("must be one of {}, not {}.".format(names, value))
+        raise ValueError(f"must be one of {names}, not {value}.")
 
 
 def validate_minimum(value, minimum):
@@ -27,9 +27,7 @@ def validate_minimum(value, minimum):
     Normally called in :meth:`~mopidy.config.types.ConfigValue.deserialize`.
     """
     if minimum is not None and value < minimum:
-        raise ValueError(
-            "{!r} must be larger than {!r}.".format(value, minimum)
-        )
+        raise ValueError(f"{value!r} must be larger than {minimum!r}.")
 
 
 def validate_maximum(value, maximum):
@@ -38,6 +36,4 @@ def validate_maximum(value, maximum):
     Normally called in :meth:`~mopidy.config.types.ConfigValue.deserialize`.
     """
     if maximum is not None and value > maximum:
-        raise ValueError(
-            "{!r} must be smaller than {!r}.".format(value, maximum)
-        )
+        raise ValueError(f"{value!r} must be smaller than {maximum!r}.")

@@ -102,9 +102,9 @@ def parse_xspf(data):
         return
 
     ns = "http://xspf.org/ns/0/"
-    path = "{{{}}}tracklist/{{{}}}track".format(ns, ns)
+    path = f"{{{ns}}}tracklist/{{{ns}}}track"
     for track in element.iterfind(path):
-        yield track.findtext("{{{}}}location".format(ns))
+        yield track.findtext(f"{{{ns}}}location")
 
 
 def parse_asx(data):
