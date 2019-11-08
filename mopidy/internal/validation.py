@@ -1,7 +1,8 @@
-from __future__ import absolute_import, unicode_literals
+import urllib
+from collections.abc import Iterable, Mapping
 
-from mopidy import compat, exceptions
-from mopidy.compat import urllib
+from mopidy import exceptions
+
 
 PLAYBACK_STATES = {"paused", "stopped", "playing"}
 
@@ -46,9 +47,9 @@ DISTINCT_FIELDS = {
 # TODO: _check_iterable(check, msg, **kwargs) + [check(a) for a in arg]?
 def _check_iterable(arg, msg, **kwargs):
     """Ensure we have an iterable which is not a string or an iterator"""
-    if isinstance(arg, compat.string_types):
+    if isinstance(arg, str):
         raise exceptions.ValidationError(msg.format(arg=arg, **kwargs))
-    elif not isinstance(arg, compat.collections_abc.Iterable):
+    elif not isinstance(arg, Iterable):
         raise exceptions.ValidationError(msg.format(arg=arg, **kwargs))
     elif iter(arg) is iter(arg):
         raise exceptions.ValidationError(msg.format(arg=arg, **kwargs))
@@ -66,26 +67,18 @@ def check_boolean(arg, msg="Expected a boolean, not {arg!r}"):
 
 
 def check_instance(arg, cls, msg="Expected a {name} instance, not {arg!r}"):
-    if cls == compat.string_types:
-        name = "string"
-    else:
-        name = cls.__name__
     if not isinstance(arg, cls):
-        raise exceptions.ValidationError(msg.format(arg=arg, name=name))
+        raise exceptions.ValidationError(msg.format(arg=arg, name=cls.__name__))
 
 
 def check_instances(arg, cls, msg="Expected a list of {name}, not {arg!r}"):
-    if cls == compat.string_types:
-        name = "string"
-    else:
-        name = cls.__name__
-    _check_iterable(arg, msg, name=name)
+    _check_iterable(arg, msg, name=cls.__name__)
     if not all(isinstance(instance, cls) for instance in arg):
-        raise exceptions.ValidationError(msg.format(arg=arg, name=name))
+        raise exceptions.ValidationError(msg.format(arg=arg, name=cls.__name__))
 
 
 def check_integer(arg, min=None, max=None):
-    if not isinstance(arg, compat.integer_types):
+    if not isinstance(arg, int):
         raise exceptions.ValidationError("Expected an integer, not %r" % arg)
     elif min is not None and arg < min:
         raise exceptions.ValidationError(
@@ -103,9 +96,9 @@ def check_query(arg, fields=SEARCH_FIELDS, list_values=True):
     # TODO: normalize blank -> [] or just remove field?
     # TODO: remove list_values?
 
-    if not isinstance(arg, compat.collections_abc.Mapping):
+    if not isinstance(arg, Mapping):
         raise exceptions.ValidationError(
-            "Expected a query dictionary, not {arg!r}".format(arg=arg)
+            f"Expected a query dictionary, not {arg!r}"
         )
 
     for key, value in arg.items():
@@ -125,12 +118,12 @@ def check_query(arg, fields=SEARCH_FIELDS, list_values=True):
 
 
 def _check_query_value(key, arg, msg):
-    if not isinstance(arg, compat.string_types) or not arg.strip():
+    if not isinstance(arg, str) or not arg.strip():
         raise exceptions.ValidationError(msg.format(arg=arg, key=key))
 
 
 def check_uri(arg, msg="Expected a valid URI, not {arg!r}"):
-    if not isinstance(arg, compat.string_types):
+    if not isinstance(arg, str):
         raise exceptions.ValidationError(msg.format(arg=arg))
     elif urllib.parse.urlparse(arg).scheme == "":
         raise exceptions.ValidationError(msg.format(arg=arg))

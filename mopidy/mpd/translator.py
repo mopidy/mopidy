@@ -1,10 +1,7 @@
-from __future__ import absolute_import, unicode_literals
-
 import datetime
 import logging
 import re
 
-from mopidy import compat
 from mopidy.models import TlTrack
 from mopidy.mpd.protocol import tagtype_list
 
@@ -20,13 +17,6 @@ def normalize_path(path, relative=False):
     if not relative:
         parts.insert(0, "")
     return "/".join(parts)
-
-
-def uri_to_mpd_format(uri):
-    if compat.PY2:
-        return uri.decode("utf-8")
-    else:
-        return uri
 
 
 def track_to_mpd_format(track, position=None, stream_title=None):
@@ -51,7 +41,7 @@ def track_to_mpd_format(track, position=None, stream_title=None):
         return []
 
     result = [
-        ("file", uri_to_mpd_format(track.uri)),
+        ("file", track.uri),
         ("Time", track.length and (track.length // 1000) or 0),
         ("Artist", concat_multi_values(track.artists, "name")),
         ("Album", track.album and track.album.name or ""),
@@ -120,7 +110,7 @@ def track_to_mpd_format(track, position=None, stream_title=None):
         result.append(("MUSICBRAINZ_TRACKID", track.musicbrainz_id))
 
     if track.album and track.album.uri:
-        result.append(("X-AlbumUri", uri_to_mpd_format(track.album.uri)))
+        result.append(("X-AlbumUri", track.album.uri))
 
     result = [element for element in result if _has_value(*element)]
 

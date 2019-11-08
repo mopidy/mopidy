@@ -1,10 +1,8 @@
-from __future__ import absolute_import, unicode_literals
-
 import os
 
 
 # FIXME replace with mock usage in tests.
-class Mtime(object):
+class Mtime:
     def __init__(self):
         self.fake = None
 

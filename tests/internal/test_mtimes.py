@@ -1,10 +1,10 @@
 import os
+import pathlib
 import shutil
 
 import pytest
 
 from mopidy import exceptions
-from mopidy.compat import pathlib
 from mopidy.internal import mtimes
 
 import tests

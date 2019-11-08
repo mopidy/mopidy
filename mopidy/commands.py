@@ -1,8 +1,7 @@
-from __future__ import absolute_import, print_function, unicode_literals
-
 import argparse
 import collections
 import contextlib
+import pathlib
 import logging
 import os
 import signal
@@ -12,7 +11,6 @@ import pykka
 
 from mopidy import config as config_lib, exceptions
 from mopidy.audio import Audio
-from mopidy.compat import pathlib
 from mopidy.core import Core
 from mopidy.internal import deps, process, timer, versioning
 from mopidy.internal.gi import GLib
@@ -57,7 +55,7 @@ class _ArgumentParser(argparse.ArgumentParser):
 
 class _HelpAction(argparse.Action):
     def __init__(self, option_strings, dest=None, help=None):
-        super(_HelpAction, self).__init__(
+        super().__init__(
             option_strings=option_strings,
             dest=dest or argparse.SUPPRESS,
             default=argparse.SUPPRESS,
@@ -69,7 +67,7 @@ class _HelpAction(argparse.Action):
         raise _HelpError()
 
 
-class Command(object):
+class Command:
 
     """Command parser and runner for building trees of commands.
 
@@ -254,7 +252,7 @@ def _actor_error_handling(name):
 # TODO: move out of this utility class
 class RootCommand(Command):
     def __init__(self):
-        super(RootCommand, self).__init__()
+        super().__init__()
         self.set(base_verbosity_level=0)
         self.add_argument(
             "-h", "--help", action="help", help="Show this message and exit"
@@ -467,7 +465,7 @@ class ConfigCommand(Command):
     help = "Show currently active configuration."
 
     def __init__(self):
-        super(ConfigCommand, self).__init__()
+        super().__init__()
         self.set(base_verbosity_level=-1)
 
     def run(self, config, errors, schemas):
@@ -479,7 +477,7 @@ class DepsCommand(Command):
     help = "Show dependencies and debug information."
 
     def __init__(self):
-        super(DepsCommand, self).__init__()
+        super().__init__()
         self.set(base_verbosity_level=-1)
 
     def run(self):

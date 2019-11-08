@@ -1,10 +1,6 @@
-from __future__ import absolute_import, unicode_literals
-
-import io
+import configparser
 import os
-
-from mopidy import compat
-from mopidy.compat import configparser, pathlib
+import pathlib
 
 
 def get_dirs():
@@ -59,17 +55,14 @@ def _get_user_dirs(xdg_config_dir):
     data = data.replace(b'"', b"")
 
     config = configparser.RawConfigParser()
-    if compat.PY2:
-        config.readfp(io.BytesIO(data))
-    else:
-        config.read_string(data.decode())
+    config.read_string(data.decode())
 
     result = {}
     for k, v in config.items("XDG_USER_DIRS"):
         if v is None:
             continue
         if isinstance(k, bytes):
-            k = k.decode("utf-8")
+            k = k.decode()
         result[k.upper()] = pathlib.Path(v).resolve()
 
     return result

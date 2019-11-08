@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import collections
 
 from mopidy.config import types
@@ -50,7 +48,7 @@ class ConfigSchema(collections.OrderedDict):
     """
 
     def __init__(self, name):
-        super(ConfigSchema, self).__init__()
+        super().__init__()
         self.name = name
 
     def deserialize(self, values):
@@ -96,7 +94,7 @@ class ConfigSchema(collections.OrderedDict):
         return result
 
 
-class MapConfigSchema(object):
+class MapConfigSchema:
 
     """Schema for handling multiple unknown keys with the same type.
 

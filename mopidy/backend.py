@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import logging
 
 from mopidy import listener
@@ -8,7 +6,7 @@ from mopidy import listener
 logger = logging.getLogger(__name__)
 
 
-class Backend(object):
+class Backend:
 
     """Backend API
 
@@ -68,7 +66,7 @@ class Backend(object):
         return True
 
 
-class LibraryProvider(object):
+class LibraryProvider:
 
     """
     :param backend: backend the controller is a part of
@@ -152,7 +150,7 @@ class LibraryProvider(object):
         pass
 
 
-class PlaybackProvider(object):
+class PlaybackProvider:
 
     """
     :param audio: the audio actor
@@ -287,7 +285,7 @@ class PlaybackProvider(object):
         return self.audio.get_position().get()
 
 
-class PlaylistsProvider(object):
+class PlaylistsProvider:
 
     """
     A playlist provider exposes a collection of playlists, methods to

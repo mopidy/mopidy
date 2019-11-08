@@ -1,15 +1,10 @@
-# encoding: utf-8
-
-from __future__ import absolute_import, unicode_literals
-
+import pathlib
 import shutil
 import tempfile
 import unittest
 
 import pytest
 
-from mopidy import compat
-from mopidy.compat import pathlib
 from mopidy.internal import path
 from mopidy.internal.gi import GLib
 
@@ -210,14 +205,13 @@ class ExpandPathTest(unittest.TestCase):
 
         assert result is None
 
-    @pytest.mark.skipif(compat.PY2, reason="requires Python 3 surrogateescape")
     def test_invalid_utf8_bytes(self):
         result = path.expand_path(b"ab\xc3\x12")
 
         assert result == pathlib.Path("ab\udcc3\x12").resolve()
 
 
-class TestIsPathInsideBaseDir(object):
+class TestIsPathInsideBaseDir:
     def test_when_inside(self):
         assert path.is_path_inside_base_dir("/æ/øå", "/æ")
 
@@ -225,15 +219,13 @@ class TestIsPathInsideBaseDir(object):
         assert not path.is_path_inside_base_dir("/æ/øå", "/ø")
 
     def test_byte_inside_str_does_not_fail(self):
-        assert path.is_path_inside_base_dir("/æ/øå".encode("utf-8"), "/æ")
+        assert path.is_path_inside_base_dir("/æ/øå".encode(), "/æ")
 
     def test_str_inside_byte_does_not_fail(self):
-        assert path.is_path_inside_base_dir("/æ/øå", "/æ".encode("utf-8"))
+        assert path.is_path_inside_base_dir("/æ/øå", "/æ".encode())
 
     def test_str_inside_str_fails_does_not_fail(self):
         assert path.is_path_inside_base_dir("/æ/øå", "/æ")
 
     def test_bytes_inside_bytes_fails_does_not_fail(self):
-        assert path.is_path_inside_base_dir(
-            "/æ/øå".encode("utf-8"), "/æ".encode("utf-8")
-        )
+        assert path.is_path_inside_base_dir("/æ/øå".encode(), "/æ".encode())

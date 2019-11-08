@@ -1,10 +1,3 @@
-from __future__ import (
-    absolute_import,
-    division,
-    print_function,
-    unicode_literals,
-)
-
 import collections
 import logging
 import time
@@ -37,7 +30,7 @@ def _trace(*args, **kwargs):
 
 
 # TODO: replace with a scan(uri, timeout=1000, proxy_config=None)?
-class Scanner(object):
+class Scanner:
 
     """
     Helper to get tags and other relevant info from URIs.
@@ -299,9 +292,9 @@ if __name__ == "__main__":
                 print("{:<20}   {}".format(key, getattr(result, key)))
             print("tags")
             for tag, value in result.tags.items():
-                line = "{:<20}   {}".format(tag, value)
+                line = f"{tag:<20}   {value}"
                 if len(line) > 77:
                     line = line[:77] + "..."
                 print(line)
         except exceptions.ScannerError as error:
-            print("{}: {}".format(uri, error))
+            print(f"{uri}: {error}")

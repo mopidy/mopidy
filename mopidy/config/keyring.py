@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import logging
 
 logger = logging.getLogger(__name__)
@@ -8,8 +6,6 @@ try:
     import dbus
 except ImportError:
     dbus = None
-
-from mopidy import compat
 
 
 # XXX: Hack to workaround introspection bug caused by gnome-keyring, should be
@@ -99,14 +95,14 @@ def set(section, key, value):
     if not collection:
         return False
 
-    if isinstance(value, compat.text_type):
-        value = value.encode("utf-8")
+    if isinstance(value, str):
+        value = value.encode()
 
     session = service.OpenSession("plain", EMPTY_STRING)[1]
     secret = dbus.Struct(
         (session, "", dbus.ByteArray(value), "plain/text; charset=utf8")
     )
-    label = "mopidy: {}/{}".format(section, key)
+    label = f"mopidy: {section}/{key}"
     attributes = {"service": "mopidy", "section": section, "key": key}
     properties = {
         "org.freedesktop.Secret.Item.Label": label,

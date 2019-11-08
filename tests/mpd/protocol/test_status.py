@@ -1,8 +1,3 @@
-# encoding: utf-8
-
-
-from __future__ import absolute_import, unicode_literals
-
 from mopidy.models import Album, Track
 
 from tests.mpd import protocol

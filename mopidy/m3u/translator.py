@@ -1,9 +1,8 @@
-from __future__ import absolute_import, print_function, unicode_literals
-
 import os
+import pathlib
+import urllib
 
-from mopidy import compat, models
-from mopidy.compat import pathlib, urllib
+from mopidy import models
 from mopidy.internal import path
 
 from . import Extension
@@ -12,10 +11,7 @@ from . import Extension
 def path_to_uri(path, scheme=Extension.ext_name):
     """Convert file path to URI."""
     bytes_path = os.path.normpath(bytes(path))
-    if compat.PY2:
-        uripath = urllib.parse.quote(bytes_path).decode("utf-8")
-    else:
-        uripath = urllib.parse.quote_from_bytes(bytes_path)
+    uripath = urllib.parse.quote_from_bytes(bytes_path)
     return urllib.parse.urlunsplit((scheme, None, uripath, None, None))
 
 
@@ -28,7 +24,7 @@ def name_from_path(path):
     """Extract name from file path."""
     name = bytes(pathlib.Path(path.stem))
     try:
-        return name.decode("utf-8", "replace")
+        return name.decode(errors="replace")
     except UnicodeError:
         return None
 
@@ -75,7 +71,7 @@ def dump_items(items, fp):
             print("#EXTINF:-1,%s" % item.name, file=fp)
         # TODO: convert file URIs to (relative) paths?
         if isinstance(item.uri, bytes):
-            print(item.uri.decode("utf-8"), file=fp)
+            print(item.uri.decode(), file=fp)
         else:
             print(item.uri, file=fp)
 

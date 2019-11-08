@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import json
 import unittest
 
@@ -7,13 +5,13 @@ import mock
 
 import pykka
 
-from mopidy import compat, core, models
+from mopidy import core, models
 from mopidy.internal import deprecation, jsonrpc
 
 from tests import dummy_backend
 
 
-class Calculator(object):
+class Calculator:
     def __init__(self):
         self._mem = None
 
@@ -495,11 +493,10 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
 
         data = error["data"]
         self.assertEqual(data["type"], "TypeError")
-        if compat.PY2:
-            message = "takes exactly 1 argument (2 given)"
-        else:
-            message = "takes 1 positional argument but 2 were given"
-        self.assertEqual(data["message"], "get_uri_schemes() %s" % message)
+        self.assertEqual(
+            data["message"],
+            "get_uri_schemes() takes 1 positional argument but 2 were given",
+        )
         self.assertIn("traceback", data)
         self.assertIn("Traceback (most recent call last):", data["traceback"])
 

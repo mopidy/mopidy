@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import socket
 import unittest
 
@@ -26,14 +24,14 @@ class FormatAddressTest(unittest.TestCase):
         address = (sentinel.host, sentinel.port)
         self.assertEqual(
             network.format_address(address),
-            "[{}]:{}".format(sentinel.host, sentinel.port),
+            f"[{sentinel.host}]:{sentinel.port}",
         )
 
     def test_format_address_ipv6(self):
         address = (sentinel.host, sentinel.port, sentinel.flow, sentinel.scope)
         self.assertEqual(
             network.format_address(address),
-            "[%s]:%s" % (sentinel.host, sentinel.port),
+            f"[{sentinel.host}]:{sentinel.port}",
         )
 
     def test_format_address_unix(self):

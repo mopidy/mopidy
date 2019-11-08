@@ -1,12 +1,11 @@
-from __future__ import absolute_import, unicode_literals
-
 import collections
 import contextlib
 import logging
 import operator
+import urllib
+from collections.abc import Mapping
 
-from mopidy import compat, exceptions, models
-from mopidy.compat import urllib
+from mopidy import exceptions, models
 from mopidy.internal import validation
 
 
@@ -32,7 +31,7 @@ def _backend_error_handling(backend, reraise=None):
         )
 
 
-class LibraryController(object):
+class LibraryController:
     pykka_traversable = True
 
     def __init__(self, backends, core):
@@ -149,7 +148,7 @@ class LibraryController(object):
             with _backend_error_handling(backend):
                 values = future.get()
                 if values is not None:
-                    validation.check_instances(values, compat.text_type)
+                    validation.check_instances(values, str)
                     result.update(values)
         return result
 
@@ -184,9 +183,7 @@ class LibraryController(object):
             with _backend_error_handling(backend):
                 if future.get() is None:
                     continue
-                validation.check_instance(
-                    future.get(), compat.collections_abc.Mapping
-                )
+                validation.check_instance(future.get(), Mapping)
                 for uri, images in future.get().items():
                     if uri not in uris:
                         raise exceptions.ValidationError(
@@ -338,7 +335,7 @@ def _normalize_query(query):
     broken_client = False
     # TODO: this breaks if query is not a dictionary like object...
     for (field, values) in query.items():
-        if isinstance(values, compat.string_types):
+        if isinstance(values, str):
             broken_client = True
             query[field] = [values]
     if broken_client:

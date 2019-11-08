@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import logging
 import random
 
@@ -12,7 +10,7 @@ from mopidy.models import TlTrack, Track
 logger = logging.getLogger(__name__)
 
 
-class TracklistController(object):
+class TracklistController:
     pykka_traversable = True
 
     def __init__(self, core):

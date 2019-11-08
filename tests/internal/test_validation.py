@@ -1,8 +1,6 @@
-from __future__ import absolute_import, unicode_literals
-
 from pytest import raises
 
-from mopidy import compat, exceptions
+from mopidy import exceptions
 from mopidy.internal import validation
 
 
@@ -41,7 +39,7 @@ def test_check_choice_error_message():
 
 
 def test_check_instance_with_valid_choices():
-    for value, cls in ((True, bool), ("a", compat.text_type), (123, int)):
+    for value, cls in ((True, bool), ("a", str), (123, int)):
         validation.check_instance(value, cls)
 
 
@@ -65,21 +63,21 @@ def test_check_instances_with_valid_values():
 
 def test_check_instances_with_invalid_values():
     with raises(exceptions.ValidationError):
-        validation.check_instances("abc", compat.string_types)
+        validation.check_instances("abc", str)
     with raises(exceptions.ValidationError):
-        validation.check_instances(["abc", 123], compat.string_types)
+        validation.check_instances(["abc", 123], str)
     with raises(exceptions.ValidationError):
-        validation.check_instances(None, compat.string_types)
+        validation.check_instances(None, str)
     with raises(exceptions.ValidationError):
-        validation.check_instances([None], compat.string_types)
+        validation.check_instances([None], str)
     with raises(exceptions.ValidationError):
-        validation.check_instances(iter(["abc"]), compat.string_types)
+        validation.check_instances(iter(["abc"]), str)
 
 
 def test_check_instances_error_message():
     with raises(exceptions.ValidationError) as excinfo:
-        validation.check_instances([1], compat.string_types)
-    assert "Expected a list of string, not [1]" == str(excinfo.value)
+        validation.check_instances([1], str)
+    assert "Expected a list of str, not [1]" == str(excinfo.value)
 
 
 def test_check_query_valid_values():
@@ -138,8 +136,7 @@ def test_check_uri_with_invalid_values():
 
 def test_check_uri_error_message():
     with raises(exceptions.ValidationError) as excinfo:
-        # py-compat: Using str() to get a native string on both Py2/3
-        validation.check_uri(str("testing"))
+        validation.check_uri("testing")
     assert "Expected a valid URI, not 'testing'" == str(excinfo.value)
 
 
@@ -164,6 +161,5 @@ def test_check_uris_with_invalid_values():
 
 def test_check_uris_error_message():
     with raises(exceptions.ValidationError) as excinfo:
-        # py-compat: Using str() to get a native string on both Py2/3
-        validation.check_uris(str("testing"))
+        validation.check_uris("testing")
     assert "Expected a list of URIs, not 'testing'" == str(excinfo.value)

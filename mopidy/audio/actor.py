@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import logging
 import os
 import threading
@@ -31,7 +29,7 @@ _GST_STATE_MAPPING = {
 
 
 # TODO: expose this as a property on audio?
-class _Appsrc(object):
+class _Appsrc:
 
     """Helper class for dealing with appsrc based playback."""
 
@@ -143,7 +141,7 @@ class _Outputs(Gst.Bin):
         self._tee.link(queue)
 
 
-class SoftwareMixer(object):
+class SoftwareMixer:
     pykka_traversable = True
 
     def __init__(self, mixer):
@@ -176,7 +174,7 @@ class SoftwareMixer(object):
         self._mixer.trigger_mute_changed(self.get_mute())
 
 
-class _Handler(object):
+class _Handler:
     def __init__(self, audio):
         self._audio = audio
         self._element = None
@@ -327,8 +325,8 @@ class _Handler(object):
         AudioListener.send("reached_end_of_stream")
 
     def on_error(self, error, debug):
-        error_msg = str(error).decode("utf-8")
-        debug_msg = debug.decode("utf-8")
+        error_msg = str(error).decode()
+        debug_msg = debug.decode()
         gst_logger.debug(
             "Got ERROR bus message: error=%r debug=%r", error_msg, debug_msg
         )
@@ -337,8 +335,8 @@ class _Handler(object):
         self._audio.stop_playback()
 
     def on_warning(self, error, debug):
-        error_msg = str(error).decode("utf-8")
-        debug_msg = debug.decode("utf-8")
+        error_msg = str(error).decode()
+        debug_msg = debug.decode()
         gst_logger.warning("GStreamer warning: %s", error_msg)
         gst_logger.debug(
             "Got WARNING bus message: error=%r debug=%r", error_msg, debug_msg
@@ -434,7 +432,7 @@ class Audio(pykka.ThreadingActor):
     mixer = None
 
     def __init__(self, config, mixer):
-        super(Audio, self).__init__()
+        super().__init__()
 
         self._config = config
         self._target_state = Gst.State.NULL

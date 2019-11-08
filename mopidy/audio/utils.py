@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 from mopidy import httpclient
 from mopidy.internal.gi import Gst
 
@@ -72,7 +70,7 @@ def setup_proxy(element, config):
     element.set_property("proxy-pw", config.get("password"))
 
 
-class Signals(object):
+class Signals:
 
     """Helper for tracking gobject signal registrations"""
 

@@ -1,10 +1,8 @@
-from __future__ import absolute_import, division, unicode_literals
-
 import datetime
 import logging
 import re
+import urllib
 
-from mopidy.compat import urllib
 from mopidy.mpd import exceptions, protocol, translator
 
 logger = logging.getLogger(__name__)
@@ -41,7 +39,7 @@ def listplaylist(context, name):
         file: relative/path/to/file3.mp3
     """
     playlist = _get_playlist(context, name)
-    uris = [translator.uri_to_mpd_format(t.uri) for t in playlist.tracks]
+    uris = [t.uri for t in playlist.tracks]
     return ["file: %s" % u for u in uris]
 
 

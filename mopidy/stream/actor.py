@@ -1,15 +1,13 @@
-from __future__ import absolute_import, unicode_literals
-
 import fnmatch
 import logging
 import re
 import time
+import urllib
 
 import pykka
 
 from mopidy import audio as audio_lib, backend, exceptions, stream
 from mopidy.audio import scan, tags
-from mopidy.compat import urllib
 from mopidy.internal import http, playlists
 from mopidy.models import Track
 
@@ -18,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class StreamBackend(pykka.ThreadingActor, backend.Backend):
     def __init__(self, config, audio):
-        super(StreamBackend, self).__init__()
+        super().__init__()
 
         self._scanner = scan.Scanner(
             timeout=config["stream"]["timeout"], proxy_config=config["proxy"]

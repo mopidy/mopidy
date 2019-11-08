@@ -1,10 +1,8 @@
-from __future__ import absolute_import, unicode_literals
-
 import contextlib
 import logging
+import urllib
 
 from mopidy import exceptions
-from mopidy.compat import urllib
 from mopidy.core import listener
 from mopidy.internal import validation
 from mopidy.models import Playlist, Ref
@@ -31,7 +29,7 @@ def _backend_error_handling(backend, reraise=None):
         )
 
 
-class PlaylistsController(object):
+class PlaylistsController:
     pykka_traversable = True
 
     def __init__(self, backends, core):

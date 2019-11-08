@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import unittest
 
 from mopidy.core import PlaybackState
@@ -139,7 +137,7 @@ class PlaybackOptionsHandlerTest(protocol.BaseTestCase):
 
 class PlaybackControlHandlerTest(protocol.BaseTestCase):
     def setUp(self):  # noqa: N802
-        super(PlaybackControlHandlerTest, self).setUp()
+        super().setUp()
         self.tracks = [
             Track(uri="dummy:a", length=40000),
             Track(uri="dummy:b", length=40000),

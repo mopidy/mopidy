@@ -1,16 +1,11 @@
-# encoding: utf-8
-
-from __future__ import absolute_import, unicode_literals
-
 import unittest
 
-from mopidy import compat
 from mopidy.audio import tags
 from mopidy.internal.gi import GLib, GObject, Gst
 from mopidy.models import Album, Artist, Track
 
 
-class TestConvertTaglist(object):
+class TestConvertTaglist:
     def make_taglist(self, tag, values):
         taglist = Gst.TagList.new_empty()
 
@@ -22,8 +17,8 @@ class TestConvertTaglist(object):
             gobject_value = GObject.Value()
             if isinstance(value, bytes):
                 gobject_value.init(GObject.TYPE_STRING)
-                gobject_value.set_string(value.decode("utf-8"))
-            elif isinstance(value, compat.text_type):
+                gobject_value.set_string(value.decode())
+            elif isinstance(value, str):
                 gobject_value.init(GObject.TYPE_STRING)
                 gobject_value.set_string(value)
             elif isinstance(value, int):
@@ -41,7 +36,6 @@ class TestConvertTaglist(object):
 
         result = tags.convert_taglist(taglist)
 
-        # py-compat: str used to represent Py2/3 native string
         assert isinstance(result[Gst.TAG_DATE][0], str)
         assert result[Gst.TAG_DATE][0] == "2014-01-07"
 
@@ -61,7 +55,6 @@ class TestConvertTaglist(object):
 
         result = tags.convert_taglist(taglist)
 
-        # py-compat: str used to represent Py2/3 native string
         assert isinstance(result[Gst.TAG_DATE_TIME][0], str)
         assert result[Gst.TAG_DATE_TIME][0] == "2014-01-07T14:13:12Z"
 
@@ -70,9 +63,9 @@ class TestConvertTaglist(object):
 
         result = tags.convert_taglist(taglist)
 
-        assert isinstance(result[Gst.TAG_ARTIST][0], compat.text_type)
+        assert isinstance(result[Gst.TAG_ARTIST][0], str)
         assert result[Gst.TAG_ARTIST][0] == "ABBA"
-        assert isinstance(result[Gst.TAG_ARTIST][1], compat.text_type)
+        assert isinstance(result[Gst.TAG_ARTIST][1], str)
         assert result[Gst.TAG_ARTIST][1] == "ACDC"
 
     def test_integer_tag(self):

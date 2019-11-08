@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import unittest
 
 import mock
@@ -15,13 +13,13 @@ from tests import dummy_audio, dummy_backend, dummy_mixer
 
 class MockConnection(mock.Mock):
     def __init__(self, *args, **kwargs):
-        super(MockConnection, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.host = mock.sentinel.host
         self.port = mock.sentinel.port
         self.response = []
 
     def queue_send(self, data):
-        data = data.decode("utf-8")
+        data = data.decode()
         lines = (line for line in data.split("\n") if line)
         self.response.extend(lines)
 
@@ -67,7 +65,7 @@ class BaseTestCase(unittest.TestCase):
 
     def send_request(self, request):
         self.connection.response = []
-        request = ("%s\n" % request).encode("utf-8")
+        request = ("%s\n" % request).encode()
         self.session.on_receive({"received": request})
         return self.connection.response
 

@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import logging
 import os
 
@@ -28,7 +26,7 @@ class FileLibraryProvider(backend.LibraryProvider):
         return models.Ref.directory(name="Files", uri=uri)
 
     def __init__(self, backend, config):
-        super(FileLibraryProvider, self).__init__(backend)
+        super().__init__(backend)
         self._media_dirs = list(self._get_media_dirs(config))
         self._show_dotfiles = config["file"]["show_dotfiles"]
         self._excluded_file_extensions = tuple(
@@ -44,8 +42,7 @@ class FileLibraryProvider(backend.LibraryProvider):
         result = []
         local_path = path.uri_to_path(uri)
 
-        # py-compat: Use str() to get a native string on both Py2/3
-        if str(local_path) == str("root"):
+        if str(local_path) == "root":
             return list(self._get_media_dirs_refs())
 
         if not self._is_in_basedir(local_path):
@@ -60,7 +57,7 @@ class FileLibraryProvider(backend.LibraryProvider):
             child_path = dir_entry.resolve()
             uri = path.path_to_uri(child_path)
 
-            if not self._show_dotfiles and dir_entry.name.startswith(str(".")):
+            if not self._show_dotfiles and dir_entry.name.startswith("."):
                 continue
 
             if (

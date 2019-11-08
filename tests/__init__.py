@@ -1,7 +1,4 @@
-from __future__ import absolute_import, unicode_literals
-
-from mopidy import compat
-from mopidy.compat import pathlib
+import pathlib
 
 
 def path_to_data_dir(name):
@@ -9,7 +6,7 @@ def path_to_data_dir(name):
     return path.resolve()
 
 
-class IsA(object):
+class IsA:
     def __init__(self, klass):
         self.klass = klass
 
@@ -26,6 +23,6 @@ class IsA(object):
         return str(self.klass)
 
 
-any_int = IsA(compat.integer_types)
-any_str = IsA(compat.string_types)
-any_unicode = IsA(compat.text_type)
+any_int = IsA(int)
+any_str = IsA(str)
+any_unicode = any_str  # TODO remove

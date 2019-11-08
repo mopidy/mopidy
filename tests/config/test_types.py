@@ -1,7 +1,3 @@
-# encoding: utf-8
-
-from __future__ import absolute_import, unicode_literals
-
 import logging
 import socket
 
@@ -9,7 +5,6 @@ import mock
 
 import pytest
 
-from mopidy import compat
 from mopidy.config import types
 from mopidy.internal import log
 
@@ -19,7 +14,7 @@ from mopidy.internal import log
     [
         # bytes are coded from UTF-8 and string-escaped:
         (b"abc", "abc"),
-        ("æøå".encode("utf-8"), "æøå"),
+        ("æøå".encode(), "æøå"),
         (b"a\nb", "a\nb"),
         (b"a\\nb", "a\nb"),
         # unicode strings are string-escaped:
@@ -38,7 +33,7 @@ def test_decode(value, expected):
     [
         # unicode strings are string-escaped and encoded as UTF-8:
         ("abc", b"abc"),
-        ("æøå", "æøå".encode("utf-8")),
+        ("æøå", "æøå".encode()),
         ("a\nb", b"a\\nb"),
         # bytes are string-escaped:
         (b"abc", b"abc"),
@@ -49,20 +44,19 @@ def test_encode(value, expected):
     assert types.encode(value) == expected
 
 
-@pytest.mark.skipif(compat.PY2, reason="requires Python 3 surrogateescape")
 def test_encode_decode_invalid_utf8():
     data = b"\xc3\x00"  # invalid utf-8
 
     assert types.encode(types.decode(data)) == data
 
 
-class TestConfigValue(object):
+class TestConfigValue:
     def test_deserialize_decodes_bytes(self):
         cv = types.ConfigValue()
 
         result = cv.deserialize(b"abc")
 
-        assert isinstance(result, compat.text_type)
+        assert isinstance(result, str)
 
     def test_serialize_conversion_to_string(self):
         cv = types.ConfigValue()
@@ -87,7 +81,7 @@ class TestConfigValue(object):
         assert isinstance(result, bytes)
 
 
-class TestDeprecated(object):
+class TestDeprecated:
     def test_deserialize_returns_deprecated_value(self):
         cv = types.Deprecated()
 
@@ -103,19 +97,19 @@ class TestDeprecated(object):
         assert isinstance(result, types.DeprecatedValue)
 
 
-class TestString(object):
+class TestString:
     def test_deserialize_conversion_success(self):
         cv = types.String()
 
         result = cv.deserialize(b" foo ")
 
         assert result == "foo"
-        assert isinstance(result, compat.text_type)
+        assert isinstance(result, str)
 
     def test_deserialize_decodes_utf8(self):
         cv = types.String()
 
-        result = cv.deserialize("æøå".encode("utf-8"))
+        result = cv.deserialize("æøå".encode())
 
         assert result == "æøå"
 
@@ -153,18 +147,11 @@ class TestString(object):
         assert cv.deserialize(b"") is None
         assert cv.deserialize(b" ") is None
 
-    def test_deserialize_decode_failure(self):
+    def test_deserialize_invalid_encoding(self):
         cv = types.String()
         incorrectly_encoded_bytes = "æøå".encode("iso-8859-1")
 
-        if compat.PY2:
-            with pytest.raises(ValueError):
-                cv.deserialize(incorrectly_encoded_bytes)
-        else:
-            assert (
-                cv.deserialize(incorrectly_encoded_bytes)
-                == "\udce6\udcf8\udce5"
-            )
+        assert cv.deserialize(incorrectly_encoded_bytes) == "\udce6\udcf8\udce5"
 
     def test_serialize_encodes_utf8(self):
         cv = types.String()
@@ -172,11 +159,11 @@ class TestString(object):
         result = cv.serialize("æøå")
 
         assert isinstance(result, bytes)
-        assert result == "æøå".encode("utf-8")
+        assert result == "æøå".encode()
 
     def test_serialize_does_not_encode_bytes(self):
         cv = types.String()
-        bytes_string = "æøå".encode("utf-8")
+        bytes_string = "æøå".encode()
 
         result = cv.serialize(bytes_string)
 
@@ -189,7 +176,7 @@ class TestString(object):
         result = cv.serialize("a\n\tb")
 
         assert isinstance(result, bytes)
-        assert result == r"a\n\tb".encode("utf-8")
+        assert result == br"a\n\tb"
 
     def test_serialize_none(self):
         cv = types.String()
@@ -208,13 +195,13 @@ class TestString(object):
             cv.deserialize(b"foobar")
 
 
-class TestSecret(object):
+class TestSecret:
     def test_deserialize_decodes_utf8(self):
         cv = types.Secret()
 
-        result = cv.deserialize("æøå".encode("utf-8"))
+        result = cv.deserialize("æøå".encode())
 
-        assert isinstance(result, compat.text_type)
+        assert isinstance(result, str)
         assert result == "æøå"
 
     def test_deserialize_enforces_required(self):
@@ -254,7 +241,7 @@ class TestSecret(object):
         assert result == b""
 
 
-class TestInteger(object):
+class TestInteger:
     def test_deserialize_conversion_success(self):
         cv = types.Integer()
 
@@ -307,7 +294,7 @@ class TestInteger(object):
             cv.deserialize("15")
 
 
-class TestBoolean(object):
+class TestBoolean:
     def test_deserialize_conversion_success(self):
         cv = types.Boolean()
 
@@ -378,7 +365,7 @@ class TestBoolean(object):
             cv.serialize("1")
 
 
-class TestList(object):
+class TestList:
     # TODO: add test_deserialize_ignores_blank
     # TODO: add test_serialize_ignores_blank
     # TODO: add test_deserialize_handles_escapes
@@ -401,10 +388,10 @@ class TestList(object):
     def test_deserialize_decodes_utf8(self):
         cv = types.List()
 
-        result = cv.deserialize("æ, ø, å".encode("utf-8"))
+        result = cv.deserialize("æ, ø, å".encode())
         assert result == ("æ", "ø", "å")
 
-        result = cv.deserialize("æ\nø\nå".encode("utf-8"))
+        result = cv.deserialize("æ\nø\nå".encode())
         assert result == ("æ", "ø", "å")
 
     def test_deserialize_does_not_double_encode_unicode(self):
@@ -444,7 +431,7 @@ class TestList(object):
         assert result == b""
 
 
-class TestLogColor(object):
+class TestLogColor:
     def test_deserialize(self):
         cv = types.LogColor()
 
@@ -471,7 +458,7 @@ class TestLogColor(object):
         assert cv.serialize("golden") == b""
 
 
-class TestLogLevel(object):
+class TestLogLevel:
     levels = {
         "critical": logging.CRITICAL,
         "error": logging.ERROR,
@@ -503,7 +490,7 @@ class TestLogLevel(object):
         cv = types.LogLevel()
 
         for name, level in self.levels.items():
-            cv.serialize(level) == name.encode("utf-8")
+            cv.serialize(level) == name.encode()
 
     def test_serialize_ignores_unknown_level(self):
         cv = types.LogLevel()
@@ -511,7 +498,7 @@ class TestLogLevel(object):
         assert cv.serialize(1337) == b""
 
 
-class TestHostname(object):
+class TestHostname:
     @mock.patch("socket.getaddrinfo")
     def test_deserialize_conversion_success(self, getaddrinfo_mock):
         cv = types.Hostname()
@@ -556,7 +543,7 @@ class TestHostname(object):
         expand_path_mock.assert_called_once_with("/tmp/mopidy.socket")
 
 
-class TestPort(object):
+class TestPort:
     def test_valid_ports(self):
         cv = types.Port()
 
@@ -582,13 +569,13 @@ class TestPort(object):
             cv.deserialize("")
 
 
-class TestExpandedPath(object):
+class TestExpandedPath:
     def test_is_str(self):
         assert isinstance(types._ExpandedPath(b"/tmp", b"foo"), str)
 
     def test_stores_both_expanded_and_original_path(self):
-        original = str("~")
-        expanded = str("expanded_path")
+        original = "~"
+        expanded = "expanded_path"
 
         result = types._ExpandedPath(original, expanded)
 
@@ -596,7 +583,7 @@ class TestExpandedPath(object):
         assert result.original == original
 
 
-class TestPath(object):
+class TestPath:
     def test_deserialize_conversion_success(self):
         cv = types.Path()
 
@@ -620,7 +607,7 @@ class TestPath(object):
 
     def test_serialize_uses_original(self):
         cv = types.Path()
-        path = types._ExpandedPath(str("original_path"), str("expanded_path"))
+        path = types._ExpandedPath("original_path", "expanded_path")
 
         assert cv.serialize(path) == b"original_path"
 
@@ -632,4 +619,4 @@ class TestPath(object):
     def test_serialize_supports_unicode_string(self):
         cv = types.Path()
 
-        assert cv.serialize("æøå") == "æøå".encode("utf-8")
+        assert cv.serialize("æøå") == "æøå".encode()

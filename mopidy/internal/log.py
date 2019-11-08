@@ -1,11 +1,7 @@
-from __future__ import absolute_import, unicode_literals
-
 import logging
 import logging.config
 import logging.handlers
 import platform
-
-from mopidy import compat
 
 
 LOG_LEVELS = {
@@ -160,7 +156,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
     is_windows = platform.system() == "Windows"
 
     def __init__(self, logger_colors):
-        super(ColorizingStreamHandler, self).__init__()
+        super().__init__()
         self.logger_map = logger_colors
 
     @property
@@ -181,7 +177,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
         message = logging.StreamHandler.format(self, record)
         if not self.is_tty or self.is_windows:
             return message
-        for name, color in compat.iteritems(self.logger_map):
+        for name, color in self.logger_map.items():
             if record.name.startswith(name):
                 return self.colorize(message, fg=color)
         if record.levelno in self.level_map:

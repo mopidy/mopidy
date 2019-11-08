@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import os
 
 import mopidy
@@ -17,7 +15,7 @@ class Extension(ext.Extension):
         return config.read(conf_file)
 
     def get_config_schema(self):
-        schema = super(Extension, self).get_config_schema()
+        schema = super().get_config_schema()
         schema["protocols"] = config.List()
         schema["metadata_blacklist"] = config.List(optional=True)
         schema["timeout"] = config.Integer(minimum=1000, maximum=1000 * 60 * 60)

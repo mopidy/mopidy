@@ -1,9 +1,6 @@
-from __future__ import absolute_import, unicode_literals
-
 import json
 import unittest
 
-from mopidy import compat
 from mopidy.models import (
     Album,
     Artist,
@@ -139,7 +136,7 @@ class RefTest(unittest.TestCase):
 
     def test_repr_without_results(self):
         self.assertEqual(
-            "Ref(name=%s'foo', type='artist', uri='uri')" % compat.text_prefix,
+            "Ref(name='foo', type='artist', uri='uri')",
             repr(Ref(uri="uri", name="foo", type="artist")),
         )
 
@@ -252,7 +249,7 @@ class ArtistTest(unittest.TestCase):
 
     def test_repr(self):
         self.assertEqual(
-            "Artist(name=%s'name', uri='uri')" % compat.text_prefix,
+            "Artist(name='name', uri='uri')",
             repr(Artist(uri="uri", name="name")),
         )
 
@@ -409,14 +406,13 @@ class AlbumTest(unittest.TestCase):
 
     def test_repr_without_artists(self):
         self.assertEqual(
-            "Album(name=%s'name', uri='uri')" % compat.text_prefix,
+            "Album(name='name', uri='uri')",
             repr(Album(uri="uri", name="name")),
         )
 
     def test_repr_with_artists(self):
         self.assertEqual(
-            "Album(artists=[Artist(name=%s'foo')], name=%s'name', uri='uri')"
-            % (compat.text_prefix, compat.text_prefix),
+            "Album(artists=[Artist(name='foo')], name='name', uri='uri')",
             repr(Album(uri="uri", name="name", artists=[Artist(name="foo")])),
         )
 
@@ -670,14 +666,13 @@ class TrackTest(unittest.TestCase):
 
     def test_repr_without_artists(self):
         self.assertEqual(
-            "Track(name=%s'name', uri='uri')" % compat.text_prefix,
+            "Track(name='name', uri='uri')",
             repr(Track(uri="uri", name="name")),
         )
 
     def test_repr_with_artists(self):
         self.assertEqual(
-            "Track(artists=[Artist(name=%s'foo')], name=%s'name', uri='uri')"
-            % (compat.text_prefix, compat.text_prefix),
+            "Track(artists=[Artist(name='foo')], name='name', uri='uri')",
             repr(Track(uri="uri", name="name", artists=[Artist(name="foo")])),
         )
 
@@ -1097,14 +1092,13 @@ class PlaylistTest(unittest.TestCase):
 
     def test_repr_without_tracks(self):
         self.assertEqual(
-            "Playlist(name=%s'name', uri='uri')" % compat.text_prefix,
+            "Playlist(name='name', uri='uri')",
             repr(Playlist(uri="uri", name="name")),
         )
 
     def test_repr_with_tracks(self):
         self.assertEqual(
-            "Playlist(name=%s'name', tracks=[Track(name=%s'foo')], uri='uri')"
-            % (compat.text_prefix, compat.text_prefix),
+            "Playlist(name='name', tracks=[Track(name='foo')], uri='uri')",
             repr(Playlist(uri="uri", name="name", tracks=[Track(name="foo")])),
         )
 

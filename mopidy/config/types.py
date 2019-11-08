@@ -1,24 +1,18 @@
-from __future__ import absolute_import, unicode_literals
-
 import logging
 import re
 import socket
 
-from mopidy import compat
 from mopidy.config import validators
 from mopidy.internal import log, path
 
 
 def decode(value):
     if isinstance(value, bytes):
-        if compat.PY2:
-            value = value.decode("utf-8")
-        else:
-            value = value.decode("utf-8", "surrogateescape")
+        value = value.decode(errors="surrogateescape")
 
     for char in ("\\", "\n", "\t"):
         value = value.replace(
-            char.encode("unicode-escape").decode("utf-8"), char
+            char.encode(encoding="unicode-escape").decode(), char
         )
 
     return value
@@ -26,27 +20,21 @@ def decode(value):
 
 def encode(value):
     if isinstance(value, bytes):
-        if compat.PY2:
-            value = value.decode("utf-8")
-        else:
-            value = value.decode("utf-8", "surrogateescape")
+        value = value.decode(errors="surrogateescape")
 
     for char in ("\\", "\n", "\t"):
         value = value.replace(
-            char, char.encode("unicode-escape").decode("utf-8")
+            char, char.encode(encoding="unicode-escape").decode()
         )
 
-    if compat.PY2:
-        return value.encode("utf-8")
-    else:
-        return value.encode("utf-8", "surrogateescape")
+    return value.encode(errors="surrogateescape")
 
 
-class DeprecatedValue(object):
+class DeprecatedValue:
     pass
 
 
-class ConfigValue(object):
+class ConfigValue:
     """Represents a config key's value and how to handle it.
 
     Normally you will only be interacting with sub-classes for config values
@@ -128,7 +116,7 @@ class Secret(String):
     def serialize(self, value, display=False):
         if value is not None and display:
             return b"********"
-        return super(Secret, self).serialize(value, display)
+        return super().serialize(value, display)
 
 
 class Integer(ConfigValue):
@@ -277,7 +265,7 @@ class Hostname(ConfigValue):
 
         try:
             socket.getaddrinfo(value, None)
-        except socket.error:
+        except OSError:
             raise ValueError("must be a resolveable hostname or valid IP")
 
         return value
@@ -291,14 +279,14 @@ class Port(Integer):
     """
 
     def __init__(self, choices=None, optional=False):
-        super(Port, self).__init__(
+        super().__init__(
             minimum=0, maximum=2 ** 16 - 1, choices=choices, optional=optional
         )
 
 
 class _ExpandedPath(str):
     def __new__(cls, original, expanded):
-        return super(_ExpandedPath, cls).__new__(cls, expanded)
+        return super().__new__(cls, expanded)
 
     def __init__(self, original, expanded):
         self.original = original
@@ -331,6 +319,6 @@ class Path(ConfigValue):
     def serialize(self, value, display=False):
         if isinstance(value, _ExpandedPath):
             value = value.original
-        if isinstance(value, compat.text_type):
-            value = value.encode("utf-8")
+        if isinstance(value, str):
+            value = value.encode()
         return value

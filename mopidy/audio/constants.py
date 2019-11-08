@@ -1,7 +1,4 @@
-from __future__ import absolute_import, unicode_literals
-
-
-class PlaybackState(object):
+class PlaybackState:
 
     """
     Enum of playback states.

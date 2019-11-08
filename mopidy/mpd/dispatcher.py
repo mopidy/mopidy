@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import logging
 import re
 
@@ -12,7 +10,7 @@ logger = logging.getLogger(__name__)
 protocol.load_protocol_modules()
 
 
-class MpdDispatcher(object):
+class MpdDispatcher:
 
     """
     The MPD session feeds the MPD dispatcher with requests. The dispatcher
@@ -209,16 +207,14 @@ class MpdDispatcher(object):
 
     def _format_lines(self, line):
         if isinstance(line, dict):
-            return [
-                "{}: {}".format(key, value) for (key, value) in line.items()
-            ]
+            return [f"{key}: {value}" for (key, value) in line.items()]
         if isinstance(line, tuple):
             (key, value) = line
-            return ["{}: {}".format(key, value)]
+            return [f"{key}: {value}"]
         return [line]
 
 
-class MpdContext(object):
+class MpdContext:
 
     """
     This object is passed as the first argument to all MPD command handlers to

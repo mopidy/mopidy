@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import logging
 import os
 
@@ -20,7 +18,7 @@ class Extension(ext.Extension):
         return config.read(conf_file)
 
     def get_config_schema(self):
-        schema = super(Extension, self).get_config_schema()
+        schema = super().get_config_schema()
         schema["base_dir"] = config.Path(optional=True)
         schema["default_encoding"] = config.String()
         schema["default_extension"] = config.String(choices=[".m3u", ".m3u8"])

@@ -1,18 +1,16 @@
-from __future__ import absolute_import, unicode_literals
-
 import logging
+import urllib
 
 from pykka.messages import ProxyCall
 
 from mopidy.audio import PlaybackState
-from mopidy.compat import urllib
 from mopidy.core import listener
 from mopidy.internal import deprecation, models, validation
 
 logger = logging.getLogger(__name__)
 
 
-class PlaybackController(object):
+class PlaybackController:
     pykka_traversable = True
 
     def __init__(self, audio, backends, core):

@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import collections
 import itertools
 import logging
@@ -49,7 +47,7 @@ class Core(
     """An instance of :class:`~mopidy.core.TracklistController`"""
 
     def __init__(self, config=None, mixer=None, backends=None, audio=None):
-        super(Core, self).__init__()
+        super().__init__()
 
         self._config = config
 
@@ -233,7 +231,7 @@ class Core(
 
 class Backends(list):
     def __init__(self, backends):
-        super(Backends, self).__init__(backends)
+        super().__init__(backends)
 
         self.with_library = collections.OrderedDict()
         self.with_library_browse = collections.OrderedDict()

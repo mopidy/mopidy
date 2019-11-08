@@ -1,6 +1,5 @@
-from __future__ import absolute_import, unicode_literals
+import urllib
 
-from mopidy.compat import urllib
 from mopidy.internal import deprecation
 from mopidy.mpd import exceptions, protocol, translator
 

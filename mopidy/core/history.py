@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import copy
 import logging
 import time
@@ -10,7 +8,7 @@ from mopidy.internal.models import HistoryState, HistoryTrack
 logger = logging.getLogger(__name__)
 
 
-class HistoryController(object):
+class HistoryController:
     pykka_traversable = True
 
     def __init__(self):

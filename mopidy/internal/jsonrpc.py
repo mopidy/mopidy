@@ -1,15 +1,11 @@
-from __future__ import absolute_import, unicode_literals
-
 import inspect
 import json
 import traceback
 
 import pykka
 
-from mopidy import compat
 
-
-class JsonRpcWrapper(object):
+class JsonRpcWrapper:
 
     """
     Wrap objects and make them accessible through JSON-RPC 2.0 messaging.
@@ -143,7 +139,7 @@ class JsonRpcWrapper(object):
                 raise JsonRpcInvalidParamsError(
                     data={
                         "type": error.__class__.__name__,
-                        "message": compat.text_type(error),
+                        "message": str(error),
                         "traceback": traceback.format_exc(),
                     }
                 )
@@ -151,7 +147,7 @@ class JsonRpcWrapper(object):
                 raise JsonRpcApplicationError(
                     data={
                         "type": error.__class__.__name__,
-                        "message": compat.text_type(error),
+                        "message": str(error),
                         "traceback": traceback.format_exc(),
                     }
                 )
@@ -175,7 +171,7 @@ class JsonRpcWrapper(object):
             raise JsonRpcInvalidRequestError(
                 data='"method" member must be included'
             )
-        if not isinstance(request["method"], compat.text_type):
+        if not isinstance(request["method"], str):
             raise JsonRpcInvalidRequestError(data='"method" must be a string')
 
     def _get_params(self, request):
@@ -301,7 +297,7 @@ def get_combined_json_encoder(encoders):
     return JsonRpcEncoder
 
 
-class JsonRpcInspector(object):
+class JsonRpcInspector:
 
     """
     Inspects a group of classes and functions to create a description of what
@@ -344,7 +340,7 @@ class JsonRpcInspector(object):
                 obj_methods = self._get_methods(obj)
                 for name, description in obj_methods.items():
                     if mount:
-                        name = "{}.{}".format(mount, name)
+                        name = f"{mount}.{name}"
                     methods[name] = description
         return methods
 
@@ -367,7 +363,7 @@ class JsonRpcInspector(object):
         }
 
     def _describe_params(self, method):
-        argspec = compat.getargspec(method)
+        argspec = inspect.getfullargspec(method)
 
         defaults = argspec.defaults and list(argspec.defaults) or []
         num_args_without_default = len(argspec.args) - len(defaults)
@@ -388,7 +384,7 @@ class JsonRpcInspector(object):
         if argspec.varargs:
             params.append({"name": argspec.varargs, "varargs": True})
 
-        if argspec.keywords:
-            params.append({"name": argspec.keywords, "kwargs": True})
+        if argspec.varkw:
+            params.append({"name": argspec.varkw, "kwargs": True})
 
         return params

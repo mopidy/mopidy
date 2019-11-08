@@ -1,8 +1,7 @@
-from __future__ import absolute_import, unicode_literals
-
 import functools
 import logging
 import os
+import urllib
 
 import tornado.escape
 import tornado.ioloop
@@ -11,7 +10,6 @@ import tornado.websocket
 
 import mopidy
 from mopidy import core, models
-from mopidy.compat import urllib
 from mopidy.internal import encoding, jsonrpc
 
 
@@ -169,9 +167,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
 def set_mopidy_headers(request_handler):
     request_handler.set_header("Cache-Control", "no-cache")
-    request_handler.set_header(
-        "X-Mopidy-Version", mopidy.__version__.encode("utf-8")
-    )
+    request_handler.set_header("X-Mopidy-Version", mopidy.__version__.encode())
 
 
 def check_origin(origin, request_headers, allowed_origins):
@@ -278,4 +274,4 @@ class StaticFileHandler(tornado.web.StaticFileHandler):
 class AddSlashHandler(tornado.web.RequestHandler):
     @tornado.web.addslash
     def prepare(self):
-        return super(AddSlashHandler, self).prepare()
+        return super().prepare()

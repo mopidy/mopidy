@@ -1,11 +1,8 @@
-from __future__ import absolute_import, unicode_literals
-
 import collections
 import datetime
 import logging
 import numbers
 
-from mopidy import compat
 from mopidy.internal import log
 from mopidy.internal.gi import GLib, Gst
 from mopidy.models import Album, Artist, Track
@@ -59,8 +56,8 @@ gstreamer-GstTagList.html
             elif isinstance(value, Gst.DateTime):
                 result[tag].append(value.to_iso8601_string())
             elif isinstance(value, bytes):
-                result[tag].append(value.decode("utf-8", "replace"))
-            elif isinstance(value, (compat.text_type, bool, numbers.Number)):
+                result[tag].append(value.decode(errors="replace"))
+            elif isinstance(value, (str, bool, numbers.Number)):
                 result[tag].append(value)
             elif isinstance(value, Gst.Sample):
                 data = _extract_sample_data(value)

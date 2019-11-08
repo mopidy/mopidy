@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 from mopidy.mpd import exceptions, protocol
 from mopidy.mpd.protocol import tagtype_list
 

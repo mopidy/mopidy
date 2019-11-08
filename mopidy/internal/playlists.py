@@ -1,9 +1,6 @@
-from __future__ import absolute_import, unicode_literals
-
+import configparser
 import io
 
-from mopidy import compat
-from mopidy.compat import configparser
 from mopidy.internal import validation
 
 try:
@@ -74,7 +71,7 @@ def parse_extm3u(data):
             continue
 
         try:
-            line = line.decode("utf-8")
+            line = line.decode()
         except UnicodeDecodeError:
             continue
 
@@ -85,10 +82,7 @@ def parse_pls(data):
     # TODO: convert non URIs to file URIs.
     try:
         cp = configparser.RawConfigParser()
-        if compat.PY2:
-            cp.readfp(io.BytesIO(data))
-        else:
-            cp.read_string(data.decode())
+        cp.read_string(data.decode())
     except configparser.Error:
         return
 
@@ -108,9 +102,9 @@ def parse_xspf(data):
         return
 
     ns = "http://xspf.org/ns/0/"
-    path = "{{{}}}tracklist/{{{}}}track".format(ns, ns)
+    path = f"{{{ns}}}tracklist/{{{ns}}}track"
     for track in element.iterfind(path):
-        yield track.findtext("{{{}}}location".format(ns))
+        yield track.findtext(f"{{{ns}}}location")
 
 
 def parse_asx(data):
@@ -134,7 +128,7 @@ def parse_urilist(data):
             continue
 
         try:
-            line = line.decode("utf-8")
+            line = line.decode()
         except UnicodeDecodeError:
             continue
 

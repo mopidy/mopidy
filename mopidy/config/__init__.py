@@ -1,13 +1,12 @@
-from __future__ import absolute_import, unicode_literals
-
+import configparser
 import io
 import itertools
 import logging
 import os
+import pathlib
 import re
+from collections.abc import Mapping
 
-from mopidy import compat
-from mopidy.compat import configparser, pathlib
 from mopidy.config import keyring
 from mopidy.config.schemas import *
 from mopidy.config.types import *
@@ -82,7 +81,7 @@ _INITIAL_HELP = """
 
 def read(config_file):
     """Helper to load config defaults in same way across core and extensions"""
-    with io.open(str(config_file), "rb") as filehandle:
+    with open(str(config_file), "rb") as filehandle:
         return filehandle.read()
 
 
@@ -119,14 +118,12 @@ def format_initial(extensions_data):
         extensions_data, key=lambda d: d.extension.dist_name
     )
     for data in extensions_data:
-        versions.append(
-            "{} {}".format(data.extension.dist_name, data.extension.version)
-        )
+        versions.append(f"{data.extension.dist_name} {data.extension.version}")
 
     header = _INITIAL_HELP.strip() % {"versions": "\n#   ".join(versions)}
     formatted_config = _format(
         config=config, comments={}, schemas=schemas, display=False, disable=True
-    ).decode("utf-8")
+    ).decode()
     return header + "\n\n" + formatted_config
 
 
@@ -138,27 +135,18 @@ def _load(files, defaults, overrides):
     logger.info("Loading config from builtin defaults")
     for default in defaults:
         if isinstance(default, bytes):
-            default = default.decode("utf-8")
-        if compat.PY2:
-            parser.readfp(io.StringIO(default))
-        else:
-            parser.read_string(default)
+            default = default.decode()
+        parser.read_string(default)
 
     # Load config from a series of config files
     for f in files:
         f = path.expand_path(f)
         if f.is_dir():
             for g in f.iterdir():
-                # py-compat: Use str() to get a native string on both Py2/3
-                if g.is_file() and g.suffix == str(".conf"):
+                if g.is_file() and g.suffix == ".conf":
                     _load_file(parser, g.resolve())
         else:
             _load_file(parser, f.resolve())
-
-    if compat.PY2:
-        # If there have been parse errors there is a python bug that causes the
-        # values to be lists, this little trick coerces these into strings.
-        parser.readfp(io.BytesIO())
 
     raw_config = {}
     for section in parser.sections():
@@ -187,12 +175,8 @@ def _load_file(parser, file_path):
 
     try:
         logger.info("Loading config from %r", file_path.as_uri())
-        if compat.PY2:
-            with file_path.open("r", encoding="utf-8") as fh:
-                parser.readfp(fh)
-        else:
-            with file_path.open("r") as fh:
-                parser.read_file(fh)
+        with file_path.open("r") as fh:
+            parser.read_file(fh)
     except configparser.MissingSectionHeaderError as e:
         logger.warning(
             "Loading config from %r failed; it does not have a config section",
@@ -205,7 +189,7 @@ def _load_file(parser, file_path):
             file_path.as_uri(),
             linenos,
         )
-    except IOError:
+    except OSError:
         # TODO: if this is the initial load of logging config we might not
         # have a logger at this point, we might want to handle this better.
         logger.debug("Config file %r not found; skipping", file_path.as_uri())
@@ -247,16 +231,16 @@ def _format(config, comments, schemas, display, disable):
             output.append("%s =" % key)
             if value is not None:
                 if isinstance(value, bytes):
-                    # py-compat: TODO: Change ConfigValue.serialize() to return
+                    # TODO: Change ConfigValue.serialize() to return
                     # unicode and remove the step decode() here.
-                    value = value.decode("utf-8")
+                    value = value.decode()
                 output[-1] += " " + value
             if comment:
                 output[-1] += "  ; " + comment.capitalize()
             if disable:
                 output[-1] = re.sub(r"^", "#", output[-1], flags=re.M)
         output.append("")
-    return "\n".join(output).strip().encode("utf-8")
+    return "\n".join(output).strip().encode()
 
 
 def _preprocess(config_string):
@@ -309,7 +293,7 @@ def _postprocess(config_string):
     return result
 
 
-class Proxy(compat.collections_abc.Mapping):
+class Proxy(Mapping):
     def __init__(self, data):
         self._data = data
 

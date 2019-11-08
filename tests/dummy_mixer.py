@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import pykka
 
 from mopidy import mixer
@@ -11,7 +9,7 @@ def create_proxy(config=None):
 
 class DummyMixer(pykka.ThreadingActor, mixer.Mixer):
     def __init__(self, config):
-        super(DummyMixer, self).__init__()
+        super().__init__()
         self._volume = None
         self._mute = None
 

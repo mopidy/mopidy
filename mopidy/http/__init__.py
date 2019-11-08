@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import logging
 import os
 
@@ -20,7 +18,7 @@ class Extension(ext.Extension):
         return config_lib.read(conf_file)
 
     def get_config_schema(self):
-        schema = super(Extension, self).get_config_schema()
+        schema = super().get_config_schema()
         schema["hostname"] = config_lib.Hostname()
         schema["port"] = config_lib.Port()
         schema["static_dir"] = config_lib.Deprecated()

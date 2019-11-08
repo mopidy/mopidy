@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import os
 import subprocess
 
@@ -9,7 +7,7 @@ import mopidy
 def get_version():
     try:
         return get_git_version()
-    except EnvironmentError:
+    except OSError:
         return mopidy.__version__
 
 
@@ -24,8 +22,8 @@ def get_git_version():
         cwd=project_dir,
     )
     if process.wait() != 0:
-        raise EnvironmentError('Execution of "git describe" failed')
-    version = process.stdout.read().strip().decode("utf-8")
+        raise OSError('Execution of "git describe" failed')
+    version = process.stdout.read().strip().decode()
     if version.startswith("v"):
         version = version[1:]
     return version

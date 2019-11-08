@@ -1,6 +1,3 @@
-from __future__ import unicode_literals
-
-
 TAGTYPE_LIST = [
     "Artist",
     "ArtistSort",

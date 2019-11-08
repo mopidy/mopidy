@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 from mopidy.models import fields
 from mopidy.models.immutable import ImmutableObject, ValidatedImmutableObject
 from mopidy.models.serialize import ModelJSONEncoder, model_json_decoder
@@ -294,7 +292,7 @@ class TlTrack(ValidatedImmutableObject):
             kwargs["tlid"] = args[0]
             kwargs["track"] = args[1]
             args = []
-        super(TlTrack, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def __iter__(self):
         return iter([self.tlid, self.track])

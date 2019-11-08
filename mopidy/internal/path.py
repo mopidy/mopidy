@@ -1,11 +1,8 @@
-from __future__ import absolute_import, unicode_literals
-
 import logging
+import pathlib
 import re
+import urllib
 
-
-from mopidy import compat
-from mopidy.compat import pathlib, urllib
 from mopidy.internal import xdg
 
 # Reexport in old location for Mopidy-Local's use
@@ -33,8 +30,8 @@ def get_or_create_dir(dir_path):
 
 def get_or_create_file(file_path, mkdir=True, content=None):
     file_path = expand_path(file_path)
-    if isinstance(content, compat.text_type):
-        content = content.encode("utf-8")
+    if isinstance(content, str):
+        content = content.encode()
     if mkdir:
         get_or_create_dir(file_path.parent)
     if not file_path.is_file():
@@ -69,27 +66,18 @@ def uri_to_path(uri):
     """
     Convert an URI to a OS specific path.
     """
-    if compat.PY2:
-        if isinstance(uri, compat.text_type):
-            uri = uri.encode("utf-8")
-        bytes_path = urllib.parse.unquote(urllib.parse.urlsplit(uri).path)
-        return pathlib.Path(bytes_path)
-    else:
-        bytes_path = urllib.parse.unquote_to_bytes(
-            urllib.parse.urlsplit(uri).path
-        )
-        unicode_path = bytes_path.decode("utf-8", "surrogateescape")
-        return pathlib.Path(unicode_path)
+    bytes_path = urllib.parse.unquote_to_bytes(urllib.parse.urlsplit(uri).path)
+    unicode_path = bytes_path.decode(errors="surrogateescape")
+    return pathlib.Path(unicode_path)
 
 
 def expand_path(path):
-    if not compat.PY2 and isinstance(path, bytes):
-        path = path.decode("utf-8", "surrogateescape")
+    if isinstance(path, bytes):
+        path = path.decode(errors="surrogateescape")
     path = str(pathlib.Path(path))
 
     for xdg_var, xdg_dir in XDG_DIRS.items():
-        # py-compat: First str() is to get native strings on both Py2/Py3
-        path = path.replace(str("$" + xdg_var), str(xdg_dir))
+        path = path.replace("$" + xdg_var, str(xdg_dir))
     if "$" in path:
         return None
 
@@ -97,11 +85,10 @@ def expand_path(path):
 
 
 def is_path_inside_base_dir(path, base_path):
-    if compat.PY3:
-        if isinstance(path, bytes):
-            path = path.decode("utf-8", "surrogateescape")
-        if isinstance(base_path, bytes):
-            base_path = base_path.decode("utf-8", "surrogateescape")
+    if isinstance(path, bytes):
+        path = path.decode(errors="surrogateescape")
+    if isinstance(base_path, bytes):
+        base_path = base_path.decode(errors="surrogateescape")
 
     path = pathlib.Path(path).resolve()
     base_path = pathlib.Path(base_path).resolve()

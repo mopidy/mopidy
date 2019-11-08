@@ -1,10 +1,5 @@
-# encoding: utf-8
-
-from __future__ import absolute_import, unicode_literals
-
 import unittest
 
-from mopidy import compat
 from mopidy.models.fields import (
     Boolean,
     Collection,
@@ -18,7 +13,7 @@ from mopidy.models.fields import (
 def create_instance(field):
     """Create an instance of a dummy class for testing fields."""
 
-    class Dummy(object):
+    class Dummy:
         attr = field
         attr._name = "attr"
 
@@ -112,7 +107,7 @@ class StringTest(unittest.TestCase):
 
     def test_native_str_allowed(self):
         instance = create_instance(String())
-        instance.attr = str("abc")
+        instance.attr = "abc"
         self.assertEqual("abc", instance.attr)
 
     def test_unicode_allowed(self):
@@ -138,7 +133,7 @@ class IdentifierTest(unittest.TestCase):
 
     def test_native_str_allowed(self):
         instance = create_instance(Identifier())
-        instance.attr = str("abc")
+        instance.attr = "abc"
         self.assertEqual("abc", instance.attr)
 
     def test_unicode_allowed(self):
@@ -149,10 +144,7 @@ class IdentifierTest(unittest.TestCase):
     def test_unicode_with_nonascii_allowed(self):
         instance = create_instance(Identifier())
         instance.attr = "æøå"
-        if compat.PY2:
-            self.assertEqual("æøå".encode("utf-8"), instance.attr)
-        else:
-            self.assertEqual("æøå", instance.attr)
+        self.assertEqual("æøå", instance.attr)
 
     def test_other_disallowed(self):
         instance = create_instance(Identifier())

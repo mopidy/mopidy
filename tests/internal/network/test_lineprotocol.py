@@ -1,13 +1,8 @@
-# encoding: utf-8
-
-from __future__ import absolute_import, unicode_literals
-
 import re
 import unittest
 
 from mock import Mock, sentinel
 
-from mopidy import compat
 from mopidy.internal import network
 
 from tests import any_unicode
@@ -117,7 +112,7 @@ class LineProtocolTest(unittest.TestCase):
     def prepare_parse_lines_test(self, recv_data=""):
         self.mock.terminator = b"\n"
         self.mock.delimiter = re.compile(br"\n")
-        self.mock.recv_buffer = recv_data.encode("utf-8")
+        self.mock.recv_buffer = recv_data.encode()
 
     def test_parse_lines_emtpy_buffer(self):
         self.prepare_parse_lines_test()
@@ -174,7 +169,7 @@ class LineProtocolTest(unittest.TestCase):
         self.prepare_parse_lines_test("æøå\n")
 
         lines = network.LineProtocol.parse_lines(self.mock)
-        self.assertEqual("æøå".encode("utf-8"), next(lines))
+        self.assertEqual("æøå".encode(), next(lines))
         with self.assertRaises(StopIteration):
             next(lines)
         self.assertEqual(b"", self.mock.recv_buffer)
@@ -253,12 +248,12 @@ class LineProtocolTest(unittest.TestCase):
     def test_decode_plain_ascii(self):
         result = network.LineProtocol.decode(self.mock, b"abc")
         self.assertEqual("abc", result)
-        self.assertEqual(compat.text_type, type(result))
+        self.assertEqual(str, type(result))
 
     def test_decode_utf8(self):
-        result = network.LineProtocol.decode(self.mock, "æøå".encode("utf-8"))
+        result = network.LineProtocol.decode(self.mock, "æøå".encode())
         self.assertEqual("æøå", result)
-        self.assertEqual(compat.text_type, type(result))
+        self.assertEqual(str, type(result))
 
     def test_decode_invalid_data(self):
         string = Mock()
@@ -280,7 +275,7 @@ class LineProtocolTest(unittest.TestCase):
 
     def test_encode_utf8(self):
         result = network.LineProtocol.encode(self.mock, "æøå")
-        self.assertEqual("æøå".encode("utf-8"), result)
+        self.assertEqual("æøå".encode(), result)
         self.assertEqual(bytes, type(result))
 
     def test_encode_invalid_data(self):

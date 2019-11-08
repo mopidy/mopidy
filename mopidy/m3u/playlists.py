@@ -1,15 +1,12 @@
-from __future__ import absolute_import, unicode_literals
-
 import contextlib
-import io
 import locale
 import logging
 import operator
 import os
+import pathlib
 import tempfile
 
 from mopidy import backend
-from mopidy.compat import pathlib
 from mopidy.internal import path
 
 from . import Extension, translator
@@ -30,7 +27,7 @@ def replace(path, mode="w+b", encoding=None, errors=None):
     (fd, tempname) = tempfile.mkstemp(dir=str(path.parent))
     tempname = pathlib.Path(tempname)
     try:
-        fp = io.open(fd, mode, encoding=encoding, errors=errors)
+        fp = open(fd, mode, encoding=encoding, errors=errors)
     except Exception:
         tempname.unlink()
         os.close(fd)
@@ -49,7 +46,7 @@ def replace(path, mode="w+b", encoding=None, errors=None):
 
 class M3UPlaylistsProvider(backend.PlaylistsProvider):
     def __init__(self, backend, config):
-        super(M3UPlaylistsProvider, self).__init__(backend)
+        super().__init__(backend)
 
         ext_config = config[Extension.ext_name]
         if ext_config["playlists_dir"] is None:
@@ -66,8 +63,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
     def as_list(self):
         result = []
         for entry in self._playlists_dir.iterdir():
-            # py-compat: Use str() to get a native string on both Py2/3
-            if entry.suffix not in [str(".m3u"), str(".m3u8")]:
+            if entry.suffix not in [".m3u", ".m3u8"]:
                 continue
             elif not entry.is_file():
                 continue
@@ -83,7 +79,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             with self._open(path, "w"):
                 pass
             mtime = self._abspath(path).stat().st_mtime
-        except EnvironmentError as e:
+        except OSError as e:
             log_environment_error("Error creating playlist %s" % name, e)
         else:
             return translator.playlist(path, [], mtime)
@@ -95,7 +91,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             return False
         try:
             self._abspath(path).unlink()
-        except EnvironmentError as e:
+        except OSError as e:
             log_environment_error("Error deleting playlist %s" % uri, e)
             return False
         else:
@@ -109,7 +105,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         try:
             with self._open(path, "r") as fp:
                 items = translator.load_items(fp, self._base_dir)
-        except EnvironmentError as e:
+        except OSError as e:
             log_environment_error("Error reading playlist %s" % uri, e)
         else:
             return items
@@ -123,7 +119,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             with self._open(path, "r") as fp:
                 items = translator.load_items(fp, self._base_dir)
             mtime = self._abspath(path).stat().st_mtime
-        except EnvironmentError as e:
+        except OSError as e:
             log_environment_error("Error reading playlist %s" % uri, e)
         else:
             return translator.playlist(path, items, mtime)
@@ -146,7 +142,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
                 path = path.with_suffix(orig_path.suffix)
                 self._abspath(orig_path).rename(self._abspath(path))
             mtime = self._abspath(path).stat().st_mtime
-        except EnvironmentError as e:
+        except OSError as e:
             log_environment_error("Error saving playlist %s" % playlist.uri, e)
         else:
             return translator.playlist(path, playlist.tracks, mtime)
@@ -162,8 +158,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         return path.is_path_inside_base_dir(local_path, self._playlists_dir)
 
     def _open(self, path, mode="r"):
-        # py-compat: Use str() to get a native string on both Py2/3
-        if path.suffix == str(".m3u8"):
+        if path.suffix == ".m3u8":
             encoding = "utf-8"
         else:
             encoding = self._default_encoding

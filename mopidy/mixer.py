@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import logging
 
 from mopidy import listener
@@ -8,7 +6,7 @@ from mopidy import listener
 logger = logging.getLogger(__name__)
 
 
-class Mixer(object):
+class Mixer:
 
     """
     Audio mixer API

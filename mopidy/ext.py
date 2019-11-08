@@ -1,11 +1,10 @@
-from __future__ import absolute_import, unicode_literals
-
 import collections
 import logging
+from collections.abc import Mapping
 
 import pkg_resources
 
-from mopidy import compat, config as config_lib, exceptions
+from mopidy import config as config_lib, exceptions
 from mopidy.internal import path
 
 
@@ -23,7 +22,7 @@ _extension_data_fields = [
 ExtensionData = collections.namedtuple("ExtensionData", _extension_data_fields)
 
 
-class Extension(object):
+class Extension:
 
     """Base class for Mopidy extensions"""
 
@@ -156,7 +155,7 @@ class Extension(object):
         raise NotImplementedError
 
 
-class Registry(compat.collections_abc.Mapping):
+class Registry(Mapping):
 
     """Registry of components provided by Mopidy extensions.
 
@@ -210,7 +209,7 @@ def load_extensions():
             extension_class = entry_point.resolve()
         except Exception as e:
             logger.exception(
-                "Failed to load extension {}: {}".format(entry_point.name, e)
+                f"Failed to load extension {entry_point.name}: {e}"
             )
             continue
 

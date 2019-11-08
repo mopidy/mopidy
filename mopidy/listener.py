@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import logging
 
 import pykka
@@ -26,7 +24,7 @@ def send(cls, event, **kwargs):
         )
 
 
-class Listener(object):
+class Listener:
     def on_event(self, event, **kwargs):
         """
         Called on all events.

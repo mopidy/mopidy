@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import threading
 import unittest
 
@@ -62,7 +60,7 @@ class BaseTest(unittest.TestCase):
         pass
 
 
-class DummyMixin(object):
+class DummyMixin:
     audio_class = dummy_audio.DummyAudio
 
     def possibly_trigger_fake_playback_error(self, uri):
@@ -130,7 +128,7 @@ class AudioDummyTest(DummyMixin, AudioTest):
 
 class DummyAudioListener(pykka.ThreadingActor, audio.AudioListener):
     def __init__(self):
-        super(DummyAudioListener, self).__init__()
+        super().__init__()
         self.events = []
         self.waiters = {}
 
@@ -152,12 +150,12 @@ class DummyAudioListener(pykka.ThreadingActor, audio.AudioListener):
 
 class AudioEventTest(BaseTest):
     def setUp(self):  # noqa: N802
-        super(AudioEventTest, self).setUp()
+        super().setUp()
         self.audio.enable_sync_handler().get()
         self.listener = DummyAudioListener.start().proxy()
 
     def tearDown(self):  # noqa: N802
-        super(AudioEventTest, self).tearDown()
+        super().tearDown()
 
     def assertEvent(self, event, **kwargs):  # noqa: N802
         self.assertIn((event, kwargs), self.listener.get_events().get())

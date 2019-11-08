@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import logging
 import os
 
@@ -61,7 +59,7 @@ def provider(backend):
     return backend.playback
 
 
-class TestTranslateURI(object):
+class TestTranslateURI:
     @responses.activate
     def test_audio_stream_returns_same_uri(self, scanner, provider):
         scanner.scan.side_effect = [

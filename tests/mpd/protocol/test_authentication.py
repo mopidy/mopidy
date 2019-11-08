@@ -1,11 +1,9 @@
-from __future__ import absolute_import, unicode_literals
-
 from tests.mpd import protocol
 
 
 class AuthenticationActiveTest(protocol.BaseTestCase):
     def get_config(self):
-        config = super(AuthenticationActiveTest, self).get_config()
+        config = super().get_config()
         config["mpd"]["password"] = "topsecret"
         return config
 

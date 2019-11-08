@@ -1,9 +1,7 @@
-from __future__ import absolute_import, unicode_literals
-
 import copy
+import itertools
 import weakref
 
-from mopidy import compat
 from mopidy.models.fields import Field
 
 
@@ -11,7 +9,7 @@ from mopidy.models.fields import Field
 _models = {}
 
 
-class ImmutableObject(object):
+class ImmutableObject:
     """
     Superclass for immutable objects whose fields can only be modified via the
     constructor.
@@ -59,7 +57,7 @@ class ImmutableObject(object):
             self.__dict__[name] = value
 
     def _items(self):
-        return compat.iteritems(self.__dict__)
+        return self.__dict__.items()
 
     def __repr__(self):
         kwarg_pairs = []
@@ -84,7 +82,7 @@ class ImmutableObject(object):
             return False
         return all(
             a == b
-            for a, b in compat.zip_longest(
+            for a, b in itertools.zip_longest(
                 self._items(), other._items(), fillvalue=object()
             )
         )
@@ -153,9 +151,7 @@ class _ValidatedImmutableObjectMeta(type):
             fields.values()
         )
 
-        clsc = super(_ValidatedImmutableObjectMeta, cls).__new__(
-            cls, name, bases, attrs
-        )
+        clsc = super().__new__(cls, name, bases, attrs)
 
         if clsc.__name__ != "ValidatedImmutableObject":
             _models[clsc.__name__] = clsc
@@ -163,14 +159,13 @@ class _ValidatedImmutableObjectMeta(type):
         return clsc
 
     def __call__(cls, *args, **kwargs):  # noqa: N805
-        instance = super(_ValidatedImmutableObjectMeta, cls).__call__(
-            *args, **kwargs
-        )
+        instance = super().__call__(*args, **kwargs)
         return cls._instances.setdefault(weakref.ref(instance), instance)
 
 
-@compat.add_metaclass(_ValidatedImmutableObjectMeta)
-class ValidatedImmutableObject(ImmutableObject):
+class ValidatedImmutableObject(
+    ImmutableObject, metaclass=_ValidatedImmutableObjectMeta
+):
     """
     Superclass for immutable objects whose fields can only be modified via the
     constructor. Fields should be :class:`Field` instances to ensure type
@@ -185,7 +180,7 @@ class ValidatedImmutableObject(ImmutableObject):
 
     def __hash__(self):
         if not hasattr(self, "_hash"):
-            hash_sum = super(ValidatedImmutableObject, self).__hash__()
+            hash_sum = super().__hash__()
             object.__setattr__(self, "_hash", hash_sum)
         return self._hash
 
@@ -221,7 +216,7 @@ class ValidatedImmutableObject(ImmutableObject):
         """
         if not kwargs:
             return self
-        other = super(ValidatedImmutableObject, self).replace(**kwargs)
+        other = super().replace(**kwargs)
         if hasattr(self, "_hash"):
             object.__delattr__(other, "_hash")
         return self._instances.setdefault(weakref.ref(other), other)

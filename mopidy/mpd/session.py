@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import logging
 
 from mopidy.internal import formatting, network
@@ -20,7 +18,7 @@ class MpdSession(network.LineProtocol):
     delimiter = br"\r?\n"
 
     def __init__(self, connection, config=None, core=None, uri_map=None):
-        super(MpdSession, self).__init__(connection)
+        super().__init__(connection)
         self.dispatcher = dispatcher.MpdDispatcher(
             session=self, config=config, core=core, uri_map=uri_map
         )
@@ -49,7 +47,7 @@ class MpdSession(network.LineProtocol):
 
     def decode(self, line):
         try:
-            return super(MpdSession, self).decode(line)
+            return super().decode(line)
         except ValueError:
             logger.warning(
                 "Stopping actor due to unescaping error, data "
