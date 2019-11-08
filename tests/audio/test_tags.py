@@ -39,7 +39,6 @@ class TestConvertTaglist(object):
 
         result = tags.convert_taglist(taglist)
 
-        # py-compat: str used to represent Py2/3 native string
         assert isinstance(result[Gst.TAG_DATE][0], str)
         assert result[Gst.TAG_DATE][0] == "2014-01-07"
 
@@ -59,7 +58,6 @@ class TestConvertTaglist(object):
 
         result = tags.convert_taglist(taglist)
 
-        # py-compat: str used to represent Py2/3 native string
         assert isinstance(result[Gst.TAG_DATE_TIME][0], str)
         assert result[Gst.TAG_DATE_TIME][0] == "2014-01-07T14:13:12Z"
 

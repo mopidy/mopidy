@@ -77,8 +77,7 @@ def expand_path(path):
     path = str(pathlib.Path(path))
 
     for xdg_var, xdg_dir in XDG_DIRS.items():
-        # py-compat: First str() is to get native strings on both Py2/Py3
-        path = path.replace(str("$" + xdg_var), str(xdg_dir))
+        path = path.replace("$" + xdg_var, str(xdg_dir))
     if "$" in path:
         return None
 

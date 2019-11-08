@@ -136,8 +136,7 @@ def test_check_uri_with_invalid_values():
 
 def test_check_uri_error_message():
     with raises(exceptions.ValidationError) as excinfo:
-        # py-compat: Using str() to get a native string on both Py2/3
-        validation.check_uri(str("testing"))
+        validation.check_uri("testing")
     assert "Expected a valid URI, not 'testing'" == str(excinfo.value)
 
 
@@ -162,6 +161,5 @@ def test_check_uris_with_invalid_values():
 
 def test_check_uris_error_message():
     with raises(exceptions.ValidationError) as excinfo:
-        # py-compat: Using str() to get a native string on both Py2/3
-        validation.check_uris(str("testing"))
+        validation.check_uris("testing")
     assert "Expected a list of URIs, not 'testing'" == str(excinfo.value)

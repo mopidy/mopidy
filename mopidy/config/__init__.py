@@ -145,8 +145,7 @@ def _load(files, defaults, overrides):
         f = path.expand_path(f)
         if f.is_dir():
             for g in f.iterdir():
-                # py-compat: Use str() to get a native string on both Py2/3
-                if g.is_file() and g.suffix == str(".conf"):
+                if g.is_file() and g.suffix == ".conf":
                     _load_file(parser, g.resolve())
         else:
             _load_file(parser, f.resolve())
@@ -234,7 +233,7 @@ def _format(config, comments, schemas, display, disable):
             output.append("%s =" % key)
             if value is not None:
                 if isinstance(value, bytes):
-                    # py-compat: TODO: Change ConfigValue.serialize() to return
+                    # TODO: Change ConfigValue.serialize() to return
                     # unicode and remove the step decode() here.
                     value = value.decode("utf-8")
                 output[-1] += " " + value

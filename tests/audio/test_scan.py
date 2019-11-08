@@ -33,8 +33,7 @@ class ScannerTest(unittest.TestCase):
 
     def check_if_missing_plugin(self):
         for path, result in self.result.items():
-            # py-compat: Use str() to get a native string on both Py2/3
-            if path.suffix != str(".mp3"):
+            if path.suffix != ".mp3":
                 continue
             if not result.playable and result.mime == "audio/mpeg":
                 raise unittest.SkipTest("Missing MP3 support?")

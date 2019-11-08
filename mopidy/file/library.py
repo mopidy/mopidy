@@ -42,8 +42,7 @@ class FileLibraryProvider(backend.LibraryProvider):
         result = []
         local_path = path.uri_to_path(uri)
 
-        # py-compat: Use str() to get a native string on both Py2/3
-        if str(local_path) == str("root"):
+        if str(local_path) == "root":
             return list(self._get_media_dirs_refs())
 
         if not self._is_in_basedir(local_path):
