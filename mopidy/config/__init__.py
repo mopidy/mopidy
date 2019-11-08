@@ -1,5 +1,4 @@
 import configparser
-import io
 import itertools
 import logging
 import os
@@ -8,14 +7,31 @@ import re
 from collections.abc import Mapping
 
 from mopidy.config import keyring
-from mopidy.config.schemas import *
-from mopidy.config.types import *
+from mopidy.config.schemas import ConfigSchema, MapConfigSchema
+from mopidy.config.types import (
+    Boolean,
+    ConfigValue,
+    Deprecated,
+    DeprecatedValue,
+    Hostname,
+    Integer,
+    List,
+    LogColor,
+    LogLevel,
+    Path,
+    Port,
+    Secret,
+    String,
+)
 from mopidy.internal import path, versioning
 
-logger = logging.getLogger(__name__)
+__all__ = [
+    # TODO List everything that is reexported, not just the unused parts.
+    "ConfigValue",
+    "List",
+]
 
-# flake8: noqa:
-# TODO: Update this to be flake8 compliant
+logger = logging.getLogger(__name__)
 
 _core_schema = ConfigSchema("core")
 _core_schema["cache_dir"] = Path()
@@ -177,7 +193,7 @@ def _load_file(parser, file_path):
         logger.info("Loading config from %r", file_path.as_uri())
         with file_path.open("r") as fh:
             parser.read_file(fh)
-    except configparser.MissingSectionHeaderError as e:
+    except configparser.MissingSectionHeaderError:
         logger.warning(
             "Loading config from %r failed; it does not have a config section",
             file_path.as_uri(),
@@ -225,7 +241,7 @@ def _format(config, comments, schemas, display, disable):
             continue
         output.append("[%s]" % schema.name)
         for key, value in serialized.items():
-            if isinstance(value, types.DeprecatedValue):
+            if isinstance(value, DeprecatedValue):
                 continue
             comment = comments.get(schema.name, {}).get(key, "")
             output.append("%s =" % key)
