@@ -53,7 +53,7 @@ def dump(path, data):
             data, cls=models.ModelJSONEncoder, indent=2, separators=(",", ": ")
         )
         with gzip.GzipFile(fileobj=tmp, mode="wb") as fp:
-            fp.write(data_string.encode("utf-8"))
+            fp.write(data_string.encode())
         tmp_path.rename(path)
     finally:
         if tmp_path.exists():

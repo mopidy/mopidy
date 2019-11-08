@@ -123,7 +123,7 @@ def format_initial(extensions_data):
     header = _INITIAL_HELP.strip() % {"versions": "\n#   ".join(versions)}
     formatted_config = _format(
         config=config, comments={}, schemas=schemas, display=False, disable=True
-    ).decode("utf-8")
+    ).decode()
     return header + "\n\n" + formatted_config
 
 
@@ -135,7 +135,7 @@ def _load(files, defaults, overrides):
     logger.info("Loading config from builtin defaults")
     for default in defaults:
         if isinstance(default, bytes):
-            default = default.decode("utf-8")
+            default = default.decode()
         parser.read_string(default)
 
     # Load config from a series of config files
@@ -233,14 +233,14 @@ def _format(config, comments, schemas, display, disable):
                 if isinstance(value, bytes):
                     # TODO: Change ConfigValue.serialize() to return
                     # unicode and remove the step decode() here.
-                    value = value.decode("utf-8")
+                    value = value.decode()
                 output[-1] += " " + value
             if comment:
                 output[-1] += "  ; " + comment.capitalize()
             if disable:
                 output[-1] = re.sub(r"^", "#", output[-1], flags=re.M)
         output.append("")
-    return "\n".join(output).strip().encode("utf-8")
+    return "\n".join(output).strip().encode()
 
 
 def _preprocess(config_string):

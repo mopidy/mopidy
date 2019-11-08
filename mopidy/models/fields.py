@@ -101,7 +101,7 @@ class Identifier(String):
     def validate(self, value):
         value = super().validate(value)
         if isinstance(value, bytes):
-            value = value.decode("utf-8")
+            value = value.decode()
         return sys.intern(value)
 
 

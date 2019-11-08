@@ -56,7 +56,7 @@ gstreamer-GstTagList.html
             elif isinstance(value, Gst.DateTime):
                 result[tag].append(value.to_iso8601_string())
             elif isinstance(value, bytes):
-                result[tag].append(value.decode("utf-8", "replace"))
+                result[tag].append(value.decode(errors="replace"))
             elif isinstance(value, (str, bool, numbers.Number)):
                 result[tag].append(value)
             elif isinstance(value, Gst.Sample):

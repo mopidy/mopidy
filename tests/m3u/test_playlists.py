@@ -127,7 +127,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
         track_uri = track.uri
         if not isinstance(track_uri, bytes):
-            track_uri = track.uri.encode("utf-8")
+            track_uri = track.uri.encode()
         self.assertEqual([b"#EXTM3U", b"#EXTINF:-1,Test\x9f", track_uri], m3u)
 
     def test_utf8_playlist_contents_is_replaced_and_written_to_disk(self):
@@ -140,7 +140,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
         track_uri = track.uri
         if not isinstance(track_uri, bytes):
-            track_uri = track.uri.encode("utf-8")
+            track_uri = track.uri.encode()
         self.assertEqual([b"#EXTM3U", b"#EXTINF:-1,Test?", track_uri], m3u)
 
     def test_playlists_are_loaded_at_startup(self):
@@ -161,7 +161,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
     )
     def test_load_playlist_with_nonfilesystem_encoding_of_filename(self):
         playlist_name = "øæå.m3u".encode("latin-1")
-        playlist_name = playlist_name.decode("utf-8", "surrogateescape")
+        playlist_name = playlist_name.decode(errors="surrogateescape")
         path = self.playlists_dir / playlist_name
         path.write_bytes(b"#EXTM3U\n")
 

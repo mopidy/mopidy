@@ -325,8 +325,8 @@ class _Handler:
         AudioListener.send("reached_end_of_stream")
 
     def on_error(self, error, debug):
-        error_msg = str(error).decode("utf-8")
-        debug_msg = debug.decode("utf-8")
+        error_msg = str(error).decode()
+        debug_msg = debug.decode()
         gst_logger.debug(
             "Got ERROR bus message: error=%r debug=%r", error_msg, debug_msg
         )
@@ -335,8 +335,8 @@ class _Handler:
         self._audio.stop_playback()
 
     def on_warning(self, error, debug):
-        error_msg = str(error).decode("utf-8")
-        debug_msg = debug.decode("utf-8")
+        error_msg = str(error).decode()
+        debug_msg = debug.decode()
         gst_logger.warning("GStreamer warning: %s", error_msg)
         gst_logger.debug(
             "Got WARNING bus message: error=%r debug=%r", error_msg, debug_msg

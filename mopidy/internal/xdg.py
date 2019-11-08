@@ -62,7 +62,7 @@ def _get_user_dirs(xdg_config_dir):
         if v is None:
             continue
         if isinstance(k, bytes):
-            k = k.decode("utf-8")
+            k = k.decode()
         result[k.upper()] = pathlib.Path(v).resolve()
 
     return result

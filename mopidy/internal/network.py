@@ -391,7 +391,7 @@ class LineProtocol(pykka.ThreadingActor):
     #: own value, or to ``terminator``s value if it is not set itself.
     delimiter = None
 
-    #: What encoding to expect incomming data to be in, can be :class:`None`.
+    #: What encoding to expect incoming data to be in, can be :class:`None`.
     encoding = "utf-8"
 
     def __init__(self, connection):

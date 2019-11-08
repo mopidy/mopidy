@@ -31,7 +31,7 @@ def get_or_create_dir(dir_path):
 def get_or_create_file(file_path, mkdir=True, content=None):
     file_path = expand_path(file_path)
     if isinstance(content, str):
-        content = content.encode("utf-8")
+        content = content.encode()
     if mkdir:
         get_or_create_dir(file_path.parent)
     if not file_path.is_file():
@@ -67,13 +67,13 @@ def uri_to_path(uri):
     Convert an URI to a OS specific path.
     """
     bytes_path = urllib.parse.unquote_to_bytes(urllib.parse.urlsplit(uri).path)
-    unicode_path = bytes_path.decode("utf-8", "surrogateescape")
+    unicode_path = bytes_path.decode(errors="surrogateescape")
     return pathlib.Path(unicode_path)
 
 
 def expand_path(path):
     if isinstance(path, bytes):
-        path = path.decode("utf-8", "surrogateescape")
+        path = path.decode(errors="surrogateescape")
     path = str(pathlib.Path(path))
 
     for xdg_var, xdg_dir in XDG_DIRS.items():
@@ -86,9 +86,9 @@ def expand_path(path):
 
 def is_path_inside_base_dir(path, base_path):
     if isinstance(path, bytes):
-        path = path.decode("utf-8", "surrogateescape")
+        path = path.decode(errors="surrogateescape")
     if isinstance(base_path, bytes):
-        base_path = base_path.decode("utf-8", "surrogateescape")
+        base_path = base_path.decode(errors="surrogateescape")
 
     path = pathlib.Path(path).resolve()
     base_path = pathlib.Path(base_path).resolve()

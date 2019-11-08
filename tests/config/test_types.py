@@ -490,7 +490,7 @@ class TestLogLevel:
         cv = types.LogLevel()
 
         for name, level in self.levels.items():
-            cv.serialize(level) == name.encode("utf-8")
+            cv.serialize(level) == name.encode()
 
     def test_serialize_ignores_unknown_level(self):
         cv = types.LogLevel()

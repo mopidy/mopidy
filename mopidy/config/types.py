@@ -8,11 +8,11 @@ from mopidy.internal import log, path
 
 def decode(value):
     if isinstance(value, bytes):
-        value = value.decode("utf-8", "surrogateescape")
+        value = value.decode(errors="surrogateescape")
 
     for char in ("\\", "\n", "\t"):
         value = value.replace(
-            char.encode("unicode-escape").decode("utf-8"), char
+            char.encode(encoding="unicode-escape").decode(), char
         )
 
     return value
@@ -20,14 +20,14 @@ def decode(value):
 
 def encode(value):
     if isinstance(value, bytes):
-        value = value.decode("utf-8", "surrogateescape")
+        value = value.decode(errors="surrogateescape")
 
     for char in ("\\", "\n", "\t"):
         value = value.replace(
-            char, char.encode("unicode-escape").decode("utf-8")
+            char, char.encode(encoding="unicode-escape").decode()
         )
 
-    return value.encode("utf-8", "surrogateescape")
+    return value.encode(errors="surrogateescape")
 
 
 class DeprecatedValue:
@@ -320,5 +320,5 @@ class Path(ConfigValue):
         if isinstance(value, _ExpandedPath):
             value = value.original
         if isinstance(value, str):
-            value = value.encode("utf-8")
+            value = value.encode()
         return value

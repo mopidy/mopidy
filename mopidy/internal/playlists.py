@@ -71,7 +71,7 @@ def parse_extm3u(data):
             continue
 
         try:
-            line = line.decode("utf-8")
+            line = line.decode()
         except UnicodeDecodeError:
             continue
 
@@ -128,7 +128,7 @@ def parse_urilist(data):
             continue
 
         try:
-            line = line.decode("utf-8")
+            line = line.decode()
         except UnicodeDecodeError:
             continue
 

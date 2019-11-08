@@ -24,7 +24,7 @@ def name_from_path(path):
     """Extract name from file path."""
     name = bytes(pathlib.Path(path.stem))
     try:
-        return name.decode("utf-8", "replace")
+        return name.decode(errors="replace")
     except UnicodeError:
         return None
 
@@ -71,7 +71,7 @@ def dump_items(items, fp):
             print("#EXTINF:-1,%s" % item.name, file=fp)
         # TODO: convert file URIs to (relative) paths?
         if isinstance(item.uri, bytes):
-            print(item.uri.decode("utf-8"), file=fp)
+            print(item.uri.decode(), file=fp)
         else:
             print(item.uri, file=fp)
 

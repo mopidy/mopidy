@@ -17,7 +17,7 @@ class TestConvertTaglist:
             gobject_value = GObject.Value()
             if isinstance(value, bytes):
                 gobject_value.init(GObject.TYPE_STRING)
-                gobject_value.set_string(value.decode("utf-8"))
+                gobject_value.set_string(value.decode())
             elif isinstance(value, str):
                 gobject_value.init(GObject.TYPE_STRING)
                 gobject_value.set_string(value)

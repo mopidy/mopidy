@@ -19,7 +19,7 @@ class MockConnection(mock.Mock):
         self.response = []
 
     def queue_send(self, data):
-        data = data.decode("utf-8")
+        data = data.decode()
         lines = (line for line in data.split("\n") if line)
         self.response.extend(lines)
 
@@ -65,7 +65,7 @@ class BaseTestCase(unittest.TestCase):
 
     def send_request(self, request):
         self.connection.response = []
-        request = ("%s\n" % request).encode("utf-8")
+        request = ("%s\n" % request).encode()
         self.session.on_receive({"received": request})
         return self.connection.response
 

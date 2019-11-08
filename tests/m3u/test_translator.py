@@ -38,14 +38,14 @@ def test_path_to_uri(path, scheme, expected):
 
 def test_latin1_path_to_uri():
     bytes_path = "æøå.m3u".encode("latin-1")
-    path = pathlib.Path(bytes_path.decode("utf-8", "surrogateescape"))
+    path = pathlib.Path(bytes_path.decode(errors="surrogateescape"))
 
     assert translator.path_to_uri(path) == "m3u:%E6%F8%E5.m3u"
 
 
 def test_utf8_path_to_uri():
     bytes_path = "æøå.m3u".encode()
-    path = pathlib.Path(bytes_path.decode("utf-8"))
+    path = pathlib.Path(bytes_path.decode())
 
     assert translator.path_to_uri(path) == "m3u:%C3%A6%C3%B8%C3%A5.m3u"
 

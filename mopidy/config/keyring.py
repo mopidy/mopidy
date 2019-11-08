@@ -96,7 +96,7 @@ def set(section, key, value):
         return False
 
     if isinstance(value, str):
-        value = value.encode("utf-8")
+        value = value.encode()
 
     session = service.OpenSession("plain", EMPTY_STRING)[1]
     secret = dbus.Struct(

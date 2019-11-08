@@ -167,9 +167,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
 def set_mopidy_headers(request_handler):
     request_handler.set_header("Cache-Control", "no-cache")
-    request_handler.set_header(
-        "X-Mopidy-Version", mopidy.__version__.encode("utf-8")
-    )
+    request_handler.set_header("X-Mopidy-Version", mopidy.__version__.encode())
 
 
 def check_origin(origin, request_headers, allowed_origins):

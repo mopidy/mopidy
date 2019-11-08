@@ -112,7 +112,7 @@ class LineProtocolTest(unittest.TestCase):
     def prepare_parse_lines_test(self, recv_data=""):
         self.mock.terminator = b"\n"
         self.mock.delimiter = re.compile(br"\n")
-        self.mock.recv_buffer = recv_data.encode("utf-8")
+        self.mock.recv_buffer = recv_data.encode()
 
     def test_parse_lines_emtpy_buffer(self):
         self.prepare_parse_lines_test()
