@@ -1,0 +1,14 @@
+version: 2
+
+python:
+  version: 3.7
+  install:
+    - requirements: docs/requirements.txt
+
+sphinx:
+  builder: htmldir
+  configuration: docs/conf.py
+
+formats:
+  - pdf
+  - epub
