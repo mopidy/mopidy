@@ -1,14 +1,4 @@
 import inspect
-import sys
-
-
-integer_types = (int,)
-string_types = (str,)
-text_type = str
-text_prefix = ""  # noqa
-
-input = input
-intern = sys.intern
 
 
 def itervalues(dct, **kwargs):

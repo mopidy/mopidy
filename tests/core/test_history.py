@@ -1,6 +1,5 @@
 import unittest
 
-from mopidy import compat
 from mopidy.core import HistoryController
 from mopidy.internal.models import HistoryState, HistoryTrack
 from mopidy.models import Artist, Ref, Track
@@ -42,7 +41,7 @@ class PlaybackHistoryTest(unittest.TestCase):
         result = self.history.get_history()
         (timestamp, ref) = result[0]
 
-        self.assertIsInstance(timestamp, compat.integer_types)
+        self.assertIsInstance(timestamp, int)
         self.assertEqual(track.uri, ref.uri)
         self.assertIn(track.name, ref.name)
         for artist in track.artists:

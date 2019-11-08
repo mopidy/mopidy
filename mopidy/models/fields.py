@@ -1,4 +1,4 @@
-from mopidy import compat
+import sys
 
 
 class Field(object):
@@ -73,7 +73,7 @@ class String(Field):
         # TODO: normalize to unicode?
         # TODO: only allow unicode?
         # TODO: disallow empty strings?
-        super(String, self).__init__(type=compat.string_types, default=default)
+        super(String, self).__init__(type=str, default=default)
 
 
 class Date(String):
@@ -102,7 +102,7 @@ class Identifier(String):
         value = super(Identifier, self).validate(value)
         if isinstance(value, bytes):
             value = value.decode("utf-8")
-        return compat.intern(value)
+        return sys.intern(value)
 
 
 class URI(Identifier):
@@ -129,9 +129,7 @@ class Integer(Field):
     def __init__(self, default=None, min=None, max=None):
         self._min = min
         self._max = max
-        super(Integer, self).__init__(
-            type=compat.integer_types, default=default
-        )
+        super(Integer, self).__init__(type=int, default=default)
 
     def validate(self, value):
         value = super(Integer, self).validate(value)
@@ -171,7 +169,7 @@ class Collection(Field):
         super(Collection, self).__init__(type=type, default=container())
 
     def validate(self, value):
-        if isinstance(value, compat.string_types):
+        if isinstance(value, str):
             raise TypeError(
                 "Expected %s to be a collection of %s, not %r"
                 % (self._name, self._type.__name__, value)

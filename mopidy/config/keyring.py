@@ -7,8 +7,6 @@ try:
 except ImportError:
     dbus = None
 
-from mopidy import compat
-
 
 # XXX: Hack to workaround introspection bug caused by gnome-keyring, should be
 # fixed by version 3.5 per:
@@ -97,7 +95,7 @@ def set(section, key, value):
     if not collection:
         return False
 
-    if isinstance(value, compat.text_type):
+    if isinstance(value, str):
         value = value.encode("utf-8")
 
     session = service.OpenSession("plain", EMPTY_STRING)[1]

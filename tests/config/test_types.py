@@ -8,7 +8,6 @@ import mock
 
 import pytest
 
-from mopidy import compat
 from mopidy.config import types
 from mopidy.internal import log
 
@@ -60,7 +59,7 @@ class TestConfigValue(object):
 
         result = cv.deserialize(b"abc")
 
-        assert isinstance(result, compat.text_type)
+        assert isinstance(result, str)
 
     def test_serialize_conversion_to_string(self):
         cv = types.ConfigValue()
@@ -108,7 +107,7 @@ class TestString(object):
         result = cv.deserialize(b" foo ")
 
         assert result == "foo"
-        assert isinstance(result, compat.text_type)
+        assert isinstance(result, str)
 
     def test_deserialize_decodes_utf8(self):
         cv = types.String()
@@ -205,7 +204,7 @@ class TestSecret(object):
 
         result = cv.deserialize("æøå".encode("utf-8"))
 
-        assert isinstance(result, compat.text_type)
+        assert isinstance(result, str)
         assert result == "æøå"
 
     def test_deserialize_enforces_required(self):

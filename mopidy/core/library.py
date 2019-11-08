@@ -5,7 +5,7 @@ import operator
 import urllib
 from collections.abc import Mapping
 
-from mopidy import compat, exceptions, models
+from mopidy import exceptions, models
 from mopidy.internal import validation
 
 
@@ -148,7 +148,7 @@ class LibraryController(object):
             with _backend_error_handling(backend):
                 values = future.get()
                 if values is not None:
-                    validation.check_instances(values, compat.text_type)
+                    validation.check_instances(values, str)
                     result.update(values)
         return result
 
@@ -335,7 +335,7 @@ def _normalize_query(query):
     broken_client = False
     # TODO: this breaks if query is not a dictionary like object...
     for (field, values) in query.items():
-        if isinstance(values, compat.string_types):
+        if isinstance(values, str):
             broken_client = True
             query[field] = [values]
     if broken_client:

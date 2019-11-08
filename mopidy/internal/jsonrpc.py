@@ -141,7 +141,7 @@ class JsonRpcWrapper(object):
                 raise JsonRpcInvalidParamsError(
                     data={
                         "type": error.__class__.__name__,
-                        "message": compat.text_type(error),
+                        "message": str(error),
                         "traceback": traceback.format_exc(),
                     }
                 )
@@ -149,7 +149,7 @@ class JsonRpcWrapper(object):
                 raise JsonRpcApplicationError(
                     data={
                         "type": error.__class__.__name__,
-                        "message": compat.text_type(error),
+                        "message": str(error),
                         "traceback": traceback.format_exc(),
                     }
                 )
@@ -173,7 +173,7 @@ class JsonRpcWrapper(object):
             raise JsonRpcInvalidRequestError(
                 data='"method" member must be included'
             )
-        if not isinstance(request["method"], compat.text_type):
+        if not isinstance(request["method"], str):
             raise JsonRpcInvalidRequestError(data='"method" must be a string')
 
     def _get_params(self, request):

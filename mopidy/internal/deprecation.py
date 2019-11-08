@@ -2,8 +2,6 @@ import contextlib
 import re
 import warnings
 
-from mopidy import compat
-
 
 # Messages used in deprecation warnings are collected here so we can target
 # them easily when ignoring warnings.
@@ -50,7 +48,7 @@ def warn(msg_id, pending=False):
 @contextlib.contextmanager
 def ignore(ids=None):
     with warnings.catch_warnings():
-        if isinstance(ids, compat.string_types):
+        if isinstance(ids, str):
             ids = [ids]
 
         if ids:

@@ -3,7 +3,6 @@ import pathlib
 import re
 import urllib
 
-from mopidy import compat
 from mopidy.internal import xdg
 
 # Reexport in old location for Mopidy-Local's use
@@ -31,7 +30,7 @@ def get_or_create_dir(dir_path):
 
 def get_or_create_file(file_path, mkdir=True, content=None):
     file_path = expand_path(file_path)
-    if isinstance(content, compat.text_type):
+    if isinstance(content, str):
         content = content.encode("utf-8")
     if mkdir:
         get_or_create_dir(file_path.parent)

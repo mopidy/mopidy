@@ -1,14 +1,12 @@
 import locale
 
-from mopidy import compat
-
 
 def locale_decode(value):
-    if isinstance(value, compat.text_type):
+    if isinstance(value, str):
         return value
 
     if not isinstance(value, bytes):
-        value = compat.text_type(value).encode()
+        value = str(value).encode()
 
     try:
         return value.decode()

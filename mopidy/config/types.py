@@ -2,7 +2,6 @@ import logging
 import re
 import socket
 
-from mopidy import compat
 from mopidy.config import validators
 from mopidy.internal import log, path
 
@@ -320,6 +319,6 @@ class Path(ConfigValue):
     def serialize(self, value, display=False):
         if isinstance(value, _ExpandedPath):
             value = value.original
-        if isinstance(value, compat.text_type):
+        if isinstance(value, str):
             value = value.encode("utf-8")
         return value
