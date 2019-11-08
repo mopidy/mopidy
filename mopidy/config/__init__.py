@@ -139,10 +139,7 @@ def _load(files, defaults, overrides):
     for default in defaults:
         if isinstance(default, bytes):
             default = default.decode("utf-8")
-        if compat.PY2:
-            parser.readfp(io.StringIO(default))
-        else:
-            parser.read_string(default)
+        parser.read_string(default)
 
     # Load config from a series of config files
     for f in files:
@@ -154,11 +151,6 @@ def _load(files, defaults, overrides):
                     _load_file(parser, g.resolve())
         else:
             _load_file(parser, f.resolve())
-
-    if compat.PY2:
-        # If there have been parse errors there is a python bug that causes the
-        # values to be lists, this little trick coerces these into strings.
-        parser.readfp(io.BytesIO())
 
     raw_config = {}
     for section in parser.sections():
@@ -187,12 +179,8 @@ def _load_file(parser, file_path):
 
     try:
         logger.info("Loading config from %r", file_path.as_uri())
-        if compat.PY2:
-            with file_path.open("r", encoding="utf-8") as fh:
-                parser.readfp(fh)
-        else:
-            with file_path.open("r") as fh:
-                parser.read_file(fh)
+        with file_path.open("r") as fh:
+            parser.read_file(fh)
     except configparser.MissingSectionHeaderError as e:
         logger.warning(
             "Loading config from %r failed; it does not have a config section",

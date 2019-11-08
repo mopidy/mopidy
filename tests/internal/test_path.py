@@ -7,7 +7,6 @@ import unittest
 
 import pytest
 
-from mopidy import compat
 from mopidy.internal import path
 from mopidy.internal.gi import GLib
 
@@ -208,7 +207,6 @@ class ExpandPathTest(unittest.TestCase):
 
         assert result is None
 
-    @pytest.mark.skipif(compat.PY2, reason="requires Python 3 surrogateescape")
     def test_invalid_utf8_bytes(self):
         result = path.expand_path(b"ab\xc3\x12")
 

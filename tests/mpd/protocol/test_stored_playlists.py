@@ -3,7 +3,6 @@
 
 import mock
 
-from mopidy import compat
 from mopidy.models import Playlist, Track
 from mopidy.mpd.protocol import stored_playlists
 
@@ -226,10 +225,7 @@ class PlaylistsHandlerTest(protocol.BaseTestCase):
         self.assertEqual("dummy:b", tracks[1].uri)
         self.assertEqual("dummy:c", tracks[2].uri)
         self.assertEqual("dummy:d", tracks[3].uri)
-        if compat.PY2:
-            self.assertEqual("dummy:ǫ", tracks[4].uri.decode("utf-8"))
-        else:
-            self.assertEqual("dummy:ǫ", tracks[4].uri)
+        self.assertEqual("dummy:ǫ", tracks[4].uri)
         self.assertInResponse("OK")
 
     def test_load_with_range_loads_part_of_playlist(self):

@@ -1,7 +1,6 @@
 # encoding: utf-8
 
 
-from mopidy import compat
 from mopidy.internal import deprecation
 from mopidy.models import Ref, Track
 
@@ -39,10 +38,7 @@ class AddCommandsTest(protocol.BaseTestCase):
 
     def test_add_unicode(self):
         for track in [self.tracks[0], self.tracks[1], self.tracks[2]]:
-            if compat.PY2:
-                self.send_request('add "%s"' % track.uri.decode("utf-8"))
-            else:
-                self.send_request('add "%s"' % track.uri)
+            self.send_request('add "%s"' % track.uri)
 
         self.assertEqual(len(self.core.tracklist.get_tracks().get()), 3)
         self.assertEqual(

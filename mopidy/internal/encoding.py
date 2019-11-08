@@ -8,10 +8,7 @@ def locale_decode(value):
         return value
 
     if not isinstance(value, bytes):
-        if compat.PY2:
-            value = bytes(value)
-        else:
-            value = compat.text_type(value).encode()
+        value = compat.text_type(value).encode()
 
     try:
         return value.decode()

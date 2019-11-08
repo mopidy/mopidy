@@ -5,7 +5,6 @@ import pathlib
 
 import pytest
 
-from mopidy import compat
 from mopidy.m3u import translator
 from mopidy.m3u.translator import path_to_uri
 from mopidy.models import Playlist, Ref, Track
@@ -41,20 +40,14 @@ def test_path_to_uri(path, scheme, expected):
 
 def test_latin1_path_to_uri():
     bytes_path = "æøå.m3u".encode("latin-1")
-    if compat.PY2:
-        path = pathlib.Path(bytes_path)
-    else:
-        path = pathlib.Path(bytes_path.decode("utf-8", "surrogateescape"))
+    path = pathlib.Path(bytes_path.decode("utf-8", "surrogateescape"))
 
     assert translator.path_to_uri(path) == "m3u:%E6%F8%E5.m3u"
 
 
 def test_utf8_path_to_uri():
     bytes_path = "æøå.m3u".encode("utf-8")
-    if compat.PY2:
-        path = pathlib.Path(bytes_path)
-    else:
-        path = pathlib.Path(bytes_path.decode("utf-8"))
+    path = pathlib.Path(bytes_path.decode("utf-8"))
 
     assert translator.path_to_uri(path) == "m3u:%C3%A6%C3%B8%C3%A5.m3u"
 

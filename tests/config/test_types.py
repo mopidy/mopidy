@@ -48,7 +48,6 @@ def test_encode(value, expected):
     assert types.encode(value) == expected
 
 
-@pytest.mark.skipif(compat.PY2, reason="requires Python 3 surrogateescape")
 def test_encode_decode_invalid_utf8():
     data = b"\xc3\x00"  # invalid utf-8
 
@@ -152,18 +151,11 @@ class TestString(object):
         assert cv.deserialize(b"") is None
         assert cv.deserialize(b" ") is None
 
-    def test_deserialize_decode_failure(self):
+    def test_deserialize_invalid_encoding(self):
         cv = types.String()
         incorrectly_encoded_bytes = "æøå".encode("iso-8859-1")
 
-        if compat.PY2:
-            with pytest.raises(ValueError):
-                cv.deserialize(incorrectly_encoded_bytes)
-        else:
-            assert (
-                cv.deserialize(incorrectly_encoded_bytes)
-                == "\udce6\udcf8\udce5"
-            )
+        assert cv.deserialize(incorrectly_encoded_bytes) == "\udce6\udcf8\udce5"
 
     def test_serialize_encodes_utf8(self):
         cv = types.String()

@@ -1,7 +1,6 @@
 import configparser
 import io
 
-from mopidy import compat
 from mopidy.internal import validation
 
 try:
@@ -83,10 +82,7 @@ def parse_pls(data):
     # TODO: convert non URIs to file URIs.
     try:
         cp = configparser.RawConfigParser()
-        if compat.PY2:
-            cp.readfp(io.BytesIO(data))
-        else:
-            cp.read_string(data.decode())
+        cp.read_string(data.decode())
     except configparser.Error:
         return
 

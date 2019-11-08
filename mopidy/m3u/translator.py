@@ -2,7 +2,7 @@ import os
 import pathlib
 import urllib
 
-from mopidy import compat, models
+from mopidy import models
 from mopidy.internal import path
 
 from . import Extension
@@ -11,10 +11,7 @@ from . import Extension
 def path_to_uri(path, scheme=Extension.ext_name):
     """Convert file path to URI."""
     bytes_path = os.path.normpath(bytes(path))
-    if compat.PY2:
-        uripath = urllib.parse.quote(bytes_path).decode("utf-8")
-    else:
-        uripath = urllib.parse.quote_from_bytes(bytes_path)
+    uripath = urllib.parse.quote_from_bytes(bytes_path)
     return urllib.parse.urlunsplit((scheme, None, uripath, None, None))
 
 

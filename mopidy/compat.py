@@ -1,8 +1,6 @@
 import inspect
 import sys
 
-PY2 = sys.version_info[0] == 2
-PY3 = sys.version_info[0] == 3
 
 integer_types = (int,)
 string_types = (str,)

@@ -3,7 +3,6 @@
 
 import unittest
 
-from mopidy import compat
 from mopidy.models.fields import (
     Boolean,
     Collection,
@@ -148,10 +147,7 @@ class IdentifierTest(unittest.TestCase):
     def test_unicode_with_nonascii_allowed(self):
         instance = create_instance(Identifier())
         instance.attr = "æøå"
-        if compat.PY2:
-            self.assertEqual("æøå".encode("utf-8"), instance.attr)
-        else:
-            self.assertEqual("æøå", instance.attr)
+        self.assertEqual("æøå", instance.attr)
 
     def test_other_disallowed(self):
         instance = create_instance(Identifier())

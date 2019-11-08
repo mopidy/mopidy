@@ -8,7 +8,7 @@ import unittest
 
 import pykka
 
-from mopidy import compat, core
+from mopidy import core
 from mopidy.m3u.backend import M3UBackend
 from mopidy.models import Playlist, Track
 
@@ -163,8 +163,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
     )
     def test_load_playlist_with_nonfilesystem_encoding_of_filename(self):
         playlist_name = "øæå.m3u".encode("latin-1")
-        if compat.PY3:
-            playlist_name = playlist_name.decode("utf-8", "surrogateescape")
+        playlist_name = playlist_name.decode("utf-8", "surrogateescape")
         path = self.playlists_dir / playlist_name
         path.write_bytes(b"#EXTM3U\n")
 

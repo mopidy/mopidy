@@ -9,10 +9,7 @@ from mopidy.internal import log, path
 
 def decode(value):
     if isinstance(value, bytes):
-        if compat.PY2:
-            value = value.decode("utf-8")
-        else:
-            value = value.decode("utf-8", "surrogateescape")
+        value = value.decode("utf-8", "surrogateescape")
 
     for char in ("\\", "\n", "\t"):
         value = value.replace(
@@ -24,20 +21,14 @@ def decode(value):
 
 def encode(value):
     if isinstance(value, bytes):
-        if compat.PY2:
-            value = value.decode("utf-8")
-        else:
-            value = value.decode("utf-8", "surrogateescape")
+        value = value.decode("utf-8", "surrogateescape")
 
     for char in ("\\", "\n", "\t"):
         value = value.replace(
             char, char.encode("unicode-escape").decode("utf-8")
         )
 
-    if compat.PY2:
-        return value.encode("utf-8")
-    else:
-        return value.encode("utf-8", "surrogateescape")
+    return value.encode("utf-8", "surrogateescape")
 
 
 class DeprecatedValue(object):

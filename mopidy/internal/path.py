@@ -67,21 +67,13 @@ def uri_to_path(uri):
     """
     Convert an URI to a OS specific path.
     """
-    if compat.PY2:
-        if isinstance(uri, compat.text_type):
-            uri = uri.encode("utf-8")
-        bytes_path = urllib.parse.unquote(urllib.parse.urlsplit(uri).path)
-        return pathlib.Path(bytes_path)
-    else:
-        bytes_path = urllib.parse.unquote_to_bytes(
-            urllib.parse.urlsplit(uri).path
-        )
-        unicode_path = bytes_path.decode("utf-8", "surrogateescape")
-        return pathlib.Path(unicode_path)
+    bytes_path = urllib.parse.unquote_to_bytes(urllib.parse.urlsplit(uri).path)
+    unicode_path = bytes_path.decode("utf-8", "surrogateescape")
+    return pathlib.Path(unicode_path)
 
 
 def expand_path(path):
-    if not compat.PY2 and isinstance(path, bytes):
+    if isinstance(path, bytes):
         path = path.decode("utf-8", "surrogateescape")
     path = str(pathlib.Path(path))
 
@@ -95,11 +87,10 @@ def expand_path(path):
 
 
 def is_path_inside_base_dir(path, base_path):
-    if compat.PY3:
-        if isinstance(path, bytes):
-            path = path.decode("utf-8", "surrogateescape")
-        if isinstance(base_path, bytes):
-            base_path = base_path.decode("utf-8", "surrogateescape")
+    if isinstance(path, bytes):
+        path = path.decode("utf-8", "surrogateescape")
+    if isinstance(base_path, bytes):
+        base_path = base_path.decode("utf-8", "surrogateescape")
 
     path = pathlib.Path(path).resolve()
     base_path = pathlib.Path(base_path).resolve()
