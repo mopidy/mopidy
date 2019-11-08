@@ -7,7 +7,6 @@ import pathlib
 import re
 from collections.abc import Mapping
 
-from mopidy import compat
 from mopidy.config import keyring
 from mopidy.config.schemas import *
 from mopidy.config.types import *

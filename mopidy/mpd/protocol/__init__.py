@@ -10,8 +10,8 @@ implement our own MPD server which is compatible with the numerous existing
 `MPD clients <https://mpd.fandom.com/wiki/Clients>`_.
 """
 
+import inspect
 
-from mopidy import compat
 from mopidy.mpd import exceptions
 
 #: The MPD protocol uses UTF-8 for encoding all data.
@@ -146,7 +146,7 @@ class Commands(object):
             if name in self.handlers:
                 raise ValueError("%s already registered" % name)
 
-            spec = compat.getargspec(func)
+            spec = inspect.getfullargspec(func)
             defaults = dict(
                 zip(spec.args[-len(spec.defaults or []) :], spec.defaults or [])
             )
@@ -162,7 +162,7 @@ class Commands(object):
             if not set(validators.keys()).issubset(spec.args):
                 raise TypeError("Validator for non-existent arg passed")
 
-            if spec.keywords:
+            if spec.varkw or spec.kwonlyargs:
                 raise TypeError("Keyword arguments are not permitted")
 
             def validate(*args, **kwargs):
@@ -170,7 +170,9 @@ class Commands(object):
                     return func(*args, **kwargs)
 
                 try:
-                    callargs = compat.getcallargs(func, *args, **kwargs)
+                    ba = inspect.signature(func).bind(*args, **kwargs)
+                    ba.apply_defaults()
+                    callargs = ba.arguments
                 except TypeError:
                     raise exceptions.MpdArgError(
                         'wrong number of arguments for "%s"' % name

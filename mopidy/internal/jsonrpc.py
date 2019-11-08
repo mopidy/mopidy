@@ -4,8 +4,6 @@ import traceback
 
 import pykka
 
-from mopidy import compat
-
 
 class JsonRpcWrapper(object):
 
@@ -365,7 +363,7 @@ class JsonRpcInspector(object):
         }
 
     def _describe_params(self, method):
-        argspec = compat.getargspec(method)
+        argspec = inspect.getfullargspec(method)
 
         defaults = argspec.defaults and list(argspec.defaults) or []
         num_args_without_default = len(argspec.args) - len(defaults)
@@ -386,7 +384,7 @@ class JsonRpcInspector(object):
         if argspec.varargs:
             params.append({"name": argspec.varargs, "varargs": True})
 
-        if argspec.keywords:
-            params.append({"name": argspec.keywords, "kwargs": True})
+        if argspec.varkw:
+            params.append({"name": argspec.varkw, "kwargs": True})
 
         return params
