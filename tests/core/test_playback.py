@@ -487,7 +487,7 @@ class TestConsumeHandling(BaseTest):
         self.core.tracklist.set_repeat(True)
         self.replay_events()
 
-        for track in self.core.tracklist.get_tl_tracks():
+        for _tl_track in self.core.tracklist.get_tl_tracks():
             self.core.playback.next()
             self.replay_events()
 

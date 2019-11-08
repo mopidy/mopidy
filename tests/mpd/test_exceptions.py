@@ -15,8 +15,10 @@ class MpdExceptionsTest(unittest.TestCase):
     def test_mpd_not_implemented_is_a_mpd_ack_error(self):
         try:
             raise MpdNotImplemented
-        except MpdAckError as e:
-            self.assertEqual(e.message, "Not implemented")
+        except MpdAckError as exc:
+            self.assertEqual(
+                exc.message, "Not implemented"  # noqa B306: Our own exception
+            )
 
     def test_get_mpd_ack_with_default_values(self):
         e = MpdAckError("A description")

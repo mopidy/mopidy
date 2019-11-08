@@ -120,8 +120,11 @@ def _get_last_modified(last_modified=None):
     return "%sZ" % dt.isoformat()
 
 
+DEFAULT_PLAYLIST_SLICE = slice(0, None)
+
+
 @protocol.commands.add("load", playlist_slice=protocol.RANGE)
-def load(context, name, playlist_slice=slice(0, None)):
+def load(context, name, playlist_slice=DEFAULT_PLAYLIST_SLICE):
     """
     *musicpd.org, stored playlists section:*
 

@@ -205,8 +205,8 @@ class Command:
 
         try:
             result = parser.parse_args(args, namespace)
-        except _ParserError as e:
-            self.exit(1, e.message, self._usage(actions, prog))
+        except _ParserError as exc:
+            self.exit(1, str(exc), self._usage(actions, prog))
 
         if not result._args:
             for attr, value in overrides.items():
@@ -238,13 +238,11 @@ def _actor_error_handling(name):
     try:
         yield
     except exceptions.BackendError as exc:
-        logger.error("Backend (%s) initialization error: %s", name, exc.message)
+        logger.error("Backend (%s) initialization error: %s", name, exc)
     except exceptions.FrontendError as exc:
-        logger.error(
-            "Frontend (%s) initialization error: %s", name, exc.message
-        )
+        logger.error("Frontend (%s) initialization error: %s", name, exc)
     except exceptions.MixerError as exc:
-        logger.error("Mixer (%s) initialization error: %s", name, exc.message)
+        logger.error("Mixer (%s) initialization error: %s", name, exc)
     except Exception:
         logger.exception("Got un-handled exception from %s", name)
 

@@ -275,8 +275,10 @@ def list_(context, *args):
     else:
         try:
             query = _query_from_mpd_search_parameters(params, _LIST_MAPPING)
-        except exceptions.MpdArgError as e:
-            e.message = "not able to parse args"
+        except exceptions.MpdArgError as exc:
+            exc.message = (  # noqa B306: Our own exception
+                "not able to parse args"
+            )
             raise
         except ValueError:
             return

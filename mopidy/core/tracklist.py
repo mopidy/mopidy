@@ -19,7 +19,11 @@ class TracklistController:
         self._tl_tracks = []
         self._version = 0
 
+        self._consume = False
+        self._random = False
         self._shuffled = []
+        self._repeat = False
+        self._single = False
 
     def get_tl_tracks(self):
         """Get tracklist as list of :class:`mopidy.models.TlTrack`."""
@@ -55,7 +59,7 @@ class TracklistController:
         :class:`False`
             Tracks are not removed from the tracklist.
         """
-        return getattr(self, "_consume", False)
+        return self._consume
 
     def set_consume(self, value):
         """Set consume mode.
@@ -68,7 +72,7 @@ class TracklistController:
         validation.check_boolean(value)
         if self.get_consume() != value:
             self._trigger_options_changed()
-        return setattr(self, "_consume", value)
+        self._consume = value
 
     def get_random(self):
         """Get random mode.
@@ -78,7 +82,7 @@ class TracklistController:
         :class:`False`
             Tracks are played in the order of the tracklist.
         """
-        return getattr(self, "_random", False)
+        return self._random
 
     def set_random(self, value):
         """Set random mode.
@@ -94,7 +98,7 @@ class TracklistController:
         if value:
             self._shuffled = self.get_tl_tracks()
             random.shuffle(self._shuffled)
-        return setattr(self, "_random", value)
+        self._random = value
 
     def get_repeat(self):
         """
@@ -105,7 +109,7 @@ class TracklistController:
         :class:`False`
             The tracklist is played once.
         """
-        return getattr(self, "_repeat", False)
+        return self._repeat
 
     def set_repeat(self, value):
         """
@@ -121,7 +125,7 @@ class TracklistController:
         validation.check_boolean(value)
         if self.get_repeat() != value:
             self._trigger_options_changed()
-        return setattr(self, "_repeat", value)
+        self._repeat = value
 
     def get_single(self):
         """
@@ -132,7 +136,7 @@ class TracklistController:
         :class:`False`
             Playback continues after current song.
         """
-        return getattr(self, "_single", False)
+        return self._single
 
     def set_single(self, value):
         """
@@ -146,7 +150,7 @@ class TracklistController:
         validation.check_boolean(value)
         if self.get_single() != value:
             self._trigger_options_changed()
-        return setattr(self, "_single", value)
+        self._single = value
 
     def index(self, tl_track=None, tlid=None):
         """
