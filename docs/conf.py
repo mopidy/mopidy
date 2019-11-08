@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 """Mopidy documentation build configuration file"""
 
 
@@ -13,7 +11,7 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/../"))
 
 
-class Mock(object):
+class Mock:
     def __init__(self, *args, **kwargs):
         pass
 

@@ -1,4 +1,4 @@
-class PlaybackState(object):
+class PlaybackState:
 
     """
     Enum of playback states.

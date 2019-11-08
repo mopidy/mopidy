@@ -1,6 +1,3 @@
-# encoding: utf-8
-
-
 from mopidy.internal import deprecation
 from mopidy.models import Ref, Track
 
@@ -9,7 +6,7 @@ from tests.mpd import protocol
 
 class AddCommandsTest(protocol.BaseTestCase):
     def setUp(self):  # noqa: N802
-        super(AddCommandsTest, self).setUp()
+        super().setUp()
 
         self.tracks = [
             Track(uri="dummy:/a", name="a"),
@@ -114,7 +111,7 @@ class AddCommandsTest(protocol.BaseTestCase):
 
 class BasePopulatedTracklistTestCase(protocol.BaseTestCase):
     def setUp(self):  # noqa: N802
-        super(BasePopulatedTracklistTestCase, self).setUp()
+        super().setUp()
         tracks = [Track(uri="dummy:/%s" % x, name=x) for x in "abcdeǂ"]
         self.backend.library.dummy_library = tracks
         self.core.tracklist.add(uris=[t.uri for t in tracks])

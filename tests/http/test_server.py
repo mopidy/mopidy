@@ -230,7 +230,7 @@ class MopidyRPCHandlerTest(HttpServerTest):
 
 class MopidyRPCHandlerNoCSRFProtectionTest(HttpServerTest):
     def get_config(self):
-        config = super(MopidyRPCHandlerNoCSRFProtectionTest, self).get_config()
+        config = super().get_config()
         config["http"]["csrf_protection"] = False
         return config
 

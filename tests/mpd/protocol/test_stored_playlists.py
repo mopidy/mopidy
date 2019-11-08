@@ -1,6 +1,3 @@
-# encoding: utf-8
-
-
 import mock
 
 from mopidy.models import Playlist, Track

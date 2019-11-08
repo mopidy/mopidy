@@ -1,6 +1,3 @@
-# encoding: utf-8
-
-
 from mopidy.models import Album, Track
 
 from tests.mpd import protocol

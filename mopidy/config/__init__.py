@@ -81,7 +81,7 @@ _INITIAL_HELP = """
 
 def read(config_file):
     """Helper to load config defaults in same way across core and extensions"""
-    with io.open(str(config_file), "rb") as filehandle:
+    with open(str(config_file), "rb") as filehandle:
         return filehandle.read()
 
 
@@ -191,7 +191,7 @@ def _load_file(parser, file_path):
             file_path.as_uri(),
             linenos,
         )
-    except IOError:
+    except OSError:
         # TODO: if this is the initial load of logging config we might not
         # have a logger at this point, we might want to handle this better.
         logger.debug("Config file %r not found; skipping", file_path.as_uri())

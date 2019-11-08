@@ -8,7 +8,7 @@ from mopidy.internal.models import HistoryState, HistoryTrack
 logger = logging.getLogger(__name__)
 
 
-class HistoryController(object):
+class HistoryController:
     pykka_traversable = True
 
     def __init__(self):

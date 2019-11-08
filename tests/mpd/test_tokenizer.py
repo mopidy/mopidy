@@ -1,6 +1,3 @@
-# encoding: utf-8
-
-
 import unittest
 
 from mopidy.mpd import exceptions, tokenize

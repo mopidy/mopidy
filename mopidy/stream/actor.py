@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class StreamBackend(pykka.ThreadingActor, backend.Backend):
     def __init__(self, config, audio):
-        super(StreamBackend, self).__init__()
+        super().__init__()
 
         self._scanner = scan.Scanner(
             timeout=config["stream"]["timeout"], proxy_config=config["proxy"]

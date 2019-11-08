@@ -5,7 +5,7 @@ import traceback
 import pykka
 
 
-class JsonRpcWrapper(object):
+class JsonRpcWrapper:
 
     """
     Wrap objects and make them accessible through JSON-RPC 2.0 messaging.
@@ -297,7 +297,7 @@ def get_combined_json_encoder(encoders):
     return JsonRpcEncoder
 
 
-class JsonRpcInspector(object):
+class JsonRpcInspector:
 
     """
     Inspects a group of classes and functions to create a description of what

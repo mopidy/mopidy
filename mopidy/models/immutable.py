@@ -9,7 +9,7 @@ from mopidy.models.fields import Field
 _models = {}
 
 
-class ImmutableObject(object):
+class ImmutableObject:
     """
     Superclass for immutable objects whose fields can only be modified via the
     constructor.
@@ -151,9 +151,7 @@ class _ValidatedImmutableObjectMeta(type):
             fields.values()
         )
 
-        clsc = super(_ValidatedImmutableObjectMeta, cls).__new__(
-            cls, name, bases, attrs
-        )
+        clsc = super().__new__(cls, name, bases, attrs)
 
         if clsc.__name__ != "ValidatedImmutableObject":
             _models[clsc.__name__] = clsc
@@ -161,9 +159,7 @@ class _ValidatedImmutableObjectMeta(type):
         return clsc
 
     def __call__(cls, *args, **kwargs):  # noqa: N805
-        instance = super(_ValidatedImmutableObjectMeta, cls).__call__(
-            *args, **kwargs
-        )
+        instance = super().__call__(*args, **kwargs)
         return cls._instances.setdefault(weakref.ref(instance), instance)
 
 
@@ -184,7 +180,7 @@ class ValidatedImmutableObject(
 
     def __hash__(self):
         if not hasattr(self, "_hash"):
-            hash_sum = super(ValidatedImmutableObject, self).__hash__()
+            hash_sum = super().__hash__()
             object.__setattr__(self, "_hash", hash_sum)
         return self._hash
 
@@ -220,7 +216,7 @@ class ValidatedImmutableObject(
         """
         if not kwargs:
             return self
-        other = super(ValidatedImmutableObject, self).replace(**kwargs)
+        other = super().replace(**kwargs)
         if hasattr(self, "_hash"):
             object.__delattr__(other, "_hash")
         return self._instances.setdefault(weakref.ref(other), other)

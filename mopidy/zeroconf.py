@@ -28,7 +28,7 @@ def _convert_text_list_to_dbus_format(text_list):
     return array
 
 
-class Zeroconf(object):
+class Zeroconf:
 
     """Publish a network service with Zeroconf.
 

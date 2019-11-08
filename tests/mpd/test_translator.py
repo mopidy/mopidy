@@ -1,6 +1,3 @@
-# encoding: utf-8
-
-
 import unittest
 
 from mopidy.models import Album, Artist, Playlist, TlTrack, Track

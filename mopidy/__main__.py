@@ -169,7 +169,7 @@ def create_initial_config_file(args, extensions_data):
         default = config_lib.format_initial(extensions_data)
         path.get_or_create_file(config_file, mkdir=False, content=default)
         logger.info("Initialized %s with default config", config_file)
-    except IOError as error:
+    except OSError as error:
         logger.warning(
             "Unable to initialize %s with default config: %s",
             config_file,

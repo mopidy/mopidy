@@ -4,7 +4,7 @@ import re
 # or playlists and then use one instance for each case?
 
 
-class MpdUriMapper(object):
+class MpdUriMapper:
 
     """
     Maintains the mappings between uniquified MPD names and URIs.

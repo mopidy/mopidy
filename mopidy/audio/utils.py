@@ -70,7 +70,7 @@ def setup_proxy(element, config):
     element.set_property("proxy-pw", config.get("password"))
 
 
-class Signals(object):
+class Signals:
 
     """Helper for tracking gobject signal registrations"""
 

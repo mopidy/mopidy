@@ -27,7 +27,7 @@ def load(path):
     try:
         with gzip.open(str(path), "rb") as fp:
             return json.load(fp, object_hook=models.model_json_decoder)
-    except (IOError, ValueError) as error:
+    except (OSError, ValueError) as error:
         logger.warning("Loading JSON failed: %s", encoding.locale_decode(error))
         return {}
 

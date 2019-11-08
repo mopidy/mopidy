@@ -10,7 +10,7 @@ from mopidy.internal import deprecation, models, validation
 logger = logging.getLogger(__name__)
 
 
-class PlaybackController(object):
+class PlaybackController:
     pykka_traversable = True
 
     def __init__(self, audio, backends, core):

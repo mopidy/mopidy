@@ -22,7 +22,7 @@ _extension_data_fields = [
 ExtensionData = collections.namedtuple("ExtensionData", _extension_data_fields)
 
 
-class Extension(object):
+class Extension:
 
     """Base class for Mopidy extensions"""
 

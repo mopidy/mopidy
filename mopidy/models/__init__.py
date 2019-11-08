@@ -292,7 +292,7 @@ class TlTrack(ValidatedImmutableObject):
             kwargs["tlid"] = args[0]
             kwargs["track"] = args[1]
             args = []
-        super(TlTrack, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def __iter__(self):
         return iter([self.tlid, self.track])

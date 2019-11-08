@@ -29,7 +29,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
     statics = []
 
     def __init__(self, config, core):
-        super(HttpFrontend, self).__init__()
+        super().__init__()
 
         self.hostname = network.format_hostname(config["http"]["hostname"])
         self.port = config["http"]["port"]
@@ -47,7 +47,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
                 apps=self.apps,
                 statics=self.statics,
             )
-        except IOError as error:
+        except OSError as error:
             raise exceptions.FrontendError(
                 "HTTP server startup failed: %s" % encoding.locale_decode(error)
             )
@@ -95,7 +95,7 @@ class HttpServer(threading.Thread):
     name = "HttpServer"
 
     def __init__(self, config, core, sockets, apps, statics):
-        super(HttpServer, self).__init__()
+        super().__init__()
 
         self.config = config
         self.core = core

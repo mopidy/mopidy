@@ -22,7 +22,7 @@ class DummyExtension(ext.Extension):
 any_testextension = IsA(DummyExtension)
 
 
-class TestExtension(object):
+class TestExtension:
     @pytest.fixture
     def extension(self):
         return ext.Extension()
@@ -67,7 +67,7 @@ class TestExtension(object):
             ext.Extension.get_data_dir(config)
 
 
-class TestLoadExtensions(object):
+class TestLoadExtensions:
     @pytest.yield_fixture
     def iter_entry_points_mock(self, request):
         patcher = mock.patch("pkg_resources.iter_entry_points")
@@ -97,7 +97,7 @@ class TestLoadExtensions(object):
         assert ext.load_extensions() == [expected]
 
     def test_gets_wrong_class(self, iter_entry_points_mock):
-        class WrongClass(object):
+        class WrongClass:
             pass
 
         mock_entry_point = mock.Mock()
@@ -163,7 +163,7 @@ class TestLoadExtensions(object):
             get.assert_called_once_with()
 
 
-class TestValidateExtensionData(object):
+class TestValidateExtensionData:
     @pytest.fixture
     def ext_data(self):
         extension = DummyExtension()

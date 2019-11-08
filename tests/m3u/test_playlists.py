@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 import pathlib
 import platform
 import shutil
@@ -366,4 +364,4 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 class M3UPlaylistsProviderBaseDirectoryTest(M3UPlaylistsProviderTest):
     def setUp(self):  # noqa: N802
         self.config["m3u"]["base_dir"] = pathlib.Path(tempfile.mkdtemp())
-        super(M3UPlaylistsProviderBaseDirectoryTest, self).setUp()
+        super().setUp()

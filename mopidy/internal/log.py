@@ -156,7 +156,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
     is_windows = platform.system() == "Windows"
 
     def __init__(self, logger_colors):
-        super(ColorizingStreamHandler, self).__init__()
+        super().__init__()
         self.logger_map = logger_colors
 
     @property

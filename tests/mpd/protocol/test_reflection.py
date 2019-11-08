@@ -66,7 +66,7 @@ class ReflectionHandlerTest(protocol.BaseTestCase):
 
 class ReflectionWhenNotAuthedTest(protocol.BaseTestCase):
     def get_config(self):
-        config = super(ReflectionWhenNotAuthedTest, self).get_config()
+        config = super().get_config()
         config["mpd"]["password"] = "topsecret"
         return config
 

@@ -13,7 +13,7 @@ from tests import dummy_audio, dummy_backend, dummy_mixer
 
 class MockConnection(mock.Mock):
     def __init__(self, *args, **kwargs):
-        super(MockConnection, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.host = mock.sentinel.host
         self.port = mock.sentinel.port
         self.response = []

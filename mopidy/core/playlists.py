@@ -29,7 +29,7 @@ def _backend_error_handling(backend, reraise=None):
         )
 
 
-class PlaylistsController(object):
+class PlaylistsController:
     pykka_traversable = True
 
     def __init__(self, backends, core):

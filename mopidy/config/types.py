@@ -30,11 +30,11 @@ def encode(value):
     return value.encode("utf-8", "surrogateescape")
 
 
-class DeprecatedValue(object):
+class DeprecatedValue:
     pass
 
 
-class ConfigValue(object):
+class ConfigValue:
     """Represents a config key's value and how to handle it.
 
     Normally you will only be interacting with sub-classes for config values
@@ -116,7 +116,7 @@ class Secret(String):
     def serialize(self, value, display=False):
         if value is not None and display:
             return b"********"
-        return super(Secret, self).serialize(value, display)
+        return super().serialize(value, display)
 
 
 class Integer(ConfigValue):
@@ -265,7 +265,7 @@ class Hostname(ConfigValue):
 
         try:
             socket.getaddrinfo(value, None)
-        except socket.error:
+        except OSError:
             raise ValueError("must be a resolveable hostname or valid IP")
 
         return value
@@ -279,14 +279,14 @@ class Port(Integer):
     """
 
     def __init__(self, choices=None, optional=False):
-        super(Port, self).__init__(
+        super().__init__(
             minimum=0, maximum=2 ** 16 - 1, choices=choices, optional=optional
         )
 
 
 class _ExpandedPath(str):
     def __new__(cls, original, expanded):
-        return super(_ExpandedPath, cls).__new__(cls, expanded)
+        return super().__new__(cls, expanded)
 
     def __init__(self, original, expanded):
         self.original = original

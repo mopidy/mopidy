@@ -11,7 +11,7 @@ from mopidy.internal import deprecation, jsonrpc
 from tests import dummy_backend
 
 
-class Calculator(object):
+class Calculator:
     def __init__(self):
         self._mem = None
 

@@ -26,7 +26,7 @@ class FileLibraryProvider(backend.LibraryProvider):
         return models.Ref.directory(name="Files", uri=uri)
 
     def __init__(self, backend, config):
-        super(FileLibraryProvider, self).__init__(backend)
+        super().__init__(backend)
         self._media_dirs = list(self._get_media_dirs(config))
         self._show_dotfiles = config["file"]["show_dotfiles"]
         self._excluded_file_extensions = tuple(
@@ -57,7 +57,7 @@ class FileLibraryProvider(backend.LibraryProvider):
             child_path = dir_entry.resolve()
             uri = path.path_to_uri(child_path)
 
-            if not self._show_dotfiles and dir_entry.name.startswith(str(".")):
+            if not self._show_dotfiles and dir_entry.name.startswith("."):
                 continue
 
             if (

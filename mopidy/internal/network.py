@@ -42,7 +42,7 @@ def try_ipv6_socket():
     try:
         socket.socket(socket.AF_INET6).close()
         return True
-    except IOError as error:
+    except OSError as error:
         logger.debug(
             "Platform supports IPv6, but socket creation failed, "
             "disabling: %s",
@@ -81,7 +81,7 @@ def format_address(address):
     """Format socket address for display."""
     host, port = address[:2]
     if port is not None:
-        return "[%s]:%s" % (host, port)
+        return "[{}]:{}".format(host, port)
     else:
         return "[%s]" % host
 
@@ -93,7 +93,7 @@ def format_hostname(hostname):
     return hostname
 
 
-class Server(object):
+class Server:
 
     """Setup listener and register it with GLib's event loop."""
 
@@ -165,7 +165,7 @@ class Server(object):
             if is_unix_socket(sock):
                 addr = (sock.getsockname(), None)
             return sock, addr
-        except socket.error as e:
+        except OSError as e:
             if e.errno in (errno.EAGAIN, errno.EINTR):
                 raise ShouldRetrySocketCall
             raise
@@ -184,7 +184,7 @@ class Server(object):
         logger.warning("Rejected connection from %s", format_address(addr))
         try:
             sock.close()
-        except socket.error:
+        except OSError:
             pass
 
     def init_connection(self, sock, addr):
@@ -193,7 +193,7 @@ class Server(object):
         )
 
 
-class Connection(object):
+class Connection:
     # NOTE: the callback code is _not_ run in the actor's thread, but in the
     # same one as the event loop. If code in the callbacks blocks, the rest of
     # GLib code will likely be blocked as well...
@@ -246,7 +246,7 @@ class Connection(object):
 
         try:
             self._sock.close()
-        except socket.error:
+        except OSError:
             pass
 
     def queue_send(self, data):
@@ -262,7 +262,7 @@ class Connection(object):
         try:
             sent = self._sock.send(data)
             return data[sent:]
-        except socket.error as e:
+        except OSError as e:
             if e.errno in (errno.EWOULDBLOCK, errno.EINTR):
                 return data
             self.stop("Unexpected client error: %s" % encoding.locale_decode(e))
@@ -295,7 +295,7 @@ class Connection(object):
                 GLib.IO_IN | GLib.IO_ERR | GLib.IO_HUP,
                 self.recv_callback,
             )
-        except socket.error as e:
+        except OSError as e:
             self.stop("Problem with connection: %s" % e)
 
     def disable_recv(self):
@@ -314,7 +314,7 @@ class Connection(object):
                 GLib.IO_OUT | GLib.IO_ERR | GLib.IO_HUP,
                 self.send_callback,
             )
-        except socket.error as e:
+        except OSError as e:
             self.stop("Problem with connection: %s" % e)
 
     def disable_send(self):
@@ -331,7 +331,7 @@ class Connection(object):
 
         try:
             data = self._sock.recv(4096)
-        except socket.error as e:
+        except OSError as e:
             if e.errno not in (errno.EWOULDBLOCK, errno.EINTR):
                 self.stop("Unexpected client error: %s" % e)
             return True
@@ -395,7 +395,7 @@ class LineProtocol(pykka.ThreadingActor):
     encoding = "utf-8"
 
     def __init__(self, connection):
-        super(LineProtocol, self).__init__()
+        super().__init__()
         self.connection = connection
         self.prevent_timeout = False
         self.recv_buffer = b""

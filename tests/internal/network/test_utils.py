@@ -31,7 +31,7 @@ class FormatAddressTest(unittest.TestCase):
         address = (sentinel.host, sentinel.port, sentinel.flow, sentinel.scope)
         self.assertEqual(
             network.format_address(address),
-            "[%s]:%s" % (sentinel.host, sentinel.port),
+            "[{}]:{}".format(sentinel.host, sentinel.port),
         )
 
     def test_format_address_unix(self):

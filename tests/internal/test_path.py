@@ -1,5 +1,3 @@
-# encoding: utf-8
-
 import pathlib
 import shutil
 import tempfile
@@ -213,7 +211,7 @@ class ExpandPathTest(unittest.TestCase):
         assert result == pathlib.Path("ab\udcc3\x12").resolve()
 
 
-class TestIsPathInsideBaseDir(object):
+class TestIsPathInsideBaseDir:
     def test_when_inside(self):
         assert path.is_path_inside_base_dir("/æ/øå", "/æ")
 
@@ -221,15 +219,13 @@ class TestIsPathInsideBaseDir(object):
         assert not path.is_path_inside_base_dir("/æ/øå", "/ø")
 
     def test_byte_inside_str_does_not_fail(self):
-        assert path.is_path_inside_base_dir("/æ/øå".encode("utf-8"), "/æ")
+        assert path.is_path_inside_base_dir("/æ/øå".encode(), "/æ")
 
     def test_str_inside_byte_does_not_fail(self):
-        assert path.is_path_inside_base_dir("/æ/øå", "/æ".encode("utf-8"))
+        assert path.is_path_inside_base_dir("/æ/øå", "/æ".encode())
 
     def test_str_inside_str_fails_does_not_fail(self):
         assert path.is_path_inside_base_dir("/æ/øå", "/æ")
 
     def test_bytes_inside_bytes_fails_does_not_fail(self):
-        assert path.is_path_inside_base_dir(
-            "/æ/øå".encode("utf-8"), "/æ".encode("utf-8")
-        )
+        assert path.is_path_inside_base_dir("/æ/øå".encode(), "/æ".encode())

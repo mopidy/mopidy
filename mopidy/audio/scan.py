@@ -30,7 +30,7 @@ def _trace(*args, **kwargs):
 
 
 # TODO: replace with a scan(uri, timeout=1000, proxy_config=None)?
-class Scanner(object):
+class Scanner:
 
     """
     Helper to get tags and other relevant info from URIs.

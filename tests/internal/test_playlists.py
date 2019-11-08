@@ -1,6 +1,3 @@
-# encoding: utf-8
-
-
 import pytest
 
 from mopidy.internal import playlists

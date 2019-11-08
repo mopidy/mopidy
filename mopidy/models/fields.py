@@ -1,7 +1,7 @@
 import sys
 
 
-class Field(object):
+class Field:
 
     """
     Base field for use in
@@ -73,7 +73,7 @@ class String(Field):
         # TODO: normalize to unicode?
         # TODO: only allow unicode?
         # TODO: disallow empty strings?
-        super(String, self).__init__(type=str, default=default)
+        super().__init__(type=str, default=default)
 
 
 class Date(String):
@@ -99,7 +99,7 @@ class Identifier(String):
     """
 
     def validate(self, value):
-        value = super(Identifier, self).validate(value)
+        value = super().validate(value)
         if isinstance(value, bytes):
             value = value.decode("utf-8")
         return sys.intern(value)
@@ -129,10 +129,10 @@ class Integer(Field):
     def __init__(self, default=None, min=None, max=None):
         self._min = min
         self._max = max
-        super(Integer, self).__init__(type=int, default=default)
+        super().__init__(type=int, default=default)
 
     def validate(self, value):
-        value = super(Integer, self).validate(value)
+        value = super().validate(value)
         if self._min is not None and value < self._min:
             raise ValueError(
                 "Expected %s to be at least %d, not %d"
@@ -154,7 +154,7 @@ class Boolean(Field):
     """
 
     def __init__(self, default=None):
-        super(Boolean, self).__init__(type=bool, default=default)
+        super().__init__(type=bool, default=default)
 
 
 class Collection(Field):
@@ -166,7 +166,7 @@ class Collection(Field):
     """
 
     def __init__(self, type, container=tuple):
-        super(Collection, self).__init__(type=type, default=container())
+        super().__init__(type=type, default=container())
 
     def validate(self, value):
         if isinstance(value, str):

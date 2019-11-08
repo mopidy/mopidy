@@ -6,7 +6,7 @@ def path_to_data_dir(name):
     return path.resolve()
 
 
-class IsA(object):
+class IsA:
     def __init__(self, klass):
         self.klass = klass
 

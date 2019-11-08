@@ -4,7 +4,7 @@ from mopidy.audio import utils
 from mopidy.internal.gi import Gst
 
 
-class TestCreateBuffer(object):
+class TestCreateBuffer:
     def test_creates_buffer(self):
         buf = utils.create_buffer(b"123", timestamp=0, duration=1000000)
 

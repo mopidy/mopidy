@@ -26,7 +26,7 @@ def _mixer_error_handling(mixer):
         )
 
 
-class MixerController(object):
+class MixerController:
     pykka_traversable = True
 
     def __init__(self, mixer):

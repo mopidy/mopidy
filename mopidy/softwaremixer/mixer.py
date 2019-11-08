@@ -13,7 +13,7 @@ class SoftwareMixer(pykka.ThreadingActor, mixer.Mixer):
     name = "software"
 
     def __init__(self, config):
-        super(SoftwareMixer, self).__init__(config)
+        super().__init__(config)
 
         self._audio_mixer = None
         self._initial_volume = None

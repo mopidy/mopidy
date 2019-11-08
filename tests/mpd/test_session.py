@@ -24,5 +24,7 @@ def test_on_line_received_logged(caplog):
 
     mpd_session.on_line_received(sentinel.line)
 
-    assert "Request from %s: %s" % (connection, sentinel.line) in caplog.text
-    assert "Response to %s:" % (connection,) in caplog.text
+    assert (
+        "Request from {}: {}".format(connection, sentinel.line) in caplog.text
+    )
+    assert "Response to {}:".format(connection) in caplog.text

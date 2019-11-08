@@ -1,6 +1,3 @@
-# encoding: utf-8
-
-
 import unittest
 
 from mopidy.audio import tags
@@ -8,7 +5,7 @@ from mopidy.internal.gi import GLib, GObject, Gst
 from mopidy.models import Album, Artist, Track
 
 
-class TestConvertTaglist(object):
+class TestConvertTaglist:
     def make_taglist(self, tag, values):
         taglist = Gst.TagList.new_empty()
 

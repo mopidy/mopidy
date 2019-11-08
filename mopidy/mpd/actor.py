@@ -29,7 +29,7 @@ _CORE_EVENTS_TO_IDLE_SUBSYSTEMS = {
 
 class MpdFrontend(pykka.ThreadingActor, CoreListener):
     def __init__(self, config, core):
-        super(MpdFrontend, self).__init__()
+        super().__init__()
 
         self.hostname = network.format_hostname(config["mpd"]["hostname"])
         self.port = config["mpd"]["port"]
@@ -54,7 +54,7 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
                 max_connections=config["mpd"]["max_connections"],
                 timeout=config["mpd"]["connection_timeout"],
             )
-        except IOError as error:
+        except OSError as error:
             raise exceptions.FrontendError(
                 "MPD server startup failed: %s" % encoding.locale_decode(error)
             )

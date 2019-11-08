@@ -108,7 +108,7 @@ def RANGE(value):  # noqa: N802
     return slice(start, stop)
 
 
-class Commands(object):
+class Commands:
 
     """Collection of MPD commands to expose to users.
 

@@ -14,7 +14,7 @@ from tests import dummy_audio, dummy_backend
 
 class MyTestPlaybackProvider(backend.PlaybackProvider):
     def __init__(self, audio, backend):
-        super(MyTestPlaybackProvider, self).__init__(audio, backend)
+        super().__init__(audio, backend)
         self._call_limit = 10
         self._call_count = 0
         self._call_onetime = False
@@ -54,11 +54,11 @@ class MyTestPlaybackProvider(backend.PlaybackProvider):
 
 class MyTestBackend(dummy_backend.DummyBackend):
     def __init__(self, config, audio):
-        super(MyTestBackend, self).__init__(config, audio)
+        super().__init__(config, audio)
         self.playback = MyTestPlaybackProvider(audio=audio, backend=self)
 
 
-class BaseTest(object):
+class BaseTest:
     config = {"core": {"max_tracklist_length": 10000}}
     tracks = [
         Track(uri="dummy:a", length=1234, name="foo"),
@@ -855,7 +855,7 @@ class TestUnplayableURI(BaseTest):
     ]
 
     def setup_method(self, method):
-        super(TestUnplayableURI, self).setup_method(method)
+        super().setup_method(method)
         tl_tracks = self.core.tracklist.get_tl_tracks()
         self.core.playback._set_current_tl_track(tl_tracks[0])
 
@@ -1007,7 +1007,7 @@ class TestStream(BaseTest):
         assert self.playback.get_stream_title() is None
 
 
-class TestBackendSelection(object):
+class TestBackendSelection:
     def setup_method(self, method):
         config = {"core": {"max_tracklist_length": 10000}}
 
@@ -1153,7 +1153,7 @@ class TestBackendSelection(object):
         self.playback2.get_time_position.assert_called_once_with()
 
 
-class TestCorePlaybackWithOldBackend(object):
+class TestCorePlaybackWithOldBackend:
     def test_type_error_from_old_backend_does_not_crash_core(self):
         config = {"core": {"max_tracklist_length": 10000}}
 
@@ -1172,7 +1172,7 @@ class TestCorePlaybackWithOldBackend(object):
         b.playback.play.assert_called_once_with()
 
 
-class TestBug1177Regression(object):
+class TestBug1177Regression:
     def test(self):
         config = {"core": {"max_tracklist_length": 10000}}
 

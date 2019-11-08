@@ -10,7 +10,7 @@ class Model(ImmutableObject):
 
     def __init__(self, *args, **kwargs):
         self.__dict__["models"] = frozenset(kwargs.pop("models", None) or [])
-        super(Model, self).__init__(self, *args, **kwargs)
+        super().__init__(self, *args, **kwargs)
 
 
 class SubModel(ImmutableObject):
