@@ -24,6 +24,8 @@ Dependencies
 
 - Pykka >= 2.0.1 is now required.
 
+- Tornado >= 4.4 is now required. The upper boundary (< 6) has been removed.
+
 - We now use a number of constants and functions from ``GLib`` instead of their
   deprecated equivalents in ``GObject``. The exact version of PyGObject and
   GLib that makes these constants and functions available in the new location
