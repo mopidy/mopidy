@@ -87,7 +87,7 @@ _INITIAL_HELP = """
 #   http://docs.mopidy.com/
 #
 # The initial commented out values reflect the defaults as of:
-#   %(versions)s
+#   {versions}
 #
 # Available options and defaults might have changed since then,
 # run `mopidy config` to see the current effective config and
@@ -129,14 +129,14 @@ def format_initial(extensions_data):
 
     config, errors = _validate(raw_config, schemas)
 
-    versions = ["Mopidy %s" % versioning.get_version()]
+    versions = [f"Mopidy {versioning.get_version()}"]
     extensions_data = sorted(
         extensions_data, key=lambda d: d.extension.dist_name
     )
     for data in extensions_data:
         versions.append(f"{data.extension.dist_name} {data.extension.version}")
 
-    header = _INITIAL_HELP.strip() % {"versions": "\n#   ".join(versions)}
+    header = _INITIAL_HELP.strip().format(versions="\n#   ".join(versions))
     formatted_config = _format(
         config=config, comments={}, schemas=schemas, display=False, disable=True
     ).decode()
@@ -239,12 +239,12 @@ def _format(config, comments, schemas, display, disable):
         )
         if not serialized:
             continue
-        output.append("[%s]" % schema.name)
+        output.append(f"[{schema.name}]")
         for key, value in serialized.items():
             if isinstance(value, DeprecatedValue):
                 continue
             comment = comments.get(schema.name, {}).get(key, "")
-            output.append("%s =" % key)
+            output.append(f"{key} =")
             if value is not None:
                 if isinstance(value, bytes):
                     # TODO: Change ConfigValue.serialize() to return
@@ -270,22 +270,20 @@ def _preprocess(config_string):
     inline_comment_re = re.compile(r" ;")
 
     def newlines(match):
-        return "__BLANK%d__ =" % next(counter)
+        return f"__BLANK{next(counter):d}__ ="
 
     def comments(match):
         if match.group(1) == "#":
-            return "__HASH%d__ =" % next(counter)
+            return f"__HASH{next(counter):d}__ ="
         elif match.group(1) == ";":
-            return "__SEMICOLON%d__ =" % next(counter)
+            return f"__SEMICOLON{next(counter):d}__ ="
 
     def inlinecomments(match):
-        return "\n__INLINE%d__ =" % next(counter)
+        return f"\n__INLINE{next(counter):d}__ ="
 
     def sections(match):
-        return "%s\n__SECTION%d__ = %s" % (
-            match.group(1),
-            next(counter),
-            match.group(2),
+        return (
+            f"{match.group(1)}\n__SECTION{next(counter):d}__ = {match.group(2)}"
         )
 
     for line in config_string.splitlines():
@@ -326,4 +324,4 @@ class Proxy(Mapping):
         return self._data.__len__()
 
     def __repr__(self):
-        return b"Proxy(%r)" % self._data
+        return f"Proxy({self._data!r})"

@@ -129,7 +129,7 @@ class DummyPlaylistsProvider(backend.PlaylistsProvider):
         pass
 
     def create(self, name):
-        playlist = Playlist(name=name, uri="dummy:%s" % name)
+        playlist = Playlist(name=name, uri=f"dummy:{name}")
         self._playlists.append(playlist)
         return playlist
 

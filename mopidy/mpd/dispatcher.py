@@ -57,7 +57,7 @@ class MpdDispatcher:
 
         response = []
         for subsystem in subsystems:
-            response.append("changed: %s" % subsystem)
+            response.append(f"changed: {subsystem}")
         response.append("OK")
         self.context.subscriptions = set()
         self.context.events = set()

@@ -31,7 +31,7 @@ class ImmutableObject:
         for key, value in kwargs.items():
             if not self._is_valid_field(key):
                 raise TypeError(
-                    '__init__() got an unexpected keyword argument "%s"' % key
+                    f"__init__() got an unexpected keyword argument {key!r}"
                 )
             self._set_field(key, value)
 
@@ -66,10 +66,8 @@ class ImmutableObject:
                 if not value:
                     continue
                 value = list(value)
-            kwarg_pairs.append("{}={}".format(key, repr(value)))
-        return "{classname}({kwargs})".format(
-            classname=self.__class__.__name__, kwargs=", ".join(kwarg_pairs),
-        )
+            kwarg_pairs.append(f"{key}={value!r}")
+        return f"{self.__class__.__name__}({', '.join(kwarg_pairs)})"
 
     def __hash__(self):
         hash_sum = 0
@@ -109,7 +107,7 @@ class ImmutableObject:
         for key, value in kwargs.items():
             if not self._is_valid_field(key):
                 raise TypeError(
-                    'replace() got an unexpected keyword argument "%s"' % key
+                    f"replace() got an unexpected keyword argument {key!r}"
                 )
             other._set_field(key, value)
         return other

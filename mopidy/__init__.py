@@ -5,8 +5,8 @@ import warnings
 
 if not sys.version_info >= (3, 7):
     sys.exit(
-        "ERROR: Mopidy requires Python >= 3.7, but found %s."
-        % platform.python_version()
+        f"ERROR: Mopidy requires Python >= 3.7, "
+        f"but found {platform.python_version()}."
     )
 
 

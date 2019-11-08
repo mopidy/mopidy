@@ -83,7 +83,7 @@ def BOOL(value):  # noqa: N802
     """Convert the values 0 and 1 into booleans."""
     if value in ("1", "0"):
         return bool(int(value))
-    raise ValueError("%r is not 0 or 1" % value)
+    raise ValueError(f"{value!r} is not 0 or 1")
 
 
 def RANGE(value):  # noqa: N802
@@ -144,7 +144,7 @@ class Commands:
 
         def wrapper(func):
             if name in self.handlers:
-                raise ValueError("%s already registered" % name)
+                raise ValueError(f"{name} already registered")
 
             spec = inspect.getfullargspec(func)
             defaults = dict(
@@ -175,7 +175,7 @@ class Commands:
                     callargs = ba.arguments
                 except TypeError:
                     raise exceptions.MpdArgError(
-                        'wrong number of arguments for "%s"' % name
+                        f'wrong number of arguments for "{name}"'
                     )
 
                 for key, value in callargs.items():

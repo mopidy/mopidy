@@ -83,13 +83,13 @@ def format_address(address):
     if port is not None:
         return f"[{host}]:{port}"
     else:
-        return "[%s]" % host
+        return f"[{host}]"
 
 
 def format_hostname(hostname):
     """Format hostname for display."""
     if has_ipv6 and re.match(r"\d+.\d+.\d+.\d+", hostname) is not None:
-        hostname = "::ffff:%s" % hostname
+        hostname = f"::ffff:{hostname}"
     return hostname
 
 
@@ -228,7 +228,7 @@ class Connection:
 
     def stop(self, reason, level=logging.DEBUG):
         if self.stopping:
-            logger.log(level, "Already stopping: %s" % reason)
+            logger.log(level, f"Already stopping: {reason}")
             return
         else:
             self.stopping = True
@@ -265,7 +265,7 @@ class Connection:
         except OSError as e:
             if e.errno in (errno.EWOULDBLOCK, errno.EINTR):
                 return data
-            self.stop("Unexpected client error: %s" % encoding.locale_decode(e))
+            self.stop(f"Unexpected client error: {encoding.locale_decode(e)}")
             return b""
 
     def enable_timeout(self):
@@ -296,7 +296,7 @@ class Connection:
                 self.recv_callback,
             )
         except OSError as e:
-            self.stop("Problem with connection: %s" % e)
+            self.stop(f"Problem with connection: {encoding.locale_decode(e)}")
 
     def disable_recv(self):
         if self.recv_id is None:
@@ -315,7 +315,7 @@ class Connection:
                 self.send_callback,
             )
         except OSError as e:
-            self.stop("Problem with connection: %s" % e)
+            self.stop(f"Problem with connection: {encoding.locale_decode(e)}")
 
     def disable_send(self):
         if self.send_id is None:
@@ -326,14 +326,16 @@ class Connection:
 
     def recv_callback(self, fd, flags):
         if flags & (GLib.IO_ERR | GLib.IO_HUP):
-            self.stop("Bad client flags: %s" % flags)
+            self.stop(f"Bad client flags: {flags}")
             return True
 
         try:
             data = self._sock.recv(4096)
         except OSError as e:
             if e.errno not in (errno.EWOULDBLOCK, errno.EINTR):
-                self.stop("Unexpected client error: %s" % e)
+                self.stop(
+                    f"Unexpected client error: {encoding.locale_decode(e)}"
+                )
             return True
 
         if not data:
@@ -350,7 +352,7 @@ class Connection:
 
     def send_callback(self, fd, flags):
         if flags & (GLib.IO_ERR | GLib.IO_HUP):
-            self.stop("Bad client flags: %s" % flags)
+            self.stop(f"Bad client flags: {flags}")
             return True
 
         # If with can't get the lock, simply try again next time socket is
@@ -368,7 +370,7 @@ class Connection:
         return True
 
     def timeout_callback(self):
-        self.stop("Client inactive for %ds; closing connection" % self.timeout)
+        self.stop(f"Client inactive for {self.timeout:d}s; closing connection")
         return False
 
     def __str__(self):

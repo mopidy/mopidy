@@ -235,10 +235,10 @@ class JsonRpcHandler(tornado.web.RequestHandler):
             if not check_origin(
                 origin, self.request.headers, self.allowed_origins
             ):
-                self.set_status(403, "Access denied for origin %s" % origin)
+                self.set_status(403, f"Access denied for origin {origin}")
                 return
 
-            self.set_header("Access-Control-Allow-Origin", "%s" % origin)
+            self.set_header("Access-Control-Allow-Origin", f"{origin}")
             self.set_header("Access-Control-Allow-Headers", "Content-Type")
 
         self.set_status(204)

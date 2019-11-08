@@ -68,7 +68,7 @@ def dump_items(items, fp):
         print("#EXTM3U", file=fp)
     for item in items:
         if item.name:
-            print("#EXTINF:-1,%s" % item.name, file=fp)
+            print(f"#EXTINF:-1,{item.name}", file=fp)
         # TODO: convert file URIs to (relative) paths?
         if isinstance(item.uri, bytes):
             print(item.uri.decode(), file=fp)

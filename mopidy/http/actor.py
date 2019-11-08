@@ -47,9 +47,10 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
                 apps=self.apps,
                 statics=self.statics,
             )
-        except OSError as error:
+        except OSError as exc:
+            error = encoding.locale_decode(exc)
             raise exceptions.FrontendError(
-                "HTTP server startup failed: %s" % encoding.locale_decode(error)
+                f"HTTP server startup failed: {error}"
             )
 
         self.zeroconf_name = config["http"]["zeroconf"]
@@ -137,7 +138,8 @@ class HttpServer(threading.Thread):
             "HTTP routes from extensions: %s",
             formatting.indent(
                 "\n".join(
-                    "{!r}: {!r}".format(r[0], r[1]) for r in request_handlers
+                    f"{path!r}: {handler!r}"
+                    for (path, handler, *_) in request_handlers
                 )
             ),
         )
@@ -153,10 +155,10 @@ class HttpServer(threading.Thread):
                 logger.exception("Loading %s failed.", app["name"])
                 continue
 
-            result.append((r"/%s" % app["name"], handlers.AddSlashHandler))
+            result.append((f"/{app['name']}", handlers.AddSlashHandler))
             for handler in request_handlers:
                 handler = list(handler)
-                handler[0] = "/{}{}".format(app["name"], handler[0])
+                handler[0] = f"/{app['name']}{handler[0]}"
                 result.append(tuple(handler))
             logger.debug("Loaded HTTP extension: %s", app["name"])
         return result
@@ -164,10 +166,10 @@ class HttpServer(threading.Thread):
     def _get_static_request_handlers(self):
         result = []
         for static in self.statics:
-            result.append((r"/%s" % static["name"], handlers.AddSlashHandler))
+            result.append((f"/{static['name']}", handlers.AddSlashHandler))
             result.append(
                 (
-                    r"/%s/(.*)" % static["name"],
+                    f"/{static['name']}/(.*)",
                     handlers.StaticFileHandler,
                     {"path": static["path"], "default_filename": "index.html"},
                 )
@@ -178,7 +180,7 @@ class HttpServer(threading.Thread):
     def _get_mopidy_request_handlers(self):
         return [
             (
-                r"/",
+                "/",
                 tornado.web.RedirectHandler,
                 {"url": "/mopidy/", "permanent": False},
             )

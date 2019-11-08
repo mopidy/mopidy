@@ -66,7 +66,7 @@ class ConfigSchema(collections.OrderedDict):
                 errors[key] = "unknown config key."
                 suggestion = _did_you_mean(key, self.keys())
                 if suggestion:
-                    errors[key] += " Did you mean %s?" % suggestion
+                    errors[key] += f" Did you mean {suggestion!r}?"
             except ValueError as e:  # deserialization failed
                 result[key] = None
                 errors[key] = str(e)

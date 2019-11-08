@@ -25,7 +25,7 @@ class AddCommandsTest(protocol.BaseTestCase):
 
     def test_add(self):
         for track in [self.tracks[0], self.tracks[0], self.tracks[1]]:
-            self.send_request('add "%s"' % track.uri)
+            self.send_request(f'add "{track.uri}"')
 
         self.assertEqual(len(self.core.tracklist.get_tracks().get()), 3)
         self.assertEqual(
@@ -35,7 +35,7 @@ class AddCommandsTest(protocol.BaseTestCase):
 
     def test_add_unicode(self):
         for track in [self.tracks[0], self.tracks[1], self.tracks[2]]:
-            self.send_request('add "%s"' % track.uri)
+            self.send_request(f'add "{track.uri}"')
 
         self.assertEqual(len(self.core.tracklist.get_tracks().get()), 3)
         self.assertEqual(
@@ -77,27 +77,27 @@ class AddCommandsTest(protocol.BaseTestCase):
 
     def test_addid_without_songpos(self):
         for track in [self.tracks[0], self.tracks[0], self.tracks[1]]:
-            self.send_request('addid "%s"' % track.uri)
+            self.send_request(f'addid "{track.uri}"')
         tl_tracks = self.core.tracklist.get_tl_tracks().get()
 
         self.assertEqual(len(tl_tracks), 3)
         self.assertEqual(tl_tracks[2].track, self.tracks[1])
-        self.assertInResponse("Id: %d" % tl_tracks[2].tlid)
+        self.assertInResponse(f"Id: {tl_tracks[2].tlid:d}")
         self.assertInResponse("OK")
 
     def test_addid_with_songpos(self):
         for track in [self.tracks[0], self.tracks[0]]:
-            self.send_request('add "%s"' % track.uri)
-        self.send_request('addid "%s" "1"' % self.tracks[1].uri)
+            self.send_request(f'add "{track.uri}"')
+        self.send_request(f'addid "{self.tracks[1].uri}" "1"')
         tl_tracks = self.core.tracklist.get_tl_tracks().get()
 
         self.assertEqual(len(tl_tracks), 3)
         self.assertEqual(tl_tracks[1].track, self.tracks[1])
-        self.assertInResponse("Id: %d" % tl_tracks[1].tlid)
+        self.assertInResponse(f"Id: {tl_tracks[1].tlid:d}")
         self.assertInResponse("OK")
 
     def test_addid_with_songpos_out_of_bounds_should_ack(self):
-        self.send_request('addid "%s" "3"' % self.tracks[0].uri)
+        self.send_request(f'addid "{self.tracks[0].uri}" "3"')
         self.assertEqualResponse("ACK [2@0] {addid} Bad song index")
 
     def test_addid_with_empty_uri_acks(self):
@@ -112,7 +112,7 @@ class AddCommandsTest(protocol.BaseTestCase):
 class BasePopulatedTracklistTestCase(protocol.BaseTestCase):
     def setUp(self):  # noqa: N802
         super().setUp()
-        tracks = [Track(uri="dummy:/%s" % x, name=x) for x in "abcdeǂ"]
+        tracks = [Track(uri=f"dummy:/{x}", name=x) for x in "abcdeǂ"]
         self.backend.library.dummy_library = tracks
         self.core.tracklist.add(uris=[t.uri for t in tracks])
 
@@ -126,7 +126,7 @@ class DeleteCommandsTest(BasePopulatedTracklistTestCase):
 
     def test_delete_songpos(self):
         tl_tracks = self.core.tracklist.get_tl_tracks().get()
-        self.send_request('delete "%d"' % tl_tracks[1].tlid)
+        self.send_request(f'delete "{tl_tracks[1].tlid}"')
         self.assertEqual(len(self.core.tracklist.get_tracks().get()), 5)
         self.assertInResponse("OK")
 
@@ -386,11 +386,11 @@ class PlChangeCommandTest(BasePopulatedTracklistTestCase):
         self.send_request('plchangesposid "0"')
         tl_tracks = self.core.tracklist.get_tl_tracks().get()
         self.assertInResponse("cpos: 0")
-        self.assertInResponse("Id: %d" % tl_tracks[0].tlid)
+        self.assertInResponse(f"Id: {tl_tracks[0].tlid:d}")
         self.assertInResponse("cpos: 2")
-        self.assertInResponse("Id: %d" % tl_tracks[1].tlid)
+        self.assertInResponse(f"Id: {tl_tracks[1].tlid:d}")
         self.assertInResponse("cpos: 2")
-        self.assertInResponse("Id: %d" % tl_tracks[2].tlid)
+        self.assertInResponse(f"Id: {tl_tracks[2].tlid:d}")
         self.assertInResponse("OK")
 
 

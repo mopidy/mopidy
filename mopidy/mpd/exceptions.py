@@ -32,11 +32,9 @@ class MpdAckError(MopidyException):
 
             ACK [%(error_code)i@%(index)i] {%(command)s} description
         """
-        return "ACK [%i@%i] {%s} %s" % (
-            self.__class__.error_code,
-            self.index,
-            self.command,
-            self.message,
+        return (
+            f"ACK [{self.__class__.error_code:d}@{self.index:d}] "
+            f"{{{self.command}}} {self.message}"
         )
 
 
@@ -54,7 +52,7 @@ class MpdPermissionError(MpdAckError):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         assert self.command is not None, "command must be given explicitly"
-        self.message = 'you don\'t have permission for "%s"' % self.command
+        self.message = f'you don\'t have permission for "{self.command}"'
 
 
 class MpdUnknownError(MpdAckError):
@@ -65,7 +63,7 @@ class MpdUnknownCommand(MpdUnknownError):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         assert self.command is not None, "command must be given explicitly"
-        self.message = 'unknown command "%s"' % self.command
+        self.message = f'unknown command "{self.command}"'
         self.command = ""
 
 
@@ -114,8 +112,8 @@ class MpdInvalidTrackForPlaylist(MpdAckError):
     def __init__(self, playlist_scheme, track_scheme, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.message = (
-            'Playlist with scheme "%s" can\'t store track scheme "%s"'
-            % (playlist_scheme, track_scheme)
+            f'Playlist with scheme "{playlist_scheme}" '
+            f'can\'t store track scheme "{track_scheme}"'
         )
 
 
@@ -125,8 +123,8 @@ class MpdFailedToSavePlaylist(MpdAckError):
 
     def __init__(self, backend_scheme, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.message = 'Backend with scheme "%s" failed to save playlist' % (
-            backend_scheme
+        self.message = (
+            f'Backend with scheme "{backend_scheme}" failed to save playlist'
         )
 
 
@@ -137,4 +135,4 @@ class MpdDisabled(MpdAckError):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         assert self.command is not None, "command must be given explicitly"
-        self.message = '"%s" has been disabled in the server' % self.command
+        self.message = f'"{self.command}" has been disabled in the server'

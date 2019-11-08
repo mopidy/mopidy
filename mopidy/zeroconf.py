@@ -64,7 +64,7 @@ class Zeroconf:
                     self.bus.get_object("org.freedesktop.Avahi", "/"),
                     "org.freedesktop.Avahi.Server",
                 )
-                self.display_hostname = "%s" % self.server.GetHostName()
+                self.display_hostname = f"{self.server.GetHostName()}"
                 self.name = string.Template(name).safe_substitute(
                     hostname=self.display_hostname, port=port
                 )
@@ -72,11 +72,9 @@ class Zeroconf:
                 logger.debug("%s: Server failed: %s", self, e)
 
     def __str__(self):
-        return 'Zeroconf service "%s" (%s at [%s]:%d)' % (
-            self.name,
-            self.stype,
-            self.host,
-            self.port,
+        return (
+            f"Zeroconf service {self.name!r} "
+            f"({self.stype} at [{self.host}]:{self.port:d})"
         )
 
     def publish(self):

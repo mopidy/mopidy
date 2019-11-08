@@ -35,7 +35,7 @@ def config_override_type(value):
         return (section.strip(), key.strip(), value.strip())
     except ValueError:
         raise argparse.ArgumentTypeError(
-            "%s must have the format section/key=value" % value
+            f"{value} must have the format section/key=value"
         )
 
 
@@ -218,7 +218,7 @@ class Command:
         child = result._args.pop(0)
         if child not in self._children:
             usage = self._usage(actions, prog)
-            self.exit(1, "unrecognized command: %s" % child, usage)
+            self.exit(1, f"unrecognized command: {child}", usage)
 
         return self._children[child]._parse(
             result._args, result, overrides, " ".join([prog, child])
@@ -258,7 +258,7 @@ class RootCommand(Command):
         self.add_argument(
             "--version",
             action="version",
-            version="Mopidy %s" % versioning.get_version(),
+            version=f"Mopidy {versioning.get_version()}",
         )
         self.add_argument(
             "-q",

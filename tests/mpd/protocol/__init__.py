@@ -65,7 +65,7 @@ class BaseTestCase(unittest.TestCase):
 
     def send_request(self, request):
         self.connection.response = []
-        request = ("%s\n" % request).encode()
+        request = f"{request}\n".encode()
         self.session.on_receive({"received": request})
         return self.connection.response
 
@@ -76,9 +76,7 @@ class BaseTestCase(unittest.TestCase):
         self.assertIn(
             value,
             self.connection.response,
-            "Did not find {} in {}".format(
-                repr(value), repr(self.connection.response)
-            ),
+            f"Did not find {value!r} in {self.connection.response!r}",
         )
 
     def assertOnceInResponse(self, value):  # noqa: N802
@@ -86,18 +84,14 @@ class BaseTestCase(unittest.TestCase):
         self.assertEqual(
             1,
             matched,
-            "Expected to find {} once in {}".format(
-                repr(value), repr(self.connection.response)
-            ),
+            f"Expected to find {value!r} once in {self.connection.response!r}",
         )
 
     def assertNotInResponse(self, value):  # noqa: N802
         self.assertNotIn(
             value,
             self.connection.response,
-            "Found {} in {}".format(
-                repr(value), repr(self.connection.response)
-            ),
+            f"Found {value!r} in {self.connection.response!r}",
         )
 
     def assertEqualResponse(self, value):  # noqa: N802

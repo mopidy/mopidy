@@ -18,7 +18,7 @@ def test(ctx, path=None, coverage=False, watch=False, warn=False):
     cmd = "pytest"
     if coverage:
         cmd += " --cov=mopidy --cov-report=term-missing"
-    cmd += " %s" % path
+    cmd += f" {path}"
     run(cmd, pty=True, warn=warn)
 
 

@@ -491,9 +491,11 @@ an example of how to use it::
 
     >>> from mopidy import httpclient
     >>> import mopidy_soundspot
-    >>> httpclient.format_user_agent('%s/%s' % (
-    ...     mopidy_soundspot.Extension.dist_name, mopidy_soundspot.__version__))
-    u'Mopidy-SoundSpot/2.0.0 Mopidy/1.0.7 Python/2.7.10'
+    >>> httpclient.format_user_agent(
+    ...     f'{mopidy_soundspot.Extension.dist_name}/'
+    ...     f'{mopidy_soundspot.__version__}'
+    ... )
+    'Mopidy-SoundSpot/2.0.0 Mopidy/3.0.0 Python/3.7.5'
 
 Example using Requests sessions
 -------------------------------
@@ -526,9 +528,10 @@ your HTTP requests::
     # constructor
     session = get_requests_session(
         proxy_config=mopidy_config['proxy'],
-        user_agent='%s/%s' % (
-            mopidy_soundspot.Extension.dist_name,
-            mopidy_soundspot.__version__))
+        user_agent=(
+            f'{mopidy_soundspot.Extension.dist_name}/{mopidy_soundspot.__version__}'
+        )
+    )
 
     response = session.get('http://example.com')
     # Now do something with ``response`` and/or make further requests using the

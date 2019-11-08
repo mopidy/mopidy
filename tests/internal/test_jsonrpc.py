@@ -362,7 +362,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         error = response["error"]
         self.assertEqual(error["code"], -32600)
         self.assertEqual(error["message"], "Invalid Request")
-        self.assertEqual(error["data"], '"jsonrpc" member must be included')
+        self.assertEqual(error["data"], "'jsonrpc' member must be included")
 
     def test_wrong_jsonrpc_version_causes_invalid_request_error(self):
         request = {
@@ -376,7 +376,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         error = response["error"]
         self.assertEqual(error["code"], -32600)
         self.assertEqual(error["message"], "Invalid Request")
-        self.assertEqual(error["data"], '"jsonrpc" value must be "2.0"')
+        self.assertEqual(error["data"], "'jsonrpc' value must be '2.0'")
 
     def test_missing_method_member_causes_invalid_request_error(self):
         request = {
@@ -389,7 +389,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         error = response["error"]
         self.assertEqual(error["code"], -32600)
         self.assertEqual(error["message"], "Invalid Request")
-        self.assertEqual(error["data"], '"method" member must be included')
+        self.assertEqual(error["data"], "'method' member must be included")
 
     def test_invalid_method_value_causes_invalid_request_error(self):
         request = {
@@ -403,7 +403,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         error = response["error"]
         self.assertEqual(error["code"], -32600)
         self.assertEqual(error["message"], "Invalid Request")
-        self.assertEqual(error["data"], '"method" must be a string')
+        self.assertEqual(error["data"], "'method' must be a string")
 
     def test_invalid_params_value_causes_invalid_request_error(self):
         request = {
@@ -419,7 +419,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         self.assertEqual(error["code"], -32600)
         self.assertEqual(error["message"], "Invalid Request")
         self.assertEqual(
-            error["data"], '"params", if given, must be an array or an object'
+            error["data"], "'params', if given, must be an array or an object"
         )
 
     def test_method_on_without_object_causes_unknown_method_error(self):
@@ -434,7 +434,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         self.assertEqual(error["code"], -32601)
         self.assertEqual(error["message"], "Method not found")
         self.assertEqual(
-            error["data"], 'Could not find object mount in method name "bogus"'
+            error["data"], "Could not find object mount in method name 'bogus'"
         )
 
     def test_method_on_unknown_object_causes_unknown_method_error(self):
@@ -448,7 +448,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         error = response["error"]
         self.assertEqual(error["code"], -32601)
         self.assertEqual(error["message"], "Method not found")
-        self.assertEqual(error["data"], 'No object found at "bogus"')
+        self.assertEqual(error["data"], "No object found at 'bogus'")
 
     def test_unknown_method_on_known_object_causes_unknown_method_error(self):
         request = {
@@ -462,7 +462,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         self.assertEqual(error["code"], -32601)
         self.assertEqual(error["message"], "Method not found")
         self.assertEqual(
-            error["data"], 'Object mounted at "core" has no member "bogus"'
+            error["data"], "Object mounted at 'core' has no member 'bogus'"
         )
 
     def test_private_method_causes_unknown_method_error(self):

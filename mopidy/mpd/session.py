@@ -25,7 +25,7 @@ class MpdSession(network.LineProtocol):
 
     def on_start(self):
         logger.info("New MPD connection from %s", self.connection)
-        self.send_lines(["OK MPD %s" % protocol.VERSION])
+        self.send_lines([f"OK MPD {protocol.VERSION}"])
 
     def on_line_received(self, line):
         logger.debug("Request from %s: %s", self.connection, line)

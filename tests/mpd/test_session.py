@@ -12,7 +12,7 @@ def test_on_start_logged(caplog):
 
     session.MpdSession(connection).on_start()
 
-    assert "New MPD connection from %s" % connection in caplog.text
+    assert f"New MPD connection from {connection}" in caplog.text
 
 
 def test_on_line_received_logged(caplog):

@@ -19,22 +19,18 @@ def format_proxy(proxy_config, auth=True):
     if not proxy_config.get("hostname"):
         return None
 
+    scheme = proxy_config.get("scheme") or "http"
+    username = proxy_config.get("username")
+    password = proxy_config.get("password")
+    hostname = proxy_config["hostname"]
     port = proxy_config.get("port")
     if not port or port < 0:
         port = 80
 
-    if proxy_config.get("username") and proxy_config.get("password") and auth:
-        template = "{scheme}://{username}:{password}@{hostname}:{port}"
+    if username and password and auth:
+        return f"{scheme}://{username}:{password}@{hostname}:{port}"
     else:
-        template = "{scheme}://{hostname}:{port}"
-
-    return template.format(
-        scheme=proxy_config.get("scheme") or "http",
-        username=proxy_config.get("username"),
-        password=proxy_config.get("password"),
-        hostname=proxy_config["hostname"],
-        port=port,
-    )
+        return f"{scheme}://{hostname}:{port}"
 
 
 def format_user_agent(name=None):
@@ -46,10 +42,8 @@ def format_user_agent(name=None):
     .. versionadded:: 1.1
     """
     parts = [
-        "Mopidy/%s" % (mopidy.__version__),
-        "{}/{}".format(
-            platform.python_implementation(), platform.python_version()
-        ),
+        f"Mopidy/{mopidy.__version__}",
+        f"{platform.python_implementation()}/{platform.python_version()}",
     ]
     if name:
         parts.insert(0, name)

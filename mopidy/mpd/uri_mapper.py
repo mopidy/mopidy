@@ -29,7 +29,7 @@ class MpdUriMapper:
         while name in self._uri_from_name:
             if self._uri_from_name[name] == uri:
                 return name
-            name = "%s [%d]" % (stripped_name, i)
+            name = f"{stripped_name} [{i:d}]"
             i += 1
         return name
 

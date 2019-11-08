@@ -80,7 +80,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
                 pass
             mtime = self._abspath(path).stat().st_mtime
         except OSError as e:
-            log_environment_error("Error creating playlist %s" % name, e)
+            log_environment_error(f"Error creating playlist {name!r}", e)
         else:
             return translator.playlist(path, [], mtime)
 
@@ -92,7 +92,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         try:
             self._abspath(path).unlink()
         except OSError as e:
-            log_environment_error("Error deleting playlist %s" % uri, e)
+            log_environment_error(f"Error deleting playlist {uri!r}", e)
             return False
         else:
             return True
@@ -106,7 +106,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             with self._open(path, "r") as fp:
                 items = translator.load_items(fp, self._base_dir)
         except OSError as e:
-            log_environment_error("Error reading playlist %s" % uri, e)
+            log_environment_error(f"Error reading playlist {uri!r}", e)
         else:
             return items
 
@@ -120,7 +120,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
                 items = translator.load_items(fp, self._base_dir)
             mtime = self._abspath(path).stat().st_mtime
         except OSError as e:
-            log_environment_error("Error reading playlist %s" % uri, e)
+            log_environment_error(f"Error reading playlist {uri!r}", e)
         else:
             return translator.playlist(path, items, mtime)
 
@@ -143,7 +143,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
                 self._abspath(orig_path).rename(self._abspath(path))
             mtime = self._abspath(path).stat().st_mtime
         except OSError as e:
-            log_environment_error("Error saving playlist %s" % playlist.uri, e)
+            log_environment_error(f"Error saving playlist {playlist.uri!r}", e)
         else:
             return translator.playlist(path, playlist.tracks, mtime)
 
@@ -166,8 +166,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             path = self._abspath(path)
         if not self._is_in_basedir(path):
             raise Exception(
-                "Path (%s) is not inside playlist_dir (%s)"
-                % (path, self._playlists_dir)
+                f"Path {path!r} is not inside playlist dir {self._playlist_dir!r}"
             )
         if "w" in mode:
             return replace(path, mode, encoding=encoding, errors="replace")

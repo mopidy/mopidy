@@ -32,12 +32,12 @@ GLib.set_prgname("mopidy")
 GLib.set_application_name("Mopidy")
 
 REQUIRED_GST_VERSION = (1, 2, 3)
+REQUIRED_GST_VERSION_DISPLAY = ".".join(map(str, REQUIRED_GST_VERSION))
 
 if Gst.version() < REQUIRED_GST_VERSION:
     sys.exit(
-        "ERROR: Mopidy requires GStreamer >= {}, but found {}.".format(
-            ".".join(map(str, REQUIRED_GST_VERSION)), Gst.version_string()
-        )
+        f"ERROR: Mopidy requires GStreamer >= {REQUIRED_GST_VERSION_DISPLAY}, "
+        f"but found {Gst.version_string()}."
     )
 
 

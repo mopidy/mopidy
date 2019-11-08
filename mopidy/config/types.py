@@ -167,7 +167,7 @@ class Boolean(ConfigValue):
             return True
         elif value.lower() in self.false_values:
             return False
-        raise ValueError("invalid value for boolean: %r" % value)
+        raise ValueError(f"invalid value for boolean: {value!r}")
 
     def serialize(self, value, display=False):
         if value is True:
@@ -175,7 +175,7 @@ class Boolean(ConfigValue):
         elif value in (False, None):
             return b"false"
         else:
-            raise ValueError("%r is not a boolean" % value)
+            raise ValueError(f"{value!r} is not a boolean")
 
 
 class List(ConfigValue):
@@ -259,9 +259,8 @@ class Hostname(ConfigValue):
 
         socket_path = path.get_unix_socket_path(value)
         if socket_path is not None:
-            return "unix:%s" % (
-                Path(not self._required).deserialize(socket_path)
-            )
+            path_str = Path(not self._required).deserialize(socket_path)
+            return f"unix:{path_str}"
 
         try:
             socket.getaddrinfo(value, None)

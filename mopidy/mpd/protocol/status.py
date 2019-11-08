@@ -100,7 +100,7 @@ def idle(context, *subsystems):
     context.subscriptions = set()
 
     for subsystem in active:
-        response.append("changed: %s" % subsystem)
+        response.append(f"changed: {subsystem}")
     return response
 
 
@@ -293,14 +293,14 @@ def _status_state(futures):
 
 
 def _status_time(futures):
-    return "%d:%d" % (
-        futures["playback.time_position"].get() // 1000,
-        _status_time_total(futures) // 1000,
-    )
+    position = futures["playback.time_position"].get() // 1000
+    total = _status_time_total(futures) // 1000
+    return f"{position:d}:{total:d}"
 
 
 def _status_time_elapsed(futures):
-    return "%.3f" % (futures["playback.time_position"].get() / 1000.0)
+    elapsed = futures["playback.time_position"].get() / 1000.0
+    return f"{elapsed:.3f}"
 
 
 def _status_time_total(futures):

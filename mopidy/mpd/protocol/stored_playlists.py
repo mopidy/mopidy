@@ -39,8 +39,7 @@ def listplaylist(context, name):
         file: relative/path/to/file3.mp3
     """
     playlist = _get_playlist(context, name)
-    uris = [t.uri for t in playlist.tracks]
-    return ["file: %s" % u for u in uris]
+    return [f"file: {track.uri}" for track in playlist.tracks]
 
 
 @protocol.commands.add("listplaylistinfo")
@@ -117,7 +116,7 @@ def _get_last_modified(last_modified=None):
     else:
         dt = datetime.datetime.utcfromtimestamp(last_modified / 1000.0)
     dt = dt.replace(microsecond=0)
-    return "%sZ" % dt.isoformat()
+    return f"{dt.isoformat()}Z"
 
 
 DEFAULT_PLAYLIST_SLICE = slice(0, None)

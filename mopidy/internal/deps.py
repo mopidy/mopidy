@@ -38,21 +38,14 @@ def _format_dependency(dep_info):
     lines = []
 
     if "version" not in dep_info:
-        lines.append("%s: not found" % dep_info["name"])
+        lines.append(f"{dep_info['name']}: not found")
     else:
-        if "path" in dep_info:
-            source = " from %s" % dep_info["path"]
-        else:
-            source = ""
-        lines.append(
-            "{}: {}{}".format(dep_info["name"], dep_info["version"], source,)
-        )
+        source = f" from {dep_info['path']}" if "path" in dep_info else ""
+        lines.append(f"{dep_info['name']}: {dep_info['version']}{source}")
 
     if "other" in dep_info:
-        lines.append(
-            "  Detailed information: %s"
-            % (formatting.indent(dep_info["other"], places=4)),
-        )
+        details = formatting.indent(dep_info["other"], places=4)
+        lines.append(f"  Detailed information: {details}")
 
     if dep_info.get("dependencies", []):
         for sub_dep_info in dep_info["dependencies"]:
@@ -81,8 +74,8 @@ def platform_info():
 def python_info():
     return {
         "name": "Python",
-        "version": "{} {}".format(
-            platform.python_implementation(), platform.python_version()
+        "version": (
+            f"{platform.python_implementation()} {platform.python_version()}"
         ),
         "path": os.path.dirname(platform.__file__),
     }
@@ -109,7 +102,7 @@ def pkg_info(project_name=None, include_extras=False):
 
 def gstreamer_info():
     other = []
-    other.append("Python wrapper: python-gi %s" % gi.__version__)
+    other.append(f"Python wrapper: python-gi {gi.__version__}")
 
     found_elements = []
     missing_elements = []
@@ -122,12 +115,12 @@ def gstreamer_info():
     other.append("Relevant elements:")
     other.append("  Found:")
     for element in found_elements:
-        other.append("    %s" % element)
+        other.append(f"    {element}")
     if not found_elements:
         other.append("    none")
     other.append("  Not found:")
     for element in missing_elements:
-        other.append("    %s" % element)
+        other.append(f"    {element}")
     if not missing_elements:
         other.append("    none")
 

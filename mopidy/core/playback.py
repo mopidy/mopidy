@@ -375,7 +375,7 @@ class PlaybackController:
             self._pending_tl_track = None
             return True
 
-        raise Exception("Unknown state: %s" % state)
+        raise Exception(f"Unknown state: {state}")
 
     def previous(self):
         """

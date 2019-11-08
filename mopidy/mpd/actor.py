@@ -56,11 +56,11 @@ class MpdFrontend(pykka.ThreadingActor, CoreListener):
             )
         except OSError as error:
             raise exceptions.FrontendError(
-                "MPD server startup failed: %s" % encoding.locale_decode(error)
+                f"MPD server startup failed: {encoding.locale_decode(error)}"
             )
 
         logger.info(
-            "MPD server running at %s", network.format_address(server.address)
+            f"MPD server running at {network.format_address(server.address)}"
         )
 
         return server

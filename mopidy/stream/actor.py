@@ -24,8 +24,8 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
 
         self._session = http.get_requests_session(
             proxy_config=config["proxy"],
-            user_agent="{}/{}".format(
-                stream.Extension.dist_name, stream.Extension.version
+            user_agent=(
+                f"{stream.Extension.dist_name}/{stream.Extension.version}"
             ),
         )
 

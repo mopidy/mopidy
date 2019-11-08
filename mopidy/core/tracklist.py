@@ -379,7 +379,7 @@ class TracklistController:
         for track in tracks:
             if self.get_length() >= max_length:
                 raise exceptions.TracklistFull(
-                    "Tracklist may contain at most %d tracks." % max_length
+                    f"Tracklist may contain at most {max_length:d} tracks."
                 )
 
             tl_track = TlTrack(self._next_tlid, track)

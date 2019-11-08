@@ -79,14 +79,14 @@ def check_instances(arg, cls, msg="Expected a list of {name}, not {arg!r}"):
 
 def check_integer(arg, min=None, max=None):
     if not isinstance(arg, int):
-        raise exceptions.ValidationError("Expected an integer, not %r" % arg)
+        raise exceptions.ValidationError(f"Expected an integer, not {arg!r}")
     elif min is not None and arg < min:
         raise exceptions.ValidationError(
-            "Expected number larger or equal to %d, not %r" % (min, arg)
+            f"Expected number larger or equal to {min}, not {arg!r}"
         )
     elif max is not None and arg > max:
         raise exceptions.ValidationError(
-            "Expected number smaller or equal to %d, not %r" % (max, arg)
+            f"Expected number smaller or equal to {max}, not {arg!r}"
         )
 
 

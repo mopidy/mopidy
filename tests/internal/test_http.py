@@ -42,7 +42,7 @@ def test_download_times_out_if_connection_times_out(session_mock, caplog):
     session_mock.get.assert_called_once_with(URI, timeout=1.0, stream=True)
     assert result is None
     assert (
-        "Download of %r failed due to connection timeout after 1.000s" % URI
+        f"Download of {URI!r} failed due to connection timeout after 1.000s"
         in caplog.text
     )
 
@@ -58,6 +58,6 @@ def test_download_times_out_if_download_is_slow(session, caplog):
 
     assert result is None
     assert (
-        "Download of %r failed due to download taking more than 1.000s" % URI
+        f"Download of {URI!r} failed due to download taking more than 1.000s"
         in caplog.text
     )

@@ -258,9 +258,9 @@ class Backends(list):
 
             for scheme in b.uri_schemes.get():
                 assert scheme not in backends_by_scheme, (
-                    'Cannot add URI scheme "%s" for %s, '
-                    "it is already handled by %s"
-                ) % (scheme, name(b), name(backends_by_scheme[scheme]))
+                    f"Cannot add URI scheme {scheme!r} for {name(b)}, "
+                    f"it is already handled by {name(backends_by_scheme[scheme])}"
+                )
                 backends_by_scheme[scheme] = b
 
                 if has_library:

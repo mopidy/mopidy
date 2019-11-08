@@ -59,7 +59,7 @@ def track_to_mpd_format(track, position=None, stream_title=None):
 
     if track.album is not None and track.album.num_tracks is not None:
         result.append(
-            ("Track", "%d/%d" % (track.track_no or 0, track.album.num_tracks))
+            ("Track", f"{track.track_no or 0}/{track.album.num_tracks}")
         )
     else:
         result.append(("Track", track.track_no or 0))

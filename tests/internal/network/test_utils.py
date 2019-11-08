@@ -36,9 +36,7 @@ class FormatAddressTest(unittest.TestCase):
 
     def test_format_address_unix(self):
         address = (sentinel.path, None)
-        self.assertEqual(
-            network.format_address(address), "[%s]" % (sentinel.path)
-        )
+        self.assertEqual(network.format_address(address), f"[{sentinel.path}]")
 
 
 class GetSocketAddress(unittest.TestCase):

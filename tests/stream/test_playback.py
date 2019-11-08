@@ -113,11 +113,11 @@ class TestTranslateURI:
         assert result == STREAM_URI
 
         # Check logging to ensure debuggability
-        assert "Unwrapping stream from URI: %s" % PLAYLIST_URI in caplog.text
-        assert "Parsed playlist (%s)" % PLAYLIST_URI in caplog.text
-        assert "Unwrapping stream from URI: %s" % STREAM_URI
+        assert f"Unwrapping stream from URI: {PLAYLIST_URI}" in caplog.text
+        assert f"Parsed playlist ({PLAYLIST_URI})" in caplog.text
+        assert f"Unwrapping stream from URI: {STREAM_URI}" in caplog.text
         assert (
-            "Unwrapped potential audio/mpeg stream: %s" % STREAM_URI
+            f"Unwrapped potential audio/mpeg stream: {STREAM_URI}"
             in caplog.text
         )
 
@@ -172,13 +172,11 @@ class TestTranslateURI:
 
         result = provider.translate_uri(PLAYLIST_URI)
 
-        assert "Unwrapping stream from URI: %s" % PLAYLIST_URI in caplog.text
+        assert f"Unwrapping stream from URI: {PLAYLIST_URI}" in caplog.text
+        assert f"GStreamer failed scanning URI ({PLAYLIST_URI})" in caplog.text
+        assert f"Parsed playlist ({PLAYLIST_URI})" in caplog.text
         assert (
-            "GStreamer failed scanning URI (%s)" % PLAYLIST_URI in caplog.text
-        )
-        assert "Parsed playlist (%s)" % PLAYLIST_URI in caplog.text
-        assert (
-            "Unwrapped potential audio/mpeg stream: %s" % STREAM_URI
+            f"Unwrapped potential audio/mpeg stream: {STREAM_URI}"
             in caplog.text
         )
         assert result == STREAM_URI
@@ -199,11 +197,10 @@ class TestTranslateURI:
 
         result = provider.translate_uri(STREAM_URI)
 
-        assert "Unwrapping stream from URI: %s" % STREAM_URI in caplog.text
-        assert "GStreamer failed scanning URI (%s)" % STREAM_URI in caplog.text
+        assert f"Unwrapping stream from URI: {STREAM_URI}" in caplog.text
+        assert f"GStreamer failed scanning URI ({STREAM_URI})" in caplog.text
         assert (
-            "Failed parsing URI (%s) as playlist; found potential stream."
-            % STREAM_URI
+            f"Failed parsing URI ({STREAM_URI}) as playlist; found potential stream."
             in caplog.text
         )
         assert result == STREAM_URI
@@ -224,8 +221,8 @@ class TestTranslateURI:
         assert result is None
 
         assert (
-            "Unwrapping stream from URI (%s) failed: "
-            "error downloading URI" % PLAYLIST_URI
+            f"Unwrapping stream from URI ({PLAYLIST_URI}) failed: "
+            f"error downloading URI"
         ) in caplog.text
 
     @responses.activate
@@ -241,14 +238,13 @@ class TestTranslateURI:
 
         result = provider.translate_uri(PLAYLIST_URI)
 
-        assert "Unwrapping stream from URI: %s" % PLAYLIST_URI in caplog.text
+        assert f"Unwrapping stream from URI: {PLAYLIST_URI}" in caplog.text
         assert (
-            "Parsed playlist (%s) and found new URI: %s"
-            % (PLAYLIST_URI, PLAYLIST_URI)
+            f"Parsed playlist ({PLAYLIST_URI}) and found new URI: {PLAYLIST_URI}"
         ) in caplog.text
         assert (
-            "Unwrapping stream from URI (%s) failed: "
-            "playlist referenced itself" % PLAYLIST_URI
+            f"Unwrapping stream from URI ({PLAYLIST_URI}) failed: "
+            f"playlist referenced itself"
         ) in caplog.text
         assert result is None
 
@@ -279,7 +275,7 @@ class TestTranslateURI:
         assert result == STREAM_URI
 
         assert (
-            "Parsed playlist (%s) and found new URI: %s"
-            % (PLAYLIST_URI, os.path.basename(STREAM_URI))
+            f"Parsed playlist ({PLAYLIST_URI}) and found new URI: "
+            f"{os.path.basename(STREAM_URI)}"
         ) in caplog.text
-        assert "Unwrapping stream from URI: %s" % STREAM_URI in caplog.text
+        assert f"Unwrapping stream from URI: {STREAM_URI}" in caplog.text

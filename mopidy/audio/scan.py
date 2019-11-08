@@ -81,7 +81,7 @@ class Scanner:
 def _setup_pipeline(uri, proxy_config=None):
     src = Gst.Element.make_from_uri(Gst.URIType.SRC, uri)
     if not src:
-        raise exceptions.ScannerError("GStreamer can not open: %s" % uri)
+        raise exceptions.ScannerError(f"GStreamer can not open: {uri}")
 
     if proxy_config:
         utils.setup_proxy(src, proxy_config)
@@ -268,7 +268,7 @@ def _process(pipeline, timeout_ms):
 
         timeout = timeout_ms - (int(time.time() * 1000) - start)
 
-    raise exceptions.ScannerError("Timeout after %dms" % timeout_ms)
+    raise exceptions.ScannerError(f"Timeout after {timeout_ms:d}ms")
 
 
 if __name__ == "__main__":
@@ -289,7 +289,8 @@ if __name__ == "__main__":
         try:
             result = scanner.scan(uri)
             for key in ("uri", "mime", "duration", "playable", "seekable"):
-                print("{:<20}   {}".format(key, getattr(result, key)))
+                value = getattr(result, key)
+                print(f"{key:<20}   {value}")
             print("tags")
             for tag, value in result.tags.items():
                 line = f"{tag:<20}   {value}"

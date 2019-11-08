@@ -32,13 +32,11 @@ class Field:
         """Validate and possibly modify the field value before assignment"""
         if self._type and not isinstance(value, self._type):
             raise TypeError(
-                "Expected %s to be a %s, not %r"
-                % (self._name, self._type, value)
+                f"Expected {self._name} to be a {self._type}, not {value!r}"
             )
         if self._choices and value not in self._choices:
             raise TypeError(
-                "Expected %s to be a one of %s, not %r"
-                % (self._name, self._choices, value)
+                f"Expected {self._name} to be a one of {self._choices}, not {value!r}"
             )
         return value
 
@@ -135,13 +133,11 @@ class Integer(Field):
         value = super().validate(value)
         if self._min is not None and value < self._min:
             raise ValueError(
-                "Expected %s to be at least %d, not %d"
-                % (self._name, self._min, value)
+                f"Expected {self._name} to be at least {self._min}, not {value:d}"
             )
         if self._max is not None and value > self._max:
             raise ValueError(
-                "Expected %s to be at most %d, not %d"
-                % (self._name, self._max, value)
+                f"Expected {self._name} to be at most {self._max}, not {value:d}"
             )
         return value
 
@@ -171,13 +167,13 @@ class Collection(Field):
     def validate(self, value):
         if isinstance(value, str):
             raise TypeError(
-                "Expected %s to be a collection of %s, not %r"
-                % (self._name, self._type.__name__, value)
+                f"Expected {self._name} to be a collection of "
+                f"{self._type.__name__}, not {value!r}"
             )
         for v in value:
             if not isinstance(v, self._type):
                 raise TypeError(
-                    "Expected %s to be a collection of %s, not %r"
-                    % (self._name, self._type.__name__, value)
+                    f"Expected {self._name} to be a collection of "
+                    f"{self._type.__name__}, not {value!r}"
                 )
         return self._default.__class__(value) or None

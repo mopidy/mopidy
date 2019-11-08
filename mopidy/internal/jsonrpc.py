@@ -161,18 +161,18 @@ class JsonRpcWrapper:
             raise JsonRpcInvalidRequestError(data="Request must be an object")
         if "jsonrpc" not in request:
             raise JsonRpcInvalidRequestError(
-                data='"jsonrpc" member must be included'
+                data="'jsonrpc' member must be included"
             )
         if request["jsonrpc"] != "2.0":
             raise JsonRpcInvalidRequestError(
-                data='"jsonrpc" value must be "2.0"'
+                data="'jsonrpc' value must be '2.0'"
             )
         if "method" not in request:
             raise JsonRpcInvalidRequestError(
-                data='"method" member must be included'
+                data="'method' member must be included"
             )
         if not isinstance(request["method"], str):
-            raise JsonRpcInvalidRequestError(data='"method" must be a string')
+            raise JsonRpcInvalidRequestError(data="'method' must be a string")
 
     def _get_params(self, request):
         if "params" not in request:
@@ -184,7 +184,7 @@ class JsonRpcWrapper:
             return [], params
         else:
             raise JsonRpcInvalidRequestError(
-                data='"params", if given, must be an array or an object'
+                data="'params', if given, must be an array or an object"
             )
 
     def _get_method(self, method_path):
@@ -196,8 +196,7 @@ class JsonRpcWrapper:
 
         if "." not in method_path:
             raise JsonRpcMethodNotFoundError(
-                data='Could not find object mount in method name "%s"'
-                % (method_path)
+                data=f"Could not find object mount in method name {method_path!r}"
             )
 
         mount, method_name = method_path.rsplit(".", 1)
@@ -211,16 +210,14 @@ class JsonRpcWrapper:
             obj = self.objects[mount]
         except KeyError:
             raise JsonRpcMethodNotFoundError(
-                data='No object found at "%s"' % mount
+                data=f"No object found at {mount!r}"
             )
 
         try:
             return getattr(obj, method_name)
         except AttributeError:
             raise JsonRpcMethodNotFoundError(
-                data='Object mounted at "{}" has no member "{}"'.format(
-                    mount, method_name
-                )
+                data=f"Object mounted at {mount!r} has no member {method_name!r}"
             )
 
     def _is_notification(self, request):

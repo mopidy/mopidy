@@ -19,8 +19,8 @@ def get_or_create_dir(dir_path):
     dir_path = expand_path(dir_path)
     if dir_path.is_file():
         raise OSError(
-            "A file with the same name as the desired dir, "
-            '"%s", already exists.' % dir_path
+            f"A file with the same name as the desired dir, "
+            f"{dir_path!r}, already exists."
         )
     elif not dir_path.is_dir():
         logger.info("Creating dir %s", dir_path)
