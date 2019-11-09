@@ -277,6 +277,9 @@ class PlaybackController:
 
         Note that the track **must** already be in the tracklist.
 
+        .. deprecated:: 3.0
+            The ``tl_track`` argument. Use ``tlid`` instead.
+
         :param tl_track: track to play
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :param tlid: TLID of the track to play

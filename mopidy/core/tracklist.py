@@ -205,6 +205,9 @@ class TracklistController:
 
         Not necessarily the same track as :meth:`next_track`.
 
+        .. deprecated:: 3.0
+            Use :meth:`get_eot_tlid` instead.
+
         :param tl_track: the reference track
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
@@ -247,6 +250,9 @@ class TracklistController:
         is enabled the next track can loop around the tracklist. When random is
         enabled this should be a random track, all tracks should be played once
         before the tracklist repeats.
+
+        .. deprecated:: 3.0
+            Use :meth:`get_next_tlid` instead.
 
         :param tl_track: the reference track
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
@@ -309,6 +315,9 @@ class TracklistController:
         For normal playback this is the previous track in the tracklist. If
         random and/or consume is enabled it should return the current track
         instead.
+
+        .. deprecated:: 3.0
+            Use :meth:`get_previous_tlid` instead.
 
         :param tl_track: the reference track
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
