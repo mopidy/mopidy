@@ -177,7 +177,7 @@ def play(context, songpos=None):
 
     try:
         tl_track = context.core.tracklist.slice(songpos, songpos + 1).get()[0]
-        return context.core.playback.play(tl_track).get()
+        return context.core.playback.play(tlid=tl_track.tlid).get()
     except IndexError:
         raise exceptions.MpdArgError("Bad song index")
 
@@ -191,11 +191,11 @@ def _play_minus_one(context):
 
     current_tl_track = context.core.playback.get_current_tl_track().get()
     if current_tl_track is not None:
-        return context.core.playback.play(current_tl_track).get()
+        return context.core.playback.play(tlid=current_tl_track.tlid).get()
 
     tl_tracks = context.core.tracklist.slice(0, 1).get()
     if tl_tracks:
-        return context.core.playback.play(tl_tracks[0]).get()
+        return context.core.playback.play(tlid=tl_tracks[0].tlid).get()
 
     return  # Fail silently
 
@@ -223,7 +223,7 @@ def playid(context, tlid):
     tl_tracks = context.core.tracklist.filter({"tlid": [tlid]}).get()
     if not tl_tracks:
         raise exceptions.MpdNoExistError("No such song")
-    return context.core.playback.play(tl_tracks[0]).get()
+    return context.core.playback.play(tlid=tl_tracks[0].tlid).get()
 
 
 @protocol.commands.add("previous")
