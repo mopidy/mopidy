@@ -243,7 +243,7 @@ class PlaybackController:
         count = self.core.tracklist.get_length() * 2
 
         while current:
-            pending = self.core.tracklist.get_next_tlid(current)
+            pending = self.core.tracklist.get_next_tlid()
             if self._change(pending, state):
                 break
             else:
@@ -309,7 +309,7 @@ class PlaybackController:
             return
 
         current = self._pending_tl_track or self._current_tl_track
-        pending = tl_track or current or self.core.tracklist.get_next_tlid(None)
+        pending = tl_track or current or self.core.tracklist.get_next_tlid()
         # avoid endless loop if 'repeat' is 'true' and no track is playable
         # * 2 -> second run to get all playable track in a shuffled playlist
         count = self.core.tracklist.get_length() * 2
@@ -320,7 +320,7 @@ class PlaybackController:
             else:
                 self.core.tracklist._mark_unplayable(pending)
             current = pending
-            pending = self.core.tracklist.get_next_tlid(current)
+            pending = self.core.tracklist.get_next_tlid()
             count -= 1
             if not count:
                 logger.info("No playable track in the list.")
