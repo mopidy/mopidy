@@ -27,7 +27,7 @@ DEV_DEPS = DOCS_DEPS + LINT_DEPS + RELEASE_DEPS + TEST_DEPS
 setup(
     name="Mopidy",
     version=get_version("mopidy/__init__.py"),
-    url="http://www.mopidy.com/",
+    url="https://mopidy.com/",
     license="Apache License, Version 2.0",
     author="Stein Magnus Jodal",
     author_email="stein.magnus@jodal.no",
