@@ -3,10 +3,7 @@ import io
 
 from mopidy.internal import validation
 
-try:
-    import xml.etree.cElementTree as elementtree  # noqa: N813
-except ImportError:
-    import xml.etree.ElementTree as elementtree  # noqa: N813
+import xml.etree.ElementTree as elementtree  # noqa: N813
 
 
 def parse(data):
