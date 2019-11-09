@@ -16,8 +16,11 @@ from scratch, we have a guide for installing Debian/Raspbian and Mopidy. See
 
 The packages are built for:
 
-- Debian stretch (stable), which also works for Raspbian stretch and Ubuntu
-  16.04 LTS and newer.
+- Debian stretch (oldstable), which also works for Raspbian stretch and Ubuntu
+  18.04 LTS.
+
+- Debian buster (stable), which also works for Raspbian buster and Ubuntu
+  19.10 and newer.
 
 The packages are available for multiple CPU architectures: i386, amd64, armel,
 and armhf (compatible with all Raspberry Pi models).
@@ -34,6 +37,10 @@ and armhf (compatible with all Raspberry Pi models).
        wget -q -O - https://apt.mopidy.com/mopidy.gpg | sudo apt-key add -
 
 #. Add the APT repo to your package sources::
+
+       sudo wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/buster.list
+
+   Or, if you run an older Debian/Ubuntu distro (including Ubuntu 18.04 LTS)::
 
        sudo wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/stretch.list
 

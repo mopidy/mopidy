@@ -159,8 +159,6 @@ class that will connect the rest of the dots.
 
 ::
 
-    from __future__ import absolute_import, unicode_literals
-
     import re
     from setuptools import setup, find_packages
 
@@ -249,8 +247,6 @@ config as a separate file named ``ext.conf``. This makes it easy to include the
 default config in documentation without duplicating it.
 
 This is ``mopidy_soundspot/__init__.py``::
-
-    from __future__ import absolute_import, unicode_literals
 
     import logging
     import os
@@ -420,9 +416,7 @@ Python conventions
 ==================
 
 In general, it would be nice if Mopidy extensions followed the same
-:ref:`codestyle` as Mopidy itself, as they're part of the same ecosystem. Among
-other things, the code style guide explains why all the above examples start
-with ``from __future__ import absolute_import, unicode_literals``.
+:ref:`codestyle` as Mopidy itself, as they're part of the same ecosystem.
 
 
 Use of Mopidy APIs
@@ -497,9 +491,11 @@ an example of how to use it::
 
     >>> from mopidy import httpclient
     >>> import mopidy_soundspot
-    >>> httpclient.format_user_agent('%s/%s' % (
-    ...     mopidy_soundspot.Extension.dist_name, mopidy_soundspot.__version__))
-    u'Mopidy-SoundSpot/2.0.0 Mopidy/1.0.7 Python/2.7.10'
+    >>> httpclient.format_user_agent(
+    ...     f'{mopidy_soundspot.Extension.dist_name}/'
+    ...     f'{mopidy_soundspot.__version__}'
+    ... )
+    'Mopidy-SoundSpot/2.0.0 Mopidy/3.0.0 Python/3.7.5'
 
 Example using Requests sessions
 -------------------------------
@@ -532,9 +528,10 @@ your HTTP requests::
     # constructor
     session = get_requests_session(
         proxy_config=mopidy_config['proxy'],
-        user_agent='%s/%s' % (
-            mopidy_soundspot.Extension.dist_name,
-            mopidy_soundspot.__version__))
+        user_agent=(
+            f'{mopidy_soundspot.Extension.dist_name}/{mopidy_soundspot.__version__}'
+        )
+    )
 
     response = session.get('http://example.com')
     # Now do something with ``response`` and/or make further requests using the

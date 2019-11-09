@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools >= 30.3.0", "wheel"]
+
+
+[tool.black]
+target-version = ["py37", "py38"]
+line-length = 80
+
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+line_length = 88
+known_tests = "tests"
+sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,TESTS,LOCALFOLDER"

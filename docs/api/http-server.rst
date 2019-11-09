@@ -45,8 +45,6 @@ available at http://localhost:6680/mywebclient/foo.html.
 
 ::
 
-    from __future__ import absolute_import, unicode_literals
-
     import os
 
     from mopidy import ext
@@ -96,8 +94,6 @@ http://localhost:6680/mywebclient/ with the string ``Hello, world! This is
 Mopidy $version``.
 
 ::
-
-    from __future__ import absolute_import, unicode_literals
 
     import os
 
@@ -150,8 +146,6 @@ is wrapped as a Tornado application and mounted at
 http://localhost:6680/mywebclient/.
 
 ::
-
-    from __future__ import absolute_import, unicode_literals
 
     import os
 

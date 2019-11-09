@@ -1,11 +1,10 @@
-from __future__ import absolute_import, unicode_literals
+import urllib
 
-from mopidy.compat import urllib
 from mopidy.internal import deprecation
 from mopidy.mpd import exceptions, protocol, translator
 
 
-@protocol.commands.add('add')
+@protocol.commands.add("add")
 def add(context, uri):
     """
     *musicpd.org, current playlist section:*
@@ -19,30 +18,32 @@ def add(context, uri):
 
     - ``add ""`` should add all tracks in the library to the current playlist.
     """
-    if not uri.strip('/'):
+    if not uri.strip("/"):
         return
 
     # If we have an URI just try and add it directly without bothering with
     # jumping through browse...
-    if urllib.parse.urlparse(uri).scheme != '':
+    if urllib.parse.urlparse(uri).scheme != "":
         if context.core.tracklist.add(uris=[uri]).get():
             return
 
     try:
         uris = []
-        for path, ref in context.browse(uri, lookup=False):
+        for _path, ref in context.browse(uri, lookup=False):
             if ref:
                 uris.append(ref.uri)
-    except exceptions.MpdNoExistError as e:
-        e.message = 'directory or file not found'
+    except exceptions.MpdNoExistError as exc:
+        exc.message = (  # noqa B306: Our own exception
+            "directory or file not found"
+        )
         raise
 
     if not uris:
-        raise exceptions.MpdNoExistError('directory or file not found')
+        raise exceptions.MpdNoExistError("directory or file not found")
     context.core.tracklist.add(uris=uris).get()
 
 
-@protocol.commands.add('addid', songpos=protocol.UINT)
+@protocol.commands.add("addid", songpos=protocol.UINT)
 def addid(context, uri, songpos=None):
     """
     *musicpd.org, current playlist section:*
@@ -62,21 +63,22 @@ def addid(context, uri, songpos=None):
     - ``addid ""`` should return an error.
     """
     if not uri:
-        raise exceptions.MpdNoExistError('No such song')
+        raise exceptions.MpdNoExistError("No such song")
 
     length = context.core.tracklist.get_length()
     if songpos is not None and songpos > length.get():
-        raise exceptions.MpdArgError('Bad song index')
+        raise exceptions.MpdArgError("Bad song index")
 
     tl_tracks = context.core.tracklist.add(
-        uris=[uri], at_position=songpos).get()
+        uris=[uri], at_position=songpos
+    ).get()
 
     if not tl_tracks:
-        raise exceptions.MpdNoExistError('No such song')
-    return ('Id', tl_tracks[0].tlid)
+        raise exceptions.MpdNoExistError("No such song")
+    return ("Id", tl_tracks[0].tlid)
 
 
-@protocol.commands.add('delete', songrange=protocol.RANGE)
+@protocol.commands.add("delete", songrange=protocol.RANGE)
 def delete(context, songrange):
     """
     *musicpd.org, current playlist section:*
@@ -91,12 +93,12 @@ def delete(context, songrange):
         end = context.core.tracklist.get_length().get()
     tl_tracks = context.core.tracklist.slice(start, end).get()
     if not tl_tracks:
-        raise exceptions.MpdArgError('Bad song index', command='delete')
+        raise exceptions.MpdArgError("Bad song index", command="delete")
     for (tlid, _) in tl_tracks:
-        context.core.tracklist.remove({'tlid': [tlid]})
+        context.core.tracklist.remove({"tlid": [tlid]})
 
 
-@protocol.commands.add('deleteid', tlid=protocol.UINT)
+@protocol.commands.add("deleteid", tlid=protocol.UINT)
 def deleteid(context, tlid):
     """
     *musicpd.org, current playlist section:*
@@ -105,12 +107,12 @@ def deleteid(context, tlid):
 
         Deletes the song ``SONGID`` from the playlist
     """
-    tl_tracks = context.core.tracklist.remove({'tlid': [tlid]}).get()
+    tl_tracks = context.core.tracklist.remove({"tlid": [tlid]}).get()
     if not tl_tracks:
-        raise exceptions.MpdNoExistError('No such song')
+        raise exceptions.MpdNoExistError("No such song")
 
 
-@protocol.commands.add('clear')
+@protocol.commands.add("clear")
 def clear(context):
     """
     *musicpd.org, current playlist section:*
@@ -122,7 +124,7 @@ def clear(context):
     context.core.tracklist.clear()
 
 
-@protocol.commands.add('move', songrange=protocol.RANGE, to=protocol.UINT)
+@protocol.commands.add("move", songrange=protocol.RANGE, to=protocol.UINT)
 def move_range(context, songrange, to):
     """
     *musicpd.org, current playlist section:*
@@ -139,7 +141,7 @@ def move_range(context, songrange, to):
     context.core.tracklist.move(start, end, to)
 
 
-@protocol.commands.add('moveid', tlid=protocol.UINT, to=protocol.UINT)
+@protocol.commands.add("moveid", tlid=protocol.UINT, to=protocol.UINT)
 def moveid(context, tlid, to):
     """
     *musicpd.org, current playlist section:*
@@ -150,14 +152,14 @@ def moveid(context, tlid, to):
         the playlist. If ``TO`` is negative, it is relative to the current
         song in the playlist (if there is one).
     """
-    tl_tracks = context.core.tracklist.filter({'tlid': [tlid]}).get()
+    tl_tracks = context.core.tracklist.filter({"tlid": [tlid]}).get()
     if not tl_tracks:
-        raise exceptions.MpdNoExistError('No such song')
+        raise exceptions.MpdNoExistError("No such song")
     position = context.core.tracklist.index(tl_tracks[0]).get()
     context.core.tracklist.move(position, position + 1, to)
 
 
-@protocol.commands.add('playlist')
+@protocol.commands.add("playlist")
 def playlist(context):
     """
     *musicpd.org, current playlist section:*
@@ -170,11 +172,11 @@ def playlist(context):
 
             Do not use this, instead use ``playlistinfo``.
     """
-    deprecation.warn('mpd.protocol.current_playlist.playlist')
+    deprecation.warn("mpd.protocol.current_playlist.playlist")
     return playlistinfo(context)
 
 
-@protocol.commands.add('playlistfind')
+@protocol.commands.add("playlistfind")
 def playlistfind(context, tag, needle):
     """
     *musicpd.org, current playlist section:*
@@ -183,8 +185,8 @@ def playlistfind(context, tag, needle):
 
         Finds songs in the current playlist with strict matching.
     """
-    if tag == 'filename':
-        tl_tracks = context.core.tracklist.filter({'uri': [needle]}).get()
+    if tag == "filename":
+        tl_tracks = context.core.tracklist.filter({"uri": [needle]}).get()
         if not tl_tracks:
             return None
         position = context.core.tracklist.index(tl_tracks[0]).get()
@@ -192,7 +194,7 @@ def playlistfind(context, tag, needle):
     raise exceptions.MpdNotImplemented  # TODO
 
 
-@protocol.commands.add('playlistid', tlid=protocol.UINT)
+@protocol.commands.add("playlistid", tlid=protocol.UINT)
 def playlistid(context, tlid=None):
     """
     *musicpd.org, current playlist section:*
@@ -203,17 +205,18 @@ def playlistid(context, tlid=None):
         and specifies a single song to display info for.
     """
     if tlid is not None:
-        tl_tracks = context.core.tracklist.filter({'tlid': [tlid]}).get()
+        tl_tracks = context.core.tracklist.filter({"tlid": [tlid]}).get()
         if not tl_tracks:
-            raise exceptions.MpdNoExistError('No such song')
+            raise exceptions.MpdNoExistError("No such song")
         position = context.core.tracklist.index(tl_tracks[0]).get()
         return translator.track_to_mpd_format(tl_tracks[0], position=position)
     else:
         return translator.tracks_to_mpd_format(
-            context.core.tracklist.get_tl_tracks().get())
+            context.core.tracklist.get_tl_tracks().get()
+        )
 
 
-@protocol.commands.add('playlistinfo')
+@protocol.commands.add("playlistinfo")
 def playlistinfo(context, parameter=None):
     """
     *musicpd.org, current playlist section:*
@@ -229,7 +232,7 @@ def playlistinfo(context, parameter=None):
     - uses negative indexes, like ``playlistinfo "-1"``, to request
       the entire playlist
     """
-    if parameter is None or parameter == '-1':
+    if parameter is None or parameter == "-1":
         start, end = 0, None
     else:
         tracklist_slice = protocol.RANGE(parameter)
@@ -237,13 +240,13 @@ def playlistinfo(context, parameter=None):
 
     tl_tracks = context.core.tracklist.get_tl_tracks().get()
     if start and start > len(tl_tracks):
-        raise exceptions.MpdArgError('Bad song index')
+        raise exceptions.MpdArgError("Bad song index")
     if end and end > len(tl_tracks):
         end = None
     return translator.tracks_to_mpd_format(tl_tracks, start, end)
 
 
-@protocol.commands.add('playlistsearch')
+@protocol.commands.add("playlistsearch")
 def playlistsearch(context, tag, needle):
     """
     *musicpd.org, current playlist section:*
@@ -260,7 +263,7 @@ def playlistsearch(context, tag, needle):
     raise exceptions.MpdNotImplemented  # TODO
 
 
-@protocol.commands.add('plchanges', version=protocol.INT)
+@protocol.commands.add("plchanges", version=protocol.INT)
 def plchanges(context, version):
     """
     *musicpd.org, current playlist section:*
@@ -280,7 +283,8 @@ def plchanges(context, version):
     tracklist_version = context.core.tracklist.get_version().get()
     if version < tracklist_version:
         return translator.tracks_to_mpd_format(
-            context.core.tracklist.get_tl_tracks().get())
+            context.core.tracklist.get_tl_tracks().get()
+        )
     elif version == tracklist_version:
         # A version match could indicate this is just a metadata update, so
         # check for a stream ref and let the client know about the change.
@@ -291,10 +295,11 @@ def plchanges(context, version):
         tl_track = context.core.playback.get_current_tl_track().get()
         position = context.core.tracklist.index(tl_track).get()
         return translator.track_to_mpd_format(
-            tl_track, position=position, stream_title=stream_title)
+            tl_track, position=position, stream_title=stream_title
+        )
 
 
-@protocol.commands.add('plchangesposid', version=protocol.INT)
+@protocol.commands.add("plchangesposid", version=protocol.INT)
 def plchangesposid(context, version):
     """
     *musicpd.org, current playlist section:*
@@ -312,14 +317,14 @@ def plchangesposid(context, version):
     if int(version) != context.core.tracklist.get_version().get():
         result = []
         for (position, (tlid, _)) in enumerate(
-                context.core.tracklist.get_tl_tracks().get()):
-            result.append(('cpos', position))
-            result.append(('Id', tlid))
+            context.core.tracklist.get_tl_tracks().get()
+        ):
+            result.append(("cpos", position))
+            result.append(("Id", tlid))
         return result
 
 
-@protocol.commands.add(
-    'prio', priority=protocol.UINT, position=protocol.RANGE)
+@protocol.commands.add("prio", priority=protocol.UINT, position=protocol.RANGE)
 def prio(context, priority, position):
     """
     *musicpd.org, current playlist section:*
@@ -335,7 +340,7 @@ def prio(context, priority, position):
     raise exceptions.MpdNotImplemented  # TODO
 
 
-@protocol.commands.add('prioid')
+@protocol.commands.add("prioid")
 def prioid(context, *args):
     """
     *musicpd.org, current playlist section:*
@@ -347,7 +352,7 @@ def prioid(context, *args):
     raise exceptions.MpdNotImplemented  # TODO
 
 
-@protocol.commands.add('rangeid', tlid=protocol.UINT, songrange=protocol.RANGE)
+@protocol.commands.add("rangeid", tlid=protocol.UINT, songrange=protocol.RANGE)
 def rangeid(context, tlid, songrange):
     """
     *musicpd.org, current playlist section:*
@@ -366,7 +371,7 @@ def rangeid(context, tlid, songrange):
     raise exceptions.MpdNotImplemented  # TODO
 
 
-@protocol.commands.add('shuffle', songrange=protocol.RANGE)
+@protocol.commands.add("shuffle", songrange=protocol.RANGE)
 def shuffle(context, songrange=None):
     """
     *musicpd.org, current playlist section:*
@@ -383,7 +388,7 @@ def shuffle(context, songrange=None):
     context.core.tracklist.shuffle(start, end)
 
 
-@protocol.commands.add('swap', songpos1=protocol.UINT, songpos2=protocol.UINT)
+@protocol.commands.add("swap", songpos1=protocol.UINT, songpos2=protocol.UINT)
 def swap(context, songpos1, songpos2):
     """
     *musicpd.org, current playlist section:*
@@ -398,7 +403,7 @@ def swap(context, songpos1, songpos2):
     context.core.tracklist.move(songpos2 - 1, songpos2, songpos1)
 
 
-@protocol.commands.add('swapid', tlid1=protocol.UINT, tlid2=protocol.UINT)
+@protocol.commands.add("swapid", tlid1=protocol.UINT, tlid2=protocol.UINT)
 def swapid(context, tlid1, tlid2):
     """
     *musicpd.org, current playlist section:*
@@ -407,16 +412,16 @@ def swapid(context, tlid1, tlid2):
 
         Swaps the positions of ``SONG1`` and ``SONG2`` (both song ids).
     """
-    tl_tracks1 = context.core.tracklist.filter({'tlid': [tlid1]}).get()
-    tl_tracks2 = context.core.tracklist.filter({'tlid': [tlid2]}).get()
+    tl_tracks1 = context.core.tracklist.filter({"tlid": [tlid1]}).get()
+    tl_tracks2 = context.core.tracklist.filter({"tlid": [tlid2]}).get()
     if not tl_tracks1 or not tl_tracks2:
-        raise exceptions.MpdNoExistError('No such song')
+        raise exceptions.MpdNoExistError("No such song")
     position1 = context.core.tracklist.index(tl_tracks1[0]).get()
     position2 = context.core.tracklist.index(tl_tracks2[0]).get()
     swap(context, position1, position2)
 
 
-@protocol.commands.add('addtagid', tlid=protocol.UINT)
+@protocol.commands.add("addtagid", tlid=protocol.UINT)
 def addtagid(context, tlid, tag, value):
     """
     *musicpd.org, current playlist section:*
@@ -434,7 +439,7 @@ def addtagid(context, tlid, tag, value):
     raise exceptions.MpdNotImplemented  # TODO
 
 
-@protocol.commands.add('cleartagid', tlid=protocol.UINT)
+@protocol.commands.add("cleartagid", tlid=protocol.UINT)
 def cleartagid(context, tlid, tag):
     """
     *musicpd.org, current playlist section:*

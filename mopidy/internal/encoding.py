@@ -1,12 +1,14 @@
-from __future__ import absolute_import, unicode_literals
-
 import locale
 
-from mopidy import compat
 
+def locale_decode(value):
+    if isinstance(value, str):
+        return value
 
-def locale_decode(bytestr):
+    if not isinstance(value, bytes):
+        value = str(value).encode()
+
     try:
-        return compat.text_type(bytestr)
-    except UnicodeError:
-        return bytes(bytestr).decode(locale.getpreferredencoding(), 'replace')
+        return value.decode()
+    except UnicodeDecodeError:
+        return value.decode(locale.getpreferredencoding(), "replace")

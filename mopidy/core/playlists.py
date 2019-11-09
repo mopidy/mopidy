@@ -1,10 +1,8 @@
-from __future__ import absolute_import, unicode_literals
-
 import contextlib
 import logging
+import urllib
 
 from mopidy import exceptions
-from mopidy.compat import urllib
 from mopidy.core import listener
 from mopidy.internal import validation
 from mopidy.models import Playlist, Ref
@@ -17,16 +15,21 @@ def _backend_error_handling(backend, reraise=None):
     try:
         yield
     except exceptions.ValidationError as e:
-        logger.error('%s backend returned bad data: %s',
-                     backend.actor_ref.actor_class.__name__, e)
+        logger.error(
+            "%s backend returned bad data: %s",
+            backend.actor_ref.actor_class.__name__,
+            e,
+        )
     except Exception as e:
         if reraise and isinstance(e, reraise):
             raise
-        logger.exception('%s backend caused an exception.',
-                         backend.actor_ref.actor_class.__name__)
+        logger.exception(
+            "%s backend caused an exception.",
+            backend.actor_ref.actor_class.__name__,
+        )
 
 
-class PlaylistsController(object):
+class PlaylistsController:
     pykka_traversable = True
 
     def __init__(self, backends, core):
@@ -57,7 +60,8 @@ class PlaylistsController(object):
         """
         futures = {
             backend: backend.playlists.as_list()
-            for backend in set(self.backends.with_playlists.values())}
+            for backend in set(self.backends.with_playlists.values())
+        }
 
         results = []
         for b, future in futures.items():
@@ -70,8 +74,10 @@ class PlaylistsController(object):
             except NotImplementedError:
                 backend_name = b.actor_ref.actor_class.__name__
                 logger.warning(
-                    '%s does not implement playlists.as_list(). '
-                    'Please upgrade it.', backend_name)
+                    "%s does not implement playlists.as_list(). "
+                    "Please upgrade it.",
+                    backend_name,
+                )
 
         return results
 
@@ -133,7 +139,7 @@ class PlaylistsController(object):
                 if result is None:
                     continue
                 validation.check_instance(result, Playlist)
-                listener.CoreListener.send('playlist_changed', playlist=result)
+                listener.CoreListener.send("playlist_changed", playlist=result)
                 return result
 
         return None
@@ -171,7 +177,7 @@ class PlaylistsController(object):
             success = True
 
         if success:
-            listener.CoreListener.send('playlist_deleted', uri=uri)
+            listener.CoreListener.send("playlist_deleted", uri=uri)
 
         return success
 
@@ -229,7 +235,7 @@ class PlaylistsController(object):
                 playlists_loaded = True
 
         if playlists_loaded:
-            listener.CoreListener.send('playlists_loaded')
+            listener.CoreListener.send("playlists_loaded")
 
     def save(self, playlist):
         """
@@ -269,7 +275,8 @@ class PlaylistsController(object):
             playlist is None or validation.check_instance(playlist, Playlist)
             if playlist:
                 listener.CoreListener.send(
-                    'playlist_changed', playlist=playlist)
+                    "playlist_changed", playlist=playlist
+                )
             return playlist
 
         return None

@@ -14,10 +14,20 @@ v3.0.0 (UNRELEASED)
 
 Backwards incompatible release.
 
+.. note::
+
+  Pre-releases of Mopidy 3.0 can be installed by running::
+
+    python3 -m pip install --pre mopidy
+
 Dependencies
 ------------
 
-- Pykka >= 2.0 is now required.
+- Python >= 3.7 is now required. Python 2.7 is no longer supported.
+
+- Pykka >= 2.0.1 is now required.
+
+- Tornado >= 4.4 is now required. The upper boundary (< 6) has been removed.
 
 - We now use a number of constants and functions from ``GLib`` instead of their
   deprecated equivalents in ``GObject``. The exact version of PyGObject and
@@ -27,7 +37,7 @@ Dependencies
 Logging
 -------
 
-- The command line option :option:`mopidy --save-debug-log` and the
+- The command line option ``mopidy --save-debug-log`` and the
   configuration :confval:`logging/debug_file` have been removed.
   To save a debug log for sharing, run ``mopidy -vvvv | tee mopidy.log``
   or equivalent. (Fixes: :issue:`1452`, PR: :issue:`1783`)
@@ -186,7 +196,13 @@ Models
 Extension support
 -----------------
 
-- (no changes yet)
+- The following methods now return :class:`pathlib.Path` objects instead of strings:
+
+  - :meth:`mopidy.ext.Extension.get_cache_dir`
+  - :meth:`mopidy.ext.Extension.get_config_dir`
+  - :meth:`mopidy.ext.Extension.get_data_dir`
+
+  This makes it easier to support arbitrary encoding in file names.
 
 HTTP frontend
 -------------
@@ -235,17 +251,68 @@ Audio
 - Remove the method :meth:`mopidy.audio.Audio.emit_end_of_stream`, which has
   been deprecated since 1.0. (Fixes: :issue:`1465`, PR: :issue:`1705`)
 
+Internals
+---------
 
-v2.2.4 (UNRELEASED)
+- Format code with Black. (PR: :issue:`1834`)
+
+- Port test assertions from ``unittest`` methods to pytest ``assert``
+  statements. (PR: :issue:`1838`)
+
+- Switch all internal path handling to use :mod:`pathlib`. (PR: :issue:`1814`)
+
+- Remove :mod:`mopidy.compat` and all Python 2/3 compatability code. (PR:
+  :issue:`1833`, :issue:`1835`)
+
+- Replace ``requirements.txt`` and ``setup.py`` with declarative config in
+  ``setup.cfg``. (PR: :issue:`1839`)
+
+
+v2.3.1 (2019-10-15)
 ===================
 
 Bug fix release.
 
-- Fix `PkgResourcesDeprecationWarning` on startup when a recent release
+- Dependencies: Lower requirement for Tornado from ``>= 5, < 6`` to ``>= 4.4, <
+  6``. Our HTTP server implementation works with Tornado 4 as well, which is
+  the latest version that is packaged on Ubuntu 18.04 LTS.
+
+
+v2.3.0 (2019-10-02)
+===================
+
+Mopidy 2.3.0 is mostly a bug fix release. Because we're requiring a new major
+version of Tornado, we're doing a minor version bump of Mopidy.
+
+- Dependencies: Support and require Tornado >= 5, < 6, as that is the latest
+  version support Python 2.7 and currently the oldest version shipped by Debian
+  and Arch. (Fixes: :issue:`1798`, PR: :issue:`1796`)
+
+- Fix ``PkgResourcesDeprecationWarning`` on startup when a recent release
   of setuptools is installed. (Fixes: :issue:`1778`, PR: :issue:`1780`)
 
 - Network: Close connection following an exception in the protocol handler.
   (Fixes: :issue:`1762`, PR: :issue:`1765`)
+
+- Network: Log client's connection details instead of server's. This fixed a
+  regression introduced as part of PR: :issue:`1629`. (Fixes: :issue:`1788`,
+  PR: :issue:`1792`)
+
+- Core: Trigger :meth:`mopidy.core.CoreListener.stream_title_changed` event
+  on recieving a ``title`` audio tag that differs from the current track's
+  :attr:`mopidy.models.Track.name`. (Fixes: :issue:`1746`, PR: :issue:`1751`)
+
+- Stream: Support playlists containing relative URIs. (Fixes: :issue:`1785`,
+  PR: :issue:`1802`)
+
+- Stream: Fix crash when unwrapping stream without MIME type. (Fixes:
+  :issue:`1760`, PR: :issue:`1800`)
+
+- MPD: Add support for seeking to time positions with float point precision.
+  (Fixes: :issue:`1756`, PR: :issue:`1801`)
+
+- MPD: Handle URIs containing non-ASCII characters. (Fixes: :issue:`1759`,
+  PR: :issue:`1805`, :issue:`1808`)
 
 
 v2.2.3 (2019-06-20)

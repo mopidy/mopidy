@@ -15,13 +15,10 @@ Asking questions
 Please get in touch with us in one of these ways when requesting help with
 Mopidy and its extensions:
 
-- Our discussion forum: `discourse.mopidy.com <https://discourse.mopidy.com>`_.
-  Just sign in and fire away.
+- Our Discourse forum: `discourse.mopidy.com <https://discourse.mopidy.com>`_.
 
-- Our IRC channel: `#mopidy <https://webchat.freenode.net/?channels=#mopidy>`_
-  on `irc.freenode.net <http://freenode.net>`_.
-  Be prepared to hang around for a while, as we're not always around to answer
-  straight away.
+- The ``#mopidy-dev`` stream on Zulip chat: `mopidy.zulipchat.com
+  <https://mopidy.zulipchat.com>`_.
 
 Before asking for help, it might be worth your time to read the
 :ref:`troubleshooting` page, both so you might find a solution to your problem
@@ -32,13 +29,13 @@ Helping users
 =============
 
 If you want to contribute to Mopidy, a great place to start is by helping other
-users on IRC and in the discussion forum. This is a contribution we value
-highly. As more people help with user support, new users get faster and better
-help. For your own benefit, you'll quickly learn what users find confusing,
-difficult or lacking, giving you some ideas for where you may contribute
-improvements, either to code or documentation. Lastly, this may also free up
-time for other contributors to spend more time on fixing bugs or implementing
-new features.
+users in the discussion forum and the ``#mopidy-users`` Zulip stream. This is a
+contribution we value highly. As more people help with user support, new users
+get faster and better help. For your own benefit, you'll quickly learn what
+users find confusing, difficult or lacking, giving you some ideas for where you
+may contribute improvements, either to code or documentation. Lastly, this may
+also free up time for other contributors to spend more time on fixing bugs or
+implementing new features.
 
 
 .. _issue-guidelines:
@@ -72,9 +69,9 @@ Pull request guidelines
    - If it's a bug, :ref:`file an issue <issue-guidelines>`.
 
    - If it's an enhancement, discuss it with other Mopidy developers first,
-     either in a GitHub issue, on the discussion forum, or on IRC. Making sure
-     your ideas and solutions are aligned with other contributors greatly
-     increases the odds of your pull request being quickly accepted.
+     either in a GitHub issue, on the discussion forum, or on Zulip chat.
+     Making sure your ideas and solutions are aligned with other contributors
+     greatly increases the odds of your pull request being quickly accepted.
 
 #. Create a new branch, based on the ``develop`` branch, for every feature or
    bug fix. Keep branches small and on topic, as that makes them far easier to
@@ -89,7 +86,7 @@ Pull request guidelines
      ``docs/add-ext-mopidy-spotify-tunigo``.
 
 #. Follow the :ref:`code style <codestyle>`, especially make sure the
-   ``flake8`` linter does not complain about anything. Travis CI will check
+   ``flake8`` linter does not complain about anything. CircleCI will check
    that your pull request is "flake8 clean". See :ref:`code-linting`.
 
 #. Include tests for any new feature or substantial bug fix. See

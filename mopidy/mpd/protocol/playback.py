@@ -1,11 +1,9 @@
-from __future__ import absolute_import, unicode_literals
-
 from mopidy.core import PlaybackState
 from mopidy.internal import deprecation
 from mopidy.mpd import exceptions, protocol
 
 
-@protocol.commands.add('consume', state=protocol.BOOL)
+@protocol.commands.add("consume", state=protocol.BOOL)
 def consume(context, state):
     """
     *musicpd.org, playback section:*
@@ -19,7 +17,7 @@ def consume(context, state):
     context.core.tracklist.set_consume(state)
 
 
-@protocol.commands.add('crossfade', seconds=protocol.UINT)
+@protocol.commands.add("crossfade", seconds=protocol.UINT)
 def crossfade(context, seconds):
     """
     *musicpd.org, playback section:*
@@ -31,7 +29,7 @@ def crossfade(context, seconds):
     raise exceptions.MpdNotImplemented  # TODO
 
 
-@protocol.commands.add('mixrampdb')
+@protocol.commands.add("mixrampdb")
 def mixrampdb(context, decibels):
     """
     *musicpd.org, playback section:*
@@ -48,7 +46,7 @@ def mixrampdb(context, decibels):
     raise exceptions.MpdNotImplemented  # TODO
 
 
-@protocol.commands.add('mixrampdelay', seconds=protocol.UINT)
+@protocol.commands.add("mixrampdelay", seconds=protocol.UINT)
 def mixrampdelay(context, seconds):
     """
     *musicpd.org, playback section:*
@@ -62,7 +60,7 @@ def mixrampdelay(context, seconds):
     raise exceptions.MpdNotImplemented  # TODO
 
 
-@protocol.commands.add('next')
+@protocol.commands.add("next")
 def next_(context):
     """
     *musicpd.org, playback section:*
@@ -120,7 +118,7 @@ def next_(context):
     return context.core.playback.next().get()
 
 
-@protocol.commands.add('pause', state=protocol.BOOL)
+@protocol.commands.add("pause", state=protocol.BOOL)
 def pause(context, state=None):
     """
     *musicpd.org, playback section:*
@@ -134,12 +132,12 @@ def pause(context, state=None):
     - Calls ``pause`` without any arguments to toogle pause.
     """
     if state is None:
-        deprecation.warn('mpd.protocol.playback.pause:state_arg')
+        deprecation.warn("mpd.protocol.playback.pause:state_arg")
 
         playback_state = context.core.playback.get_state().get()
-        if (playback_state == PlaybackState.PLAYING):
+        if playback_state == PlaybackState.PLAYING:
             context.core.playback.pause().get()
-        elif (playback_state == PlaybackState.PAUSED):
+        elif playback_state == PlaybackState.PAUSED:
             context.core.playback.resume().get()
     elif state:
         context.core.playback.pause().get()
@@ -147,7 +145,7 @@ def pause(context, state=None):
         context.core.playback.resume().get()
 
 
-@protocol.commands.add('play', songpos=protocol.INT)
+@protocol.commands.add("play", songpos=protocol.INT)
 def play(context, songpos=None):
     """
     *musicpd.org, playback section:*
@@ -181,7 +179,7 @@ def play(context, songpos=None):
         tl_track = context.core.tracklist.slice(songpos, songpos + 1).get()[0]
         return context.core.playback.play(tl_track).get()
     except IndexError:
-        raise exceptions.MpdArgError('Bad song index')
+        raise exceptions.MpdArgError("Bad song index")
 
 
 def _play_minus_one(context):
@@ -202,7 +200,7 @@ def _play_minus_one(context):
     return  # Fail silently
 
 
-@protocol.commands.add('playid', tlid=protocol.INT)
+@protocol.commands.add("playid", tlid=protocol.INT)
 def playid(context, tlid):
     """
     *musicpd.org, playback section:*
@@ -222,13 +220,13 @@ def playid(context, tlid):
     """
     if tlid == -1:
         return _play_minus_one(context)
-    tl_tracks = context.core.tracklist.filter({'tlid': [tlid]}).get()
+    tl_tracks = context.core.tracklist.filter({"tlid": [tlid]}).get()
     if not tl_tracks:
-        raise exceptions.MpdNoExistError('No such song')
+        raise exceptions.MpdNoExistError("No such song")
     return context.core.playback.play(tl_tracks[0]).get()
 
 
-@protocol.commands.add('previous')
+@protocol.commands.add("previous")
 def previous(context):
     """
     *musicpd.org, playback section:*
@@ -275,7 +273,7 @@ def previous(context):
     return context.core.playback.previous().get()
 
 
-@protocol.commands.add('random', state=protocol.BOOL)
+@protocol.commands.add("random", state=protocol.BOOL)
 def random(context, state):
     """
     *musicpd.org, playback section:*
@@ -287,7 +285,7 @@ def random(context, state):
     context.core.tracklist.set_random(state)
 
 
-@protocol.commands.add('repeat', state=protocol.BOOL)
+@protocol.commands.add("repeat", state=protocol.BOOL)
 def repeat(context, state):
     """
     *musicpd.org, playback section:*
@@ -299,7 +297,7 @@ def repeat(context, state):
     context.core.tracklist.set_repeat(state)
 
 
-@protocol.commands.add('replay_gain_mode')
+@protocol.commands.add("replay_gain_mode")
 def replay_gain_mode(context, mode):
     """
     *musicpd.org, playback section:*
@@ -316,7 +314,7 @@ def replay_gain_mode(context, mode):
     raise exceptions.MpdNotImplemented  # TODO
 
 
-@protocol.commands.add('replay_gain_status')
+@protocol.commands.add("replay_gain_status")
 def replay_gain_status(context):
     """
     *musicpd.org, playback section:*
@@ -326,10 +324,10 @@ def replay_gain_status(context):
         Prints replay gain options. Currently, only the variable
         ``replay_gain_mode`` is returned.
     """
-    return 'replay_gain_mode: off'  # TODO
+    return "replay_gain_mode: off"  # TODO
 
 
-@protocol.commands.add('seek', songpos=protocol.UINT, seconds=protocol.UINT)
+@protocol.commands.add("seek", songpos=protocol.UINT, seconds=protocol.UFLOAT)
 def seek(context, songpos, seconds):
     """
     *musicpd.org, playback section:*
@@ -346,10 +344,10 @@ def seek(context, songpos, seconds):
     tl_track = context.core.playback.get_current_tl_track().get()
     if context.core.tracklist.index(tl_track).get() != songpos:
         play(context, songpos)
-    context.core.playback.seek(seconds * 1000).get()
+    context.core.playback.seek(int(seconds * 1000)).get()
 
 
-@protocol.commands.add('seekid', tlid=protocol.UINT, seconds=protocol.UINT)
+@protocol.commands.add("seekid", tlid=protocol.UINT, seconds=protocol.UFLOAT)
 def seekid(context, tlid, seconds):
     """
     *musicpd.org, playback section:*
@@ -361,10 +359,10 @@ def seekid(context, tlid, seconds):
     tl_track = context.core.playback.get_current_tl_track().get()
     if not tl_track or tl_track.tlid != tlid:
         playid(context, tlid)
-    context.core.playback.seek(seconds * 1000).get()
+    context.core.playback.seek(int(seconds * 1000)).get()
 
 
-@protocol.commands.add('seekcur')
+@protocol.commands.add("seekcur")
 def seekcur(context, time):
     """
     *musicpd.org, playback section:*
@@ -374,16 +372,16 @@ def seekcur(context, time):
         Seeks to the position ``TIME`` within the current song. If prefixed by
         '+' or '-', then the time is relative to the current playing position.
     """
-    if time.startswith(('+', '-')):
+    if time.startswith(("+", "-")):
         position = context.core.playback.get_time_position().get()
-        position += protocol.INT(time) * 1000
+        position += int(protocol.FLOAT(time) * 1000)
         context.core.playback.seek(position).get()
     else:
-        position = protocol.UINT(time) * 1000
+        position = int(protocol.UFLOAT(time) * 1000)
         context.core.playback.seek(position).get()
 
 
-@protocol.commands.add('setvol', volume=protocol.INT)
+@protocol.commands.add("setvol", volume=protocol.INT)
 def setvol(context, volume):
     """
     *musicpd.org, playback section:*
@@ -400,10 +398,10 @@ def setvol(context, volume):
     value = min(max(0, volume), 100)
     success = context.core.mixer.set_volume(value).get()
     if not success:
-        raise exceptions.MpdSystemError('problems setting volume')
+        raise exceptions.MpdSystemError("problems setting volume")
 
 
-@protocol.commands.add('single', state=protocol.BOOL)
+@protocol.commands.add("single", state=protocol.BOOL)
 def single(context, state):
     """
     *musicpd.org, playback section:*
@@ -417,7 +415,7 @@ def single(context, state):
     context.core.tracklist.set_single(state)
 
 
-@protocol.commands.add('stop')
+@protocol.commands.add("stop")
 def stop(context):
     """
     *musicpd.org, playback section:*
@@ -429,7 +427,7 @@ def stop(context):
     context.core.playback.stop()
 
 
-@protocol.commands.add('volume', change=protocol.INT)
+@protocol.commands.add("volume", change=protocol.INT)
 def volume(context, change):
     """
     *musicpd.org, playback section:*
@@ -441,13 +439,13 @@ def volume(context, change):
         Note: ``volume`` is deprecated, use ``setvol`` instead.
     """
     if change < -100 or change > 100:
-        raise exceptions.MpdArgError('Invalid volume value')
+        raise exceptions.MpdArgError("Invalid volume value")
 
     old_volume = context.core.mixer.get_volume().get()
     if old_volume is None:
-        raise exceptions.MpdSystemError('problems setting volume')
+        raise exceptions.MpdSystemError("problems setting volume")
 
     new_volume = min(max(0, old_volume + change), 100)
     success = context.core.mixer.set_volume(new_volume).get()
     if not success:
-        raise exceptions.MpdSystemError('problems setting volume')
+        raise exceptions.MpdSystemError("problems setting volume")

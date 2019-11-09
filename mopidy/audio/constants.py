@@ -1,17 +1,14 @@
-from __future__ import absolute_import, unicode_literals
-
-
-class PlaybackState(object):
+class PlaybackState:
 
     """
     Enum of playback states.
     """
 
     #: Constant representing the paused state.
-    PAUSED = 'paused'
+    PAUSED = "paused"
 
     #: Constant representing the playing state.
-    PLAYING = 'playing'
+    PLAYING = "playing"
 
     #: Constant representing the stopped state.
-    STOPPED = 'stopped'
+    STOPPED = "stopped"

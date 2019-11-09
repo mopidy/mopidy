@@ -1,9 +1,7 @@
-from __future__ import absolute_import, unicode_literals
-
 from mopidy.mpd import exceptions, protocol
 
 
-@protocol.commands.add('command_list_begin', list_command=False)
+@protocol.commands.add("command_list_begin", list_command=False)
 def command_list_begin(context):
     """
     *musicpd.org, command list section:*
@@ -25,31 +23,37 @@ def command_list_begin(context):
     context.dispatcher.command_list = []
 
 
-@protocol.commands.add('command_list_end', list_command=False)
+@protocol.commands.add("command_list_end", list_command=False)
 def command_list_end(context):
     """See :meth:`command_list_begin()`."""
     # TODO: batch consecutive add commands
     if not context.dispatcher.command_list_receiving:
-        raise exceptions.MpdUnknownCommand(command='command_list_end')
+        raise exceptions.MpdUnknownCommand(command="command_list_end")
     context.dispatcher.command_list_receiving = False
     (command_list, context.dispatcher.command_list) = (
-        context.dispatcher.command_list, [])
+        context.dispatcher.command_list,
+        [],
+    )
     (command_list_ok, context.dispatcher.command_list_ok) = (
-        context.dispatcher.command_list_ok, False)
+        context.dispatcher.command_list_ok,
+        False,
+    )
     command_list_response = []
     for index, command in enumerate(command_list):
         response = context.dispatcher.handle_request(
-            command, current_command_list_index=index)
+            command, current_command_list_index=index
+        )
         command_list_response.extend(response)
-        if (command_list_response and
-                command_list_response[-1].startswith('ACK')):
+        if command_list_response and command_list_response[-1].startswith(
+            "ACK"
+        ):
             return command_list_response
         if command_list_ok:
-            command_list_response.append('list_OK')
+            command_list_response.append("list_OK")
     return command_list_response
 
 
-@protocol.commands.add('command_list_ok_begin', list_command=False)
+@protocol.commands.add("command_list_ok_begin", list_command=False)
 def command_list_ok_begin(context):
     """See :meth:`command_list_begin()`."""
     context.dispatcher.command_list_receiving = True
