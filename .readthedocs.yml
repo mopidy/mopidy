@@ -3,7 +3,8 @@ version: 2
 python:
   version: 3.7
   install:
-    - requirements: docs/requirements.txt
+    extra_requirements:
+      - docs
 
 sphinx:
   builder: htmldir
