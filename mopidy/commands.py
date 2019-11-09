@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import argparse
 import collections
 import contextlib
@@ -6,6 +8,7 @@ import os
 import pathlib
 import signal
 import sys
+from typing import TYPE_CHECKING
 
 import pykka
 from pykka.messages import ProxyCall
@@ -16,6 +19,10 @@ from mopidy.audio import Audio
 from mopidy.core import Core
 from mopidy.internal import deps, process, timer, versioning
 from mopidy.internal.gi import GLib
+
+if TYPE_CHECKING:
+    from typing import Optional
+
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +85,7 @@ class Command:
     argprases own sub-parser handling.
     """
 
-    help = None
+    help: Optional[str] = None
     #: Help text to display in help output.
 
     def __init__(self):
