@@ -245,6 +245,22 @@ Audio
 - Remove the method :meth:`mopidy.audio.Audio.emit_end_of_stream`, which has
   been deprecated since 1.0. (Fixes: :issue:`1465`, PR: :issue:`1705`)
 
+Internals
+---------
+
+- Format code with Black. (PR: :issue:`1834`)
+
+- Port test assertions from ``unittest`` methods to pytest ``assert``
+  statements. (PR: :issue:`1838`)
+
+- Switch all internal path handling to use :mod:`pathlib`. (PR: :issue:`1814`)
+
+- Remove :mod:`mopidy.compat` and all Python 2/3 compatability code. (PR:
+  :issue:`1833`, :issue:`1835`)
+
+- Replace ``requirements.txt`` and ``setup.py`` with declarative config in
+  ``setup.cfg``. (PR: :issue:`1839`)
+
 
 v2.3.1 (2019-10-15)
 ===================
