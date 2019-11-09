@@ -25,6 +25,8 @@ Dependencies
 
 - Python >= 3.7 is now required. Python 2.7 is no longer supported.
 
+- GStreamer >= 1.14.0 is now required.
+
 - Pykka >= 2.0.1 is now required.
 
 - Tornado >= 4.4 is now required. The upper boundary (< 6) has been removed.
