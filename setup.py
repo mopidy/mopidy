@@ -9,14 +9,29 @@ def get_version(filename):
         return metadata["version"]
 
 
+DOCS_DEPS = ["pygraphviz", "sphinx", "sphinx_rtd_theme"]
+LINT_DEPS = [
+    "black",
+    "check-manifest",
+    "flake8",
+    "flake8-bugbear",
+    "flake8-import-order",
+    "isort[pyproject]",
+    "pep8-naming",
+]
+RELEASE_DEPS = ["twine", "wheel"]
+TEST_DEPS = ["pytest", "pytest-cov", "responses"]
+DEV_DEPS = DOCS_DEPS + LINT_DEPS + RELEASE_DEPS + TEST_DEPS
+
+
 setup(
     name="Mopidy",
     version=get_version("mopidy/__init__.py"),
-    url="http://www.mopidy.com/",
+    url="https://mopidy.com/",
     license="Apache License, Version 2.0",
     author="Stein Magnus Jodal",
     author_email="stein.magnus@jodal.no",
-    description="Music server with MPD and Spotify support",
+    description="Mopidy is an extensible music server written in Python",
     long_description=open("README.rst").read(),
     packages=find_packages(exclude=["tests", "tests.*"]),
     zip_safe=False,
@@ -28,7 +43,13 @@ setup(
         "setuptools",
         "tornado >= 4.4",
     ],
-    extras_require={"http": []},  # Keep for backwards compat
+    extras_require={
+        "http": [],  # Keep for backwards compat
+        "docs": DOCS_DEPS,
+        "lint": LINT_DEPS,
+        "test": TEST_DEPS,
+        "dev": DEV_DEPS,
+    },
     entry_points={
         "console_scripts": ["mopidy = mopidy.__main__:main"],
         "mopidy.ext": [

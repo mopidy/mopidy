@@ -9,7 +9,7 @@ workflows:
     jobs:
       - py37
       - black
-      #- check-manifest
+      - check-manifest
       - docs
       - flake8
 
