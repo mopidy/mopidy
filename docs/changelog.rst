@@ -14,6 +14,12 @@ v3.0.0 (UNRELEASED)
 
 Backwards incompatible release.
 
+.. note::
+
+  Pre-releases of Mopidy 3.0 can be installed by running::
+
+    python3 -m pip install --pre mopidy
+
 Dependencies
 ------------
 
