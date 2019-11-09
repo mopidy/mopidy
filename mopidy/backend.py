@@ -1,8 +1,47 @@
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 import pykka
 
 from mopidy import listener
+
+if TYPE_CHECKING:
+    from typing import Any, Dict, List, Optional, Set, TypeVar, Union
+
+    from typing_extensions import Literal
+
+    from mopidy.models import Image, Playlist, Ref, SearchResult, Track
+
+    # TODO Fix duplication with mopidy.internal.validation.SEARCH_FIELDS
+    SearchField = Literal[
+        "uri",
+        "track_name",
+        "album",
+        "artist",
+        "albumartist",
+        "composer",
+        "performer",
+        "track_no",
+        "genre",
+        "date",
+        "comment",
+        "any",
+    ]
+
+    # TODO Fix duplication with mopidy.internal.validation.DISTINCT_FIELDS
+    DistinctField = Literal[
+        "uri", "name", "genre", "date", "comment", "musicbrainz_id"
+    ]
+
+    F = TypeVar("F")
+    QueryValue = Union[str, int]
+    Query = Dict[F, List[QueryValue]]
+
+    Uri = str
+    UriScheme = str
+
 
 logger = logging.getLogger(__name__)
 
@@ -26,43 +65,46 @@ class Backend:
     #:
     #: Should be passed to the backend constructor as the kwarg ``audio``,
     #: which will then set this field.
-    audio = None
+    # TODO(typing) Replace Any with an ActorProxy[Audio] type
+    audio: Optional[Any] = None
 
     #: The library provider. An instance of
     #: :class:`~mopidy.backend.LibraryProvider`, or :class:`None` if
     #: the backend doesn't provide a library.
-    library = None
+    library: Optional[LibraryProvider] = None
 
     #: The playback provider. An instance of
     #: :class:`~mopidy.backend.PlaybackProvider`, or :class:`None` if
     #: the backend doesn't provide playback.
-    playback = None
+    playback: Optional[PlaybackProvider] = None
 
     #: The playlists provider. An instance of
     #: :class:`~mopidy.backend.PlaylistsProvider`, or class:`None` if
     #: the backend doesn't provide playlists.
-    playlists = None
+    playlists: Optional[PlaylistsProvider] = None
 
     #: List of URI schemes this backend can handle.
-    uri_schemes = []
+    uri_schemes: List[UriScheme] = []
 
     # Because the providers is marked as pykka.traversable(), we can't get()
     # them from another actor, and need helper methods to check if the
     # providers are set or None.
 
-    def has_library(self):
+    def has_library(self) -> bool:
         return self.library is not None
 
-    def has_library_browse(self):
-        return self.has_library() and self.library.root_directory is not None
+    def has_library_browse(self) -> bool:
+        return (
+            self.library is not None and self.library.root_directory is not None
+        )
 
-    def has_playback(self):
+    def has_playback(self) -> bool:
         return self.playback is not None
 
-    def has_playlists(self):
+    def has_playlists(self) -> bool:
         return self.playlists is not None
 
-    def ping(self):
+    def ping(self) -> bool:
         """Called to check if the actor is still alive."""
         return True
 
@@ -75,7 +117,7 @@ class LibraryProvider:
     :type backend: :class:`mopidy.backend.Backend`
     """
 
-    root_directory = None
+    root_directory: Optional[Ref] = None
     """
     :class:`mopidy.models.Ref.directory` instance with a URI and name set
     representing the root of this library's browse tree. URIs must
@@ -85,10 +127,10 @@ class LibraryProvider:
     *MUST be set by any class that implements* :meth:`LibraryProvider.browse`.
     """
 
-    def __init__(self, backend):
+    def __init__(self, backend: Backend) -> None:
         self.backend = backend
 
-    def browse(self, uri):
+    def browse(self, uri: Uri) -> List[Ref]:
         """
         See :meth:`mopidy.core.LibraryController.browse`.
 
@@ -99,7 +141,9 @@ class LibraryProvider:
         """
         return []
 
-    def get_distinct(self, field, query=None):
+    def get_distinct(
+        self, field: DistinctField, query: Optional[Query[DistinctField]] = None
+    ) -> Set[str]:
         """
         See :meth:`mopidy.core.LibraryController.get_distinct`.
 
@@ -112,7 +156,7 @@ class LibraryProvider:
         """
         return set()
 
-    def get_images(self, uris):
+    def get_images(self, uris: List[Uri]) -> Dict[Uri, List[Image]]:
         """
         See :meth:`mopidy.core.LibraryController.get_images`.
 
@@ -122,7 +166,7 @@ class LibraryProvider:
         """
         return {}
 
-    def lookup(self, uri):
+    def lookup(self, uri: Uri) -> Dict[Uri, List[Track]]:
         """
         See :meth:`mopidy.core.LibraryController.lookup`.
 
@@ -130,7 +174,7 @@ class LibraryProvider:
         """
         raise NotImplementedError
 
-    def refresh(self, uri=None):
+    def refresh(self, uri: Optional[Uri] = None) -> None:
         """
         See :meth:`mopidy.core.LibraryController.refresh`.
 
@@ -138,7 +182,12 @@ class LibraryProvider:
         """
         pass
 
-    def search(self, query=None, uris=None, exact=False):
+    def search(
+        self,
+        query: Query[SearchField],
+        uris: Optional[List[Uri]] = None,
+        exact: bool = False,
+    ) -> List[SearchResult]:
         """
         See :meth:`mopidy.core.LibraryController.search`.
 
@@ -160,11 +209,12 @@ class PlaybackProvider:
     :type backend: :class:`mopidy.backend.Backend`
     """
 
-    def __init__(self, audio, backend):
+    def __init__(self, audio: Any, backend: Backend) -> None:
+        # TODO(typing) Replace Any with an ActorProxy[Audio] type
         self.audio = audio
         self.backend = backend
 
-    def pause(self):
+    def pause(self) -> bool:
         """
         Pause playback.
 
@@ -174,7 +224,7 @@ class PlaybackProvider:
         """
         return self.audio.pause_playback().get()
 
-    def play(self):
+    def play(self) -> bool:
         """
         Start playback.
 
@@ -184,7 +234,7 @@ class PlaybackProvider:
         """
         return self.audio.start_playback().get()
 
-    def prepare_change(self):
+    def prepare_change(self) -> None:
         """
         Indicate that an URI change is about to happen.
 
@@ -196,7 +246,7 @@ class PlaybackProvider:
         """
         self.audio.prepare_change().get()
 
-    def translate_uri(self, uri):
+    def translate_uri(self, uri: Uri) -> Optional[Uri]:
         """
         Convert custom URI scheme to real playable URI.
 
@@ -213,7 +263,7 @@ class PlaybackProvider:
         """
         return uri
 
-    def is_live(self, uri):
+    def is_live(self, uri: Uri) -> bool:
         """
         Decide if the URI should be treated as a live stream or not.
 
@@ -228,7 +278,7 @@ class PlaybackProvider:
         """
         return False
 
-    def should_download(self, uri):
+    def should_download(self, uri: Uri) -> bool:
         """
         Attempt progressive download buffering for the URI or not.
 
@@ -243,7 +293,7 @@ class PlaybackProvider:
         """
         return False
 
-    def change_track(self, track):
+    def change_track(self, track: Track) -> bool:
         """
         Switch to provided track.
 
@@ -272,7 +322,7 @@ class PlaybackProvider:
         ).get()
         return True
 
-    def resume(self):
+    def resume(self) -> bool:
         """
         Resume playback at the same time position playback was paused.
 
@@ -282,7 +332,7 @@ class PlaybackProvider:
         """
         return self.audio.start_playback().get()
 
-    def seek(self, time_position):
+    def seek(self, time_position: int) -> bool:
         """
         Seek to a given time position.
 
@@ -294,7 +344,7 @@ class PlaybackProvider:
         """
         return self.audio.set_position(time_position).get()
 
-    def stop(self):
+    def stop(self) -> bool:
         """
         Stop playback.
 
@@ -307,7 +357,7 @@ class PlaybackProvider:
         """
         return self.audio.stop_playback().get()
 
-    def get_time_position(self):
+    def get_time_position(self) -> int:
         """
         Get the current time position in milliseconds.
 
@@ -330,10 +380,10 @@ class PlaylistsProvider:
     :type backend: :class:`mopidy.backend.Backend` instance
     """
 
-    def __init__(self, backend):
+    def __init__(self, backend: Backend) -> None:
         self.backend = backend
 
-    def as_list(self):
+    def as_list(self) -> List[Ref]:
         """
         Get a list of the currently available playlists.
 
@@ -347,7 +397,7 @@ class PlaylistsProvider:
         """
         raise NotImplementedError
 
-    def get_items(self, uri):
+    def get_items(self, uri: Uri) -> Optional[List[Ref]]:
         """
         Get the items in a playlist specified by ``uri``.
 
@@ -363,7 +413,7 @@ class PlaylistsProvider:
         """
         raise NotImplementedError
 
-    def create(self, name):
+    def create(self, name: str) -> Optional[Playlist]:
         """
         Create a new empty playlist with the given name.
 
@@ -378,7 +428,7 @@ class PlaylistsProvider:
         """
         raise NotImplementedError
 
-    def delete(self, uri):
+    def delete(self, uri: Uri) -> bool:
         """
         Delete playlist identified by the URI.
 
@@ -395,7 +445,7 @@ class PlaylistsProvider:
         """
         raise NotImplementedError
 
-    def lookup(self, uri):
+    def lookup(self, uri: Uri) -> Optional[Playlist]:
         """
         Lookup playlist with given URI in both the set of playlists and in any
         other playlist source.
@@ -410,7 +460,7 @@ class PlaylistsProvider:
         """
         raise NotImplementedError
 
-    def refresh(self):
+    def refresh(self) -> None:
         """
         Refresh the playlists in :attr:`playlists`.
 
@@ -418,7 +468,7 @@ class PlaylistsProvider:
         """
         raise NotImplementedError
 
-    def save(self, playlist):
+    def save(self, playlist: Playlist) -> Optional[Playlist]:
         """
         Save the given playlist.
 
@@ -451,11 +501,11 @@ class BackendListener(listener.Listener):
     """
 
     @staticmethod
-    def send(event, **kwargs):
+    def send(event: str, **kwargs: Any) -> None:
         """Helper to allow calling of backend listener events"""
         listener.send(BackendListener, event, **kwargs)
 
-    def playlists_loaded(self):
+    def playlists_loaded(self) -> None:
         """
         Called when playlists are loaded or refreshed.
 
