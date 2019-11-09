@@ -6,7 +6,6 @@ from mopidy.models import Track
 
 from tests.mpd import protocol
 
-
 PAUSED = PlaybackState.PAUSED
 PLAYING = PlaybackState.PLAYING
 STOPPED = PlaybackState.STOPPED

@@ -1,7 +1,6 @@
 import os
 
 import mock
-
 import tornado.testing
 import tornado.wsgi
 

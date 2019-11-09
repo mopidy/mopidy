@@ -4,7 +4,6 @@ import time
 
 from mopidy.internal import log
 
-
 logger = logging.getLogger(__name__)
 
 

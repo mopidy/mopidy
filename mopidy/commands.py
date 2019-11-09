@@ -1,15 +1,16 @@
 import argparse
 import collections
 import contextlib
-import pathlib
 import logging
 import os
+import pathlib
 import signal
 import sys
 
 import pykka
 
-from mopidy import config as config_lib, exceptions
+from mopidy import config as config_lib
+from mopidy import exceptions
 from mopidy.audio import Audio
 from mopidy.core import Core
 from mopidy.internal import deps, process, timer, versioning

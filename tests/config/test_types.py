@@ -2,7 +2,6 @@ import logging
 import socket
 
 import mock
-
 import pytest
 
 from mopidy.config import types

@@ -2,7 +2,6 @@ import logging
 
 from mopidy import listener
 
-
 logger = logging.getLogger(__name__)
 
 

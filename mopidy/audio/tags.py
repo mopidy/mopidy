@@ -7,7 +7,6 @@ from mopidy.internal import log
 from mopidy.internal.gi import GLib, Gst
 from mopidy.models import Album, Artist, Track
 
-
 logger = logging.getLogger(__name__)
 
 

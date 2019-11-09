@@ -1,7 +1,5 @@
 import mock
-
 import pykka
-
 import pytest
 
 from mopidy import backend, core

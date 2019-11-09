@@ -12,7 +12,6 @@ import mopidy
 from mopidy import core, models
 from mopidy.internal import encoding, jsonrpc
 
-
 logger = logging.getLogger(__name__)
 
 

@@ -3,9 +3,8 @@ import logging
 import socket
 import unittest
 
-from mock import Mock, call, patch, sentinel
-
 import pykka
+from mock import Mock, call, patch, sentinel
 
 from mopidy.internal import network
 from mopidy.internal.gi import GLib

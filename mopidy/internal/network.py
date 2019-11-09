@@ -11,7 +11,6 @@ import pykka
 from mopidy.internal import encoding, path, validation
 from mopidy.internal.gi import GLib
 
-
 logger = logging.getLogger(__name__)
 
 

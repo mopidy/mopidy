@@ -3,7 +3,6 @@ import sys
 import unittest
 
 import mock
-
 import pkg_resources
 
 from mopidy.internal import deps

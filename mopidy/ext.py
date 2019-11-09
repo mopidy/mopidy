@@ -4,9 +4,9 @@ from collections.abc import Mapping
 
 import pkg_resources
 
-from mopidy import config as config_lib, exceptions
+from mopidy import config as config_lib
+from mopidy import exceptions
 from mopidy.internal import path
-
 
 logger = logging.getLogger(__name__)
 

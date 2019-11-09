@@ -2,7 +2,6 @@ import threading
 import unittest
 
 import mock
-
 import pykka
 
 from mopidy import audio

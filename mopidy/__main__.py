@@ -4,7 +4,9 @@ import sys
 
 import pykka.debug
 
-from mopidy import commands, config as config_lib, ext
+from mopidy import commands
+from mopidy import config as config_lib
+from mopidy import ext
 from mopidy.internal import encoding, log, path, process, versioning
 from mopidy.internal.gi import Gst  # noqa: F401
 

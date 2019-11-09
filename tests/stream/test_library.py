@@ -1,5 +1,4 @@
 import mock
-
 import pytest
 
 from mopidy.internal import path

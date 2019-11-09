@@ -3,7 +3,6 @@ from collections.abc import Iterable, Mapping
 
 from mopidy import exceptions
 
-
 PLAYBACK_STATES = {"paused", "stopped", "playing"}
 
 SEARCH_FIELDS = {

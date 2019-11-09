@@ -5,12 +5,12 @@ import threading
 import pykka
 
 from mopidy import exceptions
-from mopidy.audio import tags as tags_lib, utils
+from mopidy.audio import tags as tags_lib
+from mopidy.audio import utils
 from mopidy.audio.constants import PlaybackState
 from mopidy.audio.listener import AudioListener
 from mopidy.internal import process
 from mopidy.internal.gi import GLib, GObject, Gst, GstPbutils
-
 
 logger = logging.getLogger(__name__)
 

@@ -17,7 +17,6 @@ from mopidy.core.tracklist import TracklistController
 from mopidy.internal import path, storage, validation, versioning
 from mopidy.internal.models import CoreState
 
-
 logger = logging.getLogger(__name__)
 
 

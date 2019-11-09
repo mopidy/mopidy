@@ -2,7 +2,6 @@ import contextlib
 import re
 import warnings
 
-
 # Messages used in deprecation warnings are collected here so we can target
 # them easily when ignoring warnings.
 _MESSAGES = {

@@ -5,7 +5,6 @@ import re
 from mopidy.models import TlTrack
 from mopidy.mpd.protocol import tagtype_list
 
-
 logger = logging.getLogger(__name__)
 
 # TODO: special handling of local:// uri scheme

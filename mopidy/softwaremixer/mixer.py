@@ -4,7 +4,6 @@ import pykka
 
 from mopidy import mixer
 
-
 logger = logging.getLogger(__name__)
 
 

@@ -2,7 +2,6 @@ import os
 import pathlib
 
 import mock
-
 import pytest
 
 from mopidy.internal import xdg

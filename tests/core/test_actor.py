@@ -4,7 +4,6 @@ import tempfile
 import unittest
 
 import mock
-
 import pykka
 
 import mopidy
