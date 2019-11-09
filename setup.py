@@ -19,7 +19,7 @@ LINT_DEPS = [
     "isort[pyproject]",
     "pep8-naming",
 ]
-RELEASE_DEPS = ["invoke", "twine", "wheel"]
+RELEASE_DEPS = ["twine", "wheel"]
 TEST_DEPS = ["pytest", "pytest-cov", "responses"]
 DEV_DEPS = DOCS_DEPS + LINT_DEPS + RELEASE_DEPS + TEST_DEPS
 
