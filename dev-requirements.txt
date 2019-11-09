@@ -7,6 +7,9 @@ sphinx
 # Format code
 black
 
+# Import sorting
+isort[pyproject]
+
 # Check code style, errors, etc
 flake8
 flake8-bugbear
