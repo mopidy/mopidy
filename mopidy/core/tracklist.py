@@ -222,7 +222,7 @@ class TracklistController:
         # Current difference between next and EOT handling is that EOT needs to
         # handle "single", with that out of the way the rest of the logic is
         # shared.
-        return self.next_track(tl_track)
+        return self.get_next_tlid(tl_track)
 
     def get_next_tlid(self):
         """
