@@ -142,7 +142,7 @@ extlinks = {
 # -- Options for intersphinx extension ----------------------------------------
 
 intersphinx_mapping = {
-    "python": ("https://docs.python.org/2", None),
+    "python": ("https://docs.python.org/3", None),
     "pykka": ("https://www.pykka.org/en/latest/", None),
     "tornado": ("http://www.tornadoweb.org/en/stable/", None),
 }
