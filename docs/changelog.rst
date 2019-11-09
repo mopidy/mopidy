@@ -17,10 +17,7 @@ Backwards incompatible release.
 Dependencies
 ------------
 
-- Python 3.7 is now supported. Before the final release of Mopidy 3.0,
-  we'll add support for Python 3.8.
-
-- Python 2.7 is no longer supported.
+- Python >= 3.7 is now required. Python 2.7 is no longer supported.
 
 - Pykka >= 2.0.1 is now required.
 
