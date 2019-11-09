@@ -7,6 +7,7 @@ include AUTHORS
 include AUTHORS.update
 include LICENSE
 include MANIFEST.in
+include mopidy/py.typed
 include pyproject.toml
 include tox.ini
 
