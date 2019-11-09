@@ -31,7 +31,7 @@ setup(
     license="Apache License, Version 2.0",
     author="Stein Magnus Jodal",
     author_email="stein.magnus@jodal.no",
-    description="Music server with MPD and Spotify support",
+    description="Mopidy is an extensible music server written in Python",
     long_description=open("README.rst").read(),
     packages=find_packages(exclude=["tests", "tests.*"]),
     zip_safe=False,
