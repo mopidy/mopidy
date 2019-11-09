@@ -1,7 +1,15 @@
+from __future__ import annotations
+
 import logging
 import logging.config
 import logging.handlers
 import platform
+from typing import TYPE_CHECKING
+
+
+if TYPE_CHECKING:
+    from typing import Dict
+
 
 LOG_LEVELS = {
     -1: dict(root=logging.ERROR, mopidy=logging.WARNING),
@@ -147,7 +155,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
         logging.CRITICAL: ("red", "white", True),
     }
     # Map logger name to foreground colors
-    logger_map = {}
+    logger_map: Dict[str, str] = {}
 
     csi = "\x1b["
     reset = "\x1b[0m"
