@@ -448,10 +448,10 @@ class AudioEventTest(BaseTest):
 
         # Check that events counts check out.
         keys = [k for k, v in self.listener.get_events().get()]
-        assert 2 == keys.count('stream_changed')
-        assert 2 == keys.count('position_changed')
-        assert 1 == keys.count('state_changed')
-        assert 1 == keys.count('reached_end_of_stream')
+        assert keys.count("stream_changed") == 2
+        assert keys.count("position_changed") == 2
+        assert keys.count("state_changed") == 1
+        assert keys.count("reached_end_of_stream") == 1
 
         # TODO: test tag states within gaples
 
@@ -509,7 +509,7 @@ class MixerTest(BaseTest):
     def test_set_mute(self):
         for value in (True, False):
             assert self.audio.set_mute(value).get()
-            assert value == self.audio.get_mute().get()
+            assert self.audio.get_mute().get() == value
 
     @unittest.SkipTest
     def test_set_state_encapsulation(self):

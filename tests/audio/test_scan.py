@@ -48,7 +48,7 @@ class ScannerTest(unittest.TestCase):
 
         self.check_if_missing_plugin()
 
-        assert (not self.errors)
+        assert not self.errors
 
     def test_duration_is_set(self):
         self.scan(self.find("scanner/simple"))
@@ -86,7 +86,7 @@ class ScannerTest(unittest.TestCase):
 
     def test_nonexistant_dir_does_not_fail(self):
         self.scan(self.find("scanner/does-not-exist"))
-        assert (not self.errors)
+        assert not self.errors
 
     def test_other_media_is_ignored(self):
         self.scan(self.find("scanner/image"))
@@ -108,7 +108,7 @@ class ScannerTest(unittest.TestCase):
     def test_uri_list(self):
         path = path_to_data_dir("scanner/playlist.m3u")
         self.scan([path])
-        assert self.result[path].mime == 'text/uri-list'
+        assert self.result[path].mime == "text/uri-list"
 
     def test_text_plain(self):
         # GStreamer decode bin hardcodes bad handling of text plain :/
