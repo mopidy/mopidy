@@ -395,7 +395,7 @@ class PlaybackController:
         count = self.core.tracklist.get_length() * 2
 
         while current:
-            pending = self.core.tracklist.get_previous_tlid(current)
+            pending = self.core.tracklist.get_previous_tlid()
             if self._change(pending, state):
                 break
             else:
