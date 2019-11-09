@@ -2,8 +2,8 @@ import pathlib
 import shutil
 import tempfile
 import unittest
+from unittest import mock
 
-import mock
 import pykka
 
 import mopidy

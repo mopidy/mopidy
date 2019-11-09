@@ -2,9 +2,9 @@ import errno
 import logging
 import socket
 import unittest
+from unittest.mock import Mock, call, patch, sentinel
 
 import pykka
-from mock import Mock, call, patch, sentinel
 
 from mopidy.internal import network
 from mopidy.internal.gi import GLib

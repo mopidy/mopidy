@@ -1,6 +1,5 @@
 import unittest
-
-import mock
+from unittest import mock
 
 from mopidy import backend, core
 from mopidy.models import Image, Ref, SearchResult, Track

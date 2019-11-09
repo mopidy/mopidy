@@ -1,6 +1,5 @@
 import unittest
-
-import mock
+from unittest import mock
 
 from mopidy.models import Album, Artist, Playlist, Ref, SearchResult, Track
 from mopidy.mpd.protocol import music_db, stored_playlists

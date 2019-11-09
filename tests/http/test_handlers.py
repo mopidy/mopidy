@@ -1,7 +1,7 @@
 import os
 import unittest
+from unittest import mock
 
-import mock
 import tornado.testing
 import tornado.web
 import tornado.websocket

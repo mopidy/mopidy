@@ -1,7 +1,7 @@
 import os
 import pathlib
+from unittest import mock
 
-import mock
 import pytest
 
 from mopidy.internal import xdg

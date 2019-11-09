@@ -1,8 +1,8 @@
 import platform
 import sys
 import unittest
+from unittest import mock
 
-import mock
 import pkg_resources
 
 from mopidy.internal import deps

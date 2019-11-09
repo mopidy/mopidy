@@ -16,8 +16,7 @@ flake8-bugbear
 flake8-import-order
 pep8-naming
 
-# Mock dependencies in tests
-mock
+# Mock HTTP requests in tests
 responses
 
 # Test runners

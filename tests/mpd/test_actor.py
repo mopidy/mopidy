@@ -1,4 +1,5 @@
-import mock
+from unittest import mock
+
 import pytest
 
 from mopidy.mpd import actor

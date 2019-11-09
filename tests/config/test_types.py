@@ -1,7 +1,7 @@
 import logging
 import socket
+from unittest import mock
 
-import mock
 import pytest
 
 from mopidy.config import types
