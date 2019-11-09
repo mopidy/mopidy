@@ -1,7 +1,7 @@
 # flake8: noqa
 from .actor import Audio
-from .listener import AudioListener
 from .constants import PlaybackState
+from .listener import AudioListener
 from .utils import (
     calculate_duration,
     create_buffer,

@@ -7,14 +7,16 @@ sphinx
 # Format code
 black
 
+# Import sorting
+isort[pyproject]
+
 # Check code style, errors, etc
 flake8
 flake8-bugbear
 flake8-import-order
 pep8-naming
 
-# Mock dependencies in tests
-mock
+# Mock HTTP requests in tests
 responses
 
 # Test runners

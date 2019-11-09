@@ -1,9 +1,9 @@
 import logging
 import threading
-import _thread
 
 import pykka
 
+import _thread
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,5 @@
 import logging
-
-from mock import Mock, sentinel
+from unittest.mock import Mock, sentinel
 
 from mopidy.internal import network
 from mopidy.mpd import dispatcher, session

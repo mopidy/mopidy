@@ -2,7 +2,6 @@ import pytest
 
 from mopidy.internal import playlists
 
-
 BAD = b"foobarbaz"
 
 EXTM3U = b"""#EXTM3U

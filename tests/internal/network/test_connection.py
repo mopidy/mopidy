@@ -2,8 +2,7 @@ import errno
 import logging
 import socket
 import unittest
-
-from mock import Mock, call, patch, sentinel
+from unittest.mock import Mock, call, patch, sentinel
 
 import pykka
 

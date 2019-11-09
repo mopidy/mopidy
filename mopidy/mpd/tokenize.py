@@ -2,7 +2,6 @@ import re
 
 from mopidy.mpd import exceptions
 
-
 WORD_RE = re.compile(
     r"""
     ^

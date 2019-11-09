@@ -1,7 +1,6 @@
 import re
 import unittest
-
-from mock import Mock, sentinel
+from unittest.mock import Mock, sentinel
 
 from mopidy.internal import network
 

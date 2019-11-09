@@ -1,13 +1,10 @@
-import mock
+from unittest import mock
 
 import pytest
-
 import requests
-
 import responses
 
 from mopidy.internal import http
-
 
 TIMEOUT = 1000
 URI = "http://example.com/foo.txt"

@@ -1,6 +1,5 @@
 import unittest
-
-import mock
+from unittest import mock
 
 from mopidy.core import CoreListener, PlaybackState
 from mopidy.models import Playlist, TlTrack

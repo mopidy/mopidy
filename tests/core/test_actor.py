@@ -2,8 +2,7 @@ import pathlib
 import shutil
 import tempfile
 import unittest
-
-import mock
+from unittest import mock
 
 import pykka
 

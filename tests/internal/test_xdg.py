@@ -1,7 +1,6 @@
 import os
 import pathlib
-
-import mock
+from unittest import mock
 
 import pytest
 

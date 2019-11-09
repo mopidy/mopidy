@@ -5,7 +5,6 @@ from mopidy import backend, exceptions, models
 from mopidy.audio import scan, tags
 from mopidy.internal import path
 
-
 logger = logging.getLogger(__name__)
 
 

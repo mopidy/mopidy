@@ -4,11 +4,13 @@
 import os
 import sys
 
-
-# -- Workarounds to have autodoc generate API docs ----------------------------
-
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/../"))
+
+from mopidy.internal.versioning import get_version  # isort:skip
+
+
+# -- Workarounds to have autodoc generate API docs ----------------------------
 
 
 class Mock:
@@ -76,7 +78,6 @@ master_doc = "index"
 project = "Mopidy"
 copyright = "2009-2019, Stein Magnus Jodal and contributors"
 
-from mopidy.internal.versioning import get_version
 
 release = get_version()
 version = ".".join(release.split(".")[:2])

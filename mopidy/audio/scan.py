@@ -3,7 +3,8 @@ import logging
 import time
 
 from mopidy import exceptions
-from mopidy.audio import tags as tags_lib, utils
+from mopidy.audio import tags as tags_lib
+from mopidy.audio import utils
 from mopidy.internal import encoding, log
 from mopidy.internal.gi import Gst, GstPbutils
 

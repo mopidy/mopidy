@@ -11,7 +11,6 @@ from mopidy.mpd.protocol import status
 
 from tests import dummy_audio, dummy_backend, dummy_mixer
 
-
 PAUSED = PlaybackState.PAUSED
 PLAYING = PlaybackState.PLAYING
 STOPPED = PlaybackState.STOPPED

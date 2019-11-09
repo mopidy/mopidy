@@ -5,7 +5,6 @@ from mopidy import exceptions
 from mopidy.internal import validation
 from mopidy.internal.models import MixerState
 
-
 logger = logging.getLogger(__name__)
 
 

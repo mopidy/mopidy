@@ -1,6 +1,5 @@
 import random
-
-import mock
+from unittest import mock
 
 from mopidy.models import Playlist, Ref, Track
 from mopidy.mpd.protocol import stored_playlists

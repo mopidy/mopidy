@@ -2,8 +2,7 @@ import errno
 import os
 import socket
 import unittest
-
-from mock import Mock, patch, sentinel
+from unittest.mock import Mock, patch, sentinel
 
 from mopidy import exceptions
 from mopidy.internal import network

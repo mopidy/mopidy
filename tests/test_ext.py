@@ -2,7 +2,6 @@ import pathlib
 from unittest import mock
 
 import pkg_resources
-
 import pytest
 
 from mopidy import config, exceptions, ext

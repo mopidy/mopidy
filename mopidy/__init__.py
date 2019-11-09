@@ -2,7 +2,6 @@ import platform
 import sys
 import warnings
 
-
 if not sys.version_info >= (3, 7):
     sys.exit(
         f"ERROR: Mopidy requires Python >= 3.7, "

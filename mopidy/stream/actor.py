@@ -6,7 +6,8 @@ import urllib
 
 import pykka
 
-from mopidy import audio as audio_lib, backend, exceptions, stream
+from mopidy import audio as audio_lib
+from mopidy import backend, exceptions, stream
 from mopidy.audio import scan, tags
 from mopidy.internal import http, playlists
 from mopidy.models import Track

@@ -2,8 +2,8 @@ import logging
 import os
 
 import mopidy
-from mopidy import config as config_lib, exceptions, ext
-
+from mopidy import config as config_lib
+from mopidy import exceptions, ext
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,6 @@
 import json
 import unittest
-
-import mock
+from unittest import mock
 
 from mopidy.http import actor
 

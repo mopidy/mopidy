@@ -8,7 +8,6 @@ from collections.abc import Mapping
 from mopidy import exceptions, models
 from mopidy.internal import validation
 
-
 logger = logging.getLogger(__name__)
 
 

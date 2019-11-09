@@ -4,7 +4,6 @@ import weakref
 
 from mopidy.models.fields import Field
 
-
 # Registered models for automatic deserialization
 _models = {}
 

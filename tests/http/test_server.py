@@ -1,6 +1,5 @@
 import os
-
-import mock
+from unittest import mock
 
 import tornado.testing
 import tornado.wsgi

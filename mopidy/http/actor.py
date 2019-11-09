@@ -3,7 +3,6 @@ import logging
 import threading
 
 import pykka
-
 import tornado.httpserver
 import tornado.ioloop
 import tornado.netutil

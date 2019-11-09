@@ -3,7 +3,6 @@ import logging.config
 import logging.handlers
 import platform
 
-
 LOG_LEVELS = {
     -1: dict(root=logging.ERROR, mopidy=logging.WARNING),
     0: dict(root=logging.ERROR, mopidy=logging.INFO),

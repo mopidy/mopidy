@@ -1,7 +1,6 @@
 import sys
 import textwrap
 
-
 try:
     import gi
 

@@ -1,18 +1,14 @@
 import logging
 import os
-
-import mock
+from unittest import mock
 
 import pytest
-
 import requests.exceptions
-
 import responses
 
 from mopidy import exceptions
 from mopidy.audio import scan
 from mopidy.stream import actor
-
 
 TIMEOUT = 1000
 PLAYLIST_URI = "http://example.com/listen.m3u"
