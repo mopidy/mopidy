@@ -69,30 +69,24 @@ class BaseTestCase(unittest.TestCase):
         return self.connection.response
 
     def assertNoResponse(self):  # noqa: N802
-        self.assertEqual([], self.connection.response)
+        assert [] == self.connection.response
 
     def assertInResponse(self, value):  # noqa: N802
-        self.assertIn(
-            value,
-            self.connection.response,
-            f"Did not find {value!r} in {self.connection.response!r}",
-        )
+        assert (
+            value in self.connection.response
+        ), f"Did not find {value!r} in {self.connection.response!r}"
 
     def assertOnceInResponse(self, value):  # noqa: N802
         matched = len([r for r in self.connection.response if r == value])
-        self.assertEqual(
-            1,
-            matched,
-            f"Expected to find {value!r} once in {self.connection.response!r}",
-        )
+        assert (
+            1 == matched
+        ), f"Expected to find {value!r} once in {self.connection.response!r}"
 
     def assertNotInResponse(self, value):  # noqa: N802
-        self.assertNotIn(
-            value,
-            self.connection.response,
-            f"Found {value!r} in {self.connection.response!r}",
-        )
+        assert (
+            value not in self.connection.response
+        ), f"Found {value!r} in {self.connection.response!r}"
 
     def assertEqualResponse(self, value):  # noqa: N802
-        self.assertEqual(1, len(self.connection.response))
-        self.assertEqual(value, self.connection.response[0])
+        assert 1 == len(self.connection.response)
+        assert value == self.connection.response[0]

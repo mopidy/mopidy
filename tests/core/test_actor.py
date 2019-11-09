@@ -33,8 +33,8 @@ class CoreActorTest(unittest.TestCase):
     def test_uri_schemes_has_uris_from_all_backends(self):
         result = self.core.get_uri_schemes()
 
-        self.assertIn("dummy1", result)
-        self.assertIn("dummy2", result)
+        assert "dummy1" in result
+        assert "dummy2" in result
 
     def test_backends_with_colliding_uri_schemes_fails(self):
         self.backend2.uri_schemes.get.return_value = ["dummy1", "dummy2"]
@@ -49,7 +49,7 @@ class CoreActorTest(unittest.TestCase):
         )
 
     def test_version(self):
-        self.assertEqual(self.core.get_version(), versioning.get_version())
+        assert self.core.get_version() == versioning.get_version()
 
     @mock.patch("mopidy.core.playback.listener.CoreListener", spec=CoreListener)
     def test_state_changed(self, listener_mock):

@@ -8,35 +8,23 @@ from mopidy import commands
 class ConfigOverrideTypeTest(unittest.TestCase):
     def test_valid_override(self):
         expected = (b"section", b"key", b"value")
-        self.assertEqual(
-            expected, commands.config_override_type(b"section/key=value")
-        )
-        self.assertEqual(
-            expected, commands.config_override_type(b"section/key=value ")
-        )
-        self.assertEqual(
-            expected, commands.config_override_type(b"section/key =value")
-        )
-        self.assertEqual(
-            expected, commands.config_override_type(b"section /key=value")
-        )
+        assert expected == commands.config_override_type(b"section/key=value")
+        assert expected == commands.config_override_type(b"section/key=value ")
+        assert expected == commands.config_override_type(b"section/key =value")
+        assert expected == commands.config_override_type(b"section /key=value")
 
     def test_valid_override_is_bytes(self):
         section, key, value = commands.config_override_type(
             b"section/key=value"
         )
-        self.assertIsInstance(section, bytes)
-        self.assertIsInstance(key, bytes)
-        self.assertIsInstance(value, bytes)
+        assert isinstance(section, bytes)
+        assert isinstance(key, bytes)
+        assert isinstance(value, bytes)
 
     def test_empty_override(self):
         expected = (b"section", b"key", b"")
-        self.assertEqual(
-            expected, commands.config_override_type(b"section/key=")
-        )
-        self.assertEqual(
-            expected, commands.config_override_type(b"section/key=  ")
-        )
+        assert expected == commands.config_override_type(b"section/key=")
+        assert expected == commands.config_override_type(b"section/key=  ")
 
     def test_invalid_override(self):
         with self.assertRaises(argparse.ArgumentTypeError):
@@ -58,12 +46,12 @@ class CommandParsingTest(unittest.TestCase):
 
     def test_command_parsing_returns_namespace(self):
         cmd = commands.Command()
-        self.assertIsInstance(cmd.parse([]), argparse.Namespace)
+        assert isinstance(cmd.parse([]), argparse.Namespace)
 
     def test_command_parsing_does_not_contain_args(self):
         cmd = commands.Command()
         result = cmd.parse([])
-        self.assertFalse(hasattr(result, "_args"))
+        assert not hasattr(result, "_args")
 
     def test_unknown_options_bails(self):
         cmd = commands.Command()
@@ -80,7 +68,7 @@ class CommandParsingTest(unittest.TestCase):
         cmd.add_argument("--bar")
 
         result = cmd.parse(["--bar", "baz"])
-        self.assertEqual(result.bar, "baz")
+        assert result.bar == "baz"
 
     def test_command_arguments_and_sub_command(self):
         child = commands.Command()
@@ -91,8 +79,8 @@ class CommandParsingTest(unittest.TestCase):
         cmd.add_child("foo", child)
 
         result = cmd.parse(["--bar", "baz", "foo"])
-        self.assertEqual(result.bar, "baz")
-        self.assertEqual(result.baz, None)
+        assert result.bar == "baz"
+        assert result.baz is None
 
     def test_subcommand_may_have_positional(self):
         child = commands.Command()
@@ -102,7 +90,7 @@ class CommandParsingTest(unittest.TestCase):
         cmd.add_child("foo", child)
 
         result = cmd.parse(["foo", "baz"])
-        self.assertEqual(result.bar, "baz")
+        assert result.bar == "baz"
 
     def test_subcommand_may_have_remainder(self):
         child = commands.Command()
@@ -112,7 +100,7 @@ class CommandParsingTest(unittest.TestCase):
         cmd.add_child("foo", child)
 
         result = cmd.parse(["foo", "baz", "bep", "bop"])
-        self.assertEqual(result.bar, ["baz", "bep", "bop"])
+        assert result.bar == ["baz", "bep", "bop"]
 
     def test_result_stores_choosen_command(self):
         child = commands.Command()
@@ -121,10 +109,10 @@ class CommandParsingTest(unittest.TestCase):
         cmd.add_child("foo", child)
 
         result = cmd.parse(["foo"])
-        self.assertEqual(result.command, child)
+        assert result.command == child
 
         result = cmd.parse([])
-        self.assertEqual(result.command, cmd)
+        assert result.command == cmd
 
         child2 = commands.Command()
         cmd.add_child("bar", child2)
@@ -133,10 +121,10 @@ class CommandParsingTest(unittest.TestCase):
         child.add_child("baz", subchild)
 
         result = cmd.parse(["bar"])
-        self.assertEqual(result.command, child2)
+        assert result.command == child2
 
         result = cmd.parse(["foo", "baz"])
-        self.assertEqual(result.command, subchild)
+        assert result.command == subchild
 
     def test_invalid_type(self):
         cmd = commands.Command()
@@ -240,7 +228,7 @@ class CommandParsingTest(unittest.TestCase):
         cmd.set(foo="bar")
 
         result = cmd.parse([])
-        self.assertEqual(result.foo, "bar")
+        assert result.foo == "bar"
 
     def test_set_propegate(self):
         child = commands.Command()
@@ -250,7 +238,7 @@ class CommandParsingTest(unittest.TestCase):
         cmd.add_child("command", child)
 
         result = cmd.parse(["command"])
-        self.assertEqual(result.foo, "bar")
+        assert result.foo == "bar"
 
     def test_innermost_set_wins(self):
         child = commands.Command()
@@ -261,8 +249,8 @@ class CommandParsingTest(unittest.TestCase):
         cmd.add_child("command", child)
 
         result = cmd.parse(["command"])
-        self.assertEqual(result.foo, "bar")
-        self.assertEqual(result.baz, 1)
+        assert result.foo == "bar"
+        assert result.baz == 1
 
     def test_help_action_works(self):
         cmd = commands.Command()
@@ -281,36 +269,32 @@ class UsageTest(unittest.TestCase):
     def test_prog_name_default_and_override(self, argv_mock):
         argv_mock.__getitem__.return_value = "/usr/bin/foo"
         cmd = commands.Command()
-        self.assertEqual("usage: foo", cmd.format_usage().strip())
-        self.assertEqual("usage: baz", cmd.format_usage("baz").strip())
+        assert "usage: foo" == cmd.format_usage().strip()
+        assert "usage: baz" == cmd.format_usage("baz").strip()
 
     def test_basic_usage(self):
         cmd = commands.Command()
-        self.assertEqual("usage: foo", cmd.format_usage("foo").strip())
+        assert "usage: foo" == cmd.format_usage("foo").strip()
 
         cmd.add_argument("-h", "--help", action="store_true")
-        self.assertEqual("usage: foo [-h]", cmd.format_usage("foo").strip())
+        assert "usage: foo [-h]" == cmd.format_usage("foo").strip()
 
         cmd.add_argument("bar")
-        self.assertEqual("usage: foo [-h] bar", cmd.format_usage("foo").strip())
+        assert "usage: foo [-h] bar" == cmd.format_usage("foo").strip()
 
     def test_nested_usage(self):
         child = commands.Command()
         cmd = commands.Command()
         cmd.add_child("bar", child)
 
-        self.assertEqual("usage: foo", cmd.format_usage("foo").strip())
-        self.assertEqual("usage: foo bar", cmd.format_usage("foo bar").strip())
+        assert "usage: foo" == cmd.format_usage("foo").strip()
+        assert "usage: foo bar" == cmd.format_usage("foo bar").strip()
 
         cmd.add_argument("-h", "--help", action="store_true")
-        self.assertEqual(
-            "usage: foo bar", child.format_usage("foo bar").strip()
-        )
+        assert "usage: foo bar" == child.format_usage("foo bar").strip()
 
         child.add_argument("-h", "--help", action="store_true")
-        self.assertEqual(
-            "usage: foo bar [-h]", child.format_usage("foo bar").strip()
-        )
+        assert "usage: foo bar [-h]" == child.format_usage("foo bar").strip()
 
 
 class HelpTest(unittest.TestCase):
@@ -318,12 +302,12 @@ class HelpTest(unittest.TestCase):
     def test_prog_name_default_and_override(self, argv_mock):
         argv_mock.__getitem__.return_value = "/usr/bin/foo"
         cmd = commands.Command()
-        self.assertEqual("usage: foo", cmd.format_help().strip())
-        self.assertEqual("usage: bar", cmd.format_help("bar").strip())
+        assert "usage: foo" == cmd.format_help().strip()
+        assert "usage: bar" == cmd.format_help("bar").strip()
 
     def test_command_without_documenation_or_options(self):
         cmd = commands.Command()
-        self.assertEqual("usage: bar", cmd.format_help("bar").strip())
+        assert "usage: bar" == cmd.format_help("bar").strip()
 
     def test_command_with_option(self):
         cmd = commands.Command()
@@ -336,7 +320,7 @@ class HelpTest(unittest.TestCase):
             "OPTIONS:\n\n"
             "  -h, --help  show this message"
         )
-        self.assertEqual(expected, cmd.format_help("foo").strip())
+        assert expected == cmd.format_help("foo").strip()
 
     def test_command_with_option_and_positional(self):
         cmd = commands.Command()
@@ -351,7 +335,7 @@ class HelpTest(unittest.TestCase):
             "  -h, --help  show this message\n"
             "  bar         some help text"
         )
-        self.assertEqual(expected, cmd.format_help("foo").strip())
+        assert expected == cmd.format_help("foo").strip()
 
     def test_command_with_documentation(self):
         cmd = commands.Command()
@@ -360,7 +344,7 @@ class HelpTest(unittest.TestCase):
         expected = (
             "usage: foo\n\n" "some text about everything this command does."
         )
-        self.assertEqual(expected, cmd.format_help("foo").strip())
+        assert expected == cmd.format_help("foo").strip()
 
     def test_command_with_documentation_and_option(self):
         cmd = commands.Command()
@@ -375,14 +359,14 @@ class HelpTest(unittest.TestCase):
             "OPTIONS:\n\n"
             "  -h, --help  show this message"
         )
-        self.assertEqual(expected, cmd.format_help("foo").strip())
+        assert expected == cmd.format_help("foo").strip()
 
     def test_subcommand_without_documentation_or_options(self):
         child = commands.Command()
         cmd = commands.Command()
         cmd.add_child("bar", child)
 
-        self.assertEqual("usage: foo", cmd.format_help("foo").strip())
+        assert "usage: foo" == cmd.format_help("foo").strip()
 
     def test_subcommand_with_documentation_shown(self):
         child = commands.Command()
@@ -396,7 +380,7 @@ class HelpTest(unittest.TestCase):
             "bar\n\n"
             "  some text about everything this command does."
         )
-        self.assertEqual(expected, cmd.format_help("foo").strip())
+        assert expected == cmd.format_help("foo").strip()
 
     def test_subcommand_with_options_shown(self):
         child = commands.Command()
@@ -413,7 +397,7 @@ class HelpTest(unittest.TestCase):
             "bar [-h]\n\n"
             "    -h, --help  show this message"
         )
-        self.assertEqual(expected, cmd.format_help("foo").strip())
+        assert expected == cmd.format_help("foo").strip()
 
     def test_subcommand_with_positional_shown(self):
         child = commands.Command()
@@ -428,7 +412,7 @@ class HelpTest(unittest.TestCase):
             "bar baz\n\n"
             "    baz  the great and wonderful"
         )
-        self.assertEqual(expected, cmd.format_help("foo").strip())
+        assert expected == cmd.format_help("foo").strip()
 
     def test_subcommand_with_options_and_documentation(self):
         child = commands.Command()
@@ -447,7 +431,7 @@ class HelpTest(unittest.TestCase):
             "  some text about everything this command does.\n\n"
             "    -h, --help  show this message"
         )
-        self.assertEqual(expected, cmd.format_help("foo").strip())
+        assert expected == cmd.format_help("foo").strip()
 
     def test_nested_subcommands_with_options(self):
         subchild = commands.Command()
@@ -470,7 +454,7 @@ class HelpTest(unittest.TestCase):
             "bar baz [--test TEST]\n\n"
             "    --test TEST  the great and wonderful"
         )
-        self.assertEqual(expected, cmd.format_help("foo").strip())
+        assert expected == cmd.format_help("foo").strip()
 
     def test_nested_subcommands_skipped_intermediate(self):
         subchild = commands.Command()
@@ -488,7 +472,7 @@ class HelpTest(unittest.TestCase):
             "bar baz [--test TEST]\n\n"
             "    --test TEST  the great and wonderful"
         )
-        self.assertEqual(expected, cmd.format_help("foo").strip())
+        assert expected == cmd.format_help("foo").strip()
 
     def test_command_with_option_and_subcommand_with_option(self):
         child = commands.Command()
@@ -508,7 +492,7 @@ class HelpTest(unittest.TestCase):
             "bar [--test TEST]\n\n"
             "    --test TEST  the great and wonderful"
         )
-        self.assertEqual(expected, cmd.format_help("foo").strip())
+        assert expected == cmd.format_help("foo").strip()
 
     def test_command_with_options_doc_and_subcommand_with_option_and_doc(self):
         child = commands.Command()
@@ -532,7 +516,7 @@ class HelpTest(unittest.TestCase):
             "  some text about this sub-command.\n\n"
             "    --test TEST  the great and wonderful"
         )
-        self.assertEqual(expected, cmd.format_help("foo").strip())
+        assert expected == cmd.format_help("foo").strip()
 
 
 class RunTest(unittest.TestCase):

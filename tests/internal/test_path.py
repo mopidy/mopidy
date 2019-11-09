@@ -125,13 +125,13 @@ class GetOrCreateFileTest(unittest.TestCase):
 
 class GetUnixSocketPathTest(unittest.TestCase):
     def test_correctly_matched_socket_path(self):
-        self.assertEqual(
-            path.get_unix_socket_path("unix:/tmp/mopidy.socket"),
-            "/tmp/mopidy.socket",
+        assert (
+            path.get_unix_socket_path("unix:/tmp/mopidy.socket")
+            == "/tmp/mopidy.socket"
         )
 
     def test_correctly_no_match_socket_path(self):
-        self.assertIsNone(path.get_unix_socket_path("127.0.0.1"))
+        assert path.get_unix_socket_path("127.0.0.1") is None
 
 
 class PathToFileURITest(unittest.TestCase):

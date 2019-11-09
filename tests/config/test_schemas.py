@@ -22,42 +22,42 @@ class ConfigSchemaTest(unittest.TestCase):
         del self.values["foo"]
 
         result, errors = self.schema.deserialize(self.values)
-        self.assertEqual({"foo": any_unicode}, errors)
-        self.assertIsNone(result.pop("foo"))
-        self.assertIsNotNone(result.pop("bar"))
-        self.assertIsNotNone(result.pop("baz"))
-        self.assertEqual({}, result)
+        assert {"foo": any_unicode} == errors
+        assert result.pop("foo") is None
+        assert result.pop("bar") is not None
+        assert result.pop("baz") is not None
+        assert {} == result
 
     def test_deserialize_with_extra_value(self):
         self.values["extra"] = "123"
 
         result, errors = self.schema.deserialize(self.values)
-        self.assertEqual({"extra": any_unicode}, errors)
-        self.assertIsNotNone(result.pop("foo"))
-        self.assertIsNotNone(result.pop("bar"))
-        self.assertIsNotNone(result.pop("baz"))
-        self.assertEqual({}, result)
+        assert {"extra": any_unicode} == errors
+        assert result.pop("foo") is not None
+        assert result.pop("bar") is not None
+        assert result.pop("baz") is not None
+        assert {} == result
 
     def test_deserialize_with_deserialization_error(self):
         self.schema["foo"].deserialize.side_effect = ValueError("failure")
 
         result, errors = self.schema.deserialize(self.values)
-        self.assertEqual({"foo": "failure"}, errors)
-        self.assertIsNone(result.pop("foo"))
-        self.assertIsNotNone(result.pop("bar"))
-        self.assertIsNotNone(result.pop("baz"))
-        self.assertEqual({}, result)
+        assert {"foo": "failure"} == errors
+        assert result.pop("foo") is None
+        assert result.pop("bar") is not None
+        assert result.pop("baz") is not None
+        assert {} == result
 
     def test_deserialize_with_multiple_deserialization_errors(self):
         self.schema["foo"].deserialize.side_effect = ValueError("failure")
         self.schema["bar"].deserialize.side_effect = ValueError("other")
 
         result, errors = self.schema.deserialize(self.values)
-        self.assertEqual({"foo": "failure", "bar": "other"}, errors)
-        self.assertIsNone(result.pop("foo"))
-        self.assertIsNone(result.pop("bar"))
-        self.assertIsNotNone(result.pop("baz"))
-        self.assertEqual({}, result)
+        assert {"foo": "failure", "bar": "other"} == errors
+        assert result.pop("foo") is None
+        assert result.pop("bar") is None
+        assert result.pop("baz") is not None
+        assert {} == result
 
     def test_deserialize_deserialization_unknown_and_missing_errors(self):
         self.values["extra"] = "123"
@@ -65,22 +65,22 @@ class ConfigSchemaTest(unittest.TestCase):
         del self.values["baz"]
 
         result, errors = self.schema.deserialize(self.values)
-        self.assertIn("unknown", errors["extra"])
-        self.assertNotIn("foo", errors)
-        self.assertIn("failure", errors["bar"])
-        self.assertIn("not found", errors["baz"])
+        assert "unknown" in errors["extra"]
+        assert "foo" not in errors
+        assert "failure" in errors["bar"]
+        assert "not found" in errors["baz"]
 
-        self.assertNotIn("unknown", result)
-        self.assertIn("foo", result)
-        self.assertIsNone(result["bar"])
-        self.assertIsNone(result["baz"])
+        assert "unknown" not in result
+        assert "foo" in result
+        assert result["bar"] is None
+        assert result["baz"] is None
 
     def test_deserialize_deprecated_value(self):
         self.schema["foo"] = types.Deprecated()
 
         result, errors = self.schema.deserialize(self.values)
-        self.assertEqual(["bar", "baz"], sorted(result.keys()))
-        self.assertNotIn("foo", errors)
+        assert ["bar", "baz"] == sorted(result.keys())
+        assert "foo" not in errors
 
 
 class MapConfigSchemaTest(unittest.TestCase):
@@ -88,8 +88,8 @@ class MapConfigSchemaTest(unittest.TestCase):
         schema = schemas.MapConfigSchema("test", types.LogLevel())
         result, errors = schema.deserialize({"foo.bar": "DEBUG", "baz": "INFO"})
 
-        self.assertEqual(logging.DEBUG, result["foo.bar"])
-        self.assertEqual(logging.INFO, result["baz"])
+        assert logging.DEBUG == result["foo.bar"]
+        assert logging.INFO == result["baz"]
 
 
 class DidYouMeanTest(unittest.TestCase):
@@ -97,16 +97,16 @@ class DidYouMeanTest(unittest.TestCase):
         choices = ("enabled", "username", "password", "bitrate", "timeout")
 
         suggestion = schemas._did_you_mean("bitrate", choices)
-        self.assertEqual(suggestion, "bitrate")
+        assert suggestion == "bitrate"
 
         suggestion = schemas._did_you_mean("bitrote", choices)
-        self.assertEqual(suggestion, "bitrate")
+        assert suggestion == "bitrate"
 
         suggestion = schemas._did_you_mean("Bitrot", choices)
-        self.assertEqual(suggestion, "bitrate")
+        assert suggestion == "bitrate"
 
         suggestion = schemas._did_you_mean("BTROT", choices)
-        self.assertEqual(suggestion, "bitrate")
+        assert suggestion == "bitrate"
 
         suggestion = schemas._did_you_mean("btro", choices)
-        self.assertEqual(suggestion, None)
+        assert suggestion is None

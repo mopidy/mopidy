@@ -28,20 +28,16 @@ class StaticFileHandlerTest(tornado.testing.AsyncHTTPTestCase):
     def test_static_handler(self):
         response = self.fetch("/test_handlers.py", method="GET")
 
-        self.assertEqual(200, response.code)
-        self.assertEqual(
-            response.headers["X-Mopidy-Version"], mopidy.__version__
-        )
-        self.assertEqual(response.headers["Cache-Control"], "no-cache")
+        assert 200 == response.code
+        assert response.headers["X-Mopidy-Version"] == mopidy.__version__
+        assert response.headers["Cache-Control"] == "no-cache"
 
     def test_static_default_filename(self):
         response = self.fetch("/", method="GET")
 
-        self.assertEqual(200, response.code)
-        self.assertEqual(
-            response.headers["X-Mopidy-Version"], mopidy.__version__
-        )
-        self.assertEqual(response.headers["Cache-Control"], "no-cache")
+        assert 200 == response.code
+        assert response.headers["X-Mopidy-Version"] == mopidy.__version__
+        assert response.headers["Cache-Control"] == "no-cache"
 
 
 class WebSocketHandlerTest(tornado.testing.AsyncHTTPTestCase):
@@ -72,14 +68,14 @@ class WebSocketHandlerTest(tornado.testing.AsyncHTTPTestCase):
         conn = yield self.connection()
         conn.write_message("invalid request")
         message = yield conn.read_message()
-        self.assertTrue(message)
+        assert message
 
     @tornado.testing.gen_test
     def test_broadcast_makes_it_to_client(self):
         conn = yield self.connection()
         handlers.WebSocketHandler.broadcast("message", self.io_loop)
         message = yield conn.read_message()
-        self.assertEqual(message, "message")
+        assert message == "message"
 
     @tornado.testing.gen_test
     def test_broadcast_to_client_that_just_closed_connection(self):
@@ -104,48 +100,34 @@ class CheckOriginTests(unittest.TestCase):
         self.allowed = set()
 
     def test_missing_origin_blocked(self):
-        self.assertFalse(
-            handlers.check_origin(None, self.headers, self.allowed)
-        )
+        assert not handlers.check_origin(None, self.headers, self.allowed)
 
     def test_empty_origin_allowed(self):
-        self.assertTrue(handlers.check_origin("", self.headers, self.allowed))
+        assert handlers.check_origin("", self.headers, self.allowed)
 
     def test_chrome_file_origin_allowed(self):
-        self.assertTrue(
-            handlers.check_origin("file://", self.headers, self.allowed)
-        )
+        assert handlers.check_origin("file://", self.headers, self.allowed)
 
     def test_firefox_null_origin_allowed(self):
-        self.assertTrue(
-            handlers.check_origin("null", self.headers, self.allowed)
-        )
+        assert handlers.check_origin("null", self.headers, self.allowed)
 
     def test_same_host_origin_allowed(self):
-        self.assertTrue(
-            handlers.check_origin(
-                "http://localhost:6680", self.headers, self.allowed
-            )
+        assert handlers.check_origin(
+            "http://localhost:6680", self.headers, self.allowed
         )
 
     def test_different_host_origin_blocked(self):
-        self.assertFalse(
-            handlers.check_origin(
-                "http://other:6680", self.headers, self.allowed
-            )
+        assert not handlers.check_origin(
+            "http://other:6680", self.headers, self.allowed
         )
 
     def test_different_port_blocked(self):
-        self.assertFalse(
-            handlers.check_origin(
-                "http://localhost:80", self.headers, self.allowed
-            )
+        assert not handlers.check_origin(
+            "http://localhost:80", self.headers, self.allowed
         )
 
     def test_extra_origin_allowed(self):
         self.allowed.add("other:6680")
-        self.assertTrue(
-            handlers.check_origin(
-                "http://other:6680", self.headers, self.allowed
-            )
+        assert handlers.check_origin(
+            "http://other:6680", self.headers, self.allowed
         )

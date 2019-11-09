@@ -23,9 +23,9 @@ class HelpTest(unittest.TestCase):
             stdout=subprocess.PIPE,
         )
         output = process.communicate()[0]
-        self.assertIn(b"--version", output)
-        self.assertIn(b"--help", output)
-        self.assertIn(b"--quiet", output)
-        self.assertIn(b"--verbose", output)
-        self.assertIn(b"--config", output)
-        self.assertIn(b"--option", output)
+        assert b"--version" in output
+        assert b"--help" in output
+        assert b"--quiet" in output
+        assert b"--verbose" in output
+        assert b"--config" in output
+        assert b"--option" in output

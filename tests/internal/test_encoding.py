@@ -14,7 +14,7 @@ class LocaleDecodeTest(unittest.TestCase):
         )
         expected = "[Errno 98] Adresse d\xe9j\xe0 utilis\xe9e"
 
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_can_decode_an_ioerror_with_french_content(self, mock):
         mock.return_value = "UTF-8"
@@ -27,21 +27,21 @@ class LocaleDecodeTest(unittest.TestCase):
             r"[Errno 98] b'Adresse d\xc3\xa9j\xc3\xa0 utilis\xc3\xa9e'",  # Py3
         ]
 
-        self.assertIn(result, expected)
+        assert result in expected
 
     def test_does_not_use_locale_to_decode_unicode_strings(self, mock):
         mock.return_value = "UTF-8"
 
         encoding.locale_decode("abc")
 
-        self.assertFalse(mock.called)
+        assert not mock.called
 
     def test_does_not_use_locale_to_decode_ascii_bytestrings(self, mock):
         mock.return_value = "UTF-8"
 
         encoding.locale_decode(b"abc")
 
-        self.assertFalse(mock.called)
+        assert not mock.called
 
     def test_replaces_unknown_bytes_instead_of_crashing(self, mock):
         mock.return_value = "US-ASCII"

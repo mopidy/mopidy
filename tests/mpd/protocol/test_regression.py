@@ -40,27 +40,17 @@ class IssueGH17RegressionTest(protocol.BaseTestCase):
         # Playlist order: abcfde
 
         self.send_request("play")
-        self.assertEqual(
-            "dummy:a", self.core.playback.get_current_track().get().uri
-        )
+        assert "dummy:a" == self.core.playback.get_current_track().get().uri
         self.send_request('random "1"')
         self.send_request("next")
-        self.assertEqual(
-            "dummy:b", self.core.playback.get_current_track().get().uri
-        )
+        assert "dummy:b" == self.core.playback.get_current_track().get().uri
         self.send_request("next")
         # Should now be at track 'c', but playback fails and it skips ahead
-        self.assertEqual(
-            "dummy:f", self.core.playback.get_current_track().get().uri
-        )
+        assert "dummy:f" == self.core.playback.get_current_track().get().uri
         self.send_request("next")
-        self.assertEqual(
-            "dummy:d", self.core.playback.get_current_track().get().uri
-        )
+        assert "dummy:d" == self.core.playback.get_current_track().get().uri
         self.send_request("next")
-        self.assertEqual(
-            "dummy:e", self.core.playback.get_current_track().get().uri
-        )
+        assert "dummy:e" == self.core.playback.get_current_track().get().uri
 
 
 class IssueGH18RegressionTest(protocol.BaseTestCase):
@@ -102,8 +92,8 @@ class IssueGH18RegressionTest(protocol.BaseTestCase):
         self.send_request("next")
         tl_track_3 = self.core.playback.get_current_tl_track().get()
 
-        self.assertNotEqual(tl_track_1, tl_track_2)
-        self.assertNotEqual(tl_track_2, tl_track_3)
+        assert tl_track_1 != tl_track_2
+        assert tl_track_2 != tl_track_3
 
 
 class IssueGH22RegressionTest(protocol.BaseTestCase):
@@ -253,7 +243,7 @@ class IssueGH1120RegressionTest(protocol.BaseTestCase):
         self.send_request('lsinfo "/dummy"')
 
         response2 = self.send_request('lsinfo "/"')
-        self.assertEqual(response1, response2)
+        assert response1 == response2
 
 
 class IssueGH1348RegressionTest(protocol.BaseTestCase):
@@ -271,7 +261,7 @@ class IssueGH1348RegressionTest(protocol.BaseTestCase):
 
         # Create an other playlist which isn't in the map
         self.send_request('playlistadd "testing2" "dummy:a"')
-        self.assertEqual(["OK"], self.send_request('rm "testing2"'))
+        assert ["OK"] == self.send_request('rm "testing2"')
 
         playlists = self.backend.playlists.as_list().get()
-        self.assertEqual(["testing1"], [ref.name for ref in playlists])
+        assert ["testing1"] == [ref.name for ref in playlists]

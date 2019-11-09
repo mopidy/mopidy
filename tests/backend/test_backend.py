@@ -9,7 +9,7 @@ class LibraryTest(unittest.TestCase):
     def test_default_get_images_impl(self):
         library = dummy_backend.DummyLibraryProvider(backend=None)
 
-        self.assertEqual(library.get_images(["trackuri"]), {})
+        assert library.get_images(["trackuri"]) == {}
 
 
 class PlaylistsTest(unittest.TestCase):

@@ -75,26 +75,26 @@ class AudioTest(BaseTest):
     def test_start_playback_existing_file(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
-        self.assertTrue(self.audio.start_playback().get())
+        assert self.audio.start_playback().get()
 
     def test_start_playback_non_existing_file(self):
         self.possibly_trigger_fake_playback_error(self.uris[0] + "bogus")
 
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0] + "bogus")
-        self.assertFalse(self.audio.start_playback().get())
+        assert not self.audio.start_playback().get()
 
     def test_pause_playback_while_playing(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.start_playback()
-        self.assertTrue(self.audio.pause_playback().get())
+        assert self.audio.pause_playback().get()
 
     def test_stop_playback_while_playing(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.start_playback()
-        self.assertTrue(self.audio.stop_playback().get())
+        assert self.audio.stop_playback().get()
 
     @unittest.SkipTest
     def test_deliver_data(self):
@@ -157,10 +157,10 @@ class AudioEventTest(BaseTest):
         super().tearDown()
 
     def assertEvent(self, event, **kwargs):  # noqa: N802
-        self.assertIn((event, kwargs), self.listener.get_events().get())
+        assert (event, kwargs) in self.listener.get_events().get()
 
     def assertNotEvent(self, event, **kwargs):  # noqa: N802
-        self.assertNotIn((event, kwargs), self.listener.get_events().get())
+        assert (event, kwargs) not in self.listener.get_events().get()
 
     # TODO: test without uri set, with bad uri and gapless...
     # TODO: playing->playing triggered by seek should be removed
@@ -418,7 +418,7 @@ class AudioEventTest(BaseTest):
         if not event.wait(timeout=1.0):
             self.fail("End of stream not reached within deadline")
 
-        self.assertFalse(self.audio.get_current_tags().get())
+        assert not self.audio.get_current_tags().get()
 
     def test_gapless(self):
         uris = self.uris[1:]
@@ -448,16 +448,16 @@ class AudioEventTest(BaseTest):
 
         # Check that events counts check out.
         keys = [k for k, v in self.listener.get_events().get()]
-        self.assertEqual(2, keys.count("stream_changed"))
-        self.assertEqual(2, keys.count("position_changed"))
-        self.assertEqual(1, keys.count("state_changed"))
-        self.assertEqual(1, keys.count("reached_end_of_stream"))
+        assert keys.count("stream_changed") == 2
+        assert keys.count("position_changed") == 2
+        assert keys.count("state_changed") == 1
+        assert keys.count("reached_end_of_stream") == 1
 
         # TODO: test tag states within gaples
 
     # TODO: this does not belong in this testcase
     def test_current_tags_are_blank_to_begin_with(self):
-        self.assertFalse(self.audio.get_current_tags().get())
+        assert not self.audio.get_current_tags().get()
 
     def test_current_tags_blank_after_end_of_stream(self):
         event = self.listener.wait("reached_end_of_stream").get()
@@ -472,7 +472,7 @@ class AudioEventTest(BaseTest):
         if not event.wait(timeout=1.0):
             self.fail("EOS not received")
 
-        self.assertFalse(self.audio.get_current_tags().get())
+        assert not self.audio.get_current_tags().get()
 
     def test_current_tags_stored(self):
         event = self.listener.wait("reached_end_of_stream").get()
@@ -493,7 +493,7 @@ class AudioEventTest(BaseTest):
         if not event.wait(timeout=1.0):
             self.fail("EOS not received")
 
-        self.assertTrue(tags[0])
+        assert tags[0]
 
     # TODO: test that we reset when we expect between songs
 
@@ -508,8 +508,8 @@ class MixerTest(BaseTest):
     @unittest.SkipTest
     def test_set_mute(self):
         for value in (True, False):
-            self.assertTrue(self.audio.set_mute(value).get())
-            self.assertEqual(value, self.audio.get_mute().get())
+            assert self.audio.set_mute(value).get()
+            assert self.audio.get_mute().get() == value
 
     @unittest.SkipTest
     def test_set_state_encapsulation(self):
@@ -529,14 +529,14 @@ class AudioStateTest(unittest.TestCase):
         self.audio = audio.Audio(config=None, mixer=None)
 
     def test_state_starts_as_stopped(self):
-        self.assertEqual(audio.PlaybackState.STOPPED, self.audio.state)
+        assert audio.PlaybackState.STOPPED == self.audio.state
 
     def test_state_does_not_change_when_in_gst_ready_state(self):
         self.audio._handler.on_playbin_state_changed(
             Gst.State.NULL, Gst.State.READY, Gst.State.VOID_PENDING
         )
 
-        self.assertEqual(audio.PlaybackState.STOPPED, self.audio.state)
+        assert audio.PlaybackState.STOPPED == self.audio.state
 
     def test_state_changes_from_stopped_to_playing_on_play(self):
         self.audio._handler.on_playbin_state_changed(
@@ -549,7 +549,7 @@ class AudioStateTest(unittest.TestCase):
             Gst.State.PAUSED, Gst.State.PLAYING, Gst.State.VOID_PENDING
         )
 
-        self.assertEqual(audio.PlaybackState.PLAYING, self.audio.state)
+        assert audio.PlaybackState.PLAYING == self.audio.state
 
     def test_state_changes_from_playing_to_paused_on_pause(self):
         self.audio.state = audio.PlaybackState.PLAYING
@@ -558,7 +558,7 @@ class AudioStateTest(unittest.TestCase):
             Gst.State.PLAYING, Gst.State.PAUSED, Gst.State.VOID_PENDING
         )
 
-        self.assertEqual(audio.PlaybackState.PAUSED, self.audio.state)
+        assert audio.PlaybackState.PAUSED == self.audio.state
 
     def test_state_changes_from_playing_to_stopped_on_stop(self):
         self.audio.state = audio.PlaybackState.PLAYING
@@ -573,7 +573,7 @@ class AudioStateTest(unittest.TestCase):
         # self.audio._handler.on_playbin_state_changed(
         #     Gst.State.READY, Gst.State.NULL, Gst.State.VOID_PENDING)
 
-        self.assertEqual(audio.PlaybackState.STOPPED, self.audio.state)
+        assert audio.PlaybackState.STOPPED == self.audio.state
 
 
 class AudioBufferingTest(unittest.TestCase):
@@ -589,7 +589,7 @@ class AudioBufferingTest(unittest.TestCase):
 
         self.audio._handler.on_buffering(0)
         playbin.set_state.assert_called_with(Gst.State.PAUSED)
-        self.assertTrue(self.audio._buffering)
+        assert self.audio._buffering
 
     def test_stay_paused_when_buffering_finished(self):
         playbin = self.audio._playbin
@@ -598,8 +598,8 @@ class AudioBufferingTest(unittest.TestCase):
         playbin.set_state.reset_mock()
 
         self.audio._handler.on_buffering(100)
-        self.assertEqual(playbin.set_state.call_count, 0)
-        self.assertFalse(self.audio._buffering)
+        assert playbin.set_state.call_count == 0
+        assert not self.audio._buffering
 
     def test_change_to_paused_while_buffering(self):
         playbin = self.audio._playbin
@@ -613,8 +613,8 @@ class AudioBufferingTest(unittest.TestCase):
         playbin.set_state.reset_mock()
 
         self.audio._handler.on_buffering(100)
-        self.assertEqual(playbin.set_state.call_count, 0)
-        self.assertFalse(self.audio._buffering)
+        assert playbin.set_state.call_count == 0
+        assert not self.audio._buffering
 
     def test_change_to_stopped_while_buffering(self):
         playbin = self.audio._playbin
@@ -628,4 +628,4 @@ class AudioBufferingTest(unittest.TestCase):
 
         self.audio.stop_playback()
         playbin.set_state.assert_called_with(Gst.State.NULL)
-        self.assertFalse(self.audio._buffering)
+        assert not self.audio._buffering

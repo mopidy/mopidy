@@ -39,9 +39,9 @@ class TracklistTest(unittest.TestCase):
         tl_tracks = self.core.tracklist.add(uris=["dummy1:a"])
 
         self.library.lookup.assert_called_once_with("dummy1:a")
-        self.assertEqual(1, len(tl_tracks))
-        self.assertEqual(self.tracks[0], tl_tracks[0].track)
-        self.assertEqual(tl_tracks, self.core.tracklist.get_tl_tracks()[-1:])
+        assert 1 == len(tl_tracks)
+        assert self.tracks[0] == tl_tracks[0].track
+        assert tl_tracks == self.core.tracklist.get_tl_tracks()[(-1):]
 
     def test_add_by_uris_looks_up_uris_in_library(self):
         self.library.lookup.reset_mock()
@@ -56,21 +56,22 @@ class TracklistTest(unittest.TestCase):
                 mock.call("dummy1:c"),
             ]
         )
-        self.assertEqual(3, len(tl_tracks))
-        self.assertEqual(self.tracks[0], tl_tracks[0].track)
-        self.assertEqual(self.tracks[1], tl_tracks[1].track)
-        self.assertEqual(self.tracks[2], tl_tracks[2].track)
-        self.assertEqual(
-            tl_tracks, self.core.tracklist.get_tl_tracks()[-len(tl_tracks) :]
+        assert 3 == len(tl_tracks)
+        assert self.tracks[0] == tl_tracks[0].track
+        assert self.tracks[1] == tl_tracks[1].track
+        assert self.tracks[2] == tl_tracks[2].track
+        assert (
+            tl_tracks
+            == self.core.tracklist.get_tl_tracks()[(-len(tl_tracks)) :]
         )
 
     def test_remove_removes_tl_tracks_matching_query(self):
         tl_tracks = self.core.tracklist.remove({"name": ["foo"]})
 
-        self.assertEqual(2, len(tl_tracks))
+        assert 2 == len(tl_tracks)
         self.assertListEqual(self.tl_tracks[:2], tl_tracks)
 
-        self.assertEqual(1, self.core.tracklist.get_length())
+        assert 1 == self.core.tracklist.get_length()
         self.assertListEqual(
             self.tl_tracks[2:], self.core.tracklist.get_tl_tracks()
         )
@@ -78,10 +79,10 @@ class TracklistTest(unittest.TestCase):
     def test_remove_works_with_dict_instead_of_kwargs(self):
         tl_tracks = self.core.tracklist.remove({"name": ["foo"]})
 
-        self.assertEqual(2, len(tl_tracks))
+        assert 2 == len(tl_tracks)
         self.assertListEqual(self.tl_tracks[:2], tl_tracks)
 
-        self.assertEqual(1, self.core.tracklist.get_length())
+        assert 1 == self.core.tracklist.get_length()
         self.assertListEqual(
             self.tl_tracks[2:], self.core.tracklist.get_tl_tracks()
         )
@@ -89,13 +90,13 @@ class TracklistTest(unittest.TestCase):
     def test_filter_returns_tl_tracks_matching_query(self):
         tl_tracks = self.core.tracklist.filter({"name": ["foo"]})
 
-        self.assertEqual(2, len(tl_tracks))
+        assert 2 == len(tl_tracks)
         self.assertListEqual(self.tl_tracks[:2], tl_tracks)
 
     def test_filter_works_with_dict_instead_of_kwargs(self):
         tl_tracks = self.core.tracklist.filter({"name": ["foo"]})
 
-        self.assertEqual(2, len(tl_tracks))
+        assert 2 == len(tl_tracks)
         self.assertListEqual(self.tl_tracks[:2], tl_tracks)
 
     def test_filter_fails_if_values_isnt_iterable(self):
@@ -133,16 +134,16 @@ class TracklistIndexTest(unittest.TestCase):
         )
 
     def test_index_returns_index_of_track(self):
-        self.assertEqual(0, self.core.tracklist.index(self.tl_tracks[0]))
-        self.assertEqual(1, self.core.tracklist.index(self.tl_tracks[1]))
-        self.assertEqual(2, self.core.tracklist.index(self.tl_tracks[2]))
+        assert 0 == self.core.tracklist.index(self.tl_tracks[0])
+        assert 1 == self.core.tracklist.index(self.tl_tracks[1])
+        assert 2 == self.core.tracklist.index(self.tl_tracks[2])
 
     def test_index_returns_none_if_item_not_found(self):
         tl_track = TlTrack(0, Track())
-        self.assertEqual(self.core.tracklist.index(tl_track), None)
+        assert self.core.tracklist.index(tl_track) is None
 
     def test_index_returns_none_if_called_with_none(self):
-        self.assertEqual(self.core.tracklist.index(None), None)
+        assert self.core.tracklist.index(None) is None
 
     def test_index_errors_out_for_invalid_tltrack(self):
         with self.assertRaises(ValueError):
@@ -150,15 +151,15 @@ class TracklistIndexTest(unittest.TestCase):
 
     def test_index_return_index_when_called_with_tlids(self):
         tl_tracks = self.tl_tracks
-        self.assertEqual(0, self.core.tracklist.index(tlid=tl_tracks[0].tlid))
-        self.assertEqual(1, self.core.tracklist.index(tlid=tl_tracks[1].tlid))
-        self.assertEqual(2, self.core.tracklist.index(tlid=tl_tracks[2].tlid))
+        assert 0 == self.core.tracklist.index(tlid=tl_tracks[0].tlid)
+        assert 1 == self.core.tracklist.index(tlid=tl_tracks[1].tlid)
+        assert 2 == self.core.tracklist.index(tlid=tl_tracks[2].tlid)
 
     def test_index_returns_none_if_tlid_not_found(self):
-        self.assertEqual(self.core.tracklist.index(tlid=123), None)
+        assert self.core.tracklist.index(tlid=123) is None
 
     def test_index_returns_none_if_called_with_tlid_none(self):
-        self.assertEqual(self.core.tracklist.index(tlid=None), None)
+        assert self.core.tracklist.index(tlid=None) is None
 
     def test_index_errors_out_for_invalid_tlid(self):
         with self.assertRaises(ValueError):
@@ -172,10 +173,10 @@ class TracklistIndexTest(unittest.TestCase):
             self.tl_tracks[2],
         ]
 
-        self.assertEqual(None, self.core.tracklist.index())
-        self.assertEqual(0, self.core.tracklist.index())
-        self.assertEqual(1, self.core.tracklist.index())
-        self.assertEqual(2, self.core.tracklist.index())
+        assert self.core.tracklist.index() is None
+        assert 0 == self.core.tracklist.index()
+        assert 1 == self.core.tracklist.index()
+        assert 2 == self.core.tracklist.index()
 
 
 class TracklistSaveLoadStateTest(unittest.TestCase):
@@ -218,7 +219,7 @@ class TracklistSaveLoadStateTest(unittest.TestCase):
             tl_tracks=tl_tracks,
         )
         value = self.core.tracklist._save_state()
-        self.assertEqual(target, value)
+        assert target == value
 
     def test_load(self):
         old_version = self.core.tracklist.get_version()
@@ -232,19 +233,19 @@ class TracklistSaveLoadStateTest(unittest.TestCase):
         )
         coverage = ["mode", "tracklist"]
         self.core.tracklist._load_state(target, coverage)
-        self.assertEqual(False, self.core.tracklist.get_consume())
-        self.assertEqual(True, self.core.tracklist.get_repeat())
-        self.assertEqual(True, self.core.tracklist.get_single())
-        self.assertEqual(False, self.core.tracklist.get_random())
-        self.assertEqual(12, self.core.tracklist._next_tlid)
-        self.assertEqual(4, self.core.tracklist.get_length())
-        self.assertEqual(self.tl_tracks, self.core.tracklist.get_tl_tracks())
-        self.assertGreater(self.core.tracklist.get_version(), old_version)
+        assert self.core.tracklist.get_consume() is False
+        assert self.core.tracklist.get_repeat() is True
+        assert self.core.tracklist.get_single() is True
+        assert self.core.tracklist.get_random() is False
+        assert 12 == self.core.tracklist._next_tlid
+        assert 4 == self.core.tracklist.get_length()
+        assert self.tl_tracks == self.core.tracklist.get_tl_tracks()
+        assert self.core.tracklist.get_version() > old_version
 
         # after load, adding more tracks must be possible
         self.core.tracklist.add(uris=[self.tracks[1].uri])
-        self.assertEqual(13, self.core.tracklist._next_tlid)
-        self.assertEqual(5, self.core.tracklist.get_length())
+        assert 13 == self.core.tracklist._next_tlid
+        assert 5 == self.core.tracklist.get_length()
 
     def test_load_mode_only(self):
         old_version = self.core.tracklist.get_version()
@@ -258,14 +259,14 @@ class TracklistSaveLoadStateTest(unittest.TestCase):
         )
         coverage = ["mode"]
         self.core.tracklist._load_state(target, coverage)
-        self.assertEqual(False, self.core.tracklist.get_consume())
-        self.assertEqual(True, self.core.tracklist.get_repeat())
-        self.assertEqual(True, self.core.tracklist.get_single())
-        self.assertEqual(False, self.core.tracklist.get_random())
-        self.assertEqual(1, self.core.tracklist._next_tlid)
-        self.assertEqual(0, self.core.tracklist.get_length())
-        self.assertEqual([], self.core.tracklist.get_tl_tracks())
-        self.assertEqual(self.core.tracklist.get_version(), old_version)
+        assert self.core.tracklist.get_consume() is False
+        assert self.core.tracklist.get_repeat() is True
+        assert self.core.tracklist.get_single() is True
+        assert self.core.tracklist.get_random() is False
+        assert 1 == self.core.tracklist._next_tlid
+        assert 0 == self.core.tracklist.get_length()
+        assert [] == self.core.tracklist.get_tl_tracks()
+        assert self.core.tracklist.get_version() == old_version
 
     def test_load_tracklist_only(self):
         old_version = self.core.tracklist.get_version()
@@ -279,14 +280,14 @@ class TracklistSaveLoadStateTest(unittest.TestCase):
         )
         coverage = ["tracklist"]
         self.core.tracklist._load_state(target, coverage)
-        self.assertEqual(False, self.core.tracklist.get_consume())
-        self.assertEqual(False, self.core.tracklist.get_repeat())
-        self.assertEqual(False, self.core.tracklist.get_single())
-        self.assertEqual(False, self.core.tracklist.get_random())
-        self.assertEqual(12, self.core.tracklist._next_tlid)
-        self.assertEqual(4, self.core.tracklist.get_length())
-        self.assertEqual(self.tl_tracks, self.core.tracklist.get_tl_tracks())
-        self.assertGreater(self.core.tracklist.get_version(), old_version)
+        assert self.core.tracklist.get_consume() is False
+        assert self.core.tracklist.get_repeat() is False
+        assert self.core.tracklist.get_single() is False
+        assert self.core.tracklist.get_random() is False
+        assert 12 == self.core.tracklist._next_tlid
+        assert 4 == self.core.tracklist.get_length()
+        assert self.tl_tracks == self.core.tracklist.get_tl_tracks()
+        assert self.core.tracklist.get_version() > old_version
 
     def test_load_invalid_type(self):
         with self.assertRaises(TypeError):

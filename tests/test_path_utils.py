@@ -11,8 +11,8 @@ class MtimeTest(unittest.TestCase):
 
     def test_mtime_of_current_dir(self):
         mtime_dir = int(os.stat(".").st_mtime)
-        self.assertEqual(mtime_dir, path_utils.mtime("."))
+        assert mtime_dir == path_utils.mtime(".")
 
     def test_fake_time_is_returned(self):
         path_utils.mtime.set_fake_time(123456)
-        self.assertEqual(path_utils.mtime("."), 123456)
+        assert path_utils.mtime(".") == 123456

@@ -73,11 +73,11 @@ class ServerTest(unittest.TestCase):
             max_connections=sentinel.max_connections,
             timeout=sentinel.timeout,
         )
-        self.assertEqual(sentinel.protocol, self.mock.protocol)
-        self.assertEqual(sentinel.max_connections, self.mock.max_connections)
-        self.assertEqual(sentinel.timeout, self.mock.timeout)
-        self.assertEqual(sock, self.mock.server_socket)
-        self.assertEqual((str(sentinel.host), sentinel.port), self.mock.address)
+        assert sentinel.protocol == self.mock.protocol
+        assert sentinel.max_connections == self.mock.max_connections
+        assert sentinel.timeout == self.mock.timeout
+        assert sock == self.mock.server_socket
+        assert (str(sentinel.host), sentinel.port) == self.mock.address
 
     def test_create_server_socket_no_port(self):
         with self.assertRaises(exceptions.ValidationError):
@@ -195,17 +195,15 @@ class ServerTest(unittest.TestCase):
         )
         self.mock.maximum_connections_exceeded.return_value = False
 
-        self.assertTrue(
-            network.Server.handle_connection(
-                self.mock, sentinel.fileno, GLib.IO_IN
-            )
+        assert network.Server.handle_connection(
+            self.mock, sentinel.fileno, GLib.IO_IN
         )
         self.mock.accept_connection.assert_called_once_with()
         self.mock.maximum_connections_exceeded.assert_called_once_with()
         self.mock.init_connection.assert_called_once_with(
             sentinel.sock, sentinel.addr
         )
-        self.assertEqual(0, self.mock.reject_connection.call_count)
+        assert 0 == self.mock.reject_connection.call_count
 
     def test_handle_connection_exceeded_connections(self):
         self.mock.accept_connection.return_value = (
@@ -214,17 +212,15 @@ class ServerTest(unittest.TestCase):
         )
         self.mock.maximum_connections_exceeded.return_value = True
 
-        self.assertTrue(
-            network.Server.handle_connection(
-                self.mock, sentinel.fileno, GLib.IO_IN
-            )
+        assert network.Server.handle_connection(
+            self.mock, sentinel.fileno, GLib.IO_IN
         )
         self.mock.accept_connection.assert_called_once_with()
         self.mock.maximum_connections_exceeded.assert_called_once_with()
         self.mock.reject_connection.assert_called_once_with(
             sentinel.sock, sentinel.addr
         )
-        self.assertEqual(0, self.mock.init_connection.call_count)
+        assert 0 == self.mock.init_connection.call_count
 
     def test_accept_connection(self):
         sock = Mock(spec=socket.socket)
@@ -233,8 +229,8 @@ class ServerTest(unittest.TestCase):
         self.mock.server_socket = sock
 
         sock, addr = network.Server.accept_connection(self.mock)
-        self.assertEqual(connected_sock, sock)
-        self.assertEqual(sentinel.addr, addr)
+        assert connected_sock == sock
+        assert sentinel.addr == addr
 
     def test_accept_connection_unix(self):
         sock = Mock(spec=socket.socket)
@@ -245,8 +241,8 @@ class ServerTest(unittest.TestCase):
         self.mock.server_socket = sock
 
         sock, addr = network.Server.accept_connection(self.mock)
-        self.assertEqual(connected_sock, sock)
-        self.assertEqual((sentinel.sockname, None), addr)
+        assert connected_sock == sock
+        assert (sentinel.sockname, None) == addr
 
     def test_accept_connection_recoverable_error(self):
         sock = Mock(spec=socket.socket)
@@ -269,23 +265,23 @@ class ServerTest(unittest.TestCase):
         self.mock.max_connections = 10
 
         self.mock.number_of_connections.return_value = 11
-        self.assertTrue(network.Server.maximum_connections_exceeded(self.mock))
+        assert network.Server.maximum_connections_exceeded(self.mock)
 
         self.mock.number_of_connections.return_value = 10
-        self.assertTrue(network.Server.maximum_connections_exceeded(self.mock))
+        assert network.Server.maximum_connections_exceeded(self.mock)
 
         self.mock.number_of_connections.return_value = 9
-        self.assertFalse(network.Server.maximum_connections_exceeded(self.mock))
+        assert not network.Server.maximum_connections_exceeded(self.mock)
 
     @patch("pykka.ActorRegistry.get_by_class")
     def test_number_of_connections(self, get_by_class):
         self.mock.protocol = sentinel.protocol
 
         get_by_class.return_value = [1, 2, 3]
-        self.assertEqual(3, network.Server.number_of_connections(self.mock))
+        assert 3 == network.Server.number_of_connections(self.mock)
 
         get_by_class.return_value = []
-        self.assertEqual(0, network.Server.number_of_connections(self.mock))
+        assert 0 == network.Server.number_of_connections(self.mock)
 
     @patch.object(network, "Connection", new=Mock())
     def test_init_connection(self):
