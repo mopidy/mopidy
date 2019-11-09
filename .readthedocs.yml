@@ -3,8 +3,10 @@ version: 2
 python:
   version: 3.7
   install:
-    extra_requirements:
-      - docs
+    - method: pip
+      path: .
+      extra_requirements:
+        - docs
 
 sphinx:
   builder: htmldir
