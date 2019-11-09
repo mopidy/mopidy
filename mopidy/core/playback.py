@@ -191,7 +191,7 @@ class PlaybackController:
         # handled.
         self._last_position = self._current_tl_track.track.length
 
-        pending = self.core.tracklist.eot_track(self._current_tl_track)
+        pending = self.core.tracklist.get_eot_tlid(self._current_tl_track)
         # avoid endless loop if 'repeat' is 'true' and no track is playable
         # * 2 -> second run to get all playable track in a shuffled playlist
         count = self.core.tracklist.get_length() * 2
@@ -210,7 +210,7 @@ class PlaybackController:
                     )
 
             self.core.tracklist._mark_unplayable(pending)
-            pending = self.core.tracklist.eot_track(pending)
+            pending = self.core.tracklist.get_eot_tlid(pending)
             count -= 1
             if not count:
                 logger.info("No playable track in the list.")
