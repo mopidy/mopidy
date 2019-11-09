@@ -23,6 +23,9 @@ class Mock:
     def __or__(self, other):
         return Mock()
 
+    def __mro_entries__(self, bases):
+        return tuple()
+
     @classmethod
     def __getattr__(cls, name):
         if name == "get_system_config_dirs":  # GLib.get_system_config_dirs()
