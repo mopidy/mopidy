@@ -7,6 +7,7 @@ workflows:
   version: 2
   test:
     jobs:
+      - py38
       - py37
       - black
       - check-manifest
@@ -14,9 +15,9 @@ workflows:
       - flake8
 
 jobs:
-  py37: &test-template
+  py38: &test-template
     docker:
-      - image: mopidy/ci-python:3.7
+      - image: mopidy/ci-python:3.8
     steps:
       - checkout
       - restore_cache:
@@ -38,6 +39,11 @@ jobs:
           file: coverage.xml
       - store_test_results:
           path: test-results
+
+  py37:
+    <<: *test-template
+    docker:
+      - image: mopidy/ci-python:3.7
 
   black: *test-template
 
