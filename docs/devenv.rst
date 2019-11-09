@@ -93,23 +93,6 @@ confirm that you're on the right branch, run::
     git branch
 
 
-Install development tools
--------------------------
-
-We use a number of Python development tools. The :file:`dev-requirements.txt`
-file has comments describing what we use each dependency for, so we might just
-as well include the file verbatim here:
-
-.. literalinclude:: ../dev-requirements.txt
-
-Install them all into the active virtualenv by running `pip
-<https://pip.pypa.io/>`_::
-
-    pip install --upgrade -r dev-requirements.txt
-
-To upgrade the tools in the future, just rerun the exact same command.
-
-
 Install Mopidy from the Git repo
 --------------------------------
 
@@ -122,7 +105,7 @@ extension against the latest Mopidy changes.
 Assuming you're still inside the Git repo, use pip to install Mopidy from the
 Git repo in an "editable" form::
 
-    pip install --editable .
+    pip install --upgrade --editable .
 
 This will not copy the source code into the virtualenv's ``site-packages``
 directory, but instead create a link there pointing to the Git repo. Using
@@ -201,6 +184,23 @@ Finally, we can go back to the workspace, again using a virtualenvwrapper
 tool::
 
    cdproject
+
+
+Install development tools
+-------------------------
+
+Before continuing, you will probably want to install the development tools we
+use as well. These can be installed into the active virtualenv by running::
+
+    pip install --upgrade --editable ".[dev]"
+
+Note that this is the same command as you used to install Mopidy from the Git
+repo, with the addition of the ``[dev]`` suffix after ``.``. This makes pip
+install the "dev" set of extra dependencies. Exactly what the "dev" set
+includes are defined in ``setup.py``.
+
+To upgrade the development tools in the future, just rerun the exact same
+command.
 
 
 .. _running-from-git:

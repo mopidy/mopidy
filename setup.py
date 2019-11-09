@@ -9,6 +9,21 @@ def get_version(filename):
         return metadata["version"]
 
 
+DOCS_DEPS = ["pygraphviz", "sphinx", "sphinx_rtd_theme"]
+LINT_DEPS = [
+    "black",
+    "check-manifest",
+    "flake8",
+    "flake8-bugbear",
+    "flake8-import-order",
+    "isort[pyproject]",
+    "pep8-naming",
+]
+RELEASE_DEPS = ["invoke", "twine", "wheel"]
+TEST_DEPS = ["pytest", "pytest-cov", "responses"]
+DEV_DEPS = DOCS_DEPS + LINT_DEPS + RELEASE_DEPS + TEST_DEPS
+
+
 setup(
     name="Mopidy",
     version=get_version("mopidy/__init__.py"),
@@ -28,7 +43,13 @@ setup(
         "setuptools",
         "tornado >= 4.4",
     ],
-    extras_require={"http": []},  # Keep for backwards compat
+    extras_require={
+        "http": [],  # Keep for backwards compat
+        "docs": DOCS_DEPS,
+        "lint": LINT_DEPS,
+        "test": TEST_DEPS,
+        "dev": DEV_DEPS,
+    },
     entry_points={
         "console_scripts": ["mopidy = mopidy.__main__:main"],
         "mopidy.ext": [
