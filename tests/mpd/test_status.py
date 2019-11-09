@@ -47,152 +47,152 @@ class StatusHandlerTest(unittest.TestCase):
 
     def test_stats_method(self):
         result = status.stats(self.context)
-        self.assertIn("artists", result)
-        self.assertGreaterEqual(int(result["artists"]), 0)
-        self.assertIn("albums", result)
-        self.assertGreaterEqual(int(result["albums"]), 0)
-        self.assertIn("songs", result)
-        self.assertGreaterEqual(int(result["songs"]), 0)
-        self.assertIn("uptime", result)
-        self.assertGreaterEqual(int(result["uptime"]), 0)
-        self.assertIn("db_playtime", result)
-        self.assertGreaterEqual(int(result["db_playtime"]), 0)
-        self.assertIn("db_update", result)
-        self.assertGreaterEqual(int(result["db_update"]), 0)
-        self.assertIn("playtime", result)
-        self.assertGreaterEqual(int(result["playtime"]), 0)
+        assert "artists" in result
+        assert int(result["artists"]) >= 0
+        assert "albums" in result
+        assert int(result["albums"]) >= 0
+        assert "songs" in result
+        assert int(result["songs"]) >= 0
+        assert "uptime" in result
+        assert int(result["uptime"]) >= 0
+        assert "db_playtime" in result
+        assert int(result["db_playtime"]) >= 0
+        assert "db_update" in result
+        assert int(result["db_update"]) >= 0
+        assert "playtime" in result
+        assert int(result["playtime"]) >= 0
 
     def test_status_method_contains_volume_with_na_value(self):
         result = dict(status.status(self.context))
-        self.assertIn("volume", result)
-        self.assertEqual(int(result["volume"]), -1)
+        assert "volume" in result
+        assert int(result["volume"]) == (-1)
 
     def test_status_method_contains_volume(self):
         self.core.mixer.set_volume(17)
         result = dict(status.status(self.context))
-        self.assertIn("volume", result)
-        self.assertEqual(int(result["volume"]), 17)
+        assert "volume" in result
+        assert int(result["volume"]) == 17
 
     def test_status_method_contains_repeat_is_0(self):
         result = dict(status.status(self.context))
-        self.assertIn("repeat", result)
-        self.assertEqual(int(result["repeat"]), 0)
+        assert "repeat" in result
+        assert int(result["repeat"]) == 0
 
     def test_status_method_contains_repeat_is_1(self):
         self.core.tracklist.set_repeat(True)
         result = dict(status.status(self.context))
-        self.assertIn("repeat", result)
-        self.assertEqual(int(result["repeat"]), 1)
+        assert "repeat" in result
+        assert int(result["repeat"]) == 1
 
     def test_status_method_contains_random_is_0(self):
         result = dict(status.status(self.context))
-        self.assertIn("random", result)
-        self.assertEqual(int(result["random"]), 0)
+        assert "random" in result
+        assert int(result["random"]) == 0
 
     def test_status_method_contains_random_is_1(self):
         self.core.tracklist.set_random(True)
         result = dict(status.status(self.context))
-        self.assertIn("random", result)
-        self.assertEqual(int(result["random"]), 1)
+        assert "random" in result
+        assert int(result["random"]) == 1
 
     def test_status_method_contains_single(self):
         result = dict(status.status(self.context))
-        self.assertIn("single", result)
-        self.assertIn(int(result["single"]), (0, 1))
+        assert "single" in result
+        assert int(result["single"]) in (0, 1)
 
     def test_status_method_contains_consume_is_0(self):
         result = dict(status.status(self.context))
-        self.assertIn("consume", result)
-        self.assertEqual(int(result["consume"]), 0)
+        assert "consume" in result
+        assert int(result["consume"]) == 0
 
     def test_status_method_contains_consume_is_1(self):
         self.core.tracklist.set_consume(True)
         result = dict(status.status(self.context))
-        self.assertIn("consume", result)
-        self.assertEqual(int(result["consume"]), 1)
+        assert "consume" in result
+        assert int(result["consume"]) == 1
 
     def test_status_method_contains_playlist(self):
         result = dict(status.status(self.context))
-        self.assertIn("playlist", result)
-        self.assertGreaterEqual(int(result["playlist"]), 0)
-        self.assertLessEqual(int(result["playlist"]), 2 ** 31 - 1)
+        assert "playlist" in result
+        assert int(result["playlist"]) >= 0
+        assert int(result["playlist"]) <= ((2 ** 31) - 1)
 
     def test_status_method_contains_playlistlength(self):
         result = dict(status.status(self.context))
-        self.assertIn("playlistlength", result)
-        self.assertGreaterEqual(int(result["playlistlength"]), 0)
+        assert "playlistlength" in result
+        assert int(result["playlistlength"]) >= 0
 
     def test_status_method_contains_xfade(self):
         result = dict(status.status(self.context))
-        self.assertIn("xfade", result)
-        self.assertGreaterEqual(int(result["xfade"]), 0)
+        assert "xfade" in result
+        assert int(result["xfade"]) >= 0
 
     def test_status_method_contains_state_is_play(self):
         self.core.playback.set_state(PLAYING)
         result = dict(status.status(self.context))
-        self.assertIn("state", result)
-        self.assertEqual(result["state"], "play")
+        assert "state" in result
+        assert result["state"] == "play"
 
     def test_status_method_contains_state_is_stop(self):
         self.core.playback.set_state(STOPPED)
         result = dict(status.status(self.context))
-        self.assertIn("state", result)
-        self.assertEqual(result["state"], "stop")
+        assert "state" in result
+        assert result["state"] == "stop"
 
     def test_status_method_contains_state_is_pause(self):
         self.core.playback.set_state(PLAYING)
         self.core.playback.set_state(PAUSED)
         result = dict(status.status(self.context))
-        self.assertIn("state", result)
-        self.assertEqual(result["state"], "pause")
+        assert "state" in result
+        assert result["state"] == "pause"
 
     def test_status_method_when_playlist_loaded_contains_song(self):
         self.set_tracklist([Track(uri="dummy:/a")])
         self.core.playback.play().get()
         result = dict(status.status(self.context))
-        self.assertIn("song", result)
-        self.assertGreaterEqual(int(result["song"]), 0)
+        assert "song" in result
+        assert int(result["song"]) >= 0
 
     def test_status_method_when_playlist_loaded_contains_tlid_as_songid(self):
         self.set_tracklist([Track(uri="dummy:/a")])
         self.core.playback.play().get()
         result = dict(status.status(self.context))
-        self.assertIn("songid", result)
-        self.assertEqual(int(result["songid"]), 1)
+        assert "songid" in result
+        assert int(result["songid"]) == 1
 
     def test_status_method_when_playlist_loaded_contains_nextsong(self):
         self.set_tracklist([Track(uri="dummy:/a"), Track(uri="dummy:/b")])
         self.core.playback.play().get()
         result = dict(status.status(self.context))
-        self.assertIn("nextsong", result)
-        self.assertGreaterEqual(int(result["nextsong"]), 0)
+        assert "nextsong" in result
+        assert int(result["nextsong"]) >= 0
 
     def test_status_method_when_playlist_loaded_contains_nextsongid(self):
         self.set_tracklist([Track(uri="dummy:/a"), Track(uri="dummy:/b")])
         self.core.playback.play().get()
         result = dict(status.status(self.context))
-        self.assertIn("nextsongid", result)
-        self.assertEqual(int(result["nextsongid"]), 2)
+        assert "nextsongid" in result
+        assert int(result["nextsongid"]) == 2
 
     def test_status_method_when_playing_contains_time_with_no_length(self):
         self.set_tracklist([Track(uri="dummy:/a", length=None)])
         self.core.playback.play().get()
         result = dict(status.status(self.context))
-        self.assertIn("time", result)
+        assert "time" in result
         (position, total) = result["time"].split(":")
         position = int(position)
         total = int(total)
-        self.assertLessEqual(position, total)
+        assert position <= total
 
     def test_status_method_when_playing_contains_time_with_length(self):
         self.set_tracklist([Track(uri="dummy:/a", length=10000)])
         self.core.playback.play().get()
         result = dict(status.status(self.context))
-        self.assertIn("time", result)
+        assert "time" in result
         (position, total) = result["time"].split(":")
         position = int(position)
         total = int(total)
-        self.assertLessEqual(position, total)
+        assert position <= total
 
     def test_status_method_when_playing_contains_elapsed(self):
         self.set_tracklist([Track(uri="dummy:/a", length=60000)])
@@ -200,20 +200,20 @@ class StatusHandlerTest(unittest.TestCase):
         self.core.playback.pause()
         self.core.playback.seek(59123)
         result = dict(status.status(self.context))
-        self.assertIn("elapsed", result)
-        self.assertEqual(result["elapsed"], "59.123")
+        assert "elapsed" in result
+        assert result["elapsed"] == "59.123"
 
     def test_status_method_when_starting_playing_contains_elapsed_zero(self):
         self.set_tracklist([Track(uri="dummy:/a", length=10000)])
         self.core.playback.play().get()
         self.core.playback.pause()
         result = dict(status.status(self.context))
-        self.assertIn("elapsed", result)
-        self.assertEqual(result["elapsed"], "0.000")
+        assert "elapsed" in result
+        assert result["elapsed"] == "0.000"
 
     def test_status_method_when_playing_contains_bitrate(self):
         self.set_tracklist([Track(uri="dummy:/a", bitrate=3200)])
         self.core.playback.play().get()
         result = dict(status.status(self.context))
-        self.assertIn("bitrate", result)
-        self.assertEqual(int(result["bitrate"]), 3200)
+        assert "bitrate" in result
+        assert int(result["bitrate"]) == 3200

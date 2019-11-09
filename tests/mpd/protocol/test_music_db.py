@@ -14,20 +14,20 @@ class QueryFromMpdSearchFormatTest(unittest.TestCase):
         result = music_db._query_from_mpd_search_parameters(
             ["Date", "1974-01-02", "Date", "1975"], music_db._SEARCH_MAPPING
         )
-        self.assertEqual(result["date"][0], "1974-01-02")
-        self.assertEqual(result["date"][1], "1975")
+        assert result["date"][0] == "1974-01-02"
+        assert result["date"][1] == "1975"
 
     def test_empty_value_is_ignored(self):
         result = music_db._query_from_mpd_search_parameters(
             ["Date", ""], music_db._SEARCH_MAPPING
         )
-        self.assertEqual(result, {})
+        assert result == {}
 
     def test_whitespace_value_is_ignored(self):
         result = music_db._query_from_mpd_search_parameters(
             ["Date", "  "], music_db._SEARCH_MAPPING
         )
-        self.assertEqual(result, {})
+        assert result == {}
 
     # TODO Test more mappings
 
@@ -95,28 +95,24 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         self.backend.library.dummy_find_exact_result = SearchResult(
             tracks=[track]
         )
-        self.assertEqual(self.core.tracklist.get_length().get(), 0)
+        assert self.core.tracklist.get_length().get() == 0
 
         self.send_request('findadd "title" "A"')
 
-        self.assertEqual(self.core.tracklist.get_length().get(), 1)
-        self.assertEqual(
-            self.core.tracklist.get_tracks().get()[0].uri, "dummy:a"
-        )
+        assert self.core.tracklist.get_length().get() == 1
+        assert self.core.tracklist.get_tracks().get()[0].uri == "dummy:a"
         self.assertInResponse("OK")
 
     def test_searchadd(self):
         track = Track(uri="dummy:a", name="A")
         self.backend.library.dummy_library = [track]
         self.backend.library.dummy_search_result = SearchResult(tracks=[track])
-        self.assertEqual(self.core.tracklist.get_length().get(), 0)
+        assert self.core.tracklist.get_length().get() == 0
 
         self.send_request('searchadd "title" "a"')
 
-        self.assertEqual(self.core.tracklist.get_length().get(), 1)
-        self.assertEqual(
-            self.core.tracklist.get_tracks().get()[0].uri, "dummy:a"
-        )
+        assert self.core.tracklist.get_length().get() == 1
+        assert self.core.tracklist.get_tracks().get()[0].uri == "dummy:a"
         self.assertInResponse("OK")
 
     def test_searchaddpl_appends_to_existing_playlist(self):
@@ -133,15 +129,15 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         )
 
         items = self.core.playlists.get_items(playlist.uri).get()
-        self.assertEqual(len(items), 2)
+        assert len(items) == 2
 
         self.send_request('searchaddpl "my favs" "title" "a"')
 
         items = self.core.playlists.get_items(playlist.uri).get()
-        self.assertEqual(len(items), 3)
-        self.assertEqual(items[0].uri, "dummy:x")
-        self.assertEqual(items[1].uri, "dummy:y")
-        self.assertEqual(items[2].uri, "dummy:a")
+        assert len(items) == 3
+        assert items[0].uri == "dummy:x"
+        assert items[1].uri == "dummy:y"
+        assert items[2].uri == "dummy:a"
         self.assertInResponse("OK")
 
     def test_searchaddpl_creates_missing_playlist(self):
@@ -150,7 +146,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         )
 
         playlists = self.core.playlists.as_list().get()
-        self.assertNotIn("my favs", {p.name for p in playlists})
+        assert "my favs" not in {p.name for p in playlists}
 
         self.send_request('searchaddpl "my favs" "title" "a"')
 
@@ -159,8 +155,8 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
         items = self.core.playlists.get_items(playlist.uri).get()
 
-        self.assertEqual(len(items), 1)
-        self.assertEqual(items[0].uri, "dummy:a")
+        assert len(items) == 1
+        assert items[0].uri == "dummy:a"
         self.assertInResponse("OK")
 
     def test_listall_without_uri(self):
@@ -226,7 +222,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
         response1 = self.send_request('listall "dummy"')
         response2 = self.send_request('listall "/dummy"')
-        self.assertEqual(response1, response2)
+        assert response1 == response2
 
     def test_listall_for_dir_with_and_without_trailing_slash_is_the_same(self):
         self.backend.library.dummy_browse_result = {
@@ -238,7 +234,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
         response1 = self.send_request('listall "dummy"')
         response2 = self.send_request('listall "dummy/"')
-        self.assertEqual(response1, response2)
+        assert response1 == response2
 
     def test_listall_duplicate(self):
         self.backend.library.dummy_browse_result = {
@@ -319,7 +315,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
         response1 = self.send_request('listallinfo "dummy"')
         response2 = self.send_request('listallinfo "/dummy"')
-        self.assertEqual(response1, response2)
+        assert response1 == response2
 
     def test_listallinfo_for_dir_with_and_without_trailing_slash_is_same(self):
         self.backend.library.dummy_browse_result = {
@@ -331,7 +327,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
         response1 = self.send_request('listallinfo "dummy"')
         response2 = self.send_request('listallinfo "dummy/"')
-        self.assertEqual(response1, response2)
+        assert response1 == response2
 
     def test_listallinfo_duplicate(self):
         self.backend.library.dummy_browse_result = {
@@ -360,7 +356,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
         response1 = self.send_request("lsinfo")
         response2 = self.send_request('lsinfo "/"')
-        self.assertEqual(response1, response2)
+        assert response1 == response2
 
     @mock.patch.object(stored_playlists, "_get_last_modified")
     def test_lsinfo_with_empty_path_returns_same_as_for_root(
@@ -373,7 +369,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
         response1 = self.send_request('lsinfo ""')
         response2 = self.send_request('lsinfo "/"')
-        self.assertEqual(response1, response2)
+        assert response1 == response2
 
     @mock.patch.object(stored_playlists, "_get_last_modified")
     def test_lsinfo_for_root_includes_playlists(self, last_modified_mock):
@@ -413,7 +409,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
         response1 = self.send_request('lsinfo "dummy"')
         response2 = self.send_request('lsinfo "/dummy"')
-        self.assertEqual(response1, response2)
+        assert response1 == response2
 
     @mock.patch.object(stored_playlists, "_get_last_modified")
     def test_lsinfo_for_dir_with_and_without_trailing_slash_is_the_same(
@@ -429,7 +425,7 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
 
         response1 = self.send_request('lsinfo "dummy"')
         response2 = self.send_request('lsinfo "dummy/"')
-        self.assertEqual(response1, response2)
+        assert response1 == response2
 
     def test_lsinfo_for_dir_includes_tracks(self):
         self.backend.library.dummy_library = [
@@ -494,8 +490,8 @@ class MusicDatabaseHandlerTest(protocol.BaseTestCase):
         )
 
         response = self.send_request('lsinfo "/"')
-        self.assertLess(
-            response.index("directory: dummy"), response.index("playlist: a")
+        assert response.index("directory: dummy") < response.index(
+            "playlist: a"
         )
 
     def test_lsinfo_duplicate(self):

@@ -44,19 +44,19 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
     def test_created_playlist_is_persisted(self):
         uri = "m3u:test.m3u"
         path = self.playlists_dir / "test.m3u"
-        self.assertFalse(path.exists())
+        assert not path.exists()
 
         playlist = self.core.playlists.create("test")
-        self.assertEqual("test", playlist.name)
-        self.assertEqual(uri, playlist.uri)
-        self.assertTrue(path.exists())
+        assert "test" == playlist.name
+        assert uri == playlist.uri
+        assert path.exists()
 
     def test_create_sanitizes_playlist_name(self):
         playlist = self.core.playlists.create("  ../../test FOO baR ")
-        self.assertEqual("..|..|test FOO baR", playlist.name)
+        assert "..|..|test FOO baR" == playlist.name
         path = self.playlists_dir / "..|..|test FOO baR.m3u"
-        self.assertEqual(self.playlists_dir, path.parent)
-        self.assertTrue(path.exists())
+        assert self.playlists_dir == path.parent
+        assert path.exists()
 
     def test_saved_playlist_is_persisted(self):
         uri1 = "m3u:test1.m3u"
@@ -66,36 +66,36 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         path2 = self.playlists_dir / "test2.m3u"
 
         playlist = self.core.playlists.create("test1")
-        self.assertEqual("test1", playlist.name)
-        self.assertEqual(uri1, playlist.uri)
-        self.assertTrue(path1.exists())
-        self.assertFalse(path2.exists())
+        assert "test1" == playlist.name
+        assert uri1 == playlist.uri
+        assert path1.exists()
+        assert not path2.exists()
 
         playlist = self.core.playlists.save(playlist.replace(name="test2"))
-        self.assertEqual("test2", playlist.name)
-        self.assertEqual(uri2, playlist.uri)
-        self.assertFalse(path1.exists())
-        self.assertTrue(path2.exists())
+        assert "test2" == playlist.name
+        assert uri2 == playlist.uri
+        assert not path1.exists()
+        assert path2.exists()
 
     def test_deleted_playlist_is_removed(self):
         uri = "m3u:test.m3u"
         path = self.playlists_dir / "test.m3u"
 
-        self.assertFalse(path.exists())
+        assert not path.exists()
 
         playlist = self.core.playlists.create("test")
-        self.assertEqual("test", playlist.name)
-        self.assertEqual(uri, playlist.uri)
-        self.assertTrue(path.exists())
+        assert "test" == playlist.name
+        assert uri == playlist.uri
+        assert path.exists()
 
         success = self.core.playlists.delete(playlist.uri)
-        self.assertTrue(success)
-        self.assertFalse(path.exists())
+        assert success
+        assert not path.exists()
 
     def test_delete_on_path_outside_playlist_dir_returns_none(self):
         success = self.core.playlists.delete("m3u:///etc/passwd")
 
-        self.assertFalse(success)
+        assert not success
 
     def test_playlist_contents_is_written_to_disk(self):
         track = Track(uri=generate_song(1))
@@ -105,7 +105,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
         contents = path.read_text()
 
-        self.assertEqual(track.uri, contents.strip())
+        assert track.uri == contents.strip()
 
     def test_extended_playlist_contents_is_written_to_disk(self):
         track = Track(uri=generate_song(1), name="Test", length=60000)
@@ -115,7 +115,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
         m3u = path.read_text().splitlines()
 
-        self.assertEqual(["#EXTM3U", "#EXTINF:-1,Test", track.uri], m3u)
+        assert ["#EXTM3U", "#EXTINF:-1,Test", track.uri] == m3u
 
     def test_latin1_playlist_contents_is_written_to_disk(self):
         track = Track(uri=generate_song(1), name="Test\x9f", length=60000)
@@ -128,7 +128,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         track_uri = track.uri
         if not isinstance(track_uri, bytes):
             track_uri = track.uri.encode()
-        self.assertEqual([b"#EXTM3U", b"#EXTINF:-1,Test\x9f", track_uri], m3u)
+        assert [b"#EXTM3U", b"#EXTINF:-1,Test\x9f", track_uri] == m3u
 
     def test_utf8_playlist_contents_is_replaced_and_written_to_disk(self):
         track = Track(uri=generate_song(1), name="Test\u07b4", length=60000)
@@ -141,7 +141,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         track_uri = track.uri
         if not isinstance(track_uri, bytes):
             track_uri = track.uri.encode()
-        self.assertEqual([b"#EXTM3U", b"#EXTINF:-1,Test?", track_uri], m3u)
+        assert [b"#EXTM3U", b"#EXTINF:-1,Test?", track_uri] == m3u
 
     def test_playlists_are_loaded_at_startup(self):
         track = Track(uri="dummy:track:path2")
@@ -149,11 +149,11 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         playlist = playlist.replace(tracks=[track])
         playlist = self.core.playlists.save(playlist)
 
-        self.assertEqual(len(self.core.playlists.as_list()), 1)
+        assert len(self.core.playlists.as_list()) == 1
         result = self.core.playlists.lookup(playlist.uri)
-        self.assertEqual(playlist.uri, result.uri)
-        self.assertEqual(playlist.name, result.name)
-        self.assertEqual(track.uri, result.tracks[0].uri)
+        assert playlist.uri == result.uri
+        assert playlist.name == result.name
+        assert track.uri == result.tracks[0].uri
 
     @unittest.skipIf(
         platform.system() == "Darwin",
@@ -167,9 +167,9 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
         self.core.playlists.refresh()
 
-        self.assertEqual(len(self.core.playlists.as_list()), 1)
+        assert len(self.core.playlists.as_list()) == 1
         result = self.core.playlists.as_list()
-        self.assertEqual("\ufffd\ufffd\ufffd", result[0].name)
+        assert "���" == result[0].name
 
     @unittest.SkipTest
     def test_playlists_dir_is_created(self):
@@ -177,104 +177,102 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
     def test_create_returns_playlist_with_name_set(self):
         playlist = self.core.playlists.create("test")
-        self.assertEqual(playlist.name, "test")
+        assert playlist.name == "test"
 
     def test_create_returns_playlist_with_uri_set(self):
         playlist = self.core.playlists.create("test")
-        self.assertTrue(playlist.uri)
+        assert playlist.uri
 
     def test_create_adds_playlist_to_playlists_collection(self):
         playlist = self.core.playlists.create("test")
         playlists = self.core.playlists.as_list()
-        self.assertIn(playlist.uri, [ref.uri for ref in playlists])
+        assert playlist.uri in [ref.uri for ref in playlists]
 
     def test_as_list_empty_to_start_with(self):
-        self.assertEqual(len(self.core.playlists.as_list()), 0)
+        assert len(self.core.playlists.as_list()) == 0
 
     def test_as_list_ignores_non_playlists(self):
         path = self.playlists_dir / "test.foo"
         path.touch()
-        self.assertTrue(path.exists())
+        assert path.exists()
 
         self.core.playlists.refresh()
 
-        self.assertEqual(len(self.core.playlists.as_list()), 0)
+        assert len(self.core.playlists.as_list()) == 0
 
     def test_delete_non_existant_playlist(self):
         self.core.playlists.delete("m3u:unknown")
 
     def test_delete_playlist_removes_it_from_the_collection(self):
         playlist = self.core.playlists.create("test")
-        self.assertEqual(playlist, self.core.playlists.lookup(playlist.uri))
+        assert playlist == self.core.playlists.lookup(playlist.uri)
 
         self.core.playlists.delete(playlist.uri)
 
-        self.assertIsNone(self.core.playlists.lookup(playlist.uri))
+        assert self.core.playlists.lookup(playlist.uri) is None
 
     def test_delete_playlist_without_file(self):
         playlist = self.core.playlists.create("test")
-        self.assertEqual(playlist, self.core.playlists.lookup(playlist.uri))
+        assert playlist == self.core.playlists.lookup(playlist.uri)
 
         path = self.playlists_dir / "test.m3u"
-        self.assertTrue(path.exists())
+        assert path.exists()
 
         path.unlink()
-        self.assertFalse(path.exists())
+        assert not path.exists()
 
         self.core.playlists.delete(playlist.uri)
-        self.assertIsNone(self.core.playlists.lookup(playlist.uri))
+        assert self.core.playlists.lookup(playlist.uri) is None
 
     def test_lookup_finds_playlist_by_uri(self):
         original_playlist = self.core.playlists.create("test")
 
         looked_up_playlist = self.core.playlists.lookup(original_playlist.uri)
 
-        self.assertEqual(original_playlist, looked_up_playlist)
+        assert original_playlist == looked_up_playlist
 
     def test_lookup_on_path_outside_playlist_dir_returns_none(self):
         result = self.core.playlists.lookup("m3u:///etc/passwd")
 
-        self.assertIsNone(result)
+        assert result is None
 
     def test_refresh(self):
         playlist = self.core.playlists.create("test")
-        self.assertEqual(playlist, self.core.playlists.lookup(playlist.uri))
+        assert playlist == self.core.playlists.lookup(playlist.uri)
 
         self.core.playlists.refresh()
 
-        self.assertEqual(playlist, self.core.playlists.lookup(playlist.uri))
+        assert playlist == self.core.playlists.lookup(playlist.uri)
 
     def test_save_replaces_existing_playlist_with_updated_playlist(self):
         playlist1 = self.core.playlists.create("test1")
-        self.assertEqual(playlist1, self.core.playlists.lookup(playlist1.uri))
+        assert playlist1 == self.core.playlists.lookup(playlist1.uri)
 
         playlist2 = playlist1.replace(name="test2")
         playlist2 = self.core.playlists.save(playlist2)
-        self.assertIsNone(self.core.playlists.lookup(playlist1.uri))
-        self.assertEqual(playlist2, self.core.playlists.lookup(playlist2.uri))
+        assert self.core.playlists.lookup(playlist1.uri) is None
+        assert playlist2 == self.core.playlists.lookup(playlist2.uri)
 
     def test_create_replaces_existing_playlist_with_updated_playlist(self):
         track = Track(uri=generate_song(1))
         playlist1 = self.core.playlists.create("test")
         playlist1 = self.core.playlists.save(playlist1.replace(tracks=[track]))
-        self.assertEqual(playlist1, self.core.playlists.lookup(playlist1.uri))
+        assert playlist1 == self.core.playlists.lookup(playlist1.uri)
 
         playlist2 = self.core.playlists.create("test")
-        self.assertEqual(playlist1.uri, playlist2.uri)
-        self.assertNotEqual(
-            playlist1, self.core.playlists.lookup(playlist1.uri)
-        )
-        self.assertEqual(playlist2, self.core.playlists.lookup(playlist1.uri))
+        assert playlist1.uri == playlist2.uri
+        assert playlist1 != self.core.playlists.lookup(playlist1.uri)
+        assert playlist2 == self.core.playlists.lookup(playlist1.uri)
 
     def test_save_playlist_with_new_uri(self):
         uri = "m3u:test.m3u"
         self.core.playlists.save(Playlist(uri=uri))
         path = self.playlists_dir / "test.m3u"
-        self.assertTrue(path.exists())
+        assert path.exists()
 
     def test_save_on_path_outside_playlist_dir_returns_none(self):
         result = self.core.playlists.save(Playlist(uri="m3u:///tmp/test.m3u"))
-        self.assertIsNone(result)
+        assert result is None
 
     def test_playlist_with_unknown_track(self):
         track = Track(uri="file:///dev/null")
@@ -282,11 +280,11 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         playlist = playlist.replace(tracks=[track])
         playlist = self.core.playlists.save(playlist)
 
-        self.assertEqual(len(self.core.playlists.as_list()), 1)
+        assert len(self.core.playlists.as_list()) == 1
         result = self.core.playlists.lookup("m3u:test.m3u")
-        self.assertEqual("m3u:test.m3u", result.uri)
-        self.assertEqual(playlist.name, result.name)
-        self.assertEqual(track.uri, result.tracks[0].uri)
+        assert "m3u:test.m3u" == result.uri
+        assert playlist.name == result.name
+        assert track.uri == result.tracks[0].uri
 
     def test_playlist_with_absolute_path(self):
         track = Track(uri="/tmp/test.mp3")
@@ -295,11 +293,11 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         playlist = playlist.replace(tracks=[track])
         playlist = self.core.playlists.save(playlist)
 
-        self.assertEqual(len(self.core.playlists.as_list()), 1)
+        assert len(self.core.playlists.as_list()) == 1
         result = self.core.playlists.lookup("m3u:test.m3u")
-        self.assertEqual("m3u:test.m3u", result.uri)
-        self.assertEqual(playlist.name, result.name)
-        self.assertEqual(filepath.as_uri(), result.tracks[0].uri)
+        assert "m3u:test.m3u" == result.uri
+        assert playlist.name == result.name
+        assert filepath.as_uri() == result.tracks[0].uri
 
     def test_playlist_with_relative_path(self):
         track = Track(uri="test.mp3")
@@ -308,15 +306,15 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         playlist = playlist.replace(tracks=[track])
         playlist = self.core.playlists.save(playlist)
 
-        self.assertEqual(len(self.core.playlists.as_list()), 1)
+        assert len(self.core.playlists.as_list()) == 1
         result = self.core.playlists.lookup("m3u:test.m3u")
-        self.assertEqual("m3u:test.m3u", result.uri)
-        self.assertEqual(playlist.name, result.name)
-        self.assertEqual(filepath.as_uri(), result.tracks[0].uri)
+        assert "m3u:test.m3u" == result.uri
+        assert playlist.name == result.name
+        assert filepath.as_uri() == result.tracks[0].uri
 
     def test_playlist_sort_order(self):
         def check_order(playlists, names):
-            self.assertEqual(names, [playlist.name for playlist in playlists])
+            assert names == [playlist.name for playlist in playlists]
 
         self.core.playlists.create("c")
         self.core.playlists.create("a")
@@ -345,20 +343,20 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
         item_refs = self.core.playlists.get_items(playlist.uri)
 
-        self.assertEqual(len(item_refs), 1)
-        self.assertEqual(item_refs[0].type, "track")
-        self.assertEqual(item_refs[0].uri, "dummy:a")
-        self.assertEqual(item_refs[0].name, "A")
+        assert len(item_refs) == 1
+        assert item_refs[0].type == "track"
+        assert item_refs[0].uri == "dummy:a"
+        assert item_refs[0].name == "A"
 
     def test_get_items_of_unknown_playlist_returns_none(self):
         item_refs = self.core.playlists.get_items("dummy:unknown")
 
-        self.assertIsNone(item_refs)
+        assert item_refs is None
 
     def test_get_items_from_file_outside_playlist_dir_returns_none(self):
         item_refs = self.core.playlists.get_items("m3u:///etc/passwd")
 
-        self.assertIsNone(item_refs)
+        assert item_refs is None
 
 
 class M3UPlaylistsProviderBaseDirectoryTest(M3UPlaylistsProviderTest):

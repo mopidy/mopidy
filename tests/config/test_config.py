@@ -8,86 +8,86 @@ from tests import path_to_data_dir
 
 class LoadConfigTest(unittest.TestCase):
     def test_load_nothing(self):
-        self.assertEqual({}, config._load([], [], []))
+        assert {} == config._load([], [], [])
 
     def test_load_missing_file(self):
         file0 = path_to_data_dir("file0.conf")
         result = config._load([file0], [], [])
-        self.assertEqual({}, result)
+        assert {} == result
 
     @mock.patch("os.access")
     def test_load_nonreadable_file(self, access_mock):
         access_mock.return_value = False
         file1 = path_to_data_dir("file1.conf")
         result = config._load([file1], [], [])
-        self.assertEqual({}, result)
+        assert {} == result
 
     def test_load_single_default(self):
         default = b"[foo]\nbar = baz"
         expected = {"foo": {"bar": "baz"}}
         result = config._load([], [default], [])
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_unicode_default(self):
         default = "[foo]\nbar = æøå"
         expected = {"foo": {"bar": "æøå"}}
         result = config._load([], [default], [])
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_load_defaults(self):
         default1 = b"[foo]\nbar = baz"
         default2 = b"[foo2]\n"
         expected = {"foo": {"bar": "baz"}, "foo2": {}}
         result = config._load([], [default1, default2], [])
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_load_single_override(self):
         override = ("foo", "bar", "baz")
         expected = {"foo": {"bar": "baz"}}
         result = config._load([], [], [override])
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_load_overrides(self):
         override1 = ("foo", "bar", "baz")
         override2 = ("foo2", "bar", "baz")
         expected = {"foo": {"bar": "baz"}, "foo2": {"bar": "baz"}}
         result = config._load([], [], [override1, override2])
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_load_single_file(self):
         file1 = path_to_data_dir("file1.conf")
         expected = {"foo": {"bar": "baz"}}
         result = config._load([file1], [], [])
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_load_files(self):
         file1 = path_to_data_dir("file1.conf")
         file2 = path_to_data_dir("file2.conf")
         expected = {"foo": {"bar": "baz"}, "foo2": {"bar": "baz"}}
         result = config._load([file1, file2], [], [])
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_load_directory(self):
         directory = path_to_data_dir("conf1.d")
         expected = {"foo": {"bar": "baz"}, "foo2": {"bar": "baz"}}
         result = config._load([directory], [], [])
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_load_directory_only_conf_files(self):
         directory = path_to_data_dir("conf2.d")
         expected = {"foo": {"bar": "baz"}}
         result = config._load([directory], [], [])
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_load_file_with_utf8(self):
         expected = {"foo": {"bar": "æøå"}}
         result = config._load([path_to_data_dir("file3.conf")], [], [])
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_load_file_with_error(self):
         expected = {"foo": {"bar": "baz"}}
         result = config._load([path_to_data_dir("file4.conf")], [], [])
-        self.assertEqual(expected, result)
+        assert expected == result
 
 
 class ValidateTest(unittest.TestCase):
@@ -97,33 +97,33 @@ class ValidateTest(unittest.TestCase):
 
     def test_empty_config_no_schemas(self):
         conf, errors = config._validate({}, [])
-        self.assertEqual({}, conf)
-        self.assertEqual({}, errors)
+        assert {} == conf
+        assert {} == errors
 
     def test_config_no_schemas(self):
         raw_config = {"foo": {"bar": "baz"}}
         conf, errors = config._validate(raw_config, [])
-        self.assertEqual({}, conf)
-        self.assertEqual({}, errors)
+        assert {} == conf
+        assert {} == errors
 
     def test_empty_config_single_schema(self):
         conf, errors = config._validate({}, [self.schema])
-        self.assertEqual({"foo": {"bar": None}}, conf)
-        self.assertEqual({"foo": {"bar": "config key not found."}}, errors)
+        assert {"foo": {"bar": None}} == conf
+        assert {"foo": {"bar": "config key not found."}} == errors
 
     def test_config_single_schema(self):
         raw_config = {"foo": {"bar": "baz"}}
         conf, errors = config._validate(raw_config, [self.schema])
-        self.assertEqual({"foo": {"bar": "baz"}}, conf)
-        self.assertEqual({}, errors)
+        assert {"foo": {"bar": "baz"}} == conf
+        assert {} == errors
 
     def test_config_single_schema_config_error(self):
         raw_config = {"foo": {"bar": "baz"}}
         self.schema["bar"] = mock.Mock()
         self.schema["bar"].deserialize.side_effect = ValueError("bad")
         conf, errors = config._validate(raw_config, [self.schema])
-        self.assertEqual({"foo": {"bar": None}}, conf)
-        self.assertEqual({"foo": {"bar": "bad"}}, errors)
+        assert {"foo": {"bar": None}} == conf
+        assert {"foo": {"bar": "bad"}} == errors
 
     # TODO: add more tests
 
@@ -161,68 +161,54 @@ class PreProcessorTest(unittest.TestCase):
 
     def test_empty_config(self):
         result = config._preprocess("")
-        self.assertEqual(result, "[__COMMENTS__]")
+        assert result == "[__COMMENTS__]"
 
     def test_plain_section(self):
         result = config._preprocess("[section]\nfoo = bar")
-        self.assertEqual(result, "[__COMMENTS__]\n" "[section]\n" "foo = bar")
+        assert result == "[__COMMENTS__]\n[section]\nfoo = bar"
 
     def test_initial_comments(self):
         result = config._preprocess("; foobar")
-        self.assertEqual(result, "[__COMMENTS__]\n" "__SEMICOLON0__ = foobar")
+        assert result == "[__COMMENTS__]\n__SEMICOLON0__ = foobar"
 
         result = config._preprocess("# foobar")
-        self.assertEqual(result, "[__COMMENTS__]\n" "__HASH0__ = foobar")
+        assert result == "[__COMMENTS__]\n__HASH0__ = foobar"
 
         result = config._preprocess("; foo\n# bar")
-        self.assertEqual(
-            result,
-            "[__COMMENTS__]\n" "__SEMICOLON0__ = foo\n" "__HASH1__ = bar",
-        )
+        assert result == "[__COMMENTS__]\n__SEMICOLON0__ = foo\n__HASH1__ = bar"
 
     def test_initial_comment_inline_handling(self):
         result = config._preprocess("; foo ; bar ; baz")
-        self.assertEqual(
-            result,
-            "[__COMMENTS__]\n"
-            "__SEMICOLON0__ = foo\n"
-            "__INLINE1__ = bar\n"
-            "__INLINE2__ = baz",
+        assert result == (
+            "[__COMMENTS__]\n__SEMICOLON0__ = foo\n"
+            "__INLINE1__ = bar\n__INLINE2__ = baz"
         )
 
     def test_inline_semicolon_comment(self):
         result = config._preprocess("[section]\nfoo = bar ; baz")
-        self.assertEqual(
-            result,
-            "[__COMMENTS__]\n" "[section]\n" "foo = bar\n" "__INLINE0__ = baz",
+        assert (
+            result == "[__COMMENTS__]\n[section]\nfoo = bar\n__INLINE0__ = baz"
         )
 
     def test_no_inline_hash_comment(self):
         result = config._preprocess("[section]\nfoo = bar # baz")
-        self.assertEqual(
-            result, "[__COMMENTS__]\n" "[section]\n" "foo = bar # baz"
-        )
+        assert result == "[__COMMENTS__]\n[section]\nfoo = bar # baz"
 
     def test_section_extra_text(self):
         result = config._preprocess("[section] foobar")
-        self.assertEqual(
-            result, "[__COMMENTS__]\n" "[section]\n" "__SECTION0__ = foobar"
-        )
+        assert result == "[__COMMENTS__]\n[section]\n__SECTION0__ = foobar"
 
     def test_section_extra_text_inline_semicolon(self):
         result = config._preprocess("[section] foobar ; baz")
-        self.assertEqual(
-            result,
-            "[__COMMENTS__]\n"
-            "[section]\n"
-            "__SECTION0__ = foobar\n"
-            "__INLINE1__ = baz",
+        assert (
+            result
+            == "[__COMMENTS__]\n[section]\n__SECTION0__ = foobar\n__INLINE1__ = baz"
         )
 
     def test_conversion(self):
         """Tests all of the above cases at once."""
         result = config._preprocess(INPUT_CONFIG)
-        self.assertEqual(result, PROCESSED_CONFIG)
+        assert result == PROCESSED_CONFIG
 
 
 class PostProcessorTest(unittest.TestCase):
@@ -230,27 +216,27 @@ class PostProcessorTest(unittest.TestCase):
 
     def test_empty_config(self):
         result = config._postprocess("[__COMMENTS__]")
-        self.assertEqual(result, "")
+        assert result == ""
 
     def test_plain_section(self):
         result = config._postprocess(
             "[__COMMENTS__]\n" "[section]\n" "foo = bar"
         )
-        self.assertEqual(result, "[section]\nfoo = bar")
+        assert result == "[section]\nfoo = bar"
 
     def test_initial_comments(self):
         result = config._postprocess(
             "[__COMMENTS__]\n" "__SEMICOLON0__ = foobar"
         )
-        self.assertEqual(result, "; foobar")
+        assert result == "; foobar"
 
         result = config._postprocess("[__COMMENTS__]\n" "__HASH0__ = foobar")
-        self.assertEqual(result, "# foobar")
+        assert result == "# foobar"
 
         result = config._postprocess(
             "[__COMMENTS__]\n" "__SEMICOLON0__ = foo\n" "__HASH1__ = bar"
         )
-        self.assertEqual(result, "; foo\n# bar")
+        assert result == "; foo\n# bar"
 
     def test_initial_comment_inline_handling(self):
         result = config._postprocess(
@@ -259,25 +245,23 @@ class PostProcessorTest(unittest.TestCase):
             "__INLINE1__ = bar\n"
             "__INLINE2__ = baz"
         )
-        self.assertEqual(result, "; foo ; bar ; baz")
+        assert result == "; foo ; bar ; baz"
 
     def test_inline_semicolon_comment(self):
         result = config._postprocess(
             "[__COMMENTS__]\n" "[section]\n" "foo = bar\n" "__INLINE0__ = baz"
         )
-        self.assertEqual(result, "[section]\nfoo = bar ; baz")
+        assert result == "[section]\nfoo = bar ; baz"
 
     def test_no_inline_hash_comment(self):
         result = config._preprocess("[section]\nfoo = bar # baz")
-        self.assertEqual(
-            result, "[__COMMENTS__]\n" "[section]\n" "foo = bar # baz"
-        )
+        assert result == "[__COMMENTS__]\n[section]\nfoo = bar # baz"
 
     def test_section_extra_text(self):
         result = config._postprocess(
             "[__COMMENTS__]\n" "[section]\n" "__SECTION0__ = foobar"
         )
-        self.assertEqual(result, "[section] foobar")
+        assert result == "[section] foobar"
 
     def test_section_extra_text_inline_semicolon(self):
         result = config._postprocess(
@@ -286,11 +270,11 @@ class PostProcessorTest(unittest.TestCase):
             "__SECTION0__ = foobar\n"
             "__INLINE1__ = baz"
         )
-        self.assertEqual(result, "[section] foobar ; baz")
+        assert result == "[section] foobar ; baz"
 
     def test_conversion(self):
         result = config._postprocess(PROCESSED_CONFIG)
-        self.assertEqual(result, INPUT_CONFIG)
+        assert result == INPUT_CONFIG
 
 
 def test_format_initial():

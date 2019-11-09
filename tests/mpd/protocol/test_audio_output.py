@@ -8,7 +8,7 @@ class AudioOutputHandlerTest(protocol.BaseTestCase):
         self.send_request('enableoutput "0"')
 
         self.assertInResponse("OK")
-        self.assertEqual(self.core.mixer.get_mute().get(), True)
+        assert self.core.mixer.get_mute().get() is True
 
     def test_enableoutput_unknown_outputid(self):
         self.send_request('enableoutput "7"')
@@ -21,7 +21,7 @@ class AudioOutputHandlerTest(protocol.BaseTestCase):
         self.send_request('disableoutput "0"')
 
         self.assertInResponse("OK")
-        self.assertEqual(self.core.mixer.get_mute().get(), False)
+        assert self.core.mixer.get_mute().get() is False
 
     def test_disableoutput_unknown_outputid(self):
         self.send_request('disableoutput "7"')
@@ -85,24 +85,24 @@ class AudioOutputHandlerNoneMixerTest(protocol.BaseTestCase):
     enable_mixer = False
 
     def test_enableoutput(self):
-        self.assertEqual(self.core.mixer.get_mute().get(), None)
+        assert self.core.mixer.get_mute().get() is None
 
         self.send_request('enableoutput "0"')
         self.assertInResponse(
             "ACK [52@0] {enableoutput} problems enabling output"
         )
 
-        self.assertEqual(self.core.mixer.get_mute().get(), None)
+        assert self.core.mixer.get_mute().get() is None
 
     def test_disableoutput(self):
-        self.assertEqual(self.core.mixer.get_mute().get(), None)
+        assert self.core.mixer.get_mute().get() is None
 
         self.send_request('disableoutput "0"')
         self.assertInResponse(
             "ACK [52@0] {disableoutput} problems disabling output"
         )
 
-        self.assertEqual(self.core.mixer.get_mute().get(), None)
+        assert self.core.mixer.get_mute().get() is None
 
     def test_outputs_when_unmuted(self):
         self.core.mixer.set_mute(False)

@@ -56,19 +56,19 @@ class PlaylistTest(BasePlaylistsTest):
     def test_as_list_combines_result_from_backends(self):
         result = self.core.playlists.as_list()
 
-        self.assertIn(self.plr1a, result)
-        self.assertIn(self.plr1b, result)
-        self.assertIn(self.plr2a, result)
-        self.assertIn(self.plr2b, result)
+        assert self.plr1a in result
+        assert self.plr1b in result
+        assert self.plr2a in result
+        assert self.plr2b in result
 
     def test_as_list_ignores_backends_that_dont_support_it(self):
         self.sp2.as_list.return_value.get.side_effect = NotImplementedError
 
         result = self.core.playlists.as_list()
 
-        self.assertEqual(len(result), 2)
-        self.assertIn(self.plr1a, result)
-        self.assertIn(self.plr1b, result)
+        assert len(result) == 2
+        assert self.plr1a in result
+        assert self.plr1b in result
 
     def test_get_items_selects_the_matching_backend(self):
         ref = Ref.track()
@@ -76,16 +76,16 @@ class PlaylistTest(BasePlaylistsTest):
 
         result = self.core.playlists.get_items("dummy2:pl:a")
 
-        self.assertEqual([ref], result)
-        self.assertFalse(self.sp1.get_items.called)
+        assert [ref] == result
+        assert not self.sp1.get_items.called
         self.sp2.get_items.assert_called_once_with("dummy2:pl:a")
 
     def test_get_items_with_unknown_uri_scheme_does_nothing(self):
         result = self.core.playlists.get_items("unknown:a")
 
-        self.assertIsNone(result)
-        self.assertFalse(self.sp1.delete.called)
-        self.assertFalse(self.sp2.delete.called)
+        assert result is None
+        assert not self.sp1.delete.called
+        assert not self.sp2.delete.called
 
     def test_create_without_uri_scheme_uses_first_backend(self):
         playlist = Playlist()
@@ -93,9 +93,9 @@ class PlaylistTest(BasePlaylistsTest):
 
         result = self.core.playlists.create("foo")
 
-        self.assertEqual(playlist, result)
+        assert playlist == result
         self.sp1.create.assert_called_once_with("foo")
-        self.assertFalse(self.sp2.create.called)
+        assert not self.sp2.create.called
 
     def test_create_without_uri_scheme_ignores_none_result(self):
         playlist = Playlist()
@@ -104,7 +104,7 @@ class PlaylistTest(BasePlaylistsTest):
 
         result = self.core.playlists.create("foo")
 
-        self.assertEqual(playlist, result)
+        assert playlist == result
         self.sp1.create.assert_called_once_with("foo")
         self.sp2.create.assert_called_once_with("foo")
 
@@ -115,7 +115,7 @@ class PlaylistTest(BasePlaylistsTest):
 
         result = self.core.playlists.create("foo")
 
-        self.assertEqual(playlist, result)
+        assert playlist == result
         self.sp1.create.assert_called_once_with("foo")
         self.sp2.create.assert_called_once_with("foo")
 
@@ -125,8 +125,8 @@ class PlaylistTest(BasePlaylistsTest):
 
         result = self.core.playlists.create("foo", uri_scheme="dummy2")
 
-        self.assertEqual(playlist, result)
-        self.assertFalse(self.sp1.create.called)
+        assert playlist == result
+        assert not self.sp1.create.called
         self.sp2.create.assert_called_once_with("foo")
 
     def test_create_with_unsupported_uri_scheme_uses_first_backend(self):
@@ -135,56 +135,56 @@ class PlaylistTest(BasePlaylistsTest):
 
         result = self.core.playlists.create("foo", uri_scheme="dummy3")
 
-        self.assertEqual(playlist, result)
+        assert playlist == result
         self.sp1.create.assert_called_once_with("foo")
-        self.assertFalse(self.sp2.create.called)
+        assert not self.sp2.create.called
 
     def test_delete_selects_the_dummy1_backend(self):
         success = self.core.playlists.delete("dummy1:a")
 
-        self.assertTrue(success)
+        assert success
         self.sp1.delete.assert_called_once_with("dummy1:a")
-        self.assertFalse(self.sp2.delete.called)
+        assert not self.sp2.delete.called
 
     def test_delete_selects_the_dummy2_backend(self):
         success = self.core.playlists.delete("dummy2:a")
 
-        self.assertTrue(success)
-        self.assertFalse(self.sp1.delete.called)
+        assert success
+        assert not self.sp1.delete.called
         self.sp2.delete.assert_called_once_with("dummy2:a")
 
     def test_delete_with_unknown_uri_scheme_does_nothing(self):
         success = self.core.playlists.delete("unknown:a")
 
-        self.assertFalse(success)
-        self.assertFalse(self.sp1.delete.called)
-        self.assertFalse(self.sp2.delete.called)
+        assert not success
+        assert not self.sp1.delete.called
+        assert not self.sp2.delete.called
 
     def test_delete_ignores_backend_without_playlist_support(self):
         success = self.core.playlists.delete("dummy3:a")
 
-        self.assertFalse(success)
-        self.assertFalse(self.sp1.delete.called)
-        self.assertFalse(self.sp2.delete.called)
+        assert not success
+        assert not self.sp1.delete.called
+        assert not self.sp2.delete.called
 
     def test_lookup_selects_the_dummy1_backend(self):
         self.core.playlists.lookup("dummy1:a")
 
         self.sp1.lookup.assert_called_once_with("dummy1:a")
-        self.assertFalse(self.sp2.lookup.called)
+        assert not self.sp2.lookup.called
 
     def test_lookup_selects_the_dummy2_backend(self):
         self.core.playlists.lookup("dummy2:a")
 
-        self.assertFalse(self.sp1.lookup.called)
+        assert not self.sp1.lookup.called
         self.sp2.lookup.assert_called_once_with("dummy2:a")
 
     def test_lookup_track_in_backend_without_playlists_fails(self):
         result = self.core.playlists.lookup("dummy3:a")
 
-        self.assertIsNone(result)
-        self.assertFalse(self.sp1.lookup.called)
-        self.assertFalse(self.sp2.lookup.called)
+        assert result is None
+        assert not self.sp1.lookup.called
+        assert not self.sp2.lookup.called
 
     def test_refresh_without_uri_scheme_refreshes_all_backends(self):
         self.core.playlists.refresh()
@@ -195,20 +195,20 @@ class PlaylistTest(BasePlaylistsTest):
     def test_refresh_with_uri_scheme_refreshes_matching_backend(self):
         self.core.playlists.refresh(uri_scheme="dummy2")
 
-        self.assertFalse(self.sp1.refresh.called)
+        assert not self.sp1.refresh.called
         self.sp2.refresh.assert_called_once_with()
 
     def test_refresh_with_unknown_uri_scheme_refreshes_nothing(self):
         self.core.playlists.refresh(uri_scheme="foobar")
 
-        self.assertFalse(self.sp1.refresh.called)
-        self.assertFalse(self.sp2.refresh.called)
+        assert not self.sp1.refresh.called
+        assert not self.sp2.refresh.called
 
     def test_refresh_ignores_backend_without_playlist_support(self):
         self.core.playlists.refresh(uri_scheme="dummy3")
 
-        self.assertFalse(self.sp1.refresh.called)
-        self.assertFalse(self.sp2.refresh.called)
+        assert not self.sp1.refresh.called
+        assert not self.sp2.refresh.called
 
     def test_save_selects_the_dummy1_backend(self):
         playlist = Playlist(uri="dummy1:a")
@@ -216,9 +216,9 @@ class PlaylistTest(BasePlaylistsTest):
 
         result = self.core.playlists.save(playlist)
 
-        self.assertEqual(playlist, result)
+        assert playlist == result
         self.sp1.save.assert_called_once_with(playlist)
-        self.assertFalse(self.sp2.save.called)
+        assert not self.sp2.save.called
 
     def test_save_selects_the_dummy2_backend(self):
         playlist = Playlist(uri="dummy2:a")
@@ -226,34 +226,34 @@ class PlaylistTest(BasePlaylistsTest):
 
         result = self.core.playlists.save(playlist)
 
-        self.assertEqual(playlist, result)
-        self.assertFalse(self.sp1.save.called)
+        assert playlist == result
+        assert not self.sp1.save.called
         self.sp2.save.assert_called_once_with(playlist)
 
     def test_save_does_nothing_if_playlist_uri_is_unset(self):
         result = self.core.playlists.save(Playlist())
 
-        self.assertIsNone(result)
-        self.assertFalse(self.sp1.save.called)
-        self.assertFalse(self.sp2.save.called)
+        assert result is None
+        assert not self.sp1.save.called
+        assert not self.sp2.save.called
 
     def test_save_does_nothing_if_playlist_uri_has_unknown_scheme(self):
         result = self.core.playlists.save(Playlist(uri="foobar:a"))
 
-        self.assertIsNone(result)
-        self.assertFalse(self.sp1.save.called)
-        self.assertFalse(self.sp2.save.called)
+        assert result is None
+        assert not self.sp1.save.called
+        assert not self.sp2.save.called
 
     def test_save_ignores_backend_without_playlist_support(self):
         result = self.core.playlists.save(Playlist(uri="dummy3:a"))
 
-        self.assertIsNone(result)
-        self.assertFalse(self.sp1.save.called)
-        self.assertFalse(self.sp2.save.called)
+        assert result is None
+        assert not self.sp1.save.called
+        assert not self.sp2.save.called
 
     def test_get_uri_schemes(self):
         result = self.core.playlists.get_uri_schemes()
-        self.assertEqual(result, ["dummy1", "dummy2"])
+        assert result == ["dummy1", "dummy2"]
 
 
 class MockBackendCorePlaylistsBase(unittest.TestCase):
@@ -272,17 +272,17 @@ class MockBackendCorePlaylistsBase(unittest.TestCase):
 class AsListBadBackendsTest(MockBackendCorePlaylistsBase):
     def test_backend_raises_exception(self, logger):
         self.playlists.as_list.return_value.get.side_effect = Exception
-        self.assertEqual([], self.core.playlists.as_list())
+        assert [] == self.core.playlists.as_list()
         logger.exception.assert_called_with(mock.ANY, "DummyBackend")
 
     def test_backend_returns_none(self, logger):
         self.playlists.as_list.return_value.get.return_value = None
-        self.assertEqual([], self.core.playlists.as_list())
-        self.assertFalse(logger.error.called)
+        assert [] == self.core.playlists.as_list()
+        assert not logger.error.called
 
     def test_backend_returns_wrong_type(self, logger):
         self.playlists.as_list.return_value.get.return_value = "abc"
-        self.assertEqual([], self.core.playlists.as_list())
+        assert [] == self.core.playlists.as_list()
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
 
@@ -290,17 +290,17 @@ class AsListBadBackendsTest(MockBackendCorePlaylistsBase):
 class GetItemsBadBackendsTest(MockBackendCorePlaylistsBase):
     def test_backend_raises_exception(self, logger):
         self.playlists.get_items.return_value.get.side_effect = Exception
-        self.assertIsNone(self.core.playlists.get_items("dummy:/1"))
+        assert self.core.playlists.get_items("dummy:/1") is None
         logger.exception.assert_called_with(mock.ANY, "DummyBackend")
 
     def test_backend_returns_none(self, logger):
         self.playlists.get_items.return_value.get.return_value = None
-        self.assertIsNone(self.core.playlists.get_items("dummy:/1"))
-        self.assertFalse(logger.error.called)
+        assert self.core.playlists.get_items("dummy:/1") is None
+        assert not logger.error.called
 
     def test_backend_returns_wrong_type(self, logger):
         self.playlists.get_items.return_value.get.return_value = "abc"
-        self.assertIsNone(self.core.playlists.get_items("dummy:/1"))
+        assert self.core.playlists.get_items("dummy:/1") is None
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
 
@@ -308,17 +308,17 @@ class GetItemsBadBackendsTest(MockBackendCorePlaylistsBase):
 class CreateBadBackendsTest(MockBackendCorePlaylistsBase):
     def test_backend_raises_exception(self, logger):
         self.playlists.create.return_value.get.side_effect = Exception
-        self.assertIsNone(self.core.playlists.create("foobar"))
+        assert self.core.playlists.create("foobar") is None
         logger.exception.assert_called_with(mock.ANY, "DummyBackend")
 
     def test_backend_returns_none(self, logger):
         self.playlists.create.return_value.get.return_value = None
-        self.assertIsNone(self.core.playlists.create("foobar"))
-        self.assertFalse(logger.error.called)
+        assert self.core.playlists.create("foobar") is None
+        assert not logger.error.called
 
     def test_backend_returns_wrong_type(self, logger):
         self.playlists.create.return_value.get.return_value = "abc"
-        self.assertIsNone(self.core.playlists.create("foobar"))
+        assert self.core.playlists.create("foobar") is None
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
 
@@ -326,7 +326,7 @@ class CreateBadBackendsTest(MockBackendCorePlaylistsBase):
 class DeleteBadBackendsTest(MockBackendCorePlaylistsBase):
     def test_backend_raises_exception(self, logger):
         self.playlists.delete.return_value.get.side_effect = Exception
-        self.assertFalse(self.core.playlists.delete("dummy:/1"))
+        assert not self.core.playlists.delete("dummy:/1")
         logger.exception.assert_called_with(mock.ANY, "DummyBackend")
 
 
@@ -334,17 +334,17 @@ class DeleteBadBackendsTest(MockBackendCorePlaylistsBase):
 class LookupBadBackendsTest(MockBackendCorePlaylistsBase):
     def test_backend_raises_exception(self, logger):
         self.playlists.lookup.return_value.get.side_effect = Exception
-        self.assertIsNone(self.core.playlists.lookup("dummy:/1"))
+        assert self.core.playlists.lookup("dummy:/1") is None
         logger.exception.assert_called_with(mock.ANY, "DummyBackend")
 
     def test_backend_returns_none(self, logger):
         self.playlists.lookup.return_value.get.return_value = None
-        self.assertIsNone(self.core.playlists.lookup("dummy:/1"))
-        self.assertFalse(logger.error.called)
+        assert self.core.playlists.lookup("dummy:/1") is None
+        assert not logger.error.called
 
     def test_backend_returns_wrong_type(self, logger):
         self.playlists.lookup.return_value.get.return_value = "abc"
-        self.assertIsNone(self.core.playlists.lookup("dummy:/1"))
+        assert self.core.playlists.lookup("dummy:/1") is None
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
 
@@ -354,14 +354,14 @@ class RefreshBadBackendsTest(MockBackendCorePlaylistsBase):
     def test_backend_raises_exception(self, send, logger):
         self.playlists.refresh.return_value.get.side_effect = Exception
         self.core.playlists.refresh()
-        self.assertFalse(send.called)
+        assert not send.called
         logger.exception.assert_called_with(mock.ANY, "DummyBackend")
 
     @mock.patch("mopidy.core.listener.CoreListener.send")
     def test_backend_raises_exception_called_with_uri(self, send, logger):
         self.playlists.refresh.return_value.get.side_effect = Exception
         self.core.playlists.refresh("dummy")
-        self.assertFalse(send.called)
+        assert not send.called
         logger.exception.assert_called_with(mock.ANY, "DummyBackend")
 
 
@@ -370,17 +370,17 @@ class SaveBadBackendsTest(MockBackendCorePlaylistsBase):
     def test_backend_raises_exception(self, logger):
         playlist = Playlist(uri="dummy:/1")
         self.playlists.save.return_value.get.side_effect = Exception
-        self.assertIsNone(self.core.playlists.save(playlist))
+        assert self.core.playlists.save(playlist) is None
         logger.exception.assert_called_with(mock.ANY, "DummyBackend")
 
     def test_backend_returns_none(self, logger):
         playlist = Playlist(uri="dummy:/1")
         self.playlists.save.return_value.get.return_value = None
-        self.assertIsNone(self.core.playlists.save(playlist))
-        self.assertFalse(logger.error.called)
+        assert self.core.playlists.save(playlist) is None
+        assert not logger.error.called
 
     def test_backend_returns_wrong_type(self, logger):
         playlist = Playlist(uri="dummy:/1")
         self.playlists.save.return_value.get.return_value = "abc"
-        self.assertIsNone(self.core.playlists.save(playlist))
+        assert self.core.playlists.save(playlist) is None
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)

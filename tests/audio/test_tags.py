@@ -137,7 +137,7 @@ class TagsToTrackTest(unittest.TestCase):
 
     def check(self, expected):
         actual = tags.convert_tags_to_track(self.tags)
-        self.assertEqual(expected, actual)
+        assert expected == actual
 
     def test_track(self):
         self.check(self.track)

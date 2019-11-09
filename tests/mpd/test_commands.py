@@ -5,16 +5,16 @@ from mopidy.mpd import exceptions, protocol
 
 class TestConverts(unittest.TestCase):
     def test_integer(self):
-        self.assertEqual(123, protocol.INT("123"))
-        self.assertEqual(-123, protocol.INT("-123"))
-        self.assertEqual(123, protocol.INT("+123"))
+        assert 123 == protocol.INT("123")
+        assert (-123) == protocol.INT("-123")
+        assert 123 == protocol.INT("+123")
         self.assertRaises(ValueError, protocol.INT, "3.14")
         self.assertRaises(ValueError, protocol.INT, "")
         self.assertRaises(ValueError, protocol.INT, "abc")
         self.assertRaises(ValueError, protocol.INT, "12 34")
 
     def test_unsigned_integer(self):
-        self.assertEqual(123, protocol.UINT("123"))
+        assert 123 == protocol.UINT("123")
         self.assertRaises(ValueError, protocol.UINT, "-123")
         self.assertRaises(ValueError, protocol.UINT, "+123")
         self.assertRaises(ValueError, protocol.UINT, "3.14")
@@ -23,8 +23,8 @@ class TestConverts(unittest.TestCase):
         self.assertRaises(ValueError, protocol.UINT, "12 34")
 
     def test_boolean(self):
-        self.assertEqual(True, protocol.BOOL("1"))
-        self.assertEqual(False, protocol.BOOL("0"))
+        assert protocol.BOOL("1") is True
+        assert protocol.BOOL("0") is False
         self.assertRaises(ValueError, protocol.BOOL, "3.14")
         self.assertRaises(ValueError, protocol.BOOL, "")
         self.assertRaises(ValueError, protocol.BOOL, "true")
@@ -33,10 +33,10 @@ class TestConverts(unittest.TestCase):
         self.assertRaises(ValueError, protocol.BOOL, "12 34")
 
     def test_range(self):
-        self.assertEqual(slice(1, 2), protocol.RANGE("1"))
-        self.assertEqual(slice(0, 1), protocol.RANGE("0"))
-        self.assertEqual(slice(0, None), protocol.RANGE("0:"))
-        self.assertEqual(slice(1, 3), protocol.RANGE("1:3"))
+        assert slice(1, 2) == protocol.RANGE("1")
+        assert slice(0, 1) == protocol.RANGE("0")
+        assert slice(0, None) == protocol.RANGE("0:")
+        assert slice(1, 3) == protocol.RANGE("1:3")
         self.assertRaises(ValueError, protocol.RANGE, "3.14")
         self.assertRaises(ValueError, protocol.RANGE, "1:abc")
         self.assertRaises(ValueError, protocol.RANGE, "abc:1")
@@ -70,18 +70,18 @@ class TestCommands(unittest.TestCase):
     def test_function_only_takes_context_succeeds(self):
         sentinel = object()
         self.commands.add("bar")(lambda context: sentinel)
-        self.assertEqual(sentinel, self.commands.call(["bar"]))
+        assert sentinel == self.commands.call(["bar"])
 
     def test_function_has_required_arg_succeeds(self):
         sentinel = object()
         self.commands.add("bar")(lambda context, required: sentinel)
-        self.assertEqual(sentinel, self.commands.call(["bar", "arg"]))
+        assert sentinel == self.commands.call(["bar", "arg"])
 
     def test_function_has_optional_args_succeeds(self):
         sentinel = object()
         self.commands.add("bar")(lambda context, optional=None: sentinel)
-        self.assertEqual(sentinel, self.commands.call(["bar"]))
-        self.assertEqual(sentinel, self.commands.call(["bar", "arg"]))
+        assert sentinel == self.commands.call(["bar"])
+        assert sentinel == self.commands.call(["bar", "arg"])
 
     def test_function_has_required_and_optional_args_succeeds(self):
         sentinel = object()
@@ -90,20 +90,20 @@ class TestCommands(unittest.TestCase):
             return sentinel
 
         self.commands.add("bar")(func)
-        self.assertEqual(sentinel, self.commands.call(["bar", "arg"]))
-        self.assertEqual(sentinel, self.commands.call(["bar", "arg", "arg"]))
+        assert sentinel == self.commands.call(["bar", "arg"])
+        assert sentinel == self.commands.call(["bar", "arg", "arg"])
 
     def test_function_has_varargs_succeeds(self):
         sentinel, args = object(), []
         self.commands.add("bar")(lambda context, *args: sentinel)
         for _ in range(10):
-            self.assertEqual(sentinel, self.commands.call(["bar"] + args))
+            assert sentinel == self.commands.call((["bar"] + args))
             args.append("test")
 
     def test_function_has_only_varags_succeeds(self):
         sentinel = object()
         self.commands.add("baz")(lambda *args: sentinel)
-        self.assertEqual(sentinel, self.commands.call(["baz"]))
+        assert sentinel == self.commands.call(["baz"])
 
     def test_function_has_no_arguments_fails(self):
         with self.assertRaises(TypeError):
@@ -135,9 +135,9 @@ class TestCommands(unittest.TestCase):
         self.commands.add("bar")(lambda context: sentinel2)
         self.commands.add("baz")(lambda context: sentinel3)
 
-        self.assertEqual(sentinel1, self.commands.call(["foo"]))
-        self.assertEqual(sentinel2, self.commands.call(["bar"]))
-        self.assertEqual(sentinel3, self.commands.call(["baz"]))
+        assert sentinel1 == self.commands.call(["foo"])
+        assert sentinel2 == self.commands.call(["bar"])
+        assert sentinel3 == self.commands.call(["baz"])
 
     def test_call_with_nonexistent_handler(self):
         with self.assertRaises(exceptions.MpdUnknownCommand):
@@ -146,9 +146,7 @@ class TestCommands(unittest.TestCase):
     def test_call_passes_context(self):
         sentinel = object()
         self.commands.add("foo")(lambda context: context)
-        self.assertEqual(
-            sentinel, self.commands.call(["foo"], context=sentinel)
-        )
+        assert sentinel == self.commands.call(["foo"], context=sentinel)
 
     def test_call_without_args_fails(self):
         with self.assertRaises(exceptions.MpdNoCommand):
@@ -156,23 +154,21 @@ class TestCommands(unittest.TestCase):
 
     def test_call_passes_required_argument(self):
         self.commands.add("foo")(lambda context, required: required)
-        self.assertEqual("test123", self.commands.call(["foo", "test123"]))
+        assert "test123" == self.commands.call(["foo", "test123"])
 
     def test_call_passes_optional_argument(self):
         sentinel = object()
         self.commands.add("foo")(lambda context, optional=sentinel: optional)
-        self.assertEqual(sentinel, self.commands.call(["foo"]))
-        self.assertEqual("test", self.commands.call(["foo", "test"]))
+        assert sentinel == self.commands.call(["foo"])
+        assert "test" == self.commands.call(["foo", "test"])
 
     def test_call_passes_required_and_optional_argument(self):
         def func(context, required, optional=None):
             return (required, optional)
 
         self.commands.add("foo")(func)
-        self.assertEqual(("arg", None), self.commands.call(["foo", "arg"]))
-        self.assertEqual(
-            ("arg", "kwarg"), self.commands.call(["foo", "arg", "kwarg"])
-        )
+        assert ("arg", None) == self.commands.call(["foo", "arg"])
+        assert ("arg", "kwarg") == self.commands.call(["foo", "arg", "kwarg"])
 
     def test_call_passes_varargs(self):
         self.commands.add("foo")(lambda context, *args: args)
@@ -197,7 +193,7 @@ class TestCommands(unittest.TestCase):
             return required
 
         self.commands.add("test", required=lambda v: sentinel)(func)
-        self.assertEqual(sentinel, self.commands.call(["test", "foo"]))
+        assert sentinel == self.commands.call(["test", "foo"])
 
     def test_validator_gets_applied_to_optional_arg(self):
         sentinel = object()
@@ -207,7 +203,7 @@ class TestCommands(unittest.TestCase):
 
         self.commands.add("foo", optional=lambda v: sentinel)(func)
 
-        self.assertEqual(sentinel, self.commands.call(["foo", "123"]))
+        assert sentinel == self.commands.call(["foo", "123"])
 
     def test_validator_skips_optional_default(self):
         sentinel = object()
@@ -217,7 +213,7 @@ class TestCommands(unittest.TestCase):
 
         self.commands.add("foo", optional=lambda v: None)(func)
 
-        self.assertEqual(sentinel, self.commands.call(["foo"]))
+        assert sentinel == self.commands.call(["foo"])
 
     def test_validator_applied_to_non_existent_arg_fails(self):
         self.commands.add("foo")(lambda context, arg: arg)
@@ -259,8 +255,8 @@ class TestCommands(unittest.TestCase):
         self.commands.add("foo")(func1)
         self.commands.add("bar", auth_required=False)(func2)
 
-        self.assertTrue(self.commands.handlers["foo"].auth_required)
-        self.assertFalse(self.commands.handlers["bar"].auth_required)
+        assert self.commands.handlers["foo"].auth_required
+        assert not self.commands.handlers["bar"].auth_required
 
     def test_list_command_gets_stored(self):
         def func1(context):
@@ -272,5 +268,5 @@ class TestCommands(unittest.TestCase):
         self.commands.add("foo")(func1)
         self.commands.add("bar", list_command=False)(func2)
 
-        self.assertTrue(self.commands.handlers["foo"].list_command)
-        self.assertFalse(self.commands.handlers["bar"].list_command)
+        assert self.commands.handlers["foo"].list_command
+        assert not self.commands.handlers["bar"].list_command

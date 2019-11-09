@@ -42,15 +42,15 @@ class BaseCoreLibraryTest(unittest.TestCase):
 # TODO: split by method
 class CoreLibraryTest(BaseCoreLibraryTest):
     def test_get_images_returns_empty_dict_for_no_uris(self):
-        self.assertEqual({}, self.core.library.get_images([]))
+        assert {} == self.core.library.get_images([])
 
     def test_get_images_returns_empty_result_for_unknown_uri(self):
         result = self.core.library.get_images(["dummy4:track"])
-        self.assertEqual({"dummy4:track": tuple()}, result)
+        assert {"dummy4:track": tuple()} == result
 
     def test_get_images_returns_empty_result_for_library_less_uri(self):
         result = self.core.library.get_images(["dummy3:track"])
-        self.assertEqual({"dummy3:track": tuple()}, result)
+        assert {"dummy3:track": tuple()} == result
 
     def test_get_images_maps_uri_to_backend(self):
         self.core.library.get_images(["dummy1:track"])
@@ -68,7 +68,7 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         }
 
         result = self.core.library.get_images(["dummy1:track"])
-        self.assertEqual({"dummy1:track": (Image(uri="uri"),)}, result)
+        assert {"dummy1:track": (Image(uri="uri"),)} == result
 
     def test_get_images_merges_results(self):
         self.library1.get_images.return_value.get.return_value = {
@@ -87,28 +87,25 @@ class CoreLibraryTest(BaseCoreLibraryTest):
             "dummy3:track": tuple(),
             "dummy4:track": tuple(),
         }
-        self.assertEqual(expected, result)
+        assert expected == result
 
     def test_browse_root_returns_dir_ref_for_each_lib_with_root_dir_name(self):
         result = self.core.library.browse(None)
 
-        self.assertEqual(
-            result,
-            [
-                Ref.directory(uri="dummy1:directory", name="dummy1"),
-                Ref.directory(uri="dummy2:directory", name="dummy2"),
-            ],
-        )
-        self.assertFalse(self.library1.browse.called)
-        self.assertFalse(self.library2.browse.called)
-        self.assertFalse(self.backend3.library.browse.called)
+        assert result == [
+            Ref.directory(uri="dummy1:directory", name="dummy1"),
+            Ref.directory(uri="dummy2:directory", name="dummy2"),
+        ]
+        assert not self.library1.browse.called
+        assert not self.library2.browse.called
+        assert not self.backend3.library.browse.called
 
     def test_browse_empty_string_returns_nothing(self):
         result = self.core.library.browse("")
 
-        self.assertEqual(result, [])
-        self.assertFalse(self.library1.browse.called)
-        self.assertFalse(self.library2.browse.called)
+        assert result == []
+        assert not self.library1.browse.called
+        assert not self.library2.browse.called
 
     def test_browse_dummy1_selects_dummy1_backend(self):
         self.library1.browse.return_value.get.return_value = [
@@ -118,8 +115,8 @@ class CoreLibraryTest(BaseCoreLibraryTest):
 
         self.core.library.browse("dummy1:directory:/foo")
 
-        self.assertEqual(self.library1.browse.call_count, 1)
-        self.assertEqual(self.library2.browse.call_count, 0)
+        assert self.library1.browse.call_count == 1
+        assert self.library2.browse.call_count == 0
         self.library1.browse.assert_called_with("dummy1:directory:/foo")
 
     def test_browse_dummy2_selects_dummy2_backend(self):
@@ -130,16 +127,16 @@ class CoreLibraryTest(BaseCoreLibraryTest):
 
         self.core.library.browse("dummy2:directory:/bar")
 
-        self.assertEqual(self.library1.browse.call_count, 0)
-        self.assertEqual(self.library2.browse.call_count, 1)
+        assert self.library1.browse.call_count == 0
+        assert self.library2.browse.call_count == 1
         self.library2.browse.assert_called_with("dummy2:directory:/bar")
 
     def test_browse_dummy3_returns_nothing(self):
         result = self.core.library.browse("dummy3:test")
 
-        self.assertEqual(result, [])
-        self.assertEqual(self.library1.browse.call_count, 0)
-        self.assertEqual(self.library2.browse.call_count, 0)
+        assert result == []
+        assert self.library1.browse.call_count == 0
+        assert self.library2.browse.call_count == 0
 
     def test_browse_dir_returns_subdirs_and_tracks(self):
         self.library1.browse.return_value.get.return_value = [
@@ -148,16 +145,13 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         ]
 
         result = self.core.library.browse("dummy1:directory:/foo")
-        self.assertEqual(
-            result,
-            [
-                Ref.directory(uri="dummy1:directory:/foo/bar", name="Bar"),
-                Ref.track(uri="dummy1:track:/foo/baz.mp3", name="Baz"),
-            ],
-        )
+        assert result == [
+            Ref.directory(uri="dummy1:directory:/foo/bar", name="Bar"),
+            Ref.track(uri="dummy1:track:/foo/baz.mp3", name="Baz"),
+        ]
 
     def test_lookup_returns_empty_dict_for_no_uris(self):
-        self.assertEqual({}, self.core.library.lookup(uris=[]))
+        assert {} == self.core.library.lookup(uris=[])
 
     def test_lookup_can_handle_uris(self):
         track1 = Track(uri="dummy1:a", name="abc")
@@ -167,14 +161,19 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         self.library2.lookup().get.return_value = [track2]
 
         result = self.core.library.lookup(uris=["dummy1:a", "dummy2:a"])
-        self.assertEqual(result, {"dummy2:a": [track2], "dummy1:a": [track1]})
+        assert result == {
+            "dummy2:a": [track2],
+            "dummy1:a": [track1],
+        }
 
     def test_lookup_uris_returns_empty_list_for_dummy3_track(self):
         result = self.core.library.lookup(uris=["dummy3:a"])
 
-        self.assertEqual(result, {"dummy3:a": []})
-        self.assertFalse(self.library1.lookup.called)
-        self.assertFalse(self.library2.lookup.called)
+        assert result == {
+            "dummy3:a": [],
+        }
+        assert not self.library1.lookup.called
+        assert not self.library2.lookup.called
 
     def test_lookup_ignores_tracks_without_uri_set(self):
         track1 = Track(uri="dummy1:a", name="abc")
@@ -183,25 +182,27 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         self.library1.lookup().get.return_value = [track1, track2]
 
         result = self.core.library.lookup(uris=["dummy1:a"])
-        self.assertEqual(result, {"dummy1:a": [track1]})
+        assert result == {
+            "dummy1:a": [track1],
+        }
 
     def test_refresh_with_uri_selects_dummy1_backend(self):
         self.core.library.refresh("dummy1:a")
 
         self.library1.refresh.assert_called_once_with("dummy1:a")
-        self.assertFalse(self.library2.refresh.called)
+        assert not self.library2.refresh.called
 
     def test_refresh_with_uri_selects_dummy2_backend(self):
         self.core.library.refresh("dummy2:a")
 
-        self.assertFalse(self.library1.refresh.called)
+        assert not self.library1.refresh.called
         self.library2.refresh.assert_called_once_with("dummy2:a")
 
     def test_refresh_with_uri_fails_silently_for_dummy3_uri(self):
         self.core.library.refresh("dummy3:a")
 
-        self.assertFalse(self.library1.refresh.called)
-        self.assertFalse(self.library2.refresh.called)
+        assert not self.library1.refresh.called
+        assert not self.library2.refresh.called
 
     def test_refresh_without_uri_calls_all_backends(self):
         self.core.library.refresh()
@@ -220,8 +221,8 @@ class CoreLibraryTest(BaseCoreLibraryTest):
 
         result = self.core.library.search({"any": ["a"]})
 
-        self.assertIn(result1, result)
-        self.assertIn(result2, result)
+        assert result1 in result
+        assert result2 in result
         self.library1.search.assert_called_once_with(
             query={"any": ["a"]}, uris=None, exact=False
         )
@@ -237,7 +238,7 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         self.library1.search.assert_called_once_with(
             query={"any": ["a"]}, uris=["dummy1:", "dummy1:foo"], exact=False
         )
-        self.assertFalse(self.library2.search.called)
+        assert not self.library2.search.called
 
     def test_search_with_uris_selects_both_backends(self):
         self.core.library.search(
@@ -260,8 +261,8 @@ class CoreLibraryTest(BaseCoreLibraryTest):
 
         result = self.core.library.search({"any": ["a"]})
 
-        self.assertIn(result1, result)
-        self.assertNotIn(None, result)
+        assert result1 in result
+        assert None not in result
         self.library1.search.assert_called_once_with(
             query={"any": ["a"]}, uris=None, exact=False
         )
@@ -280,8 +281,8 @@ class CoreLibraryTest(BaseCoreLibraryTest):
 
         result = self.core.library.search({"any": ["a"]})
 
-        self.assertIn(result1, result)
-        self.assertIn(result2, result)
+        assert result1 in result
+        assert result2 in result
         self.library1.search.assert_called_once_with(
             query={"any": ["a"]}, uris=None, exact=False
         )
@@ -342,27 +343,27 @@ class BrowseBadBackendTest(MockBackendCoreLibraryBase):
     def test_backend_raises_exception_for_root(self, logger):
         # Might happen if root_directory is a property for some weird reason.
         self.library.root_directory.get.side_effect = Exception
-        self.assertEqual([], self.core.library.browse(None))
+        assert [] == self.core.library.browse(None)
         logger.exception.assert_called_with(mock.ANY, "DummyBackend")
 
     def test_backend_returns_none_for_root(self, logger):
         self.library.root_directory.get.return_value = None
-        self.assertEqual([], self.core.library.browse(None))
+        assert [] == self.core.library.browse(None)
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
     def test_backend_returns_wrong_type_for_root(self, logger):
         self.library.root_directory.get.return_value = 123
-        self.assertEqual([], self.core.library.browse(None))
+        assert [] == self.core.library.browse(None)
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
     def test_backend_raises_exception_for_browse(self, logger):
         self.library.browse.return_value.get.side_effect = Exception
-        self.assertEqual([], self.core.library.browse("dummy:directory"))
+        assert [] == self.core.library.browse("dummy:directory")
         logger.exception.assert_called_with(mock.ANY, "DummyBackend")
 
     def test_backend_returns_wrong_type_for_browse(self, logger):
         self.library.browse.return_value.get.return_value = [123]
-        self.assertEqual([], self.core.library.browse("dummy:directory"))
+        assert [] == self.core.library.browse("dummy:directory")
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
 
@@ -370,22 +371,22 @@ class BrowseBadBackendTest(MockBackendCoreLibraryBase):
 class GetDistinctBadBackendTest(MockBackendCoreLibraryBase):
     def test_backend_raises_exception(self, logger):
         self.library.get_distinct.return_value.get.side_effect = Exception
-        self.assertEqual(set(), self.core.library.get_distinct("artist"))
+        assert set() == self.core.library.get_distinct("artist")
         logger.exception.assert_called_with(mock.ANY, "DummyBackend")
 
     def test_backend_returns_none(self, logger):
         self.library.get_distinct.return_value.get.return_value = None
-        self.assertEqual(set(), self.core.library.get_distinct("artist"))
-        self.assertFalse(logger.error.called)
+        assert set() == self.core.library.get_distinct("artist")
+        assert not logger.error.called
 
     def test_backend_returns_wrong_type(self, logger):
         self.library.get_distinct.return_value.get.return_value = "abc"
-        self.assertEqual(set(), self.core.library.get_distinct("artist"))
+        assert set() == self.core.library.get_distinct("artist")
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
     def test_backend_returns_iterable_containing_wrong_types(self, logger):
         self.library.get_distinct.return_value.get.return_value = [1, 2, 3]
-        self.assertEqual(set(), self.core.library.get_distinct("artist"))
+        assert set() == self.core.library.get_distinct("artist")
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
 
@@ -394,37 +395,37 @@ class GetImagesBadBackendTest(MockBackendCoreLibraryBase):
     def test_backend_raises_exception(self, logger):
         uri = "dummy:/1"
         self.library.get_images.return_value.get.side_effect = Exception
-        self.assertEqual({uri: tuple()}, self.core.library.get_images([uri]))
+        assert {uri: tuple()} == self.core.library.get_images([uri])
         logger.exception.assert_called_with(mock.ANY, "DummyBackend")
 
     def test_backend_returns_none(self, logger):
         uri = "dummy:/1"
         self.library.get_images.return_value.get.return_value = None
-        self.assertEqual({uri: tuple()}, self.core.library.get_images([uri]))
-        self.assertFalse(logger.error.called)
+        assert {uri: tuple()} == self.core.library.get_images([uri])
+        assert not logger.error.called
 
     def test_backend_returns_wrong_type(self, logger):
         uri = "dummy:/1"
         self.library.get_images.return_value.get.return_value = "abc"
-        self.assertEqual({uri: tuple()}, self.core.library.get_images([uri]))
+        assert {uri: tuple()} == self.core.library.get_images([uri])
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
     def test_backend_returns_mapping_containing_wrong_types(self, logger):
         uri = "dummy:/1"
         self.library.get_images.return_value.get.return_value = {uri: "abc"}
-        self.assertEqual({uri: tuple()}, self.core.library.get_images([uri]))
+        assert {uri: tuple()} == self.core.library.get_images([uri])
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
     def test_backend_returns_mapping_containing_none(self, logger):
         uri = "dummy:/1"
         self.library.get_images.return_value.get.return_value = {uri: None}
-        self.assertEqual({uri: tuple()}, self.core.library.get_images([uri]))
+        assert {uri: tuple()} == self.core.library.get_images([uri])
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
     def test_backend_returns_unknown_uri(self, logger):
         uri = "dummy:/1"
         self.library.get_images.return_value.get.return_value = {"foo": []}
-        self.assertEqual({uri: tuple()}, self.core.library.get_images([uri]))
+        assert {uri: tuple()} == self.core.library.get_images([uri])
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
 
@@ -433,25 +434,25 @@ class LookupByUrisBadBackendTest(MockBackendCoreLibraryBase):
     def test_backend_raises_exception(self, logger):
         uri = "dummy:/1"
         self.library.lookup.return_value.get.side_effect = Exception
-        self.assertEqual({uri: []}, self.core.library.lookup(uris=[uri]))
+        assert {uri: []} == self.core.library.lookup(uris=[uri])
         logger.exception.assert_called_with(mock.ANY, "DummyBackend")
 
     def test_backend_returns_none(self, logger):
         uri = "dummy:/1"
         self.library.lookup.return_value.get.return_value = None
-        self.assertEqual({uri: []}, self.core.library.lookup(uris=[uri]))
-        self.assertFalse(logger.error.called)
+        assert {uri: []} == self.core.library.lookup(uris=[uri])
+        assert not logger.error.called
 
     def test_backend_returns_wrong_type(self, logger):
         uri = "dummy:/1"
         self.library.lookup.return_value.get.return_value = "abc"
-        self.assertEqual({uri: []}, self.core.library.lookup(uris=[uri]))
+        assert {uri: []} == self.core.library.lookup(uris=[uri])
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
     def test_backend_returns_iterable_containing_wrong_types(self, logger):
         uri = "dummy:/1"
         self.library.lookup.return_value.get.return_value = [123]
-        self.assertEqual({uri: []}, self.core.library.lookup(uris=[uri]))
+        assert {uri: []} == self.core.library.lookup(uris=[uri])
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
 
@@ -472,7 +473,7 @@ class RefreshBadBackendTest(MockBackendCoreLibraryBase):
 class SearchBadBackendTest(MockBackendCoreLibraryBase):
     def test_backend_raises_exception(self, logger):
         self.library.search.return_value.get.side_effect = Exception
-        self.assertEqual([], self.core.library.search(query={"any": ["foo"]}))
+        assert [] == self.core.library.search(query={"any": ["foo"]})
         logger.exception.assert_called_with(mock.ANY, "DummyBackend")
 
     def test_backend_raises_lookuperror(self, logger):
@@ -484,10 +485,10 @@ class SearchBadBackendTest(MockBackendCoreLibraryBase):
 
     def test_backend_returns_none(self, logger):
         self.library.search.return_value.get.return_value = None
-        self.assertEqual([], self.core.library.search(query={"any": ["foo"]}))
-        self.assertFalse(logger.error.called)
+        assert [] == self.core.library.search(query={"any": ["foo"]})
+        assert not logger.error.called
 
     def test_backend_returns_wrong_type(self, logger):
         self.library.search.return_value.get.return_value = "abc"
-        self.assertEqual([], self.core.library.search(query={"any": ["foo"]}))
+        assert [] == self.core.library.search(query={"any": ["foo"]})
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
