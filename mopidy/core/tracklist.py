@@ -197,7 +197,9 @@ class TracklistController:
         """
 
         current_tl_track = self.core.playback.get_current_tl_track()
-        return getattr(self.eot_track(current_tl_track), "tlid", None)
+        with deprecation.ignore():
+            eot_track = self.eot_track(current_tl_track)
+        return getattr(eot_track, "tlid", None)
 
     def eot_track(self, tl_track):
         """
@@ -239,7 +241,9 @@ class TracklistController:
         .. versionadded:: 1.1
         """
         current_tl_track = self.core.playback.get_current_tl_track()
-        return getattr(self.next_track(current_tl_track), "tlid", None)
+        with deprecation.ignore():
+            next_track = self.next_track(current_tl_track)
+        return getattr(next_track, "tlid", None)
 
     def next_track(self, tl_track):
         """
@@ -305,7 +309,9 @@ class TracklistController:
         .. versionadded:: 1.1
         """
         current_tl_track = self.core.playback.get_current_tl_track()
-        return getattr(self.previous_track(current_tl_track), "tlid", None)
+        with deprecation.ignore():
+            previous_track = self.previous_track(current_tl_track)
+        return getattr(previous_track, "tlid", None)
 
     def previous_track(self, tl_track):
         """
