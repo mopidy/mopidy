@@ -7,7 +7,7 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/../"))
 
-from mopidy.internal.versioning import get_version  # isort:skip
+from mopidy.internal.versioning import get_version  # isort:skip  # noqa
 
 
 # -- Workarounds to have autodoc generate API docs ----------------------------
