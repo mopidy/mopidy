@@ -169,7 +169,11 @@ def create_initial_config_file(args, extensions_data):
 
     try:
         default = config_lib.format_initial(extensions_data)
-        path.get_or_create_file(config_file, mkdir=False, content=default)
+        path.get_or_create_file(
+            config_file,
+            mkdir=False,
+            content=default.encode(errors="surrogateescape"),
+        )
         logger.info("Initialized %s with default config", config_file)
     except OSError as error:
         logger.warning(
