@@ -64,13 +64,13 @@ To get started with Mopidy, check out
     :alt: CircleCI build status
 
 .. image:: https://img.shields.io/readthedocs/mopidy.svg
-   :target: https://docs.mopidy.com/
-   :alt: Read the Docs build status
+    :target: https://docs.mopidy.com/
+    :alt: Read the Docs build status
 
 .. image:: https://img.shields.io/codecov/c/github/mopidy/mopidy/develop.svg
-   :target: https://codecov.io/gh/mopidy/mopidy
-   :alt: Test coverage
+    :target: https://codecov.io/gh/mopidy/mopidy
+    :alt: Test coverage
 
 .. image:: https://img.shields.io/badge/chat-on%20zulip-brightgreen
-   :target: https://mopidy.zulipchat.com/
-   :alt: Chat on Zulip
+    :target: https://mopidy.zulipchat.com/
+    :alt: Chat on Zulip
