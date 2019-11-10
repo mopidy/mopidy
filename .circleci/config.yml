@@ -22,7 +22,7 @@ jobs:
       - checkout
       - restore_cache:
           name: Restoring tox cache
-          key: tox-v1-{{ .Environment.CIRCLE_JOB }}-{{ checksum "setup.py" }}
+          key: tox-v1-{{ .Environment.CIRCLE_JOB }}-{{ checksum "setup.cfg" }}
       - run:
           name: Run tests
           command: |
@@ -31,7 +31,7 @@ jobs:
               --cov-report=xml
       - save_cache:
           name: Saving tox cache
-          key: tox-v1-{{ .Environment.CIRCLE_JOB }}-{{ checksum "setup.py" }}
+          key: tox-v1-{{ .Environment.CIRCLE_JOB }}-{{ checksum "setup.cfg" }}
           paths:
             - ./.tox
             - ~/.cache/pip
