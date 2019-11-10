@@ -97,8 +97,7 @@ _INITIAL_HELP = """
 
 def read(config_file):
     """Helper to load config defaults in same way across core and extensions"""
-    with open(str(config_file), "rb") as filehandle:
-        return filehandle.read()
+    return pathlib.Path(config_file).read_text(errors="surrogateescape")
 
 
 def load(files, ext_schemas, ext_defaults, overrides):
@@ -139,7 +138,7 @@ def format_initial(extensions_data):
     header = _INITIAL_HELP.strip().format(versions="\n#   ".join(versions))
     formatted_config = _format(
         config=config, comments={}, schemas=schemas, display=False, disable=True
-    ).decode()
+    )
     return header + "\n\n" + formatted_config
 
 
@@ -256,7 +255,7 @@ def _format(config, comments, schemas, display, disable):
             if disable:
                 output[-1] = re.sub(r"^", "#", output[-1], flags=re.M)
         output.append("")
-    return "\n".join(output).strip().encode()
+    return "\n".join(output).strip()
 
 
 def _preprocess(config_string):
