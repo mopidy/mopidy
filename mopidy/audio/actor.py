@@ -60,8 +60,8 @@ class _Appsrc:
         Should be called whenever we get a new appsrc.
         """
         source.set_property("caps", self._caps)
-        source.set_property("format", b"time")
-        source.set_property("stream-type", b"seekable")
+        source.set_property("format", "time")
+        source.set_property("stream-type", "seekable")
         source.set_property("max-bytes", 1 << 20)  # 1MB
         source.set_property("min-percent", 50)
 
