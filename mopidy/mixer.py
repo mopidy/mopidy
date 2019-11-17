@@ -1,14 +1,11 @@
-from __future__ import absolute_import, unicode_literals
-
 import logging
 
 from mopidy import listener
 
-
 logger = logging.getLogger(__name__)
 
 
-class Mixer(object):
+class Mixer:
 
     """
     Audio mixer API
@@ -73,8 +70,8 @@ class Mixer(object):
         either because of a call to :meth:`set_volume` or because of any
         external entity changing the volume.
         """
-        logger.debug('Mixer event: volume_changed(volume=%d)', volume)
-        MixerListener.send('volume_changed', volume=volume)
+        logger.debug("Mixer event: volume_changed(volume=%d)", volume)
+        MixerListener.send("volume_changed", volume=volume)
 
     def get_mute(self):
         """
@@ -107,8 +104,8 @@ class Mixer(object):
         changed, either because of a call to :meth:`set_mute` or because of
         any external entity changing the mute state.
         """
-        logger.debug('Mixer event: mute_changed(mute=%s)', mute)
-        MixerListener.send('mute_changed', mute=mute)
+        logger.debug("Mixer event: mute_changed(mute=%s)", mute)
+        MixerListener.send("mute_changed", mute=mute)
 
     def ping(self):
         """Called to check if the actor is still alive."""

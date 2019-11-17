@@ -1,13 +1,21 @@
-from __future__ import absolute_import, unicode_literals
-
 from mopidy.models import fields
 from mopidy.models.immutable import ImmutableObject, ValidatedImmutableObject
 from mopidy.models.serialize import ModelJSONEncoder, model_json_decoder
 
 __all__ = [
-    'ImmutableObject', 'Ref', 'Image', 'Artist', 'Album', 'Track', 'TlTrack',
-    'Playlist', 'SearchResult', 'model_json_decoder', 'ModelJSONEncoder',
-    'ValidatedImmutableObject']
+    "ImmutableObject",
+    "Ref",
+    "Image",
+    "Artist",
+    "Album",
+    "Track",
+    "TlTrack",
+    "Playlist",
+    "SearchResult",
+    "model_json_decoder",
+    "ModelJSONEncoder",
+    "ValidatedImmutableObject",
+]
 
 
 class Ref(ValidatedImmutableObject):
@@ -37,48 +45,48 @@ class Ref(ValidatedImmutableObject):
     # type = fields.Field(choices=(ALBUM, ARTIST, DIRECTORY, PLAYLIST, TRACK))
 
     #: Constant used for comparison with the :attr:`type` field.
-    ALBUM = 'album'
+    ALBUM = "album"
 
     #: Constant used for comparison with the :attr:`type` field.
-    ARTIST = 'artist'
+    ARTIST = "artist"
 
     #: Constant used for comparison with the :attr:`type` field.
-    DIRECTORY = 'directory'
+    DIRECTORY = "directory"
 
     #: Constant used for comparison with the :attr:`type` field.
-    PLAYLIST = 'playlist'
+    PLAYLIST = "playlist"
 
     #: Constant used for comparison with the :attr:`type` field.
-    TRACK = 'track'
+    TRACK = "track"
 
     @classmethod
     def album(cls, **kwargs):
         """Create a :class:`Ref` with ``type`` :attr:`ALBUM`."""
-        kwargs['type'] = Ref.ALBUM
+        kwargs["type"] = Ref.ALBUM
         return cls(**kwargs)
 
     @classmethod
     def artist(cls, **kwargs):
         """Create a :class:`Ref` with ``type`` :attr:`ARTIST`."""
-        kwargs['type'] = Ref.ARTIST
+        kwargs["type"] = Ref.ARTIST
         return cls(**kwargs)
 
     @classmethod
     def directory(cls, **kwargs):
         """Create a :class:`Ref` with ``type`` :attr:`DIRECTORY`."""
-        kwargs['type'] = Ref.DIRECTORY
+        kwargs["type"] = Ref.DIRECTORY
         return cls(**kwargs)
 
     @classmethod
     def playlist(cls, **kwargs):
         """Create a :class:`Ref` with ``type`` :attr:`PLAYLIST`."""
-        kwargs['type'] = Ref.PLAYLIST
+        kwargs["type"] = Ref.PLAYLIST
         return cls(**kwargs)
 
     @classmethod
     def track(cls, **kwargs):
         """Create a :class:`Ref` with ``type`` :attr:`TRACK`."""
-        kwargs['type'] = Ref.TRACK
+        kwargs["type"] = Ref.TRACK
         return cls(**kwargs)
 
 
@@ -281,10 +289,10 @@ class TlTrack(ValidatedImmutableObject):
 
     def __init__(self, *args, **kwargs):
         if len(args) == 2 and len(kwargs) == 0:
-            kwargs['tlid'] = args[0]
-            kwargs['track'] = args[1]
+            kwargs["tlid"] = args[0]
+            kwargs["track"] = args[1]
             args = []
-        super(TlTrack, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def __iter__(self):
         return iter([self.tlid, self.track])

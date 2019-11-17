@@ -10,20 +10,18 @@ implement our own MPD server which is compatible with the numerous existing
 `MPD clients <https://mpd.fandom.com/wiki/Clients>`_.
 """
 
-from __future__ import absolute_import, unicode_literals
-
 import inspect
 
 from mopidy.mpd import exceptions
 
 #: The MPD protocol uses UTF-8 for encoding all data.
-ENCODING = 'UTF-8'
+ENCODING = "UTF-8"
 
 #: The MPD protocol uses ``\n`` as line terminator.
-LINE_TERMINATOR = '\n'
+LINE_TERMINATOR = b"\n"
 
 #: The MPD protocol version is 0.19.0.
-VERSION = '0.19.0'
+VERSION = "0.19.0"
 
 
 def load_protocol_modules():
@@ -32,15 +30,25 @@ def load_protocol_modules():
     :attr:`commands`.
     """
     from . import (  # noqa
-        audio_output, channels, command_list, connection, current_playlist,
-        mount, music_db, playback, reflection, status, stickers,
-        stored_playlists)
+        audio_output,
+        channels,
+        command_list,
+        connection,
+        current_playlist,
+        mount,
+        music_db,
+        playback,
+        reflection,
+        status,
+        stickers,
+        stored_playlists,
+    )
 
 
 def INT(value):  # noqa: N802
-    r"""Converts a value that matches [+-]?\d+ into and integer."""
+    r"""Converts a value that matches [+-]?\d+ into an integer."""
     if value is None:
-        raise ValueError('None is not a valid integer')
+        raise ValueError("None is not a valid integer")
     # TODO: check for whitespace via value != value.strip()?
     return int(value)
 
@@ -48,17 +56,34 @@ def INT(value):  # noqa: N802
 def UINT(value):  # noqa: N802
     r"""Converts a value that matches \d+ into an integer."""
     if value is None:
-        raise ValueError('None is not a valid integer')
+        raise ValueError("None is not a valid integer")
     if not value.isdigit():
-        raise ValueError('Only positive numbers are allowed')
+        raise ValueError("Only positive numbers are allowed")
     return int(value)
+
+
+def FLOAT(value):  # noqa: N802
+    r"""Converts a value that matches [+-]\d+(.\d+)? into a float."""
+    if value is None:
+        raise ValueError("None is not a valid float")
+    return float(value)
+
+
+def UFLOAT(value):  # noqa: N802
+    r"""Converts a value that matches \d+(.\d+)? into a float."""
+    if value is None:
+        raise ValueError("None is not a valid float")
+    value = float(value)
+    if value < 0:
+        raise ValueError("Only positive numbers are allowed")
+    return value
 
 
 def BOOL(value):  # noqa: N802
     """Convert the values 0 and 1 into booleans."""
-    if value in ('1', '0'):
+    if value in ("1", "0"):
         return bool(int(value))
-    raise ValueError('%r is not 0 or 1' % value)
+    raise ValueError(f"{value!r} is not 0 or 1")
 
 
 def RANGE(value):  # noqa: N802
@@ -68,13 +93,13 @@ def RANGE(value):  # noqa: N802
     ``n:`` should become ``slice(n, None)``
     ``n:m`` should become ``slice(n, m)`` and ``m > n`` must hold
     """
-    if ':' in value:
-        start, stop = value.split(':', 1)
+    if ":" in value:
+        start, stop = value.split(":", 1)
         start = UINT(start)
         if stop.strip():
             stop = UINT(stop)
             if start >= stop:
-                raise ValueError('End must be larger than start')
+                raise ValueError("End must be larger than start")
         else:
             stop = None
     else:
@@ -83,7 +108,7 @@ def RANGE(value):  # noqa: N802
     return slice(start, stop)
 
 
-class Commands(object):
+class Commands:
 
     """Collection of MPD commands to expose to users.
 
@@ -119,33 +144,39 @@ class Commands(object):
 
         def wrapper(func):
             if name in self.handlers:
-                raise ValueError('%s already registered' % name)
+                raise ValueError(f"{name} already registered")
 
-            args, varargs, keywords, defaults = inspect.getargspec(func)
-            defaults = dict(zip(args[-len(defaults or []):], defaults or []))
+            spec = inspect.getfullargspec(func)
+            defaults = dict(
+                zip(spec.args[-len(spec.defaults or []) :], spec.defaults or [])
+            )
 
-            if not args and not varargs:
-                raise TypeError('Handler must accept at least one argument.')
+            if not spec.args and not spec.varargs:
+                raise TypeError("Handler must accept at least one argument.")
 
-            if len(args) > 1 and varargs:
+            if len(spec.args) > 1 and spec.varargs:
                 raise TypeError(
-                    '*args may not be combined with regular arguments')
+                    "*args may not be combined with regular arguments"
+                )
 
-            if not set(validators.keys()).issubset(args):
-                raise TypeError('Validator for non-existent arg passed')
+            if not set(validators.keys()).issubset(spec.args):
+                raise TypeError("Validator for non-existent arg passed")
 
-            if keywords:
-                raise TypeError('**kwargs are not permitted')
+            if spec.varkw or spec.kwonlyargs:
+                raise TypeError("Keyword arguments are not permitted")
 
             def validate(*args, **kwargs):
-                if varargs:
+                if spec.varargs:
                     return func(*args, **kwargs)
 
                 try:
-                    callargs = inspect.getcallargs(func, *args, **kwargs)
+                    ba = inspect.signature(func).bind(*args, **kwargs)
+                    ba.apply_defaults()
+                    callargs = ba.arguments
                 except TypeError:
                     raise exceptions.MpdArgError(
-                        'wrong number of arguments for "%s"' % name)
+                        f'wrong number of arguments for "{name}"'
+                    )
 
                 for key, value in callargs.items():
                     default = defaults.get(key, object())
@@ -153,7 +184,7 @@ class Commands(object):
                         try:
                             callargs[key] = validators[key](value)
                         except ValueError:
-                            raise exceptions.MpdArgError('incorrect arguments')
+                            raise exceptions.MpdArgError("incorrect arguments")
 
                 return func(**callargs)
 
@@ -161,6 +192,7 @@ class Commands(object):
             validate.list_command = list_command
             self.handlers[name] = validate
             return func
+
         return wrapper
 
     def call(self, tokens, context=None):
