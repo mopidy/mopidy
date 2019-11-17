@@ -323,7 +323,7 @@ class HttpServerWithWsgiAppTest(tornado.testing.AsyncHTTPTestCase):
                 "hostname": "127.0.0.1",
                 "port": 6680,
                 "zeroconf": "",
-                "default_webclient":"wsgi"
+                "default_webclient": "wsgi"
             }
         }
         core = mock.Mock()
