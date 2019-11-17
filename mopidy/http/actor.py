@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import threading
+from pathlib import Path
 
 import pykka
 import tornado.httpserver
@@ -191,11 +192,11 @@ class HttpServer(threading.Thread):
         ]
 
     def _get_cookie_secret(self):
-        data_path = os.path.join(
-            Extension.get_data_dir(self.config), b"data.json.gz"
+        data_path = Path(
+            os.path.join(Extension.get_data_dir(self.config), "data.json.gz")
         )
 
-        if not os.path.isfile(data_path):
+        if not data_path.is_file():
             # TODO Py3: Move to secrets
             cookie_secret = binascii.hexlify(os.urandom(32))
             storage.dump(data_path, {"cookie_secret": cookie_secret})
