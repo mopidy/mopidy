@@ -186,7 +186,7 @@ class HttpServer(threading.Thread):
             (
                 r"/",
                 tornado.web.RedirectHandler,
-                {"url": "/mopidy/", "permanent": False,},
+                {"url": "/mopidy/", "permanent": False},
             )
         ]
 
