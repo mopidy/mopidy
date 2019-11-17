@@ -1,14 +1,12 @@
-from __future__ import absolute_import, unicode_literals
-
 import collections
 import contextlib
 import logging
 import operator
+import urllib
+from collections.abc import Mapping
 
-from mopidy import compat, exceptions, models
-from mopidy.compat import urllib
+from mopidy import exceptions, models
 from mopidy.internal import validation
-
 
 logger = logging.getLogger(__name__)
 
@@ -18,16 +16,21 @@ def _backend_error_handling(backend, reraise=None):
     try:
         yield
     except exceptions.ValidationError as e:
-        logger.error('%s backend returned bad data: %s',
-                     backend.actor_ref.actor_class.__name__, e)
+        logger.error(
+            "%s backend returned bad data: %s",
+            backend.actor_ref.actor_class.__name__,
+            e,
+        )
     except Exception as e:
         if reraise and isinstance(e, reraise):
             raise
-        logger.exception('%s backend caused an exception.',
-                         backend.actor_ref.actor_class.__name__)
+        logger.exception(
+            "%s backend caused an exception.",
+            backend.actor_ref.actor_class.__name__,
+        )
 
 
-class LibraryController(object):
+class LibraryController:
     pykka_traversable = True
 
     def __init__(self, backends, core):
@@ -47,7 +50,8 @@ class LibraryController(object):
                     backends_to_uris[backend].append(uri)
         else:
             backends_to_uris = {
-                b: None for b in self.backends.with_library.values()}
+                b: None for b in self.backends.with_library.values()
+            }
         return backends_to_uris
 
     def browse(self, uri):
@@ -99,7 +103,7 @@ class LibraryController(object):
                 root = future.get()
                 validation.check_instance(root, models.Ref)
                 directories.add(root)
-        return sorted(directories, key=operator.attrgetter('name'))
+        return sorted(directories, key=operator.attrgetter("name"))
 
     def _browse(self, uri):
         scheme = urllib.parse.urlparse(uri).scheme
@@ -135,13 +139,15 @@ class LibraryController(object):
         query is None or validation.check_query(query)  # TODO: normalize?
 
         result = set()
-        futures = {b: b.library.get_distinct(field, query)
-                   for b in self.backends.with_library.values()}
+        futures = {
+            b: b.library.get_distinct(field, query)
+            for b in self.backends.with_library.values()
+        }
         for backend, future in futures.items():
             with _backend_error_handling(backend):
                 values = future.get()
                 if values is not None:
-                    validation.check_instances(values, compat.text_type)
+                    validation.check_instances(values, str)
                     result.update(values)
         return result
 
@@ -165,19 +171,23 @@ class LibraryController(object):
 
         futures = {
             backend: backend.library.get_images(backend_uris)
-            for (backend, backend_uris)
-            in self._get_backends_to_uris(uris).items() if backend_uris}
+            for (backend, backend_uris) in self._get_backends_to_uris(
+                uris
+            ).items()
+            if backend_uris
+        }
 
         results = {uri: tuple() for uri in uris}
         for backend, future in futures.items():
             with _backend_error_handling(backend):
                 if future.get() is None:
                     continue
-                validation.check_instance(future.get(), collections.Mapping)
+                validation.check_instance(future.get(), Mapping)
                 for uri, images in future.get().items():
                     if uri not in uris:
                         raise exceptions.ValidationError(
-                            'Got unknown image URI: %s' % uri)
+                            f"Got unknown image URI: {uri}"
+                        )
                     validation.check_instances(images, models.Image)
                     results[uri] += tuple(images)
         return results
@@ -293,7 +303,8 @@ class LibraryController(object):
         futures = {}
         for backend, backend_uris in self._get_backends_to_uris(uris).items():
             futures[backend] = backend.library.search(
-                query=query, uris=backend_uris, exact=exact)
+                query=query, uris=backend_uris, exact=exact
+            )
 
         # Some of our tests check for LookupError to catch bad queries. This is
         # silly and should be replaced with query validation before passing it
@@ -312,7 +323,9 @@ class LibraryController(object):
                 backend_name = backend.actor_ref.actor_class.__name__
                 logger.warning(
                     '%s does not implement library.search() with "exact" '
-                    'support. Please upgrade it.', backend_name)
+                    "support. Please upgrade it.",
+                    backend_name,
+                )
 
         return results
 
@@ -321,17 +334,20 @@ def _normalize_query(query):
     broken_client = False
     # TODO: this breaks if query is not a dictionary like object...
     for (field, values) in query.items():
-        if isinstance(values, compat.string_types):
+        if isinstance(values, str):
             broken_client = True
             query[field] = [values]
     if broken_client:
         logger.warning(
-            'A client or frontend made a broken library search. Values in '
-            'queries must be lists of strings, not a string. Please check what'
-            ' sent this query and file a bug. Query: %s', query)
+            "A client or frontend made a broken library search. Values in "
+            "queries must be lists of strings, not a string. Please check what"
+            " sent this query and file a bug. Query: %s",
+            query,
+        )
     if not query:
         logger.warning(
-            'A client or frontend made a library search with an empty query. '
-            'This is strongly discouraged. Please check what sent this query '
-            'and file a bug.')
+            "A client or frontend made a library search with an empty query. "
+            "This is strongly discouraged. Please check what sent this query "
+            "and file a bug."
+        )
     return query

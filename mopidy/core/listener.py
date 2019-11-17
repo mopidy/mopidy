@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 from mopidy import listener
 
 
@@ -32,7 +30,7 @@ class CoreListener(listener.Listener):
         :param kwargs: any other arguments to the specific event handlers
         """
         # Just delegate to parent, entry mostly for docs.
-        super(CoreListener, self).on_event(event, **kwargs)
+        super().on_event(event, **kwargs)
 
     def track_playback_paused(self, tl_track, time_position):
         """

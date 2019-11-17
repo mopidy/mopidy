@@ -1,8 +1,5 @@
-from __future__ import unicode_literals
-
 import logging
-
-from mock import Mock, sentinel
+from unittest.mock import Mock, sentinel
 
 from mopidy.internal import network
 from mopidy.mpd import dispatcher, session
@@ -14,7 +11,7 @@ def test_on_start_logged(caplog):
 
     session.MpdSession(connection).on_start()
 
-    assert 'New MPD connection from %s' % connection in caplog.text
+    assert f"New MPD connection from {connection}" in caplog.text
 
 
 def test_on_line_received_logged(caplog):
@@ -26,5 +23,5 @@ def test_on_line_received_logged(caplog):
 
     mpd_session.on_line_received(sentinel.line)
 
-    assert 'Request from %s: %s' % (connection, sentinel.line) in caplog.text
-    assert 'Response to %s:' % (connection,) in caplog.text
+    assert f"Request from {connection}: {sentinel.line}" in caplog.text
+    assert f"Response to {connection}:" in caplog.text

@@ -58,11 +58,11 @@ Most of us use the `virtualenvwrapper
 virtualenvs, so that's what we'll be using for the examples here. First,
 install and setup virtualenvwrapper as described in their docs.
 
-To create a virtualenv named ``mopidy`` which uses Python 2.7, allows access to
+To create a virtualenv named ``mopidy`` which uses Python 3.7, allows access to
 system-wide packages like GStreamer, and uses the Mopidy workspace directory as
 the "project path", run::
 
-    mkvirtualenv -a ~/mopidy-dev --python `which python2.7` \
+    mkvirtualenv -a ~/mopidy-dev --python $(which python3.7) \
       --system-site-packages mopidy
 
 Now, each time you open a terminal and want to activate the ``mopidy``
@@ -93,23 +93,6 @@ confirm that you're on the right branch, run::
     git branch
 
 
-Install development tools
--------------------------
-
-We use a number of Python development tools. The :file:`dev-requirements.txt`
-file has comments describing what we use each dependency for, so we might just
-as well include the file verbatim here:
-
-.. literalinclude:: ../dev-requirements.txt
-
-Install them all into the active virtualenv by running `pip
-<https://pip.pypa.io/>`_::
-
-    pip install --upgrade -r dev-requirements.txt
-
-To upgrade the tools in the future, just rerun the exact same command.
-
-
 Install Mopidy from the Git repo
 --------------------------------
 
@@ -122,7 +105,7 @@ extension against the latest Mopidy changes.
 Assuming you're still inside the Git repo, use pip to install Mopidy from the
 Git repo in an "editable" form::
 
-    pip install --editable .
+    pip install --upgrade --editable .
 
 This will not copy the source code into the virtualenv's ``site-packages``
 directory, but instead create a link there pointing to the Git repo. Using
@@ -203,6 +186,23 @@ tool::
    cdproject
 
 
+Install development tools
+-------------------------
+
+Before continuing, you will probably want to install the development tools we
+use as well. These can be installed into the active virtualenv by running::
+
+    pip install --upgrade --editable ".[dev]"
+
+Note that this is the same command as you used to install Mopidy from the Git
+repo, with the addition of the ``[dev]`` suffix after ``.``. This makes pip
+install the "dev" set of extra dependencies. Exactly what the "dev" set
+includes are defined in ``setup.py``.
+
+To upgrade the development tools in the future, just rerun the exact same
+command.
+
+
 .. _running-from-git:
 
 Running Mopidy from Git
@@ -259,7 +259,7 @@ lints the source code for issues and a ``docs`` environment that tests that the
 documentation can be built. You can also limit tox to just test specific
 environments using the ``-e`` option, e.g. to run just unit tests::
 
-    tox -e py27
+    tox -e py37
 
 To learn more, see the `tox documentation <https://tox.readthedocs.io/>`_ .
 
@@ -267,7 +267,7 @@ To learn more, see the `tox documentation <https://tox.readthedocs.io/>`_ .
 Running unit tests
 ------------------
 
-Under the hood, ``tox -e py27`` will use `pytest <https://docs.pytest.org/>`_
+Under the hood, ``tox -e py37`` will use `pytest <https://docs.pytest.org/>`_
 as the test runner. We can also use it directly to run all tests::
 
     pytest

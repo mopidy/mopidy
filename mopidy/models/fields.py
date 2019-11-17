@@ -1,9 +1,7 @@
-from __future__ import absolute_import, unicode_literals
-
-from mopidy import compat
+import sys
 
 
-class Field(object):
+class Field:
 
     """
     Base field for use in
@@ -33,17 +31,19 @@ class Field(object):
     def validate(self, value):
         """Validate and possibly modify the field value before assignment"""
         if self._type and not isinstance(value, self._type):
-            raise TypeError('Expected %s to be a %s, not %r' %
-                            (self._name, self._type, value))
+            raise TypeError(
+                f"Expected {self._name} to be a {self._type}, not {value!r}"
+            )
         if self._choices and value not in self._choices:
-            raise TypeError('Expected %s to be a one of %s, not %r' %
-                            (self._name, self._choices, value))
+            raise TypeError(
+                f"Expected {self._name} to be a one of {self._choices}, not {value!r}"
+            )
         return value
 
     def __get__(self, instance, owner):
         if not instance:
             return self
-        return getattr(instance, '_' + self._name, self._default)
+        return getattr(instance, "_" + self._name, self._default)
 
     def __set__(self, instance, value):
         if value is not None:
@@ -52,11 +52,11 @@ class Field(object):
         if value is None or value == self._default:
             self.__delete__(instance)
         else:
-            setattr(instance, '_' + self._name, value)
+            setattr(instance, "_" + self._name, value)
 
     def __delete__(self, instance):
-        if hasattr(instance, '_' + self._name):
-            delattr(instance, '_' + self._name)
+        if hasattr(instance, "_" + self._name):
+            delattr(instance, "_" + self._name)
 
 
 class String(Field):
@@ -71,7 +71,7 @@ class String(Field):
         # TODO: normalize to unicode?
         # TODO: only allow unicode?
         # TODO: disallow empty strings?
-        super(String, self).__init__(type=compat.string_types, default=default)
+        super().__init__(type=str, default=default)
 
 
 class Date(String):
@@ -83,6 +83,7 @@ class Date(String):
 
     :param default: default value for field
     """
+
     pass  # TODO: make this check for YYYY-MM-DD, YYYY-MM, YYYY using strptime.
 
 
@@ -94,11 +95,12 @@ class Identifier(String):
 
     :param default: default value for field
     """
+
     def validate(self, value):
-        value = super(Identifier, self).validate(value)
-        if isinstance(value, compat.text_type):
-            value = value.encode('utf-8')
-        return compat.intern(value)
+        value = super().validate(value)
+        if isinstance(value, bytes):
+            value = value.decode()
+        return sys.intern(value)
 
 
 class URI(Identifier):
@@ -109,6 +111,7 @@ class URI(Identifier):
 
     :param default: default value for field
     """
+
     pass  # TODO: validate URIs?
 
 
@@ -124,17 +127,18 @@ class Integer(Field):
     def __init__(self, default=None, min=None, max=None):
         self._min = min
         self._max = max
-        super(Integer, self).__init__(
-            type=compat.integer_types, default=default)
+        super().__init__(type=int, default=default)
 
     def validate(self, value):
-        value = super(Integer, self).validate(value)
+        value = super().validate(value)
         if self._min is not None and value < self._min:
-            raise ValueError('Expected %s to be at least %d, not %d' %
-                             (self._name, self._min, value))
+            raise ValueError(
+                f"Expected {self._name} to be at least {self._min}, not {value:d}"
+            )
         if self._max is not None and value > self._max:
-            raise ValueError('Expected %s to be at most %d, not %d' %
-                             (self._name, self._max, value))
+            raise ValueError(
+                f"Expected {self._name} to be at most {self._max}, not {value:d}"
+            )
         return value
 
 
@@ -146,7 +150,7 @@ class Boolean(Field):
     """
 
     def __init__(self, default=None):
-        super(Boolean, self).__init__(type=bool, default=default)
+        super().__init__(type=bool, default=default)
 
 
 class Collection(Field):
@@ -158,14 +162,18 @@ class Collection(Field):
     """
 
     def __init__(self, type, container=tuple):
-        super(Collection, self).__init__(type=type, default=container())
+        super().__init__(type=type, default=container())
 
     def validate(self, value):
-        if isinstance(value, compat.string_types):
-            raise TypeError('Expected %s to be a collection of %s, not %r'
-                            % (self._name, self._type.__name__, value))
+        if isinstance(value, str):
+            raise TypeError(
+                f"Expected {self._name} to be a collection of "
+                f"{self._type.__name__}, not {value!r}"
+            )
         for v in value:
             if not isinstance(v, self._type):
-                raise TypeError('Expected %s to be a collection of %s, not %r'
-                                % (self._name, self._type.__name__, value))
+                raise TypeError(
+                    f"Expected {self._name} to be a collection of "
+                    f"{self._type.__name__}, not {value!r}"
+                )
         return self._default.__class__(value) or None

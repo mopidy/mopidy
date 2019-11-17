@@ -1,9 +1,6 @@
-from __future__ import absolute_import, unicode_literals
-
-import mock
+from unittest import mock
 
 import pykka
-
 import pytest
 
 from mopidy import backend, core
@@ -15,9 +12,8 @@ from tests import dummy_audio, dummy_backend
 
 
 class MyTestPlaybackProvider(backend.PlaybackProvider):
-
     def __init__(self, audio, backend):
-        super(MyTestPlaybackProvider, self).__init__(audio, backend)
+        super().__init__(audio, backend)
         self._call_limit = 10
         self._call_count = 0
         self._call_onetime = False
@@ -33,11 +29,11 @@ class MyTestPlaybackProvider(backend.PlaybackProvider):
         self._call_count += 1
         if self._call_count > self._call_limit:
             # return any url (not 'None') to stop the endless loop
-            return 'assert: call limit reached'
-        if 'limit_never' in uri:
+            return "assert: call limit reached"
+        if "limit_never" in uri:
             # unplayable
             return None
-        elif 'limit_one' in uri:
+        elif "limit_one" in uri:
             # one time playable
             if self._call_onetime:
                 return None
@@ -45,11 +41,11 @@ class MyTestPlaybackProvider(backend.PlaybackProvider):
         return uri
 
     def translate_uri(self, uri):
-        if 'error' in uri:
+        if "error" in uri:
             raise Exception(uri)
-        elif 'unplayable' in uri:
+        elif "unplayable" in uri:
             return None
-        elif 'limit' in uri:
+        elif "limit" in uri:
             return self._translate_uri_call_limit(uri)
         else:
             return uri
@@ -57,33 +53,38 @@ class MyTestPlaybackProvider(backend.PlaybackProvider):
 
 class MyTestBackend(dummy_backend.DummyBackend):
     def __init__(self, config, audio):
-        super(MyTestBackend, self).__init__(config, audio)
+        super().__init__(config, audio)
         self.playback = MyTestPlaybackProvider(audio=audio, backend=self)
 
 
-class BaseTest(object):
-    config = {'core': {'max_tracklist_length': 10000}}
-    tracks = [Track(uri='dummy:a', length=1234),
-              Track(uri='dummy:b', length=1234),
-              Track(uri='dummy:c', length=1234)]
+class BaseTest:
+    config = {"core": {"max_tracklist_length": 10000}}
+    tracks = [
+        Track(uri="dummy:a", length=1234, name="foo"),
+        Track(uri="dummy:b", length=1234),
+        Track(uri="dummy:c", length=1234),
+    ]
 
     def setup_method(self, method):
         self.audio = dummy_audio.create_proxy(config=self.config, mixer=None)
         self.backend = MyTestBackend.start(
-            audio=self.audio, config=self.config).proxy()
+            audio=self.audio, config=self.config
+        ).proxy()
         self.core = core.Core(
-            audio=self.audio, backends=[self.backend], config=self.config)
+            audio=self.audio, backends=[self.backend], config=self.config
+        )
         self.playback = self.core.playback
 
         # We don't have a core actor running, so call about to finish directly.
         self.audio.set_about_to_finish_callback(
-            self.playback._on_about_to_finish)
+            self.playback._on_about_to_finish
+        )
 
-        with deprecation.ignore('core.tracklist.add:tracks_arg'):
+        with deprecation.ignore():
             self.core.tracklist.add(self.tracks)
 
         self.events = []
-        self.patcher = mock.patch('mopidy.audio.listener.AudioListener.send')
+        self.patcher = mock.patch("mopidy.audio.listener.AudioListener.send")
         self.send_mock = self.patcher.start()
 
         def send(event, **kwargs):
@@ -110,7 +111,6 @@ class BaseTest(object):
 
 
 class TestPlayHandling(BaseTest):
-
     def test_get_current_tl_track_play(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -175,7 +175,6 @@ class TestPlayHandling(BaseTest):
 
 
 class TestNextHandling(BaseTest):
-
     def test_get_current_tl_track_next(self):
         self.core.playback.play()
         self.replay_events()
@@ -207,14 +206,17 @@ class TestNextHandling(BaseTest):
         assert current_track == self.tracks[1]
 
     @pytest.mark.parametrize(
-        'repeat, random, single, consume, index, result', [
+        "repeat, random, single, consume, index, result",
+        [
             (False, False, False, False, 0, 1),
             (False, False, False, False, 2, None),
             (True, False, False, False, 0, 1),
             (True, False, False, False, 2, 0),
-        ])
+        ],
+    )
     def test_next_all_modes(
-            self, repeat, random, single, consume, index, result):
+        self, repeat, random, single, consume, index, result
+    ):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
         self.core.playback.play(tl_tracks[index])
@@ -231,7 +233,8 @@ class TestNextHandling(BaseTest):
             assert self.core.playback.get_current_tl_track() is None
         else:
             assert (
-                self.core.playback.get_current_tl_track() == tl_tracks[result])
+                self.core.playback.get_current_tl_track() == tl_tracks[result]
+            )
 
     def test_next_keeps_finished_track_in_tracklist(self):
         tl_track = self.core.tracklist.get_tl_tracks()[0]
@@ -257,8 +260,9 @@ class TestNextHandling(BaseTest):
 
     def test_next_skips_over_change_track_error(self):
         # Trigger an exception in translate_uri.
-        track = Track(uri='dummy:error', length=1234)
-        self.core.tracklist.add(tracks=[track], at_position=1)
+        track = Track(uri="dummy:error", length=1234)
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=[track], at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -272,8 +276,9 @@ class TestNextHandling(BaseTest):
 
     def test_next_skips_over_change_track_unplayable(self):
         # Make translate_uri return None.
-        track = Track(uri='dummy:unplayable', length=1234)
-        self.core.tracklist.add(tracks=[track], at_position=1)
+        track = Track(uri="dummy:unplayable", length=1234)
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=[track], at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -287,7 +292,6 @@ class TestNextHandling(BaseTest):
 
 
 class TestPreviousHandling(BaseTest):
-
     def test_get_current_tl_track_prev(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -307,14 +311,17 @@ class TestPreviousHandling(BaseTest):
         assert self.core.playback.get_current_track() == self.tracks[0]
 
     @pytest.mark.parametrize(
-        'repeat, random, single, consume, index, result', [
+        "repeat, random, single, consume, index, result",
+        [
             (False, False, False, False, 0, None),
             (False, False, False, False, 1, 0),
             (True, False, False, False, 0, 0),  # FIXME: #1694
             (True, False, False, False, 1, 1),  # FIXME: #1694
-        ])
+        ],
+    )
     def test_previous_all_modes(
-            self, repeat, random, single, consume, index, result):
+        self, repeat, random, single, consume, index, result
+    ):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
         self.core.playback.play(tl_tracks[index])
@@ -330,7 +337,8 @@ class TestPreviousHandling(BaseTest):
             assert self.core.playback.get_current_tl_track() is None
         else:
             assert (
-                self.core.playback.get_current_tl_track() == tl_tracks[result])
+                self.core.playback.get_current_tl_track() == tl_tracks[result]
+            )
 
     def test_previous_keeps_finished_track_in_tracklist(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -366,8 +374,9 @@ class TestPreviousHandling(BaseTest):
 
     def test_previous_skips_over_change_track_error(self):
         # Trigger an exception in translate_uri.
-        track = Track(uri='dummy:error', length=1234)
-        self.core.tracklist.add(tracks=[track], at_position=1)
+        track = Track(uri="dummy:error", length=1234)
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=[track], at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -381,8 +390,9 @@ class TestPreviousHandling(BaseTest):
 
     def test_previous_skips_over_change_track_unplayable(self):
         # Makes translate_uri return None.
-        track = Track(uri='dummy:unplayable', length=1234)
-        self.core.tracklist.add(tracks=[track], at_position=1)
+        track = Track(uri="dummy:unplayable", length=1234)
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=[track], at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -396,7 +406,6 @@ class TestPreviousHandling(BaseTest):
 
 
 class TestOnAboutToFinish(BaseTest):
-
     def test_on_about_to_finish_keeps_finished_track_in_tracklist(self):
         tl_track = self.core.tracklist.get_tl_tracks()[0]
 
@@ -407,8 +416,9 @@ class TestOnAboutToFinish(BaseTest):
 
     def test_on_about_to_finish_skips_over_change_track_error(self):
         # Trigger an exception in translate_uri.
-        track = Track(uri='dummy:error', length=1234)
-        self.core.tracklist.add(tracks=[track], at_position=1)
+        track = Track(uri="dummy:error", length=1234)
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=[track], at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -421,8 +431,9 @@ class TestOnAboutToFinish(BaseTest):
 
     def test_on_about_to_finish_skips_over_change_track_unplayable(self):
         # Makes translate_uri return None.
-        track = Track(uri='dummy:unplayable', length=1234)
-        self.core.tracklist.add(tracks=[track], at_position=1)
+        track = Track(uri="dummy:unplayable", length=1234)
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=[track], at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -435,7 +446,6 @@ class TestOnAboutToFinish(BaseTest):
 
 
 class TestConsumeHandling(BaseTest):
-
     def test_next_in_consume_mode_removes_finished_track(self):
         tl_track = self.core.tracklist.get_tl_tracks()[0]
 
@@ -476,18 +486,17 @@ class TestConsumeHandling(BaseTest):
         self.core.tracklist.set_repeat(True)
         self.replay_events()
 
-        for track in self.core.tracklist.get_tl_tracks():
+        for _tl_track in self.core.tracklist.get_tl_tracks():
             self.core.playback.next()
             self.replay_events()
 
         self.core.playback.next()
         self.replay_events()
 
-        assert self.playback.get_state() == 'stopped'
+        assert self.playback.get_state() == "stopped"
 
 
 class TestCurrentAndPendingTlTrack(BaseTest):
-
     def test_get_current_tl_track_none(self):
         assert self.core.playback.get_current_tl_track() is None
 
@@ -503,8 +512,8 @@ class TestCurrentAndPendingTlTrack(BaseTest):
         self.core.playback.play()
         self.replay_events()
 
-        self.trigger_about_to_finish(replay_until='stream_changed')
-        assert self.playback._pending_tl_track.track.uri == 'dummy:b'
+        self.trigger_about_to_finish(replay_until="stream_changed")
+        assert self.playback._pending_tl_track.track.uri == "dummy:b"
 
     def test_pending_tl_track_after_stream_changed(self):
         self.trigger_about_to_finish()
@@ -513,14 +522,14 @@ class TestCurrentAndPendingTlTrack(BaseTest):
     def test_current_tl_track_after_about_to_finish(self):
         self.core.playback.play()
         self.replay_events()
-        self.trigger_about_to_finish(replay_until='stream_changed')
-        assert self.playback.get_current_track().uri == 'dummy:a'
+        self.trigger_about_to_finish(replay_until="stream_changed")
+        assert self.playback.get_current_track().uri == "dummy:a"
 
     def test_current_tl_track_after_stream_changed(self):
         self.core.playback.play()
         self.replay_events()
         self.trigger_about_to_finish()
-        assert self.playback.get_current_track().uri == 'dummy:b'
+        assert self.playback.get_current_track().uri == "dummy:b"
 
     def test_current_tl_track_after_end_of_stream(self):
         self.core.playback.play()
@@ -532,7 +541,8 @@ class TestCurrentAndPendingTlTrack(BaseTest):
 
 
 @mock.patch(
-    'mopidy.core.playback.listener.CoreListener', spec=core.CoreListener)
+    "mopidy.core.playback.listener.CoreListener", spec=core.CoreListener
+)
 class EventEmissionTest(BaseTest):
 
     maxDiff = None  # noqa: N815
@@ -545,10 +555,11 @@ class EventEmissionTest(BaseTest):
 
         assert listener_mock.send.mock_calls == [
             mock.call(
-                'playback_state_changed',
-                old_state='stopped', new_state='playing'),
-            mock.call(
-                'track_playback_started', tl_track=tl_tracks[0]),
+                "playback_state_changed",
+                old_state="stopped",
+                new_state="playing",
+            ),
+            mock.call("track_playback_started", tl_track=tl_tracks[0]),
         ]
 
     def test_play_when_paused_emits_events(self, listener_mock):
@@ -566,13 +577,16 @@ class EventEmissionTest(BaseTest):
 
         assert listener_mock.send.mock_calls == [
             mock.call(
-                'track_playback_ended',
-                tl_track=tl_tracks[0], time_position=mock.ANY),
+                "track_playback_ended",
+                tl_track=tl_tracks[0],
+                time_position=mock.ANY,
+            ),
             mock.call(
-                'playback_state_changed',
-                old_state='paused', new_state='playing'),
-            mock.call(
-                'track_playback_started', tl_track=tl_tracks[1]),
+                "playback_state_changed",
+                old_state="paused",
+                new_state="playing",
+            ),
+            mock.call("track_playback_started", tl_track=tl_tracks[1]),
         ]
 
     def test_play_when_playing_emits_events(self, listener_mock):
@@ -587,13 +601,16 @@ class EventEmissionTest(BaseTest):
 
         assert listener_mock.send.mock_calls == [
             mock.call(
-                'track_playback_ended',
-                tl_track=tl_tracks[0], time_position=mock.ANY),
+                "track_playback_ended",
+                tl_track=tl_tracks[0],
+                time_position=mock.ANY,
+            ),
             mock.call(
-                'playback_state_changed', old_state='playing',
-                new_state='playing'),
-            mock.call(
-                'track_playback_started', tl_track=tl_tracks[2]),
+                "playback_state_changed",
+                old_state="playing",
+                new_state="playing",
+            ),
+            mock.call("track_playback_started", tl_track=tl_tracks[2]),
         ]
 
     def test_pause_emits_events(self, listener_mock):
@@ -609,11 +626,15 @@ class EventEmissionTest(BaseTest):
 
         assert listener_mock.send.mock_calls == [
             mock.call(
-                'playback_state_changed',
-                old_state='playing', new_state='paused'),
+                "playback_state_changed",
+                old_state="playing",
+                new_state="paused",
+            ),
             mock.call(
-                'track_playback_paused',
-                tl_track=tl_tracks[0], time_position=1000),
+                "track_playback_paused",
+                tl_track=tl_tracks[0],
+                time_position=1000,
+            ),
         ]
 
     def test_resume_emits_events(self, listener_mock):
@@ -630,11 +651,15 @@ class EventEmissionTest(BaseTest):
 
         assert listener_mock.send.mock_calls == [
             mock.call(
-                'playback_state_changed',
-                old_state='paused', new_state='playing'),
+                "playback_state_changed",
+                old_state="paused",
+                new_state="playing",
+            ),
             mock.call(
-                'track_playback_resumed',
-                tl_track=tl_tracks[0], time_position=1000),
+                "track_playback_resumed",
+                tl_track=tl_tracks[0],
+                time_position=1000,
+            ),
         ]
 
     def test_stop_emits_events(self, listener_mock):
@@ -651,11 +676,15 @@ class EventEmissionTest(BaseTest):
 
         assert listener_mock.send.mock_calls == [
             mock.call(
-                'playback_state_changed',
-                old_state='playing', new_state='stopped'),
+                "playback_state_changed",
+                old_state="playing",
+                new_state="stopped",
+            ),
             mock.call(
-                'track_playback_ended',
-                tl_track=tl_tracks[0], time_position=1000),
+                "track_playback_ended",
+                tl_track=tl_tracks[0],
+                time_position=1000,
+            ),
         ]
 
     def test_next_emits_events(self, listener_mock):
@@ -672,18 +701,21 @@ class EventEmissionTest(BaseTest):
 
         assert listener_mock.send.mock_calls == [
             mock.call(
-                'track_playback_ended',
-                tl_track=tl_tracks[0], time_position=mock.ANY),
+                "track_playback_ended",
+                tl_track=tl_tracks[0],
+                time_position=mock.ANY,
+            ),
             mock.call(
-                'playback_state_changed',
-                old_state='playing', new_state='playing'),
-            mock.call(
-                'track_playback_started', tl_track=tl_tracks[1]),
+                "playback_state_changed",
+                old_state="playing",
+                new_state="playing",
+            ),
+            mock.call("track_playback_started", tl_track=tl_tracks[1]),
         ]
 
     def test_next_emits_events_when_consume_mode_is_enabled(
-            self,
-            listener_mock):
+        self, listener_mock
+    ):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
         self.core.tracklist.set_consume(True)
@@ -697,16 +729,18 @@ class EventEmissionTest(BaseTest):
         self.replay_events()
 
         assert listener_mock.send.mock_calls == [
+            mock.call("tracklist_changed"),
             mock.call(
-                'tracklist_changed'),
+                "track_playback_ended",
+                tl_track=tl_tracks[0],
+                time_position=mock.ANY,
+            ),
             mock.call(
-                'track_playback_ended',
-                tl_track=tl_tracks[0], time_position=mock.ANY),
-            mock.call(
-                'playback_state_changed',
-                old_state='playing', new_state='playing'),
-            mock.call(
-                'track_playback_started', tl_track=tl_tracks[1]),
+                "playback_state_changed",
+                old_state="playing",
+                new_state="playing",
+            ),
+            mock.call("track_playback_started", tl_track=tl_tracks[1]),
         ]
 
     def test_gapless_track_change_emits_events(self, listener_mock):
@@ -720,13 +754,16 @@ class EventEmissionTest(BaseTest):
 
         assert listener_mock.send.mock_calls == [
             mock.call(
-                'track_playback_ended',
-                tl_track=tl_tracks[0], time_position=mock.ANY),
+                "track_playback_ended",
+                tl_track=tl_tracks[0],
+                time_position=mock.ANY,
+            ),
             mock.call(
-                'playback_state_changed',
-                old_state='playing', new_state='playing'),
-            mock.call(
-                'track_playback_started', tl_track=tl_tracks[1]),
+                "playback_state_changed",
+                old_state="playing",
+                new_state="playing",
+            ),
+            mock.call("track_playback_started", tl_track=tl_tracks[1]),
         ]
 
     def test_seek_emits_seeked_event(self, listener_mock):
@@ -739,8 +776,7 @@ class EventEmissionTest(BaseTest):
         self.core.playback.seek(1000)
         self.replay_events()
 
-        listener_mock.send.assert_called_once_with(
-            'seeked', time_position=1000)
+        listener_mock.send.assert_called_once_with("seeked", time_position=1000)
 
     def test_seek_past_end_of_track_emits_events(self, listener_mock):
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -754,20 +790,23 @@ class EventEmissionTest(BaseTest):
 
         assert listener_mock.send.mock_calls == [
             mock.call(
-                'track_playback_ended',
-                tl_track=tl_tracks[0], time_position=mock.ANY),
+                "track_playback_ended",
+                tl_track=tl_tracks[0],
+                time_position=mock.ANY,
+            ),
             mock.call(
-                'playback_state_changed',
-                old_state='playing', new_state='playing'),
-            mock.call(
-                'track_playback_started', tl_track=tl_tracks[1]),
+                "playback_state_changed",
+                old_state="playing",
+                new_state="playing",
+            ),
+            mock.call("track_playback_started", tl_track=tl_tracks[1]),
         ]
 
     def test_seek_race_condition_emits_events(self, listener_mock):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
         self.core.playback.play(tl_tracks[0])
-        self.trigger_about_to_finish(replay_until='stream_changed')
+        self.trigger_about_to_finish(replay_until="stream_changed")
         self.replay_events()
         listener_mock.reset_mock()
 
@@ -779,7 +818,7 @@ class EventEmissionTest(BaseTest):
         # triggered as we have to switch back to the previous track.
         # The correct behavior would be to only emit seeked.
         assert listener_mock.send.mock_calls == [
-            mock.call('seeked', time_position=1000)
+            mock.call("seeked", time_position=1000)
         ]
 
     def test_previous_emits_events(self, listener_mock):
@@ -794,25 +833,28 @@ class EventEmissionTest(BaseTest):
 
         assert listener_mock.send.mock_calls == [
             mock.call(
-                'track_playback_ended',
-                tl_track=tl_tracks[1], time_position=mock.ANY),
+                "track_playback_ended",
+                tl_track=tl_tracks[1],
+                time_position=mock.ANY,
+            ),
             mock.call(
-                'playback_state_changed',
-                old_state='playing', new_state='playing'),
-            mock.call(
-                'track_playback_started', tl_track=tl_tracks[0]),
+                "playback_state_changed",
+                old_state="playing",
+                new_state="playing",
+            ),
+            mock.call("track_playback_started", tl_track=tl_tracks[0]),
         ]
 
 
 class TestUnplayableURI(BaseTest):
 
     tracks = [
-        Track(uri='unplayable://'),
-        Track(uri='dummy:b'),
+        Track(uri="unplayable://"),
+        Track(uri="dummy:b"),
     ]
 
     def setup_method(self, method):
-        super(TestUnplayableURI, self).setup_method(method)
+        super().setup_method(method)
         tl_tracks = self.core.tracklist.get_tl_tracks()
         self.core.playback._set_current_tl_track(tl_tracks[0])
 
@@ -853,7 +895,6 @@ class TestUnplayableURI(BaseTest):
 
 
 class SeekTest(BaseTest):
-
     def test_seek_normalizes_negative_positions_to_zero(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -866,7 +907,8 @@ class SeekTest(BaseTest):
     def test_seek_fails_for_track_without_duration(self):
         track = self.tracks[0].replace(length=None)
         self.core.tracklist.clear()
-        self.core.tracklist.add([track])
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=[track])
 
         self.core.playback.play()
         self.replay_events()
@@ -901,7 +943,7 @@ class SeekTest(BaseTest):
         self.core.playback.play(tl_tracks[0])
         self.replay_events()
 
-        self.trigger_about_to_finish(replay_until='stream_changed')
+        self.trigger_about_to_finish(replay_until="stream_changed")
         self.core.playback.seek(1000)
         self.replay_events()
 
@@ -910,7 +952,6 @@ class SeekTest(BaseTest):
 
 
 class TestStream(BaseTest):
-
     def test_get_stream_title_before_playback(self):
         assert self.playback.get_stream_title() is None
 
@@ -922,16 +963,21 @@ class TestStream(BaseTest):
 
     def test_get_stream_title_during_playback_with_tags_change(self):
         self.core.playback.play()
-        self.audio.trigger_fake_tags_changed({'organization': ['baz']})
-        self.audio.trigger_fake_tags_changed({'title': ['foobar']}).get()
+        self.audio.trigger_fake_tags_changed({"title": ["foobar"]}).get()
         self.replay_events()
 
-        assert self.playback.get_stream_title() == 'foobar'
+        assert self.playback.get_stream_title() == "foobar"
+
+    def test_get_stream_title_during_playback_with_tags_unchanged(self):
+        self.core.playback.play()
+        self.audio.trigger_fake_tags_changed({"title": ["foo"]}).get()
+        self.replay_events()
+
+        assert self.playback.get_stream_title() is None
 
     def test_get_stream_title_after_next(self):
         self.core.playback.play()
-        self.audio.trigger_fake_tags_changed({'organization': ['baz']})
-        self.audio.trigger_fake_tags_changed({'title': ['foobar']}).get()
+        self.audio.trigger_fake_tags_changed({"title": ["foobar"]}).get()
         self.replay_events()
 
         self.core.playback.next()
@@ -941,21 +987,18 @@ class TestStream(BaseTest):
 
     def test_get_stream_title_after_next_with_tags_change(self):
         self.core.playback.play()
-        self.audio.trigger_fake_tags_changed({'organization': ['baz']})
-        self.audio.trigger_fake_tags_changed({'title': ['foo']}).get()
+        self.audio.trigger_fake_tags_changed({"title": ["foo"]}).get()
         self.replay_events()
 
         self.core.playback.next()
-        self.audio.trigger_fake_tags_changed({'organization': ['baz']})
-        self.audio.trigger_fake_tags_changed({'title': ['bar']}).get()
+        self.audio.trigger_fake_tags_changed({"title": ["bar"]}).get()
         self.replay_events()
 
-        assert self.playback.get_stream_title() == 'bar'
+        assert self.playback.get_stream_title() == "bar"
 
     def test_get_stream_title_after_stop(self):
         self.core.playback.play()
-        self.audio.trigger_fake_tags_changed({'organization': ['baz']})
-        self.audio.trigger_fake_tags_changed({'title': ['foobar']}).get()
+        self.audio.trigger_fake_tags_changed({"title": ["foobar"]}).get()
         self.replay_events()
 
         self.core.playback.stop()
@@ -963,34 +1006,31 @@ class TestStream(BaseTest):
         assert self.playback.get_stream_title() is None
 
 
-class TestBackendSelection(object):
-
+class TestBackendSelection:
     def setup_method(self, method):
-        config = {
-            'core': {
-                'max_tracklist_length': 10000,
-            }
-        }
+        config = {"core": {"max_tracklist_length": 10000}}
 
         self.backend1 = mock.Mock()
-        self.backend1.uri_schemes.get.return_value = ['dummy1']
+        self.backend1.uri_schemes.get.return_value = ["dummy1"]
         self.playback1 = mock.Mock(spec=backend.PlaybackProvider)
         self.backend1.playback = self.playback1
 
         self.backend2 = mock.Mock()
-        self.backend2.uri_schemes.get.return_value = ['dummy2']
+        self.backend2.uri_schemes.get.return_value = ["dummy2"]
         self.playback2 = mock.Mock(spec=backend.PlaybackProvider)
         self.backend2.playback = self.playback2
 
         self.tracks = [
-            Track(uri='dummy1:a', length=40000),
-            Track(uri='dummy2:a', length=40000),
+            Track(uri="dummy1:a", length=40000),
+            Track(uri="dummy2:a", length=40000),
         ]
 
-        self.core = core.Core(config, mixer=None, backends=[
-            self.backend1, self.backend2])
+        self.core = core.Core(
+            config, mixer=None, backends=[self.backend1, self.backend2]
+        )
 
-        self.tl_tracks = self.core.tracklist.add(self.tracks)
+        with deprecation.ignore():
+            self.tl_tracks = self.core.tracklist.add(tracks=self.tracks)
 
     def trigger_stream_changed(self):
         pending = self.core.playback._pending_tl_track
@@ -1112,48 +1152,41 @@ class TestBackendSelection(object):
         self.playback2.get_time_position.assert_called_once_with()
 
 
-class TestCorePlaybackWithOldBackend(object):
-
+class TestCorePlaybackWithOldBackend:
     def test_type_error_from_old_backend_does_not_crash_core(self):
-        config = {
-            'core': {
-                'max_tracklist_length': 10000,
-            }
-        }
+        config = {"core": {"max_tracklist_length": 10000}}
 
         b = mock.Mock()
-        b.actor_ref.actor_class.__name__ = 'DummyBackend'
-        b.uri_schemes.get.return_value = ['dummy1']
+        b.actor_ref.actor_class.__name__ = "DummyBackend"
+        b.uri_schemes.get.return_value = ["dummy1"]
         b.playback = mock.Mock(spec=backend.PlaybackProvider)
         b.playback.play.side_effect = TypeError
         b.library.lookup.return_value.get.return_value = [
-            Track(uri='dummy1:a', length=40000)]
+            Track(uri="dummy1:a", length=40000)
+        ]
 
         c = core.Core(config, mixer=None, backends=[b])
-        c.tracklist.add(uris=['dummy1:a'])
+        c.tracklist.add(uris=["dummy1:a"])
         c.playback.play()  # No TypeError == test passed.
         b.playback.play.assert_called_once_with()
 
 
-class TestBug1177Regression(object):
+class TestBug1177Regression:
     def test(self):
-        config = {
-            'core': {
-                'max_tracklist_length': 10000,
-            }
-        }
+        config = {"core": {"max_tracklist_length": 10000}}
 
         b = mock.Mock()
-        b.uri_schemes.get.return_value = ['dummy']
+        b.uri_schemes.get.return_value = ["dummy"]
         b.playback = mock.Mock(spec=backend.PlaybackProvider)
         b.playback.change_track.return_value.get.return_value = True
         b.playback.play.return_value.get.return_value = True
 
-        track1 = Track(uri='dummy:a', length=40000)
-        track2 = Track(uri='dummy:b', length=40000)
+        track1 = Track(uri="dummy:a", length=40000)
+        track2 = Track(uri="dummy:b", length=40000)
 
         c = core.Core(config, mixer=None, backends=[b])
-        c.tracklist.add([track1, track2])
+        with deprecation.ignore():
+            c.tracklist.add(tracks=[track1, track2])
 
         c.playback.play()
         b.playback.change_track.assert_called_once_with(track1)
@@ -1165,7 +1198,6 @@ class TestBug1177Regression(object):
 
 
 class TestCorePlaybackSaveLoadState(BaseTest):
-
     def test_save(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -1173,7 +1205,8 @@ class TestCorePlaybackSaveLoadState(BaseTest):
         self.replay_events()
 
         state = PlaybackState(
-            time_position=0, state='playing', tlid=tl_tracks[1].tlid)
+            time_position=0, state="playing", tlid=tl_tracks[1].tlid
+        )
         value = self.core.playback._save_state()
 
         assert state == value
@@ -1183,15 +1216,16 @@ class TestCorePlaybackSaveLoadState(BaseTest):
 
         self.core.playback.stop()
         self.replay_events()
-        assert 'stopped' == self.core.playback.get_state()
+        assert "stopped" == self.core.playback.get_state()
 
         state = PlaybackState(
-            time_position=0, state='playing', tlid=tl_tracks[2].tlid)
-        coverage = ['play-last']
+            time_position=0, state="playing", tlid=tl_tracks[2].tlid
+        )
+        coverage = ["play-last"]
         self.core.playback._load_state(state, coverage)
         self.replay_events()
 
-        assert 'playing' == self.core.playback.get_state()
+        assert "playing" == self.core.playback.get_state()
         assert tl_tracks[2] == self.core.playback.get_current_tl_track()
 
     def test_load_not_covered(self):
@@ -1199,15 +1233,16 @@ class TestCorePlaybackSaveLoadState(BaseTest):
 
         self.core.playback.stop()
         self.replay_events()
-        assert 'stopped' == self.core.playback.get_state()
+        assert "stopped" == self.core.playback.get_state()
 
         state = PlaybackState(
-            time_position=0, state='playing', tlid=tl_tracks[2].tlid)
-        coverage = ['other']
+            time_position=0, state="playing", tlid=tl_tracks[2].tlid
+        )
+        coverage = ["other"]
         self.core.playback._load_state(state, coverage)
         self.replay_events()
 
-        assert 'stopped' == self.core.playback.get_state()
+        assert "stopped" == self.core.playback.get_state()
         assert self.core.playback.get_current_tl_track() is None
 
     def test_load_invalid_type(self):
@@ -1220,8 +1255,8 @@ class TestCorePlaybackSaveLoadState(BaseTest):
 
 class TestBug1352Regression(BaseTest):
     tracks = [
-        Track(uri='dummy:a', length=40000),
-        Track(uri='dummy:b', length=40000),
+        Track(uri="dummy:a", length=40000),
+        Track(uri="dummy:b", length=40000),
     ]
 
     def test_next_when_paused_updates_history(self):
@@ -1248,19 +1283,20 @@ class TestBug1352Regression(BaseTest):
 class TestEndlessLoop(BaseTest):
 
     tracks_play = [
-        Track(uri='dummy:limit_never:a'),
-        Track(uri='dummy:limit_never:b')
+        Track(uri="dummy:limit_never:a"),
+        Track(uri="dummy:limit_never:b"),
     ]
 
     tracks_other = [
-        Track(uri='dummy:limit_never:a'),
-        Track(uri='dummy:limit_one'),
-        Track(uri='dummy:limit_never:b')
+        Track(uri="dummy:limit_never:a"),
+        Track(uri="dummy:limit_one"),
+        Track(uri="dummy:limit_never:b"),
     ]
 
     def test_play(self):
         self.core.tracklist.clear()
-        self.core.tracklist.add(self.tracks_play)
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=self.tracks_play)
 
         self.backend.playback.reset_call_limit().get()
         self.core.tracklist.set_repeat(True)
@@ -1273,7 +1309,8 @@ class TestEndlessLoop(BaseTest):
 
     def test_next(self):
         self.core.tracklist.clear()
-        self.core.tracklist.add(self.tracks_other)
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=self.tracks_other)
 
         self.backend.playback.reset_call_limit().get()
         self.core.tracklist.set_repeat(True)
@@ -1289,7 +1326,8 @@ class TestEndlessLoop(BaseTest):
 
     def test_previous(self):
         self.core.tracklist.clear()
-        self.core.tracklist.add(self.tracks_other)
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=self.tracks_other)
 
         self.backend.playback.reset_call_limit().get()
         self.core.tracklist.set_repeat(True)
@@ -1305,7 +1343,8 @@ class TestEndlessLoop(BaseTest):
 
     def test_on_about_to_finish(self):
         self.core.tracklist.clear()
-        self.core.tracklist.add(self.tracks_other)
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=self.tracks_other)
 
         self.backend.playback.reset_call_limit().get()
         self.core.tracklist.set_repeat(True)

@@ -6,9 +6,8 @@ import warnings
 
 from mopidy_local import *  # noqa
 
-
 warnings.warn(
-    'Mopidy-Local has been moved to its own project. '
-    'Update any imports from `mopidy.local` to use `mopidy_local` instead.',
-    DeprecationWarning
+    "Mopidy-Local has been moved to its own project. "
+    "Update any imports from `mopidy.local` to use `mopidy_local` instead.",
+    DeprecationWarning,
 )

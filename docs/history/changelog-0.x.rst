@@ -2372,7 +2372,7 @@ to Valentin David.
     :attr:`mopidy.settings.CONSOLE_LOG_FORMAT`. From a user's point of view:
     Less noise, more information.
   - Rename the ``mopidy --dump`` command line option to
-    :option:`mopidy --save-debug-log`.
+    ``mopidy --save-debug-log``.
   - Rename setting :attr:`mopidy.settings.DUMP_LOG_FORMAT` to
     :attr:`mopidy.settings.DEBUG_LOG_FORMAT` and use it for
     :option:`mopidy --verbose` too.
