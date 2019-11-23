@@ -188,4 +188,4 @@ http://localhost:6680/mywebclient/.
 API implementors
 ================
 
-See :ref:`ext-web`.
+See the `extension registry <https://mopidy.com/ext/>`_.

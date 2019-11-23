@@ -100,7 +100,6 @@ watch out for announcements on the `Discourse forum
     ext/mixers
     ext/backends
     ext/frontends
-    ext/web
 
 
 .. toctree::
