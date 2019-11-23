@@ -17,7 +17,7 @@ Mopidy and its extensions:
 
 - Our Discourse forum: `discourse.mopidy.com <https://discourse.mopidy.com>`_.
 
-- The ``#mopidy-dev`` stream on Zulip chat: `mopidy.zulipchat.com
+- The ``#mopidy-users`` stream on Zulip chat: `mopidy.zulipchat.com
   <https://mopidy.zulipchat.com>`_.
 
 Before asking for help, it might be worth your time to read the
