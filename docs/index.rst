@@ -11,18 +11,17 @@ of MPD and web clients.
 **Stream music from the cloud**
 
 Vanilla Mopidy only plays music from your :ref:`local disk <ext-file>` and
-:ref:`radio streams <ext-stream>`. Through :ref:`extensions <ext-backends>`,
-Mopidy can play music from cloud services like Spotify, SoundCloud, and Google
-Play Music. With Mopidy's extension support, backends for new music sources can
-be easily added.
+:ref:`radio streams <ext-stream>`. Through
+`extensions <https://mopidy.com/ext/>`_, Mopidy can play music from cloud
+services like Spotify, SoundCloud, and Google Play Music. With Mopidy's
+extension support, backends for new music sources can be easily added.
 
 **Mopidy is just a server**
 
 Mopidy is a Python application that runs in a terminal or in the background on
 Linux computers or Macs that have network connectivity and audio output. Out of
 the box, Mopidy is an :ref:`MPD <ext-mpd>` and :ref:`HTTP <ext-http>` server.
-:ref:`Additional frontends <ext-frontends>` for controlling Mopidy can be
-installed from extensions.
+Additional frontends for controlling Mopidy can be installed from extensions.
 
 **Everybody use their favorite client**
 
@@ -88,7 +87,7 @@ watch out for announcements on the `Discourse forum
 .. _ext:
 
 .. toctree::
-    :caption: Extensions
+    :caption: Bundled extensions
     :maxdepth: 2
 
     ext/file
@@ -97,9 +96,6 @@ watch out for announcements on the `Discourse forum
     ext/http
     ext/mpd
     ext/softwaremixer
-    ext/mixers
-    ext/backends
-    ext/frontends
 
 
 .. toctree::
