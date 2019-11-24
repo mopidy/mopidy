@@ -206,6 +206,10 @@ Extension support
 
   This makes it easier to support arbitrary encoding in file names.
 
+- The command :command:`mopidy deps` no longer repeats the dependencies of
+  Mopidy itself for every installed extension. This reduces the length of the
+  command's output drastically. (PR: :issue:`1846`)
+
 HTTP frontend
 -------------
 

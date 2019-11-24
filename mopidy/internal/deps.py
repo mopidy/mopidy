@@ -81,13 +81,24 @@ def python_info():
     }
 
 
-def pkg_info(project_name=None, include_extras=False):
+def pkg_info(
+    project_name=None, include_transitive_deps=True, include_extras=False
+):
     if project_name is None:
         project_name = "Mopidy"
     try:
         distribution = pkg_resources.get_distribution(project_name)
         extras = include_extras and distribution.extras or []
-        dependencies = [pkg_info(d) for d in distribution.requires(extras)]
+        if include_transitive_deps:
+            dependencies = [
+                pkg_info(
+                    d.project_name,
+                    include_transitive_deps=d.project_name != "Mopidy",
+                )
+                for d in distribution.requires(extras)
+            ]
+        else:
+            dependencies = []
         return {
             "name": project_name,
             "version": distribution.version,

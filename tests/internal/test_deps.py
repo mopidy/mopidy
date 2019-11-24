@@ -81,23 +81,23 @@ class DepsTest(unittest.TestCase):
 
     @mock.patch("pkg_resources.get_distribution")
     def test_pkg_info(self, get_distribution_mock):
-        dist_mopidy = mock.Mock()
-        dist_mopidy.project_name = "Mopidy"
-        dist_mopidy.version = "0.13"
-        dist_mopidy.location = "/tmp/example/mopidy"
-        dist_mopidy.requires.return_value = ["Pykka"]
-
-        dist_pykka = mock.Mock()
-        dist_pykka.project_name = "Pykka"
-        dist_pykka.version = "1.1"
-        dist_pykka.location = "/tmp/example/pykka"
-        dist_pykka.requires.return_value = ["setuptools"]
-
         dist_setuptools = mock.Mock()
         dist_setuptools.project_name = "setuptools"
         dist_setuptools.version = "0.6"
         dist_setuptools.location = "/tmp/example/setuptools"
         dist_setuptools.requires.return_value = []
+
+        dist_pykka = mock.Mock()
+        dist_pykka.project_name = "Pykka"
+        dist_pykka.version = "1.1"
+        dist_pykka.location = "/tmp/example/pykka"
+        dist_pykka.requires.return_value = [dist_setuptools]
+
+        dist_mopidy = mock.Mock()
+        dist_mopidy.project_name = "Mopidy"
+        dist_mopidy.version = "0.13"
+        dist_mopidy.location = "/tmp/example/mopidy"
+        dist_mopidy.requires.return_value = [dist_pykka]
 
         get_distribution_mock.side_effect = [
             dist_mopidy,
