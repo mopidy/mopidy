@@ -69,6 +69,9 @@ How to for Raspbian
    raspi-config``.
 
 
+#. Install Mopidy and any Mopidy extensions you want, as described in
+   :ref:`debian-install`.
+
 .. note::
 
    If you used the Raspbian *Desktop* image you will need to add the
