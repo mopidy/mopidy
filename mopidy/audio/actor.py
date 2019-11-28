@@ -437,6 +437,7 @@ class Audio(pykka.ThreadingActor):
         self._config = config
         self._target_state = Gst.State.NULL
         self._buffering = False
+        self._live_stream = False
         self._tags = {}
         self._pending_uri = None
         self._pending_tags = None
@@ -572,13 +573,13 @@ class Audio(pykka.ThreadingActor):
         else:
             self._appsrc.reset()
 
-        if source.__class__.__name__ == "GstSoupHTTPSrc":
+        if self._live_stream and source.__class__.__name__ == "GstSoupHTTPSrc":
             gst_logger.debug("HTTP Src - setting live mode")
             source.set_live(True)
 
         utils.setup_proxy(source, self._config["proxy"])
 
-    def set_uri(self, uri):
+    def set_uri(self, uri, live_stream=False):
         """
         Set URI of audio to be played.
 
@@ -597,6 +598,7 @@ class Audio(pykka.ThreadingActor):
 
         self._pending_uri = uri
         self._pending_tags = {}
+        self._live_stream = live_stream
         self._playbin.set_property("uri", uri)
 
         if self.mixer is not None and current_volume is not None:
