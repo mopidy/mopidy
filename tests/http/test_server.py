@@ -345,8 +345,8 @@ class HttpServerWithWsgiAppTest(tornado.testing.AsyncHTTPTestCase):
     def test_can_wrap_wsgi_apps(self):
         response = self.fetch("/wsgi/", method="GET")
 
-        self.assertEqual(200, response.code)
-        self.assertIn("Hello, world!", tornado.escape.to_unicode(response.body))
+        assert response.code == 200
+        assert "Hello, world!" in tornado.escape.to_unicode(response.body)
 
 
 def default_webapp_factory(config, core):
@@ -380,17 +380,16 @@ class HttpServerWithAppDefaultWebClient(tornado.testing.AsyncHTTPTestCase):
     def test_should_redirect_to_default_webclient(self):
         response = self.fetch("/", method="GET", follow_redirects=False)
 
-        self.assertEqual(response.code, 302)
-        self.assertEqual(response.headers["Location"], "/default_webclient/")
+        assert response.code, 302
+        assert response.headers["Location"] == "/default_webclient/"
 
         response = self.fetch(
             "/default_webclient/", method="GET", follow_redirects=True
         )
 
-        self.assertEqual(200, response.code)
-        self.assertIn(
-            "Hello from default webapp",
-            tornado.escape.to_unicode(response.body),
+        assert response.code == 200
+        assert "Hello from default webapp" in tornado.escape.to_unicode(
+            response.body
         )
 
 
@@ -419,8 +418,8 @@ class HttpServerWithStaticDefaultWebClient(tornado.testing.AsyncHTTPTestCase):
     def test_should_redirect_to_default_webclient(self):
         response = self.fetch("/", method="GET", follow_redirects=False)
 
-        self.assertEqual(response.code, 302)
-        self.assertEqual(response.headers["Location"], "/default_webclient/")
+        assert response.code == 302
+        assert response.headers["Location"] == "/default_webclient/"
 
 
 class HttpServerWithInvalidDefaultWebClient(HttpServerTest):
@@ -432,18 +431,15 @@ class HttpServerWithInvalidDefaultWebClient(HttpServerTest):
     def test_should_redirect_to_clients_list(self):
         response = self.fetch("/", method="GET", follow_redirects=False)
 
-        self.assertEqual(response.code, 302)
-        self.assertEqual(response.headers["Location"], "/mopidy/")
+        assert response.code == 302
+        assert response.headers["Location"] == "/mopidy/"
 
         response = self.fetch("/", method="GET")
         body = tornado.escape.to_unicode(response.body)
 
-        self.assertIn(
-            "This web server is a part of the Mopidy music server.", body
-        )
-        self.assertIn("testapp", body)
-        self.assertIn("teststatic", body)
-        self.assertEqual(
-            response.headers["X-Mopidy-Version"], mopidy.__version__
-        )
-        self.assertEqual(response.headers["Cache-Control"], "no-cache")
+        assert "This web server is a part of the Mopidy music server." in body
+
+        assert "testapp" in body
+        assert "teststatic" in body
+        assert response.headers["X-Mopidy-Version"] == mopidy.__version__
+        assert response.headers["Cache-Control"] == "no-cache"
