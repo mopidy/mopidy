@@ -17,4 +17,4 @@
 Mixer implementations
 =====================
 
-See :ref:`ext-mixers`.
+See the `extension registry <https://mopidy.com/ext/>`_.

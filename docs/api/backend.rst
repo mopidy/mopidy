@@ -96,4 +96,4 @@ Backend listener
 Backend implementations
 =======================
 
-See :ref:`ext-backends`.
+See the `extension registry <https://mopidy.com/ext/>`_.
