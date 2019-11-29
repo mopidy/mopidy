@@ -31,8 +31,8 @@ def config_files_type(value):
 
 def config_override_type(value):
     try:
-        section, remainder = value.split(b"/", 1)
-        key, value = remainder.split(b"=", 1)
+        section, remainder = value.split("/", 1)
+        key, value = remainder.split("=", 1)
         return (section.strip(), key.strip(), value.strip())
     except ValueError:
         raise argparse.ArgumentTypeError(

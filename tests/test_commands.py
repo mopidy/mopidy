@@ -7,32 +7,24 @@ from mopidy import commands
 
 class ConfigOverrideTypeTest(unittest.TestCase):
     def test_valid_override(self):
-        expected = (b"section", b"key", b"value")
-        assert expected == commands.config_override_type(b"section/key=value")
-        assert expected == commands.config_override_type(b"section/key=value ")
-        assert expected == commands.config_override_type(b"section/key =value")
-        assert expected == commands.config_override_type(b"section /key=value")
-
-    def test_valid_override_is_bytes(self):
-        section, key, value = commands.config_override_type(
-            b"section/key=value"
-        )
-        assert isinstance(section, bytes)
-        assert isinstance(key, bytes)
-        assert isinstance(value, bytes)
+        expected = ("section", "key", "value")
+        assert expected == commands.config_override_type("section/key=value")
+        assert expected == commands.config_override_type("section/key=value ")
+        assert expected == commands.config_override_type("section/key =value")
+        assert expected == commands.config_override_type("section /key=value")
 
     def test_empty_override(self):
-        expected = (b"section", b"key", b"")
-        assert expected == commands.config_override_type(b"section/key=")
-        assert expected == commands.config_override_type(b"section/key=  ")
+        expected = ("section", "key", "")
+        assert expected == commands.config_override_type("section/key=")
+        assert expected == commands.config_override_type("section/key=  ")
 
     def test_invalid_override(self):
         with self.assertRaises(argparse.ArgumentTypeError):
-            commands.config_override_type(b"section/key")
+            commands.config_override_type("section/key")
         with self.assertRaises(argparse.ArgumentTypeError):
-            commands.config_override_type(b"section=")
+            commands.config_override_type("section=")
         with self.assertRaises(argparse.ArgumentTypeError):
-            commands.config_override_type(b"section")
+            commands.config_override_type("section")
 
 
 class CommandParsingTest(unittest.TestCase):
@@ -523,3 +515,11 @@ class RunTest(unittest.TestCase):
     def test_default_implmentation_raises_error(self):
         with self.assertRaises(NotImplementedError):
             commands.Command().run()
+
+
+class RootCommandTest(unittest.TestCase):
+    def test_config_overrides(self):
+        cmd = commands.RootCommand()
+        result = cmd.parse(["--option", "foo/bar=baz"])
+
+        assert result.config_overrides[0] == ("foo", "bar", "baz")
