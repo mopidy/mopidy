@@ -182,18 +182,17 @@ class HttpServer(threading.Thread):
         default_webclient = self.config["http"]["default_webclient"]
         if default_webclient not in sites:
             logger.warning(
-                "Invalid default_webclient %s, "
-                "Ignoring unknown default webclient",
-                default_webclient,
+                f"Invalid default_webclient {default_webclient}, "
+                "Ignoring unknown default webclient"
             )
 
             default_webclient = "mopidy"
-        logger.debug("Default webclient is %s", default_webclient)
+        logger.debug(f"Default webclient is {default_webclient}")
 
         return [
             (
                 r"/",
                 tornado.web.RedirectHandler,
-                {"url": "/{}/".format(default_webclient), "permanent": False},
+                {"url": f"/{default_webclient}/", "permanent": False},
             )
         ]
