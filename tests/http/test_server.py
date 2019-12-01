@@ -357,7 +357,7 @@ def default_webapp_factory(config, core):
     return [("/", MainHandler, {})]
 
 
-class HttpServerWithAppDefaultWebClient(tornado.testing.AsyncHTTPTestCase):
+class HttpServerWithAppDefaultApp(tornado.testing.AsyncHTTPTestCase):
     def get_app(self):
         config = {
             "http": {
@@ -377,7 +377,7 @@ class HttpServerWithAppDefaultWebClient(tornado.testing.AsyncHTTPTestCase):
 
         return tornado.web.Application(http_server._get_request_handlers())
 
-    def test_should_redirect_to_default_webclient(self):
+    def test_should_redirect_to_default_app(self):
         response = self.fetch("/", method="GET", follow_redirects=False)
 
         assert response.code == 302
@@ -393,7 +393,7 @@ class HttpServerWithAppDefaultWebClient(tornado.testing.AsyncHTTPTestCase):
         )
 
 
-class HttpServerWithStaticDefaultWebClient(tornado.testing.AsyncHTTPTestCase):
+class HttpServerWithStaticDefaultApp(tornado.testing.AsyncHTTPTestCase):
     def get_app(self):
         config = {
             "http": {
@@ -415,16 +415,16 @@ class HttpServerWithStaticDefaultWebClient(tornado.testing.AsyncHTTPTestCase):
 
         return tornado.web.Application(http_server._get_request_handlers())
 
-    def test_should_redirect_to_default_webclient(self):
+    def test_should_redirect_to_default_app(self):
         response = self.fetch("/", method="GET", follow_redirects=False)
 
         assert response.code == 302
         assert response.headers["Location"] == "/default_app/"
 
 
-class HttpServerWithInvalidDefaultWebClient(HttpServerTest):
+class HttpServerWithInvalidDefaultApp(HttpServerTest):
     def get_config(self):
-        config = super(HttpServerWithInvalidDefaultWebClient, self).get_config()
+        config = super(HttpServerWithInvalidDefaultApp, self).get_config()
         config["http"]["default_app"] = "invalid_webclient"
         return config
 
