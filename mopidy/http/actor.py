@@ -199,5 +199,7 @@ class HttpServer(threading.Thread):
         else:
             cookie_secret = file_path.read_text().strip()
             if not cookie_secret:
-                logging.error(f"HTTP server could not find cookie secret in {file_path}")
+                logging.error(
+                    f"HTTP server could not find cookie secret in {file_path}"
+                )
         return cookie_secret
