@@ -60,7 +60,7 @@ class RootRedirectTest(HttpServerTest):
 class MopidyAppTest(HttpServerTest):
     def test_should_return_index(self):
         response = self.fetch("/mopidy/", method="GET")
-        body = tornado.escape.to_unicode(response.body)
+        body = response.body.decode()
 
         assert "This web server is a part of the Mopidy music server." in body
         assert "testapp" in body
@@ -77,7 +77,7 @@ class MopidyAppTest(HttpServerTest):
     def test_should_return_static_files(self):
         response = self.fetch("/mopidy/mopidy.css", method="GET")
 
-        assert "html {" in tornado.escape.to_unicode(response.body)
+        assert "html {" in response.body.decode()
         assert response.headers["X-Mopidy-Version"] == mopidy.__version__
         assert response.headers["Cache-Control"] == "no-cache"
 
@@ -88,7 +88,7 @@ class MopidyWebSocketHandlerTest(HttpServerTest):
 
         assert (
             'Can "Upgrade" only to "WebSocket".'
-            == tornado.escape.to_unicode(response.body)
+            == response.body.decode()
         )
 
     def test_should_return_ws_old(self):
@@ -96,7 +96,7 @@ class MopidyWebSocketHandlerTest(HttpServerTest):
 
         assert (
             'Can "Upgrade" only to "WebSocket".'
-            == tornado.escape.to_unicode(response.body)
+            == response.body.decode()
         )
 
 
@@ -346,7 +346,7 @@ class HttpServerWithWsgiAppTest(tornado.testing.AsyncHTTPTestCase):
         response = self.fetch("/wsgi/", method="GET")
 
         assert response.code == 200
-        assert "Hello, world!" in tornado.escape.to_unicode(response.body)
+        assert "Hello, world!" in response.body.decode()
 
 
 def default_webapp_factory(config, core):
@@ -435,7 +435,7 @@ class HttpServerWithInvalidDefaultWebClient(HttpServerTest):
         assert response.headers["Location"] == "/mopidy/"
 
         response = self.fetch("/", method="GET")
-        body = tornado.escape.to_unicode(response.body)
+        body = response.body.decode()
 
         assert "This web server is a part of the Mopidy music server." in body
 
