@@ -86,18 +86,12 @@ class MopidyWebSocketHandlerTest(HttpServerTest):
     def test_should_return_ws(self):
         response = self.fetch("/mopidy/ws", method="GET")
 
-        assert (
-            'Can "Upgrade" only to "WebSocket".'
-            == response.body.decode()
-        )
+        assert 'Can "Upgrade" only to "WebSocket".' == response.body.decode()
 
     def test_should_return_ws_old(self):
         response = self.fetch("/mopidy/ws/", method="GET")
 
-        assert (
-            'Can "Upgrade" only to "WebSocket".'
-            == response.body.decode()
-        )
+        assert 'Can "Upgrade" only to "WebSocket".' == response.body.decode()
 
 
 class MopidyRPCHandlerTest(HttpServerTest):
@@ -405,9 +399,7 @@ class HttpServerWithStaticDefaultApp(tornado.testing.AsyncHTTPTestCase):
         }
         core = mock.Mock()
 
-        statics = [
-            dict(name="default_app", path=os.path.dirname(__file__))
-        ]
+        statics = [dict(name="default_app", path=os.path.dirname(__file__))]
 
         http_server = actor.HttpServer(
             config=config, core=core, sockets=[], apps=[], statics=statics
