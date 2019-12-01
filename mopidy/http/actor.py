@@ -1,4 +1,4 @@
-import binascii
+import secrets
 import json
 import logging
 import os
@@ -192,22 +192,12 @@ class HttpServer(threading.Thread):
         ]
 
     def _get_cookie_secret(self):
-        data_path = Path(
-            os.path.join(Extension.get_data_dir(self.config), "data.json.gz")
-        )
-
-        if not data_path.is_file():
-            # TODO Py3: Move to secrets
-            cookie_secret = binascii.hexlify(os.urandom(32))
-            storage.dump(data_path, {"cookie_secret": cookie_secret})
-
+        file_path = Extension.get_data_dir(self.config) / "cookie_secret"
+        if not file_path.is_file():
+            cookie_secret = secrets.token_hex(32)
+            file_path.write_text(cookie_secret)
         else:
-            data = storage.load(data_path)
-            cookie_secret = data.get("cookie_secret", "").strip()
+            cookie_secret = file_path.read_text().strip()
             if not cookie_secret:
-                logging.error(
-                    "Missing cookie_secret in %s",
-                    encoding.locale_decode(data_path),
-                )
-
+                logging.error(f"HTTP server could not find cookie secret in {file_path}")
         return cookie_secret
