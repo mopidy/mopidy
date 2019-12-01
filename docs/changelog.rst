@@ -224,7 +224,7 @@ HTTP frontend
 
 - Add option ``default_app`` to redirect ``http:hostname``:``http:port`` to a specific app.
   It is the name used by the extension when it registers its ``http:static``
-  or ``http:app``. (PR `1791`)
+  or ``http:app``. (PR: :issue:`1791`)
 
 MPD frontend
 ------------
