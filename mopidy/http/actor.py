@@ -181,11 +181,7 @@ class HttpServer(threading.Thread):
 
         default_app = self.config["http"]["default_app"]
         if default_app not in sites:
-            logger.warning(
-                f"Invalid default_app {default_app}, "
-                "Ignoring unknown default webclient"
-            )
-
+            logger.warning(f"HTTP server's default app {default_app!r} not found")
             default_app = "mopidy"
         logger.debug(f"Default webclient is {default_app}")
 
