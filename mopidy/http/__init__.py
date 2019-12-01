@@ -25,7 +25,7 @@ class Extension(ext.Extension):
         schema["zeroconf"] = config_lib.String(optional=True)
         schema["allowed_origins"] = config_lib.List(optional=True)
         schema["csrf_protection"] = config_lib.Boolean(optional=True)
-        schema["default_webclient"] = config_lib.String(optional=True)
+        schema["default_app"] = config_lib.String(optional=True)
         return schema
 
     def validate_environment(self):

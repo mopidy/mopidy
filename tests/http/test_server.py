@@ -17,7 +17,7 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
                 "zeroconf": "",
                 "allowed_origins": [],
                 "csrf_protection": True,
-                "default_webclient": "mopidy",
+                "default_app": "mopidy",
             }
         }
 
@@ -273,7 +273,7 @@ class HttpServerWithStaticFilesTest(tornado.testing.AsyncHTTPTestCase):
                 "hostname": "127.0.0.1",
                 "port": 6680,
                 "zeroconf": "",
-                "default_webclient": "static",
+                "default_app": "static",
             }
         }
         core = mock.Mock()
@@ -323,7 +323,7 @@ class HttpServerWithWsgiAppTest(tornado.testing.AsyncHTTPTestCase):
                 "hostname": "127.0.0.1",
                 "port": 6680,
                 "zeroconf": "",
-                "default_webclient": "wsgi",
+                "default_app": "wsgi",
             }
         }
         core = mock.Mock()
@@ -364,12 +364,12 @@ class HttpServerWithAppDefaultWebClient(tornado.testing.AsyncHTTPTestCase):
                 "hostname": "127.0.0.1",
                 "port": 6680,
                 "zeroconf": "",
-                "default_webclient": "default_webclient",
+                "default_app": "default_app",
             }
         }
         core = mock.Mock()
 
-        apps = [dict(name="default_webclient", factory=default_webapp_factory)]
+        apps = [dict(name="default_app", factory=default_webapp_factory)]
 
         http_server = actor.HttpServer(
             config=config, core=core, sockets=[], apps=apps, statics=[]
@@ -381,10 +381,10 @@ class HttpServerWithAppDefaultWebClient(tornado.testing.AsyncHTTPTestCase):
         response = self.fetch("/", method="GET", follow_redirects=False)
 
         assert response.code, 302
-        assert response.headers["Location"] == "/default_webclient/"
+        assert response.headers["Location"] == "/default_app/"
 
         response = self.fetch(
-            "/default_webclient/", method="GET", follow_redirects=True
+            "/default_app/", method="GET", follow_redirects=True
         )
 
         assert response.code == 200
@@ -400,13 +400,13 @@ class HttpServerWithStaticDefaultWebClient(tornado.testing.AsyncHTTPTestCase):
                 "hostname": "127.0.0.1",
                 "port": 6680,
                 "zeroconf": "",
-                "default_webclient": "default_webclient",
+                "default_app": "default_app",
             }
         }
         core = mock.Mock()
 
         statics = [
-            dict(name="default_webclient", path=os.path.dirname(__file__))
+            dict(name="default_app", path=os.path.dirname(__file__))
         ]
 
         http_server = actor.HttpServer(
@@ -419,13 +419,13 @@ class HttpServerWithStaticDefaultWebClient(tornado.testing.AsyncHTTPTestCase):
         response = self.fetch("/", method="GET", follow_redirects=False)
 
         assert response.code == 302
-        assert response.headers["Location"] == "/default_webclient/"
+        assert response.headers["Location"] == "/default_app/"
 
 
 class HttpServerWithInvalidDefaultWebClient(HttpServerTest):
     def get_config(self):
         config = super(HttpServerWithInvalidDefaultWebClient, self).get_config()
-        config["http"]["default_webclient"] = "invalid_webclient"
+        config["http"]["default_app"] = "invalid_webclient"
         return config
 
     def test_should_redirect_to_clients_list(self):
