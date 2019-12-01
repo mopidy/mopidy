@@ -45,4 +45,4 @@ The following requirements applies to any frontend implementation:
 Frontend implementations
 ========================
 
-See :ref:`ext-frontends`.
+See the `extension registry <https://mopidy.com/ext/>`_.
