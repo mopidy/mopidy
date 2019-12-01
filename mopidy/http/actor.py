@@ -13,7 +13,7 @@ import tornado.websocket
 from mopidy import exceptions, models, zeroconf
 from mopidy.core import CoreListener
 from mopidy.http import Extension, handlers
-from mopidy.internal import encoding, formatting, network, storage
+from mopidy.internal import encoding, formatting, network
 
 try:
     import asyncio
