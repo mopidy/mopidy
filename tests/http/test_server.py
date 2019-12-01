@@ -380,7 +380,7 @@ class HttpServerWithAppDefaultWebClient(tornado.testing.AsyncHTTPTestCase):
     def test_should_redirect_to_default_webclient(self):
         response = self.fetch("/", method="GET", follow_redirects=False)
 
-        assert response.code, 302
+        assert response.code == 302
         assert response.headers["Location"] == "/default_app/"
 
         response = self.fetch(
