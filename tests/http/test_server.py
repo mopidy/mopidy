@@ -428,7 +428,10 @@ class HttpServerTestCookieSecret(TestCase):
 
         # first secret, generating
         secret_1 = http_server._get_cookie_secret()
+
+        assert isinstance(secret_1, str)
         assert secret_1 != ""
+        assert len(secret_1) == 64
 
         # second secret, from file
         secret_2 = http_server._get_cookie_secret()
