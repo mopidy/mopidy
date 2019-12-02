@@ -1,6 +1,6 @@
-import secrets
 import json
 import logging
+import secrets
 import threading
 
 import pykka
