@@ -223,7 +223,7 @@ HTTP frontend
   :issue:`1463`, PR: :issue:`1706`)
 
 - Add cookie secret to Tornado web server, allowing Tornado request handlers to call
-  get_secure_cookie, in an overrided implementation of get_current_user.
+  ``get_secure_cookie()``, in an implementation of ``get_current_user()``.
   (PR: :issue:`1801`)
 
 MPD frontend
