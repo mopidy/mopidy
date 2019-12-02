@@ -353,7 +353,6 @@ def cookie_secret_app_factory(config, core):
         def post(self):
             self.set_secure_cookie("user", self.get_argument("name"))
             self.write("Logged in")
-            # self.redirect("/")
 
     class MainHandler(BaseHandler):
         def get(self):
