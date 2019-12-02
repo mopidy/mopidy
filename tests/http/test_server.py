@@ -2,7 +2,7 @@ import os
 import urllib
 import tempfile
 import shutil
-from unittest import mock, TestCase
+from unittest import mock
 
 import tornado.testing
 import tornado.wsgi
