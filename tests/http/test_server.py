@@ -17,6 +17,7 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
                 "zeroconf": "",
                 "allowed_origins": [],
                 "csrf_protection": True,
+                "default_app": "mopidy",
             }
         }
 
@@ -59,7 +60,7 @@ class RootRedirectTest(HttpServerTest):
 class MopidyAppTest(HttpServerTest):
     def test_should_return_index(self):
         response = self.fetch("/mopidy/", method="GET")
-        body = tornado.escape.to_unicode(response.body)
+        body = response.body.decode()
 
         assert "This web server is a part of the Mopidy music server." in body
         assert "testapp" in body
@@ -76,7 +77,7 @@ class MopidyAppTest(HttpServerTest):
     def test_should_return_static_files(self):
         response = self.fetch("/mopidy/mopidy.css", method="GET")
 
-        assert "html {" in tornado.escape.to_unicode(response.body)
+        assert "html {" in response.body.decode()
         assert response.headers["X-Mopidy-Version"] == mopidy.__version__
         assert response.headers["Cache-Control"] == "no-cache"
 
@@ -85,18 +86,12 @@ class MopidyWebSocketHandlerTest(HttpServerTest):
     def test_should_return_ws(self):
         response = self.fetch("/mopidy/ws", method="GET")
 
-        assert (
-            'Can "Upgrade" only to "WebSocket".'
-            == tornado.escape.to_unicode(response.body)
-        )
+        assert 'Can "Upgrade" only to "WebSocket".' == response.body.decode()
 
     def test_should_return_ws_old(self):
         response = self.fetch("/mopidy/ws/", method="GET")
 
-        assert (
-            'Can "Upgrade" only to "WebSocket".'
-            == tornado.escape.to_unicode(response.body)
-        )
+        assert 'Can "Upgrade" only to "WebSocket".' == response.body.decode()
 
 
 class MopidyRPCHandlerTest(HttpServerTest):
@@ -268,7 +263,12 @@ class MopidyRPCHandlerNoCSRFProtectionTest(HttpServerTest):
 class HttpServerWithStaticFilesTest(tornado.testing.AsyncHTTPTestCase):
     def get_app(self):
         config = {
-            "http": {"hostname": "127.0.0.1", "port": 6680, "zeroconf": ""}
+            "http": {
+                "hostname": "127.0.0.1",
+                "port": 6680,
+                "zeroconf": "",
+                "default_app": "static",
+            }
         }
         core = mock.Mock()
 
@@ -313,7 +313,12 @@ def wsgi_app_factory(config, core):
 class HttpServerWithWsgiAppTest(tornado.testing.AsyncHTTPTestCase):
     def get_app(self):
         config = {
-            "http": {"hostname": "127.0.0.1", "port": 6680, "zeroconf": ""}
+            "http": {
+                "hostname": "127.0.0.1",
+                "port": 6680,
+                "zeroconf": "",
+                "default_app": "wsgi",
+            }
         }
         core = mock.Mock()
 
@@ -334,5 +339,97 @@ class HttpServerWithWsgiAppTest(tornado.testing.AsyncHTTPTestCase):
     def test_can_wrap_wsgi_apps(self):
         response = self.fetch("/wsgi/", method="GET")
 
-        assert 200 == response.code
-        assert "Hello, world!" in tornado.escape.to_unicode(response.body)
+        assert response.code == 200
+        assert "Hello, world!" in response.body.decode()
+
+
+def default_webapp_factory(config, core):
+    class MainHandler(tornado.web.RequestHandler):
+        def get(self):
+            self.write("Hello from default webapp")
+
+    return [("/", MainHandler, {})]
+
+
+class HttpServerWithAppDefaultApp(tornado.testing.AsyncHTTPTestCase):
+    def get_app(self):
+        config = {
+            "http": {
+                "hostname": "127.0.0.1",
+                "port": 6680,
+                "zeroconf": "",
+                "default_app": "default_app",
+            }
+        }
+        core = mock.Mock()
+
+        apps = [dict(name="default_app", factory=default_webapp_factory)]
+
+        http_server = actor.HttpServer(
+            config=config, core=core, sockets=[], apps=apps, statics=[]
+        )
+
+        return tornado.web.Application(http_server._get_request_handlers())
+
+    def test_should_redirect_to_default_app(self):
+        response = self.fetch("/", method="GET", follow_redirects=False)
+
+        assert response.code == 302
+        assert response.headers["Location"] == "/default_app/"
+
+        response = self.fetch(
+            "/default_app/", method="GET", follow_redirects=True
+        )
+
+        assert response.code == 200
+        assert "Hello from default webapp" in response.body.decode()
+
+
+class HttpServerWithStaticDefaultApp(tornado.testing.AsyncHTTPTestCase):
+    def get_app(self):
+        config = {
+            "http": {
+                "hostname": "127.0.0.1",
+                "port": 6680,
+                "zeroconf": "",
+                "default_app": "default_app",
+            }
+        }
+        core = mock.Mock()
+
+        statics = [dict(name="default_app", path=os.path.dirname(__file__))]
+
+        http_server = actor.HttpServer(
+            config=config, core=core, sockets=[], apps=[], statics=statics
+        )
+
+        return tornado.web.Application(http_server._get_request_handlers())
+
+    def test_should_redirect_to_default_app(self):
+        response = self.fetch("/", method="GET", follow_redirects=False)
+
+        assert response.code == 302
+        assert response.headers["Location"] == "/default_app/"
+
+
+class HttpServerWithInvalidDefaultApp(HttpServerTest):
+    def get_config(self):
+        config = super(HttpServerWithInvalidDefaultApp, self).get_config()
+        config["http"]["default_app"] = "invalid_webclient"
+        return config
+
+    def test_should_redirect_to_clients_list(self):
+        response = self.fetch("/", method="GET", follow_redirects=False)
+
+        assert response.code == 302
+        assert response.headers["Location"] == "/mopidy/"
+
+        response = self.fetch("/", method="GET")
+        body = response.body.decode()
+
+        assert "This web server is a part of the Mopidy music server." in body
+
+        assert "testapp" in body
+        assert "teststatic" in body
+        assert response.headers["X-Mopidy-Version"] == mopidy.__version__
+        assert response.headers["Cache-Control"] == "no-cache"
