@@ -113,6 +113,7 @@ See :ref:`config` for general help on configuring Mopidy.
 
 .. confval:: http/default_app
 
-    Redirect ``http:hostname``:``http:port`` to a specific web app instead of the default page.
-    It is the name used by the extension when it registers its ``http:static`` or ``http:app``.
-    By convention, it should be identical with the extension’s ``ext_name``.
+    Redirect from the web server root to a specific web app instead of Mopidy's
+    default list of web apps. The value should be the name used by the
+    extension when it registers its ``http:static`` or ``http:app`` extension
+    points. By convention, this is the the extension's ``ext_name``.

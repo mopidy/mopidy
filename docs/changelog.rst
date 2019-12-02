@@ -222,7 +222,7 @@ HTTP frontend
   :confval:`http/static_dir`, which has been deprecated since 1.0. (Fixes:
   :issue:`1463`, PR: :issue:`1706`)
 
-- Add option :confval:`http/default_app` to redirect ``http:hostname``:``http:port``
+- Add option :confval:`http/default_app` to redirect from web server root
   to a specific app instead of Mopidy's web app list. (PR: :issue:`1791`)
 
 MPD frontend
