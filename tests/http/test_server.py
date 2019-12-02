@@ -1,4 +1,7 @@
 import os
+import urllib
+import tempfile
+import shutil
 from unittest import mock
 
 import tornado.testing
@@ -433,3 +436,106 @@ class HttpServerWithInvalidDefaultApp(HttpServerTest):
         assert "teststatic" in body
         assert response.headers["X-Mopidy-Version"] == mopidy.__version__
         assert response.headers["Cache-Control"] == "no-cache"
+
+
+def cookie_secret_app_factory(config, core):
+    class BaseHandler(tornado.web.RequestHandler):
+        def get_current_user(self):
+            return self.get_secure_cookie("user")
+
+    class LoginHandler(BaseHandler):
+        def get(self):
+            self.write("This is a login form")
+
+        def post(self):
+            self.set_secure_cookie("user", self.get_argument("name"))
+            self.write("Logged in")
+
+    class MainHandler(BaseHandler):
+        def get(self):
+            if not self.current_user:
+                self.write("Unknown user...")
+                return
+
+            name = tornado.escape.xhtml_escape(self.current_user)
+            self.write("Hello, " + name)
+
+    return [("/", MainHandler, {}), ("/login", LoginHandler, {})]
+
+
+class HttpServerTestLoginWithSecureCookie(tornado.testing.AsyncHTTPTestCase):
+    def get_app(self):
+        self._dirpath = tempfile.mkdtemp()
+
+        config = {
+            "http": {
+                "hostname": "127.0.0.1",
+                "port": 6680,
+                "zeroconf": "",
+                "default_app": "mopidy",
+            },
+            "core": {"data_dir": self._dirpath},
+        }
+        core = mock.Mock()
+
+        apps = [{"name": "cookie_secret", "factory": cookie_secret_app_factory}]
+
+        http_server = actor.HttpServer(
+            config=config, core=core, sockets=[], apps=apps, statics=[]
+        )
+
+        return tornado.web.Application(
+            http_server._get_request_handlers(),
+            cookie_secret=http_server._get_cookie_secret(),
+        )
+
+    def test_main_access_without_login(self):
+        response = self.fetch("/cookie_secret", method="GET")
+
+        assert 200 == response.code
+        assert "Unknown user..." in response.body.decode()
+
+    def test_accessing_login_form_get(self):
+        response = self.fetch("/cookie_secret/login", method="GET")
+
+        assert 200 == response.code
+        assert "This is a login form" in response.body.decode()
+
+    def test_login(self):
+        post_data = {"name": "theuser"}
+        body = urllib.parse.urlencode(post_data)
+
+        response = self.fetch("/cookie_secret/login", method="POST", body=body)
+
+        assert 200 == response.code
+        assert "Logged in" in response.body.decode()
+
+        shutil.rmtree(self._dirpath)
+
+
+def test_get_secure_cookie(tmp_path):
+    config = {
+        "http": {
+            "hostname": "127.0.0.1",
+            "port": 6680,
+            "zeroconf": "",
+            "default_app": "mopidy",
+        },
+        "core": {"data_dir": tmp_path},
+    }
+    core = mock.Mock()
+
+    http_server = actor.HttpServer(
+        config=config, core=core, sockets=[], apps=[], statics=[]
+    )
+
+    # first secret, generating
+    secret_1 = http_server._get_cookie_secret()
+
+    assert isinstance(secret_1, str)
+    assert secret_1 != ""
+    assert len(secret_1) == 64
+
+    # second secret, from file
+    secret_2 = http_server._get_cookie_secret()
+    assert secret_1 == secret_2

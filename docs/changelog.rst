@@ -225,6 +225,10 @@ HTTP frontend
 - Add option :confval:`http/default_app` to redirect from web server root
   to a specific app instead of Mopidy's web app list. (PR: :issue:`1791`)
 
+- Add cookie secret to Tornado web server, allowing Tornado request handlers to
+  call ``get_secure_cookie()``, in an implementation of ``get_current_user()``.
+  (PR: :issue:`1801`)
+
 MPD frontend
 ------------
 
