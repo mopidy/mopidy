@@ -222,7 +222,7 @@ HTTP frontend
   :confval:`http/static_dir`, which has been deprecated since 1.0. (Fixes:
   :issue:`1463`, PR: :issue:`1706`)
 
-- Add cookie secret to Tornado web server, allowing tornado handlers to call
+- Add cookie secret to Tornado web server, allowing Tornado request handlers to call
   get_secure_cookie, in an overrided implementation of get_current_user.
   (PR: :issue:`1801`)
 
