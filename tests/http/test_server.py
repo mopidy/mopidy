@@ -382,9 +382,7 @@ class HttpServerWithAppDefaultApp(tornado.testing.AsyncHTTPTestCase):
         )
 
         assert response.code == 200
-        assert "Hello from default webapp" in tornado.escape.to_unicode(
-            response.body
-        )
+        assert "Hello from default webapp" in response.body.decode()
 
 
 class HttpServerWithStaticDefaultApp(tornado.testing.AsyncHTTPTestCase):
