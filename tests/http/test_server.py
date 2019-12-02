@@ -352,7 +352,7 @@ def cookie_secret_app_factory(config, core):
 
         def post(self):
             self.set_secure_cookie("user", self.get_argument("name"))
-            self.write("Logged")
+            self.write("Logged in")
             # self.redirect("/")
 
     class MainHandler(BaseHandler):
@@ -407,7 +407,7 @@ class HttpServerTestLoginWithSecureCookie(tornado.testing.AsyncHTTPTestCase):
         response = self.fetch("/cookie_secret/login", method="POST", body=body)
 
         assert 200 == response.code
-        assert "Logged" in response.body.decode()
+        assert "Logged in" in response.body.decode()
 
         shutil.rmtree(self._dirpath)
 
