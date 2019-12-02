@@ -411,29 +411,24 @@ class HttpServerTestLoginWithSecureCookie(tornado.testing.AsyncHTTPTestCase):
         shutil.rmtree(self._dirpath)
 
 
-class HttpServerTestCookieSecret(TestCase):
-    def test_get_secure_cookie(self):
-        self._dirpath = tempfile.mkdtemp()
+def test_get_secure_cookie(tmp_path):
+    config = {
+        "http": {"hostname": "127.0.0.1", "port": 6680, "zeroconf": ""},
+        "core": {"data_dir": tmp_path},
+    }
+    core = mock.Mock()
 
-        config = {
-            "http": {"hostname": "127.0.0.1", "port": 6680, "zeroconf": ""},
-            "core": {"data_dir": self._dirpath},
-        }
-        core = mock.Mock()
+    http_server = actor.HttpServer(
+        config=config, core=core, sockets=[], apps=[], statics=[]
+    )
 
-        http_server = actor.HttpServer(
-            config=config, core=core, sockets=[], apps=[], statics=[]
-        )
+    # first secret, generating
+    secret_1 = http_server._get_cookie_secret()
 
-        # first secret, generating
-        secret_1 = http_server._get_cookie_secret()
+    assert isinstance(secret_1, str)
+    assert secret_1 != ""
+    assert len(secret_1) == 64
 
-        assert isinstance(secret_1, str)
-        assert secret_1 != ""
-        assert len(secret_1) == 64
-
-        # second secret, from file
-        secret_2 = http_server._get_cookie_secret()
-        assert secret_1 == secret_2
-
-        shutil.rmtree(self._dirpath)
+    # second secret, from file
+    secret_2 = http_server._get_cookie_secret()
+    assert secret_1 == secret_2
