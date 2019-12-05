@@ -573,7 +573,7 @@ class Audio(pykka.ThreadingActor):
         else:
             self._appsrc.reset()
 
-        if self._live_stream and source.__class__.__name__ == "GstSoupHTTPSrc":
+        if self._live_stream and hasattr(source.props, "is_live"):
             gst_logger.debug("HTTP Src - setting live mode")
             source.set_live(True)
 
