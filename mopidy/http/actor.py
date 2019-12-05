@@ -1,5 +1,6 @@
 import json
 import logging
+import secrets
 import threading
 
 import pykka
@@ -11,7 +12,7 @@ import tornado.websocket
 
 from mopidy import exceptions, models, zeroconf
 from mopidy.core import CoreListener
-from mopidy.http import handlers
+from mopidy.http import Extension, handlers
 from mopidy.internal import encoding, formatting, network
 
 try:
@@ -114,7 +115,10 @@ class HttpServer(threading.Thread):
             # explicitly create an asyncio loop for the current thread.
             asyncio.set_event_loop(asyncio.new_event_loop())
 
-        self.app = tornado.web.Application(self._get_request_handlers())
+        self.app = tornado.web.Application(
+            self._get_request_handlers(),
+            cookie_secret=self._get_cookie_secret(),
+        )
         self.server = tornado.httpserver.HTTPServer(self.app)
         self.server.add_sockets(self.sockets)
 
@@ -131,7 +135,7 @@ class HttpServer(threading.Thread):
         request_handlers = []
         request_handlers.extend(self._get_app_request_handlers())
         request_handlers.extend(self._get_static_request_handlers())
-        request_handlers.extend(self._get_mopidy_request_handlers())
+        request_handlers.extend(self._get_default_request_handlers())
 
         logger.debug(
             "HTTP routes from extensions: %s",
@@ -176,11 +180,34 @@ class HttpServer(threading.Thread):
             logger.debug("Loaded static HTTP extension: %s", static["name"])
         return result
 
-    def _get_mopidy_request_handlers(self):
+    def _get_default_request_handlers(self):
+        sites = [app["name"] for app in self.apps + self.statics]
+
+        default_app = self.config["http"]["default_app"]
+        if default_app not in sites:
+            logger.warning(
+                f"HTTP server's default app {default_app!r} not found"
+            )
+            default_app = "mopidy"
+        logger.debug(f"Default webclient is {default_app}")
+
         return [
             (
-                "/",
+                r"/",
                 tornado.web.RedirectHandler,
-                {"url": "/mopidy/", "permanent": False},
+                {"url": f"/{default_app}/", "permanent": False},
             )
         ]
+
+    def _get_cookie_secret(self):
+        file_path = Extension.get_data_dir(self.config) / "cookie_secret"
+        if not file_path.is_file():
+            cookie_secret = secrets.token_hex(32)
+            file_path.write_text(cookie_secret)
+        else:
+            cookie_secret = file_path.read_text().strip()
+            if not cookie_secret:
+                logging.error(
+                    f"HTTP server could not find cookie secret in {file_path}"
+                )
+        return cookie_secret

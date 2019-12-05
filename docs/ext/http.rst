@@ -109,3 +109,11 @@ See :ref:`config` for general help on configuring Mopidy.
 
     This config should only be disabled if you understand the security implications
     and require the HTTP server's old behaviour.
+
+
+.. confval:: http/default_app
+
+    Redirect from the web server root to a specific web app instead of Mopidy's
+    default list of web apps. The value should be the name used by the
+    extension when it registers its ``http:static`` or ``http:app`` extension
+    points. By convention, this is the the extension's ``ext_name``.

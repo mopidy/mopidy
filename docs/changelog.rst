@@ -206,6 +206,10 @@ Extension support
 
   This makes it easier to support arbitrary encoding in file names.
 
+- The command :command:`mopidy deps` no longer repeats the dependencies of
+  Mopidy itself for every installed extension. This reduces the length of the
+  command's output drastically. (PR: :issue:`1846`)
+
 HTTP frontend
 -------------
 
@@ -217,6 +221,13 @@ HTTP frontend
 - Remove support for serving arbitrary files over HTTP through the use of
   :confval:`http/static_dir`, which has been deprecated since 1.0. (Fixes:
   :issue:`1463`, PR: :issue:`1706`)
+
+- Add option :confval:`http/default_app` to redirect from web server root
+  to a specific app instead of Mopidy's web app list. (PR: :issue:`1791`)
+
+- Add cookie secret to Tornado web server, allowing Tornado request handlers to
+  call ``get_secure_cookie()``, in an implementation of ``get_current_user()``.
+  (PR: :issue:`1801`)
 
 MPD frontend
 ------------
