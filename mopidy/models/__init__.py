@@ -208,8 +208,6 @@ class Track(ValidatedImmutableObject):
     :type musicbrainz_id: string
     :param last_modified: Represents last modification time
     :type last_modified: integer or :class:`None` if unknown
-    :param live_stream: Represents if the URI must be streamed.
-    :type live_stream: bool
     """
 
     #: The track URI. Read-only.
@@ -259,9 +257,6 @@ class Track(ValidatedImmutableObject):
     #: time in milliseconds since Unix epoch. For other backends it could be an
     #: equivalent timestamp or simply a version counter.
     last_modified = fields.Integer(min=0)
-
-    #: The Stream flag
-    live_stream = fields.Boolean(default=False)
 
 
 class TlTrack(ValidatedImmutableObject):

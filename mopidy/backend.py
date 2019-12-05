@@ -213,6 +213,20 @@ class PlaybackProvider:
         """
         return uri
 
+    def is_live(self, uri):
+        """
+        Defines if the custom URI scheme should be read as a live stream
+
+        *MAY be reimplemented by subclass.*
+
+        It avoids latency on web stream such as radios.
+
+        :param uri: the custom URI
+        :type uri: string
+        :rtype: bool
+        """
+        return False
+
     def change_track(self, track):
         """
         Swith to provided track.
@@ -235,7 +249,7 @@ class PlaybackProvider:
             logger.debug("Backend translated URI from %s to %s", track.uri, uri)
         if not uri:
             return False
-        self.audio.set_uri(uri, live_stream=track.live_stream).get()
+        self.audio.set_uri(uri, live_stream=self.is_live(uri)).get()
         return True
 
     def resume(self):
