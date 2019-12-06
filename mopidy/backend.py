@@ -219,7 +219,9 @@ class PlaybackProvider:
 
         *MAY be reimplemented by subclass.*
 
-        It avoids latency on web stream such as radios.
+        Playing a source as a live stream 
+        disable buffering, reducing latency for stream,
+        and discarding data when paused.
 
         :param uri: the custom URI
         :type uri: string
