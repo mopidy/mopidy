@@ -219,7 +219,7 @@ class PlaybackProvider:
 
         *MAY be reimplemented by subclass.*
 
-        Playing a source as a live stream 
+        Playing a source as a live stream
         disable buffering, reducing latency for stream,
         and discarding data when paused.
 
