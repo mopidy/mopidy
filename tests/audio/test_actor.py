@@ -96,6 +96,18 @@ class AudioTest(BaseTest):
         self.audio.start_playback()
         assert self.audio.stop_playback().get()
 
+    def test_start_playback_live_stream(self):
+        self.audio.prepare_change()
+        self.audio.set_uri(self.uris[0], live_stream=True)
+        assert self.audio.start_playback().get()
+
+    def test_start_playback_live_stream_non_existing_file(self):
+        self.possibly_trigger_fake_playback_error(self.uris[0] + "bogus")
+
+        self.audio.prepare_change()
+        self.audio.set_uri(self.uris[0] + "bogus", live_stream=True)
+        assert not self.audio.start_playback().get()
+
     @unittest.SkipTest
     def test_deliver_data(self):
         pass  # TODO
