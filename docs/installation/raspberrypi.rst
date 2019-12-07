@@ -46,20 +46,33 @@ How to for Raspbian
 #. Use the ``raspi-config`` tool to setup the basics of your Pi. You might want
    to do one or more of the following:
 
-   - Change the password of the ``pi`` user.
-   - Change the language, time zone, etc.
+   - In the top menu, change the password of the ``pi`` user.
 
-   Under "Advanced Options":
+   - Under "Network Options":
 
-   - Set a hostname.
-   - Enable SSH if not already enabled.
-   - Force a specific audio output.
-     By default, when using a HDMI display the
-     audio will also be output over HDMI, otherwise the 3.5mm jack will be used.
-   - Adjust the memory split.
-     If you're not using a display (i.e. Raspbian
-     Lite), you should set the minimum value here in order to make best use of
-     the available RAM.
+     - N1: Set a hostname.
+     - N2: Set up WiFi credentials, if you're going to use WiFi.
+
+   - Under "Localisation Options":
+
+     - I1: Change locale from ``en_GB.UTF-8`` to e.g. ``en_US.UTF-8``, that is,
+       unless you're British.
+     - I2: Change the time zone.
+     - I4: Change the WiFi country, so you only use channels allowed to use in your area.
+
+   - Under "Interfacing Options":
+
+     - P2: Enable SSH.
+
+   - Under "Advanced Options":
+
+     - A1: Expand the file system to fill th SD card.
+     - A3: Adjust the memory split.
+       If you're not going to connect a display to your Pi, you should set the
+       minimum value here in order to make best use of the available RAM.
+     - A4: Force a specific audio output.
+       By default, when using a HDMI display the
+       audio will also be output over HDMI, otherwise the 3.5mm jack will be used.
 
    Once done, select "Finish". Depending on what you changed you may be asked if
    you want to restart your Pi, select "Yes" and then log back in again
