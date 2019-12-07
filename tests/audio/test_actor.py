@@ -1,6 +1,7 @@
 import threading
 import unittest
 from unittest import mock
+import time
 
 import pykka
 
@@ -98,15 +99,12 @@ class AudioTest(BaseTest):
 
     def test_start_playback_live_stream(self):
         self.audio.prepare_change()
-        self.audio.set_uri(self.uris[0], live_stream=True)
+        self.audio.set_uri(
+            "http://radiomeuh.ice.infomaniak.ch/radiomeuh-128.mp3",
+            live_stream=True,
+        )
+        time.sleep(2)
         assert self.audio.start_playback().get()
-
-    def test_start_playback_live_stream_non_existing_file(self):
-        self.possibly_trigger_fake_playback_error(self.uris[0] + "bogus")
-
-        self.audio.prepare_change()
-        self.audio.set_uri(self.uris[0] + "bogus", live_stream=True)
-        assert not self.audio.start_playback().get()
 
     @unittest.SkipTest
     def test_deliver_data(self):
