@@ -11,8 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 class TracklistController:
-    pykka_traversable = True
-
     def __init__(self, core):
         self.core = core
         self._next_tlid = 1

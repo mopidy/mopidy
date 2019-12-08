@@ -52,14 +52,18 @@ class Core(
 
         self.backends = Backends(backends)
 
-        self.library = LibraryController(backends=self.backends, core=self)
-        self.history = HistoryController()
-        self.mixer = MixerController(mixer=mixer)
-        self.playback = PlaybackController(
-            audio=audio, backends=self.backends, core=self
+        self.library = pykka.traversable(
+            LibraryController(backends=self.backends, core=self)
         )
-        self.playlists = PlaylistsController(backends=self.backends, core=self)
-        self.tracklist = TracklistController(core=self)
+        self.history = pykka.traversable(HistoryController())
+        self.mixer = pykka.traversable(MixerController(mixer=mixer))
+        self.playback = pykka.traversable(
+            PlaybackController(audio=audio, backends=self.backends, core=self)
+        )
+        self.playlists = pykka.traversable(
+            PlaylistsController(backends=self.backends, core=self)
+        )
+        self.tracklist = pykka.traversable(TracklistController(core=self))
 
         self.audio = audio
 

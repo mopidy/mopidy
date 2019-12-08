@@ -1,5 +1,7 @@
 import logging
 
+import pykka
+
 from mopidy import listener
 
 logger = logging.getLogger(__name__)
@@ -44,9 +46,9 @@ class Backend:
     #: List of URI schemes this backend can handle.
     uri_schemes = []
 
-    # Because the providers is marked as pykka_traversible, we can't get() them
-    # from another actor, and need helper methods to check if the providers are
-    # set or None.
+    # Because the providers is marked as pykka.traversable(), we can't get()
+    # them from another actor, and need helper methods to check if the
+    # providers are set or None.
 
     def has_library(self):
         return self.library is not None
@@ -65,14 +67,13 @@ class Backend:
         return True
 
 
+@pykka.traversable
 class LibraryProvider:
 
     """
     :param backend: backend the controller is a part of
     :type backend: :class:`mopidy.backend.Backend`
     """
-
-    pykka_traversable = True
 
     root_directory = None
     """
@@ -149,6 +150,7 @@ class LibraryProvider:
         pass
 
 
+@pykka.traversable
 class PlaybackProvider:
 
     """
@@ -157,8 +159,6 @@ class PlaybackProvider:
     :param backend: the backend
     :type backend: :class:`mopidy.backend.Backend`
     """
-
-    pykka_traversable = True
 
     def __init__(self, audio, backend):
         self.audio = audio
@@ -284,6 +284,7 @@ class PlaybackProvider:
         return self.audio.get_position().get()
 
 
+@pykka.traversable
 class PlaylistsProvider:
 
     """
@@ -294,8 +295,6 @@ class PlaylistsProvider:
     :param backend: backend the controller is a part of
     :type backend: :class:`mopidy.backend.Backend` instance
     """
-
-    pykka_traversable = True
 
     def __init__(self, backend):
         self.backend = backend

@@ -31,8 +31,6 @@ def _backend_error_handling(backend, reraise=None):
 
 
 class LibraryController:
-    pykka_traversable = True
-
     def __init__(self, backends, core):
         self.backends = backends
         self.core = core

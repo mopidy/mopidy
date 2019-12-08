@@ -142,8 +142,6 @@ class _Outputs(Gst.Bin):
 
 
 class SoftwareMixer:
-    pykka_traversable = True
-
     def __init__(self, mixer):
         self._mixer = mixer
         self._element = None
@@ -452,7 +450,7 @@ class Audio(pykka.ThreadingActor):
         self._signals = utils.Signals()
 
         if mixer and self._config["audio"]["mixer"] == "software":
-            self.mixer = SoftwareMixer(mixer)
+            self.mixer = pykka.traversable(SoftwareMixer(mixer))
 
     def on_start(self):
         self._thread = threading.current_thread()
