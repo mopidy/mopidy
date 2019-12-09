@@ -587,7 +587,7 @@ class Audio(pykka.ThreadingActor):
 
         :param uri: the URI to play
         :type uri: string
-        :param live_stream: disable buffering, reducing latency for stream,
+        :param live_stream: disables buffering, reducing latency for stream,
             and discarding data when paused
         :type live_stream: bool
         """
