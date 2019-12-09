@@ -221,7 +221,7 @@ class PlaybackProvider:
 
         Playing a source as a live stream
         disables buffering, which reduces latency before playback starts,
-        and discarding data when paused.
+        and discards data when paused.
 
         :param uri: the custom URI
         :type uri: string
