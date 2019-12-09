@@ -574,7 +574,7 @@ class Audio(pykka.ThreadingActor):
             self._appsrc.reset()
 
         if self._live_stream and hasattr(source.props, "is_live"):
-            gst_logger.debug("HTTP Src - setting live mode")
+            gst_logger.debug("Enabling live stream mode")
             source.set_live(True)
 
         utils.setup_proxy(source, self._config["proxy"])
