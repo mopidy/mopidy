@@ -24,14 +24,16 @@ class DummyAudio(pykka.ThreadingActor):
         self._callback = None
         self._uri = None
         self._stream_changed = False
+        self._live_stream = False
         self._tags = {}
         self._bad_uris = set()
 
-    def set_uri(self, uri):
+    def set_uri(self, uri, live_stream=False):
         assert self._uri is None, "prepare change not called before set"
         self._position = 0
         self._uri = uri
         self._stream_changed = True
+        self._live_stream = live_stream
         self._tags = {}
 
     def set_appsrc(self, *args, **kwargs):

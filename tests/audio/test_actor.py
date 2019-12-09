@@ -629,3 +629,55 @@ class AudioBufferingTest(unittest.TestCase):
         self.audio.stop_playback()
         playbin.set_state.assert_called_with(Gst.State.NULL)
         assert not self.audio._buffering
+
+
+class AudioLiveTest(unittest.TestCase):
+    config = {
+        "audio": {
+            "buffer_time": None,
+            "mixer": "fakemixer track_max_volume=65536",
+            "mixer_track": None,
+            "mixer_volume": None,
+            "output": "testoutput",
+            "visualizer": None,
+        }
+    }
+
+    def setUp(self):  # noqa: N802
+        config = {
+            "audio": {
+                "buffer_time": None,
+                "mixer": "foomixer",
+                "mixer_volume": None,
+                "output": "testoutput",
+                "visualizer": None,
+            },
+            "proxy": {"hostname": ""},
+        }
+        self.audio = audio.Audio(config=config, mixer=None)
+
+    def test_not_live_mode(self):
+        source = mock.MagicMock()
+
+        # Avoid appsrc.configure()
+        source.get_factory.get_name = mock.MagicMock(return_value="not_appsrc")
+
+        source.props = mock.MagicMock(spec=[])
+        self.audio._live_stream = False
+
+        self.audio._on_source_setup("dummy", source)
+
+        source.set_live.assert_not_called()
+
+    def test_live_mode(self):
+        source = mock.MagicMock()
+
+        # Avoid appsrc.configure()
+        source.get_factory.get_name = mock.MagicMock(return_value="not_appsrc")
+
+        source.props.is_live = mock.MagicMock(return_value=True)
+        self.audio._live_stream = True
+
+        self.audio._on_source_setup("dummy", source)
+
+        source.set_live.assert_called_with(True)

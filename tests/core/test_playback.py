@@ -173,6 +173,9 @@ class TestPlayHandling(BaseTest):
         current_tl_track = self.core.playback.get_current_tl_track()
         assert tl_tracks[1] == current_tl_track
 
+    def test_default_is_live_behaviour_is_not_live(self):
+        assert not self.backend.playback.is_live(self.tracks[0].uri).get()
+
 
 class TestNextHandling(BaseTest):
     def test_get_current_tl_track_next(self):
