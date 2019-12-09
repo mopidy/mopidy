@@ -661,6 +661,7 @@ class AudioLiveTest(unittest.TestCase):
 
         # Avoid appsrc.configure()
         source.get_factory.get_name = mock.MagicMock(return_value="not_appsrc")
+
         source.props = mock.MagicMock(spec=[])
         self.audio._live_stream = False
 
@@ -671,7 +672,7 @@ class AudioLiveTest(unittest.TestCase):
     def test_live_mode(self):
         source = mock.MagicMock()
 
-        # disable appsrc configure
+        # Avoid appsrc.configure()
         source.get_factory.get_name = mock.MagicMock(return_value="not_appsrc")
 
         source.props.is_live = mock.MagicMock(return_value=True)
