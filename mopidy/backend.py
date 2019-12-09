@@ -215,7 +215,7 @@ class PlaybackProvider:
 
     def is_live(self, uri):
         """
-        Defines if the custom URI scheme should be read as a live stream
+        Defines if the custom URI scheme should be read as a live stream.
 
         *MAY be reimplemented by subclass.*
 
