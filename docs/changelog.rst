@@ -182,8 +182,8 @@ Backend API
 -----------
 
 - Add :meth:`mopidy.backend.PlaybackProvider.is_live` which can be
-  re-implemented by Playback providers, to define if the custom
-  URI scheme is a live stream. (PR: :issue:`1845`)
+  implemented by playback providers that wants to mark their URIs as
+  live streams that should not be buffered. (PR: :issue:`1845`)
 
 Models
 ------
@@ -266,9 +266,9 @@ Audio
 - Remove the method :meth:`mopidy.audio.Audio.emit_end_of_stream`, which has
   been deprecated since 1.0. (Fixes: :issue:`1465`, PR: :issue:`1705`)
 
-- Add live_stream option to the method :meth:`mopidy.audio.Audio.set_uri`,
-  which disables buffering, reducing latency for stream,
-  and discarding data when paused. (PR: :issue:`1845`)
+- Add ``live_stream`` option to :meth:`mopidy.audio.Audio.set_uri`
+  that disables buffering, which reduces latency before playback starts,
+  and discards data when paused. (PR: :issue:`1845`)
 
 Internals
 ---------

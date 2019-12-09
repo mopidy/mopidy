@@ -215,15 +215,14 @@ class PlaybackProvider:
 
     def is_live(self, uri):
         """
-        Defines if the custom URI scheme should be read as a live stream.
+        Decide if the URI should be threated as a live stream or not.
 
         *MAY be reimplemented by subclass.*
 
-        Playing a source as a live stream
-        disables buffering, which reduces latency before playback starts,
-        and discards data when paused.
+        Playing a source as a live stream disables buffering, which reduces
+        latency before playback starts, and discards data when paused.
 
-        :param uri: the custom URI
+        :param uri: the URI
         :type uri: string
         :rtype: bool
         """
