@@ -323,21 +323,18 @@ class _Handler:
         AudioListener.send("reached_end_of_stream")
 
     def on_error(self, error, debug):
-        error_msg = str(error).decode()
-        debug_msg = debug.decode()
+        gst_logger.error(f"GStreamer error: {error.message}")
         gst_logger.debug(
-            "Got ERROR bus message: error=%r debug=%r", error_msg, debug_msg
+            f"Got ERROR bus message: error={error!r} debug={debug!r}"
         )
-        gst_logger.error("GStreamer error: %s", error_msg)
+
         # TODO: is this needed?
         self._audio.stop_playback()
 
     def on_warning(self, error, debug):
-        error_msg = str(error).decode()
-        debug_msg = debug.decode()
-        gst_logger.warning("GStreamer warning: %s", error_msg)
+        gst_logger.warning(f"GStreamer warning: {error.message}")
         gst_logger.debug(
-            "Got WARNING bus message: error=%r debug=%r", error_msg, debug_msg
+            f"Got WARNING bus message: error={error!r} debug={debug!r}"
         )
 
     def on_async_done(self):
