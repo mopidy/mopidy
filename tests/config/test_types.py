@@ -31,12 +31,12 @@ def test_decode(value, expected):
     "value, expected",
     [
         # unicode strings are string-escaped and encoded as UTF-8:
-        ("abc", b"abc"),
-        ("æøå", "æøå".encode()),
-        ("a\nb", b"a\\nb"),
+        ("abc", "abc"),
+        ("æøå", "æøå"),
+        ("a\nb", "a\\nb"),
         # bytes are string-escaped:
-        (b"abc", b"abc"),
-        (b"a\nb", b"a\\nb"),
+        (b"abc", "abc"),
+        (b"a\nb", "a\\nb"),
     ],
 )
 def test_encode(value, expected):
@@ -46,7 +46,10 @@ def test_encode(value, expected):
 def test_encode_decode_invalid_utf8():
     data = b"\xc3\x00"  # invalid utf-8
 
-    assert types.encode(types.decode(data)) == data
+    result = types.encode(types.decode(data))
+
+    assert isinstance(result, str)
+    assert result == data.decode(errors="surrogateescape")
 
 
 class TestConfigValue:
@@ -62,22 +65,22 @@ class TestConfigValue:
 
         result = cv.serialize(object())
 
-        assert isinstance(result, bytes)
+        assert isinstance(result, str)
 
     def test_serialize_none(self):
         cv = types.ConfigValue()
 
         result = cv.serialize(None)
 
-        assert isinstance(result, bytes)
-        assert result == b""
+        assert isinstance(result, str)
+        assert result == ""
 
     def test_serialize_supports_display(self):
         cv = types.ConfigValue()
 
         result = cv.serialize(object(), display=True)
 
-        assert isinstance(result, bytes)
+        assert isinstance(result, str)
 
 
 class TestDeprecated:
@@ -152,38 +155,38 @@ class TestString:
 
         assert cv.deserialize(incorrectly_encoded_bytes) == "\udce6\udcf8\udce5"
 
-    def test_serialize_encodes_utf8(self):
+    def test_serialize_returns_text(self):
         cv = types.String()
 
         result = cv.serialize("æøå")
 
-        assert isinstance(result, bytes)
-        assert result == "æøå".encode()
+        assert isinstance(result, str)
+        assert result == "æøå"
 
-    def test_serialize_does_not_encode_bytes(self):
+    def test_serialize_decodes_bytes(self):
         cv = types.String()
         bytes_string = "æøå".encode()
 
         result = cv.serialize(bytes_string)
 
-        assert isinstance(result, bytes)
-        assert result == bytes_string
+        assert isinstance(result, str)
+        assert result == bytes_string.decode()
 
     def test_serialize_handles_escapes(self):
         cv = types.String()
 
         result = cv.serialize("a\n\tb")
 
-        assert isinstance(result, bytes)
-        assert result == br"a\n\tb"
+        assert isinstance(result, str)
+        assert result == r"a\n\tb"
 
     def test_serialize_none(self):
         cv = types.String()
 
         result = cv.serialize(None)
 
-        assert isinstance(result, bytes)
-        assert result == b""
+        assert isinstance(result, str)
+        assert result == ""
 
     def test_deserialize_enforces_choices_optional(self):
         cv = types.String(optional=True, choices=["foo", "bar", "baz"])
@@ -220,24 +223,24 @@ class TestSecret:
 
         result = cv.serialize(None)
 
-        assert isinstance(result, bytes)
-        assert result == b""
+        assert isinstance(result, str)
+        assert result == ""
 
     def test_serialize_for_display_masks_value(self):
         cv = types.Secret()
 
         result = cv.serialize("s3cret", display=True)
 
-        assert isinstance(result, bytes)
-        assert result == b"********"
+        assert isinstance(result, str)
+        assert result == "********"
 
     def test_serialize_none_for_display(self):
         cv = types.Secret()
 
         result = cv.serialize(None, display=True)
 
-        assert isinstance(result, bytes)
-        assert result == b""
+        assert isinstance(result, str)
+        assert result == ""
 
 
 class TestInteger:
@@ -332,16 +335,16 @@ class TestBoolean:
 
         result = cv.serialize(True)
 
-        assert isinstance(result, bytes)
-        assert result == b"true"
+        assert isinstance(result, str)
+        assert result == "true"
 
     def test_serialize_false(self):
         cv = types.Boolean()
 
         result = cv.serialize(False)
 
-        assert isinstance(result, bytes)
-        assert result == b"false"
+        assert isinstance(result, str)
+        assert result == "false"
 
     def test_serialize_none_as_false(self):
         # TODO We should consider making `None` an invalid value, but we have
@@ -351,8 +354,8 @@ class TestBoolean:
 
         result = cv.serialize(None)
 
-        assert isinstance(result, bytes)
-        assert result == b"false"
+        assert isinstance(result, str)
+        assert result == "false"
 
     def test_serialize_invalid_values(self):
         cv = types.Boolean()
@@ -418,16 +421,16 @@ class TestList:
 
         result = cv.serialize(("foo", "bar", "baz"))
 
-        assert isinstance(result, bytes)
-        assert result == b"\n  foo\n  bar\n  baz"
+        assert isinstance(result, str)
+        assert result == "\n  foo\n  bar\n  baz"
 
     def test_serialize_none(self):
         cv = types.List()
 
         result = cv.serialize(None)
 
-        assert isinstance(result, bytes)
-        assert result == b""
+        assert isinstance(result, str)
+        assert result == ""
 
 
 class TestLogColor:
@@ -448,13 +451,13 @@ class TestLogColor:
     def test_serialize(self):
         cv = types.LogColor()
 
-        assert cv.serialize("red") == b"red"
-        assert cv.serialize("blue") == b"blue"
+        assert cv.serialize("red") == "red"
+        assert cv.serialize("blue") == "blue"
 
     def test_serialize_ignores_unknown_color(self):
         cv = types.LogColor()
 
-        assert cv.serialize("golden") == b""
+        assert cv.serialize("golden") == ""
 
 
 class TestLogLevel:
@@ -489,12 +492,12 @@ class TestLogLevel:
         cv = types.LogLevel()
 
         for name, level in self.levels.items():
-            cv.serialize(level) == name.encode()
+            cv.serialize(level) == name
 
     def test_serialize_ignores_unknown_level(self):
         cv = types.LogLevel()
 
-        assert cv.serialize(1337) == b""
+        assert cv.serialize(1337) == ""
 
 
 class TestHostname:
@@ -608,14 +611,14 @@ class TestPath:
         cv = types.Path()
         path = types._ExpandedPath("original_path", "expanded_path")
 
-        assert cv.serialize(path) == b"original_path"
+        assert cv.serialize(path) == "original_path"
 
     def test_serialize_plain_string(self):
         cv = types.Path()
 
-        assert cv.serialize(b"path") == b"path"
+        assert cv.serialize(b"path") == "path"
 
     def test_serialize_supports_unicode_string(self):
         cv = types.Path()
 
-        assert cv.serialize("æøå") == "æøå".encode()
+        assert cv.serialize("æøå") == "æøå"

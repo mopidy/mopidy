@@ -27,7 +27,7 @@ def encode(value):
             char, char.encode(encoding="unicode-escape").decode()
         )
 
-    return value.encode(errors="surrogateescape")
+    return value
 
 
 class DeprecatedValue:
@@ -58,8 +58,8 @@ class ConfigValue:
     def serialize(self, value, display=False):
         """Convert value back to string for saving."""
         if value is None:
-            return b""
-        return encode(str(value))
+            return ""
+        return str(value)
 
 
 class Deprecated(ConfigValue):
@@ -96,7 +96,7 @@ class String(ConfigValue):
 
     def serialize(self, value, display=False):
         if value is None:
-            return b""
+            return ""
         return encode(value)
 
 
@@ -115,7 +115,7 @@ class Secret(String):
 
     def serialize(self, value, display=False):
         if value is not None and display:
-            return b"********"
+            return "********"
         return super().serialize(value, display)
 
 
@@ -171,9 +171,9 @@ class Boolean(ConfigValue):
 
     def serialize(self, value, display=False):
         if value is True:
-            return b"true"
+            return "true"
         elif value in (False, None):
-            return b"false"
+            return "false"
         else:
             raise ValueError(f"{value!r} is not a boolean")
 
@@ -200,8 +200,8 @@ class List(ConfigValue):
 
     def serialize(self, value, display=False):
         if not value:
-            return b""
-        return b"\n  " + b"\n  ".join(encode(v) for v in value if v)
+            return ""
+        return "\n  " + "\n  ".join(encode(v) for v in value if v)
 
 
 class LogColor(ConfigValue):
@@ -213,7 +213,7 @@ class LogColor(ConfigValue):
     def serialize(self, value, display=False):
         if value.lower() in log.COLORS:
             return encode(value.lower())
-        return b""
+        return ""
 
 
 class LogLevel(ConfigValue):
@@ -242,7 +242,7 @@ class LogLevel(ConfigValue):
         lookup = {v: k for k, v in self.levels.items()}
         if value in lookup:
             return encode(lookup[value])
-        return b""
+        return ""
 
 
 class Hostname(ConfigValue):
@@ -318,6 +318,6 @@ class Path(ConfigValue):
     def serialize(self, value, display=False):
         if isinstance(value, _ExpandedPath):
             value = value.original
-        if isinstance(value, str):
-            value = value.encode()
+        if isinstance(value, bytes):
+            value = value.decode(errors="surrogateescape")
         return value

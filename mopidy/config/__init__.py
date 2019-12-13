@@ -245,10 +245,6 @@ def _format(config, comments, schemas, display, disable):
             comment = comments.get(schema.name, {}).get(key, "")
             output.append(f"{key} =")
             if value is not None:
-                if isinstance(value, bytes):
-                    # TODO: Change ConfigValue.serialize() to return
-                    # unicode and remove the step decode() here.
-                    value = value.decode()
                 output[-1] += " " + value
             if comment:
                 output[-1] += "  ; " + comment.capitalize()

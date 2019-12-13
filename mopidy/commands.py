@@ -468,7 +468,12 @@ class ConfigCommand(Command):
         self.set(base_verbosity_level=-1)
 
     def run(self, config, errors, schemas):
-        print(config_lib.format(config, schemas, errors))
+        data = config_lib.format(config, schemas, errors)
+
+        # Throw away all bytes that are not valid UTF-8 before printing
+        data = data.encode(errors="surrogateescape").decode(errors="replace")
+
+        print(data)
         return 0
 
 
