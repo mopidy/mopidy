@@ -84,7 +84,7 @@ _schemas = [
 
 _INITIAL_HELP = """
 # For further information about options in this file see:
-#   http://docs.mopidy.com/
+#   https://docs.mopidy.com/
 #
 # The initial commented out values reflect the defaults as of:
 #   %(versions)s
