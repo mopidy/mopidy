@@ -87,7 +87,7 @@ _INITIAL_HELP = """
 #   https://docs.mopidy.com/
 #
 # The initial commented out values reflect the defaults as of:
-#   %(versions)s
+#   {versions}
 #
 # Available options and defaults might have changed since then,
 # run `mopidy config` to see the current effective config and
