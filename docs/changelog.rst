@@ -278,7 +278,8 @@ Internals
 - Port test assertions from ``unittest`` methods to pytest ``assert``
   statements. (PR: :issue:`1838`)
 
-- Switch all internal path handling to use :mod:`pathlib`. (PR: :issue:`1814`)
+- Switch all internal path handling to use :mod:`pathlib`. (Fixes:
+  :issue:`1744`, PR: :issue:`1814`)
 
 - Remove :mod:`mopidy.compat` and all Python 2/3 compatability code. (PR:
   :issue:`1833`, :issue:`1835`)
