@@ -195,7 +195,11 @@ class TracklistController:
         """
 
         current_tl_track = self.core.playback.get_current_tl_track()
-        return getattr(self.eot_track(current_tl_track), "tlid", None)
+
+        with deprecation.ignore("core.tracklist.eot_track"):
+            eot_tl_track = self.eot_track(current_tl_track)
+
+        return getattr(eot_tl_track, "tlid", None)
 
     def eot_track(self, tl_track):
         """
@@ -203,11 +207,14 @@ class TracklistController:
 
         Not necessarily the same track as :meth:`next_track`.
 
+        .. deprecated:: 3.0
+            Use :meth:`get_eot_tlid` instead.
+
         :param tl_track: the reference track
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
-        deprecation.warn("core.tracklist.eot_track", pending=True)
+        deprecation.warn("core.tracklist.eot_track")
         tl_track is None or validation.check_instance(tl_track, TlTrack)
         if self.get_single() and self.get_repeat():
             return tl_track
@@ -234,7 +241,11 @@ class TracklistController:
         .. versionadded:: 1.1
         """
         current_tl_track = self.core.playback.get_current_tl_track()
-        return getattr(self.next_track(current_tl_track), "tlid", None)
+
+        with deprecation.ignore("core.tracklist.next_track"):
+            next_tl_track = self.next_track(current_tl_track)
+
+        return getattr(next_tl_track, "tlid", None)
 
     def next_track(self, tl_track):
         """
@@ -246,11 +257,14 @@ class TracklistController:
         enabled this should be a random track, all tracks should be played once
         before the tracklist repeats.
 
+        .. deprecated:: 3.0
+            Use :meth:`get_next_tlid` instead.
+
         :param tl_track: the reference track
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
-        deprecation.warn("core.tracklist.next_track", pending=True)
+        deprecation.warn("core.tracklist.next_track")
         tl_track is None or validation.check_instance(tl_track, TlTrack)
 
         if not self._tl_tracks:
@@ -297,7 +311,11 @@ class TracklistController:
         .. versionadded:: 1.1
         """
         current_tl_track = self.core.playback.get_current_tl_track()
-        return getattr(self.previous_track(current_tl_track), "tlid", None)
+
+        with deprecation.ignore("core.tracklist.previous_track"):
+            previous_tl_track = self.previous_track(current_tl_track)
+
+        return getattr(previous_tl_track, "tlid", None)
 
     def previous_track(self, tl_track):
         """
@@ -308,11 +326,14 @@ class TracklistController:
         random and/or consume is enabled it should return the current track
         instead.
 
+        .. deprecated:: 3.0
+            Use :meth:`get_previous_tlid` instead.
+
         :param tl_track: the reference track
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
-        deprecation.warn("core.tracklist.previous_track", pending=True)
+        deprecation.warn("core.tracklist.previous_track")
         tl_track is None or validation.check_instance(tl_track, TlTrack)
 
         if self.get_repeat() or self.get_consume() or self.get_random():

@@ -275,6 +275,9 @@ class PlaybackController:
 
         Note that the track **must** already be in the tracklist.
 
+        .. deprecated:: 3.0
+            The ``tl_track`` argument. Use ``tlid`` instead.
+
         :param tl_track: track to play
         :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :param tlid: TLID of the track to play
@@ -287,7 +290,7 @@ class PlaybackController:
         tlid is None or validation.check_integer(tlid, min=1)
 
         if tl_track:
-            deprecation.warn("core.playback.play:tl_track_kwarg", pending=True)
+            deprecation.warn("core.playback.play:tl_track_kwarg")
 
         if tl_track is None and tlid is not None:
             for tl_track in self.core.tracklist.get_tl_tracks():
