@@ -84,10 +84,10 @@ _schemas = [
 
 _INITIAL_HELP = """
 # For further information about options in this file see:
-#   http://docs.mopidy.com/
+#   https://docs.mopidy.com/
 #
 # The initial commented out values reflect the defaults as of:
-#   %(versions)s
+#   {versions}
 #
 # Available options and defaults might have changed since then,
 # run `mopidy config` to see the current effective config and
@@ -245,10 +245,6 @@ def _format(config, comments, schemas, display, disable):
             comment = comments.get(schema.name, {}).get(key, "")
             output.append(f"{key} =")
             if value is not None:
-                if isinstance(value, bytes):
-                    # TODO: Change ConfigValue.serialize() to return
-                    # unicode and remove the step decode() here.
-                    value = value.decode()
                 output[-1] += " " + value
             if comment:
                 output[-1] += "  ; " + comment.capitalize()
