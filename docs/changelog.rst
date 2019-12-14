@@ -136,6 +136,11 @@ Playback controller
     Use :meth:`~mopidy.core.MixerController.get_volume`
     and :meth:`~mopidy.core.MixerController.set_volume`.
 
+- Deprecated the ``tl_track`` argument to
+  :meth:`mopidy.core.PlaybackController.play`, with the goal of removing it in
+  the next major release. Use the ``tlid`` argument instead.
+  (Fixes: #1773, PR: #1786, #1854)
+
 Playlist controller
 ^^^^^^^^^^^^^^^^^^^
 
@@ -177,6 +182,22 @@ Tracklist controller
 - Removed the support for passing filter criterias as keyword arguments to
   :meth:`mopidy.core.TracklistController.remove`.
   Use the ``criteria`` argument instead.
+
+- Deprecated methods, with the goal of removing them in the next major release:
+  (Fixes: #1773, PR: #1786, #1854)
+
+  - :meth:`mopidy.core.TracklistController.eot_track`.
+    Use :meth:`~mopidy.core.TracklistController.get_eot_tlid` instead.
+
+  - :meth:`mopidy.core.TracklistController.next_track`.
+    Use :meth:`~mopidy.core.TracklistController.get_next_tlid` instead.
+
+  - :meth:`mopidy.core.TracklistController.previous_track`.
+    Use :meth:`~mopidy.core.TracklistController.get_previous_tlid` instead.
+
+- The ``tracks`` argument to :meth:`mopidy.core.TracklistController.add` has
+  been deprecated since Mopidy 1.0. It is still deprecated, with the goal of
+  removing it in the next major release. Use the ``uris`` argument instead.
 
 Backend API
 -----------
