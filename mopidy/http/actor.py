@@ -13,7 +13,7 @@ import tornado.websocket
 from mopidy import exceptions, models, zeroconf
 from mopidy.core import CoreListener
 from mopidy.http import Extension, handlers
-from mopidy.internal import encoding, formatting, network
+from mopidy.internal import formatting, network
 
 try:
     import asyncio
@@ -48,10 +48,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
                 statics=self.statics,
             )
         except OSError as exc:
-            error = encoding.locale_decode(exc)
-            raise exceptions.FrontendError(
-                f"HTTP server startup failed: {error}"
-            )
+            raise exceptions.FrontendError(f"HTTP server startup failed: {exc}")
 
         self.zeroconf_name = config["http"]["zeroconf"]
         self.zeroconf_http = None

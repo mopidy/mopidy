@@ -8,7 +8,7 @@ import threading
 
 import pykka
 
-from mopidy.internal import encoding, path, validation
+from mopidy.internal import path, validation
 from mopidy.internal.gi import GLib
 
 logger = logging.getLogger(__name__)
@@ -41,11 +41,10 @@ def try_ipv6_socket():
     try:
         socket.socket(socket.AF_INET6).close()
         return True
-    except OSError as error:
+    except OSError as exc:
         logger.debug(
-            "Platform supports IPv6, but socket creation failed, "
-            "disabling: %s",
-            encoding.locale_decode(error),
+            f"Platform supports IPv6, but socket creation failed, "
+            f"disabling: {exc}"
         )
     return False
 
@@ -261,10 +260,10 @@ class Connection:
         try:
             sent = self._sock.send(data)
             return data[sent:]
-        except OSError as e:
-            if e.errno in (errno.EWOULDBLOCK, errno.EINTR):
+        except OSError as exc:
+            if exc.errno in (errno.EWOULDBLOCK, errno.EINTR):
                 return data
-            self.stop(f"Unexpected client error: {encoding.locale_decode(e)}")
+            self.stop(f"Unexpected client error: {exc}")
             return b""
 
     def enable_timeout(self):
@@ -294,8 +293,8 @@ class Connection:
                 GLib.IO_IN | GLib.IO_ERR | GLib.IO_HUP,
                 self.recv_callback,
             )
-        except OSError as e:
-            self.stop(f"Problem with connection: {encoding.locale_decode(e)}")
+        except OSError as exc:
+            self.stop(f"Problem with connection: {exc}")
 
     def disable_recv(self):
         if self.recv_id is None:
@@ -313,8 +312,8 @@ class Connection:
                 GLib.IO_OUT | GLib.IO_ERR | GLib.IO_HUP,
                 self.send_callback,
             )
-        except OSError as e:
-            self.stop(f"Problem with connection: {encoding.locale_decode(e)}")
+        except OSError as exc:
+            self.stop(f"Problem with connection: {exc}")
 
     def disable_send(self):
         if self.send_id is None:
@@ -330,11 +329,9 @@ class Connection:
 
         try:
             data = self._sock.recv(4096)
-        except OSError as e:
-            if e.errno not in (errno.EWOULDBLOCK, errno.EINTR):
-                self.stop(
-                    f"Unexpected client error: {encoding.locale_decode(e)}"
-                )
+        except OSError as exc:
+            if exc.errno not in (errno.EWOULDBLOCK, errno.EINTR):
+                self.stop(f"Unexpected client error: {exc}")
             return True
 
         if not data:

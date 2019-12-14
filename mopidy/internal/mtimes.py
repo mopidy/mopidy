@@ -4,7 +4,6 @@ import stat
 import threading
 
 from mopidy import exceptions
-from mopidy.internal import encoding
 
 
 def find_mtimes(root, follow=False):
@@ -94,9 +93,7 @@ def _find_worker(root, follow, done, work, results, errors):
             else:
                 errors[path] = exceptions.FindError("Not a file or directory.")
 
-        except OSError as e:
-            errors[path] = exceptions.FindError(
-                encoding.locale_decode(e.strerror), e.errno
-            )
+        except OSError as exc:
+            errors[path] = exceptions.FindError(exc.strerror, exc.errno)
         finally:
             work.task_done()

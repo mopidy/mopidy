@@ -10,7 +10,7 @@ import tornado.websocket
 
 import mopidy
 from mopidy import core, models
-from mopidy.internal import encoding, jsonrpc
+from mopidy.internal import jsonrpc
 
 logger = logging.getLogger(__name__)
 
@@ -90,12 +90,10 @@ def _send_broadcast(client, msg):
     # to succeed, so catch everything.
     try:
         client.write_message(msg)
-    except Exception as e:
-        error_msg = encoding.locale_decode(e)
+    except Exception as exc:
         logger.debug(
-            "Broadcast of WebSocket message to %s failed: %s",
-            client.request.remote_ip,
-            error_msg,
+            f"Broadcast of WebSocket message to "
+            f"{client.request.remote_ip} failed: {exc}"
         )
         # TODO: should this do the same cleanup as the on_message code?
 
@@ -153,9 +151,8 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                     self.request.remote_ip,
                     response,
                 )
-        except Exception as e:
-            error_msg = encoding.locale_decode(e)
-            logger.error("WebSocket request error: %s", error_msg)
+        except Exception as exc:
+            logger.error(f"WebSocket request error: {exc}")
             self.close()
 
     def check_origin(self, origin):

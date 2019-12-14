@@ -7,7 +7,7 @@ import pykka.debug
 from mopidy import commands
 from mopidy import config as config_lib
 from mopidy import ext
-from mopidy.internal import encoding, log, path, process, versioning
+from mopidy.internal import log, path, process, versioning
 from mopidy.internal.gi import Gst  # noqa: F401
 
 try:
@@ -175,11 +175,9 @@ def create_initial_config_file(args, extensions_data):
             content=default.encode(errors="surrogateescape"),
         )
         logger.info("Initialized %s with default config", config_file)
-    except OSError as error:
+    except OSError as exc:
         logger.warning(
-            "Unable to initialize %s with default config: %s",
-            config_file,
-            encoding.locale_decode(error),
+            f"Unable to initialize {config_file} with default config: {exc}"
         )
 
 
