@@ -5,7 +5,7 @@ import time
 from mopidy import exceptions
 from mopidy.audio import tags as tags_lib
 from mopidy.audio import utils
-from mopidy.internal import encoding, log
+from mopidy.internal import log
 from mopidy.internal.gi import Gst, GstPbutils
 
 # GST_ELEMENT_FACTORY_LIST:
@@ -229,12 +229,12 @@ def _process(pipeline, timeout_ms):
             elif msg.get_structure().get_name() == "have-audio":
                 have_audio = True
         elif msg.type == Gst.MessageType.ERROR:
-            error = encoding.locale_decode(msg.parse_error()[0])
+            error, _debug = msg.parse_error()
             if missing_message and not mime:
                 caps = missing_message.get_structure().get_value("detail")
                 mime = caps.get_structure(0).get_name()
                 return tags, mime, have_audio, duration
-            raise exceptions.ScannerError(error)
+            raise exceptions.ScannerError(str(error))
         elif msg.type == Gst.MessageType.EOS:
             return tags, mime, have_audio, duration
         elif msg.type == Gst.MessageType.ASYNC_DONE:

@@ -5,7 +5,6 @@ import pathlib
 import tempfile
 
 from mopidy import models
-from mopidy.internal import encoding
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +26,8 @@ def load(path):
     try:
         with gzip.open(str(path), "rb") as fp:
             return json.load(fp, object_hook=models.model_json_decoder)
-    except (OSError, ValueError) as error:
-        logger.warning("Loading JSON failed: %s", encoding.locale_decode(error))
+    except (OSError, ValueError) as exc:
+        logger.warning(f"Loading JSON failed: {exc}")
         return {}
 
 
