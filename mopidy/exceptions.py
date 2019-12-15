@@ -27,12 +27,6 @@ class ExtensionError(MopidyException):
     pass
 
 
-class FindError(MopidyException):
-    def __init__(self, message, errno=None):
-        super().__init__(message, errno)
-        self.errno = errno
-
-
 class FrontendError(MopidyException):
     pass
 

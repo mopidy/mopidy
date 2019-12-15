@@ -16,15 +16,6 @@ class ExceptionsTest(unittest.TestCase):
     def test_extension_error_is_a_mopidy_exception(self):
         assert issubclass(exceptions.ExtensionError, exceptions.MopidyException)
 
-    def test_find_error_is_a_mopidy_exception(self):
-        assert issubclass(exceptions.FindError, exceptions.MopidyException)
-
-    def test_find_error_can_store_an_errno(self):
-        exc = exceptions.FindError("msg", errno=1234)
-
-        assert exc.message == "msg"
-        assert exc.errno == 1234
-
     def test_frontend_error_is_a_mopidy_exception(self):
         assert issubclass(exceptions.FrontendError, exceptions.MopidyException)
 

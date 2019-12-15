@@ -5,9 +5,6 @@ import urllib
 
 from mopidy.internal import xdg
 
-# Reexport in old location for Mopidy-Local's use
-from mopidy.internal.mtimes import find_mtimes  # noqa
-
 logger = logging.getLogger(__name__)
 
 
