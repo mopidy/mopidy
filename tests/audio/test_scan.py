@@ -2,7 +2,7 @@ import unittest
 
 from mopidy import exceptions
 from mopidy.audio import scan
-from mopidy.internal import path as path_lib
+from mopidy.internal.path import path_to_uri
 
 from tests import path_to_data_dir
 
@@ -13,15 +13,16 @@ class ScannerTest(unittest.TestCase):
         self.result = {}
 
     def find(self, path):
-        media_dir = path_to_data_dir(path)
-        result, errors = path_lib.find_mtimes(str(media_dir))
-        for path in result:
-            yield media_dir / path
+        dir_path = path_to_data_dir(path)
+        if not dir_path.is_dir():
+            return
+        for file_path in dir_path.iterdir():
+            yield dir_path / file_path
 
     def scan(self, paths):
         scanner = scan.Scanner()
         for path in paths:
-            uri = path_lib.path_to_uri(path)
+            uri = path_to_uri(path)
             try:
                 self.result[path] = scanner.scan(uri)
             except exceptions.ScannerError as error:
