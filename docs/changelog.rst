@@ -255,8 +255,9 @@ HTTP frontend
 MPD frontend
 ------------
 
-- Improved the ``swap`` command to swap the tracks without rebuilding
-  the full tracklist.
+- The Mopidy-MPD frontend is no longer bundled with Mopidy, and has been moved
+  to its own `Git repo <https://github.com/mopidy/mopidy-mpd>`__ and
+  `PyPI project <https://pypi.org/project/Mopidy-MPD>`__.
 
 File backend
 ------------

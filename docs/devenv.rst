@@ -163,7 +163,6 @@ the Mopidy source code:
 
     [mopidy.ext]
     http = mopidy.http:Extension
-    mpd = mopidy.mpd:Extension
     softwaremixer = mopidy.softwaremixer:Extension
     stream = mopidy.stream:Extension
 

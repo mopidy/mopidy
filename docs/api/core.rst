@@ -8,7 +8,7 @@
     :synopsis: Core API for use by frontends
 
 The core API is the interface that is used by frontends like
-:mod:`mopidy.http` and :mod:`mopidy.mpd`. The core layer is in between the
+:mod:`mopidy.http` and Mopidy-MPD. The core layer is in between the
 frontends and the backends. Don't forget that you will be accessing core
 as a Pykka actor. If you are only interested in being notified about changes
 in core see :class:`~mopidy.core.CoreListener`.

@@ -25,7 +25,7 @@ Glossary
 
     frontend
         A part of Mopidy *using* the :term:`core` API. Existing frontends
-        include the :ref:`MPD server <ext-mpd>`, the MPRIS/D-Bus integration,
+        include the MPD server, the MPRIS/D-Bus integration,
         the Last.fm scrobbler, and the :ref:`HTTP server <ext-http>`.
         See :ref:`frontend-api` for details.
 
