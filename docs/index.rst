@@ -20,7 +20,7 @@ extension support, backends for new music sources can be easily added.
 
 Mopidy is a Python application that runs in a terminal or in the background on
 Linux computers or Macs that have network connectivity and audio output. Out of
-the box, Mopidy is an :ref:`MPD <ext-mpd>` and :ref:`HTTP <ext-http>` server.
+the box, Mopidy is an MPD and :ref:`HTTP <ext-http>` server.
 Additional frontends for controlling Mopidy can be installed from extensions.
 
 **Everybody use their favorite client**
@@ -94,7 +94,6 @@ watch out for announcements on the `Discourse forum
     ext/m3u
     ext/stream
     ext/http
-    ext/mpd
     ext/softwaremixer
 
 
@@ -137,7 +136,6 @@ watch out for announcements on the `Discourse forum
     glossary
     command
     api/index
-    modules/index
 
 
 Indices and tables

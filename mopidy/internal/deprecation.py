@@ -5,13 +5,6 @@ import warnings
 # Messages used in deprecation warnings are collected here so we can target
 # them easily when ignoring warnings.
 _MESSAGES = {
-    # Deprecated features mpd:
-    "mpd.protocol.playback.pause:state_arg": (
-        "The use of pause command w/o the PAUSE argument is deprecated."
-    ),
-    "mpd.protocol.current_playlist.playlist": (
-        "Do not use this, instead use playlistinfo"
-    ),
     # Deprecated features in core playback:
     "core.playback.play:tl_track_kwargs": (
         'playback.play() with "tl_track" argument is pending deprecation use '

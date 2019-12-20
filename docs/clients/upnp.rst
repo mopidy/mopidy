@@ -52,7 +52,7 @@ MediaRenderer to the network, while using the MPD protocol to control Mopidy.
    Alternatively, follow the instructions from the upmpdcli website.
 
 2. The default settings of upmpdcli will work with the default settings of
-   :ref:`ext-mpd`. Edit :file:`/etc/upmpdcli.conf` if you want to use different
+   Mopidy-MPD. Edit :file:`/etc/upmpdcli.conf` if you want to use different
    ports, hosts, or other settings.
 
 3. Start upmpdcli using the command::
