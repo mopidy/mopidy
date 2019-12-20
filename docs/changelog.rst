@@ -272,7 +272,7 @@ Local backend
   `PyPI project <https://pypi.org/project/Mopidy-Local>`__.
   (Fixes: :issue:`1003`)
 
-- The :exception:`mopidy.exceptions.FindError` has been removed, as it was only
+- The :exc:`mopidy.exceptions.FindError` has been removed, as it was only
   used by Mopidy-Local. (PR: :issue:`1857`)
 
 M3U backend
