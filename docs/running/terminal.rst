@@ -73,3 +73,6 @@ To print Mopidy's *effective* configuration, i.e. the combination of defaults,
 your configuration file, and any command line options, you can run::
 
     mopidy config
+
+This will print your full effective config with passwords masked out so that
+you safely can share the output with others for debugging.

@@ -27,6 +27,9 @@ your configuration file, and any command line options, you can run::
 
     sudo mopidyctl config
 
+This will print your full effective config with passwords masked out so that
+you safely can share the output with others for debugging.
+
 
 Service user
 ============
