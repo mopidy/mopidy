@@ -88,10 +88,51 @@ You can check if Mopidy is currently running as a service by running::
     sudo service mopidy status
 
 
-Service on OS X
-===============
+Service on macOS
+================
 
-If you're installing Mopidy on OS X, see :ref:`osx-service`.
+On macOS, you can use ``launchctl`` to start Mopidy automatically at login.
+
+If you installed Mopidy from Homebrew, simply run ``brew info mopidy`` and
+follow the instructions in the "Caveats" section::
+
+    $ brew info mopidy
+    ...
+    ==> Caveats
+    To have launchd start mopidy/mopidy/mopidy now and restart at login:
+        brew services start mopidy/mopidy/mopidy
+    Or, if you don't want/need a background service, you can just run:
+        mopidy
+
+If you happen to be on macOS, but didn't install Mopidy with Homebrew, you can
+get the same effect by adding the file
+:file:`~/Library/LaunchAgents/mopidy.plist` with the following contents:
+
+.. code:: xml
+
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+      <key>Label</key>
+      <string>mopidy</string>
+      <key>ProgramArguments</key>
+      <array>
+        <string>/usr/local/bin/mopidy</string>
+      </array>
+      <key>RunAtLoad</key>
+      <true/>
+      <key>KeepAlive</key>
+      <true/>
+    </dict>
+    </plist>
+
+You might need to adjust the path to the ``mopidy`` executable,
+``/usr/local/bin/mopidy``, to match your system.
+
+Then, to start Mopidy with ``launchctl`` right away::
+
+    launchctl load ~/Library/LaunchAgents/mopidy.plist
 
 
 Configure PulseAudio

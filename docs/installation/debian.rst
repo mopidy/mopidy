@@ -1,36 +1,47 @@
 .. _debian-install:
 
-******************************************
-Debian/Ubuntu: Install from apt.mopidy.com
-******************************************
+*************
+Debian/Ubuntu
+*************
 
-If you run a Debian based Linux distribution, like Ubuntu, the easiest way to
-install Mopidy is from the `Mopidy APT archive <https://apt.mopidy.com/>`_.
+If you run a Debian based Linux distribution, like Ubuntu or Raspbian, the
+easiest way to install Mopidy is from the
+`Mopidy APT archive <https://apt.mopidy.com/>`_.
 When installing from the APT archive, you will automatically get updates to
 Mopidy in the same way as you get updates to the rest of your system.
 
 If you're on a Raspberry Pi running Debian or Raspbian, the following
-instructions should work for you as well. If you're setting up a Raspberry Pi
+instructions will work for you as well. If you're setting up a Raspberry Pi
 from scratch, we have a guide for installing Debian/Raspbian and Mopidy. See
 :ref:`raspberrypi-installation`.
 
-The packages are built for:
 
-- Debian stretch (oldstable), which also works for Raspbian stretch and Ubuntu
-  18.04 LTS.
+Distribution and architecture support
+=====================================
 
-- Debian buster (stable), which also works for Raspbian buster and Ubuntu
-  19.10 and newer.
+The packages in the apt.mopidy.com archive are built for:
 
-The packages are available for multiple CPU architectures: i386, amd64, armel,
-and armhf (compatible with all Raspberry Pi models).
+- **Debian 9 (Stretch)**,
+  which also works for Raspbian Stretch and Ubuntu 18.04 LTS.
 
-.. note::
+- **Debian 10 (Buster)**,
+  which also works for Raspbian Buster and Ubuntu 19.10 and newer.
 
-   This is just what we currently support, not a promise to continue to
-   support the same in the future. We *will* drop support for older
-   distributions and architectures when supporting those stops us from moving
-   forward with the project.
+The few packages that are compiled are available for multiple CPU
+architectures:
+
+- **amd64**
+- **i386**
+- **armhf**, compatible with all Raspberry Pi models.
+
+This is just what we currently support, not a promise to continue to support
+the same in the future. We *will* drop support for older distributions and
+architectures when supporting those stops us from moving forward with the
+project.
+
+
+Install from apt.mopidy.com
+===========================
 
 #. Add the archive's GPG key::
 
@@ -46,19 +57,23 @@ and armhf (compatible with all Raspberry Pi models).
 
 #. Install Mopidy and all dependencies::
 
-       sudo apt-get update
-       sudo apt-get install mopidy
+       sudo apt update
+       sudo apt install mopidy
 
 #. Finally, you need to set a couple of :doc:`config values </config>`, and
    then you're ready to :doc:`run Mopidy </running>`. Alternatively you may
    want to have Mopidy run as a :ref:`system service <service>`, automatically
    starting at boot.
 
+
+Upgrading
+=========
+
 When a new release of Mopidy is out, and you can't wait for you system to
 figure it out for itself, run the following to upgrade right away::
 
-    sudo apt-get update
-    sudo apt-get dist-upgrade
+    sudo apt update
+    sudo apt upgrade
 
 
 Installing extensions
@@ -69,20 +84,19 @@ scrobbling, you need to install additional packages.
 
 To list all the extensions available from apt.mopidy.com, you can run::
 
-    apt-cache search mopidy
+    apt search mopidy
 
-To install one of the listed packages, e.g. ``mopidy-spotify``, simply run::
+To install one of the listed packages, e.g. ``mopidy-mpd``, simply run::
 
-   sudo apt-get install mopidy-spotify
+   sudo apt install mopidy-mpd
 
-You can also install any Mopidy extension directly from PyPI with ``pip``. To
-list all the extensions available from PyPI, run::
+If you cannot find the extension you want in the APT search result, you can
+install it from PyPI using ``pip`` instead.
+Even if Mopidy itself is installed from APT it will correctly detect and use
+extensions from PyPI installed globally on your system using::
 
-    pip search mopidy
+   sudo python3 -m pip install ...
 
-Note that extensions installed from PyPI will only automatically install Python
-dependencies. Please refer to the extension's documentation for information
-about any other requirements needed for the extension to work properly.
-
-For a full list of available Mopidy extensions, including those not
-installable from apt.mopidy.com, see :ref:`ext`.
+For a comprehensive index of available Mopidy extensions,
+including those not installable from APT,
+see the `Mopidy extension registry <https://mopidy.com/ext/>`_.
