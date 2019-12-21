@@ -30,8 +30,7 @@ Install from Homebrew
    This will take some time, as it will also install Mopidy's dependency
    GStreamer, which again depends on a huge number of media codecs.
 
-#. Finally, you need to set a couple of :doc:`config values </config>`, and
-   then you're ready to :doc:`run Mopidy </running>`.
+#. Now, you're ready to :ref:`run Mopidy <running>`.
 
 
 Upgrading

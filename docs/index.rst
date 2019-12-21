@@ -87,9 +87,8 @@ watch out for announcements on the `Discourse forum
     :maxdepth: 2
 
     installation/index
+    running/index
     config
-    running
-    service
     audio
     troubleshooting
 

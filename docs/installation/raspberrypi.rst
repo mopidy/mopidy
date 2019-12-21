@@ -99,9 +99,6 @@ How to for Raspbian
        [audio]
        output = alsasink
 
-   Be sure to edit the correct config file if you are
-   :doc:`running Mopidy as a service </service>`.
-
 
 Testing sound output
 ====================

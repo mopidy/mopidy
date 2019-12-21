@@ -96,8 +96,7 @@ please see :ref:`contributing`.
    <https://pypi.org/project/Mopidy>`_. To upgrade Mopidy to future
    releases, just rerun this command.
 
-#. Finally, you need to set a couple of :doc:`config values </config>`, and
-   then you're ready to :doc:`run Mopidy </running>`.
+#. Now, you're ready to :ref:`run Mopidy <running>`.
 
 
 Installing extensions

@@ -21,9 +21,7 @@ Install from Community
 
        pacman -Syu
 
-#. Finally, you need to set a couple of :doc:`config values </config>`, and
-   then you're ready to :doc:`run Mopidy </running>` or run Mopidy as a
-   :ref:`service <service>`.
+#. Now, you're ready to :ref:`run Mopidy <running>`.
 
 
 Installing extensions
