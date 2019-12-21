@@ -1021,11 +1021,11 @@ one new.
   enabled by default.
 
 - The NAD mixer have been moved out of Mopidy core to its own project,
-  Mopidy-NAD. See :ref:`ext` for more information.
+  Mopidy-NAD.
 
 - Janez Troha has made the first two external extensions for Mopidy: a backend
   for playing music from Soundcloud, and a backend for playing music from a
-  Beets music library. See :ref:`ext` for more information.
+  Beets music library.
 
 **Command line options**
 

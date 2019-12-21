@@ -93,8 +93,6 @@ watch out for announcements on the `Discourse forum
     troubleshooting
 
 
-.. _ext:
-
 .. toctree::
     :caption: Bundled extensions
     :maxdepth: 2
