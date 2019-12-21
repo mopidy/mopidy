@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 def main():
     log.bootstrap_delayed_logging()
-    logger.info("Starting Mopidy %s", versioning.get_version())
+    logger.info(f"Starting Mopidy {versioning.get_version()}")
 
     signal.signal(signal.SIGTERM, process.sigterm_handler)
     # Windows does not have signal.SIGUSR1
@@ -133,9 +133,8 @@ def main():
                 # list. We might however be able to replace this with a
                 # collections.Sequence to provide a RO view.
                 logger.exception(
-                    "Extension %s failed during setup, this might"
-                    " have left the registry in a bad state.",
-                    extension.ext_name,
+                    f"Extension {extension.ext_name} failed during setup. "
+                    f"This might have left the registry in a bad state."
                 )
 
         # Anything that wants to exit after this point must use
@@ -162,9 +161,9 @@ def create_core_dirs(config):
 def create_initial_config_file(args, extensions_data):
     """Initialize whatever the last config file is with defaults"""
 
-    config_file = args.config_files[-1]
+    config_file = path.expand_path(args.config_files[-1])
 
-    if path.expand_path(config_file).exists():
+    if config_file.exists():
         return
 
     try:
@@ -174,10 +173,10 @@ def create_initial_config_file(args, extensions_data):
             mkdir=False,
             content=default.encode(errors="surrogateescape"),
         )
-        logger.info("Initialized %s with default config", config_file)
+        logger.info(f"Initialized {config_file.as_uri()} with default config")
     except OSError as exc:
         logger.warning(
-            f"Unable to initialize {config_file} with default config: {exc}"
+            f"Unable to initialize {config_file.as_uri()} with default config: {exc}"
         )
 
 
@@ -203,20 +202,19 @@ def check_config_errors(config, errors, extensions):
             continue
 
         if section not in all_extension_names:
-            logger.warning("Found fatal %s configuration errors:", section)
+            logger.warning(f"Found fatal {section} configuration errors:")
             fatal_errors.append(section)
         elif section in extension_names["config"]:
             del errors[section]["enabled"]
             logger.warning(
-                "Found %s configuration errors, the extension "
-                "has been automatically disabled:",
-                section,
+                f"Found {section} configuration errors. "
+                f"The extension has been automatically disabled:"
             )
         else:
             continue
 
         for field, msg in errors[section].items():
-            logger.warning("  %s/%s %s", section, field, msg)
+            logger.warning(f"  {section}/{field} {msg}")
 
     if extensions["config"]:
         logger.warning(
