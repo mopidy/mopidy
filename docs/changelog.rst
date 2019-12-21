@@ -614,7 +614,7 @@ The major features of Mopidy 2.0 are:
   change tracks in the middle of a track or use previous and next. In a future
   release, previous and next will also become gapless. It is now quite easy to
   have Mopidy streaming audio over the network using Icecast. See the updated
-  :ref:`streaming` docs for details of how to set it up and workarounds for the
+  :ref:`icecast` docs for details of how to set it up and workarounds for the
   remaining issues.
 
 - Mopidy has upgraded from GStreamer 0.10 to 1.x. This has been in our backlog
@@ -808,7 +808,7 @@ Gapless
 - Add partial support for gapless playback. Gapless now works as long as you
   don't change tracks or use next/previous. (PR: :issue:`1288`)
 
-  The :ref:`streaming` docs has been updated with the workarounds still needed
+  The :ref:`icecast` docs has been updated with the workarounds still needed
   to properly stream Mopidy audio through Icecast.
 
 - Core playback has been refactored to better handle gapless, and async state

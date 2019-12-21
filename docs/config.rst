@@ -134,7 +134,7 @@ Audio section
 -------------
 
 These are the available audio configurations. For specific use cases, see
-:ref:`audio`.
+:ref:`audiosinks`.
 
 .. confval:: audio/mixer
 

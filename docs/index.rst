@@ -89,8 +89,15 @@ watch out for announcements on the `Discourse forum
     installation/index
     running/index
     config
-    audio
     troubleshooting
+
+
+.. toctree::
+    :caption: Advanced setups
+    :maxdepth: 2
+
+    audiosinks
+    icecast
 
 
 .. toctree::
