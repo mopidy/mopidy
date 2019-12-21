@@ -177,37 +177,36 @@ def _load(files, defaults, overrides):
 def _load_file(parser, file_path):
     if not file_path.exists():
         logger.debug(
-            "Loading config from %r failed; it does not exist",
-            file_path.as_uri(),
+            f"Loading config from {file_path.as_uri()} failed; "
+            f"it does not exist"
         )
         return
     if not os.access(str(file_path), os.R_OK):
         logger.warning(
-            "Loading config from %r failed; read permission missing",
-            file_path.as_uri(),
+            f"Loading config from file_path.as_uri() failed; "
+            f"read permission missing"
         )
         return
 
     try:
-        logger.info("Loading config from %r", file_path.as_uri())
+        logger.info(f"Loading config from {file_path.as_uri()}")
         with file_path.open("r") as fh:
             parser.read_file(fh)
     except configparser.MissingSectionHeaderError:
         logger.warning(
-            "Loading config from %r failed; it does not have a config section",
-            file_path.as_uri(),
+            f"Loading config from {file_path.as_uri()} failed; "
+            f"it does not have a config section"
         )
     except configparser.ParsingError as e:
         linenos = ", ".join(str(lineno) for lineno, line in e.errors)
         logger.warning(
-            "Config file %r has errors; line %s has been ignored",
-            file_path.as_uri(),
-            linenos,
+            f"Config file {file_path.as_uri()} has errors; "
+            f"line {linenos} has been ignored"
         )
     except OSError:
         # TODO: if this is the initial load of logging config we might not
         # have a logger at this point, we might want to handle this better.
-        logger.debug("Config file %r not found; skipping", file_path.as_uri())
+        logger.debug(f"Config file {file_path.as_uri()} not found; skipping")
 
 
 def _validate(raw_config, schemas):
@@ -225,7 +224,7 @@ def _validate(raw_config, schemas):
             config[schema.name] = result
 
     for section in sections:
-        logger.debug("Ignoring unknown config section: %s", section)
+        logger.debug(f"Ignoring unknown config section: {section}")
 
     return config, errors
 
