@@ -1,3 +1,5 @@
+.. _creating-releases:
+
 ******************
 Release procedures
 ******************
@@ -6,23 +8,19 @@ Here we try to keep an up to date record of how Mopidy releases are made. This
 documentation serves both as a checklist, to reduce the project's dependency on
 key individuals, and as a stepping stone to more automation.
 
-.. _creating-releases:
+#. Update the changelog. Commit it.
 
-Creating releases
-=================
-
-#. Update changelog and commit it.
-
-#. Bump the version number in ``mopidy/__init__.py``.
+#. Bump the version number in ``setup.cfg``. Commit it.
 
 #. Merge the release branch (``develop`` in the example) into master::
 
     git checkout master
-    git merge --no-ff -m "Release v0.16.0" develop
+    git pull
+    git merge --no-ff -m "Release v3.0.0" develop
 
 #. Install/upgrade tools used for packaging::
 
-    pip install -U twine wheel
+    python3 -m pip install --upgrade twine wheel
 
 #. Build package and test it manually in a new virtualenv. The following
    assumes the use of virtualenvwrapper::
@@ -30,20 +28,20 @@ Creating releases
     python setup.py sdist bdist_wheel
 
     mktmpenv
-    pip install path/to/dist/Mopidy-0.16.0.tar.gz
+    pip install ~/mopidy-dev/mopidy/dist/Mopidy-3.0.0.tar.gz
     toggleglobalsitepackages
     # do manual test
     deactivate
 
     mktmpenv
-    pip install path/to/dist/Mopidy-0.16.0-py27-none-any.whl
+    pip install ~/mopidy-dev/mopidy/dist/Mopidy-3.0.0-py3-none-any.whl
     toggleglobalsitepackages
     # do manual test
     deactivate
 
 #. Tag the release::
 
-    git tag -a -m "Release v0.16.0" v0.16.0
+    git tag -a -m "Release v3.0.0" v3.0.0
 
 #. Push to GitHub::
 
@@ -52,7 +50,7 @@ Creating releases
 #. Upload the previously built and tested sdist and bdist_wheel packages to
    PyPI::
 
-    twine upload dist/Mopidy-0.16.0*
+    twine upload dist/Mopidy-3.0.0.tar.gz dist/Mopidy-3.0.0-py3-none-any.whl
 
 #. Merge ``master`` back into ``develop`` and push the branch to GitHub.
 
@@ -62,5 +60,5 @@ Creating releases
 #. Spread the word through an announcement post on the `Discourse forum
    <https://discourse.mopidy.com/>`_.
 
-#. Notify distribution packagers, including but not limited to: Debian, Arch
-   Linux, Homebrew.
+#. Notify distribution packagers, including but not limited to:
+   Debian, Arch Linux, Homebrew.
