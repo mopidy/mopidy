@@ -139,9 +139,9 @@ watch out for announcements on the `Discourse forum
     :caption: Reference
     :maxdepth: 2
 
-    glossary
-    command
     api/index
+    command
+    glossary
 
 
 Indices and tables
