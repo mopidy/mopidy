@@ -94,23 +94,23 @@ watch out for announcements on the `Discourse forum
 
 
 .. toctree::
-    :caption: Advanced setups
-    :maxdepth: 2
-
-    audiosinks
-    icecast
-    upnp
-
-
-.. toctree::
     :caption: Bundled extensions
-    :maxdepth: 2
+    :maxdepth: 1
 
     ext/file
     ext/m3u
     ext/stream
     ext/http
     ext/softwaremixer
+
+
+.. toctree::
+    :caption: Advanced setups
+    :maxdepth: 1
+
+    audiosinks
+    icecast
+    upnp
 
 
 .. toctree::
