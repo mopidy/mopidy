@@ -130,9 +130,9 @@ watch out for announcements on the `Discourse forum
 
     contributing
     devenv
-    releasing
-    codestyle
     extensiondev
+    codestyle
+    releasing
 
 
 .. toctree::
