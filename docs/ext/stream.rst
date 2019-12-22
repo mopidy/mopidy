@@ -18,8 +18,8 @@ In addition to playing streams, the extension also understands how to extract
 streams from a lot of playlist formats. This is convenient as most Internet
 radio stations links to playlists instead of directly to the radio streams.
 
-If you're having trouble playing back a stream, run the ``mopidy deps``
-command to check if you have all relevant GStreamer plugins installed.
+If you're having trouble playing back a stream, see :ref:`show-deps` for
+how to check if you have all relevant GStreamer plugins installed.
 
 
 Configuration

@@ -21,6 +21,8 @@ unsure if it's a bug or not, ask for help in the forum or the chat first. The
 `source code <https://github.com/mopidy/mopidy>`_ may also be of help.
 
 
+.. _show-config:
+
 Show effective configuration
 ============================
 
@@ -38,6 +40,8 @@ If you run Mopidy as a system service, run::
 
     sudo mopidyctl config
 
+
+.. _show-deps:
 
 Show installed dependencies
 ===========================
