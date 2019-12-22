@@ -22,7 +22,7 @@ Mopidy is a Python application that runs in a terminal or in the background on
 Linux computers or Macs that have network connectivity and audio output.
 Out of the box, Mopidy is an HTTP server. If you install the `Mopidy-MPD`_
 extension, it becomes an MPD server too. Many additional frontends for
-controlling Mopidy are availabe as extensions.
+controlling Mopidy are available as extensions.
 
 **Pick your favorite client**
 
