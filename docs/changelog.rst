@@ -128,8 +128,8 @@ Library controller
 
 - :meth:`mopidy.core.LibraryController.search` now returns an empty result
   if there is no ``query``. Previously, it returned the full music library.
-  This does not work with online music services,
-  and have thus been deprecated since 1.0.
+  This is not feasible for online music services and has thus been deprecated
+  since 1.0.
 
 Playback controller
 ^^^^^^^^^^^^^^^^^^^
@@ -166,7 +166,7 @@ Playback controller
 - Deprecated the ``tl_track`` argument to
   :meth:`mopidy.core.PlaybackController.play`, with the goal of removing it in
   the next major release. Use the ``tlid`` argument instead.
-  (Fixes: #1773, PR: #1786, #1854)
+  (Fixes: :issue:`1773`, PR: :issue:`1786`, :issue:`1854`)
 
 Playlist controller
 ^^^^^^^^^^^^^^^^^^^
@@ -211,7 +211,7 @@ Tracklist controller
   Use the ``criteria`` argument instead.
 
 - Deprecated methods, with the goal of removing them in the next major release:
-  (Fixes: #1773, PR: #1786, #1854)
+  (Fixes: :issue:`1773`, PR: :issue:`1786`, :issue:`1854`)
 
   - :meth:`mopidy.core.TracklistController.eot_track`.
     Use :meth:`~mopidy.core.TracklistController.get_eot_tlid` instead.
@@ -230,7 +230,7 @@ Backend API
 -----------
 
 - Add :meth:`mopidy.backend.PlaybackProvider.is_live` which can be
-  implemented by playback providers that wants to mark their URIs as
+  implemented by playback providers that want to mark their URIs as
   live streams that should not be buffered. (PR: :issue:`1845`)
 
 Models
@@ -295,8 +295,8 @@ Local backend
   `PyPI project <https://pypi.org/project/Mopidy-Local>`__.
   (Fixes: :issue:`1003`)
 
-- The :exc:`mopidy.exceptions.FindError` has been removed, as it was only
-  used by Mopidy-Local. (PR: :issue:`1857`)
+- Removed :exc:`mopidy.exceptions.FindError`, as it was only used by
+  Mopidy-Local. (PR: :issue:`1857`)
 
 Audio
 -----
