@@ -1,10 +1,6 @@
-from __future__ import absolute_import, unicode_literals
-
-
 class MopidyException(Exception):
-
     def __init__(self, message, *args, **kwargs):
-        super(MopidyException, self).__init__(message, *args, **kwargs)
+        super().__init__(message, *args, **kwargs)
         self._message = message
 
     @property
@@ -22,21 +18,13 @@ class BackendError(MopidyException):
 
 
 class CoreError(MopidyException):
-
     def __init__(self, message, errno=None):
-        super(CoreError, self).__init__(message, errno)
+        super().__init__(message, errno)
         self.errno = errno
 
 
 class ExtensionError(MopidyException):
     pass
-
-
-class FindError(MopidyException):
-
-    def __init__(self, message, errno=None):
-        super(FindError, self).__init__(message, errno)
-        self.errno = errno
 
 
 class FrontendError(MopidyException):
@@ -52,9 +40,8 @@ class ScannerError(MopidyException):
 
 
 class TracklistFull(CoreError):
-
     def __init__(self, message, errno=None):
-        super(TracklistFull, self).__init__(message, errno)
+        super().__init__(message, errno)
         self.errno = errno
 
 

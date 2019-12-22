@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import logging
 import string
 
@@ -17,19 +15,20 @@ _AVAHI_PUBLISHFLAGS_NONE = 0
 
 def _is_loopback_address(host):
     return (
-        host.startswith('127.') or
-        host.startswith('::ffff:127.') or
-        host == '::1')
+        host.startswith("127.")
+        or host.startswith("::ffff:127.")
+        or host == "::1"
+    )
 
 
 def _convert_text_list_to_dbus_format(text_list):
-    array = dbus.Array(signature='ay')
+    array = dbus.Array(signature="ay")
     for text in text_list:
         array.append([dbus.Byte(ord(c)) for c in text])
     return array
 
 
-class Zeroconf(object):
+class Zeroconf:
 
     """Publish a network service with Zeroconf.
 
@@ -45,7 +44,7 @@ class Zeroconf(object):
     :type text: list of str
     """
 
-    def __init__(self, name, stype, port, domain='', host='', text=None):
+    def __init__(self, name, stype, port, domain="", host="", text=None):
         self.stype = stype
         self.port = port
         self.domain = domain
@@ -62,17 +61,21 @@ class Zeroconf(object):
             try:
                 self.bus = dbus.SystemBus()
                 self.server = dbus.Interface(
-                    self.bus.get_object('org.freedesktop.Avahi', '/'),
-                    'org.freedesktop.Avahi.Server')
-                self.display_hostname = '%s' % self.server.GetHostName()
+                    self.bus.get_object("org.freedesktop.Avahi", "/"),
+                    "org.freedesktop.Avahi.Server",
+                )
+                self.display_hostname = f"{self.server.GetHostName()}"
                 self.name = string.Template(name).safe_substitute(
-                    hostname=self.display_hostname, port=port)
+                    hostname=self.display_hostname, port=port
+                )
             except dbus.exceptions.DBusException as e:
-                logger.debug('%s: Server failed: %s', self, e)
+                logger.debug("%s: Server failed: %s", self, e)
 
     def __str__(self):
-        return 'Zeroconf service "%s" (%s at [%s]:%d)' % (
-            self.name, self.stype, self.host, self.port)
+        return (
+            f"Zeroconf service {self.name!r} "
+            f"({self.stype} at [{self.host}]:{self.port:d})"
+        )
 
     def publish(self):
         """Publish the service.
@@ -82,44 +85,53 @@ class Zeroconf(object):
 
         if _is_loopback_address(self.host):
             logger.debug(
-                '%s: Publish on loopback interface is not supported.', self)
+                "%s: Publish on loopback interface is not supported.", self
+            )
             return False
 
         if not dbus:
-            logger.debug('%s: dbus not installed; publish failed.', self)
+            logger.debug("%s: dbus not installed; publish failed.", self)
             return False
 
         if not self.bus:
-            logger.debug('%s: Bus not available; publish failed.', self)
+            logger.debug("%s: Bus not available; publish failed.", self)
             return False
 
         if not self.server:
-            logger.debug('%s: Server not available; publish failed.', self)
+            logger.debug("%s: Server not available; publish failed.", self)
             return False
 
         try:
-            if not self.bus.name_has_owner('org.freedesktop.Avahi'):
+            if not self.bus.name_has_owner("org.freedesktop.Avahi"):
                 logger.debug(
-                    '%s: Avahi service not running; publish failed.', self)
+                    "%s: Avahi service not running; publish failed.", self
+                )
                 return False
 
             self.group = dbus.Interface(
                 self.bus.get_object(
-                    'org.freedesktop.Avahi', self.server.EntryGroupNew()),
-                'org.freedesktop.Avahi.EntryGroup')
+                    "org.freedesktop.Avahi", self.server.EntryGroupNew()
+                ),
+                "org.freedesktop.Avahi.EntryGroup",
+            )
 
             self.group.AddService(
-                _AVAHI_IF_UNSPEC, _AVAHI_PROTO_UNSPEC,
+                _AVAHI_IF_UNSPEC,
+                _AVAHI_PROTO_UNSPEC,
                 dbus.UInt32(_AVAHI_PUBLISHFLAGS_NONE),
-                self.name, self.stype,
-                self.domain, self.host, dbus.UInt16(self.port),
-                _convert_text_list_to_dbus_format(self.text))
+                self.name,
+                self.stype,
+                self.domain,
+                self.host,
+                dbus.UInt16(self.port),
+                _convert_text_list_to_dbus_format(self.text),
+            )
 
             self.group.Commit()
-            logger.debug('%s: Published', self)
+            logger.debug("%s: Published", self)
             return True
         except dbus.exceptions.DBusException as e:
-            logger.debug('%s: Publish failed: %s', self, e)
+            logger.debug("%s: Publish failed: %s", self, e)
             return False
 
     def unpublish(self):
@@ -131,8 +143,8 @@ class Zeroconf(object):
         if self.group:
             try:
                 self.group.Reset()
-                logger.debug('%s: Unpublished', self)
+                logger.debug("%s: Unpublished", self)
             except dbus.exceptions.DBusException as e:
-                logger.debug('%s: Unpublish failed: %s', self, e)
+                logger.debug("%s: Unpublish failed: %s", self, e)
             finally:
                 self.group = None

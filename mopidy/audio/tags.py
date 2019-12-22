@@ -1,15 +1,11 @@
-from __future__ import absolute_import, unicode_literals
-
 import collections
 import datetime
 import logging
 import numbers
 
-from mopidy import compat
 from mopidy.internal import log
 from mopidy.internal.gi import GLib, Gst
 from mopidy.models import Album, Artist, Track
-
 
 logger = logging.getLogger(__name__)
 
@@ -46,17 +42,21 @@ gstreamer-GstTagList.html
             if isinstance(value, GLib.Date):
                 try:
                     date = datetime.date(
-                        value.get_year(), value.get_month(), value.get_day())
-                    result[tag].append(date.isoformat().decode('utf-8'))
+                        value.get_year(), value.get_month(), value.get_day()
+                    )
+                    result[tag].append(date.isoformat())
                 except ValueError:
                     logger.debug(
-                        'Ignoring dodgy date value: %d-%d-%d',
-                        value.get_year(), value.get_month(), value.get_day())
+                        "Ignoring dodgy date value: %d-%d-%d",
+                        value.get_year(),
+                        value.get_month(),
+                        value.get_day(),
+                    )
             elif isinstance(value, Gst.DateTime):
-                result[tag].append(value.to_iso8601_string().decode('utf-8'))
+                result[tag].append(value.to_iso8601_string())
             elif isinstance(value, bytes):
-                result[tag].append(value.decode('utf-8', 'replace'))
-            elif isinstance(value, (compat.text_type, bool, numbers.Number)):
+                result[tag].append(value.decode(errors="replace"))
+            elif isinstance(value, (str, bool, numbers.Number)):
                 result[tag].append(value)
             elif isinstance(value, Gst.Sample):
                 data = _extract_sample_data(value)
@@ -65,7 +65,10 @@ gstreamer-GstTagList.html
             else:
                 logger.log(
                     log.TRACE_LOG_LEVEL,
-                    'Ignoring unknown tag data: %r = %r', tag, value)
+                    "Ignoring unknown tag data: %r = %r",
+                    tag,
+                    value,
+                )
 
     # TODO: dict(result) to not leak the defaultdict, or just use setdefault?
     return result
@@ -90,49 +93,50 @@ def convert_tags_to_track(tags):
     album_kwargs = {}
     track_kwargs = {}
 
-    track_kwargs['composers'] = _artists(tags, Gst.TAG_COMPOSER)
-    track_kwargs['performers'] = _artists(tags, Gst.TAG_PERFORMER)
-    track_kwargs['artists'] = _artists(tags, Gst.TAG_ARTIST,
-                                       'musicbrainz-artistid',
-                                       'musicbrainz-sortname')
-    album_kwargs['artists'] = _artists(
-        tags, Gst.TAG_ALBUM_ARTIST, 'musicbrainz-albumartistid')
+    track_kwargs["composers"] = _artists(tags, Gst.TAG_COMPOSER)
+    track_kwargs["performers"] = _artists(tags, Gst.TAG_PERFORMER)
+    track_kwargs["artists"] = _artists(
+        tags, Gst.TAG_ARTIST, "musicbrainz-artistid", "musicbrainz-sortname"
+    )
+    album_kwargs["artists"] = _artists(
+        tags, Gst.TAG_ALBUM_ARTIST, "musicbrainz-albumartistid"
+    )
 
-    track_kwargs['genre'] = '; '.join(tags.get(Gst.TAG_GENRE, []))
-    track_kwargs['name'] = '; '.join(tags.get(Gst.TAG_TITLE, []))
-    if not track_kwargs['name']:
-        track_kwargs['name'] = '; '.join(tags.get(Gst.TAG_ORGANIZATION, []))
+    track_kwargs["genre"] = "; ".join(tags.get(Gst.TAG_GENRE, []))
+    track_kwargs["name"] = "; ".join(tags.get(Gst.TAG_TITLE, []))
+    if not track_kwargs["name"]:
+        track_kwargs["name"] = "; ".join(tags.get(Gst.TAG_ORGANIZATION, []))
 
-    track_kwargs['comment'] = '; '.join(tags.get('comment', []))
-    if not track_kwargs['comment']:
-        track_kwargs['comment'] = '; '.join(tags.get(Gst.TAG_LOCATION, []))
-    if not track_kwargs['comment']:
-        track_kwargs['comment'] = '; '.join(tags.get(Gst.TAG_COPYRIGHT, []))
+    track_kwargs["comment"] = "; ".join(tags.get("comment", []))
+    if not track_kwargs["comment"]:
+        track_kwargs["comment"] = "; ".join(tags.get(Gst.TAG_LOCATION, []))
+    if not track_kwargs["comment"]:
+        track_kwargs["comment"] = "; ".join(tags.get(Gst.TAG_COPYRIGHT, []))
 
-    track_kwargs['track_no'] = tags.get(Gst.TAG_TRACK_NUMBER, [None])[0]
-    track_kwargs['disc_no'] = tags.get(Gst.TAG_ALBUM_VOLUME_NUMBER, [None])[0]
-    track_kwargs['bitrate'] = tags.get(Gst.TAG_BITRATE, [None])[0]
-    track_kwargs['musicbrainz_id'] = tags.get('musicbrainz-trackid', [None])[0]
+    track_kwargs["track_no"] = tags.get(Gst.TAG_TRACK_NUMBER, [None])[0]
+    track_kwargs["disc_no"] = tags.get(Gst.TAG_ALBUM_VOLUME_NUMBER, [None])[0]
+    track_kwargs["bitrate"] = tags.get(Gst.TAG_BITRATE, [None])[0]
+    track_kwargs["musicbrainz_id"] = tags.get("musicbrainz-trackid", [None])[0]
 
-    album_kwargs['name'] = tags.get(Gst.TAG_ALBUM, [None])[0]
-    album_kwargs['num_tracks'] = tags.get(Gst.TAG_TRACK_COUNT, [None])[0]
-    album_kwargs['num_discs'] = tags.get(Gst.TAG_ALBUM_VOLUME_COUNT, [None])[0]
-    album_kwargs['musicbrainz_id'] = tags.get('musicbrainz-albumid', [None])[0]
+    album_kwargs["name"] = tags.get(Gst.TAG_ALBUM, [None])[0]
+    album_kwargs["num_tracks"] = tags.get(Gst.TAG_TRACK_COUNT, [None])[0]
+    album_kwargs["num_discs"] = tags.get(Gst.TAG_ALBUM_VOLUME_COUNT, [None])[0]
+    album_kwargs["musicbrainz_id"] = tags.get("musicbrainz-albumid", [None])[0]
 
-    album_kwargs['date'] = tags.get(Gst.TAG_DATE, [None])[0]
-    if not album_kwargs['date']:
+    album_kwargs["date"] = tags.get(Gst.TAG_DATE, [None])[0]
+    if not album_kwargs["date"]:
         datetime = tags.get(Gst.TAG_DATE_TIME, [None])[0]
         if datetime is not None:
-            album_kwargs['date'] = datetime.split('T')[0]
-    track_kwargs['date'] = album_kwargs['date']
+            album_kwargs["date"] = datetime.split("T")[0]
+    track_kwargs["date"] = album_kwargs["date"]
 
     # Clear out any empty values we found
     track_kwargs = {k: v for k, v in track_kwargs.items() if v}
     album_kwargs = {k: v for k, v in album_kwargs.items() if v}
 
     # Only bother with album if we have a name to show.
-    if album_kwargs.get('name'):
-        track_kwargs['album'] = Album(**album_kwargs)
+    if album_kwargs.get("name"):
+        track_kwargs["album"] = Album(**album_kwargs)
 
     return Track(**track_kwargs)
 
@@ -143,13 +147,14 @@ def _artists(tags, artist_name, artist_id=None, artist_sortname=None):
         return None
 
     # One artist name and either id or sortname, include all available fields
-    if len(tags[artist_name]) == 1 and \
-            (artist_id in tags or artist_sortname in tags):
-        attrs = {'name': tags[artist_name][0]}
+    if len(tags[artist_name]) == 1 and (
+        artist_id in tags or artist_sortname in tags
+    ):
+        attrs = {"name": tags[artist_name][0]}
         if artist_id in tags:
-            attrs['musicbrainz_id'] = tags[artist_id][0]
+            attrs["musicbrainz_id"] = tags[artist_id][0]
         if artist_sortname in tags:
-            attrs['sortname'] = tags[artist_sortname][0]
+            attrs["sortname"] = tags[artist_sortname][0]
         return [Artist(**attrs)]
 
     # Multiple artist, provide artists with name only to avoid ambiguity.

@@ -45,8 +45,6 @@ available at http://localhost:6680/mywebclient/foo.html.
 
 ::
 
-    from __future__ import absolute_import, unicode_literals
-
     import os
 
     from mopidy import ext
@@ -96,8 +94,6 @@ http://localhost:6680/mywebclient/ with the string ``Hello, world! This is
 Mopidy $version``.
 
 ::
-
-    from __future__ import absolute_import, unicode_literals
 
     import os
 
@@ -151,8 +147,6 @@ http://localhost:6680/mywebclient/.
 
 ::
 
-    from __future__ import absolute_import, unicode_literals
-
     import os
 
     import tornado.web
@@ -194,4 +188,4 @@ http://localhost:6680/mywebclient/.
 API implementors
 ================
 
-See :ref:`ext-web`.
+See the `extension registry <https://mopidy.com/ext/>`_.

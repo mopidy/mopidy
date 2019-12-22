@@ -39,7 +39,7 @@ files is a simpler solution.
 
 See :ref:`http-api` for details on how to integrate with Mopidy over HTTP. If
 you're looking for a web based client for Mopidy, go check out
-:ref:`http-clients`.
+:ref:`web-clients`.
 
 
 Configuration
@@ -70,24 +70,6 @@ See :ref:`config` for general help on configuring Mopidy.
 .. confval:: http/port
 
     Which TCP port the HTTP server should listen to.
-
-.. confval:: http/static_dir
-
-    **Deprecated:** This config is deprecated and will be removed in a future
-    version of Mopidy.
-
-    Which directory the HTTP server should serve at "/"
-
-    Change this to have Mopidy serve e.g. files for your JavaScript client.
-    "/mopidy" will continue to work as usual even if you change this setting,
-    but any other Mopidy webclient installed with pip to be served at
-    "/ext_name" will stop working if you set this config.
-
-    You're strongly encouraged to make Mopidy extensions which use the the
-    :ref:`http-server-api` to host static files on Mopidy's web server instead
-    of using :confval:`http/static_dir`. That way, installation of your web
-    client will be a lot easier for your end users, and multiple web clients
-    can easily share the same web server.
 
 .. confval:: http/zeroconf
 
@@ -127,3 +109,11 @@ See :ref:`config` for general help on configuring Mopidy.
 
     This config should only be disabled if you understand the security implications
     and require the HTTP server's old behaviour.
+
+
+.. confval:: http/default_app
+
+    Redirect from the web server root to a specific web app instead of Mopidy's
+    default list of web apps. The value should be the name used by the
+    extension when it registers its ``http:static`` or ``http:app`` extension
+    points. By convention, this is the the extension's ``ext_name``.

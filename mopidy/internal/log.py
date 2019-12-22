@@ -1,10 +1,7 @@
-from __future__ import absolute_import, unicode_literals
-
 import logging
 import logging.config
 import logging.handlers
 import platform
-
 
 LOG_LEVELS = {
     -1: dict(root=logging.ERROR, mopidy=logging.WARNING),
@@ -17,13 +14,12 @@ LOG_LEVELS = {
 
 # Custom log level which has even lower priority than DEBUG
 TRACE_LOG_LEVEL = 5
-logging.addLevelName(TRACE_LOG_LEVEL, 'TRACE')
+logging.addLevelName(TRACE_LOG_LEVEL, "TRACE")
 
 logger = logging.getLogger(__name__)
 
 
 class DelayedHandler(logging.Handler):
-
     def __init__(self):
         logging.Handler.__init__(self)
         self._released = False
@@ -35,7 +31,7 @@ class DelayedHandler(logging.Handler):
 
     def release(self):
         self._released = True
-        root = logging.getLogger('')
+        root = logging.getLogger("")
         while self._buffer:
             root.handle(self._buffer.pop(0))
 
@@ -44,90 +40,87 @@ _delayed_handler = DelayedHandler()
 
 
 def bootstrap_delayed_logging():
-    root = logging.getLogger('')
+    root = logging.getLogger("")
     root.setLevel(logging.NOTSET)
     root.addHandler(_delayed_handler)
 
 
-def setup_logging(config, verbosity_level, save_debug_log):
-
+def setup_logging(config, base_verbosity_level, args_verbosity_level):
     logging.captureWarnings(True)
 
-    if config['logging']['config_file']:
+    if config["logging"]["config_file"]:
         # Logging config from file must be read before other handlers are
         # added. If not, the other handlers will have no effect.
         try:
-            path = config['logging']['config_file']
+            path = config["logging"]["config_file"]
             logging.config.fileConfig(path, disable_existing_loggers=False)
         except Exception as e:
             # Catch everything as logging does not specify what can go wrong.
-            logger.error('Loading logging config %r failed. %s', path, e)
+            logger.error("Loading logging config %r failed. %s", path, e)
 
-    setup_console_logging(config, verbosity_level)
-    if save_debug_log:
-        setup_debug_logging_to_file(config)
+    loglevels = config.get("loglevels", {})
 
-    _delayed_handler.release()
-
-
-def setup_console_logging(config, verbosity_level):
-    if verbosity_level < min(LOG_LEVELS.keys()):
-        verbosity_level = min(LOG_LEVELS.keys())
-    if verbosity_level > max(LOG_LEVELS.keys()):
-        verbosity_level = max(LOG_LEVELS.keys())
-
-    loglevels = config.get('loglevels', {})
-    has_debug_loglevels = any([
-        level < logging.INFO for level in loglevels.values()])
-
+    verbosity_level = get_verbosity_level(
+        config, base_verbosity_level, args_verbosity_level
+    )
     verbosity_filter = VerbosityFilter(verbosity_level, loglevels)
 
-    if verbosity_level < 1 and not has_debug_loglevels:
-        log_format = config['logging']['console_format']
-    else:
-        log_format = config['logging']['debug_format']
-    formatter = logging.Formatter(log_format)
+    formatter = logging.Formatter(config["logging"]["format"])
 
-    if config['logging']['color']:
-        handler = ColorizingStreamHandler(config.get('logcolors', {}))
+    if config["logging"]["color"]:
+        handler = ColorizingStreamHandler(config.get("logcolors", {}))
     else:
         handler = logging.StreamHandler()
     handler.addFilter(verbosity_filter)
     handler.setFormatter(formatter)
 
-    logging.getLogger('').addHandler(handler)
+    logging.getLogger("").addHandler(handler)
+
+    _delayed_handler.release()
 
 
-def setup_debug_logging_to_file(config):
-    formatter = logging.Formatter(config['logging']['debug_format'])
-    handler = logging.handlers.RotatingFileHandler(
-        config['logging']['debug_file'], maxBytes=10485760, backupCount=3)
-    handler.setFormatter(formatter)
+def get_verbosity_level(config, base_verbosity_level, args_verbosity_level):
+    if args_verbosity_level:
+        result = base_verbosity_level + args_verbosity_level
+    else:
+        result = base_verbosity_level + config["logging"]["verbosity"]
 
-    logging.getLogger('').addHandler(handler)
+    if result < min(LOG_LEVELS.keys()):
+        result = min(LOG_LEVELS.keys())
+    if result > max(LOG_LEVELS.keys()):
+        result = max(LOG_LEVELS.keys())
+
+    return result
 
 
 class VerbosityFilter(logging.Filter):
-
     def __init__(self, verbosity_level, loglevels):
         self.verbosity_level = verbosity_level
         self.loglevels = loglevels
 
     def filter(self, record):
         for name, required_log_level in self.loglevels.items():
-            if record.name == name or record.name.startswith(name + '.'):
+            if record.name == name or record.name.startswith(name + "."):
                 return record.levelno >= required_log_level
 
-        if record.name.startswith('mopidy'):
-            required_log_level = LOG_LEVELS[self.verbosity_level]['mopidy']
+        if record.name.startswith("mopidy"):
+            required_log_level = LOG_LEVELS[self.verbosity_level]["mopidy"]
         else:
-            required_log_level = LOG_LEVELS[self.verbosity_level]['root']
+            required_log_level = LOG_LEVELS[self.verbosity_level]["root"]
         return record.levelno >= required_log_level
 
 
 #: Available log colors.
-COLORS = [b'black', b'red', b'green', b'yellow', b'blue', b'magenta', b'cyan',
-          b'white']
+COLORS = [
+    "black",
+    "red",
+    "green",
+    "yellow",
+    "blue",
+    "magenta",
+    "cyan",
+    "white",
+]
 
 
 class ColorizingStreamHandler(logging.StreamHandler):
@@ -146,35 +139,35 @@ class ColorizingStreamHandler(logging.StreamHandler):
 
     # Map logging levels to (background, foreground, bold/intense)
     level_map = {
-        TRACE_LOG_LEVEL: (None, 'blue', False),
-        logging.DEBUG: (None, 'blue', False),
-        logging.INFO: (None, 'white', False),
-        logging.WARNING: (None, 'yellow', False),
-        logging.ERROR: (None, 'red', False),
-        logging.CRITICAL: ('red', 'white', True),
+        TRACE_LOG_LEVEL: (None, "blue", False),
+        logging.DEBUG: (None, "blue", False),
+        logging.INFO: (None, "white", False),
+        logging.WARNING: (None, "yellow", False),
+        logging.ERROR: (None, "red", False),
+        logging.CRITICAL: ("red", "white", True),
     }
     # Map logger name to foreground colors
     logger_map = {}
 
-    csi = '\x1b['
-    reset = '\x1b[0m'
+    csi = "\x1b["
+    reset = "\x1b[0m"
 
-    is_windows = platform.system() == 'Windows'
+    is_windows = platform.system() == "Windows"
 
     def __init__(self, logger_colors):
-        super(ColorizingStreamHandler, self).__init__()
+        super().__init__()
         self.logger_map = logger_colors
 
     @property
     def is_tty(self):
-        isatty = getattr(self.stream, 'isatty', None)
+        isatty = getattr(self.stream, "isatty", None)
         return isatty and isatty()
 
     def emit(self, record):
         try:
             message = self.format(record)
             self.stream.write(message)
-            self.stream.write(getattr(self, 'terminator', '\n'))
+            self.stream.write(getattr(self, "terminator", "\n"))
             self.flush()
         except Exception:
             self.handleError(record)
@@ -183,7 +176,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
         message = logging.StreamHandler.format(self, record)
         if not self.is_tty or self.is_windows:
             return message
-        for name, color in self.logger_map.iteritems():
+        for name, color in self.logger_map.items():
             if record.name.startswith(name):
                 return self.colorize(message, fg=color)
         if record.levelno in self.level_map:
@@ -198,8 +191,9 @@ class ColorizingStreamHandler(logging.StreamHandler):
         if fg in COLORS:
             params.append(str(COLORS.index(fg) + 30))
         if bold:
-            params.append('1')
+            params.append("1")
         if params:
-            message = ''.join((
-                self.csi, ';'.join(params), 'm', message, self.reset))
+            message = "".join(
+                (self.csi, ";".join(params), "m", message, self.reset)
+            )
         return message

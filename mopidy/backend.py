@@ -1,14 +1,13 @@
-from __future__ import absolute_import, unicode_literals
-
 import logging
 
-from mopidy import listener, models
+import pykka
 
+from mopidy import listener
 
 logger = logging.getLogger(__name__)
 
 
-class Backend(object):
+class Backend:
 
     """Backend API
 
@@ -47,9 +46,9 @@ class Backend(object):
     #: List of URI schemes this backend can handle.
     uri_schemes = []
 
-    # Because the providers is marked as pykka_traversible, we can't get() them
-    # from another actor, and need helper methods to check if the providers are
-    # set or None.
+    # Because the providers is marked as pykka.traversable(), we can't get()
+    # them from another actor, and need helper methods to check if the
+    # providers are set or None.
 
     def has_library(self):
         return self.library is not None
@@ -68,14 +67,13 @@ class Backend(object):
         return True
 
 
-class LibraryProvider(object):
+@pykka.traversable
+class LibraryProvider:
 
     """
     :param backend: backend the controller is a part of
     :type backend: :class:`mopidy.backend.Backend`
     """
-
-    pykka_traversable = True
 
     root_directory = None
     """
@@ -120,18 +118,9 @@ class LibraryProvider(object):
 
         *MAY be implemented by subclass.*
 
-        Default implementation will simply call lookup and try and use the
-        album art for any tracks returned. Most extensions should replace this
-        with something smarter or simply return an empty dictionary.
+        Default implementation will simply return an empty dictionary.
         """
-        result = {}
-        for uri in uris:
-            image_uris = set()
-            for track in self.lookup(uri):
-                if track.album and track.album.images:
-                    image_uris.update(track.album.images)
-            result[uri] = [models.Image(uri=u) for u in image_uris]
-        return result
+        return {}
 
     def lookup(self, uri):
         """
@@ -161,7 +150,8 @@ class LibraryProvider(object):
         pass
 
 
-class PlaybackProvider(object):
+@pykka.traversable
+class PlaybackProvider:
 
     """
     :param audio: the audio actor
@@ -169,8 +159,6 @@ class PlaybackProvider(object):
     :param backend: the backend
     :type backend: :class:`mopidy.backend.Backend`
     """
-
-    pykka_traversable = True
 
     def __init__(self, audio, backend):
         self.audio = audio
@@ -225,6 +213,21 @@ class PlaybackProvider(object):
         """
         return uri
 
+    def is_live(self, uri):
+        """
+        Decide if the URI should be threated as a live stream or not.
+
+        *MAY be reimplemented by subclass.*
+
+        Playing a source as a live stream disables buffering, which reduces
+        latency before playback starts, and discards data when paused.
+
+        :param uri: the URI
+        :type uri: string
+        :rtype: bool
+        """
+        return False
+
     def change_track(self, track):
         """
         Swith to provided track.
@@ -244,11 +247,10 @@ class PlaybackProvider(object):
         """
         uri = self.translate_uri(track.uri)
         if uri != track.uri:
-            logger.debug(
-                'Backend translated URI from %s to %s', track.uri, uri)
+            logger.debug("Backend translated URI from %s to %s", track.uri, uri)
         if not uri:
             return False
-        self.audio.set_uri(uri).get()
+        self.audio.set_uri(uri, live_stream=self.is_live(uri)).get()
         return True
 
     def resume(self):
@@ -297,7 +299,8 @@ class PlaybackProvider(object):
         return self.audio.get_position().get()
 
 
-class PlaylistsProvider(object):
+@pykka.traversable
+class PlaylistsProvider:
 
     """
     A playlist provider exposes a collection of playlists, methods to
@@ -307,8 +310,6 @@ class PlaylistsProvider(object):
     :param backend: backend the controller is a part of
     :type backend: :class:`mopidy.backend.Backend` instance
     """
-
-    pykka_traversable = True
 
     def __init__(self, backend):
         self.backend = backend

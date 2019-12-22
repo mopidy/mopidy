@@ -1,15 +1,11 @@
-from __future__ import absolute_import, unicode_literals
-
 import unittest
-
-import mock
+from unittest import mock
 
 from mopidy.core import CoreListener, PlaybackState
 from mopidy.models import Playlist, TlTrack
 
 
 class CoreListenerTest(unittest.TestCase):
-
     def setUp(self):  # noqa: N802
         self.listener = CoreListener()
 
@@ -17,10 +13,12 @@ class CoreListenerTest(unittest.TestCase):
         self.listener.track_playback_paused = mock.Mock()
 
         self.listener.on_event(
-            'track_playback_paused', track=TlTrack(), position=0)
+            "track_playback_paused", track=TlTrack(), position=0
+        )
 
         self.listener.track_playback_paused.assert_called_with(
-            track=TlTrack(), position=0)
+            track=TlTrack(), position=0
+        )
 
     def test_listener_has_default_impl_for_track_playback_paused(self):
         self.listener.track_playback_paused(TlTrack(), 0)
@@ -36,7 +34,8 @@ class CoreListenerTest(unittest.TestCase):
 
     def test_listener_has_default_impl_for_playback_state_changed(self):
         self.listener.playback_state_changed(
-            PlaybackState.STOPPED, PlaybackState.PLAYING)
+            PlaybackState.STOPPED, PlaybackState.PLAYING
+        )
 
     def test_listener_has_default_impl_for_tracklist_changed(self):
         self.listener.tracklist_changed()
@@ -63,4 +62,4 @@ class CoreListenerTest(unittest.TestCase):
         self.listener.seeked(0)
 
     def test_listener_has_default_impl_for_stream_title_changed(self):
-        self.listener.stream_title_changed('foobar')
+        self.listener.stream_title_changed("foobar")

@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 from mopidy.internal import validation
 from mopidy.models import Ref, TlTrack, fields
 from mopidy.models.immutable import ValidatedImmutableObject

@@ -38,10 +38,10 @@ GStreamer knows how to play right before playback. For example:
   playback.
 
 - Mopidy differentiates between ``file://...`` URIs handled by
-  :ref:`ext-stream` and ``local:...`` URIs handled by :ref:`ext-local`.
+  :ref:`ext-stream` and ``local:...`` URIs handled by Mopidy-Local.
   :ref:`ext-stream` can play ``file://...`` URIs pointing to tracks and
   playlists located anywhere on your system, but it doesn't know a thing about
-  the object before you play it. On the other hand, :ref:`ext-local` scans a
+  the object before you play it. On the other hand, Mopidy-Local scans a
   predefined :confval:`local/media_dir` to build a meta data library of all
   known tracks. It is thus limited to playing tracks residing in the media
   library, but can provide additional features like directory browsing and
@@ -96,4 +96,4 @@ Backend listener
 Backend implementations
 =======================
 
-See :ref:`ext-backends`.
+See the `extension registry <https://mopidy.com/ext/>`_.

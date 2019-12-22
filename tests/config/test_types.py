@@ -1,419 +1,624 @@
-# encoding: utf-8
-
-from __future__ import absolute_import, unicode_literals
-
 import logging
 import socket
-import unittest
+from unittest import mock
 
-import mock
+import pytest
 
-from mopidy import compat
 from mopidy.config import types
+from mopidy.internal import log
 
-# TODO: DecodeTest and EncodeTest
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        # bytes are coded from UTF-8 and string-escaped:
+        (b"abc", "abc"),
+        ("æøå".encode(), "æøå"),
+        (b"a\nb", "a\nb"),
+        (b"a\\nb", "a\nb"),
+        # unicode strings are string-escaped:
+        ("abc", "abc"),
+        ("æøå", "æøå"),
+        ("a\nb", "a\nb"),
+        ("a\\nb", "a\nb"),
+    ],
+)
+def test_decode(value, expected):
+    assert types.decode(value) == expected
 
 
-class ConfigValueTest(unittest.TestCase):
+@pytest.mark.parametrize(
+    "value, expected",
+    [
+        # unicode strings are string-escaped and encoded as UTF-8:
+        ("abc", "abc"),
+        ("æøå", "æøå"),
+        ("a\nb", "a\\nb"),
+        # bytes are string-escaped:
+        (b"abc", "abc"),
+        (b"a\nb", "a\\nb"),
+    ],
+)
+def test_encode(value, expected):
+    assert types.encode(value) == expected
 
-    def test_deserialize_passes_through(self):
-        value = types.ConfigValue()
-        sentinel = object()
-        self.assertEqual(sentinel, value.deserialize(sentinel))
+
+def test_encode_decode_invalid_utf8():
+    data = b"\xc3\x00"  # invalid utf-8
+
+    result = types.encode(types.decode(data))
+
+    assert isinstance(result, str)
+    assert result == data.decode(errors="surrogateescape")
+
+
+class TestConfigValue:
+    def test_deserialize_decodes_bytes(self):
+        cv = types.ConfigValue()
+
+        result = cv.deserialize(b"abc")
+
+        assert isinstance(result, str)
 
     def test_serialize_conversion_to_string(self):
-        value = types.ConfigValue()
-        self.assertIsInstance(value.serialize(object()), bytes)
+        cv = types.ConfigValue()
+
+        result = cv.serialize(object())
+
+        assert isinstance(result, str)
 
     def test_serialize_none(self):
-        value = types.ConfigValue()
-        result = value.serialize(None)
-        self.assertIsInstance(result, bytes)
-        self.assertEqual(b'', result)
+        cv = types.ConfigValue()
+
+        result = cv.serialize(None)
+
+        assert isinstance(result, str)
+        assert result == ""
 
     def test_serialize_supports_display(self):
-        value = types.ConfigValue()
-        self.assertIsInstance(value.serialize(object(), display=True), bytes)
+        cv = types.ConfigValue()
+
+        result = cv.serialize(object(), display=True)
+
+        assert isinstance(result, str)
 
 
-class DeprecatedTest(unittest.TestCase):
-
+class TestDeprecated:
     def test_deserialize_returns_deprecated_value(self):
-        self.assertIsInstance(types.Deprecated().deserialize(b'foobar'),
-                              types.DeprecatedValue)
+        cv = types.Deprecated()
+
+        result = cv.deserialize(b"foobar")
+
+        assert isinstance(result, types.DeprecatedValue)
 
     def test_serialize_returns_deprecated_value(self):
-        self.assertIsInstance(types.Deprecated().serialize('foobar'),
-                              types.DeprecatedValue)
+        cv = types.Deprecated()
+
+        result = cv.serialize("foobar")
+
+        assert isinstance(result, types.DeprecatedValue)
 
 
-class StringTest(unittest.TestCase):
-
+class TestString:
     def test_deserialize_conversion_success(self):
-        value = types.String()
-        self.assertEqual('foo', value.deserialize(b' foo '))
-        self.assertIsInstance(value.deserialize(b'foo'), compat.text_type)
+        cv = types.String()
+
+        result = cv.deserialize(b" foo ")
+
+        assert result == "foo"
+        assert isinstance(result, str)
 
     def test_deserialize_decodes_utf8(self):
-        value = types.String()
-        result = value.deserialize('æøå'.encode('utf-8'))
-        self.assertEqual('æøå', result)
+        cv = types.String()
+
+        result = cv.deserialize("æøå".encode())
+
+        assert result == "æøå"
 
     def test_deserialize_does_not_double_encode_unicode(self):
-        value = types.String()
-        result = value.deserialize('æøå')
-        self.assertEqual('æøå', result)
+        cv = types.String()
+
+        result = cv.deserialize("æøå")
+
+        assert result == "æøå"
 
     def test_deserialize_handles_escapes(self):
-        value = types.String(optional=True)
-        result = value.deserialize(b'a\\t\\nb')
-        self.assertEqual('a\t\nb', result)
+        cv = types.String(optional=True)
+
+        result = cv.deserialize(b"a\\t\\nb")
+
+        assert result == "a\t\nb"
 
     def test_deserialize_enforces_choices(self):
-        value = types.String(choices=['foo', 'bar', 'baz'])
-        self.assertEqual('foo', value.deserialize(b'foo'))
-        self.assertRaises(ValueError, value.deserialize, b'foobar')
+        cv = types.String(choices=["foo", "bar", "baz"])
+
+        assert cv.deserialize(b"foo") == "foo"
+
+        with pytest.raises(ValueError):
+            cv.deserialize(b"foobar")
 
     def test_deserialize_enforces_required(self):
-        value = types.String()
-        self.assertRaises(ValueError, value.deserialize, b'')
+        cv = types.String()
+
+        with pytest.raises(ValueError):
+            cv.deserialize(b"")
 
     def test_deserialize_respects_optional(self):
-        value = types.String(optional=True)
-        self.assertIsNone(value.deserialize(b''))
-        self.assertIsNone(value.deserialize(b' '))
+        cv = types.String(optional=True)
 
-    def test_deserialize_decode_failure(self):
-        value = types.String()
-        incorrectly_encoded_bytes = u'æøå'.encode('iso-8859-1')
-        self.assertRaises(
-            ValueError, value.deserialize, incorrectly_encoded_bytes)
+        assert cv.deserialize(b"") is None
+        assert cv.deserialize(b" ") is None
 
-    def test_serialize_encodes_utf8(self):
-        value = types.String()
-        result = value.serialize('æøå')
-        self.assertIsInstance(result, bytes)
-        self.assertEqual('æøå'.encode('utf-8'), result)
+    def test_deserialize_invalid_encoding(self):
+        cv = types.String()
+        incorrectly_encoded_bytes = "æøå".encode("iso-8859-1")
 
-    def test_serialize_does_not_encode_bytes(self):
-        value = types.String()
-        result = value.serialize('æøå'.encode('utf-8'))
-        self.assertIsInstance(result, bytes)
-        self.assertEqual('æøå'.encode('utf-8'), result)
+        assert cv.deserialize(incorrectly_encoded_bytes) == "\udce6\udcf8\udce5"
+
+    def test_serialize_returns_text(self):
+        cv = types.String()
+
+        result = cv.serialize("æøå")
+
+        assert isinstance(result, str)
+        assert result == "æøå"
+
+    def test_serialize_decodes_bytes(self):
+        cv = types.String()
+        bytes_string = "æøå".encode()
+
+        result = cv.serialize(bytes_string)
+
+        assert isinstance(result, str)
+        assert result == bytes_string.decode()
 
     def test_serialize_handles_escapes(self):
-        value = types.String()
-        result = value.serialize('a\n\tb')
-        self.assertIsInstance(result, bytes)
-        self.assertEqual(r'a\n\tb'.encode('utf-8'), result)
+        cv = types.String()
+
+        result = cv.serialize("a\n\tb")
+
+        assert isinstance(result, str)
+        assert result == r"a\n\tb"
 
     def test_serialize_none(self):
-        value = types.String()
-        result = value.serialize(None)
-        self.assertIsInstance(result, bytes)
-        self.assertEqual(b'', result)
+        cv = types.String()
+
+        result = cv.serialize(None)
+
+        assert isinstance(result, str)
+        assert result == ""
 
     def test_deserialize_enforces_choices_optional(self):
-        value = types.String(optional=True, choices=['foo', 'bar', 'baz'])
-        self.assertEqual(None, value.deserialize(b''))
-        self.assertRaises(ValueError, value.deserialize, b'foobar')
+        cv = types.String(optional=True, choices=["foo", "bar", "baz"])
+
+        assert cv.deserialize(b"") is None
+
+        with pytest.raises(ValueError):
+            cv.deserialize(b"foobar")
 
 
-class SecretTest(unittest.TestCase):
-
+class TestSecret:
     def test_deserialize_decodes_utf8(self):
-        value = types.Secret()
-        result = value.deserialize('æøå'.encode('utf-8'))
-        self.assertIsInstance(result, compat.text_type)
-        self.assertEqual('æøå', result)
+        cv = types.Secret()
+
+        result = cv.deserialize("æøå".encode())
+
+        assert isinstance(result, str)
+        assert result == "æøå"
 
     def test_deserialize_enforces_required(self):
-        value = types.Secret()
-        self.assertRaises(ValueError, value.deserialize, b'')
+        cv = types.Secret()
+
+        with pytest.raises(ValueError):
+            cv.deserialize(b"")
 
     def test_deserialize_respects_optional(self):
-        value = types.Secret(optional=True)
-        self.assertIsNone(value.deserialize(b''))
-        self.assertIsNone(value.deserialize(b' '))
+        cv = types.Secret(optional=True)
+
+        assert cv.deserialize(b"") is None
+        assert cv.deserialize(b" ") is None
 
     def test_serialize_none(self):
-        value = types.Secret()
-        result = value.serialize(None)
-        self.assertIsInstance(result, bytes)
-        self.assertEqual(b'', result)
+        cv = types.Secret()
+
+        result = cv.serialize(None)
+
+        assert isinstance(result, str)
+        assert result == ""
 
     def test_serialize_for_display_masks_value(self):
-        value = types.Secret()
-        result = value.serialize('s3cret', display=True)
-        self.assertIsInstance(result, bytes)
-        self.assertEqual(b'********', result)
+        cv = types.Secret()
+
+        result = cv.serialize("s3cret", display=True)
+
+        assert isinstance(result, str)
+        assert result == "********"
 
     def test_serialize_none_for_display(self):
-        value = types.Secret()
-        result = value.serialize(None, display=True)
-        self.assertIsInstance(result, bytes)
-        self.assertEqual(b'', result)
+        cv = types.Secret()
+
+        result = cv.serialize(None, display=True)
+
+        assert isinstance(result, str)
+        assert result == ""
 
 
-class IntegerTest(unittest.TestCase):
-
+class TestInteger:
     def test_deserialize_conversion_success(self):
-        value = types.Integer()
-        self.assertEqual(123, value.deserialize('123'))
-        self.assertEqual(0, value.deserialize('0'))
-        self.assertEqual(-10, value.deserialize('-10'))
+        cv = types.Integer()
+
+        assert cv.deserialize("123") == 123
+        assert cv.deserialize("0") == 0
+        assert cv.deserialize("-10") == -10
 
     def test_deserialize_conversion_failure(self):
-        value = types.Integer()
-        self.assertRaises(ValueError, value.deserialize, 'asd')
-        self.assertRaises(ValueError, value.deserialize, '3.14')
-        self.assertRaises(ValueError, value.deserialize, '')
-        self.assertRaises(ValueError, value.deserialize, ' ')
+        cv = types.Integer()
+
+        with pytest.raises(ValueError):
+            cv.deserialize("asd")
+
+        with pytest.raises(ValueError):
+            cv.deserialize("3.14")
+
+    def test_deserialize_enforces_required(self):
+        cv = types.Integer()
+
+        with pytest.raises(ValueError):
+            cv.deserialize("")
+
+    def test_deserialize_respects_optional(self):
+        cv = types.Integer(optional=True)
+
+        assert cv.deserialize("") is None
 
     def test_deserialize_enforces_choices(self):
-        value = types.Integer(choices=[1, 2, 3])
-        self.assertEqual(3, value.deserialize('3'))
-        self.assertRaises(ValueError, value.deserialize, '5')
+        cv = types.Integer(choices=[1, 2, 3])
+
+        cv.deserialize("3") == 3
+
+        with pytest.raises(ValueError):
+            cv.deserialize("5")
 
     def test_deserialize_enforces_minimum(self):
-        value = types.Integer(minimum=10)
-        self.assertEqual(15, value.deserialize('15'))
-        self.assertRaises(ValueError, value.deserialize, '5')
+        cv = types.Integer(minimum=10)
+
+        assert cv.deserialize("15") == 15
+
+        with pytest.raises(ValueError):
+            cv.deserialize("5")
 
     def test_deserialize_enforces_maximum(self):
-        value = types.Integer(maximum=10)
-        self.assertEqual(5, value.deserialize('5'))
-        self.assertRaises(ValueError, value.deserialize, '15')
+        cv = types.Integer(maximum=10)
 
-    def test_deserialize_respects_optional(self):
-        value = types.Integer(optional=True)
-        self.assertEqual(None, value.deserialize(''))
+        assert cv.deserialize("5") == 5
+
+        with pytest.raises(ValueError):
+            cv.deserialize("15")
 
 
-class BooleanTest(unittest.TestCase):
-
+class TestBoolean:
     def test_deserialize_conversion_success(self):
-        value = types.Boolean()
-        for true in ('1', 'yes', 'true', 'on'):
-            self.assertIs(value.deserialize(true), True)
-            self.assertIs(value.deserialize(true.upper()), True)
-            self.assertIs(value.deserialize(true.capitalize()), True)
-        for false in ('0', 'no', 'false', 'off'):
-            self.assertIs(value.deserialize(false), False)
-            self.assertIs(value.deserialize(false.upper()), False)
-            self.assertIs(value.deserialize(false.capitalize()), False)
+        cv = types.Boolean()
+
+        for true in ("1", "yes", "true", "on"):
+            assert cv.deserialize(true) is True
+            assert cv.deserialize(true.upper()) is True
+            assert cv.deserialize(true.capitalize()) is True
+
+        for false in ("0", "no", "false", "off"):
+            assert cv.deserialize(false) is False
+            assert cv.deserialize(false.upper()) is False
+            assert cv.deserialize(false.capitalize()) is False
 
     def test_deserialize_conversion_failure(self):
-        value = types.Boolean()
-        self.assertRaises(ValueError, value.deserialize, 'nope')
-        self.assertRaises(ValueError, value.deserialize, 'sure')
-        self.assertRaises(ValueError, value.deserialize, '')
+        cv = types.Boolean()
 
-    def test_serialize_true(self):
-        value = types.Boolean()
-        result = value.serialize(True)
-        self.assertEqual(b'true', result)
-        self.assertIsInstance(result, bytes)
+        with pytest.raises(ValueError):
+            cv.deserialize("nope")
 
-    def test_serialize_false(self):
-        value = types.Boolean()
-        result = value.serialize(False)
-        self.assertEqual(b'false', result)
-        self.assertIsInstance(result, bytes)
+        with pytest.raises(ValueError):
+            cv.deserialize("sure")
+
+    def test_deserialize_enforces_required(self):
+        cv = types.Boolean()
+
+        with pytest.raises(ValueError):
+            cv.deserialize("")
 
     def test_deserialize_respects_optional(self):
-        value = types.Boolean(optional=True)
-        self.assertEqual(None, value.deserialize(''))
+        cv = types.Boolean(optional=True)
 
-    # TODO: test None or other invalid values into serialize?
+        assert cv.deserialize("") is None
+
+    def test_serialize_true(self):
+        cv = types.Boolean()
+
+        result = cv.serialize(True)
+
+        assert isinstance(result, str)
+        assert result == "true"
+
+    def test_serialize_false(self):
+        cv = types.Boolean()
+
+        result = cv.serialize(False)
+
+        assert isinstance(result, str)
+        assert result == "false"
+
+    def test_serialize_none_as_false(self):
+        # TODO We should consider making `None` an invalid value, but we have
+        # existing code that assumes it to work like False.
+
+        cv = types.Boolean()
+
+        result = cv.serialize(None)
+
+        assert isinstance(result, str)
+        assert result == "false"
+
+    def test_serialize_invalid_values(self):
+        cv = types.Boolean()
+
+        with pytest.raises(ValueError):
+            cv.serialize([])
+
+        with pytest.raises(ValueError):
+            cv.serialize("1")
 
 
-class ListTest(unittest.TestCase):
+class TestList:
     # TODO: add test_deserialize_ignores_blank
     # TODO: add test_serialize_ignores_blank
     # TODO: add test_deserialize_handles_escapes
 
     def test_deserialize_conversion_success(self):
-        value = types.List()
+        cv = types.List()
 
-        expected = ('foo', 'bar', 'baz')
-        self.assertEqual(expected, value.deserialize(b'foo, bar ,baz '))
+        result = cv.deserialize(b"foo, bar ,baz ")
+        assert result == ("foo", "bar", "baz")
 
-        expected = ('foo,bar', 'bar', 'baz')
-        self.assertEqual(expected, value.deserialize(b' foo,bar\nbar\nbaz'))
+        result = cv.deserialize(b" foo,bar\nbar\nbaz")
+        assert result == ("foo,bar", "bar", "baz")
 
     def test_deserialize_creates_tuples(self):
-        value = types.List(optional=True)
-        self.assertIsInstance(value.deserialize(b'foo,bar,baz'), tuple)
-        self.assertIsInstance(value.deserialize(b''), tuple)
+        cv = types.List(optional=True)
+
+        assert isinstance(cv.deserialize(b"foo,bar,baz"), tuple)
+        assert isinstance(cv.deserialize(b""), tuple)
 
     def test_deserialize_decodes_utf8(self):
-        value = types.List()
+        cv = types.List()
 
-        result = value.deserialize('æ, ø, å'.encode('utf-8'))
-        self.assertEqual(('æ', 'ø', 'å'), result)
+        result = cv.deserialize("æ, ø, å".encode())
+        assert result == ("æ", "ø", "å")
 
-        result = value.deserialize('æ\nø\nå'.encode('utf-8'))
-        self.assertEqual(('æ', 'ø', 'å'), result)
+        result = cv.deserialize("æ\nø\nå".encode())
+        assert result == ("æ", "ø", "å")
 
     def test_deserialize_does_not_double_encode_unicode(self):
-        value = types.List()
+        cv = types.List()
 
-        result = value.deserialize('æ, ø, å')
-        self.assertEqual(('æ', 'ø', 'å'), result)
+        result = cv.deserialize("æ, ø, å")
+        assert result == ("æ", "ø", "å")
 
-        result = value.deserialize('æ\nø\nå')
-        self.assertEqual(('æ', 'ø', 'å'), result)
+        result = cv.deserialize("æ\nø\nå")
+        assert result == ("æ", "ø", "å")
 
     def test_deserialize_enforces_required(self):
-        value = types.List()
-        self.assertRaises(ValueError, value.deserialize, b'')
+        cv = types.List()
+
+        with pytest.raises(ValueError):
+            cv.deserialize(b"")
 
     def test_deserialize_respects_optional(self):
-        value = types.List(optional=True)
-        self.assertEqual(tuple(), value.deserialize(b''))
+        cv = types.List(optional=True)
+
+        assert cv.deserialize(b"") == ()
 
     def test_serialize(self):
-        value = types.List()
-        result = value.serialize(('foo', 'bar', 'baz'))
-        self.assertIsInstance(result, bytes)
-        self.assertRegexpMatches(result, r'foo\n\s*bar\n\s*baz')
+        cv = types.List()
+
+        result = cv.serialize(("foo", "bar", "baz"))
+
+        assert isinstance(result, str)
+        assert result == "\n  foo\n  bar\n  baz"
 
     def test_serialize_none(self):
-        value = types.List()
-        result = value.serialize(None)
-        self.assertIsInstance(result, bytes)
-        self.assertEqual(result, '')
+        cv = types.List()
+
+        result = cv.serialize(None)
+
+        assert isinstance(result, str)
+        assert result == ""
 
 
-class LogLevelTest(unittest.TestCase):
+class TestLogColor:
+    def test_deserialize(self):
+        cv = types.LogColor()
+
+        assert cv.deserialize(b"RED") == "red"
+        assert cv.deserialize("RED") == "red"
+        assert cv.deserialize(b"red") == "red"
+        assert cv.deserialize("red") == "red"
+
+    def test_deserialize_enforces_choices(self):
+        cv = types.LogColor()
+
+        with pytest.raises(ValueError):
+            cv.deserialize("golden")
+
+    def test_serialize(self):
+        cv = types.LogColor()
+
+        assert cv.serialize("red") == "red"
+        assert cv.serialize("blue") == "blue"
+
+    def test_serialize_ignores_unknown_color(self):
+        cv = types.LogColor()
+
+        assert cv.serialize("golden") == ""
+
+
+class TestLogLevel:
     levels = {
-        'critical': logging.CRITICAL,
-        'error': logging.ERROR,
-        'warning': logging.WARNING,
-        'info': logging.INFO,
-        'debug': logging.DEBUG,
-        'all': logging.NOTSET,
+        "critical": logging.CRITICAL,
+        "error": logging.ERROR,
+        "warning": logging.WARNING,
+        "info": logging.INFO,
+        "debug": logging.DEBUG,
+        "trace": log.TRACE_LOG_LEVEL,
+        "all": logging.NOTSET,
     }
 
     def test_deserialize_conversion_success(self):
-        value = types.LogLevel()
+        cv = types.LogLevel()
+
         for name, level in self.levels.items():
-            self.assertEqual(level, value.deserialize(name))
-            self.assertEqual(level, value.deserialize(name.upper()))
-            self.assertEqual(level, value.deserialize(name.capitalize()))
+            assert cv.deserialize(name) == level
+            assert cv.deserialize(name.upper()) == level
+            assert cv.deserialize(name.capitalize()) == level
 
     def test_deserialize_conversion_failure(self):
-        value = types.LogLevel()
-        self.assertRaises(ValueError, value.deserialize, 'nope')
-        self.assertRaises(ValueError, value.deserialize, 'sure')
-        self.assertRaises(ValueError, value.deserialize, '')
-        self.assertRaises(ValueError, value.deserialize, ' ')
+        cv = types.LogLevel()
+
+        with pytest.raises(ValueError):
+            cv.deserialize("red alert")
+
+        with pytest.raises(ValueError):
+            cv.deserialize(" ")
 
     def test_serialize(self):
-        value = types.LogLevel()
+        cv = types.LogLevel()
+
         for name, level in self.levels.items():
-            self.assertEqual(name, value.serialize(level))
-        self.assertEqual(b'', value.serialize(1337))
+            cv.serialize(level) == name
+
+    def test_serialize_ignores_unknown_level(self):
+        cv = types.LogLevel()
+
+        assert cv.serialize(1337) == ""
 
 
-class HostnameTest(unittest.TestCase):
-
-    @mock.patch('socket.getaddrinfo')
+class TestHostname:
+    @mock.patch("socket.getaddrinfo")
     def test_deserialize_conversion_success(self, getaddrinfo_mock):
-        value = types.Hostname()
-        value.deserialize('example.com')
-        getaddrinfo_mock.assert_called_once_with('example.com', None)
+        cv = types.Hostname()
 
-    @mock.patch('socket.getaddrinfo')
+        cv.deserialize("example.com")
+
+        getaddrinfo_mock.assert_called_once_with("example.com", None)
+
+    @mock.patch("socket.getaddrinfo")
     def test_deserialize_conversion_failure(self, getaddrinfo_mock):
-        value = types.Hostname()
+        cv = types.Hostname()
         getaddrinfo_mock.side_effect = socket.error
-        self.assertRaises(ValueError, value.deserialize, 'example.com')
 
-    @mock.patch('socket.getaddrinfo')
+        with pytest.raises(ValueError):
+            cv.deserialize("example.com")
+
+    @mock.patch("socket.getaddrinfo")
     def test_deserialize_enforces_required(self, getaddrinfo_mock):
-        value = types.Hostname()
-        self.assertRaises(ValueError, value.deserialize, '')
-        self.assertEqual(0, getaddrinfo_mock.call_count)
+        cv = types.Hostname()
 
-    @mock.patch('socket.getaddrinfo')
+        with pytest.raises(ValueError):
+            cv.deserialize("")
+
+        with pytest.raises(ValueError):
+            cv.deserialize(" ")
+
+        assert getaddrinfo_mock.call_count == 0
+
+    @mock.patch("socket.getaddrinfo")
     def test_deserialize_respects_optional(self, getaddrinfo_mock):
-        value = types.Hostname(optional=True)
-        self.assertIsNone(value.deserialize(''))
-        self.assertIsNone(value.deserialize(' '))
-        self.assertEqual(0, getaddrinfo_mock.call_count)
+        cv = types.Hostname(optional=True)
 
-    @mock.patch('mopidy.internal.path.expand_path')
+        assert cv.deserialize("") is None
+        assert cv.deserialize(" ") is None
+        assert getaddrinfo_mock.call_count == 0
+
+    @mock.patch("mopidy.internal.path.expand_path")
     def test_deserialize_with_unix_socket(self, expand_path_mock):
-        value = types.Hostname()
-        self.assertIsNotNone(value.deserialize('unix:/tmp/mopidy.socket'))
-        expand_path_mock.assert_called_once_with('/tmp/mopidy.socket')
+        cv = types.Hostname()
+
+        assert cv.deserialize("unix:/tmp/mopidy.socket") is not None
+        expand_path_mock.assert_called_once_with("/tmp/mopidy.socket")
 
 
-class PortTest(unittest.TestCase):
-
+class TestPort:
     def test_valid_ports(self):
-        value = types.Port()
-        self.assertEqual(0, value.deserialize('0'))
-        self.assertEqual(1, value.deserialize('1'))
-        self.assertEqual(80, value.deserialize('80'))
-        self.assertEqual(6600, value.deserialize('6600'))
-        self.assertEqual(65535, value.deserialize('65535'))
+        cv = types.Port()
+
+        assert cv.deserialize("0") == 0
+        assert cv.deserialize("1") == 1
+        assert cv.deserialize("80") == 80
+        assert cv.deserialize("6600") == 6600
+        assert cv.deserialize("65535") == 65535
 
     def test_invalid_ports(self):
-        value = types.Port()
-        self.assertRaises(ValueError, value.deserialize, '65536')
-        self.assertRaises(ValueError, value.deserialize, '100000')
-        self.assertRaises(ValueError, value.deserialize, '-1')
-        self.assertRaises(ValueError, value.deserialize, '')
+        cv = types.Port()
+
+        with pytest.raises(ValueError):
+            cv.deserialize("65536")
+
+        with pytest.raises(ValueError):
+            cv.deserialize("100000")
+
+        with pytest.raises(ValueError):
+            cv.deserialize("-1")
+
+        with pytest.raises(ValueError):
+            cv.deserialize("")
 
 
-class ExpandedPathTest(unittest.TestCase):
+class TestExpandedPath:
+    def test_is_str(self):
+        assert isinstance(types._ExpandedPath(b"/tmp", b"foo"), str)
 
-    def test_is_bytes(self):
-        self.assertIsInstance(types.ExpandedPath(b'/tmp', b'foo'), bytes)
+    def test_stores_both_expanded_and_original_path(self):
+        original = "~"
+        expanded = "expanded_path"
 
-    def test_defaults_to_expanded(self):
-        original = b'~'
-        expanded = b'expanded_path'
-        self.assertEqual(expanded, types.ExpandedPath(original, expanded))
+        result = types._ExpandedPath(original, expanded)
 
-    @mock.patch('mopidy.internal.path.expand_path')
-    def test_orginal_stores_unexpanded(self, expand_path_mock):
-        original = b'~'
-        expanded = b'expanded_path'
-        result = types.ExpandedPath(original, expanded)
-        self.assertEqual(original, result.original)
+        assert result == expanded
+        assert result.original == original
 
 
-class PathTest(unittest.TestCase):
-
+class TestPath:
     def test_deserialize_conversion_success(self):
-        result = types.Path().deserialize(b'/foo')
-        self.assertEqual('/foo', result)
-        self.assertIsInstance(result, types.ExpandedPath)
-        self.assertIsInstance(result, bytes)
+        cv = types.Path()
+
+        result = cv.deserialize(b"/foo")
+
+        assert result == "/foo"
+        assert isinstance(result, types._ExpandedPath)
+        assert isinstance(result, str)
 
     def test_deserialize_enforces_required(self):
-        value = types.Path()
-        self.assertRaises(ValueError, value.deserialize, b'')
+        cv = types.Path()
+
+        with pytest.raises(ValueError):
+            cv.deserialize(b"")
 
     def test_deserialize_respects_optional(self):
-        value = types.Path(optional=True)
-        self.assertIsNone(value.deserialize(b''))
-        self.assertIsNone(value.deserialize(b' '))
+        cv = types.Path(optional=True)
+
+        assert cv.deserialize(b"") is None
+        assert cv.deserialize(b" ") is None
 
     def test_serialize_uses_original(self):
-        path = types.ExpandedPath(b'original_path', b'expanded_path')
-        value = types.Path()
-        self.assertEqual('expanded_path', path)
-        self.assertEqual('original_path', value.serialize(path))
+        cv = types.Path()
+        path = types._ExpandedPath("original_path", "expanded_path")
+
+        assert cv.serialize(path) == "original_path"
 
     def test_serialize_plain_string(self):
-        value = types.Path()
-        self.assertEqual('path', value.serialize(b'path'))
+        cv = types.Path()
 
-    def test_serialize_unicode_string(self):
-        value = types.Path()
-        self.assertRaises(ValueError, value.serialize, 'æøå')
+        assert cv.serialize(b"path") == "path"
+
+    def test_serialize_supports_unicode_string(self):
+        cv = types.Path()
+
+        assert cv.serialize("æøå") == "æøå"

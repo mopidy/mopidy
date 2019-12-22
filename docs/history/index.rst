@@ -11,5 +11,6 @@ For the latest releases, see :ref:`changelog`.
 .. toctree::
     :maxdepth: 1
 
+    changelog-2.x
     changelog-1.x
     changelog-0.x

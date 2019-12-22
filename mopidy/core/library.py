@@ -1,14 +1,12 @@
-from __future__ import absolute_import, unicode_literals
-
 import collections
 import contextlib
 import logging
 import operator
+import urllib
+from collections.abc import Mapping
 
-from mopidy import compat, exceptions, models
-from mopidy.compat import urllib
-from mopidy.internal import deprecation, validation
-
+from mopidy import exceptions, models
+from mopidy.internal import validation
 
 logger = logging.getLogger(__name__)
 
@@ -18,18 +16,21 @@ def _backend_error_handling(backend, reraise=None):
     try:
         yield
     except exceptions.ValidationError as e:
-        logger.error('%s backend returned bad data: %s',
-                     backend.actor_ref.actor_class.__name__, e)
+        logger.error(
+            "%s backend returned bad data: %s",
+            backend.actor_ref.actor_class.__name__,
+            e,
+        )
     except Exception as e:
         if reraise and isinstance(e, reraise):
             raise
-        logger.exception('%s backend caused an exception.',
-                         backend.actor_ref.actor_class.__name__)
+        logger.exception(
+            "%s backend caused an exception.",
+            backend.actor_ref.actor_class.__name__,
+        )
 
 
-class LibraryController(object):
-    pykka_traversable = True
-
+class LibraryController:
     def __init__(self, backends, core):
         self.backends = backends
         self.core = core
@@ -46,8 +47,9 @@ class LibraryController(object):
                 if backend is not None:
                     backends_to_uris[backend].append(uri)
         else:
-            backends_to_uris = dict([
-                (b, None) for b in self.backends.with_library.values()])
+            backends_to_uris = {
+                b: None for b in self.backends.with_library.values()
+            }
         return backends_to_uris
 
     def browse(self, uri):
@@ -99,7 +101,7 @@ class LibraryController(object):
                 root = future.get()
                 validation.check_instance(root, models.Ref)
                 directories.add(root)
-        return sorted(directories, key=operator.attrgetter('name'))
+        return sorted(directories, key=operator.attrgetter("name"))
 
     def _browse(self, uri):
         scheme = urllib.parse.urlparse(uri).scheme
@@ -135,13 +137,15 @@ class LibraryController(object):
         query is None or validation.check_query(query)  # TODO: normalize?
 
         result = set()
-        futures = {b: b.library.get_distinct(field, query)
-                   for b in self.backends.with_library.values()}
+        futures = {
+            b: b.library.get_distinct(field, query)
+            for b in self.backends.with_library.values()
+        }
         for backend, future in futures.items():
             with _backend_error_handling(backend):
                 values = future.get()
                 if values is not None:
-                    validation.check_instances(values, compat.text_type)
+                    validation.check_instances(values, str)
                     result.update(values)
         return result
 
@@ -165,63 +169,39 @@ class LibraryController(object):
 
         futures = {
             backend: backend.library.get_images(backend_uris)
-            for (backend, backend_uris)
-            in self._get_backends_to_uris(uris).items() if backend_uris}
+            for (backend, backend_uris) in self._get_backends_to_uris(
+                uris
+            ).items()
+            if backend_uris
+        }
 
         results = {uri: tuple() for uri in uris}
         for backend, future in futures.items():
             with _backend_error_handling(backend):
                 if future.get() is None:
                     continue
-                validation.check_instance(future.get(), collections.Mapping)
+                validation.check_instance(future.get(), Mapping)
                 for uri, images in future.get().items():
                     if uri not in uris:
                         raise exceptions.ValidationError(
-                            'Got unknown image URI: %s' % uri)
+                            f"Got unknown image URI: {uri}"
+                        )
                     validation.check_instances(images, models.Image)
                     results[uri] += tuple(images)
         return results
 
-    def find_exact(self, query=None, uris=None, **kwargs):
-        """Search the library for tracks where ``field`` is ``values``.
-
-        .. deprecated:: 1.0
-            Use :meth:`search` with ``exact`` set.
-        """
-        deprecation.warn('core.library.find_exact')
-        return self.search(query=query, uris=uris, exact=True, **kwargs)
-
-    def lookup(self, uri=None, uris=None):
+    def lookup(self, uris):
         """
         Lookup the given URIs.
 
         If the URI expands to multiple tracks, the returned list will contain
         them all.
 
-        :param uri: track URI
-        :type uri: string or :class:`None`
         :param uris: track URIs
-        :type uris: list of string or :class:`None`
-        :rtype: list of :class:`mopidy.models.Track` if uri was set or
-            {uri: list of :class:`mopidy.models.Track`} if uris was set.
-
-        .. versionadded:: 1.0
-            The ``uris`` argument.
-
-        .. deprecated:: 1.0
-            The ``uri`` argument. Use ``uris`` instead.
+        :type uris: list of string
+        :rtype: {uri: list of :class:`mopidy.models.Track`}
         """
-        if sum(o is not None for o in [uri, uris]) != 1:
-            raise ValueError('Exactly one of "uri" or "uris" must be set')
-
-        uris is None or validation.check_uris(uris)
-        uri is None or validation.check_uri(uri)
-
-        if uri:
-            deprecation.warn('core.library.lookup:uri_arg')
-
-        if uri is not None:
-            uris = [uri]
+        validation.check_uris(uris)
 
         futures = {}
         results = {u: [] for u in uris}
@@ -241,8 +221,6 @@ class LibraryController(object):
                     # then remove this filtering of tracks without URIs.
                     results[u] = [r for r in result if r.uri]
 
-        if uri:
-            return results[uri]
         return results
 
     def refresh(self, uri=None):
@@ -269,12 +247,13 @@ class LibraryController(object):
             with _backend_error_handling(backend):
                 future.get()
 
-    def search(self, query=None, uris=None, exact=False, **kwargs):
+    def search(self, query, uris=None, exact=False):
         """
         Search the library for tracks where ``field`` contains ``values``.
+
         ``field`` can be one of ``uri``, ``track_name``, ``album``, ``artist``,
         ``albumartist``, ``composer``, ``performer``, ``track_no``, ``genre``,
-        ``date``, ``comment`` or ``any``.
+        ``date``, ``comment``, or ``any``.
 
         If ``uris`` is given, the search is limited to results from within the
         URI roots. For example passing ``uris=['file:']`` will limit the search
@@ -308,33 +287,22 @@ class LibraryController(object):
         :rtype: list of :class:`mopidy.models.SearchResult`
 
         .. versionadded:: 1.0
-            The ``exact`` keyword argument, which replaces :meth:`find_exact`.
-
-        .. deprecated:: 1.0
-            Previously, if the query was empty, and the backend could support
-            it, all available tracks were returned. This has not changed, but
-            it is strongly discouraged. No new code should rely on this
-            behavior.
-
-        .. deprecated:: 1.1
-            Providing the search query via ``kwargs`` is no longer supported.
+            The ``exact`` keyword argument.
         """
-        query = _normalize_query(query or kwargs)
+        query = _normalize_query(query)
 
         uris is None or validation.check_uris(uris)
-        query is None or validation.check_query(query)
+        validation.check_query(query)
         validation.check_boolean(exact)
 
-        if kwargs:
-            deprecation.warn('core.library.search:kwargs_query')
-
         if not query:
-            deprecation.warn('core.library.search:empty_query')
+            return []
 
         futures = {}
         for backend, backend_uris in self._get_backends_to_uris(uris).items():
             futures[backend] = backend.library.search(
-                query=query, uris=backend_uris, exact=exact)
+                query=query, uris=backend_uris, exact=exact
+            )
 
         # Some of our tests check for LookupError to catch bad queries. This is
         # silly and should be replaced with query validation before passing it
@@ -353,7 +321,9 @@ class LibraryController(object):
                 backend_name = backend.actor_ref.actor_class.__name__
                 logger.warning(
                     '%s does not implement library.search() with "exact" '
-                    'support. Please upgrade it.', backend_name)
+                    "support. Please upgrade it.",
+                    backend_name,
+                )
 
         return results
 
@@ -362,17 +332,20 @@ def _normalize_query(query):
     broken_client = False
     # TODO: this breaks if query is not a dictionary like object...
     for (field, values) in query.items():
-        if isinstance(values, compat.string_types):
+        if isinstance(values, str):
             broken_client = True
             query[field] = [values]
     if broken_client:
         logger.warning(
-            'A client or frontend made a broken library search. Values in '
-            'queries must be lists of strings, not a string. Please check what'
-            ' sent this query and file a bug. Query: %s', query)
+            "A client or frontend made a broken library search. Values in "
+            "queries must be lists of strings, not a string. Please check what"
+            " sent this query and file a bug. Query: %s",
+            query,
+        )
     if not query:
         logger.warning(
-            'A client or frontend made a library search with an empty query. '
-            'This is strongly discouraged. Please check what sent this query '
-            'and file a bug.')
+            "A client or frontend made a library search with an empty query. "
+            "This is strongly discouraged. Please check what sent this query "
+            "and file a bug."
+        )
     return query
