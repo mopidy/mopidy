@@ -117,11 +117,11 @@ watch out for announcements on the `Discourse forum
     :caption: About
     :maxdepth: 1
 
-    authors
-    sponsors
-    versioning
     changelog
     history/index
+    versioning
+    authors
+    sponsors
 
 
 .. toctree::
