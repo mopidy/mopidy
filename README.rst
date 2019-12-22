@@ -37,7 +37,6 @@ The `Raspberry Pi`_ is an popular device to run Mopidy on, either using
 Raspbian, Ubuntu, or Arch Linux.
 Pimoroni recommends Mopidy for use with their `Pirate Audio`_ audio gear for
 Raspberry Pi.
-
 Mopidy is also a significant building block in the `Pi Musicbox`_ integrated
 audio jukebox system for Raspberry Pi.
 
