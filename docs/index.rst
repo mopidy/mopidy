@@ -98,6 +98,7 @@ watch out for announcements on the `Discourse forum
 
     audiosinks
     icecast
+    upnp
 
 
 .. toctree::
@@ -118,7 +119,6 @@ watch out for announcements on the `Discourse forum
     clients/http
     clients/mpd
     clients/mpris
-    clients/upnp
 
 
 .. toctree::

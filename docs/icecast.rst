@@ -1,8 +1,8 @@
 .. _icecast:
 
-*************************
-Streaming through Icecast
-*************************
+*******
+Icecast
+*******
 
 If you want to play the audio on another computer than the one running Mopidy,
 you can stream the audio from Mopidy through an Icecast audio streaming server.

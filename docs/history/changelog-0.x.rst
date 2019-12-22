@@ -1417,7 +1417,7 @@ long time been our most requested feature. Finally, it's here!
 
 - Updated :ref:`mpd-clients` overview.
 
-- Added :ref:`mpris-clients` and :ref:`upnp-clients` overview.
+- Added :ref:`mpris-clients` and UPnP clients overview.
 
 **Multiple backends support**
 
