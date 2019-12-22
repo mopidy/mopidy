@@ -1415,7 +1415,7 @@ long time been our most requested feature. Finally, it's here!
 
 - Moved :ref:`raspberrypi-installation` howto from the wiki to the docs.
 
-- Updated :ref:`mpd-clients` overview.
+- Updated MPD clients overview.
 
 - Added :ref:`mpris-clients` and UPnP clients overview.
 
@@ -2178,8 +2178,8 @@ changes. The main features are support for high bitrate audio from Spotify, and
 MPD password authentication.
 
 Regarding the docs, we've improved the :ref:`installation instructions
-<installation>` and done a bit of testing of the available :ref:`Android
-<android_mpd_clients>` and :ref:`iOS clients <ios_mpd_clients>` for MPD.
+<installation>` and done a bit of testing of the available Android
+and iOS clients for MPD.
 
 Please note that 0.3.0 requires some updated dependencies, as listed under
 *Important changes* below. Also, there is a known bug in the Spotify playlist

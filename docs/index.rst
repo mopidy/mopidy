@@ -117,7 +117,6 @@ watch out for announcements on the `Discourse forum
     :maxdepth: 2
 
     clients/http
-    clients/mpd
     clients/mpris
 
 

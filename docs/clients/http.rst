@@ -30,4 +30,5 @@ Web-based MPD clients
 
 In addition, there are several web based MPD clients, which doesn't use the
 :ref:`ext-http` frontend at all, but connect to Mopidy through the
-Mopidy-MPD frontend. For a list of those, see :ref:`mpd-web-clients`.
+Mopidy-MPD frontend. For a list of those, see the "Web clients" section of the
+`MPD wiki's clients list <https://mpd.fandom.com/wiki/Clients>`_.
