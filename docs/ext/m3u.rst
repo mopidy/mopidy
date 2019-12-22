@@ -10,21 +10,6 @@ on disk. It is bundled with Mopidy and enabled by default.
 This backend handles URIs starting with ``m3u:``.
 
 
-.. _m3u-migration:
-
-Migrating from Mopidy-Local playlists
-=====================================
-
-Mopidy-M3U was split out of the Mopidy-Local extension in Mopidy 1.0. To
-migrate your playlists from Mopidy-Local, simply move them from the
-:confval:`local/playlists_dir` directory to the :confval:`m3u/playlists_dir`
-directory. Assuming you have not changed the default config, run the following
-commands to migrate::
-
-    mkdir -p ~/.local/share/mopidy/m3u/
-    mv ~/.local/share/mopidy/local/playlists/* ~/.local/share/mopidy/m3u/
-
-
 Editing playlists
 =================
 

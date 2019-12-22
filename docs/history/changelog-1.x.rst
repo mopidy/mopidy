@@ -790,9 +790,8 @@ M3U backend
 -----------
 
 - Mopidy-M3U is a new bundled backend. It provides the same M3U support as was
-  previously part of the local backend. See :ref:`m3u-migration` for how to
-  migrate your local playlists to work with the M3U backend. (Fixes:
-  :issue:`1054`, PR: :issue:`1066`)
+  previously part of the local backend.
+  (Fixes: :issue:`1054`, PR: :issue:`1066`)
 
 - In playlist names, replace "/", which are illegal in M3U file names,
   with "|". (PR: :issue:`1084`)
