@@ -12,13 +12,42 @@ For older releases, see :ref:`history`.
 v3.0.0 (UNRELEASED)
 ===================
 
-Backwards incompatible release.
+The long-awaited Mopidy 3.0 is finally here, just in time for the Mopidy
+project's 10th anniversary on December 23rd!
 
-.. note::
+Mopidy 3.0 is a backward-incompatible release in a pretty significant way:
+Mopidy no longer runs on Python 2.
 
-  Pre-releases of Mopidy 3.0 can be installed by running::
+**Mopidy 3.0 requires Python 3.7 or newer.**
 
-    python3 -m pip install --pre mopidy
+While extensions have been able to continue working without changes
+throughout the 1.x and 2.x series of Mopidy, this time is different:
+
+- All extensions must be updated to work on Python 3.7 and newer.
+
+- Some extensions need to replace their use of a few long-deprecated APIs
+  that we've removed. See below for details.
+
+- Extension maintainers are also encouraged to update their project's setup to
+  match our refreshed `extension cookiecutter`_.
+
+In parallel with the development of Mopidy 3.0, we've coordinated with a few
+extension maintainers and upgraded almost 20 of the most popular extensions.
+These will all be published shortly after the release of Mopidy 3.0.
+
+We've also built a new `extension registry`_, where you can quickly track what
+extensions are ready for Python 3.
+
+In other news, the `Mopidy-MPD`_ and `Mopidy-Local`_ extensions have grown up
+and moved out to flourish as independent extension projects.
+After the move, Mopidy-Local merged with Mopidy-Local-SQLite and
+Mopidy-Local-Images, which are now both a part of the Mopidy-Local extension.
+
+.. _extension cookiecutter: https://github.com/mopidy/cookiecutter-mopidy-ext
+.. _extension registry: https://mopidy.com/ext/
+.. _Mopidy-MPD: https://mopidy.com/ext/mpd/
+.. _Mopidy-Local: https://mopidy.com/ext/local/
+
 
 Dependencies
 ------------
@@ -41,7 +70,7 @@ Logging
 
 - The command line option ``mopidy --save-debug-log`` and the
   configuration :confval:`logging/debug_file` have been removed.
-  To save a debug log for sharing, run ``mopidy -vvvv | tee mopidy.log``
+  To save a debug log for sharing, run ``mopidy -vvvv 2>&1 | tee mopidy.log``
   or equivalent. (Fixes: :issue:`1452`, PR: :issue:`1783`)
 
 - Replaced the configurations :confval:`logging/console_format`
@@ -93,16 +122,6 @@ Library controller
   if there is no ``query``. Previously, it returned the full music library.
   This does not work with online music services,
   and have thus been deprecated since 1.0.
-
-History controller
-^^^^^^^^^^^^^^^^^^
-
-- (no changes yet)
-
-Mixer controller
-^^^^^^^^^^^^^^^^
-
-- (no changes yet)
 
 Playback controller
 ^^^^^^^^^^^^^^^^^^^
@@ -175,11 +194,11 @@ Tracklist controller
   :meth:`mopidy.core.TracklistController.add`.
   Use the ``uris`` argument instead.
 
-- Removed the support for passing filter criterias as keyword arguments to
+- Removed the support for passing filter criteria as keyword arguments to
   :meth:`mopidy.core.TracklistController.filter`.
   Use the ``criteria`` argument instead.
 
-- Removed the support for passing filter criterias as keyword arguments to
+- Removed the support for passing filter criteria as keyword arguments to
   :meth:`mopidy.core.TracklistController.remove`.
   Use the ``criteria`` argument instead.
 
@@ -221,7 +240,8 @@ Models
 Extension support
 -----------------
 
-- The following methods now return :class:`pathlib.Path` objects instead of strings:
+- The following methods now return :class:`pathlib.Path` objects instead
+  of strings:
 
   - :meth:`mopidy.ext.Extension.get_cache_dir`
   - :meth:`mopidy.ext.Extension.get_config_dir`
@@ -259,11 +279,6 @@ MPD frontend
   to its own `Git repo <https://github.com/mopidy/mopidy-mpd>`__ and
   `PyPI project <https://pypi.org/project/Mopidy-MPD>`__.
 
-File backend
-------------
-
-- (no changes yet)
-
 Local backend
 -------------
 
@@ -274,16 +289,6 @@ Local backend
 
 - The :exc:`mopidy.exceptions.FindError` has been removed, as it was only
   used by Mopidy-Local. (PR: :issue:`1857`)
-
-M3U backend
------------
-
-- (no changes yet)
-
-Stream backend
---------------
-
-- (no changes yet)
 
 Audio
 -----
@@ -306,8 +311,10 @@ Internals
 - Switch all internal path handling to use :mod:`pathlib`. (Fixes:
   :issue:`1744`, PR: :issue:`1814`)
 
-- Remove :mod:`mopidy.compat` and all Python 2/3 compatability code. (PR:
+- Remove :mod:`mopidy.compat` and all Python 2/3 compatibility code. (PR:
   :issue:`1833`, :issue:`1835`)
 
 - Replace ``requirements.txt`` and ``setup.py`` with declarative config in
   ``setup.cfg``. (PR: :issue:`1839`)
+
+- Refreshed and updated all of our end user-oriented documentation.
