@@ -62,8 +62,8 @@ use extensions from PyPI installed globally on your system using::
    python3 -m pip install ...
 
 .. note::
-    Homebrew documents `pip3 install ...` as the way to install packages from
-    PyPI. This has the exact same effect as `python3 -m pip install ...`.
+    Homebrew documents ``pip3 install ...`` as the way to install packages from
+    PyPI. This has the exact same effect as ``python3 -m pip install ...``.
     We keep to the latter variant to keep our PyPI installation instructions
     identical across operating systems and distributions.
 
