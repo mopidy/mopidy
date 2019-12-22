@@ -89,6 +89,7 @@ watch out for announcements on the `Discourse forum
     installation/index
     running/index
     config
+    clients
     troubleshooting
 
 
@@ -110,14 +111,6 @@ watch out for announcements on the `Discourse forum
     ext/stream
     ext/http
     ext/softwaremixer
-
-
-.. toctree::
-    :caption: Clients
-    :maxdepth: 2
-
-    clients/http
-    clients/mpris
 
 
 .. toctree::

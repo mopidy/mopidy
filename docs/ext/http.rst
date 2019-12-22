@@ -39,7 +39,7 @@ files is a simpler solution.
 
 See :ref:`http-api` for details on how to integrate with Mopidy over HTTP. If
 you're looking for a web based client for Mopidy, go check out
-:ref:`http-clients`.
+:ref:`web-clients`.
 
 
 Configuration
