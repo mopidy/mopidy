@@ -17,10 +17,15 @@ There is a core playlist API in place for editing playlists. This is supported
 by a few Mopidy clients, but not through Mopidy's MPD server yet.
 
 It is possible to edit playlists by editing the M3U files located in the
-:confval:`m3u/playlists_dir` directory, usually
-:file:`~/.local/share/mopidy/m3u/`, by hand with a text editor. See `Wikipedia
-<https://en.wikipedia.org/wiki/M3U>`__ for a short description of the quite
-simple M3U playlist format.
+:confval:`m3u/playlists_dir` directory by hand with a text editor.
+See `Wikipedia <https://en.wikipedia.org/wiki/M3U>`__ for a short description
+of the quite simple M3U playlist format.
+
+If you run Mopidy manually in a terminal, the playlists are usually found in
+:file:`~/.local/share/mopidy/m3u/`.
+
+If you run Mopidy as a system service, the playlists are usually found in
+:file:`/var/lib/mopidy/m3u/`.
 
 
 Configuration
