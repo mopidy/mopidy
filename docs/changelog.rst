@@ -14,7 +14,7 @@ v3.0.1 (2019-12-22)
 
 Bugfix release.
 
-- Remove :mod:`mopidy.local` migration helper. (Fixes: :issue:`1861`, PR: `1862`)
+- Remove :mod:`mopidy.local` migration helper. (Fixes: :issue:`1861`, PR: :issue:`1862`)
 
 
 v3.0.0 (2019-12-22)
