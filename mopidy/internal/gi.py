@@ -16,7 +16,7 @@ except ImportError:
         number of dependencies itself, and cannot be installed with the regular
         Python tools like pip.
 
-        Please see http://docs.mopidy.com/en/latest/installation/ for
+        Please see https://docs.mopidy.com/en/latest/installation/ for
         instructions on how to install the required dependencies.
     """
         )
