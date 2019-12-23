@@ -9,10 +9,6 @@ However, note that the later models are significantly more powerful than
 the Raspberry Pi 1 and Raspberry Pi Zero; Mopidy will run noticably faster on
 the later models.
 
-.. image:: raspberrypi2.jpg
-    :width: 640
-    :height: 363
-
 
 How to for Raspbian
 ===================
