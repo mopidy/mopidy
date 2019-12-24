@@ -31,7 +31,7 @@ please see :ref:`contributing`.
 
    And on Fedora Linux from the official repositories::
 
-       sudo yum install -y gcc python3-devel python3-pip
+       sudo dnf install -y gcc python3-devel python3-pip
 
 #. Then you'll need to install GStreamer >= 1.14.0, with Python bindings.
    GStreamer is packaged for most popular Linux distributions. Search for
@@ -64,7 +64,7 @@ please see :ref:`contributing`.
 
    If you use Fedora you can install GStreamer like this::
 
-       sudo yum install -y \
+       sudo dnf install -y \
            python3-gstreamer1 \
            gstreamer1-plugins-good \
            gstreamer1-plugins-ugly
