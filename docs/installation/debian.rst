@@ -21,9 +21,6 @@ Distribution and architecture support
 
 The packages in the apt.mopidy.com archive are built for:
 
-- **Debian 9 (Stretch)**,
-  which also works for Raspbian Stretch and Ubuntu 18.04 LTS.
-
 - **Debian 10 (Buster)**,
   which also works for Raspbian Buster and Ubuntu 19.10 and newer.
 
@@ -50,10 +47,6 @@ Install from apt.mopidy.com
 #. Add the APT repo to your package sources::
 
        sudo wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/buster.list
-
-   Or, if you run an older Debian/Ubuntu distro (including Ubuntu 18.04 LTS)::
-
-       sudo wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/stretch.list
 
 #. Install Mopidy and all dependencies::
 
