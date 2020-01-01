@@ -8,6 +8,7 @@ import signal
 import sys
 
 import pykka
+from pykka.messages import ProxyCall
 
 from mopidy import config as config_lib
 from mopidy import exceptions
@@ -421,7 +422,8 @@ class RootCommand(Command):
         core = Core.start(
             config=config, mixer=mixer, backends=backends, audio=audio
         ).proxy()
-        core.setup().get()
+        call = ProxyCall(attr_path=["_setup"], args=[], kwargs={})
+        core.actor_ref.ask(call, block=True)
         return core
 
     def start_frontends(self, config, frontend_classes, core):
@@ -443,7 +445,8 @@ class RootCommand(Command):
     def stop_core(self, core):
         logger.info("Stopping Mopidy core")
         if core:
-            core.teardown().get()
+            call = ProxyCall(attr_path=["_teardown"], args=[], kwargs={})
+            core.actor_ref.ask(call, block=True)
         process.stop_actors_by_class(Core)
 
     def stop_backends(self, backend_classes):
