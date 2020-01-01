@@ -86,7 +86,7 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
         shutil.rmtree(self.temp_dir)
 
     def test_save_state(self):
-        self.core.teardown()
+        self.core._teardown()
 
         assert self.state_file.is_file()
         reload_data = storage.load(self.state_file)
@@ -107,7 +107,7 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
         assert data == reload_data
 
     def test_load_state_no_file(self):
-        self.core.setup()
+        self.core._setup()
 
         assert self.core.mixer.get_mute() is None
         assert self.core.mixer.get_volume() is None
@@ -152,7 +152,7 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
         )
         storage.dump(self.state_file, data)
 
-        self.core.setup()
+        self.core._setup()
 
         assert self.core.mixer.get_mute() is True
         assert self.core.mixer.get_volume() == 12
@@ -171,6 +171,6 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
         storage.dump(self.state_file, data)
         assert self.state_file.is_file()
 
-        self.core.setup()
+        self.core._setup()
 
         assert not self.state_file.exists()
