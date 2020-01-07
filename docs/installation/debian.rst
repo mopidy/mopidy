@@ -51,7 +51,7 @@ Install from apt.mopidy.com
 #. Install Mopidy and all dependencies::
 
        sudo apt update
-       sudo apt install mopidy
+       sudo apt install mopidy -y
 
 #. Now, you're ready to :ref:`run Mopidy <running>`.
 
