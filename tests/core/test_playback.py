@@ -466,6 +466,34 @@ class TestConsumeHandling(BaseTest):
 
         assert tl_track not in self.core.tracklist.get_tl_tracks()
 
+    def test_stop_in_consume_mode_removes_finished_track(self):
+        tl_track = self.core.tracklist.get_tl_tracks()[0]
+
+        self.core.playback.play(tl_track)
+        self.core.tracklist.set_consume(True)
+        self.replay_events()
+        assert self.playback.get_state() == "playing"
+
+        self.core.playback.stop()
+        self.replay_events()
+
+        assert self.playback.get_state() == "stopped"
+        assert tl_track not in self.core.tracklist.get_tl_tracks()
+
+    def test_stop_without_consume_does_not_remove_track(self):
+        tl_track = self.core.tracklist.get_tl_tracks()[0]
+
+        self.core.playback.play(tl_track)
+        self.core.tracklist.set_consume(False)
+        self.replay_events()
+        assert self.playback.get_state() == "playing"
+
+        self.core.playback.stop()
+        self.replay_events()
+
+        assert self.playback.get_state() == "stopped"
+        assert tl_track in self.core.tracklist.get_tl_tracks()
+
     def test_next_in_consume_mode_removes_unplayable_track(self):
         last_playable_tl_track = self.core.tracklist.get_tl_tracks()[-2]
         unplayable_tl_track = self.core.tracklist.get_tl_tracks()[-1]
@@ -502,6 +530,693 @@ class TestConsumeHandling(BaseTest):
         self.replay_events()
 
         assert self.playback.get_state() == "stopped"
+
+
+class TestRemovingCurrentTrack(BaseTest):
+
+    # A battery of tests to test removing the currently playing track.
+    # In order to catch all the possible race conditions that can occur
+    # this removes tracks at various positions within the tracklist
+    # and deals with deleing multiple tracks in three different ways:
+    # - The Mopidy-HTTP way (a list of TLIDs)
+    # - The simple MPD client way (one after another)
+    # - The MPD command-list way (a batch of commands fired in at high speed)
+
+    # Tests for removing single tracks
+
+    def test_remove_current_stops_playback_if_current_is_first(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(False)
+        self.core.playback.play(tlid=first_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == first_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove({"tlid": [first_track.tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track in self.core.tracklist.get_tl_tracks()
+        assert last_track in self.core.tracklist.get_tl_tracks()
+
+    def test_remove_current_with_consume_stops_playback_if_current_first(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tlid=first_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == first_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove({"tlid": [first_track.tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track in self.core.tracklist.get_tl_tracks()
+        assert last_track in self.core.tracklist.get_tl_tracks()
+
+    def test_remove_current_stops_if_current_is_final(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(False)
+        self.core.playback.play(tlid=last_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == last_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove({"tlid": [last_track.tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track in self.core.tracklist.get_tl_tracks()
+        assert second_track in self.core.tracklist.get_tl_tracks()
+        assert last_track not in self.core.tracklist.get_tl_tracks()
+
+    def test_remove_current_with_consume_stops_if_current_is_final(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tlid=last_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == last_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove({"tlid": [last_track.tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track in self.core.tracklist.get_tl_tracks()
+        assert second_track in self.core.tracklist.get_tl_tracks()
+        assert last_track not in self.core.tracklist.get_tl_tracks()
+
+    # Tests for removing multiple tracks the Mopidy-HTTP way
+
+    def test_list_remove_starting_at_current_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(False)
+        self.core.playback.play(tlid=first_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == first_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove(
+            {"tlid": [first_track.tlid, second_track.tlid]}
+        )
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track in self.core.tracklist.get_tl_tracks()
+
+    def test_list_remove_starting_at_current_with_consume_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tlid=first_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == first_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove(
+            {"tlid": [first_track.tlid, second_track.tlid]}
+        )
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track in self.core.tracklist.get_tl_tracks()
+
+    def test_list_remove_ending_at_current_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(False)
+        self.core.playback.play(tlid=second_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == second_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove(
+            {"tlid": [first_track.tlid, second_track.tlid]}
+        )
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track in self.core.tracklist.get_tl_tracks()
+
+    def test_list_remove_ending_at_current_with_consume_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tlid=second_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == second_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove(
+            {"tlid": [first_track.tlid, second_track.tlid]}
+        )
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track in self.core.tracklist.get_tl_tracks()
+
+    def test_list_remove_all_while_playing_first_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(False)
+        self.core.playback.play(tlid=first_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == first_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove(
+            {"tlid": [first_track.tlid, second_track.tlid, last_track.tlid]}
+        )
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track not in self.core.tracklist.get_tl_tracks()
+
+    def test_list_remove_all_while_playing_first_consume_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tlid=first_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == first_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove(
+            {"tlid": [first_track.tlid, second_track.tlid, last_track.tlid]}
+        )
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track not in self.core.tracklist.get_tl_tracks()
+
+    def test_list_remove_all_while_playing_last_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(False)
+        self.core.playback.play(tlid=last_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == last_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove(
+            {"tlid": [first_track.tlid, second_track.tlid, last_track.tlid]}
+        )
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track not in self.core.tracklist.get_tl_tracks()
+
+    def test_list_remove_all_while_playing_last_consume_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tlid=last_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == last_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove(
+            {"tlid": [first_track.tlid, second_track.tlid, last_track.tlid]}
+        )
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track not in self.core.tracklist.get_tl_tracks()
+
+    # Tests for removing multiple tracks the simple MPD client way
+
+    def test_mpd_remove_starting_at_current_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(False)
+        self.core.playback.play(tlid=first_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == first_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove({"tlid": [first_track.tlid]})
+        self.replay_events()
+        self.core.tracklist.remove({"tlid": [second_track.tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track in self.core.tracklist.get_tl_tracks()
+
+    def test_mpd_remove_starting_at_current_with_consume_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tlid=first_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == first_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove({"tlid": [first_track.tlid]})
+        self.replay_events()
+        self.core.tracklist.remove({"tlid": [second_track.tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track in self.core.tracklist.get_tl_tracks()
+
+    def test_mpd_remove_ending_at_current_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(False)
+        self.core.playback.play(tlid=second_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == second_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove({"tlid": [first_track.tlid]})
+        self.replay_events()
+        self.core.tracklist.remove({"tlid": [second_track.tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track in self.core.tracklist.get_tl_tracks()
+
+    def test_mpd_remove_ending_at_current_with_consume_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tlid=second_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == second_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove({"tlid": [first_track.tlid]})
+        self.replay_events()
+        self.core.tracklist.remove({"tlid": [second_track.tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track in self.core.tracklist.get_tl_tracks()
+
+    def test_mpd_remove_all_while_playing_first_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(False)
+        self.core.playback.play(tlid=first_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == first_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove({"tlid": [first_track.tlid]})
+        self.replay_events()
+        self.core.tracklist.remove({"tlid": [second_track.tlid]})
+        self.replay_events()
+        self.core.tracklist.remove({"tlid": [last_track.tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track not in self.core.tracklist.get_tl_tracks()
+
+    def test_mpd_remove_all_while_playing_first_consume_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tlid=first_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == first_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove({"tlid": [first_track.tlid]})
+        self.replay_events()
+        self.core.tracklist.remove({"tlid": [second_track.tlid]})
+        self.replay_events()
+        self.core.tracklist.remove({"tlid": [last_track.tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track not in self.core.tracklist.get_tl_tracks()
+
+    def test_mpd_remove_all_while_playing_last_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(False)
+        self.core.playback.play(tlid=last_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == last_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove({"tlid": [first_track.tlid]})
+        self.replay_events()
+        self.core.tracklist.remove({"tlid": [second_track.tlid]})
+        self.replay_events()
+        self.core.tracklist.remove({"tlid": [last_track.tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track not in self.core.tracklist.get_tl_tracks()
+
+    def test_mpd_remove_all_while_playing_last_consume_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tlid=last_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == last_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove({"tlid": [first_track.tlid]})
+        self.replay_events()
+        self.core.tracklist.remove({"tlid": [second_track.tlid]})
+        self.replay_events()
+        self.core.tracklist.remove({"tlid": [last_track.tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track not in self.core.tracklist.get_tl_tracks()
+
+    # Tests for removing multiple tracks the MPD Command List way
+
+    def test_batch_remove_starting_at_current_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(False)
+        self.core.playback.play(tlid=first_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == first_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove({"tlid": [first_track.tlid]})
+        self.core.tracklist.remove({"tlid": [second_track.tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track in self.core.tracklist.get_tl_tracks()
+
+    def test_batch_remove_starting_at_current_with_consume_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tlid=first_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == first_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove({"tlid": [first_track.tlid]})
+        self.core.tracklist.remove({"tlid": [second_track.tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track in self.core.tracklist.get_tl_tracks()
+
+    def test_batch_remove_ending_at_current_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(False)
+        self.core.playback.play(tlid=second_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == second_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove({"tlid": [first_track.tlid]})
+        self.core.tracklist.remove({"tlid": [second_track.tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track in self.core.tracklist.get_tl_tracks()
+
+    def test_batch_remove_ending_at_current_with_consume_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tlid=second_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == second_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove({"tlid": [first_track.tlid]})
+        self.core.tracklist.remove({"tlid": [second_track.tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track in self.core.tracklist.get_tl_tracks()
+
+    def test_batch_remove_all_while_playing_first_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(False)
+        self.core.playback.play(tlid=first_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == first_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove({"tlid": [first_track.tlid]})
+        self.core.tracklist.remove({"tlid": [second_track.tlid]})
+        self.core.tracklist.remove({"tlid": [last_track.tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track not in self.core.tracklist.get_tl_tracks()
+
+    def test_batch_remove_all_while_playing_first_consume_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tlid=first_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == first_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove({"tlid": [first_track.tlid]})
+        self.core.tracklist.remove({"tlid": [second_track.tlid]})
+        self.core.tracklist.remove({"tlid": [last_track.tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track not in self.core.tracklist.get_tl_tracks()
+
+    def test_batch_remove_all_while_playing_last_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(False)
+        self.core.playback.play(tlid=last_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == last_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove({"tlid": [first_track.tlid]})
+        self.core.tracklist.remove({"tlid": [second_track.tlid]})
+        self.core.tracklist.remove({"tlid": [last_track.tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track not in self.core.tracklist.get_tl_tracks()
+
+    def test_batch_remove_all_while_playing_last_consume_stops_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        first_track = tl_tracks[0]
+        second_track = tl_tracks[1]
+        last_track = tl_tracks[2]
+
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tlid=last_track.tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() == last_track.tlid
+        assert self.playback.get_state() == "playing"
+
+        self.core.tracklist.remove({"tlid": [first_track.tlid]})
+        self.core.tracklist.remove({"tlid": [second_track.tlid]})
+        self.core.tracklist.remove({"tlid": [last_track.tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_current_tlid() is None
+        assert self.playback.get_state() == "stopped"
+        assert first_track not in self.core.tracklist.get_tl_tracks()
+        assert second_track not in self.core.tracklist.get_tl_tracks()
+        assert last_track not in self.core.tracklist.get_tl_tracks()
 
 
 class TestCurrentAndPendingTlTrack(BaseTest):

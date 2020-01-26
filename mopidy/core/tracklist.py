@@ -513,11 +513,7 @@ class TracklistController:
         :rtype: list of :class:`mopidy.models.TlTrack` that were removed
         """
         tl_tracks = self.filter(criteria)
-        for tl_track in tl_tracks:
-            position = self._tl_tracks.index(tl_track)
-            del self._tl_tracks[position]
-        self._increase_version()
-        return tl_tracks
+        return self._remove_tracks(tl_tracks, stop_if_current=True)
 
     def shuffle(self, start=None, end=None):
         """
@@ -569,6 +565,25 @@ class TracklistController:
         # TODO: validate slice?
         return self._tl_tracks[start:end]
 
+    def _remove_tracks(self, tl_tracks, *, stop_if_current=True):
+        """Internal method for removing tracks from the tracklist."""
+
+        # Check to see if we're removing the current tl_track and stop playback
+        # if we are. If we don't do this the track keeps playing and we no
+        # longer have a reference to it.
+        current_tl_track = self.core.playback.get_current_tl_track()
+        if stop_if_current and current_tl_track in tl_tracks:
+            self.core.playback.stop()
+
+        for tl_track in tl_tracks:
+            # Check in case it got consumed by the stop() above
+            if tl_track in self._tl_tracks:
+                position = self._tl_tracks.index(tl_track)
+                del self._tl_tracks[position]
+
+        self._increase_version()
+        return tl_tracks
+
     def _mark_playing(self, tl_track):
         """Internal method for :class:`mopidy.core.PlaybackController`."""
         if self.get_random() and tl_track in self._shuffled:
@@ -585,7 +600,8 @@ class TracklistController:
     def _mark_played(self, tl_track):
         """Internal method for :class:`mopidy.core.PlaybackController`."""
         if self.get_consume() and tl_track is not None:
-            self.remove({"tlid": [tl_track.tlid]})
+            logger.debug("Consuming track %d", tl_track.tlid)
+            self._remove_tracks([tl_track], stop_if_current=False)
             return True
         return False
 

@@ -125,6 +125,7 @@ class PlaybackController:
         self.set_state(PlaybackState.STOPPED)
         if self._current_tl_track:
             self._trigger_track_playback_ended(self.get_time_position())
+        self.stop()
         self._set_current_tl_track(None)
 
     def _on_stream_changed(self, uri):
@@ -480,6 +481,8 @@ class PlaybackController:
         if self.get_state() != PlaybackState.STOPPED:
             self._last_position = self.get_time_position()
             backend = self._get_backend(self.get_current_tl_track())
+            if not backend and self._pending_tl_track is not None:
+                backend = self._get_backend(self._pending_tl_track)
             # TODO: Wrap backend call in error handling.
             if not backend or backend.playback.stop().get():
                 self.set_state(PlaybackState.STOPPED)
@@ -534,6 +537,8 @@ class PlaybackController:
 
     def _trigger_playback_state_changed(self, old_state, new_state):
         logger.debug("Triggering playback state change event")
+        if new_state == PlaybackState.STOPPED:
+            self._trigger_track_playback_ended(self.get_time_position())
         listener.CoreListener.send(
             "playback_state_changed", old_state=old_state, new_state=new_state
         )
