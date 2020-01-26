@@ -345,7 +345,7 @@ class RootCommand(Command):
             if mixer_class is not None:
                 self.stop_mixer(mixer_class)
             process.stop_remaining_actors()
-            return exit_status_code
+        return exit_status_code
 
     def get_mixer_class(self, config, mixer_classes):
         logger.debug(
