@@ -9,6 +9,15 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
+v3.0.2 (UNRELEASED)
+===================
+
+Bugfix release.
+
+- Core: Reset stream title on receipt of any ``title`` audio tag change.
+  Fixes: :issue:`1871`, PR: :issue:`1875`)
+
+
 v3.0.1 (2019-12-22)
 ===================
 
