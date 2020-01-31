@@ -319,12 +319,74 @@ class TestPreviousHandling(BaseTest):
         assert self.core.playback.get_current_track() == self.tracks[0]
 
     @pytest.mark.parametrize(
+        # following parameters intended to folow mpd's behavior
+        # see the table found in the docs for core.TracklistController.previous()
         "repeat, random, single, consume, index, result",
         [
-            (False, False, False, False, 0, None),
+            # repeat, random, single, consume
+            (True, True, True, True, 0, "rand"),
+            (True, True, True, True, 1, "rand"),
+            (True, True, True, True, 2, "rand"),
+            # repeat, random, single
+            (True, True, True, False, 0, "rand"),
+            (True, True, True, False, 1, "rand"),
+            (True, True, True, False, 2, "rand"),
+            # repeat, random, consume
+            (True, True, False, True, 0, "rand"),
+            (True, True, False, True, 1, "rand"),
+            (True, True, False, True, 2, "rand"),
+            # repeat, random
+            (True, True, False, False, 0, "rand"),
+            (True, True, False, False, 1, "rand"),
+            (True, True, False, False, 2, "rand"),
+            # repeat, random, single
+            (True, False, True, True, 0, 2),
+            (True, False, True, True, 1, 0),
+            (True, False, True, True, 2, 1),
+            # repeat, single
+            (True, False, True, False, 0, 2),
+            (True, False, True, False, 1, 0),
+            (True, False, True, False, 2, 1),
+            # repeat, consume
+            (True, False, False, True, 0, 2),
+            (True, False, False, True, 1, 0),
+            (True, False, False, True, 2, 1),
+            # repeat
+            (True, False, False, False, 0, 2),
+            (True, False, False, False, 1, 0),
+            (True, False, False, False, 2, 1),
+            # random, single, consume
+            (False, True, True, True, 0, 0),
+            (False, True, True, True, 1, 1),
+            (False, True, True, True, 2, 2),
+            # random, single
+            (False, True, True, False, 0, 0),
+            (False, True, True, False, 1, 1),
+            (False, True, True, False, 2, 2),
+            # random, consume
+            (False, True, False, True, 0, 0),
+            (False, True, False, True, 1, 1),
+            (False, True, False, True, 2, 2),
+            # random
+            (False, True, False, False, 0, 0),
+            (False, True, False, False, 1, 1),
+            (False, True, False, False, 2, 2),
+            # single, consume
+            (False, False, True, True, 0, 0),
+            (False, False, True, True, 1, 0),
+            (False, False, True, True, 2, 1),
+            # single
+            (False, False, True, False, 0, 0),
+            (False, False, True, False, 1, 0),
+            (False, False, True, False, 2, 1),
+            # consume
+            (False, False, False, True, 0, 0),
+            (False, False, False, True, 1, 0),
+            (False, False, False, True, 2, 1),
+            # nothing
+            (False, False, False, False, 0, 0),
             (False, False, False, False, 1, 0),
-            (True, False, False, False, 0, 0),  # FIXME: #1694
-            (True, False, False, False, 1, 1),  # FIXME: #1694
+            (False, False, False, False, 2, 1),
         ],
     )
     def test_previous_all_modes(
@@ -343,6 +405,8 @@ class TestPreviousHandling(BaseTest):
 
         if result is None:
             assert self.core.playback.get_current_tl_track() is None
+        elif result == "rand":
+            assert self.core.playback.get_current_tl_track() is not None
         else:
             assert (
                 self.core.playback.get_current_tl_track() == tl_tracks[result]

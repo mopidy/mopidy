@@ -302,13 +302,45 @@ class TracklistController:
         Returns the TLID of the track that will be played if calling
         :meth:`mopidy.core.PlaybackController.previous()`.
 
-        For normal playback this is the previous track in the tracklist. If
-        random and/or consume is enabled it should return the current track
-        instead.
-
         :rtype: :class:`int` or :class:`None`
 
         .. versionadded:: 1.1
+
+        For normal playback this is the previous track in the tracklist.
+        If any other playback modes are set, refer to the table below
+        for the expected behavior.
+
+        This table was made based on tests performed on
+        Music Player Daemon version 0.21.19.
+
+        *MPD's behavior when affected by repeat/random/single/consume:*
+
+            Given a playlist of three tracks numbered 1, 2, 3, and a currently
+            playing track ``c``. ``previous_track`` is defined at the track
+            that will be played upon ``previous`` calls.
+
+            ======  ======  ======  =======  =====  =====  =====
+                        Inputs                  previous_track
+            -------------------------------  -------------------
+            repeat  random  single  consume  c = 1  c = 2  c = 3
+            ======  ======  ======  =======  =====  =====  =====
+            T       T       T       T        Rand   Rand   Rand
+            T       T       T       .        Rand   Rand   Rand
+            T       T       .       T        Rand   Rand   Rand
+            T       T       .       .        Rand   Rand   Rand
+            T       .       T       T        3      1      2
+            T       .       T       .        3      1      2
+            T       .       .       T        3      1      2
+            T       .       .       .        3      1      2
+            .       T       T       T        1      2      3
+            .       T       T       .        1      2      3
+            .       T       .       T        1      2      3
+            .       T       .       .        1      2      3
+            .       .       T       T        1      1      2
+            .       .       T       .        1      1      2
+            .       .       .       T        1      1      2
+            .       .       .       .        1      1      2
+
         """
         current_tl_track = self.core.playback.get_current_tl_track()
 
@@ -322,9 +354,9 @@ class TracklistController:
         Returns the track that will be played if calling
         :meth:`mopidy.core.PlaybackController.previous()`.
 
-        For normal playback this is the previous track in the tracklist. If
-        random and/or consume is enabled it should return the current track
-        instead.
+        For normal playback this is the previous track in the tracklist.
+        If any other playback modes are set, refer to the table for the
+        expected behavior in the documentation for :meth:`get_previous_tlid`.
 
         .. deprecated:: 3.0
             Use :meth:`get_previous_tlid` instead.
@@ -336,17 +368,31 @@ class TracklistController:
         deprecation.warn("core.tracklist.previous_track")
         tl_track is None or validation.check_instance(tl_track, TlTrack)
 
-        if self.get_repeat() or self.get_consume() or self.get_random():
-            return tl_track
-
         position = self.index(tl_track)
-
-        if position in (None, 0):
+        if position is None:
             return None
 
-        # Since we know we are not at zero we have to be somewhere in the range
-        # 1 - len(tracks) Thus 'position - 1' will always be within the list.
-        return self._tl_tracks[position - 1]
+        # MPD-mimmicking previous track logic
+        if self.get_repeat() and self.get_random():
+            # return random track
+            if not self._shuffled:
+                logger.debug("Shuffling tracks")
+                self._shuffled = self._tl_tracks[:]
+                random.shuffle(self._shuffled)
+            return self._shuffled[0]
+
+        elif self.get_repeat():
+            # return track before this (wrapping around to end of laylist)
+            return self._tl_tracks[position - 1]
+        elif self.get_random():
+            # return current track
+            return tl_track
+        else:
+            # return track before current
+            # (or just current, if at earliest position)
+            if position == 0:
+                return tl_track
+            return self._tl_tracks[position - 1]
 
     def add(self, tracks=None, at_position=None, uris=None):
         """
