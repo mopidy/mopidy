@@ -67,7 +67,7 @@ please see :ref:`contributing`.
        sudo dnf install -y \
            python3-gstreamer1 \
            gstreamer1-plugins-good \
-           gstreamer1-plugins-ugly
+           gstreamer1-plugins-ugly-free
 
    **Gentoo**
 
