@@ -8,6 +8,10 @@ This changelog is used to track all major changes to Mopidy.
 
 For older releases, see :ref:`history`.
 
+v3.1.0 (unreleased)
+===================
+
+- Add (optional) pagination support to library search API
 
 v3.0.1 (2019-12-22)
 ===================

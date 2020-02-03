@@ -85,6 +85,14 @@ class LibraryProvider:
     *MUST be set by any class that implements* :meth:`LibraryProvider.browse`.
     """
 
+    supports_pagination = False
+    """
+    :bool: that indicates whether the library supports paginated search.
+    If so, the search method must have kwargs for `limit` and `offset`.
+
+    *MUST be set by any class that implemtns* :meth:`LibraryProvider.search`.
+    """
+
     def __init__(self, backend):
         self.backend = backend
 

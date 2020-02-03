@@ -22,6 +22,8 @@ class BaseCoreLibraryTest(unittest.TestCase):
         self.backend2.uri_schemes.get.return_value = ["dummy2", "du2"]
         self.backend2.actor_ref.actor_class.__name__ = "DummyBackend2"
         self.library2 = mock.Mock(spec=backend.LibraryProvider)
+        # Test backwards compatibility for pagination support
+        del self.library2.supports_pagination
         self.library2.get_images.return_value.get.return_value = {}
         self.library2.root_directory.get.return_value = dummy2_root
         self.backend2.library = self.library2
@@ -34,8 +36,26 @@ class BaseCoreLibraryTest(unittest.TestCase):
         self.backend3.has_library.return_value.get.return_value = False
         self.backend3.has_library_browse.return_value.get.return_value = False
 
+        # A backend with a library that implements pagination support
+        dummy4_root = Ref.directory(uri="dummy4:directory", name="dummy4")
+        self.backend4 = mock.Mock()
+        self.backend4.uri_schemes.get.return_value = ["dummy4"]
+        self.backend4.actor_ref.actor_class.__name__ = "DummyBackend4"
+        self.library4 = mock.Mock(spec=backend.LibraryProvider)
+        self.library4.get_images.return_value.get.return_value = {}
+        self.library4.root_directory.get.return_value = dummy4_root
+        self.library4.supports_pagination.get.return_value = True
+        self.backend4.library = self.library4
+        self.backend4.has_playlists.return_value.get.return_value = False
+
         self.core = core.Core(
-            mixer=None, backends=[self.backend1, self.backend2, self.backend3]
+            mixer=None,
+            backends=[
+                self.backend1,
+                self.backend2,
+                self.backend3,
+                self.backend4,
+            ],
         )
 
 
@@ -95,6 +115,7 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         assert result == [
             Ref.directory(uri="dummy1:directory", name="dummy1"),
             Ref.directory(uri="dummy2:directory", name="dummy2"),
+            Ref.directory(uri="dummy4:directory", name="dummy4"),
         ]
         assert not self.library1.browse.called
         assert not self.library2.browse.called
@@ -294,6 +315,21 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         self.core.library.search({"any": "foobar"})
         self.library1.search.assert_called_once_with(
             query={"any": ["foobar"]}, uris=None, exact=False
+        )
+
+    def test_search_with_pagination_support(self):
+        self.core.library.search(query={"any": ["a"]}, limit=100, offset=100)
+        # This library has `supports_pagination = False`
+        self.library1.search.assert_called_once_with(
+            query={"any": ["a"]}, uris=None, exact=False
+        )
+        # This library does not have the `supports_pagination` attribute
+        self.library2.search.assert_called_once_with(
+            query={"any": ["a"]}, uris=None, exact=False
+        )
+        # This library supports pagination
+        self.library4.search.assert_called_once_with(
+            query={"any": ["a"]}, uris=None, exact=False, limit=100, offset=100
         )
 
 

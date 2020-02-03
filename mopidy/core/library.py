@@ -247,7 +247,7 @@ class LibraryController:
             with _backend_error_handling(backend):
                 future.get()
 
-    def search(self, query, uris=None, exact=False):
+    def search(self, query, uris=None, exact=False, limit=None, offset=0):
         """
         Search the library for tracks where ``field`` contains ``values``.
 
@@ -258,6 +258,11 @@ class LibraryController:
         If ``uris`` is given, the search is limited to results from within the
         URI roots. For example passing ``uris=['file:']`` will limit the search
         to the local backend.
+
+        If ``limit`` and ``offset`` are provided, they will be passed to the
+        backend search method, but only if the library supports pagination.
+        The default value for ``limit`` is ``None``, which indicates to return
+        all matching results.
 
         Examples::
 
@@ -285,6 +290,10 @@ class LibraryController:
         :param exact: if the search should use exact matching
         :type exact: :class:`bool`
         :rtype: list of :class:`mopidy.models.SearchResult`
+        :param limit: maximum number of search results to be returned
+        :type limit: int or :class:`None`
+        :param offset: offset of the first result to be returned
+        :type offset: int
 
         .. versionadded:: 1.0
             The ``exact`` keyword argument.
@@ -300,9 +309,20 @@ class LibraryController:
 
         futures = {}
         for backend, backend_uris in self._get_backends_to_uris(uris).items():
-            futures[backend] = backend.library.search(
-                query=query, uris=backend_uris, exact=exact
-            )
+            kwargs = dict(query=query, uris=backend_uris, exact=exact)
+            # This is intended to provide safety and backwards compatibility
+            if hasattr(backend.library, "supports_pagination"):
+                if backend.library.supports_pagination.get() is True:
+                    kwargs.update(dict(limit=limit, offset=offset))
+            else:
+                backend_name = backend.actor_ref.actor_class.__name__
+                logger.warning(
+                    "%s does not implement library.search() with pagination"
+                    "support. Please upgrade it.",
+                    backend_name,
+                )
+
+            futures[backend] = backend.library.search(**kwargs)
 
         # Some of our tests check for LookupError to catch bad queries. This is
         # silly and should be replaced with query validation before passing it
