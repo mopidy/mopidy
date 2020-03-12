@@ -161,7 +161,7 @@ class LibraryController:
 
         :param uris: list of URIs to find images for
         :type uris: list of string
-        :rtype: {uri: tuple of :class:`mopidy.models.Image`}
+        :rtype: {uri: list of :class:`mopidy.models.Image`}
 
         .. versionadded:: 1.0
         """
