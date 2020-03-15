@@ -169,7 +169,7 @@ def _prompt(bus, path):
 def _item_attributes(bus, path):
     item = _interface(bus, path, "org.freedesktop.DBus.Properties")
     result = item.Get("org.freedesktop.Secret.Item", "Attributes")
-    return {bytes(k): bytes(v) for k, v in result.items()}
+    return {str(k): str(v) for k, v in result.items()}
 
 
 def _interface(bus, path, interface):
