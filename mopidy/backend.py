@@ -228,6 +228,9 @@ class PlaybackProvider:
         """
         return False
 
+    def download_track(self):
+        return False
+
     def change_track(self, track):
         """
         Swith to provided track.
@@ -250,7 +253,7 @@ class PlaybackProvider:
             logger.debug("Backend translated URI from %s to %s", track.uri, uri)
         if not uri:
             return False
-        self.audio.set_uri(uri, live_stream=self.is_live(uri)).get()
+        self.audio.set_uri(uri, live_stream=self.is_live(uri), download=self.download_track()).get()
         return True
 
     def resume(self):

@@ -574,7 +574,7 @@ class Audio(pykka.ThreadingActor):
 
         utils.setup_proxy(source, self._config["proxy"])
 
-    def set_uri(self, uri, live_stream=False):
+    def set_uri(self, uri, live_stream=False, download=False):
         """
         Set URI of audio to be played.
 
@@ -594,9 +594,16 @@ class Audio(pykka.ThreadingActor):
         else:
             current_volume = None
 
+        flags = 0x02
+        if download:
+            flags += 0x80
+
+        logger.debug(f"Flags: {flags}")
+
         self._pending_uri = uri
         self._pending_tags = {}
         self._live_stream = live_stream
+        self._playbin.set_property("flags", flags)
         self._playbin.set_property("uri", uri)
 
         if self.mixer is not None and current_volume is not None:
