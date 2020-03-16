@@ -1009,6 +1009,26 @@ class TestStream(BaseTest):
         assert self.playback.get_stream_title() is None
 
 
+class TestBug1871Regression(BaseTest):
+    def test(self):
+        track = Track(uri="dummy:d", length=1234, name="baz")
+        with deprecation.ignore():
+            self.core.tracklist.add(tracks=[track], at_position=1)
+
+        self.core.playback.play()
+        self.replay_events()
+
+        self.trigger_about_to_finish(replay_until="stream_changed")
+        self.audio.trigger_fake_tags_changed({"title": ["foo"]}).get()
+        self.replay_events()
+
+        self.audio.trigger_fake_tags_changed({"title": ["baz"]}).get()
+        self.replay_events()
+
+        assert self.playback.get_current_track().uri == "dummy:d"
+        assert self.playback.get_stream_title() is None
+
+
 class TestBackendSelection:
     def setup_method(self, method):
         config = {"core": {"max_tracklist_length": 10000}}

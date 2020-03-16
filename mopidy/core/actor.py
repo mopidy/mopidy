@@ -125,9 +125,9 @@ class Core(
         if not tags:
             return
 
-        # TODO: this is a hack to make sure we don't emit stream title changes
-        # for plain tracks. We need a better way to decide if something is a
-        # stream.
+        self.playback._stream_title = None
+        # TODO: Do not emit stream title changes for plain tracks. We need a
+        # better way to decide if something is a stream.
         if "title" in tags and tags["title"]:
             title = tags["title"][0]
             current_track = self.playback.get_current_track()
