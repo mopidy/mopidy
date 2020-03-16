@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 gst_logger = logging.getLogger("mopidy.audio.gst")
 
 _GST_PLAY_FLAGS_AUDIO = 0x02
+_GST_PLAY_FLAGS_DOWNLOAD = 0x80
 
 _GST_STATE_MAPPING = {
     Gst.State.PLAYING: PlaybackState.PLAYING,
@@ -594,9 +595,9 @@ class Audio(pykka.ThreadingActor):
         else:
             current_volume = None
 
-        flags = 0x02
+        flags = _GST_PLAY_FLAGS_AUDIO
         if download:
-            flags += 0x80
+            flags |= _GST_PLAY_FLAGS_DOWNLOAD
 
         logger.debug(f"Flags: {flags}")
 
