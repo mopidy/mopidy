@@ -215,7 +215,7 @@ class PlaybackProvider:
 
     def is_live(self, uri):
         """
-        Decide if the URI should be threated as a live stream or not.
+        Decide if the URI should be treated as a live stream or not.
 
         *MAY be reimplemented by subclass.*
 
@@ -228,12 +228,22 @@ class PlaybackProvider:
         """
         return False
 
-    def download_track(self):
+    def download_buffering(self):
+        """
+        Attempt progressive download buffering.
+
+        *MAY be reimplemented by subclass.*
+
+        When streaming a fixed length file, the entire file can be buffered
+        to improve playback performance.
+
+        :rtype: bool
+        """
         return False
 
     def change_track(self, track):
         """
-        Swith to provided track.
+        Switch to provided track.
 
         *MAY be reimplemented by subclass.*
 
@@ -253,7 +263,11 @@ class PlaybackProvider:
             logger.debug("Backend translated URI from %s to %s", track.uri, uri)
         if not uri:
             return False
-        self.audio.set_uri(uri, live_stream=self.is_live(uri), download=self.download_track()).get()
+        self.audio.set_uri(
+            uri,
+            live_stream=self.is_live(uri),
+            download=self.download_buffering(),
+        ).get()
         return True
 
     def resume(self):

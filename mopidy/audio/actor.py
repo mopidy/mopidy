@@ -586,6 +586,8 @@ class Audio(pykka.ThreadingActor):
         :param live_stream: disables buffering, reducing latency for stream,
             and discarding data when paused
         :type live_stream: bool
+        :param download: enables "download" buffering mode
+        :type download: bool
         """
 
         # XXX: Hack to workaround issue on Mac OS X where volume level
