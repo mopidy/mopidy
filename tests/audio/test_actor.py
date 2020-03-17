@@ -681,3 +681,27 @@ class AudioLiveTest(unittest.TestCase):
         self.audio._on_source_setup("dummy", source)
 
         source.set_live.assert_called_with(True)
+
+
+class DownloadBufferingTest(unittest.TestCase):
+    def setUp(self):  # noqa: N802
+        self.audio = audio.Audio(config=None, mixer=None)
+        self.audio._playbin = mock.Mock(spec=["set_property"])
+
+    def test_download_flag_is_passed_to_playbin_if_download_buffering_is_enabled(
+        self,
+    ):
+        playbin = self.audio._playbin
+
+        self.audio.set_uri("some:uri", False, True)
+
+        playbin.set_property.assert_has_calls([mock.call("flags", 0x02 | 0x80)])
+
+    def test_download_flag_is_not_passed_to_playbin_if_download_buffering_is_not_enabled(  # noqa: B950
+        self,
+    ):
+        playbin = self.audio._playbin
+
+        self.audio.set_uri("some:uri", False, False)
+
+        playbin.set_property.assert_has_calls([mock.call("flags", 0x02)])
