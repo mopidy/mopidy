@@ -224,7 +224,9 @@ def _validate(raw_config, schemas):
             config[schema.name] = result
 
     for section in sections:
-        logger.warning(f"Ignoring config section {section!r}: A matching extension was not found")
+        logger.warning(
+            f"Ignoring config section {section!r}: A matching extension was not found"
+        )
 
     return config, errors
 
