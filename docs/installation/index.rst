@@ -11,6 +11,7 @@ operating system and/or distribution:
 
     debian
     arch
+    fedora
     macos
     pypi
     raspberrypi
