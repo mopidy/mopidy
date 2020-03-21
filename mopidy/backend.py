@@ -228,7 +228,7 @@ class PlaybackProvider:
         """
         return False
 
-    def should_buffer(self):
+    def should_download(self):
         """
         Attempt progressive download buffering.
 
@@ -264,9 +264,7 @@ class PlaybackProvider:
         if not uri:
             return False
         self.audio.set_uri(
-            uri,
-            live_stream=self.is_live(uri),
-            download=self.should_buffer(),
+            uri, live_stream=self.is_live(uri), download=self.should_download(),
         ).get()
         return True
 

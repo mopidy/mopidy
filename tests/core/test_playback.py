@@ -177,7 +177,7 @@ class TestPlayHandling(BaseTest):
         assert not self.backend.playback.is_live(self.tracks[0].uri).get()
 
     def test_download_buffering_is_not_enabled_by_default(self):
-        assert not self.backend.playback.should_buffer().get()
+        assert not self.backend.playback.should_download().get()
 
 
 class TestNextHandling(BaseTest):
