@@ -49,3 +49,9 @@ See :ref:`config` for general help on configuring Mopidy.
     is typically needed for play once URIs provided by certain streaming
     providers. Regular POSIX glob semantics apply, so ``http://*.example.com/*``
     would match all example.com sub-domains.
+
+.. confval:: stream/force_live
+
+    Treat all stream URLs as live.
+    Playing a source as a live stream disables buffering, which reduces
+    latency before playback starts, and discards data when paused.

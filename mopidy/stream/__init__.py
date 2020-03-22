@@ -19,6 +19,7 @@ class Extension(ext.Extension):
         schema["protocols"] = config.List()
         schema["metadata_blacklist"] = config.List(optional=True)
         schema["timeout"] = config.Integer(minimum=1000, maximum=1000 * 60 * 60)
+        schema["force_live"] = config.Boolean(optional=True)
         return schema
 
     def validate_environment(self):

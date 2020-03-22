@@ -17,6 +17,7 @@ def config():
             "timeout": 1000,
             "metadata_blacklist": [],
             "protocols": ["file"],
+            "force_live": False,
         },
         "file": {"enabled": False},
     }

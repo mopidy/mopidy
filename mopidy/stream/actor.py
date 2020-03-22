@@ -53,6 +53,8 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
             )
             self.uri_schemes -= {"file"}
 
+        self._force_live = config["stream"]["force_live"]
+
 
 class StreamLibraryProvider(backend.LibraryProvider):
     def lookup(self, uri):
@@ -97,6 +99,19 @@ class StreamPlaybackProvider(backend.PlaybackProvider):
             requests_session=self.backend._session,
         )
         return unwrapped_uri
+
+    def is_live(self, uri):
+        """
+        Decide if the URI should be treated as a live stream or not.
+
+        Playing a source as a live stream disables buffering, which reduces
+        latency before playback starts, and discards data when paused.
+
+        :param uri: the URI
+        :type uri: string
+        :rtype: bool
+        """
+        return self.backend._force_live
 
 
 # TODO: cleanup the return value of this.
