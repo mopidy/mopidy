@@ -125,9 +125,9 @@ class Core(
         if not tags:
             return
 
-        # TODO: this is a hack to make sure we don't emit stream title changes
-        # for plain tracks. We need a better way to decide if something is a
-        # stream.
+        self.playback._stream_title = None
+        # TODO: Do not emit stream title changes for plain tracks. We need a
+        # better way to decide if something is a stream.
         if "title" in tags and tags["title"]:
             title = tags["title"][0]
             current_track = self.playback.get_current_track()
@@ -135,7 +135,7 @@ class Core(
                 self.playback._stream_title = title
                 CoreListener.send("stream_title_changed", title=title)
 
-    def setup(self):
+    def _setup(self):
         """Do not call this function. It is for internal use at startup."""
         try:
             coverage = []
@@ -153,7 +153,7 @@ class Core(
         except Exception as e:
             logger.warn("Restore state: Unexpected error: %s", str(e))
 
-    def teardown(self):
+    def _teardown(self):
         """Do not call this function. It is for internal use at shutdown."""
         try:
             if self._config and "restore_state" in self._config["core"]:
