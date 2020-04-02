@@ -11,6 +11,8 @@ Only files that are considered playable will be shown.
 
 This backend handles URIs starting with ``file:``.
 
+This backend does not currently provide images.
+
 
 Configuration
 =============
