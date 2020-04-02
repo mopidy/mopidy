@@ -9,7 +9,7 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
-v3.0.2 (UNRELEASED)
+v3.0.2 (2020-04-02)
 ===================
 
 Bugfix release.
