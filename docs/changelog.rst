@@ -15,7 +15,7 @@ v3.0.2 (2020-04-02)
 Bugfix release.
 
 - Core: Reset stream title on receipt of any ``title`` audio tag change.
-  Fixes: :issue:`1871`, PR: :issue:`1875`)
+  (Fixes: :issue:`1871`, PR: :issue:`1875`)
 
 - Core: Hide the methods :meth:`~mopidy.core.Core.setup` and
   :meth:`~mopidy.core.Core.teardown` from other actors and JSON-RPC API
