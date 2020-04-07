@@ -90,7 +90,7 @@ like most modern Linux systems, you can view the Mopidy log by running::
 
     sudo journalctl -u mopidy
 
- To save the output to a file for sharing, run::
+To save the output to a file for sharing, run::
 
     sudo journalctl -u mopidy | tee mopidy.log
 
