@@ -89,7 +89,9 @@ def check_integer(arg, min=None, max=None):
         )
 
 
-def check_query(arg, fields=SEARCH_FIELDS, list_values=True):
+def check_query(arg, fields=None, list_values=True):
+    if fields is None:
+        fields = SEARCH_FIELDS
     # TODO: normalize name  -> track_name
     # TODO: normalize value -> [value]
     # TODO: normalize blank -> [] or just remove field?

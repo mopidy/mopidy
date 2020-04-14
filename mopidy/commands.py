@@ -364,7 +364,7 @@ class RootCommand(Command):
             logger.error(
                 'Did not find unique mixer "%s". Alternatives are: %s',
                 config["audio"]["mixer"],
-                ", ".join([m.name for m in mixer_classes]) + ", none" or "none",
+                ", ".join(m.name for m in mixer_classes) + ", none" or "none",
             )
             process.exit_process()
         return selected_mixers[0]

@@ -821,7 +821,7 @@ class Audio(pykka.ThreadingActor):
         set_value(Gst.TAG_ALBUM, " ")
 
         if artists:
-            set_value(Gst.TAG_ARTIST, ", ".join([a.name for a in artists]))
+            set_value(Gst.TAG_ARTIST, ", ".join(a.name for a in artists))
 
         if track.name:
             set_value(Gst.TAG_TITLE, track.name)
