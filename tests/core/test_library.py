@@ -46,11 +46,11 @@ class CoreLibraryTest(BaseCoreLibraryTest):
 
     def test_get_images_returns_empty_result_for_unknown_uri(self):
         result = self.core.library.get_images(["dummy4:track"])
-        assert {"dummy4:track": tuple()} == result
+        assert {"dummy4:track": ()} == result
 
     def test_get_images_returns_empty_result_for_library_less_uri(self):
         result = self.core.library.get_images(["dummy3:track"])
-        assert {"dummy3:track": tuple()} == result
+        assert {"dummy3:track": ()} == result
 
     def test_get_images_maps_uri_to_backend(self):
         self.core.library.get_images(["dummy1:track"])
@@ -84,8 +84,8 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         expected = {
             "dummy1:track": (Image(uri="uri1"),),
             "dummy2:track": (Image(uri="uri2"),),
-            "dummy3:track": tuple(),
-            "dummy4:track": tuple(),
+            "dummy3:track": (),
+            "dummy4:track": (),
         }
         assert expected == result
 
@@ -395,37 +395,37 @@ class GetImagesBadBackendTest(MockBackendCoreLibraryBase):
     def test_backend_raises_exception(self, logger):
         uri = "dummy:/1"
         self.library.get_images.return_value.get.side_effect = Exception
-        assert {uri: tuple()} == self.core.library.get_images([uri])
+        assert {uri: ()} == self.core.library.get_images([uri])
         logger.exception.assert_called_with(mock.ANY, "DummyBackend")
 
     def test_backend_returns_none(self, logger):
         uri = "dummy:/1"
         self.library.get_images.return_value.get.return_value = None
-        assert {uri: tuple()} == self.core.library.get_images([uri])
+        assert {uri: ()} == self.core.library.get_images([uri])
         assert not logger.error.called
 
     def test_backend_returns_wrong_type(self, logger):
         uri = "dummy:/1"
         self.library.get_images.return_value.get.return_value = "abc"
-        assert {uri: tuple()} == self.core.library.get_images([uri])
+        assert {uri: ()} == self.core.library.get_images([uri])
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
     def test_backend_returns_mapping_containing_wrong_types(self, logger):
         uri = "dummy:/1"
         self.library.get_images.return_value.get.return_value = {uri: "abc"}
-        assert {uri: tuple()} == self.core.library.get_images([uri])
+        assert {uri: ()} == self.core.library.get_images([uri])
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
     def test_backend_returns_mapping_containing_none(self, logger):
         uri = "dummy:/1"
         self.library.get_images.return_value.get.return_value = {uri: None}
-        assert {uri: tuple()} == self.core.library.get_images([uri])
+        assert {uri: ()} == self.core.library.get_images([uri])
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
     def test_backend_returns_unknown_uri(self, logger):
         uri = "dummy:/1"
         self.library.get_images.return_value.get.return_value = {"foo": []}
-        assert {uri: tuple()} == self.core.library.get_images([uri])
+        assert {uri: ()} == self.core.library.get_images([uri])
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
 

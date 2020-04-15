@@ -175,7 +175,7 @@ class LibraryController:
             if backend_uris
         }
 
-        results = {uri: tuple() for uri in uris}
+        results = {uri: () for uri in uris}
         for backend, future in futures.items():
             with _backend_error_handling(backend):
                 if future.get() is None:
