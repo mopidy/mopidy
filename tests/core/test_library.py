@@ -2,6 +2,7 @@ import unittest
 from unittest import mock
 
 from mopidy import backend, core
+from mopidy.internal import validation
 from mopidy.models import Image, Ref, SearchResult, Track
 
 
@@ -295,6 +296,44 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         self.library1.search.assert_called_once_with(
             query={"any": ["foobar"]}, uris=None, exact=False
         )
+
+
+class GetDistinctTest(BaseCoreLibraryTest):
+    def test_with_query(self):
+        self.library1.get_distinct.return_value.get.return_value = {}
+        self.library2.get_distinct.return_value.get.return_value = {}
+
+        result = self.core.library.get_distinct("album", {"any": ["a"]})
+
+        self.library1.get_distinct.assert_called_with("album", {"any": ["a"]})
+        self.library2.get_distinct.assert_called_with("album", {"any": ["a"]})
+        assert set() == result
+
+    def test_combines_results_from_all_backends(self):
+        result1 = "foo"
+        result2 = "bar"
+        self.library1.get_distinct.return_value.get.return_value = {result1}
+        self.library2.get_distinct.return_value.get.return_value = {result2}
+
+        result = self.core.library.get_distinct("artist")
+
+        assert result1 in result
+        assert result2 in result
+
+    @mock.patch.object(core.library.validation, "check_choice")
+    def test_checks_field_is_valid(self, check_choice_mock):
+        self.core.library.get_distinct("artist")
+        check_choice_mock.assert_called_with(
+            "artist", validation.DISTINCT_FIELDS
+        )
+
+    def test_any_field_raises_valueerror(self):
+        with self.assertRaises(ValueError):
+            self.core.library.get_distinct("any")
+
+    def test_unknown_tag_in_query_raises_valueerror(self):
+        with self.assertRaises(ValueError):
+            self.core.library.get_distinct("album", {"track": ["a"]})
 
 
 class LegacyFindExactToSearchLibraryTest(unittest.TestCase):

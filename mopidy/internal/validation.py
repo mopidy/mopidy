@@ -5,7 +5,7 @@ from mopidy import exceptions
 
 PLAYBACK_STATES = {"paused", "stopped", "playing"}
 
-SEARCH_FIELDS = {
+TRACK_FIELDS = {
     "uri",
     "track_name",
     "album",
@@ -17,8 +17,9 @@ SEARCH_FIELDS = {
     "genre",
     "date",
     "comment",
-    "any",
 }
+
+SEARCH_FIELDS = TRACK_FIELDS.union({"any"})
 
 PLAYLIST_FIELDS = {"uri", "name"}  # TODO: add length and last_modified?
 
@@ -31,16 +32,7 @@ TRACKLIST_FIELDS = {  # TODO: add bitrate, length, disc_no, track_no, modified?
     "musicbrainz_id",
 }
 
-DISTINCT_FIELDS = {
-    "track",
-    "artist",
-    "albumartist",
-    "album",
-    "composer",
-    "performer",
-    "date",
-    "genre",
-}
+DISTINCT_FIELDS = TRACK_FIELDS
 
 
 # TODO: _check_iterable(check, msg, **kwargs) + [check(a) for a in arg]?
