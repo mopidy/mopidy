@@ -17,6 +17,10 @@ TRACK_FIELDS = {
     "genre",
     "date",
     "comment",
+    "disc_no",
+    "musicbrainz_albumid",
+    "musicbrainz_artistid",
+    "musicbrainz_trackid",
 }
 
 SEARCH_FIELDS = TRACK_FIELDS.union({"any"})

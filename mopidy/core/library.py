@@ -125,8 +125,11 @@ class LibraryController:
         protocol supports in a more sane fashion. Other frontends are not
         recommended to use this method.
 
-        :param string field: One of ``track``, ``artist``, ``albumartist``,
-            ``album``, ``composer``, ``performer``, ``date`` or ``genre``.
+        :param string field: Any one of ``uri``, ``track_name``, ``album``,
+            ``artist``, ``albumartist``, ``composer``, ``performer``,
+            ``track_no``, ``genre``, ``date``, ``comment``, ``disc_no``,
+            ``musicbrainz_albumid``, ``musicbrainz_artistid``, or
+            ``musicbrainz_trackid``.
         :param dict query: Query to use for limiting results, see
             :meth:`search` for details about the query format.
         :rtype: set of values corresponding to the requested field type.
@@ -253,7 +256,8 @@ class LibraryController:
 
         ``field`` can be one of ``uri``, ``track_name``, ``album``, ``artist``,
         ``albumartist``, ``composer``, ``performer``, ``track_no``, ``genre``,
-        ``date``, ``comment``, or ``any``.
+        ``date``, ``comment``, ``disc_no``, ``musicbrainz_albumid``,
+        ``musicbrainz_artistid``, ``musicbrainz_trackid`` or ``any``.
 
         If ``uris`` is given, the search is limited to results from within the
         URI roots. For example passing ``uris=['file:']`` will limit the search
