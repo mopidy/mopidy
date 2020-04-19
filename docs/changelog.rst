@@ -32,6 +32,14 @@ v3.2.1 (UNRELEASED)
 - Audio: Fix TypeError when handling create output pipeline errors.
   (Fixes: :issue:`1924`, PR: :issue:`2040`)
 
+- Core: Align values supported by the ``field`` argument to
+  :meth:`mopidy.core.LibraryController.get_distinct`: with Mopidy search query
+  fields, with the exception of 'any'. (Fixes: :issue:`1900`, PR: :issue:`1899`)
+
+- Core: Add ``musicbrainz_albumid``, ``musicbrainz_artistid``,
+  ``musicbrainz_trackid``, and ``disc_no`` to the permitted search query
+  fields. (Fixes: :issue:`1900`, PR: :issue:`1899`)
+
 
 v3.2.0 (2021-07-08)
 ===================
