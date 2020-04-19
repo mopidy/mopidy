@@ -335,6 +335,16 @@ class GetDistinctTest(BaseCoreLibraryTest):
         with self.assertRaises(ValueError):
             self.core.library.get_distinct("album", {"track": ["a"]})
 
+    def test_track_name_field_maps_to_track_for_backwards_compatibility(self):
+        self.library1.get_distinct.return_value.get.return_value = {}
+        self.library2.get_distinct.return_value.get.return_value = {}
+
+        result = self.core.library.get_distinct("track_name")
+
+        self.library1.get_distinct.assert_called_with("track", None)
+        self.library2.get_distinct.assert_called_with("track", None)
+        assert set() == result
+
 
 class LegacyFindExactToSearchLibraryTest(unittest.TestCase):
     def setUp(self):  # noqa: N802

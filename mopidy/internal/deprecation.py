@@ -26,6 +26,11 @@ _MESSAGES = {
         "tracklist.previous_track() is pending deprecation, use "
         "tracklist.get_previous_tlid()"
     ),
+    # Deprecated argument value in core library:
+    "core.library.get_distinct:field_arg:track": (
+        'library.get_distinct() with "field" argument "track" is pending '
+        ' deprecation, handle "track_name" instead'
+    ),
 }
 
 

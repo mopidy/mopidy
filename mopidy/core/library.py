@@ -6,7 +6,7 @@ import urllib
 from collections.abc import Mapping
 
 from mopidy import exceptions, models
-from mopidy.internal import validation
+from mopidy.internal import deprecation, validation
 
 logger = logging.getLogger(__name__)
 
@@ -139,9 +139,16 @@ class LibraryController:
         validation.check_choice(field, validation.DISTINCT_FIELDS)
         query is None or validation.check_query(query)  # TODO: normalize?
 
+        compat_field = {"track_name": "track"}.get(field, field)
+        if compat_field is not field:
+            deprecation.warn(
+                f"core.library.get_distinct:field_arg:{compat_field}",
+                pending=False,
+            )
+
         result = set()
         futures = {
-            b: b.library.get_distinct(field, query)
+            b: b.library.get_distinct(compat_field, query)
             for b in self.backends.with_library.values()
         }
         for backend, future in futures.items():
