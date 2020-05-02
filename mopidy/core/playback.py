@@ -301,7 +301,8 @@ class PlaybackController:
 
         if tl_track is not None:
             # TODO: allow from outside tracklist, would make sense given refs?
-            assert tl_track in self.core.tracklist.get_tl_tracks()
+            if (tl_track not in self.core.tracklist.get_tl_tracks()):
+                raise AssertionError
         elif tl_track is None and self.get_state() == PlaybackState.PAUSED:
             self.resume()
             return
