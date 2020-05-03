@@ -482,14 +482,16 @@ class TracklistController:
         # TODO: use validation helpers?
         if not start < end:
             raise AssertionError("start must be smaller than end")
-        if not start >= 0: 
+        if not start >= 0:
             raise AssertionError("start must be at least zero")
-        if not end <= len(tl_tracks): 
+        if not end <= len(tl_tracks):
             raise AssertionError("end can not be larger than tracklist length")
-        if not to_position >= 0: 
+        if not to_position >= 0:
             raise AssertionError("to_position must be at least zero")
-        if not to_position <= len(tl_tracks): 
-            raise AssertionError("to_position can not be larger than tracklist length")
+        if not to_position <= len(tl_tracks):
+            raise AssertionError(
+                "to_position can not be larger than tracklist length"
+            )
 
         new_tl_tracks = tl_tracks[:start] + tl_tracks[end:]
         for tl_track in tl_tracks[start:end]:
@@ -541,8 +543,10 @@ class TracklistController:
                 raise AssertionError("start must be at least zero")
 
         if end is not None:
-            if not end <= len(tl_tracks): 
-                raise AssertionError("end can not be larger than " + "tracklist length")
+            if not end <= len(tl_tracks):
+                raise AssertionError(
+                    "end can not be larger than " + "tracklist length"
+                )
 
         before = tl_tracks[: start or 0]
         shuffled = tl_tracks[start:end]
