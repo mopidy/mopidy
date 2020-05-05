@@ -480,15 +480,15 @@ class TracklistController:
         tl_tracks = self._tl_tracks
 
         # TODO: use validation helpers?
-        if not start < end:
+        if start >= end:
             raise AssertionError("start must be smaller than end")
-        if not start >= 0:
+        if start < 0:
             raise AssertionError("start must be at least zero")
-        if not end <= len(tl_tracks):
+        if end > len(tl_tracks):
             raise AssertionError("end can not be larger than tracklist length")
-        if not to_position >= 0:
+        if to_position < 0:
             raise AssertionError("to_position must be at least zero")
-        if not to_position <= len(tl_tracks):
+        if to_position > len(tl_tracks):
             raise AssertionError(
                 "to_position can not be larger than tracklist length"
             )
@@ -535,15 +535,15 @@ class TracklistController:
 
         # TOOD: use validation helpers?
         if start is not None and end is not None:
-            if not start < end:
+            if start >= end:
                 raise AssertionError("start must be smaller than end")
 
         if start is not None:
-            if not start >= 0:
+            if start < 0:
                 raise AssertionError("start must be at least zero")
 
         if end is not None:
-            if not end <= len(tl_tracks):
+            if end > len(tl_tracks):
                 raise AssertionError(
                     "end can not be larger than " + "tracklist length"
                 )
