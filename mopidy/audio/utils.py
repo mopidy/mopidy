@@ -82,7 +82,8 @@ class Signals:
 
         Each event may only be handled by one callback in this implementation.
         """
-        assert (element, event) not in self._ids
+        if (element, event) in self._ids:
+            raise AssertionError
         self._ids[(element, event)] = element.connect(event, func, *args)
 
     def disconnect(self, element, event):
