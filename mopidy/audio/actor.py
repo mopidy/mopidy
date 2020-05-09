@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 gst_logger = logging.getLogger("mopidy.audio.gst")
 
 _GST_PLAY_FLAGS_AUDIO = 0x02
+_GST_PLAY_FLAGS_DOWNLOAD = 0x80
 
 _GST_STATE_MAPPING = {
     Gst.State.PLAYING: PlaybackState.PLAYING,
@@ -574,7 +575,7 @@ class Audio(pykka.ThreadingActor):
 
         utils.setup_proxy(source, self._config["proxy"])
 
-    def set_uri(self, uri, live_stream=False):
+    def set_uri(self, uri, live_stream=False, download=False):
         """
         Set URI of audio to be played.
 
@@ -585,6 +586,8 @@ class Audio(pykka.ThreadingActor):
         :param live_stream: disables buffering, reducing latency for stream,
             and discarding data when paused
         :type live_stream: bool
+        :param download: enables "download" buffering mode
+        :type download: bool
         """
 
         # XXX: Hack to workaround issue on Mac OS X where volume level
@@ -594,9 +597,21 @@ class Audio(pykka.ThreadingActor):
         else:
             current_volume = None
 
+        flags = _GST_PLAY_FLAGS_AUDIO
+        if download:
+            flags |= _GST_PLAY_FLAGS_DOWNLOAD
+
+        logger.debug(f"Flags: {flags}")
+        if live_stream and download:
+            logger.warning(
+                "Ambiguous buffering flags: "
+                "'is_live' and 'should_download' should not both be set."
+            )
+
         self._pending_uri = uri
         self._pending_tags = {}
         self._live_stream = live_stream
+        self._playbin.set_property("flags", flags)
         self._playbin.set_property("uri", uri)
 
         if self.mixer is not None and current_volume is not None:

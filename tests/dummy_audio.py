@@ -28,7 +28,7 @@ class DummyAudio(pykka.ThreadingActor):
         self._tags = {}
         self._bad_uris = set()
 
-    def set_uri(self, uri, live_stream=False):
+    def set_uri(self, uri, live_stream=False, download=False):
         assert self._uri is None, "prepare change not called before set"
         self._position = 0
         self._uri = uri
