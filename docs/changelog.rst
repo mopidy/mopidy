@@ -9,6 +9,14 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
+v3.1.0 (UNRELEASED)
+===================
+
+- Add :meth:`mopidy.backend.PlaybackProvider.should_download` which can be
+  implemented by playback providers that want to use GStreamer's download
+  buffering strategy for their URIs. (PR: :issue:`1888`)
+
+
 v3.0.2 (2020-04-02)
 ===================
 

@@ -228,15 +228,17 @@ class PlaybackProvider:
         """
         return False
 
-    def should_download(self):
+    def should_download(self, uri):
         """
-        Attempt progressive download buffering.
+        Attempt progressive download buffering for the URI or not.
 
         *MAY be reimplemented by subclass.*
 
         When streaming a fixed length file, the entire file can be buffered
         to improve playback performance.
 
+        :param uri: the URI
+        :type uri: string
         :rtype: bool
         """
         return False
@@ -264,7 +266,9 @@ class PlaybackProvider:
         if not uri:
             return False
         self.audio.set_uri(
-            uri, live_stream=self.is_live(uri), download=self.should_download(),
+            uri,
+            live_stream=self.is_live(uri),
+            download=self.should_download(uri),
         ).get()
         return True
 
