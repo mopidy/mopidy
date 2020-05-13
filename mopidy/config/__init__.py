@@ -183,7 +183,7 @@ def _load_file(parser, file_path):
         return
     if not os.access(str(file_path), os.R_OK):
         logger.warning(
-            f"Loading config from file_path.as_uri() failed; "
+            f"Loading config from {file_path.as_uri()} failed; "
             f"read permission missing"
         )
         return
