@@ -324,6 +324,12 @@ class RootCommand(Command):
             core = self.start_core(config, mixer, backends, audio)
             self.start_frontends(config, frontend_classes, core)
             logger.info("Starting GLib mainloop")
+            if "save_state_period" in config["core"]:
+                def periodic_save_state():
+                    call = ProxyCall(attr_path=["_save_state"], args=[], kwargs={})
+                    core.actor_ref.ask(call, block=True)
+                    GLib.timeout_add_seconds(config["core"]["save_state_period"], periodic_save_state)
+                GLib.timeout_add_seconds(config["core"]["save_state_period"], periodic_save_state)
             loop.run()
         except (
             exceptions.BackendError,

@@ -127,6 +127,15 @@ Core section
 
     Default is ``false``.
 
+.. confval:: core/save_state_period
+
+    When set, indicate the period (in seconds) that mopidy will save the
+    state. That way, even when mopidy is badly killed (with a power outage for
+    instance), mopidy will still be able to restore a previous state with
+    core/restore_state.
+
+    Default is nothing, meaning don't save periodically.
+
 
 .. _audio-config:
 

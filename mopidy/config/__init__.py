@@ -40,6 +40,7 @@ _core_schema["data_dir"] = Path()
 # MPD supports at most 10k tracks, some clients segfault when this is exceeded.
 _core_schema["max_tracklist_length"] = Integer(minimum=1)
 _core_schema["restore_state"] = Boolean(optional=True)
+_core_schema["save_state_period"] = Integer(minimum=1)
 
 _logging_schema = ConfigSchema("logging")
 _logging_schema["verbosity"] = Integer(minimum=-1, maximum=4)
