@@ -140,10 +140,9 @@ class LibraryController:
         query is None or validation.check_query(query)  # TODO: normalize?
 
         compat_field = {"track_name": "track"}.get(field, field)
-        if compat_field != field:
+        if field == "track":
             deprecation.warn(
-                f"core.library.get_distinct:field_arg:{compat_field}",
-                pending=False,
+                f"core.library.get_distinct:field_arg:{field}", pending=False,
             )
 
         result = set()

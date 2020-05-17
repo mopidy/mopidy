@@ -34,7 +34,9 @@ v3.2.1 (UNRELEASED)
 
 - Core: Align values supported by the ``field`` argument to
   :meth:`mopidy.core.LibraryController.get_distinct`: with Mopidy search query
-  fields, with the exception of 'any'. (Fixes: :issue:`1900`, PR: :issue:`1899`)
+  fields, with the exception of 'any'. Deprecated using value 'track' with the
+  goal of removing it in the next major release, use 'track_name' instead.
+  (Fixes: :issue:`1900`, PR: :issue:`1899`)
 
 - Core: Add ``musicbrainz_albumid``, ``musicbrainz_artistid``,
   ``musicbrainz_trackid``, and ``disc_no`` to the permitted search query
