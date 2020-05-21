@@ -12,7 +12,7 @@ If you are not sure about anything below then please post on our [forum](https:/
 **Describe the bug**
 A clear and concise description of what the bug is. Is this specific to a particular Backend (e.g. Mopidy-Spotify), Frontend (e.g. Mopidy-MPD) or client?
 
-**To Reproduce**
+**To reproduce**
 Steps to reproduce the behaviour including any error messages that occur. 
 
 **Expected behaviour**
