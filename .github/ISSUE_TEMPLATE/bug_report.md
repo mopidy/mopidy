@@ -23,7 +23,7 @@ A clear and concise description of what you expected to happen.
  - [Running Mopidy](https://docs.mopidy.com/en/latest/running/) as a service or in the terminal?
  - Your config (output of `sudo mopidyctl config`)
  - Software versions (output of `sudo mopidyctl deps`)
-- Any specific hardware (e.g. an exotic USB soundcard)
+ - Any specific hardware (e.g. an exotic USB soundcard)
 
 **Additional context**
 Add any other context about the problem here. If appropriate, upload an [appropriately verbose](https://docs.mopidy.com/en/latest/troubleshooting/#debug-logging) log file showing the bug.
