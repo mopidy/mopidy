@@ -31,7 +31,7 @@ def format_dependency_list(adapters=None):
             + [gstreamer_info]
         )
 
-    return "\n".join([_format_dependency(a()) for a in adapters])
+    return "\n".join(_format_dependency(a()) for a in adapters)
 
 
 def _format_dependency(dep_info):
