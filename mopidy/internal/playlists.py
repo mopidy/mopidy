@@ -78,7 +78,7 @@ def parse_extm3u(data):
 def parse_pls(data):
     # TODO: convert non URIs to file URIs.
     try:
-        cp = configparser.RawConfigParser()
+        cp = configparser.RawConfigParser(strict=False)
         cp.read_string(data.decode())
     except configparser.Error:
         return
