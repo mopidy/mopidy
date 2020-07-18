@@ -19,6 +19,7 @@ def config():
             "follow_symlinks": False,
             "metadata_timeout": 1000,
         },
+        "core": {"cache_dir": ""},
     }
 
 

@@ -1,9 +1,11 @@
+import imghdr
 import logging
 import os
 
 from mopidy import backend, exceptions, models
 from mopidy.audio import scan, tags
 from mopidy.internal import path
+from mopidy.models import Image
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +29,7 @@ class FileLibraryProvider(backend.LibraryProvider):
     def __init__(self, backend, config):
         super().__init__(backend)
         self._media_dirs = list(self._get_media_dirs(config))
+        self._cache_dir = config["core"]["cache_dir"]
         self._show_dotfiles = config["file"]["show_dotfiles"]
         self._excluded_file_extensions = tuple(
             file_ext.lower()
@@ -146,3 +149,65 @@ class FileLibraryProvider(backend.LibraryProvider):
             path.is_path_inside_base_dir(local_path, media_dir["path"])
             for media_dir in self._media_dirs
         )
+
+    def get_images(self, uris):
+        images = {}
+        for uri in uris:
+            result = self._scanner.scan(uri)
+            if "image" in result.tags and len(result.tags["image"]) > 0:
+                image = result.tags["image"][0]
+                filename = os.path.join(self._cache_dir, path.uri_to_path(uri))
+                extension = imghdr.what("", h=image)
+                with open(f"{filename}.{extension}", "wb+") as f:
+                    f.write(image)
+                images[uri] = (
+                    Image(uri=path.path_to_uri(f"{filename}.{extension}")),
+                )
+            elif os.path.exists(
+                os.path.join(
+                    os.path.dirname(path.uri_to_path(uri)), "folder.png"
+                )
+            ):
+                images[uri] = (
+                    Image(
+                        uri=path.path_to_uri(
+                            os.path.join(
+                                os.path.dirname(path.uri_to_path(uri)),
+                                "folder.png",
+                            )
+                        )
+                    ),
+                )
+            elif os.path.exists(
+                os.path.join(
+                    os.path.dirname(path.uri_to_path(uri)), "folder.jpg"
+                )
+            ):
+                images[uri] = (
+                    Image(
+                        uri=path.path_to_uri(
+                            os.path.join(
+                                os.path.dirname(path.uri_to_path(uri)),
+                                "folder.jpg",
+                            )
+                        )
+                    ),
+                )
+            elif os.path.exists(
+                os.path.join(
+                    os.path.dirname(path.uri_to_path(uri)), "folder.jpeg"
+                )
+            ):
+                images[uri] = (
+                    Image(
+                        uri=path.path_to_uri(
+                            os.path.join(
+                                os.path.dirname(path.uri_to_path(uri)),
+                                "folder.jpeg",
+                            )
+                        )
+                    ),
+                )
+            else:
+                images[uri] = ()
+        return images
