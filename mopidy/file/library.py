@@ -160,8 +160,8 @@ class FileLibraryProvider(backend.LibraryProvider):
                 extension = imghdr.what("", h=image)
                 images[uri] = (
                     Image(
-                        uri=f'data:image/{extension};base64, '
-                            f'{base64.b64encode(image).decode("utf-8")}'
+                        uri=f"data:image/{extension};base64, "
+                        f'{base64.b64encode(image).decode("utf-8")}'
                     ),
                 )
             elif os.path.exists(
@@ -177,8 +177,8 @@ class FileLibraryProvider(backend.LibraryProvider):
                 ) as f:
                     images[uri] = (
                         Image(
-                            uri=f'data:image/png;base64, '
-                                f'{base64.b64encode(f.read()).decode("utf-8")}'
+                            uri=f"data:image/png;base64, "
+                            f'{base64.b64encode(f.read()).decode("utf-8")}'
                         ),
                     )
             elif os.path.exists(
@@ -194,8 +194,8 @@ class FileLibraryProvider(backend.LibraryProvider):
                 ) as f:
                     images[uri] = (
                         Image(
-                            uri=f'data:image/jpg;base64, '
-                                f'{base64.b64encode(f.read()).decode("utf-8")}'
+                            uri=f"data:image/jpg;base64, "
+                            f'{base64.b64encode(f.read()).decode("utf-8")}'
                         ),
                     )
             elif os.path.exists(
@@ -211,8 +211,8 @@ class FileLibraryProvider(backend.LibraryProvider):
                 ) as f:
                     images[uri] = (
                         Image(
-                            uri=f'data:image/jpeg;base64, '
-                                f'{base64.b64encode(f.read()).decode("utf-8")}'
+                            uri=f"data:image/jpeg;base64, "
+                            f'{base64.b64encode(f.read()).decode("utf-8")}'
                         ),
                     )
 
