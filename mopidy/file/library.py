@@ -1,10 +1,10 @@
 import base64
-import imghdr
 import logging
 import os
 
 from mopidy import backend, exceptions, models
 from mopidy.audio import scan, tags
+from mopidy.exceptions import ScannerError
 from mopidy.internal import path
 from mopidy.models import Image
 
@@ -30,7 +30,6 @@ class FileLibraryProvider(backend.LibraryProvider):
     def __init__(self, backend, config):
         super().__init__(backend)
         self._media_dirs = list(self._get_media_dirs(config))
-        self._cache_dir = config["core"]["cache_dir"]
         self._show_dotfiles = config["file"]["show_dotfiles"]
         self._excluded_file_extensions = tuple(
             file_ext.lower()
@@ -39,6 +38,8 @@ class FileLibraryProvider(backend.LibraryProvider):
         self._follow_symlinks = config["file"]["follow_symlinks"]
 
         self._scanner = scan.Scanner(timeout=config["file"]["metadata_timeout"])
+
+        self._folder_image_names = config["file"].get("folder_image_names", [])
 
     def browse(self, uri):
         logger.debug("Browsing files at: %s", uri)
@@ -154,68 +155,28 @@ class FileLibraryProvider(backend.LibraryProvider):
     def get_images(self, uris):
         images = {}
         for uri in uris:
-            result = self._scanner.scan(uri)
-            if "image" in result.tags and len(result.tags["image"]) > 0:
+            images[uri] = ()
+            try:
+                result = self._scanner.scan(uri)
+            except ScannerError as e:
+                logger.warning(str(e))
+                continue
+            if len(result.tags.get("image", [])) > 0:
                 image = result.tags["image"][0]
-                extension = imghdr.what("", h=image)
                 images[uri] = (
                     Image(
-                        uri=f"data:image/{extension};base64, "
-                        f'{base64.b64encode(image).decode("utf-8")}'
+                        uri=f"data:;base64, {base64.b64encode(image).decode('utf-8')}"
                     ),
                 )
-            elif os.path.exists(
-                os.path.join(
-                    os.path.dirname(path.uri_to_path(uri)), "folder.png"
-                )
-            ):
-                with open(
-                    os.path.join(
-                        os.path.dirname(path.uri_to_path(uri)), "folder.png"
-                    ),
-                    "rb",
-                ) as f:
-                    images[uri] = (
-                        Image(
-                            uri=f"data:image/png;base64, "
-                            f'{base64.b64encode(f.read()).decode("utf-8")}'
-                        ),
-                    )
-            elif os.path.exists(
-                os.path.join(
-                    os.path.dirname(path.uri_to_path(uri)), "folder.jpg"
-                )
-            ):
-                with open(
-                    os.path.join(
-                        os.path.dirname(path.uri_to_path(uri)), "folder.jpg"
-                    ),
-                    "rb",
-                ) as f:
-                    images[uri] = (
-                        Image(
-                            uri=f"data:image/jpg;base64, "
-                            f'{base64.b64encode(f.read()).decode("utf-8")}'
-                        ),
-                    )
-            elif os.path.exists(
-                os.path.join(
-                    os.path.dirname(path.uri_to_path(uri)), "folder.jpeg"
-                )
-            ):
-                with open(
-                    os.path.join(
-                        os.path.dirname(path.uri_to_path(uri)), "folder.jpeg"
-                    ),
-                    "rb",
-                ) as f:
-                    images[uri] = (
-                        Image(
-                            uri=f"data:image/jpeg;base64, "
-                            f'{base64.b64encode(f.read()).decode("utf-8")}'
-                        ),
-                    )
-
-            else:
-                images[uri] = ()
+                continue
+            for i in self._folder_image_names:
+                if (path.uri_to_path(uri).parent / i).exists():
+                    with open(path.uri_to_path(uri).parent / i, "rb",) as f:
+                        images[uri] = (
+                            Image(
+                                uri=f"data:;base64,"
+                                f"{base64.b64encode(f.read()).decode('utf-8')}"
+                            ),
+                        )
+                    break
         return images
