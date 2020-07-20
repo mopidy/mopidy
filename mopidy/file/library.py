@@ -1,3 +1,4 @@
+import base64
 import imghdr
 import logging
 import os
@@ -156,58 +157,61 @@ class FileLibraryProvider(backend.LibraryProvider):
             result = self._scanner.scan(uri)
             if "image" in result.tags and len(result.tags["image"]) > 0:
                 image = result.tags["image"][0]
-                filename = os.path.join(self._cache_dir, path.uri_to_path(uri))
                 extension = imghdr.what("", h=image)
-                with open(f"{filename}.{extension}", "wb+") as f:
-                    f.write(image)
                 images[uri] = (
-                    Image(uri=path.path_to_uri(f"{filename}.{extension}")),
+                    Image(
+                        uri=f'data:image/{extension};base64, {base64.b64encode(image).decode("utf-8")}'
+                    ),
                 )
             elif os.path.exists(
                 os.path.join(
                     os.path.dirname(path.uri_to_path(uri)), "folder.png"
                 )
             ):
-                images[uri] = (
-                    Image(
-                        uri=path.path_to_uri(
-                            os.path.join(
-                                os.path.dirname(path.uri_to_path(uri)),
-                                "folder.png",
-                            )
-                        )
+                with open(
+                    os.path.join(
+                        os.path.dirname(path.uri_to_path(uri)), "folder.png"
                     ),
-                )
+                    "rb",
+                ) as f:
+                    images[uri] = (
+                        Image(
+                            uri=f'data:image/png;base64, {base64.b64encode(f.read()).decode("utf-8")}'
+                        ),
+                    )
             elif os.path.exists(
                 os.path.join(
                     os.path.dirname(path.uri_to_path(uri)), "folder.jpg"
                 )
             ):
-                images[uri] = (
-                    Image(
-                        uri=path.path_to_uri(
-                            os.path.join(
-                                os.path.dirname(path.uri_to_path(uri)),
-                                "folder.jpg",
-                            )
-                        )
+                with open(
+                    os.path.join(
+                        os.path.dirname(path.uri_to_path(uri)), "folder.jpg"
                     ),
-                )
+                    "rb",
+                ) as f:
+                    images[uri] = (
+                        Image(
+                            uri=f'data:image/jpg;base64, {base64.b64encode(f.read()).decode("utf-8")}'
+                        ),
+                    )
             elif os.path.exists(
                 os.path.join(
                     os.path.dirname(path.uri_to_path(uri)), "folder.jpeg"
                 )
             ):
-                images[uri] = (
-                    Image(
-                        uri=path.path_to_uri(
-                            os.path.join(
-                                os.path.dirname(path.uri_to_path(uri)),
-                                "folder.jpeg",
-                            )
-                        )
+                with open(
+                    os.path.join(
+                        os.path.dirname(path.uri_to_path(uri)), "folder.jpeg"
                     ),
-                )
+                    "rb",
+                ) as f:
+                    images[uri] = (
+                        Image(
+                            uri=f'data:image/jpeg;base64, {base64.b64encode(f.read()).decode("utf-8")}'
+                        ),
+                    )
+
             else:
                 images[uri] = ()
         return images
