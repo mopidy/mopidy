@@ -62,7 +62,6 @@ How to for Raspbian
 
    - Under "Advanced Options":
 
-     - A1: Expand the file system to fill th SD card.
      - A3: Adjust the memory split.
        If you're not going to connect a display to your Pi, you should set the
        minimum value here in order to make best use of the available RAM.
@@ -77,6 +76,9 @@ How to for Raspbian
    If you want to change any settings later, you can simply rerun ``sudo
    raspi-config``.
 
+#. Ensure the system audio settings match the user audio settings::
+
+       sudo ln -s ~/.asoundrc /etc/asound.conf
 
 #. Install Mopidy and any Mopidy extensions you want, as described in
    :ref:`debian-install`.
