@@ -16,6 +16,9 @@ v3.1.0 (UNRELEASED)
   implemented by playback providers that want to use GStreamer's download
   buffering strategy for their URIs. (PR: :issue:`1888`)
 
+- Audio: Fix memory leak when converting GStreamer `sample` type tags. (Fixes:
+  :issue:`1827`, PR: :issue:`1929`)
+
 
 v3.0.2 (2020-04-02)
 ===================
