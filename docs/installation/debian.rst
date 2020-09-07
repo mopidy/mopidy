@@ -59,7 +59,7 @@ Install from apt.mopidy.com
 Upgrading
 =========
 
-When a new release of Mopidy is out, and you can't wait for you system to
+When a new release of Mopidy is out, and you can't wait for your system to
 figure it out for itself, run the following to upgrade right away::
 
     sudo apt update
