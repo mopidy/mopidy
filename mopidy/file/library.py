@@ -51,6 +51,9 @@ class FileLibraryProvider(backend.LibraryProvider):
                 uri,
             )
             return []
+        if path.uri_to_path(uri).is_file():
+            logger.error("Rejected attempt to browse file (%s)", uri)
+            return []
 
         for dir_entry in local_path.iterdir():
             child_path = dir_entry.resolve()
