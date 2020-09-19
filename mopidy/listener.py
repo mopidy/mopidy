@@ -20,7 +20,11 @@ def send(cls, event, **kwargs):
         # practise is making calls upwards in the stack, blocking here would
         # quickly deadlock.
         listener.tell(
-            ProxyCall(attr_path=["on_event"], args=[event], kwargs=kwargs,)
+            ProxyCall(
+                attr_path=["on_event"],
+                args=[event],
+                kwargs=kwargs,
+            )
         )
 
 

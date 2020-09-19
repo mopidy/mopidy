@@ -149,7 +149,7 @@ class TestPlayHandling(BaseTest):
 
     def test_resume_skips_to_next_on_unplayable_track(self):
         """Checks that we handle backend.change_track failing when
-           resuming playback."""
+        resuming playback."""
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
         self.core.playback.play(tl_tracks[0])
