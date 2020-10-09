@@ -9,6 +9,12 @@ you can stream the audio from Mopidy through an Icecast audio streaming server.
 Multiple media players can then be connected to the streaming server
 simultaneously. To use the Icecast output, do the following:
 
+.. warning::
+
+    Ubuntu 20.04 ships with a bugged version of libshout that renders the
+    shout2send sink broken and unusable. You cannot stream from Mopidy via
+    Icecast with the below method if running on Ubuntu 20.04.
+
 #. Install, configure and start the Icecast server. It can be found in the
    ``icecast2`` package in Debian/Ubuntu.
 
