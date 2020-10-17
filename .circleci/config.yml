@@ -13,6 +13,7 @@ workflows:
       - check-manifest
       - docs
       - flake8
+      - isort
 
 jobs:
   py38: &test-template
