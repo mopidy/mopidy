@@ -52,3 +52,5 @@ jobs:
   docs: *test-template
 
   flake8: *test-template
+
+  isort: *test-template
