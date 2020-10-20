@@ -1,9 +1,8 @@
 import configparser
 import io
+import xml.etree.ElementTree as elementtree  # noqa: N813
 
 from mopidy.internal import validation
-
-import xml.etree.ElementTree as elementtree  # noqa: N813
 
 
 def parse(data):

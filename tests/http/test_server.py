@@ -1,7 +1,7 @@
 import os
-import urllib
-import tempfile
 import shutil
+import tempfile
+import urllib
 from unittest import mock
 
 import tornado.testing

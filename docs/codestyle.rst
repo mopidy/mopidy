@@ -10,6 +10,8 @@ All projects in the Mopidy organization follows the following code style:
   Use Black's string normalization, which prefers ``"`` quotes over ``'``,
   unless the string contains ``"``.
 
+- Automatically sort imports using `isort <https://timothycrosley.github.io/isort>`_.
+  
 - Follow :pep:`8`.
   Run `flake8 <https://pypi.org/project/flake8>`_  to check your code
   against the guidelines.
