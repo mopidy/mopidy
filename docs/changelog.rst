@@ -12,6 +12,8 @@ For older releases, see :ref:`history`.
 v3.1.0 (UNRELEASED)
 ===================
 
+- Add Python 3.9 to our test matrix.
+
 - Add :meth:`mopidy.backend.PlaybackProvider.should_download` which can be
   implemented by playback providers that want to use GStreamer's download
   buffering strategy for their URIs. (PR: :issue:`1888`)
