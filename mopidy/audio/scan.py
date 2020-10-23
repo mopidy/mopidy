@@ -192,6 +192,7 @@ def _process(pipeline, timeout_ms):
     have_audio = False
     missing_message = None
     duration = None
+    workaround_applied = False
 
     types = (
         Gst.MessageType.ELEMENT
@@ -251,6 +252,7 @@ def _process(pipeline, timeout_ms):
             # and then waiting for a duration change.
             # https://bugzilla.gnome.org/show_bug.cgi?id=763553
             logger.debug("Using workaround for duration missing before play.")
+            workaround_applied = True
             result = pipeline.set_state(Gst.State.PLAYING)
             if result == Gst.StateChangeReturn.FAILURE:
                 return tags, mime, have_audio, duration
@@ -268,6 +270,11 @@ def _process(pipeline, timeout_ms):
             tags.update(tags_lib.convert_taglist(taglist))
 
         timeout = timeout_ms - (int(time.time() * 1000) - start)
+    
+    # Sometimes we never get a duration when the workaround is applied
+    # e.g. for youtube streams
+    if workaround_applied:
+        return tags, mime, have_audio, duration
 
     raise exceptions.ScannerError(f"Timeout after {timeout_ms:d}ms")
 
