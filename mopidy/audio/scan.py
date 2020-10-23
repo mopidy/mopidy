@@ -270,7 +270,7 @@ def _process(pipeline, timeout_ms):
             tags.update(tags_lib.convert_taglist(taglist))
 
         timeout = timeout_ms - (int(time.time() * 1000) - start)
-    
+
     # Sometimes we never get a duration when the workaround is applied
     # e.g. for youtube streams
     if workaround_applied:
