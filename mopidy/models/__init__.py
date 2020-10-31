@@ -232,7 +232,7 @@ class Track(ValidatedImmutableObject):
     genre = fields.String()
 
     #: The track number in the album. Read-only.
-    track_no = fields.Integer(min=0)
+    track_no = fields.Integer(min=-1)
 
     #: The disc number in the album. Read-only.
     disc_no = fields.Integer(min=0)
