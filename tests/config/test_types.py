@@ -274,7 +274,7 @@ class TestInteger:
     def test_deserialize_enforces_choices(self):
         cv = types.Integer(choices=[1, 2, 3])
 
-        cv.deserialize("3") == 3
+        assert cv.deserialize("3") == 3
 
         with pytest.raises(ValueError):
             cv.deserialize("5")
@@ -492,7 +492,7 @@ class TestLogLevel:
         cv = types.LogLevel()
 
         for name, level in self.levels.items():
-            cv.serialize(level) == name
+            assert cv.serialize(level) == name
 
     def test_serialize_ignores_unknown_level(self):
         cv = types.LogLevel()
