@@ -34,7 +34,7 @@ stream-lined release procedure.
 
 #. Push to GitHub::
 
-    git push master --follow-tags
+    git push origin master --follow-tags
 
 #. Go to the GitHub repository's tags page, e.g.
    ``https://github.com/mopidy/mopidy-foo/tags``. Find the tag and select
@@ -133,7 +133,7 @@ Release
 
 #. Push to GitHub::
 
-    git push master --follow-tags
+    git push origin master --follow-tags
 
 #. Upload the packages to PyPI::
 
