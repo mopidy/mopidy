@@ -15,12 +15,13 @@ Releasing extensions
 Extensions that are maintained in the Mopidy organization use a quite
 stream-lined release procedure.
 
-#. Make sure that everything has been merged into the `master` branch on
+#. Make sure that everything has been merged into the ``master`` branch on
    GitHub, and that all CI checks are green.
 
-#. Make any manual tests you feel is required.
+#. Perform any manual tests you feel are required.
 
-#. Bump version in `setup.cfg`, to e.g. `2.0.2`.
+#. Bump version in ``setup.cfg`` in line with :ref:`our strategy <versioning>`.
+   For example, to ``2.0.2``.
 
 #. Commit the bumped version::
 
@@ -48,14 +49,14 @@ stream-lined release procedure.
 This procedure has several benefits:
 
 - Everyone with commit access can make releases.
-- None without direct PyPI access can make releases without also leaving the
-  source code of what they released publicly available on GitHub, creating an
-  audit log in case of any malicious deeds.
+- No one, except those with direct PyPI access, can make releases without
+  also leaving the source code of what they released publicly available on
+  GitHub, creating an audit log in case of any malicious actions.
 - The changelog can be amended post-release through the GitHub Releases UI.
 
 The primary drawback of this procedure is that there is no obvious way to
 maintain a changelog in-between releases. The preferred solution is to make
-releases often, so that writing up the changelog from the recent Git commits is
+releases often, so that writing up a changelog from the recent Git commits is
 done in a minute or two.
 
 
@@ -95,10 +96,10 @@ Preparations
 
 #. Update the changelog. Commit and push it.
 
-#. Make sure that everything has been merged into the `master` branch on
+#. Make sure that everything has been merged into the ``develop`` branch on
    GitHub, and that all CI checks are green.
 
-#. Make any manual tests you feel is required.
+#. Perform any manual tests you feel are required.
 
 
 Release
@@ -110,8 +111,8 @@ Release
     git pull
     git merge --no-ff -m "Release v3.3.0" develop
 
-#. Bump version in `setup.cfg`, to e.g. `2.0.2`, and set the release date in
-   the changelog.
+#. Bump version in ``setup.cfg`` in line with :ref:`our strategy <versioning>`.
+   For example, to ``3.3.0``, and set the release date in the changelog.
 
 #. Commit the bumped version::
 
@@ -137,7 +138,7 @@ Release
 
 #. Upload the packages to PyPI::
 
-    twine upload dist/Mopidy-2.0.2.tar.gz dist/Mopidy-2.0.2-py3-none-any.whl
+    twine upload dist/Mopidy-3.3.0.tar.gz dist/Mopidy-3.3.0-py3-none-any.whl
 
 
 Post-release
