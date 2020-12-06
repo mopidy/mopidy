@@ -68,9 +68,9 @@ procedure.
 
 To setup this on your own repo, you must:
 
-#. Copy
-`.github/workflows/release.yml` from the Mopidy `cookiecutter project
-<https://github.com/mopidy/cookiecutter-mopidy-ext/blob/master/%7B%7Bcookiecutter.repo_name%7D%7D/.github/workflows/release.yml>`_.
+#. Copy `.github/workflows/release.yml` from the Mopidy
+   `cookiecutter project
+   <https://github.com/mopidy/cookiecutter-mopidy-ext/blob/master/%7B%7Bcookiecutter.repo_name%7D%7D/.github/workflows/release.yml>`_.
 
 #. Create a token in your account settings at PyPI with access to the relevant
    PyPI package.
