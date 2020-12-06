@@ -118,13 +118,9 @@ Release
 
     git commit -m "Release v3.3.0"
 
-#. Install/upgrade tools used for packaging::
-
-    python3 -m pip install --upgrade twine wheel
-
 #. Build package::
 
-    python3 setup.py sdist bdist_wheel
+    python3 -m build
 
 #. Tag the commit::
 
