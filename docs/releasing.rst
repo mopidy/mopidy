@@ -68,7 +68,7 @@ procedure.
 
 To setup this on your own repo, you must:
 
-#. Copy `.github/workflows/release.yml` from the Mopidy
+#. Copy ``.github/workflows/release.yml`` from the Mopidy
    `cookiecutter project
    <https://github.com/mopidy/cookiecutter-mopidy-ext/blob/master/%7B%7Bcookiecutter.repo_name%7D%7D/.github/workflows/release.yml>`_.
 
