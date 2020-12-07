@@ -20,7 +20,7 @@ stream-lined release procedure.
 
 #. Perform any manual tests you feel are required.
 
-#. Bump version in ``setup.cfg`` in line with :ref:`our strategy <versioning>`.
+#. Bump the version in ``setup.cfg`` in line with :ref:`our strategy <versioning>`.
    For example, to ``2.0.2``.
 
 #. Commit the bumped version::
@@ -105,22 +105,18 @@ Preparations
 Release
 -------
 
+#. Bump the version in ``setup.cfg`` in line with :ref:`our strategy <versioning>`.
+   For example, to ``3.3.0``, and set the release date in the changelog.
+
+#. Commit the bumped version and release date::
+
+    git commit -m "Prepare release of v3.3.0"
+
 #. Merge the release branch (``develop`` in the example) into ``master``::
 
     git checkout master
     git pull
     git merge --no-ff -m "Release v3.3.0" develop
-
-#. Bump version in ``setup.cfg`` in line with :ref:`our strategy <versioning>`.
-   For example, to ``3.3.0``, and set the release date in the changelog.
-
-#. Commit the bumped version::
-
-    git commit -m "Release v3.3.0"
-
-#. Build package::
-
-    python3 -m build
 
 #. Tag the commit::
 
@@ -132,25 +128,36 @@ Release
 
     git push origin master --follow-tags
 
-#. Upload the packages to PyPI::
+#. Go to the GitHub repository's tags page at
+   ``https://github.com/mopidy/mopidy/tags``. Find the tag and select
+   "Create release" in the tag's dropdown menu.
 
-    twine upload dist/Mopidy-3.3.0.tar.gz dist/Mopidy-3.3.0-py3-none-any.whl
+#. Copy the tag, e.g. ``v3.3.0`` into the "title" field. Write a changelog
+   entry in the description field, and hit "Release".
+
+#. GitHub Actions now builds the package and uploads it to PyPI.
 
 
 Post-release
 ------------
 
-#. Merge ``master`` back into ``develop`` and push the branch to GitHub::
+#. To prepare for further development, merge the ``master`` branch back into
+   the ``develop`` branch and push it to GitHub::
 
     git checkout develop
     git merge master
     git push origin develop
 
-#. Make sure the new tag is built by Read the Docs, and that the ``latest``
-   version shows the newly released version.
+#. Make sure the new tag is built by
+   `Read the Docs <https://readthedocs.org/projects/mopidy/builds/>`_,
+   and that the `"latest" version <https://docs.mopidy.com/en/latest/>`_
+   shows the newly released version.
 
 #. Spread the word through an announcement post on the `Discourse forum
    <https://discourse.mopidy.com/>`_.
 
 #. Notify distribution packagers, including but not limited to:
-   Debian, Arch Linux, Homebrew.
+
+   - `Arch Linux <https://www.archlinux.org/packages/community/any/mopidy/>`_
+   - `Debian <https://salsa.debian.org/mopidy-team>`_
+   - `Homebrew <https://github.com/mopidy/homebrew-mopidy>`_
