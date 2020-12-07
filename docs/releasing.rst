@@ -72,11 +72,11 @@ To setup this on your own repo, you must:
    `cookiecutter project
    <https://github.com/mopidy/cookiecutter-mopidy-ext/blob/master/%7B%7Bcookiecutter.repo_name%7D%7D/.github/workflows/release.yml>`_.
 
-#. Create a token in your account settings at PyPI with access to the relevant
-   PyPI package.
+#. Create an API token in your account settings at PyPI with scope to access
+   the extension's PyPI package.
 
 #. Copy the token to a new secret called ``PYPI_TOKEN`` in your GitHub repo's
-   settings.
+   settings. Ignore the section titled "Using this token" on PyPI.
 
 With the ``release.yml`` file and the ``PYPI_TOKEN`` secret in place, releases
 should automatically be uploaded to PyPI when you follow the procedure above.
