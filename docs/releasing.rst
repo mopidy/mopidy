@@ -42,7 +42,7 @@ stream-lined release procedure.
    "Create release" in the tag's dropdown menu.
 
 #. Copy the tag, e.g. ``v2.0.2`` into the "title" field. Write a changelog
-   entry in the description field, and hit "Release".
+   entry in the description field, and hit "Publish release".
 
 #. GitHub Actions now builds the package and uploads it to PyPI.
 
@@ -133,7 +133,7 @@ Release
    "Create release" in the tag's dropdown menu.
 
 #. Copy the tag, e.g. ``v3.3.0`` into the "title" field. Write a changelog
-   entry in the description field, and hit "Release".
+   entry in the description field, and hit "Publish release".
 
 #. GitHub Actions now builds the package and uploads it to PyPI.
 
