@@ -18,8 +18,16 @@ v3.1.0 (UNRELEASED)
   implemented by playback providers that want to use GStreamer's download
   buffering strategy for their URIs. (PR: :issue:`1888`)
 
-- Audio: Fix memory leak when converting GStreamer `sample` type tags. (Fixes:
-  :issue:`1827`, PR: :issue:`1929`)
+- Audio: Fix memory leak when converting GStreamer ``sample`` type tags.
+  (Fixes: :issue:`1827`, PR: :issue:`1929`)
+
+- Turn off strict parsing of ``*.pls`` playlist files. This was a regression
+  that happened during the migration to Python 3. (PR: :issue:`1923`)
+
+- Make the systemd unit that ships with Mopidy wait for an Internet
+  connection before starting Mopidy. When used by distribution packages, this
+  can help avoid that extensions try to connect to cloud services before the
+  machine's Internet connection is ready for use. (PR: :issue:`1946`)
 
 
 v3.0.2 (2020-04-02)
