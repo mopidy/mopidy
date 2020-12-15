@@ -607,7 +607,7 @@ class Audio(pykka.ThreadingActor):
         if live_stream and download:
             logger.warning(
                 "Ambiguous buffering flags: "
-                "'is_live' and 'should_download' should not both be set."
+                "'live_stream' and 'download' should not both be set."
             )
 
         self._pending_uri = uri
