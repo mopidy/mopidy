@@ -1,5 +1,6 @@
 include *.py
 include *.rst
+include *.toml
 include .mailmap
 include .readthedocs.yml
 include AUTHORS

@@ -73,7 +73,8 @@ class Extension:
         :param config: the Mopidy config object
         :return: pathlib.Path
         """
-        assert cls.ext_name is not None
+        if cls.ext_name is None:
+            raise AssertionError
         cache_dir_path = (
             path.expand_path(config["core"]["cache_dir"]) / cls.ext_name
         )
@@ -87,7 +88,8 @@ class Extension:
         :param config: the Mopidy config object
         :return: pathlib.Path
         """
-        assert cls.ext_name is not None
+        if cls.ext_name is None:
+            raise AssertionError
         config_dir_path = (
             path.expand_path(config["core"]["config_dir"]) / cls.ext_name
         )
@@ -103,7 +105,8 @@ class Extension:
         :param config: the Mopidy config object
         :returns: pathlib.Path
         """
-        assert cls.ext_name is not None
+        if cls.ext_name is None:
+            raise AssertionError
         data_dir_path = (
             path.expand_path(config["core"]["data_dir"]) / cls.ext_name
         )

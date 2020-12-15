@@ -1,9 +1,8 @@
+import _thread
 import logging
 import threading
 
 import pykka
-
-import _thread
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +44,7 @@ def stop_remaining_actors():
             "Seeing %d actor and %d non-actor thread(s): %s",
             num_actors,
             threading.active_count() - num_actors,
-            ", ".join([t.name for t in threading.enumerate()]),
+            ", ".join(t.name for t in threading.enumerate()),
         )
         logger.debug("Stopping %d actor(s)...", num_actors)
         pykka.ActorRegistry.stop_all()

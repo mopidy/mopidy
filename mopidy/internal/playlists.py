@@ -1,9 +1,8 @@
 import configparser
 import io
+import xml.etree.ElementTree as elementtree  # noqa: N813
 
 from mopidy.internal import validation
-
-import xml.etree.ElementTree as elementtree  # noqa: N813
 
 
 def parse(data):
@@ -78,7 +77,7 @@ def parse_extm3u(data):
 def parse_pls(data):
     # TODO: convert non URIs to file URIs.
     try:
-        cp = configparser.RawConfigParser()
+        cp = configparser.RawConfigParser(strict=False)
         cp.read_string(data.decode())
     except configparser.Error:
         return

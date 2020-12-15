@@ -27,6 +27,7 @@ NumberOfEntries=3
 File1="file:///tmp/foo"
 Title1=Sample Title
 Length1=123
+Version=2
 
 File2='file:///tmp/bar'
 Title2=Example \xc5\xa7\xc5\x95

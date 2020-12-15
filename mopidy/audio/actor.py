@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 gst_logger = logging.getLogger("mopidy.audio.gst")
 
 _GST_PLAY_FLAGS_AUDIO = 0x02
+_GST_PLAY_FLAGS_DOWNLOAD = 0x80
 
 _GST_STATE_MAPPING = {
     Gst.State.PLAYING: PlaybackState.PLAYING,
@@ -342,7 +343,9 @@ class _Handler:
 
     def on_tag(self, taglist):
         tags = tags_lib.convert_taglist(taglist)
-        gst_logger.debug("Got TAG bus message: tags=%r", dict(tags))
+        gst_logger.debug(
+            f"Got TAG bus message: tags={tags_lib.repr_tags(tags)}"
+        )
 
         # Postpone emitting tags until stream start.
         if self._audio._pending_tags is not None:
@@ -574,7 +577,7 @@ class Audio(pykka.ThreadingActor):
 
         utils.setup_proxy(source, self._config["proxy"])
 
-    def set_uri(self, uri, live_stream=False):
+    def set_uri(self, uri, live_stream=False, download=False):
         """
         Set URI of audio to be played.
 
@@ -585,6 +588,8 @@ class Audio(pykka.ThreadingActor):
         :param live_stream: disables buffering, reducing latency for stream,
             and discarding data when paused
         :type live_stream: bool
+        :param download: enables "download" buffering mode
+        :type download: bool
         """
 
         # XXX: Hack to workaround issue on Mac OS X where volume level
@@ -594,9 +599,21 @@ class Audio(pykka.ThreadingActor):
         else:
             current_volume = None
 
+        flags = _GST_PLAY_FLAGS_AUDIO
+        if download:
+            flags |= _GST_PLAY_FLAGS_DOWNLOAD
+
+        logger.debug(f"Flags: {flags}")
+        if live_stream and download:
+            logger.warning(
+                "Ambiguous buffering flags: "
+                "'live_stream' and 'download' should not both be set."
+            )
+
         self._pending_uri = uri
         self._pending_tags = {}
         self._live_stream = live_stream
+        self._playbin.set_property("flags", flags)
         self._playbin.set_property("uri", uri)
 
         if self.mixer is not None and current_volume is not None:
@@ -821,7 +838,7 @@ class Audio(pykka.ThreadingActor):
         set_value(Gst.TAG_ALBUM, " ")
 
         if artists:
-            set_value(Gst.TAG_ARTIST, ", ".join([a.name for a in artists]))
+            set_value(Gst.TAG_ARTIST, ", ".join(a.name for a in artists))
 
         if track.name:
             set_value(Gst.TAG_TITLE, track.name)

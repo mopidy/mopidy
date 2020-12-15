@@ -492,8 +492,8 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         data = error["data"]
         assert data["type"] == "TypeError"
         assert (
-            data["message"]
-            == "get_uri_schemes() takes 1 positional argument but 2 were given"
+            "get_uri_schemes() takes 1 positional argument but 2 were given"
+            in data["message"]
         )
         assert "traceback" in data
         assert "Traceback (most recent call last):" in data["traceback"]

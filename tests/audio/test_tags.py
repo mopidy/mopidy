@@ -5,6 +5,22 @@ from mopidy.internal.gi import GLib, GObject, Gst
 from mopidy.models import Album, Artist, Track
 
 
+class TestReprTags:
+    def test_bytes_truncated_default(self):
+        taglist = {"foo": [b"abcdefghijkl", b"mnop", "qrstuvwxyzabc"]}
+
+        result = tags.repr_tags(taglist)
+
+        assert result == "{'foo': [b'abcdefghij...', b'mnop', 'qrstuvwxyzabc']}"
+
+    def test_max_bytes_two(self):
+        taglist = {"foo": [b"1234", b"5678", "abcd", 67]}
+
+        result = tags.repr_tags(taglist, 2)
+
+        assert result == "{'foo': [b'12...', b'56...', 'abcd', 67]}"
+
+
 class TestConvertTaglist:
     def make_taglist(self, tag, values):
         taglist = Gst.TagList.new_empty()

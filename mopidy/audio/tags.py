@@ -10,6 +10,26 @@ from mopidy.models import Album, Artist, Track
 logger = logging.getLogger(__name__)
 
 
+def repr_tags(taglist, max_bytes=10):
+    """Returns a printable representation of a :class:`Gst.TagList`.
+
+    Tag values of type bytes are truncated to the specified length to avoid
+    large amounts of output when logging.
+
+    :param taglist: A GStreamer taglist to be represented.
+    :type taglist: :class:`Gst.TagList`
+    :param max_bytes: The maximum number of bytes to show for bytes tag values.
+    :type max_bytes: int
+    :rtype: string
+    """
+    result = dict(taglist)
+    for tag_values in result.values():
+        for i, val in enumerate(tag_values):
+            if type(val) is bytes and len(val) > max_bytes:
+                tag_values[i] = val[:max_bytes] + b"..."
+    return repr(result)
+
+
 def convert_taglist(taglist):
     """Convert a :class:`Gst.TagList` to plain Python types.
 
@@ -78,7 +98,22 @@ def _extract_sample_data(sample):
     buf = sample.get_buffer()
     if not buf:
         return None
-    return buf.extract_dup(0, buf.get_size())
+    return _extract_buffer_data(buf)
+
+
+# Fix for https://github.com/mopidy/mopidy/issues/1827
+# Using GstBuffer.extract_dup() is a memory leak in versions of PyGObject prior
+# to v3.36.0. As a workaround we use the GstMemory APIs instead.
+def _extract_buffer_data(buf):
+    mem = buf.get_all_memory()
+    if not mem:
+        return None
+    success, info = mem.map(Gst.MapFlags.READ)
+    if not success:
+        return None
+    data = info.data
+    mem.unmap(info)
+    return data
 
 
 # TODO: split based on "stream" and "track" based conversion? i.e. handle data

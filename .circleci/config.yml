@@ -7,17 +7,19 @@ workflows:
   version: 2
   test:
     jobs:
+      - py39
       - py38
       - py37
       - black
       - check-manifest
       - docs
       - flake8
+      - isort
 
 jobs:
-  py38: &test-template
+  py39: &test-template
     docker:
-      - image: mopidy/ci-python:3.8
+      - image: mopidy/ci-python:3.9
     steps:
       - checkout
       - restore_cache:
@@ -40,6 +42,11 @@ jobs:
       - store_test_results:
           path: test-results
 
+  py38:
+    <<: *test-template
+    docker:
+      - image: mopidy/ci-python:3.8
+
   py37:
     <<: *test-template
     docker:
@@ -52,3 +59,5 @@ jobs:
   docs: *test-template
 
   flake8: *test-template
+
+  isort: *test-template
