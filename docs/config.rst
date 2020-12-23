@@ -177,10 +177,38 @@ These are the available audio configurations. For specific use cases, see
 
     Expects an integer above 0.
 
-    Sets the buffer size of the GStreamer queue. If you experience buffering
+    Sets the maximum buffer size of the GStreamer queue. If you experience buffering
     before track changes, it may help to increase this, possibly by at least a
     few seconds. The default is letting GStreamer decide the size, which at the
     time of this writing is 1000.
+
+.. confval:: audio/min-buffer-size
+
+    The minimum buffer size that is given to GStreamer playbin, in bytes.
+
+    Expects an integer 0 or higher.
+
+    Sets the minimum buffer size of the GStreamer playbin. If you experience
+    buffering/stuttering, it may help to increase this. If you experience
+    latency when changing tracks, lower this value.
+    A value of 0 seems to work fine, then the minimum buffer size seems to be
+    determined by min-buffer-duration.
+    The default is 5242880 bytes, which was the old hardcoded value
+    (mopidy versions 3.1.0 or lower).
+
+.. confval:: audio/min-buffer-duration
+
+    The minimum buffer duration that is given to GStreamer playbin, in milliseconds.
+
+    Expects an integer 0 or higher.
+
+    Sets the minimum buffer duration of the GStreamer playbin. If you experience
+    buffering/stuttering, it may help to increase this. If you experience latency
+    when changing tracks, lower this value.
+    A value of 0 seems can work fine, although we recommend a minimum value of
+    250ms so small internet disturbances will not disturb your audio stream.
+    The default is 5000 milliseconds, which was the old hardcoded value
+    (mopidy versions 3.1.0 or lower).
 
 
 Logging section
