@@ -589,7 +589,7 @@ class Audio(pykka.ThreadingActor):
         logger.debug(
             "Source-setup: buffer-size=%i, buffer-duration=%i",
             self._playbin.get_property("buffer-size"),
-            self._playbin.get_property("buffer-duration")
+            self._playbin.get_property("buffer-duration"),
         )
 
         utils.setup_proxy(source, self._config["proxy"])
