@@ -480,16 +480,16 @@ class Audio(pykka.ThreadingActor):
         playbin = Gst.ElementFactory.make("playbin")
         playbin.set_property("flags", _GST_PLAY_FLAGS_AUDIO)
 
-        #minimum buffer duration in bytes
+        # minimum buffer duration in bytes
         buffersize = self._config["audio"]["min-buffer-size"]
         if buffersize is None:
-            buffersize = 5 << 20 #5MB , old fixed value
+            buffersize = 5 << 20  # 5MB , old fixed value
         playbin.set_property("buffer-size", buffersize)
 
-        #minimum buffer duration in ms
+        # minimum buffer duration in ms
         bufferduration = self._config["audio"]["min-buffer-duration"]
         if bufferduration is None:
-            bufferduration = 5000 #old fixed value
+            bufferduration = 5000  # old fixed value
         playbin.set_property("buffer-duration", bufferduration * Gst.MSECOND)
 
         self._signals.connect(playbin, "source-setup", self._on_source_setup)
@@ -587,9 +587,9 @@ class Audio(pykka.ThreadingActor):
             source.set_live(False)
 
         logger.debug(
-                "Source-setup: buffer-size=%i, buffer-duration=%i",
-                self._playbin.get_property("buffer-size"),
-                self._playbin.get_property("buffer-duration")
+            "Source-setup: buffer-size=%i, buffer-duration=%i",
+            self._playbin.get_property("buffer-size"),
+            self._playbin.get_property("buffer-duration")
         )
 
         utils.setup_proxy(source, self._config["proxy"])
