@@ -586,12 +586,6 @@ class Audio(pykka.ThreadingActor):
             gst_logger.debug("Disabling live stream mode")
             source.set_live(False)
 
-        logger.debug(
-            "Source-setup: buffer-size=%i, buffer-duration=%i",
-            self._playbin.get_property("buffer-size"),
-            self._playbin.get_property("buffer-duration"),
-        )
-
         utils.setup_proxy(source, self._config["proxy"])
 
     def set_uri(self, uri, live_stream=False, download=False):
