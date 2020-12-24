@@ -19,6 +19,8 @@ from tests import dummy_audio, path_to_data_dir
 class BaseTest(unittest.TestCase):
     config = {
         "audio": {
+            "min_buffer_size": None,
+            "min_buffer_duration": None,
             "buffer_time": None,
             "mixer": "fakemixer track_max_volume=65536",
             "mixer_track": None,
@@ -38,6 +40,8 @@ class BaseTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
         config = {
             "audio": {
+                "min_buffer_size": None,
+                "min_buffer_duration": None,
                 "buffer_time": None,
                 "mixer": "foomixer",
                 "mixer_volume": None,
@@ -667,7 +671,7 @@ class AudioLiveTest(unittest.TestCase):
 
         self.audio._on_source_setup("dummy", source)
 
-        source.set_live.assert_not_called()
+        source.set_live.assert_called_with(False)
 
     def test_live_mode(self):
         source = mock.MagicMock()
