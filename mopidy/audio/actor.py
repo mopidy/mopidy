@@ -481,13 +481,13 @@ class Audio(pykka.ThreadingActor):
         playbin.set_property("flags", _GST_PLAY_FLAGS_AUDIO)
 
         # minimum buffer duration in bytes
-        buffersize = self._config["audio"]["min-buffer-size"]
+        buffersize = self._config["audio"]["min_buffer_size"]
         if buffersize is None:
             buffersize = 5 << 20  # 5MB , old fixed value
         playbin.set_property("buffer-size", buffersize)
 
         # minimum buffer duration in ms
-        bufferduration = self._config["audio"]["min-buffer-duration"]
+        bufferduration = self._config["audio"]["min_buffer_duration"]
         if bufferduration is None:
             bufferduration = 5000  # old fixed value
         playbin.set_property("buffer-duration", bufferduration * Gst.MSECOND)

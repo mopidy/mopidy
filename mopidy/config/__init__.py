@@ -60,8 +60,8 @@ _audio_schema["mixer_volume"] = Integer(optional=True, minimum=0, maximum=100)
 _audio_schema["output"] = String()
 _audio_schema["visualizer"] = Deprecated()
 _audio_schema["buffer_time"] = Integer(optional=True, minimum=1)
-_audio_schema["min-buffer-size"] = Integer(optional=True, minimum=0)
-_audio_schema["min-buffer-duration"] = Integer(optional=True, minimum=0)
+_audio_schema["min_buffer_size"] = Integer(optional=True, minimum=0)
+_audio_schema["min_buffer_duration"] = Integer(optional=True, minimum=0)
 
 _proxy_schema = ConfigSchema("proxy")
 _proxy_schema["scheme"] = String(
