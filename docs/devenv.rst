@@ -284,7 +284,7 @@ processes in parallel, which usually cuts the test time in half or more::
 
     pytest -n 4
 
-Another useful feature from pytest-xdist, is the possiblity to stop on the
+Another useful feature from pytest-xdist, is the possibility to stop on the
 first test failure, watch the file system for changes, and then rerun the
 tests. This makes for a very quick code-test cycle::
 

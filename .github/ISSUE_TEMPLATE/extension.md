@@ -1,6 +1,6 @@
 ---
-name: Extension Request
-about: Share your idea for a new Mopidy Extension.
+name: Extension request
+about: Share your idea for a new Mopidy extension.
 title: ''
 labels: C-extension-request
 assignees: ''
