@@ -10,7 +10,6 @@ workflows:
       - py39
       - py38
       - py37
-      - black
       - check-manifest
       - docs
       - flake8
@@ -50,8 +49,6 @@ jobs:
     <<: *test-template
     docker:
       - image: mopidy/ci-python:3.7
-
-  black: *test-template
 
   check-manifest: *test-template
 
