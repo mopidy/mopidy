@@ -9,6 +9,13 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
+v3.1.1 (2020-12-26)
+===================
+
+- Fix crash when extracting tags using gst-python >= 1.18. (PR:
+  :issue:`1948`)
+
+
 v3.1.0 (2020-12-16)
 ===================
 

@@ -75,9 +75,9 @@ To get started with Mopidy, begin by reading the
     :target: https://pypi.python.org/pypi/Mopidy/
     :alt: Latest PyPI version
 
-.. image:: https://img.shields.io/circleci/project/github/mopidy/mopidy/develop.svg
-    :target: https://circleci.com/gh/mopidy/mopidy
-    :alt: CircleCI build status
+.. image:: https://img.shields.io/github/workflow/status/mopidy/mopidy/CI
+    :target: https://github.com/mopidy/mopidy/actions
+    :alt: CI build status
 
 .. image:: https://img.shields.io/readthedocs/mopidy.svg
     :target: https://docs.mopidy.com/
