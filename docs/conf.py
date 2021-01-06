@@ -79,14 +79,14 @@ source_suffix = ".rst"
 master_doc = "index"
 
 project = "Mopidy"
-copyright = "2009-2020, Stein Magnus Jodal and contributors"
+copyright = "2009-2021, Stein Magnus Jodal and contributors"
 
 
 release = get_version()
 version = ".".join(release.split(".")[:2])
 
 # To make the build reproducible, avoid using today's date in the manpages
-today = "2020"
+today = "2021"
 
 exclude_trees = ["_build"]
 
