@@ -29,7 +29,7 @@ class DelayedHandler(logging.Handler):
         if not self._released:
             self._buffer.append(record)
 
-    def release(self):
+    def release_delayed_logs(self):
         self._released = True
         root = logging.getLogger("")
         while self._buffer:
@@ -76,7 +76,7 @@ def setup_logging(config, base_verbosity_level, args_verbosity_level):
 
     logging.getLogger("").addHandler(handler)
 
-    _delayed_handler.release()
+    _delayed_handler.release_delayed_logs()
 
 
 def get_verbosity_level(config, base_verbosity_level, args_verbosity_level):
