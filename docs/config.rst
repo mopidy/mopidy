@@ -184,7 +184,7 @@ These are the available audio configurations. For specific use cases, see
 
 .. confval:: audio/min_buffer_size
 
-    The minimum buffer size that is given to GStreamer playbin, in bytes.
+    Sets the ``buffer-size`` property of the GStreamer playbin, in bytes.
 
     Expects an integer 0 or higher. Defaults to 5242880.
 
