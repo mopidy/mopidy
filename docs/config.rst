@@ -199,7 +199,7 @@ These are the available audio configurations. For specific use cases, see
 
     The minimum buffer duration that is given to GStreamer playbin, in milliseconds.
 
-    Expects an integer 0 or higher.
+    Expects an integer 0 or higher. Defaults to 5000.
 
     Sets the minimum buffer duration of the GStreamer playbin. If you experience
     buffering/stuttering, it may help to increase this. If you experience latency
