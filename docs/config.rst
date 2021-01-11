@@ -192,8 +192,6 @@ These are the available audio configurations. For specific use cases, see
     buffering/stuttering, it may help to increase this. If you experience
     latency when changing tracks, lower this value.
     If set to zero, the minimum buffer size will be governed by :confval:`audio/min_buffer_duration` instead.
-    The default is 5242880 bytes, which was the old hardcoded value
-    (mopidy versions 3.1.0 or lower).
 
 .. confval:: audio/min_buffer_duration
 
