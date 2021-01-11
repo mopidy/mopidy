@@ -186,7 +186,7 @@ These are the available audio configurations. For specific use cases, see
 
     The minimum buffer size that is given to GStreamer playbin, in bytes.
 
-    Expects an integer 0 or higher.
+    Expects an integer 0 or higher. Defaults to 5242880.
 
     Sets the minimum buffer size of the GStreamer playbin. If you experience
     buffering/stuttering, it may help to increase this. If you experience
