@@ -191,8 +191,7 @@ These are the available audio configurations. For specific use cases, see
     Sets the minimum buffer size of the GStreamer playbin. If you experience
     buffering/stuttering, it may help to increase this. If you experience
     latency when changing tracks, lower this value.
-    A value of 0 seems to work fine, then the minimum buffer size seems to be
-    determined by min_buffer_duration.
+    If set to zero, the minimum buffer size will be governed by :confval:`audio/min_buffer_duration` instead.
     The default is 5242880 bytes, which was the old hardcoded value
     (mopidy versions 3.1.0 or lower).
 
