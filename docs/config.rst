@@ -206,8 +206,6 @@ These are the available audio configurations. For specific use cases, see
     when changing tracks, lower this value.
     A value of 0 seems can work fine, although we recommend a minimum value of
     250ms so small internet disturbances will not disturb your audio stream.
-    The default is 5000 milliseconds, which was the old hardcoded value
-    (mopidy versions 3.1.0 or lower).
 
 
 Logging section
