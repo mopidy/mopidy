@@ -112,13 +112,13 @@ Pull request guidelines
    For more inspiration, feel free to read these blog posts:
 
    - `Writing Git commit messages
-     <http://365git.tumblr.com/post/3308646748/writing-git-commit-messages>`_
+     <https://365git.tumblr.com/post/3308646748/writing-git-commit-messages>`_
 
    - `A Note About Git Commit Messages
      <https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html>`_
 
    - `On commit messages
-     <http://who-t.blogspot.ch/2009/12/on-commit-messages.html>`_
+     <https://who-t.blogspot.com/2009/12/on-commit-messages.html>`_
 
 #. Send a pull request to the ``develop`` branch. See the `GitHub pull request
    docs <https://help.github.com/en/articles/about-pull-requests>`_ for help.

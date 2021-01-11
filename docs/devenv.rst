@@ -196,7 +196,7 @@ use as well. These can be installed into the active virtualenv by running::
 Note that this is the same command as you used to install Mopidy from the Git
 repo, with the addition of the ``[dev]`` suffix after ``.``. This makes pip
 install the "dev" set of extra dependencies. Exactly what the "dev" set
-includes are defined in ``setup.py``.
+includes are defined in ``setup.cfg``.
 
 To upgrade the development tools in the future, just rerun the exact same
 command.
@@ -332,7 +332,7 @@ We're quite pedantic about :ref:`codestyle` and try hard to keep the Mopidy
 code base a very clean and nice place to work in.
 
 Luckily, you can get very far by using the `flake8
-<http://flake8.readthedocs.io/>`_ linter to check your code for issues before
+<https://flake8.pycqa.org/en/latest/>`_ linter to check your code for issues before
 submitting a pull request. Mopidy passes all of flake8's checks, with only a
 very few exceptions configured in :file:`setup.cfg`. You can either run the
 ``flake8`` tox environment, like our CI setup will do on your pull request::
@@ -359,15 +359,17 @@ If successful, the command will not print anything at all.
 Writing documentation
 =====================
 
-To write documentation, we use `Sphinx <http://www.sphinx-doc.org/>`_. See
+To write documentation, we use `Sphinx <https://www.sphinx-doc.org/>`_. See
 their site for lots of documentation on how to use Sphinx.
 
 .. note::
 
-    To generate a few graphs which are part of the documentation, you need some
-    additional dependencies. You can install them from APT with::
+    To generate a few graphs which are part of the documentation, you need to
+    install the graphviz package. You can install it from APT with::
 
-        sudo apt-get install python-pygraphviz graphviz
+        sudo apt install graphviz
+
+    Other distributions typically use the same package name.
 
 To build the documentation, go into the :file:`docs/` directory::
 

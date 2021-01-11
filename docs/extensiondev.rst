@@ -87,7 +87,7 @@ with ``#egg=Mopidy-Something-dev`` for installation using
     Mopidy-Soundspot
     ****************
 
-    `Mopidy <http://www.mopidy.com/>`_ extension for playing music from
+    `Mopidy <https://mopidy.com/>`_ extension for playing music from
     `Soundspot <http://soundspot.example.com/>`_.
 
     Requires a Soundspot Platina subscription and the pysoundspot library.
@@ -101,7 +101,7 @@ with ``#egg=Mopidy-Something-dev`` for installation using
         sudo pip install Mopidy-Soundspot
 
     Or, if available, install the Debian/Ubuntu package from `apt.mopidy.com
-    <http://apt.mopidy.com/>`_.
+    <https://apt.mopidy.com/>`_.
 
 
     Configuration
