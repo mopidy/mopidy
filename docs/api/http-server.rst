@@ -11,7 +11,7 @@ to expose something over HTTP.
 The HTTP server side API can be used to:
 
 - host static files for e.g. a Mopidy client written in pure JavaScript,
-- host a `Tornado <http://www.tornadoweb.org/>`__ application, or
+- host a `Tornado <https://www.tornadoweb.org/>`__ application, or
 - host a WSGI application, including e.g. Flask applications.
 
 To host static files using the web server, an extension needs to register a
