@@ -195,7 +195,7 @@ These are the available audio configurations. For specific use cases, see
 
 .. confval:: audio/min_buffer_duration
 
-    The minimum buffer duration that is given to GStreamer playbin, in milliseconds.
+    Sets the ``buffer-duration`` property of the GStreamer playbin, in milliseconds.
 
     Expects an integer 0 or higher. Defaults to 5000.
 
