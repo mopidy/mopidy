@@ -202,8 +202,6 @@ These are the available audio configurations. For specific use cases, see
     Sets the minimum buffer duration of the GStreamer playbin. If you experience
     buffering/stuttering, it may help to increase this. If you experience latency
     when changing tracks, lower this value.
-    A value of 0 seems can work fine, although we recommend a minimum value of
-    250ms so small internet disturbances will not disturb your audio stream.
 
 
 Logging section
