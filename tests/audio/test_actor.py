@@ -671,7 +671,7 @@ class AudioLiveTest(unittest.TestCase):
 
         self.audio._on_source_setup("dummy", source)
 
-        source.set_live.assert_called_with(False)
+        source.set_live.assert_not_called()
 
     def test_live_mode(self):
         source = mock.MagicMock()
