@@ -582,9 +582,6 @@ class Audio(pykka.ThreadingActor):
         if self._live_stream and hasattr(source.props, "is_live"):
             gst_logger.debug("Enabling live stream mode")
             source.set_live(True)
-        else:
-            gst_logger.debug("Disabling live stream mode")
-            source.set_live(False)
 
         utils.setup_proxy(source, self._config["proxy"])
 
