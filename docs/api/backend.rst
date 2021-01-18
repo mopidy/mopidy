@@ -57,6 +57,11 @@ you should create your own, and name it after your extension's
 with already in use URI schemes. It is also recommended to design the format
 such that tracks, playlists and other entities can be distinguished easily.
 
+However, it's important to note that outside of the backend that created them,
+URIs are opaque values that neither Mopidy's core layer or Mopidy frontends
+should attempt to derive any meaning from. The only valid exception to this is
+checking the scheme.
+
 
 Backend class
 =============
