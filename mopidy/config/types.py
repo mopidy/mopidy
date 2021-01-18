@@ -220,7 +220,7 @@ class LogLevel(ConfigValue):
     """Log level value.
 
     Expects one of ``critical``, ``error``, ``warning``, ``info``, ``debug``,
-    or ``all``, with any casing.
+    ``trace``, or ``all``, with any casing.
     """
 
     levels = {
