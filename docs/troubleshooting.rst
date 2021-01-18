@@ -106,6 +106,29 @@ with maximum verbosity, you can add the following to :file:`mopidy.conf`:
     requests = error
 
 
+Track metadata
+==============
+
+If you find missing or incorrect metadata for a track, or are experiencing
+problems during local scanning, you can manually view track metadata as seen by
+Mopidy by running::
+
+    python3 -m mopidy.audio.scan path_to_your_file
+
+It may be useful to compare that output against other music playback software
+or audio tagging tools. One such tool is GStreamer's own ``gst-discoverer-1.0``
+which can be installed with ``sudo apt install gstreamer1.0-plugins-base-apps``
+and invoked by running::
+
+    gst-discoverer-1.0 path_to_your_file
+
+Mopidy relies on GStreamer library functions to handle audio metadata so if you
+find ``gst-discoverer-1.0`` is also unable to correctly read the metadata, but
+other software succeeds, then the problem is likely to be with GStreamer itself.
+In this situation you will likely find the behaviour is dependent on the version
+of GStreamer being used and/or the file format.
+
+
 Debugging deadlocks
 ===================
 
