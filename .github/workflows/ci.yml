@@ -24,6 +24,9 @@ jobs:
           - name: "Lint: flake8"
             python: "3.9"
             tox: flake8
+          - name: "Lint: mypy"
+            python: "3.9"
+            tox: mypy
           - name: "Docs"
             python: "3.9"
             tox: docs

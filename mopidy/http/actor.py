@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import json
 import logging
 import secrets
 import threading
+from typing import TYPE_CHECKING
 
 import pykka
 import tornado.httpserver
@@ -15,18 +18,21 @@ from mopidy.core import CoreListener
 from mopidy.http import Extension, handlers
 from mopidy.internal import formatting, network
 
+if TYPE_CHECKING:
+    from typing import Any, ClassVar, List, Type
+
 try:
     import asyncio
 except ImportError:
-    asyncio = None
+    asyncio = None  # type: ignore
 
 
 logger = logging.getLogger(__name__)
 
 
 class HttpFrontend(pykka.ThreadingActor, CoreListener):
-    apps = []
-    statics = []
+    apps: ClassVar[List[Type[Any]]] = []
+    statics: ClassVar[List[Type[Any]]] = []
 
     def __init__(self, config, core):
         super().__init__()
