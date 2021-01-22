@@ -624,6 +624,7 @@ class AudioLiveTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
         config = {"proxy": {}}
         self.audio = audio.Audio(config=config, mixer=None)
+        self.audio._playbin = mock.Mock(spec=["set_property"])
 
         self.source = mock.MagicMock()
         # Avoid appsrc.configure()
@@ -643,6 +644,17 @@ class AudioLiveTest(unittest.TestCase):
         self.audio._on_source_setup("dummy", self.source)
 
         self.source.set_live.assert_called_with(True)
+
+    def test_not_live_mode_after_set_appsrc(self):
+        self.audio._live_stream = True
+
+        # Embrace appsrc.configure()
+        self.source.get_factory.get_name.return_value = "appsrc"
+
+        self.audio.set_appsrc("")
+        self.audio._on_source_setup("dummy", self.source)
+
+        self.source.set_live.assert_not_called()
 
 
 class DownloadBufferingTest(unittest.TestCase):
@@ -665,5 +677,14 @@ class DownloadBufferingTest(unittest.TestCase):
         playbin = self.audio._playbin
 
         self.audio.set_uri("some:uri", False, False)
+
+        playbin.set_property.assert_has_calls([mock.call("flags", 0x02)])
+
+    def test_download_flag_is_not_passed_to_playbin_if_set_appsrc(  # noqa: B950
+        self,
+    ):
+        playbin = self.audio._playbin
+
+        self.audio.set_appsrc("")
 
         playbin.set_property.assert_has_calls([mock.call("flags", 0x02)])

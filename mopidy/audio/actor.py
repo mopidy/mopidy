@@ -643,6 +643,8 @@ class Audio(pykka.ThreadingActor):
         )
         uri = "appsrc://"
         self._pending_uri = uri
+        self._live_stream = False
+        self._playbin.set_property("flags", _GST_PLAY_FLAGS_AUDIO)
         self._playbin.set_property("uri", uri)
 
     def emit_data(self, buffer_):

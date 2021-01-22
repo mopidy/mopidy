@@ -9,6 +9,13 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
+v3.1.2 (UNRELEASED)
+===================
+
+- Fix appsrc track change after live-mode previously set. (Fixes:
+  :issue:`1969`, PR: :issue:`1971`)
+
+
 v3.1.1 (2020-12-26)
 ===================
 
