@@ -17,17 +17,6 @@ from tests import dummy_audio, path_to_data_dir
 
 
 class BaseTest(unittest.TestCase):
-    config = {
-        "audio": {
-            "buffer_time": None,
-            "mixer": "fakemixer track_max_volume=65536",
-            "mixer_track": None,
-            "mixer_volume": None,
-            "output": "testoutput",
-            "visualizer": None,
-        }
-    }
-
     uris = [
         path.path_to_uri(path_to_data_dir("song1.wav")),
         path.path_to_uri(path_to_data_dir("song2.wav")),
@@ -632,55 +621,28 @@ class AudioBufferingTest(unittest.TestCase):
 
 
 class AudioLiveTest(unittest.TestCase):
-    config = {
-        "audio": {
-            "buffer_time": None,
-            "mixer": "fakemixer track_max_volume=65536",
-            "mixer_track": None,
-            "mixer_volume": None,
-            "output": "testoutput",
-            "visualizer": None,
-        }
-    }
-
     def setUp(self):  # noqa: N802
-        config = {
-            "audio": {
-                "buffer_time": None,
-                "mixer": "foomixer",
-                "mixer_volume": None,
-                "output": "testoutput",
-                "visualizer": None,
-            },
-            "proxy": {"hostname": ""},
-        }
+        config = {"proxy": {}}
         self.audio = audio.Audio(config=config, mixer=None)
 
-    def test_not_live_mode(self):
-        source = mock.MagicMock()
-
+        self.source = mock.MagicMock()
         # Avoid appsrc.configure()
-        source.get_factory.get_name = mock.MagicMock(return_value="not_appsrc")
+        self.source.get_factory.get_name = mock.Mock(return_value="not_appsrc")
+        self.source.props = mock.Mock(spec=["is_live"])
 
-        source.props = mock.MagicMock(spec=[])
+    def test_not_live_mode(self):
         self.audio._live_stream = False
 
-        self.audio._on_source_setup("dummy", source)
+        self.audio._on_source_setup("dummy", self.source)
 
-        source.set_live.assert_not_called()
+        self.source.set_live.assert_not_called()
 
     def test_live_mode(self):
-        source = mock.MagicMock()
-
-        # Avoid appsrc.configure()
-        source.get_factory.get_name = mock.MagicMock(return_value="not_appsrc")
-
-        source.props.is_live = mock.MagicMock(return_value=True)
         self.audio._live_stream = True
 
-        self.audio._on_source_setup("dummy", source)
+        self.audio._on_source_setup("dummy", self.source)
 
-        source.set_live.assert_called_with(True)
+        self.source.set_live.assert_called_with(True)
 
 
 class DownloadBufferingTest(unittest.TestCase):
