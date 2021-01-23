@@ -20,7 +20,7 @@ _SELECT_TRY = 0
 _SELECT_EXPOSE = 1
 
 _Result = collections.namedtuple(
-    "Result", ("uri", "tags", "duration", "seekable", "mime", "playable")
+    "_Result", ("uri", "tags", "duration", "seekable", "mime", "playable")
 )
 
 logger = logging.getLogger(__name__)
