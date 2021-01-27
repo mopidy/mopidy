@@ -59,6 +59,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             self._base_dir = path.expand_path(ext_config["base_dir"])
         self._default_encoding = ext_config["default_encoding"]
         self._default_extension = ext_config["default_extension"]
+        self._local_tracks = ext_config["local_tracks"]
 
     def as_list(self):
         result = []
@@ -104,7 +105,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             return None
         try:
             with self._open(path, "r") as fp:
-                items = translator.load_items(fp, self._base_dir)
+                items = translator.load_items(fp, self._base_dir, self._local_tracks)
         except OSError as e:
             log_environment_error(f"Error reading playlist {uri!r}", e)
         else:
@@ -117,7 +118,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             return None
         try:
             with self._open(path, "r") as fp:
-                items = translator.load_items(fp, self._base_dir)
+                items = translator.load_items(fp, self._base_dir, self._local_tracks)
             mtime = self._abspath(path).stat().st_mtime
         except OSError as e:
             log_environment_error(f"Error reading playlist {uri!r}", e)

@@ -15,6 +15,12 @@ def path_to_uri(path, scheme=Extension.ext_name):
     return urllib.parse.urlunsplit((scheme, None, uripath, None, None))
 
 
+def path_to_uri_part(path):
+    """Convert file path to a URI part."""
+    bytes_path = os.path.normpath(bytes(path))
+    return urllib.parse.quote_from_bytes(bytes_path)
+
+
 def uri_to_path(uri):
     """Convert URI to file path."""
     return path.uri_to_path(uri)
@@ -42,7 +48,7 @@ def path_to_ref(path):
     return models.Ref.playlist(uri=path_to_uri(path), name=name_from_path(path))
 
 
-def load_items(fp, basedir):
+def load_items(fp, basedir, local_tracks=False):
     refs = []
     name = None
     for line in filter(None, (line.strip() for line in fp)):
@@ -51,10 +57,13 @@ def load_items(fp, basedir):
                 name = line.partition(",")[2]
             continue
         elif not urllib.parse.urlsplit(line).scheme:
-            path = basedir / line
+            filepath = basedir / line
             if not name:
-                name = name_from_path(path)
-            uri = path_to_uri(path, scheme="file")
+                name = name_from_path(filepath)
+            if local_tracks and path.is_path_inside_base_dir(filepath, basedir):
+                uri = 'local:track:' + path_to_uri_part(pathlib.Path(line))
+            else:
+                uri = path_to_uri(filepath, scheme="file")
         else:
             # TODO: ensure this is urlencoded
             uri = line  # do *not* extract name from (stream?) URI path

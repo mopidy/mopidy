@@ -23,6 +23,7 @@ class Extension(ext.Extension):
         schema["default_encoding"] = config.String()
         schema["default_extension"] = config.String(choices=[".m3u", ".m3u8"])
         schema["playlists_dir"] = config.Path(optional=True)
+        schema["local_tracks"] = config.Boolean(optional=True)
         return schema
 
     def setup(self, registry):
