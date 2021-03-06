@@ -146,7 +146,7 @@ extlinks = {
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
-    "pykka": ("https://www.pykka.org/en/latest/", None),
+    "pykka": ("https://pykka.readthedocs.io/en/latest/", None),
     "tornado": ("https://www.tornadoweb.org/en/stable/", None),
 }
 

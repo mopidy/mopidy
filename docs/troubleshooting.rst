@@ -142,7 +142,7 @@ this by simply running::
     pkill -SIGUSR1 mopidy
 
 You can read more about the deadlock debug helper in the
-`Pykka documentation <https://www.pykka.org/en/latest/api/debug/>`_.
+`Pykka documentation <https://pykka.readthedocs.io/en/latest/api/debug/>`_.
 
 
 Debugging GStreamer

@@ -706,7 +706,7 @@ be necessary to have a full core running for testing purposes::
 
 
 It may be advisable to take a quick look at the
-`Pykka API <https://www.pykka.org/en/latest/>`_ at this point to make sure that
+`Pykka API <https://pykka.readthedocs.io/en/latest/>`_ at this point to make sure that
 you are familiar with ``ThreadingActor``, ``ThreadingFuture``, and the
 ``proxies`` that allow you to access the attributes and methods of the actor
 directly.
