@@ -11,9 +11,14 @@ simultaneously. To use the Icecast output, do the following:
 
 .. warning::
 
-    Ubuntu 20.04 ships with a bugged version of libshout that renders the
-    shout2send sink broken and unusable. You cannot stream from Mopidy via
-    Icecast with the below method if running on Ubuntu 20.04.
+    The last known working version of libshout3 is v2.4.1, this is the version
+    available in Debian Buster. Newer versions of this library, such as those
+    found in Ubuntu 20.04 and Debian Bullseye are bugged and render GStreamer's
+    shout2send sink `broken
+    <https://gitlab.freedesktop.org/gstreamer/gst-plugins-good/-/issues/848>`_
+    and unusable. You cannot stream from Mopidy via Icecast with the below
+    method when using Ubuntu 20.04 or Debian Bullseye. Consider `Snapcast
+    <https://github.com/badaix/snapcast>`_ as an alternative solution.
 
 #. Install, configure and start the Icecast server. It can be found in the
    ``icecast2`` package in Debian/Ubuntu.
