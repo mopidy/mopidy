@@ -388,6 +388,11 @@ class TracklistController:
 
         if tracks is None:
             tracks = []
+            # counteract upmpdcli trick to fool BubbleUPnP
+            uris = [
+                uri[len("http://127.0.0.1/"):] if uri.startswith("http://127.0.0.1/") else uri
+                for uri in uris
+            ]
             track_map = self.core.library.lookup(uris=uris)
             for uri in uris:
                 tracks.extend(track_map[uri])
