@@ -59,9 +59,10 @@ class DelayedHandler(logging.Handler):
         self._released = False
         self._buffer: List[LogRecord] = []
 
-    def handle(self, record: LogRecord) -> None:
+    def handle(self, record: LogRecord) -> bool:
         if not self._released:
             self._buffer.append(record)
+        return True
 
     def release_delayed_logs(self) -> None:
         self._released = True
