@@ -9,7 +9,7 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
-v3.2.0 (UNRELEASED)
+v3.2.0 (2021-07-08)
 ===================
 
 - Initial type annotations and mypy support. (PR: :issue:`1842`)
