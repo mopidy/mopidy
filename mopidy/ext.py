@@ -1,6 +1,8 @@
-import collections
+from __future__ import annotations
+
 import logging
 from collections.abc import Mapping
+from typing import TYPE_CHECKING, NamedTuple
 
 import pkg_resources
 
@@ -8,54 +10,61 @@ from mopidy import config as config_lib
 from mopidy import exceptions
 from mopidy.internal import path
 
+if TYPE_CHECKING:
+    from pathlib import Path
+    from typing import Any, Dict, Iterator, List, Optional, Type
+
+    from mopidy.commands import Command
+    from mopidy.config import ConfigSchema
+
+    Config = Dict[str, Dict[str, Any]]
+
+
 logger = logging.getLogger(__name__)
 
 
-_extension_data_fields = [
-    "extension",
-    "entry_point",
-    "config_schema",
-    "config_defaults",
-    "command",
-]
-
-ExtensionData = collections.namedtuple("ExtensionData", _extension_data_fields)
+class ExtensionData(NamedTuple):
+    extension: "Extension"
+    entry_point: Any
+    config_schema: ConfigSchema
+    config_defaults: Any
+    command: Optional[Command]
 
 
 class Extension:
 
     """Base class for Mopidy extensions"""
 
-    dist_name = None
+    dist_name: str
     """The extension's distribution name, as registered on PyPI
 
     Example: ``Mopidy-Soundspot``
     """
 
-    ext_name = None
+    ext_name: str
     """The extension's short name, as used in setup.py and as config section
     name
 
     Example: ``soundspot``
     """
 
-    version = None
+    version: str
     """The extension's version
 
     Should match the :attr:`__version__` attribute on the extension's main
     Python module and the version registered on PyPI.
     """
 
-    def get_default_config(self):
-        """The extension's default config as a bytestring
+    def get_default_config(self) -> str:
+        """The extension's default config as a text string.
 
-        :returns: bytes or unicode
+        :returns: str
         """
         raise NotImplementedError(
             'Add at least a config section with "enabled = true"'
         )
 
-    def get_config_schema(self):
+    def get_config_schema(self) -> ConfigSchema:
         """The extension's config validation schema
 
         :returns: :class:`~mopidy.config.schemas.ConfigSchema`
@@ -65,7 +74,7 @@ class Extension:
         return schema
 
     @classmethod
-    def get_cache_dir(cls, config):
+    def get_cache_dir(cls, config: Config) -> Path:
         """Get or create cache directory for the extension.
 
         Use this directory to cache data that can safely be thrown away.
@@ -82,7 +91,7 @@ class Extension:
         return cache_dir_path
 
     @classmethod
-    def get_config_dir(cls, config):
+    def get_config_dir(cls, config: Config) -> Path:
         """Get or create configuration directory for the extension.
 
         :param config: the Mopidy config object
@@ -97,7 +106,7 @@ class Extension:
         return config_dir_path
 
     @classmethod
-    def get_data_dir(cls, config):
+    def get_data_dir(cls, config: Config) -> Path:
         """Get or create data directory for the extension.
 
         Use this directory to store data that should be persistent.
@@ -113,7 +122,7 @@ class Extension:
         path.get_or_create_dir(data_dir_path)
         return data_dir_path
 
-    def get_command(self):
+    def get_command(self) -> Optional[Command]:
         """Command to expose to command line users running ``mopidy``.
 
         :returns:
@@ -121,7 +130,7 @@ class Extension:
         """
         pass
 
-    def validate_environment(self):
+    def validate_environment(self) -> None:
         """Checks if the extension can run in the current environment.
 
         Dependencies described by :file:`setup.py` are checked by Mopidy, so
@@ -135,7 +144,7 @@ class Extension:
         """
         pass
 
-    def setup(self, registry):
+    def setup(self, registry: "Registry") -> None:
         """
         Register the extension's components in the extension :class:`Registry`.
 
@@ -178,27 +187,27 @@ class Registry(Mapping):
     e.g. ``local:foo`` or ``http:bar``.
     """
 
-    def __init__(self):
-        self._registry = {}
+    def __init__(self) -> None:
+        self._registry: Dict[str, List[Type[Any]]] = {}
 
-    def add(self, name, cls):
+    def add(self, name: str, cls: Type[Any]) -> None:
         """Add a component to the registry.
 
         Multiple classes can be registered to the same name.
         """
         self._registry.setdefault(name, []).append(cls)
 
-    def __getitem__(self, name):
+    def __getitem__(self, name: str) -> List[Type[Any]]:
         return self._registry.setdefault(name, [])
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         return iter(self._registry)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._registry)
 
 
-def load_extensions():
+def load_extensions() -> List[ExtensionData]:
     """Find all installed extensions.
 
     :returns: list of installed extensions
@@ -229,9 +238,13 @@ def load_extensions():
 
         try:
             extension = extension_class()
-            config_schema = extension.get_config_schema()
-            default_config = extension.get_default_config()
-            command = extension.get_command()
+            extension_data = ExtensionData(
+                entry_point=entry_point,
+                extension=extension,
+                config_schema=extension.get_config_schema(),
+                config_defaults=extension.get_default_config(),
+                command=extension.get_command(),
+            )
         except Exception:
             logger.exception(
                 "Setup of extension from entry point %s failed, "
@@ -240,11 +253,7 @@ def load_extensions():
             )
             continue
 
-        installed_extensions.append(
-            ExtensionData(
-                extension, entry_point, config_schema, default_config, command
-            )
-        )
+        installed_extensions.append(extension_data)
 
         logger.debug(
             "Loaded extension: %s %s", extension.dist_name, extension.version
@@ -255,7 +264,7 @@ def load_extensions():
     return installed_extensions
 
 
-def validate_extension_data(data):
+def validate_extension_data(data: ExtensionData) -> bool:
     """Verify extension's dependencies and environment.
 
     :param extensions: an extension to check

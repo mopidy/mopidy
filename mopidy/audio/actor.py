@@ -263,7 +263,7 @@ class _Handler:
         target_state = _GST_STATE_MAPPING.get(self._audio._target_state)
         if target_state is None:
             # XXX: Workaround for #1430, to be fixed properly by #1222.
-            logger.warn("Race condition happened. See #1222 and #1430.")
+            logger.warning("Race condition happened. See #1222 and #1430.")
             return
         if target_state == new_state:
             target_state = None
@@ -643,6 +643,8 @@ class Audio(pykka.ThreadingActor):
         )
         uri = "appsrc://"
         self._pending_uri = uri
+        self._live_stream = False
+        self._playbin.set_property("flags", _GST_PLAY_FLAGS_AUDIO)
         self._playbin.set_property("uri", uri)
 
     def emit_data(self, buffer_):

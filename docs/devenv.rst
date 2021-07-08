@@ -196,7 +196,7 @@ use as well. These can be installed into the active virtualenv by running::
 Note that this is the same command as you used to install Mopidy from the Git
 repo, with the addition of the ``[dev]`` suffix after ``.``. This makes pip
 install the "dev" set of extra dependencies. Exactly what the "dev" set
-includes are defined in ``setup.py``.
+includes are defined in ``setup.cfg``.
 
 To upgrade the development tools in the future, just rerun the exact same
 command.
@@ -241,11 +241,10 @@ You need to know at least one command; the one that runs all the tests::
 
     tox
 
-This will run exactly the same tests as `CircleCI
-<https://circleci.com/gh/mopidy/mopidy>`_ runs for all our branches and pull
-requests. If this command turns green, you can be quite confident that your
-pull request will get the green flag from CircleCI as well, which is a
-requirement for it to be merged.
+This will run exactly the same tests as our CI setup runs for all our
+branches and pull requests. If this command turns green, you can be quite
+confident that your pull request will get the green flag from CI as well,
+which is a requirement for it to be merged.
 
 As this is the ultimate test command, it's also the one taking the most time to
 run; up to a minute, depending on your system. But, if you have patience, this
@@ -312,16 +311,16 @@ development can be very useful.
 Continuous integration
 ----------------------
 
-Mopidy uses the free service `CircleCI`_
-for automatically running the test suite when code is pushed to GitHub. This
+Mopidy uses `GitHub Actions <https://github.com/mopidy/mopidy/actions>`_ for
+automatically running the test suite when code is pushed to GitHub. This
 works both for the main Mopidy repo, but also for any forks. This way, any
-contributions to Mopidy through GitHub will automatically be tested by CircleCI,
-and the build status will be visible in the GitHub pull request interface,
-making it easier to evaluate the quality of pull requests.
+contributions to Mopidy through GitHub will automatically be tested, and the
+build status will be visible in the GitHub pull request interface, making it
+easier to evaluate the quality of pull requests.
 
-For each successful build, CircleCI submits code coverage data to `Codecov`_.
-If you're out of work, Codecov might help you find areas in the code which
-could need better test coverage.
+For each successful build, the CI setup submits code coverage data to
+`Codecov`_. If you're out of work, Codecov might help you find areas in the
+code which could need better test coverage.
 
 
 .. _code-linting:
@@ -333,10 +332,10 @@ We're quite pedantic about :ref:`codestyle` and try hard to keep the Mopidy
 code base a very clean and nice place to work in.
 
 Luckily, you can get very far by using the `flake8
-<http://flake8.readthedocs.io/>`_ linter to check your code for issues before
+<https://flake8.pycqa.org/en/latest/>`_ linter to check your code for issues before
 submitting a pull request. Mopidy passes all of flake8's checks, with only a
 very few exceptions configured in :file:`setup.cfg`. You can either run the
-``flake8`` tox environment, like CircleCI will do on your pull request::
+``flake8`` tox environment, like our CI setup will do on your pull request::
 
     tox -e flake8
 
@@ -360,15 +359,17 @@ If successful, the command will not print anything at all.
 Writing documentation
 =====================
 
-To write documentation, we use `Sphinx <http://www.sphinx-doc.org/>`_. See
+To write documentation, we use `Sphinx <https://www.sphinx-doc.org/>`_. See
 their site for lots of documentation on how to use Sphinx.
 
 .. note::
 
-    To generate a few graphs which are part of the documentation, you need some
-    additional dependencies. You can install them from APT with::
+    To generate a few graphs which are part of the documentation, you need to
+    install the graphviz package. You can install it from APT with::
 
-        sudo apt-get install python-pygraphviz graphviz
+        sudo apt install graphviz
+
+    Other distributions typically use the same package name.
 
 To build the documentation, go into the :file:`docs/` directory::
 
@@ -557,11 +558,11 @@ https://github.com/mopidy/mopidy, and `create a pull request
 Updating a pull request
 -----------------------
 
-When the pull request is created, `CircleCI`_ will run all tests on it. If something
-fails, you'll get notified by email. You might as well just fix the issues
-right away, as we won't merge a pull request without a green CircleCI build. See
-:ref:`running-tests` on how to run the same tests locally as CircleCI runs on
-your pull request.
+When the pull request is created, our CI setup will run all tests on it. If
+something fails, you'll get notified by email. You might as well just fix the
+issues right away, as we won't merge a pull request without all CI builds
+being green. See :ref:`running-tests` on how to run the same tests locally as
+our CI setup runs on your pull request.
 
 When you've fixed the issues, you can update the pull request simply by pushing
 more commits to the same branch in your fork::

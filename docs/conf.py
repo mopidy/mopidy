@@ -79,14 +79,14 @@ source_suffix = ".rst"
 master_doc = "index"
 
 project = "Mopidy"
-copyright = "2009-2020, Stein Magnus Jodal and contributors"
+copyright = "2009-2021, Stein Magnus Jodal and contributors"
 
 
 release = get_version()
 version = ".".join(release.split(".")[:2])
 
 # To make the build reproducible, avoid using today's date in the manpages
-today = "2020"
+today = "2021"
 
 exclude_trees = ["_build"]
 
@@ -146,8 +146,8 @@ extlinks = {
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
-    "pykka": ("https://www.pykka.org/en/latest/", None),
-    "tornado": ("http://www.tornadoweb.org/en/stable/", None),
+    "pykka": ("https://pykka.readthedocs.io/en/latest/", None),
+    "tornado": ("https://www.tornadoweb.org/en/stable/", None),
 }
 
 # -- Options for linkcheck builder -------------------------------------------

@@ -279,7 +279,9 @@ class PostProcessorTest(unittest.TestCase):
 
 def test_format_initial():
     extension = ext.Extension()
+    extension.dist_name = "Mopidy-Foo"
     extension.ext_name = "foo"
+    extension.version = "0.1"
     extension.get_default_config = lambda: None
     extensions_data = [
         ext.ExtensionData(

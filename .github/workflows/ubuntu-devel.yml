@@ -1,0 +1,29 @@
+name: "Ubuntu devel"
+
+on:
+  schedule:
+    # Every Friday at 18:20 UTC, so we can fix the issue over the weekend
+    - cron: "20 18 * * 5"
+  workflow_dispatch:
+
+jobs:
+  main:
+    name: "Test: Python 3.9"
+    runs-on: ubuntu-20.04
+
+    # The container should be automatically updated from time to time.
+    container: ubuntu:devel
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            gstreamer1.0-plugins-bad \
+            gstreamer1.0-plugins-good \
+            gstreamer1.0-plugins-ugly \
+            python3-gst-1.0 \
+            python3 \
+            tox
+      - run: tox -e py39

@@ -24,16 +24,21 @@ any_testextension = IsA(DummyExtension)
 class TestExtension:
     @pytest.fixture
     def extension(self):
-        return ext.Extension()
+        class MyExtension(ext.Extension):
+            dist_name = "Mopidy-Foo"
+            ext_name = "foo"
+            version = "0.1"
 
-    def test_dist_name_is_none(self, extension):
-        assert extension.dist_name is None
+        return MyExtension()
 
-    def test_ext_name_is_none(self, extension):
-        assert extension.ext_name is None
+    def test_dist_name(self, extension):
+        assert extension.dist_name == "Mopidy-Foo"
 
-    def test_version_is_none(self, extension):
-        assert extension.version is None
+    def test_ext_name(self, extension):
+        assert extension.ext_name == "foo"
+
+    def test_version(self, extension):
+        assert extension.version == "0.1"
 
     def test_get_default_config_raises_not_implemented(self, extension):
         with pytest.raises(NotImplementedError):
@@ -50,19 +55,19 @@ class TestExtension:
         with pytest.raises(NotImplementedError):
             extension.setup(None)
 
-    def test_get_cache_dir_raises_assertion_error(self, extension):
+    def test_get_cache_dir_raises_error(self, extension):
         config = {"core": {"cache_dir": "/tmp"}}
-        with pytest.raises(AssertionError):  # ext_name not set
+        with pytest.raises(AttributeError):  # ext_name not set
             ext.Extension.get_cache_dir(config)
 
-    def test_get_config_dir_raises_assertion_error(self, extension):
+    def test_get_config_dir_raises_error(self, extension):
         config = {"core": {"config_dir": "/tmp"}}
-        with pytest.raises(AssertionError):  # ext_name not set
+        with pytest.raises(AttributeError):  # ext_name not set
             ext.Extension.get_config_dir(config)
 
-    def test_get_data_dir_raises_assertion_error(self, extension):
+    def test_get_data_dir_raises_error(self, extension):
         config = {"core": {"data_dir": "/tmp"}}
-        with pytest.raises(AssertionError):  # ext_name not set
+        with pytest.raises(AttributeError):  # ext_name not set
             ext.Extension.get_data_dir(config)
 
 

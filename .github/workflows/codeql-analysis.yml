@@ -1,0 +1,22 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ develop, master ]
+  pull_request:
+    branches: [ develop, master ]
+  schedule:
+    - cron: '32 4 * * 4'
+
+jobs:
+  analyze:
+    name: Analyze Python
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: github/codeql-action/init@v1
+        with:
+          languages: "python"
+      - uses: github/codeql-action/autobuild@v1
+      - uses: github/codeql-action/analyze@v1

@@ -9,6 +9,20 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
+v3.2.0 (2021-07-08)
+===================
+
+- Initial type annotations and mypy support. (PR: :issue:`1842`)
+
+- Move CI to GitHub Actions (PR: :issue:`1951`)
+
+- Fix logging during extension loading (Fixes: :issue:`1958`, PR:
+  :issue:`1960`)
+
+- Fix appsrc track change after live-mode previously set. (Fixes:
+  :issue:`1969`, PR: :issue:`1971`)
+
+
 v3.1.1 (2020-12-26)
 ===================
 

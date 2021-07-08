@@ -5,7 +5,7 @@ import socket
 logger = logging.getLogger(__name__)
 
 
-def try_ipv6_socket():
+def try_ipv6_socket() -> bool:
     """Determine if system really supports IPv6"""
     if not socket.has_ipv6:
         return False
@@ -24,7 +24,7 @@ def try_ipv6_socket():
 has_ipv6 = try_ipv6_socket()
 
 
-def format_hostname(hostname):
+def format_hostname(hostname: str) -> str:
     """Format hostname for display."""
     if has_ipv6 and re.match(r"\d+.\d+.\d+.\d+", hostname) is not None:
         hostname = f"::ffff:{hostname}"

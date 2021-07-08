@@ -125,6 +125,7 @@ Current track
 
 .. automethod:: mopidy.core.PlaybackController.get_current_tl_track
 .. automethod:: mopidy.core.PlaybackController.get_current_track
+.. automethod:: mopidy.core.PlaybackController.get_current_tlid
 .. automethod:: mopidy.core.PlaybackController.get_stream_title
 .. automethod:: mopidy.core.PlaybackController.get_time_position
 

@@ -1,6 +1,17 @@
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 from mopidy import listener
+
+if TYPE_CHECKING:
+    from typing import Any, Dict, Optional
+
+    from typing_extensions import Literal
+
+    MixerEvent = Literal["mute_changed", "volume_changed"]
+
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +30,7 @@ class Mixer:
     :type config: dict
     """
 
-    name = None
+    name: str
     """
     Name of the mixer.
 
@@ -28,10 +39,10 @@ class Mixer:
     mixer.
     """
 
-    def __init__(self, config):
+    def __init__(self, config: Dict) -> None:
         pass
 
-    def get_volume(self):
+    def get_volume(self) -> Optional[int]:
         """
         Get volume level of the mixer on a linear scale from 0 to 100.
 
@@ -50,7 +61,7 @@ class Mixer:
         """
         return None
 
-    def set_volume(self, volume):
+    def set_volume(self, volume: int) -> bool:
         """
         Set volume level of the mixer.
 
@@ -62,7 +73,7 @@ class Mixer:
         """
         return False
 
-    def trigger_volume_changed(self, volume):
+    def trigger_volume_changed(self, volume: int) -> None:
         """
         Send ``volume_changed`` event to all mixer listeners.
 
@@ -73,7 +84,7 @@ class Mixer:
         logger.debug("Mixer event: volume_changed(volume=%d)", volume)
         MixerListener.send("volume_changed", volume=volume)
 
-    def get_mute(self):
+    def get_mute(self) -> Optional[bool]:
         """
         Get mute state of the mixer.
 
@@ -84,7 +95,7 @@ class Mixer:
         """
         return None
 
-    def set_mute(self, mute):
+    def set_mute(self, mute: bool) -> bool:
         """
         Mute or unmute the mixer.
 
@@ -96,7 +107,7 @@ class Mixer:
         """
         return False
 
-    def trigger_mute_changed(self, mute):
+    def trigger_mute_changed(self, mute: bool) -> None:
         """
         Send ``mute_changed`` event to all mixer listeners.
 
@@ -107,7 +118,7 @@ class Mixer:
         logger.debug("Mixer event: mute_changed(mute=%s)", mute)
         MixerListener.send("mute_changed", mute=mute)
 
-    def ping(self):
+    def ping(self) -> bool:
         """Called to check if the actor is still alive."""
         return True
 
@@ -125,11 +136,11 @@ class MixerListener(listener.Listener):
     """
 
     @staticmethod
-    def send(event, **kwargs):
+    def send(event: MixerEvent, **kwargs: Any) -> None:
         """Helper to allow calling of mixer listener events"""
         listener.send(MixerListener, event, **kwargs)
 
-    def volume_changed(self, volume):
+    def volume_changed(self, volume: int) -> None:
         """
         Called after the volume has changed.
 
@@ -140,7 +151,7 @@ class MixerListener(listener.Listener):
         """
         pass
 
-    def mute_changed(self, mute):
+    def mute_changed(self, mute: bool) -> None:
         """
         Called after the mute state has changed.
 
