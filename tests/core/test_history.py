@@ -46,8 +46,16 @@ class PlaybackHistoryTest(unittest.TestCase):
         assert track.name in ref.name
         for artist in track.artists:
             assert artist.name in ref.name
-        
-
+      
+class test_without_name(unittest.TestCase):
+    def setUp(self):
+        self.tracks = [
+            Track(uri="dummy1:a", name="foober"),
+            Track(uri="dummy2:a", name="foo"),
+            Track(uri="dummy3:a", name="bar")
+        ]
+        self.history = HistoryController()
+    
 class CoreHistorySaveLoadStateTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
         self.tracks = [
