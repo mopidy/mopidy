@@ -116,7 +116,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def broadcast(cls, msg, io_loop):
         # This can be called from outside the Tornado ioloop, so we need to
         # safely cross the thread boundary by adding a callback to the loop.
-        for client in cls.clients:
+        for client in cls.clients.copy():
             # One callback per client to keep time we hold up the loop short
             io_loop.add_callback(
                 functools.partial(_send_broadcast, client, msg)
