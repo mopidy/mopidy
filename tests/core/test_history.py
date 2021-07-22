@@ -50,11 +50,43 @@ class PlaybackHistoryTest(unittest.TestCase):
 class test_without_name(unittest.TestCase):
     def setUp(self):
         self.tracks = [
-            Track(uri="dummy1:a", name="foober"),
+            Track(
+                uri="dummy1:a",
+                name="foo",
+                artists=[Artist(name=None), Artist(name=None)],
+            ),
             Track(uri="dummy2:a", name="foo"),
             Track(uri="dummy3:a", name="bar")
         ]
         self.history = HistoryController()
+    def test_add_track(self):
+        self.history._add_track(self.tracks[0])
+        assert self.history.get_length() == 1
+
+        self.history._add_track(self.tracks[1])
+        assert self.history.get_length() == 2
+
+        self.history._add_track(self.tracks[2])
+        assert self.history.get_length() == 3
+
+    def test_non_tracks_are_rejected(self):
+        with self.assertRaises(TypeError):
+            self.history._add_track(object())
+
+        assert self.history.get_length() == 0
+
+    def test_history_entry_contents(self):
+        track = self.tracks[0]
+        self.history._add_track(track)
+
+        result = self.history.get_history()
+        (timestamp, ref) = result[0]
+
+        assert isinstance(timestamp, int)
+        assert track.uri == ref.uri
+        assert track.name in ref.name
+        for artist in track.artists:
+            assert artist.name in ref.name
     
 class CoreHistorySaveLoadStateTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
