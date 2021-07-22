@@ -47,7 +47,7 @@ class PlaybackHistoryTest(unittest.TestCase):
         for artist in track.artists:
             assert artist.name in ref.name
       
-class test_without_name(unittest.TestCase):
+class TestWithoutName(unittest.TestCase):
     def setUp(self):  # noqa: N802
         self.tracks = [
             Track(
