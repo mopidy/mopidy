@@ -238,6 +238,10 @@ def load_extensions() -> List[ExtensionData]:
 
         try:
             extension = extension_class()
+            # Ensure required extension attributes are present after try block
+            _ = extension.dist_name
+            _ = extension.ext_name
+            _ = extension.version
             extension_data = ExtensionData(
                 entry_point=entry_point,
                 extension=extension,
