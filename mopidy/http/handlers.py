@@ -201,7 +201,11 @@ class JsonRpcHandler(tornado.web.RequestHandler):
 
     def post(self):
         if self.csrf_protection:
-            content_type = self.request.headers.get("Content-Type", "")
+            content_type = (
+                self.request.headers.get("Content-Type", "")
+                .split(";")[0]
+                .strip()
+            )
             if content_type != "application/json":
                 self.set_status(415, "Content-Type must be application/json")
                 return
