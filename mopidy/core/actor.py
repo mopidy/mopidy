@@ -254,10 +254,8 @@ class Backends(list):
                 has_playlists = b.has_playlists().get()
             except Exception:
                 self.remove(b)
-                logger.exception(
-                    "Fetching backend info for %s failed",
-                    b.actor_ref.actor_class.__name__,
-                )
+                logger.exception("Fetching backend info for %s failed", name(b))
+                continue
 
             for scheme in b.uri_schemes.get():
                 if scheme in backends_by_scheme:

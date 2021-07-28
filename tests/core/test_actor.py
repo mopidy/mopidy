@@ -15,15 +15,60 @@ from mopidy.models import Track
 from tests import dummy_mixer
 
 
+def make_backend_mock(
+    actor_classname,
+    *,
+    uri_schemes,
+    has_library,
+    has_library_browse,
+    has_playback,
+    has_playlists,
+):
+    backend = mock.Mock()
+    backend.actor_ref.actor_class.__name__ = actor_classname
+    backend.uri_schemes.get.return_value = uri_schemes
+
+    if isinstance(has_library, Exception):
+        backend.has_library().get.side_effect = has_library
+    else:
+        backend.has_library().get.return_value = has_library
+
+    if isinstance(has_library_browse, Exception):
+        backend.has_library_browse().get.side_effect = has_library_browse
+    else:
+        backend.has_library_browse().get.return_value = has_library_browse
+
+    if isinstance(has_playback, Exception):
+        backend.has_playback().get.side_effect = has_playback
+    else:
+        backend.has_playback().get.return_value = has_playback
+
+    if isinstance(has_playlists, Exception):
+        backend.has_playlists().get.side_effect = has_playlists
+    else:
+        backend.has_playlists().get.return_value = has_playlists
+
+    return backend
+
+
 class CoreActorTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
-        self.backend1 = mock.Mock()
-        self.backend1.uri_schemes.get.return_value = ["dummy1"]
-        self.backend1.actor_ref.actor_class.__name__ = "B1"
-
-        self.backend2 = mock.Mock()
-        self.backend2.uri_schemes.get.return_value = ["dummy2"]
-        self.backend2.actor_ref.actor_class.__name__ = "B2"
+        self.backend1 = make_backend_mock(
+            "B1",
+            uri_schemes=["dummy1"],
+            has_library=True,
+            has_library_browse=True,
+            has_playback=False,
+            has_playlists=False,
+        )
+        self.backend2 = make_backend_mock(
+            "B2",
+            uri_schemes=["dummy2"],
+            has_library=True,
+            has_library_browse=False,
+            has_playback=False,
+            has_playlists=True,
+        )
 
         self.core = Core(mixer=None, backends=[self.backend1, self.backend2])
 
@@ -35,6 +80,56 @@ class CoreActorTest(unittest.TestCase):
 
         assert "dummy1" in result
         assert "dummy2" in result
+
+    def test_backend_lists_are_accurate(self):
+        assert self.core.backends == [self.backend1, self.backend2]
+        assert list(self.core.backends.with_library.keys()) == [
+            "dummy1",
+            "dummy2",
+        ]
+        assert list(self.core.backends.with_library_browse.keys()) == ["dummy1"]
+        assert list(self.core.backends.with_playback.keys()) == []
+        assert list(self.core.backends.with_playlists.keys()) == ["dummy2"]
+
+    def test_exclude_backend_from_sublists_on_error_when_first(self):
+        backend3 = make_backend_mock(
+            "B3",
+            uri_schemes=["dummy3"],
+            has_library=Exception(),
+            has_library_browse=True,
+            has_playback=False,
+            has_playlists=False,
+        )
+
+        core = Core(
+            mixer=None, backends=[backend3, self.backend1, self.backend2]
+        )
+
+        assert core.backends == [self.backend1, self.backend2]
+        assert list(core.backends.with_library.keys()) == ["dummy1", "dummy2"]
+        assert list(core.backends.with_library_browse.keys()) == ["dummy1"]
+        assert list(core.backends.with_playback.keys()) == []
+        assert list(core.backends.with_playlists.keys()) == ["dummy2"]
+
+    def test_exclude_backend_from_sublists_on_error_when_not_first(self):
+        backend3 = make_backend_mock(
+            "B3",
+            uri_schemes=["dummy3"],
+            has_library=False,
+            has_library_browse=True,
+            has_playback=Exception(),
+            has_playlists=False,
+        )
+
+        core = Core(
+            mixer=None, backends=[self.backend1, backend3, self.backend2]
+        )
+
+        assert core.backends == [self.backend1, self.backend2]
+        assert list(core.backends.with_library.keys()) == ["dummy1", "dummy2"]
+        assert list(core.backends.with_library_browse.keys()) == ["dummy1"]
+        assert list(core.backends.with_playback.keys()) == []
+        assert list(core.backends.with_playlists.keys()) == ["dummy2"]
 
     def test_backends_with_colliding_uri_schemes_fails(self):
         self.backend2.uri_schemes.get.return_value = ["dummy1", "dummy2"]
