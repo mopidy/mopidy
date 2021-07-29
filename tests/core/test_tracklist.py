@@ -1,8 +1,9 @@
+import re
 import unittest
 from unittest import mock
 
 import pytest
-from mopidy import backend, core
+from mopidy import backend, core, exceptions
 from mopidy.internal.models import TracklistState
 from mopidy.models import TlTrack, Track
 
@@ -285,3 +286,127 @@ class TracklistSaveLoadStateTest(unittest.TestCase):
 
     def test_load_none(self):
         self.core.tracklist._load_state(None, None)
+
+
+class TracklistAddTest(unittest.TestCase):
+    def setUp(self):
+        config = {"core": {"max_tracklist_length": 10000}}
+
+        tracks = [
+            Track(uri="dummy1:a", name="foo"),
+            Track(uri="dummy1:b", name="foo"),
+            Track(uri="dummy1:c", name="bar"),
+        ]
+
+        def lookup(uris):
+            return {u: [t for t in tracks if t.uri == u] for u in uris}
+
+        self.core = core.Core(config, mixer=None, backends=[])
+        self.core.library = mock.Mock(spec=core.LibraryController)
+        self.core.library.lookup.side_effect = lookup
+
+        self.core.playback = mock.Mock(spec=core.PlaybackController)
+
+        self.tl_tracks = self.core.tracklist.add(uris=[t.uri for t in tracks])
+
+    def test_add_appends_by_default(self):
+        new_track = self.core.tracklist.add(uris=["dummy1:a"])[0]
+        all_tracks = self.core.tracklist.get_tl_tracks()
+        assert len(all_tracks) == 4
+        assert all_tracks[3].tlid == new_track.tlid
+
+    def test_add_inserts_at_supplied_position(self):
+        new_track = self.core.tracklist.add(at_position=1, uris=["dummy1:c"])[0]
+        all_tracks = self.core.tracklist.get_tl_tracks()
+        assert len(all_tracks) == 4
+        assert all_tracks[1].tlid == new_track.tlid
+
+    def test_add_inserts_at_negative_supplied_position(self):
+        new_tracks = self.core.tracklist.add(at_position=-1, uris=["dummy1:a"])
+        new_track = new_tracks[0]
+        all_tracks = self.core.tracklist.get_tl_tracks()
+        assert len(all_tracks) == 4
+        assert all_tracks[2].tlid == new_track.tlid
+
+    def test_add_inserts_at_start(self):
+        new_track = self.core.tracklist.add(at_position=0, uris=["dummy1:c"])[0]
+        all_tracks = self.core.tracklist.get_tl_tracks()
+        assert len(all_tracks) == 4
+        assert all_tracks[0].tlid == new_track.tlid
+
+    def test_add_inserts_after_currently_playing_track(self):
+        self.core.playback.get_current_tl_track.return_value = self.tl_tracks[0]
+        new_tracks = self.core.tracklist.add(at_position="+0", uris=["dummy1:c"])
+        new_track = new_tracks[0]
+        all_tracks = self.core.tracklist.get_tl_tracks()
+        assert len(all_tracks) == 4
+        assert all_tracks[1].tlid == new_track.tlid
+
+    def test_add_inserts_further_after_currently_playing_track(self):
+        self.core.playback.get_current_tl_track.return_value = self.tl_tracks[1]
+        new_tracks = self.core.tracklist.add(at_position="+1", uris=["dummy1:b"])
+        new_track = new_tracks[0]
+        all_tracks = self.core.tracklist.get_tl_tracks()
+        assert len(all_tracks) == 4
+        assert all_tracks[3].tlid == new_track.tlid
+
+    def test_add_inserts_much_further_after_currently_playing_track(self):
+        self.core.playback.get_current_tl_track.return_value = self.tl_tracks[1]
+        new_tracks = self.core.tracklist.add(at_position="+5", uris=["dummy1:b"])
+        new_track = new_tracks[0]
+        all_tracks = self.core.tracklist.get_tl_tracks()
+        assert len(all_tracks) == 4
+        assert all_tracks[3].tlid == new_track.tlid
+
+    def test_add_inserts_before_currently_playing_track(self):
+        self.core.playback.get_current_tl_track.return_value = self.tl_tracks[2]
+        new_tracks = self.core.tracklist.add(at_position="-0", uris=["dummy1:c"])
+        new_track = new_tracks[0]
+        all_tracks = self.core.tracklist.get_tl_tracks()
+        assert len(all_tracks) == 4
+        assert all_tracks[2].tlid == new_track.tlid
+
+    def test_add_inserts_further_before_currently_playing_track(self):
+        self.core.playback.get_current_tl_track.return_value = self.tl_tracks[2]
+        new_tracks = self.core.tracklist.add(at_position="-1", uris=["dummy1:c"])
+        new_track = new_tracks[0]
+        all_tracks = self.core.tracklist.get_tl_tracks()
+        assert len(all_tracks) == 4
+        assert all_tracks[1].tlid == new_track.tlid
+
+    def test_add_inserts_much_further_before_currently_playing_track(self):
+        self.core.playback.get_current_tl_track.return_value = self.tl_tracks[2]
+        new_tracks = self.core.tracklist.add(at_position="-5", uris=["dummy1:c"])
+        new_track = new_tracks[0]
+        all_tracks = self.core.tracklist.get_tl_tracks()
+        assert len(all_tracks) == 4
+        assert all_tracks[0].tlid == new_track.tlid
+
+    def test_add_rejects_invalid_offsets(self):
+        self.core.playback.get_current_tl_track.return_value = self.tl_tracks[0]
+        err_msg = re.escape(
+            "Expected an integer, or a string representing "
+            "an offset from the current track, with a prefix of '+' or '-'"
+        )
+
+        with pytest.raises(exceptions.ValidationError, match=err_msg):
+            self.core.tracklist.add(at_position="0", uris=["dummy1:c"])
+
+        with pytest.raises(exceptions.ValidationError, match=err_msg):
+            self.core.tracklist.add(at_position="4", uris=["dummy1:a"])
+
+        with pytest.raises(exceptions.ValidationError, match=err_msg):
+            self.core.tracklist.add(at_position="next", uris=["dummy1:b"])
+
+        with pytest.raises(exceptions.ValidationError, match=err_msg):
+            self.core.tracklist.add(at_position=object(), uris=["dummy1:c"])
+
+        with pytest.raises(exceptions.ValidationError, match=err_msg):
+            self.core.tracklist.add(at_position=self, uris=["dummy1:a"])
+
+    def test_add_rejects_offsets_when_no_track_playing(self):
+        err_msg = re.escape("Cannot use offset when no track is playing")
+
+        self.core.playback.get_current_tl_track.return_value = None
+        with pytest.raises(exceptions.ValidationError, match=err_msg):
+            self.core.tracklist.add(at_position="+0", uris=["dummy1:b"])
