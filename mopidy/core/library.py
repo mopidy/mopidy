@@ -39,7 +39,7 @@ class LibraryController:
         uri_scheme = urllib.parse.urlparse(uri).scheme
         return self.backends.with_library.get(uri_scheme, None)
 
-    def _get_backends_to_uris(self, uris):
+    def _get_backends_for_uris(self, uris=None, exclude_uris=None):
         if uris:
             backends_to_uris = collections.defaultdict(list)
             for uri in uris:
@@ -50,6 +50,13 @@ class LibraryController:
             backends_to_uris = {
                 b: None for b in self.backends.with_library.values()
             }
+
+        if exclude_uris:
+            for uri in exclude_uris:
+                backend = self._get_backend(uri)
+                if backend in backends_to_uris:
+                    backends_to_uris.pop(backend)
+
         return backends_to_uris
 
     def browse(self, uri):
@@ -182,8 +189,8 @@ class LibraryController:
 
         futures = {
             backend: backend.library.get_images(backend_uris)
-            for (backend, backend_uris) in self._get_backends_to_uris(
-                uris
+            for (backend, backend_uris) in self._get_backends_for_uris(
+                uris=uris
             ).items()
             if backend_uris
         }
@@ -220,7 +227,9 @@ class LibraryController:
         results = {u: [] for u in uris}
 
         # TODO: lookup(uris) to backend APIs
-        for backend, backend_uris in self._get_backends_to_uris(uris).items():
+        for backend, backend_uris in self._get_backends_for_uris(
+            uris=uris
+        ).items():
             if backend_uris:
                 for u in backend_uris:
                     futures[(backend, u)] = backend.library.lookup(u)
@@ -260,7 +269,7 @@ class LibraryController:
             with _backend_error_handling(backend):
                 future.get()
 
-    def search(self, query, uris=None, exact=False):
+    def search(self, query, uris=None, exact=False, exclude_uris=None):
         """
         Search the library for tracks where ``field`` contains ``values``.
 
@@ -271,7 +280,11 @@ class LibraryController:
 
         If ``uris`` is given, the search is limited to results from within the
         URI roots. For example passing ``uris=['file:']`` will limit the search
-        to the local backend.
+        to the file backend.
+
+        If ``exclude_uris`` is given, matching backends will be excluded from
+        search results. For example passing ``exclude_uris=['file:']`` will
+        include search results from all available backends except the file backend.
 
         Examples::
 
@@ -289,6 +302,9 @@ class LibraryController:
             # "file:///media/music" and "spotify:"
             search({'any': ['a']}, uris=['file:///media/music', 'spotify:'])
 
+            # Returns results for all backends except the Youtube backend
+            search({'any': ['xyz']}, exclude_uris=['yt:'])
+
             # Returns results matching artist 'xyz' and 'abc' in any backend
             search({'artist': ['xyz', 'abc']})
 
@@ -298,6 +314,9 @@ class LibraryController:
         :type uris: list of string or :class:`None`
         :param exact: if the search should use exact matching
         :type exact: :class:`bool`
+        :param exclude_uris: zero or more URI schemes representing backends
+        to exclude from search results
+        :type exclude_uris: list of string or :class:`None`
         :rtype: list of :class:`mopidy.models.SearchResult`
 
         .. versionadded:: 1.0
@@ -313,7 +332,9 @@ class LibraryController:
             return []
 
         futures = {}
-        for backend, backend_uris in self._get_backends_to_uris(uris).items():
+        for backend, backend_uris in self._get_backends_for_uris(
+            uris=uris, exclude_uris=exclude_uris
+        ).items():
             futures[backend] = backend.library.search(
                 query=query, uris=backend_uris, exact=exact
             )

@@ -297,6 +297,72 @@ class CoreLibraryTest(BaseCoreLibraryTest):
             query={"any": ["foobar"]}, uris=None, exact=False
         )
 
+    def test_search_with_excluded_backends(self):
+        track1 = Track(uri="dummy1:a")
+        track2 = Track(uri="dummy2:m")
+        result1 = SearchResult(tracks=[track1])
+        result2 = SearchResult(tracks=[track2])
+
+        self.library1.search.return_value.get.return_value = result1
+        self.library2.search.return_value.get.return_value = result2
+
+        result = self.core.library.search(
+            {"any": ["a", "m"]}, exclude_uris=["dummy2:"]
+        )
+
+        assert result1 in result
+        assert result2 not in result
+        self.library1.search.assert_called_once_with(
+            query={"any": ["a", "m"]}, uris=None, exact=False
+        )
+        self.library2.search.assert_not_called()
+
+    def test_search_with_excluded_backends_doesnt_fail_on_nonlibrary_backends(
+        self,
+    ):
+        track1 = Track(uri="dummy1:a")
+        track2 = Track(uri="dummy2:m")
+        result1 = SearchResult(tracks=[track1])
+        result2 = SearchResult(tracks=[track2])
+
+        self.library1.search.return_value.get.return_value = result1
+        self.library2.search.return_value.get.return_value = result2
+
+        result = self.core.library.search(
+            {"any": ["a", "m"]}, exclude_uris=["dummy3:"]
+        )
+
+        assert result1 in result
+        assert result2 in result
+        self.library1.search.assert_called_once_with(
+            query={"any": ["a", "m"]}, uris=None, exact=False
+        )
+        self.library2.search.assert_called_once_with(
+            query={"any": ["a", "m"]}, uris=None, exact=False
+        )
+
+    def test_search_with_combined_uris_and_excluded_backends(self):
+        track1 = Track(uri="dummy1:a")
+        track2 = Track(uri="dummy2:m")
+        result1 = SearchResult(tracks=[track1])
+        result2 = SearchResult(tracks=[track2])
+
+        self.library1.search.return_value.get.return_value = result1
+        self.library2.search.return_value.get.return_value = result2
+
+        result = self.core.library.search(
+            {"any": ["a", "m"]},
+            uris=["dummy1:", "dummy2:"],
+            exclude_uris=["du2:"],
+        )
+
+        assert result1 in result
+        assert result2 not in result
+        self.library1.search.assert_called_once_with(
+            query={"any": ["a", "m"]}, uris=["dummy1:"], exact=False
+        )
+        self.library2.search.assert_not_called()
+
 
 class GetDistinctTest(BaseCoreLibraryTest):
     def test_with_query(self):
