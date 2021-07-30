@@ -72,7 +72,7 @@ class TestExtension:
 
 
 class TestLoadExtensions:
-    @pytest.yield_fixture
+    @pytest.fixture
     def iter_entry_points_mock(self, request):
         patcher = mock.patch("pkg_resources.iter_entry_points")
         iter_entry_points = patcher.start()
