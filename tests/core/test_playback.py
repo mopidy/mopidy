@@ -551,7 +551,7 @@ class TestCurrentAndPendingTlTrack(BaseTest):
 @mock.patch(
     "mopidy.core.playback.listener.CoreListener", spec=core.CoreListener
 )
-class EventEmissionTest(BaseTest):
+class TestEventEmissionTest(BaseTest):
 
     maxDiff = None  # noqa: N815
 
@@ -902,7 +902,7 @@ class TestUnplayableURI(BaseTest):
         assert not success
 
 
-class SeekTest(BaseTest):
+class TestSeekTest(BaseTest):
     def test_seek_normalizes_negative_positions_to_zero(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
