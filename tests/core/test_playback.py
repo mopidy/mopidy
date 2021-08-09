@@ -958,6 +958,16 @@ class TestSeekTest(BaseTest):
         current_tl_track = self.core.playback.get_current_tl_track()
         assert current_tl_track == tl_tracks[0]
 
+    def test_seek_stopped_goes_playing(self):
+        self.core.playback.stop()
+        self.replay_events()
+        assert self.core.playback.get_state() == core.PlaybackState.STOPPED
+
+        self.core.playback.seek(1000)
+        self.replay_events()
+
+        assert self.core.playback.get_state() == core.PlaybackState.PLAYING
+
 
 class TestStream(BaseTest):
     def test_get_stream_title_before_playback(self):

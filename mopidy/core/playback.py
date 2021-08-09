@@ -153,7 +153,9 @@ class PlaybackController:
                     self.pause()
                     self._start_paused = False
             else:
-                self._seek(self._pending_position)
+                if self._seek(self._pending_position):
+                    self.set_state(PlaybackState.PLAYING)
+                    self._trigger_track_playback_started()
 
     def _on_position_changed(self, position):
         if self._pending_position is not None:
