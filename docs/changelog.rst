@@ -54,6 +54,9 @@ v3.3.0 (UNRELEASED)
 
 - Add Python 3.10 to our test matrix.
 
+- Core: Added and improved configuration parsing code for extension
+  developers. (PR: :issue:`2010`)
+
 
 v3.2.0 (2021-07-08)
 ===================

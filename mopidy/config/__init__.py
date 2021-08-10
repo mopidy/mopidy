@@ -13,11 +13,13 @@ from mopidy.config.types import (
     ConfigValue,
     Deprecated,
     DeprecatedValue,
+    Float,
     Hostname,
     Integer,
     List,
     LogColor,
     LogLevel,
+    Pair,
     Path,
     Port,
     Secret,
@@ -28,7 +30,9 @@ from mopidy.internal import path, versioning
 __all__ = [
     # TODO List everything that is reexported, not just the unused parts.
     "ConfigValue",
+    "Float",
     "List",
+    "Pair",
 ]
 
 logger = logging.getLogger(__name__)
