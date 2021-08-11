@@ -53,6 +53,8 @@ in core see :class:`~mopidy.core.CoreListener`.
 
   .. automethod:: get_version
 
+  .. automethod:: get_status
+
 Tracklist controller
 ====================
 

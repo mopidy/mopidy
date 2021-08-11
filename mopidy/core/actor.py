@@ -78,6 +78,116 @@ class Core(
         """Get version of the Mopidy core API"""
         return versioning.get_version()
 
+    def get_status(self):
+        """Retrieve the full status of the Mopidy server.
+
+        No information about the currently playing track is provided, other
+        than the length and bitrate. Similarly, no information about the
+        contents of the tracklist are provided. The output should be kept flat,
+        and track data can be nested.
+
+        Full output description:
+
+        {
+            "playback_state": One of 'playing', 'paused', 'stopped'
+            "playback_time_position": int or None
+            "playback_time_position_msec": int or None
+            "playback_time_total": int or None
+            "playback_time_total_msec": int or None
+            "playback_bitrate": int or None
+            "stream_title": int or None
+            "volume": int
+            "mute": bool
+            "repeat": bool
+            "random": bool
+            "single": bool
+            "consume": bool
+            "tracklist_version": int
+            "tracklist_length": int
+            "current_track_index": int or None
+            "current_track_tlid": int or None
+            "next_track_index": int or None
+            "next_track_tlid": int or None
+            "previous_track_index": int or None
+            "previous_track_tlid": int or None
+            "eot_track_index": int or None
+            "eot_track_tlid": int or None
+        }
+
+        .. versionadded:: 3.3
+        """
+        playback_state = self.playback.get_state()
+        playback_time_position_msec = self.playback.get_time_position()
+        current_track = self.playback.get_current_tl_track()
+        next_tlid = self.tracklist.get_next_tlid()
+        previous_tlid = self.tracklist.get_previous_tlid()
+        eot_tlid = self.tracklist.get_eot_tlid()
+
+        if playback_time_position_msec is None:
+            playback_time_position = None
+        else:
+            playback_time_position = int(playback_time_position_msec // 1000)
+
+        if current_track is None or current_track.track.length is None:
+            playback_time_total_msec = None
+            playback_time_total = None
+        else:
+            playback_time_total_msec = current_track.track.length
+            playback_time_total = int(playback_time_total_msec // 1000)
+
+        if current_track is None or current_track.track.bitrate is None:
+            playback_bitrate = None
+        else:
+            playback_bitrate = current_track.track.bitrate
+
+        if current_track:
+            current_track_index = self.tracklist.index(current_track)
+        else:
+            current_track_index = None
+
+        if next_tlid:
+            next_track_index = self.tracklist.index(tlid=next_tlid)
+        else:
+            next_track_index = None
+
+        if previous_tlid:
+            previous_track_index = self.tracklist.index(tlid=previous_tlid)
+        else:
+            previous_track_index = None
+
+        if eot_tlid:
+            eot_track_index = self.tracklist.index(tlid=eot_tlid)
+        else:
+            eot_track_index = None
+
+        status_values = {
+            "playback_state": playback_state,
+            "playback_time_position": playback_time_position,
+            "playback_time_position_msec": playback_time_position_msec,
+            "playback_time_total": playback_time_total,
+            "playback_time_total_msec": playback_time_total_msec,
+            "playback_bitrate": playback_bitrate,
+            "stream_title": self.playback.get_stream_title(),
+            "volume": self.mixer.get_volume(),
+            "mute": self.mixer.get_mute(),
+            "repeat": self.tracklist.get_repeat(),
+            "random": self.tracklist.get_random(),
+            "single": self.tracklist.get_single(),
+            "consume": self.tracklist.get_consume(),
+            "tracklist_version": self.tracklist.get_version(),
+            "tracklist_length": self.tracklist.get_length(),
+            "current_track_index": current_track_index,
+            "current_track_tlid": current_track.tlid if current_track else None,
+            "next_track_index": next_track_index,
+            "next_track_tlid": next_tlid,
+            "previous_track_index": previous_track_index,
+            "previous_track_tlid": previous_tlid,
+            "eot_track_index": eot_track_index,
+            "eot_track_tlid": eot_tlid,
+        }
+
+        return status_values
+
     def reached_end_of_stream(self):
         self.playback._on_end_of_stream()
 

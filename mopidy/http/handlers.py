@@ -66,6 +66,7 @@ def make_jsonrpc_wrapper(core_actor):
         objects={
             "core.get_uri_schemes": core.Core.get_uri_schemes,
             "core.get_version": core.Core.get_version,
+            "core.get_status": core.Core.get_status,
             "core.history": core.HistoryController,
             "core.library": core.LibraryController,
             "core.mixer": core.MixerController,
@@ -79,6 +80,7 @@ def make_jsonrpc_wrapper(core_actor):
             "core.describe": inspector.describe,
             "core.get_uri_schemes": core_actor.get_uri_schemes,
             "core.get_version": core_actor.get_version,
+            "core.get_status": core_actor.get_status,
             "core.history": core_actor.history,
             "core.library": core_actor.library,
             "core.mixer": core_actor.mixer,
