@@ -11,11 +11,12 @@ from tests import path_to_data_dir
 
 @pytest.fixture
 def config():
+    media_dir = (path_to_data_dir(""), "Test Media")
     return {
         "proxy": {},
         "file": {
             "show_dotfiles": False,
-            "media_dirs": [str(path_to_data_dir(""))],
+            "media_dirs": (media_dir,),
             "excluded_file_extensions": [],
             "follow_symlinks": False,
             "metadata_timeout": 1000,

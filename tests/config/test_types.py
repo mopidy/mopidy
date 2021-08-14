@@ -1,13 +1,28 @@
 import codecs
 import logging
+import pathlib
 import re
 import socket
+import sys
 from unittest import mock
 
 import pytest
 
 from mopidy.config import types
 from mopidy.internal import log
+
+
+@pytest.fixture(autouse=True)
+def patch_magic_mock(monkeypatch):
+    if sys.version_info < (3, 8):
+        # Polyfill MagicMock.__fspath__ for Python 3.7
+        # https://bugs.python.org/issue35022
+        def fspath(self):
+            typename = type(self).__name__
+            mockname = self._extract_mock_name()
+            return f"{typename}/{mockname}/{id(self)}"
+
+        monkeypatch.setattr(mock.MagicMock, "__fspath__", fspath, raising=False)
 
 
 @pytest.mark.parametrize(
@@ -660,7 +675,7 @@ class TestPair:
 
         cv = types.Pair(subtypes=(types.Path(), types.String()))
         result = cv.deserialize("/dev/null | empty")
-        assert result == ("/dev/null", "empty")
+        assert result == (pathlib.Path("/dev/null"), "empty")
 
         with mock.patch("socket.getaddrinfo") as getaddrinfo_mock:
             cv = types.Pair(subtypes=(types.Hostname(), types.Port()))
@@ -702,7 +717,7 @@ class TestPair:
             optional_pair=True, subtypes=(types.Path(), types.String())
         )
         result = cv.deserialize("/dev/null")
-        assert result == ("/dev/null", "/dev/null")
+        assert result == (pathlib.Path("/dev/null"), "/dev/null")
 
         cv = types.Pair(
             optional_pair=True, subtypes=(types.Port(), types.Port())
@@ -1372,12 +1387,12 @@ class TestHostname:
         assert cv.deserialize(" ") is None
         assert getaddrinfo_mock.call_count == 0
 
-    @mock.patch("mopidy.internal.path.expand_path")
-    def test_deserialize_with_unix_socket(self, expand_path_mock):
+    def test_deserialize_with_unix_socket(self):
         cv = types.Hostname()
 
-        assert cv.deserialize("unix:/tmp/mopidy.socket") is not None
-        expand_path_mock.assert_called_once_with("/tmp/mopidy.socket")
+        with mock.patch("mopidy.internal.path.expand_path") as expand_path_mock:
+            assert cv.deserialize("unix:/tmp/mopidy.socket") is not None
+            expand_path_mock.assert_called_once_with("/tmp/mopidy.socket")
 
 
 class TestPort:
@@ -1407,12 +1422,14 @@ class TestPort:
 
 
 class TestExpandedPath:
-    def test_is_str(self):
-        assert isinstance(types._ExpandedPath(b"/tmp", b"foo"), str)
+    def test_is_pathlib_path(self):
+        assert isinstance(
+            types._ExpandedPath("/tmp", pathlib.Path("/tmp")), pathlib.Path
+        )
 
     def test_stores_both_expanded_and_original_path(self):
         original = "~"
-        expanded = "expanded_path"
+        expanded = pathlib.Path("expanded_path")
 
         result = types._ExpandedPath(original, expanded)
 
@@ -1424,34 +1441,36 @@ class TestPath:
     def test_deserialize_conversion_success(self):
         cv = types.Path()
 
-        result = cv.deserialize(b"/foo")
+        result = cv.deserialize("/foo")
 
-        assert result == "/foo"
+        assert result == pathlib.Path("/foo")
         assert isinstance(result, types._ExpandedPath)
-        assert isinstance(result, str)
+        assert isinstance(result, pathlib.Path)
 
     def test_deserialize_enforces_required(self):
         cv = types.Path()
 
         with pytest.raises(ValueError):
-            cv.deserialize(b"")
+            cv.deserialize("")
 
     def test_deserialize_respects_optional(self):
         cv = types.Path(optional=True)
 
-        assert cv.deserialize(b"") is None
-        assert cv.deserialize(b" ") is None
+        assert cv.deserialize("") is None
+        assert cv.deserialize(" ") is None
 
     def test_serialize_uses_original(self):
         cv = types.Path()
-        path = types._ExpandedPath("original_path", "expanded_path")
+        path = types._ExpandedPath(
+            "original_path", pathlib.Path("expanded_path")
+        )
 
         assert cv.serialize(path) == "original_path"
 
     def test_serialize_plain_string(self):
         cv = types.Path()
 
-        assert cv.serialize(b"path") == "path"
+        assert cv.serialize("path") == "path"
 
     def test_serialize_supports_unicode_string(self):
         cv = types.Path()

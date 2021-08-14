@@ -1,9 +1,19 @@
 import logging
+import os
+import pathlib
 import re
 import socket
+from typing import Type
 
 from mopidy.config import validators
 from mopidy.internal import log, path
+
+_is_windows = os.name == "nt"
+_ExpandedPathBase: Type[pathlib.Path]
+if _is_windows:
+    _ExpandedPathBase = pathlib.WindowsPath
+else:
+    _ExpandedPathBase = pathlib.PosixPath
 
 
 def decode(value):
@@ -414,9 +424,14 @@ class Port(Integer):
         )
 
 
-# Keep this for backwards compatibility
-class _ExpandedPath(_TransformedValue):
-    pass
+# Necessary to ignore type error here, because mypy won't accept a dynamic
+# conditional base class.
+class _ExpandedPath(_ExpandedPathBase):  # type: ignore
+    def __new__(cls, original: str, transformed: pathlib.Path):
+        return super().__new__(cls, transformed)
+
+    def __init__(self, original: str, transformed: pathlib.Path):
+        self.original = original
 
 
 class Path(ConfigValue):

@@ -14,7 +14,7 @@ def config():
         "proxy": {},
         "file": {
             "show_dotfiles": False,
-            "media_dirs": [],
+            "media_dirs": tuple(),
             "excluded_file_extensions": [],
             "follow_symlinks": False,
             "metadata_timeout": 1000,

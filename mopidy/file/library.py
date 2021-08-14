@@ -1,5 +1,4 @@
 import logging
-import os
 
 from mopidy import backend, exceptions, models
 from mopidy.audio import scan, tags
@@ -109,33 +108,26 @@ class FileLibraryProvider(backend.LibraryProvider):
         return [track]
 
     def _get_media_dirs(self, config):
-        for entry in config["file"]["media_dirs"]:
-            media_dir = {}
-            media_dir_split = entry.split("|", 1)
-            local_path = path.expand_path(media_dir_split[0])
-
+        for local_path, name in config["file"]["media_dirs"]:
             if local_path is None:
                 logger.debug(
                     "Failed expanding path (%s) from file/media_dirs config "
                     "value.",
-                    media_dir_split[0],
+                    local_path.original,
                 )
                 continue
             elif not local_path.is_dir():
                 logger.warning(
                     "%s is not a directory. Please create the directory or "
                     "update the file/media_dirs config value.",
-                    local_path,
+                    local_path.original,
                 )
                 continue
 
-            media_dir["path"] = local_path
-            if len(media_dir_split) == 2:
-                media_dir["name"] = media_dir_split[1]
-            else:
-                # TODO Mpd client should accept / in dir name
-                media_dir["name"] = media_dir_split[0].replace(os.sep, "+")
-
+            media_dir = {
+                "path": local_path,
+                "name": name,
+            }
             yield media_dir
 
     def _get_media_dirs_refs(self):

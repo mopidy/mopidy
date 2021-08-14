@@ -19,7 +19,20 @@ class Extension(ext.Extension):
 
     def get_config_schema(self):
         schema = super().get_config_schema()
-        schema["media_dirs"] = config.List(optional=True)
+        schema["media_dirs"] = config.List(
+            optional=True,
+            subtype=config.Pair(
+                optional=False,
+                optional_pair=True,
+                subtypes=(
+                    config.Path(),
+                    config.String(
+                        # TODO Mpd client should accept / in dir name
+                        transformer=lambda value: value.replace(os.sep, "+")
+                    ),
+                ),
+            ),
+        )
         schema["excluded_file_extensions"] = config.List(optional=True)
         schema["show_dotfiles"] = config.Boolean(optional=True)
         schema["follow_symlinks"] = config.Boolean(optional=True)
