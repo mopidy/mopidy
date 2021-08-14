@@ -31,7 +31,7 @@ GStreamer knows how to play right before playback. For example:
   pushing raw audio data into a GStreamer ``appsrc`` element.
 
 - Mopidy-SoundCloud created it's own URI scheme, after the model of Spotify,
-  and use URIs of the following forms: ``soundcloud:search``,
+  and uses URIs of the following forms: ``soundcloud:search``,
   ``soundcloud:user-...``, ``soundcloud:exp-...``, and ``soundcloud:set-...``.
   Playback is handled by converting the custom ``soundcloud:..`` URIs to
   ``http://`` URIs immediately before they are passed on to GStreamer for
