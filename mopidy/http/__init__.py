@@ -23,7 +23,10 @@ class Extension(ext.Extension):
         schema["port"] = config_lib.Port()
         schema["static_dir"] = config_lib.Deprecated()
         schema["zeroconf"] = config_lib.String(optional=True)
-        schema["allowed_origins"] = config_lib.List(optional=True)
+        schema["allowed_origins"] = config_lib.List(
+            unique=True,
+            subtype=config_lib.String(transformer=lambda x: x.lower()),
+        )
         schema["csrf_protection"] = config_lib.Boolean(optional=True)
         schema["default_app"] = config_lib.String(optional=True)
         return schema

@@ -28,16 +28,14 @@ def make_mopidy_app_factory(apps, statics):
             logger.warning(
                 "HTTP Cross-Site Request Forgery protection is disabled"
             )
-        allowed_origins = {
-            x.lower() for x in config["http"]["allowed_origins"] if x
-        }
+
         return [
             (
                 r"/ws/?",
                 WebSocketHandler,
                 {
                     "core": core,
-                    "allowed_origins": allowed_origins,
+                    "allowed_origins": config["http"]["allowed_origins"],
                     "csrf_protection": config["http"]["csrf_protection"],
                 },
             ),
@@ -46,7 +44,7 @@ def make_mopidy_app_factory(apps, statics):
                 JsonRpcHandler,
                 {
                     "core": core,
-                    "allowed_origins": allowed_origins,
+                    "allowed_origins": config["http"]["allowed_origins"],
                     "csrf_protection": config["http"]["csrf_protection"],
                 },
             ),
@@ -177,13 +175,13 @@ def check_origin(origin, request_headers, allowed_origins):
     if origin is None:
         logger.warning("HTTP request denied for missing Origin header")
         return False
-    allowed_origins.add(request_headers.get("Host"))
+    host_header = request_headers.get("Host")
     parsed_origin = urllib.parse.urlparse(origin).netloc.lower()
     # Some frameworks (e.g. Apache Cordova) use local files. Requests from
     # these files don't really have a sensible Origin so the browser sets the
     # header to something like 'file://' or 'null'. This results here in an
     # empty parsed_origin which we choose to allow.
-    if parsed_origin and parsed_origin not in allowed_origins:
+    if parsed_origin and parsed_origin not in allowed_origins | {host_header}:
         logger.warning('HTTP request denied for Origin "%s"', origin)
         return False
     return True
