@@ -66,7 +66,7 @@ Tornado application example
 ===========================
 
 The :ref:`ext-http` extension's web server is based on the `Tornado
-<http://www.tornadoweb.org/>`__ web framework. Thus, it has first class support
+<https://www.tornadoweb.org/>`__ web framework. Thus, it has first class support
 for Tornado request handlers.
 
 In the following example, we create a :class:`tornado.web.RequestHandler`

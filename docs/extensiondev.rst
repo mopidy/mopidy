@@ -533,7 +533,7 @@ your HTTP requests::
         )
     )
 
-    response = session.get('http://example.com')
+    response = session.get('https://example.com')
     # Now do something with ``response`` and/or make further requests using the
     # ``session`` object.
 
