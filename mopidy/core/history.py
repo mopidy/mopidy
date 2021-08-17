@@ -32,7 +32,17 @@ class HistoryController:
             )
         if track.name is not None:
             name_parts.append(track.name)
-        name = " - ".join(name_parts)
+        areAllArtistNone = True
+        for artist in track.artists:
+            if artist.name is not None:
+                areAllArtistNone = False
+        if areAllArtistNone:
+            if len(name_parts) >= 1:
+                name = name_parts[-1]
+            else:
+                name = ""
+        else:
+            name = " - ".join(name_parts)
         ref = models.Ref.track(uri=track.uri, name=name)
 
         self._history.insert(0, (timestamp, ref))
