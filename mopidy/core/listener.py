@@ -185,3 +185,11 @@ class CoreListener(listener.Listener):
         :type title: string
         """
         pass
+
+    def reached_end_of_stream(self):
+        """
+        Called whenever the end of a stream is reached.
+
+        *MAY* be implemented by actor
+        """
+        pass
