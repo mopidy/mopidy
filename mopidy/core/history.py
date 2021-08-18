@@ -27,10 +27,11 @@ class HistoryController:
 
         name_parts = []
         if track.artists:
-            artist_names = [
-                artist.name for artist in track.artists if artist.name
-            ]
-            name_parts.append(", ".join(artist_names))
+            name_parts.append(
+                ", ".join(
+                    artist.name for artist in track.artists if artist.name
+                )
+            )
         if track.name is not None:
             name_parts.append(track.name)
         are_all_artist_none = True
