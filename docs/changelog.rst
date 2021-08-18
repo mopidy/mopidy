@@ -9,6 +9,24 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
+v3.2.1 (UNRELEASED)
+===================
+
+- HTTP: Fix support for websocket clients connecting/disconnecting
+  during broadcast. (PR: :issue:`1993`)
+
+- Core: Fix startup crash when loading invalid extensions. (PR:
+  :issue:`1990`)
+
+- HTTP: Improve CSRF protection Content-Type check. (PR: :issue:`1997`)
+
+- Core: Fix error-handling when fetching backend support info. (PR:
+  :issue:`1964`)
+
+- Core: Fix TypeError exception when playing track with unnamed artists.
+  (Fixes: :issue:`1991`, PR: :issue:`2012`)
+
+
 v3.2.0 (2021-07-08)
 ===================
 
