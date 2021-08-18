@@ -15,6 +15,7 @@ class PlaybackHistoryTest(unittest.TestCase):
             ),
             Track(uri="dummy2:a", name="foo"),
             Track(uri="dummy3:a", name="bar"),
+            Track(uri="dummy4:a", name="foo", artists=[Artist(name=None)]),
         ]
         self.history = HistoryController()
 
@@ -46,6 +47,10 @@ class PlaybackHistoryTest(unittest.TestCase):
         assert track.name in ref.name
         for artist in track.artists:
             assert artist.name in ref.name
+
+    def test_track_artist_no_name(self):
+        self.history._add_track(self.tracks[3])
+        assert self.history.get_length() == 1
 
 
 class CoreHistorySaveLoadStateTest(unittest.TestCase):
