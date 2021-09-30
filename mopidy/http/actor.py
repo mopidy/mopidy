@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import secrets
+import socket
 import threading
 from typing import TYPE_CHECKING
 
@@ -45,7 +47,18 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
 
         try:
             logger.debug("Starting HTTP server")
-            sockets = tornado.netutil.bind_sockets(self.port, tornado_hostname)
+            try:  # attempt to get a socket from systemd
+                fdnames = os.environ.get("LISTEN_FDNAMES", "").split(":")
+                fd = (
+                    fdnames.index("http") + 3
+                )  # 3 is the first systemd file handle
+                sock = socket.socket(fileno=fd)
+                sock.setblocking(False)
+                sockets = [sock]
+            except ValueError:
+                sockets = tornado.netutil.bind_sockets(
+                    self.port, tornado_hostname
+                )
             self.server = HttpServer(
                 config=config,
                 core=core,
