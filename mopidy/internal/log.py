@@ -125,7 +125,7 @@ def get_verbosity_level(
     if args_verbosity_level:
         result = base_verbosity_level + args_verbosity_level
     else:
-        result = base_verbosity_level + logging_config["verbosity"]
+        result = base_verbosity_level + logging_config["verbosity"] or 0
 
     if result < min(LOG_LEVELS.keys()):
         result = min(LOG_LEVELS.keys())

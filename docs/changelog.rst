@@ -26,6 +26,8 @@ v3.2.1 (UNRELEASED)
 - Core: Fix TypeError exception when playing track with unnamed artists.
   (Fixes: :issue:`1991`, PR: :issue:`2012`)
 
+- Core: Fixes invalid verbosity logging levels.
+  (Fixes: :issue:`1947`)
 
 v3.2.0 (2021-07-08)
 ===================
