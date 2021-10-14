@@ -27,7 +27,7 @@ v3.2.1 (UNRELEASED)
   (Fixes: :issue:`1991`, PR: :issue:`2012`)
 
 - Core: Fixes invalid verbosity logging levels.
-  (Fixes: :issue:`1947`)
+  (Fixes: :issue:`1947`, PR: :issue:`2021`)
 
 v3.2.0 (2021-07-08)
 ===================
