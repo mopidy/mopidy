@@ -16,6 +16,12 @@ class Extension(ext.Extension):
 
     def get_config_schema(self):
         schema = super().get_config_schema()
+        schema["min_volume"] = config.Integer(minimum=0, maximum=100)
+        schema["max_volume"] = config.Integer(minimum=0, maximum=100)
+        schema["volume_scale"] = config.String(
+            choices=("linear", "exp")
+        )
+        schema["volume_exp"] = config.Float(minimum=1, maximum=3)
         return schema
 
     def setup(self, registry):
