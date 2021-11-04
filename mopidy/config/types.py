@@ -142,6 +142,29 @@ class Integer(ConfigValue):
         return value
 
 
+class Float(ConfigValue):
+    """Floating point value."""
+
+    def __init__(
+        self, minimum=None, maximum=None, choices=None, optional=False
+    ):
+        self._required = not optional
+        self._minimum = minimum
+        self._maximum = maximum
+        self._choices = choices
+
+    def deserialize(self, value):
+        value = decode(value)
+        validators.validate_required(value, self._required)
+        if not value:
+            return None
+        value = float(value)
+        validators.validate_choice(value, self._choices)
+        validators.validate_minimum(value, self._minimum)
+        validators.validate_maximum(value, self._maximum)
+        return value
+
+
 class Boolean(ConfigValue):
     """Boolean value.
 
