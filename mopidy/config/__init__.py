@@ -15,6 +15,7 @@ from mopidy.config.types import (
     DeprecatedValue,
     Hostname,
     Integer,
+    Float,
     List,
     LogColor,
     LogLevel,
