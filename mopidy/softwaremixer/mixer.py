@@ -42,14 +42,18 @@ class SoftwareMixer(pykka.ThreadingActor, mixer.Mixer):
     def get_volume(self):
         if self._audio_mixer is None:
             return None
-        return int(self.mixer_volume_to_volume(self._audio_mixer.get_volume().get()))
+        mixer_volume = self._audio_mixer.get_volume().get()
+        if mixer_volume == round(self._logical_volume):
+            mixer_volume = self._logical_volume
+        volume = self.volume_filter_out(mixer_volume)
+        return round(volume)
 
     def set_volume(self, volume):
-        self._logical_volume = self.volume_to_mixer_volume(volume)
         if self._audio_mixer is None:
-            self._initial_volume = int(self._logical_volume)
+            self._initial_volume = volume
             return False
-        self._audio_mixer.set_volume(int(self._logical_volume))
+        self._logical_volume = self.volume_filter_in(volume)
+        self._audio_mixer.set_volume(round(self._logical_volume))
         return True
 
     def volume_filter_in(self, volume):
