@@ -81,8 +81,50 @@ class Mixer:
         either because of a call to :meth:`set_volume` or because of any
         external entity changing the volume.
         """
-        logger.debug("Mixer event: volume_changed(volume=%d)", volume)
-        MixerListener.send("volume_changed", volume=volume)
+        logger.debug("Mixer event: volume_changed(volume=%d)", round(self.volume_filter_out(volume)))
+        MixerListener.send("volume_changed", volume=round(self.volume_filter_out(volume)))
+
+    def volume_filter_in(self, volume):
+        """
+        Common filtering method to allow scaling/modifying volumes to
+        different scales. The IN method accepts the UI-visible slider
+        volume and returns the internal volume for the mixer.
+
+        Note that this function treats volumes as floating point number
+        to allow precise volume scaling, so any systems that require
+        integer representation to intentionally round the return values
+        to integers. (This is necessary to achieve smooth outputs with
+        some types of volume curves.)
+
+        *MAY be implemented by subclass.*
+
+        :param volume: Volume in the range [0..100]
+        :type volume: float
+
+        :rtype: float in range [0..100]
+        """
+        return volume
+
+    def volume_filter_out(self, volume):
+        """
+        Common filtering method to allow scaling/modifying volumes to
+        different scales. The OUT method accepts the internal volume
+        from the mixer and returns the UI-visible slider volume level.
+
+        Note that this function treats volumes as floating point number
+        to allow precise volume scaling, so any systems that require
+        integer representation to intentionally round the return values
+        to integers. (This is necessary to achieve smooth outputs with
+        some types of volume curves.)
+
+        *MAY be implemented by subclass.*
+
+        :param volume: Volume in the range [0..100]
+        :type volume: float
+
+        :rtype: float in range [0..100]
+        """
+        return volume
 
     def get_mute(self) -> Optional[bool]:
         """
