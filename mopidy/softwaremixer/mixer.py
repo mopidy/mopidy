@@ -19,10 +19,11 @@ class SoftwareMixer(pykka.ThreadingActor, mixer.Mixer):
         self._initial_mute = None
         self._logical_volume = None
 
-        self.min_volume = config["softwaremixer"]["min_volume"]
-        self.max_volume = config["softwaremixer"]["max_volume"]
-        self.volume_scale = config["softwaremixer"]["volume_scale"]
-        self.volume_exp = config["softwaremixer"]["volume_exp"]
+        self.config = config
+        self.min_volume = self.config["softwaremixer"]["min_volume"]
+        self.max_volume = self.config["softwaremixer"]["max_volume"]
+        self.volume_scale = self.config["softwaremixer"]["volume_scale"]
+        self.volume_exp = self.config["softwaremixer"]["volume_exp"]
 
     def setup(self, mixer_ref):
         self._audio_mixer = mixer_ref
