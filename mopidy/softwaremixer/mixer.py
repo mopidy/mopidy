@@ -52,31 +52,32 @@ class SoftwareMixer(pykka.ThreadingActor, mixer.Mixer):
         self._audio_mixer.set_volume(int(self._logical_volume))
         return True
 
-    def mixer_volume_to_volume(self, mixer_volume):
-        volume = mixer_volume
-        if mixer_volume == int(self._logical_volume):
-            # start calculation with exact original value to avoid
-            # loss of precision from mixer/native conversions
-            volume = self._logical_volume
-        if self.volume_scale == "exp":
-            coeff = pow(10, 2 * (self.volume_exp - 1))
-            volume = pow(coeff * volume, 1/self.volume_exp)
-        volume = (
-            (volume - self.min_volume)
-            * 100.0
-            / (self.max_volume - self.min_volume)
-        )
-        return volume
-
-    def volume_to_mixer_volume(self, volume):
-        mixer_volume = (
-            self.min_volume
-            + volume * (self.max_volume - self.min_volume) / 100.0
-        )
+    def volume_filter_in(self, volume):
+        mixer_volume = volume
         if self.volume_scale == "exp":
             coeff = pow(10, 2 * (self.volume_exp - 1))
             mixer_volume = pow(mixer_volume, self.volume_exp) / coeff
+        mixer_volume = (
+            self.min_volume
+            + mixer_volume * (self.max_volume - self.min_volume) / 100.0
+        )
         return mixer_volume
+
+    def volume_filter_out(self, volume):
+        ui_volume = volume
+        if volume == round(self._logical_volume):
+            # start calculation with exact original value to avoid
+            # loss of precision from mixer/native conversions
+            ui_volume = self._logical_volume
+        ui_volume = (
+            (ui_volume - self.min_volume)
+            * 100.0
+            / (self.max_volume - self.min_volume)
+        )
+        if self.volume_scale == "exp":
+            coeff = pow(10, 2 * (self.volume_exp - 1))
+            ui_volume = pow(coeff * ui_volume, 1/self.volume_exp)
+        return ui_volume
 
     def get_mute(self):
         if self._audio_mixer is None:
