@@ -201,6 +201,17 @@ class JsonRpcHandler(tornado.web.RequestHandler):
 
     def post(self):
         if self.csrf_protection:
+            origin = self.request.headers.get("Origin")
+
+            if not check_origin(
+                origin, self.request.headers, self.allowed_origins
+            ):
+                self.set_status(403, f"Access denied for origin {origin}")
+                return
+
+            self.set_header("Access-Control-Allow-Origin", f"{origin}")
+            self.set_header("Access-Control-Allow-Headers", "Content-Type")
+
             content_type = (
                 self.request.headers.get("Content-Type", "")
                 .split(";")[0]
