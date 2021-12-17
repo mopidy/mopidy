@@ -42,7 +42,7 @@ Install from apt.mopidy.com
 
 #. Add the archive's GPG key::
 
-       udo wget -q -O /etc/apt/trusted.gpg.d/mopidy.gpg https://apt.mopidy.com/mopidy.gpg
+       sudo wget -q -O /etc/apt/trusted.gpg.d/mopidy.gpg https://apt.mopidy.com/mopidy.gpg
 
 #. Add the APT repo to your package sources::
 
