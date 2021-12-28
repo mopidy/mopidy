@@ -21,6 +21,11 @@ class Extension(ext.Extension):
         schema["volume_scale"] = config.String(
             choices=("linear", "exp")
         )
+        # NOTE: 1 is straight linear like the default software mixer, while
+        # 3 is an extremely deep curve that goes beyond usefulness in my tests.
+        # The sweet spot on my system is somewhere between about 1.2 and 1.5, but
+        # for audio hardware that has a different inherent volume profile (?),
+        # allowing values up to 3 may be useful.
         schema["volume_exp"] = config.Float(minimum=1, maximum=3)
         return schema
 
