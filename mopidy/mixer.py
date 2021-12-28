@@ -81,8 +81,9 @@ class Mixer:
         either because of a call to :meth:`set_volume` or because of any
         external entity changing the volume.
         """
-        logger.debug("Mixer event: volume_changed(volume=%d)", round(self.volume_filter_out(volume)))
-        MixerListener.send("volume_changed", volume=round(self.volume_filter_out(volume)))
+        new_volume = round(self.volume_filter_out(volume))
+        logger.debug("Mixer event: volume_changed(volume=%d)", new_volume)
+        MixerListener.send("volume_changed", volume=new_volume)
 
     def volume_filter_in(self, volume):
         """
