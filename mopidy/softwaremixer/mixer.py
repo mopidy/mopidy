@@ -45,6 +45,16 @@ class SoftwareMixer(pykka.ThreadingActor, mixer.Mixer):
             return None
         mixer_volume = self._audio_mixer.get_volume().get()
         if mixer_volume == round(self._logical_volume):
+            # If the current logical volume yields a filtered output
+            # volume that matches what we currently have, then return
+            # the current logical volume rather than the value obtained
+            # by passing it through the reverse filter. This retains
+            # precision in cases where rounding in the middle of the
+            # conversion/calculation process would otherwise lose it.
+            # For example, an aggressive "volume_exp" value (>1.5) may
+            # result in logical values of 0-7 all rounding to 0, which 
+            # reverse-filters back to a 0 logical value; this code
+            # retains the original input value.
             mixer_volume = self._logical_volume
         volume = self.volume_filter_out(mixer_volume)
         return round(volume)
