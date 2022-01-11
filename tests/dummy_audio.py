@@ -93,12 +93,12 @@ class DummyAudio(pykka.ThreadingActor):
             self._stream_changed = True
             self._uri = None
 
-        if self._uri is not None:
-            audio.AudioListener.send("position_changed", position=0)
-
         if self._stream_changed:
             self._stream_changed = False
             audio.AudioListener.send("stream_changed", uri=self._uri)
+
+        if self._uri is not None:
+            audio.AudioListener.send("position_changed", position=0)
 
         old_state, self.state = self.state, new_state
         audio.AudioListener.send(
