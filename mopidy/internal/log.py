@@ -203,7 +203,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
     @property
     def is_tty(self) -> bool:
         isatty = getattr(self.stream, "isatty", None)
-        return isatty and isatty()
+        return isatty is not None and isatty()
 
     def emit(self, record: LogRecord) -> None:
         try:
