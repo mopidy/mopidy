@@ -2,6 +2,7 @@ import os
 import unittest
 from unittest import mock
 
+import tornado.httpclient
 import tornado.testing
 import tornado.web
 import tornado.websocket
@@ -50,16 +51,20 @@ class WebSocketHandlerTest(tornado.testing.AsyncHTTPTestCase):
                     handlers.WebSocketHandler,
                     {
                         "core": self.core,
-                        "allowed_origins": [],
+                        "allowed_origins": set(),
                         "csrf_protection": True,
                     },
                 )
             ]
         )
 
-    def connection(self):
-        url = self.get_url("/ws").replace("http", "ws")
-        return tornado.websocket.websocket_connect(url)
+    def connection(self, **kwargs):
+        conn_kwargs = {
+            "url": self.get_url("/ws").replace("http", "ws"),
+        }
+        conn_kwargs.update(kwargs)
+        request = tornado.httpclient.HTTPRequest(**conn_kwargs)
+        return tornado.websocket.websocket_connect(request)
 
     @tornado.testing.gen_test
     def test_invalid_json_rpc_request_doesnt_crash_handler(self):
@@ -92,6 +97,153 @@ class WebSocketHandlerTest(tornado.testing.AsyncHTTPTestCase):
         for client in handlers.WebSocketHandler.clients:
             client.ws_connection = None
         handlers.WebSocketHandler.broadcast("message", self.io_loop)
+
+    @tornado.testing.gen_test
+    def test_good_origin(self):
+        headers = {"Origin": "http://localhost", "Host": "localhost"}
+        conn = yield self.connection(headers=headers)
+        assert conn
+
+    @tornado.testing.gen_test
+    def test_bad_origin(self):
+        headers = {"Origin": "http://foobar", "Host": "localhost"}
+        with self.assertRaises(tornado.httpclient.HTTPClientError) as e:
+            _ = yield self.connection(headers=headers)
+        assert e.exception.code == 403
+
+
+class JsonRpcHandlerTestBase(tornado.testing.AsyncHTTPTestCase):
+    csrf_protection = True
+
+    def setUp(self):
+        super().setUp()
+        self.headers = {"Host": "localhost:6680"}
+
+    def get_app(self):
+        self.core = mock.Mock()
+        return tornado.web.Application(
+            [
+                (
+                    r"/rpc",
+                    handlers.JsonRpcHandler,
+                    {
+                        "core": self.core,
+                        "allowed_origins": set(),
+                        "csrf_protection": self.csrf_protection,
+                    },
+                )
+            ]
+        )
+
+    def assert_extra_response_headers(self, headers):
+        assert headers["Cache-Control"] == "no-cache"
+        assert headers["X-Mopidy-Version"] == mopidy.__version__
+        assert headers["Accept"] == "application/json"
+        assert headers["Content-Type"] == "application/json; utf-8"
+
+    def get_cors_response_headers(self):
+        yield (
+            "Access-Control-Allow-Origin",
+            self.headers.get("Origin"),
+        )
+        yield (
+            "Access-Control-Allow-Headers",
+            "Content-Type",
+        )
+
+    def test_head(self):
+        response = self.fetch("/rpc", method="HEAD")
+
+        assert response.code == 200
+        self.assert_extra_response_headers(response.headers)
+
+
+class JsonRpcHandlerTestCSRFEnabled(JsonRpcHandlerTestBase):
+    def test_options_sets_cors_headers(self):
+        self.headers.update({"Origin": "http://localhost:6680"})
+        response = self.fetch("/rpc", method="OPTIONS", headers=self.headers)
+
+        assert response.code == 204
+        for k, v in self.get_cors_response_headers():
+            self.assertEqual(response.headers[k], v)
+
+    def test_options_bad_origin_forbidden(self):
+        self.headers.update({"Origin": "http://foo:6680"})
+        response = self.fetch("/rpc", method="OPTIONS", headers=self.headers)
+
+        assert response.code == 403
+        assert response.reason == "Access denied for origin http://foo:6680"
+        for k, _ in self.get_cors_response_headers():
+            self.assertNotIn(k, response.headers)
+
+    def test_options_no_origin_forbidden(self):
+        response = self.fetch("/rpc", method="OPTIONS", headers=self.headers)
+
+        assert response.code == 403
+        assert response.reason == "Access denied for origin None"
+        for k, _ in self.get_cors_response_headers():
+            self.assertNotIn(k, response.headers)
+
+    def test_post_no_content_type_unsupported(self):
+        response = self.fetch(
+            "/rpc", method="POST", body="hi", headers=self.headers
+        )
+
+        assert response.code == 415
+        for k, _ in self.get_cors_response_headers():
+            self.assertNotIn(k, response.headers)
+
+    def test_post_wrong_content_type_unsupported(self):
+        self.headers.update({"Content-Type": "application/cats"})
+        response = self.fetch(
+            "/rpc", method="POST", body="hi", headers=self.headers
+        )
+
+        assert response.code == 415
+        assert response.reason == "Content-Type must be application/json"
+        for k, _ in self.get_cors_response_headers():
+            self.assertNotIn(k, response.headers)
+
+    def test_post_no_origin_ok_but_doesnt_set_cors_headers(self):
+        self.headers.update({"Content-Type": "application/json"})
+        response = self.fetch(
+            "/rpc", method="POST", body="hi", headers=self.headers
+        )
+
+        assert response.code == 200
+        for k, _ in self.get_cors_response_headers():
+            self.assertNotIn(k, response.headers)
+
+    def test_post_with_origin_ok_sets_cors_headers(self):
+        self.headers.update(
+            {"Content-Type": "application/json", "Origin": "http://foobar:6680"}
+        )
+        response = self.fetch(
+            "/rpc", method="POST", body="hi", headers=self.headers
+        )
+
+        assert response.code == 200
+        self.assert_extra_response_headers(response.headers)
+        for k, v in self.get_cors_response_headers():
+            self.assertEqual(response.headers[k], v)
+
+
+class JsonRpcHandlerTestCSRFDisabled(JsonRpcHandlerTestBase):
+    csrf_protection = False
+
+    def test_options_no_origin_success(self):
+        response = self.fetch("/rpc", method="OPTIONS", headers=self.headers)
+
+        assert response.code == 204
+
+    def test_post_no_content_type_ok(self):
+        response = self.fetch(
+            "/rpc", method="POST", body="hi", headers=self.headers
+        )
+
+        assert response.code == 200
+        for k, _ in self.get_cors_response_headers():
+            self.assertNotIn(k, response.headers)
 
 
 class CheckOriginTests(unittest.TestCase):

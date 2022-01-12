@@ -201,17 +201,11 @@ class JsonRpcHandler(tornado.web.RequestHandler):
 
     def post(self):
         if self.csrf_protection:
-            origin = self.request.headers.get("Origin")
-
-            if not check_origin(
-                origin, self.request.headers, self.allowed_origins
-            ):
-                self.set_status(403, f"Access denied for origin {origin}")
-                return
-
-            self.set_header("Access-Control-Allow-Origin", f"{origin}")
-            self.set_header("Access-Control-Allow-Headers", "Content-Type")
-
+            # This "non-standard" Content-Type requirement forces browsers to
+            # automatically issue a preflight OPTIONS request before this one.
+            # All Origin header enforcement/checking can be limited to our OPTIONS
+            # handler and requests not vulnerable to CSRF (i.e. non-browser
+            # requests) need only set the Content-Type header.
             content_type = (
                 self.request.headers.get("Content-Type", "")
                 .split(";")[0]
@@ -220,6 +214,12 @@ class JsonRpcHandler(tornado.web.RequestHandler):
             if content_type != "application/json":
                 self.set_status(415, "Content-Type must be application/json")
                 return
+
+            origin = self.request.headers.get("Origin")
+            if origin is not None:
+                # This request came from a browser and has already had its Origin
+                # checked in the preflight request.
+                self.set_cors_headers(origin)
 
         data = self.request.body
         if not data:
@@ -247,6 +247,10 @@ class JsonRpcHandler(tornado.web.RequestHandler):
         self.set_header("Accept", "application/json")
         self.set_header("Content-Type", "application/json; utf-8")
 
+    def set_cors_headers(self, origin):
+        self.set_header("Access-Control-Allow-Origin", f"{origin}")
+        self.set_header("Access-Control-Allow-Headers", "Content-Type")
+
     def options(self):
         if self.csrf_protection:
             origin = self.request.headers.get("Origin")
@@ -256,8 +260,7 @@ class JsonRpcHandler(tornado.web.RequestHandler):
                 self.set_status(403, f"Access denied for origin {origin}")
                 return
 
-            self.set_header("Access-Control-Allow-Origin", f"{origin}")
-            self.set_header("Access-Control-Allow-Headers", "Content-Type")
+            self.set_cors_headers(origin)
 
         self.set_status(204)
         self.finish()
