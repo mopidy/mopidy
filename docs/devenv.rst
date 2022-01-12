@@ -107,6 +107,11 @@ Git repo in an "editable" form::
 
     pip install --upgrade --editable .
 
+.. note::
+
+    If the above command fails with ``AttributeError: install_layout``
+    please refer to :issue:`2037` for a workaround.
+
 This will not copy the source code into the virtualenv's ``site-packages``
 directory, but instead create a link there pointing to the Git repo. Using
 ``cdsitepackages`` from virtualenvwrapper, we can quickly show that the
