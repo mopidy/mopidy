@@ -143,7 +143,7 @@ def format_initial(extensions_data):
 
 
 def _load(files, defaults, overrides):
-    parser = configparser.RawConfigParser()
+    parser = configparser.RawConfigParser(inline_comment_prefixes=(';',))
 
     # TODO: simply return path to config file for defaults so we can load it
     # all in the same way?
