@@ -129,7 +129,7 @@ class _Outputs(Gst.Bin):
             logger.error(
                 'Failed to create audio output "%s": %s', description, ex
             )
-            raise exceptions.AudioException(bytes(ex))
+            raise exceptions.AudioException(ex)
 
         self._add(output)
         logger.info('Audio output set to "%s"', description)

@@ -29,6 +29,10 @@ v3.2.1 (UNRELEASED)
 - Core: Fixes invalid verbosity logging levels.
   (Fixes: :issue:`1947`, PR: :issue:`2021`)
 
+- Audio: Fix TypeError when handling create output pipeline errors.
+  (Fixes: :issue:`1924`, PR: :issue:`2040`)
+
+
 v3.2.0 (2021-07-08)
 ===================
 
