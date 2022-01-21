@@ -33,9 +33,11 @@ v3.2.1 (UNRELEASED)
   (Fixes: :issue:`1924`, PR: :issue:`2040`)
 
 - Core: Align values supported by the ``field`` argument to
-  :meth:`mopidy.core.LibraryController.get_distinct`: with Mopidy search query
-  fields, with the exception of 'any'. Deprecated using value 'track' with the
+  :meth:`mopidy.core.LibraryController.get_distinct` with Mopidy search query
+  fields, with the exception of 'any'. Deprecated field 'track' with the
   goal of removing it in the next major release, use 'track_name' instead.
+  Backends should support both `track` and `track_name` until they require
+  a version of Mopidy where `track` has been removed. 
   (Fixes: :issue:`1900`, PR: :issue:`1899`)
 
 - Core: Add ``musicbrainz_albumid``, ``musicbrainz_artistid``,

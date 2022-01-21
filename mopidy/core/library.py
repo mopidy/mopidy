@@ -136,15 +136,18 @@ class LibraryController:
 
         .. versionadded:: 1.0
         """
-        validation.check_choice(field, validation.DISTINCT_FIELDS)
-        query is None or validation.check_query(query)  # TODO: normalize?
-
-        compat_field = {"track_name": "track"}.get(field, field)
         if field == "track":
             deprecation.warn(
                 f"core.library.get_distinct:field_arg:{field}",
                 pending=False,
             )
+            field_type = str
+        else:
+            validation.check_choice(field, validation.DISTINCT_FIELDS.keys())
+            field_type = validation.DISTINCT_FIELDS.get(field)
+        query is None or validation.check_query(query)  # TODO: normalize?
+
+        compat_field = {"track_name": "track"}.get(field, field)
 
         result = set()
         futures = {
@@ -155,7 +158,7 @@ class LibraryController:
             with _backend_error_handling(backend):
                 values = future.get()
                 if values is not None:
-                    validation.check_instances(values, str)
+                    validation.check_instances(values, field_type)
                     result.update(values)
         return result
 
