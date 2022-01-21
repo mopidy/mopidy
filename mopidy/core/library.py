@@ -142,7 +142,8 @@ class LibraryController:
         compat_field = {"track_name": "track"}.get(field, field)
         if field == "track":
             deprecation.warn(
-                f"core.library.get_distinct:field_arg:{field}", pending=False,
+                f"core.library.get_distinct:field_arg:{field}",
+                pending=False,
             )
 
         result = set()
