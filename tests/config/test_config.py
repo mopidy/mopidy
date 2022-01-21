@@ -28,6 +28,12 @@ class LoadConfigTest(unittest.TestCase):
         result = config._load([], [default], [])
         assert expected == result
 
+    def test_load_ignore_inline_comment(self):
+        default = b"[foo]\nbar = baz ; my_comment"
+        expected = {"foo": {"bar": "baz"}}
+        result = config._load([], [default], [])
+        assert expected == result
+
     def test_unicode_default(self):
         default = "[foo]\nbar = æøå"
         expected = {"foo": {"bar": "æøå"}}
