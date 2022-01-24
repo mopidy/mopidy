@@ -307,7 +307,7 @@ class GetDistinctTest(BaseCoreLibraryTest):
 
         self.library1.get_distinct.assert_called_with("album", {"any": ["a"]})
         self.library2.get_distinct.assert_called_with("album", {"any": ["a"]})
-        assert set() == result
+        assert result == set()
 
     def test_combines_results_from_all_backends(self):
         result1 = "foo"
@@ -329,7 +329,7 @@ class GetDistinctTest(BaseCoreLibraryTest):
         result = self.core.library.get_distinct("artist")
 
         assert result1 in result
-        assert 1 == len(result)
+        assert len(result) == 1
 
     @mock.patch.object(core.library.validation, "check_choice")
     def test_checks_field_is_valid(self, check_choice_mock):
@@ -355,7 +355,7 @@ class GetDistinctTest(BaseCoreLibraryTest):
 
         self.library1.get_distinct.assert_called_with("track", None)
         self.library2.get_distinct.assert_called_with("track", None)
-        assert {result1} == result
+        assert result == {result1}
 
     @mock.patch("mopidy.internal.deprecation.warn")
     def test_track_field_is_deprecated(self, deprecate_warn_mock):
@@ -363,7 +363,7 @@ class GetDistinctTest(BaseCoreLibraryTest):
         self.library1.get_distinct.return_value.get.return_value = {result1}
         self.library2.get_distinct.return_value.get.return_value = {}
 
-        assert {result1} == self.core.library.get_distinct("track")
+        assert self.core.library.get_distinct("track") == {result1}
         deprecate_warn_mock.assert_called_once_with(
             "core.library.get_distinct:field_arg:track", pending=mock.ANY
         )
@@ -374,11 +374,11 @@ class GetDistinctTest(BaseCoreLibraryTest):
         self.library1.get_distinct.return_value.get.return_value = {result1}
         self.library2.get_distinct.return_value.get.return_value = {}
 
-        assert {result1} == self.core.library.get_distinct("track_no")
-        assert {result1} == self.core.library.get_distinct("disc_no")
+        assert self.core.library.get_distinct("track_no") == {result1}
+        assert self.core.library.get_distinct("disc_no") == {result1}
         logger_mock.error.assert_not_called()
 
-        assert set() == self.core.library.get_distinct("uri")
+        assert self.core.library.get_distinct("uri") == set()
         logger_mock.error.assert_called_once()
 
     @mock.patch("mopidy.core.library.logger")
@@ -387,17 +387,17 @@ class GetDistinctTest(BaseCoreLibraryTest):
         self.library1.get_distinct.return_value.get.return_value = {result1}
         self.library2.get_distinct.return_value.get.return_value = {}
 
-        assert {result1} == self.core.library.get_distinct("track_no")
+        assert self.core.library.get_distinct("track_no") == {result1}
         logger_mock.error.assert_not_called()
 
         result2 = "foo"
         self.library2.get_distinct.return_value.get.return_value = {result2}
 
-        assert {result1} == self.core.library.get_distinct("track_no")
+        assert self.core.library.get_distinct("track_no") == {result1}
         logger_mock.error.assert_called_once()
 
         logger_mock.error.reset_mock()
-        assert {result2} == self.core.library.get_distinct("uri")
+        assert self.core.library.get_distinct("uri") == {result2}
         logger_mock.error.assert_called()
 
 
