@@ -29,7 +29,7 @@ _MESSAGES = {
     # Deprecated argument value in core library:
     "core.library.get_distinct:field_arg:track": (
         'library.get_distinct() with "field" argument "track" is pending '
-        ' deprecation, handle "track_name" instead'
+        'deprecation, use "track_name" instead'
     ),
 }
 
