@@ -44,6 +44,8 @@ v3.2.1 (UNRELEASED)
   ``musicbrainz_trackid``, and ``disc_no`` to the permitted search query
   fields. (Fixes: :issue:`1900`, PR: :issue:`1899`)
 
+- Add Python 3.10 to our test matrix.
+
 
 v3.2.0 (2021-07-08)
 ===================
