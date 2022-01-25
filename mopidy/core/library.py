@@ -6,7 +6,7 @@ import urllib
 from collections.abc import Mapping
 
 from mopidy import exceptions, models
-from mopidy.internal import validation
+from mopidy.internal import deprecation, validation
 
 logger = logging.getLogger(__name__)
 
@@ -125,27 +125,40 @@ class LibraryController:
         protocol supports in a more sane fashion. Other frontends are not
         recommended to use this method.
 
-        :param string field: One of ``track``, ``artist``, ``albumartist``,
-            ``album``, ``composer``, ``performer``, ``date`` or ``genre``.
+        :param string field: Any one of ``uri``, ``track_name``, ``album``,
+            ``artist``, ``albumartist``, ``composer``, ``performer``,
+            ``track_no``, ``genre``, ``date``, ``comment``, ``disc_no``,
+            ``musicbrainz_albumid``, ``musicbrainz_artistid``, or
+            ``musicbrainz_trackid``.
         :param dict query: Query to use for limiting results, see
             :meth:`search` for details about the query format.
         :rtype: set of values corresponding to the requested field type.
 
         .. versionadded:: 1.0
         """
-        validation.check_choice(field, validation.DISTINCT_FIELDS)
+        if field == "track":
+            deprecation.warn(
+                f"core.library.get_distinct:field_arg:{field}",
+                pending=False,
+            )
+            field_type = str
+        else:
+            validation.check_choice(field, validation.DISTINCT_FIELDS.keys())
+            field_type = validation.DISTINCT_FIELDS.get(field)
         query is None or validation.check_query(query)  # TODO: normalize?
+
+        compat_field = {"track_name": "track"}.get(field, field)
 
         result = set()
         futures = {
-            b: b.library.get_distinct(field, query)
+            b: b.library.get_distinct(compat_field, query)
             for b in self.backends.with_library.values()
         }
         for backend, future in futures.items():
             with _backend_error_handling(backend):
                 values = future.get()
                 if values is not None:
-                    validation.check_instances(values, str)
+                    validation.check_instances(values, field_type)
                     result.update(values)
         return result
 
@@ -253,7 +266,8 @@ class LibraryController:
 
         ``field`` can be one of ``uri``, ``track_name``, ``album``, ``artist``,
         ``albumartist``, ``composer``, ``performer``, ``track_no``, ``genre``,
-        ``date``, ``comment``, or ``any``.
+        ``date``, ``comment``, ``disc_no``, ``musicbrainz_albumid``,
+        ``musicbrainz_artistid``, ``musicbrainz_trackid`` or ``any``.
 
         If ``uris`` is given, the search is limited to results from within the
         URI roots. For example passing ``uris=['file:']`` will limit the search

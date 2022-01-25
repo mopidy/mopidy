@@ -2,6 +2,7 @@ import unittest
 from unittest import mock
 
 from mopidy import backend, core
+from mopidy.internal import validation
 from mopidy.models import Image, Ref, SearchResult, Track
 
 
@@ -295,6 +296,109 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         self.library1.search.assert_called_once_with(
             query={"any": ["foobar"]}, uris=None, exact=False
         )
+
+
+class GetDistinctTest(BaseCoreLibraryTest):
+    def test_with_query(self):
+        self.library1.get_distinct.return_value.get.return_value = {}
+        self.library2.get_distinct.return_value.get.return_value = {}
+
+        result = self.core.library.get_distinct("album", {"any": ["a"]})
+
+        self.library1.get_distinct.assert_called_with("album", {"any": ["a"]})
+        self.library2.get_distinct.assert_called_with("album", {"any": ["a"]})
+        assert result == set()
+
+    def test_combines_results_from_all_backends(self):
+        result1 = "foo"
+        result2 = "bar"
+        self.library1.get_distinct.return_value.get.return_value = {result1}
+        self.library2.get_distinct.return_value.get.return_value = {result2}
+
+        result = self.core.library.get_distinct("artist")
+
+        assert result1 in result
+        assert result2 in result
+
+    def test_combined_results_are_unique(self):
+        result1 = "foo"
+        result2 = "foo"
+        self.library1.get_distinct.return_value.get.return_value = {result1}
+        self.library2.get_distinct.return_value.get.return_value = {result2}
+
+        result = self.core.library.get_distinct("artist")
+
+        assert result1 in result
+        assert len(result) == 1
+
+    @mock.patch.object(core.library.validation, "check_choice")
+    def test_checks_field_is_valid(self, check_choice_mock):
+        self.core.library.get_distinct("artist")
+        check_choice_mock.assert_called_with(
+            "artist", validation.DISTINCT_FIELDS.keys()
+        )
+
+    def test_any_field_raises_valueerror(self):
+        with self.assertRaises(ValueError):
+            self.core.library.get_distinct("any")
+
+    def test_unknown_tag_in_query_raises_valueerror(self):
+        with self.assertRaises(ValueError):
+            self.core.library.get_distinct("album", {"track": ["a"]})
+
+    def test_track_name_field_maps_to_track_for_backwards_compatibility(self):
+        result1 = "foo"
+        self.library1.get_distinct.return_value.get.return_value = {result1}
+        self.library2.get_distinct.return_value.get.return_value = {}
+
+        result = self.core.library.get_distinct("track_name")
+
+        self.library1.get_distinct.assert_called_with("track", None)
+        self.library2.get_distinct.assert_called_with("track", None)
+        assert result == {result1}
+
+    @mock.patch("mopidy.internal.deprecation.warn")
+    def test_track_field_is_deprecated(self, deprecate_warn_mock):
+        result1 = "bar"
+        self.library1.get_distinct.return_value.get.return_value = {result1}
+        self.library2.get_distinct.return_value.get.return_value = {}
+
+        assert self.core.library.get_distinct("track") == {result1}
+        deprecate_warn_mock.assert_called_once_with(
+            "core.library.get_distinct:field_arg:track", pending=mock.ANY
+        )
+
+    @mock.patch("mopidy.core.library.logger")
+    def test_validate_integer_results(self, logger_mock):
+        result1 = 99
+        self.library1.get_distinct.return_value.get.return_value = {result1}
+        self.library2.get_distinct.return_value.get.return_value = {}
+
+        assert self.core.library.get_distinct("track_no") == {result1}
+        assert self.core.library.get_distinct("disc_no") == {result1}
+        logger_mock.error.assert_not_called()
+
+        assert self.core.library.get_distinct("uri") == set()
+        logger_mock.error.assert_called_once()
+
+    @mock.patch("mopidy.core.library.logger")
+    def test_wrong_result_types_removed_and_logged(self, logger_mock):
+        result1 = 99
+        self.library1.get_distinct.return_value.get.return_value = {result1}
+        self.library2.get_distinct.return_value.get.return_value = {}
+
+        assert self.core.library.get_distinct("track_no") == {result1}
+        logger_mock.error.assert_not_called()
+
+        result2 = "foo"
+        self.library2.get_distinct.return_value.get.return_value = {result2}
+
+        assert self.core.library.get_distinct("track_no") == {result1}
+        logger_mock.error.assert_called_once()
+
+        logger_mock.error.reset_mock()
+        assert self.core.library.get_distinct("uri") == {result2}
+        logger_mock.error.assert_called()
 
 
 class LegacyFindExactToSearchLibraryTest(unittest.TestCase):
