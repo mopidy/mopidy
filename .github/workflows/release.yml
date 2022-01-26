@@ -12,12 +12,12 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: "3.9"
+          python-version: "3.10"
       - name: "Install dependencies"
         run: python3 -m pip install build
       - name: "Build package"
         run: python3 -m build
-      - uses: pypa/gh-action-pypi-publish@v1.4.1
+      - uses: pypa/gh-action-pypi-publish@v1.5.0
         with:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}

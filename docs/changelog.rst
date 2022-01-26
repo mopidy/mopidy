@@ -47,6 +47,8 @@ v3.2.1 (UNRELEASED)
 - HTTP: Fix missing CORS headers on RPC response. (Fixes: :issue:`2028`,
   PR: :issue:`2029`)
 
+- Add Python 3.10 to our test matrix.
+
 
 v3.2.0 (2021-07-08)
 ===================
