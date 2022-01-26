@@ -157,58 +157,6 @@ class MopidyRPCHandlerTest(HttpServerTest):
             "result": mopidy.__version__,
         } == tornado.escape.json_decode(response.body)
 
-    def test_should_return_extra_headers(self):
-        response = self.fetch("/mopidy/rpc", method="HEAD")
-
-        assert "Accept" in response.headers
-        assert "X-Mopidy-Version" in response.headers
-        assert "Cache-Control" in response.headers
-        assert "Content-Type" in response.headers
-
-    def test_should_require_correct_content_type(self):
-        cmd = tornado.escape.json_encode(
-            {
-                "method": "core.get_version",
-                "params": [],
-                "jsonrpc": "2.0",
-                "id": 1,
-            }
-        )
-
-        response = self.fetch(
-            "/mopidy/rpc",
-            method="POST",
-            body=cmd,
-            headers={"Content-Type": "text/plain"},
-        )
-
-        assert response.code == 415
-        assert response.reason == "Content-Type must be application/json"
-
-    def test_different_origin_returns_access_denied(self):
-        response = self.fetch(
-            "/mopidy/rpc",
-            method="OPTIONS",
-            headers={"Host": "me:6680", "Origin": "http://evil:666"},
-        )
-
-        assert response.code == 403
-        assert response.reason == "Access denied for origin http://evil:666"
-
-    def test_same_origin_returns_cors_headers(self):
-        response = self.fetch(
-            "/mopidy/rpc",
-            method="OPTIONS",
-            headers={"Host": "me:6680", "Origin": "http://me:6680"},
-        )
-
-        assert (
-            response.headers["Access-Control-Allow-Origin"] == "http://me:6680"
-        )
-        assert (
-            response.headers["Access-Control-Allow-Headers"] == "Content-Type"
-        )
-
 
 class MopidyRPCHandlerNoCSRFProtectionTest(HttpServerTest):
     def get_config(self):

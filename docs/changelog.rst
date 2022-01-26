@@ -44,6 +44,9 @@ v3.2.1 (UNRELEASED)
   ``musicbrainz_trackid``, and ``disc_no`` to the permitted search query
   fields. (Fixes: :issue:`1900`, PR: :issue:`1899`)
 
+- HTTP: Fix missing CORS headers on RPC response. (Fixes: :issue:`2028`,
+  PR: :issue:`2029`)
+
 - Add Python 3.10 to our test matrix.
 
 
