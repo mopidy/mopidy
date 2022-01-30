@@ -9,28 +9,20 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
-v3.2.1 (UNRELEASED)
+v3.3.0 (UNRELEASED)
 ===================
 
-- HTTP: Fix support for websocket clients connecting/disconnecting
-  during broadcast. (PR: :issue:`1993`)
-
-- Core: Fix startup crash when loading invalid extensions. (PR:
-  :issue:`1990`)
-
-- HTTP: Improve CSRF protection Content-Type check. (PR: :issue:`1997`)
-
-- Core: Fix error-handling when fetching backend support info. (PR:
-  :issue:`1964`)
+- Core: Fixes invalid verbosity logging levels. (Fixes: :issue:`1947`,
+  PR: :issue:`2021`)
 
 - Core: Fix TypeError exception when playing track with unnamed artists.
   (Fixes: :issue:`1991`, PR: :issue:`2012`)
 
-- Core: Fixes invalid verbosity logging levels.
-  (Fixes: :issue:`1947`, PR: :issue:`2021`)
+- Core: Fix startup crash when loading invalid extensions. (PR:
+  :issue:`1990`)
 
-- Audio: Fix TypeError when handling create output pipeline errors.
-  (Fixes: :issue:`1924`, PR: :issue:`2040`)
+- Core: Fix error-handling when fetching backend support info. (PR:
+  :issue:`1964`)
 
 - Core: Align values supported by the ``field`` argument to
   :meth:`mopidy.core.LibraryController.get_distinct` with Mopidy search query
@@ -44,8 +36,21 @@ v3.2.1 (UNRELEASED)
   ``musicbrainz_trackid``, and ``disc_no`` to the permitted search query
   fields. (Fixes: :issue:`1900`, PR: :issue:`1899`)
 
+- Audio: Fix TypeError when handling create output pipeline errors.
+  (Fixes: :issue:`1924`, PR: :issue:`2040`)
+
+- Audio: Fix seek when stopped. (Fixes: :issue:`2005`, PR: :issue:`2006`)
+
+- Config: Fix support for inline comments, a regression introduced during
+  our Python 3 migration. (Fixes: :issue:`1868`, PR: :issue:`2041`)
+
 - HTTP: Fix missing CORS headers on RPC response. (Fixes: :issue:`2028`,
   PR: :issue:`2029`)
+
+- HTTP: Improve CSRF protection Content-Type check. (PR: :issue:`1997`)
+
+- HTTP: Fix support for websocket clients connecting/disconnecting
+  during broadcast. (PR: :issue:`1993`)
 
 - Add Python 3.10 to our test matrix.
 
