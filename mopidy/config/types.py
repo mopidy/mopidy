@@ -285,6 +285,10 @@ class List(ConfigValue):
 
     Supports elements split by commas or newlines. Newlines take precedence and
     empty list items will be filtered out.
+
+    Enforcing unique entries in the list will result in a set data structure
+    being used. This does not preserve ordering, which could result in the
+    serialized output being unstable.
     """
 
     def __init__(self, optional=False, unique=False, subtype=None):
