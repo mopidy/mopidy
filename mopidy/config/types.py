@@ -279,7 +279,7 @@ class Port(Integer):
 
     def __init__(self, choices=None, optional=False):
         super().__init__(
-            minimum=0, maximum=2 ** 16 - 1, choices=choices, optional=optional
+            minimum=0, maximum=2**16 - 1, choices=choices, optional=optional
         )
 
 
