@@ -8,6 +8,7 @@ Mopidy-File is an extension for playing music from your local music archive.
 It is bundled with Mopidy and enabled by default. 
 It allows you to browse through your local file system.
 Only files that are considered playable will be shown.
+For large music collections and search functionality consider `Mopidy-Local <https://mopidy.com/ext/local/>`_ instead.
 
 This backend handles URIs starting with ``file:``.
 
