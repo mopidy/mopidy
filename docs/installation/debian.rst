@@ -43,8 +43,8 @@ Install from apt.mopidy.com
 #. Add the archive's GPG key::
 
        sudo mkdir -p /usr/local/share/keyrings
-       wget -q -O - https://apt.mopidy.com/mopidy.gpg | gpg --dearmor | \
-         sudo tee /usr/local/share/keyrings/mopidy-archive-keyring.gpg
+       sudo wget -q -O /usr/local/share/keyrings/mopidy-archive-keyring.gpg \
+         https://apt.mopidy.com/mopidy.gpg
 
 #. Add the APT repo to your package sources::
 
