@@ -9,7 +9,7 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
-v3.3.0 (UNRELEASED)
+v3.3.0 (2022-04-29)
 ===================
 
 - Core: Fixes invalid verbosity logging levels. (Fixes: :issue:`1947`,
