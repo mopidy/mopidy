@@ -83,7 +83,11 @@ To install one of the listed packages, e.g. ``mopidy-mpd``, simply run::
    sudo apt install mopidy-mpd
 
 If you cannot find the extension you want in the APT search result, you can
-install it from PyPI using ``pip`` instead.
+install it from PyPI using ``pip`` instead. You need to make sure you have
+``pip``, the Python package installer installed::
+
+   sudo apt install python3-pip
+
 Even if Mopidy itself is installed from APT it will correctly detect and use
 extensions from PyPI installed globally on your system using::
 
