@@ -5,20 +5,25 @@ from mopidy import exceptions
 
 PLAYBACK_STATES = {"paused", "stopped", "playing"}
 
-SEARCH_FIELDS = {
-    "uri",
-    "track_name",
-    "album",
-    "artist",
-    "albumartist",
-    "composer",
-    "performer",
-    "track_no",
-    "genre",
-    "date",
-    "comment",
-    "any",
+TRACK_FIELDS_WITH_TYPES = {
+    "uri": str,
+    "track_name": str,
+    "album": str,
+    "artist": str,
+    "albumartist": str,
+    "composer": str,
+    "performer": str,
+    "track_no": int,
+    "genre": str,
+    "date": str,
+    "comment": str,
+    "disc_no": int,
+    "musicbrainz_albumid": str,
+    "musicbrainz_artistid": str,
+    "musicbrainz_trackid": str,
 }
+
+SEARCH_FIELDS = set(TRACK_FIELDS_WITH_TYPES).union({"any"})
 
 PLAYLIST_FIELDS = {"uri", "name"}  # TODO: add length and last_modified?
 
@@ -31,16 +36,7 @@ TRACKLIST_FIELDS = {  # TODO: add bitrate, length, disc_no, track_no, modified?
     "musicbrainz_id",
 }
 
-DISTINCT_FIELDS = {
-    "track",
-    "artist",
-    "albumartist",
-    "album",
-    "composer",
-    "performer",
-    "date",
-    "genre",
-}
+DISTINCT_FIELDS = dict(TRACK_FIELDS_WITH_TYPES)
 
 
 # TODO: _check_iterable(check, msg, **kwargs) + [check(a) for a in arg]?

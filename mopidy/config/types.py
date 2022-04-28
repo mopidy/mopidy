@@ -34,6 +34,14 @@ class DeprecatedValue:
     pass
 
 
+class _TransformedValue(str):
+    def __new__(cls, original, transformed):
+        return super().__new__(cls, transformed)
+
+    def __init__(self, original, transformed):
+        self.original = original
+
+
 class ConfigValue:
     """Represents a config key's value and how to handle it.
 
@@ -82,21 +90,32 @@ class String(ConfigValue):
     Is decoded as utf-8 and \\n \\t escapes should work and be preserved.
     """
 
-    def __init__(self, optional=False, choices=None):
+    def __init__(self, optional=False, choices=None, transformer=None):
         self._required = not optional
         self._choices = choices
+        self._transformer = transformer
 
     def deserialize(self, value):
         value = decode(value).strip()
         validators.validate_required(value, self._required)
         if not value:
             return None
+
+        # This is necessary for backwards-compatibility, in case subclasses
+        # aren't calling their parent constructor.
+        transformer = getattr(self, "_transformer", None)
+        if transformer:
+            transformed_value = transformer(value)
+            value = _TransformedValue(value, transformed_value)
+
         validators.validate_choice(value, self._choices)
         return value
 
     def serialize(self, value, display=False):
         if value is None:
             return ""
+        if isinstance(value, _TransformedValue):
+            value = value.original
         return encode(value)
 
 
@@ -109,9 +128,12 @@ class Secret(String):
     displayed.
     """
 
-    def __init__(self, optional=False, choices=None):
-        self._required = not optional
-        self._choices = None  # Choices doesn't make sense for secrets
+    def __init__(self, optional=False, choices=None, transformer=None):
+        super().__init__(
+            optional=optional,
+            choices=None,  # Choices doesn't make sense for secrets
+            transformer=transformer,
+        )
 
     def serialize(self, value, display=False):
         if value is not None and display:
@@ -137,6 +159,25 @@ class Integer(ConfigValue):
             return None
         value = int(value)
         validators.validate_choice(value, self._choices)
+        validators.validate_minimum(value, self._minimum)
+        validators.validate_maximum(value, self._maximum)
+        return value
+
+
+class Float(ConfigValue):
+    """Float value."""
+
+    def __init__(self, minimum=None, maximum=None, optional=False):
+        self._required = not optional
+        self._minimum = minimum
+        self._maximum = maximum
+
+    def deserialize(self, value):
+        value = decode(value)
+        validators.validate_required(value, self._required)
+        if not value:
+            return None
+        value = float(value)
         validators.validate_minimum(value, self._minimum)
         validators.validate_maximum(value, self._maximum)
         return value
@@ -178,15 +219,82 @@ class Boolean(ConfigValue):
             raise ValueError(f"{value!r} is not a boolean")
 
 
+class Pair(ConfigValue):
+    """Pair value
+
+    The value is expected to be a pair of elements, separated by a specified delimiter.
+    Values can optionally not be a pair, in which case the whole input is provided for
+    both sides of the value.
+    """
+
+    def __init__(
+        self, optional=False, optional_pair=False, separator="|", subtypes=None
+    ):
+        self._required = not optional
+        self._optional_pair = optional_pair
+        self._separator = separator
+        if subtypes:
+            self._subtypes = subtypes
+        else:
+            self._subtypes = (String(), String())
+
+    def deserialize(self, value):
+        raw_value = decode(value).strip()
+        validators.validate_required(raw_value, self._required)
+        if not raw_value:
+            return None
+
+        if self._separator in raw_value:
+            values = raw_value.split(self._separator, 1)
+        elif self._optional_pair:
+            values = (raw_value, raw_value)
+        else:
+            raise ValueError(
+                f"Config value must include {self._separator!r} separator: {raw_value}"
+            )
+
+        return (
+            self._subtypes[0].deserialize(encode(values[0])),
+            self._subtypes[1].deserialize(encode(values[1])),
+        )
+
+    def serialize(self, value, display=False):
+        serialized_first_value = self._subtypes[0].serialize(
+            value[0], display=display
+        )
+        serialized_second_value = self._subtypes[1].serialize(
+            value[1], display=display
+        )
+
+        if (
+            not display
+            and self._optional_pair
+            and serialized_first_value == serialized_second_value
+        ):
+            return serialized_first_value
+        else:
+            return "{0}{1}{2}".format(
+                serialized_first_value,
+                self._separator,
+                serialized_second_value,
+            )
+
+
 class List(ConfigValue):
     """List value.
 
-    Supports elements split by commas or newlines. Newlines take presedence and
+    Supports elements split by commas or newlines. Newlines take precedence and
     empty list items will be filtered out.
+
+    Enforcing unique entries in the list will result in a set data structure
+    being used. This does not preserve ordering, which could result in the
+    serialized output being unstable.
     """
 
-    def __init__(self, optional=False):
+    def __init__(self, optional=False, unique=False, subtype=None):
         self._required = not optional
+        self._unique = unique
+        self._subtype = subtype if subtype else String()
 
     def deserialize(self, value):
         value = decode(value)
@@ -194,14 +302,37 @@ class List(ConfigValue):
             values = re.split(r"\s*\n\s*", value)
         else:
             values = re.split(r"\s*,\s*", value)
-        values = tuple(v.strip() for v in values if v.strip())
+
+        # This is necessary for backwards-compatibility, in case subclasses
+        # aren't calling their parent constructor.
+        subtype = getattr(self, "_subtype", String())
+
+        values_iter = (
+            subtype.deserialize(v.strip()) for v in values if v.strip()
+        )
+        if self._unique:
+            values = frozenset(values_iter)
+        else:
+            values = tuple(values_iter)
+
         validators.validate_required(values, self._required)
-        return tuple(values)
+        return values
 
     def serialize(self, value, display=False):
         if not value:
             return ""
-        return "\n  " + "\n  ".join(encode(v) for v in value if v)
+
+        # This is necessary for backwards-compatibility, in case subclasses
+        # aren't calling their parent constructor.
+        subtype = getattr(self, "_subtype", String())
+
+        serialized_values = []
+        for item in value:
+            serialized_value = subtype.serialize(item, display=display)
+            if serialized_value:
+                serialized_values.append(serialized_value)
+
+        return "\n  " + "\n  ".join(serialized_values)
 
 
 class LogColor(ConfigValue):
@@ -283,12 +414,9 @@ class Port(Integer):
         )
 
 
-class _ExpandedPath(str):
-    def __new__(cls, original, expanded):
-        return super().__new__(cls, expanded)
-
-    def __init__(self, original, expanded):
-        self.original = original
+# Keep this for backwards compatibility
+class _ExpandedPath(_TransformedValue):
+    pass
 
 
 class Path(ConfigValue):
@@ -316,6 +444,8 @@ class Path(ConfigValue):
         return _ExpandedPath(value, expanded)
 
     def serialize(self, value, display=False):
+        if value is None:
+            return ""
         if isinstance(value, _ExpandedPath):
             value = value.original
         if isinstance(value, bytes):

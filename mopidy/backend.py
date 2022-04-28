@@ -14,8 +14,8 @@ if TYPE_CHECKING:
 
     from mopidy.models import Image, Playlist, Ref, SearchResult, Track
 
-    # TODO Fix duplication with mopidy.internal.validation.SEARCH_FIELDS
-    SearchField = Literal[
+    # TODO Fix duplication with mopidy.internal.validation.TRACK_FIELDS_WITH_TYPES
+    TrackField = Literal[
         "uri",
         "track_name",
         "album",
@@ -27,13 +27,15 @@ if TYPE_CHECKING:
         "genre",
         "date",
         "comment",
-        "any",
+        "disc_no",
+        "musicbrainz_albumid",
+        "musicbrainz_artistid",
+        "musicbrainz_trackid",
     ]
 
-    # TODO Fix duplication with mopidy.internal.validation.DISTINCT_FIELDS
-    DistinctField = Literal[
-        "uri", "name", "genre", "date", "comment", "musicbrainz_id"
-    ]
+    SearchField = Literal[TrackField, "any"]
+
+    DistinctField = TrackField
 
     F = TypeVar("F")
     QueryValue = Union[str, int]

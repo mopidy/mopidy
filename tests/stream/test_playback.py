@@ -38,7 +38,7 @@ def audio():
     return mock.Mock()
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def scanner():
     patcher = mock.patch.object(scan, "Scanner")
     yield patcher.start()()

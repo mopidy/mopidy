@@ -154,6 +154,8 @@ class PlaybackController:
                     self._start_paused = False
             else:
                 self._seek(self._pending_position)
+                self.set_state(PlaybackState.PLAYING)
+                self._trigger_track_playback_started()
 
     def _on_position_changed(self, position):
         if self._pending_position is not None:
@@ -466,6 +468,7 @@ class PlaybackController:
         if self._current_tl_track and self._pending_tl_track:
             self._change(self._current_tl_track, self.get_state())
         else:
+            # TODO: Avoid returning False here when STOPPED (seek is deferred)?
             return self._seek(time_position)
 
     def _seek(self, time_position):
