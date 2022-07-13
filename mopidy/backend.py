@@ -1,14 +1,54 @@
-from __future__ import absolute_import, unicode_literals
+from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 
-from mopidy import listener, models
+import pykka
+
+from mopidy import listener
+
+if TYPE_CHECKING:
+    from typing import Any, Dict, List, Optional, Set, TypeVar, Union
+
+    from typing_extensions import Literal
+
+    from mopidy.models import Image, Playlist, Ref, SearchResult, Track
+
+    # TODO Fix duplication with mopidy.internal.validation.TRACK_FIELDS_WITH_TYPES
+    TrackField = Literal[
+        "uri",
+        "track_name",
+        "album",
+        "artist",
+        "albumartist",
+        "composer",
+        "performer",
+        "track_no",
+        "genre",
+        "date",
+        "comment",
+        "disc_no",
+        "musicbrainz_albumid",
+        "musicbrainz_artistid",
+        "musicbrainz_trackid",
+    ]
+
+    SearchField = Literal[TrackField, "any"]
+
+    DistinctField = TrackField
+
+    F = TypeVar("F")
+    QueryValue = Union[str, int]
+    Query = Dict[F, List[QueryValue]]
+
+    Uri = str
+    UriScheme = str
 
 
 logger = logging.getLogger(__name__)
 
 
-class Backend(object):
+class Backend:
 
     """Backend API
 
@@ -27,57 +67,59 @@ class Backend(object):
     #:
     #: Should be passed to the backend constructor as the kwarg ``audio``,
     #: which will then set this field.
-    audio = None
+    # TODO(typing) Replace Any with an ActorProxy[Audio] type
+    audio: Optional[Any] = None
 
     #: The library provider. An instance of
     #: :class:`~mopidy.backend.LibraryProvider`, or :class:`None` if
     #: the backend doesn't provide a library.
-    library = None
+    library: Optional[LibraryProvider] = None
 
     #: The playback provider. An instance of
     #: :class:`~mopidy.backend.PlaybackProvider`, or :class:`None` if
     #: the backend doesn't provide playback.
-    playback = None
+    playback: Optional[PlaybackProvider] = None
 
     #: The playlists provider. An instance of
     #: :class:`~mopidy.backend.PlaylistsProvider`, or class:`None` if
     #: the backend doesn't provide playlists.
-    playlists = None
+    playlists: Optional[PlaylistsProvider] = None
 
     #: List of URI schemes this backend can handle.
-    uri_schemes = []
+    uri_schemes: List[UriScheme] = []
 
-    # Because the providers is marked as pykka_traversible, we can't get() them
-    # from another actor, and need helper methods to check if the providers are
-    # set or None.
+    # Because the providers is marked as pykka.traversable(), we can't get()
+    # them from another actor, and need helper methods to check if the
+    # providers are set or None.
 
-    def has_library(self):
+    def has_library(self) -> bool:
         return self.library is not None
 
-    def has_library_browse(self):
-        return self.has_library() and self.library.root_directory is not None
+    def has_library_browse(self) -> bool:
+        return (
+            self.library is not None and self.library.root_directory is not None
+        )
 
-    def has_playback(self):
+    def has_playback(self) -> bool:
         return self.playback is not None
 
-    def has_playlists(self):
+    def has_playlists(self) -> bool:
         return self.playlists is not None
 
-    def ping(self):
+    def ping(self) -> bool:
         """Called to check if the actor is still alive."""
         return True
 
 
-class LibraryProvider(object):
+@pykka.traversable
+class LibraryProvider:
 
     """
     :param backend: backend the controller is a part of
     :type backend: :class:`mopidy.backend.Backend`
     """
 
-    pykka_traversable = True
-
-    root_directory = None
+    root_directory: Optional[Ref] = None
     """
     :class:`mopidy.models.Ref.directory` instance with a URI and name set
     representing the root of this library's browse tree. URIs must
@@ -87,10 +129,10 @@ class LibraryProvider(object):
     *MUST be set by any class that implements* :meth:`LibraryProvider.browse`.
     """
 
-    def __init__(self, backend):
+    def __init__(self, backend: Backend) -> None:
         self.backend = backend
 
-    def browse(self, uri):
+    def browse(self, uri: Uri) -> List[Ref]:
         """
         See :meth:`mopidy.core.LibraryController.browse`.
 
@@ -101,7 +143,9 @@ class LibraryProvider(object):
         """
         return []
 
-    def get_distinct(self, field, query=None):
+    def get_distinct(
+        self, field: DistinctField, query: Optional[Query[DistinctField]] = None
+    ) -> Set[str]:
         """
         See :meth:`mopidy.core.LibraryController.get_distinct`.
 
@@ -114,26 +158,17 @@ class LibraryProvider(object):
         """
         return set()
 
-    def get_images(self, uris):
+    def get_images(self, uris: List[Uri]) -> Dict[Uri, List[Image]]:
         """
         See :meth:`mopidy.core.LibraryController.get_images`.
 
         *MAY be implemented by subclass.*
 
-        Default implementation will simply call lookup and try and use the
-        album art for any tracks returned. Most extensions should replace this
-        with something smarter or simply return an empty dictionary.
+        Default implementation will simply return an empty dictionary.
         """
-        result = {}
-        for uri in uris:
-            image_uris = set()
-            for track in self.lookup(uri):
-                if track.album and track.album.images:
-                    image_uris.update(track.album.images)
-            result[uri] = [models.Image(uri=u) for u in image_uris]
-        return result
+        return {}
 
-    def lookup(self, uri):
+    def lookup(self, uri: Uri) -> Dict[Uri, List[Track]]:
         """
         See :meth:`mopidy.core.LibraryController.lookup`.
 
@@ -141,7 +176,7 @@ class LibraryProvider(object):
         """
         raise NotImplementedError
 
-    def refresh(self, uri=None):
+    def refresh(self, uri: Optional[Uri] = None) -> None:
         """
         See :meth:`mopidy.core.LibraryController.refresh`.
 
@@ -149,7 +184,12 @@ class LibraryProvider(object):
         """
         pass
 
-    def search(self, query=None, uris=None, exact=False):
+    def search(
+        self,
+        query: Query[SearchField],
+        uris: Optional[List[Uri]] = None,
+        exact: bool = False,
+    ) -> List[SearchResult]:
         """
         See :meth:`mopidy.core.LibraryController.search`.
 
@@ -161,7 +201,8 @@ class LibraryProvider(object):
         pass
 
 
-class PlaybackProvider(object):
+@pykka.traversable
+class PlaybackProvider:
 
     """
     :param audio: the audio actor
@@ -170,13 +211,12 @@ class PlaybackProvider(object):
     :type backend: :class:`mopidy.backend.Backend`
     """
 
-    pykka_traversable = True
-
-    def __init__(self, audio, backend):
+    def __init__(self, audio: Any, backend: Backend) -> None:
+        # TODO(typing) Replace Any with an ActorProxy[Audio] type
         self.audio = audio
         self.backend = backend
 
-    def pause(self):
+    def pause(self) -> bool:
         """
         Pause playback.
 
@@ -186,7 +226,7 @@ class PlaybackProvider(object):
         """
         return self.audio.pause_playback().get()
 
-    def play(self):
+    def play(self) -> bool:
         """
         Start playback.
 
@@ -196,7 +236,7 @@ class PlaybackProvider(object):
         """
         return self.audio.start_playback().get()
 
-    def prepare_change(self):
+    def prepare_change(self) -> None:
         """
         Indicate that an URI change is about to happen.
 
@@ -208,7 +248,7 @@ class PlaybackProvider(object):
         """
         self.audio.prepare_change().get()
 
-    def translate_uri(self, uri):
+    def translate_uri(self, uri: Uri) -> Optional[Uri]:
         """
         Convert custom URI scheme to real playable URI.
 
@@ -225,9 +265,39 @@ class PlaybackProvider(object):
         """
         return uri
 
-    def change_track(self, track):
+    def is_live(self, uri: Uri) -> bool:
         """
-        Swith to provided track.
+        Decide if the URI should be treated as a live stream or not.
+
+        *MAY be reimplemented by subclass.*
+
+        Playing a source as a live stream disables buffering, which reduces
+        latency before playback starts, and discards data when paused.
+
+        :param uri: the URI
+        :type uri: string
+        :rtype: bool
+        """
+        return False
+
+    def should_download(self, uri: Uri) -> bool:
+        """
+        Attempt progressive download buffering for the URI or not.
+
+        *MAY be reimplemented by subclass.*
+
+        When streaming a fixed length file, the entire file can be buffered
+        to improve playback performance.
+
+        :param uri: the URI
+        :type uri: string
+        :rtype: bool
+        """
+        return False
+
+    def change_track(self, track: Track) -> bool:
+        """
+        Switch to provided track.
 
         *MAY be reimplemented by subclass.*
 
@@ -244,14 +314,17 @@ class PlaybackProvider(object):
         """
         uri = self.translate_uri(track.uri)
         if uri != track.uri:
-            logger.debug(
-                'Backend translated URI from %s to %s', track.uri, uri)
+            logger.debug("Backend translated URI from %s to %s", track.uri, uri)
         if not uri:
             return False
-        self.audio.set_uri(uri).get()
+        self.audio.set_uri(
+            uri,
+            live_stream=self.is_live(uri),
+            download=self.should_download(uri),
+        ).get()
         return True
 
-    def resume(self):
+    def resume(self) -> bool:
         """
         Resume playback at the same time position playback was paused.
 
@@ -261,7 +334,7 @@ class PlaybackProvider(object):
         """
         return self.audio.start_playback().get()
 
-    def seek(self, time_position):
+    def seek(self, time_position: int) -> bool:
         """
         Seek to a given time position.
 
@@ -273,7 +346,7 @@ class PlaybackProvider(object):
         """
         return self.audio.set_position(time_position).get()
 
-    def stop(self):
+    def stop(self) -> bool:
         """
         Stop playback.
 
@@ -286,7 +359,7 @@ class PlaybackProvider(object):
         """
         return self.audio.stop_playback().get()
 
-    def get_time_position(self):
+    def get_time_position(self) -> int:
         """
         Get the current time position in milliseconds.
 
@@ -297,7 +370,8 @@ class PlaybackProvider(object):
         return self.audio.get_position().get()
 
 
-class PlaylistsProvider(object):
+@pykka.traversable
+class PlaylistsProvider:
 
     """
     A playlist provider exposes a collection of playlists, methods to
@@ -308,12 +382,10 @@ class PlaylistsProvider(object):
     :type backend: :class:`mopidy.backend.Backend` instance
     """
 
-    pykka_traversable = True
-
-    def __init__(self, backend):
+    def __init__(self, backend: Backend) -> None:
         self.backend = backend
 
-    def as_list(self):
+    def as_list(self) -> List[Ref]:
         """
         Get a list of the currently available playlists.
 
@@ -327,7 +399,7 @@ class PlaylistsProvider(object):
         """
         raise NotImplementedError
 
-    def get_items(self, uri):
+    def get_items(self, uri: Uri) -> Optional[List[Ref]]:
         """
         Get the items in a playlist specified by ``uri``.
 
@@ -343,7 +415,7 @@ class PlaylistsProvider(object):
         """
         raise NotImplementedError
 
-    def create(self, name):
+    def create(self, name: str) -> Optional[Playlist]:
         """
         Create a new empty playlist with the given name.
 
@@ -358,18 +430,24 @@ class PlaylistsProvider(object):
         """
         raise NotImplementedError
 
-    def delete(self, uri):
+    def delete(self, uri: Uri) -> bool:
         """
         Delete playlist identified by the URI.
+
+        Returns :class:`True` if deleted, :class:`False` otherwise.
 
         *MUST be implemented by subclass.*
 
         :param uri: URI of the playlist to delete
         :type uri: string
+        :rtype: :class:`bool`
+
+        .. versionchanged:: 2.2
+            Return type defined.
         """
         raise NotImplementedError
 
-    def lookup(self, uri):
+    def lookup(self, uri: Uri) -> Optional[Playlist]:
         """
         Lookup playlist with given URI in both the set of playlists and in any
         other playlist source.
@@ -384,7 +462,7 @@ class PlaylistsProvider(object):
         """
         raise NotImplementedError
 
-    def refresh(self):
+    def refresh(self) -> None:
         """
         Refresh the playlists in :attr:`playlists`.
 
@@ -392,7 +470,7 @@ class PlaylistsProvider(object):
         """
         raise NotImplementedError
 
-    def save(self, playlist):
+    def save(self, playlist: Playlist) -> Optional[Playlist]:
         """
         Save the given playlist.
 
@@ -425,11 +503,11 @@ class BackendListener(listener.Listener):
     """
 
     @staticmethod
-    def send(event, **kwargs):
+    def send(event: str, **kwargs: Any) -> None:
         """Helper to allow calling of backend listener events"""
         listener.send(BackendListener, event, **kwargs)
 
-    def playlists_loaded(self):
+    def playlists_loaded(self) -> None:
         """
         Called when playlists are loaded or refreshed.
 

@@ -10,7 +10,7 @@ The following requirements applies to any frontend implementation:
   opening TCP ports and exposing Mopidy for a group of clients.
 
 - A frontend MUST implement at least one `Pykka
-  <http://pykka.readthedocs.org/>`_ actor, called the "main actor" from here
+  <https://pykka.readthedocs.io/>`_ actor, called the "main actor" from here
   on.
 
 - The main actor MUST accept two constructor arguments:
@@ -45,4 +45,4 @@ The following requirements applies to any frontend implementation:
 Frontend implementations
 ========================
 
-See :ref:`ext-frontends`.
+See the `extension registry <https://mopidy.com/ext/>`_.

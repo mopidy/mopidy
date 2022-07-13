@@ -11,7 +11,7 @@ to expose something over HTTP.
 The HTTP server side API can be used to:
 
 - host static files for e.g. a Mopidy client written in pure JavaScript,
-- host a `Tornado <http://www.tornadoweb.org/>`__ application, or
+- host a `Tornado <https://www.tornadoweb.org/>`__ application, or
 - host a WSGI application, including e.g. Flask applications.
 
 To host static files using the web server, an extension needs to register a
@@ -45,8 +45,6 @@ available at http://localhost:6680/mywebclient/foo.html.
 
 ::
 
-    from __future__ import absolute_import, unicode_literals
-
     import os
 
     from mopidy import ext
@@ -68,7 +66,7 @@ Tornado application example
 ===========================
 
 The :ref:`ext-http` extension's web server is based on the `Tornado
-<http://www.tornadoweb.org/>`__ web framework. Thus, it has first class support
+<https://www.tornadoweb.org/>`__ web framework. Thus, it has first class support
 for Tornado request handlers.
 
 In the following example, we create a :class:`tornado.web.RequestHandler`
@@ -96,8 +94,6 @@ http://localhost:6680/mywebclient/ with the string ``Hello, world! This is
 Mopidy $version``.
 
 ::
-
-    from __future__ import absolute_import, unicode_literals
 
     import os
 
@@ -151,8 +147,6 @@ http://localhost:6680/mywebclient/.
 
 ::
 
-    from __future__ import absolute_import, unicode_literals
-
     import os
 
     import tornado.web
@@ -194,4 +188,4 @@ http://localhost:6680/mywebclient/.
 API implementors
 ================
 
-See :ref:`ext-web`.
+See the `extension registry <https://mopidy.com/ext/>`_.

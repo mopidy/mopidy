@@ -32,7 +32,7 @@ named Soundspot to Mopidy, you would name your extension's Python package
 ``mopidy_soundspot``.
 
 The extension must be shipped with a ``setup.py`` file and be registered on
-`PyPI <https://pypi.python.org/>`_.  The name of the distribution on PyPI would
+`PyPI <https://pypi.org/>`_.  The name of the distribution on PyPI would
 be something like "Mopidy-Soundspot". Make sure to include the name "Mopidy"
 somewhere in that name and that you check the capitalization. This is the name
 users will use when they install your extension from PyPI.
@@ -61,7 +61,7 @@ Example content for the most important files follows below.
 cookiecutter project template
 =============================
 
-We've also made a `cookiecutter <http://cookiecutter.readthedocs.org/>`_
+We've also made a `cookiecutter <https://cookiecutter.readthedocs.io/>`_
 project template for `creating new Mopidy extensions
 <https://github.com/mopidy/cookiecutter-mopidy-ext>`_. If you install
 cookiecutter and run a single command, you're asked a few questions about the
@@ -87,7 +87,7 @@ with ``#egg=Mopidy-Something-dev`` for installation using
     Mopidy-Soundspot
     ****************
 
-    `Mopidy <http://www.mopidy.com/>`_ extension for playing music from
+    `Mopidy <https://mopidy.com/>`_ extension for playing music from
     `Soundspot <http://soundspot.example.com/>`_.
 
     Requires a Soundspot Platina subscription and the pysoundspot library.
@@ -101,7 +101,7 @@ with ``#egg=Mopidy-Something-dev`` for installation using
         sudo pip install Mopidy-Soundspot
 
     Or, if available, install the Debian/Ubuntu package from `apt.mopidy.com
-    <http://apt.mopidy.com/>`_.
+    <https://apt.mopidy.com/>`_.
 
 
     Configuration
@@ -159,8 +159,6 @@ class that will connect the rest of the dots.
 
 ::
 
-    from __future__ import absolute_import, unicode_literals
-
     import re
     from setuptools import setup, find_packages
 
@@ -215,7 +213,7 @@ file::
 
 For details on the ``MANIFEST.in`` file format, check out the `distutils docs
 <https://docs.python.org/2/distutils/sourcedist.html#manifest-template>`_.
-`check-manifest <https://pypi.python.org/pypi/check-manifest>`_ is a very
+`check-manifest <https://pypi.org/project/check-manifest>`_ is a very
 useful tool to check your ``MANIFEST.in`` file for completeness.
 
 
@@ -249,8 +247,6 @@ config as a separate file named ``ext.conf``. This makes it easy to include the
 default config in documentation without duplicating it.
 
 This is ``mopidy_soundspot/__init__.py``::
-
-    from __future__ import absolute_import, unicode_literals
 
     import logging
     import os
@@ -401,8 +397,8 @@ Example web application
 
 As of Mopidy 0.19, extensions can use Mopidy's built-in web server to host
 static web clients as well as Tornado and WSGI web applications. For several
-examples, see the :ref:`http-server-api` docs or explore with
-:ref:`http-explore-extension` extension.
+examples, see the :ref:`http-server-api` docs or explore with the
+`Mopidy-API-Explorer <https://mopidy.com/ext/api-explorer>`_ extension.
 
 
 Running an extension
@@ -420,9 +416,7 @@ Python conventions
 ==================
 
 In general, it would be nice if Mopidy extensions followed the same
-:ref:`codestyle` as Mopidy itself, as they're part of the same ecosystem. Among
-other things, the code style guide explains why all the above examples start
-with ``from __future__ import absolute_import, unicode_literals``.
+:ref:`codestyle` as Mopidy itself, as they're part of the same ecosystem.
 
 
 Use of Mopidy APIs
@@ -485,7 +479,7 @@ If you make HTTP requests please make sure to respect the :ref:`proxy configs
 configured by the Mopidy user. To make this easier for extension developers,
 the helper function :func:`mopidy.httpclient.format_proxy` was added in Mopidy
 1.1. This function returns the proxy settings `formatted the way Requests
-expects <http://www.python-requests.org/en/latest/user/advanced/#proxies>`__.
+expects <https://2.python-requests.org/en/master/user/advanced/#proxies>`__.
 
 User-Agent strings
 ------------------
@@ -497,15 +491,17 @@ an example of how to use it::
 
     >>> from mopidy import httpclient
     >>> import mopidy_soundspot
-    >>> httpclient.format_user_agent('%s/%s' % (
-    ...     mopidy_soundspot.Extension.dist_name, mopidy_soundspot.__version__))
-    u'Mopidy-SoundSpot/2.0.0 Mopidy/1.0.7 Python/2.7.10'
+    >>> httpclient.format_user_agent(
+    ...     f'{mopidy_soundspot.Extension.dist_name}/'
+    ...     f'{mopidy_soundspot.__version__}'
+    ... )
+    'Mopidy-SoundSpot/2.0.0 Mopidy/3.0.0 Python/3.7.5'
 
 Example using Requests sessions
 -------------------------------
 
 Most Mopidy extensions that make HTTP requests use the `Requests
-<http://www.python-requests.org/>`_ library to do so. When using Requests, the
+<https://2.python-requests.org/>`_ library to do so. When using Requests, the
 most convenient way to make sure the proxy and User-Agent header is set
 properly is to create a Requests session object and use that object to make all
 your HTTP requests::
@@ -532,16 +528,17 @@ your HTTP requests::
     # constructor
     session = get_requests_session(
         proxy_config=mopidy_config['proxy'],
-        user_agent='%s/%s' % (
-            mopidy_soundspot.Extension.dist_name,
-            mopidy_soundspot.__version__))
+        user_agent=(
+            f'{mopidy_soundspot.Extension.dist_name}/{mopidy_soundspot.__version__}'
+        )
+    )
 
-    response = session.get('http://example.com')
+    response = session.get('https://example.com')
     # Now do something with ``response`` and/or make further requests using the
     # ``session`` object.
 
 For further details, see Requests' docs on `session objects
-<http://www.python-requests.org/en/latest/user/advanced/#session-objects>`__.
+<https://2.python-requests.org/en/master/user/advanced/#session-objects>`__.
 
 Testing extensions
 ==================
@@ -554,8 +551,8 @@ extension in some unanticipated way.
 Before getting started, it is important to familiarize yourself with the
 Python `mock library <https://docs.python.org/dev/library/unittest.mock.html>`_.
 When it comes to running tests, Mopidy typically makes use of testing tools
-like `tox <https://tox.readthedocs.org/en/latest/>`_ and
-`pytest <http://pytest.org/latest/>`_.
+like `tox <https://tox.readthedocs.io/>`_ and
+`pytest <https://docs.pytest.org/>`_.
 
 Testing approach
 ----------------
@@ -586,7 +583,7 @@ Test cases for checking the definition of the extension should ensure that:
 
 An example of what these tests could look like is provided below::
 
-    def test_get_default_config(self):
+    def test_get_default_config():
         ext = Extension()
         config = ext.get_default_config()
 
@@ -596,7 +593,7 @@ An example of what these tests could look like is provided below::
         assert 'param_2 = value_2' in config
         assert 'param_n = value_n' in config
 
-    def test_get_config_schema(self):
+    def test_get_config_schema():
         ext = Extension()
         schema = ext.get_config_schema()
 
@@ -605,7 +602,7 @@ An example of what these tests could look like is provided below::
         assert 'param_2' in schema
         assert 'param_n' in schema
 
-    def test_setup(self):
+    def test_setup():
         registry = mock.Mock()
 
         ext = Extension()
@@ -646,9 +643,9 @@ file, and mocking the audio actor::
 The following libraries might be useful for mocking any HTTP requests that
 your extension makes:
 
-- `responses <https://pypi.python.org/pypi/responses>`_ - A utility library for
+- `responses <https://pypi.org/project/responses>`_ - A utility library for
   mocking out the requests Python library.
-- `vcrpy <https://pypi.python.org/pypi/vcrpy>`_ - Automatically mock your HTTP
+- `vcrpy <https://pypi.org/project/vcrpy>`_ - Automatically mock your HTTP
   interactions to simplify and speed up testing.
 
 At the very least, you'll probably want to patch ``requests`` or any other web
@@ -709,7 +706,7 @@ be necessary to have a full core running for testing purposes::
 
 
 It may be advisable to take a quick look at the
-`Pykka API <https://www.pykka.org/en/latest/>`_ at this point to make sure that
+`Pykka API <https://pykka.readthedocs.io/en/latest/>`_ at this point to make sure that
 you are familiar with ``ThreadingActor``, ``ThreadingFuture``, and the
 ``proxies`` that allow you to access the attributes and methods of the actor
 directly.

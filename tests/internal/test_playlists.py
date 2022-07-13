@@ -1,15 +1,8 @@
-# encoding: utf-8
-
-from __future__ import absolute_import, unicode_literals
-
-import unittest
-
 import pytest
 
 from mopidy.internal import playlists
 
-
-BAD = b'foobarbaz'
+BAD = b"foobarbaz"
 
 EXTM3U = b"""#EXTM3U
 #EXTINF:123, Sample artist - Sample title
@@ -31,11 +24,12 @@ file:///tmp/baz
 
 PLS = b"""[Playlist]
 NumberOfEntries=3
-File1=file:///tmp/foo
+File1="file:///tmp/foo"
 Title1=Sample Title
 Length1=123
+Version=2
 
-File2=file:///tmp/bar
+File2='file:///tmp/bar'
 Title2=Example \xc5\xa7\xc5\x95
 Length2=321
 File3=file:///tmp/baz
@@ -87,87 +81,70 @@ XSPF = b"""<?xml version="1.0" encoding="UTF-8"?>
 </playlist>
 """
 
-EXPECTED = [b'file:///tmp/foo', b'file:///tmp/bar', b'file:///tmp/baz']
+EXPECTED = ["file:///tmp/foo", "file:///tmp/bar", "file:///tmp/baz"]
 
 
-@pytest.mark.parametrize('data,result', [
-    (BAD, []),
-    (URILIST, EXPECTED),
-    (EXTM3U, EXPECTED),
-    (PLS, EXPECTED),
-    (ASX, EXPECTED),
-    (SIMPLE_ASX, EXPECTED),
-    (XSPF, EXPECTED),
-])
-def test_parse(data, result):
-    assert playlists.parse(data) == result
+@pytest.mark.parametrize(
+    "detect_fn, data",
+    [
+        (playlists.detect_extm3u_header, EXTM3U),
+        (playlists.detect_pls_header, PLS),
+        (playlists.detect_asx_header, ASX),
+        (playlists.detect_asx_header, SIMPLE_ASX),
+        (playlists.detect_xspf_header, XSPF),
+    ],
+)
+def test_detect_from_valid_header(detect_fn, data):
+    assert detect_fn(data) is True
 
 
-class BasePlaylistTest(object):
-    valid = None
-    invalid = None
-    detect = None
-    parse = None
-
-    def test_detect_valid_header(self):
-        self.assertTrue(self.detect(self.valid))
-
-    def test_detect_invalid_header(self):
-        self.assertFalse(self.detect(self.invalid))
-
-    def test_parse_valid_playlist(self):
-        uris = list(self.parse(self.valid))
-        self.assertEqual(uris, EXPECTED)
-
-    def test_parse_invalid_playlist(self):
-        uris = list(self.parse(self.invalid))
-        self.assertEqual(uris, [])
+@pytest.mark.parametrize(
+    "detect_fn",
+    [
+        playlists.detect_extm3u_header,
+        playlists.detect_pls_header,
+        playlists.detect_asx_header,
+        playlists.detect_asx_header,
+        playlists.detect_xspf_header,
+    ],
+)
+def test_detect_from_invalid_header(detect_fn):
+    assert detect_fn(BAD) is False
 
 
-class ExtM3uPlaylistTest(BasePlaylistTest, unittest.TestCase):
-    valid = EXTM3U
-    invalid = BAD
-    detect = staticmethod(playlists.detect_extm3u_header)
-    parse = staticmethod(playlists.parse_extm3u)
+@pytest.mark.parametrize(
+    "parse_fn, data",
+    [
+        (playlists.parse_extm3u, EXTM3U),
+        (playlists.parse_pls, PLS),
+        (playlists.parse_asx, ASX),
+        (playlists.parse_asx, SIMPLE_ASX),
+        (playlists.parse_xspf, XSPF),
+        (playlists.parse_urilist, URILIST),
+    ],
+)
+def test_parse_given_format_from_valid_data(parse_fn, data):
+    assert list(parse_fn(data)) == EXPECTED
 
 
-class PlsPlaylistTest(BasePlaylistTest, unittest.TestCase):
-    valid = PLS
-    invalid = BAD
-    detect = staticmethod(playlists.detect_pls_header)
-    parse = staticmethod(playlists.parse_pls)
+@pytest.mark.parametrize(
+    "parse_fn",
+    [
+        playlists.parse_extm3u,
+        playlists.parse_pls,
+        playlists.parse_asx,
+        playlists.parse_xspf,
+        playlists.parse_urilist,
+    ],
+)
+def test_parse_given_format_from_invalid_data(parse_fn):
+    assert list(parse_fn(BAD)) == []
 
 
-class AsxPlsPlaylistTest(BasePlaylistTest, unittest.TestCase):
-    valid = ASX
-    invalid = BAD
-    detect = staticmethod(playlists.detect_asx_header)
-    parse = staticmethod(playlists.parse_asx)
+@pytest.mark.parametrize("data", [URILIST, EXTM3U, PLS, ASX, SIMPLE_ASX, XSPF])
+def test_parse_any_format_from_valid_data(data):
+    assert playlists.parse(data) == EXPECTED
 
 
-class SimpleAsxPlsPlaylistTest(BasePlaylistTest, unittest.TestCase):
-    valid = SIMPLE_ASX
-    invalid = BAD
-    detect = staticmethod(playlists.detect_asx_header)
-    parse = staticmethod(playlists.parse_asx)
-
-
-class XspfPlaylistTest(BasePlaylistTest, unittest.TestCase):
-    valid = XSPF
-    invalid = BAD
-    detect = staticmethod(playlists.detect_xspf_header)
-    parse = staticmethod(playlists.parse_xspf)
-
-
-class UriListPlaylistTest(unittest.TestCase):
-    valid = URILIST
-    invalid = BAD
-    parse = staticmethod(playlists.parse_urilist)
-
-    def test_parse_valid_playlist(self):
-        uris = list(self.parse(self.valid))
-        self.assertEqual(uris, EXPECTED)
-
-    def test_parse_invalid_playlist(self):
-        uris = list(self.parse(self.invalid))
-        self.assertEqual(uris, [])
+def test_parse_from_invalid_data():
+    assert playlists.parse(BAD) == []

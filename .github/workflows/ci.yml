@@ -1,0 +1,61 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  main:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: "Test: Python 3.7"
+            python: "3.7"
+            tox: py37
+          - name: "Test: Python 3.8"
+            python: "3.8"
+            tox: py38
+          - name: "Test: Python 3.9"
+            python: "3.9"
+            tox: py39
+          - name: "Test: Python 3.10"
+            python: "3.10"
+            tox: py310
+            coverage: true
+          - name: "Lint: check-manifest"
+            python: "3.10"
+            tox: check-manifest
+          - name: "Lint: flake8"
+            python: "3.10"
+            tox: flake8
+          - name: "Lint: mypy"
+            python: "3.10"
+            tox: mypy
+          - name: "Docs"
+            python: "3.10"
+            tox: docs
+
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-20.04
+    container: ghcr.io/mopidy/ci:latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Fix home dir permissions to enable pip caching
+        run: chown -R root /github/home
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-${{ matrix.python }}-${{ matrix.tox }}-pip-${{ hashFiles('setup.cfg') }}-${{ hashFiles('tox.ini') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.python }}-${{ matrix.tox }}-pip-
+      - run: python -m pip install pygobject tox
+      - run: python -m tox -e ${{ matrix.tox }}
+        if: ${{ ! matrix.coverage }}
+      - run: python -m tox -e ${{ matrix.tox }} -- --cov-report=xml
+        if: ${{ matrix.coverage }}
+      - uses: codecov/codecov-action@v1
+        if: ${{ matrix.coverage }}

@@ -8,8 +8,8 @@ The :ref:`ext-http` extension makes Mopidy's :ref:`core-api` available using
 JSON-RPC over HTTP using HTTP POST and WebSockets. We also provide a JavaScript
 wrapper, called :ref:`Mopidy.js <mopidy-js>`, around the JSON-RPC over
 WebSocket API for use both from browsers and Node.js. The
-:ref:`http-explore-extension` extension, can also be used to get you
-familiarized with HTTP based APIs.
+`Mopidy-API-Explorer <https://mopidy.com/ext/api-explorer>`_ extension can
+also be used to get you familiarized with HTTP based APIs.
 
 
 .. _http-post-api:
@@ -19,13 +19,14 @@ HTTP POST API
 
 The Mopidy web server accepts HTTP requests with the POST method to
 http://localhost:6680/mopidy/rpc, where the ``localhost:6680`` part will vary
-with your local setup. The HTTP POST endpoint gives you access to Mopidy's
+with your local setup. Your requests must also set the ``Content-Type`` header
+to ``application/json``. The HTTP POST endpoint gives you access to Mopidy's
 full core API, but does not give you notification on events. If you need
 to listen to events, you should probably use the WebSocket API instead.
 
 Example usage from the command line::
 
-    $ curl -d '{"jsonrpc": "2.0", "id": 1, "method": "core.playback.get_state"}' http://localhost:6680/mopidy/rpc
+    $ curl -d '{"jsonrpc": "2.0", "id": 1, "method": "core.playback.get_state"}' -H 'Content-Type: application/json' http://localhost:6680/mopidy/rpc
     {"jsonrpc": "2.0", "id": 1, "result": "stopped"}
 
 For details on the request and response format, see :ref:`json-rpc`.
@@ -60,7 +61,7 @@ JSON-RPC 2.0 messages
 JSON-RPC 2.0 messages can be recognized by checking for the key named
 ``jsonrpc`` with the string value ``2.0``. For details on the messaging format,
 please refer to the `JSON-RPC 2.0 spec
-<http://www.jsonrpc.org/specification>`_.
+<https://www.jsonrpc.org/specification>`_.
 
 All methods in the :ref:`core-api` is made available through JSON-RPC calls
 over the WebSocket. For example, :meth:`mopidy.core.PlaybackController.play` is

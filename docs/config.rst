@@ -5,62 +5,70 @@ Configuration
 *************
 
 Mopidy has a lot of config values you can tweak, but you only need to change a
-few to get up and running. A complete :file:`~/.config/mopidy/mopidy.conf` may
-be as simple as this:
+few to get up and running. A complete :file:`mopidy.conf` may be as simple as:
 
 .. code-block:: ini
 
     [mpd]
     hostname = ::
 
-    [spotify]
+    [scrobbler]
     username = alice
     password = mysecret
 
-Mopidy primarily reads config from the file
-:file:`~/.config/mopidy/mopidy.conf`, where ``~`` means your *home directory*.
-If your username is ``alice`` and you are running Linux, the config file should
-probably be at :file:`/home/alice/.config/mopidy/mopidy.conf`. You can either
-create the configuration file yourself, or run the ``mopidy`` command, and it
-will create an empty config file for you and print what config values must be
-set to successfully start Mopidy.
 
-If running Mopidy as a service, the location of the config file and other
-details documented here differs a bit. See :ref:`service` for details about
-this.
+Configuration file location
+===========================
+
+The configuration file location depends on how you run Mopidy. See either
+:ref:`terminal` and :ref:`service` to find where the configuration file is
+located on your system.
+
+
+Editing the configuration
+=========================
 
 When you have created the configuration file, open it in a text editor, and add
-the config values you want to change.  If you want to keep the default for a
-config value, you **should not** add it to the config file, but leave it out so
-that when we change the default value in a future version, you won't have to
-change your configuration accordingly.
+the config values you want to change.
+
+If you want to keep the default value for a config value,
+you **should not** add it to the config file,
+but leave it out so that when we change the default value in a future version,
+you won't have to change your configuration accordingly.
+
+
+View effective configuration
+============================
 
 To see what's the effective configuration for your Mopidy installation, you can
-run::
+run the ``config`` subcommand.
+
+If you run Mopidy manually in a terminal, run::
 
     mopidy config
+
+If you run Mopidy as a system service, run::
+
+    sudo mopidyctl config
 
 This will print your full effective config with passwords masked out so that
 you safely can share the output with others for debugging.
 
+
+Core configuration
+==================
+
 You can find a description of all config values belonging to Mopidy's core
-below, together with their default values. In addition, all :ref:`extensions
-<ext>` got additional config values. The extension's config values and config
-defaults are documented on the :ref:`extension pages <ext>`.
+below.
 
-
-Default configuration
-=====================
-
-This is the default configuration for Mopidy itself. All extensions bring
-additional configuration values with their own defaults.
+This is the default configuration for Mopidy itself:
 
 .. literalinclude:: ../mopidy/config/default.conf
     :language: ini
 
 
-Core config section
-===================
+Core section
+------------
 
 .. confval:: core/cache_dir
 
@@ -111,14 +119,22 @@ Core config section
     The original MPD server only supports 10000 tracks in the tracklist. Some
     MPD clients will crash if this limit is exceeded.
 
+.. confval:: core/restore_state
+
+    When set to ``true``, Mopidy restores its last state when started.
+    The restored state includes the tracklist, playback history,
+    the playback state, the volume, and mute state.
+
+    Default is ``false``.
+
 
 .. _audio-config:
 
-Audio configuration
-===================
+Audio section
+-------------
 
 These are the available audio configurations. For specific use cases, see
-:ref:`audio`.
+:ref:`audiosinks`.
 
 .. confval:: audio/mixer
 
@@ -167,30 +183,33 @@ These are the available audio configurations. For specific use cases, see
     time of this writing is 1000.
 
 
-Logging configuration
-=====================
+Logging section
+---------------
+
+.. confval:: logging/verbosity
+
+    Controls the detail level of the logging.
+
+    Ranges from ``-1`` to ``4``. Defaults to ``0``.
+    Higher value is more verbose.
+
+    - ``-1`` is equivalent to :command:`mopidy -q`.
+    - ``0`` is equivalent to :command:`mopidy`.
+    - ``1`` is equivalent to :command:`mopidy -v`.
+    - ``2`` is equivalent to :command:`mopidy -vv`.
+    - ``3`` is equivalent to :command:`mopidy -vvv`.
+    - ``4`` is equivalent to :command:`mopidy -vvvv`.
 
 .. confval:: logging/color
 
     Whether or not to colorize the console log based on log level. Defaults to
     ``true``.
 
-.. confval:: logging/console_format
+.. confval:: logging/format
 
-    The log format used for informational logging.
-
-    See `the Python logging docs`_ for details on the format.
-
-.. confval:: logging/debug_format
-
-    The log format used for debug logging.
+    The message format used for logging.
 
     See `the Python logging docs`_ for details on the format.
-
-.. confval:: logging/debug_file
-
-    The file to dump debug log data to when Mopidy is run with the
-    :option:`mopidy --save-debug-log` option.
 
 .. confval:: logging/config_file
 
@@ -202,8 +221,8 @@ Logging configuration
     The ``loglevels`` config section can be used to change the log level for
     specific parts of Mopidy during development or debugging. Each key in the
     config section should match the name of a logger. The value is the log
-    level to use for that logger, one of ``debug``, ``info``, ``warning``,
-    ``error``, or ``critical``.
+    level to use for that logger, one of ``trace``, ``debug``, ``info``,
+    ``warning``, ``error``, or ``critical``.
 
 .. confval:: logcolors/*
 
@@ -218,8 +237,8 @@ Logging configuration
 
 .. _proxy-config:
 
-Proxy configuration
-===================
+Proxy section
+-------------
 
 Not all parts of Mopidy or all Mopidy extensions respect the proxy
 server configuration when connecting to the Internet. Currently, this is at
@@ -253,19 +272,21 @@ these configurations to help users on locked down networks.
 Extension configuration
 =======================
 
-Each installed Mopidy extension adds its own configuration section with one or
-more config values that you may want to tweak. For the available config
-values, please refer to the docs for each extension. Most, if not all, can be
-found at :ref:`ext`.
+Each installed Mopidy extension adds its own configuration section to
+:file:`mopidy.conf`, with one or more config values that you may want to tweak.
+For an overview of the available config values,
+please refer to the documentation for each extension.
+Most extensions can be found in the
+`Mopidy extension registry <https://mopidy.com/ext/>`_.
 
 Mopidy extensions are enabled by default when they are installed. If you want
 to disable an extension without uninstalling it, all extensions support the
 ``enabled`` config value even if it isn't explicitly documented by all
 extensions. If the ``enabled`` config value is set to ``false`` the extension
-will not be started. For example, to disable the Spotify extension, add the
+will not be started. For example, to disable the MPD extension, add the
 following to your ``mopidy.conf``::
 
-    [spotify]
+    [mpd]
     enabled = false
 
 

@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Mopidy Discourse forum
+    url: https://discourse.mopidy.com/
+    about: Please ask and answer questions here.

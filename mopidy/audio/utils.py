@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 from mopidy import httpclient
 from mopidy.internal.gi import Gst
 
@@ -19,7 +17,7 @@ def create_buffer(data, timestamp=None, duration=None):
         ``capabilites`` argument was removed.
     """
     if not data:
-        raise ValueError('Cannot create buffer without data')
+        raise ValueError("Cannot create buffer without data")
     buffer_ = Gst.Buffer.new_wrapped(data)
     if timestamp is not None:
         buffer_.pts = timestamp
@@ -64,15 +62,15 @@ def setup_proxy(element, config):
     :param config: proxy settings to use.
     :type config: :class:`dict`
     """
-    if not hasattr(element.props, 'proxy') or not config.get('hostname'):
+    if not hasattr(element.props, "proxy") or not config.get("hostname"):
         return
 
-    element.set_property('proxy', httpclient.format_proxy(config, auth=False))
-    element.set_property('proxy-id', config.get('username'))
-    element.set_property('proxy-pw', config.get('password'))
+    element.set_property("proxy", httpclient.format_proxy(config, auth=False))
+    element.set_property("proxy-id", config.get("username"))
+    element.set_property("proxy-pw", config.get("password"))
 
 
-class Signals(object):
+class Signals:
 
     """Helper for tracking gobject signal registrations"""
 
@@ -84,7 +82,8 @@ class Signals(object):
 
         Each event may only be handled by one callback in this implementation.
         """
-        assert (element, event) not in self._ids
+        if (element, event) in self._ids:
+            raise AssertionError
         self._ids[(element, event)] = element.connect(event, func, *args)
 
     def disconnect(self, element, event):
@@ -98,5 +97,5 @@ class Signals(object):
 
     def clear(self):
         """Clear all registered signal handlers."""
-        for element, event in self._ids.keys():
+        for element, event in list(self._ids):
             element.disconnect(self._ids.pop((element, event)))

@@ -1,15 +1,21 @@
 include *.py
 include *.rst
-include *.txt
+include *.toml
 include .mailmap
-include .travis.yml
+include .readthedocs.yml
 include AUTHORS
+include AUTHORS.update
 include LICENSE
 include MANIFEST.in
+include mopidy/py.typed
+include pyproject.toml
 include tox.ini
+
+recursive-include .github *
 
 recursive-include docs *
 prune docs/_build
+prune docs/.doctrees
 
 recursive-include extra *
 

@@ -31,17 +31,17 @@ GStreamer knows how to play right before playback. For example:
   pushing raw audio data into a GStreamer ``appsrc`` element.
 
 - Mopidy-SoundCloud created it's own URI scheme, after the model of Spotify,
-  and use URIs of the following forms: ``soundcloud:search``,
+  and uses URIs of the following forms: ``soundcloud:search``,
   ``soundcloud:user-...``, ``soundcloud:exp-...``, and ``soundcloud:set-...``.
   Playback is handled by converting the custom ``soundcloud:..`` URIs to
   ``http://`` URIs immediately before they are passed on to GStreamer for
   playback.
 
 - Mopidy differentiates between ``file://...`` URIs handled by
-  :ref:`ext-stream` and ``local:...`` URIs handled by :ref:`ext-local`.
+  :ref:`ext-stream` and ``local:...`` URIs handled by Mopidy-Local.
   :ref:`ext-stream` can play ``file://...`` URIs pointing to tracks and
   playlists located anywhere on your system, but it doesn't know a thing about
-  the object before you play it. On the other hand, :ref:`ext-local` scans a
+  the object before you play it. On the other hand, Mopidy-Local scans a
   predefined :confval:`local/media_dir` to build a meta data library of all
   known tracks. It is thus limited to playing tracks residing in the media
   library, but can provide additional features like directory browsing and
@@ -56,6 +56,11 @@ you should create your own, and name it after your extension's
 :attr:`~mopidy.ext.Extension.ext_name`. Care should be taken not to conflict
 with already in use URI schemes. It is also recommended to design the format
 such that tracks, playlists and other entities can be distinguished easily.
+
+However, it's important to note that outside of the backend that created them,
+URIs are opaque values that neither Mopidy's core layer or Mopidy frontends
+should attempt to derive any meaning from. The only valid exception to this is
+checking the scheme.
 
 
 Backend class
@@ -96,4 +101,4 @@ Backend listener
 Backend implementations
 =======================
 
-See :ref:`ext-backends`.
+See the `extension registry <https://mopidy.com/ext/>`_.

@@ -8,7 +8,7 @@
     :synopsis: Core API for use by frontends
 
 The core API is the interface that is used by frontends like
-:mod:`mopidy.http` and :mod:`mopidy.mpd`. The core layer is in between the
+:mod:`mopidy.http` and Mopidy-MPD. The core layer is in between the
 frontends and the backends. Don't forget that you will be accessing core
 as a Pykka actor. If you are only interested in being notified about changes
 in core see :class:`~mopidy.core.CoreListener`.
@@ -52,7 +52,6 @@ in core see :class:`~mopidy.core.CoreListener`.
   .. automethod:: get_uri_schemes
 
   .. automethod:: get_version
-
 
 Tracklist controller
 ====================
@@ -126,6 +125,7 @@ Current track
 
 .. automethod:: mopidy.core.PlaybackController.get_current_tl_track
 .. automethod:: mopidy.core.PlaybackController.get_current_track
+.. automethod:: mopidy.core.PlaybackController.get_current_tlid
 .. automethod:: mopidy.core.PlaybackController.get_stream_title
 .. automethod:: mopidy.core.PlaybackController.get_time_position
 
@@ -201,55 +201,3 @@ Core events
 
 .. autoclass:: mopidy.core.CoreListener
     :members:
-
-Deprecated API features
-=======================
-
-.. warning::
-  Though these features still work, they are slated to go away in the next
-  major Mopidy release.
-
-Core
-----
-
-.. autoattribute:: mopidy.core.Core.version
-.. autoattribute:: mopidy.core.Core.uri_schemes
-
-TracklistController
--------------------
-
-.. autoattribute:: mopidy.core.TracklistController.tl_tracks
-.. autoattribute:: mopidy.core.TracklistController.tracks
-.. autoattribute:: mopidy.core.TracklistController.version
-.. autoattribute:: mopidy.core.TracklistController.length
-
-.. autoattribute:: mopidy.core.TracklistController.consume
-.. autoattribute:: mopidy.core.TracklistController.random
-.. autoattribute:: mopidy.core.TracklistController.repeat
-.. autoattribute:: mopidy.core.TracklistController.single
-
-PlaybackController
-------------------
-
-.. automethod:: mopidy.core.PlaybackController.get_mute
-.. automethod:: mopidy.core.PlaybackController.get_volume
-
-.. autoattribute:: mopidy.core.PlaybackController.current_tl_track
-.. autoattribute:: mopidy.core.PlaybackController.current_track
-.. autoattribute:: mopidy.core.PlaybackController.state
-.. autoattribute:: mopidy.core.PlaybackController.time_position
-.. autoattribute:: mopidy.core.PlaybackController.mute
-.. autoattribute:: mopidy.core.PlaybackController.volume
-
-LibraryController
------------------
-
-.. automethod:: mopidy.core.LibraryController.find_exact
-
-PlaylistsController
--------------------
-
-.. automethod:: mopidy.core.PlaylistsController.filter
-.. automethod:: mopidy.core.PlaylistsController.get_playlists
-
-.. autoattribute:: mopidy.core.PlaylistsController.playlists

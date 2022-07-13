@@ -15,14 +15,10 @@ Asking questions
 Please get in touch with us in one of these ways when requesting help with
 Mopidy and its extensions:
 
-- Our discussion forum: `discuss.mopidy.com <https://discuss.mopidy.com>`_.
-  Just sign in and fire away.
+- Our Discourse forum: `discourse.mopidy.com <https://discourse.mopidy.com>`_.
 
-- Our IRC channel: `#mopidy <https://webchat.freenode.net/?channels=#mopidy>`_
-  on `irc.freenode.net <http://freenode.net>`_,
-  with public `searchable logs <https://botbot.me/freenode/mopidy/>`_. Be
-  prepared to hang around for a while, as we're not always around to answer
-  straight away.
+- The ``#mopidy-users`` stream on Zulip chat: `mopidy.zulipchat.com
+  <https://mopidy.zulipchat.com>`_.
 
 Before asking for help, it might be worth your time to read the
 :ref:`troubleshooting` page, both so you might find a solution to your problem
@@ -33,13 +29,13 @@ Helping users
 =============
 
 If you want to contribute to Mopidy, a great place to start is by helping other
-users on IRC and in the discussion forum. This is a contribution we value
-highly. As more people help with user support, new users get faster and better
-help. For your own benefit, you'll quickly learn what users find confusing,
-difficult or lacking, giving you some ideas for where you may contribute
-improvements, either to code or documentation. Lastly, this may also free up
-time for other contributors to spend more time on fixing bugs or implementing
-new features.
+users in the discussion forum and the ``#mopidy-users`` Zulip stream. This is a
+contribution we value highly. As more people help with user support, new users
+get faster and better help. For your own benefit, you'll quickly learn what
+users find confusing, difficult or lacking, giving you some ideas for where you
+may contribute improvements, either to code or documentation. Lastly, this may
+also free up time for other contributors to spend more time on fixing bugs or
+implementing new features.
 
 
 .. _issue-guidelines:
@@ -51,8 +47,8 @@ Issue guidelines
    tracker is not a support forum.
 
 #. If you are not sure if what you're experiencing is a bug or not, post in the
-   `discussion forum <https://discuss.mopidy.com>`__ first to verify that it's
-   a bug.
+   `discussion forum <https://discourse.mopidy.com>`__ first to verify that
+   it's a bug.
 
 #. If you are sure that you've found a bug or have a feature request, check if
    there's already an issue in the `issue tracker
@@ -73,9 +69,9 @@ Pull request guidelines
    - If it's a bug, :ref:`file an issue <issue-guidelines>`.
 
    - If it's an enhancement, discuss it with other Mopidy developers first,
-     either in a GitHub issue, on the discussion forum, or on IRC. Making sure
-     your ideas and solutions are aligned with other contributors greatly
-     increases the odds of your pull request being quickly accepted.
+     either in a GitHub issue, on the discussion forum, or on Zulip chat.
+     Making sure your ideas and solutions are aligned with other contributors
+     greatly increases the odds of your pull request being quickly accepted.
 
 #. Create a new branch, based on the ``develop`` branch, for every feature or
    bug fix. Keep branches small and on topic, as that makes them far easier to
@@ -90,8 +86,8 @@ Pull request guidelines
      ``docs/add-ext-mopidy-spotify-tunigo``.
 
 #. Follow the :ref:`code style <codestyle>`, especially make sure the
-   ``flake8`` linter does not complain about anything. Travis CI will check
-   that your pull request is "flake8 clean". See :ref:`code-linting`.
+   ``flake8`` linter does not complain about anything. Our CI setup will
+   check that your pull request is "flake8 clean". See :ref:`code-linting`.
 
 #. Include tests for any new feature or substantial bug fix. See
    :ref:`running-tests`.
@@ -116,16 +112,16 @@ Pull request guidelines
    For more inspiration, feel free to read these blog posts:
 
    - `Writing Git commit messages
-     <http://365git.tumblr.com/post/3308646748/writing-git-commit-messages>`_
+     <https://365git.tumblr.com/post/3308646748/writing-git-commit-messages>`_
 
    - `A Note About Git Commit Messages
-     <http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html>`_
+     <https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html>`_
 
    - `On commit messages
-     <http://who-t.blogspot.ch/2009/12/on-commit-messages.html>`_
+     <https://who-t.blogspot.com/2009/12/on-commit-messages.html>`_
 
 #. Send a pull request to the ``develop`` branch. See the `GitHub pull request
-   docs <https://help.github.com/articles/using-pull-requests>`_ for help.
+   docs <https://help.github.com/en/articles/about-pull-requests>`_ for help.
 
 .. note::
 

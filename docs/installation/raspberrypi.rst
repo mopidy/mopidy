@@ -5,25 +5,19 @@ Raspberry Pi
 ************
 
 Mopidy runs on all versions of `Raspberry Pi <https://www.raspberrypi.org/>`_.
-However, note that Raspberry Pi 2 B's CPU is approximately six times as
-powerful as Raspberry Pi 1 and Raspberry Pi Zero, so Mopidy will be more joyful
-to use on a Raspberry Pi 2.
-
-.. image:: raspberrypi2.jpg
-    :width: 640
-    :height: 363
+However, note that the later models are significantly more powerful than
+the Raspberry Pi 1 and Raspberry Pi Zero; Mopidy will run noticably faster on
+the later models.
 
 
-.. _raspi-wheezy:
+How to for Raspbian
+===================
 
-How to for Raspbian Jessie
-==========================
+#. Download the latest Raspbian Desktop or Lite disk image from
+   https://www.raspberrypi.org/downloads/raspbian/.
 
-#. Download the latest Jessie or Jessie Lite disk image from
-   http://www.raspberrypi.org/downloads/raspbian/.
-
-   If you're only using your Pi for Mopidy, go with Jessie Lite as you won't
-   need the full graphical desktop included in the Jessie image.
+   Unless you need a full graphical desktop the Lite image is preferable since
+   it's much smaller.
 
 #. Flash the Raspbian image you downloaded to your SD card.
 
@@ -31,10 +25,14 @@ How to for Raspbian Jessie
    <https://www.raspberrypi.org/documentation/installation/installing-images/README.md>`_
    for instructions.
 
-#. If you connect a monitor and a keyboard, you'll see that the Pi boots right
-   into the ``raspi-config`` tool.
+   You'll need to enable SSH if you are not connecting a monitor and a keyboard.
+   As of the November 2016 release, Raspbian has the SSH server disabled by
+   default. SSH can be enabled by placing a file named 'ssh', without any
+   extension, onto the boot partition of the SD card. See `here
+   <https://www.raspberrypi.org/documentation/remote-access/ssh/README.md>`_ for
+   more details.
 
-   If you boot with only a network cable connected, you'll have to find the IP
+#. If you boot with only a network cable connected, you'll have to find the IP
    address of the Pi yourself, e.g. by looking in the client list on your
    router/DHCP server. When you have found the Pi's IP address, you can SSH to
    the IP address and login with the user ``pi`` and password ``raspberry``.
@@ -44,32 +42,60 @@ How to for Raspbian Jessie
 #. Use the ``raspi-config`` tool to setup the basics of your Pi. You might want
    to do one or more of the following:
 
-   - Expand the file system to fill the SD card.
-   - Change the password of the ``pi`` user.
-   - Change the time zone.
+   - In the top menu, change the password of the ``pi`` user.
 
-   Under "Advanced Options":
+   - Under "Network Options":
 
-   - Set a hostname.
-   - Enable SSH if not already enabled.
-   - If your will use HDMI for display and 3.5mm jack for audio, force the
-     audio output to the 3.5mm jack. By default it will use HDMI for audio
-     output if an HDMI cable is connected and the 3.5mm jack if not.
+     - N1: Set a hostname.
+     - N2: Set up WiFi credentials, if you're going to use WiFi.
 
-   Once done, select "Finish" and restart your Pi.
+   - Under "Localisation Options":
+
+     - I1: Change locale from ``en_GB.UTF-8`` to e.g. ``en_US.UTF-8``, that is,
+       unless you're British.
+     - I2: Change the time zone.
+     - I4: Change the WiFi country, so you only use channels allowed to use in your area.
+
+   - Under "Interfacing Options":
+
+     - P2: Enable SSH.
+
+   - Under "Advanced Options":
+
+     - A3: Adjust the memory split.
+       If you're not going to connect a display to your Pi, you should set the
+       minimum value here in order to make best use of the available RAM.
+     - A4: Force a specific audio output.
+       By default, when using a HDMI display the
+       audio will also be output over HDMI, otherwise the 3.5mm jack will be used.
+
+   Once done, select "Finish". Depending on what you changed you may be asked if
+   you want to restart your Pi, select "Yes" and then log back in again
+   afterwards.
 
    If you want to change any settings later, you can simply rerun ``sudo
    raspi-config``.
 
-#. Once you've rebooted and has logged in as the ``pi`` user, you can enter
-   ``sudo -i`` to become ``root``.
+#. Ensure the system audio settings match the user audio settings::
 
-#. Install Mopidy and its dependencies as described in :ref:`debian-install`.
+       sudo ln -s ~/.asoundrc /etc/asound.conf
 
-#. Finally, you need to set a couple of :doc:`config values </config>`, and
-   then you're ready to :doc:`run Mopidy </running>`. Alternatively you may
-   want to have Mopidy run as a :ref:`system service <service>`, automatically
-   starting at boot.
+#. Install Mopidy and any Mopidy extensions you want, as described in
+   :ref:`debian-install`.
+
+.. note::
+
+   If you used the Raspbian *Desktop* image you will need to add the
+   ``mopidy`` user to the ``video`` group::
+
+       sudo adduser mopidy video
+
+   Also, if you are *not* using HDMI audio you must set Mopidy's
+   ``audio/output`` config value to ``alsasink``. To do this, add the following
+   snippet to your :doc:`config </config>` file::
+
+       [audio]
+       output = alsasink
 
 
 Testing sound output
@@ -82,9 +108,4 @@ You can test sound output independent of Mopidy by running::
 If you hear a voice saying "Front Center", then your sound is working.
 
 If you want to change your audio output setting, simply rerun ``sudo
-raspi-config``. Alternatively, you can change the audio output setting
-directly by running:
-
-- Auto (HDMI if connected, else 3.5mm jack): ``sudo amixer cset numid=3 0``
-- Use 3.5mm jack: ``sudo amixer cset numid=3 1``
-- Use HDMI: ``sudo amixer cset numid=3 2``
+raspi-config``.

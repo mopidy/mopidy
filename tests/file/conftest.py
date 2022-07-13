@@ -1,14 +1,9 @@
-from __future__ import unicode_literals
-
 import pytest
 
 
 @pytest.fixture
 def file_config():
-    return {
-        'file': {
-        }
-    }
+    return {"file": {}}
 
 
 @pytest.fixture

@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 # TODO: add validate regexp?
 
 
@@ -10,7 +8,7 @@ def validate_required(value, required):
     the raw string, _not_ the converted value.
     """
     if required and not value:
-        raise ValueError('must be set.')
+        raise ValueError("must be set.")
 
 
 def validate_choice(value, choices):
@@ -19,8 +17,8 @@ def validate_choice(value, choices):
     Normally called in :meth:`~mopidy.config.types.ConfigValue.deserialize`.
     """
     if choices is not None and value not in choices:
-        names = ', '.join(repr(c) for c in choices)
-        raise ValueError('must be one of %s, not %s.' % (names, value))
+        names = ", ".join(repr(c) for c in choices)
+        raise ValueError(f"must be one of {names}, not {value}.")
 
 
 def validate_minimum(value, minimum):
@@ -29,7 +27,7 @@ def validate_minimum(value, minimum):
     Normally called in :meth:`~mopidy.config.types.ConfigValue.deserialize`.
     """
     if minimum is not None and value < minimum:
-        raise ValueError('%r must be larger than %r.' % (value, minimum))
+        raise ValueError(f"{value!r} must be larger than {minimum!r}.")
 
 
 def validate_maximum(value, maximum):
@@ -38,4 +36,4 @@ def validate_maximum(value, maximum):
     Normally called in :meth:`~mopidy.config.types.ConfigValue.deserialize`.
     """
     if maximum is not None and value > maximum:
-        raise ValueError('%r must be smaller than %r.' % (value, maximum))
+        raise ValueError(f"{value!r} must be smaller than {maximum!r}.")

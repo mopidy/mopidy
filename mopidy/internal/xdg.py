@@ -1,9 +1,6 @@
-from __future__ import absolute_import, unicode_literals
-
-import io
+import configparser
 import os
-
-from mopidy.compat import configparser
+import pathlib
 
 
 def get_dirs():
@@ -20,18 +17,18 @@ def get_dirs():
     """
 
     dirs = {
-        'XDG_CACHE_DIR': (
-            os.environ.get('XDG_CACHE_HOME') or
-            os.path.expanduser(b'~/.cache')),
-        'XDG_CONFIG_DIR': (
-            os.environ.get('XDG_CONFIG_HOME') or
-            os.path.expanduser(b'~/.config')),
-        'XDG_DATA_DIR': (
-            os.environ.get('XDG_DATA_HOME') or
-            os.path.expanduser(b'~/.local/share')),
+        "XDG_CACHE_DIR": pathlib.Path(
+            os.getenv("XDG_CACHE_HOME", "~/.cache")
+        ).expanduser(),
+        "XDG_CONFIG_DIR": pathlib.Path(
+            os.getenv("XDG_CONFIG_HOME", "~/.config")
+        ).expanduser(),
+        "XDG_DATA_DIR": pathlib.Path(
+            os.getenv("XDG_DATA_HOME", "~/.local/share")
+        ).expanduser(),
     }
 
-    dirs.update(_get_user_dirs(dirs['XDG_CONFIG_DIR']))
+    dirs.update(_get_user_dirs(dirs["XDG_CONFIG_DIR"]))
 
     return dirs
 
@@ -47,21 +44,25 @@ def _get_user_dirs(xdg_config_dir):
     disabled, and thus no :mod:`glib` available.
     """
 
-    dirs_file = os.path.join(xdg_config_dir, b'user-dirs.dirs')
+    dirs_file = xdg_config_dir / "user-dirs.dirs"
 
-    if not os.path.exists(dirs_file):
+    if not dirs_file.exists():
         return {}
 
-    with open(dirs_file, 'rb') as fh:
-        data = fh.read().decode('utf-8')
-
-    data = '[XDG_USER_DIRS]\n' + data
-    data = data.replace('$HOME', os.path.expanduser('~'))
-    data = data.replace('"', '')
+    data = dirs_file.read_bytes()
+    data = b"[XDG_USER_DIRS]\n" + data
+    data = data.replace(b"$HOME", bytes(pathlib.Path.home()))
+    data = data.replace(b'"', b"")
 
     config = configparser.RawConfigParser()
-    config.readfp(io.StringIO(data))
+    config.read_string(data.decode())
 
-    return {
-        k.upper(): os.path.abspath(v)
-        for k, v in config.items('XDG_USER_DIRS') if v is not None}
+    result = {}
+    for k, v in config.items("XDG_USER_DIRS"):
+        if v is None:
+            continue
+        if isinstance(k, bytes):
+            k = k.decode()
+        result[k.upper()] = pathlib.Path(v).resolve()
+
+    return result
