@@ -445,6 +445,7 @@ class Audio(pykka.ThreadingActor):
         self._outputs = None
         self._queue = None
         self._about_to_finish_callback = None
+        self._source_setup_callback = None
 
         self._handler = _Handler(self)
         self._appsrc = _Appsrc()
@@ -571,6 +572,10 @@ class Audio(pykka.ThreadingActor):
         else:
             self._appsrc.reset()
 
+        if self._source_setup_callback:
+            logger.debug("Running source-setup callback")
+            self._source_setup_callback(source)
+
         if self._live_stream and hasattr(source.props, "is_live"):
             gst_logger.debug("Enabling live stream mode")
             source.set_live(True)
@@ -664,6 +669,17 @@ class Audio(pykka.ThreadingActor):
         :rtype: boolean
         """
         return self._appsrc.push(buffer_)
+
+    def set_source_setup_callback(self, callback):
+        """
+        Configure audio to use a source-setup callback.
+
+        This should be used to modify source-specific properties such as login
+        details.
+
+        :param callable callback: Callback to run when we setup the source.
+        """
+        self._source_setup_callback = callback
 
     def set_about_to_finish_callback(self, callback):
         """
