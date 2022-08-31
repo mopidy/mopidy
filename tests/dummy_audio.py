@@ -21,7 +21,8 @@ class DummyAudio(pykka.ThreadingActor):
         self.state = audio.PlaybackState.STOPPED
         self._volume = 0
         self._position = 0
-        self._callback = None
+        self._source_setup_callback = None
+        self._about_to_finish_callback = None
         self._uri = None
         self._stream_changed = False
         self._live_stream = False
@@ -58,6 +59,7 @@ class DummyAudio(pykka.ThreadingActor):
 
     def prepare_change(self):
         self._uri = None
+        self._source_setup_callback = None
         return True
 
     def stop_playback(self):
@@ -76,8 +78,11 @@ class DummyAudio(pykka.ThreadingActor):
     def get_current_tags(self):
         return self._tags
 
+    def set_source_setup_callback(self, callback):
+        self._source_setup_callback = callback
+
     def set_about_to_finish_callback(self, callback):
-        self._callback = callback
+        self._about_to_finish_callback = callback
 
     def enable_sync_handler(self):
         pass
@@ -121,14 +126,22 @@ class DummyAudio(pykka.ThreadingActor):
         self._tags.update(tags)
         audio.AudioListener.send("tags_changed", tags=self._tags.keys())
 
+    def get_source_setup_callback(self):
+        # This needs to be called from outside the actor or we lock up.
+        def wrapper():
+            if self._source_setup_callback:
+                self._source_setup_callback()
+
+        return wrapper
+
     def get_about_to_finish_callback(self):
         # This needs to be called from outside the actor or we lock up.
         def wrapper():
-            if self._callback:
+            if self._about_to_finish_callback:
                 self.prepare_change()
-                self._callback()
+                self._about_to_finish_callback()
 
-            if not self._uri or not self._callback:
+            if not self._uri or not self._about_to_finish_callback:
                 self._tags = {}
                 audio.AudioListener.send("reached_end_of_stream")
             else:
