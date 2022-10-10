@@ -41,7 +41,12 @@ def fetch():
         return []
 
     service = _service(bus)
-    session = service.OpenSession("plain", EMPTY_STRING)[1]
+    try:
+        session = service.OpenSession("plain", EMPTY_STRING)[1]
+    except dbus.exceptions.DBusException as e:
+        logger.debug("%s (%s)", FETCH_ERROR, e)
+        return []
+
     items, locked = service.SearchItems({"service": "mopidy"})
 
     if not locked and not items:
