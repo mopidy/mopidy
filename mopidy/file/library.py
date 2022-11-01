@@ -64,7 +64,7 @@ class FileLibraryProvider(backend.LibraryProvider):
 
             if (
                 self._excluded_file_extensions
-                and dir_entry.suffix in self._excluded_file_extensions
+                and dir_entry.suffix.lower() in self._excluded_file_extensions
             ):
                 continue
 
