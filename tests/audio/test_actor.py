@@ -47,6 +47,9 @@ class BaseTest(unittest.TestCase):
     def possibly_trigger_fake_about_to_finish(self):
         pass
 
+    def possibly_trigger_fake_source_setup(self):
+        pass
+
 
 class DummyMixin:
     audio_class = dummy_audio.DummyAudio
@@ -56,6 +59,11 @@ class DummyMixin:
 
     def possibly_trigger_fake_about_to_finish(self):
         callback = self.audio.get_about_to_finish_callback().get()
+        if callback:
+            callback()
+
+    def possibly_trigger_fake_source_setup(self):
+        callback = self.audio.get_source_setup_callback().get()
         if callback:
             callback()
 
@@ -444,6 +452,19 @@ class AudioEventTest(BaseTest):
 
         # TODO: test tag states within gaples
 
+    def test_source_setup(self):
+        mock_callback = mock.Mock()
+
+        self.audio.prepare_change()
+        self.audio.set_source_setup_callback(mock_callback).get()
+        self.audio.set_uri(self.uris[0])
+        self.audio.start_playback()
+
+        self.possibly_trigger_fake_source_setup()
+        self.audio.wait_for_state_change().get()
+
+        mock_callback.assert_called_once()
+
     # TODO: this does not belong in this testcase
     def test_current_tags_are_blank_to_begin_with(self):
         assert not self.audio.get_current_tags().get()
@@ -688,3 +709,28 @@ class DownloadBufferingTest(unittest.TestCase):
         self.audio.set_appsrc("")
 
         playbin.set_property.assert_has_calls([mock.call("flags", 0x02)])
+
+
+class SourceSetupCallbackTest(unittest.TestCase):
+    def setUp(self):  # noqa: N802
+        config = {"proxy": {}}
+        self.audio = audio.Audio(config=config, mixer=None)
+        self.audio._playbin = mock.Mock(spec=["set_property"])
+
+        self.source = mock.MagicMock()
+        # Avoid appsrc.configure()
+        self.source.get_factory.get_name = mock.Mock(return_value="not_appsrc")
+
+    def test_source_setup_callback(self):
+        mock_callback = mock.MagicMock()
+        self.audio.set_source_setup_callback(mock_callback)
+
+        self.audio._on_source_setup("dummy", self.source)
+
+        mock_callback.assert_called_once_with(self.source)
+
+        self.audio.set_source_setup_callback(None)
+
+        self.audio._on_source_setup("dummy", self.source)
+
+        mock_callback.assert_called_once()

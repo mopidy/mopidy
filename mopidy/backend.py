@@ -44,6 +44,8 @@ if TYPE_CHECKING:
     Uri = str
     UriScheme = str
 
+    GstElement = TypeVar("GstElement")
+
 
 logger = logging.getLogger(__name__)
 
@@ -295,6 +297,20 @@ class PlaybackProvider:
         """
         return False
 
+    def on_source_setup(self, source: GstElement) -> None:
+        """
+        Called when a new GStreamer source is created, allowing us to configure
+        the source. This runs in the audio thread so should not block.
+
+        *MAY be reimplemented by subclass.*
+
+        :param source: the GStreamer source element
+        :type source: GstElement
+
+        .. versionadded:: 3.4
+        """
+        pass
+
     def change_track(self, track: Track) -> bool:
         """
         Switch to provided track.
@@ -317,6 +333,7 @@ class PlaybackProvider:
             logger.debug("Backend translated URI from %s to %s", track.uri, uri)
         if not uri:
             return False
+        self.audio.set_source_setup_callback(self.on_source_setup).get()
         self.audio.set_uri(
             uri,
             live_stream=self.is_live(uri),
