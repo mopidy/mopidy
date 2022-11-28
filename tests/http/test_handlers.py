@@ -51,7 +51,7 @@ class WebSocketHandlerTest(tornado.testing.AsyncHTTPTestCase):
                     handlers.WebSocketHandler,
                     {
                         "core": self.core,
-                        "allowed_origins": set(),
+                        "allowed_origins": frozenset(),
                         "csrf_protection": True,
                     },
                 )
