@@ -200,7 +200,7 @@ class LibraryProvider:
         .. versionadded:: 1.0
             The ``exact`` param which replaces the old ``find_exact``.
         """
-        pass
+        return []
 
 
 @pykka.traversable
