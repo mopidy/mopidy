@@ -18,7 +18,7 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
                 "hostname": "127.0.0.1",
                 "port": 6680,
                 "zeroconf": "",
-                "allowed_origins": [],
+                "allowed_origins": frozenset(),
                 "csrf_protection": True,
                 "default_app": "mopidy",
             }

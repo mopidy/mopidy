@@ -9,6 +9,20 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
+v3.4.0 (2022-11-28)
+===================
+
+- Config: Handle DBus "Algorithm plain is not supported" error. (PR: :issue:`2061`)
+
+- File: Fix uppercase ``excluded_file_extensions``. (PR: :issue:`2063`)
+
+- Add :meth:`mopidy.backend.PlaybackProvider.on_source_setup` which can be
+  implemented by Backend playback providers that want to set GStreamer source
+  properties in the ``source-setup`` callback. (PR: :issue:`2060`)
+
+- HTTP: Improve handling of ``allowed_origins`` config setting. (PR: :issue:`2054`)
+
+
 v3.3.0 (2022-04-29)
 ===================
 
