@@ -9,7 +9,7 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
-v3.4.0 (UNRELEASED)
+v3.4.0 (2022-11-28)
 ===================
 
 - Config: Handle DBus "Algorithm plain is not supported" error. (PR: :issue:`2061`)
