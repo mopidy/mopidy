@@ -9,6 +9,12 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
+v3.4.1 (UNRELEASED)
+===================
+
+- HTTP: Fix non-optional ``allowed_origins`` config setting. (PR: :issue:`2066`)
+
+
 v3.4.0 (2022-11-28)
 ===================
 
