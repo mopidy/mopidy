@@ -24,6 +24,7 @@ class Extension(ext.Extension):
         schema["static_dir"] = config_lib.Deprecated()
         schema["zeroconf"] = config_lib.String(optional=True)
         schema["allowed_origins"] = config_lib.List(
+            optional=True,
             unique=True,
             subtype=config_lib.String(transformer=lambda x: x.lower()),
         )
