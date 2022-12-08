@@ -56,11 +56,19 @@ Mopidy extensions:
 Web-based MPD clients
 ---------------------
 
-Lastly, there are several web based MPD clients, which doesn't use the
+There are several web based MPD clients, which doesn't use the
 :ref:`ext-http` frontend at all, but connect to Mopidy through the
-Mopidy-MPD frontend. For a list of those, see the "Web clients" section of the
-`MPD wiki's clients list <https://mpd.fandom.com/wiki/Clients>`_.
+Mopidy-MPD frontend. For a list of those, see the "Web clients"
+section of the `MPD wiki's clients list
+<https://mpd.fandom.com/wiki/Clients>`_.
 
+Standalone applications
+-----------------------
+
+Lastly, there are Mopidy clients implemented as standalone
+applications:
+
+- `Argos <https://github.com/orontee/argos>`_
 
 .. _mpd-clients:
 
