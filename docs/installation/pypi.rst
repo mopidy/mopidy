@@ -105,12 +105,7 @@ Installing extensions
 If you want to use any Mopidy extensions, like Spotify support or Last.fm
 scrobbling, you need to install additional Mopidy extensions.
 
-You can install any Mopidy extension directly from PyPI with ``pip``. To list
-all the extensions available from PyPI, run::
-
-    python3 -m pip search mopidy
-
-To install one of the listed packages, e.g. ``Mopidy-MPD``, simply run::
+You can install any Mopidy extension directly from PyPI with ``pip``. Search the PyPI website to find available extensions. To install one of the listed packages, e.g. ``Mopidy-MPD``, simply run::
 
    sudo python3 -m pip install Mopidy-MPD
 
