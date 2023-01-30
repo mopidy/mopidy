@@ -42,13 +42,13 @@ Install from apt.mopidy.com
 
 #. Add the archive's GPG key::
 
-       sudo mkdir -p /usr/local/share/keyrings
-       sudo wget -q -O /usr/local/share/keyrings/mopidy-archive-keyring.gpg \
+       sudo wget -q -O /usr/share/keyrings/mopidy-archive-keyring.gpg \
          https://apt.mopidy.com/mopidy.gpg
 
 #. Add the APT repo to your package sources::
 
-       sudo wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/buster.list
+      printf "deb [signed-by=/usr/share/keyrings/mopidy-archive-keyring.gpg] https://apt.mopidy.com/ buster main contrib non-free\ndeb-src [signed-by=/usr/share/keyrings/mopidy-archive-keyring.gpg] https://apt.mopidy.com/ buster main contrib non-free" \
+      | sudo tee /etc/apt/sources.list.d/mopidy.list
 
 #. Install Mopidy and all dependencies::
 
