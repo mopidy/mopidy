@@ -39,7 +39,7 @@ def warn(msg_id, pending=False):
         category = PendingDeprecationWarning
     else:
         category = DeprecationWarning
-    warnings.warn(_MESSAGES.get(msg_id, msg_id), category)
+    warnings.warn(_MESSAGES.get(msg_id, msg_id), category, stacklevel=2)
 
 
 @contextlib.contextmanager
