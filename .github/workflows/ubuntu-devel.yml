@@ -15,7 +15,7 @@ jobs:
     container: ubuntu:devel
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install dependencies
         run: |
           apt-get update
