@@ -26,7 +26,6 @@ class Core(
     backend.BackendListener,
     mixer.MixerListener,
 ):
-
     library = None
     """An instance of :class:`~mopidy.core.LibraryController`"""
 

@@ -5,7 +5,6 @@ from mopidy import config, ext
 
 
 class Extension(ext.Extension):
-
     dist_name = "Mopidy-Stream"
     ext_name = "stream"
     version = mopidy.__version__
