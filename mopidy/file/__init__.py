@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 
 
 class Extension(ext.Extension):
-
     dist_name = "Mopidy-File"
     ext_name = "file"
     version = mopidy.__version__

@@ -552,7 +552,6 @@ class TestCurrentAndPendingTlTrack(BaseTest):
     "mopidy.core.playback.listener.CoreListener", spec=core.CoreListener
 )
 class TestEventEmission(BaseTest):
-
     maxDiff = None  # noqa: N815
 
     def test_play_when_stopped_emits_events(self, listener_mock):
@@ -855,7 +854,6 @@ class TestEventEmission(BaseTest):
 
 
 class TestUnplayableURI(BaseTest):
-
     tracks = [
         Track(uri="unplayable://"),
         Track(uri="dummy:b"),
@@ -1317,7 +1315,6 @@ class TestBug1352Regression(BaseTest):
 
 
 class TestEndlessLoop(BaseTest):
-
     tracks_play = [
         Track(uri="dummy:limit_never:a"),
         Track(uri="dummy:limit_never:b"),

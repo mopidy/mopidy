@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 
 
 class SoftwareMixer(pykka.ThreadingActor, mixer.Mixer):
-
     name = "software"
 
     def __init__(self, config):

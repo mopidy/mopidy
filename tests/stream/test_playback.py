@@ -72,7 +72,6 @@ class TestTranslateURI:
     def test_playable_ogg_stream_is_not_considered_a_playlist(
         self, scanner, provider
     ):
-
         scanner.scan.side_effect = [
             # Set playable to True to ignore detection as possible playlist
             mock.Mock(mime="application/ogg", playable=True),
@@ -85,7 +84,6 @@ class TestTranslateURI:
 
     @responses.activate
     def test_text_playlist_with_mpeg_stream(self, scanner, provider, caplog):
-
         caplog.set_level(logging.DEBUG)
         scanner.scan.side_effect = [
             # Scanning playlist
@@ -151,7 +149,6 @@ class TestTranslateURI:
     def test_scan_fails_but_playlist_parsing_succeeds(
         self, scanner, provider, caplog
     ):
-
         caplog.set_level(logging.DEBUG)
         scanner.scan.side_effect = [
             # Scanning playlist
@@ -181,7 +178,6 @@ class TestTranslateURI:
     def test_scan_fails_and_playlist_parsing_fails(
         self, scanner, provider, caplog
     ):
-
         caplog.set_level(logging.DEBUG)
         scanner.scan.side_effect = exceptions.ScannerError("some failure")
         responses.add(
