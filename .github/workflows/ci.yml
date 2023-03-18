@@ -46,7 +46,7 @@ jobs:
       - name: Fix home dir permissions to enable pip caching
         run: chown -R root /github/home
       - name: Cache pip
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-${{ matrix.python }}-${{ matrix.tox }}-pip-${{ hashFiles('setup.cfg') }}-${{ hashFiles('tox.ini') }}
