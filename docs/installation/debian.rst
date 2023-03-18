@@ -21,8 +21,8 @@ Distribution and architecture support
 
 The packages in the apt.mopidy.com archive are built for:
 
-- **Debian 10 (Buster)**,
-  which also works for Raspbian Buster and Ubuntu 19.10 and newer.
+- **Debian 11 (Bullseye)**,
+  which also works for Raspbian Bullseye and Ubuntu 22.04 and newer.
 
 The few packages that are compiled are available for multiple CPU
 architectures:
@@ -48,7 +48,7 @@ Install from apt.mopidy.com
 
 #. Add the APT repo to your package sources::
 
-       sudo wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/buster.list
+       sudo wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/bullseye.list
 
 #. Install Mopidy and all dependencies::
 
