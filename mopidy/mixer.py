@@ -6,9 +6,7 @@ from typing import TYPE_CHECKING
 from mopidy import listener
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, Optional
-
-    from typing_extensions import Literal
+    from typing import Any, Literal, Optional
 
     MixerEvent = Literal["mute_changed", "volume_changed"]
 
@@ -39,7 +37,7 @@ class Mixer:
     mixer.
     """
 
-    def __init__(self, config: Dict) -> None:
+    def __init__(self, config: dict) -> None:
         pass
 
     def get_volume(self) -> Optional[int]:

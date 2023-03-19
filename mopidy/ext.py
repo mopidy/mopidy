@@ -11,20 +11,21 @@ from mopidy import exceptions
 from mopidy.internal import path
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from pathlib import Path
-    from typing import Any, Dict, Iterator, List, Optional, Type
+    from typing import Any, Optional
 
     from mopidy.commands import Command
     from mopidy.config import ConfigSchema
 
-    Config = Dict[str, Dict[str, Any]]
+    Config = dict[str, dict[str, Any]]
 
 
 logger = logging.getLogger(__name__)
 
 
 class ExtensionData(NamedTuple):
-    extension: "Extension"
+    extension: Extension
     entry_point: Any
     config_schema: ConfigSchema
     config_defaults: Any
@@ -144,7 +145,7 @@ class Extension:
         """
         pass
 
-    def setup(self, registry: "Registry") -> None:
+    def setup(self, registry: Registry) -> None:
         """
         Register the extension's components in the extension :class:`Registry`.
 
@@ -188,16 +189,16 @@ class Registry(Mapping):
     """
 
     def __init__(self) -> None:
-        self._registry: Dict[str, List[Type[Any]]] = {}
+        self._registry: dict[str, list[type[Any]]] = {}
 
-    def add(self, name: str, cls: Type[Any]) -> None:
+    def add(self, name: str, cls: type[Any]) -> None:
         """Add a component to the registry.
 
         Multiple classes can be registered to the same name.
         """
         self._registry.setdefault(name, []).append(cls)
 
-    def __getitem__(self, name: str) -> List[Type[Any]]:
+    def __getitem__(self, name: str) -> list[type[Any]]:
         return self._registry.setdefault(name, [])
 
     def __iter__(self) -> Iterator[str]:
@@ -207,7 +208,7 @@ class Registry(Mapping):
         return len(self._registry)
 
 
-def load_extensions() -> List[ExtensionData]:
+def load_extensions() -> list[ExtensionData]:
     """Find all installed extensions.
 
     :returns: list of installed extensions

@@ -8,9 +8,9 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from logging import LogRecord
-    from typing import Dict, List, Optional, Tuple
+    from typing import Literal, Optional
 
-    from typing_extensions import Literal, TypedDict
+    from typing_extensions import TypedDict
 
     LogColor = Literal[
         "black",
@@ -27,8 +27,8 @@ if TYPE_CHECKING:
 
     class Config(TypedDict):
         logging: LoggingConfig
-        loglevels: Dict[str, int]
-        logcolors: Dict[str, LogColor]
+        loglevels: dict[str, int]
+        logcolors: dict[str, LogColor]
 
     class LoggingConfig(TypedDict):
         verbosity: int
@@ -37,7 +37,7 @@ if TYPE_CHECKING:
         config_file: str
 
 
-LOG_LEVELS: Dict[int, Dict[str, int]] = {
+LOG_LEVELS: dict[int, dict[str, int]] = {
     -1: dict(root=logging.ERROR, mopidy=logging.WARNING),
     0: dict(root=logging.ERROR, mopidy=logging.INFO),
     1: dict(root=logging.WARNING, mopidy=logging.DEBUG),
@@ -57,7 +57,7 @@ class DelayedHandler(logging.Handler):
     def __init__(self) -> None:
         logging.Handler.__init__(self)
         self._released = False
-        self._buffer: List[LogRecord] = []
+        self._buffer: list[LogRecord] = []
 
     def handle(self, record: LogRecord) -> bool:
         if not self._released:
@@ -136,7 +136,7 @@ def get_verbosity_level(
 
 
 class VerbosityFilter(logging.Filter):
-    def __init__(self, verbosity_level: int, loglevels: Dict[str, int]):
+    def __init__(self, verbosity_level: int, loglevels: dict[str, int]):
         self.verbosity_level = verbosity_level
         self.loglevels = loglevels
 
@@ -153,7 +153,7 @@ class VerbosityFilter(logging.Filter):
 
 
 #: Available log colors.
-COLORS: List[LogColor] = [
+COLORS: list[LogColor] = [
     "black",
     "red",
     "green",
@@ -180,7 +180,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
     """
 
     # Map logging levels to (background, foreground, bold/intense)
-    level_map: Dict[int, Tuple[Optional[LogColor], LogColor, bool]] = {
+    level_map: dict[int, tuple[Optional[LogColor], LogColor, bool]] = {
         TRACE_LOG_LEVEL: (None, "blue", False),
         logging.DEBUG: (None, "blue", False),
         logging.INFO: (None, "white", False),
@@ -189,14 +189,14 @@ class ColorizingStreamHandler(logging.StreamHandler):
         logging.CRITICAL: ("red", "white", True),
     }
     # Map logger name to foreground colors
-    logger_map: Dict[str, LogColor] = {}
+    logger_map: dict[str, LogColor] = {}
 
     csi = "\x1b["
     reset = "\x1b[0m"
 
     is_windows = platform.system() == "Windows"
 
-    def __init__(self, logger_colors: Dict[str, LogColor]) -> None:
+    def __init__(self, logger_colors: dict[str, LogColor]) -> None:
         super().__init__()
         self.logger_map = logger_colors
 
