@@ -198,10 +198,12 @@ class TestValidateExtensionData:
         assert not ext.validate_extension_data(ext_data)
 
     def test_entry_point_require_exception(self, ext_data):
-        ext_data.entry_point.require.side_effect = Exception
+        ext_data.entry_point.require.side_effect = Exception(
+            "Some extension error"
+        )
 
         # Hope that entry points are well behaved, so exception will bubble.
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match="Some extension error"):
             assert not ext.validate_extension_data(ext_data)
 
     def test_extenions_validate_environment_error(self, ext_data):
