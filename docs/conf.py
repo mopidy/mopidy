@@ -131,14 +131,17 @@ man_pages = [
 # -- Options for extlink extension --------------------------------------------
 
 extlinks = {
-    "issue": ("https://github.com/mopidy/mopidy/issues/%s", "#"),
-    "commit": ("https://github.com/mopidy/mopidy/commit/%s", "commit "),
-    "js": ("https://github.com/mopidy/mopidy.js/issues/%s", "mopidy.js#"),
+    "issue": ("https://github.com/mopidy/mopidy/issues/%s", "#%s"),
+    "commit": ("https://github.com/mopidy/mopidy/commit/%s", "commit %s"),
+    "js": ("https://github.com/mopidy/mopidy.js/issues/%s", "mopidy.js#%s"),
     "mpris": (
         "https://github.com/mopidy/mopidy-mpris/issues/%s",
-        "mopidy-mpris#",
+        "mopidy-mpris#%s",
     ),
-    "discuss": ("https://discourse.mopidy.com/t/%s", "discourse.mopidy.com/t/"),
+    "discuss": (
+        "https://discourse.mopidy.com/t/%s",
+        "discourse.mopidy.com/t/%s",
+    ),
 }
 
 
