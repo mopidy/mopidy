@@ -60,5 +60,5 @@ jobs:
         if: ${{ ! matrix.coverage }}
       - run: python -m tox -e ${{ matrix.tox }} -- --cov-report=xml
         if: ${{ matrix.coverage }}
-      - uses: codecov/codecov-action@v1
+      - uses: codecov/codecov-action@v3
         if: ${{ matrix.coverage }}
