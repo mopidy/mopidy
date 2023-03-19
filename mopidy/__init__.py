@@ -4,9 +4,9 @@ import warnings
 
 import pkg_resources
 
-if not sys.version_info >= (3, 7):
+if not sys.version_info >= (3, 9):
     sys.exit(
-        f"ERROR: Mopidy requires Python >= 3.7, "
+        f"ERROR: Mopidy requires Python >= 3.9, "
         f"but found {platform.python_version()}."
     )
 

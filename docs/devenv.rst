@@ -262,7 +262,7 @@ lints the source code for issues and a ``docs`` environment that tests that the
 documentation can be built. You can also limit tox to just test specific
 environments using the ``-e`` option, e.g. to run just unit tests::
 
-    tox -e py37
+    tox -e py39
 
 To learn more, see the `tox documentation <https://tox.readthedocs.io/>`_ .
 
@@ -270,7 +270,7 @@ To learn more, see the `tox documentation <https://tox.readthedocs.io/>`_ .
 Running unit tests
 ------------------
 
-Under the hood, ``tox -e py37`` will use `pytest <https://docs.pytest.org/>`_
+Under the hood, ``tox -e py39`` will use `pytest <https://docs.pytest.org/>`_
 as the test runner. We can also use it directly to run all tests::
 
     pytest
