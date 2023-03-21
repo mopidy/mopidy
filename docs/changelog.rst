@@ -15,7 +15,7 @@ v3.5.0 (UNRELEASED)
 Dependencies
 ------------
 
-- Python >= 3.9 is now required. Python 3.7 and 3.8 is no longer supported.
+- Python >= 3.9 is now required. Python 3.7 and 3.8 are no longer supported.
 
 
 v3.4.1 (2022-12-07)
