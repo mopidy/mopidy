@@ -16,7 +16,7 @@ from mopidy import core, models
 from mopidy.internal import jsonrpc
 
 if TYPE_CHECKING:
-    from typing import ClassVar, Set
+    from typing import ClassVar
 
 
 logger = logging.getLogger(__name__)
@@ -107,7 +107,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     # XXX This set is shared by all WebSocketHandler objects. This isn't
     # optimal, but there's currently no use case for having more than one of
     # these anyway.
-    clients: ClassVar[Set[WebSocketHandler]] = set()
+    clients: ClassVar[set[WebSocketHandler]] = set()
 
     @classmethod
     def broadcast(cls, msg, io_loop):

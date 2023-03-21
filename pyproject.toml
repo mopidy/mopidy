@@ -3,7 +3,7 @@ requires = ["setuptools >= 30.3.0", "wheel"]
 
 
 [tool.black]
-target-version = ["py37", "py38", "py39", "py310"]
+target-version = ["py39", "py310", "py311"]
 line-length = 80
 
 

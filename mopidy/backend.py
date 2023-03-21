@@ -8,9 +8,7 @@ import pykka
 from mopidy import listener
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, List, Optional, Set, TypeVar, Union
-
-    from typing_extensions import Literal
+    from typing import Any, Literal, Optional, TypeVar, Union
 
     from mopidy.models import Image, Playlist, Ref, SearchResult, Track
 
@@ -39,7 +37,7 @@ if TYPE_CHECKING:
 
     F = TypeVar("F")
     QueryValue = Union[str, int]
-    Query = Dict[F, List[QueryValue]]
+    Query = dict[F, list[QueryValue]]
 
     Uri = str
     UriScheme = str
@@ -88,7 +86,7 @@ class Backend:
     playlists: Optional[PlaylistsProvider] = None
 
     #: List of URI schemes this backend can handle.
-    uri_schemes: List[UriScheme] = []
+    uri_schemes: list[UriScheme] = []
 
     # Because the providers is marked as pykka.traversable(), we can't get()
     # them from another actor, and need helper methods to check if the
@@ -134,7 +132,7 @@ class LibraryProvider:
     def __init__(self, backend: Backend) -> None:
         self.backend = backend
 
-    def browse(self, uri: Uri) -> List[Ref]:
+    def browse(self, uri: Uri) -> list[Ref]:
         """
         See :meth:`mopidy.core.LibraryController.browse`.
 
@@ -147,7 +145,7 @@ class LibraryProvider:
 
     def get_distinct(
         self, field: DistinctField, query: Optional[Query[DistinctField]] = None
-    ) -> Set[str]:
+    ) -> set[str]:
         """
         See :meth:`mopidy.core.LibraryController.get_distinct`.
 
@@ -160,7 +158,7 @@ class LibraryProvider:
         """
         return set()
 
-    def get_images(self, uris: List[Uri]) -> Dict[Uri, List[Image]]:
+    def get_images(self, uris: list[Uri]) -> dict[Uri, list[Image]]:
         """
         See :meth:`mopidy.core.LibraryController.get_images`.
 
@@ -170,7 +168,7 @@ class LibraryProvider:
         """
         return {}
 
-    def lookup(self, uri: Uri) -> Dict[Uri, List[Track]]:
+    def lookup(self, uri: Uri) -> dict[Uri, list[Track]]:
         """
         See :meth:`mopidy.core.LibraryController.lookup`.
 
@@ -189,9 +187,9 @@ class LibraryProvider:
     def search(
         self,
         query: Query[SearchField],
-        uris: Optional[List[Uri]] = None,
+        uris: Optional[list[Uri]] = None,
         exact: bool = False,
-    ) -> List[SearchResult]:
+    ) -> list[SearchResult]:
         """
         See :meth:`mopidy.core.LibraryController.search`.
 
@@ -402,7 +400,7 @@ class PlaylistsProvider:
     def __init__(self, backend: Backend) -> None:
         self.backend = backend
 
-    def as_list(self) -> List[Ref]:
+    def as_list(self) -> list[Ref]:
         """
         Get a list of the currently available playlists.
 
@@ -416,7 +414,7 @@ class PlaylistsProvider:
         """
         raise NotImplementedError
 
-    def get_items(self, uri: Uri) -> Optional[List[Ref]]:
+    def get_items(self, uri: Uri) -> Optional[list[Ref]]:
         """
         Get the items in a playlist specified by ``uri``.
 

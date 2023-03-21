@@ -365,7 +365,7 @@ class HttpServerWithStaticDefaultApp(tornado.testing.AsyncHTTPTestCase):
 
 class HttpServerWithInvalidDefaultApp(HttpServerTest):
     def get_config(self):
-        config = super(HttpServerWithInvalidDefaultApp, self).get_config()
+        config = super().get_config()
         config["http"]["default_app"] = "invalid_webclient"
         return config
 

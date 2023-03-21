@@ -273,7 +273,7 @@ class Pair(ConfigValue):
         ):
             return serialized_first_value
         else:
-            return "{0}{1}{2}".format(
+            return "{}{}{}".format(
                 serialized_first_value,
                 self._separator,
                 serialized_second_value,

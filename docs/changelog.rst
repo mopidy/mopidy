@@ -9,6 +9,15 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
+v3.5.0 (UNRELEASED)
+===================
+
+Dependencies
+------------
+
+- Python >= 3.9 is now required. Python 3.7 and 3.8 are no longer supported.
+
+
 v3.4.1 (2022-12-07)
 ===================
 
@@ -49,7 +58,7 @@ v3.3.0 (2022-04-29)
   fields, with the exception of 'any'. Deprecated field 'track' with the
   goal of removing it in the next major release, use 'track_name' instead.
   Backends should support both `track` and `track_name` until they require
-  a version of Mopidy where `track` has been removed. 
+  a version of Mopidy where `track` has been removed.
   (Fixes: :issue:`1900`, PR: :issue:`1899`)
 
 - Core: Add ``musicbrainz_albumid``, ``musicbrainz_artistid``,
