@@ -79,7 +79,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 project = "Mopidy"
-copyright = "2009-2021, Stein Magnus Jodal and contributors"
+copyright = "2009-2023, Stein Magnus Jodal and contributors"
 
 
 release = get_version()
