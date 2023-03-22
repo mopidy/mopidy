@@ -33,7 +33,7 @@ please see :ref:`contributing`.
 
        sudo dnf install -y gcc python3-devel python3-pip
 
-#. Then you'll need to install GStreamer >= 1.14.0, with Python bindings.
+#. Then you'll need to install GStreamer >= 1.18.0, with Python bindings.
    GStreamer is packaged for most popular Linux distributions. Search for
    GStreamer in your package manager, and make sure to install the Python
    bindings, and the "good" and "ugly" plugin sets.
