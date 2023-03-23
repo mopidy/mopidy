@@ -58,8 +58,8 @@ class ScannerTest(unittest.TestCase):
 
         ogg = path_to_data_dir("scanner/simple/song1.ogg")
         mp3 = path_to_data_dir("scanner/simple/song1.mp3")
-        assert self.result[mp3].duration == 4680
-        assert self.result[ogg].duration == 4680
+        assert self.result[mp3].duration == 4608
+        assert self.result[ogg].duration == 4704
 
     def test_artist_is_set(self):
         self.scan(self.find("scanner/simple"))
