@@ -46,7 +46,7 @@ def main():
         extensions_data = ext.load_extensions()
 
         for data in extensions_data:
-            if data.command:  # TODO: check isinstance?
+            if isinstance(data.command, commands.Command):
                 data.command.set(extension=data.extension)
                 root_cmd.add_child(data.extension.ext_name, data.command)
 
