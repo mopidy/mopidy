@@ -1,6 +1,7 @@
 import logging
 import signal
 import sys
+from collections import defaultdict
 
 import pykka.debug
 
@@ -66,36 +67,9 @@ def main():
             config, args.base_verbosity_level, args.verbosity_level
         )
 
-        extensions = {
-            "validate": [],
-            "config": [],
-            "disabled": [],
-            "enabled": [],
-        }
-        for data in extensions_data:
-            extension = data.extension
-
-            # TODO: factor out all of this to a helper that can be tested
-            if not ext.validate_extension_data(data):
-                config[extension.ext_name] = {"enabled": False}
-                config_errors[extension.ext_name] = {
-                    "enabled": "extension disabled by self check."
-                }
-                extensions["validate"].append(extension)
-            elif not config[extension.ext_name]["enabled"]:
-                config[extension.ext_name] = {"enabled": False}
-                config_errors[extension.ext_name] = {
-                    "enabled": "extension disabled by user config."
-                }
-                extensions["disabled"].append(extension)
-            elif config_errors.get(extension.ext_name):
-                config[extension.ext_name]["enabled"] = False
-                config_errors[extension.ext_name][
-                    "enabled"
-                ] = "extension disabled due to config errors."
-                extensions["config"].append(extension)
-            else:
-                extensions["enabled"].append(extension)
+        config, config_errors, extensions = categorize_extensions(
+            config, config_errors, extensions_data
+        )
 
         log_extension_info(
             [d.extension for d in extensions_data], extensions["enabled"]
@@ -150,6 +124,38 @@ def main():
     except Exception as ex:
         logger.exception(ex)
         raise
+
+
+def categorize_extensions(config, config_errors, extensions_data):
+    """Categorizes extension into four categories: validate,
+    enabled,disabled and config"""
+    extensions = defaultdict(list)
+
+    for data in extensions_data:
+        extension = data.extension
+
+        if not ext.validate_extension_data(data):
+            config[extension.ext_name] = {"enabled": False}
+            config_errors[extension.ext_name] = {
+                "enabled": "extension disabled by self check."
+            }
+            extensions["validate"].append(extension)
+        elif not config[extension.ext_name]["enabled"]:
+            config[extension.ext_name] = {"enabled": False}
+            config_errors[extension.ext_name] = {
+                "enabled": "extension disabled by user config."
+            }
+            extensions["disabled"].append(extension)
+        elif config_errors.get(extension.ext_name):
+            config[extension.ext_name]["enabled"] = False
+            config_errors[extension.ext_name][
+                "enabled"
+            ] = "extension disabled due to config errors."
+            extensions["config"].append(extension)
+        else:
+            extensions["enabled"].append(extension)
+
+    return config, config_errors, extensions
 
 
 def create_core_dirs(config):
