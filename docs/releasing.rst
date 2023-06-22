@@ -15,7 +15,7 @@ Releasing extensions
 Extensions that are maintained in the Mopidy organization use a quite
 stream-lined release procedure.
 
-#. Make sure that everything has been merged into the ``master`` branch on
+#. Make sure that everything has been merged into the ``main`` branch on
    GitHub, and that all CI checks are green.
 
 #. Perform any manual tests you feel are required.
@@ -35,7 +35,7 @@ stream-lined release procedure.
 
 #. Push to GitHub::
 
-    git push origin master --follow-tags
+    git push origin main --follow-tags
 
 #. Go to the GitHub repository's tags page, e.g.
    ``https://github.com/mopidy/mopidy-foo/tags``. Find the tag and select
@@ -70,7 +70,7 @@ To setup this on your own repo, you must:
 
 #. Copy ``.github/workflows/release.yml`` from the Mopidy
    `cookiecutter project
-   <https://github.com/mopidy/cookiecutter-mopidy-ext/blob/master/%7B%7Bcookiecutter.repo_name%7D%7D/.github/workflows/release.yml>`_.
+   <https://github.com/mopidy/cookiecutter-mopidy-ext/blob/main/%7B%7Bcookiecutter.repo_name%7D%7D/.github/workflows/release.yml>`_.
 
 #. Create an API token in your account settings at PyPI with scope to access
    the extension's PyPI package.
@@ -112,9 +112,9 @@ Release
 
     git commit -m "Prepare release of v3.3.0"
 
-#. Merge the release branch (``develop`` in the example) into ``master``::
+#. Merge the release branch (``develop`` in the example) into ``main``::
 
-    git checkout master
+    git checkout main
     git pull
     git merge --no-ff -m "Release v3.3.0" develop
 
@@ -126,7 +126,7 @@ Release
 
 #. Push to GitHub::
 
-    git push origin master --follow-tags
+    git push origin main --follow-tags
 
 #. Go to the GitHub repository's tags page at
    ``https://github.com/mopidy/mopidy/tags``. Find the tag and select
@@ -141,11 +141,11 @@ Release
 Post-release
 ------------
 
-#. To prepare for further development, merge the ``master`` branch back into
+#. To prepare for further development, merge the ``main`` branch back into
    the ``develop`` branch and push it to GitHub::
 
     git checkout develop
-    git merge master
+    git merge main
     git push origin develop
 
 #. Make sure the new tag is built by
