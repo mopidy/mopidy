@@ -62,18 +62,19 @@ used to select playlists from Spotify.
 To get started with Mopidy, begin by reading the
 `installation docs <https://docs.mopidy.com/en/latest/installation/>`_.
 
+
 **Contribute**
 
-If you want to contribute, begin by reading the
-`contribute <https://docs.mopidy.com/en/latest/contributing/>`_
+Begin by reading the
+`contributing <https://docs.mopidy.com/en/latest/contributing/>`_
 section of our documentation.
 
-If you are a developer, please read
+If you are a developer, please also read
 `Development environment <https://docs.mopidy.com/en/latest/devenv/>`_
-or
+and/or
 `Extension development <https://docs.mopidy.com/en/latest/extensiondev/>`_
 
-We welcome all kinds of help from bug fixing, testing to documentation.
+We welcome all kinds of help with bug fixing, testing, documentation and supporting other users.
 
 
 **Project resources**
