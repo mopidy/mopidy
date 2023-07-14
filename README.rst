@@ -64,7 +64,7 @@ To get started with Mopidy, begin by reading the
 
 **Contribute**
 
-If you want to contribute, being by reading the
+If you want to contribute, begin by reading the
 `contribute <https://docs.mopidy.com/en/latest/contributing/>`_
 section of our documentation.
 
