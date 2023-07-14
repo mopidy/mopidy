@@ -1,40 +1,11 @@
-# TODO Test browse()
-from unittest import mock
+import copy
 
-import pytest
-
-from mopidy.file import backend
-from mopidy.internal import path
+from mopidy.file.library import FileLibraryProvider
 
 from tests import path_to_data_dir
 
 
-@pytest.fixture
-def config():
-    return {
-        "proxy": {},
-        "file": {
-            "show_dotfiles": False,
-            "media_dirs": [str(path_to_data_dir(""))],
-            "excluded_file_extensions": [],
-            "follow_symlinks": False,
-            "metadata_timeout": 1000,
-        },
-    }
-
-
-@pytest.fixture
-def audio():
-    return mock.Mock()
-
-
-@pytest.fixture
-def track_uri():
-    return path.path_to_uri(path_to_data_dir("song1.wav"))
-
-
-def test_file_browse(config, audio, track_uri, caplog):
-    provider = backend.FileBackend(audio=audio, config=config).library
+def test_file_browse(provider, track_uri, caplog):
     result = provider.browse(track_uri)
 
     assert len(result) == 0
@@ -42,3 +13,18 @@ def test_file_browse(config, audio, track_uri, caplog):
     assert any(
         map(lambda record: "Rejected attempt" in record.message, caplog.records)
     )
+
+
+def test_file_root_directory(config):
+    """Test root_directory()"""
+    root_config = copy.deepcopy(config)
+    mopidy_file = FileLibraryProvider(None, root_config)
+    ref = mopidy_file.root_directory
+    assert ref.ALBUM == "album"
+    root_config["file"]["media_dirs"].append(str(path_to_data_dir("")))
+    mopidy_file = FileLibraryProvider(None, root_config)
+    ref = mopidy_file.root_directory
+    assert ref.ALBUM == "album"
+    root_config["file"]["media_dirs"] = []
+    mopidy_file = FileLibraryProvider(None, root_config)
+    assert not mopidy_file.root_directory
