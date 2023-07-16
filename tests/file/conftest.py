@@ -3,35 +3,34 @@ from unittest import mock
 import pytest
 
 from mopidy.file import backend
-from mopidy.internal import path
 
 from tests import path_to_data_dir
 
 
 @pytest.fixture
-def config():
+def media_dirs():
+    return [str(path_to_data_dir(""))]
+
+
+@pytest.fixture
+def follow_symlinks():
+    return False
+
+
+@pytest.fixture
+def config(media_dirs, follow_symlinks):
     return {
         "proxy": {},
         "file": {
             "show_dotfiles": False,
-            "media_dirs": [str(path_to_data_dir(""))],
-            "excluded_file_extensions": [],
-            "follow_symlinks": False,
+            "media_dirs": media_dirs,
+            "excluded_file_extensions": [".conf"],
+            "follow_symlinks": follow_symlinks,
             "metadata_timeout": 1000,
         },
     }
 
 
 @pytest.fixture
-def audio():
-    return mock.Mock()
-
-
-@pytest.fixture
-def track_uri():
-    return path.path_to_uri(path_to_data_dir("song1.wav"))
-
-
-@pytest.fixture
-def provider(audio, config):
-    return backend.FileBackend(audio=audio, config=config).library
+def provider(config):
+    return backend.FileBackend(audio=mock.Mock(), config=config).library

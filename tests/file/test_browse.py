@@ -1,30 +1,49 @@
-import copy
+import pytest
 
-from mopidy.file.library import FileLibraryProvider
+from mopidy.internal import path
 
 from tests import path_to_data_dir
 
 
-def test_file_browse(provider, track_uri, caplog):
-    result = provider.browse(track_uri)
+@pytest.mark.parametrize("follow_symlinks", [True, False])
+@pytest.mark.parametrize(
+    "uri, levelname",
+    [
+        ("file:root", None),
+        ("not_in_data_path", "WARNING"),
+        (path.path_to_uri(path_to_data_dir("song1.wav")), "ERROR"),
+        (path.path_to_uri(path_to_data_dir("")), None),
+    ],
+)
+def test_file_browse(provider, uri, levelname, caplog):
+    result = provider.browse(uri)
+    assert type(result) == list
+    if levelname:
+        assert len(result) == 0
+        record = caplog.records[0]
+        assert record.levelname == levelname
+        assert "Rejected attempt" in record.message
+        return
 
-    assert len(result) == 0
-    assert any(map(lambda record: record.levelname == "ERROR", caplog.records))
-    assert any(
-        map(lambda record: "Rejected attempt" in record.message, caplog.records)
-    )
+    assert len(result) >= 1
 
 
-def test_file_root_directory(config):
+@pytest.mark.parametrize(
+    "media_dirs, expected",
+    [
+        ([str(path_to_data_dir(""))], False),
+        ([str(path_to_data_dir("")), str(path_to_data_dir(""))], True),
+        ([], None),
+        ([str(path_to_data_dir("song1.wav"))], None),
+        (["|" + str(path_to_data_dir(""))], False),
+        ([str(path_to_data_dir("$"))], None),
+    ],
+)
+def test_file_root_directory(provider, expected):
     """Test root_directory()"""
-    root_config = copy.deepcopy(config)
-    mopidy_file = FileLibraryProvider(None, root_config)
-    ref = mopidy_file.root_directory
+    ref = provider.root_directory
+    if expected is None:
+        assert not ref
+        return
     assert ref.ALBUM == "album"
-    root_config["file"]["media_dirs"].append(str(path_to_data_dir("")))
-    mopidy_file = FileLibraryProvider(None, root_config)
-    ref = mopidy_file.root_directory
-    assert ref.ALBUM == "album"
-    root_config["file"]["media_dirs"] = []
-    mopidy_file = FileLibraryProvider(None, root_config)
-    assert not mopidy_file.root_directory
+    assert (ref.uri == "file:root") == expected
