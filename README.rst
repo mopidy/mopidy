@@ -63,18 +63,16 @@ To get started with Mopidy, begin by reading the
 `installation docs <https://docs.mopidy.com/en/latest/installation/>`_.
 
 
-**Contribute**
+**Contributing**
 
 Begin by reading the
 `contributing <https://docs.mopidy.com/en/latest/contributing/>`_
 section of our documentation.
-
 If you are a developer, please also read
 `Development environment <https://docs.mopidy.com/en/latest/devenv/>`_
 and/or
-`Extension development <https://docs.mopidy.com/en/latest/extensiondev/>`_
-
-We welcome all kinds of help with bug fixing, testing, documentation and supporting other users.
+`Extension development <https://docs.mopidy.com/en/latest/extensiondev/>`_.
+We welcome all kinds of help with bug fixing, testing, documentation, and supporting other users.
 
 
 **Project resources**
