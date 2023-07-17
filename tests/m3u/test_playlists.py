@@ -310,7 +310,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         result = self.core.playlists.lookup("m3u:test.m3u")
         assert "m3u:test.m3u" == result.uri
         assert playlist.name == result.name
-        assert filepath.as_uri() == result.tracks[0].uri
+        assert filepath.resolve().as_uri() == result.tracks[0].uri
 
     def test_playlist_sort_order(self):
         def check_order(playlists, names):
