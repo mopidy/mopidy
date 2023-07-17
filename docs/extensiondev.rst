@@ -495,7 +495,7 @@ an example of how to use it::
     ...     f'{mopidy_soundspot.Extension.dist_name}/'
     ...     f'{mopidy_soundspot.__version__}'
     ... )
-    'Mopidy-SoundSpot/2.0.0 Mopidy/3.0.0 Python/3.7.5'
+    'Mopidy-SoundSpot/2.0.0 Mopidy/3.0.0 Python/3.9.2'
 
 Example using Requests sessions
 -------------------------------
