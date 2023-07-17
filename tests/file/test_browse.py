@@ -45,5 +45,5 @@ def test_file_root_directory(provider, expected):
     if expected is None:
         assert not ref
         return
-    assert ref.ALBUM == "album"
+    assert ref.name == "Files"
     assert (ref.uri == "file:root") == expected
