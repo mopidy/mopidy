@@ -305,9 +305,10 @@ class RootCommand(Command):
         )
 
     def run(self, args, config):
-        def on_sigterm(loop):
+        def on_sigterm(loop) -> bool:
             logger.info("GLib mainloop got SIGTERM. Exiting...")
             loop.quit()
+            return GLib.SOURCE_REMOVE
 
         loop = GLib.MainLoop()
         GLib.unix_signal_add(
