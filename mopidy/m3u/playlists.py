@@ -166,7 +166,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             path = self._abspath(path)
         if not self._is_in_basedir(path):
             raise Exception(
-                f"Path {path!r} is not inside playlist dir {self._playlist_dir!r}"
+                f"Path {path!r} is not inside playlist dir {self._playlists_dir!r}"
             )
         if "w" in mode:
             return replace(path, mode, encoding=encoding, errors="replace")
