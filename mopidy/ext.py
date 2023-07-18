@@ -1,28 +1,23 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Mapping
-from typing import TYPE_CHECKING, NamedTuple, Union
+from collections.abc import Iterator, Mapping
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, NamedTuple, Optional, Union
 
 import pkg_resources
 
 from mopidy import config as config_lib
 from mopidy import exceptions
+from mopidy.commands import Command
+from mopidy.config import ConfigSchema
 from mopidy.internal import path
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
-    from pathlib import Path
-    from typing import Any, Optional
-
     from typing_extensions import TypeAlias
-
-    from mopidy.commands import Command
-    from mopidy.config import ConfigSchema
 
     Config = dict[str, dict[str, Any]]
     RegistryEntry: TypeAlias = Union[type[Any], dict[str, Any]]
-
 
 logger = logging.getLogger(__name__)
 
@@ -84,9 +79,11 @@ class Extension:
         :param config: the Mopidy config object
         :return: pathlib.Path
         """
-        if cls.ext_name is None:
-            raise AssertionError
-        cache_dir_path = path.expand_path(config["core"]["cache_dir"]) / cls.ext_name
+        if not hasattr(cls, "ext_name") or cls.ext_name is None:
+            raise AttributeError(f"{cls} not an extension or ext_name missing!")
+        cache_dir_path = (
+            path.expand_path(config["core"]["cache_dir"]) / cls.ext_name
+        )
         path.get_or_create_dir(cache_dir_path)
         return cache_dir_path
 
@@ -97,9 +94,11 @@ class Extension:
         :param config: the Mopidy config object
         :return: pathlib.Path
         """
-        if cls.ext_name is None:
-            raise AssertionError
-        config_dir_path = path.expand_path(config["core"]["config_dir"]) / cls.ext_name
+        if not hasattr(cls, "ext_name") or cls.ext_name is None:
+            raise AttributeError(f"{cls} not an extension or ext_name missing!")
+        config_dir_path = (
+            path.expand_path(config["core"]["config_dir"]) / cls.ext_name
+        )
         path.get_or_create_dir(config_dir_path)
         return config_dir_path
 
@@ -112,9 +111,11 @@ class Extension:
         :param config: the Mopidy config object
         :returns: pathlib.Path
         """
-        if cls.ext_name is None:
-            raise AssertionError
-        data_dir_path = path.expand_path(config["core"]["data_dir"]) / cls.ext_name
+        if not hasattr(cls, "ext_name") or cls.ext_name is None:
+            raise AttributeError(f"{cls} not an extension or ext_name missing!")
+        data_dir_path = (
+            path.expand_path(config["core"]["data_dir"]) / cls.ext_name
+        )
         path.get_or_create_dir(data_dir_path)
         return data_dir_path
 

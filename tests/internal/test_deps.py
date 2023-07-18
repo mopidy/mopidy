@@ -1,15 +1,15 @@
 import platform
 import sys
-import unittest
 from unittest import mock
 
 import pkg_resources
+import pytest
 
 from mopidy.internal import deps
 from mopidy.internal.gi import Gst, gi
 
 
-class DepsTest(unittest.TestCase):
+class TestDeps:
     def test_format_dependency_list(self):
         adapters = [
             lambda: dict(name="Python", version="FooPython 2.7.3"),
@@ -30,20 +30,21 @@ class DepsTest(unittest.TestCase):
         ]
 
         result = deps.format_dependency_list(adapters)
-
         assert "Python: FooPython 2.7.3" in result
-
         assert "Platform: Loonix 4.0.1" in result
-
         assert "Pykka: 1.1 from /foo/bar" in result
         assert "/baz.py" not in result
         assert "Detailed information: Quux" in result
-
         assert "Foo: not found" in result
-
         assert "Mopidy: 0.13" in result
         assert "  pylast: 0.5" in result
         assert "    setuptools: 0.6" in result
+
+    def test_format_dependency_list_real(self):
+        result = deps.format_dependency_list()
+        assert "Python 3." in result
+        assert "Mopidy: 3." in result
+        assert "setuptools: 6" in result
 
     def test_executable_info(self):
         result = deps.executable_info()
@@ -76,6 +77,13 @@ class DepsTest(unittest.TestCase):
         assert "Python wrapper: python-gi" in result["other"]
         assert gi.__version__ in result["other"]
         assert "Relevant elements:" in result["other"]
+
+        with mock.patch(
+            "mopidy.internal.deps._gstreamer_check_elements",
+            return_val=("test1", True),
+        ):
+            result = deps.gstreamer_info()
+            assert "    none" in result["other"]
 
     @mock.patch("pkg_resources.get_distribution")
     def test_pkg_info(self, get_distribution_mock):
@@ -136,3 +144,13 @@ class DepsTest(unittest.TestCase):
         assert "Mopidy" == result["name"]
         assert "version" not in result
         assert "path" not in result
+
+    @pytest.mark.parametrize("include_transitive_deps", [True, False])
+    @pytest.mark.parametrize("include_extras", [True, False])
+    def test_pkg_info_real(self, include_transitive_deps, include_extras):
+        result = deps.pkg_info(
+            "Mopidy",
+            include_transitive_deps=include_transitive_deps,
+            include_extras=include_extras,
+        )
+        assert result
