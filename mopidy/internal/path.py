@@ -67,7 +67,7 @@ def uri_to_path(uri):
     return pathlib.Path(unicode_path)
 
 
-def expand_path(path):
+def expand_path(path) -> pathlib.Path:
     if isinstance(path, bytes):
         path = path.decode(errors="surrogateescape")
     path = str(pathlib.Path(path))
@@ -75,7 +75,7 @@ def expand_path(path):
     for xdg_var, xdg_dir in XDG_DIRS.items():
         path = path.replace("$" + xdg_var, str(xdg_dir))
     if "$" in path:
-        return None
+        raise ValueError(f"Unexpanded '$...' in path {path!r}")
 
     return pathlib.Path(path).expanduser().resolve()
 

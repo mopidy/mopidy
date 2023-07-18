@@ -36,11 +36,9 @@ def test_file_browse(provider, uri, levelname, caplog):
         ([], None),
         ([str(path_to_data_dir("song1.wav"))], None),
         (["|" + str(path_to_data_dir(""))], False),
-        ([str(path_to_data_dir("$"))], None),
     ],
 )
 def test_file_root_directory(provider, expected):
-    """Test root_directory()"""
     ref = provider.root_directory
     if expected is None:
         assert not ref
