@@ -90,11 +90,14 @@ def parse_pls(data):
 
 
 def parse_xspf(data):
+    element = None
     try:
         # Last element will be root.
         for _event, element in elementtree.iterparse(io.BytesIO(data)):
             element.tag = element.tag.lower()  # normalize
     except elementtree.ParseError:
+        return
+    if element is None:
         return
 
     ns = "http://xspf.org/ns/0/"
@@ -104,11 +107,14 @@ def parse_xspf(data):
 
 
 def parse_asx(data):
+    element = None
     try:
         # Last element will be root.
         for _event, element in elementtree.iterparse(io.BytesIO(data)):
             element.tag = element.tag.lower()  # normalize
     except elementtree.ParseError:
+        return
+    if element is None:
         return
 
     for ref in element.findall("entry/ref[@href]"):
