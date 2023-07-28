@@ -1,44 +1,49 @@
-# TODO Test browse()
-from unittest import mock
-
 import pytest
 
-from mopidy.file import backend
 from mopidy.internal import path
 
 from tests import path_to_data_dir
 
 
-@pytest.fixture
-def config():
-    return {
-        "proxy": {},
-        "file": {
-            "show_dotfiles": False,
-            "media_dirs": [str(path_to_data_dir(""))],
-            "excluded_file_extensions": [],
-            "follow_symlinks": False,
-            "metadata_timeout": 1000,
-        },
-    }
+@pytest.mark.parametrize("follow_symlinks", [True, False])
+@pytest.mark.parametrize(
+    "uri, levelname",
+    [
+        ("file:root", None),
+        ("not_in_data_path", "WARNING"),
+        (path.path_to_uri(path_to_data_dir("song1.wav")), "ERROR"),
+        (path.path_to_uri(path_to_data_dir("")), None),
+    ],
+)
+def test_file_browse(provider, uri, levelname, caplog):
+    result = provider.browse(uri)
+    assert type(result) == list
+    if levelname:
+        assert len(result) == 0
+        record = caplog.records[0]
+        assert record.levelname == levelname
+        assert "Rejected attempt" in record.message
+        return
+
+    assert len(result) >= 1
 
 
-@pytest.fixture
-def audio():
-    return mock.Mock()
-
-
-@pytest.fixture
-def track_uri():
-    return path.path_to_uri(path_to_data_dir("song1.wav"))
-
-
-def test_file_browse(config, audio, track_uri, caplog):
-    provider = backend.FileBackend(audio=audio, config=config).library
-    result = provider.browse(track_uri)
-
-    assert len(result) == 0
-    assert any(map(lambda record: record.levelname == "ERROR", caplog.records))
-    assert any(
-        map(lambda record: "Rejected attempt" in record.message, caplog.records)
-    )
+@pytest.mark.parametrize(
+    "media_dirs, expected",
+    [
+        ([str(path_to_data_dir(""))], False),
+        ([str(path_to_data_dir("")), str(path_to_data_dir(""))], True),
+        ([], None),
+        ([str(path_to_data_dir("song1.wav"))], None),
+        (["|" + str(path_to_data_dir(""))], False),
+        ([str(path_to_data_dir("$"))], None),
+    ],
+)
+def test_file_root_directory(provider, expected):
+    """Test root_directory()"""
+    ref = provider.root_directory
+    if expected is None:
+        assert not ref
+        return
+    assert ref.name == "Files"
+    assert (ref.uri == "file:root") == expected
