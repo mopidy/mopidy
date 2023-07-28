@@ -1,15 +1,36 @@
+from unittest import mock
+
 import pytest
 
+from mopidy.file import backend
+
+from tests import path_to_data_dir
+
 
 @pytest.fixture
-def file_config():
-    return {"file": {}}
+def media_dirs():
+    return [str(path_to_data_dir(""))]
 
 
 @pytest.fixture
-def file_library(file_config):
-    # Import library, thus scanner, thus gobject as late as possible to avoid
-    # hard to track import errors during conftest setup.
-    from mopidy.file import library
+def follow_symlinks():
+    return False
 
-    return library.FileLibraryProvider(backend=None, config=file_config)
+
+@pytest.fixture
+def config(media_dirs, follow_symlinks):
+    return {
+        "proxy": {},
+        "file": {
+            "show_dotfiles": False,
+            "media_dirs": media_dirs,
+            "excluded_file_extensions": [".conf"],
+            "follow_symlinks": follow_symlinks,
+            "metadata_timeout": 1000,
+        },
+    }
+
+
+@pytest.fixture
+def provider(config):
+    return backend.FileBackend(audio=mock.Mock(), config=config).library
