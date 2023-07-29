@@ -1,4 +1,5 @@
 import logging
+from typing import TYPE_CHECKING
 
 import pykka
 
@@ -55,3 +56,11 @@ class SoftwareMixer(pykka.ThreadingActor, mixer.Mixer):
             return False
         self._audio_mixer.set_mute(mute)
         return True
+
+
+if TYPE_CHECKING:
+    from pykka.typing import proxy_method
+
+    class SoftwareMixerProxy(mixer.MixerProxy):
+        setup = proxy_method(SoftwareMixer.setup)
+        teardown = proxy_method(SoftwareMixer.teardown)
