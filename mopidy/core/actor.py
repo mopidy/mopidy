@@ -1,6 +1,8 @@
-import collections
+from __future__ import annotations
+
 import itertools
 import logging
+from typing import TYPE_CHECKING
 
 import pykka
 
@@ -16,6 +18,14 @@ from mopidy.core.playlists import PlaylistsController
 from mopidy.core.tracklist import TracklistController
 from mopidy.internal import path, storage, validation, versioning
 from mopidy.internal.models import CoreState
+
+if TYPE_CHECKING:
+    from mopidy.core.history import HistoryControllerProxy
+    from mopidy.core.library import LibraryControllerProxy
+    from mopidy.core.mixer import MixerControllerProxy
+    from mopidy.core.playback import PlaybackControllerProxy
+    from mopidy.core.playlists import PlaylistsControllerProxy
+    from mopidy.core.tracklist import TracklistControllerProxy
 
 logger = logging.getLogger(__name__)
 
@@ -272,3 +282,25 @@ class Backends(list):
                     self.with_playback[scheme] = b
                 if has_playlists:
                     self.with_playlists[scheme] = b
+
+
+if TYPE_CHECKING:
+    from pykka.typing import ActorMemberMixin, proxy_method
+
+    class CoreProxy(ActorMemberMixin, pykka.ActorProxy[Core]):
+        library: LibraryControllerProxy
+        history: HistoryControllerProxy
+        mixer: MixerControllerProxy
+        playback: PlaybackControllerProxy
+        playlists: PlaylistsControllerProxy
+        tracklist: TracklistControllerProxy
+        get_uri_schemes = proxy_method(Core.get_uri_schemes)
+        get_version = proxy_method(Core.get_version)
+        reached_end_of_stream = proxy_method(Core.reached_end_of_stream)
+        stream_changed = proxy_method(Core.stream_changed)
+        position_changed = proxy_method(Core.position_changed)
+        state_changed = proxy_method(Core.state_changed)
+        playlists_loaded = proxy_method(Core.playlists_loaded)
+        volume_changed = proxy_method(Core.volume_changed)
+        mute_changed = proxy_method(Core.mute_changed)
+        tags_changed = proxy_method(Core.tags_changed)

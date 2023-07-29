@@ -4,6 +4,7 @@ import logging
 import operator
 import urllib
 from collections.abc import Mapping
+from typing import TYPE_CHECKING
 
 from mopidy import exceptions, models
 from mopidy.internal import deprecation, validation
@@ -363,3 +364,15 @@ def _normalize_query(query):
             "and file a bug."
         )
     return query
+
+
+if TYPE_CHECKING:
+    from pykka.typing import proxy_method
+
+    class LibraryControllerProxy:
+        browse = proxy_method(LibraryController.browse)
+        get_distinct = proxy_method(LibraryController.get_distinct)
+        get_images = proxy_method(LibraryController.get_images)
+        lookup = proxy_method(LibraryController.lookup)
+        refresh = proxy_method(LibraryController.refresh)
+        search = proxy_method(LibraryController.search)

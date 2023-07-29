@@ -1,5 +1,6 @@
 import contextlib
 import logging
+from typing import TYPE_CHECKING
 
 from mopidy import exceptions
 from mopidy.internal import validation
@@ -109,3 +110,13 @@ class MixerController:
             self.set_mute(state.mute)
             if state.volume:
                 self.set_volume(state.volume)
+
+
+if TYPE_CHECKING:
+    from pykka.typing import proxy_method
+
+    class MixerControllerProxy:
+        get_volume = proxy_method(MixerController.get_volume)
+        set_volume = proxy_method(MixerController.set_volume)
+        get_mute = proxy_method(MixerController.get_mute)
+        set_mute = proxy_method(MixerController.set_mute)

@@ -1,6 +1,7 @@
 import contextlib
 import logging
 import urllib
+from typing import TYPE_CHECKING
 
 from mopidy import exceptions
 from mopidy.core import listener
@@ -278,3 +279,17 @@ class PlaylistsController:
             return playlist
 
         return None
+
+
+if TYPE_CHECKING:
+    from pykka.typing import proxy_method
+
+    class PlaylistsControllerProxy:
+        get_uri_schemes = proxy_method(PlaylistsController.get_uri_schemes)
+        as_list = proxy_method(PlaylistsController.as_list)
+        get_items = proxy_method(PlaylistsController.get_items)
+        create = proxy_method(PlaylistsController.create)
+        delete = proxy_method(PlaylistsController.delete)
+        lookup = proxy_method(PlaylistsController.lookup)
+        refresh = proxy_method(PlaylistsController.refresh)
+        save = proxy_method(PlaylistsController.save)
