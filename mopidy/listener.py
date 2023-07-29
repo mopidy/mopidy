@@ -21,8 +21,8 @@ def send(cls, event, **kwargs):
         # quickly deadlock.
         listener.tell(
             ProxyCall(
-                attr_path=["on_event"],
-                args=[event],
+                attr_path=("on_event",),
+                args=(event,),
                 kwargs=kwargs,
             )
         )

@@ -175,8 +175,8 @@ class PlaybackController:
         """
         self.core.actor_ref.ask(
             ProxyCall(
-                attr_path=["playback", "_on_about_to_finish"],
-                args=[],
+                attr_path=("playback", "_on_about_to_finish"),
+                args=(),
                 kwargs={},
             )
         )
