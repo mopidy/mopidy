@@ -3,7 +3,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 try:
-    import dbus
+    import dbus  # pyright: ignore[reportMissingImports]
 except ImportError:
     dbus = None
 
@@ -155,6 +155,7 @@ def _collection(bus):
 # NOTE: Hack to probe if a given collection actually exists. Needed to work
 # around an introspection bug in setting passwords for non-existant aliases.
 def _collection_exists(bus, path):
+    assert dbus
     try:
         item = _interface(bus, path, "org.freedesktop.DBus.Properties")
         item.Get("org.freedesktop.Secret.Collection", "Label")
@@ -178,5 +179,6 @@ def _item_attributes(bus, path):
 
 
 def _interface(bus, path, interface):
+    assert dbus
     obj = bus.get_object("org.freedesktop.secrets", path)
     return dbus.Interface(obj, interface)

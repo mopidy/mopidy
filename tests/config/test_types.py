@@ -54,37 +54,6 @@ def test_encode_decode_invalid_utf8():
     assert result == data.decode(errors="surrogateescape")
 
 
-class TestConfigValue:
-    def test_deserialize_decodes_bytes(self):
-        cv = types.ConfigValue()
-
-        result = cv.deserialize(b"abc")
-
-        assert isinstance(result, str)
-
-    def test_serialize_conversion_to_string(self):
-        cv = types.ConfigValue()
-
-        result = cv.serialize(object())
-
-        assert isinstance(result, str)
-
-    def test_serialize_none(self):
-        cv = types.ConfigValue()
-
-        result = cv.serialize(None)
-
-        assert isinstance(result, str)
-        assert result == ""
-
-    def test_serialize_supports_display(self):
-        cv = types.ConfigValue()
-
-        result = cv.serialize(object(), display=True)
-
-        assert isinstance(result, str)
-
-
 class TestDeprecated:
     def test_deserialize_returns_deprecated_value(self):
         cv = types.Deprecated()

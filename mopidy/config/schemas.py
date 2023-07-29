@@ -1,4 +1,5 @@
 import collections
+from typing import Any
 
 from mopidy.config import types
 
@@ -47,17 +48,20 @@ class ConfigSchema(collections.OrderedDict):
     persistence.
     """
 
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         super().__init__()
         self.name = name
 
-    def deserialize(self, values):
+    def deserialize(
+        self,
+        values: dict[str, Any],
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
         """Validates the given ``values`` using the config schema.
 
         Returns a tuple with cleaned values and errors.
         """
-        errors = {}
-        result = {}
+        errors: dict[str, Any] = {}
+        result: dict[str, Any] = {}
 
         for key, value in values.items():
             try:
@@ -80,13 +84,18 @@ class ConfigSchema(collections.OrderedDict):
 
         return result, errors
 
-    def serialize(self, values, display=False):
+    def serialize(
+        self,
+        values: dict[str, Any],
+        display: bool = False,
+    ) -> dict[str, Any]:
         """Converts the given ``values`` to a format suitable for persistence.
 
         If ``display`` is :class:`True` secret config values, like passwords,
         will be masked out.
 
-        Returns a dict of config keys and values."""
+        Returns a dict of config keys and values.
+        """
         result = collections.OrderedDict()
         for key in self.keys():
             if key in values:
@@ -102,13 +111,16 @@ class MapConfigSchema:
     serialize/deserialize interface.
     """
 
-    def __init__(self, name, value_type):
+    def __init__(self, name: str, value_type: types.ConfigValue) -> None:
         self.name = name
         self._value_type = value_type
 
-    def deserialize(self, values):
-        errors = {}
-        result = {}
+    def deserialize(
+        self,
+        values: dict[str, Any],
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        errors: dict[str, Any] = {}
+        result: dict[str, Any] = {}
 
         for key, value in values.items():
             try:
@@ -118,7 +130,11 @@ class MapConfigSchema:
                 errors[key] = str(e)
         return result, errors
 
-    def serialize(self, values, display=False):
+    def serialize(
+        self,
+        values: dict[str, Any],
+        display: bool = False,
+    ) -> dict[str, Any]:
         result = collections.OrderedDict()
         for key in sorted(values.keys()):
             result[key] = self._value_type.serialize(values[key], display)

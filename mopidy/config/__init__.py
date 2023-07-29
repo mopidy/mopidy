@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import configparser
 import itertools
 import logging
@@ -5,6 +7,15 @@ import os
 import pathlib
 import re
 from collections.abc import Mapping
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Iterator,
+    Optional,
+    TypedDict,
+    Union,
+    cast,
+)
 
 from mopidy.config import keyring
 from mopidy.config.schemas import ConfigSchema, MapConfigSchema
@@ -26,6 +37,17 @@ from mopidy.config.types import (
     String,
 )
 from mopidy.internal import path, versioning
+from mopidy.internal.log import LogColorName, LogLevelName
+
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
+    from mopidy.ext import ExtensionData
+
+    ConfigErrors: TypeAlias = dict[str, dict[str, Any]]
+    ConfigSchemas: TypeAlias = list[Union[ConfigSchema, MapConfigSchema]]
+    RawConfig: TypeAlias = dict[str, dict[str, Any]]
+
 
 __all__ = [
     # TODO List everything that is reexported, not just the unused parts.
@@ -36,6 +58,46 @@ __all__ = [
 ]
 
 logger = logging.getLogger(__name__)
+
+
+class Config(TypedDict):
+    core: CoreConfig
+    logging: LoggingConfig
+    loglevels: dict[LogLevelName, int]
+    logcolors: dict[LogLevelName, LogColorName]
+    audio: AudioConfig
+    proxy: ProxyConfig
+
+
+class CoreConfig(TypedDict):
+    cache_dir: pathlib.Path
+    config_dir: pathlib.Path
+    data_dir: pathlib.Path
+    max_tracklist_length: int
+    restore_state: bool
+
+
+class LoggingConfig(TypedDict):
+    verbosity: int
+    format: str
+    color: bool
+    config_file: Optional[pathlib.Path]
+
+
+class AudioConfig(TypedDict):
+    mixer: str
+    mixer_volume: Optional[int]
+    output: str
+    buffer_time: Optional[int]
+
+
+class ProxyConfig(TypedDict):
+    scheme: Optional[str]
+    hostname: Optional[str]
+    port: Optional[int]
+    username: Optional[str]
+    password: Optional[str]
+
 
 _core_schema = ConfigSchema("core")
 _core_schema["cache_dir"] = Path()
@@ -67,7 +129,8 @@ _audio_schema["buffer_time"] = Integer(optional=True, minimum=1)
 
 _proxy_schema = ConfigSchema("proxy")
 _proxy_schema["scheme"] = String(
-    optional=True, choices=["http", "https", "socks4", "socks5"]
+    optional=True,
+    choices=("http", "https", "socks4", "socks5"),
 )
 _proxy_schema["hostname"] = Hostname(optional=True)
 _proxy_schema["port"] = Port(optional=True)
@@ -77,7 +140,7 @@ _proxy_schema["password"] = Secret(optional=True)
 # NOTE: if multiple outputs ever comes something like LogLevelConfigSchema
 # _outputs_schema = config.AudioOutputConfigSchema()
 
-_schemas = [
+_schemas: ConfigSchemas = [
     _core_schema,
     _logging_schema,
     _loglevels_schema,
@@ -99,12 +162,17 @@ _INITIAL_HELP = """
 """
 
 
-def read(config_file):
+def read(config_file: str | os.PathLike[str]) -> str:
     """Helper to load config defaults in same way across core and extensions"""
     return pathlib.Path(config_file).read_text(errors="surrogateescape")
 
 
-def load(files, ext_schemas, ext_defaults, overrides):
+def load(
+    files: list[os.PathLike],
+    ext_schemas: list[ConfigSchema],
+    ext_defaults: list[str],
+    overrides: list[Any],
+) -> tuple[Config, ConfigErrors]:
     config_dir = pathlib.Path(__file__).parent
     defaults = [read(config_dir / "default.conf")]
     defaults.extend(ext_defaults)
@@ -115,13 +183,18 @@ def load(files, ext_schemas, ext_defaults, overrides):
     return _validate(raw_config, schemas)
 
 
-def format(config, ext_schemas, comments=None, display=True):
+def format(
+    config: Config,
+    ext_schemas: ConfigSchemas,
+    comments: Optional[dict] = None,
+    display: bool = True,
+) -> str:
     schemas = _schemas[:]
     schemas.extend(ext_schemas)
     return _format(config, comments or {}, schemas, display, False)
 
 
-def format_initial(extensions_data):
+def format_initial(extensions_data: list[ExtensionData]) -> str:
     config_dir = pathlib.Path(__file__).parent
     defaults = [read(config_dir / "default.conf")]
     defaults.extend(d.extension.get_default_config() for d in extensions_data)
@@ -146,7 +219,11 @@ def format_initial(extensions_data):
     return header + "\n\n" + formatted_config
 
 
-def _load(files, defaults, overrides):
+def _load(
+    files: list[os.PathLike],
+    defaults: list[str],
+    overrides: list[str],
+) -> RawConfig:
     parser = configparser.RawConfigParser(inline_comment_prefixes=(";",))
 
     # TODO: simply return path to config file for defaults so we can load it
@@ -167,7 +244,7 @@ def _load(files, defaults, overrides):
         else:
             _load_file(parser, f.resolve())
 
-    raw_config = {}
+    raw_config: RawConfig = {}
     for section in parser.sections():
         raw_config[section] = dict(parser.items(section))
 
@@ -178,7 +255,10 @@ def _load(files, defaults, overrides):
     return raw_config
 
 
-def _load_file(parser, file_path):
+def _load_file(
+    parser: configparser.RawConfigParser,
+    file_path: pathlib.Path,
+) -> None:
     if not file_path.exists():
         logger.debug(
             f"Loading config from {file_path.as_uri()} failed; "
@@ -213,10 +293,13 @@ def _load_file(parser, file_path):
         logger.debug(f"Config file {file_path.as_uri()} not found; skipping")
 
 
-def _validate(raw_config, schemas):
+def _validate(
+    raw_config: RawConfig,
+    schemas: ConfigSchemas,
+) -> tuple[Config, ConfigErrors]:
     # Get validated config
-    config = {}
-    errors = {}
+    config: RawConfig = {}
+    errors: ConfigErrors = {}
     sections = set(raw_config)
     for schema in schemas:
         sections.discard(schema.name)
@@ -233,14 +316,21 @@ def _validate(raw_config, schemas):
             f"because no matching extension was found"
         )
 
-    return config, errors
+    return cast(Config, config), errors
 
 
-def _format(config, comments, schemas, display, disable):
+def _format(
+    config: Config,
+    comments: dict[str, Any],
+    schemas: ConfigSchemas,
+    display: bool,
+    disable: bool,
+) -> str:
     output = []
     for schema in schemas:
         serialized = schema.serialize(
-            config.get(schema.name, {}), display=display
+            config.get(schema.name, {}),
+            display=display,
         )
         if not serialized:
             continue
@@ -260,7 +350,7 @@ def _format(config, comments, schemas, display, disable):
     return "\n".join(output).strip()
 
 
-def _preprocess(config_string):
+def _preprocess(config_string: str) -> str:
     """Convert a raw config into a form that preserves comments etc."""
     results = ["[__COMMENTS__]"]
     counter = itertools.count(0)
@@ -270,19 +360,19 @@ def _preprocess(config_string):
     comment_re = re.compile(r"^(#|;)")
     inline_comment_re = re.compile(r" ;")
 
-    def newlines(match):
+    def newlines(match) -> str:
         return f"__BLANK{next(counter):d}__ ="
 
-    def comments(match):
+    def comments(match) -> Optional[str]:
         if match.group(1) == "#":
             return f"__HASH{next(counter):d}__ ="
         elif match.group(1) == ";":
             return f"__SEMICOLON{next(counter):d}__ ="
 
-    def inlinecomments(match):
+    def inlinecomments(match) -> str:
         return f"\n__INLINE{next(counter):d}__ ="
 
-    def sections(match):
+    def sections(match) -> str:
         return (
             f"{match.group(1)}\n__SECTION{next(counter):d}__ = {match.group(2)}"
         )
@@ -296,7 +386,7 @@ def _preprocess(config_string):
     return "\n".join(results)
 
 
-def _postprocess(config_string):
+def _postprocess(config_string: str) -> str:
     """Converts a preprocessed config back to original form."""
     flags = re.IGNORECASE | re.MULTILINE
     result = re.sub(r"^\[__COMMENTS__\](\n|$)", "", config_string, flags=flags)
@@ -309,20 +399,20 @@ def _postprocess(config_string):
 
 
 class Proxy(Mapping):
-    def __init__(self, data):
+    def __init__(self, data: Union[Config, dict[str, Any]]) -> None:
         self._data = data
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> Any:
         item = self._data.__getitem__(key)
         if isinstance(item, dict):
             return Proxy(item)
         return item
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         return self._data.__iter__()
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self._data.__len__()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Proxy({self._data!r})"

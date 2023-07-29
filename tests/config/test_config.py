@@ -99,7 +99,7 @@ class LoadConfigTest(unittest.TestCase):
 class ValidateTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
         self.schema = config.ConfigSchema("foo")
-        self.schema["bar"] = config.ConfigValue()
+        self.schema["bar"] = config.String()
 
     def test_empty_config_no_schemas(self):
         conf, errors = config._validate({}, [])
