@@ -70,7 +70,11 @@ class CoreActorTest(unittest.TestCase):
             has_playlists=True,
         )
 
-        self.core = Core(mixer=None, backends=[self.backend1, self.backend2])
+        self.core = Core(
+            config={},
+            mixer=None,
+            backends=[self.backend1, self.backend2],
+        )
 
     def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
@@ -102,7 +106,9 @@ class CoreActorTest(unittest.TestCase):
         )
 
         core = Core(
-            mixer=None, backends=[backend3, self.backend1, self.backend2]
+            config={},
+            mixer=None,
+            backends=[backend3, self.backend1, self.backend2],
         )
 
         assert core.backends == [self.backend1, self.backend2]
@@ -122,7 +128,9 @@ class CoreActorTest(unittest.TestCase):
         )
 
         core = Core(
-            mixer=None, backends=[self.backend1, backend3, self.backend2]
+            config={},
+            mixer=None,
+            backends=[self.backend1, backend3, self.backend2],
         )
 
         assert core.backends == [self.backend1, self.backend2]
@@ -139,6 +147,7 @@ class CoreActorTest(unittest.TestCase):
             "Cannot add URI scheme 'dummy1' for B2, "
             "it is already handled by B1",
             Core,
+            config={},
             mixer=None,
             backends=[self.backend1, self.backend2],
         )
@@ -174,7 +183,11 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
         }
 
         self.mixer = dummy_mixer.create_proxy()
-        self.core = Core(config=config, mixer=self.mixer, backends=[])
+        self.core = Core(
+            config=config,
+            mixer=self.mixer,
+            backends=[],
+        )
 
     def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()

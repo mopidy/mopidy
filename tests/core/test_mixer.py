@@ -12,7 +12,11 @@ from tests import dummy_mixer
 class CoreMixerTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
         self.mixer = mock.Mock(spec=mixer.Mixer)
-        self.core = core.Core(mixer=self.mixer, backends=[])
+        self.core = core.Core(
+            config={},
+            mixer=self.mixer,
+            backends=[],
+        )
 
     def test_get_volume(self):
         self.mixer.get_volume.return_value.get.return_value = 30
@@ -41,7 +45,11 @@ class CoreMixerTest(unittest.TestCase):
 
 class CoreNoneMixerTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
-        self.core = core.Core(mixer=None, backends=[])
+        self.core = core.Core(
+            config={},
+            mixer=None,
+            backends=[],
+        )
 
     def test_get_volume_return_none_because_it_is_unknown(self):
         assert self.core.mixer.get_volume() is None
@@ -60,7 +68,11 @@ class CoreNoneMixerTest(unittest.TestCase):
 class CoreMixerListenerTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
         self.mixer = dummy_mixer.create_proxy()
-        self.core = core.Core(mixer=self.mixer, backends=[])
+        self.core = core.Core(
+            config={},
+            mixer=self.mixer,
+            backends=[],
+        )
 
     def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()
@@ -80,7 +92,11 @@ class CoreMixerListenerTest(unittest.TestCase):
 @mock.patch.object(mixer.MixerListener, "send")
 class CoreNoneMixerListenerTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
-        self.core = core.Core(mixer=None, backends=[])
+        self.core = core.Core(
+            config={},
+            mixer=None,
+            backends=[],
+        )
 
     def test_forwards_mixer_volume_changed_event_to_frontends(self, send):
         assert self.core.mixer.set_volume(volume=60) is False
@@ -95,7 +111,11 @@ class MockBackendCoreMixerBase(unittest.TestCase):
     def setUp(self):  # noqa: N802
         self.mixer = mock.Mock()
         self.mixer.actor_ref.actor_class.__name__ = "DummyMixer"
-        self.core = core.Core(mixer=self.mixer, backends=[])
+        self.core = core.Core(
+            config={},
+            mixer=None,
+            backends=[],
+        )
 
 
 class GetVolumeBadBackendTest(MockBackendCoreMixerBase):
@@ -149,7 +169,11 @@ class SetMuteBadBackendTest(MockBackendCoreMixerBase):
 class CoreMixerSaveLoadStateTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
         self.mixer = dummy_mixer.create_proxy()
-        self.core = core.Core(mixer=self.mixer, backends=[])
+        self.core = core.Core(
+            config={},
+            mixer=self.mixer,
+            backends=[],
+        )
 
     def test_save_mute(self):
         volume = 32

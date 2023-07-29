@@ -167,8 +167,10 @@ class TracklistController:
         .. versionadded:: 1.1
             The *tlid* parameter
         """
-        tl_track is None or validation.check_instance(tl_track, TlTrack)
-        tlid is None or validation.check_integer(tlid, min=1)
+        if tl_track is not None:
+            validation.check_instance(tl_track, TlTrack)
+        if tlid is not None:
+            validation.check_integer(tlid, min=1)
 
         if tl_track is None and tlid is None:
             tl_track = self.core.playback.get_current_tl_track()
@@ -216,7 +218,8 @@ class TracklistController:
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
         deprecation.warn("core.tracklist.eot_track")
-        tl_track is None or validation.check_instance(tl_track, TlTrack)
+        if tl_track is not None:
+            validation.check_instance(tl_track, TlTrack)
         if self.get_single() and self.get_repeat():
             return tl_track
         elif self.get_single():
@@ -266,7 +269,8 @@ class TracklistController:
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
         deprecation.warn("core.tracklist.next_track")
-        tl_track is None or validation.check_instance(tl_track, TlTrack)
+        if tl_track is not None:
+            validation.check_instance(tl_track, TlTrack)
 
         if not self._tl_tracks:
             return None
@@ -335,7 +339,8 @@ class TracklistController:
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
         deprecation.warn("core.tracklist.previous_track")
-        tl_track is None or validation.check_instance(tl_track, TlTrack)
+        if tl_track is not None:
+            validation.check_instance(tl_track, TlTrack)
 
         if self.get_repeat() or self.get_consume() or self.get_random():
             return tl_track
@@ -380,8 +385,10 @@ class TracklistController:
         if sum(o is not None for o in [tracks, uris]) != 1:
             raise ValueError('Exactly one of "tracks" or "uris" must be set')
 
-        tracks is None or validation.check_instances(tracks, Track)
-        uris is None or validation.check_uris(uris)
+        if tracks is not None:
+            validation.check_instances(tracks, Track)
+        if uris is not None:
+            validation.check_uris(uris)
         validation.check_integer(at_position or 0)
 
         if tracks:
@@ -390,6 +397,7 @@ class TracklistController:
         if tracks is None:
             tracks = []
             track_map = self.core.library.lookup(uris=uris)
+            assert uris is not None
             for uri in uris:
                 tracks.extend(track_map[uri])
 

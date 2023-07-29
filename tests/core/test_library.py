@@ -36,7 +36,9 @@ class BaseCoreLibraryTest(unittest.TestCase):
         self.backend3.has_library_browse.return_value.get.return_value = False
 
         self.core = core.Core(
-            mixer=None, backends=[self.backend1, self.backend2, self.backend3]
+            config={},
+            mixer=None,
+            backends=[self.backend1, self.backend2, self.backend3],
         )
 
 
@@ -407,7 +409,7 @@ class LegacyFindExactToSearchLibraryTest(unittest.TestCase):
         self.backend.actor_ref.actor_class.__name__ = "DummyBackend"
         self.backend.uri_schemes.get.return_value = ["dummy"]
         self.backend.library = mock.Mock(spec=backend.LibraryProvider)
-        self.core = core.Core(mixer=None, backends=[self.backend])
+        self.core = core.Core(config={}, mixer=None, backends=[self.backend])
 
     def test_core_search_call_backend_search_with_exact(self):
         self.core.library.search(query={"any": ["a"]})
@@ -439,7 +441,7 @@ class MockBackendCoreLibraryBase(unittest.TestCase):
         self.backend.uri_schemes.get.return_value = ["dummy"]
         self.backend.library = self.library
 
-        self.core = core.Core(mixer=None, backends=[self.backend])
+        self.core = core.Core(config={}, mixer=None, backends=[self.backend])
 
 
 @mock.patch("mopidy.core.library.logger")
