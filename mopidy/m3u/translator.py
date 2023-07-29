@@ -1,6 +1,6 @@
 import os
 import pathlib
-import urllib
+import urllib.parse
 
 from mopidy import models
 from mopidy.internal import path
