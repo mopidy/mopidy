@@ -4,7 +4,7 @@ import string
 logger = logging.getLogger(__name__)
 
 try:
-    import dbus
+    import dbus  # pyright: ignore[reportMissingImports]
 except ImportError:
     dbus = None
 
@@ -22,6 +22,7 @@ def _is_loopback_address(host):
 
 
 def _convert_text_list_to_dbus_format(text_list):
+    assert dbus
     array = dbus.Array(signature="ay")
     for text in text_list:
         array.append([dbus.Byte(ord(c)) for c in text])
@@ -139,6 +140,7 @@ class Zeroconf:
 
         Call when your service shuts down.
         """
+        assert dbus
 
         if self.group:
             try:
