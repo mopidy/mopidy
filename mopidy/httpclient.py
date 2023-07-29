@@ -1,11 +1,17 @@
+"""Helpers for configuring HTTP clients used in Mopidy extensions."""
+
+from __future__ import annotations
+
 import platform
+from typing import TYPE_CHECKING, Optional
 
 import mopidy
 
-"Helpers for configuring HTTP clients used in Mopidy extensions."
+if TYPE_CHECKING:
+    from mopidy.config import ProxyConfig
 
 
-def format_proxy(proxy_config, auth=True):
+def format_proxy(proxy_config: ProxyConfig, auth: bool = True) -> Optional[str]:
     """Convert a Mopidy proxy config to the commonly used proxy string format.
 
     Outputs ``scheme://host:port``, ``scheme://user:pass@host:port`` or
@@ -33,7 +39,7 @@ def format_proxy(proxy_config, auth=True):
         return f"{scheme}://{hostname}:{port}"
 
 
-def format_user_agent(name=None):
+def format_user_agent(name: Optional[str] = None) -> str:
     """Construct a User-Agent suitable for use in client code.
 
     This will identify use by the provided ``name`` (which should be on the

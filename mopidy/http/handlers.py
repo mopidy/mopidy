@@ -3,7 +3,7 @@ from __future__ import annotations
 import functools
 import logging
 import os
-import urllib
+import urllib.parse
 from typing import TYPE_CHECKING
 
 import tornado.escape

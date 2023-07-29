@@ -4,7 +4,7 @@ import json
 import logging
 import secrets
 import threading
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 import pykka
 import tornado.httpserver
@@ -18,23 +18,24 @@ from mopidy.core import CoreListener
 from mopidy.http import Extension, handlers
 from mopidy.internal import formatting, network
 
-if TYPE_CHECKING:
-    from typing import Any, ClassVar
-
 try:
     import asyncio
 except ImportError:
     asyncio = None  # type: ignore
+
+if TYPE_CHECKING:
+    from mopidy.core.actor import CoreProxy
+    from mopidy.ext import Config, RegistryEntry
 
 
 logger = logging.getLogger(__name__)
 
 
 class HttpFrontend(pykka.ThreadingActor, CoreListener):
-    apps: ClassVar[list[type[Any]]] = []
-    statics: ClassVar[list[type[Any]]] = []
+    apps: ClassVar[list[RegistryEntry]] = []
+    statics: ClassVar[list[RegistryEntry]] = []
 
-    def __init__(self, config, core):
+    def __init__(self, config: Config, core: CoreProxy):
         super().__init__()
 
         self.hostname = network.format_hostname(config["http"]["hostname"])
@@ -132,6 +133,7 @@ class HttpServer(threading.Thread):
 
     def stop(self):
         logger.debug("Stopping HTTP server")
+        assert self.io_loop
         self.io_loop.add_callback(self.io_loop.stop)
 
     def _get_request_handlers(self):
