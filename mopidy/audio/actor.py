@@ -888,3 +888,31 @@ class Audio(pykka.ThreadingActor):
         # TODO: should we return None when stopped?
         # TODO: support only fetching keys we care about?
         return self._tags
+
+
+if TYPE_CHECKING:
+    from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
+
+    class AudioProxy(ActorMemberMixin, pykka.ActorProxy[Audio]):
+        """Audio layer wrapped in a Pykka actor proxy."""
+
+        state = proxy_field(Audio.state)
+        set_uri = proxy_method(Audio.set_uri)
+        set_appsrc = proxy_method(Audio.set_appsrc)
+        emit_data = proxy_method(Audio.emit_data)
+        set_source_setup_callback = proxy_method(
+            Audio.set_source_setup_callback
+        )
+        set_about_to_finish_callback = proxy_method(
+            Audio.set_about_to_finish_callback
+        )
+        get_position = proxy_method(Audio.get_position)
+        set_position = proxy_method(Audio.set_position)
+        start_playback = proxy_method(Audio.start_playback)
+        pause_playback = proxy_method(Audio.pause_playback)
+        prepare_change = proxy_method(Audio.prepare_change)
+        stop_playback = proxy_method(Audio.stop_playback)
+        wait_for_state_change = proxy_method(Audio.wait_for_state_change)
+        enable_sync_handler = proxy_method(Audio.enable_sync_handler)
+        set_metadata = proxy_method(Audio.set_metadata)
+        get_current_tags = proxy_method(Audio.get_current_tags)
