@@ -1,6 +1,8 @@
 import collections
 import logging
 import time
+from enum import IntEnum
+from typing import Any, Optional, cast
 
 from mopidy import exceptions
 from mopidy.audio import tags as tags_lib
@@ -8,16 +10,20 @@ from mopidy.audio import utils
 from mopidy.internal import log
 from mopidy.internal.gi import Gst, GstPbutils
 
-# GST_ELEMENT_FACTORY_LIST:
-_DECODER = 1 << 0
-_AUDIO = 1 << 50
-_DEMUXER = 1 << 5
-_DEPAYLOADER = 1 << 8
-_PARSER = 1 << 6
 
-# GST_TYPE_AUTOPLUG_SELECT_RESULT:
-_SELECT_TRY = 0
-_SELECT_EXPOSE = 1
+class GstElementFactoryListType(IntEnum):
+    DECODER = 1 << 0
+    AUDIO = 1 << 50
+    DEMUXER = 1 << 5
+    DEPAYLOADER = 1 << 8
+    PARSER = 1 << 6
+
+
+class GstAutoplugSelectResult(IntEnum):
+    TRY = 0
+    EXPOSE = 1
+    SKIP = 2
+
 
 _Result = collections.namedtuple(
     "_Result", ("uri", "tags", "duration", "seekable", "mime", "playable")
@@ -79,7 +85,9 @@ class Scanner:
 
 # Turns out it's _much_ faster to just create a new pipeline for every as
 # decodebins and other elements don't seem to take well to being reused.
-def _setup_pipeline(uri, proxy_config=None):
+def _setup_pipeline(
+    uri: str, proxy_config=None
+) -> tuple[Gst.Pipeline, utils.Signals]:
     src = Gst.Element.make_from_uri(Gst.URIType.SRC, uri)
     if not src:
         raise exceptions.ScannerError(f"GStreamer can not open: {uri}")
@@ -88,7 +96,13 @@ def _setup_pipeline(uri, proxy_config=None):
         utils.setup_proxy(src, proxy_config)
 
     signals = utils.Signals()
+
     pipeline = Gst.ElementFactory.make("pipeline")
+    if pipeline is None:
+        raise exceptions.AudioException(
+            "Failed to create GStreamer pipeline element."
+        )
+    pipeline = cast(Gst.Pipeline, pipeline)
     pipeline.add(src)
 
     if _has_src_pads(src):
@@ -117,7 +131,16 @@ def _has_dynamic_src_pad(element):
 
 def _setup_decodebin(element, pad, pipeline, signals):
     typefind = Gst.ElementFactory.make("typefind")
+    if typefind is None:
+        raise exceptions.AudioException(
+            "Failed to create GStreamer typefind element."
+        )
+
     decodebin = Gst.ElementFactory.make("decodebin")
+    if decodebin is None:
+        raise exceptions.AudioException(
+            "Failed to create GStreamer decodebin element."
+        )
 
     for element in (typefind, decodebin):
         pipeline.add(element)
@@ -131,44 +154,115 @@ def _setup_decodebin(element, pad, pipeline, signals):
     signals.connect(decodebin, "autoplug-select", _autoplug_select)
 
 
-def _have_type(element, probability, caps, decodebin):
+def _have_type(
+    element: Gst.Element,
+    probability: int,
+    caps: Gst.Caps,
+    decodebin: Gst.Bin,
+) -> None:
     decodebin.set_property("sink-caps", caps)
     struct = Gst.Structure.new_empty("have-type")
     struct.set_value("caps", caps.get_structure(0))
-    element.get_bus().post(Gst.Message.new_application(element, struct))
+
+    element_bus = element.get_bus()
+    if element_bus is None:
+        raise exceptions.AudioException(
+            "Failed to get bus of GStreamer element."
+        )
+
+    message = Gst.Message.new_application(element, struct)
+    if message is None:
+        raise exceptions.AudioException("Failed to create GStreamer message.")
+
+    element_bus.post(message)
 
 
-def _pad_added(element, pad, pipeline):
-    sink = Gst.ElementFactory.make("fakesink")
-    sink.set_property("sync", False)
+def _pad_added(
+    element: Gst.Element,
+    pad: Gst.Pad,
+    pipeline: Gst.Pipeline,
+) -> None:
+    fakesink = Gst.ElementFactory.make("fakesink")
+    if fakesink is None:
+        raise exceptions.AudioException(
+            "Failed to create GStreamer fakesink element."
+        )
 
-    pipeline.add(sink)
-    sink.sync_state_with_parent()
-    pad.link(sink.get_static_pad("sink"))
+    fakesink.set_property("sync", False)
 
-    if pad.query_caps().is_subset(Gst.Caps.from_string("audio/x-raw")):
+    pipeline.add(fakesink)
+    fakesink.sync_state_with_parent()
+    fakesink_sink = fakesink.get_static_pad("sink")
+    if fakesink_sink is None:
+        raise exceptions.AudioException(
+            "Failed to get sink pad of GStreamer fakesink."
+        )
+    pad.link(fakesink_sink)
+
+    raw_caps = Gst.Caps.from_string("audio/x-raw")
+    assert raw_caps
+
+    if pad.query_caps().is_subset(raw_caps):
         # Probably won't happen due to autoplug-select fix, but lets play it
         # safe until we've tested more.
         struct = Gst.Structure.new_empty("have-audio")
-        element.get_bus().post(Gst.Message.new_application(element, struct))
+
+        element_bus = element.get_bus()
+        if element_bus is None:
+            raise exceptions.AudioException(
+                "Failed to get bus of GStreamer element."
+            )
+
+        message = Gst.Message.new_application(element, struct)
+        if message is None:
+            raise exceptions.AudioException(
+                "Failed to create GStreamer message."
+            )
+
+        element_bus.post(message)
 
 
-def _autoplug_select(element, pad, caps, factory):
-    if factory.list_is_type(_DECODER | _AUDIO):
+def _autoplug_select(
+    element: Gst.Element,
+    pad: Gst.Pad,
+    caps: Gst.Caps,
+    factory: Gst.ElementFactory,
+) -> GstAutoplugSelectResult:
+    if factory.list_is_type(
+        GstElementFactoryListType.DECODER | GstElementFactoryListType.AUDIO
+    ):
         struct = Gst.Structure.new_empty("have-audio")
-        element.get_bus().post(Gst.Message.new_application(element, struct))
-    if not factory.list_is_type(_DEMUXER | _DEPAYLOADER | _PARSER):
-        return _SELECT_EXPOSE
-    return _SELECT_TRY
+
+        element_bus = element.get_bus()
+        if element_bus is None:
+            raise exceptions.AudioException(
+                "Failed to get bus of GStreamer element."
+            )
+
+        message = Gst.Message.new_application(element, struct)
+        if message is None:
+            raise exceptions.AudioException(
+                "Failed to create GStreamer message."
+            )
+
+        element_bus.post(message)
+
+    if not factory.list_is_type(
+        GstElementFactoryListType.DEMUXER
+        | GstElementFactoryListType.DEPAYLOADER
+        | GstElementFactoryListType.PARSER
+    ):
+        return GstAutoplugSelectResult.EXPOSE
+    return GstAutoplugSelectResult.TRY
 
 
-def _start_pipeline(pipeline):
+def _start_pipeline(pipeline: Gst.Pipeline) -> None:
     result = pipeline.set_state(Gst.State.PAUSED)
     if result == Gst.StateChangeReturn.NO_PREROLL:
         pipeline.set_state(Gst.State.PLAYING)
 
 
-def _query_duration(pipeline):
+def _query_duration(pipeline: Gst.Pipeline) -> tuple[bool, Optional[int]]:
     success, duration = pipeline.query_duration(Gst.Format.TIME)
     if not success:
         duration = None  # Make sure error case preserves None.
@@ -179,16 +273,19 @@ def _query_duration(pipeline):
     return success, duration
 
 
-def _query_seekable(pipeline):
+def _query_seekable(pipeline: Gst.Pipeline) -> bool:
     query = Gst.Query.new_seeking(Gst.Format.TIME)
     pipeline.query(query)
     return query.parse_seeking()[1]
 
 
-def _process(pipeline, timeout_ms):
+def _process(
+    pipeline: Gst.Pipeline,
+    timeout_ms: int,
+) -> tuple[dict[str, Any], Optional[str], bool, Optional[int]]:
     bus = pipeline.get_bus()
     tags = {}
-    mime = None
+    mime: Optional[str] = None
     have_audio = False
     missing_message = None
     duration = None
@@ -210,8 +307,10 @@ def _process(pipeline, timeout_ms):
         if msg is None:
             break
 
-        if logger.isEnabledFor(log.TRACE_LOG_LEVEL) and msg.get_structure():
-            debug_text = msg.get_structure().to_string()
+        structure = msg.get_structure()
+
+        if logger.isEnabledFor(log.TRACE_LOG_LEVEL) and structure:
+            debug_text = structure.to_string()
             if len(debug_text) > 77:
                 debug_text = debug_text[:77] + "..."
             _trace("element %s: %s", msg.src.get_name(), debug_text)
@@ -220,20 +319,26 @@ def _process(pipeline, timeout_ms):
             if GstPbutils.is_missing_plugin_message(msg):
                 missing_message = msg
         elif msg.type == Gst.MessageType.APPLICATION:
-            if msg.get_structure().get_name() == "have-type":
-                mime = msg.get_structure().get_value("caps").get_name()
-                if mime and (
-                    mime.startswith("text/") or mime == "application/xml"
-                ):
-                    return tags, mime, have_audio, duration
-            elif msg.get_structure().get_name() == "have-audio":
+            if structure and structure.get_name() == "have-type":
+                caps = cast(Optional[Gst.Caps], structure.get_value("caps"))
+                if caps:
+                    mime = cast(
+                        str,
+                        caps.get_name(),  # pyright: ignore[reportGeneralTypeIssues]
+                    )
+                    if mime.startswith("text/") or mime == "application/xml":
+                        return tags, mime, have_audio, duration
+            elif structure and structure.get_name() == "have-audio":
                 have_audio = True
         elif msg.type == Gst.MessageType.ERROR:
             error, _debug = msg.parse_error()
             if missing_message and not mime:
-                caps = missing_message.get_structure().get_value("detail")
-                mime = caps.get_structure(0).get_name()
-                return tags, mime, have_audio, duration
+                if (
+                    (structure := missing_message.get_structure())
+                    and (caps := structure.get_value("detail"))
+                    and (mime := caps.get_structure(0).get_name())
+                ):
+                    return tags, mime, have_audio, duration
             raise exceptions.ScannerError(str(error))
         elif msg.type == Gst.MessageType.EOS:
             return tags, mime, have_audio, duration

@@ -52,7 +52,10 @@ class JsonRpcTestBase(unittest.TestCase):
         self.calc = Calculator()
 
         with deprecation.ignore():
-            self.core = core.Core.start(backends=[self.backend]).proxy()
+            self.core = core.Core.start(
+                config={},
+                backends=[self.backend],
+            ).proxy()
 
         self.jrw = jsonrpc.JsonRpcWrapper(
             objects={

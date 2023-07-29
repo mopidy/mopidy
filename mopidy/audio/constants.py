@@ -1,4 +1,7 @@
-class PlaybackState:
+from enum import Enum
+
+
+class PlaybackState(str, Enum):
 
     """
     Enum of playback states.
