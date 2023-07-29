@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import logging
 import signal
 import sys
+from typing import TYPE_CHECKING, TypedDict
 
 import pykka.debug
 
@@ -12,12 +15,20 @@ from mopidy.internal.gi import Gst  # noqa: F401
 
 try:
     # Make GLib's mainloop the event loop for python-dbus
-    import dbus.mainloop.glib
+    import dbus.mainloop.glib  # pyright: ignore[reportMissingImports]
 
     dbus.mainloop.glib.threads_init()
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 except ImportError:
     pass
+
+if TYPE_CHECKING:
+
+    class ExtensionsStatus(TypedDict):
+        validate: list[ext.Extension]
+        config: list[ext.Extension]
+        disabled: list[ext.Extension]
+        enabled: list[ext.Extension]
 
 
 logger = logging.getLogger(__name__)
@@ -66,7 +77,7 @@ def main():
             config, args.base_verbosity_level, args.verbosity_level
         )
 
-        extensions = {
+        extensions_status: ExtensionsStatus = {
             "validate": [],
             "config": [],
             "disabled": [],
@@ -81,24 +92,24 @@ def main():
                 config_errors[extension.ext_name] = {
                     "enabled": "extension disabled by self check."
                 }
-                extensions["validate"].append(extension)
+                extensions_status["validate"].append(extension)
             elif not config[extension.ext_name]["enabled"]:
                 config[extension.ext_name] = {"enabled": False}
                 config_errors[extension.ext_name] = {
                     "enabled": "extension disabled by user config."
                 }
-                extensions["disabled"].append(extension)
+                extensions_status["disabled"].append(extension)
             elif config_errors.get(extension.ext_name):
                 config[extension.ext_name]["enabled"] = False
                 config_errors[extension.ext_name][
                     "enabled"
                 ] = "extension disabled due to config errors."
-                extensions["config"].append(extension)
+                extensions_status["config"].append(extension)
             else:
-                extensions["enabled"].append(extension)
+                extensions_status["enabled"].append(extension)
 
         log_extension_info(
-            [d.extension for d in extensions_data], extensions["enabled"]
+            [d.extension for d in extensions_data], extensions_status["enabled"]
         )
 
         # Config and deps commands are simply special cased for now.
@@ -108,23 +119,26 @@ def main():
         elif args.command == deps_cmd:
             return args.command.run()
 
-        check_config_errors(config, config_errors, extensions)
+        check_config_errors(config, config_errors, extensions_status)
 
-        if not extensions["enabled"]:
+        if not extensions_status["enabled"]:
             logger.error("No extension enabled, exiting...")
             sys.exit(1)
 
         # Read-only config from here on, please.
         proxied_config = config_lib.Proxy(config)
 
-        if args.extension and args.extension not in extensions["enabled"]:
+        if (
+            args.extension
+            and args.extension not in extensions_status["enabled"]
+        ):
             logger.error(
                 "Unable to run command provided by disabled extension %s",
                 args.extension.ext_name,
             )
             return 1
 
-        for extension in extensions["enabled"]:
+        for extension in extensions_status["enabled"]:
             try:
                 extension.setup(registry)
             except Exception:
@@ -188,7 +202,11 @@ def log_extension_info(all_extensions, enabled_extensions):
     logger.info("Disabled extensions: %s", ", ".join(disabled_names) or "none")
 
 
-def check_config_errors(config, errors, extensions):
+def check_config_errors(
+    config: config_lib.Config,
+    errors: config_lib.ConfigErrors,
+    extensions,
+) -> None:
     fatal_errors = []
     extension_names = {}
     all_extension_names = set()

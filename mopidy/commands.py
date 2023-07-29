@@ -8,9 +8,19 @@ import os
 import pathlib
 import signal
 import sys
-from typing import TYPE_CHECKING
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Generator,
+    Iterable,
+    NoReturn,
+    Optional,
+    Sequence,
+    cast,
+)
 
 import pykka
+from pykka import ThreadingActor
 from pykka.messages import ProxyCall
 
 from mopidy import config as config_lib
@@ -21,23 +31,26 @@ from mopidy.internal import deps, process, timer, versioning
 from mopidy.internal.gi import GLib
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from mopidy.audio import AudioProxy
+    from mopidy.backend import BackendActor, BackendProxy
+    from mopidy.core import CoreProxy
+    from mopidy.mixer import MixerActor, MixerProxy
 
 
 logger = logging.getLogger(__name__)
 
-_default_config = [
+_default_config: list[pathlib.Path] = [
     (pathlib.Path(base) / "mopidy" / "mopidy.conf").resolve()
     for base in GLib.get_system_config_dirs() + [GLib.get_user_config_dir()]
 ]
 DEFAULT_CONFIG = ":".join(map(str, _default_config))
 
 
-def config_files_type(value):
+def config_files_type(value: str) -> list[str]:
     return value.split(":")
 
 
-def config_override_type(value):
+def config_override_type(value: str) -> tuple[str, str, str]:
     try:
         section, remainder = value.split("/", 1)
         key, value = remainder.split("=", 1)
@@ -49,7 +62,7 @@ def config_override_type(value):
 
 
 class _ParserError(Exception):
-    def __init__(self, message):
+    def __init__(self, message) -> None:
         self.message = message
 
 
@@ -58,12 +71,17 @@ class _HelpError(Exception):
 
 
 class _ArgumentParser(argparse.ArgumentParser):
-    def error(self, message):
+    def error(self, message) -> NoReturn:
         raise _ParserError(message)
 
 
 class _HelpAction(argparse.Action):
-    def __init__(self, option_strings, dest=None, help=None):
+    def __init__(
+        self,
+        option_strings: Sequence[str],
+        dest: Optional[str] = None,
+        help: Optional[str] = None,
+    ) -> None:
         super().__init__(
             option_strings=option_strings,
             dest=dest or argparse.SUPPRESS,
@@ -72,7 +90,13 @@ class _HelpAction(argparse.Action):
             help=help,
         )
 
-    def __call__(self, parser, namespace, values, option_string=None):
+    def __call__(
+        self,
+        parser,
+        namespace,
+        values,
+        option_string=None,
+    ) -> NoReturn:
         raise _HelpError()
 
 
@@ -88,13 +112,17 @@ class Command:
     help: Optional[str] = None
     #: Help text to display in help output.
 
-    def __init__(self):
+    _children: dict[str, Command]
+    _arguments: list[tuple[tuple[Any], dict[str, Any]]]
+    _overrides: dict[str, Any]
+
+    def __init__(self) -> None:
         self._children = collections.OrderedDict()
         self._arguments = []
         self._overrides = {}
 
-    def _build(self):
-        actions = []
+    def _build(self) -> tuple[_ArgumentParser, list[argparse.Action]]:
+        actions: list[argparse.Action] = []
         parser = _ArgumentParser(add_help=False)
         parser.register("action", "help", _HelpAction)
 
@@ -106,7 +134,7 @@ class Command:
         )
         return parser, actions
 
-    def add_child(self, name, command):
+    def add_child(self, name: str, command: Command) -> None:
         """Add a child parser to consider using.
 
         :param name: name to use for the sub-command that is being added.
@@ -114,7 +142,7 @@ class Command:
         """
         self._children[name] = command
 
-    def add_argument(self, *args, **kwargs):
+    def add_argument(self, *args: Any, **kwargs: Any) -> None:
         """Add an argument to the parser.
 
         This method takes all the same arguments as the
@@ -122,27 +150,32 @@ class Command:
         """
         self._arguments.append((args, kwargs))
 
-    def set(self, **kwargs):
+    def set(self, **kwargs: Any) -> None:
         """Override a value in the finaly result of parsing."""
         self._overrides.update(kwargs)
 
-    def exit(self, status_code=0, message=None, usage=None):
+    def exit(
+        self,
+        status_code: int = 0,
+        message: Optional[str] = None,
+        usage: Optional[str] = None,
+    ) -> NoReturn:
         """Optionally print a message and exit."""
         print("\n\n".join(m for m in (usage, message) if m))
         sys.exit(status_code)
 
-    def format_usage(self, prog=None):
+    def format_usage(self, prog: Optional[str] = None) -> str:
         """Format usage for current parser."""
         actions = self._build()[1]
         prog = prog or os.path.basename(sys.argv[0])
         return self._usage(actions, prog) + "\n"
 
-    def _usage(self, actions, prog):
+    def _usage(self, actions: Iterable[argparse.Action], prog) -> str:
         formatter = argparse.HelpFormatter(prog)
         formatter.add_usage(None, actions, [])
         return formatter.format_help().strip()
 
-    def format_help(self, prog=None):
+    def format_help(self, prog: Optional[str] = None) -> str:
         """Format help for current parser and children."""
         actions = self._build()[1]
         prog = prog or os.path.basename(sys.argv[0])
@@ -169,7 +202,7 @@ class Command:
 
         return formatter.format_help() + "\n".join(subhelp)
 
-    def _subhelp(self, name, result):
+    def _subhelp(self, name: str, result: list[str]) -> None:
         actions = self._build()[1]
 
         if self.help or actions:
@@ -186,7 +219,9 @@ class Command:
         for childname, child in self._children.items():
             child._subhelp(" ".join((name, childname)), result)
 
-    def parse(self, args, prog=None):
+    def parse(
+        self, args: list[str], prog: Optional[str] = None
+    ) -> argparse.Namespace:
         """Parse command line arguments.
 
         Will recursively parse commands until a final parser is found or an
@@ -203,12 +238,21 @@ class Command:
         prog = prog or os.path.basename(sys.argv[0])
         try:
             return self._parse(
-                args, argparse.Namespace(), self._overrides.copy(), prog
+                args,
+                argparse.Namespace(),
+                self._overrides.copy(),
+                prog,
             )
         except _HelpError:
             self.exit(0, self.format_help(prog))
 
-    def _parse(self, args, namespace, overrides, prog):
+    def _parse(
+        self,
+        args: Sequence[str],
+        namespace: argparse.Namespace,
+        overrides: dict[str, Any],
+        prog: str,
+    ) -> argparse.Namespace:
         overrides.update(self._overrides)
         parser, actions = self._build()
 
@@ -233,7 +277,7 @@ class Command:
             result._args, result, overrides, " ".join([prog, child])
         )
 
-    def run(self, *args, **kwargs):
+    def run(self, *args: Any, **kwargs: Any) -> int:
         """Run the command.
 
         Must be implemented by sub-classes that are not simply an intermediate
@@ -243,7 +287,7 @@ class Command:
 
 
 @contextlib.contextmanager
-def _actor_error_handling(name):
+def _actor_error_handling(name) -> Generator[None, Any, None]:
     try:
         yield
     except exceptions.BackendError as exc:
@@ -258,7 +302,7 @@ def _actor_error_handling(name):
 
 # TODO: move out of this utility class
 class RootCommand(Command):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.set(base_verbosity_level=0)
         self.add_argument(
@@ -316,8 +360,8 @@ class RootCommand(Command):
         )
 
         mixer_class = self.get_mixer_class(config, args.registry["mixer"])
-        backend_classes = args.registry["backend"]
-        frontend_classes = args.registry["frontend"]
+        backend_classes: list[type[BackendActor]] = args.registry["backend"]
+        frontend_classes: list[type[ThreadingActor]] = args.registry["frontend"]
         core = None
 
         exit_status_code = 0
@@ -355,7 +399,11 @@ class RootCommand(Command):
             process.stop_remaining_actors()
         return exit_status_code
 
-    def get_mixer_class(self, config, mixer_classes):
+    def get_mixer_class(
+        self,
+        config: config_lib.Config,
+        mixer_classes: list[type[MixerActor]],
+    ) -> Optional[type[MixerActor]]:
         logger.debug(
             "Available Mopidy mixers: %s",
             ", ".join(m.__name__ for m in mixer_classes) or "none",
@@ -377,10 +425,14 @@ class RootCommand(Command):
             process.exit_process()
         return selected_mixers[0]
 
-    def start_mixer(self, config, mixer_class):
+    def start_mixer(
+        self,
+        config: config_lib.Config,
+        mixer_class: type[MixerActor],
+    ) -> Optional[MixerProxy]:
         logger.info("Starting Mopidy mixer: %s", mixer_class.__name__)
         with _actor_error_handling(mixer_class.__name__):
-            mixer = mixer_class.start(config=config).proxy()
+            mixer = cast(MixerProxy, mixer_class.start(config=config).proxy())
             try:
                 mixer.ping().get()
                 return mixer
@@ -388,7 +440,11 @@ class RootCommand(Command):
                 logger.error("Actor died: %s", exc)
         return None
 
-    def configure_mixer(self, config, mixer):
+    def configure_mixer(
+        self,
+        config: config_lib.Config,
+        mixer: MixerProxy,
+    ) -> None:
         volume = config["audio"]["mixer_volume"]
         if volume is not None:
             mixer.set_volume(volume)
@@ -396,11 +452,20 @@ class RootCommand(Command):
         else:
             logger.debug("Mixer volume left unchanged")
 
-    def start_audio(self, config, mixer):
+    def start_audio(
+        self,
+        config: config_lib.Config,
+        mixer: Optional[MixerProxy],
+    ) -> AudioProxy:
         logger.info("Starting Mopidy audio")
-        return Audio.start(config=config, mixer=mixer).proxy()
+        return cast(AudioProxy, Audio.start(config=config, mixer=mixer).proxy())
 
-    def start_backends(self, config, backend_classes, audio):
+    def start_backends(
+        self,
+        config: config_lib.Config,
+        backend_classes: list[type[BackendActor]],
+        audio,
+    ) -> list[BackendProxy]:
         logger.info(
             "Starting Mopidy backends: %s",
             ", ".join(b.__name__ for b in backend_classes) or "none",
@@ -410,9 +475,10 @@ class RootCommand(Command):
         for backend_class in backend_classes:
             with _actor_error_handling(backend_class.__name__):
                 with timer.time_logger(backend_class.__name__):
-                    backend = backend_class.start(
-                        config=config, audio=audio
-                    ).proxy()
+                    backend = cast(
+                        BackendProxy,
+                        backend_class.start(config=config, audio=audio).proxy(),
+                    )
                     backends.append(backend)
 
         # Block until all on_starts have finished, letting them run in parallel
@@ -425,16 +491,30 @@ class RootCommand(Command):
 
         return backends
 
-    def start_core(self, config, mixer, backends, audio):
+    def start_core(
+        self,
+        config: config_lib.Config,
+        mixer: Optional[MixerProxy],
+        backends: list[BackendProxy],
+        audio: AudioProxy,
+    ) -> CoreProxy:
         logger.info("Starting Mopidy core")
-        core = Core.start(
-            config=config, mixer=mixer, backends=backends, audio=audio
-        ).proxy()
-        call = ProxyCall(attr_path=["_setup"], args=[], kwargs={})
+        core = cast(
+            CoreProxy,
+            Core.start(
+                config=config, mixer=mixer, backends=backends, audio=audio
+            ).proxy(),
+        )
+        call = ProxyCall(attr_path=("_setup",), args=(), kwargs={})
         core.actor_ref.ask(call, block=True)
         return core
 
-    def start_frontends(self, config, frontend_classes, core):
+    def start_frontends(
+        self,
+        config: config_lib.Config,
+        frontend_classes: list[type[ThreadingActor]],
+        core: CoreProxy,
+    ) -> None:
         logger.info(
             "Starting Mopidy frontends: %s",
             ", ".join(f.__name__ for f in frontend_classes) or "none",
@@ -445,28 +525,30 @@ class RootCommand(Command):
                 with timer.time_logger(frontend_class.__name__):
                     frontend_class.start(config=config, core=core)
 
-    def stop_frontends(self, frontend_classes):
+    def stop_frontends(
+        self, frontend_classes: list[type[ThreadingActor]]
+    ) -> None:
         logger.info("Stopping Mopidy frontends")
         for frontend_class in frontend_classes:
             process.stop_actors_by_class(frontend_class)
 
-    def stop_core(self, core):
+    def stop_core(self, core: Optional[CoreProxy]) -> None:
         logger.info("Stopping Mopidy core")
-        if core:
-            call = ProxyCall(attr_path=["_teardown"], args=[], kwargs={})
+        if core is not None:
+            call = ProxyCall(attr_path=("_teardown",), args=(), kwargs={})
             core.actor_ref.ask(call, block=True)
         process.stop_actors_by_class(Core)
 
-    def stop_backends(self, backend_classes):
+    def stop_backends(self, backend_classes: list[type[BackendActor]]) -> None:
         logger.info("Stopping Mopidy backends")
         for backend_class in backend_classes:
             process.stop_actors_by_class(backend_class)
 
-    def stop_audio(self):
+    def stop_audio(self) -> None:
         logger.info("Stopping Mopidy audio")
         process.stop_actors_by_class(Audio)
 
-    def stop_mixer(self, mixer_class):
+    def stop_mixer(self, mixer_class: type[MixerActor]) -> None:
         logger.info("Stopping Mopidy mixer")
         process.stop_actors_by_class(mixer_class)
 
@@ -474,11 +556,16 @@ class RootCommand(Command):
 class ConfigCommand(Command):
     help = "Show currently active configuration."
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.set(base_verbosity_level=-1)
 
-    def run(self, config, errors, schemas):
+    def run(
+        self,
+        config: config_lib.Config,
+        errors: config_lib.ConfigErrors,
+        schemas: config_lib.ConfigSchemas,
+    ) -> int:
         data = config_lib.format(config, schemas, errors)
 
         # Throw away all bytes that are not valid UTF-8 before printing
@@ -491,10 +578,10 @@ class ConfigCommand(Command):
 class DepsCommand(Command):
     help = "Show dependencies and debug information."
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.set(base_verbosity_level=-1)
 
-    def run(self):
+    def run(self) -> int:
         print(deps.format_dependency_list())
         return 0
