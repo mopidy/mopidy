@@ -1,3 +1,5 @@
+# pyright: reportMissingModuleSource=false
+
 import sys
 import textwrap
 

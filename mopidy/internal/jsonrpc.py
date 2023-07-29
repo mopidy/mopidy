@@ -362,7 +362,7 @@ class JsonRpcInspector:
     def _describe_params(self, method):
         argspec = inspect.getfullargspec(method)
 
-        defaults = argspec.defaults and list(argspec.defaults) or []
+        defaults = list(argspec.defaults) if argspec.defaults else []
         num_args_without_default = len(argspec.args) - len(defaults)
         no_defaults = [None] * num_args_without_default
         defaults = no_defaults + defaults

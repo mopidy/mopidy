@@ -1,7 +1,7 @@
 import logging
 import pathlib
 import re
-import urllib
+import urllib.parse
 
 from mopidy.internal import xdg
 

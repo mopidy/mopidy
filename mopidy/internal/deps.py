@@ -1,54 +1,70 @@
+from __future__ import annotations
+
 import functools
 import os
 import platform
 import sys
+from typing import TYPE_CHECKING, Callable, Optional, TypedDict
 
 import pkg_resources
 
 from mopidy.internal import formatting
 from mopidy.internal.gi import Gst, gi
 
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
 
-def format_dependency_list(adapters=None):
+    class DepInfo(TypedDict, total=False):
+        name: str
+        version: str
+        path: str
+        dependencies: list[DepInfo]
+        other: str
+
+    Adapter: TypeAlias = Callable[[], DepInfo]
+
+
+def format_dependency_list(adapters: Optional[list[Adapter]] = None) -> str:
     if adapters is None:
         dist_names = {
             ep.dist.project_name
             for ep in pkg_resources.iter_entry_points("mopidy.ext")
-            if ep.dist.project_name != "Mopidy"
+            if ep.dist is not None and ep.dist.project_name != "Mopidy"
         }
         dist_infos = [
             functools.partial(pkg_info, dist_name) for dist_name in dist_names
         ]
 
-        adapters = (
-            [
-                executable_info,
-                platform_info,
-                python_info,
-                functools.partial(pkg_info, "Mopidy", True),
-            ]
-            + dist_infos
-            + [gstreamer_info]
-        )
+        adapters = [
+            executable_info,
+            platform_info,
+            python_info,
+            functools.partial(pkg_info, "Mopidy", True),
+            *dist_infos,
+            gstreamer_info,
+        ]
 
     return "\n".join(_format_dependency(a()) for a in adapters)
 
 
-def _format_dependency(dep_info):
+def _format_dependency(dep_info: DepInfo) -> str:
     lines = []
 
+    if not (name := dep_info.get("name")):
+        return "Name not found"
+
     if "version" not in dep_info:
-        lines.append(f"{dep_info['name']}: not found")
+        lines.append(f"{name}: not found")
     else:
         source = f" from {dep_info['path']}" if "path" in dep_info else ""
-        lines.append(f"{dep_info['name']}: {dep_info['version']}{source}")
+        lines.append(f"{name}: {dep_info['version']}{source}")
 
     if "other" in dep_info:
         details = formatting.indent(dep_info["other"], places=4)
         lines.append(f"  Detailed information: {details}")
 
     if dep_info.get("dependencies", []):
-        for sub_dep_info in dep_info["dependencies"]:
+        for sub_dep_info in dep_info.get("dependencies", {}):
             sub_dep_lines = _format_dependency(sub_dep_info)
             lines.append(
                 formatting.indent(sub_dep_lines, places=2, singles=True)
@@ -57,21 +73,21 @@ def _format_dependency(dep_info):
     return "\n".join(lines)
 
 
-def executable_info():
+def executable_info() -> DepInfo:
     return {
         "name": "Executable",
         "version": sys.argv[0],
     }
 
 
-def platform_info():
+def platform_info() -> DepInfo:
     return {
         "name": "Platform",
         "version": platform.platform(),
     }
 
 
-def python_info():
+def python_info() -> DepInfo:
     return {
         "name": "Python",
         "version": (
@@ -82,13 +98,20 @@ def python_info():
 
 
 def pkg_info(
-    project_name=None, include_transitive_deps=True, include_extras=False
-):
+    project_name: Optional[str] = None,
+    include_transitive_deps: bool = True,
+    include_extras: bool = False,
+) -> DepInfo:
     if project_name is None:
         project_name = "Mopidy"
     try:
         distribution = pkg_resources.get_distribution(project_name)
-        extras = include_extras and distribution.extras or []
+
+        extras: tuple[str, ...] = (
+            include_extras and tuple(distribution.extras) or ()
+        )
+
+        dependencies: list[DepInfo] = []
         if include_transitive_deps:
             dependencies = [
                 pkg_info(
@@ -97,8 +120,6 @@ def pkg_info(
                 )
                 for d in distribution.requires(extras)
             ]
-        else:
-            dependencies = []
         return {
             "name": project_name,
             "version": distribution.version,
@@ -111,8 +132,8 @@ def pkg_info(
         }
 
 
-def gstreamer_info():
-    other = []
+def gstreamer_info() -> DepInfo:
+    other: list[str] = []
     other.append(f"Python wrapper: python-gi {gi.__version__}")
 
     found_elements = []
