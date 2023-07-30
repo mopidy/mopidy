@@ -17,7 +17,7 @@ from tests import path_to_data_dir
 )
 def test_file_browse(provider, uri, levelname, caplog):
     result = provider.browse(uri)
-    assert type(result) == list
+    assert type(result) is list
     if levelname:
         assert len(result) == 0
         record = caplog.records[0]
