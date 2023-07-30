@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, NamedTuple
+from typing import TYPE_CHECKING, NamedTuple, Union
 
 import pkg_resources
 
@@ -15,10 +15,13 @@ if TYPE_CHECKING:
     from pathlib import Path
     from typing import Any, Optional
 
+    from typing_extensions import TypeAlias
+
     from mopidy.commands import Command
     from mopidy.config import ConfigSchema
 
     Config = dict[str, dict[str, Any]]
+    RegistryEntry: TypeAlias = Union[type[Any], dict[str, Any]]
 
 
 logger = logging.getLogger(__name__)
@@ -189,16 +192,16 @@ class Registry(Mapping):
     """
 
     def __init__(self) -> None:
-        self._registry: dict[str, list[type[Any]]] = {}
+        self._registry: dict[str, list[RegistryEntry]] = {}
 
-    def add(self, name: str, cls: type[Any]) -> None:
+    def add(self, name: str, entry: RegistryEntry) -> None:
         """Add a component to the registry.
 
         Multiple classes can be registered to the same name.
         """
-        self._registry.setdefault(name, []).append(cls)
+        self._registry.setdefault(name, []).append(entry)
 
-    def __getitem__(self, name: str) -> list[type[Any]]:
+    def __getitem__(self, name: str) -> list[RegistryEntry]:
         return self._registry.setdefault(name, [])
 
     def __iter__(self) -> Iterator[str]:
