@@ -12,12 +12,15 @@ For older releases, see :ref:`history`.
 v3.5.0 (UNRELEASED)
 ===================
 
+- tox: added "tox -e ci", to allow easy CI check before "git push".
+
 Dependencies
 ------------
 
 - Python >= 3.9 is now required. Python 3.7 and 3.8 are no longer supported.
 
 - GStreamer >= 1.18.0 is now required.
+
 
 
 v3.4.1 (2022-12-07)
