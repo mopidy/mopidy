@@ -1,12 +1,20 @@
+from __future__ import annotations
+
 import collections
 import contextlib
 import logging
 import operator
-import urllib
+import urllib.parse
 from collections.abc import Mapping
+from typing import TYPE_CHECKING, Optional, cast
 
 from mopidy import exceptions, models
+from mopidy.backend import DistinctField
 from mopidy.internal import deprecation, validation
+
+if TYPE_CHECKING:
+    from mopidy.backend import BackendProxy
+    from mopidy.core.actor import Backends, Core
 
 logger = logging.getLogger(__name__)
 
@@ -31,11 +39,11 @@ def _backend_error_handling(backend, reraise=None):
 
 
 class LibraryController:
-    def __init__(self, backends, core):
+    def __init__(self, backends: Backends, core: Core) -> None:
         self.backends = backends
         self.core = core
 
-    def _get_backend(self, uri):
+    def _get_backend(self, uri: str) -> Optional[BackendProxy]:
         uri_scheme = urllib.parse.urlparse(uri).scheme
         return self.backends.with_library.get(uri_scheme, None)
 
@@ -145,9 +153,12 @@ class LibraryController:
         else:
             validation.check_choice(field, validation.DISTINCT_FIELDS.keys())
             field_type = validation.DISTINCT_FIELDS.get(field)
-        query is None or validation.check_query(query)  # TODO: normalize?
+        if query is not None:
+            validation.check_query(query)  # TODO: normalize?
 
-        compat_field = {"track_name": "track"}.get(field, field)
+        compat_field = cast(
+            DistinctField, {"track_name": "track"}.get(field, field)
+        )
 
         result = set()
         futures = {
@@ -158,7 +169,8 @@ class LibraryController:
             with _backend_error_handling(backend):
                 values = future.get()
                 if values is not None:
-                    validation.check_instances(values, field_type)
+                    if field_type is not None:
+                        validation.check_instances(values, field_type)
                     result.update(values)
         return result
 
@@ -236,14 +248,15 @@ class LibraryController:
 
         return results
 
-    def refresh(self, uri=None):
+    def refresh(self, uri: Optional[str] = None):
         """
         Refresh library. Limit to URI and below if an URI is given.
 
         :param uri: directory or track URI
         :type uri: string
         """
-        uri is None or validation.check_uri(uri)
+        if uri is not None:
+            validation.check_uri(uri)
 
         futures = {}
         backends = {}
@@ -305,7 +318,8 @@ class LibraryController:
         """
         query = _normalize_query(query)
 
-        uris is None or validation.check_uris(uris)
+        if uris is not None:
+            validation.check_uris(uris)
         validation.check_query(query)
         validation.check_boolean(exact)
 
@@ -363,3 +377,15 @@ def _normalize_query(query):
             "and file a bug."
         )
     return query
+
+
+if TYPE_CHECKING:
+    from pykka.typing import proxy_method
+
+    class LibraryControllerProxy:
+        browse = proxy_method(LibraryController.browse)
+        get_distinct = proxy_method(LibraryController.get_distinct)
+        get_images = proxy_method(LibraryController.get_images)
+        lookup = proxy_method(LibraryController.lookup)
+        refresh = proxy_method(LibraryController.refresh)
+        search = proxy_method(LibraryController.search)

@@ -33,7 +33,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
         audio = dummy_audio.create_proxy()
         backend = M3UBackend.start(config=self.config, audio=audio).proxy()
-        self.core = core.Core(backends=[backend])
+        self.core = core.Core(config=self.config, backends=[backend])
 
     def tearDown(self):  # noqa: N802
         pykka.ActorRegistry.stop_all()

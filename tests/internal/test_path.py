@@ -201,9 +201,12 @@ class ExpandPathTest(unittest.TestCase):
         assert str(result) == expected
 
     def test_xdg_subsititution_unknown(self):
-        result = path.expand_path("/tmp/$XDG_INVALID_DIR/foo")
+        with pytest.raises(ValueError) as exc_info:
+            path.expand_path("/tmp/$XDG_INVALID_DIR/foo")
 
-        assert result is None
+        assert str(exc_info.value) == (
+            "Unexpanded '$...' in path '/tmp/$XDG_INVALID_DIR/foo'"
+        )
 
     def test_invalid_utf8_bytes(self):
         result = path.expand_path(b"ab\xc3\x12")

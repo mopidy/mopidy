@@ -1,5 +1,6 @@
 import logging
 import random
+from typing import TYPE_CHECKING
 
 from mopidy import exceptions
 from mopidy.core import listener
@@ -166,8 +167,10 @@ class TracklistController:
         .. versionadded:: 1.1
             The *tlid* parameter
         """
-        tl_track is None or validation.check_instance(tl_track, TlTrack)
-        tlid is None or validation.check_integer(tlid, min=1)
+        if tl_track is not None:
+            validation.check_instance(tl_track, TlTrack)
+        if tlid is not None:
+            validation.check_integer(tlid, min=1)
 
         if tl_track is None and tlid is None:
             tl_track = self.core.playback.get_current_tl_track()
@@ -215,7 +218,8 @@ class TracklistController:
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
         deprecation.warn("core.tracklist.eot_track")
-        tl_track is None or validation.check_instance(tl_track, TlTrack)
+        if tl_track is not None:
+            validation.check_instance(tl_track, TlTrack)
         if self.get_single() and self.get_repeat():
             return tl_track
         elif self.get_single():
@@ -265,7 +269,8 @@ class TracklistController:
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
         deprecation.warn("core.tracklist.next_track")
-        tl_track is None or validation.check_instance(tl_track, TlTrack)
+        if tl_track is not None:
+            validation.check_instance(tl_track, TlTrack)
 
         if not self._tl_tracks:
             return None
@@ -334,7 +339,8 @@ class TracklistController:
         :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
         deprecation.warn("core.tracklist.previous_track")
-        tl_track is None or validation.check_instance(tl_track, TlTrack)
+        if tl_track is not None:
+            validation.check_instance(tl_track, TlTrack)
 
         if self.get_repeat() or self.get_consume() or self.get_random():
             return tl_track
@@ -379,8 +385,10 @@ class TracklistController:
         if sum(o is not None for o in [tracks, uris]) != 1:
             raise ValueError('Exactly one of "tracks" or "uris" must be set')
 
-        tracks is None or validation.check_instances(tracks, Track)
-        uris is None or validation.check_uris(uris)
+        if tracks is not None:
+            validation.check_instances(tracks, Track)
+        if uris is not None:
+            validation.check_uris(uris)
         validation.check_integer(at_position or 0)
 
         if tracks:
@@ -389,6 +397,7 @@ class TracklistController:
         if tracks is None:
             tracks = []
             track_map = self.core.library.lookup(uris=uris)
+            assert uris is not None
             for uri in uris:
                 tracks.extend(track_map[uri])
 
@@ -624,3 +633,35 @@ class TracklistController:
                 self._next_tlid = max(state.next_tlid, self._next_tlid)
                 self._tl_tracks = list(state.tl_tracks)
                 self._increase_version()
+
+
+if TYPE_CHECKING:
+    from pykka.typing import proxy_method
+
+    class TracklistControllerProxy:
+        get_tl_tracks = proxy_method(TracklistController.get_tl_tracks)
+        get_tracks = proxy_method(TracklistController.get_tracks)
+        get_length = proxy_method(TracklistController.get_length)
+        get_version = proxy_method(TracklistController.get_version)
+        get_consume = proxy_method(TracklistController.get_consume)
+        set_consume = proxy_method(TracklistController.set_consume)
+        get_random = proxy_method(TracklistController.get_random)
+        set_random = proxy_method(TracklistController.set_random)
+        get_repeat = proxy_method(TracklistController.get_repeat)
+        set_repeat = proxy_method(TracklistController.set_repeat)
+        get_single = proxy_method(TracklistController.get_single)
+        set_single = proxy_method(TracklistController.set_single)
+        index = proxy_method(TracklistController.index)
+        get_eot_tlid = proxy_method(TracklistController.get_eot_tlid)
+        eot_track = proxy_method(TracklistController.eot_track)
+        get_next_tlid = proxy_method(TracklistController.get_next_tlid)
+        next_track = proxy_method(TracklistController.next_track)
+        get_previous_tlid = proxy_method(TracklistController.get_previous_tlid)
+        previous_track = proxy_method(TracklistController.previous_track)
+        add = proxy_method(TracklistController.add)
+        clear = proxy_method(TracklistController.clear)
+        filter = proxy_method(TracklistController.filter)
+        move = proxy_method(TracklistController.move)
+        remove = proxy_method(TracklistController.remove)
+        shuffle = proxy_method(TracklistController.shuffle)
+        slice = proxy_method(TracklistController.slice)

@@ -2,7 +2,8 @@ import fnmatch
 import logging
 import re
 import time
-import urllib
+import urllib.parse
+from typing import Optional
 
 import pykka
 
@@ -41,20 +42,22 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
         self.playback = StreamPlaybackProvider(audio=audio, backend=self)
         self.playlists = None
 
-        self.uri_schemes = audio_lib.supported_uri_schemes(
+        uri_schemes = audio_lib.supported_uri_schemes(
             config["stream"]["protocols"]
         )
-
         if "file" in self.uri_schemes and config["file"]["enabled"]:
             logger.warning(
                 'The stream/protocols config value includes the "file" '
                 'protocol. "file" playback is now handled by Mopidy-File. '
                 "Please remove it from the stream/protocols config."
             )
-            self.uri_schemes -= {"file"}
+            uri_schemes -= {"file"}
+        self.uri_schemes = sorted(list(uri_schemes))
 
 
 class StreamLibraryProvider(backend.LibraryProvider):
+    backend: StreamBackend
+
     def lookup(self, uri):
         if urllib.parse.urlsplit(uri).scheme not in self.backend.uri_schemes:
             return []
@@ -82,6 +85,8 @@ class StreamLibraryProvider(backend.LibraryProvider):
 
 
 class StreamPlaybackProvider(backend.PlaybackProvider):
+    backend: StreamBackend
+
     def translate_uri(self, uri):
         if urllib.parse.urlsplit(uri).scheme not in self.backend.uri_schemes:
             return None
@@ -100,7 +105,12 @@ class StreamPlaybackProvider(backend.PlaybackProvider):
 
 
 # TODO: cleanup the return value of this.
-def _unwrap_stream(uri, timeout, scanner, requests_session):
+def _unwrap_stream(
+    uri: str,
+    timeout: float,
+    scanner: scan.Scanner,
+    requests_session,
+) -> tuple[Optional[str], Optional[scan._Result]]:
     """
     Get a stream URI from a playlist URI, ``uri``.
 
@@ -185,3 +195,5 @@ def _unwrap_stream(uri, timeout, scanner, requests_session):
         new_uri = uris[0]
         logger.debug("Parsed playlist (%s) and found new URI: %s", uri, new_uri)
         uri = urllib.parse.urljoin(uri, new_uri)
+
+    return None, None

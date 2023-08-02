@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
+import pykka
+
 from mopidy import listener
 
 if TYPE_CHECKING:
@@ -159,3 +161,22 @@ class MixerListener(listener.Listener):
         :type mute: bool
         """
         pass
+
+
+if TYPE_CHECKING:
+    from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
+
+    class MixerActor(pykka.ThreadingActor, Mixer):
+        pass
+
+    class MixerProxy(ActorMemberMixin, pykka.ActorProxy[MixerActor]):
+        """Mixer wrapped in a Pykka actor proxy."""
+
+        name = proxy_field(MixerActor.name)
+        get_volume = proxy_method(MixerActor.get_volume)
+        set_volume = proxy_method(MixerActor.set_volume)
+        trigger_volume_changed = proxy_method(MixerActor.trigger_volume_changed)
+        get_mute = proxy_method(MixerActor.get_mute)
+        set_mute = proxy_method(MixerActor.set_mute)
+        trigger_mute_changed = proxy_method(MixerActor.trigger_mute_changed)
+        ping = proxy_method(MixerActor.ping)

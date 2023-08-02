@@ -1,8 +1,13 @@
+from __future__ import annotations
+
 import copy
 import itertools
 import weakref
+from typing import Any, ClassVar, Generic, TypeVar
 
 from mopidy.models.fields import Field
+
+T = TypeVar("T", bound="type")
 
 # Registered models for automatic deserialization
 _models = {}
@@ -127,11 +132,20 @@ class ImmutableObject:
         return data
 
 
-class _ValidatedImmutableObjectMeta(type):
+class _ValidatedImmutableObjectMeta(type, Generic[T]):
 
     """Helper that initializes fields, slots and memoizes instance creation."""
 
-    def __new__(cls, name, bases, attrs):
+    _instances: dict[
+        weakref.ReferenceType[_ValidatedImmutableObjectMeta[T]], T
+    ] = {}
+
+    def __new__(
+        cls: type[_ValidatedImmutableObjectMeta],
+        name: str,
+        bases: tuple[type, ...],
+        attrs: dict[str, Any],
+    ) -> _ValidatedImmutableObjectMeta:
         fields = {}
 
         for base in bases:  # Copy parent fields over to our state
@@ -148,14 +162,20 @@ class _ValidatedImmutableObjectMeta(type):
             fields.values()
         )
 
-        clsc = super().__new__(cls, name, bases, attrs)
+        clsc: _ValidatedImmutableObjectMeta = super().__new__(
+            cls, name, bases, attrs
+        )
 
         if clsc.__name__ != "ValidatedImmutableObject":
             _models[clsc.__name__] = clsc
 
         return clsc
 
-    def __call__(cls, *args, **kwargs):  # noqa: N805
+    def __call__(
+        cls,
+        *args: Any,
+        **kwargs: Any,
+    ) -> T:  # noqa: N805
         instance = super().__call__(*args, **kwargs)
         return cls._instances.setdefault(weakref.ref(instance), instance)
 
@@ -173,6 +193,8 @@ class ValidatedImmutableObject(
     give you the same instance twice.
     """
 
+    _fields: ClassVar[dict[str, Any]]
+    _instances: ClassVar[weakref.WeakValueDictionary]
     __slots__ = ["_hash"]
 
     def __hash__(self):

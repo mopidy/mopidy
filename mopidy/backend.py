@@ -1,48 +1,46 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Literal, Optional, TypeVar, Union
 
 import pykka
 
 from mopidy import listener
 
 if TYPE_CHECKING:
-    from typing import Any, Literal, Optional, TypeVar, Union
-
+    from mopidy.audio.actor import AudioProxy
+    from mopidy.internal.gi import Gst
     from mopidy.models import Image, Playlist, Ref, SearchResult, Track
 
-    # TODO Fix duplication with mopidy.internal.validation.TRACK_FIELDS_WITH_TYPES
-    TrackField = Literal[
-        "uri",
-        "track_name",
-        "album",
-        "artist",
-        "albumartist",
-        "composer",
-        "performer",
-        "track_no",
-        "genre",
-        "date",
-        "comment",
-        "disc_no",
-        "musicbrainz_albumid",
-        "musicbrainz_artistid",
-        "musicbrainz_trackid",
-    ]
+# TODO Fix duplication with mopidy.internal.validation.TRACK_FIELDS_WITH_TYPES
+TrackField = Literal[
+    "uri",
+    "track_name",
+    "album",
+    "artist",
+    "albumartist",
+    "composer",
+    "performer",
+    "track_no",
+    "genre",
+    "date",
+    "comment",
+    "disc_no",
+    "musicbrainz_albumid",
+    "musicbrainz_artistid",
+    "musicbrainz_trackid",
+]
 
-    SearchField = Literal[TrackField, "any"]
+SearchField = Literal[TrackField, "any"]
 
-    DistinctField = TrackField
+DistinctField = TrackField
 
-    F = TypeVar("F")
-    QueryValue = Union[str, int]
-    Query = dict[F, list[QueryValue]]
+F = TypeVar("F")
+QueryValue = Union[str, int]
+Query = dict[F, list[QueryValue]]
 
-    Uri = str
-    UriScheme = str
-
-    GstElement = TypeVar("GstElement")
+Uri = str
+UriScheme = str
 
 
 logger = logging.getLogger(__name__)
@@ -67,8 +65,7 @@ class Backend:
     #:
     #: Should be passed to the backend constructor as the kwarg ``audio``,
     #: which will then set this field.
-    # TODO(typing) Replace Any with an ActorProxy[Audio] type
-    audio: Optional[Any] = None
+    audio: AudioProxy
 
     #: The library provider. An instance of
     #: :class:`~mopidy.backend.LibraryProvider`, or :class:`None` if
@@ -211,8 +208,7 @@ class PlaybackProvider:
     :type backend: :class:`mopidy.backend.Backend`
     """
 
-    def __init__(self, audio: Any, backend: Backend) -> None:
-        # TODO(typing) Replace Any with an ActorProxy[Audio] type
+    def __init__(self, audio: AudioProxy, backend: Backend) -> None:
         self.audio = audio
         self.backend = backend
 
@@ -295,7 +291,7 @@ class PlaybackProvider:
         """
         return False
 
-    def on_source_setup(self, source: GstElement) -> None:
+    def on_source_setup(self, source: Gst.Element) -> None:
         """
         Called when a new GStreamer source is created, allowing us to configure
         the source. This runs in the audio thread so should not block.
@@ -529,3 +525,56 @@ class BackendListener(listener.Listener):
         *MAY* be implemented by actor.
         """
         pass
+
+
+if TYPE_CHECKING:
+    from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
+
+    class BackendActor(pykka.ThreadingActor, Backend):
+        pass
+
+    class BackendProxy(ActorMemberMixin, pykka.ActorProxy[BackendActor]):
+        """Backend wrapped in a Pykka actor proxy."""
+
+        audio = proxy_field(BackendActor.audio)
+        library: LibraryProviderProxy
+        playback: PlaybackProviderProxy
+        playlists: PlaylistsProviderProxy
+        uri_schemes = proxy_field(BackendActor.uri_schemes)
+        has_library = proxy_method(BackendActor.has_library)
+        has_library_browse = proxy_method(BackendActor.has_library_browse)
+        has_playback = proxy_method(BackendActor.has_playback)
+        has_playlists = proxy_method(BackendActor.has_playlists)
+        ping = proxy_method(BackendActor.ping)
+
+    class LibraryProviderProxy:
+        root_directory = proxy_field(LibraryProvider.root_directory)
+        browse = proxy_method(LibraryProvider.browse)
+        get_distinct = proxy_method(LibraryProvider.get_distinct)
+        get_images = proxy_method(LibraryProvider.get_images)
+        lookup = proxy_method(LibraryProvider.lookup)
+        refresh = proxy_method(LibraryProvider.refresh)
+        search = proxy_method(LibraryProvider.search)
+
+    class PlaybackProviderProxy:
+        pause = proxy_method(PlaybackProvider.pause)
+        play = proxy_method(PlaybackProvider.play)
+        prepare_change = proxy_method(PlaybackProvider.prepare_change)
+        translate_uri = proxy_method(PlaybackProvider.translate_uri)
+        is_live = proxy_method(PlaybackProvider.is_live)
+        should_download = proxy_method(PlaybackProvider.should_download)
+        on_source_setup = proxy_method(PlaybackProvider.on_source_setup)
+        change_track = proxy_method(PlaybackProvider.change_track)
+        resume = proxy_method(PlaybackProvider.resume)
+        seek = proxy_method(PlaybackProvider.seek)
+        stop = proxy_method(PlaybackProvider.stop)
+        get_time_position = proxy_method(PlaybackProvider.get_time_position)
+
+    class PlaylistsProviderProxy:
+        as_list = proxy_method(PlaylistsProvider.as_list)
+        get_items = proxy_method(PlaylistsProvider.get_items)
+        create = proxy_method(PlaylistsProvider.create)
+        delete = proxy_method(PlaylistsProvider.delete)
+        lookup = proxy_method(PlaylistsProvider.lookup)
+        refresh = proxy_method(PlaylistsProvider.refresh)
+        save = proxy_method(PlaylistsProvider.save)

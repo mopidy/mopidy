@@ -1,6 +1,8 @@
-import collections
+from __future__ import annotations
+
 import itertools
 import logging
+from typing import TYPE_CHECKING, Optional
 
 import pykka
 
@@ -17,6 +19,15 @@ from mopidy.core.tracklist import TracklistController
 from mopidy.internal import path, storage, validation, versioning
 from mopidy.internal.models import CoreState
 
+if TYPE_CHECKING:
+    from mopidy.config import Config
+    from mopidy.core.history import HistoryControllerProxy
+    from mopidy.core.library import LibraryControllerProxy
+    from mopidy.core.mixer import MixerControllerProxy
+    from mopidy.core.playback import PlaybackControllerProxy
+    from mopidy.core.playlists import PlaylistsControllerProxy
+    from mopidy.core.tracklist import TracklistControllerProxy
+
 logger = logging.getLogger(__name__)
 
 
@@ -26,30 +37,37 @@ class Core(
     backend.BackendListener,
     mixer.MixerListener,
 ):
-    library = None
+    library: LibraryController
     """An instance of :class:`~mopidy.core.LibraryController`"""
 
-    history = None
+    history: HistoryController
     """An instance of :class:`~mopidy.core.HistoryController`"""
 
-    mixer = None
+    mixer: MixerController
     """An instance of :class:`~mopidy.core.MixerController`"""
 
-    playback = None
+    playback: PlaybackController
     """An instance of :class:`~mopidy.core.PlaybackController`"""
 
-    playlists = None
+    playlists: PlaylistsController
     """An instance of :class:`~mopidy.core.PlaylistsController`"""
 
-    tracklist = None
+    tracklist: TracklistController
     """An instance of :class:`~mopidy.core.TracklistController`"""
 
-    def __init__(self, config=None, mixer=None, backends=None, audio=None):
+    def __init__(
+        self,
+        config: Config,
+        *,
+        mixer: Optional[mixer.MixerProxy] = None,
+        backends: list[backend.BackendProxy],
+        audio: Optional[audio.AudioProxy] = None,
+    ) -> None:
         super().__init__()
 
         self._config = config
 
-        self.backends = Backends(backends)
+        self.backends = Backends(backends or [])
 
         self.library = pykka.traversable(
             LibraryController(backends=self.backends, core=self)
@@ -66,27 +84,32 @@ class Core(
 
         self.audio = audio
 
-    def get_uri_schemes(self):
+    def get_uri_schemes(self) -> list[backend.UriScheme]:
         """Get list of URI schemes we can handle"""
         futures = [b.uri_schemes for b in self.backends]
         results = pykka.get_all(futures)
         uri_schemes = itertools.chain(*results)
         return sorted(uri_schemes)
 
-    def get_version(self):
+    def get_version(self) -> str:
         """Get version of the Mopidy core API"""
         return versioning.get_version()
 
-    def reached_end_of_stream(self):
+    def reached_end_of_stream(self) -> None:
         self.playback._on_end_of_stream()
 
-    def stream_changed(self, uri):
+    def stream_changed(self, uri) -> None:
         self.playback._on_stream_changed(uri)
 
-    def position_changed(self, position):
+    def position_changed(self, position) -> None:
         self.playback._on_position_changed(position)
 
-    def state_changed(self, old_state, new_state, target_state):
+    def state_changed(
+        self,
+        old_state: PlaybackState,
+        new_state: PlaybackState,
+        target_state: PlaybackState,
+    ) -> None:
         # XXX: This is a temporary fix for issue #232 while we wait for a more
         # permanent solution with the implementation of issue #234. When the
         # Spotify play token is lost, the Spotify backend pauses audio
@@ -232,18 +255,20 @@ class Core(
 
 
 class Backends(list):
-    def __init__(self, backends):
+    def __init__(self, backends: list[backend.BackendProxy]):
         super().__init__(backends)
 
-        self.with_library = collections.OrderedDict()
-        self.with_library_browse = collections.OrderedDict()
-        self.with_playback = collections.OrderedDict()
-        self.with_playlists = collections.OrderedDict()
+        self.with_library: dict[backend.UriScheme, backend.BackendProxy] = {}
+        self.with_library_browse: dict[
+            backend.UriScheme, backend.BackendProxy
+        ] = {}
+        self.with_playback: dict[backend.UriScheme, backend.BackendProxy] = {}
+        self.with_playlists: dict[backend.UriScheme, backend.BackendProxy] = {}
 
-        backends_by_scheme = {}
+        backends_by_scheme: dict[backend.UriScheme, backend.BackendProxy] = {}
 
-        def name(b):
-            return b.actor_ref.actor_class.__name__
+        def name(backend_proxy: backend.BackendProxy) -> str:
+            return backend_proxy.actor_ref.actor_class.__name__
 
         for b in backends:
             try:
@@ -272,3 +297,25 @@ class Backends(list):
                     self.with_playback[scheme] = b
                 if has_playlists:
                     self.with_playlists[scheme] = b
+
+
+if TYPE_CHECKING:
+    from pykka.typing import ActorMemberMixin, proxy_method
+
+    class CoreProxy(ActorMemberMixin, pykka.ActorProxy[Core]):
+        library: LibraryControllerProxy
+        history: HistoryControllerProxy
+        mixer: MixerControllerProxy
+        playback: PlaybackControllerProxy
+        playlists: PlaylistsControllerProxy
+        tracklist: TracklistControllerProxy
+        get_uri_schemes = proxy_method(Core.get_uri_schemes)
+        get_version = proxy_method(Core.get_version)
+        reached_end_of_stream = proxy_method(Core.reached_end_of_stream)
+        stream_changed = proxy_method(Core.stream_changed)
+        position_changed = proxy_method(Core.position_changed)
+        state_changed = proxy_method(Core.state_changed)
+        playlists_loaded = proxy_method(Core.playlists_loaded)
+        volume_changed = proxy_method(Core.volume_changed)
+        mute_changed = proxy_method(Core.mute_changed)
+        tags_changed = proxy_method(Core.tags_changed)

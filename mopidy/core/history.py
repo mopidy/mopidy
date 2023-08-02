@@ -1,6 +1,7 @@
 import copy
 import logging
 import time
+from typing import TYPE_CHECKING
 
 from mopidy import models
 from mopidy.internal.models import HistoryState, HistoryTrack
@@ -73,3 +74,11 @@ class HistoryController:
     def _load_state(self, state, coverage):
         if state and "history" in coverage:
             self._history = [(h.timestamp, h.track) for h in state.history]
+
+
+if TYPE_CHECKING:
+    from pykka.typing import proxy_method
+
+    class HistoryControllerProxy:
+        get_length = proxy_method(HistoryController.get_length)
+        get_history = proxy_method(HistoryController.get_history)

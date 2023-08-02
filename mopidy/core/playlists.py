@@ -1,6 +1,7 @@
 import contextlib
 import logging
-import urllib
+import urllib.parse
+from typing import TYPE_CHECKING
 
 from mopidy import exceptions
 from mopidy.core import listener
@@ -72,8 +73,7 @@ class PlaylistsController:
             except NotImplementedError:
                 backend_name = b.actor_ref.actor_class.__name__
                 logger.warning(
-                    "%s does not implement playlists.as_list(). "
-                    "Please upgrade it.",
+                    "%s does not implement playlists.as_list(). Please upgrade it.",
                     backend_name,
                 )
 
@@ -103,7 +103,8 @@ class PlaylistsController:
 
         with _backend_error_handling(backend):
             items = backend.playlists.get_items(uri).get()
-            items is None or validation.check_instances(items, Ref)
+            if items is not None:
+                validation.check_instances(items, Ref)
             return items
 
         return None
@@ -195,7 +196,8 @@ class PlaylistsController:
 
         with _backend_error_handling(backend):
             playlist = backend.playlists.lookup(uri).get()
-            playlist is None or validation.check_instance(playlist, Playlist)
+            if playlist is not None:
+                validation.check_instance(playlist, Playlist)
             return playlist
 
         return None
@@ -270,7 +272,8 @@ class PlaylistsController:
         # TODO: we let AssertionError error through due to legacy tests :/
         with _backend_error_handling(backend, reraise=AssertionError):
             playlist = backend.playlists.save(playlist).get()
-            playlist is None or validation.check_instance(playlist, Playlist)
+            if playlist is not None:
+                validation.check_instance(playlist, Playlist)
             if playlist:
                 listener.CoreListener.send(
                     "playlist_changed", playlist=playlist
@@ -278,3 +281,17 @@ class PlaylistsController:
             return playlist
 
         return None
+
+
+if TYPE_CHECKING:
+    from pykka.typing import proxy_method
+
+    class PlaylistsControllerProxy:
+        get_uri_schemes = proxy_method(PlaylistsController.get_uri_schemes)
+        as_list = proxy_method(PlaylistsController.as_list)
+        get_items = proxy_method(PlaylistsController.get_items)
+        create = proxy_method(PlaylistsController.create)
+        delete = proxy_method(PlaylistsController.delete)
+        lookup = proxy_method(PlaylistsController.lookup)
+        refresh = proxy_method(PlaylistsController.refresh)
+        save = proxy_method(PlaylistsController.save)

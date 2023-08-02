@@ -15,3 +15,15 @@ use_parentheses = true
 line_length = 80
 known_tests = "tests"
 sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,TESTS,LOCALFOLDER"
+
+
+[tool.pyright]
+pythonVersion = "3.9"
+# Use venv from parent directory, to share it with any extensions:
+venvPath = "../"
+venv = ".venv"
+typeCheckingMode = "basic"
+# Not all dependencies have type hints:
+reportMissingTypeStubs = false
+# Already covered by flake8-self:
+reportPrivateImportUsage = false

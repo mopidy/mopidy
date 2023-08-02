@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import contextlib
 import locale
 import logging
@@ -5,11 +7,15 @@ import operator
 import os
 import pathlib
 import tempfile
+from typing import TYPE_CHECKING
 
 from mopidy import backend
 from mopidy.internal import path
 
 from . import Extension, translator
+
+if TYPE_CHECKING:
+    from mopidy.models import Playlist
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +133,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
     def refresh(self):
         pass  # nothing to do
 
-    def save(self, playlist):
+    def save(self, playlist: Playlist) -> Playlist | None:
         path = translator.uri_to_path(playlist.uri)
         if not self._is_in_basedir(path):
             logger.debug("Ignoring path outside playlist dir: %s", playlist.uri)
@@ -166,7 +172,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             path = self._abspath(path)
         if not self._is_in_basedir(path):
             raise Exception(
-                f"Path {path!r} is not inside playlist dir {self._playlist_dir!r}"
+                f"Path {path!r} is not inside playlist dir {self._playlists_dir!r}"
             )
         if "w" in mode:
             return replace(path, mode, encoding=encoding, errors="replace")

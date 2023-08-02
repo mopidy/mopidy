@@ -1,7 +1,23 @@
+from __future__ import annotations
+
 import sys
+from typing import (
+    Any,
+    Callable,
+    Generic,
+    Iterable,
+    Optional,
+    TypeVar,
+    Union,
+    cast,
+    overload,
+)
+
+T = TypeVar("T")
+TField = TypeVar("TField", bound="Field")
 
 
-class Field:
+class Field(Generic[T]):
 
     """
     Base field for use in
@@ -19,8 +35,13 @@ class Field:
     :param choices: if set the field value must be one of these
     """
 
-    def __init__(self, default=None, type=None, choices=None):
-        self._name = None  # Set by ValidatedImmutableObjectMeta
+    def __init__(
+        self,
+        default: Optional[T] = None,
+        type: Optional[type[T]] = None,
+        choices: Optional[Iterable[T]] = None,
+    ) -> None:
+        self._name: str | None = None  # Set by ValidatedImmutableObjectMeta
         self._choices = choices
         self._default = default
         self._type = type
@@ -28,7 +49,7 @@ class Field:
         if self._default is not None:
             self.validate(self._default)
 
-    def validate(self, value):
+    def validate(self, value: T) -> T:
         """Validate and possibly modify the field value before assignment"""
         if self._type and not isinstance(value, self._type):
             raise TypeError(
@@ -40,26 +61,38 @@ class Field:
             )
         return value
 
-    def __get__(self, instance, owner):
-        if not instance:
-            return self
-        return getattr(instance, "_" + self._name, self._default)
+    @overload
+    def __get__(self: TField, obj: None, objtype: None) -> TField:
+        ...
 
-    def __set__(self, instance, value):
+    @overload
+    def __get__(self, obj: object, objtype: type[object]) -> T:
+        ...
+
+    def __get__(
+        self: TField,
+        obj: Optional[object],
+        objtype: Optional[type[object]],
+    ) -> Union[T, TField]:
+        if not obj:
+            return self
+        return cast(T, getattr(obj, f"_{self._name}", self._default))
+
+    def __set__(self, obj: object, value: T) -> None:
         if value is not None:
             value = self.validate(value)
 
         if value is None or value == self._default:
-            self.__delete__(instance)
+            self.__delete__(obj)
         else:
-            setattr(instance, "_" + self._name, value)
+            setattr(obj, f"_{self._name}", value)
 
-    def __delete__(self, instance):
-        if hasattr(instance, "_" + self._name):
-            delattr(instance, "_" + self._name)
+    def __delete__(self, obj: object) -> None:
+        if hasattr(obj, f"_{self._name}"):
+            delattr(obj, f"_{self._name}")
 
 
-class String(Field):
+class String(Field[str]):
 
     """
     Specialized :class:`Field` which is wired up for bytes and unicode.
@@ -67,7 +100,7 @@ class String(Field):
     :param default: default value for field
     """
 
-    def __init__(self, default=None):
+    def __init__(self, default: str | None = None) -> None:
         # TODO: normalize to unicode?
         # TODO: only allow unicode?
         # TODO: disallow empty strings?
@@ -96,7 +129,7 @@ class Identifier(String):
     :param default: default value for field
     """
 
-    def validate(self, value):
+    def validate(self, value: str) -> str:
         value = super().validate(value)
         if isinstance(value, bytes):
             value = value.decode()
@@ -115,7 +148,7 @@ class URI(Identifier):
     pass  # TODO: validate URIs?
 
 
-class Integer(Field):
+class Integer(Field[int]):
     """
     :class:`Field` for storing integer numbers.
 
@@ -124,12 +157,12 @@ class Integer(Field):
     :param max: field value must be smaller or equal to this value when set
     """
 
-    def __init__(self, default=None, min=None, max=None):
+    def __init__(self, default=None, min=None, max=None) -> None:
         self._min = min
         self._max = max
         super().__init__(type=int, default=default)
 
-    def validate(self, value):
+    def validate(self, value: int):
         value = super().validate(value)
         if self._min is not None and value < self._min:
             raise ValueError(
@@ -142,18 +175,18 @@ class Integer(Field):
         return value
 
 
-class Boolean(Field):
+class Boolean(Field[bool]):
     """
     :class:`Field` for storing boolean values
 
     :param default: default value for field
     """
 
-    def __init__(self, default=None):
+    def __init__(self, default=None) -> None:
         super().__init__(type=bool, default=default)
 
 
-class Collection(Field):
+class Collection(Field[Union[tuple, frozenset]]):
     """
     :class:`Field` for storing collections of a given type.
 
@@ -161,10 +194,16 @@ class Collection(Field):
     :param container: the type to store the items in
     """
 
-    def __init__(self, type, container=tuple):
+    def __init__(
+        self,
+        type: type,
+        container: Callable[[], Union[tuple, frozenset]] = tuple,
+    ) -> None:
         super().__init__(type=type, default=container())
 
-    def validate(self, value):
+    def validate(self, value: Iterable[Any]) -> Optional[Iterable[Any]]:
+        assert self._default is not None
+        assert self._type is not None
         if isinstance(value, str):
             raise TypeError(
                 f"Expected {self._name} to be a collection of "

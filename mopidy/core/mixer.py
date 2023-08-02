@@ -1,9 +1,15 @@
+from __future__ import annotations
+
 import contextlib
 import logging
+from typing import TYPE_CHECKING, Optional
 
 from mopidy import exceptions
 from mopidy.internal import validation
 from mopidy.internal.models import MixerState
+
+if TYPE_CHECKING:
+    from mopidy.mixer import MixerProxy
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +32,7 @@ def _mixer_error_handling(mixer):
 
 
 class MixerController:
-    def __init__(self, mixer):
+    def __init__(self, mixer: Optional[MixerProxy]):
         self._mixer = mixer
 
     def get_volume(self):
@@ -41,7 +47,8 @@ class MixerController:
 
         with _mixer_error_handling(self._mixer):
             volume = self._mixer.get_volume().get()
-            volume is None or validation.check_integer(volume, min=0, max=100)
+            if volume is not None:
+                validation.check_integer(volume, min=0, max=100)
             return volume
 
         return None
@@ -78,7 +85,8 @@ class MixerController:
 
         with _mixer_error_handling(self._mixer):
             mute = self._mixer.get_mute().get()
-            mute is None or validation.check_instance(mute, bool)
+            if mute is not None:
+                validation.check_instance(mute, bool)
             return mute
 
         return None
@@ -109,3 +117,13 @@ class MixerController:
             self.set_mute(state.mute)
             if state.volume:
                 self.set_volume(state.volume)
+
+
+if TYPE_CHECKING:
+    from pykka.typing import proxy_method
+
+    class MixerControllerProxy:
+        get_volume = proxy_method(MixerController.get_volume)
+        set_volume = proxy_method(MixerController.set_volume)
+        get_mute = proxy_method(MixerController.get_mute)
+        set_mute = proxy_method(MixerController.set_mute)

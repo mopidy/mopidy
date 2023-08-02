@@ -1,11 +1,14 @@
-import urllib
+import urllib.parse
 from collections.abc import Iterable, Mapping
+from typing import Any, Optional, TypeVar, Union
 
 from mopidy import exceptions
 
+T = TypeVar("T")
+
 PLAYBACK_STATES = {"paused", "stopped", "playing"}
 
-TRACK_FIELDS_WITH_TYPES = {
+TRACK_FIELDS_WITH_TYPES: dict[str, Union[type[str], type[int]]] = {
     "uri": str,
     "track_name": str,
     "album": str,
@@ -40,7 +43,11 @@ DISTINCT_FIELDS = dict(TRACK_FIELDS_WITH_TYPES)
 
 
 # TODO: _check_iterable(check, msg, **kwargs) + [check(a) for a in arg]?
-def _check_iterable(arg, msg, **kwargs):
+def _check_iterable(
+    arg,
+    msg,
+    **kwargs: Any,
+) -> None:
     """Ensure we have an iterable which is not a string or an iterator"""
     if isinstance(arg, str):
         raise exceptions.ValidationError(msg.format(arg=arg, **kwargs))
@@ -50,29 +57,48 @@ def _check_iterable(arg, msg, **kwargs):
         raise exceptions.ValidationError(msg.format(arg=arg, **kwargs))
 
 
-def check_choice(arg, choices, msg="Expected one of {choices}, not {arg!r}"):
+def check_choice(
+    arg: T,
+    choices: Iterable[T],
+    msg: str = "Expected one of {choices}, not {arg!r}",
+) -> None:
     if arg not in choices:
         raise exceptions.ValidationError(
             msg.format(arg=arg, choices=tuple(choices))
         )
 
 
-def check_boolean(arg, msg="Expected a boolean, not {arg!r}"):
+def check_boolean(
+    arg: bool,
+    msg: str = "Expected a boolean, not {arg!r}",
+) -> None:
     check_instance(arg, bool, msg=msg)
 
 
-def check_instance(arg, cls, msg="Expected a {name} instance, not {arg!r}"):
+def check_instance(
+    arg: T,
+    cls: type[T],
+    msg: str = "Expected a {name} instance, not {arg!r}",
+) -> None:
     if not isinstance(arg, cls):
         raise exceptions.ValidationError(msg.format(arg=arg, name=cls.__name__))
 
 
-def check_instances(arg, cls, msg="Expected a list of {name}, not {arg!r}"):
+def check_instances(
+    arg: Iterable[Any],
+    cls: type,
+    msg: str = "Expected a list of {name}, not {arg!r}",
+) -> None:
     _check_iterable(arg, msg, name=cls.__name__)
     if not all(isinstance(instance, cls) for instance in arg):
         raise exceptions.ValidationError(msg.format(arg=arg, name=cls.__name__))
 
 
-def check_integer(arg, min=None, max=None):
+def check_integer(
+    arg: int,
+    min: Optional[int] = None,
+    max: Optional[int] = None,
+) -> None:
     if not isinstance(arg, int):
         raise exceptions.ValidationError(f"Expected an integer, not {arg!r}")
     elif min is not None and arg < min:
@@ -85,7 +111,11 @@ def check_integer(arg, min=None, max=None):
         )
 
 
-def check_query(arg, fields=None, list_values=True):
+def check_query(
+    arg: dict[str, Any],
+    fields: Optional[set[str]] = None,
+    list_values: bool = True,
+) -> None:
     if fields is None:
         fields = SEARCH_FIELDS
     # TODO: normalize name  -> track_name
@@ -114,18 +144,28 @@ def check_query(arg, fields=None, list_values=True):
             )
 
 
-def _check_query_value(key, arg, msg):
+def _check_query_value(
+    key: str,
+    arg: Any,
+    msg: str,
+) -> None:
     if not isinstance(arg, str) or not arg.strip():
         raise exceptions.ValidationError(msg.format(arg=arg, key=key))
 
 
-def check_uri(arg, msg="Expected a valid URI, not {arg!r}"):
+def check_uri(
+    arg: str,
+    msg="Expected a valid URI, not {arg!r}",
+) -> None:
     if not isinstance(arg, str):
         raise exceptions.ValidationError(msg.format(arg=arg))
     elif urllib.parse.urlparse(arg).scheme == "":
         raise exceptions.ValidationError(msg.format(arg=arg))
 
 
-def check_uris(arg, msg="Expected a list of URIs, not {arg!r}"):
+def check_uris(
+    arg: Iterable[str],
+    msg="Expected a list of URIs, not {arg!r}",
+) -> None:
     _check_iterable(arg, msg)
     [check_uri(a, msg) for a in arg]

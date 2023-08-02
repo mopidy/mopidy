@@ -23,6 +23,7 @@ def get_git_version():
     )
     if process.wait() != 0:
         raise OSError('Execution of "git describe" failed')
+    assert process.stdout
     version = process.stdout.read().strip().decode()
     if version.startswith("v"):
         version = version[1:]

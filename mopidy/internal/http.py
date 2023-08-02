@@ -1,19 +1,29 @@
+from __future__ import annotations
+
 import logging
 import time
+from typing import TYPE_CHECKING
 
 import requests
 
 from mopidy import httpclient
 
+if TYPE_CHECKING:
+    from mopidy.httpclient import ProxyConfig
+
 logger = logging.getLogger(__name__)
 
 
-def get_requests_session(proxy_config, user_agent):
-    proxy = httpclient.format_proxy(proxy_config)
-    full_user_agent = httpclient.format_user_agent(user_agent)
-
+def get_requests_session(
+    proxy_config: ProxyConfig,
+    user_agent: str,
+) -> requests.Session:
     session = requests.Session()
-    session.proxies.update({"http": proxy, "https": proxy})
+
+    if proxy := httpclient.format_proxy(proxy_config):
+        session.proxies.update({"http": proxy, "https": proxy})
+
+    full_user_agent = httpclient.format_user_agent(user_agent)
     session.headers.update({"user-agent": full_user_agent})
 
     return session

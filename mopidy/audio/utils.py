@@ -1,14 +1,25 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Optional, cast
+
 from mopidy import httpclient
 from mopidy.internal.gi import Gst
 
+if TYPE_CHECKING:
+    from mopidy.config import ProxyConfig
 
-def calculate_duration(num_samples, sample_rate):
+
+def calculate_duration(num_samples: int, sample_rate: int) -> int:
     """Determine duration of samples using GStreamer helper for precise
     math."""
     return Gst.util_uint64_scale(num_samples, Gst.SECOND, sample_rate)
 
 
-def create_buffer(data, timestamp=None, duration=None):
+def create_buffer(
+    data: bytes,
+    timestamp: Optional[int] = None,
+    duration: Optional[int] = None,
+) -> Gst.Buffer:
     """Create a new GStreamer buffer based on provided data.
 
     Mainly intended to keep gst imports out of non-audio modules.
@@ -26,17 +37,17 @@ def create_buffer(data, timestamp=None, duration=None):
     return buffer_
 
 
-def millisecond_to_clocktime(value):
+def millisecond_to_clocktime(value: int) -> int:
     """Convert a millisecond time to internal GStreamer time."""
     return value * Gst.MSECOND
 
 
-def clocktime_to_millisecond(value):
+def clocktime_to_millisecond(value: int) -> int:
     """Convert an internal GStreamer time to millisecond time."""
     return value // Gst.MSECOND
 
 
-def supported_uri_schemes(uri_schemes):
+def supported_uri_schemes(uri_schemes: Iterable[str]) -> set[str]:
     """Determine which URIs we can actually support from provided whitelist.
 
     :param uri_schemes: list/set of URIs to check support for.
@@ -47,6 +58,7 @@ def supported_uri_schemes(uri_schemes):
     registry = Gst.Registry.get()
 
     for factory in registry.get_feature_list(Gst.ElementFactory):
+        factory = cast(Gst.ElementFactory, factory)
         for uri in factory.get_uri_protocols():
             if uri in uri_schemes:
                 supported_schemes.add(uri)
@@ -54,7 +66,7 @@ def supported_uri_schemes(uri_schemes):
     return supported_schemes
 
 
-def setup_proxy(element, config):
+def setup_proxy(element: Gst.Element, config: ProxyConfig) -> None:
     """Configure a GStreamer element with proxy settings.
 
     :param element: element to setup proxy in.
@@ -74,10 +86,16 @@ class Signals:
 
     """Helper for tracking gobject signal registrations"""
 
-    def __init__(self):
-        self._ids = {}
+    def __init__(self) -> None:
+        self._ids: dict[tuple[Gst.Element, str], int] = {}
 
-    def connect(self, element, event, func, *args):
+    def connect(
+        self,
+        element: Gst.Element,
+        event: str,
+        func: Callable,
+        *args: Any,
+    ) -> None:
         """Connect a function + args to signal event on an element.
 
         Each event may only be handled by one callback in this implementation.
@@ -86,7 +104,7 @@ class Signals:
             raise AssertionError
         self._ids[(element, event)] = element.connect(event, func, *args)
 
-    def disconnect(self, element, event):
+    def disconnect(self, element: Gst.Element, event: str) -> None:
         """Disconnect whatever handler we have for an element+event pair.
 
         Does nothing it the handler has already been removed.
@@ -95,7 +113,7 @@ class Signals:
         if signal_id is not None:
             element.disconnect(signal_id)
 
-    def clear(self):
+    def clear(self) -> None:
         """Clear all registered signal handlers."""
         for element, event in list(self._ids):
             element.disconnect(self._ids.pop((element, event)))
