@@ -266,6 +266,11 @@ environments using the ``-e`` option, e.g. to run just unit tests::
 
 To learn more, see the `tox documentation <https://tox.readthedocs.io/>`_ .
 
+Before submitting a pull request, we recommend running::
+
+    tox -e ci
+
+This will locally run similar tests to what we use in our CI runs and help us to merge high-quality contributions.
 
 Running unit tests
 ------------------
