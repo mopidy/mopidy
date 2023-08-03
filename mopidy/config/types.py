@@ -11,6 +11,7 @@ from typing import (
     Any,
     AnyStr,
     Callable,
+    ClassVar,
     Generic,
     Literal,
     Optional,
@@ -407,7 +408,7 @@ class LogLevel(ConfigValue[log.LogLevelName]):
     ``trace``, or ``all``, with any casing.
     """
 
-    levels: dict[str, int] = {
+    levels: ClassVar[dict[str, int]] = {
         "critical": logging.CRITICAL,
         "error": logging.ERROR,
         "warning": logging.WARNING,

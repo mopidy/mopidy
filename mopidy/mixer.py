@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 import pykka
 from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
@@ -31,7 +31,7 @@ class Mixer:
     :type config: dict
     """
 
-    name: str
+    name: ClassVar[str] = ""
     """
     Name of the mixer.
 

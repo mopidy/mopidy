@@ -85,7 +85,7 @@ class Backend:
     playlists: Optional[PlaylistsProvider] = None
 
     #: List of URI schemes this backend can handle.
-    uri_schemes: list[UriScheme] = []
+    uri_schemes: list[UriScheme] = []  # noqa: RUF012
 
     # Because the providers is marked as pykka.traversable(), we can't get()
     # them from another actor, and need helper methods to check if the

@@ -1,4 +1,5 @@
 import logging
+from typing import ClassVar
 
 import pykka
 
@@ -9,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class FileBackend(pykka.ThreadingActor, backend.Backend):
-    uri_schemes = ["file"]
+    uri_schemes: ClassVar[list[str]] = ["file"]
 
     def __init__(self, config, audio):
         super().__init__()
