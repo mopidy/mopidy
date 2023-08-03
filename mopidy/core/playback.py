@@ -134,7 +134,7 @@ class PlaybackController:
             self._trigger_track_playback_ended(self.get_time_position())
         self._set_current_tl_track(None)
 
-    def _on_stream_changed(self, uri):
+    def _on_stream_changed(self, _uri):
         if self._last_position is None:
             position = self.get_time_position()
         else:
@@ -164,7 +164,7 @@ class PlaybackController:
                 self.set_state(PlaybackState.PLAYING)
                 self._trigger_track_playback_started()
 
-    def _on_position_changed(self, position):
+    def _on_position_changed(self, _position):
         if self._pending_position is not None:
             self._trigger_seeked(self._pending_position)
             self._pending_position = None

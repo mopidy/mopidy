@@ -1,3 +1,5 @@
+# ruff: noqa: ARG002
+
 from __future__ import annotations
 
 import logging
@@ -55,10 +57,10 @@ class DeprecatedValue:
 
 
 class _TransformedValue(str):
-    def __new__(cls, original, transformed):
+    def __new__(cls, _original, transformed):
         return super().__new__(cls, transformed)
 
-    def __init__(self, original, transformed):
+    def __init__(self, original, _transformed):
         self.original = original
 
 

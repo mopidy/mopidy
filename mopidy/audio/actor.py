@@ -118,7 +118,7 @@ class _Appsrc:
         result = self._source.emit("push-buffer", buffer_)
         return result == Gst.FlowReturn.OK
 
-    def _on_signal(self, element, clocktime, func) -> bool:
+    def _on_signal(self, _element, clocktime, func) -> bool:
         # This shim is used to ensure we always return true, and also handles
         # that not all the callbacks have a time argument.
         if clocktime is None:
@@ -244,7 +244,7 @@ class _Handler:
             self._pad.remove_probe(self._event_handler_id)
         self._event_handler_id = None
 
-    def on_message(self, bus, msg):
+    def on_message(self, _bus, msg):
         if msg.type == Gst.MessageType.STATE_CHANGED:
             if msg.src != self._element:
                 return
@@ -271,7 +271,7 @@ class _Handler:
         elif msg.type == Gst.MessageType.STREAM_START:
             self.on_stream_start()
 
-    def on_pad_event(self, pad, pad_probe_info):
+    def on_pad_event(self, _pad, pad_probe_info):
         event = pad_probe_info.get_event()
         if event.type == Gst.EventType.SEGMENT:
             self.on_segment(event.parse_segment())
@@ -616,7 +616,7 @@ class Audio(pykka.ThreadingActor):
         if self.mixer:
             self.mixer.teardown()
 
-    def _on_about_to_finish(self, element: Gst.Element) -> None:
+    def _on_about_to_finish(self, _element: Gst.Element) -> None:
         if self._thread == threading.current_thread():
             logger.error("about-to-finish in actor, aborting to avoid deadlock.")
             return
@@ -628,7 +628,7 @@ class Audio(pykka.ThreadingActor):
 
     def _on_source_setup(
         self,
-        element: Gst.Element,
+        _element: Gst.Element,
         source: Gst.Element,
     ) -> None:
         gst_logger.debug(

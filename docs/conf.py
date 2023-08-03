@@ -17,7 +17,7 @@ class Mock:
     def __init__(self, *args, **kwargs):
         pass
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *_args, **_kwargs):
         return Mock()
 
     def __or__(self, other):

@@ -1,3 +1,5 @@
+# ruff: noqa: ARG002
+
 import pykka
 
 from mopidy import backend

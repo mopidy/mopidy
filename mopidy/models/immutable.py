@@ -30,7 +30,7 @@ class ImmutableObject:
     # slots as they will still get an instance dict.
     __slots__ = ["__weakref__"]
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *_args, **kwargs):
         for key, value in kwargs.items():
             if not self._is_valid_field(key):
                 raise TypeError(
