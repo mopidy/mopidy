@@ -238,7 +238,7 @@ class TagsToTrackTest(unittest.TestCase):
 
     def test_missing_track_artist_musicbrainz_id(self):
         del self.tags["musicbrainz-artistid"]
-        artist = list(self.track.artists)[0].replace(musicbrainz_id=None)
+        artist = next(iter(self.track.artists)).replace(musicbrainz_id=None)
         self.check(self.track.replace(artists=[artist]))
 
     def test_multiple_track_artist_musicbrainz_id(self):
@@ -311,7 +311,7 @@ class TagsToTrackTest(unittest.TestCase):
 
     def test_missing_album_artist_musicbrainz_id(self):
         del self.tags["musicbrainz-albumartistid"]
-        albumartist = list(self.track.album.artists)[0]
+        albumartist = next(iter(self.track.album.artists))
         albumartist = albumartist.replace(musicbrainz_id=None)
         album = self.track.album.replace(artists=[albumartist])
         self.check(self.track.replace(album=album))
