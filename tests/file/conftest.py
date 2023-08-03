@@ -3,7 +3,6 @@ from unittest import mock
 import pytest
 
 from mopidy.file import backend
-
 from tests import path_to_data_dir
 
 

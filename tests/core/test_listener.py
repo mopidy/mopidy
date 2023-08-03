@@ -12,9 +12,7 @@ class CoreListenerTest(unittest.TestCase):
     def test_on_event_forwards_to_specific_handler(self):
         self.listener.track_playback_paused = mock.Mock()
 
-        self.listener.on_event(
-            "track_playback_paused", track=TlTrack(), position=0
-        )
+        self.listener.on_event("track_playback_paused", track=TlTrack(), position=0)
 
         self.listener.track_playback_paused.assert_called_with(
             track=TlTrack(), position=0

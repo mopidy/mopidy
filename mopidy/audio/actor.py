@@ -142,9 +142,7 @@ class _Outputs(Gst.Bin):
 
         tee_sink = self._tee.get_static_pad("sink")
         if tee_sink is None:
-            raise exceptions.AudioException(
-                "Failed to get sink from GStreamer tee."
-            )
+            raise exceptions.AudioException("Failed to get sink from GStreamer tee.")
         ghost_pad = Gst.GhostPad.new("sink", tee_sink)
         self.add_pad(ghost_pad)
 
@@ -155,9 +153,7 @@ class _Outputs(Gst.Bin):
                 description, ghost_unlinked_pads=True
             )
         except GLib.Error as exc:
-            logger.error(
-                'Failed to create audio output "%s": %s', description, exc
-            )
+            logger.error('Failed to create audio output "%s": %s', description, exc)
             raise exceptions.AudioException(exc)
 
         self._add(output)
@@ -346,9 +342,7 @@ class _Handler:
             return
 
         if structure is not None and structure.has_field("buffering-mode"):
-            buffering_mode = structure.get_enum(
-                "buffering-mode", Gst.BufferingMode
-            )
+            buffering_mode = structure.get_enum("buffering-mode", Gst.BufferingMode)
             if buffering_mode == Gst.BufferingMode.LIVE:
                 return  # Live sources stall in paused.
 
@@ -363,9 +357,7 @@ class _Handler:
                 self._audio._playbin.set_state(Gst.State.PLAYING)
             level = logging.DEBUG
 
-        gst_logger.log(
-            level, "Got BUFFERING bus message: percent=%d%%", percent
-        )
+        gst_logger.log(level, "Got BUFFERING bus message: percent=%d%%", percent)
 
     def on_end_of_stream(self):
         gst_logger.debug("Got EOS (end of stream) bus message.")
@@ -375,27 +367,21 @@ class _Handler:
 
     def on_error(self, error, debug):
         gst_logger.error(f"GStreamer error: {error.message}")
-        gst_logger.debug(
-            f"Got ERROR bus message: error={error!r} debug={debug!r}"
-        )
+        gst_logger.debug(f"Got ERROR bus message: error={error!r} debug={debug!r}")
 
         # TODO: is this needed?
         self._audio.stop_playback()
 
     def on_warning(self, error, debug):
         gst_logger.warning(f"GStreamer warning: {error.message}")
-        gst_logger.debug(
-            f"Got WARNING bus message: error={error!r} debug={debug!r}"
-        )
+        gst_logger.debug(f"Got WARNING bus message: error={error!r} debug={debug!r}")
 
     def on_async_done(self):
         gst_logger.debug("Got ASYNC_DONE bus message.")
 
     def on_tag(self, taglist):
         tags = tags_lib.convert_taglist(taglist)
-        gst_logger.debug(
-            f"Got TAG bus message: tags={tags_lib.repr_tags(tags)}"
-        )
+        gst_logger.debug(f"Got TAG bus message: tags={tags_lib.repr_tags(tags)}")
 
         # Postpone emitting tags until stream start.
         if self._audio._pending_tags is not None:
@@ -422,8 +408,7 @@ class _Handler:
         logger.warning("Could not find a %s to handle media.", desc)
         if GstPbutils.install_plugins_supported():
             logger.info(
-                "You might be able to fix this by running: "
-                'gst-installer "%s"',
+                "You might be able to fix this by running: " 'gst-installer "%s"',
                 debug,
             )
         # TODO: store the missing plugins installer info in a file so we can
@@ -537,9 +522,7 @@ class Audio(pykka.ThreadingActor):
     def _setup_playbin(self) -> None:
         playbin = Gst.ElementFactory.make("playbin")
         if playbin is None:
-            raise exceptions.AudioException(
-                "Failed to create GStreamer playbin."
-            )
+            raise exceptions.AudioException("Failed to create GStreamer playbin.")
         playbin.set_property("flags", _GST_PLAY_FLAGS_AUDIO)
 
         # TODO: turn into config values...
@@ -547,9 +530,7 @@ class Audio(pykka.ThreadingActor):
         playbin.set_property("buffer-duration", 5 * Gst.SECOND)
 
         self._signals.connect(playbin, "source-setup", self._on_source_setup)
-        self._signals.connect(
-            playbin, "about-to-finish", self._on_about_to_finish
-        )
+        self._signals.connect(playbin, "about-to-finish", self._on_about_to_finish)
 
         self._playbin = playbin
         self._handler.setup_message_handling(playbin)
@@ -596,9 +577,7 @@ class Audio(pykka.ThreadingActor):
 
         queue = Gst.ElementFactory.make("queue")
         if queue is None:
-            raise exceptions.AudioException(
-                "Failed to create GStreamer queue element."
-            )
+            raise exceptions.AudioException("Failed to create GStreamer queue element.")
 
         volume = Gst.ElementFactory.make("volume")
         if volume is None:
@@ -629,9 +608,7 @@ class Audio(pykka.ThreadingActor):
 
         queue_sink = queue.get_static_pad("sink")
         if queue_sink is None:
-            raise exceptions.AudioException(
-                "Failed to get sink from GStreamer queue."
-            )
+            raise exceptions.AudioException("Failed to get sink from GStreamer queue.")
         ghost_pad = Gst.GhostPad.new("sink", queue_sink)
         audio_sink.add_pad(ghost_pad)
 
@@ -644,9 +621,7 @@ class Audio(pykka.ThreadingActor):
 
     def _on_about_to_finish(self, element: Gst.Element) -> None:
         if self._thread == threading.current_thread():
-            logger.error(
-                "about-to-finish in actor, aborting to avoid deadlock."
-            )
+            logger.error("about-to-finish in actor, aborting to avoid deadlock.")
             return
 
         gst_logger.debug("Got about-to-finish event.")
@@ -911,9 +886,7 @@ class Audio(pykka.ThreadingActor):
 
         bus = self._playbin.get_bus()
         if bus is None:
-            raise exceptions.AudioException(
-                "Failed to get bus from GStreamer playbin."
-            )
+            raise exceptions.AudioException("Failed to get bus from GStreamer playbin.")
 
         bus.set_sync_handler(sync_handler)
 
@@ -952,9 +925,7 @@ class Audio(pykka.ThreadingActor):
         )
 
         if result == Gst.StateChangeReturn.FAILURE:
-            logger.warning(
-                "Setting GStreamer state to %s failed", state.value_name
-            )
+            logger.warning("Setting GStreamer state to %s failed", state.value_name)
             return False
         # TODO: at this point we could already emit stopped event instead
         # of faking it in the message handling when result=OK
@@ -1035,12 +1006,8 @@ if TYPE_CHECKING:
         set_uri = proxy_method(Audio.set_uri)
         set_appsrc = proxy_method(Audio.set_appsrc)
         emit_data = proxy_method(Audio.emit_data)
-        set_source_setup_callback = proxy_method(
-            Audio.set_source_setup_callback
-        )
-        set_about_to_finish_callback = proxy_method(
-            Audio.set_about_to_finish_callback
-        )
+        set_source_setup_callback = proxy_method(Audio.set_source_setup_callback)
+        set_about_to_finish_callback = proxy_method(Audio.set_about_to_finish_callback)
         get_position = proxy_method(Audio.get_position)
         set_position = proxy_method(Audio.set_position)
         start_playback = proxy_method(Audio.start_playback)

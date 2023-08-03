@@ -27,30 +27,22 @@ V = TypeVar("V", bound="ConfigValue")
 
 def decode(value: AnyStr) -> str:
     result = (
-        value.decode(errors="surrogateescape")
-        if isinstance(value, bytes)
-        else value
+        value.decode(errors="surrogateescape") if isinstance(value, bytes) else value
     )
 
     for char in ("\\", "\n", "\t"):
-        result = result.replace(
-            char.encode(encoding="unicode-escape").decode(), char
-        )
+        result = result.replace(char.encode(encoding="unicode-escape").decode(), char)
 
     return result
 
 
 def encode(value: AnyStr) -> str:
     result = (
-        value.decode(errors="surrogateescape")
-        if isinstance(value, bytes)
-        else value
+        value.decode(errors="surrogateescape") if isinstance(value, bytes) else value
     )
 
     for char in ("\\", "\n", "\t"):
-        result = result.replace(
-            char, char.encode(encoding="unicode-escape").decode()
-        )
+        result = result.replace(char, char.encode(encoding="unicode-escape").decode())
 
     return result
 
@@ -314,12 +306,8 @@ class Pair(ConfigValue[tuple[K, V]]):
         )
 
     def serialize(self, value: tuple[K, V], display: bool = False) -> str:
-        serialized_first_value = self._subtypes[0].serialize(
-            value[0], display=display
-        )
-        serialized_second_value = self._subtypes[1].serialize(
-            value[1], display=display
-        )
+        serialized_first_value = self._subtypes[0].serialize(value[0], display=display)
+        serialized_second_value = self._subtypes[1].serialize(value[1], display=display)
 
         if (
             not display
@@ -369,9 +357,7 @@ class List(ConfigValue[V]):
         # aren't calling their parent constructor.
         subtype: ConfigValue = getattr(self, "_subtype", String())
 
-        values_iter = (
-            subtype.deserialize(s.strip()) for s in strings if s.strip()
-        )
+        values_iter = (subtype.deserialize(s.strip()) for s in strings if s.strip())
         if self._unique:
             values = frozenset(values_iter)
         else:

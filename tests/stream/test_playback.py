@@ -69,9 +69,7 @@ class TestTranslateURI:
         assert result == STREAM_URI
 
     @responses.activate
-    def test_playable_ogg_stream_is_not_considered_a_playlist(
-        self, scanner, provider
-    ):
+    def test_playable_ogg_stream_is_not_considered_a_playlist(self, scanner, provider):
         scanner.scan.side_effect = [
             # Set playable to True to ignore detection as possible playlist
             mock.Mock(mime="application/ogg", playable=True),
@@ -110,10 +108,7 @@ class TestTranslateURI:
         assert f"Unwrapping stream from URI: {PLAYLIST_URI}" in caplog.text
         assert f"Parsed playlist ({PLAYLIST_URI})" in caplog.text
         assert f"Unwrapping stream from URI: {STREAM_URI}" in caplog.text
-        assert (
-            f"Unwrapped potential audio/mpeg stream: {STREAM_URI}"
-            in caplog.text
-        )
+        assert f"Unwrapped potential audio/mpeg stream: {STREAM_URI}" in caplog.text
 
         # Check proper Requests session setup
         assert (
@@ -146,9 +141,7 @@ class TestTranslateURI:
         assert result == STREAM_URI
 
     @responses.activate
-    def test_scan_fails_but_playlist_parsing_succeeds(
-        self, scanner, provider, caplog
-    ):
+    def test_scan_fails_but_playlist_parsing_succeeds(self, scanner, provider, caplog):
         caplog.set_level(logging.DEBUG)
         scanner.scan.side_effect = [
             # Scanning playlist
@@ -168,16 +161,11 @@ class TestTranslateURI:
         assert f"Unwrapping stream from URI: {PLAYLIST_URI}" in caplog.text
         assert f"GStreamer failed scanning URI ({PLAYLIST_URI})" in caplog.text
         assert f"Parsed playlist ({PLAYLIST_URI})" in caplog.text
-        assert (
-            f"Unwrapped potential audio/mpeg stream: {STREAM_URI}"
-            in caplog.text
-        )
+        assert f"Unwrapped potential audio/mpeg stream: {STREAM_URI}" in caplog.text
         assert result == STREAM_URI
 
     @responses.activate
-    def test_scan_fails_and_playlist_parsing_fails(
-        self, scanner, provider, caplog
-    ):
+    def test_scan_fails_and_playlist_parsing_fails(self, scanner, provider, caplog):
         caplog.set_level(logging.DEBUG)
         scanner.scan.side_effect = exceptions.ScannerError("some failure")
         responses.add(
@@ -241,9 +229,7 @@ class TestTranslateURI:
         assert result is None
 
     @responses.activate
-    def test_playlist_with_relative_mpeg_stream(
-        self, scanner, provider, caplog
-    ):
+    def test_playlist_with_relative_mpeg_stream(self, scanner, provider, caplog):
         caplog.set_level(logging.DEBUG)
         scanner.scan.side_effect = [
             # Scanning playlist

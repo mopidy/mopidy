@@ -26,9 +26,7 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
 
         self._session = http.get_requests_session(
             proxy_config=config["proxy"],
-            user_agent=(
-                f"{stream.Extension.dist_name}/{stream.Extension.version}"
-            ),
+            user_agent=(f"{stream.Extension.dist_name}/{stream.Extension.version}"),
         )
 
         blacklist = config["stream"]["metadata_blacklist"]
@@ -42,9 +40,7 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
         self.playback = StreamPlaybackProvider(audio=audio, backend=self)
         self.playlists = None
 
-        uri_schemes = audio_lib.supported_uri_schemes(
-            config["stream"]["protocols"]
-        )
+        uri_schemes = audio_lib.supported_uri_schemes(config["stream"]["protocols"])
         if "file" in self.uri_schemes and config["file"]["enabled"]:
             logger.warning(
                 'The stream/protocols config value includes the "file" '
@@ -125,8 +121,7 @@ def _unwrap_stream(
     while time.time() < deadline:
         if uri in seen_uris:
             logger.info(
-                "Unwrapping stream from URI (%s) failed: "
-                "playlist referenced itself",
+                "Unwrapping stream from URI (%s) failed: " "playlist referenced itself",
                 uri,
             )
             return None, None
@@ -139,8 +134,7 @@ def _unwrap_stream(
             scan_timeout = deadline - time.time()
             if scan_timeout < 0:
                 logger.info(
-                    "Unwrapping stream from URI (%s) failed: "
-                    "timed out in %sms",
+                    "Unwrapping stream from URI (%s) failed: " "timed out in %sms",
                     uri,
                     timeout,
                 )
@@ -157,9 +151,7 @@ def _unwrap_stream(
                 and not scan_result.mime.startswith("application/")
             )
             if scan_result.playable or has_interesting_mime:
-                logger.debug(
-                    "Unwrapped potential %s stream: %s", scan_result.mime, uri
-                )
+                logger.debug("Unwrapped potential %s stream: %s", scan_result.mime, uri)
                 return uri, scan_result
 
         download_timeout = deadline - time.time()
@@ -170,14 +162,11 @@ def _unwrap_stream(
                 timeout,
             )
             return None, None
-        content = http.download(
-            requests_session, uri, timeout=download_timeout / 1000
-        )
+        content = http.download(requests_session, uri, timeout=download_timeout / 1000)
 
         if content is None:
             logger.info(
-                "Unwrapping stream from URI (%s) failed: "
-                "error downloading URI %s",
+                "Unwrapping stream from URI (%s) failed: " "error downloading URI %s",
                 original_uri,
                 uri,
             )

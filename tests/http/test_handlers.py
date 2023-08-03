@@ -185,9 +185,7 @@ class JsonRpcHandlerTestCSRFEnabled(JsonRpcHandlerTestBase):
             self.assertNotIn(k, response.headers)
 
     def test_post_no_content_type_unsupported(self):
-        response = self.fetch(
-            "/rpc", method="POST", body="hi", headers=self.headers
-        )
+        response = self.fetch("/rpc", method="POST", body="hi", headers=self.headers)
 
         assert response.code == 415
         for k, _ in self.get_cors_response_headers():
@@ -195,9 +193,7 @@ class JsonRpcHandlerTestCSRFEnabled(JsonRpcHandlerTestBase):
 
     def test_post_wrong_content_type_unsupported(self):
         self.headers.update({"Content-Type": "application/cats"})
-        response = self.fetch(
-            "/rpc", method="POST", body="hi", headers=self.headers
-        )
+        response = self.fetch("/rpc", method="POST", body="hi", headers=self.headers)
 
         assert response.code == 415
         assert response.reason == "Content-Type must be application/json"
@@ -206,9 +202,7 @@ class JsonRpcHandlerTestCSRFEnabled(JsonRpcHandlerTestBase):
 
     def test_post_no_origin_ok_but_doesnt_set_cors_headers(self):
         self.headers.update({"Content-Type": "application/json"})
-        response = self.fetch(
-            "/rpc", method="POST", body="hi", headers=self.headers
-        )
+        response = self.fetch("/rpc", method="POST", body="hi", headers=self.headers)
 
         assert response.code == 200
         for k, _ in self.get_cors_response_headers():
@@ -218,9 +212,7 @@ class JsonRpcHandlerTestCSRFEnabled(JsonRpcHandlerTestBase):
         self.headers.update(
             {"Content-Type": "application/json", "Origin": "http://foobar:6680"}
         )
-        response = self.fetch(
-            "/rpc", method="POST", body="hi", headers=self.headers
-        )
+        response = self.fetch("/rpc", method="POST", body="hi", headers=self.headers)
 
         assert response.code == 200
         self.assert_extra_response_headers(response.headers)
@@ -237,9 +229,7 @@ class JsonRpcHandlerTestCSRFDisabled(JsonRpcHandlerTestBase):
         assert response.code == 204
 
     def test_post_no_content_type_ok(self):
-        response = self.fetch(
-            "/rpc", method="POST", body="hi", headers=self.headers
-        )
+        response = self.fetch("/rpc", method="POST", body="hi", headers=self.headers)
 
         assert response.code == 200
         for k, _ in self.get_cors_response_headers():
@@ -280,6 +270,4 @@ class CheckOriginTests(unittest.TestCase):
 
     def test_extra_origin_allowed(self):
         self.allowed.add("other:6680")
-        assert handlers.check_origin(
-            "http://other:6680", self.headers, self.allowed
-        )
+        assert handlers.check_origin("http://other:6680", self.headers, self.allowed)

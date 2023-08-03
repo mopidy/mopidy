@@ -110,9 +110,7 @@ class ImmutableObject:
         other = copy.copy(self)
         for key, value in kwargs.items():
             if not self._is_valid_field(key):
-                raise TypeError(
-                    f"replace() got an unexpected keyword argument {key!r}"
-                )
+                raise TypeError(f"replace() got an unexpected keyword argument {key!r}")
             other._set_field(key, value)
         return other
 
@@ -136,9 +134,7 @@ class _ValidatedImmutableObjectMeta(type, Generic[T]):
 
     """Helper that initializes fields, slots and memoizes instance creation."""
 
-    _instances: dict[
-        weakref.ReferenceType[_ValidatedImmutableObjectMeta[T]], T
-    ] = {}
+    _instances: dict[weakref.ReferenceType[_ValidatedImmutableObjectMeta[T]], T] = {}
 
     def __new__(
         cls: type[_ValidatedImmutableObjectMeta],
@@ -158,13 +154,9 @@ class _ValidatedImmutableObjectMeta(type, Generic[T]):
 
         attrs["_fields"] = fields
         attrs["_instances"] = weakref.WeakValueDictionary()
-        attrs["__slots__"] = list(attrs.get("__slots__", [])) + list(
-            fields.values()
-        )
+        attrs["__slots__"] = list(attrs.get("__slots__", [])) + list(fields.values())
 
-        clsc: _ValidatedImmutableObjectMeta = super().__new__(
-            cls, name, bases, attrs
-        )
+        clsc: _ValidatedImmutableObjectMeta = super().__new__(cls, name, bases, attrs)
 
         if clsc.__name__ != "ValidatedImmutableObject":
             _models[clsc.__name__] = clsc

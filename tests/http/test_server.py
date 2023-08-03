@@ -35,9 +35,7 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
         apps = [
             {
                 "name": "mopidy",
-                "factory": handlers.make_mopidy_app_factory(
-                    testapps, teststatics
-                ),
+                "factory": handlers.make_mopidy_app_factory(testapps, teststatics),
             }
         ]
 
@@ -328,9 +326,7 @@ class HttpServerWithAppDefaultApp(tornado.testing.AsyncHTTPTestCase):
         assert response.code == 302
         assert response.headers["Location"] == "/default_app/"
 
-        response = self.fetch(
-            "/default_app/", method="GET", follow_redirects=True
-        )
+        response = self.fetch("/default_app/", method="GET", follow_redirects=True)
 
         assert response.code == 200
         assert "Hello from default webapp" in response.body.decode()

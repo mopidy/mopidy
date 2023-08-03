@@ -73,9 +73,7 @@ def main():
         create_core_dirs(config)
         create_initial_config_file(args, extensions_data)
 
-        log.setup_logging(
-            config, args.base_verbosity_level, args.verbosity_level
-        )
+        log.setup_logging(config, args.base_verbosity_level, args.verbosity_level)
 
         extensions_status: ExtensionsStatus = {
             "validate": [],
@@ -128,10 +126,7 @@ def main():
         # Read-only config from here on, please.
         proxied_config = config_lib.Proxy(config)
 
-        if (
-            args.extension
-            and args.extension not in extensions_status["enabled"]
-        ):
+        if args.extension and args.extension not in extensions_status["enabled"]:
             logger.error(
                 "Unable to run command provided by disabled extension %s",
                 args.extension.ext_name,

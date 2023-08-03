@@ -132,9 +132,7 @@ def get_verbosity_level(
 
 
 class VerbosityFilter(logging.Filter):
-    def __init__(
-        self, verbosity_level: int, loglevels: dict[LogLevelName, int]
-    ):
+    def __init__(self, verbosity_level: int, loglevels: dict[LogLevelName, int]):
         self.verbosity_level = verbosity_level
         self.loglevels = loglevels
 
@@ -239,7 +237,5 @@ class ColorizingStreamHandler(logging.StreamHandler):
         if bold:
             params.append("1")
         if params:
-            message = "".join(
-                (self.csi, ";".join(params), "m", message, self.reset)
-            )
+            message = "".join((self.csi, ";".join(params), "m", message, self.reset))
         return message

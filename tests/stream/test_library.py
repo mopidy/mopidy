@@ -5,7 +5,6 @@ import pytest
 from mopidy.internal import path
 from mopidy.models import Track
 from mopidy.stream import actor
-
 from tests import path_to_data_dir
 
 

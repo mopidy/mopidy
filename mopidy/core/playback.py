@@ -44,9 +44,7 @@ class PlaybackController:
         self._start_paused = False
 
         if self._audio:
-            self._audio.set_about_to_finish_callback(
-                self._on_about_to_finish_callback
-            )
+            self._audio.set_about_to_finish_callback(self._on_about_to_finish_callback)
 
     def _get_backend(self, tl_track):
         if tl_track is None:
@@ -384,8 +382,7 @@ class PlaybackController:
                 # TODO: check by binding against underlying play method using
                 # inspect and otherwise re-raise?
                 logger.error(
-                    "%s needs to be updated to work with this "
-                    "version of Mopidy.",
+                    "%s needs to be updated to work with this " "version of Mopidy.",
                     backend,
                 )
                 return False
@@ -586,9 +583,7 @@ if TYPE_CHECKING:
     from pykka.typing import proxy_method
 
     class PlaybackControllerProxy:
-        get_current_tl_track = proxy_method(
-            PlaybackController.get_current_tl_track
-        )
+        get_current_tl_track = proxy_method(PlaybackController.get_current_tl_track)
         get_current_track = proxy_method(PlaybackController.get_current_track)
         get_current_tlid = proxy_method(PlaybackController.get_current_tlid)
         get_stream_title = proxy_method(PlaybackController.get_stream_title)

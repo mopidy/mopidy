@@ -5,7 +5,6 @@ import pkg_resources
 import pytest
 
 from mopidy import config, exceptions, ext
-
 from tests import IsA, any_unicode
 
 
@@ -179,9 +178,7 @@ class TestValidateExtensionData:
         defaults = extension.get_default_config()
         command = extension.get_command()
 
-        return ext.ExtensionData(
-            extension, entry_point, schema, defaults, command
-        )
+        return ext.ExtensionData(extension, entry_point, schema, defaults, command)
 
     def test_name_mismatch(self, ext_data):
         ext_data.entry_point.name = "barfoo"
@@ -198,9 +195,7 @@ class TestValidateExtensionData:
         assert not ext.validate_extension_data(ext_data)
 
     def test_entry_point_require_exception(self, ext_data):
-        ext_data.entry_point.require.side_effect = Exception(
-            "Some extension error"
-        )
+        ext_data.entry_point.require.side_effect = Exception("Some extension error")
 
         # Hope that entry points are well behaved, so exception will bubble.
         with pytest.raises(Exception, match="Some extension error"):

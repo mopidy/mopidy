@@ -275,9 +275,7 @@ class PlaylistsController:
             if playlist is not None:
                 validation.check_instance(playlist, Playlist)
             if playlist:
-                listener.CoreListener.send(
-                    "playlist_changed", playlist=playlist
-                )
+                listener.CoreListener.send("playlist_changed", playlist=playlist)
             return playlist
 
         return None

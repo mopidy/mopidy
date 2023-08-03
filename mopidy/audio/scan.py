@@ -85,9 +85,7 @@ class Scanner:
 
 # Turns out it's _much_ faster to just create a new pipeline for every as
 # decodebins and other elements don't seem to take well to being reused.
-def _setup_pipeline(
-    uri: str, proxy_config=None
-) -> tuple[Gst.Pipeline, utils.Signals]:
+def _setup_pipeline(uri: str, proxy_config=None) -> tuple[Gst.Pipeline, utils.Signals]:
     src = Gst.Element.make_from_uri(Gst.URIType.SRC, uri)
     if not src:
         raise exceptions.ScannerError(f"GStreamer can not open: {uri}")
@@ -99,9 +97,7 @@ def _setup_pipeline(
 
     pipeline = Gst.ElementFactory.make("pipeline")
     if pipeline is None:
-        raise exceptions.AudioException(
-            "Failed to create GStreamer pipeline element."
-        )
+        raise exceptions.AudioException("Failed to create GStreamer pipeline element.")
     pipeline = cast(Gst.Pipeline, pipeline)
     pipeline.add(src)
 
@@ -132,15 +128,11 @@ def _has_dynamic_src_pad(element):
 def _setup_decodebin(element, pad, pipeline, signals):
     typefind = Gst.ElementFactory.make("typefind")
     if typefind is None:
-        raise exceptions.AudioException(
-            "Failed to create GStreamer typefind element."
-        )
+        raise exceptions.AudioException("Failed to create GStreamer typefind element.")
 
     decodebin = Gst.ElementFactory.make("decodebin")
     if decodebin is None:
-        raise exceptions.AudioException(
-            "Failed to create GStreamer decodebin element."
-        )
+        raise exceptions.AudioException("Failed to create GStreamer decodebin element.")
 
     for element in (typefind, decodebin):
         pipeline.add(element)
@@ -166,9 +158,7 @@ def _have_type(
 
     element_bus = element.get_bus()
     if element_bus is None:
-        raise exceptions.AudioException(
-            "Failed to get bus of GStreamer element."
-        )
+        raise exceptions.AudioException("Failed to get bus of GStreamer element.")
 
     message = Gst.Message.new_application(element, struct)
     if message is None:
@@ -184,9 +174,7 @@ def _pad_added(
 ) -> None:
     fakesink = Gst.ElementFactory.make("fakesink")
     if fakesink is None:
-        raise exceptions.AudioException(
-            "Failed to create GStreamer fakesink element."
-        )
+        raise exceptions.AudioException("Failed to create GStreamer fakesink element.")
 
     fakesink.set_property("sync", False)
 
@@ -194,9 +182,7 @@ def _pad_added(
     fakesink.sync_state_with_parent()
     fakesink_sink = fakesink.get_static_pad("sink")
     if fakesink_sink is None:
-        raise exceptions.AudioException(
-            "Failed to get sink pad of GStreamer fakesink."
-        )
+        raise exceptions.AudioException("Failed to get sink pad of GStreamer fakesink.")
     pad.link(fakesink_sink)
 
     raw_caps = Gst.Caps.from_string("audio/x-raw")
@@ -209,15 +195,11 @@ def _pad_added(
 
         element_bus = element.get_bus()
         if element_bus is None:
-            raise exceptions.AudioException(
-                "Failed to get bus of GStreamer element."
-            )
+            raise exceptions.AudioException("Failed to get bus of GStreamer element.")
 
         message = Gst.Message.new_application(element, struct)
         if message is None:
-            raise exceptions.AudioException(
-                "Failed to create GStreamer message."
-            )
+            raise exceptions.AudioException("Failed to create GStreamer message.")
 
         element_bus.post(message)
 
@@ -235,15 +217,11 @@ def _autoplug_select(
 
         element_bus = element.get_bus()
         if element_bus is None:
-            raise exceptions.AudioException(
-                "Failed to get bus of GStreamer element."
-            )
+            raise exceptions.AudioException("Failed to get bus of GStreamer element.")
 
         message = Gst.Message.new_application(element, struct)
         if message is None:
-            raise exceptions.AudioException(
-                "Failed to create GStreamer message."
-            )
+            raise exceptions.AudioException("Failed to create GStreamer message.")
 
         element_bus.post(message)
 

@@ -25,9 +25,7 @@ logger = logging.getLogger(__name__)
 def make_mopidy_app_factory(apps, statics):
     def mopidy_app_factory(config, core):
         if not config["http"]["csrf_protection"]:
-            logger.warning(
-                "HTTP Cross-Site Request Forgery protection is disabled"
-            )
+            logger.warning("HTTP Cross-Site Request Forgery protection is disabled")
 
         return [
             (
@@ -115,9 +113,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         # safely cross the thread boundary by adding a callback to the loop.
         for client in cls.clients.copy():
             # One callback per client to keep time we hold up the loop short
-            io_loop.add_callback(
-                functools.partial(_send_broadcast, client, msg)
-            )
+            io_loop.add_callback(functools.partial(_send_broadcast, client, msg))
 
     def initialize(self, core, allowed_origins, csrf_protection):
         self.jsonrpc = make_jsonrpc_wrapper(core)
@@ -131,9 +127,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
     def on_close(self):
         self.clients.discard(self)
-        logger.debug(
-            "Closed WebSocket connection from %s", self.request.remote_ip
-        )
+        logger.debug("Closed WebSocket connection from %s", self.request.remote_ip)
 
     def on_message(self, message):
         if not message:
@@ -146,9 +140,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         )
 
         try:
-            response = self.jsonrpc.handle_json(
-                tornado.escape.native_str(message)
-            )
+            response = self.jsonrpc.handle_json(tornado.escape.native_str(message))
             if response and self.write_message(response):
                 logger.debug(
                     "Sent WebSocket message to %s: %r",
@@ -204,9 +196,7 @@ class JsonRpcHandler(tornado.web.RequestHandler):
             # handler and requests not vulnerable to CSRF (i.e. non-browser
             # requests) need only set the Content-Type header.
             content_type = (
-                self.request.headers.get("Content-Type", "")
-                .split(";")[0]
-                .strip()
+                self.request.headers.get("Content-Type", "").split(";")[0].strip()
             )
             if content_type != "application/json":
                 self.set_status(415, "Content-Type must be application/json")
@@ -222,9 +212,7 @@ class JsonRpcHandler(tornado.web.RequestHandler):
         if not data:
             return
 
-        logger.debug(
-            "Received RPC message from %s: %r", self.request.remote_ip, data
-        )
+        logger.debug("Received RPC message from %s: %r", self.request.remote_ip, data)
 
         try:
             self.set_extra_headers()
@@ -251,9 +239,7 @@ class JsonRpcHandler(tornado.web.RequestHandler):
     def options(self):
         if self.csrf_protection:
             origin = self.request.headers.get("Origin")
-            if not check_origin(
-                origin, self.request.headers, self.allowed_origins
-            ):
+            if not check_origin(origin, self.request.headers, self.allowed_origins):
                 self.set_status(403, f"Access denied for origin {origin}")
                 return
 

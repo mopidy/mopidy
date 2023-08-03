@@ -63,9 +63,7 @@ def check_choice(
     msg: str = "Expected one of {choices}, not {arg!r}",
 ) -> None:
     if arg not in choices:
-        raise exceptions.ValidationError(
-            msg.format(arg=arg, choices=tuple(choices))
-        )
+        raise exceptions.ValidationError(msg.format(arg=arg, choices=tuple(choices)))
 
 
 def check_boolean(
@@ -124,9 +122,7 @@ def check_query(
     # TODO: remove list_values?
 
     if not isinstance(arg, Mapping):
-        raise exceptions.ValidationError(
-            f"Expected a query dictionary, not {arg!r}"
-        )
+        raise exceptions.ValidationError(f"Expected a query dictionary, not {arg!r}")
 
     for key, value in arg.items():
         check_choice(

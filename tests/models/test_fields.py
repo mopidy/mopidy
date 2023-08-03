@@ -1,13 +1,6 @@
 import unittest
 
-from mopidy.models.fields import (
-    Boolean,
-    Collection,
-    Field,
-    Identifier,
-    Integer,
-    String,
-)
+from mopidy.models.fields import Boolean, Collection, Field, Identifier, Integer, String
 
 
 def create_instance(field):

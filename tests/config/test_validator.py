@@ -16,9 +16,7 @@ class ValidateChoiceTest(unittest.TestCase):
 
     def test_invalid_value_fails(self):
         words = ["foo", "bar", "baz"]
-        self.assertRaises(
-            ValueError, validators.validate_choice, "foobar", words
-        )
+        self.assertRaises(ValueError, validators.validate_choice, "foobar", words)
         self.assertRaises(ValueError, validators.validate_choice, 5, [1, 2, 3])
 
 

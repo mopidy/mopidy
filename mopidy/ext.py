@@ -64,9 +64,7 @@ class Extension:
 
         :returns: str
         """
-        raise NotImplementedError(
-            'Add at least a config section with "enabled = true"'
-        )
+        raise NotImplementedError('Add at least a config section with "enabled = true"')
 
     def get_config_schema(self) -> ConfigSchema:
         """The extension's config validation schema
@@ -88,9 +86,7 @@ class Extension:
         """
         if cls.ext_name is None:
             raise AssertionError
-        cache_dir_path = (
-            path.expand_path(config["core"]["cache_dir"]) / cls.ext_name
-        )
+        cache_dir_path = path.expand_path(config["core"]["cache_dir"]) / cls.ext_name
         path.get_or_create_dir(cache_dir_path)
         return cache_dir_path
 
@@ -103,9 +99,7 @@ class Extension:
         """
         if cls.ext_name is None:
             raise AssertionError
-        config_dir_path = (
-            path.expand_path(config["core"]["config_dir"]) / cls.ext_name
-        )
+        config_dir_path = path.expand_path(config["core"]["config_dir"]) / cls.ext_name
         path.get_or_create_dir(config_dir_path)
         return config_dir_path
 
@@ -120,9 +114,7 @@ class Extension:
         """
         if cls.ext_name is None:
             raise AssertionError
-        data_dir_path = (
-            path.expand_path(config["core"]["data_dir"]) / cls.ext_name
-        )
+        data_dir_path = path.expand_path(config["core"]["data_dir"]) / cls.ext_name
         path.get_or_create_dir(data_dir_path)
         return data_dir_path
 
@@ -224,9 +216,7 @@ def load_extensions() -> list[ExtensionData]:
         try:
             extension_class = entry_point.resolve()
         except Exception as e:
-            logger.exception(
-                f"Failed to load extension {entry_point.name}: {e}"
-            )
+            logger.exception(f"Failed to load extension {entry_point.name}: {e}")
             continue
 
         try:
@@ -255,17 +245,14 @@ def load_extensions() -> list[ExtensionData]:
             )
         except Exception:
             logger.exception(
-                "Setup of extension from entry point %s failed, "
-                "ignoring extension.",
+                "Setup of extension from entry point %s failed, " "ignoring extension.",
                 entry_point.name,
             )
             continue
 
         installed_extensions.append(extension_data)
 
-        logger.debug(
-            "Loaded extension: %s %s", extension.dist_name, extension.version
-        )
+        logger.debug("Loaded extension: %s %s", extension.dist_name, extension.version)
 
     names = (ed.extension.ext_name for ed in installed_extensions)
     logger.debug("Discovered extensions: %s", ", ".join(names))
@@ -309,9 +296,7 @@ def validate_extension_data(data: ExtensionData) -> bool:
                 found.location,
             )
         else:
-            logger.info(
-                "Disabled extension %s: %s", data.extension.ext_name, exc
-            )
+            logger.info("Disabled extension %s: %s", data.extension.ext_name, exc)
         return False
 
     try:

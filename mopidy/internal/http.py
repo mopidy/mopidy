@@ -53,8 +53,7 @@ def download(session, uri, timeout=1.0, chunk_size=4096):
         content.append(chunk)
         if time.time() > deadline:
             logger.warning(
-                "Download of %r failed due to download taking more "
-                "than %.3fs",
+                "Download of %r failed due to download taking more " "than %.3fs",
                 uri,
                 timeout,
             )

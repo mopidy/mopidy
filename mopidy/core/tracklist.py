@@ -498,9 +498,7 @@ class TracklistController:
         if to_position < 0:
             raise AssertionError("to_position must be at least zero")
         if to_position > len(tl_tracks):
-            raise AssertionError(
-                "to_position can not be larger than tracklist length"
-            )
+            raise AssertionError("to_position can not be larger than tracklist length")
 
         new_tl_tracks = tl_tracks[:start] + tl_tracks[end:]
         for tl_track in tl_tracks[start:end]:
@@ -553,9 +551,7 @@ class TracklistController:
 
         if end is not None:
             if end > len(tl_tracks):
-                raise AssertionError(
-                    "end can not be larger than " + "tracklist length"
-                )
+                raise AssertionError("end can not be larger than " + "tracklist length")
 
         before = tl_tracks[: start or 0]
         shuffled = tl_tracks[start:end]

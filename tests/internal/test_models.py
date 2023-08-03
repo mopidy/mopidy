@@ -8,13 +8,7 @@ from mopidy.internal.models import (
     PlaybackState,
     TracklistState,
 )
-from mopidy.models import (
-    ModelJSONEncoder,
-    Ref,
-    TlTrack,
-    Track,
-    model_json_decoder,
-)
+from mopidy.models import ModelJSONEncoder, Ref, TlTrack, Track, model_json_decoder
 
 
 class HistoryTrackTest(unittest.TestCase):
