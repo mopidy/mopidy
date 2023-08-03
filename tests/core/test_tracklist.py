@@ -7,7 +7,7 @@ from mopidy.models import TlTrack, Track
 
 
 class TracklistTest(unittest.TestCase):
-    def setUp(self):  # noqa:
+    def setUp(self):
         config = {"core": {"max_tracklist_length": 10000}}
 
         self.tracks = [
@@ -102,7 +102,7 @@ class TracklistTest(unittest.TestCase):
 
 
 class TracklistIndexTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         config = {"core": {"max_tracklist_length": 10000}}
 
         self.tracks = [
@@ -169,7 +169,7 @@ class TracklistIndexTest(unittest.TestCase):
 
 
 class TracklistSaveLoadStateTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         config = {"core": {"max_tracklist_length": 10000}}
 
         self.tracks = [

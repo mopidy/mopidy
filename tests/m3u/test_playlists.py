@@ -25,7 +25,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         }
     }
 
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.config["m3u"]["playlists_dir"] = pathlib.Path(tempfile.mkdtemp())
         self.playlists_dir = self.config["m3u"]["playlists_dir"]
         self.base_dir = self.config["m3u"]["base_dir"] or self.playlists_dir
@@ -34,7 +34,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         backend = M3UBackend.start(config=self.config, audio=audio).proxy()
         self.core = core.Core(config=self.config, backends=[backend])
 
-    def tearDown(self):  # noqa: N802
+    def tearDown(self):
         pykka.ActorRegistry.stop_all()
 
         if self.playlists_dir.exists():
@@ -359,6 +359,6 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
 
 class M3UPlaylistsProviderBaseDirectoryTest(M3UPlaylistsProviderTest):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.config["m3u"]["base_dir"] = pathlib.Path(tempfile.mkdtemp())
         super().setUp()

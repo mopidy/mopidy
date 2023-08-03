@@ -164,7 +164,7 @@ class _ValidatedImmutableObjectMeta(type, Generic[T]):
         cls,
         *args: Any,
         **kwargs: Any,
-    ) -> T:  # noqa: N805
+    ) -> T:
         instance = super().__call__(*args, **kwargs)
         return cls._instances.setdefault(weakref.ref(instance), instance)
 

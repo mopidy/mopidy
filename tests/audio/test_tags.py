@@ -96,7 +96,7 @@ class TestConvertTaglist:
 # TODO: current test is trying to test everything at once with a complete tags
 # set, instead we might want to try with a minimal one making testing easier.
 class TagsToTrackTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.tags = {
             "album": ["album"],
             "track-number": [1],

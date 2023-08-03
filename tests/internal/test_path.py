@@ -10,10 +10,10 @@ from mopidy.internal.gi import GLib
 
 
 class GetOrCreateDirTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.parent = pathlib.Path(tempfile.mkdtemp()).resolve()
 
-    def tearDown(self):  # noqa: N802
+    def tearDown(self):
         if self.parent.is_dir():
             shutil.rmtree(str(self.parent))
 
@@ -58,10 +58,10 @@ class GetOrCreateDirTest(unittest.TestCase):
 
 
 class GetOrCreateFileTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.parent = pathlib.Path(tempfile.mkdtemp()).resolve()
 
-    def tearDown(self):  # noqa: N802
+    def tearDown(self):
         if self.parent.is_dir():
             shutil.rmtree(str(self.parent))
 

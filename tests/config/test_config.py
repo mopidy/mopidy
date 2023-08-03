@@ -96,7 +96,7 @@ class LoadConfigTest(unittest.TestCase):
 
 
 class ValidateTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.schema = config.ConfigSchema("foo")
         self.schema["bar"] = config.String()
 
@@ -162,7 +162,7 @@ __HASH10__ = foo # = should all be treated as a comment."""
 
 
 class PreProcessorTest(unittest.TestCase):
-    maxDiff = None  # Show entire diff.  # noqa: N815
+    maxDiff = None  # Show entire diff.
 
     def test_empty_config(self):
         result = config._preprocess("")
@@ -215,7 +215,7 @@ class PreProcessorTest(unittest.TestCase):
 
 
 class PostProcessorTest(unittest.TestCase):
-    maxDiff = None  # Show entire diff.  # noqa: N815
+    maxDiff = None  # Show entire diff.
 
     def test_empty_config(self):
         result = config._postprocess("[__COMMENTS__]")

@@ -11,7 +11,7 @@ from mopidy import commands
 from mopidy import config as config_lib
 from mopidy import ext
 from mopidy.internal import log, path, process, versioning
-from mopidy.internal.gi import Gst  # noqa: F401
+from mopidy.internal.gi import Gst
 
 try:
     # Make GLib's mainloop the event loop for python-dbus

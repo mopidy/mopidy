@@ -34,7 +34,7 @@ class Extension(ext.Extension):
 
     def validate_environment(self):
         try:
-            import tornado.web  # noqa
+            import tornado.web
         except ImportError as e:
             raise exceptions.ExtensionError("tornado library not found", e)
 

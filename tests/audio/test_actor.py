@@ -23,7 +23,7 @@ class BaseTest(unittest.TestCase):
 
     audio_class = audio.Audio
 
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         config = {
             "audio": {
                 "buffer_time": None,
@@ -37,7 +37,7 @@ class BaseTest(unittest.TestCase):
         self.song_uri = path.path_to_uri(path_to_data_dir("song1.wav"))
         self.audio = self.audio_class.start(config=config, mixer=None).proxy()
 
-    def tearDown(self):  # noqa
+    def tearDown(self):
         pykka.ActorRegistry.stop_all()
 
     def possibly_trigger_fake_playback_error(self, uri):
@@ -144,18 +144,18 @@ class DummyAudioListener(pykka.ThreadingActor, audio.AudioListener):
 
 
 class AudioEventTest(BaseTest):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         super().setUp()
         self.audio.enable_sync_handler().get()
         self.listener = DummyAudioListener.start().proxy()
 
-    def tearDown(self):  # noqa: N802
+    def tearDown(self):
         super().tearDown()
 
-    def assertEvent(self, event, **kwargs):  # noqa: N802
+    def assertEvent(self, event, **kwargs):
         assert (event, kwargs) in self.listener.get_events().get()
 
-    def assertNotEvent(self, event, **kwargs):  # noqa: N802
+    def assertNotEvent(self, event, **kwargs):
         assert (event, kwargs) not in self.listener.get_events().get()
 
     # TODO: test without uri set, with bad uri and gapless...
@@ -534,7 +534,7 @@ class MixerTest(BaseTest):
 
 
 class AudioStateTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.audio = audio.Audio(config=None, mixer=None)
 
     def test_state_starts_as_stopped(self):
@@ -586,7 +586,7 @@ class AudioStateTest(unittest.TestCase):
 
 
 class AudioBufferingTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.audio = audio.Audio(config=None, mixer=None)
         self.audio._playbin = mock.Mock(spec=["set_state"])
 
@@ -641,7 +641,7 @@ class AudioBufferingTest(unittest.TestCase):
 
 
 class AudioLiveTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         config = {"proxy": {}}
         self.audio = audio.Audio(config=config, mixer=None)
         self.audio._playbin = mock.Mock(spec=["set_property"])
@@ -678,7 +678,7 @@ class AudioLiveTest(unittest.TestCase):
 
 
 class DownloadBufferingTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.audio = audio.Audio(config=None, mixer=None)
         self.audio._playbin = mock.Mock(spec=["set_property"])
 
@@ -691,7 +691,7 @@ class DownloadBufferingTest(unittest.TestCase):
 
         playbin.set_property.assert_has_calls([mock.call("flags", 0x02 | 0x80)])
 
-    def test_download_flag_is_not_passed_to_playbin_if_download_buffering_is_not_enabled(  # noqa: B950
+    def test_download_flag_is_not_passed_to_playbin_if_download_buffering_is_not_enabled(
         self,
     ):
         playbin = self.audio._playbin
@@ -700,7 +700,7 @@ class DownloadBufferingTest(unittest.TestCase):
 
         playbin.set_property.assert_has_calls([mock.call("flags", 0x02)])
 
-    def test_download_flag_is_not_passed_to_playbin_if_set_appsrc(  # noqa: B950
+    def test_download_flag_is_not_passed_to_playbin_if_set_appsrc(
         self,
     ):
         playbin = self.audio._playbin
@@ -711,7 +711,7 @@ class DownloadBufferingTest(unittest.TestCase):
 
 
 class SourceSetupCallbackTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         config = {"proxy": {}}
         self.audio = audio.Audio(config=config, mixer=None)
         self.audio._playbin = mock.Mock(spec=["set_property"])

@@ -1,6 +1,6 @@
 import configparser
 import io
-import xml.etree.ElementTree as elementtree  # noqa: N813
+import xml.etree.ElementTree as elementtree
 
 from mopidy.internal import validation
 

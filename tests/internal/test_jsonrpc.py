@@ -46,7 +46,7 @@ class Calculator:
 
 
 class JsonRpcTestBase(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.backend = dummy_backend.create_proxy()
         self.calc = Calculator()
 
@@ -69,7 +69,7 @@ class JsonRpcTestBase(unittest.TestCase):
             decoders=[models.model_json_decoder],
         )
 
-    def tearDown(self):  # noqa: N802
+    def tearDown(self):
         pykka.ActorRegistry.stop_all()
 
 
