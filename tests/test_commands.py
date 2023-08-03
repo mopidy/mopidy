@@ -305,9 +305,7 @@ class HelpTest(unittest.TestCase):
         cmd = commands.Command()
         cmd.add_argument("-h", "--help", action="store_true", help="show this message")
 
-        expected = (
-            "usage: foo [-h]\n\nOPTIONS:\n\n  -h, --help  show this message"
-        )
+        expected = "usage: foo [-h]\n\nOPTIONS:\n\n  -h, --help  show this message"
         assert expected == cmd.format_help("foo").strip()
 
     def test_command_with_option_and_positional(self):

@@ -86,9 +86,10 @@ class ModelTest(unittest.TestCase):
         assert repr(Model(uri="uri", name="name")) == "Model(name='name', uri='uri')"
 
     def test_repr_with_models(self):
-        assert repr(
-            Model(uri="uri", name="name", models=[SubModel(name=123)])
-        ) == "Model(models=[SubModel(name=123)], name='name', uri='uri')"
+        assert (
+            repr(Model(uri="uri", name="name", models=[SubModel(name=123)]))
+            == "Model(models=[SubModel(name=123)], name='name', uri='uri')"
+        )
 
     def test_serialize_without_models(self):
         self.assertDictEqual(

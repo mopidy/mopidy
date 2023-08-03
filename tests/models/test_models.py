@@ -135,9 +135,10 @@ class RefTest(unittest.TestCase):
             Ref(foo="baz")
 
     def test_repr_without_results(self):
-        assert repr(
-            Ref(uri="uri", name="foo", type="artist")
-        ) == "Ref(name='foo', type='artist', uri='uri')"
+        assert (
+            repr(Ref(uri="uri", name="foo", type="artist"))
+            == "Ref(name='foo', type='artist', uri='uri')"
+        )
 
     def test_serialize_without_results(self):
         self.assertDictEqual(
@@ -404,9 +405,10 @@ class AlbumTest(unittest.TestCase):
         assert repr(Album(uri="uri", name="name")) == "Album(name='name', uri='uri')"
 
     def test_repr_with_artists(self):
-        assert repr(
-            Album(uri="uri", name="name", artists=[Artist(name="foo")])
-        ) == "Album(artists=[Artist(name='foo')], name='name', uri='uri')"
+        assert (
+            repr(Album(uri="uri", name="name", artists=[Artist(name="foo")]))
+            == "Album(artists=[Artist(name='foo')], name='name', uri='uri')"
+        )
 
     def test_serialize_without_artists(self):
         self.assertDictEqual(
@@ -660,9 +662,10 @@ class TrackTest(unittest.TestCase):
         assert repr(Track(uri="uri", name="name")) == "Track(name='name', uri='uri')"
 
     def test_repr_with_artists(self):
-        assert repr(
-            Track(uri="uri", name="name", artists=[Artist(name="foo")])
-        ) == "Track(artists=[Artist(name='foo')], name='name', uri='uri')"
+        assert (
+            repr(Track(uri="uri", name="name", artists=[Artist(name="foo")]))
+            == "Track(artists=[Artist(name='foo')], name='name', uri='uri')"
+        )
 
     def test_serialize_without_artists(self):
         self.assertDictEqual(
@@ -933,9 +936,10 @@ class TlTrackTest(unittest.TestCase):
         assert track2 == track
 
     def test_repr(self):
-        assert repr(
-            TlTrack(tlid=123, track=Track(uri="uri"))
-        ) == "TlTrack(tlid=123, track=Track(uri='uri'))"
+        assert (
+            repr(TlTrack(tlid=123, track=Track(uri="uri")))
+            == "TlTrack(tlid=123, track=Track(uri='uri'))"
+        )
 
     def test_serialize(self):
         track = Track(uri="uri", name="name")
@@ -1078,14 +1082,15 @@ class PlaylistTest(unittest.TestCase):
             Playlist(foo="baz")
 
     def test_repr_without_tracks(self):
-        assert repr(
-            Playlist(uri="uri", name="name")
-        ) == "Playlist(name='name', uri='uri')"
+        assert (
+            repr(Playlist(uri="uri", name="name")) == "Playlist(name='name', uri='uri')"
+        )
 
     def test_repr_with_tracks(self):
-        assert repr(
-            Playlist(uri="uri", name="name", tracks=[Track(name="foo")])
-        ) == "Playlist(name='name', tracks=[Track(name='foo')], uri='uri')"
+        assert (
+            repr(Playlist(uri="uri", name="name", tracks=[Track(name="foo")]))
+            == "Playlist(name='name', tracks=[Track(name='foo')], uri='uri')"
+        )
 
     def test_serialize_without_tracks(self):
         self.assertDictEqual(
