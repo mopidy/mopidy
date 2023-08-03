@@ -207,7 +207,7 @@ class TestNextHandling(BaseTest):
         assert current_track == self.tracks[1]
 
     @pytest.mark.parametrize(
-        "repeat, random, single, consume, index, result",
+        ("repeat", "random", "single", "consume", "index", "result"),
         [
             (False, False, False, False, 0, 1),
             (False, False, False, False, 2, None),
@@ -308,7 +308,7 @@ class TestPreviousHandling(BaseTest):
         assert self.core.playback.get_current_track() == self.tracks[0]
 
     @pytest.mark.parametrize(
-        "repeat, random, single, consume, index, result",
+        ("repeat", "random", "single", "consume", "index", "result"),
         [
             (False, False, False, False, 0, None),
             (False, False, False, False, 1, 0),

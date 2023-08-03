@@ -19,7 +19,7 @@ def dumps(items):
 
 
 @pytest.mark.parametrize(
-    "path,scheme,expected",
+    ("path", "scheme", "expected"),
     [
         ("test", None, "m3u:test"),
         ("test.m3u", None, "m3u:test.m3u"),
@@ -51,7 +51,7 @@ def test_utf8_path_to_uri():
 
 
 @pytest.mark.parametrize(
-    "path,expected",
+    ("path", "expected"),
     [
         ("test", "test"),
         ("test.m3u", "test"),
@@ -72,7 +72,7 @@ def test_path_from_name():
 
 
 @pytest.mark.parametrize(
-    "path,expected",
+    ("path", "expected"),
     [
         ("test.m3u", ("m3u:test.m3u", "test")),
         ("Test Playlist.m3u", ("m3u:Test%20Playlist.m3u", "Test Playlist")),
@@ -86,7 +86,7 @@ def test_path_to_ref(path, expected):
 
 
 @pytest.mark.parametrize(
-    "contents,basedir,expected",
+    ("contents", "basedir", "expected"),
     [
         ("", ".", None),
         ("test.mp3", "/playlists", ("file:///playlists/test.mp3", "test")),

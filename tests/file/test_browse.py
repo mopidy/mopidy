@@ -6,7 +6,7 @@ from tests import path_to_data_dir
 
 @pytest.mark.parametrize("follow_symlinks", [True, False])
 @pytest.mark.parametrize(
-    "uri, levelname",
+    ("uri", "levelname"),
     [
         ("file:root", None),
         ("not_in_data_path", "WARNING"),
@@ -28,7 +28,7 @@ def test_file_browse(provider, uri, levelname, caplog):
 
 
 @pytest.mark.parametrize(
-    "media_dirs, expected",
+    ("media_dirs", "expected"),
     [
         ([str(path_to_data_dir(""))], False),
         ([str(path_to_data_dir("")), str(path_to_data_dir(""))], True),

@@ -11,7 +11,7 @@ from mopidy.internal import log
 
 
 @pytest.mark.parametrize(
-    "value, expected",
+    ("value", "expected"),
     [
         # bytes are coded from UTF-8 and string-escaped:
         (b"abc", "abc"),
@@ -30,7 +30,7 @@ def test_decode(value, expected):
 
 
 @pytest.mark.parametrize(
-    "value, expected",
+    ("value", "expected"),
     [
         # unicode strings are string-escaped and encoded as UTF-8:
         ("abc", "abc"),
