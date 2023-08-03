@@ -1,6 +1,6 @@
 import configparser
 import io
-import xml.etree.ElementTree as elementtree
+from xml.etree import ElementTree
 
 from mopidy.internal import validation
 
@@ -33,9 +33,9 @@ def detect_xspf_header(data):
 
     try:
         data = io.BytesIO(data)
-        for _event, element in elementtree.iterparse(data, events=["start"]):
+        for _event, element in ElementTree.iterparse(data, events=["start"]):
             return element.tag.lower() == "{http://xspf.org/ns/0/}playlist"
-    except elementtree.ParseError:
+    except ElementTree.ParseError:
         pass
     return False
 
@@ -47,9 +47,9 @@ def detect_asx_header(data):
 
     try:
         data = io.BytesIO(data)
-        for _event, element in elementtree.iterparse(data, events=["start"]):
+        for _event, element in ElementTree.iterparse(data, events=["start"]):
             return element.tag.lower() == "asx"
-    except elementtree.ParseError:
+    except ElementTree.ParseError:
         pass
     return False
 
@@ -93,9 +93,9 @@ def parse_xspf(data):
     element = None
     try:
         # Last element will be root.
-        for _event, element in elementtree.iterparse(io.BytesIO(data)):
+        for _event, element in ElementTree.iterparse(io.BytesIO(data)):
             element.tag = element.tag.lower()  # normalize
-    except elementtree.ParseError:
+    except ElementTree.ParseError:
         return
     if element is None:
         return
@@ -110,9 +110,9 @@ def parse_asx(data):
     element = None
     try:
         # Last element will be root.
-        for _event, element in elementtree.iterparse(io.BytesIO(data)):
+        for _event, element in ElementTree.iterparse(io.BytesIO(data)):
             element.tag = element.tag.lower()  # normalize
-    except elementtree.ParseError:
+    except ElementTree.ParseError:
         return
     if element is None:
         return

@@ -1,4 +1,4 @@
-class MopidyException(Exception):
+class MopidyException(Exception):  # noqa: N818
     def __init__(self, message, *args, **kwargs):
         super().__init__(message, *args, **kwargs)
         self._message = message
@@ -39,7 +39,7 @@ class ScannerError(MopidyException):
     pass
 
 
-class TracklistFull(CoreError):
+class TracklistFull(CoreError):  # noqa: N818
     def __init__(self, message, errno=None):
         super().__init__(message, errno)
         self.errno = errno
