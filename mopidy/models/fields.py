@@ -2,16 +2,19 @@ from __future__ import annotations
 
 import sys
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Generic,
-    Iterable,
     Optional,
     TypeVar,
     Union,
     cast,
     overload,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 T = TypeVar("T")
 TField = TypeVar("TField", bound="Field")

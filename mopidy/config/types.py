@@ -5,11 +5,11 @@ import re
 import socket
 from abc import ABC, abstractmethod
 from typing import (
+    TYPE_CHECKING,
     Any,
     AnyStr,
     Callable,
     Generic,
-    Iterable,
     Literal,
     Optional,
     TypeVar,
@@ -19,6 +19,9 @@ from typing import (
 
 from mopidy.config import validators
 from mopidy.internal import log, path
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 T = TypeVar("T")
 K = TypeVar("K", bound="ConfigValue")

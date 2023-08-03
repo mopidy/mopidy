@@ -6,8 +6,8 @@ import logging
 import os
 import pathlib
 import re
-from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, Iterator, Optional, TypedDict, Union, cast
+from collections.abc import Iterator, Mapping
+from typing import TYPE_CHECKING, Any, Optional, TypedDict, Union, cast
 
 from mopidy.config import keyring
 from mopidy.config.schemas import ConfigSchema, MapConfigSchema

@@ -6,6 +6,8 @@ from mopidy import httpclient
 from mopidy.internal.gi import Gst
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from mopidy.config import ProxyConfig
 
 

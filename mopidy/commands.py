@@ -9,12 +9,10 @@ import pathlib
 import signal
 import sys
 from typing import (
+    TYPE_CHECKING,
     Any,
-    Generator,
-    Iterable,
     NoReturn,
     Optional,
-    Sequence,
     cast,
 )
 
@@ -30,6 +28,9 @@ from mopidy.core import Core, CoreProxy
 from mopidy.internal import deps, process, timer, versioning
 from mopidy.internal.gi import GLib
 from mopidy.mixer import MixerActor, MixerProxy
+
+if TYPE_CHECKING:
+    from collections.abc import Generator, Iterable, Sequence
 
 logger = logging.getLogger(__name__)
 

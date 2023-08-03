@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from abc import abstractmethod
-from typing import TYPE_CHECKING, Any, Iterable, Optional, Protocol, TypeVar
+from typing import TYPE_CHECKING, Any, Optional, Protocol, TypeVar
 
 if TYPE_CHECKING:
+    from abc import abstractmethod
+    from collections.abc import Iterable
 
     class Comparable(Protocol):
         @abstractmethod
