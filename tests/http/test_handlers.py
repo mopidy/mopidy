@@ -165,7 +165,7 @@ class JsonRpcHandlerTestCSRFEnabled(JsonRpcHandlerTestBase):
 
         assert response.code == 204
         for k, v in self.get_cors_response_headers():
-            self.assertEqual(response.headers[k], v)
+            assert response.headers[k] == v
 
     def test_options_bad_origin_forbidden(self):
         self.headers.update({"Origin": "http://foo:6680"})
@@ -174,7 +174,7 @@ class JsonRpcHandlerTestCSRFEnabled(JsonRpcHandlerTestBase):
         assert response.code == 403
         assert response.reason == "Access denied for origin http://foo:6680"
         for k, _ in self.get_cors_response_headers():
-            self.assertNotIn(k, response.headers)
+            assert k not in response.headers
 
     def test_options_no_origin_forbidden(self):
         response = self.fetch("/rpc", method="OPTIONS", headers=self.headers)
@@ -182,14 +182,14 @@ class JsonRpcHandlerTestCSRFEnabled(JsonRpcHandlerTestBase):
         assert response.code == 403
         assert response.reason == "Access denied for origin None"
         for k, _ in self.get_cors_response_headers():
-            self.assertNotIn(k, response.headers)
+            assert k not in response.headers
 
     def test_post_no_content_type_unsupported(self):
         response = self.fetch("/rpc", method="POST", body="hi", headers=self.headers)
 
         assert response.code == 415
         for k, _ in self.get_cors_response_headers():
-            self.assertNotIn(k, response.headers)
+            assert k not in response.headers
 
     def test_post_wrong_content_type_unsupported(self):
         self.headers.update({"Content-Type": "application/cats"})
@@ -198,7 +198,7 @@ class JsonRpcHandlerTestCSRFEnabled(JsonRpcHandlerTestBase):
         assert response.code == 415
         assert response.reason == "Content-Type must be application/json"
         for k, _ in self.get_cors_response_headers():
-            self.assertNotIn(k, response.headers)
+            assert k not in response.headers
 
     def test_post_no_origin_ok_but_doesnt_set_cors_headers(self):
         self.headers.update({"Content-Type": "application/json"})
@@ -206,7 +206,7 @@ class JsonRpcHandlerTestCSRFEnabled(JsonRpcHandlerTestBase):
 
         assert response.code == 200
         for k, _ in self.get_cors_response_headers():
-            self.assertNotIn(k, response.headers)
+            assert k not in response.headers
 
     def test_post_with_origin_ok_sets_cors_headers(self):
         self.headers.update(
@@ -217,7 +217,7 @@ class JsonRpcHandlerTestCSRFEnabled(JsonRpcHandlerTestBase):
         assert response.code == 200
         self.assert_extra_response_headers(response.headers)
         for k, v in self.get_cors_response_headers():
-            self.assertEqual(response.headers[k], v)
+            assert response.headers[k] == v
 
 
 class JsonRpcHandlerTestCSRFDisabled(JsonRpcHandlerTestBase):
@@ -233,7 +233,7 @@ class JsonRpcHandlerTestCSRFDisabled(JsonRpcHandlerTestBase):
 
         assert response.code == 200
         for k, _ in self.get_cors_response_headers():
-            self.assertNotIn(k, response.headers)
+            assert k not in response.headers
 
 
 class CheckOriginTests(unittest.TestCase):
