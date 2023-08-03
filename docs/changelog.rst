@@ -22,6 +22,9 @@ Dependencies
 
 - GStreamer >= 1.18.0 is now required.
 
+- Replaced pkg_resources with importlib.metadata
+
+
 
 
 v3.4.1 (2022-12-07)

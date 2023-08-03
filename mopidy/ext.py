@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Mapping
+from importlib import import_module
 from typing import TYPE_CHECKING, NamedTuple, Union
 
-import pkg_resources
+import importlib_metadata as metadata
 
 from mopidy import config as config_lib
 from mopidy import exceptions
@@ -15,8 +16,9 @@ from mopidy.internal import path
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
-    from typing_extensions import TypeAlias
     from typing import Any, Optional
+
+    from typing_extensions import TypeAlias
 
     Config = dict[str, dict[str, Any]]
     RegistryEntry: TypeAlias = Union[type[Any], dict[str, Any]]
@@ -73,6 +75,12 @@ class Extension:
         return schema
 
     @classmethod
+    def check_attr(cls) -> None:
+        """Check if ext_name exist."""
+        if not hasattr(cls, "ext_name") or cls.ext_name is None:
+            raise AttributeError(f"{cls} not an extension or ext_name missing!")
+
+    @classmethod
     def get_cache_dir(cls, config: Config) -> Path:
         """Get or create cache directory for the extension.
 
@@ -81,8 +89,7 @@ class Extension:
         :param config: the Mopidy config object
         :return: pathlib.Path
         """
-        if not hasattr(cls, "ext_name") or cls.ext_name is None:
-            raise AttributeError(f"{cls} not an extension or ext_name missing!")
+        cls.check_attr()
         cache_dir_path = path.expand_path(config["core"]["cache_dir"]) / cls.ext_name
         path.get_or_create_dir(cache_dir_path)
         return cache_dir_path
@@ -94,8 +101,7 @@ class Extension:
         :param config: the Mopidy config object
         :return: pathlib.Path
         """
-        if not hasattr(cls, "ext_name") or cls.ext_name is None:
-            raise AttributeError(f"{cls} not an extension or ext_name missing!")
+        cls.check_attr()
         config_dir_path = path.expand_path(config["core"]["config_dir"]) / cls.ext_name
         path.get_or_create_dir(config_dir_path)
         return config_dir_path
@@ -109,8 +115,7 @@ class Extension:
         :param config: the Mopidy config object
         :returns: pathlib.Path
         """
-        if not hasattr(cls, "ext_name") or cls.ext_name is None:
-            raise AttributeError(f"{cls} not an extension or ext_name missing!")
+        cls.check_attr()
         data_dir_path = path.expand_path(config["core"]["data_dir"]) / cls.ext_name
         path.get_or_create_dir(data_dir_path)
         return data_dir_path
@@ -208,12 +213,13 @@ def load_extensions() -> list[ExtensionData]:
 
     installed_extensions = []
 
-    for entry_point in pkg_resources.iter_entry_points("mopidy.ext"):
+    for entry_point in metadata.entry_points(group="mopidy.ext"):
         logger.debug("Loading entry point: %s", entry_point)
         try:
-            extension_class = entry_point.resolve()
-        except Exception as e:
-            logger.exception(f"Failed to load extension {entry_point.name}: {e}")
+            module = import_module(entry_point.module)
+            extension_class = module.Extension
+        except Exception as exc:
+            logger.exception(f"Failed to load extension {entry_point.name}: {exc}")
             continue
 
         try:
@@ -274,26 +280,16 @@ def validate_extension_data(data: ExtensionData) -> bool:
         return False
 
     try:
-        data.entry_point.require()
-    except pkg_resources.DistributionNotFound as exc:
+        module = import_module(data.entry_point.module)
+        module.Extension()
+    except ModuleNotFoundError as exc:
         logger.info(
-            "Disabled extension %s: Dependency %s not found",
+            "Disabled extension %s: Exception %s",
             data.extension.ext_name,
             exc,
         )
-        return False
-    except pkg_resources.VersionConflict as exc:
-        if len(exc.args) == 2:
-            found, required = exc.args
-            logger.info(
-                "Disabled extension %s: %s required, but found %s at %s",
-                data.extension.ext_name,
-                required,
-                found,
-                found.location,
-            )
-        else:
-            logger.info("Disabled extension %s: %s", data.extension.ext_name, exc)
+        # Remark: There are no version check, so any version is accepted
+        # this is a difference to pkg_resources, and affect debugging.
         return False
 
     try:

@@ -1,8 +1,7 @@
 import platform
 import sys
 import warnings
-
-import pkg_resources
+from importlib.metadata import version
 
 if not sys.version_info >= (3, 9):
     sys.exit(
@@ -12,4 +11,4 @@ if not sys.version_info >= (3, 9):
 
 warnings.filterwarnings("ignore", "could not open display")
 
-__version__ = pkg_resources.get_distribution("Mopidy").version
+__version__ = version("Mopidy")
