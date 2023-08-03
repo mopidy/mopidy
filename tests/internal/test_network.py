@@ -12,7 +12,7 @@ class TryIPv6SocketTest(unittest.TestCase):
     @patch("socket.has_ipv6", True)
     @patch("socket.socket")
     def test_system_with_broken_ipv6(self, socket_mock):
-        socket_mock.side_effect = IOError()
+        socket_mock.side_effect = OSError()
         assert not network.try_ipv6_socket()
 
     @patch("socket.has_ipv6", True)
