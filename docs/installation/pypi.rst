@@ -12,7 +12,7 @@ you can install Mopidy from PyPI using the ``pip`` installer.
 If you are looking to contribute or wish to install from source using ``git``
 please see :ref:`contributing`.
 
-#. First of all, you need Python 3.9 or newer. Check if you have Python and
+#. First of all, you need Python 3.10 or newer. Check if you have Python and
    what version by running::
 
        python3 --version

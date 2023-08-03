@@ -3,9 +3,9 @@ import sys
 import warnings
 from importlib.metadata import version
 
-if not sys.version_info >= (3, 9):
+if not sys.version_info >= (3, 10):
     sys.exit(
-        f"ERROR: Mopidy requires Python >= 3.9, "
+        f"ERROR: Mopidy requires Python >= 3.10, "
         f"but found {platform.python_version()}."
     )
 

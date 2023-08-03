@@ -27,7 +27,7 @@ v3.5.0 (UNRELEASED)
 Dependencies
 ------------
 
-- Python >= 3.9 is now required. Python 3.7 and 3.8 are no longer supported.
+- Python >= 3.10 is now required. Python 3.7, 3.8 and 3.9 are no longer supported.
 
 - GStreamer >= 1.18.0 is now required.
 

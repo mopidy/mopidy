@@ -7,7 +7,7 @@ target-version = ["py39", "py310", "py311"]
 
 
 [tool.pyright]
-pythonVersion = "3.9"
+pythonVersion = "3.10"
 # Use venv from parent directory, to share it with any extensions:
 venvPath = "../"
 venv = ".venv"
