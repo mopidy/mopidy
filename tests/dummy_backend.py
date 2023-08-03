@@ -109,9 +109,7 @@ class DummyPlaylistsProvider(backend.PlaylistsProvider):
         self._allow_save = enabled
 
     def as_list(self):
-        return [
-            Ref.playlist(uri=pl.uri, name=pl.name) for pl in self._playlists
-        ]
+        return [Ref.playlist(uri=pl.uri, name=pl.name) for pl in self._playlists]
 
     def get_items(self, uri):
         playlist = self.lookup(uri)

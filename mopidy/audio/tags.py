@@ -189,9 +189,7 @@ def _artists(tags, artist_name, artist_id=None, artist_sortname=None):
         return None
 
     # One artist name and either id or sortname, include all available fields
-    if len(tags[artist_name]) == 1 and (
-        artist_id in tags or artist_sortname in tags
-    ):
+    if len(tags[artist_name]) == 1 and (artist_id in tags or artist_sortname in tags):
         attrs = {"name": tags[artist_name][0]}
         if artist_id in tags:
             attrs["musicbrainz_id"] = tags[artist_id][0]

@@ -93,9 +93,7 @@ class Backend:
         return self.library is not None
 
     def has_library_browse(self) -> bool:
-        return (
-            self.library is not None and self.library.root_directory is not None
-        )
+        return self.library is not None and self.library.root_directory is not None
 
     def has_playback(self) -> bool:
         return self.playback is not None

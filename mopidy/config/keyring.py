@@ -35,9 +35,7 @@ def fetch():
         return []
 
     if not bus.name_has_owner("org.freedesktop.secrets"):
-        logger.debug(
-            "%s (org.freedesktop.secrets service not running)", FETCH_ERROR
-        )
+        logger.debug("%s (org.freedesktop.secrets service not running)", FETCH_ERROR)
         return []
 
     service = _service(bus)
@@ -125,16 +123,12 @@ def set(section, key, value):
         return True
 
     _prompt(bus, prompt).Dismiss()
-    logger.debug(
-        "Saving secret %s/%s failed. (Keyring is locked)", section, key
-    )
+    logger.debug("Saving secret %s/%s failed. (Keyring is locked)", section, key)
     return False
 
 
 def _service(bus):
-    return _interface(
-        bus, "/org/freedesktop/secrets", "org.freedesktop.Secret.Service"
-    )
+    return _interface(bus, "/org/freedesktop/secrets", "org.freedesktop.Secret.Service")
 
 
 # NOTE: depending on versions and setup 'default' might not exists, so try and

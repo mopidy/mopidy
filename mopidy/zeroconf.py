@@ -14,11 +14,7 @@ _AVAHI_PUBLISHFLAGS_NONE = 0
 
 
 def _is_loopback_address(host):
-    return (
-        host.startswith("127.")
-        or host.startswith("::ffff:127.")
-        or host == "::1"
-    )
+    return host.startswith("127.") or host.startswith("::ffff:127.") or host == "::1"
 
 
 def _convert_text_list_to_dbus_format(text_list):
@@ -85,9 +81,7 @@ class Zeroconf:
         """
 
         if _is_loopback_address(self.host):
-            logger.debug(
-                "%s: Publish on loopback interface is not supported.", self
-            )
+            logger.debug("%s: Publish on loopback interface is not supported.", self)
             return False
 
         if not dbus:
@@ -104,9 +98,7 @@ class Zeroconf:
 
         try:
             if not self.bus.name_has_owner("org.freedesktop.Avahi"):
-                logger.debug(
-                    "%s: Avahi service not running; publish failed.", self
-                )
+                logger.debug("%s: Avahi service not running; publish failed.", self)
                 return False
 
             self.group = dbus.Interface(

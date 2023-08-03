@@ -11,7 +11,6 @@ from mopidy.audio import PlaybackState
 from mopidy.core import Core, CoreListener
 from mopidy.internal import models, storage, versioning
 from mopidy.models import Track
-
 from tests import dummy_mixer
 
 
@@ -144,8 +143,7 @@ class CoreActorTest(unittest.TestCase):
 
         self.assertRaisesRegex(
             AssertionError,
-            "Cannot add URI scheme 'dummy1' for B2, "
-            "it is already handled by B1",
+            "Cannot add URI scheme 'dummy1' for B2, " "it is already handled by B1",
             Core,
             config={},
             mixer=None,
@@ -253,9 +251,7 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
                     ),
                 ]
             ),
-            playback=models.PlaybackState(
-                tlid=12, state="paused", time_position=432
-            ),
+            playback=models.PlaybackState(tlid=12, state="paused", time_position=432),
             mixer=models.MixerState(mute=True, volume=12),
         )
         storage.dump(self.state_file, data)

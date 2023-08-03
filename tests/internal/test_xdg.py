@@ -15,9 +15,7 @@ def environ():
 
 
 def test_cache_dir_default(environ):
-    assert xdg.get_dirs()["XDG_CACHE_DIR"] == (
-        pathlib.Path("~/.cache").expanduser()
-    )
+    assert xdg.get_dirs()["XDG_CACHE_DIR"] == (pathlib.Path("~/.cache").expanduser())
 
 
 def test_cache_dir_from_env(environ):
@@ -27,9 +25,7 @@ def test_cache_dir_from_env(environ):
 
 
 def test_config_dir_default(environ):
-    assert xdg.get_dirs()["XDG_CONFIG_DIR"] == (
-        pathlib.Path("~/.config").expanduser()
-    )
+    assert xdg.get_dirs()["XDG_CONFIG_DIR"] == (pathlib.Path("~/.config").expanduser())
 
 
 def test_config_dir_from_env(environ):

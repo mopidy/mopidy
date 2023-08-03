@@ -66,9 +66,7 @@ def _format_dependency(dep_info: DepInfo) -> str:
     if dep_info.get("dependencies", []):
         for sub_dep_info in dep_info.get("dependencies", {}):
             sub_dep_lines = _format_dependency(sub_dep_info)
-            lines.append(
-                formatting.indent(sub_dep_lines, places=2, singles=True)
-            )
+            lines.append(formatting.indent(sub_dep_lines, places=2, singles=True))
 
     return "\n".join(lines)
 
@@ -90,9 +88,7 @@ def platform_info() -> DepInfo:
 def python_info() -> DepInfo:
     return {
         "name": "Python",
-        "version": (
-            f"{platform.python_implementation()} {platform.python_version()}"
-        ),
+        "version": (f"{platform.python_implementation()} {platform.python_version()}"),
         "path": os.path.dirname(platform.__file__),
     }
 
@@ -107,9 +103,7 @@ def pkg_info(
     try:
         distribution = pkg_resources.get_distribution(project_name)
 
-        extras: tuple[str, ...] = (
-            include_extras and tuple(distribution.extras) or ()
-        )
+        extras: tuple[str, ...] = include_extras and tuple(distribution.extras) or ()
 
         dependencies: list[DepInfo] = []
         if include_transitive_deps:
@@ -205,6 +199,4 @@ def _gstreamer_check_elements():
         factory.get_name()
         for factory in Gst.Registry.get().get_feature_list(Gst.ElementFactory)
     ]
-    return [
-        (element, element in known_elements) for element in elements_to_check
-    ]
+    return [(element, element in known_elements) for element in elements_to_check]

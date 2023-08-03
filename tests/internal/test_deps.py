@@ -14,9 +14,7 @@ class DepsTest(unittest.TestCase):
         adapters = [
             lambda: dict(name="Python", version="FooPython 2.7.3"),
             lambda: dict(name="Platform", version="Loonix 4.0.1"),
-            lambda: dict(
-                name="Pykka", version="1.1", path="/foo/bar", other="Quux"
-            ),
+            lambda: dict(name="Pykka", version="1.1", path="/foo/bar", other="Quux"),
             lambda: dict(name="Foo"),
             lambda: dict(
                 name="Mopidy",

@@ -247,9 +247,7 @@ class ArtistTest(unittest.TestCase):
             Artist(serialize="baz")
 
     def test_repr(self):
-        assert "Artist(name='name', uri='uri')" == repr(
-            Artist(uri="uri", name="name")
-        )
+        assert "Artist(name='name', uri='uri')" == repr(Artist(uri="uri", name="name"))
 
     def test_serialize(self):
         self.assertDictEqual(
@@ -403,14 +401,11 @@ class AlbumTest(unittest.TestCase):
             Album(foo="baz")
 
     def test_repr_without_artists(self):
-        assert "Album(name='name', uri='uri')" == repr(
-            Album(uri="uri", name="name")
-        )
+        assert "Album(name='name', uri='uri')" == repr(Album(uri="uri", name="name"))
 
     def test_repr_with_artists(self):
-        assert (
-            "Album(artists=[Artist(name='foo')], name='name', uri='uri')"
-            == repr(Album(uri="uri", name="name", artists=[Artist(name="foo")]))
+        assert "Album(artists=[Artist(name='foo')], name='name', uri='uri')" == repr(
+            Album(uri="uri", name="name", artists=[Artist(name="foo")])
         )
 
     def test_serialize_without_artists(self):
@@ -662,14 +657,11 @@ class TrackTest(unittest.TestCase):
             Track(foo="baz")
 
     def test_repr_without_artists(self):
-        assert "Track(name='name', uri='uri')" == repr(
-            Track(uri="uri", name="name")
-        )
+        assert "Track(name='name', uri='uri')" == repr(Track(uri="uri", name="name"))
 
     def test_repr_with_artists(self):
-        assert (
-            "Track(artists=[Artist(name='foo')], name='name', uri='uri')"
-            == repr(Track(uri="uri", name="name", artists=[Artist(name="foo")]))
+        assert "Track(artists=[Artist(name='foo')], name='name', uri='uri')" == repr(
+            Track(uri="uri", name="name", artists=[Artist(name="foo")])
         )
 
     def test_serialize_without_artists(self):
@@ -1091,11 +1083,8 @@ class PlaylistTest(unittest.TestCase):
         )
 
     def test_repr_with_tracks(self):
-        assert (
-            "Playlist(name='name', tracks=[Track(name='foo')], uri='uri')"
-            == repr(
-                Playlist(uri="uri", name="name", tracks=[Track(name="foo")])
-            )
+        assert "Playlist(name='name', tracks=[Track(name='foo')], uri='uri')" == repr(
+            Playlist(uri="uri", name="name", tracks=[Track(name="foo")])
         )
 
     def test_serialize_without_tracks(self):
@@ -1149,12 +1138,8 @@ class PlaylistTest(unittest.TestCase):
 
     def test_eq(self):
         tracks = [Track()]
-        playlist1 = Playlist(
-            uri="uri", name="name", tracks=tracks, last_modified=1
-        )
-        playlist2 = Playlist(
-            uri="uri", name="name", tracks=tracks, last_modified=1
-        )
+        playlist1 = Playlist(uri="uri", name="name", tracks=tracks, last_modified=1)
+        playlist2 = Playlist(uri="uri", name="name", tracks=tracks, last_modified=1)
         assert playlist1 == playlist2
         assert hash(playlist1) == hash(playlist2)
 

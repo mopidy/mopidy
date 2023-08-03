@@ -186,9 +186,7 @@ class Core(
 
     def _get_data_dir(self):
         # get or create data director for core
-        data_dir_path = (
-            path.expand_path(self._config["core"]["data_dir"]) / "core"
-        )
+        data_dir_path = path.expand_path(self._config["core"]["data_dir"]) / "core"
         path.get_or_create_dir(data_dir_path)
         return data_dir_path
 
@@ -259,9 +257,7 @@ class Backends(list):
         super().__init__(backends)
 
         self.with_library: dict[backend.UriScheme, backend.BackendProxy] = {}
-        self.with_library_browse: dict[
-            backend.UriScheme, backend.BackendProxy
-        ] = {}
+        self.with_library_browse: dict[backend.UriScheme, backend.BackendProxy] = {}
         self.with_playback: dict[backend.UriScheme, backend.BackendProxy] = {}
         self.with_playlists: dict[backend.UriScheme, backend.BackendProxy] = {}
 

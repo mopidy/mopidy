@@ -7,15 +7,7 @@ import os
 import pathlib
 import re
 from collections.abc import Mapping
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Iterator,
-    Optional,
-    TypedDict,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Any, Iterator, Optional, TypedDict, Union, cast
 
 from mopidy.config import keyring
 from mopidy.config.schemas import ConfigSchema, MapConfigSchema
@@ -206,9 +198,7 @@ def format_initial(extensions_data: list[ExtensionData]) -> str:
     config, errors = _validate(raw_config, schemas)
 
     versions = [f"Mopidy {versioning.get_version()}"]
-    extensions_data = sorted(
-        extensions_data, key=lambda d: d.extension.dist_name
-    )
+    extensions_data = sorted(extensions_data, key=lambda d: d.extension.dist_name)
     for data in extensions_data:
         versions.append(f"{data.extension.dist_name} {data.extension.version}")
 
@@ -261,8 +251,7 @@ def _load_file(
 ) -> None:
     if not file_path.exists():
         logger.debug(
-            f"Loading config from {file_path.as_uri()} failed; "
-            f"it does not exist"
+            f"Loading config from {file_path.as_uri()} failed; " f"it does not exist"
         )
         return
     if not os.access(str(file_path), os.R_OK):
@@ -373,9 +362,7 @@ def _preprocess(config_string: str) -> str:
         return f"\n__INLINE{next(counter):d}__ ="
 
     def sections(match) -> str:
-        return (
-            f"{match.group(1)}\n__SECTION{next(counter):d}__ = {match.group(2)}"
-        )
+        return f"{match.group(1)}\n__SECTION{next(counter):d}__ = {match.group(2)}"
 
     for line in config_string.splitlines():
         line = blank_line_re.sub(newlines, line)

@@ -129,9 +129,7 @@ class Command:
         for args, kwargs in self._arguments:
             actions.append(parser.add_argument(*args, **kwargs))
 
-        parser.add_argument(
-            "_args", nargs=argparse.REMAINDER, help=argparse.SUPPRESS
-        )
+        parser.add_argument("_args", nargs=argparse.REMAINDER, help=argparse.SUPPRESS)
         return parser, actions
 
     def add_child(self, name: str, command: Command) -> None:
@@ -219,9 +217,7 @@ class Command:
         for childname, child in self._children.items():
             child._subhelp(" ".join((name, childname)), result)
 
-    def parse(
-        self, args: list[str], prog: Optional[str] = None
-    ) -> argparse.Namespace:
+    def parse(self, args: list[str], prog: Optional[str] = None) -> argparse.Namespace:
         """Parse command line arguments.
 
         Will recursively parse commands until a final parser is found or an
@@ -355,9 +351,7 @@ class RootCommand(Command):
             return GLib.SOURCE_REMOVE
 
         loop = GLib.MainLoop()
-        GLib.unix_signal_add(
-            GLib.PRIORITY_DEFAULT, signal.SIGTERM, on_sigterm, loop
-        )
+        GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, on_sigterm, loop)
 
         mixer_class = self.get_mixer_class(config, args.registry["mixer"])
         backend_classes: list[type[BackendActor]] = args.registry["backend"]
@@ -525,9 +519,7 @@ class RootCommand(Command):
                 with timer.time_logger(frontend_class.__name__):
                     frontend_class.start(config=config, core=core)
 
-    def stop_frontends(
-        self, frontend_classes: list[type[ThreadingActor]]
-    ) -> None:
+    def stop_frontends(self, frontend_classes: list[type[ThreadingActor]]) -> None:
         logger.info("Stopping Mopidy frontends")
         for frontend_class in frontend_classes:
             process.stop_actors_by_class(frontend_class)

@@ -12,9 +12,7 @@ def get_version():
 
 
 def get_git_version():
-    project_dir = os.path.abspath(
-        os.path.join(os.path.dirname(mopidy.__file__), "..")
-    )
+    project_dir = os.path.abspath(os.path.join(os.path.dirname(mopidy.__file__), ".."))
     process = subprocess.Popen(
         ["git", "describe"],
         stdout=subprocess.PIPE,

@@ -303,22 +303,16 @@ class HelpTest(unittest.TestCase):
 
     def test_command_with_option(self):
         cmd = commands.Command()
-        cmd.add_argument(
-            "-h", "--help", action="store_true", help="show this message"
-        )
+        cmd.add_argument("-h", "--help", action="store_true", help="show this message")
 
         expected = (
-            "usage: foo [-h]\n\n"
-            "OPTIONS:\n\n"
-            "  -h, --help  show this message"
+            "usage: foo [-h]\n\n" "OPTIONS:\n\n" "  -h, --help  show this message"
         )
         assert expected == cmd.format_help("foo").strip()
 
     def test_command_with_option_and_positional(self):
         cmd = commands.Command()
-        cmd.add_argument(
-            "-h", "--help", action="store_true", help="show this message"
-        )
+        cmd.add_argument("-h", "--help", action="store_true", help="show this message")
         cmd.add_argument("bar", help="some help text")
 
         expected = (
@@ -333,17 +327,13 @@ class HelpTest(unittest.TestCase):
         cmd = commands.Command()
         cmd.help = "some text about everything this command does."
 
-        expected = (
-            "usage: foo\n\n" "some text about everything this command does."
-        )
+        expected = "usage: foo\n\n" "some text about everything this command does."
         assert expected == cmd.format_help("foo").strip()
 
     def test_command_with_documentation_and_option(self):
         cmd = commands.Command()
         cmd.help = "some text about everything this command does."
-        cmd.add_argument(
-            "-h", "--help", action="store_true", help="show this message"
-        )
+        cmd.add_argument("-h", "--help", action="store_true", help="show this message")
 
         expected = (
             "usage: foo [-h]\n\n"
@@ -471,9 +461,7 @@ class HelpTest(unittest.TestCase):
         child.add_argument("--test", help="the great and wonderful")
 
         cmd = commands.Command()
-        cmd.add_argument(
-            "-h", "--help", action="store_true", help="show this message"
-        )
+        cmd.add_argument("-h", "--help", action="store_true", help="show this message")
         cmd.add_child("bar", child)
 
         expected = (
@@ -493,9 +481,7 @@ class HelpTest(unittest.TestCase):
 
         cmd = commands.Command()
         cmd.help = "some text about everything this command does."
-        cmd.add_argument(
-            "-h", "--help", action="store_true", help="show this message"
-        )
+        cmd.add_argument("-h", "--help", action="store_true", help="show this message")
         cmd.add_child("bar", child)
 
         expected = (

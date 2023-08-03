@@ -55,9 +55,7 @@ class LibraryController:
                 if backend is not None:
                     backends_to_uris[backend].append(uri)
         else:
-            backends_to_uris = {
-                b: None for b in self.backends.with_library.values()
-            }
+            backends_to_uris = {b: None for b in self.backends.with_library.values()}
         return backends_to_uris
 
     def browse(self, uri):
@@ -156,9 +154,7 @@ class LibraryController:
         if query is not None:
             validation.check_query(query)  # TODO: normalize?
 
-        compat_field = cast(
-            DistinctField, {"track_name": "track"}.get(field, field)
-        )
+        compat_field = cast(DistinctField, {"track_name": "track"}.get(field, field))
 
         result = set()
         futures = {
@@ -194,9 +190,7 @@ class LibraryController:
 
         futures = {
             backend: backend.library.get_images(backend_uris)
-            for (backend, backend_uris) in self._get_backends_to_uris(
-                uris
-            ).items()
+            for (backend, backend_uris) in self._get_backends_to_uris(uris).items()
             if backend_uris
         }
 

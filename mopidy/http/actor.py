@@ -146,8 +146,7 @@ class HttpServer(threading.Thread):
             "HTTP routes from extensions: %s",
             formatting.indent(
                 "\n".join(
-                    f"{path!r}: {handler!r}"
-                    for (path, handler, *_) in request_handlers
+                    f"{path!r}: {handler!r}" for (path, handler, *_) in request_handlers
                 )
             ),
         )
@@ -190,9 +189,7 @@ class HttpServer(threading.Thread):
 
         default_app = self.config["http"]["default_app"]
         if default_app not in sites:
-            logger.warning(
-                f"HTTP server's default app {default_app!r} not found"
-            )
+            logger.warning(f"HTTP server's default app {default_app!r} not found")
             default_app = "mopidy"
         logger.debug(f"Default webclient is {default_app}")
 

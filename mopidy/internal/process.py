@@ -37,9 +37,7 @@ def stop_actors_by_class(klass):
 def stop_remaining_actors():
     num_actors = len(pykka.ActorRegistry.get_all())
     while num_actors:
-        logger.error(
-            "There are actor threads still running, this is probably a bug"
-        )
+        logger.error("There are actor threads still running, this is probably a bug")
         logger.debug(
             "Seeing %d actor and %d non-actor thread(s): %s",
             num_actors,

@@ -29,8 +29,7 @@ class FileLibraryProvider(backend.LibraryProvider):
         self._media_dirs = list(self._get_media_dirs(config))
         self._show_dotfiles = config["file"]["show_dotfiles"]
         self._excluded_file_extensions = tuple(
-            file_ext.lower()
-            for file_ext in config["file"]["excluded_file_extensions"]
+            file_ext.lower() for file_ext in config["file"]["excluded_file_extensions"]
         )
         self._follow_symlinks = config["file"]["follow_symlinks"]
 
@@ -77,9 +76,7 @@ class FileLibraryProvider(backend.LibraryProvider):
                 continue
 
             if child_path.is_dir():
-                result.append(
-                    models.Ref.directory(name=dir_entry.name, uri=uri)
-                )
+                result.append(models.Ref.directory(name=dir_entry.name, uri=uri))
             elif child_path.is_file():
                 result.append(models.Ref.track(name=dir_entry.name, uri=uri))
 
@@ -116,8 +113,7 @@ class FileLibraryProvider(backend.LibraryProvider):
 
             if local_path is None:
                 logger.debug(
-                    "Failed expanding path (%s) from file/media_dirs config "
-                    "value.",
+                    "Failed expanding path (%s) from file/media_dirs config " "value.",
                     media_dir_split[0],
                 )
                 continue

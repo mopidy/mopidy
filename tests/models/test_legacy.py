@@ -83,14 +83,11 @@ class ModelTest(unittest.TestCase):
             Model(foo="baz")
 
     def test_repr_without_models(self):
-        assert "Model(name='name', uri='uri')" == repr(
-            Model(uri="uri", name="name")
-        )
+        assert "Model(name='name', uri='uri')" == repr(Model(uri="uri", name="name"))
 
     def test_repr_with_models(self):
-        assert (
-            "Model(models=[SubModel(name=123)], name='name', uri='uri')"
-            == repr(Model(uri="uri", name="name", models=[SubModel(name=123)]))
+        assert "Model(models=[SubModel(name=123)], name='name', uri='uri')" == repr(
+            Model(uri="uri", name="name", models=[SubModel(name=123)])
         )
 
     def test_serialize_without_models(self):

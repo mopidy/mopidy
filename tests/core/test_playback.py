@@ -7,7 +7,6 @@ from mopidy import backend, core
 from mopidy.internal import deprecation
 from mopidy.internal.models import PlaybackState
 from mopidy.models import Track
-
 from tests import dummy_audio, dummy_backend
 
 
@@ -67,18 +66,14 @@ class BaseTest:
 
     def setup_method(self, method):
         self.audio = dummy_audio.create_proxy(config=self.config, mixer=None)
-        self.backend = MyTestBackend.start(
-            audio=self.audio, config=self.config
-        ).proxy()
+        self.backend = MyTestBackend.start(audio=self.audio, config=self.config).proxy()
         self.core = core.Core(
             audio=self.audio, backends=[self.backend], config=self.config
         )
         self.playback = self.core.playback
 
         # We don't have a core actor running, so call about to finish directly.
-        self.audio.set_about_to_finish_callback(
-            self.playback._on_about_to_finish
-        )
+        self.audio.set_about_to_finish_callback(self.playback._on_about_to_finish)
 
         with deprecation.ignore():
             self.core.tracklist.add(self.tracks)
@@ -177,9 +172,7 @@ class TestPlayHandling(BaseTest):
         assert not self.backend.playback.is_live(self.tracks[0].uri).get()
 
     def test_download_buffering_is_not_enabled_by_default(self):
-        assert not self.backend.playback.should_download(
-            self.tracks[0].uri
-        ).get()
+        assert not self.backend.playback.should_download(self.tracks[0].uri).get()
 
 
 class TestNextHandling(BaseTest):
@@ -222,9 +215,7 @@ class TestNextHandling(BaseTest):
             (True, False, False, False, 2, 0),
         ],
     )
-    def test_next_all_modes(
-        self, repeat, random, single, consume, index, result
-    ):
+    def test_next_all_modes(self, repeat, random, single, consume, index, result):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
         self.core.playback.play(tl_tracks[index])
@@ -240,9 +231,7 @@ class TestNextHandling(BaseTest):
         if result is None:
             assert self.core.playback.get_current_tl_track() is None
         else:
-            assert (
-                self.core.playback.get_current_tl_track() == tl_tracks[result]
-            )
+            assert self.core.playback.get_current_tl_track() == tl_tracks[result]
 
     def test_next_keeps_finished_track_in_tracklist(self):
         tl_track = self.core.tracklist.get_tl_tracks()[0]
@@ -327,9 +316,7 @@ class TestPreviousHandling(BaseTest):
             (True, False, False, False, 1, 1),  # FIXME: #1694
         ],
     )
-    def test_previous_all_modes(
-        self, repeat, random, single, consume, index, result
-    ):
+    def test_previous_all_modes(self, repeat, random, single, consume, index, result):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
         self.core.playback.play(tl_tracks[index])
@@ -344,9 +331,7 @@ class TestPreviousHandling(BaseTest):
         if result is None:
             assert self.core.playback.get_current_tl_track() is None
         else:
-            assert (
-                self.core.playback.get_current_tl_track() == tl_tracks[result]
-            )
+            assert self.core.playback.get_current_tl_track() == tl_tracks[result]
 
     def test_previous_keeps_finished_track_in_tracklist(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -548,9 +533,7 @@ class TestCurrentAndPendingTlTrack(BaseTest):
         assert self.playback.get_current_tl_track() is None
 
 
-@mock.patch(
-    "mopidy.core.playback.listener.CoreListener", spec=core.CoreListener
-)
+@mock.patch("mopidy.core.playback.listener.CoreListener", spec=core.CoreListener)
 class TestEventEmission(BaseTest):
     maxDiff = None  # noqa: N815
 
@@ -720,9 +703,7 @@ class TestEventEmission(BaseTest):
             mock.call("track_playback_started", tl_track=tl_tracks[1]),
         ]
 
-    def test_next_emits_events_when_consume_mode_is_enabled(
-        self, listener_mock
-    ):
+    def test_next_emits_events_when_consume_mode_is_enabled(self, listener_mock):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
         self.core.tracklist.set_consume(True)
@@ -1238,9 +1219,7 @@ class TestCorePlaybackSaveLoadState(BaseTest):
         self.core.playback.play(tl_tracks[1])
         self.replay_events()
 
-        state = PlaybackState(
-            time_position=0, state="playing", tlid=tl_tracks[1].tlid
-        )
+        state = PlaybackState(time_position=0, state="playing", tlid=tl_tracks[1].tlid)
         value = self.core.playback._save_state()
 
         assert state == value
@@ -1252,9 +1231,7 @@ class TestCorePlaybackSaveLoadState(BaseTest):
         self.replay_events()
         assert "stopped" == self.core.playback.get_state()
 
-        state = PlaybackState(
-            time_position=0, state="playing", tlid=tl_tracks[2].tlid
-        )
+        state = PlaybackState(time_position=0, state="playing", tlid=tl_tracks[2].tlid)
         coverage = ["play-last"]
         self.core.playback._load_state(state, coverage)
         self.replay_events()
@@ -1269,9 +1246,7 @@ class TestCorePlaybackSaveLoadState(BaseTest):
         self.replay_events()
         assert "stopped" == self.core.playback.get_state()
 
-        state = PlaybackState(
-            time_position=0, state="playing", tlid=tl_tracks[2].tlid
-        )
+        state = PlaybackState(time_position=0, state="playing", tlid=tl_tracks[2].tlid)
         coverage = ["other"]
         self.core.playback._load_state(state, coverage)
         self.replay_events()

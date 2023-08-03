@@ -54,9 +54,7 @@ class JsonRpcWrapper:
 
     def __init__(self, objects, decoders=None, encoders=None):
         if "" in objects.keys():
-            raise AttributeError(
-                "The empty string is not allowed as an object mount"
-            )
+            raise AttributeError("The empty string is not allowed as an object mount")
         self.objects = objects
         self.decoder = get_combined_json_decoder(decoders or [])
         self.encoder = get_combined_json_encoder(encoders or [])
@@ -160,17 +158,11 @@ class JsonRpcWrapper:
         if not isinstance(request, dict):
             raise JsonRpcInvalidRequestError(data="Request must be an object")
         if "jsonrpc" not in request:
-            raise JsonRpcInvalidRequestError(
-                data="'jsonrpc' member must be included"
-            )
+            raise JsonRpcInvalidRequestError(data="'jsonrpc' member must be included")
         if request["jsonrpc"] != "2.0":
-            raise JsonRpcInvalidRequestError(
-                data="'jsonrpc' value must be '2.0'"
-            )
+            raise JsonRpcInvalidRequestError(data="'jsonrpc' value must be '2.0'")
         if "method" not in request:
-            raise JsonRpcInvalidRequestError(
-                data="'method' member must be included"
-            )
+            raise JsonRpcInvalidRequestError(data="'method' member must be included")
         if not isinstance(request["method"], str):
             raise JsonRpcInvalidRequestError(data="'method' must be a string")
 
@@ -202,16 +194,12 @@ class JsonRpcWrapper:
         mount, method_name = method_path.rsplit(".", 1)
 
         if method_name.startswith("_"):
-            raise JsonRpcMethodNotFoundError(
-                data="Private methods are not exported"
-            )
+            raise JsonRpcMethodNotFoundError(data="Private methods are not exported")
 
         try:
             obj = self.objects[mount]
         except KeyError:
-            raise JsonRpcMethodNotFoundError(
-                data=f"No object found at {mount!r}"
-            )
+            raise JsonRpcMethodNotFoundError(data=f"No object found at {mount!r}")
 
         try:
             return getattr(obj, method_name)
@@ -319,9 +307,7 @@ class JsonRpcInspector:
 
     def __init__(self, objects):
         if "" in objects.keys():
-            raise AttributeError(
-                "The empty string is not allowed as an object mount"
-            )
+            raise AttributeError("The empty string is not allowed as an object mount")
         self.objects = objects
 
     def describe(self):
