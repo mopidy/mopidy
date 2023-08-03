@@ -101,7 +101,6 @@ class _HelpAction(argparse.Action):
 
 
 class Command:
-
     """Command parser and runner for building trees of commands.
 
     This class provides a wraper around :class:`argparse.ArgumentParser`

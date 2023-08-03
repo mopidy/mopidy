@@ -155,7 +155,7 @@ _INITIAL_HELP = """
 
 
 def read(config_file: str | os.PathLike[str]) -> str:
-    """Helper to load config defaults in same way across core and extensions"""
+    """Helper to load config defaults in same way across core and extensions."""
     return pathlib.Path(config_file).read_text(errors="surrogateescape")
 
 

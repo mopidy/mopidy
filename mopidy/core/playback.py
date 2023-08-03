@@ -67,8 +67,7 @@ class PlaybackController:
         self._current_tl_track = value
 
     def get_current_track(self):
-        """
-        Get the currently playing or selected track.
+        """Get the currently playing or selected track.
 
         Extracted from :meth:`get_current_tl_track` for convenience.
 
@@ -77,8 +76,7 @@ class PlaybackController:
         return getattr(self.get_current_tl_track(), "track", None)
 
     def get_current_tlid(self):
-        """
-        Get the currently playing or selected TLID.
+        """Get the currently playing or selected TLID.
 
         Extracted from :meth:`get_current_tl_track` for convenience.
 
@@ -94,7 +92,6 @@ class PlaybackController:
 
     def get_state(self):
         """Get The playback state."""
-
         return self._state
 
     def set_state(self, new_state):
@@ -231,8 +228,7 @@ class PlaybackController:
                 break
 
     def _on_tracklist_change(self):
-        """
-        Tell the playback controller that the current playlist has changed.
+        """Tell the playback controller that the current playlist has changed.
 
         Used by :class:`mopidy.core.TracklistController`.
         """
@@ -244,8 +240,7 @@ class PlaybackController:
             self._set_current_tl_track(None)
 
     def next(self):
-        """
-        Change to the next track.
+        """Change to the next track.
 
         The current playback state will be kept. If it was playing, playing
         will continue. If it was paused, it will still be paused, etc.
@@ -285,8 +280,7 @@ class PlaybackController:
             self._trigger_track_playback_paused()
 
     def play(self, tl_track=None, tlid=None):
-        """
-        Play the given track, or if the given tl_track and tlid is
+        """Play the given track, or if the given tl_track and tlid is
         :class:`None`, play the currently active track.
 
         Note that the track **must** already be in the tracklist.
@@ -397,8 +391,7 @@ class PlaybackController:
         raise Exception(f"Unknown state: {state}")
 
     def previous(self):
-        """
-        Change to the previous track.
+        """Change to the previous track.
 
         The current playback state will be kept. If it was playing, playing
         will continue. If it was paused, it will still be paused, etc.
@@ -442,8 +435,7 @@ class PlaybackController:
         # wait for state change?
 
     def seek(self, time_position: int) -> bool:
-        """
-        Seeks to time position given in milliseconds.
+        """Seeks to time position given in milliseconds.
 
         :param time_position: time position in milliseconds
         :type time_position: int

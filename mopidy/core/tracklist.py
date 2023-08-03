@@ -37,8 +37,7 @@ class TracklistController:
         return len(self._tl_tracks)
 
     def get_version(self):
-        """
-        Get the tracklist version.
+        """Get the tracklist version.
 
         Integer which is increased every time the tracklist is changed. Is not
         reset before Mopidy is restarted.
@@ -100,8 +99,7 @@ class TracklistController:
         self._random = value
 
     def get_repeat(self):
-        """
-        Get repeat mode.
+        """Get repeat mode.
 
         :class:`True`
             The tracklist is played repeatedly.
@@ -111,8 +109,7 @@ class TracklistController:
         return self._repeat
 
     def set_repeat(self, value):
-        """
-        Set repeat mode.
+        """Set repeat mode.
 
         To repeat a single track, set both ``repeat`` and ``single``.
 
@@ -127,8 +124,7 @@ class TracklistController:
         self._repeat = value
 
     def get_single(self):
-        """
-        Get single mode.
+        """Get single mode.
 
         :class:`True`
             Playback is stopped after current song, unless in ``repeat`` mode.
@@ -138,8 +134,7 @@ class TracklistController:
         return self._single
 
     def set_single(self, value):
-        """
-        Set single mode.
+        """Set single mode.
 
         :class:`True`
             Playback is stopped after current song, unless in ``repeat`` mode.
@@ -152,8 +147,7 @@ class TracklistController:
         self._single = value
 
     def index(self, tl_track=None, tlid=None):
-        """
-        The position of the given track in the tracklist.
+        """The position of the given track in the tracklist.
 
         If neither *tl_track* or *tlid* is given we return the index of
         the currently playing track.
@@ -187,8 +181,7 @@ class TracklistController:
         return None
 
     def get_eot_tlid(self):
-        """
-        The TLID of the track that will be played after the current track.
+        """The TLID of the track that will be played after the current track.
 
         Not necessarily the same TLID as returned by :meth:`get_next_tlid`.
 
@@ -196,7 +189,6 @@ class TracklistController:
 
         .. versionadded:: 1.1
         """
-
         current_tl_track = self.core.playback.get_current_tl_track()
 
         with deprecation.ignore("core.tracklist.eot_track"):
@@ -205,8 +197,7 @@ class TracklistController:
         return getattr(eot_tl_track, "tlid", None)
 
     def eot_track(self, tl_track):
-        """
-        The track that will be played after the given track.
+        """The track that will be played after the given track.
 
         Not necessarily the same track as :meth:`next_track`.
 
@@ -231,8 +222,7 @@ class TracklistController:
         return self.next_track(tl_track)
 
     def get_next_tlid(self):
-        """
-        The tlid of the track that will be played if calling
+        """The tlid of the track that will be played if calling
         :meth:`mopidy.core.PlaybackController.next()`.
 
         For normal playback this is the next track in the tracklist. If repeat
@@ -252,8 +242,7 @@ class TracklistController:
         return getattr(next_tl_track, "tlid", None)
 
     def next_track(self, tl_track):
-        """
-        The track that will be played if calling
+        """The track that will be played if calling
         :meth:`mopidy.core.PlaybackController.next()`.
 
         For normal playback this is the next track in the tracklist. If repeat
@@ -303,8 +292,7 @@ class TracklistController:
         return self._tl_tracks[next_index]
 
     def get_previous_tlid(self):
-        """
-        Returns the TLID of the track that will be played if calling
+        """Returns the TLID of the track that will be played if calling
         :meth:`mopidy.core.PlaybackController.previous()`.
 
         For normal playback this is the previous track in the tracklist. If
@@ -323,8 +311,7 @@ class TracklistController:
         return getattr(previous_tl_track, "tlid", None)
 
     def previous_track(self, tl_track):
-        """
-        Returns the track that will be played if calling
+        """Returns the track that will be played if calling
         :meth:`mopidy.core.PlaybackController.previous()`.
 
         For normal playback this is the previous track in the tracklist. If
@@ -355,8 +342,7 @@ class TracklistController:
         return self._tl_tracks[position - 1]
 
     def add(self, tracks=None, at_position=None, uris=None):
-        """
-        Add tracks to the tracklist.
+        """Add tracks to the tracklist.
 
         If ``uris`` is given instead of ``tracks``, the URIs are
         looked up in the library and the resulting tracks are added to the
@@ -425,8 +411,7 @@ class TracklistController:
         return tl_tracks
 
     def clear(self):
-        """
-        Clear the tracklist.
+        """Clear the tracklist.
 
         Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
         """
@@ -434,8 +419,7 @@ class TracklistController:
         self._increase_version()
 
     def filter(self, criteria):
-        """
-        Filter the tracklist by the given criteria.
+        """Filter the tracklist by the given criteria.
 
         Each rule in the criteria consists of a model field and a list of
         values to compare it against. If the model field matches any of the
@@ -471,8 +455,7 @@ class TracklistController:
         return matches
 
     def move(self, start, end, to_position):
-        """
-        Move the tracks in the slice ``[start:end]`` to ``to_position``.
+        """Move the tracks in the slice ``[start:end]`` to ``to_position``.
 
         Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
 
@@ -508,8 +491,7 @@ class TracklistController:
         self._increase_version()
 
     def remove(self, criteria):
-        """
-        Remove the matching tracks from the tracklist.
+        """Remove the matching tracks from the tracklist.
 
         Uses :meth:`filter()` to lookup the tracks to remove.
 
@@ -527,8 +509,7 @@ class TracklistController:
         return tl_tracks
 
     def shuffle(self, start=None, end=None):
-        """
-        Shuffles the entire tracklist. If ``start`` and ``end`` is given only
+        """Shuffles the entire tracklist. If ``start`` and ``end`` is given only
         shuffles the slice ``[start:end]``.
 
         Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
@@ -561,8 +542,7 @@ class TracklistController:
         self._increase_version()
 
     def slice(self, start, end):
-        """
-        Returns a slice of the tracklist, limited by the given start and end
+        """Returns a slice of the tracklist, limited by the given start and end
         positions.
 
         :param start: position of first track to include in slice

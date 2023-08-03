@@ -17,9 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class Mixer:
-
-    """
-    Audio mixer API
+    """Audio mixer API.
 
     If the mixer has problems during initialization it should raise
     :exc:`mopidy.exceptions.MixerError` with a descriptive error message. This
@@ -43,8 +41,7 @@ class Mixer:
         pass
 
     def get_volume(self) -> Optional[int]:
-        """
-        Get volume level of the mixer on a linear scale from 0 to 100.
+        """Get volume level of the mixer on a linear scale from 0 to 100.
 
         Example values:
 
@@ -62,8 +59,7 @@ class Mixer:
         return None
 
     def set_volume(self, volume: int) -> bool:
-        """
-        Set volume level of the mixer.
+        """Set volume level of the mixer.
 
         *MAY be implemented by subclass.*
 
@@ -74,8 +70,7 @@ class Mixer:
         return False
 
     def trigger_volume_changed(self, volume: int) -> None:
-        """
-        Send ``volume_changed`` event to all mixer listeners.
+        """Send ``volume_changed`` event to all mixer listeners.
 
         This method should be called by subclasses when the volume is changed,
         either because of a call to :meth:`set_volume` or because of any
@@ -85,8 +80,7 @@ class Mixer:
         MixerListener.send("volume_changed", volume=volume)
 
     def get_mute(self) -> Optional[bool]:
-        """
-        Get mute state of the mixer.
+        """Get mute state of the mixer.
 
         *MAY be implemented by subclass.*
 
@@ -96,8 +90,7 @@ class Mixer:
         return None
 
     def set_mute(self, mute: bool) -> bool:
-        """
-        Mute or unmute the mixer.
+        """Mute or unmute the mixer.
 
         *MAY be implemented by subclass.*
 
@@ -108,8 +101,7 @@ class Mixer:
         return False
 
     def trigger_mute_changed(self, mute: bool) -> None:
-        """
-        Send ``mute_changed`` event to all mixer listeners.
+        """Send ``mute_changed`` event to all mixer listeners.
 
         This method should be called by subclasses when the mute state is
         changed, either because of a call to :meth:`set_mute` or because of
@@ -124,9 +116,7 @@ class Mixer:
 
 
 class MixerListener(listener.Listener):
-
-    """
-    Marker interface for recipients of events sent by the mixer actor.
+    """Marker interface for recipients of events sent by the mixer actor.
 
     Any Pykka actor that mixes in this class will receive calls to the methods
     defined here when the corresponding events happen in the mixer actor. This
@@ -137,12 +127,11 @@ class MixerListener(listener.Listener):
 
     @staticmethod
     def send(event: MixerEvent, **kwargs: Any) -> None:
-        """Helper to allow calling of mixer listener events"""
+        """Helper to allow calling of mixer listener events."""
         listener.send(MixerListener, event, **kwargs)
 
     def volume_changed(self, volume: int) -> None:
-        """
-        Called after the volume has changed.
+        """Called after the volume has changed.
 
         *MAY* be implemented by actor.
 
@@ -152,8 +141,7 @@ class MixerListener(listener.Listener):
         pass
 
     def mute_changed(self, mute: bool) -> None:
-        """
-        Called after the mute state has changed.
+        """Called after the mute state has changed.
 
         *MAY* be implemented by actor.
 

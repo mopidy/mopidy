@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 
 def validate_required(value: Any, required: bool) -> None:
-    """Validate that ``value`` is set if ``required``
+    """Validate that ``value`` is set if ``required``.
 
     Normally called in :meth:`~mopidy.config.types.ConfigValue.deserialize` on
     the raw string, _not_ the converted value.
@@ -28,7 +28,7 @@ def validate_required(value: Any, required: bool) -> None:
 
 
 def validate_choice(value: T, choices: Optional[Iterable[T]]) -> None:
-    """Validate that ``value`` is one of the ``choices``
+    """Validate that ``value`` is one of the ``choices``.
 
     Normally called in :meth:`~mopidy.config.types.ConfigValue.deserialize`.
     """
@@ -38,7 +38,7 @@ def validate_choice(value: T, choices: Optional[Iterable[T]]) -> None:
 
 
 def validate_minimum(value: CT, minimum: Optional[CT]) -> None:
-    """Validate that ``value`` is at least ``minimum``
+    """Validate that ``value`` is at least ``minimum``.
 
     Normally called in :meth:`~mopidy.config.types.ConfigValue.deserialize`.
     """
@@ -47,7 +47,7 @@ def validate_minimum(value: CT, minimum: Optional[CT]) -> None:
 
 
 def validate_maximum(value: CT, maximum: Optional[CT]) -> None:
-    """Validate that ``value`` is at most ``maximum``
+    """Validate that ``value`` is at most ``maximum``.
 
     Normally called in :meth:`~mopidy.config.types.ConfigValue.deserialize`.
     """

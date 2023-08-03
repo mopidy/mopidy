@@ -38,9 +38,7 @@ def _trace(*args, **kwargs):
 
 # TODO: replace with a scan(uri, timeout=1000, proxy_config=None)?
 class Scanner:
-
-    """
-    Helper to get tags and other relevant info from URIs.
+    """Helper to get tags and other relevant info from URIs.
 
     :param timeout: timeout for scanning a URI in ms
     :param proxy_config: dictionary containing proxy config strings.
@@ -52,8 +50,7 @@ class Scanner:
         self._proxy_config = proxy_config or {}
 
     def scan(self, uri, timeout=None):
-        """
-        Scan the given uri collecting relevant metadata.
+        """Scan the given uri collecting relevant metadata.
 
         :param uri: URI of the resource to scan.
         :type uri: string

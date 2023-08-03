@@ -55,8 +55,7 @@ def setup_proxy(element: Gst.Element, config: ProxyConfig) -> None:
 
 
 class Signals:
-
-    """Helper for tracking gobject signal registrations"""
+    """Helper for tracking gobject signal registrations."""
 
     def __init__(self) -> None:
         self._ids: dict[tuple[Gst.Element, str], int] = {}

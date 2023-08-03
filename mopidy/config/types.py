@@ -261,7 +261,7 @@ class Boolean(ConfigValue[bool]):
 
 
 class Pair(ConfigValue[tuple[K, V]]):
-    """Pair value
+    """Pair value.
 
     The value is expected to be a pair of elements, separated by a specified delimiter.
     Values can optionally not be a pair, in which case the whole input is provided for

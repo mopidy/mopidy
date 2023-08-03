@@ -168,8 +168,7 @@ def create_core_dirs(config):
 
 
 def create_initial_config_file(args, extensions_data):
-    """Initialize whatever the last config file is with defaults"""
-
+    """Initialize whatever the last config file is with defaults."""
     config_file = path.expand_path(args.config_files[-1])
 
     if config_file.exists():

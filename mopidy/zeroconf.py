@@ -26,7 +26,6 @@ def _convert_text_list_to_dbus_format(text_list):
 
 
 class Zeroconf:
-
     """Publish a network service with Zeroconf.
 
     Currently, this only works on Linux using Avahi via D-Bus.
@@ -79,7 +78,6 @@ class Zeroconf:
 
         Call when your service starts.
         """
-
         if _is_loopback_address(self.host):
             logger.debug("%s: Publish on loopback interface is not supported.", self)
             return False

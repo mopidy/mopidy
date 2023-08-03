@@ -18,9 +18,7 @@ TField = TypeVar("TField", bound="Field")
 
 
 class Field(Generic[T]):
-
-    """
-    Base field for use in
+    """Base field for use in
     :class:`~mopidy.models.immutable.ValidatedImmutableObject`. These fields
     are responsible for type checking and other data sanitation in our models.
 
@@ -50,7 +48,7 @@ class Field(Generic[T]):
             self.validate(self._default)
 
     def validate(self, value: T) -> T:
-        """Validate and possibly modify the field value before assignment"""
+        """Validate and possibly modify the field value before assignment."""
         if self._type and not isinstance(value, self._type):
             raise TypeError(
                 f"Expected {self._name} to be a {self._type}, not {value!r}"
@@ -93,9 +91,7 @@ class Field(Generic[T]):
 
 
 class String(Field[str]):
-
-    """
-    Specialized :class:`Field` which is wired up for bytes and unicode.
+    """Specialized :class:`Field` which is wired up for bytes and unicode.
 
     :param default: default value for field
     """
@@ -108,8 +104,7 @@ class String(Field[str]):
 
 
 class Date(String):
-    """
-    :class:`Field` for storing ISO 8601 dates as a string.
+    """:class:`Field` for storing ISO 8601 dates as a string.
 
     Supported formats are ``YYYY-MM-DD``, ``YYYY-MM`` and ``YYYY``, currently
     not validated.
@@ -121,8 +116,7 @@ class Date(String):
 
 
 class Identifier(String):
-    """
-    :class:`Field` for storing values such as GUIDs or other identifiers.
+    """:class:`Field` for storing values such as GUIDs or other identifiers.
 
     Values will be interned.
 
@@ -137,8 +131,7 @@ class Identifier(String):
 
 
 class URI(Identifier):
-    """
-    :class:`Field` for storing URIs
+    """:class:`Field` for storing URIs.
 
     Values will be interned, currently not validated.
 
@@ -149,8 +142,7 @@ class URI(Identifier):
 
 
 class Integer(Field[int]):
-    """
-    :class:`Field` for storing integer numbers.
+    """:class:`Field` for storing integer numbers.
 
     :param default: default value for field
     :param min: field value must be larger or equal to this value when set
@@ -176,8 +168,7 @@ class Integer(Field[int]):
 
 
 class Boolean(Field[bool]):
-    """
-    :class:`Field` for storing boolean values
+    """:class:`Field` for storing boolean values.
 
     :param default: default value for field
     """
@@ -187,8 +178,7 @@ class Boolean(Field[bool]):
 
 
 class Collection(Field[Union[tuple, frozenset]]):
-    """
-    :class:`Field` for storing collections of a given type.
+    """:class:`Field` for storing collections of a given type.
 
     :param type: all items stored in the collection must be of this type
     :param container: the type to store the items in

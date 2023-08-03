@@ -59,8 +59,7 @@ class LibraryController:
         return backends_to_uris
 
     def browse(self, uri):
-        """
-        Browse directories and tracks at the given ``uri``.
+        """Browse directories and tracks at the given ``uri``.
 
         ``uri`` is a string which represents some directory belonging to a
         backend. To get the intial root directories for backends pass
@@ -124,8 +123,7 @@ class LibraryController:
         return []
 
     def get_distinct(self, field, query=None):
-        """
-        List distinct values for a given field from the library.
+        """List distinct values for a given field from the library.
 
         This has mainly been added to support the list commands the MPD
         protocol supports in a more sane fashion. Other frontends are not
@@ -171,7 +169,7 @@ class LibraryController:
         return result
 
     def get_images(self, uris):
-        """Lookup the images for the given URIs
+        """Lookup the images for the given URIs.
 
         Backends can use this to return image URIs for any URI they know about
         be it tracks, albums, playlists. The lookup result is a dictionary
@@ -210,8 +208,7 @@ class LibraryController:
         return results
 
     def lookup(self, uris):
-        """
-        Lookup the given URIs.
+        """Lookup the given URIs.
 
         If the URI expands to multiple tracks, the returned list will contain
         them all.
@@ -243,8 +240,7 @@ class LibraryController:
         return results
 
     def refresh(self, uri: Optional[str] = None):
-        """
-        Refresh library. Limit to URI and below if an URI is given.
+        """Refresh library. Limit to URI and below if an URI is given.
 
         :param uri: directory or track URI
         :type uri: string
@@ -268,8 +264,7 @@ class LibraryController:
                 future.get()
 
     def search(self, query, uris=None, exact=False):
-        """
-        Search the library for tracks where ``field`` contains ``values``.
+        """Search the library for tracks where ``field`` contains ``values``.
 
         ``field`` can be one of ``uri``, ``track_name``, ``album``, ``artist``,
         ``albumartist``, ``composer``, ``performer``, ``track_no``, ``genre``,

@@ -38,8 +38,7 @@ class ExtensionData(NamedTuple):
 
 
 class Extension:
-
-    """Base class for Mopidy extensions"""
+    """Base class for Mopidy extensions."""
 
     dist_name: str
     """The extension's distribution name, as registered on PyPI
@@ -69,7 +68,7 @@ class Extension:
         raise NotImplementedError('Add at least a config section with "enabled = true"')
 
     def get_config_schema(self) -> ConfigSchema:
-        """The extension's config validation schema
+        """The extension's config validation schema.
 
         :returns: :class:`~mopidy.config.schemas.ConfigSchema`
         """
@@ -146,8 +145,7 @@ class Extension:
         pass
 
     def setup(self, registry: Registry) -> None:
-        """
-        Register the extension's components in the extension :class:`Registry`.
+        """Register the extension's components in the extension :class:`Registry`.
 
         For example, to register a backend::
 
@@ -169,7 +167,6 @@ class Extension:
 
 
 class Registry(Mapping):
-
     """Registry of components provided by Mopidy extensions.
 
     Passed to the :meth:`~Extension.setup` method of all extensions. The
@@ -213,7 +210,6 @@ def load_extensions() -> list[ExtensionData]:
 
     :returns: list of installed extensions
     """
-
     installed_extensions = []
 
     for entry_point in metadata.entry_points(group="mopidy.ext"):
@@ -270,7 +266,6 @@ def validate_extension_data(data: ExtensionData) -> bool:
     :param extensions: an extension to check
     :returns: if extension should be run
     """
-
     logger.debug("Validating extension: %s", data.extension.ext_name)
 
     if data.extension.ext_name != data.entry_point.name:

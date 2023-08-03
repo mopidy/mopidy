@@ -47,8 +47,7 @@ logger = logging.getLogger(__name__)
 
 
 class Backend:
-
-    """Backend API
+    """Backend API.
 
     If the backend has problems during initialization it should raise
     :exc:`mopidy.exceptions.BackendError` with a descriptive error message.
@@ -108,9 +107,7 @@ class Backend:
 
 @pykka.traversable
 class LibraryProvider:
-
-    """
-    :param backend: backend the controller is a part of
+    """:param backend: backend the controller is a part of
     :type backend: :class:`mopidy.backend.Backend`
     """
 
@@ -128,8 +125,7 @@ class LibraryProvider:
         self.backend = backend
 
     def browse(self, uri: Uri) -> list[Ref]:
-        """
-        See :meth:`mopidy.core.LibraryController.browse`.
+        """See :meth:`mopidy.core.LibraryController.browse`.
 
         If you implement this method, make sure to also set
         :attr:`root_directory`.
@@ -141,8 +137,7 @@ class LibraryProvider:
     def get_distinct(
         self, field: DistinctField, query: Optional[Query[DistinctField]] = None
     ) -> set[str]:
-        """
-        See :meth:`mopidy.core.LibraryController.get_distinct`.
+        """See :meth:`mopidy.core.LibraryController.get_distinct`.
 
         *MAY be implemented by subclass.*
 
@@ -154,8 +149,7 @@ class LibraryProvider:
         return set()
 
     def get_images(self, uris: list[Uri]) -> dict[Uri, list[Image]]:
-        """
-        See :meth:`mopidy.core.LibraryController.get_images`.
+        """See :meth:`mopidy.core.LibraryController.get_images`.
 
         *MAY be implemented by subclass.*
 
@@ -164,16 +158,14 @@ class LibraryProvider:
         return {}
 
     def lookup(self, uri: Uri) -> dict[Uri, list[Track]]:
-        """
-        See :meth:`mopidy.core.LibraryController.lookup`.
+        """See :meth:`mopidy.core.LibraryController.lookup`.
 
         *MUST be implemented by subclass.*
         """
         raise NotImplementedError
 
     def refresh(self, uri: Optional[Uri] = None) -> None:
-        """
-        See :meth:`mopidy.core.LibraryController.refresh`.
+        """See :meth:`mopidy.core.LibraryController.refresh`.
 
         *MAY be implemented by subclass.*
         """
@@ -185,8 +177,7 @@ class LibraryProvider:
         uris: Optional[list[Uri]] = None,
         exact: bool = False,
     ) -> list[SearchResult]:
-        """
-        See :meth:`mopidy.core.LibraryController.search`.
+        """See :meth:`mopidy.core.LibraryController.search`.
 
         *MAY be implemented by subclass.*
 
@@ -198,9 +189,7 @@ class LibraryProvider:
 
 @pykka.traversable
 class PlaybackProvider:
-
-    """
-    :param audio: the audio actor
+    """:param audio: the audio actor
     :type audio: actor proxy to an instance of :class:`mopidy.audio.Audio`
     :param backend: the backend
     :type backend: :class:`mopidy.backend.Backend`
@@ -211,8 +200,7 @@ class PlaybackProvider:
         self.backend = backend
 
     def pause(self) -> bool:
-        """
-        Pause playback.
+        """Pause playback.
 
         *MAY be reimplemented by subclass.*
 
@@ -221,8 +209,7 @@ class PlaybackProvider:
         return self.audio.pause_playback().get()
 
     def play(self) -> bool:
-        """
-        Start playback.
+        """Start playback.
 
         *MAY be reimplemented by subclass.*
 
@@ -231,8 +218,7 @@ class PlaybackProvider:
         return self.audio.start_playback().get()
 
     def prepare_change(self) -> None:
-        """
-        Indicate that an URI change is about to happen.
+        """Indicate that an URI change is about to happen.
 
         *MAY be reimplemented by subclass.*
 
@@ -243,8 +229,7 @@ class PlaybackProvider:
         self.audio.prepare_change().get()
 
     def translate_uri(self, uri: Uri) -> Optional[Uri]:
-        """
-        Convert custom URI scheme to real playable URI.
+        """Convert custom URI scheme to real playable URI.
 
         *MAY be reimplemented by subclass.*
 
@@ -260,8 +245,7 @@ class PlaybackProvider:
         return uri
 
     def is_live(self, uri: Uri) -> bool:
-        """
-        Decide if the URI should be treated as a live stream or not.
+        """Decide if the URI should be treated as a live stream or not.
 
         *MAY be reimplemented by subclass.*
 
@@ -275,8 +259,7 @@ class PlaybackProvider:
         return False
 
     def should_download(self, uri: Uri) -> bool:
-        """
-        Attempt progressive download buffering for the URI or not.
+        """Attempt progressive download buffering for the URI or not.
 
         *MAY be reimplemented by subclass.*
 
@@ -290,8 +273,7 @@ class PlaybackProvider:
         return False
 
     def on_source_setup(self, source: Gst.Element) -> None:
-        """
-        Called when a new GStreamer source is created, allowing us to configure
+        """Called when a new GStreamer source is created, allowing us to configure
         the source. This runs in the audio thread so should not block.
 
         *MAY be reimplemented by subclass.*
@@ -304,8 +286,7 @@ class PlaybackProvider:
         pass
 
     def change_track(self, track: Track) -> bool:
-        """
-        Switch to provided track.
+        """Switch to provided track.
 
         *MAY be reimplemented by subclass.*
 
@@ -334,8 +315,7 @@ class PlaybackProvider:
         return True
 
     def resume(self) -> bool:
-        """
-        Resume playback at the same time position playback was paused.
+        """Resume playback at the same time position playback was paused.
 
         *MAY be reimplemented by subclass.*
 
@@ -344,8 +324,7 @@ class PlaybackProvider:
         return self.audio.start_playback().get()
 
     def seek(self, time_position: int) -> bool:
-        """
-        Seek to a given time position.
+        """Seek to a given time position.
 
         *MAY be reimplemented by subclass.*
 
@@ -356,8 +335,7 @@ class PlaybackProvider:
         return self.audio.set_position(time_position).get()
 
     def stop(self) -> bool:
-        """
-        Stop playback.
+        """Stop playback.
 
         *MAY be reimplemented by subclass.*
 
@@ -369,8 +347,7 @@ class PlaybackProvider:
         return self.audio.stop_playback().get()
 
     def get_time_position(self) -> int:
-        """
-        Get the current time position in milliseconds.
+        """Get the current time position in milliseconds.
 
         *MAY be reimplemented by subclass.*
 
@@ -381,9 +358,7 @@ class PlaybackProvider:
 
 @pykka.traversable
 class PlaylistsProvider:
-
-    """
-    A playlist provider exposes a collection of playlists, methods to
+    """A playlist provider exposes a collection of playlists, methods to
     create/change/delete playlists in this collection, and lookup of any
     playlist the backend knows about.
 
@@ -395,8 +370,7 @@ class PlaylistsProvider:
         self.backend = backend
 
     def as_list(self) -> list[Ref]:
-        """
-        Get a list of the currently available playlists.
+        """Get a list of the currently available playlists.
 
         Returns a list of :class:`~mopidy.models.Ref` objects referring to the
         playlists. In other words, no information about the playlists' content
@@ -409,8 +383,7 @@ class PlaylistsProvider:
         raise NotImplementedError
 
     def get_items(self, uri: Uri) -> Optional[list[Ref]]:
-        """
-        Get the items in a playlist specified by ``uri``.
+        """Get the items in a playlist specified by ``uri``.
 
         Returns a list of :class:`~mopidy.models.Ref` objects referring to the
         playlist's items.
@@ -425,8 +398,7 @@ class PlaylistsProvider:
         raise NotImplementedError
 
     def create(self, name: str) -> Optional[Playlist]:
-        """
-        Create a new empty playlist with the given name.
+        """Create a new empty playlist with the given name.
 
         Returns a new playlist with the given name and an URI, or :class:`None`
         on failure.
@@ -440,8 +412,7 @@ class PlaylistsProvider:
         raise NotImplementedError
 
     def delete(self, uri: Uri) -> bool:
-        """
-        Delete playlist identified by the URI.
+        """Delete playlist identified by the URI.
 
         Returns :class:`True` if deleted, :class:`False` otherwise.
 
@@ -457,8 +428,7 @@ class PlaylistsProvider:
         raise NotImplementedError
 
     def lookup(self, uri: Uri) -> Optional[Playlist]:
-        """
-        Lookup playlist with given URI in both the set of playlists and in any
+        """Lookup playlist with given URI in both the set of playlists and in any
         other playlist source.
 
         Returns the playlists or :class:`None` if not found.
@@ -472,16 +442,14 @@ class PlaylistsProvider:
         raise NotImplementedError
 
     def refresh(self) -> None:
-        """
-        Refresh the playlists in :attr:`playlists`.
+        """Refresh the playlists in :attr:`playlists`.
 
         *MUST be implemented by subclass.*
         """
         raise NotImplementedError
 
     def save(self, playlist: Playlist) -> Optional[Playlist]:
-        """
-        Save the given playlist.
+        """Save the given playlist.
 
         The playlist must have an ``uri`` attribute set. To create a new
         playlist with an URI, use :meth:`create`.
@@ -498,9 +466,7 @@ class PlaylistsProvider:
 
 
 class BackendListener(listener.Listener):
-
-    """
-    Marker interface for recipients of events sent by the backend actors.
+    """Marker interface for recipients of events sent by the backend actors.
 
     Any Pykka actor that mixes in this class will receive calls to the methods
     defined here when the corresponding events happen in a backend actor. This
@@ -513,12 +479,11 @@ class BackendListener(listener.Listener):
 
     @staticmethod
     def send(event: str, **kwargs: Any) -> None:
-        """Helper to allow calling of backend listener events"""
+        """Helper to allow calling of backend listener events."""
         listener.send(BackendListener, event, **kwargs)
 
     def playlists_loaded(self) -> None:
-        """
-        Called when playlists are loaded or refreshed.
+        """Called when playlists are loaded or refreshed.
 
         *MAY* be implemented by actor.
         """

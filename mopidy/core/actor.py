@@ -85,14 +85,14 @@ class Core(
         self.audio = audio
 
     def get_uri_schemes(self) -> list[backend.UriScheme]:
-        """Get list of URI schemes we can handle"""
+        """Get list of URI schemes we can handle."""
         futures = [b.uri_schemes for b in self.backends]
         results = pykka.get_all(futures)
         uri_schemes = itertools.chain(*results)
         return sorted(uri_schemes)
 
     def get_version(self) -> str:
-        """Get version of the Mopidy core API"""
+        """Get version of the Mopidy core API."""
         return versioning.get_version()
 
     def reached_end_of_stream(self) -> None:
@@ -194,10 +194,7 @@ class Core(
         return self._get_data_dir() / "state.json.gz"
 
     def _save_state(self):
-        """
-        Save current state to disk.
-        """
-
+        """Save current state to disk."""
         state_file = self._get_state_file()
         logger.info("Saving state to %s", state_file)
 
@@ -213,8 +210,7 @@ class Core(
         logger.debug("Saving state done")
 
     def _load_state(self, coverage):
-        """
-        Restore state from disk.
+        """Restore state from disk.
 
         Load state from disk and restore it. Parameter ``coverage``
         limits the amount of data to restore. Possible
@@ -229,7 +225,6 @@ class Core(
         :param coverage: amount of data to restore
         :type coverage: list of strings
         """
-
         state_file = self._get_state_file()
         logger.info("Loading state from %s", state_file)
 

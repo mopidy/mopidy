@@ -14,8 +14,7 @@ _models = {}
 
 
 class ImmutableObject:
-    """
-    Superclass for immutable objects whose fields can only be modified via the
+    """Superclass for immutable objects whose fields can only be modified via the
     constructor.
 
     This version of this class has been retained to avoid breaking any clients
@@ -93,8 +92,7 @@ class ImmutableObject:
         return not self.__eq__(other)
 
     def replace(self, **kwargs):
-        """
-        Replace the fields in the model and return a new instance
+        """Replace the fields in the model and return a new instance.
 
         Examples::
 
@@ -131,7 +129,6 @@ class ImmutableObject:
 
 
 class _ValidatedImmutableObjectMeta(type, Generic[T]):
-
     """Helper that initializes fields, slots and memoizes instance creation."""
 
     _instances: dict[weakref.ReferenceType[_ValidatedImmutableObjectMeta[T]], T] = {}
@@ -175,8 +172,7 @@ class _ValidatedImmutableObjectMeta(type, Generic[T]):
 class ValidatedImmutableObject(
     ImmutableObject, metaclass=_ValidatedImmutableObjectMeta
 ):
-    """
-    Superclass for immutable objects whose fields can only be modified via the
+    """Superclass for immutable objects whose fields can only be modified via the
     constructor. Fields should be :class:`Field` instances to ensure type
     safety in our models.
 
@@ -207,8 +203,7 @@ class ValidatedImmutableObject(
                 yield field, getattr(self, key)
 
     def replace(self, **kwargs):
-        """
-        Replace the fields in the model and return a new instance
+        """Replace the fields in the model and return a new instance.
 
         Examples::
 
