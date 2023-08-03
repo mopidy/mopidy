@@ -32,7 +32,7 @@ class MyTestPlaybackProvider(backend.PlaybackProvider):
         if "limit_never" in uri:
             # unplayable
             return None
-        elif "limit_one" in uri:
+        if "limit_one" in uri:
             # one time playable
             if self._call_onetime:
                 return None
@@ -42,12 +42,11 @@ class MyTestPlaybackProvider(backend.PlaybackProvider):
     def translate_uri(self, uri):
         if "error" in uri:
             raise Exception(uri)
-        elif "unplayable" in uri:
+        if "unplayable" in uri:
             return None
-        elif "limit" in uri:
+        if "limit" in uri:
             return self._translate_uri_call_limit(uri)
-        else:
-            return uri
+        return uri
 
 
 class MyTestBackend(dummy_backend.DummyBackend):

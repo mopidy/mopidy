@@ -18,7 +18,7 @@ class FileLibraryProvider(backend.LibraryProvider):
     def root_directory(self):
         if not self._media_dirs:
             return None
-        elif len(self._media_dirs) == 1:
+        if len(self._media_dirs) == 1:
             uri = path.path_to_uri(self._media_dirs[0]["path"])
         else:
             uri = "file:root"

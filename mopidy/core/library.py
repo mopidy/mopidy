@@ -92,7 +92,7 @@ class LibraryController:
         """
         if uri is None:
             return self._roots()
-        elif not uri.strip():
+        if not uri.strip():
             return []
         validation.check_uri(uri)
         return self._browse(uri)

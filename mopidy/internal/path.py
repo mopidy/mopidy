@@ -18,7 +18,7 @@ def get_or_create_dir(dir_path):
             f"A file with the same name as the desired dir, "
             f"{dir_path!r}, already exists."
         )
-    elif not dir_path.is_dir():
+    if not dir_path.is_dir():
         logger.info(f"Creating dir {dir_path.as_uri()}")
         dir_path.mkdir(mode=0o755, parents=True)
     return dir_path

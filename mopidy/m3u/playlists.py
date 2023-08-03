@@ -71,11 +71,10 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         for entry in self._playlists_dir.iterdir():
             if entry.suffix not in [".m3u", ".m3u8"]:
                 continue
-            elif not entry.is_file():
+            if not entry.is_file():
                 continue
-            else:
-                playlist_path = entry.relative_to(self._playlists_dir)
-                result.append(translator.path_to_ref(playlist_path))
+            playlist_path = entry.relative_to(self._playlists_dir)
+            result.append(translator.path_to_ref(playlist_path))
         result.sort(key=operator.attrgetter("name"))
         return result
 
@@ -154,10 +153,9 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             return translator.playlist(path, playlist.tracks, mtime)
 
     def _abspath(self, path):
-        if not path.is_absolute():
-            return self._playlists_dir / path
-        else:
+        if path.is_absolute():
             return path
+        return self._playlists_dir / path
 
     def _is_in_basedir(self, local_path):
         local_path = self._abspath(local_path)
@@ -176,5 +174,4 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             )
         if "w" in mode:
             return replace(path, mode, encoding=encoding, errors="replace")
-        else:
-            return path.open(mode, encoding=encoding, errors="replace")
+        return path.open(mode, encoding=encoding, errors="replace")

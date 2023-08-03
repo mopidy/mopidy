@@ -123,8 +123,8 @@ def _unwrap_stream(
                 uri,
             )
             return None, None
-        else:
-            seen_uris.add(uri)
+
+        seen_uris.add(uri)
 
         logger.debug("Unwrapping stream from URI: %s", uri)
 

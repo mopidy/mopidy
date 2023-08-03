@@ -113,9 +113,9 @@ class _Appsrc:
             gst_logger.debug("Sending appsrc end-of-stream event.")
             result = self._source.emit("end-of-stream")
             return result == Gst.FlowReturn.OK
-        else:
-            result = self._source.emit("push-buffer", buffer_)
-            return result == Gst.FlowReturn.OK
+
+        result = self._source.emit("push-buffer", buffer_)
+        return result == Gst.FlowReturn.OK
 
     def _on_signal(self, element, clocktime, func) -> bool:
         # This shim is used to ensure we always return true, and also handles
@@ -813,10 +813,9 @@ class Audio(pykka.ThreadingActor):
         # duplicate seek events making it to appsrc. Since elements are not
         # allowed to act on the seek event, only modify it, this should be safe
         # to do.
-        result = self._queue.seek_simple(
+        return self._queue.seek_simple(
             Gst.Format.TIME, Gst.SeekFlags.FLUSH, gst_position
         )
-        return result
 
     def start_playback(self) -> bool:
         """Notify GStreamer that it should start playback.

@@ -304,7 +304,8 @@ def validate_extension_data(data: ExtensionData) -> bool:
             data.extension.ext_name,
         )
         return False
-    elif not isinstance(data.config_schema.get("enabled"), config_lib.Boolean):
+
+    if not isinstance(data.config_schema.get("enabled"), config_lib.Boolean):
         logger.error(
             'Extension %s does not have the required "enabled" config'
             " option, disabling.",

@@ -93,8 +93,7 @@ class JsonRpcWrapper:
         """
         if isinstance(request, list):
             return self._handle_batch(request)
-        else:
-            return self._handle_single_request(request)
+        return self._handle_single_request(request)
 
     def _handle_batch(self, requests):
         if not requests:
@@ -172,12 +171,11 @@ class JsonRpcWrapper:
         params = request["params"]
         if isinstance(params, list):
             return params, {}
-        elif isinstance(params, dict):
+        if isinstance(params, dict):
             return [], params
-        else:
-            raise JsonRpcInvalidRequestError(
-                data="'params', if given, must be an array or an object"
-            )
+        raise JsonRpcInvalidRequestError(
+            data="'params', if given, must be an array or an object"
+        )
 
     def _get_method(self, method_path):
         if callable(self.objects.get(method_path, None)):

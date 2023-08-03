@@ -14,8 +14,7 @@ class Extension(ext.Extension):
         return config.read(conf_file)
 
     def get_config_schema(self):
-        schema = super().get_config_schema()
-        return schema
+        return super().get_config_schema()
 
     def setup(self, registry):
         from .mixer import SoftwareMixer

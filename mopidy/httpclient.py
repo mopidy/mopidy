@@ -35,8 +35,8 @@ def format_proxy(proxy_config: ProxyConfig, auth: bool = True) -> Optional[str]:
 
     if username and password and auth:
         return f"{scheme}://{username}:{password}@{hostname}:{port}"
-    else:
-        return f"{scheme}://{hostname}:{port}"
+
+    return f"{scheme}://{hostname}:{port}"
 
 
 def format_user_agent(name: Optional[str] = None) -> str:

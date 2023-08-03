@@ -243,7 +243,7 @@ class Boolean(ConfigValue[bool]):
             return None
         if result.lower() in self.true_values:
             return True
-        elif result.lower() in self.false_values:
+        if result.lower() in self.false_values:
             return False
         raise ValueError(f"invalid value for boolean: {result!r}")
 
@@ -254,10 +254,9 @@ class Boolean(ConfigValue[bool]):
     ) -> Literal["true", "false"]:
         if value is True:
             return "true"
-        elif value in (False, None):
+        if value in (False, None):
             return "false"
-        else:
-            raise ValueError(f"{value!r} is not a boolean")
+        raise ValueError(f"{value!r} is not a boolean")
 
 
 class Pair(ConfigValue[tuple[K, V]]):
@@ -315,12 +314,12 @@ class Pair(ConfigValue[tuple[K, V]]):
             and serialized_first_value == serialized_second_value
         ):
             return serialized_first_value
-        else:
-            return "{}{}{}".format(
-                serialized_first_value,
-                self._separator,
-                serialized_second_value,
-            )
+
+        return "{}{}{}".format(
+            serialized_first_value,
+            self._separator,
+            serialized_second_value,
+        )
 
 
 class List(ConfigValue[V]):

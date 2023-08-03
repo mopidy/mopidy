@@ -254,7 +254,7 @@ class PlaylistsController:
         validation.check_instance(playlist, Playlist)
 
         if playlist.uri is None:
-            return  # TODO: log this problem?
+            return None  # TODO: log this problem?
 
         uri_scheme = urllib.parse.urlparse(playlist.uri).scheme
         backend = self.backends.with_playlists.get(uri_scheme, None)

@@ -355,8 +355,9 @@ def _preprocess(config_string: str) -> str:
     def comments(match) -> Optional[str]:
         if match.group(1) == "#":
             return f"__HASH{next(counter):d}__ ="
-        elif match.group(1) == ";":
+        if match.group(1) == ";":
             return f"__SEMICOLON{next(counter):d}__ ="
+        return None
 
     def inlinecomments(match) -> str:
         return f"\n__INLINE{next(counter):d}__ ="
@@ -381,8 +382,7 @@ def _postprocess(config_string: str) -> str:
     result = re.sub(r"^__HASH\d+__ =(.*)$", r"#\g<1>", result, flags=flags)
     result = re.sub(r"^__SEMICOLON\d+__ =(.*)$", r";\g<1>", result, flags=flags)
     result = re.sub(r"\n__SECTION\d+__ =(.*)$", r"\g<1>", result, flags=flags)
-    result = re.sub(r"^__BLANK\d+__ =$", "", result, flags=flags)
-    return result
+    return re.sub(r"^__BLANK\d+__ =$", "", result, flags=flags)
 
 
 class Proxy(Mapping):

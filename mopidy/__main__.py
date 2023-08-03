@@ -7,9 +7,8 @@ from typing import TYPE_CHECKING, TypedDict
 
 import pykka.debug
 
-from mopidy import commands
+from mopidy import commands, ext
 from mopidy import config as config_lib
-from mopidy import ext
 from mopidy.internal import log, path, process, versioning
 from mopidy.internal.gi import Gst
 
@@ -114,7 +113,7 @@ def main():
         if args.command == config_cmd:
             schemas = [d.config_schema for d in extensions_data]
             return args.command.run(config, config_errors, schemas)
-        elif args.command == deps_cmd:
+        if args.command == deps_cmd:
             return args.command.run()
 
         check_config_errors(config, config_errors, extensions_status)

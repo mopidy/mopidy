@@ -213,7 +213,7 @@ class TracklistController:
             validation.check_instance(tl_track, TlTrack)
         if self.get_single() and self.get_repeat():
             return tl_track
-        elif self.get_single():
+        if self.get_single():
             return None
 
         # Current difference between next and EOT handling is that EOT needs to
@@ -284,8 +284,7 @@ class TracklistController:
         if self.get_repeat():
             if self.get_consume() and len(self._tl_tracks) == 1:
                 return None
-            else:
-                next_index %= len(self._tl_tracks)
+            next_index %= len(self._tl_tracks)
         elif next_index >= len(self._tl_tracks):
             return None
 

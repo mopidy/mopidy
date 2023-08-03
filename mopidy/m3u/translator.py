@@ -50,7 +50,7 @@ def load_items(fp, basedir):
             if line.startswith("#EXTINF:"):
                 name = line.partition(",")[2]
             continue
-        elif not urllib.parse.urlsplit(line).scheme:
+        if not urllib.parse.urlsplit(line).scheme:
             path = basedir / line
             if not name:
                 name = name_from_path(path)
