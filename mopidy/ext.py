@@ -128,7 +128,6 @@ class Extension:
         :returns:
           Instance of a :class:`~mopidy.commands.Command` class.
         """
-        pass
 
     def validate_environment(self) -> None:
         """Checks if the extension can run in the current environment.
@@ -142,7 +141,6 @@ class Extension:
         :raises: :exc:`~mopidy.exceptions.ExtensionError`
         :returns: :class:`None`
         """
-        pass
 
     def setup(self, registry: Registry) -> None:
         """Register the extension's components in the extension :class:`Registry`.

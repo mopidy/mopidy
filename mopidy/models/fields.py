@@ -112,7 +112,7 @@ class Date(String):
     :param default: default value for field
     """
 
-    pass  # TODO: make this check for YYYY-MM-DD, YYYY-MM, YYYY using strptime.
+    # TODO: make this check for YYYY-MM-DD, YYYY-MM, YYYY using strptime.
 
 
 class Identifier(String):
@@ -138,7 +138,7 @@ class URI(Identifier):
     :param default: default value for field
     """
 
-    pass  # TODO: validate URIs?
+    # TODO: validate URIs?
 
 
 class Integer(Field[int]):

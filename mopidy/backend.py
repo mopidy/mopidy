@@ -169,7 +169,6 @@ class LibraryProvider:
 
         *MAY be implemented by subclass.*
         """
-        pass
 
     def search(
         self,
@@ -283,7 +282,6 @@ class PlaybackProvider:
 
         .. versionadded:: 3.4
         """
-        pass
 
     def change_track(self, track: Track) -> bool:
         """Switch to provided track.
@@ -487,7 +485,6 @@ class BackendListener(listener.Listener):
 
         *MAY* be implemented by actor.
         """
-        pass
 
 
 if TYPE_CHECKING:

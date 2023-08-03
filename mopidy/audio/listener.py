@@ -21,7 +21,6 @@ class AudioListener(listener.Listener):
 
         *MAY* be implemented by actor.
         """
-        pass
 
     def stream_changed(self, uri):
         """Called whenever the audio stream changes.
@@ -30,7 +29,6 @@ class AudioListener(listener.Listener):
 
         :param string uri: URI the stream has started playing.
         """
-        pass
 
     def position_changed(self, position):
         """Called whenever the position of the stream changes.
@@ -39,7 +37,6 @@ class AudioListener(listener.Listener):
 
         :param int position: Position in milliseconds.
         """
-        pass
 
     def state_changed(self, old_state, new_state, target_state):
         """Called after the playback state have changed.
@@ -67,7 +64,6 @@ class AudioListener(listener.Listener):
         :type target_state: string from :class:`mopidy.core.PlaybackState`
             field or :class:`None` if this is a final state.
         """
-        pass
 
     def tags_changed(self, tags):
         """Called whenever the current audio stream's tags change.
@@ -84,4 +80,3 @@ class AudioListener(listener.Listener):
         :param tags: The tags that have just been updated.
         :type tags: :class:`set` of strings
         """
-        pass

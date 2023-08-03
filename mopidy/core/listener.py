@@ -39,7 +39,6 @@ class CoreListener(listener.Listener):
         :param time_position: the time position in milliseconds
         :type time_position: int
         """
-        pass
 
     def track_playback_resumed(self, tl_track, time_position):
         """Called whenever track playback is resumed.
@@ -51,7 +50,6 @@ class CoreListener(listener.Listener):
         :param time_position: the time position in milliseconds
         :type time_position: int
         """
-        pass
 
     def track_playback_started(self, tl_track):
         """Called whenever a new track starts playing.
@@ -61,7 +59,6 @@ class CoreListener(listener.Listener):
         :param tl_track: the track that just started playing
         :type tl_track: :class:`mopidy.models.TlTrack`
         """
-        pass
 
     def track_playback_ended(self, tl_track, time_position):
         """Called whenever playback of a track ends.
@@ -73,7 +70,6 @@ class CoreListener(listener.Listener):
         :param time_position: the time position in milliseconds
         :type time_position: int
         """
-        pass
 
     def playback_state_changed(self, old_state, new_state):
         """Called whenever playback state is changed.
@@ -85,21 +81,18 @@ class CoreListener(listener.Listener):
         :param new_state: the state after the change
         :type new_state: string from :class:`mopidy.core.PlaybackState` field
         """
-        pass
 
     def tracklist_changed(self):
         """Called whenever the tracklist is changed.
 
         *MAY* be implemented by actor.
         """
-        pass
 
     def playlists_loaded(self):
         """Called when playlists are loaded or refreshed.
 
         *MAY* be implemented by actor.
         """
-        pass
 
     def playlist_changed(self, playlist):
         """Called whenever a playlist is changed.
@@ -109,7 +102,6 @@ class CoreListener(listener.Listener):
         :param playlist: the changed playlist
         :type playlist: :class:`mopidy.models.Playlist`
         """
-        pass
 
     def playlist_deleted(self, uri):
         """Called whenever a playlist is deleted.
@@ -119,14 +111,12 @@ class CoreListener(listener.Listener):
         :param uri: the URI of the deleted playlist
         :type uri: string
         """
-        pass
 
     def options_changed(self):
         """Called whenever an option is changed.
 
         *MAY* be implemented by actor.
         """
-        pass
 
     def volume_changed(self, volume):
         """Called whenever the volume is changed.
@@ -136,7 +126,6 @@ class CoreListener(listener.Listener):
         :param volume: the new volume in the range [0..100]
         :type volume: int
         """
-        pass
 
     def mute_changed(self, mute):
         """Called whenever the mute state is changed.
@@ -146,7 +135,6 @@ class CoreListener(listener.Listener):
         :param mute: the new mute state
         :type mute: boolean
         """
-        pass
 
     def seeked(self, time_position):
         """Called whenever the time position changes by an unexpected amount, e.g.
@@ -157,7 +145,6 @@ class CoreListener(listener.Listener):
         :param time_position: the position that was seeked to in milliseconds
         :type time_position: int
         """
-        pass
 
     def stream_title_changed(self, title):
         """Called whenever the currently playing stream title changes.
@@ -167,4 +154,3 @@ class CoreListener(listener.Listener):
         :param title: the new stream title
         :type title: string
         """
-        pass

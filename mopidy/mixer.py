@@ -138,7 +138,6 @@ class MixerListener(listener.Listener):
         :param volume: the new volume
         :type volume: int in range [0..100]
         """
-        pass
 
     def mute_changed(self, mute: bool) -> None:
         """Called after the mute state has changed.
@@ -148,7 +147,6 @@ class MixerListener(listener.Listener):
         :param mute: :class:`True` if muted, :class:`False` if not muted
         :type mute: bool
         """
-        pass
 
 
 if TYPE_CHECKING:
