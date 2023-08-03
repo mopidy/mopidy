@@ -143,7 +143,7 @@ class CoreActorTest(unittest.TestCase):
 
         self.assertRaisesRegex(
             AssertionError,
-            "Cannot add URI scheme 'dummy1' for B2, " "it is already handled by B1",
+            "Cannot add URI scheme 'dummy1' for B2, it is already handled by B1",
             Core,
             config={},
             mixer=None,

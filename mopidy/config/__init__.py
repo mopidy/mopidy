@@ -251,7 +251,7 @@ def _load_file(
 ) -> None:
     if not file_path.exists():
         logger.debug(
-            f"Loading config from {file_path.as_uri()} failed; " f"it does not exist"
+            f"Loading config from {file_path.as_uri()} failed; it does not exist"
         )
         return
     if not os.access(str(file_path), os.R_OK):

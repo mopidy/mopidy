@@ -15,7 +15,7 @@ _MESSAGES = {
         'tracklist.add() "tracks" argument is deprecated'
     ),
     "core.tracklist.eot_track": (
-        "tracklist.eot_track() is pending deprecation, use " "tracklist.get_eot_tlid()"
+        "tracklist.eot_track() is pending deprecation, use tracklist.get_eot_tlid()"
     ),
     "core.tracklist.next_track": (
         "tracklist.next_track() is pending deprecation, use "

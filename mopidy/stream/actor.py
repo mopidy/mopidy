@@ -119,7 +119,7 @@ def _unwrap_stream(
     while time.time() < deadline:
         if uri in seen_uris:
             logger.info(
-                "Unwrapping stream from URI (%s) failed: " "playlist referenced itself",
+                "Unwrapping stream from URI (%s) failed: playlist referenced itself",
                 uri,
             )
             return None, None
@@ -132,7 +132,7 @@ def _unwrap_stream(
             scan_timeout = deadline - time.time()
             if scan_timeout < 0:
                 logger.info(
-                    "Unwrapping stream from URI (%s) failed: " "timed out in %sms",
+                    "Unwrapping stream from URI (%s) failed: timed out in %sms",
                     uri,
                     timeout,
                 )
@@ -164,7 +164,7 @@ def _unwrap_stream(
 
         if content is None:
             logger.info(
-                "Unwrapping stream from URI (%s) failed: " "error downloading URI %s",
+                "Unwrapping stream from URI (%s) failed: error downloading URI %s",
                 original_uri,
                 uri,
             )

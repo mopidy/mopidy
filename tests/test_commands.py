@@ -306,7 +306,7 @@ class HelpTest(unittest.TestCase):
         cmd.add_argument("-h", "--help", action="store_true", help="show this message")
 
         expected = (
-            "usage: foo [-h]\n\n" "OPTIONS:\n\n" "  -h, --help  show this message"
+            "usage: foo [-h]\n\nOPTIONS:\n\n  -h, --help  show this message"
         )
         assert expected == cmd.format_help("foo").strip()
 
@@ -327,7 +327,7 @@ class HelpTest(unittest.TestCase):
         cmd = commands.Command()
         cmd.help = "some text about everything this command does."
 
-        expected = "usage: foo\n\n" "some text about everything this command does."
+        expected = "usage: foo\n\nsome text about everything this command does."
         assert expected == cmd.format_help("foo").strip()
 
     def test_command_with_documentation_and_option(self):

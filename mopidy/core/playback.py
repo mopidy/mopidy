@@ -376,7 +376,7 @@ class PlaybackController:
                 # TODO: check by binding against underlying play method using
                 # inspect and otherwise re-raise?
                 logger.error(
-                    "%s needs to be updated to work with this " "version of Mopidy.",
+                    "%s needs to be updated to work with this version of Mopidy.",
                     backend,
                 )
                 return False

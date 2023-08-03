@@ -128,7 +128,7 @@ def check_query(
         check_choice(
             key,
             fields,
-            msg="Expected query field to be one of " "{choices}, not {arg!r}",
+            msg="Expected query field to be one of {choices}, not {arg!r}",
         )
         if list_values:
             msg = 'Expected "{key}" to be list of strings, not {arg!r}'

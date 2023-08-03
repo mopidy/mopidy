@@ -223,7 +223,7 @@ def load_extensions() -> list[ExtensionData]:
                 raise TypeError  # issubclass raises TypeError on non-class
         except TypeError:
             logger.error(
-                "Entry point %s did not contain a valid extension" "class: %r",
+                "Entry point %s did not contain a valid extensionclass: %r",
                 entry_point.name,
                 extension_class,
             )
@@ -244,7 +244,7 @@ def load_extensions() -> list[ExtensionData]:
             )
         except Exception:
             logger.exception(
-                "Setup of extension from entry point %s failed, " "ignoring extension.",
+                "Setup of extension from entry point %s failed, ignoring extension.",
                 entry_point.name,
             )
             continue

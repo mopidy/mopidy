@@ -222,18 +222,18 @@ class PostProcessorTest(unittest.TestCase):
         assert result == ""
 
     def test_plain_section(self):
-        result = config._postprocess("[__COMMENTS__]\n" "[section]\n" "foo = bar")
+        result = config._postprocess("[__COMMENTS__]\n[section]\nfoo = bar")
         assert result == "[section]\nfoo = bar"
 
     def test_initial_comments(self):
-        result = config._postprocess("[__COMMENTS__]\n" "__SEMICOLON0__ = foobar")
+        result = config._postprocess("[__COMMENTS__]\n__SEMICOLON0__ = foobar")
         assert result == "; foobar"
 
-        result = config._postprocess("[__COMMENTS__]\n" "__HASH0__ = foobar")
+        result = config._postprocess("[__COMMENTS__]\n__HASH0__ = foobar")
         assert result == "# foobar"
 
         result = config._postprocess(
-            "[__COMMENTS__]\n" "__SEMICOLON0__ = foo\n" "__HASH1__ = bar"
+            "[__COMMENTS__]\n__SEMICOLON0__ = foo\n__HASH1__ = bar"
         )
         assert result == "; foo\n# bar"
 
@@ -248,7 +248,7 @@ class PostProcessorTest(unittest.TestCase):
 
     def test_inline_semicolon_comment(self):
         result = config._postprocess(
-            "[__COMMENTS__]\n" "[section]\n" "foo = bar\n" "__INLINE0__ = baz"
+            "[__COMMENTS__]\n[section]\nfoo = bar\n__INLINE0__ = baz"
         )
         assert result == "[section]\nfoo = bar ; baz"
 
@@ -258,7 +258,7 @@ class PostProcessorTest(unittest.TestCase):
 
     def test_section_extra_text(self):
         result = config._postprocess(
-            "[__COMMENTS__]\n" "[section]\n" "__SECTION0__ = foobar"
+            "[__COMMENTS__]\n[section]\n__SECTION0__ = foobar"
         )
         assert result == "[section] foobar"
 

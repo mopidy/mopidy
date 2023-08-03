@@ -14,7 +14,7 @@ def try_ipv6_socket() -> bool:
         return True
     except OSError as exc:
         logger.debug(
-            f"Platform supports IPv6, but socket creation failed, " f"disabling: {exc}"
+            f"Platform supports IPv6, but socket creation failed, disabling: {exc}"
         )
     return False
 

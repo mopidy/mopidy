@@ -113,7 +113,7 @@ class FileLibraryProvider(backend.LibraryProvider):
 
             if local_path is None:
                 logger.debug(
-                    "Failed expanding path (%s) from file/media_dirs config " "value.",
+                    "Failed expanding path (%s) from file/media_dirs config value.",
                     media_dir_split[0],
                 )
                 continue
