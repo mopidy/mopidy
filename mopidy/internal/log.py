@@ -32,12 +32,12 @@ LogColorName = Literal[
 ]
 
 LOG_LEVELS: dict[int, dict[str, int]] = {
-    -1: dict(root=logging.ERROR, mopidy=logging.WARNING),
-    0: dict(root=logging.ERROR, mopidy=logging.INFO),
-    1: dict(root=logging.WARNING, mopidy=logging.DEBUG),
-    2: dict(root=logging.INFO, mopidy=logging.DEBUG),
-    3: dict(root=logging.DEBUG, mopidy=logging.DEBUG),
-    4: dict(root=logging.NOTSET, mopidy=logging.NOTSET),
+    -1: {"root": logging.ERROR, "mopidy": logging.WARNING},
+    0: {"root": logging.ERROR, "mopidy": logging.INFO},
+    1: {"root": logging.WARNING, "mopidy": logging.DEBUG},
+    2: {"root": logging.INFO, "mopidy": logging.DEBUG},
+    3: {"root": logging.DEBUG, "mopidy": logging.DEBUG},
+    4: {"root": logging.NOTSET, "mopidy": logging.NOTSET},
 }
 
 # Custom log level which has even lower priority than DEBUG

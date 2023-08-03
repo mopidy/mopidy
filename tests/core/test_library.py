@@ -414,13 +414,13 @@ class LegacyFindExactToSearchLibraryTest(unittest.TestCase):
     def test_core_search_call_backend_search_with_exact(self):
         self.core.library.search(query={"any": ["a"]})
         self.backend.library.search.assert_called_once_with(
-            query=dict(any=["a"]), uris=None, exact=False
+            query={"any": ["a"]}, uris=None, exact=False
         )
 
     def test_core_search_with_exact_call_backend_search_with_exact(self):
         self.core.library.search(query={"any": ["a"]}, exact=True)
         self.backend.library.search.assert_called_once_with(
-            query=dict(any=["a"]), uris=None, exact=True
+            query={"any": ["a"]}, uris=None, exact=True
         )
 
     def test_core_search_with_handles_legacy_backend(self):

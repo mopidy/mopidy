@@ -17,21 +17,34 @@ from mopidy.internal.gi import Gst, gi
 class TestDeps:
     def test_format_dependency_list(self):
         adapters = [
-            lambda: dict(name="Python", version="FooPython 2.7.3"),
-            lambda: dict(name="Platform", version="Loonix 4.0.1"),
-            lambda: dict(name="Pykka", version="1.1", path="/foo/bar", other="Quux"),
-            lambda: dict(name="Foo"),
-            lambda: dict(
-                name="Mopidy",
-                version="0.13",
-                dependencies=[
-                    dict(
-                        name="pylast",
-                        version="0.5",
-                        dependencies=[dict(name="setuptools", version="0.6")],
-                    )
+            lambda: {
+                "name": "Python",
+                "version": "FooPython 2.7.3",
+            },
+            lambda: {
+                "name": "Platform",
+                "version": "Loonix 4.0.1",
+            },
+            lambda: {
+                "name": "Pykka",
+                "version": "1.1",
+                "path": "/foo/bar",
+                "other": "Quux",
+            },
+            lambda: {
+                "name": "Foo",
+            },
+            lambda: {
+                "name": "Mopidy",
+                "version": "0.13",
+                "dependencies": [
+                    {
+                        "name": "pylast",
+                        "version": "0.5",
+                        "dependencies": [{"name": "setuptools", "version": "0.6"}],
+                    }
                 ],
-            ),
+            },
         ]
 
         result = deps.format_dependency_list(adapters)

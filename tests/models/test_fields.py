@@ -173,7 +173,7 @@ class IntegerTest(unittest.TestCase):
     def test_other_disallowed(self):
         instance = create_instance(String())
         with self.assertRaises(TypeError):
-            instance.attr = tuple()
+            instance.attr = ()
 
     def test_min_validation(self):
         instance = create_instance(Integer(min=0))

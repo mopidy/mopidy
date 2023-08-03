@@ -29,8 +29,8 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
         core.get_version = mock.MagicMock(name="get_version")
         core.get_version.return_value = mopidy.__version__
 
-        testapps = [dict(name="testapp")]
-        teststatics = [dict(name="teststatic")]
+        testapps = [{"name": "testapp"}]
+        teststatics = [{"name": "teststatic"}]
 
         apps = [
             {
@@ -221,7 +221,7 @@ class HttpServerWithStaticFilesTest(tornado.testing.AsyncHTTPTestCase):
         }
         core = mock.Mock()
 
-        statics = [dict(name="static", path=os.path.dirname(__file__))]
+        statics = [{"name": "static", "path": os.path.dirname(__file__)}]
 
         http_server = actor.HttpServer(
             config=config, core=core, sockets=[], apps=[], statics=statics
@@ -312,7 +312,7 @@ class HttpServerWithAppDefaultApp(tornado.testing.AsyncHTTPTestCase):
         }
         core = mock.Mock()
 
-        apps = [dict(name="default_app", factory=default_webapp_factory)]
+        apps = [{"name": "default_app", "factory": default_webapp_factory}]
 
         http_server = actor.HttpServer(
             config=config, core=core, sockets=[], apps=apps, statics=[]
@@ -344,7 +344,7 @@ class HttpServerWithStaticDefaultApp(tornado.testing.AsyncHTTPTestCase):
         }
         core = mock.Mock()
 
-        statics = [dict(name="default_app", path=os.path.dirname(__file__))]
+        statics = [{"name": "default_app", "path": os.path.dirname(__file__)}]
 
         http_server = actor.HttpServer(
             config=config, core=core, sockets=[], apps=[], statics=statics

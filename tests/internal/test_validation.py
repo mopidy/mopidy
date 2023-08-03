@@ -10,7 +10,7 @@ def test_check_boolean_with_valid_values():
 
 
 def test_check_boolean_with_other_values():
-    for value in 1, 0, None, "", list(), tuple():
+    for value in 1, 0, None, "", [], ():
         with raises(exceptions.ValidationError):
             validation.check_boolean(value)
 
@@ -86,7 +86,7 @@ def test_check_query_valid_values():
 
 
 def test_check_query_random_iterables():
-    for value in None, tuple(), list(), "abc":
+    for value in None, (), [], "abc":
         with raises(exceptions.ValidationError):
             validation.check_query(value)
 
@@ -129,7 +129,7 @@ def test_check_uri_with_valid_values():
 def test_check_uri_with_invalid_values():
     # Note that tuple catches a potential bug with using "'foo' % arg" for
     # formatting.
-    for value in ("foobar", "htt p://example.com", None, 1234, tuple()):
+    for value in ("foobar", "htt p://example.com", None, 1234, ()):
         with raises(exceptions.ValidationError):
             validation.check_uri(value)
 

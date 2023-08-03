@@ -24,7 +24,7 @@ class Mock:
         return Mock()
 
     def __mro_entries__(self, bases):
-        return tuple()
+        return ()
 
     @classmethod
     def __getattr__(cls, name):
