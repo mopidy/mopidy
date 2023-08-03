@@ -42,7 +42,7 @@ class PlaylistsController:
 
         .. versionadded:: 2.0
         """
-        return list(sorted(self.backends.with_playlists.keys()))
+        return sorted(self.backends.with_playlists.keys())
 
     def as_list(self):
         """Get a list of the currently available playlists.

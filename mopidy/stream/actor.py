@@ -48,7 +48,7 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
                 "Please remove it from the stream/protocols config."
             )
             uri_schemes -= {"file"}
-        self.uri_schemes = sorted(list(uri_schemes))
+        self.uri_schemes = sorted(uri_schemes)
 
 
 class StreamLibraryProvider(backend.LibraryProvider):

@@ -267,7 +267,7 @@ class ClientListHandler(tornado.web.RequestHandler):
             names.add(static["name"])
         names.discard("mopidy")
 
-        self.render("data/clients.html", apps=sorted(list(names)))
+        self.render("data/clients.html", apps=sorted(names))
 
 
 class StaticFileHandler(tornado.web.StaticFileHandler):
