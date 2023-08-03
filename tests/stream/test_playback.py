@@ -1,5 +1,5 @@
 import logging
-import os
+from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -240,7 +240,7 @@ class TestTranslateURI:
         responses.add(
             responses.GET,
             PLAYLIST_URI,
-            body=BODY.replace(STREAM_URI, os.path.basename(STREAM_URI)),
+            body=BODY.replace(STREAM_URI, Path(STREAM_URI).name),
             content_type="audio/x-mpegurl",
         )
 
@@ -254,6 +254,6 @@ class TestTranslateURI:
 
         assert (
             f"Parsed playlist ({PLAYLIST_URI}) and found new URI: "
-            f"{os.path.basename(STREAM_URI)}"
+            f"{Path(STREAM_URI).name}"
         ) in caplog.text
         assert f"Unwrapping stream from URI: {STREAM_URI}" in caplog.text

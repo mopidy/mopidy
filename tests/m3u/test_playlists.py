@@ -3,6 +3,7 @@ import platform
 import shutil
 import tempfile
 import unittest
+from typing import Any, ClassVar
 
 import pykka
 
@@ -15,7 +16,7 @@ from tests.m3u import generate_song
 
 class M3UPlaylistsProviderTest(unittest.TestCase):
     backend_class = M3UBackend
-    config = {
+    config: ClassVar[dict[str, dict[str, Any]]] = {
         "m3u": {
             "enabled": True,
             "base_dir": None,

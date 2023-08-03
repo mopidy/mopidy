@@ -2,6 +2,7 @@ import codecs
 import logging
 import re
 import socket
+from typing import ClassVar
 from unittest import mock
 
 import pytest
@@ -1209,7 +1210,7 @@ class TestLogColor:
 
 
 class TestLogLevel:
-    levels = {
+    levels: ClassVar[dict[str, int]] = {
         "critical": logging.CRITICAL,
         "error": logging.ERROR,
         "warning": logging.WARNING,

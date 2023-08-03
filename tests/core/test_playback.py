@@ -1,3 +1,4 @@
+from typing import ClassVar
 from unittest import mock
 
 import pykka
@@ -56,8 +57,10 @@ class MyTestBackend(dummy_backend.DummyBackend):
 
 
 class BaseTest:
-    config = {"core": {"max_tracklist_length": 10000}}
-    tracks = [
+    config: ClassVar[dict[str, dict[str, int]]] = {
+        "core": {"max_tracklist_length": 10000}
+    }
+    tracks: ClassVar[list[Track]] = [
         Track(uri="dummy:a", length=1234, name="foo"),
         Track(uri="dummy:b", length=1234),
         Track(uri="dummy:c", length=1234),
@@ -834,7 +837,7 @@ class TestEventEmission(BaseTest):
 
 
 class TestUnplayableURI(BaseTest):
-    tracks = [
+    tracks: ClassVar[list[Track]] = [
         Track(uri="unplayable://"),
         Track(uri="dummy:b"),
     ]
@@ -1262,7 +1265,7 @@ class TestCorePlaybackSaveLoadState(BaseTest):
 
 
 class TestBug1352Regression(BaseTest):
-    tracks = [
+    tracks: ClassVar[list[Track]] = [
         Track(uri="dummy:a", length=40000),
         Track(uri="dummy:b", length=40000),
     ]
@@ -1289,12 +1292,12 @@ class TestBug1352Regression(BaseTest):
 
 
 class TestEndlessLoop(BaseTest):
-    tracks_play = [
+    tracks_play: ClassVar[list[Track]] = [
         Track(uri="dummy:limit_never:a"),
         Track(uri="dummy:limit_never:b"),
     ]
 
-    tracks_other = [
+    tracks_other: ClassVar[list[Track]] = [
         Track(uri="dummy:limit_never:a"),
         Track(uri="dummy:limit_one"),
         Track(uri="dummy:limit_never:b"),

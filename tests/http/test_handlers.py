@@ -1,5 +1,5 @@
-import os
 import unittest
+from pathlib import Path
 from unittest import mock
 
 import tornado.httpclient
@@ -19,7 +19,7 @@ class StaticFileHandlerTest(tornado.testing.AsyncHTTPTestCase):
                     r"/(.*)",
                     handlers.StaticFileHandler,
                     {
-                        "path": os.path.dirname(__file__),
+                        "path": Path(__file__).parent,
                         "default_filename": "test_handlers.py",
                     },
                 )

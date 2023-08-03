@@ -1,7 +1,7 @@
-import os
 import shutil
 import tempfile
 import urllib
+from pathlib import Path
 from unittest import mock
 
 import tornado.testing
@@ -221,7 +221,12 @@ class HttpServerWithStaticFilesTest(tornado.testing.AsyncHTTPTestCase):
         }
         core = mock.Mock()
 
-        statics = [{"name": "static", "path": os.path.dirname(__file__)}]
+        statics = [
+            {
+                "name": "static",
+                "path": Path(__file__).parent,
+            }
+        ]
 
         http_server = actor.HttpServer(
             config=config, core=core, sockets=[], apps=[], statics=statics
@@ -344,7 +349,12 @@ class HttpServerWithStaticDefaultApp(tornado.testing.AsyncHTTPTestCase):
         }
         core = mock.Mock()
 
-        statics = [{"name": "default_app", "path": os.path.dirname(__file__)}]
+        statics = [
+            {
+                "name": "default_app",
+                "path": Path(__file__).parent,
+            }
+        ]
 
         http_server = actor.HttpServer(
             config=config, core=core, sockets=[], apps=[], statics=statics

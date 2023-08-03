@@ -157,7 +157,7 @@ class IntegerTest(unittest.TestCase):
 
     def test_int_allowed(self):
         instance = create_instance(Integer())
-        instance.attr = int(123)
+        instance.attr = 123
         assert instance.attr == 123
 
     def test_float_disallowed(self):
