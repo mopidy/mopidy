@@ -1,4 +1,5 @@
-# flake8: noqa
+# ruff: noqa
+
 from typing import TYPE_CHECKING
 
 from .actor import Audio
