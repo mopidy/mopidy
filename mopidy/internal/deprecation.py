@@ -34,10 +34,7 @@ _MESSAGES = {
 
 
 def warn(msg_id, pending=False):
-    if pending:
-        category = PendingDeprecationWarning
-    else:
-        category = DeprecationWarning
+    category = PendingDeprecationWarning if pending else DeprecationWarning
     warnings.warn(_MESSAGES.get(msg_id, msg_id), category, stacklevel=2)
 
 

@@ -307,13 +307,12 @@ def _process(
                 have_audio = True
         elif msg.type == Gst.MessageType.ERROR:
             error, _debug = msg.parse_error()
-            if missing_message and not mime:
-                if (
-                    (structure := missing_message.get_structure())
-                    and (caps := structure.get_value("detail"))
-                    and (mime := caps.get_structure(0).get_name())
-                ):
-                    return tags, mime, have_audio, duration
+            if missing_message and not mime and (
+                (structure := missing_message.get_structure())
+                and (caps := structure.get_value("detail"))
+                and (mime := caps.get_structure(0).get_name())
+            ):
+                return tags, mime, have_audio, duration
             raise exceptions.ScannerError(str(error))
         elif msg.type == Gst.MessageType.EOS:
             return tags, mime, have_audio, duration

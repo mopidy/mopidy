@@ -53,7 +53,7 @@ class JsonRpcWrapper:
     """
 
     def __init__(self, objects, decoders=None, encoders=None):
-        if "" in objects.keys():
+        if "" in objects:
             raise AttributeError("The empty string is not allowed as an object mount")
         self.objects = objects
         self.decoder = get_combined_json_decoder(decoders or [])
@@ -304,7 +304,7 @@ class JsonRpcInspector:
     """
 
     def __init__(self, objects):
-        if "" in objects.keys():
+        if "" in objects:
             raise AttributeError("The empty string is not allowed as an object mount")
         self.objects = objects
 

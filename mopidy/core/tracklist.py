@@ -521,17 +521,14 @@ class TracklistController:
         tl_tracks = self._tl_tracks
 
         # TOOD: use validation helpers?
-        if start is not None and end is not None:
-            if start >= end:
-                raise AssertionError("start must be smaller than end")
+        if start is not None and end is not None and start >= end:
+            raise AssertionError("start must be smaller than end")
 
-        if start is not None:
-            if start < 0:
-                raise AssertionError("start must be at least zero")
+        if start is not None and start < 0:
+            raise AssertionError("start must be at least zero")
 
-        if end is not None:
-            if end > len(tl_tracks):
-                raise AssertionError("end can not be larger than " + "tracklist length")
+        if end is not None and end > len(tl_tracks):
+            raise AssertionError("end can not be larger than " + "tracklist length")
 
         before = tl_tracks[: start or 0]
         shuffled = tl_tracks[start:end]

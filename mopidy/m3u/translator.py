@@ -31,10 +31,7 @@ def name_from_path(path):
 
 def path_from_name(name, ext=None, sep="|"):
     """Convert name with optional extension to file path."""
-    if ext:
-        name = name.replace(os.sep, sep) + ext
-    else:
-        name = name.replace(os.sep, sep)
+    name = name.replace(os.sep, sep) + ext if ext else name.replace(os.sep, sep)
     return pathlib.Path(name)
 
 

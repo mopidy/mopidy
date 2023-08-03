@@ -162,10 +162,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         return path.is_path_inside_base_dir(local_path, self._playlists_dir)
 
     def _open(self, path, mode="r"):
-        if path.suffix == ".m3u8":
-            encoding = "utf-8"
-        else:
-            encoding = self._default_encoding
+        encoding = "utf-8" if path.suffix == ".m3u8" else self._default_encoding
         if not path.is_absolute():
             path = self._abspath(path)
         if not self._is_in_basedir(path):

@@ -680,10 +680,7 @@ class Audio(pykka.ThreadingActor):
 
         # XXX: Hack to workaround issue on Mac OS X where volume level
         # does not persist between track changes. mopidy/mopidy#886
-        if self.mixer is not None:
-            current_volume = self.mixer.get_volume()
-        else:
-            current_volume = None
+        current_volume = self.mixer.get_volume() if self.mixer is not None else None
 
         flags = _GST_PLAY_FLAGS_AUDIO
         if download:

@@ -357,10 +357,7 @@ class List(ConfigValue[V]):
         subtype: ConfigValue = getattr(self, "_subtype", String())
 
         values_iter = (subtype.deserialize(s.strip()) for s in strings if s.strip())
-        if self._unique:
-            values = frozenset(values_iter)
-        else:
-            values = tuple(values_iter)
+        values = frozenset(values_iter) if self._unique else tuple(values_iter)
 
         validators.validate_required(values, self._required)
         return cast(Union[tuple[V, ...], frozenset[V]], values)
