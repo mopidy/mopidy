@@ -4,6 +4,7 @@ import logging
 from typing import TYPE_CHECKING, Any, Literal, Optional, TypeVar, Union
 
 import pykka
+from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
 
 from mopidy import listener
 
@@ -487,54 +488,55 @@ class BackendListener(listener.Listener):
         """
 
 
-if TYPE_CHECKING:
-    from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
+class BackendActor(pykka.ThreadingActor, Backend):
+    pass
 
-    class BackendActor(pykka.ThreadingActor, Backend):
-        pass
 
-    class BackendProxy(ActorMemberMixin, pykka.ActorProxy[BackendActor]):
-        """Backend wrapped in a Pykka actor proxy."""
+class BackendProxy(ActorMemberMixin, pykka.ActorProxy[BackendActor]):
+    """Backend wrapped in a Pykka actor proxy."""
 
-        audio = proxy_field(BackendActor.audio)
-        library: LibraryProviderProxy
-        playback: PlaybackProviderProxy
-        playlists: PlaylistsProviderProxy
-        uri_schemes = proxy_field(BackendActor.uri_schemes)
-        has_library = proxy_method(BackendActor.has_library)
-        has_library_browse = proxy_method(BackendActor.has_library_browse)
-        has_playback = proxy_method(BackendActor.has_playback)
-        has_playlists = proxy_method(BackendActor.has_playlists)
-        ping = proxy_method(BackendActor.ping)
+    audio = proxy_field(BackendActor.audio)
+    library: LibraryProviderProxy
+    playback: PlaybackProviderProxy
+    playlists: PlaylistsProviderProxy
+    uri_schemes = proxy_field(BackendActor.uri_schemes)
+    has_library = proxy_method(BackendActor.has_library)
+    has_library_browse = proxy_method(BackendActor.has_library_browse)
+    has_playback = proxy_method(BackendActor.has_playback)
+    has_playlists = proxy_method(BackendActor.has_playlists)
+    ping = proxy_method(BackendActor.ping)
 
-    class LibraryProviderProxy:
-        root_directory = proxy_field(LibraryProvider.root_directory)
-        browse = proxy_method(LibraryProvider.browse)
-        get_distinct = proxy_method(LibraryProvider.get_distinct)
-        get_images = proxy_method(LibraryProvider.get_images)
-        lookup = proxy_method(LibraryProvider.lookup)
-        refresh = proxy_method(LibraryProvider.refresh)
-        search = proxy_method(LibraryProvider.search)
 
-    class PlaybackProviderProxy:
-        pause = proxy_method(PlaybackProvider.pause)
-        play = proxy_method(PlaybackProvider.play)
-        prepare_change = proxy_method(PlaybackProvider.prepare_change)
-        translate_uri = proxy_method(PlaybackProvider.translate_uri)
-        is_live = proxy_method(PlaybackProvider.is_live)
-        should_download = proxy_method(PlaybackProvider.should_download)
-        on_source_setup = proxy_method(PlaybackProvider.on_source_setup)
-        change_track = proxy_method(PlaybackProvider.change_track)
-        resume = proxy_method(PlaybackProvider.resume)
-        seek = proxy_method(PlaybackProvider.seek)
-        stop = proxy_method(PlaybackProvider.stop)
-        get_time_position = proxy_method(PlaybackProvider.get_time_position)
+class LibraryProviderProxy:
+    root_directory = proxy_field(LibraryProvider.root_directory)
+    browse = proxy_method(LibraryProvider.browse)
+    get_distinct = proxy_method(LibraryProvider.get_distinct)
+    get_images = proxy_method(LibraryProvider.get_images)
+    lookup = proxy_method(LibraryProvider.lookup)
+    refresh = proxy_method(LibraryProvider.refresh)
+    search = proxy_method(LibraryProvider.search)
 
-    class PlaylistsProviderProxy:
-        as_list = proxy_method(PlaylistsProvider.as_list)
-        get_items = proxy_method(PlaylistsProvider.get_items)
-        create = proxy_method(PlaylistsProvider.create)
-        delete = proxy_method(PlaylistsProvider.delete)
-        lookup = proxy_method(PlaylistsProvider.lookup)
-        refresh = proxy_method(PlaylistsProvider.refresh)
-        save = proxy_method(PlaylistsProvider.save)
+
+class PlaybackProviderProxy:
+    pause = proxy_method(PlaybackProvider.pause)
+    play = proxy_method(PlaybackProvider.play)
+    prepare_change = proxy_method(PlaybackProvider.prepare_change)
+    translate_uri = proxy_method(PlaybackProvider.translate_uri)
+    is_live = proxy_method(PlaybackProvider.is_live)
+    should_download = proxy_method(PlaybackProvider.should_download)
+    on_source_setup = proxy_method(PlaybackProvider.on_source_setup)
+    change_track = proxy_method(PlaybackProvider.change_track)
+    resume = proxy_method(PlaybackProvider.resume)
+    seek = proxy_method(PlaybackProvider.seek)
+    stop = proxy_method(PlaybackProvider.stop)
+    get_time_position = proxy_method(PlaybackProvider.get_time_position)
+
+
+class PlaylistsProviderProxy:
+    as_list = proxy_method(PlaylistsProvider.as_list)
+    get_items = proxy_method(PlaylistsProvider.get_items)
+    create = proxy_method(PlaylistsProvider.create)
+    delete = proxy_method(PlaylistsProvider.delete)
+    lookup = proxy_method(PlaylistsProvider.lookup)
+    refresh = proxy_method(PlaylistsProvider.refresh)
+    save = proxy_method(PlaylistsProvider.save)

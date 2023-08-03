@@ -5,6 +5,7 @@ import logging
 from typing import TYPE_CHECKING, Optional
 
 import pykka
+from pykka.typing import ActorMemberMixin, proxy_method
 
 import mopidy
 from mopidy import audio, backend, mixer
@@ -290,23 +291,20 @@ class Backends(list):
                     self.with_playlists[scheme] = b
 
 
-if TYPE_CHECKING:
-    from pykka.typing import ActorMemberMixin, proxy_method
-
-    class CoreProxy(ActorMemberMixin, pykka.ActorProxy[Core]):
-        library: LibraryControllerProxy
-        history: HistoryControllerProxy
-        mixer: MixerControllerProxy
-        playback: PlaybackControllerProxy
-        playlists: PlaylistsControllerProxy
-        tracklist: TracklistControllerProxy
-        get_uri_schemes = proxy_method(Core.get_uri_schemes)
-        get_version = proxy_method(Core.get_version)
-        reached_end_of_stream = proxy_method(Core.reached_end_of_stream)
-        stream_changed = proxy_method(Core.stream_changed)
-        position_changed = proxy_method(Core.position_changed)
-        state_changed = proxy_method(Core.state_changed)
-        playlists_loaded = proxy_method(Core.playlists_loaded)
-        volume_changed = proxy_method(Core.volume_changed)
-        mute_changed = proxy_method(Core.mute_changed)
-        tags_changed = proxy_method(Core.tags_changed)
+class CoreProxy(ActorMemberMixin, pykka.ActorProxy[Core]):
+    library: LibraryControllerProxy
+    history: HistoryControllerProxy
+    mixer: MixerControllerProxy
+    playback: PlaybackControllerProxy
+    playlists: PlaylistsControllerProxy
+    tracklist: TracklistControllerProxy
+    get_uri_schemes = proxy_method(Core.get_uri_schemes)
+    get_version = proxy_method(Core.get_version)
+    reached_end_of_stream = proxy_method(Core.reached_end_of_stream)
+    stream_changed = proxy_method(Core.stream_changed)
+    position_changed = proxy_method(Core.position_changed)
+    state_changed = proxy_method(Core.state_changed)
+    playlists_loaded = proxy_method(Core.playlists_loaded)
+    volume_changed = proxy_method(Core.volume_changed)
+    mute_changed = proxy_method(Core.mute_changed)
+    tags_changed = proxy_method(Core.tags_changed)

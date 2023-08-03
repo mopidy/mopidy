@@ -1,7 +1,7 @@
 import logging
-from typing import TYPE_CHECKING
 
 import pykka
+from pykka.typing import proxy_method
 
 from mopidy import mixer
 
@@ -58,9 +58,6 @@ class SoftwareMixer(pykka.ThreadingActor, mixer.Mixer):
         return True
 
 
-if TYPE_CHECKING:
-    from pykka.typing import proxy_method
-
-    class SoftwareMixerProxy(mixer.MixerProxy):
-        setup = proxy_method(SoftwareMixer.setup)
-        teardown = proxy_method(SoftwareMixer.teardown)
+class SoftwareMixerProxy(mixer.MixerProxy):
+    setup = proxy_method(SoftwareMixer.setup)
+    teardown = proxy_method(SoftwareMixer.teardown)

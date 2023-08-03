@@ -9,7 +9,6 @@ import pathlib
 import signal
 import sys
 from typing import (
-    TYPE_CHECKING,
     Any,
     Generator,
     Iterable,
@@ -25,17 +24,12 @@ from pykka.messages import ProxyCall
 
 from mopidy import config as config_lib
 from mopidy import exceptions
-from mopidy.audio import Audio
-from mopidy.core import Core
+from mopidy.audio import Audio, AudioProxy
+from mopidy.backend import BackendActor, BackendProxy
+from mopidy.core import Core, CoreProxy
 from mopidy.internal import deps, process, timer, versioning
 from mopidy.internal.gi import GLib
-
-if TYPE_CHECKING:
-    from mopidy.audio import AudioProxy
-    from mopidy.backend import BackendActor, BackendProxy
-    from mopidy.core import CoreProxy
-    from mopidy.mixer import MixerActor, MixerProxy
-
+from mopidy.mixer import MixerActor, MixerProxy
 
 logger = logging.getLogger(__name__)
 
