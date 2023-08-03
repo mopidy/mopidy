@@ -14,7 +14,7 @@ _AVAHI_PUBLISHFLAGS_NONE = 0
 
 
 def _is_loopback_address(host):
-    return host.startswith("127.") or host.startswith("::ffff:127.") or host == "::1"
+    return host.startswith(("127.", "::ffff:127.")) or host == "::1"
 
 
 def _convert_text_list_to_dbus_format(text_list):
