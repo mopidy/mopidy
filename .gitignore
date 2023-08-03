@@ -6,7 +6,6 @@
 .cache/
 .coverage
 .idea
-.mypy_cache/
 .noseids
 .pytest_cache/
 .tox

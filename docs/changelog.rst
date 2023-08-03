@@ -13,6 +13,7 @@ v3.5.0 (UNRELEASED)
 ===================
 
 - tox: added "tox -e ci", to allow easy CI check before "git push".
+- tox: changed from mypy to pyright
 
 Dependencies
 ------------
