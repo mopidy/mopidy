@@ -54,19 +54,19 @@ class TestDeps:
     def test_executable_info(self):
         result = deps.executable_info()
 
-        assert "Executable" == result["name"]
+        assert result["name"] == "Executable"
         assert sys.argv[0] in result["version"]
 
     def test_platform_info(self):
         result = deps.platform_info()
 
-        assert "Platform" == result["name"]
+        assert result["name"] == "Platform"
         assert platform.platform() in result["version"]
 
     def test_python_info(self):
         result = deps.python_info()
 
-        assert "Python" == result["name"]
+        assert result["name"] == "Python"
         assert platform.python_implementation() in result["version"]
         assert platform.python_version() in result["version"]
         assert "python" in result["path"]
@@ -75,7 +75,7 @@ class TestDeps:
     def test_gstreamer_info(self):
         result = deps.gstreamer_info()
 
-        assert "GStreamer" == result["name"]
+        assert result["name"] == "GStreamer"
         assert ".".join(map(str, Gst.version())) == result["version"]
         assert "gi" in result["path"]
         assert "__init__.py" not in result["path"]
@@ -125,17 +125,17 @@ class TestDeps:
 
         result = deps.pkg_info()
 
-        assert "Mopidy" == result["name"]
-        assert "0.13" == result["version"]
+        assert result["name"] == "Mopidy"
+        assert result["version"] == "0.13"
         assert "mopidy" in result["path"]
 
         dep_info_pykka = result["dependencies"][0]
-        assert "Pykka" == dep_info_pykka["name"]
-        assert "1.1" == dep_info_pykka["version"]
+        assert dep_info_pykka["name"] == "Pykka"
+        assert dep_info_pykka["version"] == "1.1"
 
         dep_info_setuptools = dep_info_pykka["dependencies"][0]
-        assert "setuptools" == dep_info_setuptools["name"]
-        assert "0.6" == dep_info_setuptools["version"]
+        assert dep_info_setuptools["name"] == "setuptools"
+        assert dep_info_setuptools["version"] == "0.6"
 
     @mock.patch.object(metadata, "distribution")
     def test_pkg_info_for_missing_dist(self, get_distribution_mock):
@@ -143,7 +143,7 @@ class TestDeps:
 
         result = deps.pkg_info()
 
-        assert "Mopidy" == result["name"]
+        assert result["name"] == "Mopidy"
         assert "version" not in result
         assert "path" not in result
 
@@ -153,7 +153,7 @@ class TestDeps:
         # get_distribution_mock.side_effect = metadata.VersionConflict
         result = deps.pkg_info()
 
-        assert "Mopidy" == result["name"]
+        assert result["name"] == "Mopidy"
         assert "version" not in result
         assert "path" not in result
 

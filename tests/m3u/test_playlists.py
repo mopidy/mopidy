@@ -46,13 +46,13 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         assert not path.exists()
 
         playlist = self.core.playlists.create("test")
-        assert "test" == playlist.name
+        assert playlist.name == "test"
         assert uri == playlist.uri
         assert path.exists()
 
     def test_create_sanitizes_playlist_name(self):
         playlist = self.core.playlists.create("  ../../test FOO baR ")
-        assert "..|..|test FOO baR" == playlist.name
+        assert playlist.name == "..|..|test FOO baR"
         path = self.playlists_dir / "..|..|test FOO baR.m3u"
         assert self.playlists_dir == path.parent
         assert path.exists()
@@ -65,13 +65,13 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         path2 = self.playlists_dir / "test2.m3u"
 
         playlist = self.core.playlists.create("test1")
-        assert "test1" == playlist.name
+        assert playlist.name == "test1"
         assert uri1 == playlist.uri
         assert path1.exists()
         assert not path2.exists()
 
         playlist = self.core.playlists.save(playlist.replace(name="test2"))
-        assert "test2" == playlist.name
+        assert playlist.name == "test2"
         assert uri2 == playlist.uri
         assert not path1.exists()
         assert path2.exists()
@@ -83,7 +83,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         assert not path.exists()
 
         playlist = self.core.playlists.create("test")
-        assert "test" == playlist.name
+        assert playlist.name == "test"
         assert uri == playlist.uri
         assert path.exists()
 
@@ -168,7 +168,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
         assert len(self.core.playlists.as_list()) == 1
         result = self.core.playlists.as_list()
-        assert "���" == result[0].name
+        assert result[0].name == "���"
 
     @unittest.SkipTest
     def test_playlists_dir_is_created(self):
@@ -281,7 +281,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
         assert len(self.core.playlists.as_list()) == 1
         result = self.core.playlists.lookup("m3u:test.m3u")
-        assert "m3u:test.m3u" == result.uri
+        assert result.uri == "m3u:test.m3u"
         assert playlist.name == result.name
         assert track.uri == result.tracks[0].uri
 
@@ -294,7 +294,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
         assert len(self.core.playlists.as_list()) == 1
         result = self.core.playlists.lookup("m3u:test.m3u")
-        assert "m3u:test.m3u" == result.uri
+        assert result.uri == "m3u:test.m3u"
         assert playlist.name == result.name
         assert filepath.as_uri() == result.tracks[0].uri
 
@@ -307,7 +307,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
         assert len(self.core.playlists.as_list()) == 1
         result = self.core.playlists.lookup("m3u:test.m3u")
-        assert "m3u:test.m3u" == result.uri
+        assert result.uri == "m3u:test.m3u"
         assert playlist.name == result.name
         assert filepath.resolve().as_uri() == result.tracks[0].uri
 

@@ -889,7 +889,7 @@ class TestSeek(BaseTest):
         self.replay_events()
 
         self.core.playback.seek(-100)  # Dummy audio doesn't progress time.
-        assert 0 == self.core.playback.get_time_position()
+        assert self.core.playback.get_time_position() == 0
 
     def test_seek_fails_for_track_without_duration(self):
         track = self.tracks[0].replace(length=None)
@@ -901,7 +901,7 @@ class TestSeek(BaseTest):
         self.replay_events()
 
         assert not self.core.playback.seek(1000)
-        assert 0 == self.core.playback.get_time_position()
+        assert self.core.playback.get_time_position() == 0
 
     def test_seek_play_stay_playing(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -1229,14 +1229,14 @@ class TestCorePlaybackSaveLoadState(BaseTest):
 
         self.core.playback.stop()
         self.replay_events()
-        assert "stopped" == self.core.playback.get_state()
+        assert self.core.playback.get_state() == "stopped"
 
         state = PlaybackState(time_position=0, state="playing", tlid=tl_tracks[2].tlid)
         coverage = ["play-last"]
         self.core.playback._load_state(state, coverage)
         self.replay_events()
 
-        assert "playing" == self.core.playback.get_state()
+        assert self.core.playback.get_state() == "playing"
         assert tl_tracks[2] == self.core.playback.get_current_tl_track()
 
     def test_load_not_covered(self):
@@ -1244,14 +1244,14 @@ class TestCorePlaybackSaveLoadState(BaseTest):
 
         self.core.playback.stop()
         self.replay_events()
-        assert "stopped" == self.core.playback.get_state()
+        assert self.core.playback.get_state() == "stopped"
 
         state = PlaybackState(time_position=0, state="playing", tlid=tl_tracks[2].tlid)
         coverage = ["other"]
         self.core.playback._load_state(state, coverage)
         self.replay_events()
 
-        assert "stopped" == self.core.playback.get_state()
+        assert self.core.playback.get_state() == "stopped"
         assert self.core.playback.get_current_tl_track() is None
 
     def test_load_invalid_type(self):

@@ -29,14 +29,14 @@ class StaticFileHandlerTest(tornado.testing.AsyncHTTPTestCase):
     def test_static_handler(self):
         response = self.fetch("/test_handlers.py", method="GET")
 
-        assert 200 == response.code
+        assert response.code == 200
         assert response.headers["X-Mopidy-Version"] == mopidy.__version__
         assert response.headers["Cache-Control"] == "no-cache"
 
     def test_static_default_filename(self):
         response = self.fetch("/", method="GET")
 
-        assert 200 == response.code
+        assert response.code == 200
         assert response.headers["X-Mopidy-Version"] == mopidy.__version__
         assert response.headers["Cache-Control"] == "no-cache"
 

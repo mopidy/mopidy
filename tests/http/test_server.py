@@ -87,12 +87,12 @@ class MopidyWebSocketHandlerTest(HttpServerTest):
     def test_should_return_ws(self):
         response = self.fetch("/mopidy/ws", method="GET")
 
-        assert 'Can "Upgrade" only to "WebSocket".' == response.body.decode()
+        assert response.body.decode() == 'Can "Upgrade" only to "WebSocket".'
 
     def test_should_return_ws_old(self):
         response = self.fetch("/mopidy/ws/", method="GET")
 
-        assert 'Can "Upgrade" only to "WebSocket".' == response.body.decode()
+        assert response.body.decode() == 'Can "Upgrade" only to "WebSocket".'
 
 
 class MopidyRPCHandlerTest(HttpServerTest):
@@ -238,7 +238,7 @@ class HttpServerWithStaticFilesTest(tornado.testing.AsyncHTTPTestCase):
     def test_can_serve_static_files(self):
         response = self.fetch("/static/test_server.py", method="GET")
 
-        assert 200 == response.code
+        assert response.code == 200
         assert response.headers["X-Mopidy-Version"] == mopidy.__version__
         assert response.headers["Cache-Control"] == "no-cache"
 
@@ -436,13 +436,13 @@ class HttpServerTestLoginWithSecureCookie(tornado.testing.AsyncHTTPTestCase):
     def test_main_access_without_login(self):
         response = self.fetch("/cookie_secret", method="GET")
 
-        assert 200 == response.code
+        assert response.code == 200
         assert "Unknown user..." in response.body.decode()
 
     def test_accessing_login_form_get(self):
         response = self.fetch("/cookie_secret/login", method="GET")
 
-        assert 200 == response.code
+        assert response.code == 200
         assert "This is a login form" in response.body.decode()
 
     def test_login(self):
@@ -451,7 +451,7 @@ class HttpServerTestLoginWithSecureCookie(tornado.testing.AsyncHTTPTestCase):
 
         response = self.fetch("/cookie_secret/login", method="POST", body=body)
 
-        assert 200 == response.code
+        assert response.code == 200
         assert "Logged in" in response.body.decode()
 
         shutil.rmtree(self._dirpath)

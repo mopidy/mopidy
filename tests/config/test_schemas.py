@@ -87,8 +87,8 @@ class MapConfigSchemaTest(unittest.TestCase):
         schema = schemas.MapConfigSchema("test", types.LogLevel())
         result, errors = schema.deserialize({"foo.bar": "DEBUG", "baz": "INFO"})
 
-        assert logging.DEBUG == result["foo.bar"]
-        assert logging.INFO == result["baz"]
+        assert result["foo.bar"] == logging.DEBUG
+        assert result["baz"] == logging.INFO
 
 
 class DidYouMeanTest(unittest.TestCase):

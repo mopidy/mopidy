@@ -538,14 +538,14 @@ class AudioStateTest(unittest.TestCase):
         self.audio = audio.Audio(config=None, mixer=None)
 
     def test_state_starts_as_stopped(self):
-        assert audio.PlaybackState.STOPPED == self.audio.state
+        assert self.audio.state == audio.PlaybackState.STOPPED
 
     def test_state_does_not_change_when_in_gst_ready_state(self):
         self.audio._handler.on_playbin_state_changed(
             Gst.State.NULL, Gst.State.READY, Gst.State.VOID_PENDING
         )
 
-        assert audio.PlaybackState.STOPPED == self.audio.state
+        assert self.audio.state == audio.PlaybackState.STOPPED
 
     def test_state_changes_from_stopped_to_playing_on_play(self):
         self.audio._handler.on_playbin_state_changed(
@@ -558,7 +558,7 @@ class AudioStateTest(unittest.TestCase):
             Gst.State.PAUSED, Gst.State.PLAYING, Gst.State.VOID_PENDING
         )
 
-        assert audio.PlaybackState.PLAYING == self.audio.state
+        assert self.audio.state == audio.PlaybackState.PLAYING
 
     def test_state_changes_from_playing_to_paused_on_pause(self):
         self.audio.state = audio.PlaybackState.PLAYING
@@ -567,7 +567,7 @@ class AudioStateTest(unittest.TestCase):
             Gst.State.PLAYING, Gst.State.PAUSED, Gst.State.VOID_PENDING
         )
 
-        assert audio.PlaybackState.PAUSED == self.audio.state
+        assert self.audio.state == audio.PlaybackState.PAUSED
 
     def test_state_changes_from_playing_to_stopped_on_stop(self):
         self.audio.state = audio.PlaybackState.PLAYING
@@ -582,7 +582,7 @@ class AudioStateTest(unittest.TestCase):
         # self.audio._handler.on_playbin_state_changed(
         #     Gst.State.READY, Gst.State.NULL, Gst.State.VOID_PENDING)
 
-        assert audio.PlaybackState.STOPPED == self.audio.state
+        assert self.audio.state == audio.PlaybackState.STOPPED
 
 
 class AudioBufferingTest(unittest.TestCase):

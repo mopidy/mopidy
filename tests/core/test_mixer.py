@@ -206,7 +206,7 @@ class CoreMixerSaveLoadStateTest(unittest.TestCase):
         target = MixerState(volume=56, mute=False)
         coverage = ["other"]
         self.core.mixer._load_state(target, coverage)
-        assert 21 == self.core.mixer.get_volume()
+        assert self.core.mixer.get_volume() == 21
         assert self.core.mixer.get_mute() is True
 
     def test_load_mute_on(self):

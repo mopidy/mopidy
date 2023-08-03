@@ -21,7 +21,7 @@ class FieldDescriptorTest(unittest.TestCase):
 
     def test_field_knows_its_name(self):
         instance = create_instance(Field())
-        assert "attr" == instance.__class__.attr._name
+        assert instance.__class__.attr._name == "attr"
 
     def test_field_has_none_as_default(self):
         instance = create_instance(Field())
@@ -34,13 +34,13 @@ class FieldDescriptorTest(unittest.TestCase):
     def test_field_assigment_and_retrival(self):
         instance = create_instance(Field())
         instance.attr = 1234
-        assert 1234 == instance.attr
+        assert instance.attr == 1234
 
     def test_field_can_be_reassigned(self):
         instance = create_instance(Field())
         instance.attr = 1234
         instance.attr = 5678
-        assert 5678 == instance.attr
+        assert instance.attr == 5678
 
     def test_field_can_be_deleted(self):
         instance = create_instance(Field())
@@ -68,7 +68,7 @@ class FieldDescriptorTest(unittest.TestCase):
 class FieldTest(unittest.TestCase):
     def test_default_handling(self):
         instance = create_instance(Field(default=1234))
-        assert 1234 == instance.attr
+        assert instance.attr == 1234
 
     def test_type_checking(self):
         instance = create_instance(Field(type=set))
@@ -96,17 +96,17 @@ class FieldTest(unittest.TestCase):
 class StringTest(unittest.TestCase):
     def test_default_handling(self):
         instance = create_instance(String(default="abc"))
-        assert "abc" == instance.attr
+        assert instance.attr == "abc"
 
     def test_native_str_allowed(self):
         instance = create_instance(String())
         instance.attr = "abc"
-        assert "abc" == instance.attr
+        assert instance.attr == "abc"
 
     def test_unicode_allowed(self):
         instance = create_instance(String())
         instance.attr = "abc"
-        assert "abc" == instance.attr
+        assert instance.attr == "abc"
 
     def test_other_disallowed(self):
         instance = create_instance(String())
@@ -116,28 +116,28 @@ class StringTest(unittest.TestCase):
     def test_empty_string(self):
         instance = create_instance(String())
         instance.attr = ""
-        assert "" == instance.attr
+        assert instance.attr == ""
 
 
 class IdentifierTest(unittest.TestCase):
     def test_default_handling(self):
         instance = create_instance(Identifier(default="abc"))
-        assert "abc" == instance.attr
+        assert instance.attr == "abc"
 
     def test_native_str_allowed(self):
         instance = create_instance(Identifier())
         instance.attr = "abc"
-        assert "abc" == instance.attr
+        assert instance.attr == "abc"
 
     def test_unicode_allowed(self):
         instance = create_instance(Identifier())
         instance.attr = "abc"
-        assert "abc" == instance.attr
+        assert instance.attr == "abc"
 
     def test_unicode_with_nonascii_allowed(self):
         instance = create_instance(Identifier())
         instance.attr = "æøå"
-        assert "æøå" == instance.attr
+        assert instance.attr == "æøå"
 
     def test_other_disallowed(self):
         instance = create_instance(Identifier())
@@ -147,18 +147,18 @@ class IdentifierTest(unittest.TestCase):
     def test_empty_string(self):
         instance = create_instance(Identifier())
         instance.attr = ""
-        assert "" == instance.attr
+        assert instance.attr == ""
 
 
 class IntegerTest(unittest.TestCase):
     def test_default_handling(self):
         instance = create_instance(Integer(default=1234))
-        assert 1234 == instance.attr
+        assert instance.attr == 1234
 
     def test_int_allowed(self):
         instance = create_instance(Integer())
         instance.attr = int(123)
-        assert 123 == instance.attr
+        assert instance.attr == 123
 
     def test_float_disallowed(self):
         instance = create_instance(Integer())
@@ -178,7 +178,7 @@ class IntegerTest(unittest.TestCase):
     def test_min_validation(self):
         instance = create_instance(Integer(min=0))
         instance.attr = 0
-        assert 0 == instance.attr
+        assert instance.attr == 0
 
         with self.assertRaises(ValueError):
             instance.attr = -1
@@ -186,7 +186,7 @@ class IntegerTest(unittest.TestCase):
     def test_max_validation(self):
         instance = create_instance(Integer(max=10))
         instance.attr = 10
-        assert 10 == instance.attr
+        assert instance.attr == 10
 
         with self.assertRaises(ValueError):
             instance.attr = 11

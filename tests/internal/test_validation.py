@@ -18,7 +18,7 @@ def test_check_boolean_with_other_values():
 def test_check_boolean_error_message():
     with raises(exceptions.ValidationError) as excinfo:
         validation.check_boolean(1234)
-    assert "Expected a boolean, not 1234" == str(excinfo.value)
+    assert str(excinfo.value) == "Expected a boolean, not 1234"
 
 
 def test_check_choice_with_valid_values():
@@ -35,7 +35,7 @@ def test_check_choice_with_invalid_values():
 def test_check_choice_error_message():
     with raises(exceptions.ValidationError) as excinfo:
         validation.check_choice(5, (1, 2, 3))
-    assert "Expected one of (1, 2, 3), not 5" == str(excinfo.value)
+    assert str(excinfo.value) == "Expected one of (1, 2, 3), not 5"
 
 
 def test_check_instance_with_valid_choices():
@@ -52,7 +52,7 @@ def test_check_instance_with_invalid_values():
 def test_check_instance_error_message():
     with raises(exceptions.ValidationError) as excinfo:
         validation.check_instance(1, dict)
-    assert "Expected a dict instance, not 1" == str(excinfo.value)
+    assert str(excinfo.value) == "Expected a dict instance, not 1"
 
 
 def test_check_instances_with_valid_values():
@@ -77,7 +77,7 @@ def test_check_instances_with_invalid_values():
 def test_check_instances_error_message():
     with raises(exceptions.ValidationError) as excinfo:
         validation.check_instances([1], str)
-    assert "Expected a list of str, not [1]" == str(excinfo.value)
+    assert str(excinfo.value) == "Expected a list of str, not [1]"
 
 
 def test_check_query_valid_values():
@@ -94,7 +94,7 @@ def test_check_query_random_iterables():
 def test_check_mapping_error_message():
     with raises(exceptions.ValidationError) as excinfo:
         validation.check_query([])
-    assert "Expected a query dictionary, not []" == str(excinfo.value)
+    assert str(excinfo.value) == "Expected a query dictionary, not []"
 
 
 def test_check_query_invalid_fields():
@@ -137,7 +137,7 @@ def test_check_uri_with_invalid_values():
 def test_check_uri_error_message():
     with raises(exceptions.ValidationError) as excinfo:
         validation.check_uri("testing")
-    assert "Expected a valid URI, not 'testing'" == str(excinfo.value)
+    assert str(excinfo.value) == "Expected a valid URI, not 'testing'"
 
 
 def test_check_uris_with_valid_values():
@@ -162,4 +162,4 @@ def test_check_uris_with_invalid_values():
 def test_check_uris_error_message():
     with raises(exceptions.ValidationError) as excinfo:
         validation.check_uris("testing")
-    assert "Expected a list of URIs, not 'testing'" == str(excinfo.value)
+    assert str(excinfo.value) == "Expected a list of URIs, not 'testing'"
