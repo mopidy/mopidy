@@ -3,10 +3,11 @@ from __future__ import annotations
 import functools
 import os
 import platform
+import re
 import sys
 from typing import TYPE_CHECKING, Callable, Optional, TypedDict
 
-import pkg_resources
+import importlib_metadata as metadata
 
 from mopidy.internal import formatting
 from mopidy.internal.gi import Gst, gi
@@ -27,9 +28,9 @@ if TYPE_CHECKING:
 def format_dependency_list(adapters: Optional[list[Adapter]] = None) -> str:
     if adapters is None:
         dist_names = {
-            ep.dist.project_name
-            for ep in pkg_resources.iter_entry_points("mopidy.ext")
-            if ep.dist is not None and ep.dist.project_name != "Mopidy"
+            ep.dist.name
+            for ep in metadata.entry_points(group="mopidy.ext")
+            if ep.dist.name != "Mopidy"
         }
         dist_infos = [
             functools.partial(pkg_info, dist_name) for dist_name in dist_names
@@ -43,7 +44,6 @@ def format_dependency_list(adapters: Optional[list[Adapter]] = None) -> str:
             *dist_infos,
             gstreamer_info,
         ]
-
     return "\n".join(_format_dependency(a()) for a in adapters)
 
 
@@ -101,26 +101,32 @@ def pkg_info(
     if project_name is None:
         project_name = "Mopidy"
     try:
-        distribution = pkg_resources.get_distribution(project_name)
-
-        extras: tuple[str, ...] = include_extras and tuple(distribution.extras) or ()
-
-        dependencies: list[DepInfo] = []
-        if include_transitive_deps:
-            dependencies = [
-                pkg_info(
-                    d.project_name,
-                    include_transitive_deps=d.project_name != "Mopidy",
+        distribution = metadata.distribution(project_name)
+        if include_transitive_deps and distribution.requires:
+            dependencies = []
+            for raw in distribution.requires:
+                if "importlib_metadata" in raw or (
+                    not include_extras and "extra" in raw
+                ):
+                    continue
+                entry = re.match(
+                    "[a-zA-Z0-9_']+", raw
+                ).group()  # pyright: ignore[reportOptionalMemberAccess]
+                dependencies.append(
+                    pkg_info(
+                        entry,
+                        include_transitive_deps=entry != "Mopidy",
+                    )
                 )
-                for d in distribution.requires(extras)
-            ]
+        else:
+            dependencies = []
         return {
             "name": project_name,
             "version": distribution.version,
-            "path": distribution.location,
+            "path": str(distribution.locate_file(".")),
             "dependencies": dependencies,
         }
-    except pkg_resources.ResolutionError:
+    except metadata.PackageNotFoundError:
         return {
             "name": project_name,
         }
