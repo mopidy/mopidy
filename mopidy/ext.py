@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Mapping
-from importlib import import_module
 from typing import TYPE_CHECKING, NamedTuple, Union
 
 import importlib_metadata as metadata
@@ -216,8 +215,7 @@ def load_extensions() -> list[ExtensionData]:
     for entry_point in metadata.entry_points(group="mopidy.ext"):
         logger.debug("Loading entry point: %s", entry_point)
         try:
-            module = import_module(entry_point.module)
-            extension_class = module.Extension
+            extension_class = entry_point.load()
         except Exception as exc:
             logger.exception(f"Failed to load extension {entry_point.name}: {exc}")
             continue
@@ -280,8 +278,7 @@ def validate_extension_data(data: ExtensionData) -> bool:
         return False
 
     try:
-        module = import_module(data.entry_point.module)
-        module.Extension()
+        data.entry_point.load()
     except ModuleNotFoundError as exc:
         logger.info(
             "Disabled extension %s: Exception %s",
