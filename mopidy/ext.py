@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Iterator, Mapping
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, NamedTuple, Optional, Union
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, NamedTuple, Union
 
 import pkg_resources
 
@@ -14,7 +13,10 @@ from mopidy.config import ConfigSchema
 from mopidy.internal import path
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+    from pathlib import Path
     from typing_extensions import TypeAlias
+    from typing import Any, Optional
 
     Config = dict[str, dict[str, Any]]
     RegistryEntry: TypeAlias = Union[type[Any], dict[str, Any]]
@@ -81,9 +83,7 @@ class Extension:
         """
         if not hasattr(cls, "ext_name") or cls.ext_name is None:
             raise AttributeError(f"{cls} not an extension or ext_name missing!")
-        cache_dir_path = (
-            path.expand_path(config["core"]["cache_dir"]) / cls.ext_name
-        )
+        cache_dir_path = path.expand_path(config["core"]["cache_dir"]) / cls.ext_name
         path.get_or_create_dir(cache_dir_path)
         return cache_dir_path
 
@@ -96,9 +96,7 @@ class Extension:
         """
         if not hasattr(cls, "ext_name") or cls.ext_name is None:
             raise AttributeError(f"{cls} not an extension or ext_name missing!")
-        config_dir_path = (
-            path.expand_path(config["core"]["config_dir"]) / cls.ext_name
-        )
+        config_dir_path = path.expand_path(config["core"]["config_dir"]) / cls.ext_name
         path.get_or_create_dir(config_dir_path)
         return config_dir_path
 
@@ -113,9 +111,7 @@ class Extension:
         """
         if not hasattr(cls, "ext_name") or cls.ext_name is None:
             raise AttributeError(f"{cls} not an extension or ext_name missing!")
-        data_dir_path = (
-            path.expand_path(config["core"]["data_dir"]) / cls.ext_name
-        )
+        data_dir_path = path.expand_path(config["core"]["data_dir"]) / cls.ext_name
         path.get_or_create_dir(data_dir_path)
         return data_dir_path
 

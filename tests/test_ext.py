@@ -178,9 +178,7 @@ class TestValidateExtensionData:
         error = pkg_resources.VersionConflict
         ext_data.entry_point.require.side_effect = error
         assert not ext.validate_extension_data(ext_data)
-        error = pkg_resources.VersionConflict(
-            ext_data.extension, "test_expected"
-        )
+        error = pkg_resources.VersionConflict(ext_data.extension, "test_expected")
         ext_data.entry_point.require.side_effect = error
         assert not ext.validate_extension_data(ext_data)
 

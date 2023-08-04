@@ -78,6 +78,7 @@ class TestDeps:
         assert gi.__version__ in result["other"]
         assert "Relevant elements:" in result["other"]
 
+    def test_gstreamer_check_elements(self):
         with mock.patch(
             "mopidy.internal.deps._gstreamer_check_elements",
             return_val=("test1", True),
