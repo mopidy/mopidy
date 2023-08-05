@@ -7,7 +7,10 @@ import re
 import sys
 from typing import TYPE_CHECKING, Callable, Optional, TypedDict
 
-import importlib_metadata as metadata
+if sys.version_info < (3, 10):
+    import importlib_metadata as metadata  # pyright: ignore[reportMissingImports]
+else:
+    from importlib import metadata
 
 from mopidy.internal import formatting
 from mopidy.internal.gi import Gst, gi
@@ -109,15 +112,14 @@ def pkg_info(
                     not include_extras and "extra" in raw
                 ):
                     continue
-                entry = re.match(
-                    "[a-zA-Z0-9_']+", raw
-                ).group()  # pyright: ignore[reportOptionalMemberAccess]
-                dependencies.append(
-                    pkg_info(
-                        entry,
-                        include_transitive_deps=entry != "Mopidy",
+                if match := re.match("[a-zA-Z0-9_-]+", raw):
+                    entry = match.group(0)
+                    dependencies.append(
+                        pkg_info(
+                            entry,
+                            include_transitive_deps=entry != "Mopidy",
+                        )
                     )
-                )
         else:
             dependencies = []
         return {

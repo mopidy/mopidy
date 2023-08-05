@@ -3,7 +3,11 @@ import sys
 from pathlib import Path
 from unittest import mock
 
-import importlib_metadata as metadata
+if sys.version_info < (3, 10):
+    import importlib_metadata as metadata  # pyright: ignore[reportMissingImports]
+else:
+    from importlib import metadata
+
 import pytest
 
 from mopidy.internal import deps
@@ -87,7 +91,7 @@ class TestDeps:
             result = deps.gstreamer_info()
             assert "    none" in result["other"]
 
-    @mock.patch("importlib_metadata.distribution")
+    @mock.patch.object(metadata, "distribution")
     def test_pkg_info(self, get_distribution_mock):
         dist_setuptools = mock.MagicMock()
         dist_setuptools.name = "setuptools"
@@ -133,7 +137,7 @@ class TestDeps:
         assert "setuptools" == dep_info_setuptools["name"]
         assert "0.6" == dep_info_setuptools["version"]
 
-    @mock.patch("importlib_metadata.distribution")
+    @mock.patch.object(metadata, "distribution")
     def test_pkg_info_for_missing_dist(self, get_distribution_mock):
         get_distribution_mock.side_effect = metadata.PackageNotFoundError("test")
 
@@ -144,7 +148,7 @@ class TestDeps:
         assert "path" not in result
 
     @pytest.mark.skip("Version control missing in metadata")
-    @mock.patch("importlib_metadata.distribution")
+    @mock.patch.object(metadata, "distribution")
     def test_pkg_info_for_wrong_dist_version(self, get_distribution_mock):
         # get_distribution_mock.side_effect = metadata.VersionConflict
         result = deps.pkg_info()

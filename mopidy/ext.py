@@ -1,10 +1,14 @@
 from __future__ import annotations
 
 import logging
+import sys
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, NamedTuple, Union
 
-import importlib_metadata as metadata
+if sys.version_info < (3, 10):
+    import importlib_metadata as metadata  # pyright: ignore[reportMissingImports]
+else:
+    from importlib import metadata
 
 from mopidy import config as config_lib
 from mopidy import exceptions
