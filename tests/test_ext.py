@@ -1,6 +1,11 @@
 import pathlib
-from importlib import metadata
+import sys
 from unittest import mock
+
+if sys.version_info < (3, 10):
+    import importlib_metadata as metadata  # pyright: ignore[reportMissingImports]
+else:
+    from importlib import metadata
 
 import pytest
 
@@ -74,7 +79,7 @@ class TestExtension:
 class TestLoadExtensions:
     @pytest.fixture
     def iter_entry_points_mock(self, request):
-        patcher = mock.patch("importlib_metadata.entry_points")
+        patcher = mock.patch.object(metadata, "entry_points")
         iter_entry_points = patcher.start()
         iter_entry_points.return_value = []
         yield iter_entry_points

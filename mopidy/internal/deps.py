@@ -7,7 +7,10 @@ import re
 import sys
 from typing import TYPE_CHECKING, Callable, Optional, TypedDict
 
-import importlib_metadata as metadata
+if sys.version_info < (3, 10):
+    import importlib_metadata as metadata  # pyright: ignore[reportMissingImports]
+else:
+    from importlib import metadata
 
 from mopidy.internal import formatting
 from mopidy.internal.gi import Gst, gi
