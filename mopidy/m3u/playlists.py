@@ -33,7 +33,7 @@ def replace(path, mode="w+b", encoding=None, errors=None):
     (fd, tempname) = tempfile.mkstemp(dir=str(path.parent))
     tempname = pathlib.Path(tempname)
     try:
-        fp = open(fd, mode, encoding=encoding, errors=errors)
+        fp = open(fd, mode, encoding=encoding, errors=errors)  # noqa: PTH123, SIM115
     except Exception:
         tempname.unlink()
         os.close(fd)

@@ -82,16 +82,16 @@ class TestDeps:
         assert result["name"] == "Python"
         assert platform.python_implementation() in result["version"]
         assert platform.python_version() in result["version"]
-        assert "python" in result["path"]
-        assert "platform.py" not in result["path"]
+        assert "python" in str(result["path"])
+        assert "platform.py" not in str(result["path"])
 
     def test_gstreamer_info(self):
         result = deps.gstreamer_info()
 
         assert result["name"] == "GStreamer"
         assert ".".join(map(str, Gst.version())) == result["version"]
-        assert "gi" in result["path"]
-        assert "__init__.py" not in result["path"]
+        assert "gi" in str(result["path"])
+        assert "__init__.py" not in str(result["path"])
         assert "Python wrapper: python-gi" in result["other"]
         assert gi.__version__ in result["other"]
         assert "Relevant elements:" in result["other"]
@@ -140,7 +140,7 @@ class TestDeps:
 
         assert result["name"] == "Mopidy"
         assert result["version"] == "0.13"
-        assert "mopidy" in result["path"]
+        assert "mopidy" in str(result["path"])
 
         dep_info_pykka = result["dependencies"][0]
         assert dep_info_pykka["name"] == "Pykka"

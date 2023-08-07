@@ -4,10 +4,9 @@ import argparse
 import collections
 import contextlib
 import logging
-import os
-import pathlib
 import signal
 import sys
+from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -34,8 +33,8 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-_default_config: list[pathlib.Path] = [
-    (pathlib.Path(base) / "mopidy" / "mopidy.conf").resolve()
+_default_config: list[Path] = [
+    (Path(base) / "mopidy" / "mopidy.conf").resolve()
     for base in GLib.get_system_config_dirs() + [GLib.get_user_config_dir()]
 ]
 DEFAULT_CONFIG = ":".join(map(str, _default_config))
@@ -155,7 +154,7 @@ class Command:
     def format_usage(self, prog: Optional[str] = None) -> str:
         """Format usage for current parser."""
         actions = self._build()[1]
-        prog = prog or os.path.basename(sys.argv[0])
+        prog = prog or Path(sys.argv[0]).name
         return self._usage(actions, prog) + "\n"
 
     def _usage(self, actions: Iterable[argparse.Action], prog) -> str:
@@ -166,7 +165,7 @@ class Command:
     def format_help(self, prog: Optional[str] = None) -> str:
         """Format help for current parser and children."""
         actions = self._build()[1]
-        prog = prog or os.path.basename(sys.argv[0])
+        prog = prog or Path(sys.argv[0]).name
 
         formatter = argparse.HelpFormatter(prog)
         formatter.add_usage(None, actions, [])
@@ -221,7 +220,7 @@ class Command:
         :type prog: string
         :rtype: :class:`argparse.Namespace`
         """
-        prog = prog or os.path.basename(sys.argv[0])
+        prog = prog or Path(sys.argv[0]).name
         try:
             return self._parse(
                 args,

@@ -2,6 +2,7 @@ import collections
 import logging
 import time
 from enum import IntEnum
+from pathlib import Path
 from typing import Any, Optional, cast
 
 from mopidy import exceptions
@@ -356,7 +357,6 @@ def _process(
 
 
 if __name__ == "__main__":
-    import os
     import sys
 
     from mopidy.internal import path
@@ -369,7 +369,7 @@ if __name__ == "__main__":
     scanner = Scanner(5000)
     for uri in sys.argv[1:]:
         if not Gst.uri_is_valid(uri):
-            uri = path.path_to_uri(os.path.abspath(uri))
+            uri = path.path_to_uri(Path(uri).resolve())
         try:
             result = scanner.scan(uri)
             for key in ("uri", "mime", "duration", "playable", "seekable"):
