@@ -6,7 +6,8 @@ import logging
 import secrets
 import socket
 import threading
-from typing import TYPE_CHECKING, ClassVar
+from os import PathLike
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, TypedDict
 
 import pykka
 import tornado.httpserver
@@ -22,15 +23,28 @@ from mopidy.internal import formatting, network
 
 if TYPE_CHECKING:
     from mopidy.core.actor import CoreProxy
-    from mopidy.ext import Config, RegistryEntry
+    from mopidy.ext import Config
 
 
 logger = logging.getLogger(__name__)
 
 
+class HttpApp(TypedDict):
+    name: str
+    factory: Callable[
+        [Config, CoreProxy],
+        list[tuple[str, tornado.web.RequestHandler, dict[str, Any]]],
+    ]
+
+
+class HttpStatic(TypedDict):
+    name: str
+    path: str | PathLike[str]
+
+
 class HttpFrontend(pykka.ThreadingActor, CoreListener):
-    apps: ClassVar[list[RegistryEntry]] = []
-    statics: ClassVar[list[RegistryEntry]] = []
+    apps: ClassVar[list[HttpApp]] = []
+    statics: ClassVar[list[HttpStatic]] = []
 
     def __init__(self, config: Config, core: CoreProxy):
         super().__init__()
@@ -101,8 +115,8 @@ class HttpServer(threading.Thread):
         config: Config,
         core: CoreProxy,
         sockets: list[socket.socket],
-        apps: list[RegistryEntry],
-        statics: list[RegistryEntry],
+        apps: list[HttpApp],
+        statics: list[HttpStatic],
     ) -> None:
         super().__init__()
 

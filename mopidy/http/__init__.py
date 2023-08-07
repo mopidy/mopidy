@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import cast
 
 import mopidy
 from mopidy import config, exceptions, ext
@@ -37,11 +38,11 @@ class Extension(ext.Extension):
             raise exceptions.ExtensionError("tornado library not found") from exc
 
     def setup(self, registry):
-        from .actor import HttpFrontend
+        from .actor import HttpApp, HttpFrontend, HttpStatic
         from .handlers import make_mopidy_app_factory
 
-        HttpFrontend.apps = registry["http:app"]
-        HttpFrontend.statics = registry["http:static"]
+        HttpFrontend.apps = cast(list[HttpApp], registry["http:app"])
+        HttpFrontend.statics = cast(list[HttpStatic], registry["http:static"])
 
         registry.add("frontend", HttpFrontend)
         registry.add(
