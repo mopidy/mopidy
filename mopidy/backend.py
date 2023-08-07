@@ -497,7 +497,6 @@ class BackendActor(pykka.ThreadingActor, Backend):
 class BackendProxy(ActorMemberMixin, pykka.ActorProxy[BackendActor]):
     """Backend wrapped in a Pykka actor proxy."""
 
-    audio = proxy_field(BackendActor.audio)
     library: LibraryProviderProxy
     playback: PlaybackProviderProxy
     playlists: PlaylistsProviderProxy
