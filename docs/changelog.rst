@@ -12,7 +12,16 @@ For older releases, see :ref:`history`.
 v3.5.0 (UNRELEASED)
 ===================
 
+- Audio: Removed functions only used by Mopidy-Spotify's bespoke audio delivery
+  mechanism, which has not been used since Spotify shut down their libspotify
+  APIs in May 2022. The removed functions are:
+
+  - :func:`mopidy.audio.calculate_duration`
+  - :func:`mopidy.audio.create_buffer`
+  - :func:`mopidy.audio.millisecond_to_clocktime`
+
 - tox: added "tox -e ci", to allow easy CI check before "git push".
+
 - tox: changed from mypy to pyright
 
 Dependencies
@@ -23,8 +32,6 @@ Dependencies
 - GStreamer >= 1.18.0 is now required.
 
 - Replaced pkg_resources with importlib.metadata
-
-
 
 
 v3.4.1 (2022-12-07)
