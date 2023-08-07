@@ -9,7 +9,7 @@ try:
     gi.require_version("Gst", "1.0")
     from gi.repository import GLib, GObject, Gst
 except ImportError:
-    print(
+    print(  # noqa: T201
         textwrap.dedent(
             """
         ERROR: A GObject based library was not found.

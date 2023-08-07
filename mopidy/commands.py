@@ -149,7 +149,7 @@ class Command:
         usage: Optional[str] = None,
     ) -> NoReturn:
         """Optionally print a message and exit."""
-        print("\n\n".join(m for m in (usage, message) if m))
+        print("\n\n".join(m for m in (usage, message) if m))  # noqa: T201
         sys.exit(status_code)
 
     def format_usage(self, prog: Optional[str] = None) -> str:
@@ -553,7 +553,7 @@ class ConfigCommand(Command):
         # Throw away all bytes that are not valid UTF-8 before printing
         data = data.encode(errors="surrogateescape").decode(errors="replace")
 
-        print(data)
+        print(data)  # noqa: T201
         return 0
 
 
@@ -565,5 +565,5 @@ class DepsCommand(Command):
         self.set(base_verbosity_level=-1)
 
     def run(self) -> int:
-        print(deps.format_dependency_list())
+        print(deps.format_dependency_list())  # noqa: T201
         return 0

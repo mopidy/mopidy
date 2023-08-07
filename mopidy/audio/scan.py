@@ -374,12 +374,12 @@ if __name__ == "__main__":
             result = scanner.scan(uri)
             for key in ("uri", "mime", "duration", "playable", "seekable"):
                 value = getattr(result, key)
-                print(f"{key:<20}   {value}")
-            print("tags")
+                print(f"{key:<20}   {value}")  # noqa: T201
+            print("tags")  # noqa: T201
             for tag, value in result.tags.items():
                 line = f"{tag:<20}   {value}"
                 if len(line) > 77:
                     line = line[:77] + "..."
-                print(line)
+                print(line)  # noqa: T201
         except exceptions.ScannerError as error:
-            print(f"{uri}: {error}")
+            print(f"{uri}: {error}")  # noqa: T201

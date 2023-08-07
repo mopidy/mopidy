@@ -150,7 +150,7 @@ def main():
         try:
             return args.command.run(args, proxied_config)
         except NotImplementedError:
-            print(root_cmd.format_help())
+            print(root_cmd.format_help())  # noqa: T201
             return 1
 
     except KeyboardInterrupt:
