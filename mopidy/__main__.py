@@ -198,14 +198,14 @@ def log_extension_info(all_extensions, enabled_extensions):
 def check_config_errors(
     config: config_lib.Config,
     errors: config_lib.ConfigErrors,
-    extensions,
+    extensions_status: ExtensionsStatus,
 ) -> None:
     fatal_errors = []
     extension_names = {}
     all_extension_names = set()
 
-    for state in extensions:
-        extension_names[state] = {e.ext_name for e in extensions[state]}
+    for state in extensions_status:
+        extension_names[state] = {e.ext_name for e in extensions_status[state]}
         all_extension_names.update(extension_names[state])
 
     for section in sorted(errors):
@@ -227,7 +227,7 @@ def check_config_errors(
         for field, msg in errors[section].items():
             logger.warning(f"  {section}/{field} {msg}")
 
-    if extensions["config"]:
+    if extensions_status["config"]:
         logger.warning(
             "Please fix the extension configuration errors or "
             "disable the extensions to silence these messages."

@@ -1,4 +1,5 @@
 import logging
+from typing import Union
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ FETCH_ERROR = (
 )
 
 
-def fetch():
+def fetch() -> list[tuple[str, str, bytes]]:  # noqa: PLR0911
     if not dbus:
         logger.debug("%s (dbus not installed)", FETCH_ERROR)
         return []
@@ -64,7 +65,11 @@ def fetch():
     return result
 
 
-def set(section, key, value):  # noqa: A001
+def set(  # noqa: A001, PLR0911
+    section: str,
+    key: str,
+    value: Union[str, bytes],
+) -> bool:
     """Store a secret config value for a given section/key.
 
     Indicates if storage failed or succeeded.

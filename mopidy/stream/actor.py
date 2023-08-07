@@ -100,8 +100,7 @@ class StreamPlaybackProvider(backend.PlaybackProvider):
         return unwrapped_uri
 
 
-# TODO: cleanup the return value of this.
-def _unwrap_stream(
+def _unwrap_stream(  # noqa: PLR0911  # TODO: cleanup the return value of this.
     uri: str,
     timeout: float,
     scanner: scan.Scanner,

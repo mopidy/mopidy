@@ -259,7 +259,7 @@ def load_extensions() -> list[ExtensionData]:
     return installed_extensions
 
 
-def validate_extension_data(data: ExtensionData) -> bool:
+def validate_extension_data(data: ExtensionData) -> bool:  # noqa: PLR0911
     """Verify extension's dependencies and environment.
 
     :param extensions: an extension to check

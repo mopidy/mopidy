@@ -337,7 +337,11 @@ class PlaybackController:
 
         # TODO return result?
 
-    def _change(self, pending_tl_track, state):
+    def _change(  # noqa: PLR0911
+        self,
+        pending_tl_track: Optional[TlTrack],
+        state: PlaybackState,
+    ) -> bool:
         self._pending_tl_track = pending_tl_track
 
         if not pending_tl_track:

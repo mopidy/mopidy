@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import secrets
+import socket
 import threading
 from typing import TYPE_CHECKING, ClassVar
 
@@ -99,7 +100,14 @@ def on_event(name, io_loop, **data):
 class HttpServer(threading.Thread):
     name = "HttpServer"
 
-    def __init__(self, config, core, sockets, apps, statics):
+    def __init__(  # noqa: PLR0913
+        self,
+        config: Config,
+        core: CoreProxy,
+        sockets: list[socket.socket],
+        apps: list[RegistryEntry],
+        statics: list[RegistryEntry],
+    ) -> None:
         super().__init__()
 
         self.config = config
