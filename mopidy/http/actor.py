@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import secrets
@@ -18,11 +19,6 @@ from mopidy import exceptions, models, zeroconf
 from mopidy.core import CoreListener
 from mopidy.http import Extension, handlers
 from mopidy.internal import formatting, network
-
-try:
-    import asyncio
-except ImportError:
-    asyncio = None  # type: ignore
 
 if TYPE_CHECKING:
     from mopidy.core.actor import CoreProxy
@@ -121,11 +117,9 @@ class HttpServer(threading.Thread):
         self.io_loop = None
 
     def run(self):
-        if asyncio:
-            # If asyncio is available, Tornado uses it as its IO loop. Since we
-            # start Tornado in a another thread than the main thread, we must
-            # explicitly create an asyncio loop for the current thread.
-            asyncio.set_event_loop(asyncio.new_event_loop())
+        # Since we start Tornado in a another thread than the main thread,
+        # we must explicitly create an asyncio loop for the current thread.
+        asyncio.set_event_loop(asyncio.new_event_loop())
 
         self.app = tornado.web.Application(
             self._get_request_handlers(),
