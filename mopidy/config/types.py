@@ -109,9 +109,9 @@ class Deprecated(ConfigValue[Any]):
 
 
 class String(ConfigValue[str]):
-    """String value.
+    r"""String value.
 
-    Is decoded as utf-8 and \\n \\t escapes should work and be preserved.
+    Is decoded as utf-8, and \n and \t escapes should work and be preserved.
     """
 
     def __init__(
@@ -149,9 +149,9 @@ class String(ConfigValue[str]):
 
 
 class Secret(String):
-    """Secret string value.
+    r"""Secret string value.
 
-    Is decoded as utf-8 and \\n \\t escapes should work and be preserved.
+    Is decoded as utf-8, and \n and \t escapes should work and be preserved.
 
     Should be used for passwords, auth tokens etc. Will mask value when being
     displayed.
