@@ -35,7 +35,7 @@ class FileLibraryProvider(backend.LibraryProvider):
 
         self._scanner = scan.Scanner(timeout=config["file"]["metadata_timeout"])
 
-    def browse(self, uri):
+    def browse(self, uri) -> list[models.Ref]:  # noqa: C901
         logger.debug("Browsing files at: %s", uri)
         result = []
         local_path = path.uri_to_path(uri)

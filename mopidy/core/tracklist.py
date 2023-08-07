@@ -1,6 +1,6 @@
 import logging
 import random
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from mopidy import exceptions
 from mopidy.core import listener
@@ -241,7 +241,7 @@ class TracklistController:
 
         return getattr(next_tl_track, "tlid", None)
 
-    def next_track(self, tl_track):
+    def next_track(self, tl_track) -> Optional[TlTrack]:
         """The track that will be played if calling
         :meth:`mopidy.core.PlaybackController.next()`.
 
@@ -340,7 +340,12 @@ class TracklistController:
         # 1 - len(tracks) Thus 'position - 1' will always be within the list.
         return self._tl_tracks[position - 1]
 
-    def add(self, tracks=None, at_position=None, uris=None):
+    def add(  # noqa: C901
+        self,
+        tracks=None,
+        at_position=None,
+        uris=None,
+    ) -> list[TlTrack]:
         """Add tracks to the tracklist.
 
         If ``uris`` is given instead of ``tracks``, the URIs are

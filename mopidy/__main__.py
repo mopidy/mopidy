@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def main():
+def main() -> int:  # noqa: C901, PLR0912, PLR0915
     log.bootstrap_delayed_logging()
     logger.info(f"Starting Mopidy {versioning.get_version()}")
 
@@ -154,7 +154,7 @@ def main():
             return 1
 
     except KeyboardInterrupt:
-        pass
+        return 0
     except Exception:
         logger.exception("Unhandled exception")
         raise

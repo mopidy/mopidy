@@ -278,7 +278,7 @@ class PlaybackController:
             self.set_state(PlaybackState.PAUSED)
             self._trigger_track_playback_paused()
 
-    def play(self, tl_track=None, tlid=None):
+    def play(self, tl_track=None, tlid=None) -> None:  # noqa: C901, PLR0912
         """Play the given track, or if the given tl_track and tlid is
         :class:`None`, play the currently active track.
 

@@ -246,7 +246,7 @@ class _Handler:
             self._pad.remove_probe(self._event_handler_id)
         self._event_handler_id = None
 
-    def on_message(self, _bus, msg):
+    def on_message(self, _bus, msg) -> None:  # noqa: C901
         if msg.type == Gst.MessageType.STATE_CHANGED:
             if msg.src != self._element:
                 return

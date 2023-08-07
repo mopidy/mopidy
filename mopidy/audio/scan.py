@@ -255,7 +255,7 @@ def _query_seekable(pipeline: Gst.Pipeline) -> bool:
     return query.parse_seeking()[1]
 
 
-def _process(
+def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
     pipeline: Gst.Pipeline,
     timeout_ms: int,
 ) -> tuple[dict[str, Any], Optional[str], bool, Optional[int]]:
