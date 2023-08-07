@@ -15,12 +15,12 @@ from mopidy.audio.constants import PlaybackState
 from mopidy.audio.listener import AudioListener
 from mopidy.internal import process
 from mopidy.internal.gi import GLib, GObject, Gst, GstPbutils
-from mopidy.softwaremixer.mixer import SoftwareMixerProxy
 
 if TYPE_CHECKING:
     from mopidy.config import Config
     from mopidy.mixer import MixerProxy
     from mopidy.models import Track
+    from mopidy.softwaremixer.mixer import SoftwareMixerProxy
 
 logger = logging.getLogger(__name__)
 
@@ -490,6 +490,8 @@ class Audio(pykka.ThreadingActor):
         self._signals = utils.Signals()
 
         if mixer and self._config["audio"]["mixer"] == "software":
+            from mopidy.softwaremixer.mixer import SoftwareMixerProxy
+
             mixer = cast(SoftwareMixerProxy, mixer)
             self.mixer = pykka.traversable(SoftwareMixerAdapter(mixer))
 

@@ -12,8 +12,6 @@ else:
 
 from mopidy import config as config_lib
 from mopidy import exceptions
-from mopidy.commands import Command
-from mopidy.config import ConfigSchema
 from mopidy.internal import path
 
 if TYPE_CHECKING:
@@ -22,6 +20,9 @@ if TYPE_CHECKING:
     from typing import Any, Optional
 
     from typing_extensions import TypeAlias
+
+    from mopidy.commands import Command
+    from mopidy.config import ConfigSchema
 
     Config = dict[str, dict[str, Any]]
     RegistryEntry: TypeAlias = Union[type[Any], dict[str, Any]]

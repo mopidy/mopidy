@@ -1,8 +1,4 @@
-# ruff: noqa
-
-from typing import TYPE_CHECKING
-
-from .actor import Core
+from .actor import Core, CoreProxy
 from .history import HistoryController
 from .library import LibraryController
 from .listener import CoreListener
@@ -11,5 +7,15 @@ from .playback import PlaybackController, PlaybackState
 from .playlists import PlaylistsController
 from .tracklist import TracklistController
 
-if TYPE_CHECKING:
-    from .actor import CoreProxy
+__all__ = [
+    "Core",
+    "CoreListener",
+    "CoreProxy",
+    "HistoryController",
+    "LibraryController",
+    "MixerController",
+    "PlaybackController",
+    "PlaybackState",
+    "PlaylistsController",
+    "TracklistController",
+]
