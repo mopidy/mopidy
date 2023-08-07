@@ -349,7 +349,7 @@ def _preprocess(config_string: str) -> str:
     comment_re = re.compile(r"^(#|;)")
     inline_comment_re = re.compile(r" ;")
 
-    def newlines(match) -> str:
+    def newlines(_match) -> str:
         return f"__BLANK{next(counter):d}__ ="
 
     def comments(match) -> Optional[str]:
@@ -359,7 +359,7 @@ def _preprocess(config_string: str) -> str:
             return f"__SEMICOLON{next(counter):d}__ ="
         return None
 
-    def inlinecomments(match) -> str:
+    def inlinecomments(_match) -> str:
         return f"\n__INLINE{next(counter):d}__ ="
 
     def sections(match) -> str:

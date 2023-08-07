@@ -116,7 +116,7 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
         if args.command == deps_cmd:
             return args.command.run()
 
-        check_config_errors(config, config_errors, extensions_status)
+        check_config_errors(config_errors, extensions_status)
 
         if not extensions_status["enabled"]:
             logger.error("No extension enabled, exiting...")
@@ -196,7 +196,6 @@ def log_extension_info(all_extensions, enabled_extensions):
 
 
 def check_config_errors(
-    config: config_lib.Config,
     errors: config_lib.ConfigErrors,
     extensions_status: ExtensionsStatus,
 ) -> None:

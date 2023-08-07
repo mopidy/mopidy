@@ -146,7 +146,7 @@ def _setup_decodebin(element, pad, pipeline, signals):
 
 def _have_type(
     element: Gst.Element,
-    probability: int,
+    _probability: int,
     caps: Gst.Caps,
     decodebin: Gst.Bin,
 ) -> None:
@@ -204,8 +204,8 @@ def _pad_added(
 
 def _autoplug_select(
     element: Gst.Element,
-    pad: Gst.Pad,
-    caps: Gst.Caps,
+    _pad: Gst.Pad,
+    _caps: Gst.Caps,
     factory: Gst.ElementFactory,
 ) -> GstAutoplugSelectResult:
     if factory.list_is_type(
