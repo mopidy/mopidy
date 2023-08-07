@@ -410,7 +410,7 @@ class _Handler:
         logger.warning("Could not find a %s to handle media.", desc)
         if GstPbutils.install_plugins_supported():
             logger.info(
-                "You might be able to fix this by running: " 'gst-installer "%s"',
+                "You might be able to fix this by running: 'gst-installer \"%s\"'",
                 debug,
             )
         # TODO: store the missing plugins installer info in a file so we can
