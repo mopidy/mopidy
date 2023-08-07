@@ -175,7 +175,7 @@ def load(
     return _validate(raw_config, schemas)
 
 
-def format(
+def format(  # noqa: A001
     config: Config,
     ext_schemas: ConfigSchemas,
     comments: Optional[dict] = None,

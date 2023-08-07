@@ -64,7 +64,7 @@ def fetch():
     return result
 
 
-def set(section, key, value):
+def set(section, key, value):  # noqa: A001
     """Store a secret config value for a given section/key.
 
     Indicates if storage failed or succeeded.
