@@ -111,7 +111,7 @@ def _extract_buffer_data(buf):
     success, info = mem.map(Gst.MapFlags.READ)
     if not success:
         return None
-    if isinstance(info.data, memoryview):
+    if isinstance(info.data, memoryview):  # noqa: SIM108
         # We need to copy the data as the memoryview is released
         # when we call mem.unmap()
         data = bytes(info.data)

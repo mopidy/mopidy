@@ -117,9 +117,11 @@ def _has_src_pads(element):
 
 def _has_dynamic_src_pad(element):
     for template in element.get_pad_template_list():
-        if template.direction == Gst.PadDirection.SRC:
-            if template.presence == Gst.PadPresence.SOMETIMES:
-                return True
+        if (
+            template.direction == Gst.PadDirection.SRC
+            and template.presence == Gst.PadPresence.SOMETIMES
+        ):
+            return True
     return False
 
 

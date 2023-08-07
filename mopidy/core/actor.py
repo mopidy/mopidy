@@ -164,15 +164,18 @@ class Core(
         """Do not call this function. It is for internal use at startup."""
         try:
             coverage = []
-            if self._config and "restore_state" in self._config["core"]:
-                if self._config["core"]["restore_state"]:
-                    coverage = [
-                        "tracklist",
-                        "mode",
-                        "play-last",
-                        "mixer",
-                        "history",
-                    ]
+            if (
+                self._config
+                and "restore_state" in self._config["core"]
+                and self._config["core"]["restore_state"]
+            ):
+                coverage = [
+                    "tracklist",
+                    "mode",
+                    "play-last",
+                    "mixer",
+                    "history",
+                ]
             if len(coverage):
                 self._load_state(coverage)
         except Exception as e:
@@ -181,9 +184,12 @@ class Core(
     def _teardown(self):
         """Do not call this function. It is for internal use at shutdown."""
         try:
-            if self._config and "restore_state" in self._config["core"]:
-                if self._config["core"]["restore_state"]:
-                    self._save_state()
+            if (
+                self._config
+                and "restore_state" in self._config["core"]
+                and self._config["core"]["restore_state"]
+            ):
+                self._save_state()
         except Exception as e:
             logger.warning("Unexpected error while saving state: %s", str(e))
 

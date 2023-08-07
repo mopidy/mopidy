@@ -264,11 +264,14 @@ class TracklistController:
         if not self._tl_tracks:
             return None
 
-        if self.get_random() and not self._shuffled:
-            if self.get_repeat() or not tl_track:
-                logger.debug("Shuffling tracks")
-                self._shuffled = self._tl_tracks[:]
-                random.shuffle(self._shuffled)
+        if (
+            self.get_random()
+            and not self._shuffled
+            and (self.get_repeat() or not tl_track)
+        ):
+            logger.debug("Shuffling tracks")
+            self._shuffled = self._tl_tracks[:]
+            random.shuffle(self._shuffled)
 
         if self.get_random():
             if self._shuffled:

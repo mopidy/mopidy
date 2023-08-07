@@ -457,13 +457,14 @@ class RootCommand(Command):
 
         backends = []
         for backend_class in backend_classes:
-            with _actor_error_handling(backend_class.__name__):
-                with timer.time_logger(backend_class.__name__):
-                    backend = cast(
-                        BackendProxy,
-                        backend_class.start(config=config, audio=audio).proxy(),
-                    )
-                    backends.append(backend)
+            with _actor_error_handling(backend_class.__name__), timer.time_logger(
+                backend_class.__name__
+            ):
+                backend = cast(
+                    BackendProxy,
+                    backend_class.start(config=config, audio=audio).proxy(),
+                )
+                backends.append(backend)
 
         # Block until all on_starts have finished, letting them run in parallel
         for backend in backends[:]:
@@ -505,9 +506,10 @@ class RootCommand(Command):
         )
 
         for frontend_class in frontend_classes:
-            with _actor_error_handling(frontend_class.__name__):
-                with timer.time_logger(frontend_class.__name__):
-                    frontend_class.start(config=config, core=core)
+            with _actor_error_handling(frontend_class.__name__), timer.time_logger(
+                frontend_class.__name__
+            ):
+                frontend_class.start(config=config, core=core)
 
     def stop_frontends(self, frontend_classes: list[type[ThreadingActor]]) -> None:
         logger.info("Stopping Mopidy frontends")
