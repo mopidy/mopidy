@@ -209,7 +209,7 @@ def format_initial(extensions_data: list[ExtensionData]) -> str:
 def _load(
     files: list[os.PathLike],
     defaults: list[str],
-    overrides: list[str],
+    overrides: list[tuple[str, str, Any]],
 ) -> RawConfig:
     parser = configparser.RawConfigParser(inline_comment_prefixes=(";",))
 
