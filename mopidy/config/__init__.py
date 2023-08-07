@@ -29,12 +29,12 @@ from mopidy.config.types import (
     String,
 )
 from mopidy.internal import path, versioning
-from mopidy.internal.log import LogColorName, LogLevelName
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from mopidy.ext import ExtensionData
+    from mopidy.internal.log import LogColorName, LogLevelName
 
     ConfigErrors: TypeAlias = dict[str, dict[str, Any]]
     ConfigSchemas: TypeAlias = list[Union[ConfigSchema, MapConfigSchema]]

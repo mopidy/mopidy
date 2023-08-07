@@ -10,11 +10,11 @@ from mopidy.audio import PlaybackState
 from mopidy.core import listener
 from mopidy.exceptions import CoreError
 from mopidy.internal import deprecation, models, validation
-from mopidy.models import TlTrack
 
 if TYPE_CHECKING:
     from mopidy.audio.actor import AudioProxy
     from mopidy.core.actor import Backends, Core
+    from mopidy.models import TlTrack
 
 logger = logging.getLogger(__name__)
 
