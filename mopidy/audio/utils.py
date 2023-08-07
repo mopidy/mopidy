@@ -1,40 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Optional, cast
+from typing import TYPE_CHECKING, Any, Callable, Iterable, cast
 
 from mopidy import httpclient
 from mopidy.internal.gi import Gst
 
 if TYPE_CHECKING:
     from mopidy.config import ProxyConfig
-
-
-def calculate_duration(num_samples: int, sample_rate: int) -> int:
-    """Determine duration of samples using GStreamer helper for precise
-    math."""
-    return Gst.util_uint64_scale(num_samples, Gst.SECOND, sample_rate)
-
-
-def create_buffer(
-    data: bytes,
-    timestamp: Optional[int] = None,
-    duration: Optional[int] = None,
-) -> Gst.Buffer:
-    """Create a new GStreamer buffer based on provided data.
-
-    Mainly intended to keep gst imports out of non-audio modules.
-
-    .. versionchanged:: 2.0
-        ``capabilites`` argument was removed.
-    """
-    if not data:
-        raise ValueError("Cannot create buffer without data")
-    buffer_ = Gst.Buffer.new_wrapped(data)
-    if timestamp is not None:
-        buffer_.pts = timestamp
-    if duration is not None:
-        buffer_.duration = duration
-    return buffer_
 
 
 def millisecond_to_clocktime(value: int) -> int:
