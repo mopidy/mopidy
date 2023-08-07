@@ -4,7 +4,7 @@ import functools
 import logging
 import urllib.parse
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Optional, Union, cast
 
 import tornado.escape
 import tornado.ioloop
@@ -13,18 +13,29 @@ import tornado.websocket
 
 import mopidy
 from mopidy import core, models
+from mopidy.http.types import HttpConfig
 from mopidy.internal import jsonrpc
 
 if TYPE_CHECKING:
+    from collections.abc import Awaitable
     from typing import ClassVar
+
+    from mopidy.core.actor import CoreProxy
+    from mopidy.ext import Config
+    from mopidy.http.types import HttpApp, HttpStatic, RequestRule
 
 
 logger = logging.getLogger(__name__)
 
 
-def make_mopidy_app_factory(apps, statics):
-    def mopidy_app_factory(config, core):
-        if not config["http"]["csrf_protection"]:
+def make_mopidy_app_factory(
+    *,
+    apps: list[HttpApp],
+    statics: list[HttpStatic],
+) -> Callable[[Config, CoreProxy], list[RequestRule]]:
+    def mopidy_app_factory(config: Config, core: CoreProxy) -> list[RequestRule]:
+        http_config = cast(HttpConfig, config["http"])
+        if not http_config["csrf_protection"]:
             logger.warning("HTTP Cross-Site Request Forgery protection is disabled")
 
         return [
@@ -33,8 +44,8 @@ def make_mopidy_app_factory(apps, statics):
                 WebSocketHandler,
                 {
                     "core": core,
-                    "allowed_origins": config["http"]["allowed_origins"],
-                    "csrf_protection": config["http"]["csrf_protection"],
+                    "allowed_origins": http_config["allowed_origins"],
+                    "csrf_protection": http_config["csrf_protection"],
                 },
             ),
             (
@@ -42,22 +53,31 @@ def make_mopidy_app_factory(apps, statics):
                 JsonRpcHandler,
                 {
                     "core": core,
-                    "allowed_origins": config["http"]["allowed_origins"],
-                    "csrf_protection": config["http"]["csrf_protection"],
+                    "allowed_origins": http_config["allowed_origins"],
+                    "csrf_protection": http_config["csrf_protection"],
                 },
             ),
             (
                 r"/(.+)",
                 StaticFileHandler,
-                {"path": str(Path(__file__).parent / "data")},
+                {
+                    "path": str(Path(__file__).parent / "data"),
+                },
             ),
-            (r"/", ClientListHandler, {"apps": apps, "statics": statics}),
+            (
+                r"/",
+                ClientListHandler,
+                {
+                    "apps": apps,
+                    "statics": statics,
+                },
+            ),
         ]
 
     return mopidy_app_factory
 
 
-def make_jsonrpc_wrapper(core_actor):
+def make_jsonrpc_wrapper(core_actor: CoreProxy) -> jsonrpc.JsonRpcWrapper:
     inspector = jsonrpc.JsonRpcInspector(
         objects={
             "core.get_uri_schemes": core.Core.get_uri_schemes,
@@ -87,7 +107,10 @@ def make_jsonrpc_wrapper(core_actor):
     )
 
 
-def _send_broadcast(client, msg):
+def _send_broadcast(
+    client: WebSocketHandler,
+    msg: Union[bytes, str, dict[str, Any]],
+) -> None:
     # We could check for client.ws_connection, but we don't really
     # care why the broadcast failed, we just want the rest of them
     # to succeed, so catch everything.
@@ -108,28 +131,37 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     clients: ClassVar[set[WebSocketHandler]] = set()
 
     @classmethod
-    def broadcast(cls, msg, io_loop):
+    def broadcast(
+        cls,
+        msg: Union[bytes, str, dict[str, Any]],
+        io_loop: tornado.ioloop.IOLoop,
+    ) -> None:
         # This can be called from outside the Tornado ioloop, so we need to
         # safely cross the thread boundary by adding a callback to the loop.
         for client in cls.clients.copy():
             # One callback per client to keep time we hold up the loop short
             io_loop.add_callback(functools.partial(_send_broadcast, client, msg))
 
-    def initialize(self, core, allowed_origins, csrf_protection):
+    def initialize(
+        self,
+        core: CoreProxy,
+        allowed_origins: set[str],
+        csrf_protection: Optional[bool],
+    ) -> None:
         self.jsonrpc = make_jsonrpc_wrapper(core)
         self.allowed_origins = allowed_origins
         self.csrf_protection = csrf_protection
 
-    def open(self):
+    def open(self, *_args: str, **_kwargs: str) -> Optional[Awaitable[None]]:
         self.set_nodelay(True)
         self.clients.add(self)
         logger.debug("New WebSocket connection from %s", self.request.remote_ip)
 
-    def on_close(self):
+    def on_close(self) -> None:
         self.clients.discard(self)
         logger.debug("Closed WebSocket connection from %s", self.request.remote_ip)
 
-    def on_message(self, message):
+    def on_message(self, message: Union[str, bytes]) -> Optional[Awaitable[None]]:
         if not message:
             return
 
@@ -151,18 +183,22 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             logger.error(f"WebSocket request error: {exc}")
             self.close()
 
-    def check_origin(self, origin):
+    def check_origin(self, origin: str) -> bool:
         if not self.csrf_protection:
             return True
         return check_origin(origin, self.request.headers, self.allowed_origins)
 
 
-def set_mopidy_headers(request_handler):
+def set_mopidy_headers(request_handler: tornado.web.RequestHandler) -> None:
     request_handler.set_header("Cache-Control", "no-cache")
     request_handler.set_header("X-Mopidy-Version", mopidy.__version__.encode())
 
 
-def check_origin(origin, request_headers, allowed_origins):
+def check_origin(
+    origin: Optional[str],
+    request_headers: tornado.httputil.HTTPHeaders,
+    allowed_origins: set[str],
+) -> bool:
     if origin is None:
         logger.warning("HTTP request denied for missing Origin header")
         return False
@@ -179,16 +215,21 @@ def check_origin(origin, request_headers, allowed_origins):
 
 
 class JsonRpcHandler(tornado.web.RequestHandler):
-    def initialize(self, core, allowed_origins, csrf_protection):
+    def initialize(
+        self,
+        core: CoreProxy,
+        allowed_origins: set[str],
+        csrf_protection: Optional[bool],
+    ) -> None:
         self.jsonrpc = make_jsonrpc_wrapper(core)
         self.allowed_origins = allowed_origins
         self.csrf_protection = csrf_protection
 
-    def head(self):
+    def head(self) -> Optional[Awaitable[None]]:
         self.set_extra_headers()
         self.finish()
 
-    def post(self):
+    def post(self) -> Optional[Awaitable[None]]:
         if self.csrf_protection:
             # This "non-standard" Content-Type requirement forces browsers to
             # automatically issue a preflight OPTIONS request before this one.
@@ -227,22 +268,23 @@ class JsonRpcHandler(tornado.web.RequestHandler):
             logger.error("HTTP JSON-RPC request error: %s", e)
             self.write_error(500)
 
-    def set_extra_headers(self):
+    def set_extra_headers(self) -> None:
         set_mopidy_headers(self)
         self.set_header("Accept", "application/json")
         self.set_header("Content-Type", "application/json; utf-8")
 
-    def set_cors_headers(self, origin):
+    def set_cors_headers(self, origin: str) -> None:
         self.set_header("Access-Control-Allow-Origin", f"{origin}")
         self.set_header("Access-Control-Allow-Headers", "Content-Type")
 
-    def options(self):
+    def options(self) -> Optional[Awaitable[None]]:
         if self.csrf_protection:
-            origin = self.request.headers.get("Origin")
+            origin = cast(Optional[str], self.request.headers.get("Origin"))
             if not check_origin(origin, self.request.headers, self.allowed_origins):
                 self.set_status(403, f"Access denied for origin {origin}")
                 return
 
+            assert origin
             self.set_cors_headers(origin)
 
         self.set_status(204)
@@ -250,14 +292,14 @@ class JsonRpcHandler(tornado.web.RequestHandler):
 
 
 class ClientListHandler(tornado.web.RequestHandler):
-    def initialize(self, apps, statics):
+    def initialize(self, apps: list[HttpApp], statics: list[HttpStatic]) -> None:
         self.apps = apps
         self.statics = statics
 
-    def get_template_path(self):
+    def get_template_path(self) -> str:
         return str(Path(__file__).parent)
 
-    def get(self):
+    def get(self) -> Optional[Awaitable[None]]:
         set_mopidy_headers(self)
 
         names = set()
@@ -271,11 +313,11 @@ class ClientListHandler(tornado.web.RequestHandler):
 
 
 class StaticFileHandler(tornado.web.StaticFileHandler):
-    def set_extra_headers(self, _path):
+    def set_extra_headers(self, _path: str) -> None:
         set_mopidy_headers(self)
 
 
 class AddSlashHandler(tornado.web.RequestHandler):
     @tornado.web.addslash
-    def prepare(self):
+    def prepare(self) -> Optional[Awaitable[None]]:
         return super().prepare()
