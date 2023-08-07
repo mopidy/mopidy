@@ -40,7 +40,6 @@ class Ref(ValidatedImmutableObject):
     #: The object type, e.g. "artist", "album", "track", "playlist",
     #: "directory". Read-only.
     type = fields.Identifier()  # TODO: consider locking this down.
-    # type = fields.Field(choices=(ALBUM, ARTIST, DIRECTORY, PLAYLIST, TRACK))
 
     #: Constant used for comparison with the :attr:`type` field.
     ALBUM = "album"

@@ -160,16 +160,6 @@ class TestDeps:
         assert "version" not in result
         assert "path" not in result
 
-    @pytest.mark.skip("Version control missing in metadata")
-    @mock.patch.object(metadata, "distribution")
-    def test_pkg_info_for_wrong_dist_version(self, get_distribution_mock):
-        # get_distribution_mock.side_effect = metadata.VersionConflict
-        result = deps.pkg_info()
-
-        assert result["name"] == "Mopidy"
-        assert "version" not in result
-        assert "path" not in result
-
     @pytest.mark.parametrize("include_transitive_deps", [True, False])
     @pytest.mark.parametrize("include_extras", [True, False])
     def test_pkg_info_real(self, include_transitive_deps, include_extras):

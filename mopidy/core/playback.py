@@ -256,9 +256,6 @@ class PlaybackController:
             if self._change(pending, state):
                 break
             self.core.tracklist._mark_unplayable(pending)
-            # TODO: this could be needed to prevent a loop in rare cases
-            # if current == pending:
-            #     break
             current = pending
             count -= 1
             if not count:
@@ -272,9 +269,6 @@ class PlaybackController:
         backend = self._get_backend(self.get_current_tl_track())
         # TODO: Wrap backend call in error handling.
         if not backend or backend.playback.pause().get():
-            # TODO: switch to:
-            # backend.track(pause)
-            # wait for state change?
             self.set_state(PlaybackState.PAUSED)
             self._trigger_track_playback_paused()
 
@@ -410,9 +404,6 @@ class PlaybackController:
             if self._change(pending, state):
                 break
             self.core.tracklist._mark_unplayable(pending)
-            # TODO: this could be needed to prevent a loop in rare cases
-            # if current == pending:
-            #     break
             current = pending
             count -= 1
             if not count:
@@ -431,9 +422,6 @@ class PlaybackController:
             self.set_state(PlaybackState.PLAYING)
             # TODO: trigger via gst messages
             self._trigger_track_playback_resumed()
-        # TODO: switch to:
-        # backend.resume()
-        # wait for state change?
 
     def seek(self, time_position: int) -> bool:
         """Seeks to time position given in milliseconds.

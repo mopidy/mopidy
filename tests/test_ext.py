@@ -183,13 +183,9 @@ class TestValidateExtensionData:
 
     @pytest.mark.skip("Version control missing in metadata")
     def test_version_conflict(self, ext_data):
-        # error = metadata.VersionConflict
         error = metadata.PackageNotFoundError
         ext_data.entry_point.require.side_effect = error
         assert not ext.validate_extension_data(ext_data)
-        # error = metadata.VersionConflict(
-        #     ext_data.extension, "test_expected"
-        # )
         ext_data.entry_point.require.side_effect = error
         assert not ext.validate_extension_data(ext_data)
 

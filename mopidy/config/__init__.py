@@ -129,9 +129,6 @@ _proxy_schema["port"] = Port(optional=True)
 _proxy_schema["username"] = String(optional=True)
 _proxy_schema["password"] = Secret(optional=True)
 
-# NOTE: if multiple outputs ever comes something like LogLevelConfigSchema
-# _outputs_schema = config.AudioOutputConfigSchema()
-
 _schemas: ConfigSchemas = [
     _core_schema,
     _logging_schema,
