@@ -15,7 +15,8 @@ if TYPE_CHECKING:
     from mopidy.internal.gi import Gst
     from mopidy.models import Image, Playlist, Ref, SearchResult, Track
 
-# TODO Fix duplication with mopidy.internal.validation.TRACK_FIELDS_WITH_TYPES
+# TODO Fix duplication with mopidy.core.library.DistinctField and
+# mopidy.internal.validation.TRACK_FIELDS_WITH_TYPES
 TrackField = Literal[
     "uri",
     "track_name",
