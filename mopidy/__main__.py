@@ -155,8 +155,8 @@ def main():
 
     except KeyboardInterrupt:
         pass
-    except Exception as ex:
-        logger.exception(ex)
+    except Exception:
+        logger.exception("Unhandled exception")
         raise
 
 

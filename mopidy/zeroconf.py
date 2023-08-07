@@ -120,10 +120,11 @@ class Zeroconf:
 
             self.group.Commit()
             logger.debug("%s: Published", self)
-            return True
         except dbus.exceptions.DBusException as e:
             logger.debug("%s: Publish failed: %s", self, e)
             return False
+        else:
+            return True
 
     def unpublish(self):
         """Unpublish the service.

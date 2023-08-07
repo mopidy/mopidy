@@ -8,6 +8,7 @@ from pykka.messages import ProxyCall
 
 from mopidy.audio import PlaybackState
 from mopidy.core import listener
+from mopidy.exceptions import CoreError
 from mopidy.internal import deprecation, models, validation
 from mopidy.models import TlTrack
 
@@ -385,7 +386,7 @@ class PlaybackController:
             self._pending_tl_track = None
             return True
 
-        raise Exception(f"Unknown state: {state}")
+        raise CoreError(f"Unknown playback state: {state}")
 
     def previous(self):
         """Change to the previous track.

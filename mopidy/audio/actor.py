@@ -154,7 +154,9 @@ class _Outputs(Gst.Bin):
             )
         except GLib.Error as exc:
             logger.error('Failed to create audio output "%s": %s', description, exc)
-            raise exceptions.AudioException(exc)
+            raise exceptions.AudioException(
+                f"Failed to create audio output {description!r}"
+            ) from exc
 
         self._add(output)
         logger.info('Audio output set to "%s"', description)
@@ -502,8 +504,8 @@ class Audio(pykka.ThreadingActor):
             self._setup_playbin()
             self._setup_outputs()
             self._setup_audio_sink()
-        except GLib.Error as exc:
-            logger.exception(exc)
+        except GLib.Error:
+            logger.exception("Unknown GLib error on audio startup.")
             process.exit_process()
 
     def on_stop(self) -> None:

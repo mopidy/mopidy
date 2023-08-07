@@ -33,8 +33,8 @@ class Extension(ext.Extension):
     def validate_environment(self):
         try:
             import tornado.web  # noqa: F401 (Imported to test if available)
-        except ImportError as e:
-            raise exceptions.ExtensionError("tornado library not found", e)
+        except ImportError as exc:
+            raise exceptions.ExtensionError("tornado library not found") from exc
 
     def setup(self, registry):
         from .actor import HttpFrontend

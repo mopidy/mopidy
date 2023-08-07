@@ -10,6 +10,7 @@ import tempfile
 from typing import TYPE_CHECKING
 
 from mopidy import backend
+from mopidy.exceptions import BackendError
 from mopidy.internal import path
 
 from . import Extension, translator
@@ -166,7 +167,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         if not path.is_absolute():
             path = self._abspath(path)
         if not self._is_in_basedir(path):
-            raise Exception(
+            raise BackendError(
                 f"Path {path!r} is not inside playlist dir {self._playlists_dir!r}"
             )
         if "w" in mode:

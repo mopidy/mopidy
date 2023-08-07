@@ -215,13 +215,13 @@ def load_extensions() -> list[ExtensionData]:
         logger.debug("Loading entry point: %s", entry_point)
         try:
             extension_class = entry_point.load()
-        except Exception as exc:
-            logger.exception(f"Failed to load extension {entry_point.name}: {exc}")
+        except Exception:
+            logger.exception(f"Failed to load extension {entry_point.name}.")
             continue
 
         try:
             if not issubclass(extension_class, Extension):
-                raise TypeError  # issubclass raises TypeError on non-class
+                raise TypeError  # noqa: TRY301
         except TypeError:
             logger.error(
                 "Entry point %s did not contain a valid extensionclass: %r",

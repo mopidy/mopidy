@@ -449,8 +449,8 @@ class Hostname(ConfigValue):
 
         try:
             socket.getaddrinfo(value, None)
-        except OSError:
-            raise ValueError("must be a resolveable hostname or valid IP")
+        except OSError as exc:
+            raise ValueError("must be a resolveable hostname or valid IP") from exc
 
         return value
 

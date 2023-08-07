@@ -49,10 +49,10 @@ def config_override_type(value: str) -> tuple[str, str, str]:
         section, remainder = value.split("/", 1)
         key, value = remainder.split("=", 1)
         return (section.strip(), key.strip(), value.strip())
-    except ValueError:
+    except ValueError as exc:
         raise argparse.ArgumentTypeError(
             f"{value} must have the format section/key=value"
-        )
+        ) from exc
 
 
 class _ParserError(Exception):
@@ -418,9 +418,10 @@ class RootCommand(Command):
             mixer = cast(MixerProxy, mixer_class.start(config=config).proxy())
             try:
                 mixer.ping().get()
-                return mixer
             except pykka.ActorDeadError as exc:
                 logger.error("Actor died: %s", exc)
+            else:
+                return mixer
         return None
 
     def configure_mixer(

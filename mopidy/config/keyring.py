@@ -150,9 +150,10 @@ def _collection_exists(bus, path):
     try:
         item = _interface(bus, path, "org.freedesktop.DBus.Properties")
         item.Get("org.freedesktop.Secret.Collection", "Label")
-        return True
     except dbus.exceptions.DBusException:
         return False
+    else:
+        return True
 
 
 # NOTE: We could call prompt.Prompt('') to unlock the keyring when it is not
