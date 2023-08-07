@@ -321,11 +321,7 @@ class Pair(ConfigValue[tuple[K, V]]):
         ):
             return serialized_first_value
 
-        return "{}{}{}".format(
-            serialized_first_value,
-            self._separator,
-            serialized_second_value,
-        )
+        return f"{serialized_first_value}{self._separator}{serialized_second_value}"
 
 
 class List(ConfigValue[V]):
