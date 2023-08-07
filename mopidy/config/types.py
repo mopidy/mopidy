@@ -280,7 +280,7 @@ class Pair(ConfigValue[tuple[K, V]]):
         optional: bool = False,
         optional_pair: bool = False,
         separator: str = "|",
-        subtypes: tuple[K, V] = (String(), String()),
+        subtypes: tuple[K, V] = (String(), String()),  # noqa: B008
     ) -> None:
         self._required = not optional
         self._optional_pair = optional_pair
@@ -343,7 +343,7 @@ class List(ConfigValue[V]):
         self,
         optional: bool = False,
         unique: bool = False,
-        subtype: V = String(),
+        subtype: V = String(),  # noqa: B008
     ) -> None:
         self._required = not optional
         self._unique = unique
