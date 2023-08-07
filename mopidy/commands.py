@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 _default_config: list[Path] = [
     (Path(base) / "mopidy" / "mopidy.conf").resolve()
-    for base in GLib.get_system_config_dirs() + [GLib.get_user_config_dir()]
+    for base in [*GLib.get_system_config_dirs(), GLib.get_user_config_dir()]
 ]
 DEFAULT_CONFIG = ":".join(map(str, _default_config))
 
