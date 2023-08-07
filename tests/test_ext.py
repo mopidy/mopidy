@@ -90,7 +90,7 @@ class TestLoadExtensions:
         entry_point = mock.Mock()
         entry_point.load = mock.Mock(return_value=DummyExtension)
         iter_entry_points_mock.return_value = [entry_point]
-        yield entry_point
+        return entry_point
 
     def test_no_extensions(self, iter_entry_points_mock):
         assert ext.load_extensions() == []
@@ -157,7 +157,7 @@ class TestValidateExtensionData:
         extension = DummyExtension()
         entry_point = mock.Mock()
         entry_point.name = extension.ext_name
-        yield ext.ExtensionData(
+        return ext.ExtensionData(
             extension,
             entry_point,
             extension.get_config_schema(),
