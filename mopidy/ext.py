@@ -224,7 +224,7 @@ def load_extensions() -> list[ExtensionData]:
                 raise TypeError  # noqa: TRY301
         except TypeError:
             logger.error(
-                "Entry point %s did not contain a valid extensionclass: %r",
+                "Entry point %s did not contain a valid extension class: %r",
                 entry_point.name,
                 extension_class,
             )
