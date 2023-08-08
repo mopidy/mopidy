@@ -5,10 +5,10 @@ class MopidyException(Exception):  # noqa: N818
 
     @property
     def message(self):
-        """Reimplement message field that was deprecated in Python 2.6"""
+        """Reimplement message field that was deprecated in Python 2.6."""
         return self._message
 
-    @message.setter  # noqa
+    @message.setter
     def message(self, message):
         self._message = message
 
@@ -45,7 +45,7 @@ class TracklistFull(CoreError):  # noqa: N818
         self.errno = errno
 
 
-class AudioException(MopidyException):  # noqa: N818
+class AudioException(MopidyException):
     pass
 
 

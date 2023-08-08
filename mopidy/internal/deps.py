@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import functools
-import os
 import platform
 import re
 import sys
+from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Optional, TypedDict
 
 if sys.version_info < (3, 10):
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     class DepInfo(TypedDict, total=False):
         name: str
         version: str
-        path: str
+        path: Path
         dependencies: list[DepInfo]
         other: str
 
@@ -92,7 +92,7 @@ def python_info() -> DepInfo:
     return {
         "name": "Python",
         "version": (f"{platform.python_implementation()} {platform.python_version()}"),
-        "path": os.path.dirname(platform.__file__),
+        "path": Path(platform.__file__).parent,
     }
 
 
@@ -125,7 +125,7 @@ def pkg_info(
         return {
             "name": project_name,
             "version": distribution.version,
-            "path": str(distribution.locate_file(".")),
+            "path": distribution.locate_file("."),
             "dependencies": dependencies,
         }
     except metadata.PackageNotFoundError:
@@ -161,7 +161,7 @@ def gstreamer_info() -> DepInfo:
     return {
         "name": "GStreamer",
         "version": ".".join(map(str, Gst.version())),
-        "path": os.path.dirname(gi.__file__),
+        "path": Path(gi.__file__).parent,
         "other": "\n".join(other),
     }
 

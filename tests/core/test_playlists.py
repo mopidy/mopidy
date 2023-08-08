@@ -6,7 +6,7 @@ from mopidy.models import Playlist, Ref, Track
 
 
 class BasePlaylistsTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.plr1a = Ref.playlist(name="A", uri="dummy1:pl:a")
         self.plr1b = Ref.playlist(name="B", uri="dummy1:pl:b")
         self.plr2a = Ref.playlist(name="A", uri="dummy2:pl:a")
@@ -259,7 +259,7 @@ class PlaylistTest(BasePlaylistsTest):
 
 
 class MockBackendCorePlaylistsBase(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.playlists = mock.Mock(spec=backend.PlaylistsProvider)
 
         self.backend = mock.Mock()

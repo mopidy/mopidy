@@ -51,9 +51,9 @@ def _check_iterable(
     """Ensure we have an iterable which is not a string or an iterator"""
     if isinstance(arg, str):
         raise exceptions.ValidationError(msg.format(arg=arg, **kwargs))
-    elif not isinstance(arg, Iterable):
+    if not isinstance(arg, Iterable):
         raise exceptions.ValidationError(msg.format(arg=arg, **kwargs))
-    elif iter(arg) is iter(arg):
+    if iter(arg) is iter(arg):
         raise exceptions.ValidationError(msg.format(arg=arg, **kwargs))
 
 
@@ -99,11 +99,11 @@ def check_integer(
 ) -> None:
     if not isinstance(arg, int):
         raise exceptions.ValidationError(f"Expected an integer, not {arg!r}")
-    elif min is not None and arg < min:
+    if min is not None and arg < min:
         raise exceptions.ValidationError(
             f"Expected number larger or equal to {min}, not {arg!r}"
         )
-    elif max is not None and arg > max:
+    if max is not None and arg > max:
         raise exceptions.ValidationError(
             f"Expected number smaller or equal to {max}, not {arg!r}"
         )
@@ -128,7 +128,7 @@ def check_query(
         check_choice(
             key,
             fields,
-            msg="Expected query field to be one of " "{choices}, not {arg!r}",
+            msg="Expected query field to be one of {choices}, not {arg!r}",
         )
         if list_values:
             msg = 'Expected "{key}" to be list of strings, not {arg!r}'
@@ -155,7 +155,7 @@ def check_uri(
 ) -> None:
     if not isinstance(arg, str):
         raise exceptions.ValidationError(msg.format(arg=arg))
-    elif urllib.parse.urlparse(arg).scheme == "":
+    if urllib.parse.urlparse(arg).scheme == "":
         raise exceptions.ValidationError(msg.format(arg=arg))
 
 

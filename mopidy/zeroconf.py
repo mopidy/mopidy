@@ -1,5 +1,6 @@
 import logging
 import string
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -13,11 +14,11 @@ _AVAHI_PROTO_UNSPEC = -1
 _AVAHI_PUBLISHFLAGS_NONE = 0
 
 
-def _is_loopback_address(host):
-    return host.startswith("127.") or host.startswith("::ffff:127.") or host == "::1"
+def _is_loopback_address(host: str) -> bool:
+    return host.startswith(("127.", "::ffff:127.")) or host == "::1"
 
 
-def _convert_text_list_to_dbus_format(text_list):
+def _convert_text_list_to_dbus_format(text_list: list[str]):
     assert dbus
     array = dbus.Array(signature="ay")
     for text in text_list:
@@ -26,7 +27,6 @@ def _convert_text_list_to_dbus_format(text_list):
 
 
 class Zeroconf:
-
     """Publish a network service with Zeroconf.
 
     Currently, this only works on Linux using Avahi via D-Bus.
@@ -41,7 +41,15 @@ class Zeroconf:
     :type text: list of str
     """
 
-    def __init__(self, name, stype, port, domain="", host="", text=None):
+    def __init__(  # noqa: PLR0913
+        self,
+        name: str,
+        stype: str,
+        port: int,
+        domain: str = "",
+        host: str = "",
+        text: Optional[list[str]] = None,
+    ) -> None:
         self.stype = stype
         self.port = port
         self.domain = domain
@@ -68,18 +76,17 @@ class Zeroconf:
             except dbus.exceptions.DBusException as e:
                 logger.debug("%s: Server failed: %s", self, e)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (
             f"Zeroconf service {self.name!r} "
             f"({self.stype} at [{self.host}]:{self.port:d})"
         )
 
-    def publish(self):
+    def publish(self) -> bool:  # noqa: PLR0911
         """Publish the service.
 
         Call when your service starts.
         """
-
         if _is_loopback_address(self.host):
             logger.debug("%s: Publish on loopback interface is not supported.", self)
             return False
@@ -122,12 +129,13 @@ class Zeroconf:
 
             self.group.Commit()
             logger.debug("%s: Published", self)
-            return True
         except dbus.exceptions.DBusException as e:
             logger.debug("%s: Publish failed: %s", self, e)
             return False
+        else:
+            return True
 
-    def unpublish(self):
+    def unpublish(self) -> None:
         """Unpublish the service.
 
         Call when your service shuts down.

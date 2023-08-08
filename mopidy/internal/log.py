@@ -5,7 +5,7 @@ import logging.config
 import logging.handlers
 import platform
 from logging import LogRecord
-from typing import TYPE_CHECKING, Literal, Optional
+from typing import TYPE_CHECKING, ClassVar, Literal, Optional
 
 if TYPE_CHECKING:
     from mopidy.config import Config, LoggingConfig
@@ -32,12 +32,12 @@ LogColorName = Literal[
 ]
 
 LOG_LEVELS: dict[int, dict[str, int]] = {
-    -1: dict(root=logging.ERROR, mopidy=logging.WARNING),
-    0: dict(root=logging.ERROR, mopidy=logging.INFO),
-    1: dict(root=logging.WARNING, mopidy=logging.DEBUG),
-    2: dict(root=logging.INFO, mopidy=logging.DEBUG),
-    3: dict(root=logging.DEBUG, mopidy=logging.DEBUG),
-    4: dict(root=logging.NOTSET, mopidy=logging.NOTSET),
+    -1: {"root": logging.ERROR, "mopidy": logging.WARNING},
+    0: {"root": logging.ERROR, "mopidy": logging.INFO},
+    1: {"root": logging.WARNING, "mopidy": logging.DEBUG},
+    2: {"root": logging.INFO, "mopidy": logging.DEBUG},
+    3: {"root": logging.DEBUG, "mopidy": logging.DEBUG},
+    4: {"root": logging.NOTSET, "mopidy": logging.NOTSET},
 }
 
 # Custom log level which has even lower priority than DEBUG
@@ -176,7 +176,9 @@ class ColorizingStreamHandler(logging.StreamHandler):
     """
 
     # Map logging levels to (background, foreground, bold/intense)
-    level_map: dict[int, tuple[Optional[LogColorName], LogColorName, bool]] = {
+    level_map: ClassVar[
+        dict[int, tuple[Optional[LogColorName], LogColorName, bool]]
+    ] = {
         TRACE_LOG_LEVEL: (None, "blue", False),
         logging.DEBUG: (None, "blue", False),
         logging.INFO: (None, "white", False),
@@ -185,7 +187,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
         logging.CRITICAL: ("red", "white", True),
     }
     # Map logger name to foreground colors
-    logger_map: dict[LogLevelName, LogColorName] = {}
+    logger_map: dict[LogLevelName, LogColorName]
 
     csi = "\x1b["
     reset = "\x1b[0m"

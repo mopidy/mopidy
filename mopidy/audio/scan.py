@@ -2,6 +2,7 @@ import collections
 import logging
 import time
 from enum import IntEnum
+from pathlib import Path
 from typing import Any, Optional, cast
 
 from mopidy import exceptions
@@ -38,9 +39,7 @@ def _trace(*args, **kwargs):
 
 # TODO: replace with a scan(uri, timeout=1000, proxy_config=None)?
 class Scanner:
-
-    """
-    Helper to get tags and other relevant info from URIs.
+    """Helper to get tags and other relevant info from URIs.
 
     :param timeout: timeout for scanning a URI in ms
     :param proxy_config: dictionary containing proxy config strings.
@@ -52,8 +51,7 @@ class Scanner:
         self._proxy_config = proxy_config or {}
 
     def scan(self, uri, timeout=None):
-        """
-        Scan the given uri collecting relevant metadata.
+        """Scan the given uri collecting relevant metadata.
 
         :param uri: URI of the resource to scan.
         :type uri: string
@@ -119,9 +117,11 @@ def _has_src_pads(element):
 
 def _has_dynamic_src_pad(element):
     for template in element.get_pad_template_list():
-        if template.direction == Gst.PadDirection.SRC:
-            if template.presence == Gst.PadPresence.SOMETIMES:
-                return True
+        if (
+            template.direction == Gst.PadDirection.SRC
+            and template.presence == Gst.PadPresence.SOMETIMES
+        ):
+            return True
     return False
 
 
@@ -148,7 +148,7 @@ def _setup_decodebin(element, pad, pipeline, signals):
 
 def _have_type(
     element: Gst.Element,
-    probability: int,
+    _probability: int,
     caps: Gst.Caps,
     decodebin: Gst.Bin,
 ) -> None:
@@ -206,8 +206,8 @@ def _pad_added(
 
 def _autoplug_select(
     element: Gst.Element,
-    pad: Gst.Pad,
-    caps: Gst.Caps,
+    _pad: Gst.Pad,
+    _caps: Gst.Caps,
     factory: Gst.ElementFactory,
 ) -> GstAutoplugSelectResult:
     if factory.list_is_type(
@@ -257,7 +257,7 @@ def _query_seekable(pipeline: Gst.Pipeline) -> bool:
     return query.parse_seeking()[1]
 
 
-def _process(
+def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
     pipeline: Gst.Pipeline,
     timeout_ms: int,
 ) -> tuple[dict[str, Any], Optional[str], bool, Optional[int]]:
@@ -310,13 +310,16 @@ def _process(
                 have_audio = True
         elif msg.type == Gst.MessageType.ERROR:
             error, _debug = msg.parse_error()
-            if missing_message and not mime:
-                if (
+            if (
+                missing_message
+                and not mime
+                and (
                     (structure := missing_message.get_structure())
                     and (caps := structure.get_value("detail"))
                     and (mime := caps.get_structure(0).get_name())
-                ):
-                    return tags, mime, have_audio, duration
+                )
+            ):
+                return tags, mime, have_audio, duration
             raise exceptions.ScannerError(str(error))
         elif msg.type == Gst.MessageType.EOS:
             return tags, mime, have_audio, duration
@@ -356,7 +359,6 @@ def _process(
 
 
 if __name__ == "__main__":
-    import os
     import sys
 
     from mopidy.internal import path
@@ -369,17 +371,17 @@ if __name__ == "__main__":
     scanner = Scanner(5000)
     for uri in sys.argv[1:]:
         if not Gst.uri_is_valid(uri):
-            uri = path.path_to_uri(os.path.abspath(uri))
+            uri = path.path_to_uri(Path(uri).resolve())
         try:
             result = scanner.scan(uri)
             for key in ("uri", "mime", "duration", "playable", "seekable"):
                 value = getattr(result, key)
-                print(f"{key:<20}   {value}")
-            print("tags")
+                print(f"{key:<20}   {value}")  # noqa: T201
+            print("tags")  # noqa: T201
             for tag, value in result.tags.items():
                 line = f"{tag:<20}   {value}"
                 if len(line) > 77:
                     line = line[:77] + "..."
-                print(line)
+                print(line)  # noqa: T201
         except exceptions.ScannerError as error:
-            print(f"{uri}: {error}")
+            print(f"{uri}: {error}")  # noqa: T201

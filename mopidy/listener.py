@@ -30,8 +30,7 @@ def send(cls, event, **kwargs):
 
 class Listener:
     def on_event(self, event, **kwargs):
-        """
-        Called on all events.
+        """Called on all events.
 
         *MAY* be implemented by actor. By default, this method forwards the
         event to the specific event methods.

@@ -1,14 +1,13 @@
 """Mopidy documentation build configuration file"""
 
 
-import os
 import sys
+from pathlib import Path
 
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/../"))
+sys.path.insert(0, str(Path(__file__).parent.resolve()))
+sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 
-from mopidy.internal.versioning import get_version  # isort:skip  # noqa
-
+from mopidy.internal.versioning import get_version  # noqa: E402
 
 # -- Workarounds to have autodoc generate API docs ----------------------------
 
@@ -17,23 +16,22 @@ class Mock:
     def __init__(self, *args, **kwargs):
         pass
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *_args, **_kwargs):
         return Mock()
 
     def __or__(self, other):
         return Mock()
 
     def __mro_entries__(self, bases):
-        return tuple()
+        return ()
 
     @classmethod
     def __getattr__(cls, name):
         if name == "get_system_config_dirs":  # GLib.get_system_config_dirs()
             return list
-        elif name == "get_user_config_dir":  # GLib.get_user_config_dir()
+        if name == "get_user_config_dir":  # GLib.get_user_config_dir()
             return str
-        else:
-            return Mock()
+        return Mock()
 
 
 MOCK_MODULES = [
@@ -79,7 +77,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 project = "Mopidy"
-copyright = "2009-2023, Stein Magnus Jodal and contributors"
+copyright = "2009-2023, Stein Magnus Jodal and contributors"  # noqa: A001
 
 
 release = get_version()

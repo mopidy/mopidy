@@ -18,7 +18,7 @@ class FileLibraryProvider(backend.LibraryProvider):
     def root_directory(self):
         if not self._media_dirs:
             return None
-        elif len(self._media_dirs) == 1:
+        if len(self._media_dirs) == 1:
             uri = path.path_to_uri(self._media_dirs[0]["path"])
         else:
             uri = "file:root"
@@ -35,7 +35,7 @@ class FileLibraryProvider(backend.LibraryProvider):
 
         self._scanner = scan.Scanner(timeout=config["file"]["metadata_timeout"])
 
-    def browse(self, uri):
+    def browse(self, uri) -> list[models.Ref]:  # noqa: C901
         logger.debug("Browsing files at: %s", uri)
         result = []
         local_path = path.uri_to_path(uri)
@@ -113,7 +113,7 @@ class FileLibraryProvider(backend.LibraryProvider):
 
             if local_path is None:
                 logger.debug(
-                    "Failed expanding path (%s) from file/media_dirs config " "value.",
+                    "Failed expanding path (%s) from file/media_dirs config value.",
                     media_dir_split[0],
                 )
                 continue

@@ -13,7 +13,7 @@ def exit_process():
     logger.debug("Interrupted main")
 
 
-def sigterm_handler(signum, frame):
+def sigterm_handler(_signum, _frame):
     """A :mod:`signal` handler which will exit the program on signal.
 
     This function is not called when the process' main thread is running a GLib

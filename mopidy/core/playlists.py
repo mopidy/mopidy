@@ -36,18 +36,16 @@ class PlaylistsController:
         self.core = core
 
     def get_uri_schemes(self):
-        """
-        Get the list of URI schemes that support playlists.
+        """Get the list of URI schemes that support playlists.
 
         :rtype: list of string
 
         .. versionadded:: 2.0
         """
-        return list(sorted(self.backends.with_playlists.keys()))
+        return sorted(self.backends.with_playlists.keys())
 
     def as_list(self):
-        """
-        Get a list of the currently available playlists.
+        """Get a list of the currently available playlists.
 
         Returns a list of :class:`~mopidy.models.Ref` objects referring to the
         playlists. In other words, no information about the playlists' content
@@ -80,8 +78,7 @@ class PlaylistsController:
         return results
 
     def get_items(self, uri):
-        """
-        Get the items in a playlist specified by ``uri``.
+        """Get the items in a playlist specified by ``uri``.
 
         Returns a list of :class:`~mopidy.models.Ref` objects referring to the
         playlist's items.
@@ -110,8 +107,7 @@ class PlaylistsController:
         return None
 
     def create(self, name, uri_scheme=None):
-        """
-        Create a new playlist.
+        """Create a new playlist.
 
         If ``uri_scheme`` matches an URI scheme handled by a current backend,
         that backend is asked to create the playlist. If ``uri_scheme`` is
@@ -144,8 +140,7 @@ class PlaylistsController:
         return None
 
     def delete(self, uri):
-        """
-        Delete playlist identified by the URI.
+        """Delete playlist identified by the URI.
 
         If the URI doesn't match the URI schemes handled by the current
         backends, nothing happens.
@@ -181,8 +176,7 @@ class PlaylistsController:
         return success
 
     def lookup(self, uri):
-        """
-        Lookup playlist with given URI in both the set of playlists and in any
+        """Lookup playlist with given URI in both the set of playlists and in any
         other playlist sources. Returns :class:`None` if not found.
 
         :param uri: playlist URI
@@ -205,8 +199,7 @@ class PlaylistsController:
     # TODO: there is an inconsistency between library.refresh(uri) and this
     # call, not sure how to sort this out.
     def refresh(self, uri_scheme=None):
-        """
-        Refresh the playlists in :attr:`playlists`.
+        """Refresh the playlists in :attr:`playlists`.
 
         If ``uri_scheme`` is :class:`None`, all backends are asked to refresh.
         If ``uri_scheme`` is an URI scheme handled by a backend, only that
@@ -238,8 +231,7 @@ class PlaylistsController:
             listener.CoreListener.send("playlists_loaded")
 
     def save(self, playlist):
-        """
-        Save the playlist.
+        """Save the playlist.
 
         For a playlist to be saveable, it must have the ``uri`` attribute set.
         You must not set the ``uri`` atribute yourself, but use playlist
@@ -262,7 +254,7 @@ class PlaylistsController:
         validation.check_instance(playlist, Playlist)
 
         if playlist.uri is None:
-            return  # TODO: log this problem?
+            return None  # TODO: log this problem?
 
         uri_scheme = urllib.parse.urlparse(playlist.uri).scheme
         backend = self.backends.with_playlists.get(uri_scheme, None)

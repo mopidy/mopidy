@@ -4,9 +4,7 @@ from mopidy.models import immutable
 
 
 class ModelJSONEncoder(json.JSONEncoder):
-
-    """
-    Automatically serialize Mopidy models to JSON.
+    """Automatically serialize Mopidy models to JSON.
 
     Usage::
 
@@ -23,8 +21,7 @@ class ModelJSONEncoder(json.JSONEncoder):
 
 
 def model_json_decoder(dct):
-    """
-    Automatically deserialize Mopidy models from JSON.
+    """Automatically deserialize Mopidy models from JSON.
 
     Usage::
 

@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import secrets
+import socket
 import threading
-from typing import TYPE_CHECKING, ClassVar
+from os import PathLike
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, TypedDict
 
 import pykka
 import tornado.httpserver
@@ -18,22 +21,30 @@ from mopidy.core import CoreListener
 from mopidy.http import Extension, handlers
 from mopidy.internal import formatting, network
 
-try:
-    import asyncio
-except ImportError:
-    asyncio = None  # type: ignore
-
 if TYPE_CHECKING:
     from mopidy.core.actor import CoreProxy
-    from mopidy.ext import Config, RegistryEntry
+    from mopidy.ext import Config
 
 
 logger = logging.getLogger(__name__)
 
 
+class HttpApp(TypedDict):
+    name: str
+    factory: Callable[
+        [Config, CoreProxy],
+        list[tuple[str, tornado.web.RequestHandler, dict[str, Any]]],
+    ]
+
+
+class HttpStatic(TypedDict):
+    name: str
+    path: str | PathLike[str]
+
+
 class HttpFrontend(pykka.ThreadingActor, CoreListener):
-    apps: ClassVar[list[RegistryEntry]] = []
-    statics: ClassVar[list[RegistryEntry]] = []
+    apps: ClassVar[list[HttpApp]] = []
+    statics: ClassVar[list[HttpStatic]] = []
 
     def __init__(self, config: Config, core: CoreProxy):
         super().__init__()
@@ -55,7 +66,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
                 statics=self.statics,
             )
         except OSError as exc:
-            raise exceptions.FrontendError(f"HTTP server startup failed: {exc}")
+            raise exceptions.FrontendError("HTTP server startup failed.") from exc
 
         self.zeroconf_name = config["http"]["zeroconf"]
         self.zeroconf_http = None
@@ -99,7 +110,14 @@ def on_event(name, io_loop, **data):
 class HttpServer(threading.Thread):
     name = "HttpServer"
 
-    def __init__(self, config, core, sockets, apps, statics):
+    def __init__(  # noqa: PLR0913
+        self,
+        config: Config,
+        core: CoreProxy,
+        sockets: list[socket.socket],
+        apps: list[HttpApp],
+        statics: list[HttpStatic],
+    ) -> None:
         super().__init__()
 
         self.config = config
@@ -113,11 +131,9 @@ class HttpServer(threading.Thread):
         self.io_loop = None
 
     def run(self):
-        if asyncio:
-            # If asyncio is available, Tornado uses it as its IO loop. Since we
-            # start Tornado in a another thread than the main thread, we must
-            # explicitly create an asyncio loop for the current thread.
-            asyncio.set_event_loop(asyncio.new_event_loop())
+        # Since we start Tornado in a another thread than the main thread,
+        # we must explicitly create an asyncio loop for the current thread.
+        asyncio.set_event_loop(asyncio.new_event_loop())
 
         self.app = tornado.web.Application(
             self._get_request_handlers(),

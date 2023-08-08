@@ -37,7 +37,6 @@ def _levenshtein(a, b):
 
 
 class ConfigSchema(collections.OrderedDict):
-
     """Logical group of config values that correspond to a config section.
 
     Schemas are set up by assigning config keys with config values to
@@ -104,7 +103,6 @@ class ConfigSchema(collections.OrderedDict):
 
 
 class MapConfigSchema:
-
     """Schema for handling multiple unknown keys with the same type.
 
     Does not sub-class :class:`ConfigSchema`, but implements the same

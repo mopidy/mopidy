@@ -2,10 +2,7 @@ from enum import Enum
 
 
 class PlaybackState(str, Enum):
-
-    """
-    Enum of playback states.
-    """
+    """Enum of playback states."""
 
     #: Constant representing the paused state.
     PAUSED = "paused"

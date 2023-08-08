@@ -2,6 +2,7 @@ import codecs
 import logging
 import re
 import socket
+from typing import ClassVar
 from unittest import mock
 
 import pytest
@@ -11,7 +12,7 @@ from mopidy.internal import log
 
 
 @pytest.mark.parametrize(
-    "value, expected",
+    ("value", "expected"),
     [
         # bytes are coded from UTF-8 and string-escaped:
         (b"abc", "abc"),
@@ -30,7 +31,7 @@ def test_decode(value, expected):
 
 
 @pytest.mark.parametrize(
-    "value, expected",
+    ("value", "expected"),
     [
         # unicode strings are string-escaped and encoded as UTF-8:
         ("abc", "abc"),
@@ -1209,7 +1210,7 @@ class TestLogColor:
 
 
 class TestLogLevel:
-    levels = {
+    levels: ClassVar[dict[str, int]] = {
         "critical": logging.CRITICAL,
         "error": logging.ERROR,
         "warning": logging.WARNING,

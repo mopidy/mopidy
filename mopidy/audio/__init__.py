@@ -1,10 +1,12 @@
-# flake8: noqa
-from typing import TYPE_CHECKING
-
-from .actor import Audio
+from .actor import Audio, AudioProxy
 from .constants import PlaybackState
 from .listener import AudioListener
 from .utils import supported_uri_schemes
 
-if TYPE_CHECKING:
-    from .actor import AudioProxy
+__all__ = [
+    "Audio",
+    "AudioProxy",
+    "PlaybackState",
+    "AudioListener",
+    "supported_uri_schemes",
+]

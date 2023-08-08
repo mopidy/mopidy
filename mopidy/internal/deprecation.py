@@ -15,7 +15,7 @@ _MESSAGES = {
         'tracklist.add() "tracks" argument is deprecated'
     ),
     "core.tracklist.eot_track": (
-        "tracklist.eot_track() is pending deprecation, use " "tracklist.get_eot_tlid()"
+        "tracklist.eot_track() is pending deprecation, use tracklist.get_eot_tlid()"
     ),
     "core.tracklist.next_track": (
         "tracklist.next_track() is pending deprecation, use "
@@ -34,10 +34,7 @@ _MESSAGES = {
 
 
 def warn(msg_id, pending=False):
-    if pending:
-        category = PendingDeprecationWarning
-    else:
-        category = DeprecationWarning
+    category = PendingDeprecationWarning if pending else DeprecationWarning
     warnings.warn(_MESSAGES.get(msg_id, msg_id), category, stacklevel=2)
 
 

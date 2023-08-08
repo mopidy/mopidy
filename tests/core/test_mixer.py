@@ -9,7 +9,7 @@ from tests import dummy_mixer
 
 
 class CoreMixerTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.mixer = mock.Mock(spec=mixer.Mixer)
         self.core = core.Core(
             config={},
@@ -43,7 +43,7 @@ class CoreMixerTest(unittest.TestCase):
 
 
 class CoreNoneMixerTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.core = core.Core(
             config={},
             mixer=None,
@@ -65,7 +65,7 @@ class CoreNoneMixerTest(unittest.TestCase):
 
 @mock.patch.object(mixer.MixerListener, "send")
 class CoreMixerListenerTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.mixer = dummy_mixer.create_proxy()
         self.core = core.Core(
             config={},
@@ -73,7 +73,7 @@ class CoreMixerListenerTest(unittest.TestCase):
             backends=[],
         )
 
-    def tearDown(self):  # noqa: N802
+    def tearDown(self):
         pykka.ActorRegistry.stop_all()
 
     def test_forwards_mixer_volume_changed_event_to_frontends(self, send):
@@ -90,7 +90,7 @@ class CoreMixerListenerTest(unittest.TestCase):
 
 @mock.patch.object(mixer.MixerListener, "send")
 class CoreNoneMixerListenerTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.core = core.Core(
             config={},
             mixer=None,
@@ -107,7 +107,7 @@ class CoreNoneMixerListenerTest(unittest.TestCase):
 
 
 class MockBackendCoreMixerBase(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.mixer = mock.Mock()
         self.mixer.actor_ref.actor_class.__name__ = "DummyMixer"
         self.core = core.Core(
@@ -166,7 +166,7 @@ class SetMuteBadBackendTest(MockBackendCoreMixerBase):
 
 
 class CoreMixerSaveLoadStateTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.mixer = dummy_mixer.create_proxy()
         self.core = core.Core(
             config={},
@@ -206,7 +206,7 @@ class CoreMixerSaveLoadStateTest(unittest.TestCase):
         target = MixerState(volume=56, mute=False)
         coverage = ["other"]
         self.core.mixer._load_state(target, coverage)
-        assert 21 == self.core.mixer.get_volume()
+        assert self.core.mixer.get_volume() == 21
         assert self.core.mixer.get_mute() is True
 
     def test_load_mute_on(self):

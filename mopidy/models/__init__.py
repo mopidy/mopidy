@@ -19,9 +19,7 @@ __all__ = [
 
 
 class Ref(ValidatedImmutableObject):
-
-    """
-    Model to represent URI references with a human friendly name and type
+    """Model to represent URI references with a human friendly name and type
     attached. This is intended for use a lightweight object "free" of metadata
     that can be passed around instead of using full blown models.
 
@@ -42,7 +40,6 @@ class Ref(ValidatedImmutableObject):
     #: The object type, e.g. "artist", "album", "track", "playlist",
     #: "directory". Read-only.
     type = fields.Identifier()  # TODO: consider locking this down.
-    # type = fields.Field(choices=(ALBUM, ARTIST, DIRECTORY, PLAYLIST, TRACK))
 
     #: Constant used for comparison with the :attr:`type` field.
     ALBUM = "album"
@@ -91,9 +88,7 @@ class Ref(ValidatedImmutableObject):
 
 
 class Image(ValidatedImmutableObject):
-
-    """
-    :param string uri: URI of the image
+    """:param string uri: URI of the image
     :param int width: Optional width of image or :class:`None`
     :param int height: Optional height of image or :class:`None`
     """
@@ -109,9 +104,7 @@ class Image(ValidatedImmutableObject):
 
 
 class Artist(ValidatedImmutableObject):
-
-    """
-    :param uri: artist URI
+    """:param uri: artist URI
     :type uri: string
     :param name: artist name
     :type name: string
@@ -135,9 +128,7 @@ class Artist(ValidatedImmutableObject):
 
 
 class Album(ValidatedImmutableObject):
-
-    """
-    :param uri: album URI
+    """:param uri: album URI
     :type uri: string
     :param name: album name
     :type name: string
@@ -176,9 +167,7 @@ class Album(ValidatedImmutableObject):
 
 
 class Track(ValidatedImmutableObject):
-
-    """
-    :param uri: track URI
+    """:param uri: track URI
     :type uri: string
     :param name: track name
     :type name: string
@@ -260,9 +249,7 @@ class Track(ValidatedImmutableObject):
 
 
 class TlTrack(ValidatedImmutableObject):
-
-    """
-    A tracklist track. Wraps a regular track and it's tracklist ID.
+    """A tracklist track. Wraps a regular track and it's tracklist ID.
 
     The use of :class:`TlTrack` allows the same track to appear multiple times
     in the tracklist.
@@ -299,9 +286,7 @@ class TlTrack(ValidatedImmutableObject):
 
 
 class Playlist(ValidatedImmutableObject):
-
-    """
-    :param uri: playlist URI
+    """:param uri: playlist URI
     :type uri: string
     :param name: playlist name
     :type name: string
@@ -336,9 +321,7 @@ class Playlist(ValidatedImmutableObject):
 
 
 class SearchResult(ValidatedImmutableObject):
-
-    """
-    :param uri: search result URI
+    """:param uri: search result URI
     :type uri: string
     :param tracks: matching tracks
     :type tracks: list of :class:`Track` elements

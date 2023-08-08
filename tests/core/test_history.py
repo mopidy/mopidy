@@ -6,7 +6,7 @@ from mopidy.models import Artist, Ref, Track
 
 
 class PlaybackHistoryTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.tracks = [
             Track(
                 uri="dummy1:a",
@@ -54,7 +54,7 @@ class PlaybackHistoryTest(unittest.TestCase):
 
 
 class CoreHistorySaveLoadStateTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.tracks = [
             Track(uri="dummy1:a", name="foober"),
             Track(uri="dummy2:a", name="foo"),

@@ -257,7 +257,7 @@ is all you need to know. Always run this command before pushing your changes to
 GitHub.
 
 If you take a look at the tox config file, :file:`tox.ini`, you'll see that tox
-runs tests in multiple environments, including a ``flake8`` environment that
+runs tests in multiple environments, including a ``ruff`` environment that
 lints the source code for issues and a ``docs`` environment that tests that the
 documentation can be built. You can also limit tox to just test specific
 environments using the ``-e`` option, e.g. to run just unit tests::
@@ -341,26 +341,26 @@ Style checking and linting
 We're quite pedantic about :ref:`codestyle` and try hard to keep the Mopidy
 code base a very clean and nice place to work in.
 
-Luckily, you can get very far by using the `flake8
-<https://flake8.pycqa.org/en/latest/>`_ linter to check your code for issues before
-submitting a pull request. Mopidy passes all of flake8's checks, with only a
-very few exceptions configured in :file:`setup.cfg`. You can either run the
-``flake8`` tox environment, like our CI setup will do on your pull request::
+Luckily, you can get very far by using the `ruff
+<https://github.com/astral-sh/ruff>`_ linter to check your code for issues before
+submitting a pull request. Mopidy's ruff rules are configured in :file:`pyproject.toml`.
+You can either run the ``ruff`` tox environment, like our CI setup will do on
+your pull request::
 
-    tox -e flake8
+    tox -e ruff
 
-Or you can run flake8 directly::
+Or you can run ruff directly::
 
-    flake8
+    ruff .
 
 If successful, the command will not print anything at all.
 
 .. note::
 
-    In some rare cases it doesn't make sense to listen to flake8's warnings. In
+    In some rare cases it doesn't make sense to listen to ruff's warnings. In
     those cases, ignore the check by appending ``# noqa: <warning code>`` to
     the source line that triggers the warning. The ``# noqa`` part will make
-    flake8 skip all checks on the line, while the warning code will help other
+    ruff skip all checks on the line, while the warning code will help other
     developers lookup what you are ignoring.
 
 
@@ -410,8 +410,8 @@ Working on extensions
 
 Much of the above also applies to Mopidy extensions, though they're often a bit
 simpler. They don't have documentation sites and their test suites are either
-small and fast, or sadly missing entirely. Most of them use tox and flake8, and
-pytest can be used to run their test suites.
+small and fast, or sadly missing entirely. Most of them use tox to run various
+linters, and pytest can be used to run their test suites.
 
 .. contents::
    :local:

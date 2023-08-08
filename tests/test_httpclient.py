@@ -6,7 +6,7 @@ from mopidy import httpclient
 
 
 @pytest.mark.parametrize(
-    "config,expected",
+    ("config", "expected"),
     [
         ({}, None),
         ({"hostname": ""}, None),
@@ -36,7 +36,7 @@ def test_format_proxy_without_auth():
 
 
 @pytest.mark.parametrize(
-    "name,expected",
+    ("name", "expected"),
     [
         (None, r"^Mopidy/[^ ]+ CPython|/[^ ]+$"),
         ("Foo", r"^Foo Mopidy/[^ ]+ CPython|/[^ ]+$"),

@@ -14,7 +14,7 @@ class IsA:
         try:
             return isinstance(rhs, self.klass)
         except TypeError:
-            return type(rhs) == type(self.klass)  # noqa
+            return type(rhs) == type(self.klass)  # noqa: E721
 
     def __ne__(self, rhs):
         return not self.__eq__(rhs)

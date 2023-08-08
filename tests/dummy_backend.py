@@ -114,7 +114,7 @@ class DummyPlaylistsProvider(backend.PlaylistsProvider):
     def get_items(self, uri):
         playlist = self.lookup(uri)
         if playlist is None:
-            return
+            return None
         return [Ref.track(uri=t.uri, name=t.name) for t in playlist.tracks]
 
     def lookup(self, uri):
@@ -122,6 +122,7 @@ class DummyPlaylistsProvider(backend.PlaylistsProvider):
         for playlist in self._playlists:
             if playlist.uri == uri:
                 return playlist
+        return None
 
     def refresh(self):
         pass

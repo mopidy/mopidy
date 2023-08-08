@@ -7,11 +7,10 @@ from typing import TYPE_CHECKING, TypedDict
 
 import pykka.debug
 
-from mopidy import commands
+from mopidy import commands, ext
 from mopidy import config as config_lib
-from mopidy import ext
 from mopidy.internal import log, path, process, versioning
-from mopidy.internal.gi import Gst  # noqa: F401
+from mopidy.internal.gi import Gst  # noqa: F401 (imported to test GStreamer presence)
 
 try:
     # Make GLib's mainloop the event loop for python-dbus
@@ -34,7 +33,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def main():
+def main() -> int:  # noqa: C901, PLR0912, PLR0915
     log.bootstrap_delayed_logging()
     logger.info(f"Starting Mopidy {versioning.get_version()}")
 
@@ -114,10 +113,10 @@ def main():
         if args.command == config_cmd:
             schemas = [d.config_schema for d in extensions_data]
             return args.command.run(config, config_errors, schemas)
-        elif args.command == deps_cmd:
+        if args.command == deps_cmd:
             return args.command.run()
 
-        check_config_errors(config, config_errors, extensions_status)
+        check_config_errors(config_errors, extensions_status)
 
         if not extensions_status["enabled"]:
             logger.error("No extension enabled, exiting...")
@@ -151,13 +150,13 @@ def main():
         try:
             return args.command.run(args, proxied_config)
         except NotImplementedError:
-            print(root_cmd.format_help())
+            print(root_cmd.format_help())  # noqa: T201
             return 1
 
     except KeyboardInterrupt:
-        pass
-    except Exception as ex:
-        logger.exception(ex)
+        return 0
+    except Exception:
+        logger.exception("Unhandled exception")
         raise
 
 
@@ -168,8 +167,7 @@ def create_core_dirs(config):
 
 
 def create_initial_config_file(args, extensions_data):
-    """Initialize whatever the last config file is with defaults"""
-
+    """Initialize whatever the last config file is with defaults."""
     config_file = path.expand_path(args.config_files[-1])
 
     if config_file.exists():
@@ -198,16 +196,15 @@ def log_extension_info(all_extensions, enabled_extensions):
 
 
 def check_config_errors(
-    config: config_lib.Config,
     errors: config_lib.ConfigErrors,
-    extensions,
+    extensions_status: ExtensionsStatus,
 ) -> None:
     fatal_errors = []
     extension_names = {}
     all_extension_names = set()
 
-    for state in extensions:
-        extension_names[state] = {e.ext_name for e in extensions[state]}
+    for state in extensions_status:
+        extension_names[state] = {e.ext_name for e in extensions_status[state]}
         all_extension_names.update(extension_names[state])
 
     for section in sorted(errors):
@@ -229,7 +226,7 @@ def check_config_errors(
         for field, msg in errors[section].items():
             logger.warning(f"  {section}/{field} {msg}")
 
-    if extensions["config"]:
+    if extensions_status["config"]:
         logger.warning(
             "Please fix the extension configuration errors or "
             "disable the extensions to silence these messages."

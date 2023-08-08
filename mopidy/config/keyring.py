@@ -1,4 +1,5 @@
 import logging
+from typing import Union
 
 logger = logging.getLogger(__name__)
 
@@ -11,10 +12,7 @@ except ImportError:
 # XXX: Hack to workaround introspection bug caused by gnome-keyring, should be
 # fixed by version 3.5 per:
 # https://git.gnome.org/browse/gnome-keyring/commit/?id=5dccbe88eb94eea9934e2b7
-if dbus:
-    EMPTY_STRING = dbus.String("", variant_level=1)
-else:
-    EMPTY_STRING = ""
+EMPTY_STRING = dbus.String("", variant_level=1) if dbus else ""
 
 
 FETCH_ERROR = (
@@ -23,7 +21,7 @@ FETCH_ERROR = (
 )
 
 
-def fetch():
+def fetch() -> list[tuple[str, str, bytes]]:  # noqa: PLR0911
     if not dbus:
         logger.debug("%s (dbus not installed)", FETCH_ERROR)
         return []
@@ -67,7 +65,11 @@ def fetch():
     return result
 
 
-def set(section, key, value):
+def set(  # noqa: A001, PLR0911
+    section: str,
+    key: str,
+    value: Union[str, bytes],
+) -> bool:
     """Store a secret config value for a given section/key.
 
     Indicates if storage failed or succeeded.
@@ -153,9 +155,10 @@ def _collection_exists(bus, path):
     try:
         item = _interface(bus, path, "org.freedesktop.DBus.Properties")
         item.Get("org.freedesktop.Secret.Collection", "Label")
-        return True
     except dbus.exceptions.DBusException:
         return False
+    else:
+        return True
 
 
 # NOTE: We could call prompt.Prompt('') to unlock the keyring when it is not

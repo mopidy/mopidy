@@ -48,7 +48,7 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
                 "Please remove it from the stream/protocols config."
             )
             uri_schemes -= {"file"}
-        self.uri_schemes = sorted(list(uri_schemes))
+        self.uri_schemes = sorted(uri_schemes)
 
 
 class StreamLibraryProvider(backend.LibraryProvider):
@@ -100,20 +100,17 @@ class StreamPlaybackProvider(backend.PlaybackProvider):
         return unwrapped_uri
 
 
-# TODO: cleanup the return value of this.
-def _unwrap_stream(
+def _unwrap_stream(  # noqa: PLR0911  # TODO: cleanup the return value of this.
     uri: str,
     timeout: float,
     scanner: scan.Scanner,
     requests_session,
 ) -> tuple[Optional[str], Optional[scan._Result]]:
-    """
-    Get a stream URI from a playlist URI, ``uri``.
+    """Get a stream URI from a playlist URI, ``uri``.
 
     Unwraps nested playlists until something that's not a playlist is found or
     the ``timeout`` is reached.
     """
-
     original_uri = uri
     seen_uris = set()
     deadline = time.time() + timeout
@@ -121,12 +118,12 @@ def _unwrap_stream(
     while time.time() < deadline:
         if uri in seen_uris:
             logger.info(
-                "Unwrapping stream from URI (%s) failed: " "playlist referenced itself",
+                "Unwrapping stream from URI (%s) failed: playlist referenced itself",
                 uri,
             )
             return None, None
-        else:
-            seen_uris.add(uri)
+
+        seen_uris.add(uri)
 
         logger.debug("Unwrapping stream from URI: %s", uri)
 
@@ -134,7 +131,7 @@ def _unwrap_stream(
             scan_timeout = deadline - time.time()
             if scan_timeout < 0:
                 logger.info(
-                    "Unwrapping stream from URI (%s) failed: " "timed out in %sms",
+                    "Unwrapping stream from URI (%s) failed: timed out in %sms",
                     uri,
                     timeout,
                 )
@@ -166,7 +163,7 @@ def _unwrap_stream(
 
         if content is None:
             logger.info(
-                "Unwrapping stream from URI (%s) failed: " "error downloading URI %s",
+                "Unwrapping stream from URI (%s) failed: error downloading URI %s",
                 original_uri,
                 uri,
             )

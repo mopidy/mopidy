@@ -1,3 +1,5 @@
+# ruff: noqa: ARG002
+
 from __future__ import annotations
 
 import logging
@@ -5,11 +7,12 @@ import re
 import socket
 from abc import ABC, abstractmethod
 from typing import (
+    TYPE_CHECKING,
     Any,
     AnyStr,
     Callable,
+    ClassVar,
     Generic,
-    Iterable,
     Literal,
     Optional,
     TypeVar,
@@ -19,6 +22,9 @@ from typing import (
 
 from mopidy.config import validators
 from mopidy.internal import log, path
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 T = TypeVar("T")
 K = TypeVar("K", bound="ConfigValue")
@@ -52,10 +58,10 @@ class DeprecatedValue:
 
 
 class _TransformedValue(str):
-    def __new__(cls, original, transformed):
+    def __new__(cls, _original, transformed):
         return super().__new__(cls, transformed)
 
-    def __init__(self, original, transformed):
+    def __init__(self, original, _transformed):
         self.original = original
 
 
@@ -103,9 +109,9 @@ class Deprecated(ConfigValue[Any]):
 
 
 class String(ConfigValue[str]):
-    """String value.
+    r"""String value.
 
-    Is decoded as utf-8 and \\n \\t escapes should work and be preserved.
+    Is decoded as utf-8, and \n and \t escapes should work and be preserved.
     """
 
     def __init__(
@@ -143,9 +149,9 @@ class String(ConfigValue[str]):
 
 
 class Secret(String):
-    """Secret string value.
+    r"""Secret string value.
 
-    Is decoded as utf-8 and \\n \\t escapes should work and be preserved.
+    Is decoded as utf-8, and \n and \t escapes should work and be preserved.
 
     Should be used for passwords, auth tokens etc. Will mask value when being
     displayed.
@@ -243,7 +249,7 @@ class Boolean(ConfigValue[bool]):
             return None
         if result.lower() in self.true_values:
             return True
-        elif result.lower() in self.false_values:
+        if result.lower() in self.false_values:
             return False
         raise ValueError(f"invalid value for boolean: {result!r}")
 
@@ -254,14 +260,13 @@ class Boolean(ConfigValue[bool]):
     ) -> Literal["true", "false"]:
         if value is True:
             return "true"
-        elif value in (False, None):
+        if value in (False, None):
             return "false"
-        else:
-            raise ValueError(f"{value!r} is not a boolean")
+        raise ValueError(f"{value!r} is not a boolean")
 
 
 class Pair(ConfigValue[tuple[K, V]]):
-    """Pair value
+    """Pair value.
 
     The value is expected to be a pair of elements, separated by a specified delimiter.
     Values can optionally not be a pair, in which case the whole input is provided for
@@ -315,12 +320,8 @@ class Pair(ConfigValue[tuple[K, V]]):
             and serialized_first_value == serialized_second_value
         ):
             return serialized_first_value
-        else:
-            return "{}{}{}".format(
-                serialized_first_value,
-                self._separator,
-                serialized_second_value,
-            )
+
+        return f"{serialized_first_value}{self._separator}{serialized_second_value}"
 
 
 class List(ConfigValue[V]):
@@ -358,10 +359,7 @@ class List(ConfigValue[V]):
         subtype: ConfigValue = getattr(self, "_subtype", String())
 
         values_iter = (subtype.deserialize(s.strip()) for s in strings if s.strip())
-        if self._unique:
-            values = frozenset(values_iter)
-        else:
-            values = tuple(values_iter)
+        values = frozenset(values_iter) if self._unique else tuple(values_iter)
 
         validators.validate_required(values, self._required)
         return cast(Union[tuple[V, ...], frozenset[V]], values)
@@ -406,7 +404,7 @@ class LogLevel(ConfigValue[log.LogLevelName]):
     ``trace``, or ``all``, with any casing.
     """
 
-    levels: dict[str, int] = {
+    levels: ClassVar[dict[str, int]] = {
         "critical": logging.CRITICAL,
         "error": logging.ERROR,
         "warning": logging.WARNING,
@@ -447,8 +445,8 @@ class Hostname(ConfigValue):
 
         try:
             socket.getaddrinfo(value, None)
-        except OSError:
-            raise ValueError("must be a resolveable hostname or valid IP")
+        except OSError as exc:
+            raise ValueError("must be a resolveable hostname or valid IP") from exc
 
         return value
 

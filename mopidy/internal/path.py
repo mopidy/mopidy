@@ -2,6 +2,8 @@ import logging
 import pathlib
 import re
 import urllib.parse
+from os import PathLike
+from typing import Union
 
 from mopidy.internal import xdg
 
@@ -18,7 +20,7 @@ def get_or_create_dir(dir_path):
             f"A file with the same name as the desired dir, "
             f"{dir_path!r}, already exists."
         )
-    elif not dir_path.is_dir():
+    if not dir_path.is_dir():
         logger.info(f"Creating dir {dir_path.as_uri()}")
         dir_path.mkdir(mode=0o755, parents=True)
     return dir_path
@@ -45,7 +47,7 @@ def get_unix_socket_path(socket_path):
     return match.group(1)
 
 
-def path_to_uri(path):
+def path_to_uri(path: Union[str, PathLike[str]]) -> str:
     """
     Convert OS specific path to file:// URI.
 

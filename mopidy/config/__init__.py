@@ -6,8 +6,8 @@ import logging
 import os
 import pathlib
 import re
-from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, Iterator, Optional, TypedDict, Union, cast
+from collections.abc import Iterator, Mapping
+from typing import TYPE_CHECKING, Any, Optional, TypedDict, Union, cast
 
 from mopidy.config import keyring
 from mopidy.config.schemas import ConfigSchema, MapConfigSchema
@@ -29,12 +29,12 @@ from mopidy.config.types import (
     String,
 )
 from mopidy.internal import path, versioning
-from mopidy.internal.log import LogColorName, LogLevelName
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
 
     from mopidy.ext import ExtensionData
+    from mopidy.internal.log import LogColorName, LogLevelName
 
     ConfigErrors: TypeAlias = dict[str, dict[str, Any]]
     ConfigSchemas: TypeAlias = list[Union[ConfigSchema, MapConfigSchema]]
@@ -129,9 +129,6 @@ _proxy_schema["port"] = Port(optional=True)
 _proxy_schema["username"] = String(optional=True)
 _proxy_schema["password"] = Secret(optional=True)
 
-# NOTE: if multiple outputs ever comes something like LogLevelConfigSchema
-# _outputs_schema = config.AudioOutputConfigSchema()
-
 _schemas: ConfigSchemas = [
     _core_schema,
     _logging_schema,
@@ -154,8 +151,8 @@ _INITIAL_HELP = """
 """
 
 
-def read(config_file: str | os.PathLike[str]) -> str:
-    """Helper to load config defaults in same way across core and extensions"""
+def read(config_file: Union[str, os.PathLike[str]]) -> str:
+    """Helper to load config defaults in same way across core and extensions."""
     return pathlib.Path(config_file).read_text(errors="surrogateescape")
 
 
@@ -175,7 +172,7 @@ def load(
     return _validate(raw_config, schemas)
 
 
-def format(
+def format(  # noqa: A001
     config: Config,
     ext_schemas: ConfigSchemas,
     comments: Optional[dict] = None,
@@ -212,7 +209,7 @@ def format_initial(extensions_data: list[ExtensionData]) -> str:
 def _load(
     files: list[os.PathLike],
     defaults: list[str],
-    overrides: list[str],
+    overrides: list[tuple[str, str, Any]],
 ) -> RawConfig:
     parser = configparser.RawConfigParser(inline_comment_prefixes=(";",))
 
@@ -251,7 +248,7 @@ def _load_file(
 ) -> None:
     if not file_path.exists():
         logger.debug(
-            f"Loading config from {file_path.as_uri()} failed; " f"it does not exist"
+            f"Loading config from {file_path.as_uri()} failed; it does not exist"
         )
         return
     if not os.access(str(file_path), os.R_OK):
@@ -349,16 +346,17 @@ def _preprocess(config_string: str) -> str:
     comment_re = re.compile(r"^(#|;)")
     inline_comment_re = re.compile(r" ;")
 
-    def newlines(match) -> str:
+    def newlines(_match) -> str:
         return f"__BLANK{next(counter):d}__ ="
 
     def comments(match) -> Optional[str]:
         if match.group(1) == "#":
             return f"__HASH{next(counter):d}__ ="
-        elif match.group(1) == ";":
+        if match.group(1) == ";":
             return f"__SEMICOLON{next(counter):d}__ ="
+        return None
 
-    def inlinecomments(match) -> str:
+    def inlinecomments(_match) -> str:
         return f"\n__INLINE{next(counter):d}__ ="
 
     def sections(match) -> str:
@@ -381,8 +379,7 @@ def _postprocess(config_string: str) -> str:
     result = re.sub(r"^__HASH\d+__ =(.*)$", r"#\g<1>", result, flags=flags)
     result = re.sub(r"^__SEMICOLON\d+__ =(.*)$", r";\g<1>", result, flags=flags)
     result = re.sub(r"\n__SECTION\d+__ =(.*)$", r"\g<1>", result, flags=flags)
-    result = re.sub(r"^__BLANK\d+__ =$", "", result, flags=flags)
-    return result
+    return re.sub(r"^__BLANK\d+__ =$", "", result, flags=flags)
 
 
 class Proxy(Mapping):

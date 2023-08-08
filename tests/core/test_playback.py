@@ -1,3 +1,4 @@
+from typing import ClassVar
 from unittest import mock
 
 import pykka
@@ -32,7 +33,7 @@ class MyTestPlaybackProvider(backend.PlaybackProvider):
         if "limit_never" in uri:
             # unplayable
             return None
-        elif "limit_one" in uri:
+        if "limit_one" in uri:
             # one time playable
             if self._call_onetime:
                 return None
@@ -42,12 +43,11 @@ class MyTestPlaybackProvider(backend.PlaybackProvider):
     def translate_uri(self, uri):
         if "error" in uri:
             raise Exception(uri)
-        elif "unplayable" in uri:
+        if "unplayable" in uri:
             return None
-        elif "limit" in uri:
+        if "limit" in uri:
             return self._translate_uri_call_limit(uri)
-        else:
-            return uri
+        return uri
 
 
 class MyTestBackend(dummy_backend.DummyBackend):
@@ -57,8 +57,10 @@ class MyTestBackend(dummy_backend.DummyBackend):
 
 
 class BaseTest:
-    config = {"core": {"max_tracklist_length": 10000}}
-    tracks = [
+    config: ClassVar[dict[str, dict[str, int]]] = {
+        "core": {"max_tracklist_length": 10000}
+    }
+    tracks: ClassVar[list[Track]] = [
         Track(uri="dummy:a", length=1234, name="foo"),
         Track(uri="dummy:b", length=1234),
         Track(uri="dummy:c", length=1234),
@@ -207,7 +209,7 @@ class TestNextHandling(BaseTest):
         assert current_track == self.tracks[1]
 
     @pytest.mark.parametrize(
-        "repeat, random, single, consume, index, result",
+        ("repeat", "random", "single", "consume", "index", "result"),
         [
             (False, False, False, False, 0, 1),
             (False, False, False, False, 2, None),
@@ -308,7 +310,7 @@ class TestPreviousHandling(BaseTest):
         assert self.core.playback.get_current_track() == self.tracks[0]
 
     @pytest.mark.parametrize(
-        "repeat, random, single, consume, index, result",
+        ("repeat", "random", "single", "consume", "index", "result"),
         [
             (False, False, False, False, 0, None),
             (False, False, False, False, 1, 0),
@@ -535,7 +537,7 @@ class TestCurrentAndPendingTlTrack(BaseTest):
 
 @mock.patch("mopidy.core.playback.listener.CoreListener", spec=core.CoreListener)
 class TestEventEmission(BaseTest):
-    maxDiff = None  # noqa: N815
+    maxDiff = None
 
     def test_play_when_stopped_emits_events(self, listener_mock):
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -835,7 +837,7 @@ class TestEventEmission(BaseTest):
 
 
 class TestUnplayableURI(BaseTest):
-    tracks = [
+    tracks: ClassVar[list[Track]] = [
         Track(uri="unplayable://"),
         Track(uri="dummy:b"),
     ]
@@ -889,7 +891,7 @@ class TestSeek(BaseTest):
         self.replay_events()
 
         self.core.playback.seek(-100)  # Dummy audio doesn't progress time.
-        assert 0 == self.core.playback.get_time_position()
+        assert self.core.playback.get_time_position() == 0
 
     def test_seek_fails_for_track_without_duration(self):
         track = self.tracks[0].replace(length=None)
@@ -901,7 +903,7 @@ class TestSeek(BaseTest):
         self.replay_events()
 
         assert not self.core.playback.seek(1000)
-        assert 0 == self.core.playback.get_time_position()
+        assert self.core.playback.get_time_position() == 0
 
     def test_seek_play_stay_playing(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -1229,14 +1231,14 @@ class TestCorePlaybackSaveLoadState(BaseTest):
 
         self.core.playback.stop()
         self.replay_events()
-        assert "stopped" == self.core.playback.get_state()
+        assert self.core.playback.get_state() == "stopped"
 
         state = PlaybackState(time_position=0, state="playing", tlid=tl_tracks[2].tlid)
         coverage = ["play-last"]
         self.core.playback._load_state(state, coverage)
         self.replay_events()
 
-        assert "playing" == self.core.playback.get_state()
+        assert self.core.playback.get_state() == "playing"
         assert tl_tracks[2] == self.core.playback.get_current_tl_track()
 
     def test_load_not_covered(self):
@@ -1244,14 +1246,14 @@ class TestCorePlaybackSaveLoadState(BaseTest):
 
         self.core.playback.stop()
         self.replay_events()
-        assert "stopped" == self.core.playback.get_state()
+        assert self.core.playback.get_state() == "stopped"
 
         state = PlaybackState(time_position=0, state="playing", tlid=tl_tracks[2].tlid)
         coverage = ["other"]
         self.core.playback._load_state(state, coverage)
         self.replay_events()
 
-        assert "stopped" == self.core.playback.get_state()
+        assert self.core.playback.get_state() == "stopped"
         assert self.core.playback.get_current_tl_track() is None
 
     def test_load_invalid_type(self):
@@ -1263,7 +1265,7 @@ class TestCorePlaybackSaveLoadState(BaseTest):
 
 
 class TestBug1352Regression(BaseTest):
-    tracks = [
+    tracks: ClassVar[list[Track]] = [
         Track(uri="dummy:a", length=40000),
         Track(uri="dummy:b", length=40000),
     ]
@@ -1290,12 +1292,12 @@ class TestBug1352Regression(BaseTest):
 
 
 class TestEndlessLoop(BaseTest):
-    tracks_play = [
+    tracks_play: ClassVar[list[Track]] = [
         Track(uri="dummy:limit_never:a"),
         Track(uri="dummy:limit_never:b"),
     ]
 
-    tracks_other = [
+    tracks_other: ClassVar[list[Track]] = [
         Track(uri="dummy:limit_never:a"),
         Track(uri="dummy:limit_one"),
         Track(uri="dummy:limit_never:b"),

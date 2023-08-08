@@ -12,8 +12,6 @@ else:
 
 from mopidy import config as config_lib
 from mopidy import exceptions
-from mopidy.commands import Command
-from mopidy.config import ConfigSchema
 from mopidy.internal import path
 
 if TYPE_CHECKING:
@@ -22,6 +20,9 @@ if TYPE_CHECKING:
     from typing import Any, Optional
 
     from typing_extensions import TypeAlias
+
+    from mopidy.commands import Command
+    from mopidy.config import ConfigSchema
 
     Config = dict[str, dict[str, Any]]
     RegistryEntry: TypeAlias = Union[type[Any], dict[str, Any]]
@@ -38,8 +39,7 @@ class ExtensionData(NamedTuple):
 
 
 class Extension:
-
-    """Base class for Mopidy extensions"""
+    """Base class for Mopidy extensions."""
 
     dist_name: str
     """The extension's distribution name, as registered on PyPI
@@ -69,7 +69,7 @@ class Extension:
         raise NotImplementedError('Add at least a config section with "enabled = true"')
 
     def get_config_schema(self) -> ConfigSchema:
-        """The extension's config validation schema
+        """The extension's config validation schema.
 
         :returns: :class:`~mopidy.config.schemas.ConfigSchema`
         """
@@ -129,7 +129,6 @@ class Extension:
         :returns:
           Instance of a :class:`~mopidy.commands.Command` class.
         """
-        pass
 
     def validate_environment(self) -> None:
         """Checks if the extension can run in the current environment.
@@ -143,11 +142,9 @@ class Extension:
         :raises: :exc:`~mopidy.exceptions.ExtensionError`
         :returns: :class:`None`
         """
-        pass
 
     def setup(self, registry: Registry) -> None:
-        """
-        Register the extension's components in the extension :class:`Registry`.
+        """Register the extension's components in the extension :class:`Registry`.
 
         For example, to register a backend::
 
@@ -169,7 +166,6 @@ class Extension:
 
 
 class Registry(Mapping):
-
     """Registry of components provided by Mopidy extensions.
 
     Passed to the :meth:`~Extension.setup` method of all extensions. The
@@ -213,23 +209,22 @@ def load_extensions() -> list[ExtensionData]:
 
     :returns: list of installed extensions
     """
-
     installed_extensions = []
 
     for entry_point in metadata.entry_points(group="mopidy.ext"):
         logger.debug("Loading entry point: %s", entry_point)
         try:
             extension_class = entry_point.load()
-        except Exception as exc:
-            logger.exception(f"Failed to load extension {entry_point.name}: {exc}")
+        except Exception:
+            logger.exception(f"Failed to load extension {entry_point.name}.")
             continue
 
         try:
             if not issubclass(extension_class, Extension):
-                raise TypeError  # issubclass raises TypeError on non-class
+                raise TypeError  # noqa: TRY301
         except TypeError:
             logger.error(
-                "Entry point %s did not contain a valid extension" "class: %r",
+                "Entry point %s did not contain a valid extensionclass: %r",
                 entry_point.name,
                 extension_class,
             )
@@ -250,7 +245,7 @@ def load_extensions() -> list[ExtensionData]:
             )
         except Exception:
             logger.exception(
-                "Setup of extension from entry point %s failed, " "ignoring extension.",
+                "Setup of extension from entry point %s failed, ignoring extension.",
                 entry_point.name,
             )
             continue
@@ -264,13 +259,12 @@ def load_extensions() -> list[ExtensionData]:
     return installed_extensions
 
 
-def validate_extension_data(data: ExtensionData) -> bool:
+def validate_extension_data(data: ExtensionData) -> bool:  # noqa: PLR0911
     """Verify extension's dependencies and environment.
 
     :param extensions: an extension to check
     :returns: if extension should be run
     """
-
     logger.debug("Validating extension: %s", data.extension.ext_name)
 
     if data.extension.ext_name != data.entry_point.name:
@@ -311,7 +305,8 @@ def validate_extension_data(data: ExtensionData) -> bool:
             data.extension.ext_name,
         )
         return False
-    elif not isinstance(data.config_schema.get("enabled"), config_lib.Boolean):
+
+    if not isinstance(data.config_schema.get("enabled"), config_lib.Boolean):
         logger.error(
             'Extension %s does not have the required "enabled" config'
             " option, disabling.",

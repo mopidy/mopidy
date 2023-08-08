@@ -31,10 +31,7 @@ def name_from_path(path):
 
 def path_from_name(name, ext=None, sep="|"):
     """Convert name with optional extension to file path."""
-    if ext:
-        name = name.replace(os.sep, sep) + ext
-    else:
-        name = name.replace(os.sep, sep)
+    name = name.replace(os.sep, sep) + ext if ext else name.replace(os.sep, sep)
     return pathlib.Path(name)
 
 
@@ -50,7 +47,7 @@ def load_items(fp, basedir):
             if line.startswith("#EXTINF:"):
                 name = line.partition(",")[2]
             continue
-        elif not urllib.parse.urlsplit(line).scheme:
+        if not urllib.parse.urlsplit(line).scheme:
             path = basedir / line
             if not name:
                 name = name_from_path(path)

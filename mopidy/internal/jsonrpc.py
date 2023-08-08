@@ -53,7 +53,7 @@ class JsonRpcWrapper:
     """
 
     def __init__(self, objects, decoders=None, encoders=None):
-        if "" in objects.keys():
+        if "" in objects:
             raise AttributeError("The empty string is not allowed as an object mount")
         self.objects = objects
         self.decoder = get_combined_json_decoder(decoders or [])
@@ -93,8 +93,7 @@ class JsonRpcWrapper:
         """
         if isinstance(request, list):
             return self._handle_batch(request)
-        else:
-            return self._handle_single_request(request)
+        return self._handle_single_request(request)
 
     def _handle_batch(self, requests):
         if not requests:
@@ -114,8 +113,8 @@ class JsonRpcWrapper:
         try:
             self._validate_request(request)
             args, kwargs = self._get_params(request)
-        except JsonRpcInvalidRequestError as error:
-            return error.get_response()
+        except JsonRpcInvalidRequestError as exc:
+            return exc.get_response()
 
         try:
             method = self._get_method(request["method"])
@@ -133,26 +132,26 @@ class JsonRpcWrapper:
                     "id": request["id"],
                     "result": result,
                 }
-            except TypeError as error:
+            except TypeError as exc:
                 raise JsonRpcInvalidParamsError(
                     data={
-                        "type": error.__class__.__name__,
-                        "message": str(error),
+                        "type": exc.__class__.__name__,
+                        "message": str(exc),
                         "traceback": traceback.format_exc(),
                     }
-                )
-            except Exception as error:
+                ) from exc
+            except Exception as exc:
                 raise JsonRpcApplicationError(
                     data={
-                        "type": error.__class__.__name__,
-                        "message": str(error),
+                        "type": exc.__class__.__name__,
+                        "message": str(exc),
                         "traceback": traceback.format_exc(),
                     }
-                )
-        except JsonRpcError as error:
+                ) from exc
+        except JsonRpcError as exc:
             if self._is_notification(request):
                 return None
-            return error.get_response(request["id"])
+            return exc.get_response(request["id"])
 
     def _validate_request(self, request):
         if not isinstance(request, dict):
@@ -172,12 +171,11 @@ class JsonRpcWrapper:
         params = request["params"]
         if isinstance(params, list):
             return params, {}
-        elif isinstance(params, dict):
+        if isinstance(params, dict):
             return [], params
-        else:
-            raise JsonRpcInvalidRequestError(
-                data="'params', if given, must be an array or an object"
-            )
+        raise JsonRpcInvalidRequestError(
+            data="'params', if given, must be an array or an object"
+        )
 
     def _get_method(self, method_path):
         if callable(self.objects.get(method_path, None)):
@@ -198,15 +196,17 @@ class JsonRpcWrapper:
 
         try:
             obj = self.objects[mount]
-        except KeyError:
-            raise JsonRpcMethodNotFoundError(data=f"No object found at {mount!r}")
+        except KeyError as exc:
+            raise JsonRpcMethodNotFoundError(
+                data=f"No object found at {mount!r}"
+            ) from exc
 
         try:
             return getattr(obj, method_name)
-        except AttributeError:
+        except AttributeError as exc:
             raise JsonRpcMethodNotFoundError(
                 data=f"Object mounted at {mount!r} has no member {method_name!r}"
-            )
+            ) from exc
 
     def _is_notification(self, request):
         return "id" not in request
@@ -306,7 +306,7 @@ class JsonRpcInspector:
     """
 
     def __init__(self, objects):
-        if "" in objects.keys():
+        if "" in objects:
             raise AttributeError("The empty string is not allowed as an object mount")
         self.objects = objects
 

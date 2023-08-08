@@ -51,7 +51,7 @@ def make_backend_mock(
 
 
 class CoreActorTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.backend1 = make_backend_mock(
             "B1",
             uri_schemes=["dummy1"],
@@ -75,7 +75,7 @@ class CoreActorTest(unittest.TestCase):
             backends=[self.backend1, self.backend2],
         )
 
-    def tearDown(self):  # noqa: N802
+    def tearDown(self):
         pykka.ActorRegistry.stop_all()
 
     def test_uri_schemes_has_uris_from_all_backends(self):
@@ -143,7 +143,7 @@ class CoreActorTest(unittest.TestCase):
 
         self.assertRaisesRegex(
             AssertionError,
-            "Cannot add URI scheme 'dummy1' for B2, " "it is already handled by B1",
+            "Cannot add URI scheme 'dummy1' for B2, it is already handled by B1",
             Core,
             config={},
             mixer=None,
@@ -187,7 +187,7 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
             backends=[],
         )
 
-    def tearDown(self):  # noqa: N802
+    def tearDown(self):
         pykka.ActorRegistry.stop_all()
         shutil.rmtree(self.temp_dir)
 

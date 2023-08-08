@@ -4,18 +4,14 @@ import argparse
 import collections
 import contextlib
 import logging
-import os
-import pathlib
 import signal
 import sys
+from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
-    Generator,
-    Iterable,
     NoReturn,
     Optional,
-    Sequence,
     cast,
 )
 
@@ -25,23 +21,21 @@ from pykka.messages import ProxyCall
 
 from mopidy import config as config_lib
 from mopidy import exceptions
-from mopidy.audio import Audio
-from mopidy.core import Core
+from mopidy.audio import Audio, AudioProxy
+from mopidy.backend import BackendActor, BackendProxy
+from mopidy.core import Core, CoreProxy
 from mopidy.internal import deps, process, timer, versioning
 from mopidy.internal.gi import GLib
+from mopidy.mixer import MixerActor, MixerProxy
 
 if TYPE_CHECKING:
-    from mopidy.audio import AudioProxy
-    from mopidy.backend import BackendActor, BackendProxy
-    from mopidy.core import CoreProxy
-    from mopidy.mixer import MixerActor, MixerProxy
-
+    from collections.abc import Generator, Iterable, Sequence
 
 logger = logging.getLogger(__name__)
 
-_default_config: list[pathlib.Path] = [
-    (pathlib.Path(base) / "mopidy" / "mopidy.conf").resolve()
-    for base in GLib.get_system_config_dirs() + [GLib.get_user_config_dir()]
+_default_config: list[Path] = [
+    (Path(base) / "mopidy" / "mopidy.conf").resolve()
+    for base in [*GLib.get_system_config_dirs(), GLib.get_user_config_dir()]
 ]
 DEFAULT_CONFIG = ":".join(map(str, _default_config))
 
@@ -55,10 +49,10 @@ def config_override_type(value: str) -> tuple[str, str, str]:
         section, remainder = value.split("/", 1)
         key, value = remainder.split("=", 1)
         return (section.strip(), key.strip(), value.strip())
-    except ValueError:
+    except ValueError as exc:
         raise argparse.ArgumentTypeError(
             f"{value} must have the format section/key=value"
-        )
+        ) from exc
 
 
 class _ParserError(Exception):
@@ -91,17 +85,12 @@ class _HelpAction(argparse.Action):
         )
 
     def __call__(
-        self,
-        parser,
-        namespace,
-        values,
-        option_string=None,
+        self, parser, namespace, values, option_string=None  # noqa: ARG002
     ) -> NoReturn:
-        raise _HelpError()
+        raise _HelpError
 
 
 class Command:
-
     """Command parser and runner for building trees of commands.
 
     This class provides a wraper around :class:`argparse.ArgumentParser`
@@ -159,13 +148,13 @@ class Command:
         usage: Optional[str] = None,
     ) -> NoReturn:
         """Optionally print a message and exit."""
-        print("\n\n".join(m for m in (usage, message) if m))
+        print("\n\n".join(m for m in (usage, message) if m))  # noqa: T201
         sys.exit(status_code)
 
     def format_usage(self, prog: Optional[str] = None) -> str:
         """Format usage for current parser."""
         actions = self._build()[1]
-        prog = prog or os.path.basename(sys.argv[0])
+        prog = prog or Path(sys.argv[0]).name
         return self._usage(actions, prog) + "\n"
 
     def _usage(self, actions: Iterable[argparse.Action], prog) -> str:
@@ -176,7 +165,7 @@ class Command:
     def format_help(self, prog: Optional[str] = None) -> str:
         """Format help for current parser and children."""
         actions = self._build()[1]
-        prog = prog or os.path.basename(sys.argv[0])
+        prog = prog or Path(sys.argv[0]).name
 
         formatter = argparse.HelpFormatter(prog)
         formatter.add_usage(None, actions, [])
@@ -231,7 +220,7 @@ class Command:
         :type prog: string
         :rtype: :class:`argparse.Namespace`
         """
-        prog = prog or os.path.basename(sys.argv[0])
+        prog = prog or Path(sys.argv[0]).name
         try:
             return self._parse(
                 args,
@@ -429,9 +418,10 @@ class RootCommand(Command):
             mixer = cast(MixerProxy, mixer_class.start(config=config).proxy())
             try:
                 mixer.ping().get()
-                return mixer
             except pykka.ActorDeadError as exc:
                 logger.error("Actor died: %s", exc)
+            else:
+                return mixer
         return None
 
     def configure_mixer(
@@ -467,13 +457,14 @@ class RootCommand(Command):
 
         backends = []
         for backend_class in backend_classes:
-            with _actor_error_handling(backend_class.__name__):
-                with timer.time_logger(backend_class.__name__):
-                    backend = cast(
-                        BackendProxy,
-                        backend_class.start(config=config, audio=audio).proxy(),
-                    )
-                    backends.append(backend)
+            with _actor_error_handling(backend_class.__name__), timer.time_logger(
+                backend_class.__name__
+            ):
+                backend = cast(
+                    BackendProxy,
+                    backend_class.start(config=config, audio=audio).proxy(),
+                )
+                backends.append(backend)
 
         # Block until all on_starts have finished, letting them run in parallel
         for backend in backends[:]:
@@ -515,9 +506,10 @@ class RootCommand(Command):
         )
 
         for frontend_class in frontend_classes:
-            with _actor_error_handling(frontend_class.__name__):
-                with timer.time_logger(frontend_class.__name__):
-                    frontend_class.start(config=config, core=core)
+            with _actor_error_handling(frontend_class.__name__), timer.time_logger(
+                frontend_class.__name__
+            ):
+                frontend_class.start(config=config, core=core)
 
     def stop_frontends(self, frontend_classes: list[type[ThreadingActor]]) -> None:
         logger.info("Stopping Mopidy frontends")
@@ -563,7 +555,7 @@ class ConfigCommand(Command):
         # Throw away all bytes that are not valid UTF-8 before printing
         data = data.encode(errors="surrogateescape").decode(errors="replace")
 
-        print(data)
+        print(data)  # noqa: T201
         return 0
 
 
@@ -575,5 +567,5 @@ class DepsCommand(Command):
         self.set(base_verbosity_level=-1)
 
     def run(self) -> int:
-        print(deps.format_dependency_list())
+        print(deps.format_dependency_list())  # noqa: T201
         return 0

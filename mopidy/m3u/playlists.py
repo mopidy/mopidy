@@ -10,6 +10,7 @@ import tempfile
 from typing import TYPE_CHECKING
 
 from mopidy import backend
+from mopidy.exceptions import BackendError
 from mopidy.internal import path
 
 from . import Extension, translator
@@ -33,7 +34,7 @@ def replace(path, mode="w+b", encoding=None, errors=None):
     (fd, tempname) = tempfile.mkstemp(dir=str(path.parent))
     tempname = pathlib.Path(tempname)
     try:
-        fp = open(fd, mode, encoding=encoding, errors=errors)
+        fp = open(fd, mode, encoding=encoding, errors=errors)  # noqa: PTH123, SIM115
     except Exception:
         tempname.unlink()
         os.close(fd)
@@ -71,11 +72,10 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         for entry in self._playlists_dir.iterdir():
             if entry.suffix not in [".m3u", ".m3u8"]:
                 continue
-            elif not entry.is_file():
+            if not entry.is_file():
                 continue
-            else:
-                playlist_path = entry.relative_to(self._playlists_dir)
-                result.append(translator.path_to_ref(playlist_path))
+            playlist_path = entry.relative_to(self._playlists_dir)
+            result.append(translator.path_to_ref(playlist_path))
         result.sort(key=operator.attrgetter("name"))
         return result
 
@@ -154,27 +154,22 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             return translator.playlist(path, playlist.tracks, mtime)
 
     def _abspath(self, path):
-        if not path.is_absolute():
-            return self._playlists_dir / path
-        else:
+        if path.is_absolute():
             return path
+        return self._playlists_dir / path
 
     def _is_in_basedir(self, local_path):
         local_path = self._abspath(local_path)
         return path.is_path_inside_base_dir(local_path, self._playlists_dir)
 
     def _open(self, path, mode="r"):
-        if path.suffix == ".m3u8":
-            encoding = "utf-8"
-        else:
-            encoding = self._default_encoding
+        encoding = "utf-8" if path.suffix == ".m3u8" else self._default_encoding
         if not path.is_absolute():
             path = self._abspath(path)
         if not self._is_in_basedir(path):
-            raise Exception(
+            raise BackendError(
                 f"Path {path!r} is not inside playlist dir {self._playlists_dir!r}"
             )
         if "w" in mode:
             return replace(path, mode, encoding=encoding, errors="replace")
-        else:
-            return path.open(mode, encoding=encoding, errors="replace")
+        return path.open(mode, encoding=encoding, errors="replace")

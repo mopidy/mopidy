@@ -17,21 +17,34 @@ from mopidy.internal.gi import Gst, gi
 class TestDeps:
     def test_format_dependency_list(self):
         adapters = [
-            lambda: dict(name="Python", version="FooPython 2.7.3"),
-            lambda: dict(name="Platform", version="Loonix 4.0.1"),
-            lambda: dict(name="Pykka", version="1.1", path="/foo/bar", other="Quux"),
-            lambda: dict(name="Foo"),
-            lambda: dict(
-                name="Mopidy",
-                version="0.13",
-                dependencies=[
-                    dict(
-                        name="pylast",
-                        version="0.5",
-                        dependencies=[dict(name="setuptools", version="0.6")],
-                    )
+            lambda: {
+                "name": "Python",
+                "version": "FooPython 2.7.3",
+            },
+            lambda: {
+                "name": "Platform",
+                "version": "Loonix 4.0.1",
+            },
+            lambda: {
+                "name": "Pykka",
+                "version": "1.1",
+                "path": "/foo/bar",
+                "other": "Quux",
+            },
+            lambda: {
+                "name": "Foo",
+            },
+            lambda: {
+                "name": "Mopidy",
+                "version": "0.13",
+                "dependencies": [
+                    {
+                        "name": "pylast",
+                        "version": "0.5",
+                        "dependencies": [{"name": "setuptools", "version": "0.6"}],
+                    }
                 ],
-            ),
+            },
         ]
 
         result = deps.format_dependency_list(adapters)
@@ -54,31 +67,31 @@ class TestDeps:
     def test_executable_info(self):
         result = deps.executable_info()
 
-        assert "Executable" == result["name"]
+        assert result["name"] == "Executable"
         assert sys.argv[0] in result["version"]
 
     def test_platform_info(self):
         result = deps.platform_info()
 
-        assert "Platform" == result["name"]
+        assert result["name"] == "Platform"
         assert platform.platform() in result["version"]
 
     def test_python_info(self):
         result = deps.python_info()
 
-        assert "Python" == result["name"]
+        assert result["name"] == "Python"
         assert platform.python_implementation() in result["version"]
         assert platform.python_version() in result["version"]
-        assert "python" in result["path"]
-        assert "platform.py" not in result["path"]
+        assert "python" in str(result["path"])
+        assert "platform.py" not in str(result["path"])
 
     def test_gstreamer_info(self):
         result = deps.gstreamer_info()
 
-        assert "GStreamer" == result["name"]
+        assert result["name"] == "GStreamer"
         assert ".".join(map(str, Gst.version())) == result["version"]
-        assert "gi" in result["path"]
-        assert "__init__.py" not in result["path"]
+        assert "gi" in str(result["path"])
+        assert "__init__.py" not in str(result["path"])
         assert "Python wrapper: python-gi" in result["other"]
         assert gi.__version__ in result["other"]
         assert "Relevant elements:" in result["other"]
@@ -125,17 +138,17 @@ class TestDeps:
 
         result = deps.pkg_info()
 
-        assert "Mopidy" == result["name"]
-        assert "0.13" == result["version"]
-        assert "mopidy" in result["path"]
+        assert result["name"] == "Mopidy"
+        assert result["version"] == "0.13"
+        assert "mopidy" in str(result["path"])
 
         dep_info_pykka = result["dependencies"][0]
-        assert "Pykka" == dep_info_pykka["name"]
-        assert "1.1" == dep_info_pykka["version"]
+        assert dep_info_pykka["name"] == "Pykka"
+        assert dep_info_pykka["version"] == "1.1"
 
         dep_info_setuptools = dep_info_pykka["dependencies"][0]
-        assert "setuptools" == dep_info_setuptools["name"]
-        assert "0.6" == dep_info_setuptools["version"]
+        assert dep_info_setuptools["name"] == "setuptools"
+        assert dep_info_setuptools["version"] == "0.6"
 
     @mock.patch.object(metadata, "distribution")
     def test_pkg_info_for_missing_dist(self, get_distribution_mock):
@@ -143,17 +156,7 @@ class TestDeps:
 
         result = deps.pkg_info()
 
-        assert "Mopidy" == result["name"]
-        assert "version" not in result
-        assert "path" not in result
-
-    @pytest.mark.skip("Version control missing in metadata")
-    @mock.patch.object(metadata, "distribution")
-    def test_pkg_info_for_wrong_dist_version(self, get_distribution_mock):
-        # get_distribution_mock.side_effect = metadata.VersionConflict
-        result = deps.pkg_info()
-
-        assert "Mopidy" == result["name"]
+        assert result["name"] == "Mopidy"
         assert "version" not in result
         assert "path" not in result
 

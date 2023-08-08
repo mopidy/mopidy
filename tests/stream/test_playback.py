@@ -1,5 +1,5 @@
 import logging
-import os
+from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -20,7 +20,7 @@ http://foo.bar/baz
 """.strip()
 
 
-@pytest.fixture
+@pytest.fixture()
 def config():
     return {
         "proxy": {},
@@ -33,24 +33,24 @@ def config():
     }
 
 
-@pytest.fixture
+@pytest.fixture()
 def audio():
     return mock.Mock()
 
 
-@pytest.fixture
+@pytest.fixture()
 def scanner():
     patcher = mock.patch.object(scan, "Scanner")
     yield patcher.start()()
     patcher.stop()
 
 
-@pytest.fixture
+@pytest.fixture()
 def backend(audio, config, scanner):
     return actor.StreamBackend(audio=audio, config=config)
 
 
-@pytest.fixture
+@pytest.fixture()
 def provider(backend):
     return backend.playback
 
@@ -240,7 +240,7 @@ class TestTranslateURI:
         responses.add(
             responses.GET,
             PLAYLIST_URI,
-            body=BODY.replace(STREAM_URI, os.path.basename(STREAM_URI)),
+            body=BODY.replace(STREAM_URI, Path(STREAM_URI).name),
             content_type="audio/x-mpegurl",
         )
 
@@ -254,6 +254,6 @@ class TestTranslateURI:
 
         assert (
             f"Parsed playlist ({PLAYLIST_URI}) and found new URI: "
-            f"{os.path.basename(STREAM_URI)}"
+            f"{Path(STREAM_URI).name}"
         ) in caplog.text
         assert f"Unwrapping stream from URI: {STREAM_URI}" in caplog.text

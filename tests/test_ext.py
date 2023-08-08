@@ -27,7 +27,7 @@ any_testextension = IsA(DummyExtension)
 
 
 class TestExtension:
-    @pytest.fixture
+    @pytest.fixture()
     def extension(self):
         class MyExtension(ext.Extension):
             dist_name = "Mopidy-Foo"
@@ -77,7 +77,7 @@ class TestExtension:
 
 
 class TestLoadExtensions:
-    @pytest.fixture
+    @pytest.fixture()
     def iter_entry_points_mock(self, request):
         patcher = mock.patch.object(metadata, "entry_points")
         iter_entry_points = patcher.start()
@@ -85,12 +85,12 @@ class TestLoadExtensions:
         yield iter_entry_points
         patcher.stop()
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_entry_point(self, iter_entry_points_mock):
         entry_point = mock.Mock()
         entry_point.load = mock.Mock(return_value=DummyExtension)
         iter_entry_points_mock.return_value = [entry_point]
-        yield entry_point
+        return entry_point
 
     def test_no_extensions(self, iter_entry_points_mock):
         assert ext.load_extensions() == []
@@ -152,12 +152,12 @@ class TestLoadExtensions:
 
 
 class TestValidateExtensionData:
-    @pytest.fixture
+    @pytest.fixture()
     def ext_data(self):
         extension = DummyExtension()
         entry_point = mock.Mock()
         entry_point.name = extension.ext_name
-        yield ext.ExtensionData(
+        return ext.ExtensionData(
             extension,
             entry_point,
             extension.get_config_schema(),
@@ -183,13 +183,9 @@ class TestValidateExtensionData:
 
     @pytest.mark.skip("Version control missing in metadata")
     def test_version_conflict(self, ext_data):
-        # error = metadata.VersionConflict
         error = metadata.PackageNotFoundError
         ext_data.entry_point.require.side_effect = error
         assert not ext.validate_extension_data(ext_data)
-        # error = metadata.VersionConflict(
-        #     ext_data.extension, "test_expected"
-        # )
         ext_data.entry_point.require.side_effect = error
         assert not ext.validate_extension_data(ext_data)
 

@@ -7,7 +7,7 @@ from mopidy.models import Image, Ref, SearchResult, Track
 
 
 class BaseCoreLibraryTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         dummy1_root = Ref.directory(uri="dummy1:directory", name="dummy1")
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ["dummy1"]
@@ -404,7 +404,7 @@ class GetDistinctTest(BaseCoreLibraryTest):
 
 
 class LegacyFindExactToSearchLibraryTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.backend = mock.Mock()
         self.backend.actor_ref.actor_class.__name__ = "DummyBackend"
         self.backend.uri_schemes.get.return_value = ["dummy"]
@@ -414,13 +414,13 @@ class LegacyFindExactToSearchLibraryTest(unittest.TestCase):
     def test_core_search_call_backend_search_with_exact(self):
         self.core.library.search(query={"any": ["a"]})
         self.backend.library.search.assert_called_once_with(
-            query=dict(any=["a"]), uris=None, exact=False
+            query={"any": ["a"]}, uris=None, exact=False
         )
 
     def test_core_search_with_exact_call_backend_search_with_exact(self):
         self.core.library.search(query={"any": ["a"]}, exact=True)
         self.backend.library.search.assert_called_once_with(
-            query=dict(any=["a"]), uris=None, exact=True
+            query={"any": ["a"]}, uris=None, exact=True
         )
 
     def test_core_search_with_handles_legacy_backend(self):
@@ -430,7 +430,7 @@ class LegacyFindExactToSearchLibraryTest(unittest.TestCase):
 
 
 class MockBackendCoreLibraryBase(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         dummy_root = Ref.directory(uri="dummy:directory", name="dummy")
 
         self.library = mock.Mock(spec=backend.LibraryProvider)

@@ -2,9 +2,7 @@ from mopidy import listener
 
 
 class AudioListener(listener.Listener):
-
-    """
-    Marker interface for recipients of events sent by the audio actor.
+    """Marker interface for recipients of events sent by the audio actor.
 
     Any Pykka actor that mixes in this class will receive calls to the methods
     defined here when the corresponding events happen in the core actor. This
@@ -15,40 +13,33 @@ class AudioListener(listener.Listener):
 
     @staticmethod
     def send(event, **kwargs):
-        """Helper to allow calling of audio listener events"""
+        """Helper to allow calling of audio listener events."""
         listener.send(AudioListener, event, **kwargs)
 
     def reached_end_of_stream(self):
-        """
-        Called whenever the end of the audio stream is reached.
+        """Called whenever the end of the audio stream is reached.
 
         *MAY* be implemented by actor.
         """
-        pass
 
     def stream_changed(self, uri):
-        """
-        Called whenever the audio stream changes.
+        """Called whenever the audio stream changes.
 
         *MAY* be implemented by actor.
 
         :param string uri: URI the stream has started playing.
         """
-        pass
 
     def position_changed(self, position):
-        """
-        Called whenever the position of the stream changes.
+        """Called whenever the position of the stream changes.
 
         *MAY* be implemented by actor.
 
         :param int position: Position in milliseconds.
         """
-        pass
 
     def state_changed(self, old_state, new_state, target_state):
-        """
-        Called after the playback state have changed.
+        """Called after the playback state have changed.
 
         Will be called for both immediate and async state changes in GStreamer.
 
@@ -73,11 +64,9 @@ class AudioListener(listener.Listener):
         :type target_state: string from :class:`mopidy.core.PlaybackState`
             field or :class:`None` if this is a final state.
         """
-        pass
 
     def tags_changed(self, tags):
-        """
-        Called whenever the current audio stream's tags change.
+        """Called whenever the current audio stream's tags change.
 
         This event signals that some track metadata has been updated. This can
         be metadata such as artists, titles, organization, or details about the
@@ -91,4 +80,3 @@ class AudioListener(listener.Listener):
         :param tags: The tags that have just been updated.
         :type tags: :class:`set` of strings
         """
-        pass

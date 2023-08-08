@@ -30,14 +30,14 @@ class GenericCopyTest(unittest.TestCase):
     def test_copying_model_with_basic_values(self):
         model = Model(name="foo", uri="bar")
         other = model.replace(name="baz")
-        assert "baz" == other.name
-        assert "bar" == other.uri
+        assert other.name == "baz"
+        assert other.uri == "bar"
 
     def test_copying_model_with_missing_values(self):
         model = Model(uri="bar")
         other = model.replace(name="baz")
-        assert "baz" == other.name
-        assert "bar" == other.uri
+        assert other.name == "baz"
+        assert other.uri == "bar"
 
     def test_copying_model_with_private_internal_value(self):
         model = Model(models=[SubModel(name=123)])
@@ -83,11 +83,12 @@ class ModelTest(unittest.TestCase):
             Model(foo="baz")
 
     def test_repr_without_models(self):
-        assert "Model(name='name', uri='uri')" == repr(Model(uri="uri", name="name"))
+        assert repr(Model(uri="uri", name="name")) == "Model(name='name', uri='uri')"
 
     def test_repr_with_models(self):
-        assert "Model(models=[SubModel(name=123)], name='name', uri='uri')" == repr(
-            Model(uri="uri", name="name", models=[SubModel(name=123)])
+        assert (
+            repr(Model(uri="uri", name="name", models=[SubModel(name=123)]))
+            == "Model(models=[SubModel(name=123)], name='name', uri='uri')"
         )
 
     def test_serialize_without_models(self):

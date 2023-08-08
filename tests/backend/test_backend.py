@@ -12,7 +12,7 @@ class LibraryTest(unittest.TestCase):
 
 
 class PlaylistsTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.provider = backend.PlaylistsProvider(backend=None)
 
     def test_as_list_default_impl(self):

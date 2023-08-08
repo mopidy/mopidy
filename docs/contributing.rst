@@ -86,8 +86,8 @@ Pull request guidelines
      ``docs/add-ext-mopidy-spotify-tunigo``.
 
 #. Follow the :ref:`code style <codestyle>`, especially make sure the
-   ``flake8`` linter does not complain about anything. Our CI setup will
-   check that your pull request is "flake8 clean". See :ref:`code-linting`.
+   ``ruff`` linter does not complain about anything. Our CI setup will
+   check that your pull request is "ruff clean". See :ref:`code-linting`.
 
 #. Include tests for any new feature or substantial bug fix. See
    :ref:`running-tests`.

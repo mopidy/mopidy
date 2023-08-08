@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import functools
 import logging
-import os
 import urllib.parse
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import tornado.escape
@@ -49,7 +49,7 @@ def make_mopidy_app_factory(apps, statics):
             (
                 r"/(.+)",
                 StaticFileHandler,
-                {"path": os.path.join(os.path.dirname(__file__), "data")},
+                {"path": str(Path(__file__).parent / "data")},
             ),
             (r"/", ClientListHandler, {"apps": apps, "statics": statics}),
         ]
@@ -255,7 +255,7 @@ class ClientListHandler(tornado.web.RequestHandler):
         self.statics = statics
 
     def get_template_path(self):
-        return os.path.dirname(__file__)
+        return str(Path(__file__).parent)
 
     def get(self):
         set_mopidy_headers(self)
@@ -267,11 +267,11 @@ class ClientListHandler(tornado.web.RequestHandler):
             names.add(static["name"])
         names.discard("mopidy")
 
-        self.render("data/clients.html", apps=sorted(list(names)))
+        self.render("data/clients.html", apps=sorted(names))
 
 
 class StaticFileHandler(tornado.web.StaticFileHandler):
-    def set_extra_headers(self, path):
+    def set_extra_headers(self, _path):
         set_mopidy_headers(self)
 
 

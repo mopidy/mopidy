@@ -28,12 +28,12 @@ class ConfigOverrideTypeTest(unittest.TestCase):
 
 
 class CommandParsingTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.exit_patcher = mock.patch.object(commands.Command, "exit")
         self.exit_mock = self.exit_patcher.start()
         self.exit_mock.side_effect = SystemExit
 
-    def tearDown(self):  # noqa: N802
+    def tearDown(self):
         self.exit_patcher.stop()
 
     def test_command_parsing_returns_namespace(self):
@@ -261,32 +261,32 @@ class UsageTest(unittest.TestCase):
     def test_prog_name_default_and_override(self, argv_mock):
         argv_mock.__getitem__.return_value = "/usr/bin/foo"
         cmd = commands.Command()
-        assert "usage: foo" == cmd.format_usage().strip()
-        assert "usage: baz" == cmd.format_usage("baz").strip()
+        assert cmd.format_usage().strip() == "usage: foo"
+        assert cmd.format_usage("baz").strip() == "usage: baz"
 
     def test_basic_usage(self):
         cmd = commands.Command()
-        assert "usage: foo" == cmd.format_usage("foo").strip()
+        assert cmd.format_usage("foo").strip() == "usage: foo"
 
         cmd.add_argument("-h", "--help", action="store_true")
-        assert "usage: foo [-h]" == cmd.format_usage("foo").strip()
+        assert cmd.format_usage("foo").strip() == "usage: foo [-h]"
 
         cmd.add_argument("bar")
-        assert "usage: foo [-h] bar" == cmd.format_usage("foo").strip()
+        assert cmd.format_usage("foo").strip() == "usage: foo [-h] bar"
 
     def test_nested_usage(self):
         child = commands.Command()
         cmd = commands.Command()
         cmd.add_child("bar", child)
 
-        assert "usage: foo" == cmd.format_usage("foo").strip()
-        assert "usage: foo bar" == cmd.format_usage("foo bar").strip()
+        assert cmd.format_usage("foo").strip() == "usage: foo"
+        assert cmd.format_usage("foo bar").strip() == "usage: foo bar"
 
         cmd.add_argument("-h", "--help", action="store_true")
-        assert "usage: foo bar" == child.format_usage("foo bar").strip()
+        assert child.format_usage("foo bar").strip() == "usage: foo bar"
 
         child.add_argument("-h", "--help", action="store_true")
-        assert "usage: foo bar [-h]" == child.format_usage("foo bar").strip()
+        assert child.format_usage("foo bar").strip() == "usage: foo bar [-h]"
 
 
 class HelpTest(unittest.TestCase):
@@ -294,20 +294,18 @@ class HelpTest(unittest.TestCase):
     def test_prog_name_default_and_override(self, argv_mock):
         argv_mock.__getitem__.return_value = "/usr/bin/foo"
         cmd = commands.Command()
-        assert "usage: foo" == cmd.format_help().strip()
-        assert "usage: bar" == cmd.format_help("bar").strip()
+        assert cmd.format_help().strip() == "usage: foo"
+        assert cmd.format_help("bar").strip() == "usage: bar"
 
     def test_command_without_documenation_or_options(self):
         cmd = commands.Command()
-        assert "usage: bar" == cmd.format_help("bar").strip()
+        assert cmd.format_help("bar").strip() == "usage: bar"
 
     def test_command_with_option(self):
         cmd = commands.Command()
         cmd.add_argument("-h", "--help", action="store_true", help="show this message")
 
-        expected = (
-            "usage: foo [-h]\n\n" "OPTIONS:\n\n" "  -h, --help  show this message"
-        )
+        expected = "usage: foo [-h]\n\nOPTIONS:\n\n  -h, --help  show this message"
         assert expected == cmd.format_help("foo").strip()
 
     def test_command_with_option_and_positional(self):
@@ -327,7 +325,7 @@ class HelpTest(unittest.TestCase):
         cmd = commands.Command()
         cmd.help = "some text about everything this command does."
 
-        expected = "usage: foo\n\n" "some text about everything this command does."
+        expected = "usage: foo\n\nsome text about everything this command does."
         assert expected == cmd.format_help("foo").strip()
 
     def test_command_with_documentation_and_option(self):
@@ -348,7 +346,7 @@ class HelpTest(unittest.TestCase):
         cmd = commands.Command()
         cmd.add_child("bar", child)
 
-        assert "usage: foo" == cmd.format_help("foo").strip()
+        assert cmd.format_help("foo").strip() == "usage: foo"
 
     def test_subcommand_with_documentation_shown(self):
         child = commands.Command()
