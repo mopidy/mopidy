@@ -23,6 +23,9 @@ jobs:
             python: "3.11"
             tox: py311
             coverage: true
+          - name: "Lint: black"
+            python: "3.11"
+            tox: black
           - name: "Lint: check-manifest"
             python: "3.11"
             tox: check-manifest
