@@ -25,7 +25,7 @@ def repr_tags(taglist, max_bytes=10):
     result = dict(taglist)
     for tag_values in result.values():
         for i, val in enumerate(tag_values):
-            if type(val) is bytes and len(val) > max_bytes:
+            if isinstance(val, bytes) and len(val) > max_bytes:
                 tag_values[i] = val[:max_bytes] + b"..."
     return repr(result)
 
