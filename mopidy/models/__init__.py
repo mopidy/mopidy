@@ -3,17 +3,17 @@ from mopidy.models.immutable import ImmutableObject, ValidatedImmutableObject
 from mopidy.models.serialize import ModelJSONEncoder, model_json_decoder
 
 __all__ = [
-    "ImmutableObject",
-    "Ref",
-    "Image",
-    "Artist",
     "Album",
-    "Track",
-    "TlTrack",
-    "Playlist",
-    "SearchResult",
+    "Artist",
+    "Image",
+    "ImmutableObject",
     "model_json_decoder",
     "ModelJSONEncoder",
+    "Playlist",
+    "Ref",
+    "SearchResult",
+    "TlTrack",
+    "Track",
     "ValidatedImmutableObject",
 ]
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import random
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Optional
 
 from mopidy import exceptions
 from mopidy.core import listener
@@ -13,11 +13,8 @@ from mopidy.models import TlTrack, Track
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
-
     from mopidy.core.actor import Core
-
-    Criteria: TypeAlias = dict[str, list[Any]]
+    from mopidy.types import Query, TracklistField
 
 
 class TracklistController:
@@ -438,7 +435,7 @@ class TracklistController:
         self._tl_tracks = []
         self._increase_version()
 
-    def filter(self, criteria: Criteria) -> list[TlTrack]:
+    def filter(self, criteria: Query[TracklistField]) -> list[TlTrack]:
         """Filter the tracklist by the given criteria.
 
         Each rule in the criteria consists of a model field and a list of
@@ -464,7 +461,7 @@ class TracklistController:
         :rtype: list of :class:`mopidy.models.TlTrack`
         """
         tlids = criteria.pop("tlid", [])
-        validation.check_query(criteria, validation.TRACKLIST_FIELDS)
+        validation.check_query(criteria, validation.TRACKLIST_FIELDS.keys())
         validation.check_instances(tlids, int)
 
         matches = self._tl_tracks
@@ -510,7 +507,7 @@ class TracklistController:
         self._tl_tracks = new_tl_tracks
         self._increase_version()
 
-    def remove(self, criteria: Criteria) -> list[TlTrack]:
+    def remove(self, criteria: Query[TracklistField]) -> list[TlTrack]:
         """Remove the matching tracks from the tracklist.
 
         Uses :meth:`filter()` to lookup the tracks to remove.
@@ -549,7 +546,7 @@ class TracklistController:
             raise AssertionError("start must be at least zero")
 
         if end is not None and end > len(tl_tracks):
-            raise AssertionError("end can not be larger than " + "tracklist length")
+            raise AssertionError("end can not be larger than tracklist length")
 
         before = tl_tracks[: start or 0]
         shuffled = tl_tracks[start:end]

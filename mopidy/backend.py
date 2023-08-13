@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Literal, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Optional
 
 import pykka
 from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
@@ -14,37 +14,7 @@ if TYPE_CHECKING:
     from mopidy.audio.actor import AudioProxy
     from mopidy.internal.gi import Gst
     from mopidy.models import Image, Playlist, Ref, SearchResult, Track
-
-# TODO Fix duplication with mopidy.core.library.DistinctField and
-# mopidy.internal.validation.TRACK_FIELDS_WITH_TYPES
-TrackField = Literal[
-    "uri",
-    "track_name",
-    "album",
-    "artist",
-    "albumartist",
-    "composer",
-    "performer",
-    "track_no",
-    "genre",
-    "date",
-    "comment",
-    "disc_no",
-    "musicbrainz_albumid",
-    "musicbrainz_artistid",
-    "musicbrainz_trackid",
-]
-
-SearchField = Literal[TrackField, "any"]
-
-DistinctField = TrackField
-
-F = TypeVar("F")
-QueryValue = Union[str, int]
-Query = dict[F, list[QueryValue]]
-
-Uri = str
-UriScheme = str
+    from mopidy.types import DistinctField, Query, SearchField, Uri, UriScheme
 
 
 logger = logging.getLogger(__name__)

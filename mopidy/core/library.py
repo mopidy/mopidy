@@ -6,38 +6,16 @@ import logging
 import operator
 import urllib.parse
 from collections.abc import Generator, Mapping
-from typing import TYPE_CHECKING, Any, Literal, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Optional, Union, cast
 
 from mopidy import exceptions
 from mopidy.internal import deprecation, validation
 from mopidy.models import Image, Ref, SearchResult, Track
+from mopidy.types import DistinctField, Query, SearchField
 
 if TYPE_CHECKING:
     from mopidy.backend import BackendProxy
     from mopidy.core.actor import Backends, Core
-
-
-# TODO Fix duplication with mopidy.backend.DistinctField and
-# mopidy.internal.validation.TRACK_FIELDS_WITH_TYPES
-DistinctField = Literal[
-    "uri",
-    "track_name",
-    "album",
-    "artist",
-    "albumartist",
-    "composer",
-    "performer",
-    "track_no",
-    "genre",
-    "date",
-    "comment",
-    "disc_no",
-    "musicbrainz_albumid",
-    "musicbrainz_artistid",
-    "musicbrainz_trackid",
-]
-SearchField = Union[DistinctField, Literal["any"]]
-SearchQuery = dict[SearchField, list[str]]
 
 logger = logging.getLogger(__name__)
 
@@ -155,8 +133,8 @@ class LibraryController:
 
     def get_distinct(
         self,
-        field: SearchField,
-        query: Optional[SearchQuery] = None,
+        field: DistinctField,
+        query: Optional[Query[DistinctField]] = None,
     ) -> set[Any]:
         """List distinct values for a given field from the library.
 
@@ -300,7 +278,7 @@ class LibraryController:
 
     def search(
         self,
-        query: SearchQuery,
+        query: Query[SearchField],
         uris: Optional[list[str]] = None,
         exact: bool = False,
     ) -> list[SearchResult]:
@@ -385,7 +363,7 @@ class LibraryController:
         return results
 
 
-def _normalize_query(query: SearchQuery) -> SearchQuery:
+def _normalize_query(query: Query[SearchField]) -> Query[SearchField]:
     broken_client = False
     # TODO: this breaks if query is not a dictionary like object...
     for field, values in query.items():
