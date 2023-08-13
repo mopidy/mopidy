@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, Optional, Union, cast
 from mopidy import exceptions
 from mopidy.internal import deprecation, validation
 from mopidy.models import Image, Ref, SearchResult, Track
-from mopidy.types import DistinctField, Query, SearchField
+from mopidy.types import DistinctField, Query, SearchField, Uri
 
 if TYPE_CHECKING:
     from mopidy.backend import BackendProxy
@@ -47,18 +47,18 @@ class LibraryController:
         self.backends = backends
         self.core = core
 
-    def _get_backend(self, uri: str) -> Optional[BackendProxy]:
+    def _get_backend(self, uri: Uri) -> Optional[BackendProxy]:
         uri_scheme = urllib.parse.urlparse(uri).scheme
         return self.backends.with_library.get(uri_scheme, None)
 
     def _get_backends_to_uris(
         self,
-        uris: Optional[list[str]],
-    ) -> dict[BackendProxy, Optional[list[str]]]:
+        uris: Optional[list[Uri]],
+    ) -> dict[BackendProxy, Optional[list[Uri]]]:
         if not uris:
             return {b: None for b in self.backends.with_library.values()}
 
-        result: dict[BackendProxy, Optional[list[str]]] = collections.defaultdict(list)
+        result: dict[BackendProxy, Optional[list[Uri]]] = collections.defaultdict(list)
         for uri in uris:
             backend = self._get_backend(uri)
             if backend is not None:
@@ -67,7 +67,7 @@ class LibraryController:
                 lst.append(uri)
         return result
 
-    def browse(self, uri: str) -> list[Ref]:
+    def browse(self, uri: Uri) -> list[Ref]:
         """Browse directories and tracks at the given ``uri``.
 
         ``uri`` is a string which represents some directory belonging to a
@@ -117,7 +117,7 @@ class LibraryController:
                 directories.add(root)
         return sorted(directories, key=operator.attrgetter("name"))
 
-    def _browse(self, uri: str) -> list[Ref]:
+    def _browse(self, uri: Uri) -> list[Ref]:
         scheme = urllib.parse.urlparse(uri).scheme
         backend = self.backends.with_library_browse.get(scheme)
 
@@ -181,7 +181,7 @@ class LibraryController:
                     result.update(values)
         return result
 
-    def get_images(self, uris: list[str]) -> dict[str, tuple[Image, ...]]:
+    def get_images(self, uris: list[Uri]) -> dict[Uri, tuple[Image, ...]]:
         """Lookup the images for the given URIs.
 
         Backends can use this to return image URIs for any URI they know about
@@ -220,7 +220,7 @@ class LibraryController:
                     results[uri] += tuple(images)
         return results
 
-    def lookup(self, uris: list[str]) -> dict[str, list[Track]]:
+    def lookup(self, uris: list[Uri]) -> dict[Uri, list[Track]]:
         """Lookup the given URIs.
 
         If the URI expands to multiple tracks, the returned list will contain
@@ -252,7 +252,7 @@ class LibraryController:
 
         return results
 
-    def refresh(self, uri: Optional[str] = None) -> None:
+    def refresh(self, uri: Optional[Uri] = None) -> None:
         """Refresh library. Limit to URI and below if an URI is given.
 
         :param uri: directory or track URI
@@ -279,7 +279,7 @@ class LibraryController:
     def search(
         self,
         query: Query[SearchField],
-        uris: Optional[list[str]] = None,
+        uris: Optional[list[Uri]] = None,
         exact: bool = False,
     ) -> list[SearchResult]:
         """Search the library for tracks where ``field`` contains ``values``.

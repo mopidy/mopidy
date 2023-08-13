@@ -7,6 +7,7 @@ from mopidy import listener
 if TYPE_CHECKING:
     from mopidy.audio import PlaybackState
     from mopidy.models import Playlist, TlTrack
+    from mopidy.types import Uri
 
 
 class CoreListener(listener.Listener):
@@ -115,7 +116,7 @@ class CoreListener(listener.Listener):
         :type playlist: :class:`mopidy.models.Playlist`
         """
 
-    def playlist_deleted(self, uri: str) -> None:
+    def playlist_deleted(self, uri: Uri) -> None:
         """Called whenever a playlist is deleted.
 
         *MAY* be implemented by actor.

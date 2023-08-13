@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 if TYPE_CHECKING:
     from mopidy.backend import BackendProxy
     from mopidy.core.actor import Backends, Core
+    from mopidy.types import Uri, UriScheme
 
 
 @contextlib.contextmanager
@@ -45,7 +46,7 @@ class PlaylistsController:
         self.backends = backends
         self.core = core
 
-    def get_uri_schemes(self) -> list[str]:
+    def get_uri_schemes(self) -> list[UriScheme]:
         """Get the list of URI schemes that support playlists.
 
         :rtype: list of string
@@ -87,7 +88,7 @@ class PlaylistsController:
 
         return results
 
-    def get_items(self, uri: str) -> Optional[list[Ref]]:
+    def get_items(self, uri: Uri) -> Optional[list[Ref]]:
         """Get the items in a playlist specified by ``uri``.
 
         Returns a list of :class:`~mopidy.models.Ref` objects referring to the
@@ -116,7 +117,11 @@ class PlaylistsController:
 
         return None
 
-    def create(self, name: str, uri_scheme: Optional[str] = None) -> Optional[Playlist]:
+    def create(
+        self,
+        name: str,
+        uri_scheme: Optional[UriScheme] = None,
+    ) -> Optional[Playlist]:
         """Create a new playlist.
 
         If ``uri_scheme`` matches an URI scheme handled by a current backend,
@@ -149,7 +154,7 @@ class PlaylistsController:
 
         return None
 
-    def delete(self, uri: str) -> bool:
+    def delete(self, uri: Uri) -> bool:
         """Delete playlist identified by the URI.
 
         If the URI doesn't match the URI schemes handled by the current
@@ -185,7 +190,7 @@ class PlaylistsController:
 
         return success
 
-    def lookup(self, uri: str) -> Optional[Playlist]:
+    def lookup(self, uri: Uri) -> Optional[Playlist]:
         """Lookup playlist with given URI in both the set of playlists and in any
         other playlist sources. Returns :class:`None` if not found.
 
@@ -208,7 +213,7 @@ class PlaylistsController:
 
     # TODO: there is an inconsistency between library.refresh(uri) and this
     # call, not sure how to sort this out.
-    def refresh(self, uri_scheme: Optional[str] = None) -> None:
+    def refresh(self, uri_scheme: Optional[UriScheme] = None) -> None:
         """Refresh the playlists in :attr:`playlists`.
 
         If ``uri_scheme`` is :class:`None`, all backends are asked to refresh.

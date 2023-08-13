@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     from mopidy.core.playback import PlaybackControllerProxy
     from mopidy.core.playlists import PlaylistsControllerProxy
     from mopidy.core.tracklist import TracklistControllerProxy
+    from mopidy.types import Uri
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +103,7 @@ class Core(
     def reached_end_of_stream(self) -> None:
         self.playback._on_end_of_stream()
 
-    def stream_changed(self, uri: str) -> None:
+    def stream_changed(self, uri: Uri) -> None:
         self.playback._on_stream_changed(uri)
 
     def position_changed(self, position: int) -> None:

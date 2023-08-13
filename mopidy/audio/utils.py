@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any, Callable, cast
 
 from mopidy import httpclient
 from mopidy.internal.gi import Gst
+from mopidy.types import UriScheme
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -21,7 +22,7 @@ def clocktime_to_millisecond(value: int) -> int:
     return value // Gst.MSECOND
 
 
-def supported_uri_schemes(uri_schemes: Iterable[str]) -> set[str]:
+def supported_uri_schemes(uri_schemes: Iterable[UriScheme]) -> set[UriScheme]:
     """Determine which URIs we can actually support from provided whitelist.
 
     :param uri_schemes: list/set of URIs to check support for.

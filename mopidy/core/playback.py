@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from mopidy.backend import BackendProxy
     from mopidy.core.actor import Backends, Core
     from mopidy.models import TlTrack, Track
+    from mopidy.types import Uri
 
 logger = logging.getLogger(__name__)
 
@@ -136,7 +137,7 @@ class PlaybackController:
             self._trigger_track_playback_ended(self.get_time_position())
         self._set_current_tl_track(None)
 
-    def _on_stream_changed(self, _uri: str) -> None:
+    def _on_stream_changed(self, _uri: Uri) -> None:
         if self._last_position is None:
             position = self.get_time_position()
         else:

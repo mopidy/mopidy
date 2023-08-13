@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from mopidy.core.actor import Core
-    from mopidy.types import Query, TracklistField
+    from mopidy.types import Query, TracklistField, Uri
 
 
 class TracklistController:
@@ -357,7 +357,7 @@ class TracklistController:
         self,
         tracks: Optional[list[Track]] = None,
         at_position: Optional[int] = None,
-        uris: Optional[list[str]] = None,
+        uris: Optional[list[Uri]] = None,
     ) -> list[TlTrack]:
         """Add tracks to the tracklist.
 
