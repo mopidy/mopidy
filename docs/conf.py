@@ -9,42 +9,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 
 from mopidy.internal.versioning import get_version  # noqa: E402
 
-# -- Workarounds to have autodoc generate API docs ----------------------------
-
-
-class Mock:
-    def __init__(self, *args, **kwargs):
-        pass
-
-    def __call__(self, *_args, **_kwargs):
-        return Mock()
-
-    def __or__(self, other):
-        return Mock()
-
-    def __mro_entries__(self, bases):
-        return ()
-
-    @classmethod
-    def __getattr__(cls, name):
-        if name == "get_system_config_dirs":  # GLib.get_system_config_dirs()
-            return list
-        if name == "get_user_config_dir":  # GLib.get_user_config_dir()
-            return str
-        return Mock()
-
-
-MOCK_MODULES = [
-    "dbus",
-    "dbus.mainloop",
-    "dbus.mainloop.glib",
-    "dbus.service",
-    "mopidy.internal.gi",
-]
-for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = Mock()
-
-
 # -- Custom Sphinx setup ------------------------------------------------------
 
 
@@ -60,7 +24,7 @@ def setup(app):
 
 # -- General configuration ----------------------------------------------------
 
-needs_sphinx = "1.3"
+needs_sphinx = "1.6"
 
 extensions = [
     "sphinx.ext.autodoc",
@@ -121,6 +85,14 @@ latex_documents = [
 
 man_pages = [
     ("command", "mopidy", "music server", "", "1"),
+]
+
+
+# -- Options for autodoc extension --------------------------------------------
+
+autodoc_mock_imports = [
+    "dbus",
+    "mopidy.internal.gi",
 ]
 
 
