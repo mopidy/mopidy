@@ -32,6 +32,7 @@ extensions = [
     "sphinx.ext.graphviz",
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
+    "sphinx_autodoc_typehints",
     "sphinx_rtd_theme",
 ]
 
