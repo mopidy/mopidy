@@ -47,13 +47,11 @@ for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
 
 
-# -- Custom Sphinx object types -----------------------------------------------
+# -- Custom Sphinx setup ------------------------------------------------------
 
 
 def setup(app):
-    from sphinx.ext.autodoc import cut_lines
-
-    app.connect("autodoc-process-docstring", cut_lines(4, what=["module"]))
+    # Add custom Sphinx object type for Mopidy's config values
     app.add_object_type(
         "confval",
         "confval",
