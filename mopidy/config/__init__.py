@@ -151,13 +151,13 @@ _INITIAL_HELP = """
 """
 
 
-def read(config_file: Union[str, os.PathLike[str]]) -> str:
+def read(config_file: pathlib.Path) -> str:
     """Helper to load config defaults in same way across core and extensions."""
     return pathlib.Path(config_file).read_text(errors="surrogateescape")
 
 
 def load(
-    files: list[os.PathLike],
+    files: list[pathlib.Path],
     ext_schemas: list[ConfigSchema],
     ext_defaults: list[str],
     overrides: list[Any],
@@ -207,7 +207,7 @@ def format_initial(extensions_data: list[ExtensionData]) -> str:
 
 
 def _load(
-    files: list[os.PathLike],
+    files: list[pathlib.Path],
     defaults: list[str],
     overrides: list[tuple[str, str, Any]],
 ) -> RawConfig:
