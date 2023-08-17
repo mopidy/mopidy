@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import signal
 import sys
+from pathlib import Path
 from typing import TYPE_CHECKING, TypedDict
 
 import pykka.debug
@@ -10,7 +11,10 @@ import pykka.debug
 from mopidy import commands, ext
 from mopidy import config as config_lib
 from mopidy.internal import log, path, process, versioning
-from mopidy.internal.gi import Gst  # noqa: F401 (imported to test GStreamer presence)
+from mopidy.internal.gi import (
+    GLib,
+    Gst,  # noqa: F401 (imported to test GStreamer presence)
+)
 
 try:
     # Make GLib's mainloop the event loop for python-dbus
@@ -62,15 +66,23 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
 
         args = root_cmd.parse(sys.argv[1:])
 
+        default_config_files = [
+            (Path(base) / "mopidy" / "mopidy.conf").resolve()
+            for base in [*GLib.get_system_config_dirs(), GLib.get_user_config_dir()]
+        ]
+        config_files = [
+            Path(f) for f in args.config_files or []
+        ] or default_config_files
+
         config, config_errors = config_lib.load(
-            args.config_files,
+            config_files,
             [d.config_schema for d in extensions_data],
             [d.config_defaults for d in extensions_data],
             args.config_overrides,
         )
 
         create_core_dirs(config)
-        create_initial_config_file(args, extensions_data)
+        create_initial_config_file(config_files, extensions_data)
 
         log.setup_logging(config, args.base_verbosity_level, args.verbosity_level)
 
@@ -166,9 +178,9 @@ def create_core_dirs(config):
     path.get_or_create_dir(config["core"]["data_dir"])
 
 
-def create_initial_config_file(args, extensions_data):
+def create_initial_config_file(config_files, extensions_data):
     """Initialize whatever the last config file is with defaults."""
-    config_file = path.expand_path(args.config_files[-1])
+    config_file = path.expand_path(config_files[-1])
 
     if config_file.exists():
         return

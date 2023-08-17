@@ -9,49 +9,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 
 from mopidy.internal.versioning import get_version  # noqa: E402
 
-# -- Workarounds to have autodoc generate API docs ----------------------------
-
-
-class Mock:
-    def __init__(self, *args, **kwargs):
-        pass
-
-    def __call__(self, *_args, **_kwargs):
-        return Mock()
-
-    def __or__(self, other):
-        return Mock()
-
-    def __mro_entries__(self, bases):
-        return ()
-
-    @classmethod
-    def __getattr__(cls, name):
-        if name == "get_system_config_dirs":  # GLib.get_system_config_dirs()
-            return list
-        if name == "get_user_config_dir":  # GLib.get_user_config_dir()
-            return str
-        return Mock()
-
-
-MOCK_MODULES = [
-    "dbus",
-    "dbus.mainloop",
-    "dbus.mainloop.glib",
-    "dbus.service",
-    "mopidy.internal.gi",
-]
-for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = Mock()
-
-
-# -- Custom Sphinx object types -----------------------------------------------
+# -- Custom Sphinx setup ------------------------------------------------------
 
 
 def setup(app):
-    from sphinx.ext.autodoc import cut_lines
-
-    app.connect("autodoc-process-docstring", cut_lines(4, what=["module"]))
+    # Add custom Sphinx object type for Mopidy's config values
     app.add_object_type(
         "confval",
         "confval",
@@ -62,7 +24,7 @@ def setup(app):
 
 # -- General configuration ----------------------------------------------------
 
-needs_sphinx = "1.3"
+needs_sphinx = "3.4"
 
 extensions = [
     "sphinx.ext.autodoc",
@@ -70,6 +32,8 @@ extensions = [
     "sphinx.ext.graphviz",
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
+    "sphinx_autodoc_typehints",
+    "sphinx_rtd_theme",
 ]
 
 templates_path = ["_templates"]
@@ -123,6 +87,14 @@ latex_documents = [
 
 man_pages = [
     ("command", "mopidy", "music server", "", "1"),
+]
+
+
+# -- Options for autodoc extension --------------------------------------------
+
+autodoc_mock_imports = [
+    "dbus",
+    "mopidy.internal.gi",
 ]
 
 
