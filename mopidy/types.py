@@ -27,7 +27,6 @@ DistinctField: TypeAlias = Literal[
     "musicbrainz_artistid",
     "musicbrainz_trackid",
 ]
-DistinctQuery: TypeAlias = dict[DistinctField, list[QueryValue]]
 
 # Types for search queries
 SearchField: TypeAlias = Union[DistinctField, Literal["any"]]

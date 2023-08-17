@@ -134,7 +134,7 @@ class LibraryController:
     def get_distinct(
         self,
         field: DistinctField,
-        query: Optional[Query[DistinctField]] = None,
+        query: Optional[Query[SearchField]] = None,
     ) -> set[Any]:
         """List distinct values for a given field from the library.
 

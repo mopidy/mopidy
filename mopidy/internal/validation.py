@@ -132,7 +132,7 @@ def check_integer(
 
 
 def check_query(
-    arg: Union[Query[DistinctField], Query[SearchField], Query[TracklistField]],
+    arg: Union[Query[SearchField], Query[TracklistField]],
     fields: Optional[Iterable[str]] = None,
 ) -> None:
     if fields is None:
