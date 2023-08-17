@@ -10,6 +10,7 @@ from mopidy.audio import PlaybackState
 from mopidy.core import listener
 from mopidy.exceptions import CoreError
 from mopidy.internal import deprecation, models, validation
+from mopidy.types import UriScheme
 
 if TYPE_CHECKING:
     from mopidy.audio.actor import AudioProxy
@@ -52,7 +53,7 @@ class PlaybackController:
     def _get_backend(self, tl_track: Optional[TlTrack]) -> Optional[BackendProxy]:
         if tl_track is None:
             return None
-        uri_scheme = urllib.parse.urlparse(tl_track.track.uri).scheme
+        uri_scheme = UriScheme(urllib.parse.urlparse(tl_track.track.uri).scheme)
         return self.backends.with_playback.get(uri_scheme, None)
 
     def get_current_tl_track(self) -> Optional[TlTrack]:

@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any, Optional, Union, cast
 from mopidy import exceptions
 from mopidy.internal import deprecation, validation
 from mopidy.models import Image, Ref, SearchResult, Track
-from mopidy.types import DistinctField, Query, SearchField, Uri
+from mopidy.types import DistinctField, Query, SearchField, Uri, UriScheme
 
 if TYPE_CHECKING:
     from mopidy.backend import BackendProxy
@@ -48,7 +48,7 @@ class LibraryController:
         self.core = core
 
     def _get_backend(self, uri: Uri) -> Optional[BackendProxy]:
-        uri_scheme = urllib.parse.urlparse(uri).scheme
+        uri_scheme = UriScheme(urllib.parse.urlparse(uri).scheme)
         return self.backends.with_library.get(uri_scheme, None)
 
     def _get_backends_to_uris(
@@ -118,7 +118,7 @@ class LibraryController:
         return sorted(directories, key=operator.attrgetter("name"))
 
     def _browse(self, uri: Uri) -> list[Ref]:
-        scheme = urllib.parse.urlparse(uri).scheme
+        scheme = UriScheme(urllib.parse.urlparse(uri).scheme)
         backend = self.backends.with_library_browse.get(scheme)
 
         if not backend:

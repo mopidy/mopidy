@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TypeVar, Union
+from typing import TYPE_CHECKING, Literal, NewType, TypeVar, Union
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -47,5 +47,5 @@ TracklistField: TypeAlias = Literal[
 QueryField: TypeAlias = Union[DistinctField, SearchField, TracklistField]
 
 # URI types
-Uri: TypeAlias = str
-UriScheme: TypeAlias = str
+Uri = NewType("Uri", str)
+UriScheme = NewType("UriScheme", str)

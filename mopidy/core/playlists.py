@@ -10,13 +10,14 @@ from mopidy import exceptions
 from mopidy.core import listener
 from mopidy.internal import validation
 from mopidy.models import Playlist, Ref
+from mopidy.types import UriScheme
 
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from mopidy.backend import BackendProxy
     from mopidy.core.actor import Backends, Core
-    from mopidy.types import Uri, UriScheme
+    from mopidy.types import Uri
 
 
 @contextlib.contextmanager
@@ -103,7 +104,7 @@ class PlaylistsController:
         """
         validation.check_uri(uri)
 
-        uri_scheme = urllib.parse.urlparse(uri).scheme
+        uri_scheme = UriScheme(urllib.parse.urlparse(uri).scheme)
         backend = self.backends.with_playlists.get(uri_scheme, None)
 
         if not backend:
@@ -171,7 +172,7 @@ class PlaylistsController:
         """
         validation.check_uri(uri)
 
-        uri_scheme = urllib.parse.urlparse(uri).scheme
+        uri_scheme = UriScheme(urllib.parse.urlparse(uri).scheme)
         backend = self.backends.with_playlists.get(uri_scheme, None)
         if not backend:
             return False
@@ -198,7 +199,7 @@ class PlaylistsController:
         :type uri: string
         :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
-        uri_scheme = urllib.parse.urlparse(uri).scheme
+        uri_scheme = UriScheme(urllib.parse.urlparse(uri).scheme)
         backend = self.backends.with_playlists.get(uri_scheme, None)
         if not backend:
             return None
@@ -271,7 +272,7 @@ class PlaylistsController:
         if playlist.uri is None:
             return None  # TODO: log this problem?
 
-        uri_scheme = urllib.parse.urlparse(playlist.uri).scheme
+        uri_scheme = UriScheme(urllib.parse.urlparse(playlist.uri).scheme)
         backend = self.backends.with_playlists.get(uri_scheme, None)
         if not backend:
             return None
