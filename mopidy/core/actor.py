@@ -114,7 +114,7 @@ class Core(
         self,
         old_state: PlaybackState,
         new_state: PlaybackState,
-        target_state: PlaybackState,
+        target_state: Optional[PlaybackState],
     ) -> None:
         # XXX: This is a temporary fix for issue #232 while we wait for a more
         # permanent solution with the implementation of issue #234. When the

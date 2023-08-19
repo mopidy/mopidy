@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, Optional
 
 import pykka
 from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
@@ -11,9 +11,9 @@ from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
 from mopidy import listener
 
 if TYPE_CHECKING:
-    from typing import Any, Literal, Optional
+    from typing_extensions import TypeAlias
 
-    MixerEvent = Literal["mute_changed", "volume_changed"]
+    from mopidy.types import Percentage
 
 
 logger = logging.getLogger(__name__)
@@ -43,7 +43,7 @@ class Mixer:
     def __init__(self, config: dict) -> None:
         pass
 
-    def get_volume(self) -> Optional[int]:
+    def get_volume(self) -> Optional[Percentage]:
         """Get volume level of the mixer on a linear scale from 0 to 100.
 
         Example values:
@@ -61,7 +61,7 @@ class Mixer:
         """
         return None
 
-    def set_volume(self, volume: int) -> bool:
+    def set_volume(self, volume: Percentage) -> bool:
         """Set volume level of the mixer.
 
         *MAY be implemented by subclass.*
@@ -72,7 +72,7 @@ class Mixer:
         """
         return False
 
-    def trigger_volume_changed(self, volume: int) -> None:
+    def trigger_volume_changed(self, volume: Percentage) -> None:
         """Send ``volume_changed`` event to all mixer listeners.
 
         This method should be called by subclasses when the volume is changed,
@@ -116,6 +116,9 @@ class Mixer:
     def ping(self) -> bool:
         """Called to check if the actor is still alive."""
         return True
+
+
+MixerEvent: TypeAlias = Literal["mute_changed", "volume_changed"]
 
 
 class MixerListener(listener.Listener):

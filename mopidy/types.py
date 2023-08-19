@@ -51,4 +51,5 @@ Uri = NewType("Uri", str)
 UriScheme = NewType("UriScheme", str)
 
 # Integer types
+Percentage = NewType("Percentage", int)
 DurationMs = NewType("DurationMs", int)

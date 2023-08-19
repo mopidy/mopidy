@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Optional
 from mopidy import exceptions
 from mopidy.internal import validation
 from mopidy.internal.models import MixerState
+from mopidy.types import Percentage
 
 if TYPE_CHECKING:
     from mopidy.mixer import MixerProxy
@@ -36,7 +37,7 @@ class MixerController:
     def __init__(self, mixer: Optional[MixerProxy]) -> None:
         self._mixer = mixer
 
-    def get_volume(self) -> Optional[int]:
+    def get_volume(self) -> Optional[Percentage]:
         """Get the volume.
 
         Integer in range [0..100] or :class:`None` if unknown.
@@ -54,7 +55,7 @@ class MixerController:
 
         return None
 
-    def set_volume(self, volume: int) -> bool:
+    def set_volume(self, volume: Percentage) -> bool:
         """Set the volume.
 
         The volume is defined as an integer in range [0..100].
@@ -117,7 +118,7 @@ class MixerController:
         if state and "mixer" in coverage:
             self.set_mute(state.mute)
             if state.volume:
-                self.set_volume(state.volume)
+                self.set_volume(Percentage(state.volume))
 
 
 if TYPE_CHECKING:

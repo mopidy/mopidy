@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Literal, Optional
 
 import pykka
 from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
@@ -11,10 +11,19 @@ from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
 from mopidy import listener
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
     from mopidy.audio.actor import AudioProxy
     from mopidy.internal.gi import Gst
     from mopidy.models import Image, Playlist, Ref, SearchResult, Track
-    from mopidy.types import DistinctField, Query, SearchField, Uri, UriScheme
+    from mopidy.types import (
+        DistinctField,
+        DurationMs,
+        Query,
+        SearchField,
+        Uri,
+        UriScheme,
+    )
 
 
 logger = logging.getLogger(__name__)
@@ -295,7 +304,7 @@ class PlaybackProvider:
         """
         return self.audio.start_playback().get()
 
-    def seek(self, time_position: int) -> bool:
+    def seek(self, time_position: DurationMs) -> bool:
         """Seek to a given time position.
 
         *MAY be reimplemented by subclass.*
@@ -318,7 +327,7 @@ class PlaybackProvider:
         """
         return self.audio.stop_playback().get()
 
-    def get_time_position(self) -> int:
+    def get_time_position(self) -> DurationMs:
         """Get the current time position in milliseconds.
 
         *MAY be reimplemented by subclass.*
@@ -437,6 +446,9 @@ class PlaylistsProvider:
         raise NotImplementedError
 
 
+BackendEvent: TypeAlias = Literal["playlists_loaded"]
+
+
 class BackendListener(listener.Listener):
     """Marker interface for recipients of events sent by the backend actors.
 
@@ -450,7 +462,7 @@ class BackendListener(listener.Listener):
     """
 
     @staticmethod
-    def send(event: str, **kwargs: Any) -> None:
+    def send(event: BackendEvent, **kwargs: Any) -> None:
         """Helper to allow calling of backend listener events."""
         listener.send(BackendListener, event, **kwargs)
 

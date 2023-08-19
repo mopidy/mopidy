@@ -11,7 +11,7 @@ from mopidy.audio import PlaybackState
 from mopidy.core import listener
 from mopidy.exceptions import CoreError
 from mopidy.internal import deprecation, models, validation
-from mopidy.types import UriScheme
+from mopidy.types import DurationMs, UriScheme
 
 if TYPE_CHECKING:
     from mopidy.audio.actor import AudioProxy
@@ -41,11 +41,11 @@ class PlaybackController:
         self._current_tl_track: Optional[TlTrack] = None
         self._pending_tl_track: Optional[TlTrack] = None
 
-        self._pending_position: Optional[int] = None
-        self._last_position: Optional[int] = None
+        self._pending_position: Optional[DurationMs] = None
+        self._last_position: Optional[DurationMs] = None
         self._previous: bool = False
 
-        self._start_at_position: Optional[int] = None
+        self._start_at_position: Optional[DurationMs] = None
         self._start_paused: bool = False
 
         if self._audio:
@@ -123,13 +123,13 @@ class PlaybackController:
 
         self._trigger_playback_state_changed(old_state, new_state)
 
-    def get_time_position(self) -> int:
+    def get_time_position(self) -> DurationMs:
         """Get time position in milliseconds."""
         if self._pending_position is not None:
             return self._pending_position
         backend = self._get_backend(self.get_current_tl_track())
         if not backend:
-            return 0
+            return DurationMs(0)
         # TODO: Wrap backend call in error handling.
         return backend.playback.get_time_position().get()
 
@@ -200,7 +200,10 @@ class PlaybackController:
         # Unless overridden by other calls (e.g. next / previous / stop) this
         # will be the last position recorded until the track gets reassigned.
         if self._current_tl_track is not None:
-            self._last_position = self._current_tl_track.track.length
+            if self._current_tl_track.track.length is not None:
+                self._last_position = DurationMs(self._current_tl_track.track.length)
+            else:
+                self._last_position = None
         else:
             # TODO: Check if case when track.length isn't populated needs to be
             # handled.
@@ -431,7 +434,7 @@ class PlaybackController:
             # TODO: trigger via gst messages
             self._trigger_track_playback_resumed()
 
-    def seek(self, time_position: int) -> bool:
+    def seek(self, time_position: DurationMs) -> bool:
         """Seeks to time position given in milliseconds.
 
         :param time_position: time position in milliseconds
@@ -443,7 +446,7 @@ class PlaybackController:
 
         if time_position < 0:
             logger.debug("Client seeked to negative position. Seeking to zero.")
-            time_position = 0
+            time_position = DurationMs(0)
 
         if not self.core.tracklist.get_length():
             return False
@@ -458,7 +461,7 @@ class PlaybackController:
             return False
 
         if time_position < 0:
-            time_position = 0
+            time_position = DurationMs(0)
         elif time_position > tl_track.track.length:
             # TODO: GStreamer will trigger a about-to-finish for us, use that?
             self.next()
@@ -475,7 +478,7 @@ class PlaybackController:
         # TODO: Avoid returning False here when STOPPED (seek is deferred)?
         return self._seek(time_position)
 
-    def _seek(self, time_position: int) -> bool:
+    def _seek(self, time_position: DurationMs) -> bool:
         backend = self._get_backend(self.get_current_tl_track())
         if not backend:
             return False
@@ -568,7 +571,7 @@ class PlaybackController:
             if state.state == PlaybackState.PAUSED:
                 self._start_paused = True
             if state.state in (PlaybackState.PLAYING, PlaybackState.PAUSED):
-                self._start_at_position = state.time_position
+                self._start_at_position = DurationMs(state.time_position)
                 self.play(tlid=state.tlid)
 
 

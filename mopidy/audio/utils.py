@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Callable, cast
 
 from mopidy import httpclient
 from mopidy.internal.gi import Gst
-from mopidy.types import UriScheme
+from mopidy.types import DurationMs, UriScheme
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -12,14 +12,14 @@ if TYPE_CHECKING:
     from mopidy.config import ProxyConfig
 
 
-def millisecond_to_clocktime(value: int) -> int:
+def millisecond_to_clocktime(value: DurationMs) -> int:
     """Convert a millisecond time to internal GStreamer time."""
     return value * Gst.MSECOND
 
 
-def clocktime_to_millisecond(value: int) -> int:
+def clocktime_to_millisecond(value: int) -> DurationMs:
     """Convert an internal GStreamer time to millisecond time."""
-    return value // Gst.MSECOND
+    return DurationMs(value // Gst.MSECOND)
 
 
 def supported_uri_schemes(uri_schemes: Iterable[UriScheme]) -> set[UriScheme]:
