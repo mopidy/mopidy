@@ -1,6 +1,8 @@
 import unittest
 from unittest import mock
 
+import pytest
+
 from mopidy import backend, core
 from mopidy.internal import validation
 from mopidy.models import Image, Ref, SearchResult, Track
@@ -341,11 +343,11 @@ class GetDistinctTest(BaseCoreLibraryTest):
         )
 
     def test_any_field_raises_valueerror(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             self.core.library.get_distinct("any")
 
     def test_unknown_tag_in_query_raises_valueerror(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             self.core.library.get_distinct("album", {"track": ["a"]})
 
     def test_track_name_field_maps_to_track_for_backwards_compatibility(self):
@@ -586,7 +588,7 @@ class SearchBadBackendTest(MockBackendCoreLibraryBase):
         # TODO: is this behavior desired? Do we need to continue handling
         # LookupError case specially.
         self.library.search.return_value.get.side_effect = LookupError
-        with self.assertRaises(LookupError):
+        with pytest.raises(LookupError):
             self.core.library.search(query={"any": ["foo"]})
 
     def test_backend_returns_none(self, logger):

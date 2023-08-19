@@ -5,6 +5,7 @@ import unittest
 from unittest import mock
 
 import pykka
+import pytest
 
 import mopidy
 from mopidy.audio import PlaybackState
@@ -141,14 +142,15 @@ class CoreActorTest(unittest.TestCase):
     def test_backends_with_colliding_uri_schemes_fails(self):
         self.backend2.uri_schemes.get.return_value = ["dummy1", "dummy2"]
 
-        self.assertRaisesRegex(
+        with pytest.raises(
             AssertionError,
-            "Cannot add URI scheme 'dummy1' for B2, it is already handled by B1",
-            Core,
-            config={},
-            mixer=None,
-            backends=[self.backend1, self.backend2],
-        )
+            match="Cannot add URI scheme 'dummy1' for B2, it is already handled by B1",
+        ):
+            Core(
+                config={},
+                mixer=None,
+                backends=[self.backend1, self.backend2],
+            )
 
     def test_version(self):
         assert self.core.get_version() == versioning.get_version()

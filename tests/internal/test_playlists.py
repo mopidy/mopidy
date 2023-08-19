@@ -104,7 +104,6 @@ def test_detect_from_valid_header(detect_fn, data):
         playlists.detect_extm3u_header,
         playlists.detect_pls_header,
         playlists.detect_asx_header,
-        playlists.detect_asx_header,
         playlists.detect_xspf_header,
     ],
 )

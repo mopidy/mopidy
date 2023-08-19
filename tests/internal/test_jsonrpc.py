@@ -3,6 +3,7 @@ import unittest
 from unittest import mock
 
 import pykka
+import pytest
 
 from mopidy import core, models
 from mopidy.internal import deprecation, jsonrpc
@@ -75,7 +76,7 @@ class JsonRpcTestBase(unittest.TestCase):
 
 class JsonRpcSetupTest(JsonRpcTestBase):
     def test_empty_object_mounts_is_not_allowed(self):
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             jsonrpc.JsonRpcWrapper(objects={"": Calculator()})
 
 
@@ -580,7 +581,7 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
 
 class JsonRpcInspectorTest(JsonRpcTestBase):
     def test_empty_object_mounts_is_not_allowed(self):
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             jsonrpc.JsonRpcInspector(objects={"": Calculator})
 
     def test_can_describe_method_on_root(self):

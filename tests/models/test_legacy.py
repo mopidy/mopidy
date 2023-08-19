@@ -1,5 +1,7 @@
 import unittest
 
+import pytest
+
 from mopidy.models import ImmutableObject
 
 
@@ -45,7 +47,7 @@ class GenericCopyTest(unittest.TestCase):
         assert SubModel(name=345) in other.models
 
     def test_copying_model_with_invalid_key(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             Model().replace(invalid_key=True)
 
     def test_copying_model_to_remove(self):
@@ -58,28 +60,28 @@ class ModelTest(unittest.TestCase):
         uri = "an_uri"
         model = Model(uri=uri)
         assert model.uri == uri
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             model.uri = None
 
     def test_name(self):
         name = "a name"
         model = Model(name=name)
         assert model.name == name
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             model.name = None
 
     def test_submodels(self):
         models = [SubModel(name=123), SubModel(name=456)]
         model = Model(models=models)
         assert set(model.models) == set(models)
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             model.models = None
 
     def test_models_none(self):
         assert set() == Model(models=None).models
 
     def test_invalid_kwarg(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             Model(foo="baz")
 
     def test_repr_without_models(self):

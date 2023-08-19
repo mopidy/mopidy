@@ -1,5 +1,7 @@
 import unittest
 
+import pytest
+
 from mopidy.models.fields import Boolean, Collection, Field, Identifier, Integer, String
 
 
@@ -74,22 +76,22 @@ class FieldTest(unittest.TestCase):
         instance = create_instance(Field(type=set))
         instance.attr = set()
 
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             instance.attr = 1234
 
     def test_choices_checking(self):
         instance = create_instance(Field(choices=(1, 2, 3)))
         instance.attr = 1
 
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             instance.attr = 4
 
     def test_default_respects_type_check(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             create_instance(Field(type=int, default="123"))
 
     def test_default_respects_choices_check(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             create_instance(Field(choices=(1, 2, 3), default=5))
 
 
@@ -110,7 +112,7 @@ class StringTest(unittest.TestCase):
 
     def test_other_disallowed(self):
         instance = create_instance(String())
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             instance.attr = 1234
 
     def test_empty_string(self):
@@ -141,7 +143,7 @@ class IdentifierTest(unittest.TestCase):
 
     def test_other_disallowed(self):
         instance = create_instance(Identifier())
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             instance.attr = 1234
 
     def test_empty_string(self):
@@ -162,17 +164,17 @@ class IntegerTest(unittest.TestCase):
 
     def test_float_disallowed(self):
         instance = create_instance(Integer())
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             instance.attr = 123.0
 
     def test_numeric_string_disallowed(self):
         instance = create_instance(Integer())
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             instance.attr = "123"
 
     def test_other_disallowed(self):
         instance = create_instance(String())
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             instance.attr = ()
 
     def test_min_validation(self):
@@ -180,7 +182,7 @@ class IntegerTest(unittest.TestCase):
         instance.attr = 0
         assert instance.attr == 0
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             instance.attr = -1
 
     def test_max_validation(self):
@@ -188,7 +190,7 @@ class IntegerTest(unittest.TestCase):
         instance.attr = 10
         assert instance.attr == 10
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             instance.attr = 11
 
 
@@ -209,7 +211,7 @@ class BooleanTest(unittest.TestCase):
 
     def test_int_forbidden(self):
         instance = create_instance(Boolean())
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             instance.attr = 1
 
 
@@ -230,15 +232,15 @@ class CollectionTest(unittest.TestCase):
 
     def test_collection_with_wrong_type(self):
         instance = create_instance(Collection(type=int, container=frozenset))
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             instance.attr = [1, "2", 3]
 
     def test_collection_with_string(self):
         instance = create_instance(Collection(type=int, container=frozenset))
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             instance.attr = "123"
 
     def test_strings_should_not_be_considered_a_collection(self):
         instance = create_instance(Collection(type=str, container=tuple))
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             instance.attr = b"123"

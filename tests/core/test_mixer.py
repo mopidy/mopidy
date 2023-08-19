@@ -2,6 +2,7 @@ import unittest
 from unittest import mock
 
 import pykka
+import pytest
 
 from mopidy import core, mixer
 from mopidy.internal.models import MixerState
@@ -226,7 +227,7 @@ class CoreMixerSaveLoadStateTest(unittest.TestCase):
         assert self.core.mixer.get_mute() is False
 
     def test_load_invalid_type(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             self.core.mixer._load_state(11, None)
 
     def test_load_none(self):

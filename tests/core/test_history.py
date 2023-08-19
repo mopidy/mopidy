@@ -1,5 +1,7 @@
 import unittest
 
+import pytest
+
 from mopidy.core import HistoryController
 from mopidy.internal.models import HistoryState, HistoryTrack
 from mopidy.models import Artist, Ref, Track
@@ -30,7 +32,7 @@ class PlaybackHistoryTest(unittest.TestCase):
         assert self.history.get_length() == 3
 
     def test_non_tracks_are_rejected(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             self.history._add_track(object())
 
         assert self.history.get_length() == 0
@@ -105,7 +107,7 @@ class CoreHistorySaveLoadStateTest(unittest.TestCase):
         assert hist[3] == (56, self.refs[1])
 
     def test_load_invalid_type(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             self.history._load_state(11, None)
 
     def test_load_none(self):

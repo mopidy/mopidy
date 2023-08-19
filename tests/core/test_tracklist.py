@@ -1,6 +1,8 @@
 import unittest
 from unittest import mock
 
+import pytest
+
 from mopidy import backend, core
 from mopidy.internal.models import TracklistState
 from mopidy.models import TlTrack, Track
@@ -91,11 +93,11 @@ class TracklistTest(unittest.TestCase):
         self.assertListEqual(self.tl_tracks[:2], tl_tracks)
 
     def test_filter_fails_if_values_isnt_iterable(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             self.core.tracklist.filter({"tlid": 3})
 
     def test_filter_fails_if_values_is_a_string(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             self.core.tracklist.filter({"uri": "a"})
 
     # TODO Extract tracklist tests from the local backend tests
@@ -135,7 +137,7 @@ class TracklistIndexTest(unittest.TestCase):
         assert self.core.tracklist.index(None) is None
 
     def test_index_errors_out_for_invalid_tltrack(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             self.core.tracklist.index("abc")
 
     def test_index_return_index_when_called_with_tlids(self):
@@ -151,7 +153,7 @@ class TracklistIndexTest(unittest.TestCase):
         assert self.core.tracklist.index(tlid=None) is None
 
     def test_index_errors_out_for_invalid_tlid(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             self.core.tracklist.index(tlid=-1)
 
     def test_index_without_args_returns_current_tl_track_index(self):
@@ -279,7 +281,7 @@ class TracklistSaveLoadStateTest(unittest.TestCase):
         assert self.core.tracklist.get_version() > old_version
 
     def test_load_invalid_type(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             self.core.tracklist._load_state(11, None)
 
     def test_load_none(self):

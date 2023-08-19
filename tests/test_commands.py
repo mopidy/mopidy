@@ -2,6 +2,8 @@ import argparse
 import unittest
 from unittest import mock
 
+import pytest
+
 from mopidy import commands
 
 
@@ -19,11 +21,11 @@ class ConfigOverrideTypeTest(unittest.TestCase):
         assert expected == commands.config_override_type("section/key=  ")
 
     def test_invalid_override(self):
-        with self.assertRaises(argparse.ArgumentTypeError):
+        with pytest.raises(argparse.ArgumentTypeError):
             commands.config_override_type("section/key")
-        with self.assertRaises(argparse.ArgumentTypeError):
+        with pytest.raises(argparse.ArgumentTypeError):
             commands.config_override_type("section=")
-        with self.assertRaises(argparse.ArgumentTypeError):
+        with pytest.raises(argparse.ArgumentTypeError):
             commands.config_override_type("section")
 
 
@@ -47,12 +49,12 @@ class CommandParsingTest(unittest.TestCase):
 
     def test_unknown_options_bails(self):
         cmd = commands.Command()
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse(["--foobar"])
 
     def test_invalid_sub_command_bails(self):
         cmd = commands.Command()
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse(["foo"])
 
     def test_command_arguments(self):
@@ -122,7 +124,7 @@ class CommandParsingTest(unittest.TestCase):
         cmd = commands.Command()
         cmd.add_argument("--bar", type=int)
 
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse(["--bar", "zero"], prog="foo")
 
         self.exit_mock.assert_called_once_with(
@@ -138,14 +140,14 @@ class CommandParsingTest(unittest.TestCase):
         cmd = commands.Command()
         cmd.add_argument("--bar", required=True)
 
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse([])
         self.exit_mock.assert_called_once_with(
             mock.ANY, mock.ANY, "usage: foo --bar BAR"
         )
 
         self.exit_mock.reset_mock()
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse([], prog="baz")
 
         self.exit_mock.assert_called_once_with(
@@ -156,7 +158,7 @@ class CommandParsingTest(unittest.TestCase):
         cmd = commands.Command()
         cmd.add_argument("--bar", required=True)
 
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse([], prog="foo")
 
         self.exit_mock.assert_called_once_with(
@@ -169,7 +171,7 @@ class CommandParsingTest(unittest.TestCase):
         cmd = commands.Command()
         cmd.add_argument("bar")
 
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse([], prog="foo")
 
         self.exit_mock.assert_called_once_with(
@@ -185,7 +187,7 @@ class CommandParsingTest(unittest.TestCase):
         cmd = commands.Command()
         cmd.add_child("bar", child)
 
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse(["bar"], prog="foo")
 
         self.exit_mock.assert_called_once_with(
@@ -197,7 +199,7 @@ class CommandParsingTest(unittest.TestCase):
     def test_unknown_command(self):
         cmd = commands.Command()
 
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse(["--help"], prog="foo")
 
         self.exit_mock.assert_called_once_with(
@@ -208,7 +210,7 @@ class CommandParsingTest(unittest.TestCase):
         cmd = commands.Command()
         cmd.add_child("baz", commands.Command())
 
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse(["bar"], prog="foo")
 
         self.exit_mock.assert_called_once_with(
@@ -249,7 +251,7 @@ class CommandParsingTest(unittest.TestCase):
         cmd.add_argument("-h", action="help")
         cmd.format_help = mock.Mock()
 
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse(["-h"])
 
         cmd.format_help.assert_called_once_with(mock.ANY)
@@ -497,7 +499,7 @@ class HelpTest(unittest.TestCase):
 
 class RunTest(unittest.TestCase):
     def test_default_implmentation_raises_error(self):
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             commands.Command().run()
 
 

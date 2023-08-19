@@ -2,6 +2,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+import pytest
 import tornado.httpclient
 import tornado.testing
 import tornado.web
@@ -107,9 +108,9 @@ class WebSocketHandlerTest(tornado.testing.AsyncHTTPTestCase):
     @tornado.testing.gen_test
     def test_bad_origin(self):
         headers = {"Origin": "http://foobar", "Host": "localhost"}
-        with self.assertRaises(tornado.httpclient.HTTPClientError) as e:
+        with pytest.raises(tornado.httpclient.HTTPClientError) as exc_info:
             _ = yield self.connection(headers=headers)
-        assert e.exception.code == 403
+        assert exc_info.value.code == 403
 
 
 class JsonRpcHandlerTestBase(tornado.testing.AsyncHTTPTestCase):
