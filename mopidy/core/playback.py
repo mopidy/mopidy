@@ -294,9 +294,7 @@ class PlaybackController:
             The ``tl_track`` argument. Use ``tlid`` instead.
 
         :param tl_track: track to play
-        :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :param tlid: TLID of the track to play
-        :type tlid: :class:`int` or :class:`None`
         """
         if sum(o is not None for o in [tl_track, tlid]) > 1:
             raise ValueError('At most one of "tl_track" and "tlid" may be set')
@@ -438,9 +436,9 @@ class PlaybackController:
     def seek(self, time_position: DurationMs) -> bool:
         """Seeks to time position given in milliseconds.
 
+        Returns :class:`True` if successful, else :class:`False`.
+
         :param time_position: time position in milliseconds
-        :type time_position: int
-        :rtype: :class:`True` if successful, else :class:`False`
         """
         # TODO: seek needs to take pending tracks into account :(
         validation.check_integer(time_position)

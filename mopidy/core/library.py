@@ -96,8 +96,7 @@ class LibraryController:
 
             Ref.directory(uri='dummy:directory:/bar', name='bar')
 
-        :param string uri: URI to browse
-        :rtype: list of :class:`mopidy.models.Ref`
+        :param uri: URI to browse
 
         .. versionadded:: 0.18
         """
@@ -144,14 +143,15 @@ class LibraryController:
         protocol supports in a more sane fashion. Other frontends are not
         recommended to use this method.
 
-        :param string field: Any one of ``uri``, ``track_name``, ``album``,
+        Returns set of values corresponding to the requested field type.
+
+        :param field: Any one of ``uri``, ``track_name``, ``album``,
             ``artist``, ``albumartist``, ``composer``, ``performer``,
             ``track_no``, ``genre``, ``date``, ``comment``, ``disc_no``,
             ``musicbrainz_albumid``, ``musicbrainz_artistid``, or
             ``musicbrainz_trackid``.
-        :param dict query: Query to use for limiting results, see
+        :param query: Query to use for limiting results, see
             :meth:`search` for details about the query format.
-        :rtype: set of values corresponding to the requested field type.
 
         .. versionadded:: 1.0
         """
@@ -194,8 +194,6 @@ class LibraryController:
         for will simply return an empty list for that URI.
 
         :param uris: list of URIs to find images for
-        :type uris: list of string
-        :rtype: {uri: tuple of :class:`mopidy.models.Image`}
 
         .. versionadded:: 1.0
         """
@@ -229,8 +227,6 @@ class LibraryController:
         them all.
 
         :param uris: track URIs
-        :type uris: list of string
-        :rtype: {uri: list of :class:`mopidy.models.Track`}
         """
         validation.check_uris(uris)
 
@@ -258,7 +254,6 @@ class LibraryController:
         """Refresh library. Limit to URI and below if an URI is given.
 
         :param uri: directory or track URI
-        :type uri: string
         """
         if uri is not None:
             validation.check_uri(uri)
@@ -286,11 +281,6 @@ class LibraryController:
     ) -> list[SearchResult]:
         """Search the library for tracks where ``field`` contains ``values``.
 
-        ``field`` can be one of ``uri``, ``track_name``, ``album``, ``artist``,
-        ``albumartist``, ``composer``, ``performer``, ``track_no``, ``genre``,
-        ``date``, ``comment``, ``disc_no``, ``musicbrainz_albumid``,
-        ``musicbrainz_artistid``, ``musicbrainz_trackid`` or ``any``.
-
         If ``uris`` is given, the search is limited to results from within the
         URI roots. For example passing ``uris=['file:']`` will limit the search
         to the local backend.
@@ -315,12 +305,8 @@ class LibraryController:
             search({'artist': ['xyz', 'abc']})
 
         :param query: one or more queries to search for
-        :type query: dict
         :param uris: zero or more URI roots to limit the search to
-        :type uris: list of string or :class:`None`
         :param exact: if the search should use exact matching
-        :type exact: :class:`bool`
-        :rtype: list of :class:`mopidy.models.SearchResult`
 
         .. versionadded:: 1.0
             The ``exact`` keyword argument.

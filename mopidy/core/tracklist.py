@@ -166,10 +166,7 @@ class TracklistController:
         the currently playing track.
 
         :param tl_track: the track to find the index of
-        :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
         :param tlid: TLID of the track to find the index of
-        :type tlid: :class:`int` or :class:`None`
-        :rtype: :class:`int` or :class:`None`
 
         .. versionadded:: 1.1
             The *tlid* parameter
@@ -198,8 +195,6 @@ class TracklistController:
 
         Not necessarily the same TLID as returned by :meth:`get_next_tlid`.
 
-        :rtype: :class:`int` or :class:`None`
-
         .. versionadded:: 1.1
         """
         current_tl_track = self.core.playback.get_current_tl_track()
@@ -218,8 +213,6 @@ class TracklistController:
             Use :meth:`get_eot_tlid` instead.
 
         :param tl_track: the reference track
-        :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
-        :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
         deprecation.warn("core.tracklist.eot_track")
         if tl_track is not None:
@@ -243,8 +236,6 @@ class TracklistController:
         enabled this should be a random track, all tracks should be played once
         before the tracklist repeats.
 
-        :rtype: :class:`int` or :class:`None`
-
         .. versionadded:: 1.1
         """
         current_tl_track = self.core.playback.get_current_tl_track()
@@ -267,8 +258,6 @@ class TracklistController:
             Use :meth:`get_next_tlid` instead.
 
         :param tl_track: the reference track
-        :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
-        :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
         deprecation.warn("core.tracklist.next_track")
         if tl_track is not None:
@@ -314,8 +303,6 @@ class TracklistController:
         random and/or consume is enabled it should return the current track
         instead.
 
-        :rtype: :class:`int` or :class:`None`
-
         .. versionadded:: 1.1
         """
         current_tl_track = self.core.playback.get_current_tl_track()
@@ -337,8 +324,6 @@ class TracklistController:
             Use :meth:`get_previous_tlid` instead.
 
         :param tl_track: the reference track
-        :type tl_track: :class:`mopidy.models.TlTrack` or :class:`None`
-        :rtype: :class:`mopidy.models.TlTrack` or :class:`None`
         """
         deprecation.warn("core.tracklist.previous_track")
         if tl_track is not None:
@@ -375,12 +360,8 @@ class TracklistController:
         Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
 
         :param tracks: tracks to add
-        :type tracks: list of :class:`mopidy.models.Track` or :class:`None`
         :param at_position: position in tracklist to add tracks
-        :type at_position: int or :class:`None`
         :param uris: list of URIs for tracks to add
-        :type uris: list of string or :class:`None`
-        :rtype: list of :class:`mopidy.models.TlTrack`
 
         .. versionadded:: 1.0
             The ``uris`` argument.
@@ -460,8 +441,6 @@ class TracklistController:
             filter({'tlid': [1, 3, 6], 'uri': ['xyz', 'abc']})
 
         :param criteria: one or more rules to match by
-        :type criteria: dict, of (string, list) pairs
-        :rtype: list of :class:`mopidy.models.TlTrack`
         """
         tlids = criteria.pop("tlid", [])
         validation.check_query(criteria, validation.TRACKLIST_FIELDS.keys())
@@ -480,11 +459,8 @@ class TracklistController:
         Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
 
         :param start: position of first track to move
-        :type start: int
         :param end: position after last track to move
-        :type end: int
         :param to_position: new position for the tracks
-        :type to_position: int
         """
         if start == end:
             end += 1
@@ -517,9 +493,9 @@ class TracklistController:
 
         Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
 
+        Returns the removed tracks.
+
         :param criteria: one or more rules to match by
-        :type criteria: dict, of (string, list) pairs
-        :rtype: list of :class:`mopidy.models.TlTrack` that were removed
         """
         tl_tracks = self.filter(criteria)
         for tl_track in tl_tracks:
@@ -535,9 +511,7 @@ class TracklistController:
         Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
 
         :param start: position of first track to shuffle
-        :type start: int or :class:`None`
         :param end: position after last track to shuffle
-        :type end: int or :class:`None`
         """
         tl_tracks = self._tl_tracks
 
@@ -563,10 +537,7 @@ class TracklistController:
         positions.
 
         :param start: position of first track to include in slice
-        :type start: int
         :param end: position after last track to include in slice
-        :type end: int
-        :rtype: list of :class:`mopidy.models.TlTrack`
         """
         # TODO: validate slice?
         return self._tl_tracks[start:end]

@@ -29,7 +29,6 @@ class HistoryController:
         Internal method for :class:`mopidy.core.PlaybackController`.
 
         :param track: track to add
-        :type track: :class:`mopidy.models.Track`
         """
         if not isinstance(track, Track):
             raise TypeError("Only Track objects can be added to the history")
@@ -49,20 +48,14 @@ class HistoryController:
         self._history.insert(0, (timestamp, ref))
 
     def get_length(self) -> int:
-        """Get the number of tracks in the history.
-
-        :returns: the history length
-        :rtype: int
-        """
+        """Get the number of tracks in the history."""
         return len(self._history)
 
     def get_history(self) -> History:
         """Get the track history.
 
+        Returns a list of two-tuples with timestamp and a reference to the track.
         The timestamps are milliseconds since epoch.
-
-        :returns: the track history
-        :rtype: list of (timestamp, :class:`mopidy.models.Ref`) tuples
         """
         return copy.copy(self._history)
 

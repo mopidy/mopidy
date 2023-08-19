@@ -52,8 +52,6 @@ class PlaylistsController:
     def get_uri_schemes(self) -> list[UriScheme]:
         """Get the list of URI schemes that support playlists.
 
-        :rtype: list of string
-
         .. versionadded:: 2.0
         """
         return sorted(self.backends.with_playlists.keys())
@@ -64,8 +62,6 @@ class PlaylistsController:
         Returns a list of :class:`~mopidy.models.Ref` objects referring to the
         playlists. In other words, no information about the playlists' content
         is given.
-
-        :rtype: list of :class:`mopidy.models.Ref`
 
         .. versionadded:: 1.0
         """
@@ -99,8 +95,6 @@ class PlaylistsController:
 
         If a playlist with the given ``uri`` doesn't exist, it returns
         :class:`None`.
-
-        :rtype: list of :class:`mopidy.models.Ref`, or :class:`None`
 
         .. versionadded:: 1.0
         """
@@ -136,10 +130,7 @@ class PlaylistsController:
         by creating new instances of :class:`mopidy.models.Playlist`.
 
         :param name: name of the new playlist
-        :type name: string
         :param uri_scheme: use the backend matching the URI scheme
-        :type uri_scheme: string
-        :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
         if uri_scheme in self.backends.with_playlists:
             backends = [self.backends.with_playlists[uri_scheme]]
@@ -166,8 +157,6 @@ class PlaylistsController:
         Returns :class:`True` if deleted, :class:`False` otherwise.
 
         :param uri: URI of the playlist to delete
-        :type uri: string
-        :rtype: :class:`bool`
 
         .. versionchanged:: 2.2
             Return type defined.
@@ -198,8 +187,6 @@ class PlaylistsController:
         other playlist sources. Returns :class:`None` if not found.
 
         :param uri: playlist URI
-        :type uri: string
-        :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
         uri_scheme = UriScheme(urllib.parse.urlparse(uri).scheme)
         backend = self.backends.with_playlists.get(uri_scheme, None)
@@ -225,7 +212,6 @@ class PlaylistsController:
         current backend, nothing happens.
 
         :param uri_scheme: limit to the backend matching the URI scheme
-        :type uri_scheme: string
         """
         # TODO: check: uri_scheme is None or uri_scheme?
 
@@ -266,8 +252,6 @@ class PlaylistsController:
         current backend, nothing is done and :class:`None` is returned.
 
         :param playlist: the playlist
-        :type playlist: :class:`mopidy.models.Playlist`
-        :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
         validation.check_instance(playlist, Playlist)
 
