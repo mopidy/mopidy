@@ -49,3 +49,6 @@ QueryField: TypeAlias = Union[DistinctField, SearchField, TracklistField]
 # URI types
 Uri = NewType("Uri", str)
 UriScheme = NewType("UriScheme", str)
+
+# Integer types
+DurationMs = NewType("DurationMs", int)
