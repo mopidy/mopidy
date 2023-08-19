@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any, Callable, cast
 
 from mopidy import httpclient
 from mopidy.internal.gi import Gst
+from mopidy.types import DurationMs, UriScheme
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -11,17 +12,17 @@ if TYPE_CHECKING:
     from mopidy.config import ProxyConfig
 
 
-def millisecond_to_clocktime(value: int) -> int:
+def millisecond_to_clocktime(value: DurationMs) -> int:
     """Convert a millisecond time to internal GStreamer time."""
     return value * Gst.MSECOND
 
 
-def clocktime_to_millisecond(value: int) -> int:
+def clocktime_to_millisecond(value: int) -> DurationMs:
     """Convert an internal GStreamer time to millisecond time."""
-    return value // Gst.MSECOND
+    return DurationMs(value // Gst.MSECOND)
 
 
-def supported_uri_schemes(uri_schemes: Iterable[str]) -> set[str]:
+def supported_uri_schemes(uri_schemes: Iterable[UriScheme]) -> set[UriScheme]:
     """Determine which URIs we can actually support from provided whitelist.
 
     :param uri_schemes: list/set of URIs to check support for.
@@ -33,9 +34,10 @@ def supported_uri_schemes(uri_schemes: Iterable[str]) -> set[str]:
 
     for factory in registry.get_feature_list(Gst.ElementFactory):
         factory = cast(Gst.ElementFactory, factory)
-        for uri in factory.get_uri_protocols():
-            if uri in uri_schemes:
-                supported_schemes.add(uri)
+        for uri_protocol in factory.get_uri_protocols():
+            uri_scheme = UriScheme(uri_protocol)
+            if uri_scheme in uri_schemes:
+                supported_schemes.add(uri_scheme)
 
     return supported_schemes
 

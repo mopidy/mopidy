@@ -27,6 +27,7 @@ from mopidy.core import Core, CoreProxy
 from mopidy.internal import deps, process, timer, versioning
 from mopidy.internal.gi import GLib
 from mopidy.mixer import MixerActor, MixerProxy
+from mopidy.types import Percentage
 
 if TYPE_CHECKING:
     from collections.abc import Generator, Iterable, Sequence
@@ -424,7 +425,7 @@ class RootCommand(Command):
     ) -> None:
         volume = config["audio"]["mixer_volume"]
         if volume is not None:
-            mixer.set_volume(volume)
+            mixer.set_volume(Percentage(volume))
             logger.info("Mixer volume set to %d", volume)
         else:
             logger.debug("Mixer volume left unchanged")

@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import logging
 import random
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Optional
 
 from mopidy import exceptions
@@ -10,33 +13,37 @@ from mopidy.models import TlTrack, Track
 
 logger = logging.getLogger(__name__)
 
+if TYPE_CHECKING:
+    from mopidy.core.actor import Core
+    from mopidy.types import Query, TracklistField, Uri
+
 
 class TracklistController:
-    def __init__(self, core):
+    def __init__(self, core: Core) -> None:
         self.core = core
-        self._next_tlid = 1
-        self._tl_tracks = []
-        self._version = 0
+        self._next_tlid: int = 1
+        self._tl_tracks: list[TlTrack] = []
+        self._version: int = 0
 
-        self._consume = False
-        self._random = False
-        self._shuffled = []
-        self._repeat = False
-        self._single = False
+        self._consume: bool = False
+        self._random: bool = False
+        self._shuffled: list[TlTrack] = []
+        self._repeat: bool = False
+        self._single: bool = False
 
-    def get_tl_tracks(self):
+    def get_tl_tracks(self) -> list[TlTrack]:
         """Get tracklist as list of :class:`mopidy.models.TlTrack`."""
         return self._tl_tracks[:]
 
-    def get_tracks(self):
+    def get_tracks(self) -> list[Track]:
         """Get tracklist as list of :class:`mopidy.models.Track`."""
         return [tl_track.track for tl_track in self._tl_tracks]
 
-    def get_length(self):
+    def get_length(self) -> int:
         """Get length of the tracklist."""
         return len(self._tl_tracks)
 
-    def get_version(self):
+    def get_version(self) -> int:
         """Get the tracklist version.
 
         Integer which is increased every time the tracklist is changed. Is not
@@ -44,12 +51,12 @@ class TracklistController:
         """
         return self._version
 
-    def _increase_version(self):
+    def _increase_version(self) -> None:
         self._version += 1
         self.core.playback._on_tracklist_change()
         self._trigger_tracklist_changed()
 
-    def get_consume(self):
+    def get_consume(self) -> bool:
         """Get consume mode.
 
         :class:`True`
@@ -59,7 +66,7 @@ class TracklistController:
         """
         return self._consume
 
-    def set_consume(self, value):
+    def set_consume(self, value: bool) -> None:
         """Set consume mode.
 
         :class:`True`
@@ -72,7 +79,7 @@ class TracklistController:
             self._trigger_options_changed()
         self._consume = value
 
-    def get_random(self):
+    def get_random(self) -> bool:
         """Get random mode.
 
         :class:`True`
@@ -82,7 +89,7 @@ class TracklistController:
         """
         return self._random
 
-    def set_random(self, value):
+    def set_random(self, value: bool) -> None:
         """Set random mode.
 
         :class:`True`
@@ -98,7 +105,7 @@ class TracklistController:
             random.shuffle(self._shuffled)
         self._random = value
 
-    def get_repeat(self):
+    def get_repeat(self) -> bool:
         """Get repeat mode.
 
         :class:`True`
@@ -108,7 +115,7 @@ class TracklistController:
         """
         return self._repeat
 
-    def set_repeat(self, value):
+    def set_repeat(self, value: bool) -> None:
         """Set repeat mode.
 
         To repeat a single track, set both ``repeat`` and ``single``.
@@ -123,7 +130,7 @@ class TracklistController:
             self._trigger_options_changed()
         self._repeat = value
 
-    def get_single(self):
+    def get_single(self) -> bool:
         """Get single mode.
 
         :class:`True`
@@ -133,7 +140,7 @@ class TracklistController:
         """
         return self._single
 
-    def set_single(self, value):
+    def set_single(self, value: bool) -> None:
         """Set single mode.
 
         :class:`True`
@@ -146,7 +153,11 @@ class TracklistController:
             self._trigger_options_changed()
         self._single = value
 
-    def index(self, tl_track=None, tlid=None):
+    def index(
+        self,
+        tl_track: Optional[TlTrack] = None,
+        tlid: Optional[int] = None,
+    ) -> Optional[int]:
         """The position of the given track in the tracklist.
 
         If neither *tl_track* or *tlid* is given we return the index of
@@ -180,7 +191,7 @@ class TracklistController:
                     return i
         return None
 
-    def get_eot_tlid(self):
+    def get_eot_tlid(self) -> Optional[int]:
         """The TLID of the track that will be played after the current track.
 
         Not necessarily the same TLID as returned by :meth:`get_next_tlid`.
@@ -196,7 +207,7 @@ class TracklistController:
 
         return getattr(eot_tl_track, "tlid", None)
 
-    def eot_track(self, tl_track):
+    def eot_track(self, tl_track: Optional[TlTrack]) -> Optional[TlTrack]:
         """The track that will be played after the given track.
 
         Not necessarily the same track as :meth:`next_track`.
@@ -221,7 +232,7 @@ class TracklistController:
         # shared.
         return self.next_track(tl_track)
 
-    def get_next_tlid(self):
+    def get_next_tlid(self) -> Optional[int]:
         """The tlid of the track that will be played if calling
         :meth:`mopidy.core.PlaybackController.next()`.
 
@@ -241,7 +252,7 @@ class TracklistController:
 
         return getattr(next_tl_track, "tlid", None)
 
-    def next_track(self, tl_track) -> Optional[TlTrack]:
+    def next_track(self, tl_track: Optional[TlTrack]) -> Optional[TlTrack]:
         """The track that will be played if calling
         :meth:`mopidy.core.PlaybackController.next()`.
 
@@ -293,7 +304,7 @@ class TracklistController:
 
         return self._tl_tracks[next_index]
 
-    def get_previous_tlid(self):
+    def get_previous_tlid(self) -> Optional[int]:
         """Returns the TLID of the track that will be played if calling
         :meth:`mopidy.core.PlaybackController.previous()`.
 
@@ -312,7 +323,7 @@ class TracklistController:
 
         return getattr(previous_tl_track, "tlid", None)
 
-    def previous_track(self, tl_track):
+    def previous_track(self, tl_track: Optional[TlTrack]) -> Optional[TlTrack]:
         """Returns the track that will be played if calling
         :meth:`mopidy.core.PlaybackController.previous()`.
 
@@ -345,9 +356,9 @@ class TracklistController:
 
     def add(  # noqa: C901
         self,
-        tracks=None,
-        at_position=None,
-        uris=None,
+        tracks: Optional[Iterable[Track]] = None,
+        at_position: Optional[int] = None,
+        uris: Optional[Iterable[Uri]] = None,
     ) -> list[TlTrack]:
         """Add tracks to the tracklist.
 
@@ -389,8 +400,8 @@ class TracklistController:
 
         if tracks is None:
             tracks = []
-            track_map = self.core.library.lookup(uris=uris)
             assert uris is not None
+            track_map = self.core.library.lookup(uris=uris)
             for uri in uris:
                 tracks.extend(track_map[uri])
 
@@ -417,7 +428,7 @@ class TracklistController:
 
         return tl_tracks
 
-    def clear(self):
+    def clear(self) -> None:
         """Clear the tracklist.
 
         Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
@@ -425,7 +436,7 @@ class TracklistController:
         self._tl_tracks = []
         self._increase_version()
 
-    def filter(self, criteria):
+    def filter(self, criteria: Query[TracklistField]) -> list[TlTrack]:
         """Filter the tracklist by the given criteria.
 
         Each rule in the criteria consists of a model field and a list of
@@ -451,7 +462,7 @@ class TracklistController:
         :rtype: list of :class:`mopidy.models.TlTrack`
         """
         tlids = criteria.pop("tlid", [])
-        validation.check_query(criteria, validation.TRACKLIST_FIELDS)
+        validation.check_query(criteria, validation.TRACKLIST_FIELDS.keys())
         validation.check_instances(tlids, int)
 
         matches = self._tl_tracks
@@ -461,7 +472,7 @@ class TracklistController:
             matches = [ct for ct in matches if ct.tlid in tlids]
         return matches
 
-    def move(self, start, end, to_position):
+    def move(self, start: int, end: int, to_position: int) -> None:
         """Move the tracks in the slice ``[start:end]`` to ``to_position``.
 
         Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
@@ -497,7 +508,7 @@ class TracklistController:
         self._tl_tracks = new_tl_tracks
         self._increase_version()
 
-    def remove(self, criteria):
+    def remove(self, criteria: Query[TracklistField]) -> list[TlTrack]:
         """Remove the matching tracks from the tracklist.
 
         Uses :meth:`filter()` to lookup the tracks to remove.
@@ -515,7 +526,7 @@ class TracklistController:
         self._increase_version()
         return tl_tracks
 
-    def shuffle(self, start=None, end=None):
+    def shuffle(self, start: Optional[int] = None, end: Optional[int] = None) -> None:
         """Shuffles the entire tracklist. If ``start`` and ``end`` is given only
         shuffles the slice ``[start:end]``.
 
@@ -536,7 +547,7 @@ class TracklistController:
             raise AssertionError("start must be at least zero")
 
         if end is not None and end > len(tl_tracks):
-            raise AssertionError("end can not be larger than " + "tracklist length")
+            raise AssertionError("end can not be larger than tracklist length")
 
         before = tl_tracks[: start or 0]
         shuffled = tl_tracks[start:end]
@@ -545,7 +556,7 @@ class TracklistController:
         self._tl_tracks = before + shuffled + after
         self._increase_version()
 
-    def slice(self, start, end):
+    def slice(self, start: int, end: int) -> list[TlTrack]:
         """Returns a slice of the tracklist, limited by the given start and end
         positions.
 
@@ -553,32 +564,35 @@ class TracklistController:
         :type start: int
         :param end: position after last track to include in slice
         :type end: int
-        :rtype: :class:`mopidy.models.TlTrack`
+        :rtype: list of :class:`mopidy.models.TlTrack`
         """
         # TODO: validate slice?
         return self._tl_tracks[start:end]
 
-    def _mark_playing(self, tl_track):
+    def _mark_playing(self, tl_track: TlTrack) -> None:
         """Internal method for :class:`mopidy.core.PlaybackController`."""
         if self.get_random() and tl_track in self._shuffled:
             self._shuffled.remove(tl_track)
 
-    def _mark_unplayable(self, tl_track):
+    def _mark_unplayable(self, tl_track: Optional[TlTrack]) -> None:
         """Internal method for :class:`mopidy.core.PlaybackController`."""
-        logger.warning("Track is not playable: %s", tl_track.track.uri)
+        logger.warning(
+            "Track is not playable: %s",
+            tl_track.track.uri if tl_track else None,
+        )
         if self.get_consume() and tl_track is not None:
             self.remove({"tlid": [tl_track.tlid]})
         if self.get_random() and tl_track in self._shuffled:
             self._shuffled.remove(tl_track)
 
-    def _mark_played(self, tl_track):
+    def _mark_played(self, tl_track: Optional[TlTrack]) -> bool:
         """Internal method for :class:`mopidy.core.PlaybackController`."""
         if self.get_consume() and tl_track is not None:
             self.remove({"tlid": [tl_track.tlid]})
             return True
         return False
 
-    def _trigger_tracklist_changed(self):
+    def _trigger_tracklist_changed(self) -> None:
         if self.get_random():
             self._shuffled = self._tl_tracks[:]
             random.shuffle(self._shuffled)
@@ -588,11 +602,11 @@ class TracklistController:
         logger.debug("Triggering event: tracklist_changed()")
         listener.CoreListener.send("tracklist_changed")
 
-    def _trigger_options_changed(self):
+    def _trigger_options_changed(self) -> None:
         logger.debug("Triggering options changed event")
         listener.CoreListener.send("options_changed")
 
-    def _save_state(self):
+    def _save_state(self) -> TracklistState:
         return TracklistState(
             tl_tracks=self._tl_tracks,
             next_tlid=self._next_tlid,
@@ -602,7 +616,11 @@ class TracklistController:
             single=self.get_single(),
         )
 
-    def _load_state(self, state, coverage):
+    def _load_state(
+        self,
+        state: TracklistState,
+        coverage: Iterable[str],
+    ) -> None:
         if state:
             if "mode" in coverage:
                 self.set_consume(state.consume)

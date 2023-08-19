@@ -13,6 +13,8 @@ from typing import (
     overload,
 )
 
+from mopidy.types import Uri
+
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
@@ -133,7 +135,7 @@ class Identifier(String):
         return sys.intern(value)
 
 
-class URI(Identifier):
+class URI(Field[Uri]):
     """:class:`Field` for storing URIs.
 
     Values will be interned, currently not validated.
@@ -141,7 +143,12 @@ class URI(Identifier):
     :param default: default value for field
     """
 
-    # TODO: validate URIs?
+    def validate(self, value: Uri) -> Uri:
+        value = super().validate(value)
+        if isinstance(value, bytes):
+            value = value.decode()
+        # TODO: validate URIs?
+        return Uri(sys.intern(value))
 
 
 class Integer(Field[int]):

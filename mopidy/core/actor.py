@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import itertools
 import logging
+from collections.abc import Iterable
+from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
 import pykka
@@ -30,6 +32,7 @@ if TYPE_CHECKING:
     from mopidy.core.playback import PlaybackControllerProxy
     from mopidy.core.playlists import PlaylistsControllerProxy
     from mopidy.core.tracklist import TracklistControllerProxy
+    from mopidy.types import Uri
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +66,7 @@ class Core(
         config: Config,
         *,
         mixer: Optional[mixer.MixerProxy] = None,
-        backends: list[backend.BackendProxy],
+        backends: Iterable[backend.BackendProxy],
         audio: Optional[audio.AudioProxy] = None,
     ) -> None:
         super().__init__()
@@ -101,17 +104,17 @@ class Core(
     def reached_end_of_stream(self) -> None:
         self.playback._on_end_of_stream()
 
-    def stream_changed(self, uri) -> None:
+    def stream_changed(self, uri: Uri) -> None:
         self.playback._on_stream_changed(uri)
 
-    def position_changed(self, position) -> None:
+    def position_changed(self, position: int) -> None:
         self.playback._on_position_changed(position)
 
     def state_changed(
         self,
         old_state: PlaybackState,
         new_state: PlaybackState,
-        target_state: PlaybackState,
+        target_state: Optional[PlaybackState],
     ) -> None:
         # XXX: This is a temporary fix for issue #232 while we wait for a more
         # permanent solution with the implementation of issue #234. When the
@@ -130,37 +133,37 @@ class Core(
             self.playback.set_state(new_state)
             self.playback._trigger_track_playback_paused()
 
-    def playlists_loaded(self):
+    def playlists_loaded(self) -> None:
         # Forward event from backend to frontends
         CoreListener.send("playlists_loaded")
 
-    def volume_changed(self, volume):
+    def volume_changed(self, volume: int) -> None:
         # Forward event from mixer to frontends
         CoreListener.send("volume_changed", volume=volume)
 
-    def mute_changed(self, mute):
+    def mute_changed(self, mute: bool) -> None:
         # Forward event from mixer to frontends
         CoreListener.send("mute_changed", mute=mute)
 
-    def tags_changed(self, tags):
+    def tags_changed(self, tags: set[str]) -> None:
         if not self.audio or "title" not in tags:
             return
 
-        tags = self.audio.get_current_tags().get()
-        if not tags:
+        current_tags = self.audio.get_current_tags().get()
+        if not current_tags:
             return
 
         self.playback._stream_title = None
         # TODO: Do not emit stream title changes for plain tracks. We need a
         # better way to decide if something is a stream.
-        if "title" in tags and tags["title"]:
-            title = tags["title"][0]
+        if "title" in current_tags and current_tags["title"]:
+            title = current_tags["title"][0]
             current_track = self.playback.get_current_track()
             if current_track is not None and current_track.name != title:
                 self.playback._stream_title = title
                 CoreListener.send("stream_title_changed", title=title)
 
-    def _setup(self):
+    def _setup(self) -> None:
         """Do not call this function. It is for internal use at startup."""
         try:
             coverage = []
@@ -181,7 +184,7 @@ class Core(
         except Exception as e:
             logger.warning("Restore state: Unexpected error: %s", str(e))
 
-    def _teardown(self):
+    def _teardown(self) -> None:
         """Do not call this function. It is for internal use at shutdown."""
         try:
             if (
@@ -193,16 +196,16 @@ class Core(
         except Exception as e:
             logger.warning("Unexpected error while saving state: %s", str(e))
 
-    def _get_data_dir(self):
+    def _get_data_dir(self) -> Path:
         # get or create data director for core
         data_dir_path = path.expand_path(self._config["core"]["data_dir"]) / "core"
         path.get_or_create_dir(data_dir_path)
         return data_dir_path
 
-    def _get_state_file(self):
+    def _get_state_file(self) -> Path:
         return self._get_data_dir() / "state.json.gz"
 
-    def _save_state(self):
+    def _save_state(self) -> None:
         """Save current state to disk."""
         state_file = self._get_state_file()
         logger.info("Saving state to %s", state_file)
@@ -218,7 +221,7 @@ class Core(
         storage.dump(state_file, data)
         logger.debug("Saving state done")
 
-    def _load_state(self, coverage):
+    def _load_state(self, coverage: Iterable[str]) -> None:
         """Restore state from disk.
 
         Load state from disk and restore it. Parameter ``coverage``
@@ -257,7 +260,7 @@ class Core(
 
 
 class Backends(list):
-    def __init__(self, backends: list[backend.BackendProxy]):
+    def __init__(self, backends: Iterable[backend.BackendProxy]) -> None:
         super().__init__(backends)
 
         self.with_library: dict[backend.UriScheme, backend.BackendProxy] = {}

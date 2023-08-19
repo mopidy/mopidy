@@ -1,4 +1,13 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
 from mopidy import listener
+
+if TYPE_CHECKING:
+    from mopidy.audio import PlaybackState
+    from mopidy.models import Playlist, TlTrack
+    from mopidy.types import Uri
 
 
 class CoreListener(listener.Listener):
@@ -12,11 +21,11 @@ class CoreListener(listener.Listener):
     """
 
     @staticmethod
-    def send(event, **kwargs):
+    def send(event: str, **kwargs: Any) -> None:
         """Helper to allow calling of core listener events."""
         listener.send(CoreListener, event, **kwargs)
 
-    def on_event(self, event, **kwargs):
+    def on_event(self, event: str, **kwargs: Any) -> None:
         """Called on all events.
 
         *MAY* be implemented by actor. By default, this method forwards the
@@ -29,7 +38,7 @@ class CoreListener(listener.Listener):
         # Just delegate to parent, entry mostly for docs.
         super().on_event(event, **kwargs)
 
-    def track_playback_paused(self, tl_track, time_position):
+    def track_playback_paused(self, tl_track: TlTrack, time_position: int) -> None:
         """Called whenever track playback is paused.
 
         *MAY* be implemented by actor.
@@ -40,7 +49,7 @@ class CoreListener(listener.Listener):
         :type time_position: int
         """
 
-    def track_playback_resumed(self, tl_track, time_position):
+    def track_playback_resumed(self, tl_track: TlTrack, time_position: int) -> None:
         """Called whenever track playback is resumed.
 
         *MAY* be implemented by actor.
@@ -51,7 +60,7 @@ class CoreListener(listener.Listener):
         :type time_position: int
         """
 
-    def track_playback_started(self, tl_track):
+    def track_playback_started(self, tl_track: TlTrack) -> None:
         """Called whenever a new track starts playing.
 
         *MAY* be implemented by actor.
@@ -60,7 +69,7 @@ class CoreListener(listener.Listener):
         :type tl_track: :class:`mopidy.models.TlTrack`
         """
 
-    def track_playback_ended(self, tl_track, time_position):
+    def track_playback_ended(self, tl_track: TlTrack, time_position: int) -> None:
         """Called whenever playback of a track ends.
 
         *MAY* be implemented by actor.
@@ -71,7 +80,11 @@ class CoreListener(listener.Listener):
         :type time_position: int
         """
 
-    def playback_state_changed(self, old_state, new_state):
+    def playback_state_changed(
+        self,
+        old_state: PlaybackState,
+        new_state: PlaybackState,
+    ) -> None:
         """Called whenever playback state is changed.
 
         *MAY* be implemented by actor.
@@ -82,19 +95,19 @@ class CoreListener(listener.Listener):
         :type new_state: string from :class:`mopidy.core.PlaybackState` field
         """
 
-    def tracklist_changed(self):
+    def tracklist_changed(self) -> None:
         """Called whenever the tracklist is changed.
 
         *MAY* be implemented by actor.
         """
 
-    def playlists_loaded(self):
+    def playlists_loaded(self) -> None:
         """Called when playlists are loaded or refreshed.
 
         *MAY* be implemented by actor.
         """
 
-    def playlist_changed(self, playlist):
+    def playlist_changed(self, playlist: Playlist) -> None:
         """Called whenever a playlist is changed.
 
         *MAY* be implemented by actor.
@@ -103,7 +116,7 @@ class CoreListener(listener.Listener):
         :type playlist: :class:`mopidy.models.Playlist`
         """
 
-    def playlist_deleted(self, uri):
+    def playlist_deleted(self, uri: Uri) -> None:
         """Called whenever a playlist is deleted.
 
         *MAY* be implemented by actor.
@@ -112,13 +125,13 @@ class CoreListener(listener.Listener):
         :type uri: string
         """
 
-    def options_changed(self):
+    def options_changed(self) -> None:
         """Called whenever an option is changed.
 
         *MAY* be implemented by actor.
         """
 
-    def volume_changed(self, volume):
+    def volume_changed(self, volume: int) -> None:
         """Called whenever the volume is changed.
 
         *MAY* be implemented by actor.
@@ -127,7 +140,7 @@ class CoreListener(listener.Listener):
         :type volume: int
         """
 
-    def mute_changed(self, mute):
+    def mute_changed(self, mute: bool) -> None:
         """Called whenever the mute state is changed.
 
         *MAY* be implemented by actor.
@@ -136,7 +149,7 @@ class CoreListener(listener.Listener):
         :type mute: boolean
         """
 
-    def seeked(self, time_position):
+    def seeked(self, time_position: int) -> None:
         """Called whenever the time position changes by an unexpected amount, e.g.
         at seek to a new time position.
 
@@ -146,7 +159,7 @@ class CoreListener(listener.Listener):
         :type time_position: int
         """
 
-    def stream_title_changed(self, title):
+    def stream_title_changed(self, title: str) -> None:
         """Called whenever the currently playing stream title changes.
 
         *MAY* be implemented by actor.

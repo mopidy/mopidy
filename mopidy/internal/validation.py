@@ -1,45 +1,67 @@
+from __future__ import annotations
+
 import urllib.parse
 from collections.abc import Iterable, Mapping
-from typing import Any, Optional, TypeVar, Union
+from typing import Any, Literal, Optional, TypeVar, Union, get_args
 
 from mopidy import exceptions
+from mopidy.audio.constants import PlaybackState
+from mopidy.types import (
+    DistinctField,
+    Query,
+    QueryValue,
+    SearchField,
+    TracklistField,
+)
+
+
+def get_literals(literal_type: Any) -> set[str]:
+    # Check if it's a union
+    if hasattr(literal_type, "__origin__") and literal_type.__origin__ is Union:
+        literals = set()
+        for arg in get_args(literal_type):
+            literals.update(get_literals(arg))
+        return literals
+
+    # Check if it's a literal
+    if hasattr(literal_type, "__origin__") and literal_type.__origin__ is Literal:
+        return set(get_args(literal_type))
+
+    raise ValueError("Provided type is neither a Union nor a Literal type.")
+
 
 T = TypeVar("T")
 
-PLAYBACK_STATES = {"paused", "stopped", "playing"}
+PLAYBACK_STATES: set[str] = {ps.value for ps in PlaybackState}
 
-TRACK_FIELDS_WITH_TYPES: dict[str, Union[type[str], type[int]]] = {
-    "uri": str,
-    "track_name": str,
+FIELD_TYPES: dict[str, type] = {
     "album": str,
-    "artist": str,
     "albumartist": str,
-    "composer": str,
-    "performer": str,
-    "track_no": int,
-    "genre": str,
-    "date": str,
+    "any": Union[int, str],
+    "artist": str,
     "comment": str,
+    "composer": str,
+    "date": str,
     "disc_no": int,
+    "genre": str,
+    "musicbrainz_id": str,
     "musicbrainz_albumid": str,
     "musicbrainz_artistid": str,
     "musicbrainz_trackid": str,
+    "name": str,
+    "performer": str,
+    "tlid": int,
+    "track_name": str,
+    "track_no": int,
+    "uri": str,
 }
-
-SEARCH_FIELDS = set(TRACK_FIELDS_WITH_TYPES).union({"any"})
-
-PLAYLIST_FIELDS = {"uri", "name"}  # TODO: add length and last_modified?
-
-TRACKLIST_FIELDS = {  # TODO: add bitrate, length, disc_no, track_no, modified?
-    "uri",
-    "name",
-    "genre",
-    "date",
-    "comment",
-    "musicbrainz_id",
+DISTINCT_FIELDS: dict[str, type] = {
+    x: FIELD_TYPES[x] for x in get_literals(DistinctField)
 }
-
-DISTINCT_FIELDS = dict(TRACK_FIELDS_WITH_TYPES)
+SEARCH_FIELDS: dict[str, type] = {x: FIELD_TYPES[x] for x in get_literals(SearchField)}
+TRACKLIST_FIELDS: dict[str, type] = {
+    x: FIELD_TYPES[x] for x in get_literals(TracklistField) - {"tlid"}
+}
 
 
 # TODO: _check_iterable(check, msg, **kwargs) + [check(a) for a in arg]?
@@ -110,16 +132,14 @@ def check_integer(
 
 
 def check_query(
-    arg: dict[str, Any],
-    fields: Optional[set[str]] = None,
-    list_values: bool = True,
+    arg: Union[Query[SearchField], Query[TracklistField]],
+    fields: Optional[Iterable[str]] = None,
 ) -> None:
     if fields is None:
-        fields = SEARCH_FIELDS
+        fields = SEARCH_FIELDS.keys()
     # TODO: normalize name  -> track_name
     # TODO: normalize value -> [value]
     # TODO: normalize blank -> [] or just remove field?
-    # TODO: remove list_values?
 
     if not isinstance(arg, Mapping):
         raise exceptions.ValidationError(f"Expected a query dictionary, not {arg!r}")
@@ -130,19 +150,14 @@ def check_query(
             fields,
             msg="Expected query field to be one of {choices}, not {arg!r}",
         )
-        if list_values:
-            msg = 'Expected "{key}" to be list of strings, not {arg!r}'
-            _check_iterable(value, msg, key=key)
-            [_check_query_value(key, v, msg) for v in value]
-        else:
-            _check_query_value(
-                key, value, 'Expected "{key}" to be a string, not {arg!r}'
-            )
+        msg = 'Expected "{key}" to be list of strings, not {arg!r}'
+        _check_iterable(value, msg, key=key)
+        [_check_query_value(key, v, msg) for v in value]
 
 
 def _check_query_value(
-    key: str,
-    arg: Any,
+    key: Union[DistinctField, SearchField, TracklistField],
+    arg: QueryValue,
     msg: str,
 ) -> None:
     if not isinstance(arg, str) or not arg.strip():

@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import contextlib
 import logging
-from typing import TYPE_CHECKING, Optional
+from collections.abc import Generator, Iterable
+from typing import TYPE_CHECKING, Any, Optional
 
 from mopidy import exceptions
 from mopidy.internal import validation
 from mopidy.internal.models import MixerState
+from mopidy.types import Percentage
 
 if TYPE_CHECKING:
     from mopidy.mixer import MixerProxy
@@ -15,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 @contextlib.contextmanager
-def _mixer_error_handling(mixer):
+def _mixer_error_handling(mixer: MixerProxy) -> Generator[None, Any, None]:
     try:
         yield
     except exceptions.ValidationError as e:
@@ -32,10 +34,10 @@ def _mixer_error_handling(mixer):
 
 
 class MixerController:
-    def __init__(self, mixer: Optional[MixerProxy]):
+    def __init__(self, mixer: Optional[MixerProxy]) -> None:
         self._mixer = mixer
 
-    def get_volume(self):
+    def get_volume(self) -> Optional[Percentage]:
         """Get the volume.
 
         Integer in range [0..100] or :class:`None` if unknown.
@@ -53,7 +55,7 @@ class MixerController:
 
         return None
 
-    def set_volume(self, volume):
+    def set_volume(self, volume: Percentage) -> bool:
         """Set the volume.
 
         The volume is defined as an integer in range [0..100].
@@ -74,7 +76,7 @@ class MixerController:
 
         return False
 
-    def get_mute(self):
+    def get_mute(self) -> Optional[bool]:
         """Get mute state.
 
         :class:`True` if muted, :class:`False` unmuted, :class:`None` if
@@ -91,7 +93,7 @@ class MixerController:
 
         return None
 
-    def set_mute(self, mute):
+    def set_mute(self, mute: bool) -> bool:
         """Set mute state.
 
         :class:`True` to mute, :class:`False` to unmute.
@@ -109,14 +111,14 @@ class MixerController:
 
         return False
 
-    def _save_state(self):
+    def _save_state(self) -> MixerState:
         return MixerState(volume=self.get_volume(), mute=self.get_mute())
 
-    def _load_state(self, state, coverage):
+    def _load_state(self, state: MixerState, coverage: Iterable[str]) -> None:
         if state and "mixer" in coverage:
             self.set_mute(state.mute)
             if state.volume:
-                self.set_volume(state.volume)
+                self.set_volume(Percentage(state.volume))
 
 
 if TYPE_CHECKING:

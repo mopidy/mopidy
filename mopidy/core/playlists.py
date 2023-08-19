@@ -1,18 +1,30 @@
+from __future__ import annotations
+
 import contextlib
 import logging
 import urllib.parse
-from typing import TYPE_CHECKING
+from collections.abc import Generator
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 from mopidy import exceptions
 from mopidy.core import listener
 from mopidy.internal import validation
 from mopidy.models import Playlist, Ref
+from mopidy.types import UriScheme
 
 logger = logging.getLogger(__name__)
 
+if TYPE_CHECKING:
+    from mopidy.backend import BackendProxy
+    from mopidy.core.actor import Backends, Core
+    from mopidy.types import Uri
+
 
 @contextlib.contextmanager
-def _backend_error_handling(backend, reraise=None):
+def _backend_error_handling(
+    backend: BackendProxy,
+    reraise: Union[None, type[Exception], tuple[type[Exception], ...]] = None,
+) -> Generator[None, Any, None]:
     try:
         yield
     except exceptions.ValidationError as e:
@@ -31,11 +43,11 @@ def _backend_error_handling(backend, reraise=None):
 
 
 class PlaylistsController:
-    def __init__(self, backends, core):
+    def __init__(self, backends: Backends, core: Core) -> None:
         self.backends = backends
         self.core = core
 
-    def get_uri_schemes(self):
+    def get_uri_schemes(self) -> list[UriScheme]:
         """Get the list of URI schemes that support playlists.
 
         :rtype: list of string
@@ -44,7 +56,7 @@ class PlaylistsController:
         """
         return sorted(self.backends.with_playlists.keys())
 
-    def as_list(self):
+    def as_list(self) -> list[Ref]:
         """Get a list of the currently available playlists.
 
         Returns a list of :class:`~mopidy.models.Ref` objects referring to the
@@ -77,7 +89,7 @@ class PlaylistsController:
 
         return results
 
-    def get_items(self, uri):
+    def get_items(self, uri: Uri) -> Optional[list[Ref]]:
         """Get the items in a playlist specified by ``uri``.
 
         Returns a list of :class:`~mopidy.models.Ref` objects referring to the
@@ -92,7 +104,7 @@ class PlaylistsController:
         """
         validation.check_uri(uri)
 
-        uri_scheme = urllib.parse.urlparse(uri).scheme
+        uri_scheme = UriScheme(urllib.parse.urlparse(uri).scheme)
         backend = self.backends.with_playlists.get(uri_scheme, None)
 
         if not backend:
@@ -106,7 +118,11 @@ class PlaylistsController:
 
         return None
 
-    def create(self, name, uri_scheme=None):
+    def create(
+        self,
+        name: str,
+        uri_scheme: Optional[UriScheme] = None,
+    ) -> Optional[Playlist]:
         """Create a new playlist.
 
         If ``uri_scheme`` matches an URI scheme handled by a current backend,
@@ -139,7 +155,7 @@ class PlaylistsController:
 
         return None
 
-    def delete(self, uri):
+    def delete(self, uri: Uri) -> bool:
         """Delete playlist identified by the URI.
 
         If the URI doesn't match the URI schemes handled by the current
@@ -156,7 +172,7 @@ class PlaylistsController:
         """
         validation.check_uri(uri)
 
-        uri_scheme = urllib.parse.urlparse(uri).scheme
+        uri_scheme = UriScheme(urllib.parse.urlparse(uri).scheme)
         backend = self.backends.with_playlists.get(uri_scheme, None)
         if not backend:
             return False
@@ -175,7 +191,7 @@ class PlaylistsController:
 
         return success
 
-    def lookup(self, uri):
+    def lookup(self, uri: Uri) -> Optional[Playlist]:
         """Lookup playlist with given URI in both the set of playlists and in any
         other playlist sources. Returns :class:`None` if not found.
 
@@ -183,7 +199,7 @@ class PlaylistsController:
         :type uri: string
         :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
-        uri_scheme = urllib.parse.urlparse(uri).scheme
+        uri_scheme = UriScheme(urllib.parse.urlparse(uri).scheme)
         backend = self.backends.with_playlists.get(uri_scheme, None)
         if not backend:
             return None
@@ -198,7 +214,7 @@ class PlaylistsController:
 
     # TODO: there is an inconsistency between library.refresh(uri) and this
     # call, not sure how to sort this out.
-    def refresh(self, uri_scheme=None):
+    def refresh(self, uri_scheme: Optional[UriScheme] = None) -> None:
         """Refresh the playlists in :attr:`playlists`.
 
         If ``uri_scheme`` is :class:`None`, all backends are asked to refresh.
@@ -230,7 +246,7 @@ class PlaylistsController:
         if playlists_loaded:
             listener.CoreListener.send("playlists_loaded")
 
-    def save(self, playlist):
+    def save(self, playlist: Playlist) -> Optional[Playlist]:
         """Save the playlist.
 
         For a playlist to be saveable, it must have the ``uri`` attribute set.
@@ -256,19 +272,19 @@ class PlaylistsController:
         if playlist.uri is None:
             return None  # TODO: log this problem?
 
-        uri_scheme = urllib.parse.urlparse(playlist.uri).scheme
+        uri_scheme = UriScheme(urllib.parse.urlparse(playlist.uri).scheme)
         backend = self.backends.with_playlists.get(uri_scheme, None)
         if not backend:
             return None
 
         # TODO: we let AssertionError error through due to legacy tests :/
         with _backend_error_handling(backend, reraise=AssertionError):
-            playlist = backend.playlists.save(playlist).get()
-            if playlist is not None:
-                validation.check_instance(playlist, Playlist)
-            if playlist:
-                listener.CoreListener.send("playlist_changed", playlist=playlist)
-            return playlist
+            result = backend.playlists.save(playlist).get()
+            if result is not None:
+                validation.check_instance(result, Playlist)
+            if result:
+                listener.CoreListener.send("playlist_changed", playlist=result)
+            return result
 
         return None
 

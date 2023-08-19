@@ -1,4 +1,23 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Literal, Optional
+
 from mopidy import listener
+
+if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
+    from mopidy.audio import PlaybackState
+    from mopidy.types import DurationMs, Uri
+
+
+AudioEvent: TypeAlias = Literal[
+    "position_changed",
+    "reached_end_of_stream",
+    "state_changed",
+    "stream_changed",
+    "tags_changed",
+]
 
 
 class AudioListener(listener.Listener):
@@ -12,17 +31,17 @@ class AudioListener(listener.Listener):
     """
 
     @staticmethod
-    def send(event, **kwargs):
+    def send(event: AudioEvent, **kwargs: Any) -> None:
         """Helper to allow calling of audio listener events."""
         listener.send(AudioListener, event, **kwargs)
 
-    def reached_end_of_stream(self):
+    def reached_end_of_stream(self) -> None:
         """Called whenever the end of the audio stream is reached.
 
         *MAY* be implemented by actor.
         """
 
-    def stream_changed(self, uri):
+    def stream_changed(self, uri: Uri) -> None:
         """Called whenever the audio stream changes.
 
         *MAY* be implemented by actor.
@@ -30,7 +49,7 @@ class AudioListener(listener.Listener):
         :param string uri: URI the stream has started playing.
         """
 
-    def position_changed(self, position):
+    def position_changed(self, position: DurationMs) -> None:
         """Called whenever the position of the stream changes.
 
         *MAY* be implemented by actor.
@@ -38,7 +57,12 @@ class AudioListener(listener.Listener):
         :param int position: Position in milliseconds.
         """
 
-    def state_changed(self, old_state, new_state, target_state):
+    def state_changed(
+        self,
+        old_state: PlaybackState,
+        new_state: PlaybackState,
+        target_state: Optional[PlaybackState],
+    ) -> None:
         """Called after the playback state have changed.
 
         Will be called for both immediate and async state changes in GStreamer.
@@ -56,16 +80,15 @@ class AudioListener(listener.Listener):
         *MAY* be implemented by actor.
 
         :param old_state: the state before the change
-        :type old_state: string from :class:`mopidy.core.PlaybackState` field
+        :type old_state: :class:`mopidy.audio.PlaybackState`
         :param new_state: the state after the change
-        :type new_state: A :class:`mopidy.core.PlaybackState` field
-        :type new_state: string from :class:`mopidy.core.PlaybackState` field
+        :type new_state: :class:`mopidy.audio.PlaybackState`
         :param target_state: the intended state
-        :type target_state: string from :class:`mopidy.core.PlaybackState`
-            field or :class:`None` if this is a final state.
+        :type target_state: :class:`mopidy.audio.PlaybackState`
+            or :class:`None` if this is a final state.
         """
 
-    def tags_changed(self, tags):
+    def tags_changed(self, tags: set[str]) -> None:
         """Called whenever the current audio stream's tags change.
 
         This event signals that some track metadata has been updated. This can

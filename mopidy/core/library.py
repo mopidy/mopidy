@@ -5,12 +5,13 @@ import contextlib
 import logging
 import operator
 import urllib.parse
-from collections.abc import Mapping
-from typing import TYPE_CHECKING, Optional, cast
+from collections.abc import Generator, Iterable, Mapping
+from typing import TYPE_CHECKING, Any, Optional, Union, cast
 
-from mopidy import exceptions, models
-from mopidy.backend import DistinctField
+from mopidy import exceptions
 from mopidy.internal import deprecation, validation
+from mopidy.models import Image, Ref, SearchResult, Track
+from mopidy.types import DistinctField, Query, SearchField, Uri, UriScheme
 
 if TYPE_CHECKING:
     from mopidy.backend import BackendProxy
@@ -20,7 +21,10 @@ logger = logging.getLogger(__name__)
 
 
 @contextlib.contextmanager
-def _backend_error_handling(backend, reraise=None):
+def _backend_error_handling(
+    backend: BackendProxy,
+    reraise: Union[None, type[Exception], tuple[type[Exception], ...]] = None,
+) -> Generator[None, Any, None]:
     try:
         yield
     except exceptions.ValidationError as e:
@@ -43,22 +47,27 @@ class LibraryController:
         self.backends = backends
         self.core = core
 
-    def _get_backend(self, uri: str) -> Optional[BackendProxy]:
-        uri_scheme = urllib.parse.urlparse(uri).scheme
+    def _get_backend(self, uri: Uri) -> Optional[BackendProxy]:
+        uri_scheme = UriScheme(urllib.parse.urlparse(uri).scheme)
         return self.backends.with_library.get(uri_scheme, None)
 
-    def _get_backends_to_uris(self, uris):
-        if uris:
-            backends_to_uris = collections.defaultdict(list)
-            for uri in uris:
-                backend = self._get_backend(uri)
-                if backend is not None:
-                    backends_to_uris[backend].append(uri)
-        else:
-            backends_to_uris = {b: None for b in self.backends.with_library.values()}
-        return backends_to_uris
+    def _get_backends_to_uris(
+        self,
+        uris: Optional[Iterable[Uri]],
+    ) -> dict[BackendProxy, Optional[list[Uri]]]:
+        if not uris:
+            return {b: None for b in self.backends.with_library.values()}
 
-    def browse(self, uri):
+        result: dict[BackendProxy, Optional[list[Uri]]] = collections.defaultdict(list)
+        for uri in uris:
+            backend = self._get_backend(uri)
+            if backend is not None:
+                lst = result[backend]
+                assert lst is not None
+                lst.append(uri)
+        return result
+
+    def browse(self, uri: Uri) -> list[Ref]:
         """Browse directories and tracks at the given ``uri``.
 
         ``uri`` is a string which represents some directory belonging to a
@@ -97,19 +106,19 @@ class LibraryController:
         validation.check_uri(uri)
         return self._browse(uri)
 
-    def _roots(self):
+    def _roots(self) -> list[Ref]:
         directories = set()
         backends = self.backends.with_library_browse.values()
         futures = {b: b.library.root_directory for b in backends}
         for backend, future in futures.items():
             with _backend_error_handling(backend):
                 root = future.get()
-                validation.check_instance(root, models.Ref)
+                validation.check_instance(root, Ref)
                 directories.add(root)
         return sorted(directories, key=operator.attrgetter("name"))
 
-    def _browse(self, uri):
-        scheme = urllib.parse.urlparse(uri).scheme
+    def _browse(self, uri: Uri) -> list[Ref]:
+        scheme = UriScheme(urllib.parse.urlparse(uri).scheme)
         backend = self.backends.with_library_browse.get(scheme)
 
         if not backend:
@@ -117,12 +126,16 @@ class LibraryController:
 
         with _backend_error_handling(backend):
             result = backend.library.browse(uri).get()
-            validation.check_instances(result, models.Ref)
+            validation.check_instances(result, Ref)
             return result
 
         return []
 
-    def get_distinct(self, field, query=None):
+    def get_distinct(
+        self,
+        field: DistinctField,
+        query: Optional[Query[SearchField]] = None,
+    ) -> set[Any]:
         """List distinct values for a given field from the library.
 
         This has mainly been added to support the list commands the MPD
@@ -168,7 +181,7 @@ class LibraryController:
                     result.update(values)
         return result
 
-    def get_images(self, uris):
+    def get_images(self, uris: Iterable[Uri]) -> dict[Uri, tuple[Image, ...]]:
         """Lookup the images for the given URIs.
 
         Backends can use this to return image URIs for any URI they know about
@@ -203,11 +216,11 @@ class LibraryController:
                         raise exceptions.ValidationError(
                             f"Got unknown image URI: {uri}"
                         )
-                    validation.check_instances(images, models.Image)
+                    validation.check_instances(images, Image)
                     results[uri] += tuple(images)
         return results
 
-    def lookup(self, uris):
+    def lookup(self, uris: Iterable[Uri]) -> dict[Uri, list[Track]]:
         """Lookup the given URIs.
 
         If the URI expands to multiple tracks, the returned list will contain
@@ -232,14 +245,14 @@ class LibraryController:
             with _backend_error_handling(backend):
                 result = future.get()
                 if result is not None:
-                    validation.check_instances(result, models.Track)
+                    validation.check_instances(result, Track)
                     # TODO Consider making Track.uri field mandatory, and
                     # then remove this filtering of tracks without URIs.
                     results[u] = [r for r in result if r.uri]
 
         return results
 
-    def refresh(self, uri: Optional[str] = None):
+    def refresh(self, uri: Optional[Uri] = None) -> None:
         """Refresh library. Limit to URI and below if an URI is given.
 
         :param uri: directory or track URI
@@ -263,7 +276,12 @@ class LibraryController:
             with _backend_error_handling(backend):
                 future.get()
 
-    def search(self, query, uris=None, exact=False):
+    def search(
+        self,
+        query: Query[SearchField],
+        uris: Optional[Iterable[Uri]] = None,
+        exact: bool = False,
+    ) -> list[SearchResult]:
         """Search the library for tracks where ``field`` contains ``values``.
 
         ``field`` can be one of ``uri``, ``track_name``, ``album``, ``artist``,
@@ -332,7 +350,7 @@ class LibraryController:
                 with _backend_error_handling(backend, reraise=reraise):
                     result = future.get()
                     if result is not None:
-                        validation.check_instance(result, models.SearchResult)
+                        validation.check_instance(result, SearchResult)
                         results.append(result)
             except TypeError:
                 backend_name = backend.actor_ref.actor_class.__name__
@@ -345,7 +363,7 @@ class LibraryController:
         return results
 
 
-def _normalize_query(query):
+def _normalize_query(query: Query[SearchField]) -> Query[SearchField]:
     broken_client = False
     # TODO: this breaks if query is not a dictionary like object...
     for field, values in query.items():

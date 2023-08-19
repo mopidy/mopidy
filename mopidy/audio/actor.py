@@ -15,6 +15,7 @@ from mopidy.audio.constants import PlaybackState
 from mopidy.audio.listener import AudioListener
 from mopidy.internal import process
 from mopidy.internal.gi import GLib, GObject, Gst, GstPbutils
+from mopidy.types import DurationMs, Percentage
 
 if TYPE_CHECKING:
     from mopidy.config import Config
@@ -195,11 +196,11 @@ class SoftwareMixerAdapter:
         self._signals.clear()
         self._mixer.teardown()
 
-    def get_volume(self) -> int:
+    def get_volume(self) -> Percentage:
         assert self._element
-        return int(round(self._element.get_property("volume") * 100))
+        return Percentage(round(self._element.get_property("volume") * 100))
 
-    def set_volume(self, volume: int) -> None:
+    def set_volume(self, volume: Percentage) -> None:
         assert self._element
         self._element.set_property("volume", volume / 100.0)
         self._mixer.trigger_volume_changed(self.get_volume())
@@ -781,7 +782,7 @@ class Audio(pykka.ThreadingActor):
         """
         self._about_to_finish_callback = callback
 
-    def get_position(self) -> int:
+    def get_position(self) -> DurationMs:
         """Get position in milliseconds.
 
         :rtype: int
@@ -794,11 +795,11 @@ class Audio(pykka.ThreadingActor):
             # TODO: take state into account for this and possibly also return
             # None as the unknown value instead of zero?
             logger.debug("Position query failed")
-            return 0
+            return DurationMs(0)
 
         return utils.clocktime_to_millisecond(position)
 
-    def set_position(self, position: int) -> bool:
+    def set_position(self, position: DurationMs) -> bool:
         """Set position in milliseconds.
 
         :param position: the position in milliseconds
