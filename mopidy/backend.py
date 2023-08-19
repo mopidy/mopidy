@@ -38,9 +38,7 @@ class Backend:
     fix the issue.
 
     :param config: the entire Mopidy configuration
-    :type config: dict
     :param audio: actor proxy for the audio subsystem
-    :type audio: :class:`pykka.ActorProxy` for :class:`mopidy.audio.Audio`
     """
 
     #: Actor proxy to an instance of :class:`mopidy.audio.Audio`.
@@ -90,8 +88,9 @@ class Backend:
 
 @pykka.traversable
 class LibraryProvider:
-    """:param backend: backend the controller is a part of
-    :type backend: :class:`mopidy.backend.Backend`
+    """A library provider provides a library of music to Mopidy.
+
+    :param backend: backend the controller is a part of
     """
 
     root_directory: Optional[Ref] = None
@@ -171,10 +170,10 @@ class LibraryProvider:
 
 @pykka.traversable
 class PlaybackProvider:
-    """:param audio: the audio actor
-    :type audio: actor proxy to an instance of :class:`mopidy.audio.Audio`
+    """A playback provider provides audio playback control.
+
+    :param audio: the audio actor
     :param backend: the backend
-    :type backend: :class:`mopidy.backend.Backend`
     """
 
     def __init__(self, audio: AudioProxy, backend: Backend) -> None:
@@ -221,8 +220,6 @@ class PlaybackProvider:
         return :class:`None`.
 
         :param uri: the URI to translate
-        :type uri: string
-        :rtype: string or :class:`None` if the URI could not be translated
         """
         return uri
 
@@ -235,8 +232,6 @@ class PlaybackProvider:
         latency before playback starts, and discards data when paused.
 
         :param uri: the URI
-        :type uri: string
-        :rtype: bool
         """
         return False
 
@@ -249,8 +244,6 @@ class PlaybackProvider:
         to improve playback performance.
 
         :param uri: the URI
-        :type uri: string
-        :rtype: bool
         """
         return False
 
@@ -261,7 +254,6 @@ class PlaybackProvider:
         *MAY be reimplemented by subclass.*
 
         :param source: the GStreamer source element
-        :type source: GstElement
 
         .. versionadded:: 3.4
         """
@@ -279,8 +271,6 @@ class PlaybackProvider:
         is what you want to implement.
 
         :param track: the track to play
-        :type track: :class:`mopidy.models.Track`
-        :rtype: :class:`True` if successful, else :class:`False`
         """
         uri = self.translate_uri(track.uri)
         if uri != track.uri:
@@ -300,7 +290,7 @@ class PlaybackProvider:
 
         *MAY be reimplemented by subclass.*
 
-        :rtype: :class:`True` if successful, else :class:`False`
+        Returns :class:`True` if successful, else :class:`False`.
         """
         return self.audio.start_playback().get()
 
@@ -309,9 +299,9 @@ class PlaybackProvider:
 
         *MAY be reimplemented by subclass.*
 
+        Returns :class:`True` if successful, else :class:`False`.
+
         :param time_position: time position in milliseconds
-        :type time_position: int
-        :rtype: :class:`True` if successful, else :class:`False`
         """
         return self.audio.set_position(time_position).get()
 
@@ -323,7 +313,7 @@ class PlaybackProvider:
         Should not be used for tracking if tracks have been played or when we
         are done playing them.
 
-        :rtype: :class:`True` if successful, else :class:`False`
+        Returns :class:`True` if successful, else :class:`False`.
         """
         return self.audio.stop_playback().get()
 
@@ -331,20 +321,18 @@ class PlaybackProvider:
         """Get the current time position in milliseconds.
 
         *MAY be reimplemented by subclass.*
-
-        :rtype: int
         """
         return self.audio.get_position().get()
 
 
 @pykka.traversable
 class PlaylistsProvider:
-    """A playlist provider exposes a collection of playlists, methods to
-    create/change/delete playlists in this collection, and lookup of any
-    playlist the backend knows about.
+    """A playlist provider exposes a collection of playlists.
+
+    The methods can create/change/delete playlists in this collection, and
+    lookup of any playlist the backend knows about.
 
     :param backend: backend the controller is a part of
-    :type backend: :class:`mopidy.backend.Backend` instance
     """
 
     def __init__(self, backend: Backend) -> None:
@@ -356,8 +344,6 @@ class PlaylistsProvider:
         Returns a list of :class:`~mopidy.models.Ref` objects referring to the
         playlists. In other words, no information about the playlists' content
         is given.
-
-        :rtype: list of :class:`mopidy.models.Ref`
 
         .. versionadded:: 1.0
         """
@@ -372,8 +358,6 @@ class PlaylistsProvider:
         If a playlist with the given ``uri`` doesn't exist, it returns
         :class:`None`.
 
-        :rtype: list of :class:`mopidy.models.Ref`, or :class:`None`
-
         .. versionadded:: 1.0
         """
         raise NotImplementedError
@@ -387,8 +371,6 @@ class PlaylistsProvider:
         *MUST be implemented by subclass.*
 
         :param name: name of the new playlist
-        :type name: string
-        :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
         raise NotImplementedError
 
@@ -400,8 +382,6 @@ class PlaylistsProvider:
         *MUST be implemented by subclass.*
 
         :param uri: URI of the playlist to delete
-        :type uri: string
-        :rtype: :class:`bool`
 
         .. versionchanged:: 2.2
             Return type defined.
@@ -417,8 +397,6 @@ class PlaylistsProvider:
         *MUST be implemented by subclass.*
 
         :param uri: playlist URI
-        :type uri: string
-        :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
         raise NotImplementedError
 
@@ -440,8 +418,6 @@ class PlaylistsProvider:
         *MUST be implemented by subclass.*
 
         :param playlist: the playlist to save
-        :type playlist: :class:`mopidy.models.Playlist`
-        :rtype: :class:`mopidy.models.Playlist` or :class:`None`
         """
         raise NotImplementedError
 
