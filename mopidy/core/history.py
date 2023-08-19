@@ -6,6 +6,8 @@ import time
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
+from pykka.typing import proxy_method
+
 from mopidy.internal.models import HistoryState, HistoryTrack
 from mopidy.models import Ref, Track
 
@@ -82,9 +84,6 @@ class HistoryController:
             self._history = [(h.timestamp, h.track) for h in state.history]
 
 
-if TYPE_CHECKING:
-    from pykka.typing import proxy_method
-
-    class HistoryControllerProxy:
-        get_length = proxy_method(HistoryController.get_length)
-        get_history = proxy_method(HistoryController.get_history)
+class HistoryControllerProxy:
+    get_length = proxy_method(HistoryController.get_length)
+    get_history = proxy_method(HistoryController.get_history)

@@ -6,9 +6,9 @@ import contextlib
 import logging
 import signal
 import sys
+from collections.abc import Generator, Iterable, Sequence
 from pathlib import Path
 from typing import (
-    TYPE_CHECKING,
     Any,
     NoReturn,
     Optional,
@@ -28,9 +28,6 @@ from mopidy.internal import deps, process, timer, versioning
 from mopidy.internal.gi import GLib
 from mopidy.mixer import MixerActor, MixerProxy
 from mopidy.types import Percentage
-
-if TYPE_CHECKING:
-    from collections.abc import Generator, Iterable, Sequence
 
 logger = logging.getLogger(__name__)
 

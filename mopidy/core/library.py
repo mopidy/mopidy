@@ -8,6 +8,8 @@ import urllib.parse
 from collections.abc import Generator, Iterable, Mapping
 from typing import TYPE_CHECKING, Any, Optional, Union, cast
 
+from pykka.typing import proxy_method
+
 from mopidy import exceptions
 from mopidy.internal import deprecation, validation
 from mopidy.models import Image, Ref, SearchResult, Track
@@ -386,13 +388,10 @@ def _normalize_query(query: Query[SearchField]) -> Query[SearchField]:
     return query
 
 
-if TYPE_CHECKING:
-    from pykka.typing import proxy_method
-
-    class LibraryControllerProxy:
-        browse = proxy_method(LibraryController.browse)
-        get_distinct = proxy_method(LibraryController.get_distinct)
-        get_images = proxy_method(LibraryController.get_images)
-        lookup = proxy_method(LibraryController.lookup)
-        refresh = proxy_method(LibraryController.refresh)
-        search = proxy_method(LibraryController.search)
+class LibraryControllerProxy:
+    browse = proxy_method(LibraryController.browse)
+    get_distinct = proxy_method(LibraryController.get_distinct)
+    get_images = proxy_method(LibraryController.get_images)
+    lookup = proxy_method(LibraryController.lookup)
+    refresh = proxy_method(LibraryController.refresh)
+    search = proxy_method(LibraryController.search)

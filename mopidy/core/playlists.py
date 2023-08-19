@@ -6,6 +6,8 @@ import urllib.parse
 from collections.abc import Generator
 from typing import TYPE_CHECKING, Any, Optional, Union
 
+from pykka.typing import proxy_method
+
 from mopidy import exceptions
 from mopidy.core import listener
 from mopidy.internal import validation
@@ -289,15 +291,12 @@ class PlaylistsController:
         return None
 
 
-if TYPE_CHECKING:
-    from pykka.typing import proxy_method
-
-    class PlaylistsControllerProxy:
-        get_uri_schemes = proxy_method(PlaylistsController.get_uri_schemes)
-        as_list = proxy_method(PlaylistsController.as_list)
-        get_items = proxy_method(PlaylistsController.get_items)
-        create = proxy_method(PlaylistsController.create)
-        delete = proxy_method(PlaylistsController.delete)
-        lookup = proxy_method(PlaylistsController.lookup)
-        refresh = proxy_method(PlaylistsController.refresh)
-        save = proxy_method(PlaylistsController.save)
+class PlaylistsControllerProxy:
+    get_uri_schemes = proxy_method(PlaylistsController.get_uri_schemes)
+    as_list = proxy_method(PlaylistsController.as_list)
+    get_items = proxy_method(PlaylistsController.get_items)
+    create = proxy_method(PlaylistsController.create)
+    delete = proxy_method(PlaylistsController.delete)
+    lookup = proxy_method(PlaylistsController.lookup)
+    refresh = proxy_method(PlaylistsController.refresh)
+    save = proxy_method(PlaylistsController.save)

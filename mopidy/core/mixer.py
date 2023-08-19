@@ -5,6 +5,8 @@ import logging
 from collections.abc import Generator, Iterable
 from typing import TYPE_CHECKING, Any, Optional
 
+from pykka.typing import proxy_method
+
 from mopidy import exceptions
 from mopidy.internal import validation
 from mopidy.internal.models import MixerState
@@ -121,11 +123,8 @@ class MixerController:
                 self.set_volume(Percentage(state.volume))
 
 
-if TYPE_CHECKING:
-    from pykka.typing import proxy_method
-
-    class MixerControllerProxy:
-        get_volume = proxy_method(MixerController.get_volume)
-        set_volume = proxy_method(MixerController.set_volume)
-        get_mute = proxy_method(MixerController.get_mute)
-        set_mute = proxy_method(MixerController.set_mute)
+class MixerControllerProxy:
+    get_volume = proxy_method(MixerController.get_volume)
+    set_volume = proxy_method(MixerController.set_volume)
+    get_mute = proxy_method(MixerController.get_mute)
+    set_mute = proxy_method(MixerController.set_mute)

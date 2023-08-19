@@ -6,6 +6,7 @@ from collections.abc import Iterable
 from typing import TYPE_CHECKING, Optional
 
 from pykka.messages import ProxyCall
+from pykka.typing import proxy_method
 
 from mopidy.audio import PlaybackState
 from mopidy.core import listener
@@ -575,20 +576,17 @@ class PlaybackController:
                 self.play(tlid=state.tlid)
 
 
-if TYPE_CHECKING:
-    from pykka.typing import proxy_method
-
-    class PlaybackControllerProxy:
-        get_current_tl_track = proxy_method(PlaybackController.get_current_tl_track)
-        get_current_track = proxy_method(PlaybackController.get_current_track)
-        get_current_tlid = proxy_method(PlaybackController.get_current_tlid)
-        get_stream_title = proxy_method(PlaybackController.get_stream_title)
-        get_state = proxy_method(PlaybackController.get_state)
-        set_state = proxy_method(PlaybackController.set_state)
-        get_time_position = proxy_method(PlaybackController.get_time_position)
-        next = proxy_method(PlaybackController.next)
-        pause = proxy_method(PlaybackController.pause)
-        play = proxy_method(PlaybackController.play)
-        previous = proxy_method(PlaybackController.previous)
-        seek = proxy_method(PlaybackController.seek)
-        stop = proxy_method(PlaybackController.stop)
+class PlaybackControllerProxy:
+    get_current_tl_track = proxy_method(PlaybackController.get_current_tl_track)
+    get_current_track = proxy_method(PlaybackController.get_current_track)
+    get_current_tlid = proxy_method(PlaybackController.get_current_tlid)
+    get_stream_title = proxy_method(PlaybackController.get_stream_title)
+    get_state = proxy_method(PlaybackController.get_state)
+    set_state = proxy_method(PlaybackController.set_state)
+    get_time_position = proxy_method(PlaybackController.get_time_position)
+    next = proxy_method(PlaybackController.next)
+    pause = proxy_method(PlaybackController.pause)
+    play = proxy_method(PlaybackController.play)
+    previous = proxy_method(PlaybackController.previous)
+    seek = proxy_method(PlaybackController.seek)
+    stop = proxy_method(PlaybackController.stop)
