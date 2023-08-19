@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import logging
-from collections.abc import Generator
+from collections.abc import Generator, Iterable
 from typing import TYPE_CHECKING, Any, Optional
 
 from mopidy import exceptions
@@ -113,7 +113,7 @@ class MixerController:
     def _save_state(self) -> MixerState:
         return MixerState(volume=self.get_volume(), mute=self.get_mute())
 
-    def _load_state(self, state: MixerState, coverage: list[str]) -> None:
+    def _load_state(self, state: MixerState, coverage: Iterable[str]) -> None:
         if state and "mixer" in coverage:
             self.set_mute(state.mute)
             if state.volume:

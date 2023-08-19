@@ -5,7 +5,7 @@ import contextlib
 import logging
 import operator
 import urllib.parse
-from collections.abc import Generator, Mapping
+from collections.abc import Generator, Iterable, Mapping
 from typing import TYPE_CHECKING, Any, Optional, Union, cast
 
 from mopidy import exceptions
@@ -53,7 +53,7 @@ class LibraryController:
 
     def _get_backends_to_uris(
         self,
-        uris: Optional[list[Uri]],
+        uris: Optional[Iterable[Uri]],
     ) -> dict[BackendProxy, Optional[list[Uri]]]:
         if not uris:
             return {b: None for b in self.backends.with_library.values()}
@@ -181,7 +181,7 @@ class LibraryController:
                     result.update(values)
         return result
 
-    def get_images(self, uris: list[Uri]) -> dict[Uri, tuple[Image, ...]]:
+    def get_images(self, uris: Iterable[Uri]) -> dict[Uri, tuple[Image, ...]]:
         """Lookup the images for the given URIs.
 
         Backends can use this to return image URIs for any URI they know about
@@ -220,7 +220,7 @@ class LibraryController:
                     results[uri] += tuple(images)
         return results
 
-    def lookup(self, uris: list[Uri]) -> dict[Uri, list[Track]]:
+    def lookup(self, uris: Iterable[Uri]) -> dict[Uri, list[Track]]:
         """Lookup the given URIs.
 
         If the URI expands to multiple tracks, the returned list will contain
@@ -279,7 +279,7 @@ class LibraryController:
     def search(
         self,
         query: Query[SearchField],
-        uris: Optional[list[Uri]] = None,
+        uris: Optional[Iterable[Uri]] = None,
         exact: bool = False,
     ) -> list[SearchResult]:
         """Search the library for tracks where ``field`` contains ``values``.

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import urllib.parse
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Optional
 
 from pykka.messages import ProxyCall
@@ -562,7 +563,7 @@ class PlaybackController:
             state=self.get_state(),
         )
 
-    def _load_state(self, state: models.PlaybackState, coverage: list[str]) -> None:
+    def _load_state(self, state: models.PlaybackState, coverage: Iterable[str]) -> None:
         if state and "play-last" in coverage and state.tlid is not None:
             if state.state == PlaybackState.PAUSED:
                 self._start_paused = True

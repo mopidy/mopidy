@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import logging
 import time
+from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
 from mopidy.internal.models import HistoryState, HistoryTrack
@@ -76,7 +77,7 @@ class HistoryController:
                 break
         return HistoryState(history=history_list)
 
-    def _load_state(self, state: HistoryState, coverage: list[str]) -> None:
+    def _load_state(self, state: HistoryState, coverage: Iterable[str]) -> None:
         if state and "history" in coverage:
             self._history = [(h.timestamp, h.track) for h in state.history]
 

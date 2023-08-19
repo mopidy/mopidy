@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import itertools
 import logging
+from collections.abc import Iterable
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional
 
@@ -65,7 +66,7 @@ class Core(
         config: Config,
         *,
         mixer: Optional[mixer.MixerProxy] = None,
-        backends: list[backend.BackendProxy],
+        backends: Iterable[backend.BackendProxy],
         audio: Optional[audio.AudioProxy] = None,
     ) -> None:
         super().__init__()
@@ -220,7 +221,7 @@ class Core(
         storage.dump(state_file, data)
         logger.debug("Saving state done")
 
-    def _load_state(self, coverage: list[str]) -> None:
+    def _load_state(self, coverage: Iterable[str]) -> None:
         """Restore state from disk.
 
         Load state from disk and restore it. Parameter ``coverage``
@@ -259,7 +260,7 @@ class Core(
 
 
 class Backends(list):
-    def __init__(self, backends: list[backend.BackendProxy]) -> None:
+    def __init__(self, backends: Iterable[backend.BackendProxy]) -> None:
         super().__init__(backends)
 
         self.with_library: dict[backend.UriScheme, backend.BackendProxy] = {}

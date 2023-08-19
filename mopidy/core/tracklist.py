@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import random
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Optional
 
 from mopidy import exceptions
@@ -355,9 +356,9 @@ class TracklistController:
 
     def add(  # noqa: C901
         self,
-        tracks: Optional[list[Track]] = None,
+        tracks: Optional[Iterable[Track]] = None,
         at_position: Optional[int] = None,
-        uris: Optional[list[Uri]] = None,
+        uris: Optional[Iterable[Uri]] = None,
     ) -> list[TlTrack]:
         """Add tracks to the tracklist.
 
@@ -618,7 +619,7 @@ class TracklistController:
     def _load_state(
         self,
         state: TracklistState,
-        coverage: list[str],
+        coverage: Iterable[str],
     ) -> None:
         if state:
             if "mode" in coverage:
