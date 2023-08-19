@@ -185,7 +185,7 @@ class PlaybackProvider:
 
         *MAY be reimplemented by subclass.*
 
-        :rtype: :class:`True` if successful, else :class:`False`
+        Returns :class:`True` if successful, else :class:`False`.
         """
         return self.audio.pause_playback().get()
 
@@ -194,7 +194,7 @@ class PlaybackProvider:
 
         *MAY be reimplemented by subclass.*
 
-        :rtype: :class:`True` if successful, else :class:`False`
+        Returns :class:`True` if successful, else :class:`False`.
         """
         return self.audio.start_playback().get()
 

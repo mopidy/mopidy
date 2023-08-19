@@ -530,7 +530,7 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
         assert error["message"] == "Invalid Request"
         assert error["data"] == "Request must be an object"
 
-    def test_batch_of_both_successfull_and_failing_requests(self):
+    def test_batch_of_both_successful_and_failing_requests(self):
         request = [
             # Call with positional params
             {

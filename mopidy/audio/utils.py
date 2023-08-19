@@ -26,8 +26,6 @@ def supported_uri_schemes(uri_schemes: Iterable[UriScheme]) -> set[UriScheme]:
     """Determine which URIs we can actually support from provided whitelist.
 
     :param uri_schemes: list/set of URIs to check support for.
-    :type uri_schemes: list or set or URI schemes as strings.
-    :rtype: set of URI schemes we can support via this GStreamer install.
     """
     supported_schemes = set()
     registry = Gst.Registry.get()
@@ -46,9 +44,7 @@ def setup_proxy(element: Gst.Element, config: ProxyConfig) -> None:
     """Configure a GStreamer element with proxy settings.
 
     :param element: element to setup proxy in.
-    :type element: :class:`Gst.GstElement`
     :param config: proxy settings to use.
-    :type config: :class:`dict`
     """
     if not hasattr(element.props, "proxy") or not config.get("hostname"):
         return

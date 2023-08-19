@@ -674,12 +674,9 @@ class Audio(pykka.ThreadingActor):
         You *MUST* call :meth:`prepare_change` before calling this method.
 
         :param uri: the URI to play
-        :type uri: string
         :param live_stream: disables buffering, reducing latency for stream,
             and discarding data when paused
-        :type live_stream: bool
         :param download: enables "download" buffering mode
-        :type download: bool
         """
         assert self._playbin
 
@@ -720,14 +717,10 @@ class Audio(pykka.ThreadingActor):
 
         :param caps: GStreamer caps string describing the audio format to
             expect
-        :type caps: string
         :param need_data: callback for when appsrc needs data
-        :type need_data: callable which takes data length hint in ms
         :param enough_data: callback for when appsrc has enough data
-        :type enough_data: callable
         :param seek_data: callback for when data from a new position is needed
             to continue playback
-        :type seek_data: callable which takes time position in ms
         """
         assert self._playbin
 
@@ -755,8 +748,6 @@ class Audio(pykka.ThreadingActor):
         Returns :class:`True` if data was delivered.
 
         :param buffer_: buffer to pass to appsrc
-        :type buffer_: :class:`Gst.Buffer` or :class:`None`
-        :rtype: boolean
         """
         return self._appsrc.push(buffer_)
 
@@ -783,10 +774,7 @@ class Audio(pykka.ThreadingActor):
         self._about_to_finish_callback = callback
 
     def get_position(self) -> DurationMs:
-        """Get position in milliseconds.
-
-        :rtype: int
-        """
+        """Get position in milliseconds."""
         assert self._playbin
 
         success, position = self._playbin.query_position(Gst.Format.TIME)
@@ -803,8 +791,6 @@ class Audio(pykka.ThreadingActor):
         """Set position in milliseconds.
 
         :param position: the position in milliseconds
-        :type position: int
-        :rtype: :class:`True` if successful, else :class:`False`
         """
         assert self._queue
 
@@ -823,14 +809,14 @@ class Audio(pykka.ThreadingActor):
     def start_playback(self) -> bool:
         """Notify GStreamer that it should start playback.
 
-        :rtype: :class:`True` if successfull, else :class:`False`
+        Returns :class:`True` if successful, else :class:`False`.
         """
         return self._set_state(Gst.State.PLAYING)
 
     def pause_playback(self) -> bool:
         """Notify GStreamer that it should pause playback.
 
-        :rtype: :class:`True` if successfull, else :class:`False`
+        Returns :class:`True` if successful, else :class:`False`.
         """
         return self._set_state(Gst.State.PAUSED)
 
@@ -847,7 +833,7 @@ class Audio(pykka.ThreadingActor):
     def stop_playback(self) -> bool:
         """Notify GStreamer that is should stop playback.
 
-        :rtype: :class:`True` if successfull, else :class:`False`
+        Returns :class:`True` if successful, else :class:`False`.
         """
         return self._set_state(Gst.State.NULL)
 
@@ -892,10 +878,10 @@ class Audio(pykka.ThreadingActor):
             "READY" -> "NULL"
             "READY" -> "PAUSED"
 
+        Returns :class:`True` if successful, else :class:`False`.
+
         :param state: State to set playbin to. One of: `Gst.State.NULL`,
             `Gst.State.READY`, `Gst.State.PAUSED` and `Gst.State.PLAYING`.
-        :type state: :class:`Gst.State`
-        :rtype: :class:`True` if successfull, else :class:`False`
         """
         assert self._playbin
 
@@ -926,7 +912,6 @@ class Audio(pykka.ThreadingActor):
         deliver raw audio data to GStreamer.
 
         :param track: the current track
-        :type track: :class:`mopidy.models.Track`
         """
         assert self._playbin
 
@@ -971,8 +956,6 @@ class Audio(pykka.ThreadingActor):
         dictionary. For each set of tags we collect a tags_changed event is
         emitted with the keys of the changes tags. After such calls users may
         call this function to get the updated values.
-
-        :rtype: {key: [values]} dict for the current media.
         """
         # TODO: should this be a (deep) copy? most likely yes
         # TODO: should we return None when stopped?

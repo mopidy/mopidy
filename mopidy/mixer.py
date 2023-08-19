@@ -28,7 +28,6 @@ class Mixer:
     the issue.
 
     :param config: the entire Mopidy configuration
-    :type config: dict
     """
 
     name: ClassVar[str] = ""
@@ -56,8 +55,6 @@ class Mixer:
             Volume is unknown.
 
         *MAY be implemented by subclass.*
-
-        :rtype: int in range [0..100] or :class:`None`
         """
         return None
 
@@ -66,9 +63,9 @@ class Mixer:
 
         *MAY be implemented by subclass.*
 
+        Returns :class:`True` if successful, :class:`False` otherwise.
+
         :param volume: Volume in the range [0..100]
-        :type volume: int
-        :rtype: :class:`True` if success, :class:`False` if failure
         """
         return False
 
@@ -87,8 +84,8 @@ class Mixer:
 
         *MAY be implemented by subclass.*
 
-        :rtype: :class:`True` if muted, :class:`False` if unmuted,
-          :class:`None` if unknown.
+        Returns :class:`True` if muted, :class:`False` if unmuted, and
+        :class:`None` if unknown.
         """
         return None
 
@@ -97,9 +94,9 @@ class Mixer:
 
         *MAY be implemented by subclass.*
 
+        Returns :class:`True` if successful, :class:`False` otherwise.
+
         :param mute: :class:`True` to mute, :class:`False` to unmute
-        :type mute: bool
-        :rtype: :class:`True` if success, :class:`False` if failure
         """
         return False
 
@@ -136,13 +133,12 @@ class MixerListener(listener.Listener):
         """Helper to allow calling of mixer listener events."""
         listener.send(MixerListener, event, **kwargs)
 
-    def volume_changed(self, volume: int) -> None:
+    def volume_changed(self, volume: Percentage) -> None:
         """Called after the volume has changed.
 
         *MAY* be implemented by actor.
 
         :param volume: the new volume
-        :type volume: int in range [0..100]
         """
 
     def mute_changed(self, mute: bool) -> None:

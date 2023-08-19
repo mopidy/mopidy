@@ -117,7 +117,6 @@ class Command:
         """Add a child parser to consider using.
 
         :param name: name to use for the sub-command that is being added.
-        :type name: string
         """
         self._children[name] = command
 
@@ -207,10 +206,7 @@ class Command:
         in the command attribute of the return value.
 
         :param args: list of arguments to parse
-        :type args: list of strings
         :param prog: name to use for program
-        :type prog: string
-        :rtype: :class:`argparse.Namespace`
         """
         prog = prog or Path(sys.argv[0]).name
         try:
