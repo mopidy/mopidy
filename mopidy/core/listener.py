@@ -1,13 +1,33 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from mopidy import listener
 
 if TYPE_CHECKING:
+    from typing_extensions import TypeAlias
+
     from mopidy.audio import PlaybackState
     from mopidy.models import Playlist, TlTrack
-    from mopidy.types import Uri
+    from mopidy.types import DurationMs, Percentage, Uri
+
+
+CoreEvent: TypeAlias = Literal[
+    "track_playback_paused",
+    "track_playback_resumed",
+    "track_playback_started",
+    "track_playback_ended",
+    "playback_state_changed",
+    "tracklist_changed",
+    "playlists_loaded",
+    "playlist_changed",
+    "playlist_deleted",
+    "options_changed",
+    "volume_changed",
+    "mute_changed",
+    "seeked",
+    "stream_title_changed",
+]
 
 
 class CoreListener(listener.Listener):
@@ -21,43 +41,46 @@ class CoreListener(listener.Listener):
     """
 
     @staticmethod
-    def send(event: str, **kwargs: Any) -> None:
+    def send(event: CoreEvent, **kwargs: Any) -> None:
         """Helper to allow calling of core listener events."""
         listener.send(CoreListener, event, **kwargs)
 
-    def on_event(self, event: str, **kwargs: Any) -> None:
+    def on_event(self, event: CoreEvent, **kwargs: Any) -> None:
         """Called on all events.
 
         *MAY* be implemented by actor. By default, this method forwards the
         event to the specific event methods.
 
         :param event: the event name
-        :type event: string
         :param kwargs: any other arguments to the specific event handlers
         """
         # Just delegate to parent, entry mostly for docs.
         super().on_event(event, **kwargs)
 
-    def track_playback_paused(self, tl_track: TlTrack, time_position: int) -> None:
+    def track_playback_paused(
+        self,
+        tl_track: TlTrack,
+        time_position: DurationMs,
+    ) -> None:
         """Called whenever track playback is paused.
 
         *MAY* be implemented by actor.
 
         :param tl_track: the track that was playing when playback paused
-        :type tl_track: :class:`mopidy.models.TlTrack`
         :param time_position: the time position in milliseconds
-        :type time_position: int
         """
 
-    def track_playback_resumed(self, tl_track: TlTrack, time_position: int) -> None:
+    def track_playback_resumed(
+        self,
+        tl_track: TlTrack,
+        time_position: DurationMs,
+    ) -> None:
         """Called whenever track playback is resumed.
 
         *MAY* be implemented by actor.
 
         :param tl_track: the track that was playing when playback resumed
-        :type tl_track: :class:`mopidy.models.TlTrack`
         :param time_position: the time position in milliseconds
-        :type time_position: int
         """
 
     def track_playback_started(self, tl_track: TlTrack) -> None:
@@ -66,18 +89,19 @@ class CoreListener(listener.Listener):
         *MAY* be implemented by actor.
 
         :param tl_track: the track that just started playing
-        :type tl_track: :class:`mopidy.models.TlTrack`
         """
 
-    def track_playback_ended(self, tl_track: TlTrack, time_position: int) -> None:
+    def track_playback_ended(
+        self,
+        tl_track: TlTrack,
+        time_position: DurationMs,
+    ) -> None:
         """Called whenever playback of a track ends.
 
         *MAY* be implemented by actor.
 
         :param tl_track: the track that was played before playback stopped
-        :type tl_track: :class:`mopidy.models.TlTrack`
         :param time_position: the time position in milliseconds
-        :type time_position: int
         """
 
     def playback_state_changed(
@@ -131,7 +155,7 @@ class CoreListener(listener.Listener):
         *MAY* be implemented by actor.
         """
 
-    def volume_changed(self, volume: int) -> None:
+    def volume_changed(self, volume: Percentage) -> None:
         """Called whenever the volume is changed.
 
         *MAY* be implemented by actor.
@@ -149,7 +173,7 @@ class CoreListener(listener.Listener):
         :type mute: boolean
         """
 
-    def seeked(self, time_position: int) -> None:
+    def seeked(self, time_position: DurationMs) -> None:
         """Called whenever the time position changes by an unexpected amount, e.g.
         at seek to a new time position.
 
