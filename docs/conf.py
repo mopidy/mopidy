@@ -97,6 +97,10 @@ autodoc_mock_imports = [
     "mopidy.internal.gi",
 ]
 
+typehints_document_rtype = True
+typehints_use_signature = False
+typehints_use_signature_return = True
+
 
 # -- Options for extlink extension --------------------------------------------
 
