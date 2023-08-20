@@ -140,13 +140,13 @@ class Zeroconf:
 
         Call when your service shuts down.
         """
-        assert dbus
+        if not dbus or not self.group:
+            return
 
-        if self.group:
-            try:
-                self.group.Reset()
-                logger.debug("%s: Unpublished", self)
-            except dbus.exceptions.DBusException as e:
-                logger.debug("%s: Unpublish failed: %s", self, e)
-            finally:
-                self.group = None
+        try:
+            self.group.Reset()
+            logger.debug("%s: Unpublished", self)
+        except dbus.exceptions.DBusException as e:
+            logger.debug("%s: Unpublish failed: %s", self, e)
+        finally:
+            self.group = None
