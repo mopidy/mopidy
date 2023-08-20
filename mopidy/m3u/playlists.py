@@ -5,23 +5,28 @@ import locale
 import logging
 import operator
 import os
-import pathlib
 import tempfile
-from typing import TYPE_CHECKING
+from collections.abc import Generator
+from pathlib import Path
+from typing import IO, TYPE_CHECKING, Any, Optional, Union, cast
 
 from mopidy import backend
 from mopidy.exceptions import BackendError
 from mopidy.internal import path
+from mopidy.m3u.types import M3UConfig
 
 from . import Extension, translator
 
 if TYPE_CHECKING:
-    from mopidy.models import Playlist
+    from mopidy.backend import Backend
+    from mopidy.ext import Config
+    from mopidy.models import Playlist, Ref
+    from mopidy.types import Uri
 
 logger = logging.getLogger(__name__)
 
 
-def log_environment_error(message, error):
+def log_environment_error(message: str, error: EnvironmentError) -> None:
     if isinstance(error.strerror, bytes):
         strerror = error.strerror.decode(locale.getpreferredencoding())
     else:
@@ -30,9 +35,14 @@ def log_environment_error(message, error):
 
 
 @contextlib.contextmanager
-def replace(path, mode="w+b", encoding=None, errors=None):
+def replace(
+    path: Path,
+    mode: str = "w+b",
+    encoding: Optional[str] = None,
+    errors: Optional[str] = None,
+) -> Generator[IO[Any], None, None]:
     (fd, tempname) = tempfile.mkstemp(dir=str(path.parent))
-    tempname = pathlib.Path(tempname)
+    tempname = Path(tempname)
     try:
         fp = open(fd, mode, encoding=encoding, errors=errors)  # noqa: PTH123, SIM115
     except Exception:
@@ -52,22 +62,25 @@ def replace(path, mode="w+b", encoding=None, errors=None):
 
 
 class M3UPlaylistsProvider(backend.PlaylistsProvider):
-    def __init__(self, backend, config):
+    def __init__(self, backend: Backend, config: Config) -> None:
         super().__init__(backend)
 
-        ext_config = config[Extension.ext_name]
-        if ext_config["playlists_dir"] is None:
-            self._playlists_dir = Extension.get_data_dir(config)
-        else:
-            self._playlists_dir = path.expand_path(ext_config["playlists_dir"])
-        if ext_config["base_dir"] is None:
-            self._base_dir = self._playlists_dir
-        else:
-            self._base_dir = path.expand_path(ext_config["base_dir"])
+        ext_config = cast(M3UConfig, config[Extension.ext_name])
+
+        self._playlists_dir = (
+            path.expand_path(ext_config["playlists_dir"])
+            if ext_config["playlists_dir"]
+            else Extension.get_data_dir(config)
+        )
+        self._base_dir = (
+            path.expand_path(ext_config["base_dir"])
+            if ext_config["base_dir"]
+            else self._playlists_dir
+        )
         self._default_encoding = ext_config["default_encoding"]
         self._default_extension = ext_config["default_extension"]
 
-    def as_list(self):
+    def as_list(self) -> list[Ref]:
         result = []
         for entry in self._playlists_dir.iterdir():
             if entry.suffix not in [".m3u", ".m3u8"]:
@@ -79,7 +92,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         result.sort(key=operator.attrgetter("name"))
         return result
 
-    def create(self, name):
+    def create(self, name: str) -> Optional[Playlist]:
         path = translator.path_from_name(name.strip(), self._default_extension)
         try:
             with self._open(path, "w"):
@@ -90,7 +103,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         else:
             return translator.playlist(path, [], mtime)
 
-    def delete(self, uri):
+    def delete(self, uri: Uri) -> bool:
         path = translator.uri_to_path(uri)
         if not self._is_in_basedir(path):
             logger.debug("Ignoring path outside playlist dir: %s", uri)
@@ -103,7 +116,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         else:
             return True
 
-    def get_items(self, uri):
+    def get_items(self, uri: Uri) -> Optional[list[Ref]]:
         path = translator.uri_to_path(uri)
         if not self._is_in_basedir(path):
             logger.debug("Ignoring path outside playlist dir: %s", uri)
@@ -116,7 +129,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         else:
             return items
 
-    def lookup(self, uri):
+    def lookup(self, uri: Uri) -> Optional[Playlist]:
         path = translator.uri_to_path(uri)
         if not self._is_in_basedir(path):
             logger.debug("Ignoring path outside playlist dir: %s", uri)
@@ -130,10 +143,10 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         else:
             return translator.playlist(path, items, mtime)
 
-    def refresh(self):
+    def refresh(self) -> None:
         pass  # nothing to do
 
-    def save(self, playlist: Playlist) -> Playlist | None:
+    def save(self, playlist: Playlist) -> Optional[Playlist]:
         path = translator.uri_to_path(playlist.uri)
         if not self._is_in_basedir(path):
             logger.debug("Ignoring path outside playlist dir: %s", playlist.uri)
@@ -153,16 +166,18 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         else:
             return translator.playlist(path, playlist.tracks, mtime)
 
-    def _abspath(self, path):
+    def _abspath(self, path: Path) -> Path:
         if path.is_absolute():
             return path
         return self._playlists_dir / path
 
-    def _is_in_basedir(self, local_path):
+    def _is_in_basedir(self, local_path: Path) -> bool:
         local_path = self._abspath(local_path)
         return path.is_path_inside_base_dir(local_path, self._playlists_dir)
 
-    def _open(self, path, mode="r"):
+    def _open(
+        self, path: Path, mode: str = "r"
+    ) -> Union[contextlib._GeneratorContextManager[IO[Any]], IO[Any]]:
         encoding = "utf-8" if path.suffix == ".m3u8" else self._default_encoding
         if not path.is_absolute():
             path = self._abspath(path)
