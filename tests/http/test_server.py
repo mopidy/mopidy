@@ -35,7 +35,10 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
         apps = [
             {
                 "name": "mopidy",
-                "factory": handlers.make_mopidy_app_factory(testapps, teststatics),
+                "factory": handlers.make_mopidy_app_factory(
+                    apps=testapps,
+                    statics=teststatics,
+                ),
             }
         ]
 
@@ -229,7 +232,11 @@ class HttpServerWithStaticFilesTest(tornado.testing.AsyncHTTPTestCase):
         ]
 
         http_server = actor.HttpServer(
-            config=config, core=core, sockets=[], apps=[], statics=statics
+            config=config,
+            core=core,
+            sockets=[],
+            apps=[],
+            statics=statics,
         )
 
         return tornado.web.Application(http_server._get_request_handlers())
@@ -357,7 +364,11 @@ class HttpServerWithStaticDefaultApp(tornado.testing.AsyncHTTPTestCase):
         ]
 
         http_server = actor.HttpServer(
-            config=config, core=core, sockets=[], apps=[], statics=statics
+            config=config,
+            core=core,
+            sockets=[],
+            apps=[],
+            statics=statics,
         )
 
         return tornado.web.Application(http_server._get_request_handlers())
@@ -432,7 +443,12 @@ class HttpServerTestLoginWithSecureCookie(tornado.testing.AsyncHTTPTestCase):
         }
         core = mock.Mock()
 
-        apps = [{"name": "cookie_secret", "factory": cookie_secret_app_factory}]
+        apps = [
+            {
+                "name": "cookie_secret",
+                "factory": cookie_secret_app_factory,
+            }
+        ]
 
         http_server = actor.HttpServer(
             config=config, core=core, sockets=[], apps=apps, statics=[]
@@ -480,7 +496,11 @@ def test_get_secure_cookie(tmp_path):
     core = mock.Mock()
 
     http_server = actor.HttpServer(
-        config=config, core=core, sockets=[], apps=[], statics=[]
+        config=config,
+        core=core,
+        sockets=[],
+        apps=[],
+        statics=[],
     )
 
     # first secret, generating

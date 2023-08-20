@@ -6,8 +6,7 @@ import logging
 import secrets
 import socket
 import threading
-from os import PathLike
-from typing import TYPE_CHECKING, Any, Callable, ClassVar, TypedDict
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import pykka
 import tornado.httpserver
@@ -24,29 +23,17 @@ from mopidy.internal import formatting, network
 if TYPE_CHECKING:
     from mopidy.core.actor import CoreProxy
     from mopidy.ext import Config
+    from mopidy.http.types import HttpApp, HttpStatic, RequestRule
 
 
 logger = logging.getLogger(__name__)
-
-
-class HttpApp(TypedDict):
-    name: str
-    factory: Callable[
-        [Config, CoreProxy],
-        list[tuple[str, tornado.web.RequestHandler, dict[str, Any]]],
-    ]
-
-
-class HttpStatic(TypedDict):
-    name: str
-    path: str | PathLike[str]
 
 
 class HttpFrontend(pykka.ThreadingActor, CoreListener):
     apps: ClassVar[list[HttpApp]] = []
     statics: ClassVar[list[HttpStatic]] = []
 
-    def __init__(self, config: Config, core: CoreProxy):
+    def __init__(self, config: Config, core: CoreProxy) -> None:
         super().__init__()
 
         self.hostname = network.format_hostname(config["http"]["hostname"])
@@ -72,7 +59,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         self.zeroconf_http = None
         self.zeroconf_mopidy_http = None
 
-    def on_start(self):
+    def on_start(self) -> None:
         logger.info("HTTP server running at [%s]:%s", self.hostname, self.port)
         self.server.start()
 
@@ -88,7 +75,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
             self.zeroconf_http.publish()
             self.zeroconf_mopidy_http.publish()
 
-    def on_stop(self):
+    def on_stop(self) -> None:
         if self.zeroconf_http:
             self.zeroconf_http.unpublish()
         if self.zeroconf_mopidy_http:
@@ -96,11 +83,12 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
 
         self.server.stop()
 
-    def on_event(self, name, **data):
+    def on_event(self, name: str, **data: Any) -> None:
+        assert self.server.io_loop
         on_event(name, self.server.io_loop, **data)
 
 
-def on_event(name, io_loop, **data):
+def on_event(name: str, io_loop: tornado.ioloop.IOLoop, **data: Any) -> None:
     event = data
     event["event"] = name
     message = json.dumps(event, cls=models.ModelJSONEncoder)
@@ -130,13 +118,13 @@ class HttpServer(threading.Thread):
         self.server = None
         self.io_loop = None
 
-    def run(self):
+    def run(self) -> None:
         # Since we start Tornado in a another thread than the main thread,
         # we must explicitly create an asyncio loop for the current thread.
         asyncio.set_event_loop(asyncio.new_event_loop())
 
         self.app = tornado.web.Application(
-            self._get_request_handlers(),
+            self._get_request_handlers(),  # pyright: ignore[reportGeneralTypeIssues]
             cookie_secret=self._get_cookie_secret(),
         )
         self.server = tornado.httpserver.HTTPServer(self.app)
@@ -147,12 +135,12 @@ class HttpServer(threading.Thread):
 
         logger.debug("Stopped HTTP server")
 
-    def stop(self):
+    def stop(self) -> None:
         logger.debug("Stopping HTTP server")
         assert self.io_loop
         self.io_loop.add_callback(self.io_loop.stop)
 
-    def _get_request_handlers(self):
+    def _get_request_handlers(self) -> list[RequestRule]:
         request_handlers = []
         request_handlers.extend(self._get_app_request_handlers())
         request_handlers.extend(self._get_static_request_handlers())
@@ -169,7 +157,7 @@ class HttpServer(threading.Thread):
 
         return request_handlers
 
-    def _get_app_request_handlers(self):
+    def _get_app_request_handlers(self) -> list[RequestRule]:
         result = []
         for app in self.apps:
             try:
@@ -186,7 +174,7 @@ class HttpServer(threading.Thread):
             logger.debug("Loaded HTTP extension: %s", app["name"])
         return result
 
-    def _get_static_request_handlers(self):
+    def _get_static_request_handlers(self) -> list[RequestRule]:
         result = []
         for static in self.statics:
             result.append((f"/{static['name']}", handlers.AddSlashHandler))
@@ -200,7 +188,7 @@ class HttpServer(threading.Thread):
             logger.debug("Loaded static HTTP extension: %s", static["name"])
         return result
 
-    def _get_default_request_handlers(self):
+    def _get_default_request_handlers(self) -> list[RequestRule]:
         sites = [app["name"] for app in self.apps + self.statics]
 
         default_app = self.config["http"]["default_app"]
@@ -217,7 +205,7 @@ class HttpServer(threading.Thread):
             )
         ]
 
-    def _get_cookie_secret(self):
+    def _get_cookie_secret(self) -> str:
         file_path = Extension.get_data_dir(self.config) / "cookie_secret"
         if not file_path.is_file():
             cookie_secret = secrets.token_hex(32)
