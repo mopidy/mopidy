@@ -648,8 +648,6 @@ class AudioLiveTest(unittest.TestCase):
         self.audio._playbin = mock.Mock(spec=["set_property"])
 
         self.source = mock.MagicMock()
-        # Avoid appsrc.configure()
-        self.source.get_factory.get_name = mock.Mock(return_value="not_appsrc")
         self.source.props = mock.Mock(spec=["is_live"])
 
     def test_not_live_mode(self):
@@ -665,17 +663,6 @@ class AudioLiveTest(unittest.TestCase):
         self.audio._on_source_setup("dummy", self.source)
 
         self.source.set_live.assert_called_with(True)
-
-    def test_not_live_mode_after_set_appsrc(self):
-        self.audio._live_stream = True
-
-        # Embrace appsrc.configure()
-        self.source.get_factory.get_name.return_value = "appsrc"
-
-        self.audio.set_appsrc("")
-        self.audio._on_source_setup("dummy", self.source)
-
-        self.source.set_live.assert_not_called()
 
 
 class DownloadBufferingTest(unittest.TestCase):
@@ -701,15 +688,6 @@ class DownloadBufferingTest(unittest.TestCase):
 
         playbin.set_property.assert_has_calls([mock.call("flags", 0x02)])
 
-    def test_download_flag_is_not_passed_to_playbin_if_set_appsrc(
-        self,
-    ):
-        playbin = self.audio._playbin
-
-        self.audio.set_appsrc("")
-
-        playbin.set_property.assert_has_calls([mock.call("flags", 0x02)])
-
 
 class SourceSetupCallbackTest(unittest.TestCase):
     def setUp(self):
@@ -718,8 +696,6 @@ class SourceSetupCallbackTest(unittest.TestCase):
         self.audio._playbin = mock.Mock(spec=["set_property"])
 
         self.source = mock.MagicMock()
-        # Avoid appsrc.configure()
-        self.source.get_factory.get_name = mock.Mock(return_value="not_appsrc")
 
     def test_source_setup_callback(self):
         mock_callback = mock.MagicMock()
