@@ -757,7 +757,7 @@ class Audio(pykka.ThreadingActor):
         This should be used to modify source-specific properties such as login
         details.
 
-        :param callable callback: Callback to run when we setup the source.
+        :param callable: Callback to run when we setup the source.
         """
         self._source_setup_callback = callback
 
@@ -769,7 +769,7 @@ class Audio(pykka.ThreadingActor):
         block until this call has been made. :meth:`prepare_change` is not
         needed before :meth:`set_uri` in this one special case.
 
-        :param callable callback: Callback to run when we need the next URI.
+        :param callable: Callback to run when we need the next URI.
         """
         self._about_to_finish_callback = callback
 
