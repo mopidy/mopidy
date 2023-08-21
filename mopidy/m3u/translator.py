@@ -1,45 +1,60 @@
-import os
-import pathlib
-import urllib.parse
+from __future__ import annotations
 
-from mopidy import models
+import os
+import urllib.parse
+from collections.abc import Iterable
+from pathlib import Path
+from typing import IO, Optional, Union
+
 from mopidy.internal import path
+from mopidy.models import Playlist, Ref, Track
+from mopidy.types import Uri
 
 from . import Extension
 
 
-def path_to_uri(path, scheme=Extension.ext_name):
+def path_to_uri(
+    path: Path,
+    scheme: str = Extension.ext_name,
+) -> Uri:
     """Convert file path to URI."""
     bytes_path = os.path.normpath(bytes(path))
     uripath = urllib.parse.quote_from_bytes(bytes_path)
-    return urllib.parse.urlunsplit((scheme, None, uripath, None, None))
+    return Uri(urllib.parse.urlunsplit((scheme, None, uripath, None, None)))
 
 
-def uri_to_path(uri):
+def uri_to_path(uri: Uri) -> Path:
     """Convert URI to file path."""
     return path.uri_to_path(uri)
 
 
-def name_from_path(path):
+def name_from_path(path: Path) -> Optional[str]:
     """Extract name from file path."""
-    name = bytes(pathlib.Path(path.stem))
+    name = bytes(Path(path.stem))
     try:
         return name.decode(errors="replace")
     except UnicodeError:
         return None
 
 
-def path_from_name(name, ext=None, sep="|"):
+def path_from_name(
+    name: str,
+    ext: Optional[str] = None,
+    sep: str = "|",
+) -> Path:
     """Convert name with optional extension to file path."""
     name = name.replace(os.sep, sep) + ext if ext else name.replace(os.sep, sep)
-    return pathlib.Path(name)
+    return Path(name)
 
 
-def path_to_ref(path):
-    return models.Ref.playlist(uri=path_to_uri(path), name=name_from_path(path))
+def path_to_ref(path: Path) -> Ref:
+    return Ref.playlist(uri=path_to_uri(path), name=name_from_path(path))
 
 
-def load_items(fp, basedir):
+def load_items(
+    fp: IO[str],
+    basedir: Path,
+) -> list[Ref]:
     refs = []
     name = None
     for line in filter(None, (line.strip() for line in fp)):
@@ -55,12 +70,15 @@ def load_items(fp, basedir):
         else:
             # TODO: ensure this is urlencoded
             uri = line  # do *not* extract name from (stream?) URI path
-        refs.append(models.Ref.track(uri=uri, name=name))
+        refs.append(Ref.track(uri=uri, name=name))
         name = None
     return refs
 
 
-def dump_items(items, fp):
+def dump_items(
+    items: Iterable[Union[Ref, Track]],
+    fp: IO[str],
+) -> None:
     if any(item.name for item in items):
         print("#EXTM3U", file=fp)
     for item in items:
@@ -73,12 +91,16 @@ def dump_items(items, fp):
             print(item.uri, file=fp)
 
 
-def playlist(path, items=None, mtime=None):
+def playlist(
+    path: Path,
+    items: Optional[Iterable[Union[Ref, Track]]] = None,
+    mtime: Optional[float] = None,
+) -> Playlist:
     if items is None:
         items = []
-    return models.Playlist(
+    return Playlist(
         uri=path_to_uri(path),
         name=name_from_path(path),
-        tracks=[models.Track(uri=item.uri, name=item.name) for item in items],
+        tracks=[Track(uri=item.uri, name=item.name) for item in items],
         last_modified=(int(mtime * 1000) if mtime else None),
     )
