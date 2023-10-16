@@ -1,12 +1,8 @@
 import platform
 import sys
+from importlib import metadata
 from pathlib import Path
 from unittest import mock
-
-if sys.version_info < (3, 10):
-    import importlib_metadata as metadata  # pyright: ignore[reportMissingImports]
-else:
-    from importlib import metadata
 
 import pytest
 

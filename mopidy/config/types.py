@@ -6,11 +6,11 @@ import logging
 import re
 import socket
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from typing import (
     TYPE_CHECKING,
     Any,
     AnyStr,
-    Callable,
     ClassVar,
     Generic,
     Literal,
@@ -280,7 +280,7 @@ class Pair(ConfigValue[tuple[K, V]]):
         optional: bool = False,
         optional_pair: bool = False,
         separator: str = "|",
-        subtypes: tuple[K, V] = (String(), String()),  # noqa: B008
+        subtypes: tuple[K, V] = (String(), String()),
     ) -> None:
         self._required = not optional
         self._optional_pair = optional_pair

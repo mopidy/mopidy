@@ -89,7 +89,7 @@ ignore = [
     "UP006", # deprecated-collection-type
     "UP007", # typing-union
 ]
-target-version = "py39"
+target-version = "py311"
 
 [tool.ruff.per-file-ignores]
 "docs/*" = [

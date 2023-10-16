@@ -355,7 +355,7 @@ class JsonRpcInspector:
 
         params = []
 
-        for arg, _default in zip(argspec.args, defaults):
+        for arg, _default in zip(argspec.args, defaults, strict=True):
             if arg == "self":
                 continue
             params.append({"name": arg})

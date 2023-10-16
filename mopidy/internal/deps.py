@@ -4,19 +4,16 @@ import functools
 import platform
 import re
 import sys
+from collections.abc import Callable
+from importlib import metadata
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Optional, TypedDict
-
-if sys.version_info < (3, 10):
-    import importlib_metadata as metadata  # pyright: ignore[reportMissingImports]
-else:
-    from importlib import metadata
+from typing import TYPE_CHECKING, Optional, TypedDict
 
 from mopidy.internal import formatting
 from mopidy.internal.gi import Gst, gi
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
+    from typing import TypeAlias
 
     class DepInfo(TypedDict, total=False):
         name: str

@@ -31,7 +31,7 @@ from mopidy.config.types import (
 from mopidy.internal import path, versioning
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
+    from typing import TypeAlias
 
     from mopidy.ext import ExtensionData
     from mopidy.internal.log import LogColorName, LogLevelName

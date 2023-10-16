@@ -11,7 +11,7 @@ from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
 from mopidy import listener
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
+    from typing import TypeAlias
 
     from mopidy.types import Percentage
 
