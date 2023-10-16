@@ -20,7 +20,7 @@ Dependencies
 
 - Python >= 3.11 is now required. Python 3.7-3.10 are no longer supported.
 
-- GStreamer >= 1.18.0 is now required.
+- GStreamer >= 1.22.0 is now required.
 
 - Pykka >= 4.0 is now required.
 
