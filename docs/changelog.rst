@@ -18,9 +18,11 @@ old versions of our dependencies and a number of deprecated APIs.
 Dependencies
 ------------
 
-- Python >= 3.9 is now required. Python 3.7 and 3.8 are no longer supported.
+- Python >= 3.11 is now required. Python 3.7-3.10 are no longer supported.
 
 - GStreamer >= 1.18.0 is now required.
+
+- Pykka >= 4.0 is now required.
 
 - Replaced :mod:`pkg_resources`` with :mod:`importlib.metadata`.
 
