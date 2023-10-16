@@ -94,7 +94,7 @@ class Command:
     #: Help text to display in help output.
 
     _children: dict[str, Command]
-    _arguments: list[tuple[tuple[Any], dict[str, Any]]]
+    _arguments: list[tuple[tuple[Any, ...], dict[str, Any]]]
     _overrides: dict[str, Any]
 
     def __init__(self) -> None:

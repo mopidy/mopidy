@@ -6,6 +6,7 @@ import re
 import sys
 from collections.abc import Callable
 from importlib import metadata
+from os import PathLike
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional, TypedDict
 
@@ -18,7 +19,7 @@ if TYPE_CHECKING:
     class DepInfo(TypedDict, total=False):
         name: str
         version: str
-        path: Path
+        path: PathLike[str]
         dependencies: list[DepInfo]
         other: str
 
@@ -30,7 +31,7 @@ def format_dependency_list(adapters: Optional[list[Adapter]] = None) -> str:
         dist_names = {
             ep.dist.name
             for ep in metadata.entry_points(group="mopidy.ext")
-            if ep.dist.name != "Mopidy"
+            if ep.dist is not None and ep.dist.name != "Mopidy"
         }
         dist_infos = [
             functools.partial(pkg_info, dist_name) for dist_name in dist_names

@@ -505,4 +505,4 @@ class Path(ConfigValue[_ExpandedPath]):
             result = result.original
         if isinstance(result, bytes):
             result = result.decode(errors="surrogateescape")
-        return result
+        return str(result)

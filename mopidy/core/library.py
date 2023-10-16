@@ -205,7 +205,7 @@ class LibraryController:
             if backend_uris
         }
 
-        results = {uri: () for uri in uris}
+        results: dict[Uri, tuple[Image, ...]] = {uri: () for uri in uris}
         for backend, future in futures.items():
             with _backend_error_handling(backend):
                 if future.get() is None:
