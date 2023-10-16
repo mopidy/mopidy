@@ -26,6 +26,8 @@ Dependencies
 
 - Requests >= 2.28 is now required.
 
+- Setuptools >= 66 is now required.
+
 - Tornado >= 6.2 is now required.
 
 - Replaced :mod:`pkg_resources`` with :mod:`importlib.metadata`.
