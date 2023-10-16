@@ -9,8 +9,20 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
-v3.5.0 (UNRELEASED)
+v4.0.0 (UNRELEASED)
 ===================
+
+Mopidy 4.0 is a backward-incompatible release because we've dropped support for
+old versions of our dependencies and a number of deprecated APIs.
+
+Dependencies
+------------
+
+- Python >= 3.9 is now required. Python 3.7 and 3.8 are no longer supported.
+
+- GStreamer >= 1.18.0 is now required.
+
+- Replaced :mod:`pkg_resources`` with :mod:`importlib.metadata`.
 
 Audio
 -----
@@ -22,15 +34,6 @@ Audio
   - :func:`mopidy.audio.calculate_duration`
   - :func:`mopidy.audio.create_buffer`
   - :func:`mopidy.audio.millisecond_to_clocktime`
-
-Dependencies
-------------
-
-- Python >= 3.9 is now required. Python 3.7 and 3.8 are no longer supported.
-
-- GStreamer >= 1.18.0 is now required.
-
-- Replaced :mod:`pkg_resources`` with :mod:`importlib.metadata`.
 
 Internals
 ---------
