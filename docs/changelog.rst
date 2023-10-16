@@ -24,6 +24,8 @@ Dependencies
 
 - Pykka >= 4.0 is now required.
 
+- Tornado >= 6.2 is now required.
+
 - Replaced :mod:`pkg_resources`` with :mod:`importlib.metadata`.
 
 Audio
