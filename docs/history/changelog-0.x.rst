@@ -573,7 +573,7 @@ guys. Thanks to everyone that has contributed!
 **Internal changes**
 
 - Events from the audio actor, backends, and core actor are now emitted
-  asyncronously through the GObject event loop. This should resolve the issue
+  asynchronously through the GObject event loop. This should resolve the issue
   that has blocked the merge of the EOT-vs-EOS fix for a long time.
 
 
@@ -1074,7 +1074,7 @@ one new.
 
 - Developers running Mopidy from a Git clone now need to run ``python setup.py
   develop`` to register the bundled extensions. If you don't do this, Mopidy
-  will not find any frontends or backends. Note that we highly recomend you do
+  will not find any frontends or backends. Note that we highly recommend you do
   this in a virtualenv, not system wide. As a bonus, the command also gives
   you a ``mopidy`` executable in your search path.
 
@@ -1538,7 +1538,7 @@ backends and the future HTTP frontend.
   dependencies where looked up in Pykka's actor registry.
 
 - All properties in the core API now got getters, and setters if setting them
-  is allowed. They are not explictly listed in the docs as they have the same
+  is allowed. They are not explicitly listed in the docs as they have the same
   behavior as the documented properties, but they are available and may be
   used. This is useful for the future HTTP frontend.
 
@@ -1744,7 +1744,7 @@ resolved a bunch of related issues.
 
 - :issue:`150`: Fix bug which caused some clients to block Mopidy completely.
   The bug was caused by some clients sending ``close`` and then shutting down
-  the connection right away. This trigged a situation in which the connection
+  the connection right away. This triggered a situation in which the connection
   cleanup code would wait for an response that would never come inside the
   event loop, blocking everything else.
 
@@ -2041,7 +2041,7 @@ minor bugs.
   The GStreamer `appsrc` bin wasn't being linked due to lack of default caps.
   (Fixes: :issue:`85`)
 
-- Fix crash in :mod:`mopidy.mixers.nad` that occures at startup when the
+- Fix crash in :mod:`mopidy.mixers.nad` that occurs at startup when the
   :mod:`io` module is available. We used an `eol` keyword argument which is
   supported by :meth:`serial.FileLike.readline`, but not by
   :meth:`io.RawBaseIO.readline`.  When the :mod:`io` module is available, it is
@@ -2266,7 +2266,7 @@ to this problem.
 
 - Settings:
 
-  - Automatically expand the "~" characted to the user's home directory and
+  - Automatically expand the "~" character to the user's home directory and
     make the path absolute for settings with names ending in ``_PATH`` or
     ``_FILE``.
 
@@ -2545,7 +2545,7 @@ multiple times in a playlist, and support for IPv6. We have also fixed the
 choppy playback on the libspotify backend. For the road ahead of us, we got an
 updated release roadmap with our goals for the 0.1 to 0.3 releases.
 
-Enjoy the best alpha relase of Mopidy ever :-)
+Enjoy the best alpha release of Mopidy ever :-)
 
 **Changes**
 
@@ -2677,7 +2677,7 @@ v0.1.0a0 (2010-03-27)
 Raymond in *The Cathedral and the Bazaar*.
 
 Three months of development should be more than enough. We have more to do, but
-Mopidy is working and usable. 0.1.0a0 is an alpha release, which basicly means
+Mopidy is working and usable. 0.1.0a0 is an alpha release, which basically means
 we will still change APIs, add features, etc. before the final 0.1.0 release.
 But the software is usable as is, so we release it. Please give it a try and
 give us feedback, either at our IRC channel or through the `issue tracker
