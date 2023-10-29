@@ -33,7 +33,7 @@ systems, you can control the music from any phone, tablet, or computer.
 
 **Mopidy on Raspberry Pi**
 
-The `Raspberry Pi`_ is an popular device to run Mopidy on, either using
+The `Raspberry Pi`_ is a popular device to run Mopidy on, either using
 Raspbian, Ubuntu, or Arch Linux.
 Pimoroni recommends Mopidy for use with their `Pirate Audio`_ audio gear for
 Raspberry Pi.
@@ -45,7 +45,7 @@ audio jukebox system for Raspberry Pi.
 Mopidy's extension support and Python, JSON-RPC, and JavaScript APIs make
 Mopidy a perfect base for your projects.
 In one hack, a Raspberry Pi was embedded in an old cassette player. The buttons
-and volume control are wired up with GPIO on the Raspberry Pi, and is used to
+and volume control are wired up with GPIO on the Raspberry Pi, and are used to
 control playback through a custom Mopidy extension. The cassettes have NFC tags
 used to select playlists from Spotify.
 
