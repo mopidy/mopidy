@@ -15,13 +15,12 @@ from mopidy.audio import utils
 from mopidy.audio.constants import PlaybackState
 from mopidy.audio.listener import AudioListener
 from mopidy.internal import process
-from mopidy.internal.gi import GLib, GObject, Gst, GstPbutils
+from mopidy.internal.gi import GLib, Gst, GstPbutils
 from mopidy.types import DurationMs, Percentage
 
 if TYPE_CHECKING:
     from mopidy.config import Config
     from mopidy.mixer import MixerProxy
-    from mopidy.models import Track
     from mopidy.softwaremixer.mixer import SoftwareMixerProxy
 
 logger = logging.getLogger(__name__)
@@ -39,95 +38,6 @@ _GST_STATE_MAPPING: dict[Gst.State, PlaybackState] = {
     Gst.State.PAUSED: PlaybackState.PAUSED,
     Gst.State.NULL: PlaybackState.STOPPED,
 }
-
-
-# TODO: expose this as a property on audio?
-class _Appsrc:
-    """Helper class for dealing with appsrc based playback."""
-
-    def __init__(self) -> None:
-        self._signals = utils.Signals()
-        self.reset()
-
-    def reset(self) -> None:
-        """Reset the helper.
-
-        Should be called whenever the source changes and we are not setting up
-        a new appsrc.
-        """
-        self.prepare(
-            caps=None,
-            need_data=None,
-            enough_data=None,
-            seek_data=None,
-        )
-
-    def prepare(
-        self,
-        *,
-        caps: Optional[Gst.Caps],
-        need_data: Optional[Callable],
-        enough_data: Optional[Callable],
-        seek_data: Optional[Callable],
-    ) -> None:
-        """Store info we will need when the appsrc element gets installed."""
-        self._signals.clear()
-        self._source = None
-        self._caps = caps
-        self._need_data_callback = need_data
-        self._seek_data_callback = seek_data
-        self._enough_data_callback = enough_data
-
-    def configure(self, source) -> None:
-        """Configure the supplied source for use.
-
-        Should be called whenever we get a new appsrc.
-        """
-        source.set_property("caps", self._caps)
-        source.set_property("format", "time")
-        source.set_property("stream-type", "seekable")
-        source.set_property("max-bytes", 1 << 20)  # 1MB
-        source.set_property("min-percent", 50)
-
-        if self._need_data_callback:
-            self._signals.connect(
-                source, "need-data", self._on_signal, self._need_data_callback
-            )
-        if self._seek_data_callback:
-            self._signals.connect(
-                source, "seek-data", self._on_signal, self._seek_data_callback
-            )
-        if self._enough_data_callback:
-            self._signals.connect(
-                source,
-                "enough-data",
-                self._on_signal,
-                None,
-                self._enough_data_callback,
-            )
-
-        self._source = source
-
-    def push(self, buffer_) -> bool:
-        if self._source is None:
-            return False
-
-        if buffer_ is None:
-            gst_logger.debug("Sending appsrc end-of-stream event.")
-            result = self._source.emit("end-of-stream")
-            return result == Gst.FlowReturn.OK
-
-        result = self._source.emit("push-buffer", buffer_)
-        return result == Gst.FlowReturn.OK
-
-    def _on_signal(self, _element, clocktime, func) -> bool:
-        # This shim is used to ensure we always return true, and also handles
-        # that not all the callbacks have a time argument.
-        if clocktime is None:
-            func()
-        else:
-            func(utils.clocktime_to_millisecond(clocktime))
-        return True
 
 
 # TODO: expose this as a property on audio when #790 gets further along.
@@ -490,7 +400,6 @@ class Audio(pykka.ThreadingActor):
         self._source_setup_callback: Optional[Callable] = None
 
         self._handler = _Handler(self)
-        self._appsrc = _Appsrc()
         self._signals = utils.Signals()
 
         if mixer and self._config["audio"]["mixer"] == "software":
@@ -593,8 +502,8 @@ class Audio(pykka.ThreadingActor):
         # to this queue.
 
         # TODO: See if settings should be set to minimize latency. Previous
-        # setting breaks appsrc, and settings before that broke on a few
-        # systems. So leave the default to play it safe.
+        # setting breaks appsrc (which we no longer use), and settings before
+        # that broke on a few systems. So leave the default to play it safe.
         buffer_time = self._config["audio"]["buffer_time"]
         if buffer_time is not None and buffer_time > 0:
             queue.set_property("max-size-time", buffer_time * Gst.MSECOND)
@@ -646,11 +555,6 @@ class Audio(pykka.ThreadingActor):
             raise exceptions.AudioException(
                 "Failed to get factory from GStreamer source."
             )
-
-        if source_factory.get_name() == "appsrc":
-            self._appsrc.configure(source)
-        else:
-            self._appsrc.reset()
 
         if self._source_setup_callback:
             logger.debug("Running source-setup callback")
@@ -705,53 +609,6 @@ class Audio(pykka.ThreadingActor):
         if self.mixer is not None and current_volume is not None:
             self.mixer.set_volume(current_volume)
 
-    def set_appsrc(
-        self,
-        caps: str,
-        need_data: Optional[Callable] = None,
-        enough_data: Optional[Callable] = None,
-        seek_data: Optional[Callable] = None,
-    ) -> None:
-        """Switch to using appsrc for getting audio to be played.
-
-        You *MUST* call :meth:`prepare_change` before calling this method.
-
-        :param caps: GStreamer caps string describing the audio format to
-            expect
-        :param need_data: callback for when appsrc needs data
-        :param enough_data: callback for when appsrc has enough data
-        :param seek_data: callback for when data from a new position is needed
-            to continue playback
-        """
-        assert self._playbin
-
-        self._appsrc.prepare(
-            caps=Gst.Caps.from_string(caps),
-            need_data=need_data,
-            enough_data=enough_data,
-            seek_data=seek_data,
-        )
-        uri = "appsrc://"
-        self._pending_uri = uri
-        self._live_stream = False
-        self._playbin.set_property("flags", _GST_PLAY_FLAGS_AUDIO)
-        self._playbin.set_property("uri", uri)
-
-    def emit_data(self, buffer_: Optional[Gst.Buffer]) -> bool:
-        """Call this to deliver raw audio data to be played.
-
-        If the buffer is :class:`None`, the end-of-stream token is put on the
-        playbin. We will get a GStreamer message when the stream playback
-        reaches the token, and can then do any end-of-stream related tasks.
-
-        Note that the URI must be set to ``appsrc://`` for this to work.
-
-        Returns :class:`True` if data was delivered.
-
-        :param buffer_: buffer to pass to appsrc
-        """
-        return self._appsrc.push(buffer_)
-
     def set_source_setup_callback(self, callback: Callable) -> None:
         """Configure audio to use a source-setup callback.
 
@@ -800,9 +657,9 @@ class Audio(pykka.ThreadingActor):
         gst_logger.debug("Sending flushing seek: position=%r", gst_position)
         # Send seek event to the queue not the playbin. The default behavior
         # for bins is to forward this event to all sinks. Which results in
-        # duplicate seek events making it to appsrc. Since elements are not
-        # allowed to act on the seek event, only modify it, this should be safe
-        # to do.
+        # duplicate seek events making it to appsrc (which we no longer use).
+        # Since elements are not allowed to act on the seek event, only modify
+        # it, this should be safe to do.
         return self._queue.seek_simple(
             Gst.Format.TIME, Gst.SeekFlags.FLUSH, gst_position
         )
@@ -832,7 +689,7 @@ class Audio(pykka.ThreadingActor):
         return self._set_state(Gst.State.READY)
 
     def stop_playback(self) -> bool:
-        """Notify GStreamer that is should stop playback.
+        """Notify GStreamer that it should stop playback.
 
         Returns :class:`True` if successful, else :class:`False`.
         """
@@ -904,58 +761,12 @@ class Audio(pykka.ThreadingActor):
         # of faking it in the message handling when result=OK
         return True
 
-    # TODO: bake this into setup appsrc perhaps?
-    def set_metadata(self, track: Track) -> None:
-        """Set track metadata for currently playing song.
-
-        Only needs to be called by sources such as ``appsrc`` which do not
-        already inject tags in playbin, e.g. when using :meth:`emit_data` to
-        deliver raw audio data to GStreamer.
-
-        :param track: the current track
-        """
-        assert self._playbin
-
-        taglist = Gst.TagList.new_empty()
-        artists = [a for a in (track.artists or []) if a.name]
-
-        def set_value(tag, value):
-            gobject_value = GObject.Value()
-            gobject_value.init(GObject.TYPE_STRING)
-            gobject_value.set_string(value)
-            taglist.add_value(Gst.TagMergeMode.REPLACE, tag, gobject_value)
-
-        # Default to blank data to trick shoutcast into clearing any previous
-        # values it might have.
-        # TODO: Verify if this works at all, likely it doesn't.
-        set_value(Gst.TAG_ARTIST, " ")
-        set_value(Gst.TAG_TITLE, " ")
-        set_value(Gst.TAG_ALBUM, " ")
-
-        if artists:
-            set_value(Gst.TAG_ARTIST, ", ".join(a.name for a in artists))
-
-        if track.name:
-            set_value(Gst.TAG_TITLE, track.name)
-
-        if track.album and track.album.name:
-            set_value(Gst.TAG_ALBUM, track.album.name)
-
-        gst_logger.debug(
-            "Sending TAG event for track %r: %r", track.uri, taglist.to_string()
-        )
-        event = Gst.Event.new_tag(taglist)
-        if self._pending_uri:
-            self._pending_metadata = event
-        else:
-            self._playbin.send_event(event)
-
     def get_current_tags(self) -> dict[str, list[Any]]:
         """Get the currently playing media's tags.
 
         If no tags have been found, or nothing is playing this returns an empty
         dictionary. For each set of tags we collect a tags_changed event is
-        emitted with the keys of the changes tags. After such calls users may
+        emitted with the keys of the changed tags. After such calls users may
         call this function to get the updated values.
         """
         # TODO: should this be a (deep) copy? most likely yes
@@ -969,8 +780,6 @@ class AudioProxy(ActorMemberMixin, pykka.ActorProxy[Audio]):
 
     state = proxy_field(Audio.state)
     set_uri = proxy_method(Audio.set_uri)
-    set_appsrc = proxy_method(Audio.set_appsrc)
-    emit_data = proxy_method(Audio.emit_data)
     set_source_setup_callback = proxy_method(Audio.set_source_setup_callback)
     set_about_to_finish_callback = proxy_method(Audio.set_about_to_finish_callback)
     get_position = proxy_method(Audio.get_position)
@@ -981,5 +790,4 @@ class AudioProxy(ActorMemberMixin, pykka.ActorProxy[Audio]):
     stop_playback = proxy_method(Audio.stop_playback)
     wait_for_state_change = proxy_method(Audio.wait_for_state_change)
     enable_sync_handler = proxy_method(Audio.enable_sync_handler)
-    set_metadata = proxy_method(Audio.set_metadata)
     get_current_tags = proxy_method(Audio.get_current_tags)

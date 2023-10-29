@@ -39,6 +39,9 @@ Audio
   which has not been used since Spotify shut down their libspotify APIs in
   May 2022. The removed functions/methods are:
 
+  - :meth:`mopidy.audio.Audio.emit_data`
+  - :meth:`mopidy.audio.Audio.set_appsrc`
+  - :meth:`mopidy.audio.Audio.set_metadata`
   - :func:`mopidy.audio.calculate_duration`
   - :func:`mopidy.audio.create_buffer`
   - :func:`mopidy.audio.millisecond_to_clocktime`
