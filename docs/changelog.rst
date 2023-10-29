@@ -43,6 +43,11 @@ Audio
   - :func:`mopidy.audio.create_buffer`
   - :func:`mopidy.audio.millisecond_to_clocktime`
 
+M3U
+---
+
+- Stop following symlinks when `file/follow_symlinks` is false. (PR: :issue:`2094`)
+
 Internals
 ---------
 
