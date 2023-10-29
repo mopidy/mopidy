@@ -3,12 +3,12 @@
 import sys
 import textwrap
 
-try:
-    import gi
+import gi
 
+try:
     gi.require_version("Gst", "1.0")
-    from gi.repository import GLib, GObject, Gst
-except ImportError:
+    gi.require_version("GstPbutils", "1.0")
+except ValueError:
     print(  # noqa: T201
         textwrap.dedent(
             """
@@ -24,11 +24,10 @@ except ImportError:
         )
     )
     raise
-else:
-    Gst.init([])
-    gi.require_version("GstPbutils", "1.0")
-    from gi.repository import GstPbutils
 
+from gi.repository import GLib, GObject, Gst, GstPbutils
+
+Gst.init([])
 GLib.set_prgname("mopidy")
 GLib.set_application_name("Mopidy")
 
