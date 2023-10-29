@@ -26,7 +26,7 @@ controlling Mopidy are available as extensions.
 
 **Pick your favorite client**
 
-You and the people around you can all connect their favorite MPD or web client
+You and the people around you can all connect your favorite MPD or web client
 to the Mopidy server to search for music and manage the playlist together.
 With a browser or MPD client, which is available for all popular operating
 systems, you can control the music from any phone, tablet, or computer.
