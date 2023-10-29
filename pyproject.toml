@@ -3,11 +3,11 @@ requires = ["setuptools >= 30.3.0", "wheel"]
 
 
 [tool.black]
-target-version = ["py39", "py310", "py311"]
+target-version = ["py311", "py312"]
 
 
 [tool.pyright]
-pythonVersion = "3.9"
+pythonVersion = "3.11"
 # Use venv from parent directory, to share it with any extensions:
 venvPath = "../"
 venv = ".venv"
@@ -89,7 +89,7 @@ ignore = [
     "UP006", # deprecated-collection-type
     "UP007", # typing-union
 ]
-target-version = "py39"
+target-version = "py311"
 
 [tool.ruff.per-file-ignores]
 "docs/*" = [

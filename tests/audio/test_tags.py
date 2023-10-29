@@ -26,7 +26,7 @@ class TestConvertTaglist:
         taglist = Gst.TagList.new_empty()
 
         for value in values:
-            if isinstance(value, (GLib.Date, Gst.DateTime)):
+            if isinstance(value, GLib.Date | Gst.DateTime):
                 taglist.add_value(Gst.TagMergeMode.APPEND, tag, value)
                 continue
 

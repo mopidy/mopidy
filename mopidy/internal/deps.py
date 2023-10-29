@@ -4,24 +4,22 @@ import functools
 import platform
 import re
 import sys
+from collections.abc import Callable
+from importlib import metadata
+from os import PathLike
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Optional, TypedDict
-
-if sys.version_info < (3, 10):
-    import importlib_metadata as metadata  # pyright: ignore[reportMissingImports]
-else:
-    from importlib import metadata
+from typing import TYPE_CHECKING, Optional, TypedDict
 
 from mopidy.internal import formatting
 from mopidy.internal.gi import Gst, gi
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
+    from typing import TypeAlias
 
     class DepInfo(TypedDict, total=False):
         name: str
         version: str
-        path: Path
+        path: PathLike[str]
         dependencies: list[DepInfo]
         other: str
 
@@ -33,7 +31,7 @@ def format_dependency_list(adapters: Optional[list[Adapter]] = None) -> str:
         dist_names = {
             ep.dist.name
             for ep in metadata.entry_points(group="mopidy.ext")
-            if ep.dist.name != "Mopidy"
+            if ep.dist is not None and ep.dist.name != "Mopidy"
         }
         dist_infos = [
             functools.partial(pkg_info, dist_name) for dist_name in dist_names

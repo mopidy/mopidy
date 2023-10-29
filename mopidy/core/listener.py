@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Literal
 from mopidy import listener
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
+    from typing import TypeAlias
 
     from mopidy.audio import PlaybackState
     from mopidy.models import Playlist, TlTrack

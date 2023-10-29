@@ -31,7 +31,7 @@ from mopidy.config.types import (
 from mopidy.internal import path, versioning
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
+    from typing import TypeAlias
 
     from mopidy.ext import ExtensionData
     from mopidy.internal.log import LogColorName, LogLevelName
@@ -349,12 +349,14 @@ def _preprocess(config_string: str) -> str:
     def newlines(_match) -> str:
         return f"__BLANK{next(counter):d}__ ="
 
-    def comments(match) -> Optional[str]:
-        if match.group(1) == "#":
-            return f"__HASH{next(counter):d}__ ="
-        if match.group(1) == ";":
-            return f"__SEMICOLON{next(counter):d}__ ="
-        return None
+    def comments(match) -> str:
+        match match.group(1):
+            case "#":
+                return f"__HASH{next(counter):d}__ ="
+            case ";":
+                return f"__SEMICOLON{next(counter):d}__ ="
+            case _:
+                raise AssertionError(f"Unexpected comment type: {match.group(1)!r}")
 
     def inlinecomments(_match) -> str:
         return f"\n__INLINE{next(counter):d}__ ="

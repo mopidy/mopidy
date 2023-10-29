@@ -76,7 +76,7 @@ gstreamer-GstTagList.html
                 result[tag].append(value.to_iso8601_string())
             elif isinstance(value, bytes):
                 result[tag].append(value.decode(errors="replace"))
-            elif isinstance(value, (str, bool, numbers.Number)):
+            elif isinstance(value, str | bool | numbers.Number):
                 result[tag].append(value)
             elif isinstance(value, Gst.Sample):
                 data = _extract_sample_data(value)

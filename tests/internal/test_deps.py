@@ -1,12 +1,8 @@
 import platform
 import sys
+from importlib import metadata
 from pathlib import Path
 from unittest import mock
-
-if sys.version_info < (3, 10):
-    import importlib_metadata as metadata  # pyright: ignore[reportMissingImports]
-else:
-    from importlib import metadata
 
 import pytest
 
@@ -61,7 +57,7 @@ class TestDeps:
     def test_format_dependency_list_real(self):
         result = deps.format_dependency_list()
         assert "Python 3." in result
-        assert "Mopidy: 3." in result
+        assert "Mopidy: 4." in result
         assert "setuptools: 6" in result
 
     def test_executable_info(self):

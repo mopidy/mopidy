@@ -3,7 +3,8 @@ from __future__ import annotations
 import logging
 import os
 import threading
-from typing import TYPE_CHECKING, Any, Callable, Optional, cast
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any, Optional, cast
 
 import pykka
 from pykka.typing import ActorMemberMixin, proxy_field, proxy_method

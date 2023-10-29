@@ -10,7 +10,7 @@ easiest way to install Mopidy is from the
 When installing from the APT archive, you will automatically get updates to
 Mopidy in the same way as you get updates to the rest of your system.
 
-If you're on a Raspberry Pi running Debian or Raspbian, the following
+If you're on a Raspberry Pi running Debian or Raspberry Pi OS, the following
 instructions will work for you as well. If you're setting up a Raspberry Pi
 from scratch, we have a guide for installing Debian/Raspbian and Mopidy. See
 :ref:`raspberrypi-installation`.
@@ -21,8 +21,8 @@ Distribution and architecture support
 
 The packages in the apt.mopidy.com archive are built for:
 
-- **Debian 11 (Bullseye)**,
-  which also works for Raspbian Bullseye and Ubuntu 22.04 and newer.
+- **Debian 12 (Bookworm)**,
+  which also works for Ubuntu 23.10 and Raspberry Pi OS 2023-10-10 or newer.
 
 The few packages that are compiled are available for multiple CPU
 architectures:
@@ -48,7 +48,7 @@ Install from apt.mopidy.com
 
 #. Add the APT repo to your package sources::
 
-       sudo wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/bullseye.list
+       sudo wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/bookworm.list
 
 #. Install Mopidy and all dependencies::
 

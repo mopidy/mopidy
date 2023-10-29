@@ -65,7 +65,7 @@ class ImmutableObject:
     def __repr__(self):
         kwarg_pairs = []
         for key, value in sorted(self._items()):
-            if isinstance(value, (frozenset, tuple)):
+            if isinstance(value, frozenset | tuple):
                 if not value:
                     continue
                 value = list(value)
@@ -116,7 +116,7 @@ class ImmutableObject:
         data = {}
         data["__model__"] = self.__class__.__name__
         for key, value in self._items():
-            if isinstance(value, (set, frozenset, list, tuple)):
+            if isinstance(value, set | frozenset | list | tuple):
                 value = [
                     v.serialize() if isinstance(v, ImmutableObject) else v
                     for v in value

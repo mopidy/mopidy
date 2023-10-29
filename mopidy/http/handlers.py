@@ -3,8 +3,9 @@ from __future__ import annotations
 import functools
 import logging
 import urllib.parse
+from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Optional, Union, cast
 
 import tornado.escape
 import tornado.ioloop

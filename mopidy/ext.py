@@ -1,14 +1,9 @@
 from __future__ import annotations
 
 import logging
-import sys
 from collections.abc import Mapping
+from importlib import metadata
 from typing import TYPE_CHECKING, NamedTuple, Union
-
-if sys.version_info < (3, 10):
-    import importlib_metadata as metadata  # pyright: ignore[reportMissingImports]
-else:
-    from importlib import metadata
 
 from mopidy import config as config_lib
 from mopidy import exceptions
@@ -17,9 +12,7 @@ from mopidy.internal import path
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
-    from typing import Any, Optional
-
-    from typing_extensions import TypeAlias
+    from typing import Any, Optional, TypeAlias
 
     from mopidy.commands import Command
     from mopidy.config import ConfigSchema

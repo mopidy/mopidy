@@ -12,7 +12,7 @@ from mopidy.internal.models import HistoryState, HistoryTrack
 from mopidy.models import Ref, Track
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
+    from typing import TypeAlias
 
 logger = logging.getLogger(__name__)
 
