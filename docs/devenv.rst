@@ -58,12 +58,10 @@ Most of us use the `virtualenvwrapper
 virtualenvs, so that's what we'll be using for the examples here. First,
 install and setup virtualenvwrapper as described in their docs.
 
-To create a virtualenv named ``mopidy``, which allows access to
-system-wide packages like GStreamer, and uses the Mopidy workspace directory as
-the "project path", run::
+To create a virtualenv named ``mopidy`` and uses the Mopidy workspace directory
+as the "project path", run::
 
-    mkvirtualenv -a ~/mopidy-dev --python $(which python3) \
-      --system-site-packages mopidy
+    mkvirtualenv -a ~/mopidy-dev --python $(which python3) mopidy
 
 Now, each time you open a terminal and want to activate the ``mopidy``
 virtualenv, run::
