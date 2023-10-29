@@ -39,8 +39,9 @@ class Extension(ext.Extension):
             raise exceptions.ExtensionError("tornado library not found") from exc
 
     def setup(self, registry: ext.Registry) -> None:
-        from .actor import HttpApp, HttpFrontend, HttpStatic
+        from .actor import HttpFrontend
         from .handlers import make_mopidy_app_factory
+        from .types import HttpApp, HttpStatic
 
         HttpFrontend.apps = cast(list[HttpApp], registry["http:app"])
         HttpFrontend.statics = cast(list[HttpStatic], registry["http:static"])
