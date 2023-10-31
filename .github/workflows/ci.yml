@@ -20,15 +20,15 @@ jobs:
             python: "3.12"
             tox: py312
             coverage: true
-          - name: "Lint: black"
-            python: "3.12"
-            tox: black
           - name: "Lint: pyright"
             python: "3.12"
             tox: pyright
-          - name: "Lint: ruff"
+          - name: "Lint: ruff lint"
             python: "3.12"
-            tox: ruff
+            tox: ruff-lint
+          - name: "Lint: ruff format"
+            python: "3.12"
+            tox: ruff-format
           - name: "Docs"
             python: "3.12"
             tox: docs

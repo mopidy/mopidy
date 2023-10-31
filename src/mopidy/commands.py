@@ -76,7 +76,11 @@ class _HelpAction(argparse.Action):
         )
 
     def __call__(
-        self, parser, namespace, values, option_string=None  # noqa: ARG002
+        self,
+        parser,  # noqa: ARG002
+        namespace,  # noqa: ARG002
+        values,  # noqa: ARG002
+        option_string=None,  # noqa: ARG002
     ) -> NoReturn:
         raise _HelpError
 

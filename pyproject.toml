@@ -38,7 +38,7 @@ docs = [
     "sphinx-autodoc-typehints >= 1.12",
     "sphinx-rtd-theme >= 1.2",
 ]
-lint = ["black == 23.10.1", "ruff == 0.1.3"]
+lint = ["ruff == 0.1.3"]
 test = ["pytest >= 7.2", "pytest-cov >= 4.0", "responses >= 0.18"]
 typing = [
     "pygobject-stubs",
@@ -65,10 +65,6 @@ http = "mopidy.http:Extension"
 m3u = "mopidy.m3u:Extension"
 softwaremixer = "mopidy.softwaremixer:Extension"
 stream = "mopidy.stream:Extension"
-
-
-[tool.black]
-target-version = ["py311", "py312"]
 
 
 [tool.pyright]
@@ -150,6 +146,7 @@ ignore = [
     "FBT001",  # boolean-positional-arg-in-function-definition  # TODO
     "FBT002",  # boolean-default-value-in-function-definition  # TODO
     "FBT003",  # boolean-positional-value-in-function-call  # TODO
+    "ISC001",  # single-line-implicit-string-concatenation
     "PLR2004", # magic-value-comparison
     "PLW2901", # redefined-loop-name
     "RET504",  # unnecessary-assign
