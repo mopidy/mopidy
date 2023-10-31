@@ -2,7 +2,6 @@ import io
 import pathlib
 
 import pytest
-
 from mopidy.m3u import translator
 from mopidy.m3u.translator import path_to_uri
 from mopidy.models import Playlist, Ref, Track

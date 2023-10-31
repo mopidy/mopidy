@@ -3,11 +3,11 @@ from unittest import mock
 
 import pykka
 import pytest
-
 from mopidy import backend, core
 from mopidy.internal import deprecation
 from mopidy.internal.models import PlaybackState
 from mopidy.models import Track
+
 from tests import dummy_audio, dummy_backend
 
 

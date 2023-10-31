@@ -1,7 +1,6 @@
 import unittest
 
 import pytest
-
 from mopidy.core import HistoryController
 from mopidy.internal.models import HistoryState, HistoryTrack
 from mopidy.models import Artist, Ref, Track

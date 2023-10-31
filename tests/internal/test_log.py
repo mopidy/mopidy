@@ -1,5 +1,4 @@
 import pytest
-
 from mopidy.internal import log
 
 

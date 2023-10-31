@@ -2,13 +2,12 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+import mopidy
 import pytest
 import tornado.httpclient
 import tornado.testing
 import tornado.web
 import tornado.websocket
-
-import mopidy
 from mopidy.http import handlers
 
 

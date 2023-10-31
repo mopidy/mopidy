@@ -181,8 +181,5 @@ target-version = "py311"
     "TRY002",  # raise-vanilla-class
 ]
 
-[tool.ruff.isort]
-known-first-party = ["mopidy"]
-
 
 [tool.setuptools_scm]

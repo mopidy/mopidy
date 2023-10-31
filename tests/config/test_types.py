@@ -6,7 +6,6 @@ from typing import ClassVar
 from unittest import mock
 
 import pytest
-
 from mopidy.config import types
 from mopidy.internal import log
 

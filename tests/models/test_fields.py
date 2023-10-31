@@ -1,7 +1,6 @@
 import unittest
 
 import pytest
-
 from mopidy.models.fields import Boolean, Collection, Field, Identifier, Integer, String
 
 

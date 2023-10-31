@@ -5,7 +5,6 @@ from unittest import mock
 import pytest
 import requests.exceptions
 import responses
-
 from mopidy import exceptions
 from mopidy.audio import scan
 from mopidy.stream import actor

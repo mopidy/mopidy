@@ -3,7 +3,6 @@ from unittest import mock
 import pytest
 import requests
 import responses
-
 from mopidy.internal import http
 
 TIMEOUT = 1000
