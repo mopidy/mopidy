@@ -22,6 +22,9 @@ Dependencies
 
 - GStreamer >= 1.22.0 is now required.
 
+- PyGObject >= 3.42 is now an explicit Python dependency, and not something we
+  assume you'll install together with GStreamer.
+
 - Pykka >= 4.0 is now required.
 
 - Requests >= 2.28 is now required.
