@@ -164,7 +164,7 @@ target-version = "py311"
     "D",      # pydocstyle
     "INP001", # flake8-no-pep420
 ]
-"mopidy/internal/*" = [
+"src/mopidy/internal/*" = [
     "D", # pydocstyle
 ]
 "tests/*" = [
@@ -183,10 +183,5 @@ target-version = "py311"
 [tool.ruff.isort]
 known-first-party = ["mopidy"]
 
-
-[tool.setuptools.packages.find]
-where = [""]
-include = ["mopidy"]
-namespaces = false
 
 [tool.setuptools_scm]

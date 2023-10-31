@@ -47,7 +47,7 @@ Configuration
 
 See :ref:`config` for general help on configuring Mopidy.
 
-.. literalinclude:: ../../mopidy/http/ext.conf
+.. literalinclude:: ../../src/mopidy/http/ext.conf
     :language: ini
 
 .. confval:: http/enabled
