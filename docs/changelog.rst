@@ -12,7 +12,7 @@ For older releases, see :ref:`history`.
 v3.4.2 (UNRELEASED)
 ===================
 
-- Deps: Python 3.11 are now included in the testing matrix.
+- Deps: Python 3.11 and 3.12 are now included in the testing matrix.
 
 - M3U: Stop following symlinks when :confval:`file/follow_symlinks` is false.
   (PR: :issue:`2094`)

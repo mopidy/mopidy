@@ -25,19 +25,22 @@ jobs:
             tox: py310
           - name: "Test: Python 3.11"
             python: "3.11"
-            tox: py310
+            tox: py311
+          - name: "Test: Python 3.12"
+            python: "3.12"
+            tox: py312
             coverage: true
           - name: "Lint: check-manifest"
-            python: "3.11"
+            python: "3.12"
             tox: check-manifest
           - name: "Lint: flake8"
-            python: "3.11"
+            python: "3.12"
             tox: flake8
           - name: "Lint: mypy"
-            python: "3.11"
+            python: "3.12"
             tox: mypy
           - name: "Docs"
-            python: "3.11"
+            python: "3.12"
             tox: docs
 
     name: ${{ matrix.name }}
