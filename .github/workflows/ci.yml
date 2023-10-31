@@ -23,9 +23,6 @@ jobs:
           - name: "Lint: black"
             python: "3.12"
             tox: black
-          - name: "Lint: check-manifest"
-            python: "3.12"
-            tox: check-manifest
           - name: "Lint: pyright"
             python: "3.12"
             tox: pyright

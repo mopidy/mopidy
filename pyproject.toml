@@ -1,5 +1,65 @@
 [build-system]
-requires = ["setuptools >= 30.3.0", "wheel"]
+requires = ["setuptools >= 66", "setuptools-scm >= 7.1"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "Mopidy"
+version = "4.0.0a1"
+description = "Mopidy is an extensible music server written in Python"
+readme = "README.rst"
+requires-python = ">= 3.11"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Stein Magnus Jodal", email = "stein.magnus@jodal.no" }]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: No Input/Output (Daemon)",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Sound/Audio :: Players",
+]
+dependencies = [
+    "pygobject >= 3.42",
+    "pykka >= 4.0",
+    "requests >= 2.28",
+    "setuptools >= 66",
+    "tornado >= 6.2",
+]
+
+[project.optional-dependencies]
+docs = [
+    "pygraphviz >= 0.20",
+    "sphinx >= 5.3",
+    "sphinx-autodoc-typehints >= 1.12",
+    "sphinx-rtd-theme >= 1.2",
+]
+lint = ["black", "ruff == 0.1.0"]
+test = ["pytest", "pytest-cov", "responses"]
+typing = ["pygobject-stubs", "pyright", "types-requests", "types-setuptools"]
+dev = ["mopidy[docs,lint,test,typing]", "tox"]
+
+[project.urls]
+Homepage = "https://mopidy.com/"
+Documentation = "https://docs.mopidy.com/"
+"Discourse forum" = "https://discourse.mopidy.com/"
+"Zulip chat" = "https://mopidy.zulipchat.com/"
+Source = "https://github.com/mopidy/mopidy"
+Issues = "https://github.com/mopidy/mopidy/issues"
+
+[project.scripts]
+mopidy = "mopidy.__main__:main"
+
+[project.entry-points."mopidy.ext"]
+file = "mopidy.file:Extension"
+http = "mopidy.http:Extension"
+m3u = "mopidy.m3u:Extension"
+softwaremixer = "mopidy.softwaremixer:Extension"
+stream = "mopidy.stream:Extension"
 
 
 [tool.black]
@@ -122,3 +182,11 @@ target-version = "py311"
 
 [tool.ruff.isort]
 known-first-party = ["mopidy"]
+
+
+[tool.setuptools.packages.find]
+where = [""]
+include = ["mopidy"]
+namespaces = false
+
+[tool.setuptools_scm]

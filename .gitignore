@@ -8,6 +8,7 @@
 .idea
 .noseids
 .pytest_cache/
+.ruff_cache/
 .tox
 MANIFEST
 build/
