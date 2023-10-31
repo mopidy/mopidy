@@ -18,6 +18,14 @@ reportMissingTypeStubs = false
 reportPrivateImportUsage = false
 
 
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error::DeprecationWarning:mopidy[.*]",
+    "ignore::PendingDeprecationWarning:mopidy[.*]",
+    "ignore::DeprecationWarning:mopidy[.*]",
+]
+
+
 [tool.ruff]
 select = [
     "A", # flake8-builtins
