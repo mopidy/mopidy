@@ -17,6 +17,8 @@ v3.4.2 (UNRELEASED)
 - M3U: Stop following symlinks when :confval:`file/follow_symlinks` is false.
   (PR: :issue:`2094`)
 
+- zeroconf: Fix exception on shutdown if `dbus` is not installed.
+
 - Docs: Fix crash when building docs on recent Sphinx versions.
 
 - Dev: Make stacktraces from deprecation warnings include the offending call
