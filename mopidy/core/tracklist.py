@@ -455,7 +455,7 @@ class TracklistController:
         validation.check_instances(tlids, int)
 
         matches = self._tl_tracks
-        for (key, values) in criteria.items():
+        for key, values in criteria.items():
             matches = [ct for ct in matches if getattr(ct.track, key) in values]
         if tlids:
             matches = [ct for ct in matches if ct.tlid in tlids]

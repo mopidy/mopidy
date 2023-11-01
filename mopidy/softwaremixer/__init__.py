@@ -5,7 +5,6 @@ from mopidy import config, ext
 
 
 class Extension(ext.Extension):
-
     dist_name = "Mopidy-SoftwareMixer"
     ext_name = "softwaremixer"
     version = mopidy.__version__

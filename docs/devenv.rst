@@ -58,11 +58,11 @@ Most of us use the `virtualenvwrapper
 virtualenvs, so that's what we'll be using for the examples here. First,
 install and setup virtualenvwrapper as described in their docs.
 
-To create a virtualenv named ``mopidy`` which uses Python 3.7, allows access to
+To create a virtualenv named ``mopidy``, which allows access to
 system-wide packages like GStreamer, and uses the Mopidy workspace directory as
 the "project path", run::
 
-    mkvirtualenv -a ~/mopidy-dev --python $(which python3.7) \
+    mkvirtualenv -a ~/mopidy-dev --python $(which python3) \
       --system-site-packages mopidy
 
 Now, each time you open a terminal and want to activate the ``mopidy``
@@ -266,6 +266,11 @@ environments using the ``-e`` option, e.g. to run just unit tests::
 
 To learn more, see the `tox documentation <https://tox.readthedocs.io/>`_ .
 
+Before submitting a pull request, we recommend running::
+
+    tox -e ci
+
+This will locally run similar tests to what we use in our CI runs and help us to merge high-quality contributions.
 
 Running unit tests
 ------------------

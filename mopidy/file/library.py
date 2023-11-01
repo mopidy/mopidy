@@ -68,7 +68,7 @@ class FileLibraryProvider(backend.LibraryProvider):
             ):
                 continue
 
-            if child_path.is_symlink() and not self._follow_symlinks:
+            if dir_entry.is_symlink() and not self._follow_symlinks:
                 logger.debug("Ignoring symlink: %s", uri)
                 continue
 

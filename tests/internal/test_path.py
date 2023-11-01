@@ -11,7 +11,7 @@ from mopidy.internal.gi import GLib
 
 class GetOrCreateDirTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
-        self.parent = pathlib.Path(tempfile.mkdtemp())
+        self.parent = pathlib.Path(tempfile.mkdtemp()).resolve()
 
     def tearDown(self):  # noqa: N802
         if self.parent.is_dir():
@@ -59,7 +59,7 @@ class GetOrCreateDirTest(unittest.TestCase):
 
 class GetOrCreateFileTest(unittest.TestCase):
     def setUp(self):  # noqa: N802
-        self.parent = pathlib.Path(tempfile.mkdtemp())
+        self.parent = pathlib.Path(tempfile.mkdtemp()).resolve()
 
     def tearDown(self):  # noqa: N802
         if self.parent.is_dir():
@@ -182,7 +182,7 @@ class ExpandPathTest(unittest.TestCase):
     def test_absolute_path(self):
         result = path.expand_path("/tmp/foo")
 
-        assert result == pathlib.Path("/tmp/foo")
+        assert result == pathlib.Path("/tmp/foo").resolve()
 
     def test_home_dir_expansion(self):
         result = path.expand_path("~/foo")

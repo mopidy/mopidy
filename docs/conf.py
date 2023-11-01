@@ -47,13 +47,11 @@ for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
 
 
-# -- Custom Sphinx object types -----------------------------------------------
+# -- Custom Sphinx setup ------------------------------------------------------
 
 
 def setup(app):
-    from sphinx.ext.autodoc import cut_lines
-
-    app.connect("autodoc-process-docstring", cut_lines(4, what=["module"]))
+    # Add custom Sphinx object type for Mopidy's config values
     app.add_object_type(
         "confval",
         "confval",
@@ -72,6 +70,7 @@ extensions = [
     "sphinx.ext.graphviz",
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
+    "sphinx_rtd_theme",
 ]
 
 templates_path = ["_templates"]
@@ -79,7 +78,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 project = "Mopidy"
-copyright = "2009-2021, Stein Magnus Jodal and contributors"
+copyright = "2009-2023, Stein Magnus Jodal and contributors"
 
 
 release = get_version()
@@ -131,14 +130,17 @@ man_pages = [
 # -- Options for extlink extension --------------------------------------------
 
 extlinks = {
-    "issue": ("https://github.com/mopidy/mopidy/issues/%s", "#"),
-    "commit": ("https://github.com/mopidy/mopidy/commit/%s", "commit "),
-    "js": ("https://github.com/mopidy/mopidy.js/issues/%s", "mopidy.js#"),
+    "issue": ("https://github.com/mopidy/mopidy/issues/%s", "#%s"),
+    "commit": ("https://github.com/mopidy/mopidy/commit/%s", "commit %s"),
+    "js": ("https://github.com/mopidy/mopidy.js/issues/%s", "mopidy.js#%s"),
     "mpris": (
         "https://github.com/mopidy/mopidy-mpris/issues/%s",
-        "mopidy-mpris#",
+        "mopidy-mpris#%s",
     ),
-    "discuss": ("https://discourse.mopidy.com/t/%s", "discourse.mopidy.com/t/"),
+    "discuss": (
+        "https://discourse.mopidy.com/t/%s",
+        "discourse.mopidy.com/t/%s",
+    ),
 }
 
 

@@ -345,7 +345,7 @@ class LibraryController:
 def _normalize_query(query):
     broken_client = False
     # TODO: this breaks if query is not a dictionary like object...
-    for (field, values) in query.items():
+    for field, values in query.items():
         if isinstance(values, str):
             broken_client = True
             query[field] = [values]

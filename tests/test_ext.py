@@ -198,10 +198,12 @@ class TestValidateExtensionData:
         assert not ext.validate_extension_data(ext_data)
 
     def test_entry_point_require_exception(self, ext_data):
-        ext_data.entry_point.require.side_effect = Exception
+        ext_data.entry_point.require.side_effect = Exception(
+            "Some extension error"
+        )
 
         # Hope that entry points are well behaved, so exception will bubble.
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match="Some extension error"):
             assert not ext.validate_extension_data(ext_data)
 
     def test_extenions_validate_environment_error(self, ext_data):
@@ -249,7 +251,7 @@ class TestValidateExtensionData:
         with mock.patch.object(ext.path, "get_or_create_dir"):
             cache_dir = extension.get_cache_dir(config)
 
-        expected = pathlib.Path(core_cache_dir) / extension.ext_name
+        expected = pathlib.Path(core_cache_dir).resolve() / extension.ext_name
         assert cache_dir == expected
 
     def test_get_config_dir(self, ext_data):
@@ -260,7 +262,7 @@ class TestValidateExtensionData:
         with mock.patch.object(ext.path, "get_or_create_dir"):
             config_dir = extension.get_config_dir(config)
 
-        expected = pathlib.Path(core_config_dir) / extension.ext_name
+        expected = pathlib.Path(core_config_dir).resolve() / extension.ext_name
         assert config_dir == expected
 
     def test_get_data_dir(self, ext_data):
@@ -271,5 +273,5 @@ class TestValidateExtensionData:
         with mock.patch.object(ext.path, "get_or_create_dir"):
             data_dir = extension.get_data_dir(config)
 
-        expected = pathlib.Path(core_data_dir) / extension.ext_name
+        expected = pathlib.Path(core_data_dir).resolve() / extension.ext_name
         assert data_dir == expected

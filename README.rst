@@ -33,7 +33,7 @@ systems, you can control the music from any phone, tablet, or computer.
 
 **Mopidy on Raspberry Pi**
 
-The `Raspberry Pi`_ is an popular device to run Mopidy on, either using
+The `Raspberry Pi`_ is a popular device to run Mopidy on, either using
 Raspbian, Ubuntu, or Arch Linux.
 Pimoroni recommends Mopidy for use with their `Pirate Audio`_ audio gear for
 Raspberry Pi.
@@ -45,7 +45,7 @@ audio jukebox system for Raspberry Pi.
 Mopidy's extension support and Python, JSON-RPC, and JavaScript APIs make
 Mopidy a perfect base for your projects.
 In one hack, a Raspberry Pi was embedded in an old cassette player. The buttons
-and volume control are wired up with GPIO on the Raspberry Pi, and is used to
+and volume control are wired up with GPIO on the Raspberry Pi, and are used to
 control playback through a custom Mopidy extension. The cassettes have NFC tags
 used to select playlists from Spotify.
 
@@ -63,6 +63,18 @@ To get started with Mopidy, begin by reading the
 `installation docs <https://docs.mopidy.com/en/latest/installation/>`_.
 
 
+**Contributing**
+
+Begin by reading the
+`contributing <https://docs.mopidy.com/en/latest/contributing/>`_
+section of our documentation.
+If you are a developer, please also read
+`Development environment <https://docs.mopidy.com/en/latest/devenv/>`_
+and/or
+`Extension development <https://docs.mopidy.com/en/latest/extensiondev/>`_.
+We welcome all kinds of help with bug fixing, testing, documentation, and supporting other users.
+
+
 **Project resources**
 
 - `Documentation <https://docs.mopidy.com/>`_
@@ -75,8 +87,8 @@ To get started with Mopidy, begin by reading the
     :target: https://pypi.python.org/pypi/Mopidy/
     :alt: Latest PyPI version
 
-.. image:: https://img.shields.io/github/workflow/status/mopidy/mopidy/CI
-    :target: https://github.com/mopidy/mopidy/actions
+.. image:: https://img.shields.io/github/actions/workflow/status/mopidy/mopidy/ci.yml?branch=develop
+    :target: https://github.com/mopidy/mopidy/actions/workflows/ci.yml
     :alt: CI build status
 
 .. image:: https://img.shields.io/readthedocs/mopidy.svg
