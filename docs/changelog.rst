@@ -9,7 +9,7 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
-v3.4.2 (UNRELEASED)
+v3.4.2 (2023-11-01)
 ===================
 
 - Deps: Python 3.11 and 3.12 are now included in the testing matrix.
