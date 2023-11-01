@@ -49,12 +49,6 @@ Audio
   - :func:`mopidy.audio.create_buffer`
   - :func:`mopidy.audio.millisecond_to_clocktime`
 
-M3U
----
-
-- Stop following symlinks when :confval:`file/follow_symlinks` is false. (PR:
-  :issue:`2094`)
-
 Internals
 ---------
 
@@ -62,7 +56,30 @@ Internals
 
 - Switched from mypy to pyright for type checking.
 
-- Added ``tox -e ci``, to allow easy CI check before ``git push``.
+
+v3.4.2 (2023-11-01)
+===================
+
+- Deps: Python 3.11 and 3.12 are now included in the testing matrix.
+
+- M3U: Stop following symlinks when :confval:`file/follow_symlinks` is false.
+  (PR: :issue:`2094`)
+
+- zeroconf: Fix exception on shutdown if `dbus` is not installed.
+
+- Docs: Fix crash when building docs on recent Sphinx versions.
+
+- Dev: Make stacktraces from deprecation warnings include the offending call
+  site, to help upgrade API usage in extensions.
+
+- Dev: Upgrade CI workflows to fix Node.js 12 deprecation notices and avoid
+  Codecov's bash uploader.
+
+- Dev: Make tests pass on macOS. (PR: :issue:`2092`)
+
+- Dev: Incease test coverage of Mopidy-File to 100%. (PR: :issue:`2096`)
+
+- Dev: Added ``"tox -e ci``", to allow easy CI check before ``git push``.
 
 
 v3.4.1 (2022-12-07)
