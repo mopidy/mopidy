@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import platform
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import mopidy
 
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from mopidy.config import ProxyConfig
 
 
-def format_proxy(proxy_config: ProxyConfig, auth: bool = True) -> Optional[str]:
+def format_proxy(proxy_config: ProxyConfig, auth: bool = True) -> str | None:
     """Convert a Mopidy proxy config to the commonly used proxy string format.
 
     Outputs ``scheme://host:port``, ``scheme://user:pass@host:port`` or
@@ -39,7 +39,7 @@ def format_proxy(proxy_config: ProxyConfig, auth: bool = True) -> Optional[str]:
     return f"{scheme}://{hostname}:{port}"
 
 
-def format_user_agent(name: Optional[str] = None) -> str:
+def format_user_agent(name: str | None = None) -> str:
     """Construct a User-Agent suitable for use in client code.
 
     This will identify use by the provided ``name`` (which should be on the

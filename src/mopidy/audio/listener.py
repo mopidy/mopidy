@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal, Optional
+from typing import TYPE_CHECKING, Any, Literal
 
 from mopidy import listener
 
@@ -61,7 +61,7 @@ class AudioListener(listener.Listener):
         self,
         old_state: PlaybackState,
         new_state: PlaybackState,
-        target_state: Optional[PlaybackState],
+        target_state: PlaybackState | None,
     ) -> None:
         """Called after the playback state have changed.
 

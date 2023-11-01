@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from os import PathLike
-from typing import TYPE_CHECKING, Any, Optional, TypedDict
+from typing import TYPE_CHECKING, Any, TypedDict
 
 import tornado.web
 
@@ -19,10 +19,10 @@ RequestRule: TypeAlias = tuple[str, type[tornado.web.RequestHandler], dict[str, 
 class HttpConfig(TypedDict):
     hostname: str
     port: int
-    zeroconf: Optional[str]
+    zeroconf: str | None
     allowed_origins: list[str]
-    csrf_protection: Optional[bool]
-    default_app: Optional[str]
+    csrf_protection: bool | None
+    default_app: str | None
 
 
 class HttpApp(TypedDict):

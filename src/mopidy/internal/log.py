@@ -5,7 +5,7 @@ import logging.config
 import logging.handlers
 import platform
 from logging import LogRecord
-from typing import TYPE_CHECKING, ClassVar, Literal, Optional
+from typing import TYPE_CHECKING, ClassVar, Literal
 
 if TYPE_CHECKING:
     from mopidy.config import Config, LoggingConfig
@@ -176,9 +176,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
     """
 
     # Map logging levels to (background, foreground, bold/intense)
-    level_map: ClassVar[
-        dict[int, tuple[Optional[LogColorName], LogColorName, bool]]
-    ] = {
+    level_map: ClassVar[dict[int, tuple[LogColorName | None, LogColorName, bool]]] = {
         TRACE_LOG_LEVEL: (None, "blue", False),
         logging.DEBUG: (None, "blue", False),
         logging.INFO: (None, "white", False),
@@ -227,8 +225,8 @@ class ColorizingStreamHandler(logging.StreamHandler):
     def colorize(
         self,
         message: str,
-        bg: Optional[LogColorName] = None,
-        fg: Optional[LogColorName] = None,
+        bg: LogColorName | None = None,
+        fg: LogColorName | None = None,
         bold: bool = False,
     ) -> str:
         params = []

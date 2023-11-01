@@ -6,7 +6,7 @@ import logging
 import operator
 import urllib.parse
 from collections.abc import Generator, Iterable, Mapping
-from typing import TYPE_CHECKING, Any, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from pykka.typing import proxy_method
 
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 @contextlib.contextmanager
 def _backend_error_handling(
     backend: BackendProxy,
-    reraise: Union[None, type[Exception], tuple[type[Exception], ...]] = None,
+    reraise: None | (type[Exception] | tuple[type[Exception], ...]) = None,
 ) -> Generator[None, Any, None]:
     try:
         yield
@@ -49,18 +49,18 @@ class LibraryController:
         self.backends = backends
         self.core = core
 
-    def _get_backend(self, uri: Uri) -> Optional[BackendProxy]:
+    def _get_backend(self, uri: Uri) -> BackendProxy | None:
         uri_scheme = UriScheme(urllib.parse.urlparse(uri).scheme)
         return self.backends.with_library.get(uri_scheme, None)
 
     def _get_backends_to_uris(
         self,
-        uris: Optional[Iterable[Uri]],
-    ) -> dict[BackendProxy, Optional[list[Uri]]]:
+        uris: Iterable[Uri] | None,
+    ) -> dict[BackendProxy, list[Uri] | None]:
         if not uris:
             return {b: None for b in self.backends.with_library.values()}
 
-        result: dict[BackendProxy, Optional[list[Uri]]] = collections.defaultdict(list)
+        result: dict[BackendProxy, list[Uri] | None] = collections.defaultdict(list)
         for uri in uris:
             backend = self._get_backend(uri)
             if backend is not None:
@@ -135,7 +135,7 @@ class LibraryController:
     def get_distinct(
         self,
         field: DistinctField,
-        query: Optional[Query[SearchField]] = None,
+        query: Query[SearchField] | None = None,
     ) -> set[Any]:
         """List distinct values for a given field from the library.
 
@@ -250,7 +250,7 @@ class LibraryController:
 
         return results
 
-    def refresh(self, uri: Optional[Uri] = None) -> None:
+    def refresh(self, uri: Uri | None = None) -> None:
         """Refresh library. Limit to URI and below if an URI is given.
 
         :param uri: directory or track URI
@@ -276,7 +276,7 @@ class LibraryController:
     def search(
         self,
         query: Query[SearchField],
-        uris: Optional[Iterable[Uri]] = None,
+        uris: Iterable[Uri] | None = None,
         exact: bool = False,
     ) -> list[SearchResult]:
         """Search the library for tracks where ``field`` contains ``values``.

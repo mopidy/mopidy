@@ -5,7 +5,7 @@ import logging
 import urllib.parse
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import tornado.escape
 import tornado.ioloop
@@ -110,7 +110,7 @@ def make_jsonrpc_wrapper(core_actor: CoreProxy) -> jsonrpc.JsonRpcWrapper:
 
 def _send_broadcast(
     client: WebSocketHandler,
-    msg: Union[bytes, str, dict[str, Any]],
+    msg: bytes | str | dict[str, Any],
 ) -> None:
     # We could check for client.ws_connection, but we don't really
     # care why the broadcast failed, we just want the rest of them
@@ -134,7 +134,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     @classmethod
     def broadcast(
         cls,
-        msg: Union[bytes, str, dict[str, Any]],
+        msg: bytes | str | dict[str, Any],
         io_loop: tornado.ioloop.IOLoop,
     ) -> None:
         # This can be called from outside the Tornado ioloop, so we need to
@@ -147,13 +147,13 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         self,
         core: CoreProxy,
         allowed_origins: set[str],
-        csrf_protection: Optional[bool],
+        csrf_protection: bool | None,
     ) -> None:
         self.jsonrpc = make_jsonrpc_wrapper(core)
         self.allowed_origins = allowed_origins
         self.csrf_protection = csrf_protection
 
-    def open(self, *_args: str, **_kwargs: str) -> Optional[Awaitable[None]]:
+    def open(self, *_args: str, **_kwargs: str) -> Awaitable[None] | None:
         self.set_nodelay(True)
         self.clients.add(self)
         logger.debug("New WebSocket connection from %s", self.request.remote_ip)
@@ -162,7 +162,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         self.clients.discard(self)
         logger.debug("Closed WebSocket connection from %s", self.request.remote_ip)
 
-    def on_message(self, message: Union[str, bytes]) -> Optional[Awaitable[None]]:
+    def on_message(self, message: str | bytes) -> Awaitable[None] | None:
         if not message:
             return
 
@@ -196,7 +196,7 @@ def set_mopidy_headers(request_handler: tornado.web.RequestHandler) -> None:
 
 
 def check_origin(
-    origin: Optional[str],
+    origin: str | None,
     request_headers: tornado.httputil.HTTPHeaders,
     allowed_origins: set[str],
 ) -> bool:
@@ -220,17 +220,17 @@ class JsonRpcHandler(tornado.web.RequestHandler):
         self,
         core: CoreProxy,
         allowed_origins: set[str],
-        csrf_protection: Optional[bool],
+        csrf_protection: bool | None,
     ) -> None:
         self.jsonrpc = make_jsonrpc_wrapper(core)
         self.allowed_origins = allowed_origins
         self.csrf_protection = csrf_protection
 
-    def head(self) -> Optional[Awaitable[None]]:
+    def head(self) -> Awaitable[None] | None:
         self.set_extra_headers()
         self.finish()
 
-    def post(self) -> Optional[Awaitable[None]]:
+    def post(self) -> Awaitable[None] | None:
         if self.csrf_protection:
             # This "non-standard" Content-Type requirement forces browsers to
             # automatically issue a preflight OPTIONS request before this one.
@@ -278,9 +278,9 @@ class JsonRpcHandler(tornado.web.RequestHandler):
         self.set_header("Access-Control-Allow-Origin", f"{origin}")
         self.set_header("Access-Control-Allow-Headers", "Content-Type")
 
-    def options(self) -> Optional[Awaitable[None]]:
+    def options(self) -> Awaitable[None] | None:
         if self.csrf_protection:
-            origin = cast(Optional[str], self.request.headers.get("Origin"))
+            origin = cast(str | None, self.request.headers.get("Origin"))
             if not check_origin(origin, self.request.headers, self.allowed_origins):
                 self.set_status(403, f"Access denied for origin {origin}")
                 return
@@ -300,7 +300,7 @@ class ClientListHandler(tornado.web.RequestHandler):
     def get_template_path(self) -> str:
         return str(Path(__file__).parent)
 
-    def get(self) -> Optional[Awaitable[None]]:
+    def get(self) -> Awaitable[None] | None:
         set_mopidy_headers(self)
 
         names = set()
@@ -320,5 +320,5 @@ class StaticFileHandler(tornado.web.StaticFileHandler):
 
 class AddSlashHandler(tornado.web.RequestHandler):
     @tornado.web.addslash
-    def prepare(self) -> Optional[Awaitable[None]]:
+    def prepare(self) -> Awaitable[None] | None:
         return super().prepare()

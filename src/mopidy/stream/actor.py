@@ -3,7 +3,6 @@ import logging
 import re
 import time
 import urllib.parse
-from typing import Optional
 
 import pykka
 
@@ -105,7 +104,7 @@ def _unwrap_stream(  # noqa: PLR0911  # TODO: cleanup the return value of this.
     timeout: float,
     scanner: scan.Scanner,
     requests_session,
-) -> tuple[Optional[str], Optional[scan._Result]]:
+) -> tuple[str | None, scan._Result | None]:
     """Get a stream URI from a playlist URI, ``uri``.
 
     Unwraps nested playlists until something that's not a playlist is found or

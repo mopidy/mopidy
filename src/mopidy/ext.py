@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Mapping
 from importlib import metadata
-from typing import TYPE_CHECKING, NamedTuple, Union
+from typing import TYPE_CHECKING, NamedTuple
 
 from mopidy import config as config_lib
 from mopidy import exceptions
@@ -12,13 +12,13 @@ from mopidy.internal import path
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
-    from typing import Any, Optional, TypeAlias
+    from typing import Any, TypeAlias
 
     from mopidy.commands import Command
     from mopidy.config import ConfigSchema
 
     Config = dict[str, dict[str, Any]]
-    RegistryEntry: TypeAlias = Union[type[Any], dict[str, Any]]
+    RegistryEntry: TypeAlias = type[Any] | dict[str, Any]
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class ExtensionData(NamedTuple):
     entry_point: Any
     config_schema: ConfigSchema
     config_defaults: Any
-    command: Optional[Command]
+    command: Command | None
 
 
 class Extension:
@@ -116,7 +116,7 @@ class Extension:
         path.get_or_create_dir(data_dir_path)
         return data_dir_path
 
-    def get_command(self) -> Optional[Command]:
+    def get_command(self) -> Command | None:
         """Command to expose to command line users running ``mopidy``.
 
         :returns:

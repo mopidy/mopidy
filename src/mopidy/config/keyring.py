@@ -1,5 +1,4 @@
 import logging
-from typing import Union
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +67,7 @@ def fetch() -> list[tuple[str, str, bytes]]:  # noqa: PLR0911
 def set(  # noqa: A001, PLR0911
     section: str,
     key: str,
-    value: Union[str, bytes],
+    value: str | bytes,
 ) -> bool:
     """Store a secret config value for a given section/key.
 

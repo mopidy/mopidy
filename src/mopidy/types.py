@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Literal, NewType, TypeVar, Union
+from typing import TYPE_CHECKING, Literal, NewType, TypeVar
 
 if TYPE_CHECKING:
     from typing import TypeAlias
 
 F = TypeVar("F")
-QueryValue: TypeAlias = Union[str, int]
+QueryValue: TypeAlias = str | int
 Query: TypeAlias = dict[F, Iterable[QueryValue]]
 
 # Types for distinct queries
@@ -30,7 +30,7 @@ DistinctField: TypeAlias = Literal[
 ]
 
 # Types for search queries
-SearchField: TypeAlias = Union[DistinctField, Literal["any"]]
+SearchField: TypeAlias = DistinctField | Literal["any"]
 SearchQuery: TypeAlias = dict[SearchField, Iterable[QueryValue]]
 
 # Types for tracklist filtering
@@ -44,7 +44,7 @@ TracklistField: TypeAlias = Literal[
 ]
 
 # Superset of all fields that can be used in a query
-QueryField: TypeAlias = Union[DistinctField, SearchField, TracklistField]
+QueryField: TypeAlias = DistinctField | SearchField | TracklistField
 
 # URI types
 Uri = NewType("Uri", str)

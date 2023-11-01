@@ -4,7 +4,7 @@ import logging
 import os
 import threading
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, Optional, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import pykka
 from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
@@ -87,9 +87,9 @@ class _Outputs(Gst.Bin):
 
 class SoftwareMixerAdapter:
     _mixer: SoftwareMixerProxy
-    _element: Optional[Gst.Element]
-    _last_volume: Optional[int]
-    _last_mute: Optional[bool]
+    _element: Gst.Element | None
+    _last_volume: int | None
+    _last_mute: bool | None
     _signals: utils.Signals
 
     def __init__(self, mixer: SoftwareMixerProxy) -> None:
@@ -375,12 +375,12 @@ class Audio(pykka.ThreadingActor):
     state: PlaybackState = PlaybackState.STOPPED
 
     #: The software mixing interface :class:`mopidy.audio.actor.SoftwareMixerAdapter`
-    mixer: Optional[SoftwareMixerAdapter] = None
+    mixer: SoftwareMixerAdapter | None = None
 
     def __init__(
         self,
         config: Config,
-        mixer: Optional[MixerProxy],
+        mixer: MixerProxy | None,
     ) -> None:
         super().__init__()
 
@@ -389,15 +389,15 @@ class Audio(pykka.ThreadingActor):
         self._buffering: bool = False
         self._live_stream: bool = False
         self._tags: dict[str, list[Any]] = {}
-        self._pending_uri: Optional[str] = None
-        self._pending_tags: Optional[dict[str, list[Any]]] = None
+        self._pending_uri: str | None = None
+        self._pending_tags: dict[str, list[Any]] | None = None
         self._pending_metadata = None
 
-        self._playbin: Optional[Gst.Element] = None
+        self._playbin: Gst.Element | None = None
         self._outputs = None
         self._queue = None
-        self._about_to_finish_callback: Optional[Callable] = None
-        self._source_setup_callback: Optional[Callable] = None
+        self._about_to_finish_callback: Callable | None = None
+        self._source_setup_callback: Callable | None = None
 
         self._handler = _Handler(self)
         self._signals = utils.Signals()

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Literal, Optional
+from typing import TYPE_CHECKING, Any, Literal
 
 import pykka
 from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
@@ -50,17 +50,17 @@ class Backend:
     #: The library provider. An instance of
     #: :class:`~mopidy.backend.LibraryProvider`, or :class:`None` if
     #: the backend doesn't provide a library.
-    library: Optional[LibraryProvider] = None
+    library: LibraryProvider | None = None
 
     #: The playback provider. An instance of
     #: :class:`~mopidy.backend.PlaybackProvider`, or :class:`None` if
     #: the backend doesn't provide playback.
-    playback: Optional[PlaybackProvider] = None
+    playback: PlaybackProvider | None = None
 
     #: The playlists provider. An instance of
     #: :class:`~mopidy.backend.PlaylistsProvider`, or class:`None` if
     #: the backend doesn't provide playlists.
-    playlists: Optional[PlaylistsProvider] = None
+    playlists: PlaylistsProvider | None = None
 
     #: List of URI schemes this backend can handle.
     uri_schemes: list[UriScheme] = []  # noqa: RUF012
@@ -93,7 +93,7 @@ class LibraryProvider:
     :param backend: backend the controller is a part of
     """
 
-    root_directory: Optional[Ref] = None
+    root_directory: Ref | None = None
     """
     :class:`mopidy.models.Ref.directory` instance with a URI and name set
     representing the root of this library's browse tree. URIs must
@@ -117,7 +117,7 @@ class LibraryProvider:
         return []
 
     def get_distinct(
-        self, field: DistinctField, query: Optional[Query[SearchField]] = None
+        self, field: DistinctField, query: Query[SearchField] | None = None
     ) -> set[str]:
         """See :meth:`mopidy.core.LibraryController.get_distinct`.
 
@@ -146,7 +146,7 @@ class LibraryProvider:
         """
         raise NotImplementedError
 
-    def refresh(self, uri: Optional[Uri] = None) -> None:
+    def refresh(self, uri: Uri | None = None) -> None:
         """See :meth:`mopidy.core.LibraryController.refresh`.
 
         *MAY be implemented by subclass.*
@@ -155,7 +155,7 @@ class LibraryProvider:
     def search(
         self,
         query: Query[SearchField],
-        uris: Optional[list[Uri]] = None,
+        uris: list[Uri] | None = None,
         exact: bool = False,
     ) -> list[SearchResult]:
         """See :meth:`mopidy.core.LibraryController.search`.
@@ -209,7 +209,7 @@ class PlaybackProvider:
         """
         self.audio.prepare_change().get()
 
-    def translate_uri(self, uri: Uri) -> Optional[Uri]:
+    def translate_uri(self, uri: Uri) -> Uri | None:
         """Convert custom URI scheme to real playable URI.
 
         *MAY be reimplemented by subclass.*
@@ -349,7 +349,7 @@ class PlaylistsProvider:
         """
         raise NotImplementedError
 
-    def get_items(self, uri: Uri) -> Optional[list[Ref]]:
+    def get_items(self, uri: Uri) -> list[Ref] | None:
         """Get the items in a playlist specified by ``uri``.
 
         Returns a list of :class:`~mopidy.models.Ref` objects referring to the
@@ -362,7 +362,7 @@ class PlaylistsProvider:
         """
         raise NotImplementedError
 
-    def create(self, name: str) -> Optional[Playlist]:
+    def create(self, name: str) -> Playlist | None:
         """Create a new empty playlist with the given name.
 
         Returns a new playlist with the given name and an URI, or :class:`None`
@@ -388,7 +388,7 @@ class PlaylistsProvider:
         """
         raise NotImplementedError
 
-    def lookup(self, uri: Uri) -> Optional[Playlist]:
+    def lookup(self, uri: Uri) -> Playlist | None:
         """Lookup playlist with given URI in both the set of playlists and in any
         other playlist source.
 
@@ -407,7 +407,7 @@ class PlaylistsProvider:
         """
         raise NotImplementedError
 
-    def save(self, playlist: Playlist) -> Optional[Playlist]:
+    def save(self, playlist: Playlist) -> Playlist | None:
         """Save the given playlist.
 
         The playlist must have an ``uri`` attribute set. To create a new

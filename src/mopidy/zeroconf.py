@@ -1,6 +1,5 @@
 import logging
 import string
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +47,7 @@ class Zeroconf:
         port: int,
         domain: str = "",
         host: str = "",
-        text: Optional[list[str]] = None,
+        text: list[str] | None = None,
     ) -> None:
         self.stype = stype
         self.port = port

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import urllib.parse
 from collections.abc import Iterable, Mapping
-from typing import Any, Literal, Optional, TypeVar, Union, get_args
+from typing import Any, Literal, TypeVar, Union, get_args
 
 from mopidy import exceptions
 from mopidy.audio.constants import PlaybackState
@@ -37,7 +37,7 @@ PLAYBACK_STATES: set[str] = {ps.value for ps in PlaybackState}
 FIELD_TYPES: dict[str, type] = {
     "album": str,
     "albumartist": str,
-    "any": Union[int, str],
+    "any": int | str,
     "artist": str,
     "comment": str,
     "composer": str,
@@ -116,8 +116,8 @@ def check_instances(
 
 def check_integer(
     arg: int,
-    min: Optional[int] = None,
-    max: Optional[int] = None,
+    min: int | None = None,
+    max: int | None = None,
 ) -> None:
     if not isinstance(arg, int):
         raise exceptions.ValidationError(f"Expected an integer, not {arg!r}")
@@ -132,8 +132,8 @@ def check_integer(
 
 
 def check_query(
-    arg: Union[Query[SearchField], Query[TracklistField]],
-    fields: Optional[Iterable[str]] = None,
+    arg: Query[SearchField] | Query[TracklistField],
+    fields: Iterable[str] | None = None,
 ) -> None:
     if fields is None:
         fields = SEARCH_FIELDS.keys()
@@ -156,7 +156,7 @@ def check_query(
 
 
 def _check_query_value(
-    key: Union[DistinctField, SearchField, TracklistField],
+    key: DistinctField | (SearchField | TracklistField),
     arg: QueryValue,
     msg: str,
 ) -> None:

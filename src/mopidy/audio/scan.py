@@ -3,7 +3,7 @@ import logging
 import time
 from enum import IntEnum
 from pathlib import Path
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 from mopidy import exceptions
 from mopidy.audio import tags as tags_lib
@@ -240,7 +240,7 @@ def _start_pipeline(pipeline: Gst.Pipeline) -> None:
         pipeline.set_state(Gst.State.PLAYING)
 
 
-def _query_duration(pipeline: Gst.Pipeline) -> tuple[bool, Optional[int]]:
+def _query_duration(pipeline: Gst.Pipeline) -> tuple[bool, int | None]:
     success, duration = pipeline.query_duration(Gst.Format.TIME)
     if not success:
         duration = None  # Make sure error case preserves None.
@@ -260,10 +260,10 @@ def _query_seekable(pipeline: Gst.Pipeline) -> bool:
 def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
     pipeline: Gst.Pipeline,
     timeout_ms: int,
-) -> tuple[dict[str, Any], Optional[str], bool, Optional[int]]:
+) -> tuple[dict[str, Any], str | None, bool, int | None]:
     bus = pipeline.get_bus()
     tags = {}
-    mime: Optional[str] = None
+    mime: str | None = None
     have_audio = False
     missing_message = None
     duration = None
@@ -298,7 +298,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
                 missing_message = msg
         elif msg.type == Gst.MessageType.APPLICATION:
             if structure and structure.get_name() == "have-type":
-                caps = cast(Optional[Gst.Caps], structure.get_value("caps"))
+                caps = cast(Gst.Caps | None, structure.get_value("caps"))
                 if caps:
                     mime = cast(
                         str,

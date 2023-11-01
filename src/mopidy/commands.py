@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import (
     Any,
     NoReturn,
-    Optional,
     cast,
 )
 
@@ -65,8 +64,8 @@ class _HelpAction(argparse.Action):
     def __init__(
         self,
         option_strings: Sequence[str],
-        dest: Optional[str] = None,
-        help: Optional[str] = None,
+        dest: str | None = None,
+        help: str | None = None,
     ) -> None:
         super().__init__(
             option_strings=option_strings,
@@ -90,7 +89,7 @@ class Command:
     argprases own sub-parser handling.
     """
 
-    help: Optional[str] = None
+    help: str | None = None
     #: Help text to display in help output.
 
     _children: dict[str, Command]
@@ -135,14 +134,14 @@ class Command:
     def exit(
         self,
         status_code: int = 0,
-        message: Optional[str] = None,
-        usage: Optional[str] = None,
+        message: str | None = None,
+        usage: str | None = None,
     ) -> NoReturn:
         """Optionally print a message and exit."""
         print("\n\n".join(m for m in (usage, message) if m))  # noqa: T201
         sys.exit(status_code)
 
-    def format_usage(self, prog: Optional[str] = None) -> str:
+    def format_usage(self, prog: str | None = None) -> str:
         """Format usage for current parser."""
         actions = self._build()[1]
         prog = prog or Path(sys.argv[0]).name
@@ -153,7 +152,7 @@ class Command:
         formatter.add_usage(None, actions, [])
         return formatter.format_help().strip()
 
-    def format_help(self, prog: Optional[str] = None) -> str:
+    def format_help(self, prog: str | None = None) -> str:
         """Format help for current parser and children."""
         actions = self._build()[1]
         prog = prog or Path(sys.argv[0]).name
@@ -197,7 +196,7 @@ class Command:
         for childname, child in self._children.items():
             child._subhelp(" ".join((name, childname)), result)
 
-    def parse(self, args: list[str], prog: Optional[str] = None) -> argparse.Namespace:
+    def parse(self, args: list[str], prog: str | None = None) -> argparse.Namespace:
         """Parse command line arguments.
 
         Will recursively parse commands until a final parser is found or an
@@ -373,7 +372,7 @@ class RootCommand(Command):
         self,
         config: config_lib.Config,
         mixer_classes: list[type[MixerActor]],
-    ) -> Optional[type[MixerActor]]:
+    ) -> type[MixerActor] | None:
         logger.debug(
             "Available Mopidy mixers: %s",
             ", ".join(m.__name__ for m in mixer_classes) or "none",
@@ -399,7 +398,7 @@ class RootCommand(Command):
         self,
         config: config_lib.Config,
         mixer_class: type[MixerActor],
-    ) -> Optional[MixerProxy]:
+    ) -> MixerProxy | None:
         logger.info("Starting Mopidy mixer: %s", mixer_class.__name__)
         with _actor_error_handling(mixer_class.__name__):
             mixer = cast(MixerProxy, mixer_class.start(config=config).proxy())
@@ -426,7 +425,7 @@ class RootCommand(Command):
     def start_audio(
         self,
         config: config_lib.Config,
-        mixer: Optional[MixerProxy],
+        mixer: MixerProxy | None,
     ) -> AudioProxy:
         logger.info("Starting Mopidy audio")
         return cast(AudioProxy, Audio.start(config=config, mixer=mixer).proxy())
@@ -466,7 +465,7 @@ class RootCommand(Command):
     def start_core(
         self,
         config: config_lib.Config,
-        mixer: Optional[MixerProxy],
+        mixer: MixerProxy | None,
         backends: list[BackendProxy],
         audio: AudioProxy,
     ) -> CoreProxy:
@@ -503,7 +502,7 @@ class RootCommand(Command):
         for frontend_class in frontend_classes:
             process.stop_actors_by_class(frontend_class)
 
-    def stop_core(self, core: Optional[CoreProxy]) -> None:
+    def stop_core(self, core: CoreProxy | None) -> None:
         logger.info("Stopping Mopidy core")
         if core is not None:
             call = ProxyCall(attr_path=("_teardown",), args=(), kwargs={})
