@@ -25,7 +25,7 @@ used.
 
 See :ref:`config` for general help on configuring Mopidy.
 
-.. literalinclude:: ../../mopidy/softwaremixer/ext.conf
+.. literalinclude:: ../../src/mopidy/softwaremixer/ext.conf
     :language: ini
 
 .. confval:: softwaremixer/enabled

@@ -27,7 +27,7 @@ Configuration
 
 See :ref:`config` for general help on configuring Mopidy.
 
-.. literalinclude:: ../../mopidy/stream/ext.conf
+.. literalinclude:: ../../src/mopidy/stream/ext.conf
     :language: ini
 
 .. confval:: stream/enabled

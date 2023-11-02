@@ -33,7 +33,7 @@ Configuration
 
 See :ref:`config` for general help on configuring Mopidy.
 
-.. literalinclude:: ../../mopidy/m3u/ext.conf
+.. literalinclude:: ../../src/mopidy/m3u/ext.conf
     :language: ini
 
 .. confval:: m3u/enabled
