@@ -12,14 +12,14 @@ you can install Mopidy from PyPI using the ``pip`` installer.
 If you are looking to contribute or wish to install from source using ``git``
 please see :ref:`contributing`.
 
-#. First of all, you need Python 3.9 or newer. Check if you have Python and
+#. First of all, you need Python 3.11 or newer. Check if you have Python and
    what version by running::
 
        python3 --version
 
 #. You need to make sure you have ``pip``, the Python package installer. You'll
    also need a C compiler and the Python development headers to install some
-   Mopidy extensions, like Mopidy-Spotify.
+   Mopidy extensions.
 
    This is how you install it on Debian/Ubuntu::
 
@@ -33,22 +33,26 @@ please see :ref:`contributing`.
 
        sudo dnf install -y gcc python3-devel python3-pip
 
-#. Then you'll need to install GStreamer >= 1.18.0, with Python bindings.
-   GStreamer is packaged for most popular Linux distributions. Search for
-   GStreamer in your package manager, and make sure to install the Python
-   bindings, and the "good" and "ugly" plugin sets.
+#. Then you'll need to install GStreamer >= 1.22.0.
+   GStreamer is packaged for most popular Linux distributions.
+   Search for GStreamer in your package manager and make sure to install the
+   "good" and "ugly" plugin sets, as well as the Python bindings.
+   To be able to build the Python bindings from source,
+   also install the development headers for ``libcairo2`` and ``libgirepository1.0``.
 
    **Debian/Ubuntu**
 
    If you use Debian/Ubuntu you can install GStreamer like this::
 
        sudo apt install \
-           python3-gst-1.0 \
-           gir1.2-gstreamer-1.0 \
            gir1.2-gst-plugins-base-1.0 \
+           gir1.2-gstreamer-1.0 \
            gstreamer1.0-plugins-good \
            gstreamer1.0-plugins-ugly \
-           gstreamer1.0-tools
+           gstreamer1.0-tools \
+           libcairo2-dev \
+           libgirepository1.0-dev \
+           python3-gst-1.0
 
    **Arch Linux**
 
@@ -56,6 +60,8 @@ please see :ref:`contributing`.
    repository::
 
        sudo pacman -S \
+           cairo \
+           gobject-introspection \
            gst-python \
            gst-plugins-good \
            gst-plugins-ugly
@@ -65,6 +71,8 @@ please see :ref:`contributing`.
    If you use Fedora you can install GStreamer like this::
 
        sudo dnf install -y \
+           cairo-devel \
+           gobject-introspection-devel \
            python3-gstreamer1 \
            gstreamer1-plugins-good \
            gstreamer1-plugins-ugly-free
@@ -73,7 +81,11 @@ please see :ref:`contributing`.
 
    If you use Gentoo you can install GStreamer like this::
 
-       emerge -av gst-python gst-plugins-meta
+       emerge -av \
+           dev-libs/gobject-introspection \
+           dev-python/gst-python \
+           media-plugins/gst-plugins-meta \
+           x11-libs/cairo
 
    ``gst-plugins-meta`` is the one that actually pulls in the plugins you want,
    so pay attention to the USE flags, e.g. ``alsa``, ``mp3``, etc.
@@ -83,18 +95,27 @@ please see :ref:`contributing`.
    If you use macOS, you can install GStreamer from Homebrew::
 
        brew install \
+           cairo \
+           gobject-introspection \
            gst-python \
            gst-plugins-base \
            gst-plugins-good \
            gst-plugins-ugly
 
-#. Install the latest release of Mopidy::
+#. You are now ready to install the latest release of Mopidy.
 
-       sudo python3 -m pip install --upgrade mopidy
+   If you're installing Mopidy inside a Python virtual environment,
+   activate the virtualenv and run::
+
+       python3 -m pip install --upgrade mopidy
+
+   If you want to install Mopidy globally on your system, you can run::
+
+       sudo python3 -m pip install --upgrade --break-system-packages mopidy
 
    This will use ``pip`` to install the latest release of `Mopidy from PyPI
-   <https://pypi.org/project/Mopidy>`_. To upgrade Mopidy to future
-   releases, just rerun this command.
+   <https://pypi.org/project/Mopidy>`_.
+   To upgrade Mopidy in the future, just rerun the same command.
 
 #. Now, you're ready to :ref:`run Mopidy <running>`.
 
@@ -105,9 +126,16 @@ Installing extensions
 If you want to use any Mopidy extensions, like Spotify support or Last.fm
 scrobbling, you need to install additional Mopidy extensions.
 
-You can install any Mopidy extension directly from PyPI with ``pip``. Search the PyPI website to find available extensions. To install one of the listed packages, e.g. ``Mopidy-MPD``, simply run::
+You can install any Mopidy extension directly from PyPI with ``pip``.
+Search the PyPI website to find available extensions.
+To install one of the listed packages, e.g. ``Mopidy-MPD``,
+inside a virtualenv, simply run::
 
-   sudo python3 -m pip install Mopidy-MPD
+   python3 -m pip install Mopidy-MPD
+
+To install the same package globally on your system, run::
+
+    sudo python3 -m pip install --break-system-packages Mopidy-MPD
 
 Note that extensions installed with ``pip`` will only install Python
 dependencies. Please refer to the extension's documentation for information
