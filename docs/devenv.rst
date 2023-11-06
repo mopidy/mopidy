@@ -104,7 +104,7 @@ Git repo in an "editable" form::
     pip install --upgrade --editable .
 
 When using the ``--editable`` flag, the source code is not copied into the
-virtualenv's ``site-packages`` directory, but instead create a link there
+virtualenv's ``site-packages`` directory, but instead creates a link there
 pointing to the Git repo. This way, you can change the source code in the Git
 repo and the changes will be visible inside the virtualenv without having to
 reinstall Mopidy.
