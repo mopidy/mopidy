@@ -1,5 +1,4 @@
 import pytest
-
 from mopidy import exceptions
 from mopidy.internal import validation
 

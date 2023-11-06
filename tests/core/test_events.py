@@ -2,10 +2,10 @@ import unittest
 from unittest import mock
 
 import pykka
-
 from mopidy import core
 from mopidy.internal import deprecation
 from mopidy.models import Track
+
 from tests import dummy_backend
 
 

@@ -1,5 +1,4 @@
 import pytest
-
 from mopidy.config import validators
 
 

@@ -3,8 +3,8 @@ from importlib import metadata
 from unittest import mock
 
 import pytest
-
 from mopidy import config, exceptions, ext
+
 from tests import IsA, any_unicode
 
 

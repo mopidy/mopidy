@@ -1,8 +1,8 @@
 import unittest
 
 import pytest
-
 from mopidy import backend
+
 from tests import dummy_backend
 
 

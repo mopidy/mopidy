@@ -131,9 +131,7 @@ class ImmutableObject:
 class _ValidatedImmutableObjectMeta(type, Generic[T]):
     """Helper that initializes fields, slots and memoizes instance creation."""
 
-    _instances: dict[
-        weakref.ReferenceType[_ValidatedImmutableObjectMeta[T]], T
-    ] = {}  # noqa: RUF012
+    _instances: dict[weakref.ReferenceType[_ValidatedImmutableObjectMeta[T]], T] = {}  # noqa: RUF012
 
     def __new__(
         cls: type[_ValidatedImmutableObjectMeta],

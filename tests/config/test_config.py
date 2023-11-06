@@ -2,6 +2,7 @@ import unittest
 from unittest import mock
 
 from mopidy import config, ext
+
 from tests import path_to_data_dir
 
 

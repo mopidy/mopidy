@@ -13,12 +13,12 @@ repos:
   - repo: local
     hooks:
       - id: ruff
-        name: ruff
+        name: ruff check
         entry: ruff
         language: system
         types: [python]
-      - id: black
-        name: black
-        entry: black
+      - id: ruff-format
+        name: ruff format
+        entry: ruff-format
         language: system
         types: [python]
