@@ -75,15 +75,7 @@ Pull request guidelines
 
 #. Create a new branch, based on the ``develop`` branch, for every feature or
    bug fix. Keep branches small and on topic, as that makes them far easier to
-   review. We often use the following naming convention for branches:
-
-   - Features get the prefix ``feature/``, e.g.
-     ``feature/track-last-modified-as-ms``.
-
-   - Bug fixes get the prefix ``fix/``, e.g. ``fix/902-consume-track-on-next``.
-
-   - Improvements to the documentation get the prefix ``docs/``, e.g.
-     ``docs/add-ext-mopidy-spotify-tunigo``.
+   review.
 
 #. Follow the :ref:`code style <codestyle>`, especially make sure the
    ``ruff`` linter does not complain about anything. Our CI setup will

@@ -46,30 +46,27 @@ Mopidy and extensions.
 Make a virtualenv
 -----------------
 
-Make a Python `virtualenv <https://virtualenv.pypa.io/>`_ for Mopidy
-development. The virtualenv will wall off Mopidy and its dependencies from the
-rest of your system. All development and installation of Python dependencies,
-versions of Mopidy, and extensions are done inside the virtualenv. This way
-your regular Mopidy install, which you set up in the first step, is unaffected
-by your hacking and will always be working.
+Make a Python virtualenv for Mopidy development.
+The virtualenv will wall off Mopidy and its dependencies from the rest of your system.
+All development and installation of Python dependencies,
+versions of Mopidy, and extensions are done inside the virtualenv.
+This way your regular Mopidy install,
+which you set up in the first step,
+is unaffected by your hacking and will always be working.
 
-Most of us use the `virtualenvwrapper
-<https://virtualenvwrapper.readthedocs.io/>`_ to ease working with
-virtualenvs, so that's what we'll be using for the examples here. First,
-install and setup virtualenvwrapper as described in their docs.
+To create a virtualenv in the Mopidy workspace directory, run::
 
-To create a virtualenv named ``mopidy`` and uses the Mopidy workspace directory
-as the "project path", run::
-
-    mkvirtualenv -a ~/mopidy-dev --python $(which python3) mopidy
+    python3 -m venv ~/mopidy-dev/.venv
 
 Now, each time you open a terminal and want to activate the ``mopidy``
 virtualenv, run::
 
-    workon mopidy
+    . ~/mopidy-dev/.venv/bin/activate
 
-This will both activate the ``mopidy`` virtualenv, and change the current
-working directory to ``~/mopidy-dev``.
+There are lots of ways to set up your shell to automatically activate the virtualenv,
+e.g. when changing directory into ``~/mopidy-dev/`` or a subdirectory.
+As this is just convenience and not strictly required,
+it is left as an exercise for the reader.
 
 
 Clone the repo from GitHub
@@ -78,6 +75,7 @@ Clone the repo from GitHub
 Once inside the virtualenv, it's time to clone the ``mopidy/mopidy`` Git repo
 from GitHub::
 
+    cd ~/mopidy-dev/
     git clone https://github.com/mopidy/mopidy.git
 
 When you've cloned the ``mopidy`` Git repo, ``cd`` into it::
@@ -105,59 +103,40 @@ Git repo in an "editable" form::
 
     pip install --upgrade --editable .
 
-.. note::
-
-    If the above command fails with ``AttributeError: install_layout``
-    please refer to :issue:`2037` for a workaround.
-
-This will not copy the source code into the virtualenv's ``site-packages``
-directory, but instead create a link there pointing to the Git repo. Using
-``cdsitepackages`` from virtualenvwrapper, we can quickly show that the
-installed :file:`Mopidy.egg-link` file points back to the Git repo::
-
-    $ cdsitepackages
-    $ cat Mopidy.egg-link
-    /home/user/mopidy-dev/mopidy
-    .%
-    $
+When using the ``--editable`` flag, the source code is not copied into the
+virtualenv's ``site-packages`` directory, but instead creates a link there
+pointing to the Git repo. This way, you can change the source code in the Git
+repo and the changes will be visible inside the virtualenv without having to
+reinstall Mopidy.
 
 It will also create a ``mopidy`` executable inside the virtualenv that will
-always run the latest code from the Git repo. Using another
-virtualenvwrapper command, ``cdvirtualenv``, we can show that too::
+always run the latest code from the Git repo::
 
-    $ cdvirtualenv
-    $ cat bin/mopidy
+    $ cat ~/mopidy-dev/.venv/bin/mopidy
     ...
 
-The executable should contain something like this, using :mod:`pkg_resources`
-to look up Mopidy's "console script" entry point::
+This file is on the path when the virtualenv is active, so you can run it from
+anywhere, simply by running::
 
-    #!/home/user/virtualenvs/mopidy/bin/python2
-    # EASY-INSTALL-ENTRY-SCRIPT: 'Mopidy==0.19.5','console_scripts','mopidy'
-    __requires__ = 'Mopidy==0.19.5'
-    import sys
-    from pkg_resources import load_entry_point
-
-    if __name__ == '__main__':
-        sys.exit(
-            load_entry_point('Mopidy==0.19.5', 'console_scripts', 'mopidy')()
-        )
+    mopidy
 
 .. note::
 
-    It still works to run ``python mopidy`` directly on the
-    :file:`~/mopidy-dev/mopidy/mopidy/` Python package directory, but if
-    you don't run the ``pip install`` command above, the extensions bundled
-    with Mopidy will not be registered with :mod:`pkg_resources`, making Mopidy
-    quite useless.
+    It is also possible to run Python apps directly,
+    e.g. using ``python3 src/mopidy`` directly on the
+    :file:`~/mopidy-dev/mopidy/src/mopidy/` Python package directory.
+    However, if you don't run the install command above,
+    the extensions bundled with Mopidy will not be registered and made available
+    for use, making Mopidy quite useless.
 
-Third, the ``pip install`` command will register the bundled Mopidy
-extensions so that Mopidy may find them through :mod:`pkg_resources`. The
-result of this can be seen in the Git repo, in a new directory called
-:file:`Mopidy.egg-info`, which is ignored by Git. The
-:file:`Mopidy.egg-info/entry_points.txt` file is of special interest as it
-shows both how the above executable and the bundled extensions are connected to
-the Mopidy source code:
+Third, the install command will register the bundled Mopidy
+extensions so that Mopidy may find them through :mod:`importlib`.
+The result of this can be seen in a file named :file:`entry_points.txt`
+which can be found inside the virtualenv dir, e.g.
+:file:`~/mopidy-dev/.venv/lib/python3.11/site-packages/Mopidy-4.0.0.dist-info/entry_points.txt`.
+The :file:`entry_points.txt` file is of special interest as it shows both how
+the above executable and the bundled extensions are connected to the Mopidy
+source code:
 
 .. code-block:: ini
 
@@ -165,27 +144,11 @@ the Mopidy source code:
     mopidy = mopidy.__main__:main
 
     [mopidy.ext]
+    file = mopidy.file:Extension
     http = mopidy.http:Extension
+    m3u = mopidy.m3u:Extension
     softwaremixer = mopidy.softwaremixer:Extension
     stream = mopidy.stream:Extension
-
-.. warning::
-
-   It's not uncommon to clean up in the Git repo now and then, e.g. by running
-   ``git clean``.
-
-   If you do this, then the :file:`Mopidy.egg-info` directory will be removed,
-   and :mod:`pkg_resources` will no longer know how to locate the "console
-   script" entry point or the bundled Mopidy extensions.
-
-   The fix is simply to run the install command again::
-
-       pip install --editable .
-
-Finally, we can go back to the workspace, again using a virtualenvwrapper
-tool::
-
-   cdproject
 
 
 Install development tools
@@ -194,12 +157,13 @@ Install development tools
 Before continuing, you will probably want to install the development tools we
 use as well. These can be installed into the active virtualenv by running::
 
+    cd ~/mopidy-dev/mopidy/
     pip install --upgrade --editable ".[dev]"
 
 Note that this is the same command as you used to install Mopidy from the Git
 repo, with the addition of the ``[dev]`` suffix after ``.``. This makes pip
 install the "dev" set of extra dependencies. Exactly what the "dev" set
-includes are defined in ``setup.cfg``.
+includes are defined in :file:`pyproject.toml`.
 
 To upgrade the development tools in the future, just rerun the exact same
 command.
@@ -258,9 +222,9 @@ If you take a look at the tox config file, :file:`tox.ini`, you'll see that tox
 runs tests in multiple environments, including a ``ruff`` environment that
 lints the source code for issues and a ``docs`` environment that tests that the
 documentation can be built. You can also limit tox to just test specific
-environments using the ``-e`` option, e.g. to run just unit tests::
+environments using the ``-e`` option, e.g. to run just unit tests on Python 3.11::
 
-    tox -e py39
+    tox -e py311
 
 To learn more, see the `tox documentation <https://tox.readthedocs.io/>`_ .
 
@@ -268,12 +232,14 @@ Before submitting a pull request, we recommend running::
 
     tox -e ci
 
-This will locally run similar tests to what we use in our CI runs and help us to merge high-quality contributions.
+This will locally run similar tests to what we use in our CI runs and help us to
+merge high-quality contributions.
+
 
 Running unit tests
 ------------------
 
-Under the hood, ``tox -e py39`` will use `pytest <https://docs.pytest.org/>`_
+Under the hood, ``tox -e py311`` will use `pytest <https://docs.pytest.org/>`_
 as the test runner. We can also use it directly to run all tests::
 
     pytest
@@ -286,12 +252,12 @@ We can limit to just tests in a single directory to save time::
 
     pytest tests/http/
 
-With the help of the pytest-xdist plugin, we can run tests with four Python
+With the help of the ``pytest-xdist`` plugin, we can run tests with four Python
 processes in parallel, which usually cuts the test time in half or more::
 
     pytest -n 4
 
-Another useful feature from pytest-xdist, is the possibility to stop on the
+Another useful feature from ``pytest-xdist``, is the possibility to stop on the
 first test failure, watch the file system for changes, and then rerun the
 tests. This makes for a very quick code-test cycle::
 
@@ -421,7 +387,7 @@ Installing extensions
 As always, the ``mopidy`` virtualenv should be active when working on
 extensions::
 
-    workon mopidy
+    . ~/mopidy-dev/.venv/bin/activate
 
 Just like with non-development Mopidy installations, you can install extensions
 using pip::
@@ -431,7 +397,7 @@ using pip::
 Installing an extension from its Git repo works the same way as with Mopidy
 itself. First, go to the Mopidy workspace::
 
-    cdproject    # or cd ~/mopidy-dev/
+    cd ~/mopidy-dev/
 
 Clone the desired Mopidy extension::
 
@@ -439,17 +405,17 @@ Clone the desired Mopidy extension::
 
 Change to the newly created extension directory::
 
-    cd mopidy-spotify/
+    cd ~/mopidy-dev/mopidy-spotify/
 
 Then, install the extension in "editable" mode, so that it can be imported from
 anywhere inside the virtualenv and the extension is registered and discoverable
-through :mod:`pkg_resources`::
+through :mod:`importlib`::
 
     pip install --editable .
 
 Every extension will have a ``README.rst`` file. It may contain information
 about extra dependencies required, development process, etc. Extensions usually
-have a changelog in the readme file.
+have a changelog in their GitHub relases page.
 
 
 Upgrading extensions
@@ -459,10 +425,7 @@ Extensions often have a much quicker life cycle than Mopidy itself, often with
 daily releases in periods of active development. To find outdated extensions in
 your virtualenv, you can run::
 
-    pip search mopidy
-
-This will list all available Mopidy extensions and compare the installed
-versions with the latest available ones.
+    pip list --outdated
 
 To upgrade an extension installed with pip, simply use pip::
 
@@ -566,10 +529,11 @@ https://github.com/mopidy/mopidy, and `create a pull request
 Updating a pull request
 -----------------------
 
-When the pull request is created, our CI setup will run all tests on it. If
-something fails, you'll get notified by email. You might as well just fix the
-issues right away, as we won't merge a pull request without all CI builds
-being green. See :ref:`running-tests` on how to run the same tests locally as
+When the pull request is created, our CI setup will run all tests on it.
+If something fails, you'll usually get a notification from GitHub.
+You might as well just fix the issues right away,
+as we won't merge a pull request without all CI builds being green.
+See :ref:`running-tests` on how to run the same tests locally as
 our CI setup runs on your pull request.
 
 When you've fixed the issues, you can update the pull request simply by pushing
@@ -580,13 +544,3 @@ more commits to the same branch in your fork::
 Likewise, when you get review comments from other developers on your pull
 request, you're expected to create additional commits which addresses the
 comments. Push them to your branch so that the pull request is updated.
-
-.. note::
-
-    Setup the remote as the default push target for your branch::
-
-        git branch --set-upstream-to myuser/fix/666-crash-on-foo
-
-    Then you can push more commits without specifying the remote::
-
-        git push
