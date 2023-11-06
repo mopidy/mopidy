@@ -4,7 +4,7 @@ import os
 import urllib.parse
 from collections.abc import Iterable
 from pathlib import Path
-from typing import IO, Optional, Union
+from typing import IO
 
 from mopidy.internal import path
 from mopidy.models import Playlist, Ref, Track
@@ -28,7 +28,7 @@ def uri_to_path(uri: Uri) -> Path:
     return path.uri_to_path(uri)
 
 
-def name_from_path(path: Path) -> Optional[str]:
+def name_from_path(path: Path) -> str | None:
     """Extract name from file path."""
     name = bytes(Path(path.stem))
     try:
@@ -39,7 +39,7 @@ def name_from_path(path: Path) -> Optional[str]:
 
 def path_from_name(
     name: str,
-    ext: Optional[str] = None,
+    ext: str | None = None,
     sep: str = "|",
 ) -> Path:
     """Convert name with optional extension to file path."""
@@ -76,7 +76,7 @@ def load_items(
 
 
 def dump_items(
-    items: Iterable[Union[Ref, Track]],
+    items: Iterable[Ref | Track],
     fp: IO[str],
 ) -> None:
     if any(item.name for item in items):
@@ -93,8 +93,8 @@ def dump_items(
 
 def playlist(
     path: Path,
-    items: Optional[Iterable[Union[Ref, Track]]] = None,
-    mtime: Optional[float] = None,
+    items: Iterable[Ref | Track] | None = None,
+    mtime: float | None = None,
 ) -> Playlist:
     if items is None:
         items = []

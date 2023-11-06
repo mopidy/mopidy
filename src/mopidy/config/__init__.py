@@ -7,7 +7,7 @@ import os
 import pathlib
 import re
 from collections.abc import Iterator, Mapping
-from typing import TYPE_CHECKING, Any, Optional, TypedDict, Union, cast
+from typing import TYPE_CHECKING, Any, TypedDict, cast
 
 from mopidy.config import keyring
 from mopidy.config.schemas import ConfigSchema, MapConfigSchema
@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from mopidy.internal.log import LogColorName, LogLevelName
 
     ConfigErrors: TypeAlias = dict[str, dict[str, Any]]
-    ConfigSchemas: TypeAlias = list[Union[ConfigSchema, MapConfigSchema]]
+    ConfigSchemas: TypeAlias = list[ConfigSchema | MapConfigSchema]
     RawConfig: TypeAlias = dict[str, dict[str, Any]]
 
 
@@ -73,22 +73,22 @@ class LoggingConfig(TypedDict):
     verbosity: int
     format: str
     color: bool
-    config_file: Optional[pathlib.Path]
+    config_file: pathlib.Path | None
 
 
 class AudioConfig(TypedDict):
     mixer: str
-    mixer_volume: Optional[int]
+    mixer_volume: int | None
     output: str
-    buffer_time: Optional[int]
+    buffer_time: int | None
 
 
 class ProxyConfig(TypedDict):
-    scheme: Optional[str]
-    hostname: Optional[str]
-    port: Optional[int]
-    username: Optional[str]
-    password: Optional[str]
+    scheme: str | None
+    hostname: str | None
+    port: int | None
+    username: str | None
+    password: str | None
 
 
 _core_schema = ConfigSchema("core")
@@ -175,7 +175,7 @@ def load(
 def format(  # noqa: A001
     config: Config,
     ext_schemas: ConfigSchemas,
-    comments: Optional[dict] = None,
+    comments: dict | None = None,
     display: bool = True,
 ) -> str:
     schemas = _schemas[:]
@@ -385,7 +385,7 @@ def _postprocess(config_string: str) -> str:
 
 
 class Proxy(Mapping):
-    def __init__(self, data: Union[Config, dict[str, Any]]) -> None:
+    def __init__(self, data: Config | dict[str, Any]) -> None:
         self._data = data
 
     def __getitem__(self, key) -> Any:

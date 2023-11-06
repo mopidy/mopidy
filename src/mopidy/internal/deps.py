@@ -8,7 +8,7 @@ from collections.abc import Callable
 from importlib import metadata
 from os import PathLike
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, TypedDict
+from typing import TYPE_CHECKING, TypedDict
 
 from mopidy.internal import formatting
 from mopidy.internal.gi import Gst, gi
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     Adapter: TypeAlias = Callable[[], DepInfo]
 
 
-def format_dependency_list(adapters: Optional[list[Adapter]] = None) -> str:
+def format_dependency_list(adapters: list[Adapter] | None = None) -> str:
     if adapters is None:
         dist_names = {
             ep.dist.name
@@ -95,7 +95,7 @@ def python_info() -> DepInfo:
 
 
 def pkg_info(
-    project_name: Optional[str] = None,
+    project_name: str | None = None,
     include_transitive_deps: bool = True,
     include_extras: bool = False,
 ) -> DepInfo:

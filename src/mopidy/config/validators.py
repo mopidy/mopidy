@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional, Protocol, TypeVar
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar
 
 if TYPE_CHECKING:
     from abc import abstractmethod
@@ -28,7 +28,7 @@ def validate_required(value: Any, required: bool) -> None:
         raise ValueError("must be set.")
 
 
-def validate_choice(value: T, choices: Optional[Iterable[T]]) -> None:
+def validate_choice(value: T, choices: Iterable[T] | None) -> None:
     """Validate that ``value`` is one of the ``choices``.
 
     Normally called in :meth:`~mopidy.config.types.ConfigValue.deserialize`.
@@ -38,7 +38,7 @@ def validate_choice(value: T, choices: Optional[Iterable[T]]) -> None:
         raise ValueError(f"must be one of {names}, not {value}.")
 
 
-def validate_minimum(value: CT, minimum: Optional[CT]) -> None:
+def validate_minimum(value: CT, minimum: CT | None) -> None:
     """Validate that ``value`` is at least ``minimum``.
 
     Normally called in :meth:`~mopidy.config.types.ConfigValue.deserialize`.
@@ -47,7 +47,7 @@ def validate_minimum(value: CT, minimum: Optional[CT]) -> None:
         raise ValueError(f"{value!r} must be larger than {minimum!r}.")
 
 
-def validate_maximum(value: CT, maximum: Optional[CT]) -> None:
+def validate_maximum(value: CT, maximum: CT | None) -> None:
     """Validate that ``value`` is at most ``maximum``.
 
     Normally called in :meth:`~mopidy.config.types.ConfigValue.deserialize`.

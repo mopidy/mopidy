@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import random
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from pykka.typing import proxy_method
 
@@ -157,9 +157,9 @@ class TracklistController:
 
     def index(
         self,
-        tl_track: Optional[TlTrack] = None,
-        tlid: Optional[int] = None,
-    ) -> Optional[int]:
+        tl_track: TlTrack | None = None,
+        tlid: int | None = None,
+    ) -> int | None:
         """The position of the given track in the tracklist.
 
         If neither *tl_track* or *tlid* is given we return the index of
@@ -190,7 +190,7 @@ class TracklistController:
                     return i
         return None
 
-    def get_eot_tlid(self) -> Optional[int]:
+    def get_eot_tlid(self) -> int | None:
         """The TLID of the track that will be played after the current track.
 
         Not necessarily the same TLID as returned by :meth:`get_next_tlid`.
@@ -204,7 +204,7 @@ class TracklistController:
 
         return getattr(eot_tl_track, "tlid", None)
 
-    def eot_track(self, tl_track: Optional[TlTrack]) -> Optional[TlTrack]:
+    def eot_track(self, tl_track: TlTrack | None) -> TlTrack | None:
         """The track that will be played after the given track.
 
         Not necessarily the same track as :meth:`next_track`.
@@ -227,7 +227,7 @@ class TracklistController:
         # shared.
         return self.next_track(tl_track)
 
-    def get_next_tlid(self) -> Optional[int]:
+    def get_next_tlid(self) -> int | None:
         """The tlid of the track that will be played if calling
         :meth:`mopidy.core.PlaybackController.next()`.
 
@@ -245,7 +245,7 @@ class TracklistController:
 
         return getattr(next_tl_track, "tlid", None)
 
-    def next_track(self, tl_track: Optional[TlTrack]) -> Optional[TlTrack]:
+    def next_track(self, tl_track: TlTrack | None) -> TlTrack | None:
         """The track that will be played if calling
         :meth:`mopidy.core.PlaybackController.next()`.
 
@@ -295,7 +295,7 @@ class TracklistController:
 
         return self._tl_tracks[next_index]
 
-    def get_previous_tlid(self) -> Optional[int]:
+    def get_previous_tlid(self) -> int | None:
         """Returns the TLID of the track that will be played if calling
         :meth:`mopidy.core.PlaybackController.previous()`.
 
@@ -312,7 +312,7 @@ class TracklistController:
 
         return getattr(previous_tl_track, "tlid", None)
 
-    def previous_track(self, tl_track: Optional[TlTrack]) -> Optional[TlTrack]:
+    def previous_track(self, tl_track: TlTrack | None) -> TlTrack | None:
         """Returns the track that will be played if calling
         :meth:`mopidy.core.PlaybackController.previous()`.
 
@@ -343,9 +343,9 @@ class TracklistController:
 
     def add(  # noqa: C901
         self,
-        tracks: Optional[Iterable[Track]] = None,
-        at_position: Optional[int] = None,
-        uris: Optional[Iterable[Uri]] = None,
+        tracks: Iterable[Track] | None = None,
+        at_position: int | None = None,
+        uris: Iterable[Uri] | None = None,
     ) -> list[TlTrack]:
         """Add tracks to the tracklist.
 
@@ -504,7 +504,7 @@ class TracklistController:
         self._increase_version()
         return tl_tracks
 
-    def shuffle(self, start: Optional[int] = None, end: Optional[int] = None) -> None:
+    def shuffle(self, start: int | None = None, end: int | None = None) -> None:
         """Shuffles the entire tracklist. If ``start`` and ``end`` is given only
         shuffles the slice ``[start:end]``.
 
@@ -547,7 +547,7 @@ class TracklistController:
         if self.get_random() and tl_track in self._shuffled:
             self._shuffled.remove(tl_track)
 
-    def _mark_unplayable(self, tl_track: Optional[TlTrack]) -> None:
+    def _mark_unplayable(self, tl_track: TlTrack | None) -> None:
         """Internal method for :class:`mopidy.core.PlaybackController`."""
         logger.warning(
             "Track is not playable: %s",
@@ -558,7 +558,7 @@ class TracklistController:
         if self.get_random() and tl_track in self._shuffled:
             self._shuffled.remove(tl_track)
 
-    def _mark_played(self, tl_track: Optional[TlTrack]) -> bool:
+    def _mark_played(self, tl_track: TlTrack | None) -> bool:
         """Internal method for :class:`mopidy.core.PlaybackController`."""
         if self.get_consume() and tl_track is not None:
             self.remove({"tlid": [tl_track.tlid]})

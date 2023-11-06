@@ -6,7 +6,7 @@ import itertools
 import logging
 from collections.abc import Iterable
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import pykka
 from pykka.typing import ActorMemberMixin, proxy_method
@@ -65,9 +65,9 @@ class Core(
         self,
         config: Config,
         *,
-        mixer: Optional[mixer.MixerProxy] = None,
+        mixer: mixer.MixerProxy | None = None,
         backends: Iterable[backend.BackendProxy],
-        audio: Optional[audio.AudioProxy] = None,
+        audio: audio.AudioProxy | None = None,
     ) -> None:
         super().__init__()
 
@@ -114,7 +114,7 @@ class Core(
         self,
         old_state: PlaybackState,
         new_state: PlaybackState,
-        target_state: Optional[PlaybackState],
+        target_state: PlaybackState | None,
     ) -> None:
         # XXX: This is a temporary fix for issue #232 while we wait for a more
         # permanent solution with the implementation of issue #234. When the

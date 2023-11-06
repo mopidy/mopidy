@@ -157,10 +157,6 @@ ignore = [
     "TCH003",  # typing-only-standard-library-import
     "TRY003",  # raise-vanilla-args
     "TRY400",  # error-instead-of-exception
-    #
-    # Equivalent to `pyupgrade --keep-runtime-typing`:
-    "UP006", # deprecated-collection-type
-    "UP007", # typing-union
 ]
 target-version = "py311"
 

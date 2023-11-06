@@ -4,7 +4,7 @@ import contextlib
 import logging
 import urllib.parse
 from collections.abc import Generator
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 from pykka.typing import proxy_method
 
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 @contextlib.contextmanager
 def _backend_error_handling(
     backend: BackendProxy,
-    reraise: Union[None, type[Exception], tuple[type[Exception], ...]] = None,
+    reraise: None | (type[Exception] | tuple[type[Exception], ...]) = None,
 ) -> Generator[None, Any, None]:
     try:
         yield
@@ -87,7 +87,7 @@ class PlaylistsController:
 
         return results
 
-    def get_items(self, uri: Uri) -> Optional[list[Ref]]:
+    def get_items(self, uri: Uri) -> list[Ref] | None:
         """Get the items in a playlist specified by ``uri``.
 
         Returns a list of :class:`~mopidy.models.Ref` objects referring to the
@@ -117,8 +117,8 @@ class PlaylistsController:
     def create(
         self,
         name: str,
-        uri_scheme: Optional[UriScheme] = None,
-    ) -> Optional[Playlist]:
+        uri_scheme: UriScheme | None = None,
+    ) -> Playlist | None:
         """Create a new playlist.
 
         If ``uri_scheme`` matches an URI scheme handled by a current backend,
@@ -182,7 +182,7 @@ class PlaylistsController:
 
         return success
 
-    def lookup(self, uri: Uri) -> Optional[Playlist]:
+    def lookup(self, uri: Uri) -> Playlist | None:
         """Lookup playlist with given URI in both the set of playlists and in any
         other playlist sources. Returns :class:`None` if not found.
 
@@ -203,7 +203,7 @@ class PlaylistsController:
 
     # TODO: there is an inconsistency between library.refresh(uri) and this
     # call, not sure how to sort this out.
-    def refresh(self, uri_scheme: Optional[UriScheme] = None) -> None:
+    def refresh(self, uri_scheme: UriScheme | None = None) -> None:
         """Refresh the playlists in :attr:`playlists`.
 
         If ``uri_scheme`` is :class:`None`, all backends are asked to refresh.
@@ -234,7 +234,7 @@ class PlaylistsController:
         if playlists_loaded:
             listener.CoreListener.send("playlists_loaded")
 
-    def save(self, playlist: Playlist) -> Optional[Playlist]:
+    def save(self, playlist: Playlist) -> Playlist | None:
         """Save the playlist.
 
         For a playlist to be saveable, it must have the ``uri`` attribute set.

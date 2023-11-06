@@ -6,9 +6,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Generic,
-    Optional,
     TypeVar,
-    Union,
     cast,
     overload,
 )
@@ -40,9 +38,9 @@ class Field(Generic[T]):
 
     def __init__(
         self,
-        default: Optional[T] = None,
-        type: Optional[type[T]] = None,
-        choices: Optional[Iterable[T]] = None,
+        default: T | None = None,
+        type: type[T] | None = None,
+        choices: Iterable[T] | None = None,
     ) -> None:
         self._name: str | None = None  # Set by ValidatedImmutableObjectMeta
         self._choices = choices
@@ -74,9 +72,9 @@ class Field(Generic[T]):
 
     def __get__(
         self: TField,
-        obj: Optional[object],
-        objtype: Optional[type[object]],
-    ) -> Union[T, TField]:
+        obj: object | None,
+        objtype: type[object] | None,
+    ) -> T | TField:
         if not obj:
             return self
         return cast(T, getattr(obj, f"_{self._name}", self._default))
@@ -187,7 +185,7 @@ class Boolean(Field[bool]):
         super().__init__(type=bool, default=default)
 
 
-class Collection(Field[Union[tuple, frozenset]]):
+class Collection(Field[tuple | frozenset]):
     """:class:`Field` for storing collections of a given type.
 
     :param type: all items stored in the collection must be of this type
@@ -197,11 +195,11 @@ class Collection(Field[Union[tuple, frozenset]]):
     def __init__(
         self,
         type: type,
-        container: Callable[[], Union[tuple, frozenset]] = tuple,
+        container: Callable[[], tuple | frozenset] = tuple,
     ) -> None:
         super().__init__(type=type, default=container())
 
-    def validate(self, value: Iterable[Any]) -> Optional[Iterable[Any]]:
+    def validate(self, value: Iterable[Any]) -> Iterable[Any] | None:
         assert self._default is not None
         assert self._type is not None
         if isinstance(value, str):

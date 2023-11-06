@@ -3,7 +3,7 @@ from __future__ import annotations
 import contextlib
 import logging
 from collections.abc import Generator, Iterable
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from pykka.typing import proxy_method
 
@@ -36,10 +36,10 @@ def _mixer_error_handling(mixer: MixerProxy) -> Generator[None, Any, None]:
 
 
 class MixerController:
-    def __init__(self, mixer: Optional[MixerProxy]) -> None:
+    def __init__(self, mixer: MixerProxy | None) -> None:
         self._mixer = mixer
 
-    def get_volume(self) -> Optional[Percentage]:
+    def get_volume(self) -> Percentage | None:
         """Get the volume.
 
         Integer in range [0..100] or :class:`None` if unknown.
@@ -78,7 +78,7 @@ class MixerController:
 
         return False
 
-    def get_mute(self) -> Optional[bool]:
+    def get_mute(self) -> bool | None:
         """Get mute state.
 
         :class:`True` if muted, :class:`False` unmuted, :class:`None` if

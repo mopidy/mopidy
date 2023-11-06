@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import urllib.parse
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from pykka.messages import ProxyCall
 from pykka.typing import proxy_method
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 class PlaybackController:
     def __init__(
         self,
-        audio: Optional[AudioProxy],
+        audio: AudioProxy | None,
         backends: Backends,
         core: Core,
     ) -> None:
@@ -36,43 +36,43 @@ class PlaybackController:
         self.core = core
         self._audio = audio
 
-        self._stream_title: Optional[str] = None
+        self._stream_title: str | None = None
         self._state = PlaybackState.STOPPED
 
-        self._current_tl_track: Optional[TlTrack] = None
-        self._pending_tl_track: Optional[TlTrack] = None
+        self._current_tl_track: TlTrack | None = None
+        self._pending_tl_track: TlTrack | None = None
 
-        self._pending_position: Optional[DurationMs] = None
-        self._last_position: Optional[DurationMs] = None
+        self._pending_position: DurationMs | None = None
+        self._last_position: DurationMs | None = None
         self._previous: bool = False
 
-        self._start_at_position: Optional[DurationMs] = None
+        self._start_at_position: DurationMs | None = None
         self._start_paused: bool = False
 
         if self._audio:
             self._audio.set_about_to_finish_callback(self._on_about_to_finish_callback)
 
-    def _get_backend(self, tl_track: Optional[TlTrack]) -> Optional[BackendProxy]:
+    def _get_backend(self, tl_track: TlTrack | None) -> BackendProxy | None:
         if tl_track is None:
             return None
         uri_scheme = UriScheme(urllib.parse.urlparse(tl_track.track.uri).scheme)
         return self.backends.with_playback.get(uri_scheme, None)
 
-    def get_current_tl_track(self) -> Optional[TlTrack]:
+    def get_current_tl_track(self) -> TlTrack | None:
         """Get the currently playing or selected track.
 
         Returns a :class:`mopidy.models.TlTrack` or :class:`None`.
         """
         return self._current_tl_track
 
-    def _set_current_tl_track(self, value: Optional[TlTrack]) -> None:
+    def _set_current_tl_track(self, value: TlTrack | None) -> None:
         """Set the currently playing or selected track.
 
         *Internal:* This is only for use by Mopidy's test suite.
         """
         self._current_tl_track = value
 
-    def get_current_track(self) -> Optional[Track]:
+    def get_current_track(self) -> Track | None:
         """Get the currently playing or selected track.
 
         Extracted from :meth:`get_current_tl_track` for convenience.
@@ -81,7 +81,7 @@ class PlaybackController:
         """
         return getattr(self.get_current_tl_track(), "track", None)
 
-    def get_current_tlid(self) -> Optional[int]:
+    def get_current_tlid(self) -> int | None:
         """Get the currently playing or selected TLID.
 
         Extracted from :meth:`get_current_tl_track` for convenience.
@@ -92,7 +92,7 @@ class PlaybackController:
         """
         return getattr(self.get_current_tl_track(), "tlid", None)
 
-    def get_stream_title(self) -> Optional[str]:
+    def get_stream_title(self) -> str | None:
         """Get the current stream title or :class:`None`."""
         return self._stream_title
 
@@ -282,8 +282,8 @@ class PlaybackController:
 
     def play(  # noqa: C901, PLR0912
         self,
-        tl_track: Optional[TlTrack] = None,
-        tlid: Optional[int] = None,
+        tl_track: TlTrack | None = None,
+        tlid: int | None = None,
     ) -> None:
         """Play the given track, or if the given tl_track and tlid is
         :class:`None`, play the currently active track.
@@ -343,7 +343,7 @@ class PlaybackController:
 
     def _change(  # noqa: PLR0911
         self,
-        pending_tl_track: Optional[TlTrack],
+        pending_tl_track: TlTrack | None,
         state: PlaybackState,
     ) -> bool:
         self._pending_tl_track = pending_tl_track

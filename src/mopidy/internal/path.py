@@ -3,7 +3,6 @@ import pathlib
 import re
 import urllib.parse
 from os import PathLike
-from typing import Union
 
 from mopidy.internal import xdg
 
@@ -47,7 +46,7 @@ def get_unix_socket_path(socket_path):
     return match.group(1)
 
 
-def path_to_uri(path: Union[str, PathLike[str]]) -> str:
+def path_to_uri(path: str | PathLike[str]) -> str:
     """
     Convert OS specific path to file:// URI.
 

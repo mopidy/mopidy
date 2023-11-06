@@ -14,9 +14,7 @@ from typing import (
     ClassVar,
     Generic,
     Literal,
-    Optional,
     TypeVar,
-    Union,
     cast,
 )
 
@@ -83,7 +81,7 @@ class ConfigValue(ABC, Generic[T]):
     """
 
     @abstractmethod
-    def deserialize(self, value: AnyStr) -> Optional[T]:
+    def deserialize(self, value: AnyStr) -> T | None:
         """Cast raw string to appropriate type."""
         raise NotImplementedError
 
@@ -117,14 +115,14 @@ class String(ConfigValue[str]):
     def __init__(
         self,
         optional: bool = False,
-        choices: Optional[Iterable[str]] = None,
-        transformer: Optional[Callable[[str], str]] = None,
+        choices: Iterable[str] | None = None,
+        transformer: Callable[[str], str] | None = None,
     ) -> None:
         self._required = not optional
         self._choices = choices
         self._transformer = transformer
 
-    def deserialize(self, value: AnyStr) -> Optional[str]:
+    def deserialize(self, value: AnyStr) -> str | None:
         result = decode(value).strip()
         validators.validate_required(result, self._required)
         if not result:
@@ -161,7 +159,7 @@ class Secret(String):
         self,
         optional: bool = False,
         choices: None = None,
-        transformer: Optional[Callable[[str], str]] = None,
+        transformer: Callable[[str], str] | None = None,
     ) -> None:
         super().__init__(
             optional=optional,
@@ -180,9 +178,9 @@ class Integer(ConfigValue[int]):
 
     def __init__(
         self,
-        minimum: Optional[int] = None,
-        maximum: Optional[int] = None,
-        choices: Optional[Iterable[int]] = None,
+        minimum: int | None = None,
+        maximum: int | None = None,
+        choices: Iterable[int] | None = None,
         optional: bool = False,
     ) -> None:
         self._required = not optional
@@ -190,7 +188,7 @@ class Integer(ConfigValue[int]):
         self._maximum = maximum
         self._choices = choices
 
-    def deserialize(self, value: AnyStr) -> Optional[int]:
+    def deserialize(self, value: AnyStr) -> int | None:
         result = decode(value)
         validators.validate_required(result, self._required)
         if not result:
@@ -207,15 +205,15 @@ class Float(ConfigValue[float]):
 
     def __init__(
         self,
-        minimum: Optional[float] = None,
-        maximum: Optional[float] = None,
+        minimum: float | None = None,
+        maximum: float | None = None,
         optional: bool = False,
     ) -> None:
         self._required = not optional
         self._minimum = minimum
         self._maximum = maximum
 
-    def deserialize(self, value: AnyStr) -> Optional[float]:
+    def deserialize(self, value: AnyStr) -> float | None:
         result = decode(value)
         validators.validate_required(result, self._required)
         if not value:
@@ -242,7 +240,7 @@ class Boolean(ConfigValue[bool]):
     def __init__(self, optional: bool = False) -> None:
         self._required = not optional
 
-    def deserialize(self, value: AnyStr) -> Optional[bool]:
+    def deserialize(self, value: AnyStr) -> bool | None:
         result = decode(value)
         validators.validate_required(result, self._required)
         if not result:
@@ -287,7 +285,7 @@ class Pair(ConfigValue[tuple[K, V]]):
         self._separator = separator
         self._subtypes = subtypes
 
-    def deserialize(self, value: str) -> Optional[tuple[K, V]]:
+    def deserialize(self, value: str) -> tuple[K, V] | None:
         raw_value = decode(value).strip()
         validators.validate_required(raw_value, self._required)
         if not raw_value:
@@ -345,7 +343,7 @@ class List(ConfigValue[V]):
         self._unique = unique
         self._subtype = subtype
 
-    def deserialize(self, value: str) -> Union[tuple[V, ...], frozenset[V]]:
+    def deserialize(self, value: str) -> tuple[V, ...] | frozenset[V]:
         value = decode(value)
 
         strings: list[str]
@@ -362,10 +360,10 @@ class List(ConfigValue[V]):
         values = frozenset(values_iter) if self._unique else tuple(values_iter)
 
         validators.validate_required(values, self._required)
-        return cast(Union[tuple[V, ...], frozenset[V]], values)
+        return cast(tuple[V, ...] | frozenset[V], values)
 
     def serialize(
-        self, value: Union[tuple[V, ...], frozenset[V]], display: bool = False
+        self, value: tuple[V, ...] | frozenset[V], display: bool = False
     ) -> str:
         if not value:
             return ""
@@ -414,7 +412,7 @@ class LogLevel(ConfigValue[log.LogLevelName]):
         "all": logging.NOTSET,
     }
 
-    def deserialize(self, value: str) -> Optional[int]:
+    def deserialize(self, value: str) -> int | None:
         value = decode(value)
         validators.validate_choice(value.lower(), self.levels.keys())
         return self.levels.get(value.lower())
@@ -432,7 +430,7 @@ class Hostname(ConfigValue):
     def __init__(self, optional: bool = False) -> None:
         self._required = not optional
 
-    def deserialize(self, value: str, display: bool = False) -> Optional[str]:
+    def deserialize(self, value: str, display: bool = False) -> str | None:
         value = decode(value).strip()
         validators.validate_required(value, self._required)
         if not value:
@@ -484,7 +482,7 @@ class Path(ConfigValue[_ExpandedPath]):
     def __init__(self, optional=False):
         self._required = not optional
 
-    def deserialize(self, value: str) -> Optional[_ExpandedPath]:
+    def deserialize(self, value: str) -> _ExpandedPath | None:
         value = decode(value).strip()
         expanded = path.expand_path(value)
         validators.validate_required(value, self._required)
@@ -495,7 +493,7 @@ class Path(ConfigValue[_ExpandedPath]):
 
     def serialize(
         self,
-        value: Union[None, _ExpandedPath, bytes],
+        value: None | (_ExpandedPath | bytes),
         display: bool = False,
     ) -> str:
         if value is None:

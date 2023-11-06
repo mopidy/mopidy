@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar, Literal, Optional
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import pykka
 from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
@@ -42,7 +42,7 @@ class Mixer:
     def __init__(self, config: dict) -> None:
         pass
 
-    def get_volume(self) -> Optional[Percentage]:
+    def get_volume(self) -> Percentage | None:
         """Get volume level of the mixer on a linear scale from 0 to 100.
 
         Example values:
@@ -79,7 +79,7 @@ class Mixer:
         logger.debug("Mixer event: volume_changed(volume=%d)", volume)
         MixerListener.send("volume_changed", volume=volume)
 
-    def get_mute(self) -> Optional[bool]:
+    def get_mute(self) -> bool | None:
         """Get mute state of the mixer.
 
         *MAY be implemented by subclass.*
