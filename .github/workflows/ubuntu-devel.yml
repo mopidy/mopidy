@@ -19,16 +19,13 @@ jobs:
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y \
-            # Basics
             git \
             python3 \
             tox \
-            # GStreamer
             gstreamer1.0-plugins-bad \
             gstreamer1.0-plugins-good \
             gstreamer1.0-plugins-ugly \
             python3-gst-1.0 \
-            # pygobject dependencies
             libcairo2-dev \
             libgirepository1.0-dev \
             libglib2.0-dev
