@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import functools
+import json
 import logging
 import urllib.parse
 from collections.abc import Callable
@@ -110,19 +111,34 @@ def make_jsonrpc_wrapper(core_actor: CoreProxy) -> jsonrpc.JsonRpcWrapper:
 
 def _send_broadcast(
     client: WebSocketHandler,
-    msg: bytes | str | dict[str, Any],
+    msg: dict[str, Any],
 ) -> None:
     # We could check for client.ws_connection, but we don't really
     # care why the broadcast failed, we just want the rest of them
     # to succeed, so catch everything.
     try:
-        client.write_message(msg)
+        if client.notif_mode:
+            raw_msg = create_notification(**msg)
+        else:
+            raw_msg = create_event(**msg)
+        client.write_message(raw_msg)
     except Exception as exc:
         logger.debug(
             f"Broadcast of WebSocket message to "
             f"{client.request.remote_ip} failed: {exc}"
         )
         # TODO: should this do the same cleanup as the on_message code?
+
+
+def create_event(name: str, **data: Any) -> bytes:
+    event = data
+    event["event"] = name
+    return json.dumps(event, cls=models.ModelJSONEncoder)
+
+
+def create_notification(name: str, **data: Any) -> bytes:
+    event = {"jsonrpc": "2.0", "method": name, "params": data}
+    return json.dumps(event, cls=models.ModelJSONEncoder)
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
@@ -134,7 +150,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     @classmethod
     def broadcast(
         cls,
-        msg: bytes | str | dict[str, Any],
+        msg: dict[str, Any],
         io_loop: tornado.ioloop.IOLoop,
     ) -> None:
         # This can be called from outside the Tornado ioloop, so we need to
@@ -154,9 +170,16 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         self.csrf_protection = csrf_protection
 
     def open(self, *_args: str, **_kwargs: str) -> Awaitable[None] | None:
+        self.notif_mode = (
+            self.get_argument("events_as_notifications", None, True) is not None
+        )
         self.set_nodelay(True)
         self.clients.add(self)
-        logger.debug("New WebSocket connection from %s", self.request.remote_ip)
+        logger.debug(
+            "New WebSocket connection from %s (%s mode)",
+            self.request.remote_ip,
+            "jsonrpc notification" if self.notif_mode else "standard event",
+        )
 
     def on_close(self) -> None:
         self.clients.discard(self)

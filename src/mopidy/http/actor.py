@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import secrets
 import socket
@@ -15,7 +14,7 @@ import tornado.netutil
 import tornado.web
 import tornado.websocket
 
-from mopidy import exceptions, models, zeroconf
+from mopidy import exceptions, zeroconf
 from mopidy.core import CoreListener
 from mopidy.http import Extension, handlers
 from mopidy.internal import formatting, network
@@ -83,16 +82,9 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
 
         self.server.stop()
 
-    def on_event(self, name: str, **data: Any) -> None:
+    def on_event(self, **data: Any) -> None:
         assert self.server.io_loop
-        on_event(name, self.server.io_loop, **data)
-
-
-def on_event(name: str, io_loop: tornado.ioloop.IOLoop, **data: Any) -> None:
-    event = data
-    event["event"] = name
-    message = json.dumps(event, cls=models.ModelJSONEncoder)
-    handlers.WebSocketHandler.broadcast(message, io_loop)
+        handlers.WebSocketHandler.broadcast(data, self.server.io_loop)
 
 
 class HttpServer(threading.Thread):
