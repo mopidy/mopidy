@@ -157,7 +157,7 @@ class LibraryProvider:
         query: Query[SearchField],
         uris: list[Uri] | None = None,
         exact: bool = False,
-    ) -> list[SearchResult]:
+    ) -> SearchResult | None:
         """See :meth:`mopidy.core.LibraryController.search`.
 
         *MAY be implemented by subclass.*
@@ -165,7 +165,7 @@ class LibraryProvider:
         .. versionadded:: 1.0
             The ``exact`` param which replaces the old ``find_exact``.
         """
-        return []
+        return None
 
 
 @pykka.traversable
