@@ -1169,9 +1169,9 @@ class TestCorePlaybackWithOldBackend:
         b.uri_schemes.get.return_value = ["dummy1"]
         b.playback = mock.Mock(spec=backend.PlaybackProvider)
         b.playback.play.side_effect = TypeError
-        b.library.lookup.return_value.get.return_value = [
-            Track(uri="dummy1:a", length=40000)
-        ]
+        b.library.lookup_many.return_value.get.return_value = {
+            "dummy1:a": [Track(uri="dummy1:a", length=40000)]
+        }
 
         c = core.Core(config, mixer=None, backends=[b])
         c.tracklist.add(uris=["dummy1:a"])

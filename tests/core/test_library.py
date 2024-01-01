@@ -161,8 +161,8 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         track1 = Track(uri="dummy1:a", name="abc")
         track2 = Track(uri="dummy2:a", name="def")
 
-        self.library1.lookup().get.return_value = [track1]
-        self.library2.lookup().get.return_value = [track2]
+        self.library1.lookup_many().get.return_value = {"dummy1:a": [track1]}
+        self.library2.lookup_many().get.return_value = {"dummy2:a": [track2]}
 
         result = self.core.library.lookup(uris=["dummy1:a", "dummy2:a"])
         assert result == {
@@ -183,11 +183,43 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         track1 = Track(uri="dummy1:a", name="abc")
         track2 = Track()
 
-        self.library1.lookup().get.return_value = [track1, track2]
+        self.library1.lookup_many().get.return_value = {"dummy1:a": [track1, track2]}
 
         result = self.core.library.lookup(uris=["dummy1:a"])
         assert result == {
             "dummy1:a": [track1],
+        }
+
+    def test_lookup_batches_uris(self):
+        track1 = Track(uri="dummy1:a", name="abc")
+        track2 = Track(uri="dummy1:b", name="def")
+        track3 = Track(uri="dummy2:a", name="ghi")
+        track4 = Track(uri="dummy2:b", name="jkl")
+
+        self.library1.lookup_many.return_value.get.return_value = {
+            "dummy1:a": [track1],
+            "dummy1:b": [track2],
+        }
+        self.library2.lookup_many.return_value.get.return_value = {
+            "dummy2:a": [track3],
+            "dummy2:b": [track4],
+        }
+
+        result = self.core.library.lookup(uris=[
+            "dummy1:a",
+            "dummy1:b",
+            "dummy2:a",
+            "dummy2:b",
+        ])
+
+        self.library1.lookup_many.assert_called_once_with(["dummy1:a", "dummy1:b"])
+        self.library2.lookup_many.assert_called_once_with(["dummy2:a", "dummy2:b"])
+
+        assert result == {
+            "dummy1:a": [track1],
+            "dummy1:b": [track2],
+            "dummy2:a": [track3],
+            "dummy2:b": [track4],
         }
 
     def test_refresh_with_uri_selects_dummy1_backend(self):
@@ -540,25 +572,27 @@ class GetImagesBadBackendTest(MockBackendCoreLibraryBase):
 class LookupByUrisBadBackendTest(MockBackendCoreLibraryBase):
     def test_backend_raises_exception(self, logger):
         uri = "dummy:/1"
-        self.library.lookup.return_value.get.side_effect = Exception
+        self.library.lookup_many.return_value.get.side_effect = Exception
         assert {uri: []} == self.core.library.lookup(uris=[uri])
         logger.exception.assert_called_with(mock.ANY, "DummyBackend")
 
     def test_backend_returns_none(self, logger):
         uri = "dummy:/1"
-        self.library.lookup.return_value.get.return_value = None
+        self.library.lookup_many.return_value.get.return_value = None
         assert {uri: []} == self.core.library.lookup(uris=[uri])
         assert not logger.error.called
 
     def test_backend_returns_wrong_type(self, logger):
         uri = "dummy:/1"
-        self.library.lookup.return_value.get.return_value = "abc"
+        self.library.lookup_many.return_value.get.return_value = [
+            Track(uri=uri, name="abc")
+        ]
         assert {uri: []} == self.core.library.lookup(uris=[uri])
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
     def test_backend_returns_iterable_containing_wrong_types(self, logger):
         uri = "dummy:/1"
-        self.library.lookup.return_value.get.return_value = [123]
+        self.library.lookup_many.return_value.get.return_value = {uri: [123]}
         assert {uri: []} == self.core.library.lookup(uris=[uri])
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
