@@ -83,9 +83,9 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
 
         self.server.stop()
 
-    def on_event(self, name: str, **data: Any) -> None:
+    def on_event(self, event: str, **data: Any) -> None:
         assert self.server.io_loop
-        on_event(name, self.server.io_loop, **data)
+        on_event(event, self.server.io_loop, **data)
 
 
 def on_event(name: str, io_loop: tornado.ioloop.IOLoop, **data: Any) -> None:
