@@ -139,7 +139,7 @@ class LibraryProvider:
         """
         return {}
 
-    def lookup(self, uri: Uri) -> dict[Uri, list[Track]]:
+    def lookup(self, uri: Uri) -> list[Track]:
         """See :meth:`mopidy.core.LibraryController.lookup`.
 
         *MUST be implemented by subclass.*
