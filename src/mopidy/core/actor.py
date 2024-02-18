@@ -156,7 +156,7 @@ class Core(
         self.playback._stream_title = None
         # TODO: Do not emit stream title changes for plain tracks. We need a
         # better way to decide if something is a stream.
-        if "title" in current_tags and current_tags["title"]:
+        if current_tags.get("title"):
             title = current_tags["title"][0]
             current_track = self.playback.get_current_track()
             if current_track is not None and current_track.name != title:

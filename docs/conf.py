@@ -7,7 +7,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.resolve()))
 sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 
-from mopidy.internal.versioning import get_version  # noqa: E402
+from mopidy.internal.versioning import get_version
 
 # -- Custom Sphinx setup ------------------------------------------------------
 
