@@ -12,10 +12,10 @@ class Extension(ext.Extension):
     ext_name = "file"
     version = mopidy.__version__
 
-    def get_default_config(self):
+    def get_default_config(self) -> str:
         return config.read(Path(__file__).parent / "ext.conf")
 
-    def get_config_schema(self):
+    def get_config_schema(self) -> config.ConfigSchema:
         schema = super().get_config_schema()
         schema["media_dirs"] = config.List(optional=True)
         schema["excluded_file_extensions"] = config.List(optional=True)
@@ -24,7 +24,7 @@ class Extension(ext.Extension):
         schema["metadata_timeout"] = config.Integer(optional=True)
         return schema
 
-    def setup(self, registry):
+    def setup(self, registry) -> None:
         from .backend import FileBackend
 
         registry.add("backend", FileBackend)
