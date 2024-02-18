@@ -85,7 +85,7 @@ class ConfigValue(ABC, Generic[T]):
         """Cast raw string to appropriate type."""
         raise NotImplementedError
 
-    def serialize(self, value: T, display: bool = False) -> str:
+    def serialize(self, value: T, display: bool = False) -> str | DeprecatedValue:
         """Convert value back to string for saving."""
         if value is None:
             return ""
@@ -99,10 +99,10 @@ class Deprecated(ConfigValue[Any]):
     not cause the config parser to crash.
     """
 
-    def deserialize(self, value: AnyStr):
+    def deserialize(self, value: AnyStr) -> DeprecatedValue:
         return DeprecatedValue()
 
-    def serialize(self, value: Any, display: bool = False):
+    def serialize(self, value: Any, display: bool = False) -> DeprecatedValue:
         return DeprecatedValue()
 
 
@@ -285,7 +285,7 @@ class Pair(ConfigValue[tuple[K, V]]):
         self._separator = separator
         self._subtypes = subtypes
 
-    def deserialize(self, value: str) -> tuple[K, V] | None:
+    def deserialize(self, value: AnyStr) -> tuple[K, V] | None:
         raw_value = decode(value).strip()
         validators.validate_required(raw_value, self._required)
         if not raw_value:
@@ -308,9 +308,16 @@ class Pair(ConfigValue[tuple[K, V]]):
             ),
         )
 
-    def serialize(self, value: tuple[K, V], display: bool = False) -> str:
+    def serialize(
+        self, value: tuple[K, V], display: bool = False
+    ) -> str | DeprecatedValue:
         serialized_first_value = self._subtypes[0].serialize(value[0], display=display)
         serialized_second_value = self._subtypes[1].serialize(value[1], display=display)
+
+        if isinstance(serialized_first_value, DeprecatedValue) or isinstance(
+            serialized_second_value, DeprecatedValue
+        ):
+            return DeprecatedValue()
 
         if (
             not display
@@ -322,7 +329,7 @@ class Pair(ConfigValue[tuple[K, V]]):
         return f"{serialized_first_value}{self._separator}{serialized_second_value}"
 
 
-class List(ConfigValue[V]):
+class List(ConfigValue[tuple[V, ...] | frozenset[V]]):
     """List value.
 
     Supports elements split by commas or newlines. Newlines take precedence and
@@ -343,14 +350,14 @@ class List(ConfigValue[V]):
         self._unique = unique
         self._subtype = subtype
 
-    def deserialize(self, value: str) -> tuple[V, ...] | frozenset[V]:
-        value = decode(value)
+    def deserialize(self, value: AnyStr) -> tuple[V, ...] | frozenset[V]:
+        raw_value = decode(value)
 
         strings: list[str]
-        if "\n" in value:
-            strings = re.split(r"\s*\n\s*", value)
+        if "\n" in raw_value:
+            strings = re.split(r"\s*\n\s*", raw_value)
         else:
-            strings = re.split(r"\s*,\s*", value)
+            strings = re.split(r"\s*,\s*", raw_value)
 
         # This is necessary for backwards-compatibility, in case subclasses
         # aren't calling their parent constructor.
@@ -382,10 +389,11 @@ class List(ConfigValue[V]):
 
 
 class LogColor(ConfigValue[log.LogColorName]):
-    def deserialize(self, value: str) -> str:
-        value = decode(value)
-        validators.validate_choice(value.lower(), log.COLORS)
-        return value.lower()
+    def deserialize(self, value: AnyStr) -> log.LogColorName:
+        raw_value = decode(value).lower()
+        validators.validate_choice(raw_value, log.COLORS)
+        raw_value = cast(log.LogColorName, raw_value)
+        return raw_value
 
     def serialize(self, value: log.LogColorName, display: bool = False) -> str:
         if value.lower() in log.COLORS:
@@ -393,14 +401,14 @@ class LogColor(ConfigValue[log.LogColorName]):
         return ""
 
 
-class LogLevel(ConfigValue[log.LogLevelName]):
+class LogLevel(ConfigValue[int]):
     """Log level value.
 
     Expects one of ``critical``, ``error``, ``warning``, ``info``, ``debug``,
     ``trace``, or ``all``, with any casing.
     """
 
-    levels: ClassVar[dict[str, int]] = {
+    levels: ClassVar[dict[log.LogLevelName, int]] = {
         "critical": logging.CRITICAL,
         "error": logging.ERROR,
         "warning": logging.WARNING,
@@ -410,41 +418,40 @@ class LogLevel(ConfigValue[log.LogLevelName]):
         "all": logging.NOTSET,
     }
 
-    def deserialize(self, value: str) -> int | None:
-        value = decode(value)
-        validators.validate_choice(value.lower(), self.levels.keys())
-        return self.levels.get(value.lower())
+    def deserialize(self, value: AnyStr) -> int | None:
+        raw_value = decode(value).lower()
+        validators.validate_choice(raw_value, self.levels.keys())
+        raw_value = cast(log.LogLevelName, raw_value)
+        return self.levels.get(raw_value)
 
-    def serialize(self, value: log.LogLevelName, display: bool = False) -> str:
+    def serialize(self, value: int, display: bool = False) -> str:
         lookup = {v: k for k, v in self.levels.items()}
-        if value in lookup:
-            return encode(lookup[value])
-        return ""
+        return encode(lookup.get(value, ""))
 
 
-class Hostname(ConfigValue):
+class Hostname(ConfigValue[str]):
     """Network hostname value."""
 
     def __init__(self, optional: bool = False) -> None:
         self._required = not optional
 
-    def deserialize(self, value: str, display: bool = False) -> str | None:
-        value = decode(value).strip()
-        validators.validate_required(value, self._required)
-        if not value:
+    def deserialize(self, value: AnyStr, display: bool = False) -> str | None:
+        raw_value = decode(value).strip()
+        validators.validate_required(raw_value, self._required)
+        if not raw_value:
             return None
 
-        socket_path = path.get_unix_socket_path(value)
+        socket_path = path.get_unix_socket_path(raw_value)
         if socket_path is not None:
             path_str = Path(not self._required).deserialize(socket_path)
             return f"unix:{path_str}"
 
         try:
-            socket.getaddrinfo(value, None)
+            socket.getaddrinfo(raw_value, None)
         except OSError as exc:
             raise ValueError("must be a resolveable hostname or valid IP") from exc
 
-        return value
+        return raw_value
 
 
 class Port(Integer):
@@ -480,14 +487,14 @@ class Path(ConfigValue[_ExpandedPath]):
     def __init__(self, optional=False):
         self._required = not optional
 
-    def deserialize(self, value: str) -> _ExpandedPath | None:
-        value = decode(value).strip()
-        expanded = path.expand_path(value)
-        validators.validate_required(value, self._required)
+    def deserialize(self, value: AnyStr) -> _ExpandedPath | None:
+        raw_value = decode(value).strip()
+        expanded = path.expand_path(raw_value)
+        validators.validate_required(raw_value, self._required)
         validators.validate_required(expanded, self._required)
-        if not value or expanded is None:
+        if not raw_value or expanded is None:
             return None
-        return _ExpandedPath(value, expanded)
+        return _ExpandedPath(raw_value, expanded)
 
     def serialize(
         self,
