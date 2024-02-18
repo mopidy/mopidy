@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import pykka
 from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
@@ -63,7 +63,7 @@ class Backend:
     playlists: PlaylistsProvider | None = None
 
     #: List of URI schemes this backend can handle.
-    uri_schemes: list[UriScheme] = []  # noqa: RUF012
+    uri_schemes: ClassVar[list[UriScheme]] = []
 
     # Because the providers is marked as pykka.traversable(), we can't get()
     # them from another actor, and need helper methods to check if the

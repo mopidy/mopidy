@@ -5,12 +5,13 @@ import pykka
 
 from mopidy import backend
 from mopidy.file import library
+from mopidy.types import UriScheme
 
 logger = logging.getLogger(__name__)
 
 
 class FileBackend(pykka.ThreadingActor, backend.Backend):
-    uri_schemes: ClassVar[list[str]] = ["file"]
+    uri_schemes: ClassVar[list[UriScheme]] = [UriScheme("file")]
 
     def __init__(self, config, audio):
         super().__init__()

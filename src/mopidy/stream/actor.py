@@ -11,6 +11,7 @@ from mopidy import backend, exceptions, stream
 from mopidy.audio import scan, tags
 from mopidy.internal import http, playlists
 from mopidy.models import Track
+from mopidy.types import UriScheme
 
 logger = logging.getLogger(__name__)
 
@@ -40,14 +41,14 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
         self.playlists = None
 
         uri_schemes = audio_lib.supported_uri_schemes(config["stream"]["protocols"])
-        if "file" in self.uri_schemes and config["file"]["enabled"]:
+        if UriScheme("file") in StreamBackend.uri_schemes and config["file"]["enabled"]:
             logger.warning(
                 'The stream/protocols config value includes the "file" '
                 'protocol. "file" playback is now handled by Mopidy-File. '
                 "Please remove it from the stream/protocols config."
             )
-            uri_schemes -= {"file"}
-        self.uri_schemes = sorted(uri_schemes)
+            uri_schemes -= {UriScheme("file")}
+        StreamBackend.uri_schemes = sorted(uri_schemes)
 
 
 class StreamLibraryProvider(backend.LibraryProvider):
