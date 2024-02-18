@@ -11,12 +11,13 @@ from mopidy import backend, exceptions, stream
 from mopidy.audio import scan, tags
 from mopidy.internal import http, playlists
 from mopidy.models import Track
+from mopidy.types import Uri, UriScheme
 
 logger = logging.getLogger(__name__)
 
 
 class StreamBackend(pykka.ThreadingActor, backend.Backend):
-    def __init__(self, config, audio):
+    def __init__(self, config, audio) -> None:
         super().__init__()
 
         self._scanner = scan.Scanner(
@@ -40,20 +41,20 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
         self.playlists = None
 
         uri_schemes = audio_lib.supported_uri_schemes(config["stream"]["protocols"])
-        if "file" in self.uri_schemes and config["file"]["enabled"]:
+        if UriScheme("file") in StreamBackend.uri_schemes and config["file"]["enabled"]:
             logger.warning(
                 'The stream/protocols config value includes the "file" '
                 'protocol. "file" playback is now handled by Mopidy-File. '
                 "Please remove it from the stream/protocols config."
             )
-            uri_schemes -= {"file"}
-        self.uri_schemes = sorted(uri_schemes)
+            uri_schemes -= {UriScheme("file")}
+        StreamBackend.uri_schemes = sorted(uri_schemes)
 
 
 class StreamLibraryProvider(backend.LibraryProvider):
     backend: StreamBackend
 
-    def lookup(self, uri):
+    def lookup(self, uri: Uri) -> list[Track]:
         if urllib.parse.urlsplit(uri).scheme not in self.backend.uri_schemes:
             return []
 
@@ -82,7 +83,7 @@ class StreamLibraryProvider(backend.LibraryProvider):
 class StreamPlaybackProvider(backend.PlaybackProvider):
     backend: StreamBackend
 
-    def translate_uri(self, uri):
+    def translate_uri(self, uri: Uri) -> Uri | None:
         if urllib.parse.urlsplit(uri).scheme not in self.backend.uri_schemes:
             return None
 
@@ -100,11 +101,11 @@ class StreamPlaybackProvider(backend.PlaybackProvider):
 
 
 def _unwrap_stream(  # noqa: PLR0911  # TODO: cleanup the return value of this.
-    uri: str,
+    uri: Uri,
     timeout: float,
     scanner: scan.Scanner,
     requests_session,
-) -> tuple[str | None, scan._Result | None]:
+) -> tuple[Uri | None, scan._Result | None]:
     """Get a stream URI from a playlist URI, ``uri``.
 
     Unwraps nested playlists until something that's not a playlist is found or
@@ -179,6 +180,6 @@ def _unwrap_stream(  # noqa: PLR0911  # TODO: cleanup the return value of this.
         # TODO Test streams and return first that seems to be playable
         new_uri = uris[0]
         logger.debug("Parsed playlist (%s) and found new URI: %s", uri, new_uri)
-        uri = urllib.parse.urljoin(uri, new_uri)
+        uri = Uri(urllib.parse.urljoin(uri, new_uri))
 
     return None, None

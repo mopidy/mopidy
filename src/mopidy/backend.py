@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import pykka
 from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
@@ -11,8 +11,6 @@ from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
 from mopidy import listener
 
 if TYPE_CHECKING:
-    from typing import TypeAlias
-
     from mopidy.audio.actor import AudioProxy
     from mopidy.internal.gi import Gst
     from mopidy.models import Image, Playlist, Ref, SearchResult, Track
@@ -63,7 +61,7 @@ class Backend:
     playlists: PlaylistsProvider | None = None
 
     #: List of URI schemes this backend can handle.
-    uri_schemes: list[UriScheme] = []  # noqa: RUF012
+    uri_schemes: ClassVar[list[UriScheme]] = []
 
     # Because the providers is marked as pykka.traversable(), we can't get()
     # them from another actor, and need helper methods to check if the
@@ -139,7 +137,7 @@ class LibraryProvider:
         """
         return {}
 
-    def lookup(self, uri: Uri) -> dict[Uri, list[Track]]:
+    def lookup(self, uri: Uri) -> list[Track]:
         """See :meth:`mopidy.core.LibraryController.lookup`.
 
         *MUST be implemented by subclass.*
@@ -422,9 +420,6 @@ class PlaylistsProvider:
         raise NotImplementedError
 
 
-BackendEvent: TypeAlias = Literal["playlists_loaded"]
-
-
 class BackendListener(listener.Listener):
     """Marker interface for recipients of events sent by the backend actors.
 
@@ -438,7 +433,7 @@ class BackendListener(listener.Listener):
     """
 
     @staticmethod
-    def send(event: BackendEvent, **kwargs: Any) -> None:
+    def send(event: str, **kwargs: Any) -> None:
         """Helper to allow calling of backend listener events."""
         listener.send(BackendListener, event, **kwargs)
 

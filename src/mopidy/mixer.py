@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar, Literal
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import pykka
 from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
@@ -11,8 +11,6 @@ from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
 from mopidy import listener
 
 if TYPE_CHECKING:
-    from typing import TypeAlias
-
     from mopidy.types import Percentage
 
 
@@ -115,9 +113,6 @@ class Mixer:
         return True
 
 
-MixerEvent: TypeAlias = Literal["mute_changed", "volume_changed"]
-
-
 class MixerListener(listener.Listener):
     """Marker interface for recipients of events sent by the mixer actor.
 
@@ -129,7 +124,7 @@ class MixerListener(listener.Listener):
     """
 
     @staticmethod
-    def send(event: MixerEvent, **kwargs: Any) -> None:
+    def send(event: str, **kwargs: Any) -> None:
         """Helper to allow calling of mixer listener events."""
         listener.send(MixerListener, event, **kwargs)
 

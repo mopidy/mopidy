@@ -14,10 +14,10 @@ class ModelJSONEncoder(json.JSONEncoder):
 
     """
 
-    def default(self, obj):
-        if isinstance(obj, immutable.ImmutableObject):
-            return obj.serialize()
-        return json.JSONEncoder.default(self, obj)
+    def default(self, o):
+        if isinstance(o, immutable.ImmutableObject):
+            return o.serialize()
+        return json.JSONEncoder.default(self, o)
 
 
 def model_json_decoder(dct):

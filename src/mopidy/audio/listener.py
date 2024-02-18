@@ -1,23 +1,12 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any
 
 from mopidy import listener
 
 if TYPE_CHECKING:
-    from typing import TypeAlias
-
     from mopidy.audio import PlaybackState
     from mopidy.types import DurationMs, Uri
-
-
-AudioEvent: TypeAlias = Literal[
-    "position_changed",
-    "reached_end_of_stream",
-    "state_changed",
-    "stream_changed",
-    "tags_changed",
-]
 
 
 class AudioListener(listener.Listener):
@@ -31,7 +20,7 @@ class AudioListener(listener.Listener):
     """
 
     @staticmethod
-    def send(event: AudioEvent, **kwargs: Any) -> None:
+    def send(event: str, **kwargs: Any) -> None:
         """Helper to allow calling of audio listener events."""
         listener.send(AudioListener, event, **kwargs)
 
