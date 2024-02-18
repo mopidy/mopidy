@@ -271,13 +271,13 @@ def get_combined_json_decoder(decoders):
 
 def get_combined_json_encoder(encoders):
     class JsonRpcEncoder(json.JSONEncoder):
-        def default(self, obj):
+        def default(self, o):
             for encoder in encoders:
                 try:
-                    return encoder().default(obj)
+                    return encoder().default(o)
                 except TypeError:
                     pass  # Try next encoder
-            return json.JSONEncoder.default(self, obj)
+            return json.JSONEncoder.default(self, o)
 
     return JsonRpcEncoder
 
