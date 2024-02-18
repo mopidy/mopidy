@@ -42,7 +42,7 @@ lint = ["ruff == 0.2.2"]
 test = ["pytest >= 7.2", "pytest-cov >= 4.0", "responses >= 0.18"]
 typing = [
     "pygobject-stubs",
-    "pyright == 1.1.333",
+    "pyright == 1.1.350",
     "types-requests",
     "types-setuptools",
 ]

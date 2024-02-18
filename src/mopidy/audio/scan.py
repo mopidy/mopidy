@@ -302,7 +302,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
                 if caps:
                     mime = cast(
                         str,
-                        caps.get_name(),  # pyright: ignore[reportGeneralTypeIssues]
+                        caps.get_name(),  # pyright: ignore[reportAttributeAccessIssue]
                     )
                     if mime.startswith("text/") or mime == "application/xml":
                         return tags, mime, have_audio, duration

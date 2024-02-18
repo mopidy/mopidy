@@ -564,7 +564,7 @@ class Audio(pykka.ThreadingActor):
             gst_logger.debug("Enabling live stream mode")
             # TODO(typing): Once pygobject-stubs includes GstApp, cast to AppSrc:
             # source = cast(GstApp.AppSrc, source)  # noqa: ERA001
-            source.set_live(True)  # pyright: ignore[reportGeneralTypeIssues]
+            source.set_live(True)  # pyright: ignore[reportAttributeAccessIssue]
 
         utils.setup_proxy(source, self._config["proxy"])
 

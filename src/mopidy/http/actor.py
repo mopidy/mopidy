@@ -124,7 +124,7 @@ class HttpServer(threading.Thread):
         asyncio.set_event_loop(asyncio.new_event_loop())
 
         self.app = tornado.web.Application(
-            self._get_request_handlers(),  # pyright: ignore[reportGeneralTypeIssues]
+            self._get_request_handlers(),  # pyright: ignore[reportArgumentType]
             cookie_secret=self._get_cookie_secret(),
         )
         self.server = tornado.httpserver.HTTPServer(self.app)

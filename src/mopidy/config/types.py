@@ -370,7 +370,7 @@ class List(ConfigValue[V]):
 
         # This is necessary for backwards-compatibility, in case subclasses
         # aren't calling their parent constructor.
-        subtype: V = getattr(self, "_subtype", String())  # pyright: ignore[reportGeneralTypeIssues]
+        subtype: V = getattr(self, "_subtype", String())  # pyright: ignore[reportAssignmentType]
 
         serialized_values = []
         for item in value:
