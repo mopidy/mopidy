@@ -72,7 +72,7 @@ pythonVersion = "3.11"
 # Use venv from parent directory, to share it with any extensions:
 venvPath = "../"
 venv = ".venv"
-typeCheckingMode = "basic"
+typeCheckingMode = "standard"
 # Not all dependencies have type hints:
 reportMissingTypeStubs = false
 # Already covered by flake8-self:
