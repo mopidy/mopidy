@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
 
 T = TypeVar("T")
+V = TypeVar("V")
 TField = TypeVar("TField", bound="Field")
 
 
@@ -162,7 +163,7 @@ class Integer(Field[int]):
         self._max = max
         super().__init__(type=int, default=default)
 
-    def validate(self, value: int):
+    def validate(self, value: int) -> int:
         value = super().validate(value)
         if self._min is not None and value < self._min:
             raise ValueError(
@@ -185,7 +186,7 @@ class Boolean(Field[bool]):
         super().__init__(type=bool, default=default)
 
 
-class Collection(Field[tuple | frozenset]):
+class Collection(Field[tuple[V, ...] | frozenset[V]]):
     """:class:`Field` for storing collections of a given type.
 
     :param type: all items stored in the collection must be of this type
@@ -199,7 +200,7 @@ class Collection(Field[tuple | frozenset]):
     ) -> None:
         super().__init__(type=type, default=container())
 
-    def validate(self, value: Iterable[Any]) -> Iterable[Any] | None:
+    def validate(self, value: Iterable[Any]) -> tuple[V, ...] | frozenset[V]:
         assert self._default is not None
         assert self._type is not None
         if isinstance(value, str):
@@ -213,4 +214,4 @@ class Collection(Field[tuple | frozenset]):
                     f"Expected {self._name} to be a collection of "
                     f"{self._type.__name__}, not {value!r}"
                 )
-        return self._default.__class__(value) or None
+        return self._default.__class__(value)

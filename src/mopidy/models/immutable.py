@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import itertools
 import weakref
+from collections.abc import Generator
 from typing import Any, ClassVar, Generic, TypeVar
 
 from mopidy.models.fields import Field
@@ -59,8 +60,8 @@ class ImmutableObject:
         else:
             self.__dict__[name] = value
 
-    def _items(self):
-        return self.__dict__.items()
+    def _items(self) -> Generator[tuple[str, Any], Any, None]:
+        yield from self.__dict__.items()
 
     def __repr__(self):
         kwarg_pairs = []
@@ -197,7 +198,7 @@ class ValidatedImmutableObject(
     def _set_field(self, name, value):
         object.__setattr__(self, name, value)
 
-    def _items(self):
+    def _items(self) -> Generator[tuple[str, Any], Any, None]:
         for field, key in self._fields.items():
             if hasattr(self, key):
                 yield field, getattr(self, key)
