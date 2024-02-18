@@ -314,7 +314,10 @@ class ClientListHandler(tornado.web.RequestHandler):
 
 
 class StaticFileHandler(tornado.web.StaticFileHandler):
-    def set_extra_headers(self, _path: str) -> None:
+    def set_extra_headers(
+        self,
+        path: str,  # noqa: ARG002
+    ) -> None:
         set_mopidy_headers(self)
 
 
