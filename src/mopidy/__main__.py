@@ -4,7 +4,7 @@ import logging
 import signal
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, TypedDict, cast
 
 import pykka.debug
 
@@ -122,11 +122,18 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
         )
 
         # Config and deps commands are simply special cased for now.
-        if args.command == config_cmd:
-            schemas = [d.config_schema for d in extensions_data]
-            return args.command.run(config, config_errors, schemas)
-        if args.command == deps_cmd:
-            return args.command.run()
+        if isinstance(args.command, commands.ConfigCommand):
+            return args.command.run(
+                args=args,
+                config=config,
+                errors=config_errors,
+                schemas=[d.config_schema for d in extensions_data],
+            )
+        if isinstance(args.command, commands.DepsCommand):
+            return args.command.run(
+                args=args,
+                config=config,
+            )
 
         check_config_errors(config_errors, extensions_status)
 
@@ -135,7 +142,7 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
             sys.exit(1)
 
         # Read-only config from here on, please.
-        proxied_config = config_lib.Proxy(config)
+        proxied_config = cast(config_lib.Config, config_lib.Proxy(config))
 
         if args.extension and args.extension not in extensions_status["enabled"]:
             logger.error(
@@ -160,7 +167,11 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
         # Anything that wants to exit after this point must use
         # mopidy.internal.process.exit_process as actors can have been started.
         try:
-            return args.command.run(args, proxied_config)
+            assert isinstance(args.command, commands.Command)
+            return args.command.run(
+                args=args,
+                config=proxied_config,
+            )
         except NotImplementedError:
             print(root_cmd.format_help())  # noqa: T201
             return 1

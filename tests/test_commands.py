@@ -499,7 +499,7 @@ class HelpTest(unittest.TestCase):
 class RunTest(unittest.TestCase):
     def test_default_implmentation_raises_error(self):
         with pytest.raises(NotImplementedError):
-            commands.Command().run()
+            commands.Command().run(args=None, config=None)
 
 
 class RootCommandTest(unittest.TestCase):

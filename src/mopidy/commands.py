@@ -90,7 +90,7 @@ class Command:
 
     This class provides a wraper around :class:`argparse.ArgumentParser`
     for handling this type of command line application in a better way than
-    argprases own sub-parser handling.
+    argparse's own sub-parser handling.
     """
 
     help: str | None = None
@@ -253,7 +253,13 @@ class Command:
             result._args, result, overrides, " ".join([prog, child])
         )
 
-    def run(self, *args: Any, **kwargs: Any) -> int:
+    def run(
+        self,
+        args: argparse.Namespace,
+        config: config_lib.Config,
+        *_args: Any,
+        **_kwargs: Any,
+    ) -> int:
         """Run the command.
 
         Must be implemented by sub-classes that are not simply an intermediate
@@ -323,7 +329,13 @@ class RootCommand(Command):
             help="`section/key=value` values to override config options",
         )
 
-    def run(self, args, config):
+    def run(
+        self,
+        args: argparse.Namespace,
+        config: config_lib.Config,
+        *_args: Any,
+        **_kwargs: Any,
+    ) -> int:
         def on_sigterm(loop) -> bool:
             logger.info("GLib mainloop got SIGTERM. Exiting...")
             loop.quit()
@@ -536,9 +548,12 @@ class ConfigCommand(Command):
 
     def run(
         self,
+        args: argparse.Namespace,  # noqa: ARG002
         config: config_lib.Config,
+        *_args: Any,
         errors: config_lib.ConfigErrors,
         schemas: config_lib.ConfigSchemas,
+        **_kwargs: Any,
     ) -> int:
         data = config_lib.format(config, schemas, errors)
 
@@ -556,6 +571,12 @@ class DepsCommand(Command):
         super().__init__()
         self.set(base_verbosity_level=-1)
 
-    def run(self) -> int:
+    def run(
+        self,
+        args: argparse.Namespace,  # noqa: ARG002
+        config: config_lib.Config,  # noqa: ARG002
+        *_args: Any,
+        **_kwargs: Any,
+    ) -> int:
         print(deps.format_dependency_list())  # noqa: T201
         return 0
