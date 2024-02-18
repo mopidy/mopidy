@@ -3,8 +3,10 @@ import pathlib
 import re
 import urllib.parse
 from os import PathLike
+from typing import AnyStr
 
 from mopidy.internal import xdg
+from mopidy.types import Uri
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +14,7 @@ logger = logging.getLogger(__name__)
 XDG_DIRS = xdg.get_dirs()
 
 
-def get_or_create_dir(dir_path):
+def get_or_create_dir(dir_path: str | PathLike[str]) -> pathlib.Path:
     dir_path = expand_path(dir_path)
     if dir_path.is_file():
         raise OSError(
@@ -25,25 +27,33 @@ def get_or_create_dir(dir_path):
     return dir_path
 
 
-def get_or_create_file(file_path, mkdir=True, content=None):
+def get_or_create_file(
+    file_path: str | PathLike[str],
+    mkdir: bool = True,
+    content: AnyStr | None = None,
+) -> pathlib.Path:
     file_path = expand_path(file_path)
-    if isinstance(content, str):
-        content = content.encode()
+    if file_path.is_file():
+        return file_path
     if mkdir:
         get_or_create_dir(file_path.parent)
-    if not file_path.is_file():
-        logger.info(f"Creating file {file_path.as_uri()}")
-        file_path.touch(exist_ok=False)
-        if content is not None:
+    logger.info(f"Creating file {file_path.as_uri()}")
+    file_path.touch(exist_ok=False)
+    match content:
+        case str():
+            file_path.write_text(content)
+        case bytes():
             file_path.write_bytes(content)
+        case None:
+            pass
     return file_path
 
 
-def get_unix_socket_path(socket_path):
+def get_unix_socket_path(socket_path: str) -> pathlib.Path | None:
     match = re.search("^unix:(.*)", socket_path)
     if not match:
         return None
-    return match.group(1)
+    return pathlib.Path(match.group(1))
 
 
 def path_to_uri(path: str | PathLike[str]) -> str:
@@ -59,7 +69,7 @@ def path_to_uri(path: str | PathLike[str]) -> str:
     return pathlib.Path(path).as_uri()
 
 
-def uri_to_path(uri):
+def uri_to_path(uri: Uri | str) -> pathlib.Path:
     """
     Convert an URI to a OS specific path.
     """
@@ -68,10 +78,10 @@ def uri_to_path(uri):
     return pathlib.Path(unicode_path)
 
 
-def expand_path(path) -> pathlib.Path:
+def expand_path(path: bytes | str | PathLike[str]) -> pathlib.Path:
     if isinstance(path, bytes):
         path = path.decode(errors="surrogateescape")
-    path = str(pathlib.Path(path))
+    path = str(pathlib.Path(path))  # pyright: ignore[reportArgumentType,reportCallIssue]
 
     for xdg_var, xdg_dir in XDG_DIRS.items():
         path = path.replace("$" + xdg_var, str(xdg_dir))
@@ -81,14 +91,17 @@ def expand_path(path) -> pathlib.Path:
     return pathlib.Path(path).expanduser().resolve()
 
 
-def is_path_inside_base_dir(path, base_path):
+def is_path_inside_base_dir(
+    path: bytes | str | PathLike[str],
+    base_path: bytes | str | PathLike[str],
+) -> bool:
     if isinstance(path, bytes):
         path = path.decode(errors="surrogateescape")
     if isinstance(base_path, bytes):
         base_path = base_path.decode(errors="surrogateescape")
 
-    path = pathlib.Path(path).resolve()
-    base_path = pathlib.Path(base_path).resolve()
+    path = pathlib.Path(path).resolve()  # pyright: ignore[reportArgumentType]
+    base_path = pathlib.Path(base_path).resolve()  # pyright: ignore[reportArgumentType]
 
     if path.is_file():
         # Use dir of file for prefix comparision, so we don't accept

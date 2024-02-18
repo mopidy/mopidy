@@ -53,7 +53,7 @@ class GetOrCreateDirTest(unittest.TestCase):
 
     def test_create_dir_with_none(self):
         with pytest.raises(TypeError):
-            path.get_or_create_dir(None)
+            path.get_or_create_dir(None)  # pyright: ignore[reportArgumentType]
 
 
 class GetOrCreateFileTest(unittest.TestCase):
@@ -100,7 +100,7 @@ class GetOrCreateFileTest(unittest.TestCase):
 
     def test_create_file_with_none_filename_throws_type_error(self):
         with pytest.raises(TypeError):
-            path.get_or_create_file(None)
+            path.get_or_create_file(None)  # pyright: ignore[reportArgumentType]
 
     def test_create_dir_without_mkdir(self):
         file_path = self.parent / "foo" / "bar"
@@ -124,8 +124,8 @@ class GetOrCreateFileTest(unittest.TestCase):
 
 class GetUnixSocketPathTest(unittest.TestCase):
     def test_correctly_matched_socket_path(self):
-        assert (
-            path.get_unix_socket_path("unix:/tmp/mopidy.socket") == "/tmp/mopidy.socket"
+        assert path.get_unix_socket_path("unix:/tmp/mopidy.socket") == pathlib.Path(
+            "/tmp/mopidy.socket"
         )
 
     def test_correctly_no_match_socket_path(self):

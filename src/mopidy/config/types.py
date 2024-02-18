@@ -443,7 +443,7 @@ class Hostname(ConfigValue[str]):
 
         socket_path = path.get_unix_socket_path(raw_value)
         if socket_path is not None:
-            path_str = Path(not self._required).deserialize(socket_path)
+            path_str = Path(not self._required).deserialize(str(socket_path))
             return f"unix:{path_str}"
 
         try:
