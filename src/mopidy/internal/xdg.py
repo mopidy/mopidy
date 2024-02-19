@@ -3,7 +3,7 @@ import os
 import pathlib
 
 
-def get_dirs():
+def get_dirs() -> dict[str, pathlib.Path]:
     """Returns a dict of all the known XDG Base Directories for the current user.
 
     The keys ``XDG_CACHE_DIR``, ``XDG_CONFIG_DIR``, and ``XDG_DATA_DIR`` is
@@ -33,7 +33,7 @@ def get_dirs():
     return dirs
 
 
-def _get_user_dirs(xdg_config_dir):
+def _get_user_dirs(xdg_config_dir: pathlib.Path) -> dict[str, pathlib.Path]:
     """Returns a dict of XDG dirs read from
     ``$XDG_CONFIG_HOME/user-dirs.dirs``.
 
@@ -57,9 +57,9 @@ def _get_user_dirs(xdg_config_dir):
     config = configparser.RawConfigParser()
     config.read_string(data.decode())
 
-    result = {}
+    result: dict[str, pathlib.Path] = {}
     for k, v in config.items("XDG_USER_DIRS"):
-        if v is None:
+        if v is None:  # pyright: ignore[reportUnnecessaryComparison]
             continue
         if isinstance(k, bytes):
             k = k.decode()
