@@ -33,10 +33,57 @@ Dependencies
 
 - Tornado >= 6.2 is now required.
 
-- Replaced :mod:`pkg_resources` with :mod:`importlib.metadata`.
+- Replaced :mod:`pkg_resources` with :mod:`importlib.metadata` from Python's
+  standard library.
 
-Audio
------
+Core API
+--------
+
+Changes to the Core API may affect Mopidy clients.
+
+Root object
+^^^^^^^^^^^
+
+- No changes so far.
+
+Library controller
+^^^^^^^^^^^^^^^^^^
+
+- No changes so far.
+
+Playback controller
+^^^^^^^^^^^^^^^^^^^
+
+- No changes so far.
+
+Playlist controller
+^^^^^^^^^^^^^^^^^^^
+
+- No changes so far.
+
+Tracklist controller
+^^^^^^^^^^^^^^^^^^^^
+
+- No changes so far.
+
+Backend API
+-----------
+
+Changes to the Backend API may affect Mopidy backend extensions.
+
+- No changes so far.
+
+Models
+------
+
+Changes to the data models may affect any Mopidy extension or client.
+
+- No changes so far.
+
+Audio API
+---------
+
+Changes to the Audio API may affect a few Mopidy backend extensions.
 
 - Removed APIs only used by Mopidy-Spotify's bespoke audio delivery mechanism,
   which has not been used since Spotify shut down their libspotify APIs in
