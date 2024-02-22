@@ -5,11 +5,6 @@ import warnings
 # Messages used in deprecation warnings are collected here so we can target
 # them easily when ignoring warnings.
 _MESSAGES = {
-    # Deprecated features in core playback:
-    "core.playback.play:tl_track_kwargs": (
-        'playback.play() with "tl_track" argument is pending deprecation use '
-        '"tlid" instead'
-    ),
     # Deprecated features in core tracklist:
     "core.tracklist.add:tracks_arg": (
         'tracklist.add() "tracks" argument is deprecated'
