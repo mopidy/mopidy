@@ -52,3 +52,5 @@ jobs:
         if: ${{ matrix.coverage }}
       - uses: codecov/codecov-action@v4
         if: ${{ matrix.coverage }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
