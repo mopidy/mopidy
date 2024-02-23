@@ -44,7 +44,9 @@ Changes to the Core API may affect Mopidy clients.
 Root object
 ^^^^^^^^^^^
 
-- No changes so far.
+- The :class:`mopidy.core.Core` class now requires the `config` argument to be
+  present. As this argument is provided by Mopidy itself at runtime, this
+  should only affect the setup of extension's test suites.
 
 Library controller
 ^^^^^^^^^^^^^^^^^^
