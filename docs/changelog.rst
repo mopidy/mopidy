@@ -98,6 +98,13 @@ Changes to the Audio API may affect a few Mopidy backend extensions.
   - :func:`mopidy.audio.create_buffer`
   - :func:`mopidy.audio.millisecond_to_clocktime`
 
+Extension support
+-----------------
+
+- The command :command:`mopidy deps` no longer repeats transitive dependencies
+  that have already been listed. This reduces the length of the command's output
+  drastically. (PR: :issue:`2152`)
+
 Internals
 ---------
 
