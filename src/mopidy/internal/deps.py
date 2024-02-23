@@ -1,135 +1,133 @@
 from __future__ import annotations
 
-import functools
 import platform
 import re
 import sys
-from collections.abc import Callable
+from dataclasses import dataclass, field
 from importlib import metadata
 from os import PathLike
 from pathlib import Path
-from typing import TYPE_CHECKING, TypedDict
 
 from mopidy.internal import formatting
 from mopidy.internal.gi import Gst, gi
 
-if TYPE_CHECKING:
-    from typing import TypeAlias
 
-    class DepInfo(TypedDict, total=False):
-        name: str
-        version: str
-        path: PathLike[str]
-        dependencies: list[DepInfo]
-        other: str
-
-    Adapter: TypeAlias = Callable[[], DepInfo]
+@dataclass
+class DepInfo:
+    name: str
+    version: str | None = None
+    path: PathLike[str] | None = None
+    dependencies: list[DepInfo] = field(default_factory=list)
+    other: str | None = None
 
 
-def format_dependency_list(adapters: list[Adapter] | None = None) -> str:
-    if adapters is None:
-        dist_names = {
-            ep.dist.name
+def format_dependency_list(dependencies: list[DepInfo] | None = None) -> str:
+    if dependencies is None:
+        seen_pkgs = set()
+        ext_pkg_names = {
+            ext_pkg_name
             for ep in metadata.entry_points(group="mopidy.ext")
-            if ep.dist is not None and ep.dist.name != "Mopidy"
+            if ep.dist is not None
+            and (ext_pkg_name := ep.dist.name.lower())
+            and ext_pkg_name != "mopidy"
         }
-        dist_infos = [
-            functools.partial(pkg_info, dist_name) for dist_name in dist_names
+        dependencies = [
+            executable_info(),
+            platform_info(),
+            python_info(),
+            pkg_info(
+                pkg_name="mopidy",
+                seen_pkgs=seen_pkgs,
+            ),
+            *[
+                pkg_info(
+                    pkg_name=pkg_name,
+                    seen_pkgs=seen_pkgs,
+                )
+                for pkg_name in ext_pkg_names
+            ],
+            gstreamer_info(),
         ]
-
-        adapters = [
-            executable_info,
-            platform_info,
-            python_info,
-            functools.partial(pkg_info, "Mopidy", True),
-            *dist_infos,
-            gstreamer_info,
-        ]
-    return "\n".join(_format_dependency(a()) for a in adapters)
+    return "\n".join(_format_dependency(dep) for dep in dependencies)
 
 
-def _format_dependency(dep_info: DepInfo) -> str:
+def _format_dependency(dep: DepInfo) -> str:
     lines = []
 
-    if not (name := dep_info.get("name")):
-        return "Name not found"
-
-    if "version" not in dep_info:
-        lines.append(f"{name}: not found")
+    if dep.version is None:
+        lines.append(f"{dep.name}: not found")
     else:
-        source = f" from {dep_info['path']}" if "path" in dep_info else ""
-        lines.append(f"{name}: {dep_info['version']}{source}")
+        source = f" from {dep.path}" if dep.path else ""
+        lines.append(f"{dep.name}: {dep.version}{source}")
 
-    if "other" in dep_info:
-        details = formatting.indent(dep_info["other"], places=4)
+    if dep.other:
+        details = formatting.indent(dep.other, places=4)
         lines.append(f"  Detailed information: {details}")
 
-    if dep_info.get("dependencies", []):
-        for sub_dep_info in dep_info.get("dependencies", {}):
-            sub_dep_lines = _format_dependency(sub_dep_info)
-            lines.append(formatting.indent(sub_dep_lines, places=2, singles=True))
+    for sub_dep in dep.dependencies:
+        sub_dep_lines = _format_dependency(sub_dep)
+        lines.append(formatting.indent(sub_dep_lines, places=2, singles=True))
 
     return "\n".join(lines)
 
 
 def executable_info() -> DepInfo:
-    return {
-        "name": "Executable",
-        "version": sys.argv[0],
-    }
+    return DepInfo(
+        name="Executable",
+        version=sys.argv[0],
+    )
 
 
 def platform_info() -> DepInfo:
-    return {
-        "name": "Platform",
-        "version": platform.platform(),
-    }
+    return DepInfo(
+        name="Platform",
+        version=platform.platform(),
+    )
 
 
 def python_info() -> DepInfo:
-    return {
-        "name": "Python",
-        "version": (f"{platform.python_implementation()} {platform.python_version()}"),
-        "path": Path(platform.__file__).parent,
-    }
+    return DepInfo(
+        name="Python",
+        version=f"{platform.python_implementation()} {platform.python_version()}",
+        path=Path(platform.__file__).parent,
+    )
 
 
 def pkg_info(
-    project_name: str | None = None,
-    include_transitive_deps: bool = True,
-    include_extras: bool = False,
+    *,
+    pkg_name: str,
+    depth: int = 0,
+    seen_pkgs: set[str],
 ) -> DepInfo:
-    if project_name is None:
-        project_name = "Mopidy"
     try:
-        distribution = metadata.distribution(project_name)
-        if include_transitive_deps and distribution.requires:
-            dependencies = []
+        dependencies = []
+        distribution = metadata.distribution(pkg_name)
+        if distribution.requires:
             for raw in distribution.requires:
-                if "importlib_metadata" in raw or (
-                    not include_extras and "extra" in raw
-                ):
+                if "extra" in raw:
                     continue
                 if match := re.match("[a-zA-Z0-9_-]+", raw):
-                    entry = match.group(0)
+                    name = match.group(0).lower()
+                    if depth > 0 and name in seen_pkgs:
+                        continue
+                    seen_pkgs.add(name)
                     dependencies.append(
                         pkg_info(
-                            entry,
-                            include_transitive_deps=entry != "Mopidy",
+                            pkg_name=name,
+                            depth=depth + 1,
+                            seen_pkgs=seen_pkgs,
                         )
                     )
-        else:
-            dependencies = []
-        return {
-            "name": project_name,
-            "version": distribution.version,
-            "path": distribution.locate_file("."),
-            "dependencies": dependencies,
-        }
+        return DepInfo(
+            name=pkg_name,
+            version=distribution.version,
+            path=distribution.locate_file("."),
+            dependencies=dependencies,
+        )
     except metadata.PackageNotFoundError:
-        return {
-            "name": project_name,
-        }
+        return DepInfo(
+            name=pkg_name,
+        )
 
 
 def gstreamer_info() -> DepInfo:
@@ -156,12 +154,12 @@ def gstreamer_info() -> DepInfo:
     if not missing_elements:
         other.append("    none")
 
-    return {
-        "name": "GStreamer",
-        "version": ".".join(map(str, Gst.version())),
-        "path": Path(gi.__file__).parent,
-        "other": "\n".join(other),
-    }
+    return DepInfo(
+        name="GStreamer",
+        version=".".join(map(str, Gst.version())),
+        path=Path(gi.__file__).parent,
+        other="\n".join(other),
+    )
 
 
 def _gstreamer_check_elements():
