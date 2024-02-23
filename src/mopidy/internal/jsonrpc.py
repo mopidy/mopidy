@@ -1,8 +1,58 @@
 import inspect
 import json
 import traceback
+from collections.abc import Callable
+from typing import Any, Literal, TypeAlias, TypedDict, TypeVar
 
 import pykka
+
+T = TypeVar("T")
+
+
+class JsonRpcNotification(TypedDict):
+    jsonrpc: Literal["2.0"]
+    method: str
+    params: list[Any] | dict[str, Any]
+
+
+JsonRpcRequestId: TypeAlias = str | int | float
+
+
+class JsonRpcRequest(JsonRpcNotification):
+    id: JsonRpcRequestId | None
+
+
+class JsonRpcErrorDetails(TypedDict, total=False):
+    code: int
+    message: str
+    data: Any | None
+
+
+class JsonRpcErrorResponse(TypedDict):
+    jsonrpc: Literal["2.0"]
+    id: JsonRpcRequestId | None
+    error: JsonRpcErrorDetails
+
+
+class JsonRpcSuccessResponse(TypedDict):
+    jsonrpc: Literal["2.0"]
+    id: JsonRpcRequestId
+    result: Any
+
+
+JsonRpcResponse: TypeAlias = JsonRpcErrorResponse | JsonRpcSuccessResponse
+
+
+class JsonRpcParamDescription(TypedDict, total=False):
+    name: str
+    default: Any
+    varargs: bool
+    kwargs: bool
+
+
+class JsonRpcMethodDescription(TypedDict):
+    description: str | None
+    params: list[JsonRpcParamDescription]
 
 
 class JsonRpcWrapper:
@@ -52,26 +102,31 @@ class JsonRpcWrapper:
         method :meth:`default` implemented
     """
 
-    def __init__(self, objects, decoders=None, encoders=None):
+    def __init__(
+        self,
+        objects: dict[str, Any],
+        decoders: list[Callable[[dict[Any, Any]], Any]] | None = None,
+        encoders: list[type[json.JSONEncoder]] | None = None,
+    ):
         if "" in objects:
             raise AttributeError("The empty string is not allowed as an object mount")
         self.objects = objects
         self.decoder = get_combined_json_decoder(decoders or [])
         self.encoder = get_combined_json_encoder(encoders or [])
 
-    def handle_json(self, request):
+    def handle_json(self, request_json: str) -> str | None:
         """
         Handles an incoming request encoded as a JSON string.
 
         Returns a response as a JSON string for commands, and :class:`None` for
         notifications.
 
-        :param request: the serialized JSON-RPC request
-        :type request: string
+        :param request_json: the serialized JSON-RPC request
+        :type request_json: string
         :rtype: string or :class:`None`
         """
         try:
-            request = json.loads(request, object_hook=self.decoder)
+            request: JsonRpcRequest = json.loads(request_json, object_hook=self.decoder)
         except ValueError:
             response = JsonRpcParseError().get_response()
         else:
@@ -80,7 +135,10 @@ class JsonRpcWrapper:
             return None
         return json.dumps(response, cls=self.encoder)
 
-    def handle_data(self, request):
+    def handle_data(
+        self,
+        request: JsonRpcRequest | list[JsonRpcRequest],
+    ) -> JsonRpcResponse | list[JsonRpcResponse] | None:
         """
         Handles an incoming request in the form of a Python data structure.
 
@@ -95,13 +153,16 @@ class JsonRpcWrapper:
             return self._handle_batch(request)
         return self._handle_single_request(request)
 
-    def _handle_batch(self, requests):
+    def _handle_batch(
+        self,
+        requests: list[JsonRpcRequest],
+    ) -> JsonRpcErrorResponse | list[JsonRpcResponse] | None:
         if not requests:
             return JsonRpcInvalidRequestError(
                 data="Batch list cannot be empty"
             ).get_response()
 
-        responses = []
+        responses: list[JsonRpcResponse] = []
         for request in requests:
             response = self._handle_single_request(request)
             if response:
@@ -109,7 +170,7 @@ class JsonRpcWrapper:
 
         return responses or None
 
-    def _handle_single_request(self, request):
+    def _handle_single_request(self, request: JsonRpcRequest) -> JsonRpcResponse | None:
         try:
             self._validate_request(request)
             args, kwargs = self._get_params(request)
@@ -122,11 +183,11 @@ class JsonRpcWrapper:
             try:
                 result = method(*args, **kwargs)
 
-                if self._is_notification(request):
+                if "id" not in request or request["id"] is None:
+                    # Request is a notification, so we don't need to respond
                     return None
 
                 result = self._unwrap_result(result)
-
                 return {
                     "jsonrpc": "2.0",
                     "id": request["id"],
@@ -149,12 +210,13 @@ class JsonRpcWrapper:
                     }
                 ) from exc
         except JsonRpcError as exc:
-            if self._is_notification(request):
+            if "id" not in request or request["id"] is None:
+                # Request is a notification, so we don't need to respond
                 return None
             return exc.get_response(request["id"])
 
-    def _validate_request(self, request):
-        if not isinstance(request, dict):
+    def _validate_request(self, request: JsonRpcRequest) -> None:
+        if not isinstance(request, dict):  # pyright: ignore[reportUnnecessaryIsInstance]
             raise JsonRpcInvalidRequestError(data="Request must be an object")
         if "jsonrpc" not in request:
             raise JsonRpcInvalidRequestError(data="'jsonrpc' member must be included")
@@ -162,22 +224,22 @@ class JsonRpcWrapper:
             raise JsonRpcInvalidRequestError(data="'jsonrpc' value must be '2.0'")
         if "method" not in request:
             raise JsonRpcInvalidRequestError(data="'method' member must be included")
-        if not isinstance(request["method"], str):
+        if not isinstance(request["method"], str):  # pyright: ignore[reportUnnecessaryIsInstance]
             raise JsonRpcInvalidRequestError(data="'method' must be a string")
 
-    def _get_params(self, request):
+    def _get_params(self, request: JsonRpcRequest) -> tuple[list[Any], dict[Any, Any]]:
         if "params" not in request:
             return [], {}
         params = request["params"]
         if isinstance(params, list):
             return params, {}
-        if isinstance(params, dict):
+        if isinstance(params, dict):  # pyright: ignore[reportUnnecessaryIsInstance]
             return [], params
         raise JsonRpcInvalidRequestError(
             data="'params', if given, must be an array or an object"
         )
 
-    def _get_method(self, method_path):
+    def _get_method(self, method_path: str) -> Callable[..., Any]:
         if callable(self.objects.get(method_path, None)):
             # The mounted object is the callable
             return self.objects[method_path]
@@ -208,12 +270,9 @@ class JsonRpcWrapper:
                 data=f"Object mounted at {mount!r} has no member {method_name!r}"
             ) from exc
 
-    def _is_notification(self, request):
-        return "id" not in request
-
-    def _unwrap_result(self, result):
+    def _unwrap_result(self, result: pykka.Future[T] | T) -> T:
         if isinstance(result, pykka.Future):
-            result = result.get()
+            return result.get()  # pyright: ignore[reportUnknownVariableType]
         return result
 
 
@@ -221,11 +280,14 @@ class JsonRpcError(Exception):
     code = -32000
     message = "Unspecified server error"
 
-    def __init__(self, data=None):
+    def __init__(self, data: Any | None = None) -> None:
         self.data = data
 
-    def get_response(self, request_id=None):
-        response = {
+    def get_response(
+        self,
+        request_id: JsonRpcRequestId | None = None,
+    ) -> JsonRpcErrorResponse:
+        response: JsonRpcErrorResponse = {
             "jsonrpc": "2.0",
             "id": request_id,
             "error": {"code": self.code, "message": self.message},
@@ -260,8 +322,10 @@ class JsonRpcApplicationError(JsonRpcError):
     message = "Application error"
 
 
-def get_combined_json_decoder(decoders):
-    def decode(dct):
+def get_combined_json_decoder(
+    decoders: list[Callable[[dict[Any, Any]], Any]],
+) -> Callable[[dict[Any, Any]], Any]:
+    def decode(dct: dict[Any, Any]) -> dict[Any, Any]:
         for decoder in decoders:
             dct = decoder(dct)
         return dct
@@ -269,9 +333,11 @@ def get_combined_json_decoder(decoders):
     return decode
 
 
-def get_combined_json_encoder(encoders):
+def get_combined_json_encoder(
+    encoders: list[type[json.JSONEncoder]],
+) -> type[json.JSONEncoder]:
     class JsonRpcEncoder(json.JSONEncoder):
-        def default(self, o):
+        def default(self, o: Any) -> Any:
             for encoder in encoders:
                 try:
                     return encoder().default(o)
@@ -305,17 +371,17 @@ class JsonRpcInspector:
     :type objects: dict
     """
 
-    def __init__(self, objects):
+    def __init__(self, objects: dict[str, Callable[..., Any]]) -> None:
         if "" in objects:
             raise AttributeError("The empty string is not allowed as an object mount")
         self.objects = objects
 
-    def describe(self):
+    def describe(self) -> dict[str, Any]:
         """
         Inspects the object and returns a data structure which describes the
         available properties and methods.
         """
-        methods = {}
+        methods: dict[str, JsonRpcMethodDescription] = {}
         for mount, obj in self.objects.items():
             if inspect.isroutine(obj):
                 methods[mount] = self._describe_method(obj)
@@ -327,8 +393,8 @@ class JsonRpcInspector:
                     methods[name] = description
         return methods
 
-    def _get_methods(self, obj):
-        methods = {}
+    def _get_methods(self, obj: Any) -> dict[str, JsonRpcMethodDescription]:
+        methods: dict[str, JsonRpcMethodDescription] = {}
         for name, value in inspect.getmembers(obj):
             if name.startswith("_"):
                 continue
@@ -339,13 +405,16 @@ class JsonRpcInspector:
                 methods[name] = method
         return methods
 
-    def _describe_method(self, method):
+    def _describe_method(self, method: Callable[..., Any]) -> JsonRpcMethodDescription:
         return {
             "description": inspect.getdoc(method),
             "params": self._describe_params(method),
         }
 
-    def _describe_params(self, method):
+    def _describe_params(
+        self,
+        method: Callable[..., Any],
+    ) -> list[JsonRpcParamDescription]:
         argspec = inspect.getfullargspec(method)
 
         defaults = list(argspec.defaults) if argspec.defaults else []
@@ -353,7 +422,7 @@ class JsonRpcInspector:
         no_defaults = [None] * num_args_without_default
         defaults = no_defaults + defaults
 
-        params = []
+        params: list[JsonRpcParamDescription] = []
 
         for arg, _default in zip(argspec.args, defaults, strict=True):
             if arg == "self":
