@@ -69,7 +69,7 @@ class LibraryController:
                 lst.append(uri)
         return result
 
-    def browse(self, uri: Uri) -> list[Ref]:
+    def browse(self, uri: Uri | None) -> list[Ref]:
         """Browse directories and tracks at the given ``uri``.
 
         ``uri`` is a string which represents some directory belonging to a
