@@ -586,5 +586,6 @@ class PlaybackControllerProxy:
     pause = proxy_method(PlaybackController.pause)
     play = proxy_method(PlaybackController.play)
     previous = proxy_method(PlaybackController.previous)
+    resume = proxy_method(PlaybackController.resume)
     seek = proxy_method(PlaybackController.seek)
     stop = proxy_method(PlaybackController.stop)
