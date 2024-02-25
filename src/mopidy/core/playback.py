@@ -11,7 +11,7 @@ from pykka.typing import proxy_method
 from mopidy.audio import PlaybackState
 from mopidy.core import listener
 from mopidy.exceptions import CoreError
-from mopidy.internal import deprecation, models, validation
+from mopidy.internal import models, validation
 from mopidy.types import DurationMs, UriScheme
 
 if TYPE_CHECKING:
@@ -280,47 +280,39 @@ class PlaybackController:
             self.set_state(PlaybackState.PAUSED)
             self._trigger_track_playback_paused()
 
-    def play(  # noqa: C901, PLR0912
+    def play(
         self,
-        tl_track: TlTrack | None = None,
         tlid: int | None = None,
     ) -> None:
-        """Play the given track, or if the given tl_track and tlid is
-        :class:`None`, play the currently active track.
+        """Play a track from the tracklist, specified by the tracklist ID.
 
-        Note that the track **must** already be in the tracklist.
+        Note that the track must already be in the tracklist.
 
-        .. deprecated:: 3.0
+        If no tracklist ID is provided, resume playback of the currently
+        active track.
+
+        .. versionremoved:: 4.0
             The ``tl_track`` argument. Use ``tlid`` instead.
 
-        :param tl_track: track to play
-        :param tlid: TLID of the track to play
+        :param tlid: Tracklist ID of the track to play
         """
-        if sum(o is not None for o in [tl_track, tlid]) > 1:
-            raise ValueError('At most one of "tl_track" and "tlid" may be set')
-
-        if tl_track is not None:
-            validation.check_instance(tl_track, models.TlTrack)
-        if tlid is not None:
-            validation.check_integer(tlid, min=1)
-
-        if tl_track:
-            deprecation.warn("core.playback.play:tl_track_kwarg")
-
-        if tl_track is None and tlid is not None:
-            for tl_track in self.core.tracklist.get_tl_tracks():
-                if tl_track.tlid == tlid:
-                    break
-            else:
-                tl_track = None
-
-        if tl_track is not None:
-            # TODO: allow from outside tracklist, would make sense given refs?
-            if tl_track not in self.core.tracklist.get_tl_tracks():
-                raise AssertionError
-        elif tl_track is None and self.get_state() == PlaybackState.PAUSED:
+        if tlid is None and self.get_state() == PlaybackState.PAUSED:
             self.resume()
             return
+
+        tl_track: TlTrack | None = None
+        if tlid is not None:
+            validation.check_integer(tlid, min=1)
+            for candidate_tl_track in self.core.tracklist.get_tl_tracks():
+                if candidate_tl_track.tlid == tlid:
+                    tl_track = candidate_tl_track
+                    break
+            else:
+                logger.info(
+                    "Tried to play track with TLID %d, "
+                    "but it was not found in the tracklist.",
+                    tlid,
+                )
 
         current = self._pending_tl_track or self._current_tl_track
         pending = tl_track or current or self.core.tracklist.next_track(None)
@@ -338,8 +330,6 @@ class PlaybackController:
             if not count:
                 logger.info("No playable track in the list.")
                 break
-
-        # TODO return result?
 
     def _change(  # noqa: PLR0911
         self,

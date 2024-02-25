@@ -41,6 +41,11 @@ Core API
 
 Changes to the Core API may affect Mopidy clients.
 
+Some of the changes in the Core API are related to replacing the use of
+full ``TlTrack`` objects as API arguments with tracklist IDs, ``tlid``.
+This is especially relevant for remote clients, like web clients, which may
+pass a lot less data over the network when using tracklist IDs in API calls.
+
 Root object
 ^^^^^^^^^^^
 
@@ -56,7 +61,11 @@ Library controller
 Playback controller
 ^^^^^^^^^^^^^^^^^^^
 
-- No changes so far.
+- :meth:`mopidy.core.PlaybackController.play`
+  no longer accepts ``TlTrack`` objects,
+  which has been deprecated since Mopidy 3.0.
+  Use tracklist IDs (``tlid``) instead.
+  (Fixes :issue:`1855`, PR: :issue:`2150`)
 
 Playlist controller
 ^^^^^^^^^^^^^^^^^^^
