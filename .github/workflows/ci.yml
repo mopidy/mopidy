@@ -45,7 +45,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           cache: pip
-      - run: python -m pip install pygobject tox
+      - run: python -m pip install tox
       - run: python -m tox -e ${{ matrix.tox }}
         if: ${{ ! matrix.coverage }}
       - run: python -m tox -e ${{ matrix.tox }} -- --cov-report=xml
