@@ -9,6 +9,7 @@ import re
 from collections.abc import Iterator, Mapping
 from typing import TYPE_CHECKING, Any, TypedDict, cast
 
+import mopidy
 from mopidy.config import keyring
 from mopidy.config.schemas import ConfigSchema, MapConfigSchema
 from mopidy.config.types import (
@@ -28,7 +29,7 @@ from mopidy.config.types import (
     Secret,
     String,
 )
-from mopidy.internal import path, versioning
+from mopidy.internal import path
 
 if TYPE_CHECKING:
     from typing import TypeAlias
@@ -194,7 +195,7 @@ def format_initial(extensions_data: list[ExtensionData]) -> str:
 
     config, errors = _validate(raw_config, schemas)
 
-    versions = [f"Mopidy {versioning.get_version()}"]
+    versions = [f"Mopidy {mopidy.__version__}"]
     extensions_data = sorted(extensions_data, key=lambda d: d.extension.dist_name)
     for data in extensions_data:
         versions.append(f"{data.extension.dist_name} {data.extension.version}")

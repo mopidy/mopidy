@@ -9,7 +9,7 @@ import pykka
 import pytest
 from mopidy.audio import PlaybackState
 from mopidy.core import Core, CoreListener
-from mopidy.internal import models, storage, versioning
+from mopidy.internal import models, storage
 from mopidy.models import Track
 
 from tests import dummy_mixer
@@ -153,7 +153,7 @@ class CoreActorTest(unittest.TestCase):
             )
 
     def test_version(self):
-        assert self.core.get_version() == versioning.get_version()
+        assert self.core.get_version() == mopidy.__version__
 
     @mock.patch("mopidy.core.playback.listener.CoreListener", spec=CoreListener)
     def test_state_changed(self, listener_mock):

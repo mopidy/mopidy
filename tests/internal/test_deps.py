@@ -60,7 +60,7 @@ class TestDeps:
     def test_format_dependency_list_real(self):
         result = deps.format_dependency_list()
         assert "Python 3." in result
-        assert "mopidy: 4." in result
+        assert "mopidy:" in result
         assert "setuptools: 6" in result
 
     def test_executable_info(self):

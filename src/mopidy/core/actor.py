@@ -21,7 +21,7 @@ from mopidy.core.mixer import MixerController
 from mopidy.core.playback import PlaybackController
 from mopidy.core.playlists import PlaylistsController
 from mopidy.core.tracklist import TracklistController
-from mopidy.internal import path, storage, validation, versioning
+from mopidy.internal import path, storage, validation
 from mopidy.internal.models import CoreState
 
 if TYPE_CHECKING:
@@ -99,7 +99,7 @@ class Core(
 
     def get_version(self) -> str:
         """Get version of the Mopidy core API."""
-        return versioning.get_version()
+        return mopidy.__version__
 
     def reached_end_of_stream(self) -> None:
         self.playback._on_end_of_stream()
