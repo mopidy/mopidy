@@ -18,12 +18,13 @@ import pykka
 from pykka import ThreadingActor
 from pykka.messages import ProxyCall
 
+import mopidy
 from mopidy import config as config_lib
 from mopidy import exceptions
 from mopidy.audio import Audio, AudioProxy
 from mopidy.backend import BackendActor, BackendProxy
 from mopidy.core import Core, CoreProxy
-from mopidy.internal import deps, process, timer, versioning
+from mopidy.internal import deps, process, timer
 from mopidy.internal.gi import GLib
 from mopidy.mixer import MixerActor, MixerProxy
 from mopidy.types import Percentage
@@ -293,7 +294,7 @@ class RootCommand(Command):
         self.add_argument(
             "--version",
             action="version",
-            version=f"Mopidy {versioning.get_version()}",
+            version=f"Mopidy {mopidy.__version__}",
         )
         self.add_argument(
             "-q",
