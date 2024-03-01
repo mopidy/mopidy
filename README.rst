@@ -83,19 +83,19 @@ We welcome all kinds of help with bug fixing, testing, documentation, and suppor
 - `Source code <https://github.com/mopidy/mopidy>`_
 - `Issue tracker <https://github.com/mopidy/mopidy/issues>`_
 
-.. image:: https://img.shields.io/pypi/v/Mopidy.svg?style=flat
-    :target: https://pypi.python.org/pypi/Mopidy/
+.. image:: https://img.shields.io/pypi/v/mopidy
+    :target: https://pypi.org/project/mopidy/
     :alt: Latest PyPI version
 
-.. image:: https://img.shields.io/github/actions/workflow/status/mopidy/mopidy/ci.yml?branch=develop
+.. image:: https://img.shields.io/github/actions/workflow/status/mopidy/mopidy/ci.yml
     :target: https://github.com/mopidy/mopidy/actions/workflows/ci.yml
     :alt: CI build status
 
-.. image:: https://img.shields.io/readthedocs/mopidy.svg
+.. image:: https://img.shields.io/readthedocs/mopidy
     :target: https://docs.mopidy.com/
     :alt: Read the Docs build status
 
-.. image:: https://img.shields.io/codecov/c/github/mopidy/mopidy/develop.svg
+.. image:: https://img.shields.io/codecov/c/github/mopidy/mopidy
     :target: https://codecov.io/gh/mopidy/mopidy
     :alt: Test coverage
 

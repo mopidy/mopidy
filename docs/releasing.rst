@@ -27,9 +27,9 @@ stream-lined release procedure.
 
     git commit -m "Release v2.0.2"
 
-#. Tag the commit::
+#. Tag the commit with an annotated tag::
 
-    git tag -m "Release v2.0.2" v2.0.2
+    git tag -a -m "Release v2.0.2" v2.0.2
 
    It is encouraged to use ``-s`` to sign the tag if you have a GnuPG setup.
 
@@ -86,18 +86,17 @@ Releasing Mopidy itself
 =======================
 
 Mopidy itself is a bit more complicated than extensions because the changelog
-is maintained in the Git repo, and because we maintain multiple branches to be
-able to work towards the next bugfix release and the next feature release at
-the same time.
+is maintained in the Git repo.
 
 
 Preparations
 ------------
 
-#. Update the changelog. Commit and push it.
-
-#. Make sure that everything has been merged into the ``develop`` branch on
+#. Make sure that everything has been merged into the ``main`` branch on
    GitHub, and that all CI checks are green.
+
+#. Make sure the changelog in the ``docs/changelog.rst`` file includes all
+   significant changes since the last release. Commit and push it.
 
 #. Perform any manual tests you feel are required.
 
@@ -105,32 +104,35 @@ Preparations
 Release
 -------
 
-#. Bump the version in ``setup.cfg`` in line with :ref:`our strategy <versioning>`.
-   For example, to ``3.3.0``, and set the release date in the changelog.
+#. Select a version number in line with :ref:`our strategy <versioning>`,
+   e.g. ``v3.3.0`` in the following examples.
 
-#. Commit the bumped version and release date::
+#. Update the release in ``docs/changelog.rst`` with the right version number
+   and release date.
 
-    git commit -m "Prepare release of v3.3.0"
+#. Commit the final touches to the changelog::
 
-#. Merge the release branch (``develop`` in the example) into ``main``::
+    git commit -m "Release v3.3.0"
 
-    git checkout main
-    git pull
-    git merge --no-ff -m "Release v3.3.0" develop
+#. Tag the commit with an annotated tag::
 
-#. Tag the commit::
-
-    git tag -m "Release v3.3.0" v3.3.0
+    git tag -a -m "Release v3.3.0" v3.3.0
 
    It is encouraged to use ``-s`` to sign the tag if you have a GnuPG setup.
+
+#. Verify that Mopidy reports the new version number::
+
+     mopidy --version
+
+    If it doesn't, check that you've properly tagged the release.
 
 #. Push to GitHub::
 
     git push origin main --follow-tags
 
-#. Go to the GitHub repository's tags page at
-   ``https://github.com/mopidy/mopidy/tags``. Find the tag and select
-   "Create release" in the tag's dropdown menu.
+#. Go to the GitHub repository's
+   `tags page <https://github.com/mopidy/mopidy/tags>`_.
+   Find the tag and select "Create release" in the tag's dropdown menu.
 
 #. Copy the tag, e.g. ``v3.3.0`` into the "title" field. Write a changelog
    entry in the description field, and hit "Publish release".
@@ -141,16 +143,9 @@ Release
 Post-release
 ------------
 
-#. To prepare for further development, merge the ``main`` branch back into
-   the ``develop`` branch and push it to GitHub::
-
-    git checkout develop
-    git merge main
-    git push origin develop
-
 #. Make sure the new tag is built by
    `Read the Docs <https://readthedocs.org/projects/mopidy/builds/>`_,
-   and that the `"latest" version <https://docs.mopidy.com/en/latest/>`_
+   and that the `"stable" version <https://docs.mopidy.com/stable/>`_
    shows the newly released version.
 
 #. Spread the word through an announcement post on the `Discourse forum
@@ -158,6 +153,6 @@ Post-release
 
 #. Notify distribution packagers, including but not limited to:
 
-   - `Arch Linux <https://www.archlinux.org/packages/community/any/mopidy/>`_
+   - `Arch Linux <https://archlinux.org/packages/extra/any/mopidy/>`_
    - `Debian <https://salsa.debian.org/mopidy-team>`_
    - `Homebrew <https://github.com/mopidy/homebrew-mopidy>`_
