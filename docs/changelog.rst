@@ -117,6 +117,9 @@ Extension support
 Internals
 ---------
 
+- Dropped split between the ``main`` and ``develop`` branches. We now use
+  ``main`` for all development, and have removed the ``develop`` branch.
+
 - Added type hints to most of the source code.
 
 - Switched from mypy to pyright for type checking.
