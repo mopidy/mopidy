@@ -75,7 +75,6 @@ class PlaybackState(ValidatedImmutableObject):
 
 
 class TracklistState(ValidatedImmutableObject):
-
     """
     State of the tracklist controller.
     Internally used for save/load state.
@@ -114,7 +113,6 @@ class TracklistState(ValidatedImmutableObject):
 
 
 class CoreState(ValidatedImmutableObject):
-
     """
     State of all Core controller.
     Internally used for save/load state.

@@ -110,9 +110,9 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
                 extensions_status["disabled"].append(extension)
             elif config_errors.get(extension.ext_name):
                 config[extension.ext_name]["enabled"] = False
-                config_errors[extension.ext_name][
-                    "enabled"
-                ] = "extension disabled due to config errors."
+                config_errors[extension.ext_name]["enabled"] = (
+                    "extension disabled due to config errors."
+                )
                 extensions_status["config"].append(extension)
             else:
                 extensions_status["enabled"].append(extension)

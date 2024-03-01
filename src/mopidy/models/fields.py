@@ -64,12 +64,10 @@ class Field(Generic[T]):
         return value
 
     @overload
-    def __get__(self: TField, obj: None, objtype: None) -> TField:
-        ...
+    def __get__(self: TField, obj: None, objtype: None) -> TField: ...
 
     @overload
-    def __get__(self, obj: object, objtype: type[object]) -> T:
-        ...
+    def __get__(self, obj: object, objtype: type[object]) -> T: ...
 
     def __get__(
         self: TField,

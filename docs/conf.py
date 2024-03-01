@@ -1,6 +1,5 @@
 """Mopidy documentation build configuration file"""
 
-
 import sys
 from pathlib import Path
 

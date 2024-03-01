@@ -4,7 +4,6 @@ This backend implements the backend API in the simplest way possible.  It is
 used in tests of the frontends.
 """
 
-
 import pykka
 from mopidy import backend
 from mopidy.models import Playlist, Ref, SearchResult

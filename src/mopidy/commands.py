@@ -459,8 +459,9 @@ class RootCommand(Command):
 
         backends = []
         for backend_class in backend_classes:
-            with _actor_error_handling(backend_class.__name__), timer.time_logger(
-                backend_class.__name__
+            with (
+                _actor_error_handling(backend_class.__name__),
+                timer.time_logger(backend_class.__name__),
             ):
                 backend = cast(
                     BackendProxy,
@@ -508,8 +509,9 @@ class RootCommand(Command):
         )
 
         for frontend_class in frontend_classes:
-            with _actor_error_handling(frontend_class.__name__), timer.time_logger(
-                frontend_class.__name__
+            with (
+                _actor_error_handling(frontend_class.__name__),
+                timer.time_logger(frontend_class.__name__),
             ):
                 frontend_class.start(config=config, core=core)
 

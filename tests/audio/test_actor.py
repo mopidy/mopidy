@@ -509,7 +509,6 @@ class AudioEventTest(BaseTest):
 
 
 class AudioDummyEventTest(DummyMixin, AudioEventTest):
-
     """Exercise the AudioEventTest against our mock audio classes."""
 
 

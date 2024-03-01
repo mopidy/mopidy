@@ -4,7 +4,6 @@ This class implements the audio API in the simplest way possible. It is used in
 tests of the core and backends.
 """
 
-
 import pykka
 from mopidy import audio
 

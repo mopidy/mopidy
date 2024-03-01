@@ -162,7 +162,6 @@ COLORS: list[LogColorName] = [
 
 
 class ColorizingStreamHandler(logging.StreamHandler):
-
     """
     Stream handler which colorizes the log using ANSI escape sequences.
 

@@ -56,7 +56,6 @@ class JsonRpcMethodDescription(TypedDict):
 
 
 class JsonRpcWrapper:
-
     """
     Wrap objects and make them accessible through JSON-RPC 2.0 messaging.
 
@@ -349,7 +348,6 @@ def get_combined_json_encoder(
 
 
 class JsonRpcInspector:
-
     """
     Inspects a group of classes and functions to create a description of what
     methods they can expose over JSON-RPC 2.0.

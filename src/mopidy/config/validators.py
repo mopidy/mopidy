@@ -8,8 +8,7 @@ if TYPE_CHECKING:
 
     class Comparable(Protocol):
         @abstractmethod
-        def __lt__(self: CT, other: CT, /) -> bool:
-            ...
+        def __lt__(self: CT, other: CT, /) -> bool: ...
 
     T = TypeVar("T")
     CT = TypeVar("CT", bound=Comparable)
