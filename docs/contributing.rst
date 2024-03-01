@@ -73,7 +73,7 @@ Pull request guidelines
      Making sure your ideas and solutions are aligned with other contributors
      greatly increases the odds of your pull request being quickly accepted.
 
-#. Create a new branch, based on the ``develop`` branch, for every feature or
+#. Create a new branch, based on the ``main`` branch, for every feature or
    bug fix. Keep branches small and on topic, as that makes them far easier to
    review.
 
@@ -112,13 +112,5 @@ Pull request guidelines
    - `On commit messages
      <https://who-t.blogspot.com/2009/12/on-commit-messages.html>`_
 
-#. Send a pull request to the ``develop`` branch. See the `GitHub pull request
+#. Send a pull request to the ``main`` branch. See the `GitHub pull request
    docs <https://help.github.com/en/articles/about-pull-requests>`_ for help.
-
-.. note::
-
-    If you are contributing a bug fix for a specific minor version of Mopidy
-    you should create the branch based on ``release-x.y`` instead of
-    ``develop``. When the release is done the changes will be merged back into
-    ``develop`` automatically as part of the normal release process. See
-    :ref:`creating-releases`.
