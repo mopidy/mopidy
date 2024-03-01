@@ -82,7 +82,7 @@ When you've cloned the ``mopidy`` Git repo, ``cd`` into it::
 
     cd ~/mopidy-dev/mopidy/
 
-With a fresh clone of the Git repo, you should start out on the ``develop``
+With a fresh clone of the Git repo, you should start out on the ``main``
 branch. This is where all features for the next feature release land. To
 confirm that you're on the right branch, run::
 
@@ -501,12 +501,12 @@ Creating a branch
 Fetch the latest data from all remotes without affecting your working
 directory::
 
-    git remote update
+    git remote update --prune
 
 Now, we are ready to create and checkout a new branch off of the upstream
-``develop`` branch for our work::
+``main`` branch for our work::
 
-    git checkout -b fix/666-crash-on-foo upstream/develop
+    git checkout -b fix-crash-on-foo upstream/main
 
 Do the work, while remembering to adhere to code style, test the changes, make
 necessary updates to the documentation, and making small commits with good
@@ -519,7 +519,7 @@ Creating a pull request
 
 When everything is done and committed, push the branch to your fork on GitHub::
 
-    git push myuser fix/666-crash-on-foo
+    git push myuser fix-crash-on-foo
 
 Go to the repository on GitHub where you want the change merged, in this case
 https://github.com/mopidy/mopidy, and `create a pull request
@@ -539,7 +539,7 @@ our CI setup runs on your pull request.
 When you've fixed the issues, you can update the pull request simply by pushing
 more commits to the same branch in your fork::
 
-    git push myuser fix/666-crash-on-foo
+    git push myuser fix-crash-on-foo
 
 Likewise, when you get review comments from other developers on your pull
 request, you're expected to create additional commits which addresses the
