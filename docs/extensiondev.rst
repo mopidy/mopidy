@@ -779,5 +779,5 @@ the events fire::
 
 
 For further details and examples, refer to the
-`/tests <https://github.com/mopidy/mopidy/tree/develop/tests>`_
-directory on the Mopidy development branch.
+`/tests <https://github.com/mopidy/mopidy/tree/main/tests>`_
+directory in the Mopidy repo.
