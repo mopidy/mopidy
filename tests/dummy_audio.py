@@ -4,9 +4,7 @@ This class implements the audio API in the simplest way possible. It is used in
 tests of the core and backends.
 """
 
-
 import pykka
-
 from mopidy import audio
 
 
@@ -37,12 +35,6 @@ class DummyAudio(pykka.ThreadingActor):
         self._live_stream = live_stream
         self._tags = {}
 
-    def set_appsrc(self, *args, **kwargs):
-        pass
-
-    def emit_data(self, buffer_):
-        pass
-
     def get_position(self):
         return self._position
 
@@ -71,9 +63,6 @@ class DummyAudio(pykka.ThreadingActor):
     def set_volume(self, volume):
         self._volume = volume
         return True
-
-    def set_metadata(self, track):
-        pass
 
     def get_current_tags(self):
         return self._tags

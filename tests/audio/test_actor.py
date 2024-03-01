@@ -1,9 +1,9 @@
 import threading
 import unittest
+from typing import ClassVar
 from unittest import mock
 
 import pykka
-
 from mopidy import audio
 from mopidy.audio.constants import PlaybackState
 from mopidy.internal import path
@@ -17,14 +17,14 @@ from tests import dummy_audio, path_to_data_dir
 
 
 class BaseTest(unittest.TestCase):
-    uris = [
+    uris: ClassVar[list[str]] = [
         path.path_to_uri(path_to_data_dir("song1.wav")),
         path.path_to_uri(path_to_data_dir("song2.wav")),
     ]
 
     audio_class = audio.Audio
 
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         config = {
             "audio": {
                 "buffer_time": None,
@@ -38,7 +38,7 @@ class BaseTest(unittest.TestCase):
         self.song_uri = path.path_to_uri(path_to_data_dir("song1.wav"))
         self.audio = self.audio_class.start(config=config, mixer=None).proxy()
 
-    def tearDown(self):  # noqa
+    def tearDown(self):
         pykka.ActorRegistry.stop_all()
 
     def possibly_trigger_fake_playback_error(self, uri):
@@ -145,18 +145,18 @@ class DummyAudioListener(pykka.ThreadingActor, audio.AudioListener):
 
 
 class AudioEventTest(BaseTest):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         super().setUp()
         self.audio.enable_sync_handler().get()
         self.listener = DummyAudioListener.start().proxy()
 
-    def tearDown(self):  # noqa: N802
+    def tearDown(self):
         super().tearDown()
 
-    def assertEvent(self, event, **kwargs):  # noqa: N802
+    def assert_event(self, event, **kwargs):
         assert (event, kwargs) in self.listener.get_events().get()
 
-    def assertNotEvent(self, event, **kwargs):  # noqa: N802
+    def assert_not_event(self, event, **kwargs):
         assert (event, kwargs) not in self.listener.get_events().get()
 
     # TODO: test without uri set, with bad uri and gapless...
@@ -170,7 +170,7 @@ class AudioEventTest(BaseTest):
         self.audio.start_playback()
 
         self.audio.wait_for_state_change().get()
-        self.assertEvent(
+        self.assert_event(
             "state_changed",
             old_state=PlaybackState.STOPPED,
             new_state=PlaybackState.PLAYING,
@@ -183,7 +183,7 @@ class AudioEventTest(BaseTest):
         self.audio.pause_playback()
 
         self.audio.wait_for_state_change().get()
-        self.assertEvent(
+        self.assert_event(
             "state_changed",
             old_state=PlaybackState.STOPPED,
             new_state=PlaybackState.PAUSED,
@@ -200,7 +200,7 @@ class AudioEventTest(BaseTest):
         self.audio.start_playback()
 
         self.audio.wait_for_state_change().get()
-        self.assertEvent(
+        self.assert_event(
             "state_changed",
             old_state=PlaybackState.PAUSED,
             new_state=PlaybackState.PLAYING,
@@ -217,7 +217,7 @@ class AudioEventTest(BaseTest):
         self.audio.stop_playback()
 
         self.audio.wait_for_state_change().get()
-        self.assertEvent(
+        self.assert_event(
             "state_changed",
             old_state=PlaybackState.PAUSED,
             new_state=PlaybackState.STOPPED,
@@ -234,7 +234,7 @@ class AudioEventTest(BaseTest):
         self.audio.pause_playback()
 
         self.audio.wait_for_state_change().get()
-        self.assertEvent(
+        self.assert_event(
             "state_changed",
             old_state=PlaybackState.PLAYING,
             new_state=PlaybackState.PAUSED,
@@ -251,7 +251,7 @@ class AudioEventTest(BaseTest):
         self.audio.stop_playback()
 
         self.audio.wait_for_state_change().get()
-        self.assertEvent(
+        self.assert_event(
             "state_changed",
             old_state=PlaybackState.PLAYING,
             new_state=PlaybackState.STOPPED,
@@ -267,7 +267,7 @@ class AudioEventTest(BaseTest):
         # Since we are going from stopped to playing, the state change is
         # enough to ensure the stream changed.
         self.audio.wait_for_state_change().get()
-        self.assertEvent("stream_changed", uri=self.uris[0])
+        self.assert_event("stream_changed", uri=self.uris[0])
 
     def test_stream_changed_event_on_multiple_changes(self):
         self.audio.prepare_change()
@@ -276,14 +276,14 @@ class AudioEventTest(BaseTest):
         self.audio.start_playback()
 
         self.audio.wait_for_state_change().get()
-        self.assertEvent("stream_changed", uri=self.uris[0])
+        self.assert_event("stream_changed", uri=self.uris[0])
 
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[1])
         self.audio.pause_playback()
 
         self.audio.wait_for_state_change().get()
-        self.assertEvent("stream_changed", uri=self.uris[1])
+        self.assert_event("stream_changed", uri=self.uris[1])
 
     def test_stream_changed_event_on_playing_to_paused(self):
         self.audio.prepare_change()
@@ -292,13 +292,13 @@ class AudioEventTest(BaseTest):
         self.audio.start_playback()
 
         self.audio.wait_for_state_change().get()
-        self.assertEvent("stream_changed", uri=self.uris[0])
+        self.assert_event("stream_changed", uri=self.uris[0])
 
         self.listener.clear_events()
         self.audio.pause_playback()
 
         self.audio.wait_for_state_change().get()
-        self.assertNotEvent("stream_changed", uri=self.uris[0])
+        self.assert_not_event("stream_changed", uri=self.uris[0])
 
     def test_stream_changed_event_on_paused_to_stopped(self):
         self.audio.prepare_change()
@@ -310,7 +310,7 @@ class AudioEventTest(BaseTest):
         self.audio.stop_playback()
 
         self.audio.wait_for_state_change().get()
-        self.assertEvent("stream_changed", uri=None)
+        self.assert_event("stream_changed", uri=None)
 
     def test_position_changed_on_pause(self):
         self.audio.prepare_change()
@@ -319,7 +319,7 @@ class AudioEventTest(BaseTest):
         self.audio.wait_for_state_change()
 
         self.audio.wait_for_state_change().get()
-        self.assertEvent("position_changed", position=0)
+        self.assert_event("position_changed", position=0)
 
     def test_stream_changed_event_on_paused_to_playing(self):
         self.audio.prepare_change()
@@ -328,13 +328,13 @@ class AudioEventTest(BaseTest):
         self.audio.pause_playback()
 
         self.audio.wait_for_state_change().get()
-        self.assertEvent("stream_changed", uri=self.uris[0])
+        self.assert_event("stream_changed", uri=self.uris[0])
 
         self.listener.clear_events()
         self.audio.start_playback()
 
         self.audio.wait_for_state_change().get()
-        self.assertNotEvent("stream_changed", uri=self.uris[0])
+        self.assert_not_event("stream_changed", uri=self.uris[0])
 
     def test_position_changed_on_play(self):
         self.audio.prepare_change()
@@ -343,7 +343,7 @@ class AudioEventTest(BaseTest):
         self.audio.wait_for_state_change()
 
         self.audio.wait_for_state_change().get()
-        self.assertEvent("position_changed", position=0)
+        self.assert_event("position_changed", position=0)
 
     def test_position_changed_on_seek_while_stopped(self):
         self.audio.prepare_change()
@@ -351,7 +351,7 @@ class AudioEventTest(BaseTest):
         self.audio.set_position(2000)
 
         self.audio.wait_for_state_change().get()
-        self.assertNotEvent("position_changed", position=0)
+        self.assert_not_event("position_changed", position=0)
 
     def test_position_changed_on_seek_after_play(self):
         self.audio.prepare_change()
@@ -363,7 +363,7 @@ class AudioEventTest(BaseTest):
         self.audio.set_position(2000)
 
         self.audio.wait_for_state_change().get()
-        self.assertEvent("position_changed", position=2000)
+        self.assert_event("position_changed", position=2000)
 
     def test_position_changed_on_seek_after_pause(self):
         self.audio.prepare_change()
@@ -375,7 +375,7 @@ class AudioEventTest(BaseTest):
         self.audio.set_position(2000)
 
         self.audio.wait_for_state_change().get()
-        self.assertEvent("position_changed", position=2000)
+        self.assert_event("position_changed", position=2000)
 
     def test_tags_changed_on_playback(self):
         self.audio.prepare_change()
@@ -383,7 +383,7 @@ class AudioEventTest(BaseTest):
         self.audio.start_playback()
         self.audio.wait_for_state_change().get()
 
-        self.assertEvent("tags_changed", tags=mock.ANY)
+        self.assert_event("tags_changed", tags=mock.ANY)
 
     # Unlike the other events, having the state changed done is not
     # enough to ensure our event is called. So we setup a threading
@@ -401,7 +401,7 @@ class AudioEventTest(BaseTest):
         if not event.wait(timeout=1.0):
             self.fail("Stream changed not reached within deadline")
 
-        self.assertEvent("stream_changed", uri=self.uris[0])
+        self.assert_event("stream_changed", uri=self.uris[0])
 
     def test_reached_end_of_stream_event(self):
         event = self.listener.wait("reached_end_of_stream").get()
@@ -440,8 +440,8 @@ class AudioEventTest(BaseTest):
             self.fail("EOS not received")
 
         # Check that both uris got played
-        self.assertEvent("stream_changed", uri=self.uris[0])
-        self.assertEvent("stream_changed", uri=self.uris[1])
+        self.assert_event("stream_changed", uri=self.uris[0])
+        self.assert_event("stream_changed", uri=self.uris[1])
 
         # Check that events counts check out.
         keys = [k for k, v in self.listener.get_events().get()]
@@ -509,7 +509,6 @@ class AudioEventTest(BaseTest):
 
 
 class AudioDummyEventTest(DummyMixin, AudioEventTest):
-
     """Exercise the AudioEventTest against our mock audio classes."""
 
 
@@ -535,18 +534,18 @@ class MixerTest(BaseTest):
 
 
 class AudioStateTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.audio = audio.Audio(config=None, mixer=None)
 
     def test_state_starts_as_stopped(self):
-        assert audio.PlaybackState.STOPPED == self.audio.state
+        assert self.audio.state == audio.PlaybackState.STOPPED
 
     def test_state_does_not_change_when_in_gst_ready_state(self):
         self.audio._handler.on_playbin_state_changed(
             Gst.State.NULL, Gst.State.READY, Gst.State.VOID_PENDING
         )
 
-        assert audio.PlaybackState.STOPPED == self.audio.state
+        assert self.audio.state == audio.PlaybackState.STOPPED
 
     def test_state_changes_from_stopped_to_playing_on_play(self):
         self.audio._handler.on_playbin_state_changed(
@@ -559,7 +558,7 @@ class AudioStateTest(unittest.TestCase):
             Gst.State.PAUSED, Gst.State.PLAYING, Gst.State.VOID_PENDING
         )
 
-        assert audio.PlaybackState.PLAYING == self.audio.state
+        assert self.audio.state == audio.PlaybackState.PLAYING
 
     def test_state_changes_from_playing_to_paused_on_pause(self):
         self.audio.state = audio.PlaybackState.PLAYING
@@ -568,7 +567,7 @@ class AudioStateTest(unittest.TestCase):
             Gst.State.PLAYING, Gst.State.PAUSED, Gst.State.VOID_PENDING
         )
 
-        assert audio.PlaybackState.PAUSED == self.audio.state
+        assert self.audio.state == audio.PlaybackState.PAUSED
 
     def test_state_changes_from_playing_to_stopped_on_stop(self):
         self.audio.state = audio.PlaybackState.PLAYING
@@ -583,11 +582,11 @@ class AudioStateTest(unittest.TestCase):
         # self.audio._handler.on_playbin_state_changed(
         #     Gst.State.READY, Gst.State.NULL, Gst.State.VOID_PENDING)
 
-        assert audio.PlaybackState.STOPPED == self.audio.state
+        assert self.audio.state == audio.PlaybackState.STOPPED
 
 
 class AudioBufferingTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.audio = audio.Audio(config=None, mixer=None)
         self.audio._playbin = mock.Mock(spec=["set_state"])
 
@@ -642,14 +641,12 @@ class AudioBufferingTest(unittest.TestCase):
 
 
 class AudioLiveTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         config = {"proxy": {}}
         self.audio = audio.Audio(config=config, mixer=None)
         self.audio._playbin = mock.Mock(spec=["set_property"])
 
         self.source = mock.MagicMock()
-        # Avoid appsrc.configure()
-        self.source.get_factory.get_name = mock.Mock(return_value="not_appsrc")
         self.source.props = mock.Mock(spec=["is_live"])
 
     def test_not_live_mode(self):
@@ -666,20 +663,9 @@ class AudioLiveTest(unittest.TestCase):
 
         self.source.set_live.assert_called_with(True)
 
-    def test_not_live_mode_after_set_appsrc(self):
-        self.audio._live_stream = True
-
-        # Embrace appsrc.configure()
-        self.source.get_factory.get_name.return_value = "appsrc"
-
-        self.audio.set_appsrc("")
-        self.audio._on_source_setup("dummy", self.source)
-
-        self.source.set_live.assert_not_called()
-
 
 class DownloadBufferingTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.audio = audio.Audio(config=None, mixer=None)
         self.audio._playbin = mock.Mock(spec=["set_property"])
 
@@ -692,7 +678,7 @@ class DownloadBufferingTest(unittest.TestCase):
 
         playbin.set_property.assert_has_calls([mock.call("flags", 0x02 | 0x80)])
 
-    def test_download_flag_is_not_passed_to_playbin_if_download_buffering_is_not_enabled(  # noqa: B950
+    def test_download_flag_is_not_passed_to_playbin_if_download_buffering_is_disabled(
         self,
     ):
         playbin = self.audio._playbin
@@ -701,25 +687,14 @@ class DownloadBufferingTest(unittest.TestCase):
 
         playbin.set_property.assert_has_calls([mock.call("flags", 0x02)])
 
-    def test_download_flag_is_not_passed_to_playbin_if_set_appsrc(  # noqa: B950
-        self,
-    ):
-        playbin = self.audio._playbin
-
-        self.audio.set_appsrc("")
-
-        playbin.set_property.assert_has_calls([mock.call("flags", 0x02)])
-
 
 class SourceSetupCallbackTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         config = {"proxy": {}}
         self.audio = audio.Audio(config=config, mixer=None)
         self.audio._playbin = mock.Mock(spec=["set_property"])
 
         self.source = mock.MagicMock()
-        # Avoid appsrc.configure()
-        self.source.get_factory.get_name = mock.Mock(return_value="not_appsrc")
 
     def test_source_setup_callback(self):
         mock_callback = mock.MagicMock()

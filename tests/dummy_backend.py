@@ -4,9 +4,7 @@ This backend implements the backend API in the simplest way possible.  It is
 used in tests of the frontends.
 """
 
-
 import pykka
-
 from mopidy import backend
 from mopidy.models import Playlist, Ref, SearchResult
 
@@ -109,14 +107,12 @@ class DummyPlaylistsProvider(backend.PlaylistsProvider):
         self._allow_save = enabled
 
     def as_list(self):
-        return [
-            Ref.playlist(uri=pl.uri, name=pl.name) for pl in self._playlists
-        ]
+        return [Ref.playlist(uri=pl.uri, name=pl.name) for pl in self._playlists]
 
     def get_items(self, uri):
         playlist = self.lookup(uri)
         if playlist is None:
-            return
+            return None
         return [Ref.track(uri=t.uri, name=t.name) for t in playlist.tracks]
 
     def lookup(self, uri):
@@ -124,6 +120,7 @@ class DummyPlaylistsProvider(backend.PlaylistsProvider):
         for playlist in self._playlists:
             if playlist.uri == uri:
                 return playlist
+        return None
 
     def refresh(self):
         pass

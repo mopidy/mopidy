@@ -1,5 +1,4 @@
 import pykka
-
 from mopidy import mixer
 
 

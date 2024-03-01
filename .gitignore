@@ -6,9 +6,9 @@
 .cache/
 .coverage
 .idea
-.mypy_cache/
 .noseids
 .pytest_cache/
+.ruff_cache/
 .tox
 MANIFEST
 build/

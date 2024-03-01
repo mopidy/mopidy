@@ -1,9 +1,8 @@
 import pathlib
+from importlib import metadata
 from unittest import mock
 
-import pkg_resources
 import pytest
-
 from mopidy import config, exceptions, ext
 
 from tests import IsA, any_unicode
@@ -13,6 +12,7 @@ class DummyExtension(ext.Extension):
     dist_name = "Mopidy-Foobar"
     ext_name = "foobar"
     version = "1.2.3"
+    location = __file__
 
     def get_default_config(self):
         return "[foobar]\nenabled = true"
@@ -22,7 +22,7 @@ any_testextension = IsA(DummyExtension)
 
 
 class TestExtension:
-    @pytest.fixture
+    @pytest.fixture()
     def extension(self):
         class MyExtension(ext.Extension):
             dist_name = "Mopidy-Foo"
@@ -72,24 +72,25 @@ class TestExtension:
 
 
 class TestLoadExtensions:
-    @pytest.fixture
+    @pytest.fixture()
     def iter_entry_points_mock(self, request):
-        patcher = mock.patch("pkg_resources.iter_entry_points")
+        patcher = mock.patch.object(metadata, "entry_points")
         iter_entry_points = patcher.start()
         iter_entry_points.return_value = []
         yield iter_entry_points
         patcher.stop()
 
+    @pytest.fixture()
+    def mock_entry_point(self, iter_entry_points_mock):
+        entry_point = mock.Mock()
+        entry_point.load = mock.Mock(return_value=DummyExtension)
+        iter_entry_points_mock.return_value = [entry_point]
+        return entry_point
+
     def test_no_extensions(self, iter_entry_points_mock):
-        iter_entry_points_mock.return_value = []
         assert ext.load_extensions() == []
 
-    def test_load_extensions(self, iter_entry_points_mock):
-        mock_entry_point = mock.Mock()
-        mock_entry_point.resolve.return_value = DummyExtension
-
-        iter_entry_points_mock.return_value = [mock_entry_point]
-
+    def test_load_extensions(self, mock_entry_point):
         expected = ext.ExtensionData(
             any_testextension,
             mock_entry_point,
@@ -97,69 +98,47 @@ class TestLoadExtensions:
             any_unicode,
             None,
         )
-
         assert ext.load_extensions() == [expected]
 
-    def test_gets_wrong_class(self, iter_entry_points_mock):
+    def test_load_extensions_exception(self, mock_entry_point, caplog):
+        mock_entry_point.load.side_effect = Exception("test")
+        ext.load_extensions()
+        assert "Failed to load extension" in caplog.records[0].message
+
+    def test_load_extensions_real(self):
+        installed_extensions = ext.load_extensions()
+        assert len(installed_extensions)
+
+    def test_gets_wrong_class(self, mock_entry_point):
         class WrongClass:
             pass
 
-        mock_entry_point = mock.Mock()
-        mock_entry_point.resolve.return_value = WrongClass
-
-        iter_entry_points_mock.return_value = [mock_entry_point]
-
+        mock_entry_point.load.return_value = WrongClass
         assert ext.load_extensions() == []
 
-    def test_gets_instance(self, iter_entry_points_mock):
-        mock_entry_point = mock.Mock()
-        mock_entry_point.resolve.return_value = DummyExtension()
-
-        iter_entry_points_mock.return_value = [mock_entry_point]
-
+    def test_gets_instance(self, mock_entry_point):
+        mock_entry_point.load.return_value = DummyExtension()
         assert ext.load_extensions() == []
 
-    def test_creating_instance_fails(self, iter_entry_points_mock):
-        mock_extension = mock.Mock(spec=ext.Extension)
-        mock_extension.side_effect = Exception
-
-        mock_entry_point = mock.Mock()
-        mock_entry_point.resolve.return_value = mock_extension
-
-        iter_entry_points_mock.return_value = [mock_entry_point]
-
+    def test_creating_instance_fails(self, mock_entry_point):
+        mock_entry_point.load.return_value = mock.Mock(side_effect=Exception)
         assert ext.load_extensions() == []
 
-    def test_get_config_schema_fails(self, iter_entry_points_mock):
-        mock_entry_point = mock.Mock()
-        mock_entry_point.resolve.return_value = DummyExtension
-
-        iter_entry_points_mock.return_value = [mock_entry_point]
-
+    def test_get_config_schema_fails(self, mock_entry_point):
         with mock.patch.object(DummyExtension, "get_config_schema") as get:
             get.side_effect = Exception
 
             assert ext.load_extensions() == []
             get.assert_called_once_with()
 
-    def test_get_default_config_fails(self, iter_entry_points_mock):
-        mock_entry_point = mock.Mock()
-        mock_entry_point.resolve.return_value = DummyExtension
-
-        iter_entry_points_mock.return_value = [mock_entry_point]
-
+    def test_get_default_config_fails(self, mock_entry_point):
         with mock.patch.object(DummyExtension, "get_default_config") as get:
             get.side_effect = Exception
 
             assert ext.load_extensions() == []
             get.assert_called_once_with()
 
-    def test_get_command_fails(self, iter_entry_points_mock):
-        mock_entry_point = mock.Mock()
-        mock_entry_point.resolve.return_value = DummyExtension
-
-        iter_entry_points_mock.return_value = [mock_entry_point]
-
+    def test_get_command_fails(self, mock_entry_point):
         with mock.patch.object(DummyExtension, "get_command") as get:
             get.side_effect = Exception
 
@@ -168,39 +147,45 @@ class TestLoadExtensions:
 
 
 class TestValidateExtensionData:
-    @pytest.fixture
+    @pytest.fixture()
     def ext_data(self):
         extension = DummyExtension()
-
         entry_point = mock.Mock()
         entry_point.name = extension.ext_name
-
-        schema = extension.get_config_schema()
-        defaults = extension.get_default_config()
-        command = extension.get_command()
-
         return ext.ExtensionData(
-            extension, entry_point, schema, defaults, command
+            extension,
+            entry_point,
+            extension.get_config_schema(),
+            extension.get_default_config(),
+            extension.get_command(),
         )
+
+    def test_real(self):
+        for dist in ext.load_extensions():
+            assert ext.validate_extension_data(dist)
+
+    def test_ok(self, ext_data):
+        assert ext.validate_extension_data(ext_data)
 
     def test_name_mismatch(self, ext_data):
         ext_data.entry_point.name = "barfoo"
         assert not ext.validate_extension_data(ext_data)
 
     def test_distribution_not_found(self, ext_data):
-        error = pkg_resources.DistributionNotFound
-        ext_data.entry_point.require.side_effect = error
+        error = metadata.PackageNotFoundError
+        ext_data.entry_point.load.side_effect = error
         assert not ext.validate_extension_data(ext_data)
 
+    @pytest.mark.skip("Version control missing in metadata")
     def test_version_conflict(self, ext_data):
-        error = pkg_resources.VersionConflict
+        error = metadata.PackageNotFoundError
+        ext_data.entry_point.require.side_effect = error
+        assert not ext.validate_extension_data(ext_data)
         ext_data.entry_point.require.side_effect = error
         assert not ext.validate_extension_data(ext_data)
 
     def test_entry_point_require_exception(self, ext_data):
-        ext_data.entry_point.require.side_effect = Exception(
-            "Some extension error"
-        )
+        ext_data.entry_point.load.side_effect = Exception("Some extension error")
 
         # Hope that entry points are well behaved, so exception will bubble.
         with pytest.raises(Exception, match="Some extension error"):
@@ -275,3 +260,13 @@ class TestValidateExtensionData:
 
         expected = pathlib.Path(core_data_dir).resolve() / extension.ext_name
         assert data_dir == expected
+
+
+class TestRegistry:
+    def test_registry(self):
+        reg = ext.Registry()
+        assert not len(reg)
+
+        # __iter__ is implemented
+        for _entry in reg:
+            pass

@@ -9,6 +9,10 @@ However, note that the later models are significantly more powerful than
 the Raspberry Pi 1 and Raspberry Pi Zero; Mopidy will run noticably faster on
 the later models.
 
+.. warning:: Update needed
+
+   This page is outdated and needs to be updated for Raspberry Pi OS released 2023-10-10.
+
 
 How to for Raspbian
 ===================

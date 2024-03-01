@@ -1,16 +1,13 @@
 from unittest import mock
 
 import pytest
-
 from mopidy import exceptions
 from mopidy.internal import path
 
 from tests import path_to_data_dir
 
 
-@pytest.mark.parametrize(
-    "track_uri", [path.path_to_uri(path_to_data_dir("song1.wav"))]
-)
+@pytest.mark.parametrize("track_uri", [path.path_to_uri(path_to_data_dir("song1.wav"))])
 def test_lookup(provider, track_uri):
     result = provider.lookup(track_uri)
 

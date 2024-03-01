@@ -2,6 +2,7 @@ import argparse
 import unittest
 from unittest import mock
 
+import pytest
 from mopidy import commands
 
 
@@ -19,21 +20,21 @@ class ConfigOverrideTypeTest(unittest.TestCase):
         assert expected == commands.config_override_type("section/key=  ")
 
     def test_invalid_override(self):
-        with self.assertRaises(argparse.ArgumentTypeError):
+        with pytest.raises(argparse.ArgumentTypeError):
             commands.config_override_type("section/key")
-        with self.assertRaises(argparse.ArgumentTypeError):
+        with pytest.raises(argparse.ArgumentTypeError):
             commands.config_override_type("section=")
-        with self.assertRaises(argparse.ArgumentTypeError):
+        with pytest.raises(argparse.ArgumentTypeError):
             commands.config_override_type("section")
 
 
 class CommandParsingTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.exit_patcher = mock.patch.object(commands.Command, "exit")
         self.exit_mock = self.exit_patcher.start()
         self.exit_mock.side_effect = SystemExit
 
-    def tearDown(self):  # noqa: N802
+    def tearDown(self):
         self.exit_patcher.stop()
 
     def test_command_parsing_returns_namespace(self):
@@ -47,12 +48,12 @@ class CommandParsingTest(unittest.TestCase):
 
     def test_unknown_options_bails(self):
         cmd = commands.Command()
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse(["--foobar"])
 
     def test_invalid_sub_command_bails(self):
         cmd = commands.Command()
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse(["foo"])
 
     def test_command_arguments(self):
@@ -122,7 +123,7 @@ class CommandParsingTest(unittest.TestCase):
         cmd = commands.Command()
         cmd.add_argument("--bar", type=int)
 
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse(["--bar", "zero"], prog="foo")
 
         self.exit_mock.assert_called_once_with(
@@ -138,14 +139,14 @@ class CommandParsingTest(unittest.TestCase):
         cmd = commands.Command()
         cmd.add_argument("--bar", required=True)
 
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse([])
         self.exit_mock.assert_called_once_with(
             mock.ANY, mock.ANY, "usage: foo --bar BAR"
         )
 
         self.exit_mock.reset_mock()
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse([], prog="baz")
 
         self.exit_mock.assert_called_once_with(
@@ -156,7 +157,7 @@ class CommandParsingTest(unittest.TestCase):
         cmd = commands.Command()
         cmd.add_argument("--bar", required=True)
 
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse([], prog="foo")
 
         self.exit_mock.assert_called_once_with(
@@ -169,7 +170,7 @@ class CommandParsingTest(unittest.TestCase):
         cmd = commands.Command()
         cmd.add_argument("bar")
 
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse([], prog="foo")
 
         self.exit_mock.assert_called_once_with(
@@ -185,7 +186,7 @@ class CommandParsingTest(unittest.TestCase):
         cmd = commands.Command()
         cmd.add_child("bar", child)
 
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse(["bar"], prog="foo")
 
         self.exit_mock.assert_called_once_with(
@@ -197,7 +198,7 @@ class CommandParsingTest(unittest.TestCase):
     def test_unknown_command(self):
         cmd = commands.Command()
 
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse(["--help"], prog="foo")
 
         self.exit_mock.assert_called_once_with(
@@ -208,7 +209,7 @@ class CommandParsingTest(unittest.TestCase):
         cmd = commands.Command()
         cmd.add_child("baz", commands.Command())
 
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse(["bar"], prog="foo")
 
         self.exit_mock.assert_called_once_with(
@@ -249,7 +250,7 @@ class CommandParsingTest(unittest.TestCase):
         cmd.add_argument("-h", action="help")
         cmd.format_help = mock.Mock()
 
-        with self.assertRaises(SystemExit):
+        with pytest.raises(SystemExit):
             cmd.parse(["-h"])
 
         cmd.format_help.assert_called_once_with(mock.ANY)
@@ -261,32 +262,32 @@ class UsageTest(unittest.TestCase):
     def test_prog_name_default_and_override(self, argv_mock):
         argv_mock.__getitem__.return_value = "/usr/bin/foo"
         cmd = commands.Command()
-        assert "usage: foo" == cmd.format_usage().strip()
-        assert "usage: baz" == cmd.format_usage("baz").strip()
+        assert cmd.format_usage().strip() == "usage: foo"
+        assert cmd.format_usage("baz").strip() == "usage: baz"
 
     def test_basic_usage(self):
         cmd = commands.Command()
-        assert "usage: foo" == cmd.format_usage("foo").strip()
+        assert cmd.format_usage("foo").strip() == "usage: foo"
 
         cmd.add_argument("-h", "--help", action="store_true")
-        assert "usage: foo [-h]" == cmd.format_usage("foo").strip()
+        assert cmd.format_usage("foo").strip() == "usage: foo [-h]"
 
         cmd.add_argument("bar")
-        assert "usage: foo [-h] bar" == cmd.format_usage("foo").strip()
+        assert cmd.format_usage("foo").strip() == "usage: foo [-h] bar"
 
     def test_nested_usage(self):
         child = commands.Command()
         cmd = commands.Command()
         cmd.add_child("bar", child)
 
-        assert "usage: foo" == cmd.format_usage("foo").strip()
-        assert "usage: foo bar" == cmd.format_usage("foo bar").strip()
+        assert cmd.format_usage("foo").strip() == "usage: foo"
+        assert cmd.format_usage("foo bar").strip() == "usage: foo bar"
 
         cmd.add_argument("-h", "--help", action="store_true")
-        assert "usage: foo bar" == child.format_usage("foo bar").strip()
+        assert child.format_usage("foo bar").strip() == "usage: foo bar"
 
         child.add_argument("-h", "--help", action="store_true")
-        assert "usage: foo bar [-h]" == child.format_usage("foo bar").strip()
+        assert child.format_usage("foo bar").strip() == "usage: foo bar [-h]"
 
 
 class HelpTest(unittest.TestCase):
@@ -294,31 +295,23 @@ class HelpTest(unittest.TestCase):
     def test_prog_name_default_and_override(self, argv_mock):
         argv_mock.__getitem__.return_value = "/usr/bin/foo"
         cmd = commands.Command()
-        assert "usage: foo" == cmd.format_help().strip()
-        assert "usage: bar" == cmd.format_help("bar").strip()
+        assert cmd.format_help().strip() == "usage: foo"
+        assert cmd.format_help("bar").strip() == "usage: bar"
 
     def test_command_without_documenation_or_options(self):
         cmd = commands.Command()
-        assert "usage: bar" == cmd.format_help("bar").strip()
+        assert cmd.format_help("bar").strip() == "usage: bar"
 
     def test_command_with_option(self):
         cmd = commands.Command()
-        cmd.add_argument(
-            "-h", "--help", action="store_true", help="show this message"
-        )
+        cmd.add_argument("-h", "--help", action="store_true", help="show this message")
 
-        expected = (
-            "usage: foo [-h]\n\n"
-            "OPTIONS:\n\n"
-            "  -h, --help  show this message"
-        )
+        expected = "usage: foo [-h]\n\nOPTIONS:\n\n  -h, --help  show this message"
         assert expected == cmd.format_help("foo").strip()
 
     def test_command_with_option_and_positional(self):
         cmd = commands.Command()
-        cmd.add_argument(
-            "-h", "--help", action="store_true", help="show this message"
-        )
+        cmd.add_argument("-h", "--help", action="store_true", help="show this message")
         cmd.add_argument("bar", help="some help text")
 
         expected = (
@@ -333,17 +326,13 @@ class HelpTest(unittest.TestCase):
         cmd = commands.Command()
         cmd.help = "some text about everything this command does."
 
-        expected = (
-            "usage: foo\n\n" "some text about everything this command does."
-        )
+        expected = "usage: foo\n\nsome text about everything this command does."
         assert expected == cmd.format_help("foo").strip()
 
     def test_command_with_documentation_and_option(self):
         cmd = commands.Command()
         cmd.help = "some text about everything this command does."
-        cmd.add_argument(
-            "-h", "--help", action="store_true", help="show this message"
-        )
+        cmd.add_argument("-h", "--help", action="store_true", help="show this message")
 
         expected = (
             "usage: foo [-h]\n\n"
@@ -358,7 +347,7 @@ class HelpTest(unittest.TestCase):
         cmd = commands.Command()
         cmd.add_child("bar", child)
 
-        assert "usage: foo" == cmd.format_help("foo").strip()
+        assert cmd.format_help("foo").strip() == "usage: foo"
 
     def test_subcommand_with_documentation_shown(self):
         child = commands.Command()
@@ -471,9 +460,7 @@ class HelpTest(unittest.TestCase):
         child.add_argument("--test", help="the great and wonderful")
 
         cmd = commands.Command()
-        cmd.add_argument(
-            "-h", "--help", action="store_true", help="show this message"
-        )
+        cmd.add_argument("-h", "--help", action="store_true", help="show this message")
         cmd.add_child("bar", child)
 
         expected = (
@@ -493,9 +480,7 @@ class HelpTest(unittest.TestCase):
 
         cmd = commands.Command()
         cmd.help = "some text about everything this command does."
-        cmd.add_argument(
-            "-h", "--help", action="store_true", help="show this message"
-        )
+        cmd.add_argument("-h", "--help", action="store_true", help="show this message")
         cmd.add_child("bar", child)
 
         expected = (
@@ -513,8 +498,8 @@ class HelpTest(unittest.TestCase):
 
 class RunTest(unittest.TestCase):
     def test_default_implmentation_raises_error(self):
-        with self.assertRaises(NotImplementedError):
-            commands.Command().run()
+        with pytest.raises(NotImplementedError):
+            commands.Command().run(args=None, config=None)
 
 
 class RootCommandTest(unittest.TestCase):

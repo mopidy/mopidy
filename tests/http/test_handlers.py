@@ -1,13 +1,13 @@
-import os
 import unittest
+from pathlib import Path
 from unittest import mock
 
+import mopidy
+import pytest
 import tornado.httpclient
 import tornado.testing
 import tornado.web
 import tornado.websocket
-
-import mopidy
 from mopidy.http import handlers
 
 
@@ -19,7 +19,7 @@ class StaticFileHandlerTest(tornado.testing.AsyncHTTPTestCase):
                     r"/(.*)",
                     handlers.StaticFileHandler,
                     {
-                        "path": os.path.dirname(__file__),
+                        "path": Path(__file__).parent,
                         "default_filename": "test_handlers.py",
                     },
                 )
@@ -29,14 +29,14 @@ class StaticFileHandlerTest(tornado.testing.AsyncHTTPTestCase):
     def test_static_handler(self):
         response = self.fetch("/test_handlers.py", method="GET")
 
-        assert 200 == response.code
+        assert response.code == 200
         assert response.headers["X-Mopidy-Version"] == mopidy.__version__
         assert response.headers["Cache-Control"] == "no-cache"
 
     def test_static_default_filename(self):
         response = self.fetch("/", method="GET")
 
-        assert 200 == response.code
+        assert response.code == 200
         assert response.headers["X-Mopidy-Version"] == mopidy.__version__
         assert response.headers["Cache-Control"] == "no-cache"
 
@@ -107,9 +107,9 @@ class WebSocketHandlerTest(tornado.testing.AsyncHTTPTestCase):
     @tornado.testing.gen_test
     def test_bad_origin(self):
         headers = {"Origin": "http://foobar", "Host": "localhost"}
-        with self.assertRaises(tornado.httpclient.HTTPClientError) as e:
+        with pytest.raises(tornado.httpclient.HTTPClientError) as exc_info:
             _ = yield self.connection(headers=headers)
-        assert e.exception.code == 403
+        assert exc_info.value.code == 403
 
 
 class JsonRpcHandlerTestBase(tornado.testing.AsyncHTTPTestCase):
@@ -165,7 +165,7 @@ class JsonRpcHandlerTestCSRFEnabled(JsonRpcHandlerTestBase):
 
         assert response.code == 204
         for k, v in self.get_cors_response_headers():
-            self.assertEqual(response.headers[k], v)
+            assert response.headers[k] == v
 
     def test_options_bad_origin_forbidden(self):
         self.headers.update({"Origin": "http://foo:6680"})
@@ -174,7 +174,7 @@ class JsonRpcHandlerTestCSRFEnabled(JsonRpcHandlerTestBase):
         assert response.code == 403
         assert response.reason == "Access denied for origin http://foo:6680"
         for k, _ in self.get_cors_response_headers():
-            self.assertNotIn(k, response.headers)
+            assert k not in response.headers
 
     def test_options_no_origin_forbidden(self):
         response = self.fetch("/rpc", method="OPTIONS", headers=self.headers)
@@ -182,50 +182,42 @@ class JsonRpcHandlerTestCSRFEnabled(JsonRpcHandlerTestBase):
         assert response.code == 403
         assert response.reason == "Access denied for origin None"
         for k, _ in self.get_cors_response_headers():
-            self.assertNotIn(k, response.headers)
+            assert k not in response.headers
 
     def test_post_no_content_type_unsupported(self):
-        response = self.fetch(
-            "/rpc", method="POST", body="hi", headers=self.headers
-        )
+        response = self.fetch("/rpc", method="POST", body="hi", headers=self.headers)
 
         assert response.code == 415
         for k, _ in self.get_cors_response_headers():
-            self.assertNotIn(k, response.headers)
+            assert k not in response.headers
 
     def test_post_wrong_content_type_unsupported(self):
         self.headers.update({"Content-Type": "application/cats"})
-        response = self.fetch(
-            "/rpc", method="POST", body="hi", headers=self.headers
-        )
+        response = self.fetch("/rpc", method="POST", body="hi", headers=self.headers)
 
         assert response.code == 415
         assert response.reason == "Content-Type must be application/json"
         for k, _ in self.get_cors_response_headers():
-            self.assertNotIn(k, response.headers)
+            assert k not in response.headers
 
     def test_post_no_origin_ok_but_doesnt_set_cors_headers(self):
         self.headers.update({"Content-Type": "application/json"})
-        response = self.fetch(
-            "/rpc", method="POST", body="hi", headers=self.headers
-        )
+        response = self.fetch("/rpc", method="POST", body="hi", headers=self.headers)
 
         assert response.code == 200
         for k, _ in self.get_cors_response_headers():
-            self.assertNotIn(k, response.headers)
+            assert k not in response.headers
 
     def test_post_with_origin_ok_sets_cors_headers(self):
         self.headers.update(
             {"Content-Type": "application/json", "Origin": "http://foobar:6680"}
         )
-        response = self.fetch(
-            "/rpc", method="POST", body="hi", headers=self.headers
-        )
+        response = self.fetch("/rpc", method="POST", body="hi", headers=self.headers)
 
         assert response.code == 200
         self.assert_extra_response_headers(response.headers)
         for k, v in self.get_cors_response_headers():
-            self.assertEqual(response.headers[k], v)
+            assert response.headers[k] == v
 
 
 class JsonRpcHandlerTestCSRFDisabled(JsonRpcHandlerTestBase):
@@ -237,13 +229,11 @@ class JsonRpcHandlerTestCSRFDisabled(JsonRpcHandlerTestBase):
         assert response.code == 204
 
     def test_post_no_content_type_ok(self):
-        response = self.fetch(
-            "/rpc", method="POST", body="hi", headers=self.headers
-        )
+        response = self.fetch("/rpc", method="POST", body="hi", headers=self.headers)
 
         assert response.code == 200
         for k, _ in self.get_cors_response_headers():
-            self.assertNotIn(k, response.headers)
+            assert k not in response.headers
 
 
 class CheckOriginTests(unittest.TestCase):
@@ -280,6 +270,4 @@ class CheckOriginTests(unittest.TestCase):
 
     def test_extra_origin_allowed(self):
         self.allowed.add("other:6680")
-        assert handlers.check_origin(
-            "http://other:6680", self.headers, self.allowed
-        )
+        assert handlers.check_origin("http://other:6680", self.headers, self.allowed)

@@ -1,51 +1,6 @@
 """Mopidy documentation build configuration file"""
 
-
-import os
-import sys
-
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/../"))
-
-from mopidy.internal.versioning import get_version  # isort:skip  # noqa
-
-
-# -- Workarounds to have autodoc generate API docs ----------------------------
-
-
-class Mock:
-    def __init__(self, *args, **kwargs):
-        pass
-
-    def __call__(self, *args, **kwargs):
-        return Mock()
-
-    def __or__(self, other):
-        return Mock()
-
-    def __mro_entries__(self, bases):
-        return tuple()
-
-    @classmethod
-    def __getattr__(cls, name):
-        if name == "get_system_config_dirs":  # GLib.get_system_config_dirs()
-            return list
-        elif name == "get_user_config_dir":  # GLib.get_user_config_dir()
-            return str
-        else:
-            return Mock()
-
-
-MOCK_MODULES = [
-    "dbus",
-    "dbus.mainloop",
-    "dbus.mainloop.glib",
-    "dbus.service",
-    "mopidy.internal.gi",
-]
-for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = Mock()
-
+from importlib.metadata import version
 
 # -- Custom Sphinx setup ------------------------------------------------------
 
@@ -62,7 +17,7 @@ def setup(app):
 
 # -- General configuration ----------------------------------------------------
 
-needs_sphinx = "1.3"
+needs_sphinx = "5.3"
 
 extensions = [
     "sphinx.ext.autodoc",
@@ -70,6 +25,7 @@ extensions = [
     "sphinx.ext.graphviz",
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
+    "sphinx_autodoc_typehints",
     "sphinx_rtd_theme",
 ]
 
@@ -78,10 +34,10 @@ source_suffix = ".rst"
 master_doc = "index"
 
 project = "Mopidy"
-copyright = "2009-2023, Stein Magnus Jodal and contributors"
+copyright = "2009-2023, Stein Magnus Jodal and contributors"  # noqa: A001
 
 
-release = get_version()
+release = version("Mopidy")
 version = ".".join(release.split(".")[:2])
 
 # To make the build reproducible, avoid using today's date in the manpages
@@ -125,6 +81,18 @@ latex_documents = [
 man_pages = [
     ("command", "mopidy", "music server", "", "1"),
 ]
+
+
+# -- Options for autodoc extension --------------------------------------------
+
+autodoc_mock_imports = [
+    "dbus",
+    "mopidy.internal.gi",
+]
+
+typehints_document_rtype = True
+typehints_use_signature = False
+typehints_use_signature_return = True
 
 
 # -- Options for extlink extension --------------------------------------------

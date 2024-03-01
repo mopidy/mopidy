@@ -97,9 +97,9 @@ class LoadConfigTest(unittest.TestCase):
 
 
 class ValidateTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.schema = config.ConfigSchema("foo")
-        self.schema["bar"] = config.ConfigValue()
+        self.schema["bar"] = config.String()
 
     def test_empty_config_no_schemas(self):
         conf, errors = config._validate({}, [])
@@ -163,7 +163,7 @@ __HASH10__ = foo # = should all be treated as a comment."""
 
 
 class PreProcessorTest(unittest.TestCase):
-    maxDiff = None  # Show entire diff.  # noqa: N815
+    maxDiff = None  # Show entire diff.
 
     def test_empty_config(self):
         result = config._preprocess("")
@@ -192,9 +192,7 @@ class PreProcessorTest(unittest.TestCase):
 
     def test_inline_semicolon_comment(self):
         result = config._preprocess("[section]\nfoo = bar ; baz")
-        assert (
-            result == "[__COMMENTS__]\n[section]\nfoo = bar\n__INLINE0__ = baz"
-        )
+        assert result == "[__COMMENTS__]\n[section]\nfoo = bar\n__INLINE0__ = baz"
 
     def test_no_inline_hash_comment(self):
         result = config._preprocess("[section]\nfoo = bar # baz")
@@ -218,29 +216,25 @@ class PreProcessorTest(unittest.TestCase):
 
 
 class PostProcessorTest(unittest.TestCase):
-    maxDiff = None  # Show entire diff.  # noqa: N815
+    maxDiff = None  # Show entire diff.
 
     def test_empty_config(self):
         result = config._postprocess("[__COMMENTS__]")
         assert result == ""
 
     def test_plain_section(self):
-        result = config._postprocess(
-            "[__COMMENTS__]\n" "[section]\n" "foo = bar"
-        )
+        result = config._postprocess("[__COMMENTS__]\n[section]\nfoo = bar")
         assert result == "[section]\nfoo = bar"
 
     def test_initial_comments(self):
-        result = config._postprocess(
-            "[__COMMENTS__]\n" "__SEMICOLON0__ = foobar"
-        )
+        result = config._postprocess("[__COMMENTS__]\n__SEMICOLON0__ = foobar")
         assert result == "; foobar"
 
-        result = config._postprocess("[__COMMENTS__]\n" "__HASH0__ = foobar")
+        result = config._postprocess("[__COMMENTS__]\n__HASH0__ = foobar")
         assert result == "# foobar"
 
         result = config._postprocess(
-            "[__COMMENTS__]\n" "__SEMICOLON0__ = foo\n" "__HASH1__ = bar"
+            "[__COMMENTS__]\n__SEMICOLON0__ = foo\n__HASH1__ = bar"
         )
         assert result == "; foo\n# bar"
 
@@ -255,7 +249,7 @@ class PostProcessorTest(unittest.TestCase):
 
     def test_inline_semicolon_comment(self):
         result = config._postprocess(
-            "[__COMMENTS__]\n" "[section]\n" "foo = bar\n" "__INLINE0__ = baz"
+            "[__COMMENTS__]\n[section]\nfoo = bar\n__INLINE0__ = baz"
         )
         assert result == "[section]\nfoo = bar ; baz"
 
@@ -264,9 +258,7 @@ class PostProcessorTest(unittest.TestCase):
         assert result == "[__COMMENTS__]\n[section]\nfoo = bar # baz"
 
     def test_section_extra_text(self):
-        result = config._postprocess(
-            "[__COMMENTS__]\n" "[section]\n" "__SECTION0__ = foobar"
-        )
+        result = config._postprocess("[__COMMENTS__]\n[section]\n__SECTION0__ = foobar")
         assert result == "[section] foobar"
 
     def test_section_extra_text_inline_semicolon(self):

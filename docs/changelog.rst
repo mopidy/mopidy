@@ -9,6 +9,122 @@ This changelog is used to track all major changes to Mopidy.
 For older releases, see :ref:`history`.
 
 
+v4.0.0 (UNRELEASED)
+===================
+
+Mopidy 4.0 is a backward-incompatible release because we've dropped support for
+old versions of our dependencies and a number of deprecated APIs.
+
+Dependencies
+------------
+
+- Python >= 3.11 is now required. Python 3.7-3.10 are no longer supported.
+
+- GStreamer >= 1.22.0 is now required.
+
+- PyGObject >= 3.42 is now an explicit Python dependency, and not something we
+  assume you'll install together with GStreamer.
+
+- Pykka >= 4.0 is now required.
+
+- Requests >= 2.28 is now required.
+
+- Setuptools >= 66 is now required.
+
+- Tornado >= 6.2 is now required.
+
+- Replaced :mod:`pkg_resources` with :mod:`importlib.metadata` from Python's
+  standard library.
+
+Core API
+--------
+
+Changes to the Core API may affect Mopidy clients.
+
+Some of the changes in the Core API are related to replacing the use of
+full ``TlTrack`` objects as API arguments with tracklist IDs, ``tlid``.
+This is especially relevant for remote clients, like web clients, which may
+pass a lot less data over the network when using tracklist IDs in API calls.
+
+Root object
+^^^^^^^^^^^
+
+- The :class:`mopidy.core.Core` class now requires the `config` argument to be
+  present. As this argument is provided by Mopidy itself at runtime, this
+  should only affect the setup of extension's test suites.
+
+Library controller
+^^^^^^^^^^^^^^^^^^
+
+- No changes so far.
+
+Playback controller
+^^^^^^^^^^^^^^^^^^^
+
+- :meth:`mopidy.core.PlaybackController.play`
+  no longer accepts ``TlTrack`` objects,
+  which has been deprecated since Mopidy 3.0.
+  Use tracklist IDs (``tlid``) instead.
+  (Fixes :issue:`1855`, PR: :issue:`2150`)
+
+Playlist controller
+^^^^^^^^^^^^^^^^^^^
+
+- No changes so far.
+
+Tracklist controller
+^^^^^^^^^^^^^^^^^^^^
+
+- No changes so far.
+
+Backend API
+-----------
+
+Changes to the Backend API may affect Mopidy backend extensions.
+
+- No changes so far.
+
+Models
+------
+
+Changes to the data models may affect any Mopidy extension or client.
+
+- No changes so far.
+
+Audio API
+---------
+
+Changes to the Audio API may affect a few Mopidy backend extensions.
+
+- Removed APIs only used by Mopidy-Spotify's bespoke audio delivery mechanism,
+  which has not been used since Spotify shut down their libspotify APIs in
+  May 2022. The removed functions/methods are:
+
+  - :meth:`mopidy.audio.Audio.emit_data`
+  - :meth:`mopidy.audio.Audio.set_appsrc`
+  - :meth:`mopidy.audio.Audio.set_metadata`
+  - :func:`mopidy.audio.calculate_duration`
+  - :func:`mopidy.audio.create_buffer`
+  - :func:`mopidy.audio.millisecond_to_clocktime`
+
+Extension support
+-----------------
+
+- The command :command:`mopidy deps` no longer repeats transitive dependencies
+  that have already been listed. This reduces the length of the command's output
+  drastically. (PR: :issue:`2152`)
+
+Internals
+---------
+
+- Dropped split between the ``main`` and ``develop`` branches. We now use
+  ``main`` for all development, and have removed the ``develop`` branch.
+
+- Added type hints to most of the source code.
+
+- Switched from mypy to pyright for type checking.
+
+
 v3.4.2 (2023-11-01)
 ===================
 
@@ -31,13 +147,14 @@ v3.4.2 (2023-11-01)
 
 - Dev: Incease test coverage of Mopidy-File to 100%. (PR: :issue:`2096`)
 
-- Dev: Added "tox -e ci", to allow easy CI check before "git push".
+- Dev: Added ``"tox -e ci``", to allow easy CI check before ``git push``.
 
 
 v3.4.1 (2022-12-07)
 ===================
 
-- HTTP: Fix non-optional ``allowed_origins`` config setting. (PR: :issue:`2066`)
+- HTTP: Fix non-optional :confval:`http/allowed_origins` config setting. (PR:
+  :issue:`2066`)
 
 
 v3.4.0 (2022-11-28)
@@ -45,13 +162,14 @@ v3.4.0 (2022-11-28)
 
 - Config: Handle DBus "Algorithm plain is not supported" error. (PR: :issue:`2061`)
 
-- File: Fix uppercase ``excluded_file_extensions``. (PR: :issue:`2063`)
+- File: Fix uppercase :confval:`file/excluded_file_extensions`. (PR:
+  :issue:`2063`)
 
 - Add :meth:`mopidy.backend.PlaybackProvider.on_source_setup` which can be
   implemented by Backend playback providers that want to set GStreamer source
   properties in the ``source-setup`` callback. (PR: :issue:`2060`)
 
-- HTTP: Improve handling of ``allowed_origins`` config setting. (PR: :issue:`2054`)
+- HTTP: Improve handling of :confval:`http/allowed_origins` config setting. (PR: :issue:`2054`)
 
 
 v3.3.0 (2022-04-29)

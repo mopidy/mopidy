@@ -3,7 +3,7 @@ import unittest
 from unittest import mock
 
 import pykka
-
+import pytest
 from mopidy import core, models
 from mopidy.internal import deprecation, jsonrpc
 
@@ -47,12 +47,15 @@ class Calculator:
 
 
 class JsonRpcTestBase(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.backend = dummy_backend.create_proxy()
         self.calc = Calculator()
 
         with deprecation.ignore():
-            self.core = core.Core.start(backends=[self.backend]).proxy()
+            self.core = core.Core.start(
+                config={},
+                backends=[self.backend],
+            ).proxy()
 
         self.jrw = jsonrpc.JsonRpcWrapper(
             objects={
@@ -67,13 +70,13 @@ class JsonRpcTestBase(unittest.TestCase):
             decoders=[models.model_json_decoder],
         )
 
-    def tearDown(self):  # noqa: N802
+    def tearDown(self):
         pykka.ActorRegistry.stop_all()
 
 
 class JsonRpcSetupTest(JsonRpcTestBase):
     def test_empty_object_mounts_is_not_allowed(self):
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             jsonrpc.JsonRpcWrapper(objects={"": Calculator()})
 
 
@@ -95,9 +98,7 @@ class JsonRpcSerializationTest(JsonRpcTestBase):
         request = '{"foo": {"__model__": "Artist", "name": "bar"}}'
         self.jrw.handle_json(request)
 
-        self.jrw.handle_data.assert_called_once_with(
-            {"foo": models.Artist(name="bar")}
-        )
+        self.jrw.handle_data.assert_called_once_with({"foo": models.Artist(name="bar")})
 
     def test_handle_json_encodes_mopidy_models(self):
         self.jrw.handle_data = mock.Mock()
@@ -417,9 +418,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         error = response["error"]
         assert error["code"] == (-32600)
         assert error["message"] == "Invalid Request"
-        assert (
-            error["data"] == "'params', if given, must be an array or an object"
-        )
+        assert error["data"] == "'params', if given, must be an array or an object"
 
     def test_method_on_without_object_causes_unknown_method_error(self):
         request = {
@@ -432,10 +431,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         error = response["error"]
         assert error["code"] == (-32601)
         assert error["message"] == "Method not found"
-        assert (
-            error["data"]
-            == "Could not find object mount in method name 'bogus'"
-        )
+        assert error["data"] == "Could not find object mount in method name 'bogus'"
 
     def test_method_on_unknown_object_causes_unknown_method_error(self):
         request = {
@@ -534,7 +530,7 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
         assert error["message"] == "Invalid Request"
         assert error["data"] == "Request must be an object"
 
-    def test_batch_of_both_successfull_and_failing_requests(self):
+    def test_batch_of_both_successful_and_failing_requests(self):
         request = [
             # Call with positional params
             {
@@ -585,7 +581,7 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
 
 class JsonRpcInspectorTest(JsonRpcTestBase):
     def test_empty_object_mounts_is_not_allowed(self):
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             jsonrpc.JsonRpcInspector(objects={"": Calculator})
 
     def test_can_describe_method_on_root(self):
@@ -603,8 +599,7 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
 
         assert "calc.add" in methods
         assert (
-            methods["calc.add"]["description"]
-            == "Returns the sum of the given numbers"
+            methods["calc.add"]["description"] == "Returns the sum of the given numbers"
         )
 
         assert "calc.sub" in methods
@@ -660,6 +655,4 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
         assert len(methods["core.playlists.as_list"]["params"]) == 0
 
         assert "core.tracklist.filter" in methods
-        assert (
-            methods["core.tracklist.filter"]["params"][0]["name"] == "criteria"
-        )
+        assert methods["core.tracklist.filter"]["params"][0]["name"] == "criteria"

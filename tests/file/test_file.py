@@ -1,4 +1,5 @@
 """Test file (except browse and lookup)"""
+
 from mopidy import ext
 from mopidy.file import Extension
 from mopidy.file.backend import FileBackend

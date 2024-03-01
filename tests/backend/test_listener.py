@@ -5,7 +5,7 @@ from mopidy import backend
 
 
 class BackendListenerTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.listener = backend.BackendListener()
 
     def test_on_event_forwards_to_specific_handler(self):

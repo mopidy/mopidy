@@ -26,7 +26,7 @@ class TestConvertTaglist:
         taglist = Gst.TagList.new_empty()
 
         for value in values:
-            if isinstance(value, (GLib.Date, Gst.DateTime)):
+            if isinstance(value, GLib.Date | Gst.DateTime):
                 taglist.add_value(Gst.TagMergeMode.APPEND, tag, value)
                 continue
 
@@ -96,7 +96,7 @@ class TestConvertTaglist:
 # TODO: current test is trying to test everything at once with a complete tags
 # set, instead we might want to try with a minimal one making testing easier.
 class TagsToTrackTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.tags = {
             "album": ["album"],
             "track-number": [1],
@@ -120,9 +120,7 @@ class TagsToTrackTest(unittest.TestCase):
             "bitrate": [1000],
         }
 
-        artist = Artist(
-            name="artist", musicbrainz_id="artistid", sortname="sortname"
-        )
+        artist = Artist(name="artist", musicbrainz_id="artistid", sortname="sortname")
         composer = Artist(name="composer")
         performer = Artist(name="performer")
         albumartist = Artist(name="albumartist", musicbrainz_id="albumartistid")
@@ -209,9 +207,7 @@ class TagsToTrackTest(unittest.TestCase):
     def test_missing_track_date(self):
         del self.tags["date"]
         self.check(
-            self.track.replace(
-                album=self.track.album.replace(date=None), date=None
-            )
+            self.track.replace(album=self.track.album.replace(date=None), date=None)
         )
 
     def test_multiple_track_date(self):
@@ -242,7 +238,7 @@ class TagsToTrackTest(unittest.TestCase):
 
     def test_missing_track_artist_musicbrainz_id(self):
         del self.tags["musicbrainz-artistid"]
-        artist = list(self.track.artists)[0].replace(musicbrainz_id=None)
+        artist = next(iter(self.track.artists)).replace(musicbrainz_id=None)
         self.check(self.track.replace(artists=[artist]))
 
     def test_multiple_track_artist_musicbrainz_id(self):
@@ -315,7 +311,7 @@ class TagsToTrackTest(unittest.TestCase):
 
     def test_missing_album_artist_musicbrainz_id(self):
         del self.tags["musicbrainz-albumartistid"]
-        albumartist = list(self.track.album.artists)[0]
+        albumartist = next(iter(self.track.album.artists))
         albumartist = albumartist.replace(musicbrainz_id=None)
         album = self.track.album.replace(artists=[albumartist])
         self.check(self.track.replace(album=album))

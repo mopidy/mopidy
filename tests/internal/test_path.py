@@ -4,16 +4,15 @@ import tempfile
 import unittest
 
 import pytest
-
 from mopidy.internal import path
 from mopidy.internal.gi import GLib
 
 
 class GetOrCreateDirTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.parent = pathlib.Path(tempfile.mkdtemp()).resolve()
 
-    def tearDown(self):  # noqa: N802
+    def tearDown(self):
         if self.parent.is_dir():
             shutil.rmtree(str(self.parent))
 
@@ -54,14 +53,14 @@ class GetOrCreateDirTest(unittest.TestCase):
 
     def test_create_dir_with_none(self):
         with pytest.raises(TypeError):
-            path.get_or_create_dir(None)
+            path.get_or_create_dir(None)  # pyright: ignore[reportArgumentType]
 
 
 class GetOrCreateFileTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.parent = pathlib.Path(tempfile.mkdtemp()).resolve()
 
-    def tearDown(self):  # noqa: N802
+    def tearDown(self):
         if self.parent.is_dir():
             shutil.rmtree(str(self.parent))
 
@@ -101,7 +100,7 @@ class GetOrCreateFileTest(unittest.TestCase):
 
     def test_create_file_with_none_filename_throws_type_error(self):
         with pytest.raises(TypeError):
-            path.get_or_create_file(None)
+            path.get_or_create_file(None)  # pyright: ignore[reportArgumentType]
 
     def test_create_dir_without_mkdir(self):
         file_path = self.parent / "foo" / "bar"
@@ -125,9 +124,8 @@ class GetOrCreateFileTest(unittest.TestCase):
 
 class GetUnixSocketPathTest(unittest.TestCase):
     def test_correctly_matched_socket_path(self):
-        assert (
-            path.get_unix_socket_path("unix:/tmp/mopidy.socket")
-            == "/tmp/mopidy.socket"
+        assert path.get_unix_socket_path("unix:/tmp/mopidy.socket") == pathlib.Path(
+            "/tmp/mopidy.socket"
         )
 
     def test_correctly_no_match_socket_path(self):
@@ -177,7 +175,7 @@ class ExpandPathTest(unittest.TestCase):
     def test_empty_path(self):
         result = path.expand_path("")
 
-        assert result == pathlib.Path(".").resolve()
+        assert result == pathlib.Path().resolve()
 
     def test_absolute_path(self):
         result = path.expand_path("/tmp/foo")
@@ -201,9 +199,12 @@ class ExpandPathTest(unittest.TestCase):
         assert str(result) == expected
 
     def test_xdg_subsititution_unknown(self):
-        result = path.expand_path("/tmp/$XDG_INVALID_DIR/foo")
+        with pytest.raises(ValueError) as exc_info:
+            path.expand_path("/tmp/$XDG_INVALID_DIR/foo")
 
-        assert result is None
+        assert str(exc_info.value) == (
+            "Unexpanded '$...' in path '/tmp/$XDG_INVALID_DIR/foo'"
+        )
 
     def test_invalid_utf8_bytes(self):
         result = path.expand_path(b"ab\xc3\x12")

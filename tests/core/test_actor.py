@@ -4,12 +4,12 @@ import tempfile
 import unittest
 from unittest import mock
 
-import pykka
-
 import mopidy
+import pykka
+import pytest
 from mopidy.audio import PlaybackState
 from mopidy.core import Core, CoreListener
-from mopidy.internal import models, storage, versioning
+from mopidy.internal import models, storage
 from mopidy.models import Track
 
 from tests import dummy_mixer
@@ -52,7 +52,7 @@ def make_backend_mock(
 
 
 class CoreActorTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.backend1 = make_backend_mock(
             "B1",
             uri_schemes=["dummy1"],
@@ -70,9 +70,13 @@ class CoreActorTest(unittest.TestCase):
             has_playlists=True,
         )
 
-        self.core = Core(mixer=None, backends=[self.backend1, self.backend2])
+        self.core = Core(
+            config={},
+            mixer=None,
+            backends=[self.backend1, self.backend2],
+        )
 
-    def tearDown(self):  # noqa: N802
+    def tearDown(self):
         pykka.ActorRegistry.stop_all()
 
     def test_uri_schemes_has_uris_from_all_backends(self):
@@ -102,7 +106,9 @@ class CoreActorTest(unittest.TestCase):
         )
 
         core = Core(
-            mixer=None, backends=[backend3, self.backend1, self.backend2]
+            config={},
+            mixer=None,
+            backends=[backend3, self.backend1, self.backend2],
         )
 
         assert core.backends == [self.backend1, self.backend2]
@@ -122,7 +128,9 @@ class CoreActorTest(unittest.TestCase):
         )
 
         core = Core(
-            mixer=None, backends=[self.backend1, backend3, self.backend2]
+            config={},
+            mixer=None,
+            backends=[self.backend1, backend3, self.backend2],
         )
 
         assert core.backends == [self.backend1, self.backend2]
@@ -134,17 +142,18 @@ class CoreActorTest(unittest.TestCase):
     def test_backends_with_colliding_uri_schemes_fails(self):
         self.backend2.uri_schemes.get.return_value = ["dummy1", "dummy2"]
 
-        self.assertRaisesRegex(
+        with pytest.raises(
             AssertionError,
-            "Cannot add URI scheme 'dummy1' for B2, "
-            "it is already handled by B1",
-            Core,
-            mixer=None,
-            backends=[self.backend1, self.backend2],
-        )
+            match="Cannot add URI scheme 'dummy1' for B2, it is already handled by B1",
+        ):
+            Core(
+                config={},
+                mixer=None,
+                backends=[self.backend1, self.backend2],
+            )
 
     def test_version(self):
-        assert self.core.get_version() == versioning.get_version()
+        assert self.core.get_version() == mopidy.__version__
 
     @mock.patch("mopidy.core.playback.listener.CoreListener", spec=CoreListener)
     def test_state_changed(self, listener_mock):
@@ -174,9 +183,13 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
         }
 
         self.mixer = dummy_mixer.create_proxy()
-        self.core = Core(config=config, mixer=self.mixer, backends=[])
+        self.core = Core(
+            config=config,
+            mixer=self.mixer,
+            backends=[],
+        )
 
-    def tearDown(self):  # noqa: N802
+    def tearDown(self):
         pykka.ActorRegistry.stop_all()
         shutil.rmtree(self.temp_dir)
 
@@ -240,9 +253,7 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
                     ),
                 ]
             ),
-            playback=models.PlaybackState(
-                tlid=12, state="paused", time_position=432
-            ),
+            playback=models.PlaybackState(tlid=12, state="paused", time_position=432),
             mixer=models.MixerState(mute=True, volume=12),
         )
         storage.dump(self.state_file, data)

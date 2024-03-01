@@ -6,7 +6,7 @@ from mopidy.models import Playlist, Ref, Track
 
 
 class BasePlaylistsTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.plr1a = Ref.playlist(name="A", uri="dummy1:pl:a")
         self.plr1b = Ref.playlist(name="B", uri="dummy1:pl:b")
         self.plr2a = Ref.playlist(name="A", uri="dummy2:pl:a")
@@ -48,7 +48,9 @@ class BasePlaylistsTest(unittest.TestCase):
         self.backend3.playlists = None
 
         self.core = core.Core(
-            mixer=None, backends=[self.backend3, self.backend1, self.backend2]
+            config={},
+            mixer=None,
+            backends=[self.backend3, self.backend1, self.backend2],
         )
 
 
@@ -257,7 +259,7 @@ class PlaylistTest(BasePlaylistsTest):
 
 
 class MockBackendCorePlaylistsBase(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.playlists = mock.Mock(spec=backend.PlaylistsProvider)
 
         self.backend = mock.Mock()
@@ -265,7 +267,11 @@ class MockBackendCorePlaylistsBase(unittest.TestCase):
         self.backend.uri_schemes.get.return_value = ["dummy"]
         self.backend.playlists = self.playlists
 
-        self.core = core.Core(mixer=None, backends=[self.backend])
+        self.core = core.Core(
+            config={},
+            mixer=None,
+            backends=[self.backend],
+        )
 
 
 @mock.patch("mopidy.core.playlists.logger")

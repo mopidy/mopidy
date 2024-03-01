@@ -1,5 +1,6 @@
 import unittest
 
+import pytest
 from mopidy.models import ImmutableObject
 
 
@@ -30,14 +31,14 @@ class GenericCopyTest(unittest.TestCase):
     def test_copying_model_with_basic_values(self):
         model = Model(name="foo", uri="bar")
         other = model.replace(name="baz")
-        assert "baz" == other.name
-        assert "bar" == other.uri
+        assert other.name == "baz"
+        assert other.uri == "bar"
 
     def test_copying_model_with_missing_values(self):
         model = Model(uri="bar")
         other = model.replace(name="baz")
-        assert "baz" == other.name
-        assert "bar" == other.uri
+        assert other.name == "baz"
+        assert other.uri == "bar"
 
     def test_copying_model_with_private_internal_value(self):
         model = Model(models=[SubModel(name=123)])
@@ -45,7 +46,7 @@ class GenericCopyTest(unittest.TestCase):
         assert SubModel(name=345) in other.models
 
     def test_copying_model_with_invalid_key(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             Model().replace(invalid_key=True)
 
     def test_copying_model_to_remove(self):
@@ -58,39 +59,37 @@ class ModelTest(unittest.TestCase):
         uri = "an_uri"
         model = Model(uri=uri)
         assert model.uri == uri
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             model.uri = None
 
     def test_name(self):
         name = "a name"
         model = Model(name=name)
         assert model.name == name
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             model.name = None
 
     def test_submodels(self):
         models = [SubModel(name=123), SubModel(name=456)]
         model = Model(models=models)
         assert set(model.models) == set(models)
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             model.models = None
 
     def test_models_none(self):
         assert set() == Model(models=None).models
 
     def test_invalid_kwarg(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             Model(foo="baz")
 
     def test_repr_without_models(self):
-        assert "Model(name='name', uri='uri')" == repr(
-            Model(uri="uri", name="name")
-        )
+        assert repr(Model(uri="uri", name="name")) == "Model(name='name', uri='uri')"
 
     def test_repr_with_models(self):
         assert (
-            "Model(models=[SubModel(name=123)], name='name', uri='uri')"
-            == repr(Model(uri="uri", name="name", models=[SubModel(name=123)]))
+            repr(Model(uri="uri", name="name", models=[SubModel(name=123)]))
+            == "Model(models=[SubModel(name=123)], name='name', uri='uri')"
         )
 
     def test_serialize_without_models(self):

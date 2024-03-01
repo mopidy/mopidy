@@ -1,26 +1,19 @@
-import os
 import subprocess
 import sys
 import unittest
+from pathlib import Path
 
 import mopidy
 
 
 class HelpTest(unittest.TestCase):
     def test_help_has_mopidy_options(self):
-        mopidy_dir = os.path.dirname(mopidy.__file__)
-        args = [sys.executable, mopidy_dir, "--help"]
+        mopidy_dir = Path(mopidy.__file__).parent
+        args = [sys.executable, "-m", "mopidy", "--help"]
         process = subprocess.Popen(
             args,
-            env={
-                "PYTHONPATH": ":".join(
-                    [
-                        os.path.join(mopidy_dir, ".."),
-                        os.environ.get("PYTHONPATH", ""),
-                    ]
-                )
-            },
             stdout=subprocess.PIPE,
+            cwd=mopidy_dir.parent,
         )
         output = process.communicate()[0]
         assert b"--version" in output

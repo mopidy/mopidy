@@ -2,16 +2,16 @@ import codecs
 import logging
 import re
 import socket
+from typing import ClassVar
 from unittest import mock
 
 import pytest
-
 from mopidy.config import types
 from mopidy.internal import log
 
 
 @pytest.mark.parametrize(
-    "value, expected",
+    ("value", "expected"),
     [
         # bytes are coded from UTF-8 and string-escaped:
         (b"abc", "abc"),
@@ -30,7 +30,7 @@ def test_decode(value, expected):
 
 
 @pytest.mark.parametrize(
-    "value, expected",
+    ("value", "expected"),
     [
         # unicode strings are string-escaped and encoded as UTF-8:
         ("abc", "abc"),
@@ -52,37 +52,6 @@ def test_encode_decode_invalid_utf8():
 
     assert isinstance(result, str)
     assert result == data.decode(errors="surrogateescape")
-
-
-class TestConfigValue:
-    def test_deserialize_decodes_bytes(self):
-        cv = types.ConfigValue()
-
-        result = cv.deserialize(b"abc")
-
-        assert isinstance(result, str)
-
-    def test_serialize_conversion_to_string(self):
-        cv = types.ConfigValue()
-
-        result = cv.serialize(object())
-
-        assert isinstance(result, str)
-
-    def test_serialize_none(self):
-        cv = types.ConfigValue()
-
-        result = cv.serialize(None)
-
-        assert isinstance(result, str)
-        assert result == ""
-
-    def test_serialize_supports_display(self):
-        cv = types.ConfigValue()
-
-        result = cv.serialize(object(), display=True)
-
-        assert isinstance(result, str)
 
 
 class TestDeprecated:
@@ -210,9 +179,7 @@ class TestString:
             ("ABC123def456GHI789", "abc123def456ghi789"),
         ),
     )
-    def test_deserialize_utilises_transformer(
-        self, original: str, transformed: str
-    ):
+    def test_deserialize_utilises_transformer(self, original: str, transformed: str):
         cv = types.String(transformer=lambda value: value.lower())
 
         result = cv.deserialize(original)
@@ -544,11 +511,7 @@ class TestPair:
     def test_deserialize_enforces_required_separator(self):
         cv = types.Pair()
 
-        errmsg = (
-            "^"
-            + re.escape("Config value must include '|' separator: abc")
-            + "$"
-        )
+        errmsg = "^" + re.escape("Config value must include '|' separator: abc") + "$"
         with pytest.raises(ValueError, match=errmsg):
             cv.deserialize("abc")
 
@@ -561,9 +524,7 @@ class TestPair:
         result = cv.deserialize("abc|def")
         assert result == ("abc", "def")
 
-    @pytest.mark.parametrize(
-        "sep", ("!", "@", "#", "$", "%", "^", "&", "*", "/", "\\")
-    )
+    @pytest.mark.parametrize("sep", ("!", "@", "#", "$", "%", "^", "&", "*", "/", "\\"))
     def test_deserialize_respects_custom_separator(self, sep: str):
         cv = types.Pair(separator=sep)
 
@@ -590,9 +551,7 @@ class TestPair:
         with pytest.raises(ValueError, match=errmsg):
             cv.deserialize("abc|def")
 
-    @pytest.mark.parametrize(
-        "sep", ("!", "@", "#", "$", "%", "^", "&", "*", "/", "\\")
-    )
+    @pytest.mark.parametrize("sep", ("!", "@", "#", "$", "%", "^", "&", "*", "/", "\\"))
     def test_deserialize_respects_optional_custom_separator(self, sep: str):
         cv = types.Pair(optional_pair=True, separator=sep)
 
@@ -625,15 +584,11 @@ class TestPair:
 
     @pytest.mark.parametrize("optional", (True, False))
     @pytest.mark.parametrize("optional_pair", (True, False))
-    @pytest.mark.parametrize(
-        "sep", ("!", "@", "#", "$", "%", "^", "&", "*", "/", "\\")
-    )
+    @pytest.mark.parametrize("sep", ("!", "@", "#", "$", "%", "^", "&", "*", "/", "\\"))
     def test_deserialize_enforces_required_pair_values_with_custom_separator(
         self, optional: bool, optional_pair: bool, sep: str
     ):
-        cv = types.Pair(
-            optional=optional, optional_pair=optional_pair, separator=sep
-        )
+        cv = types.Pair(optional=optional, optional_pair=optional_pair, separator=sep)
 
         errmsg = re.escape("must be set")
 
@@ -692,30 +647,22 @@ class TestPair:
             cv.deserialize("123")
 
     def test_deserialize_with_custom_subtypes_respects_optional_separator(self):
-        cv = types.Pair(
-            optional_pair=True, subtypes=(types.Integer(), types.Integer())
-        )
+        cv = types.Pair(optional_pair=True, subtypes=(types.Integer(), types.Integer()))
         result = cv.deserialize("42")
         assert result == (42, 42)
 
-        cv = types.Pair(
-            optional_pair=True, subtypes=(types.Path(), types.String())
-        )
+        cv = types.Pair(optional_pair=True, subtypes=(types.Path(), types.String()))
         result = cv.deserialize("/dev/null")
         assert result == ("/dev/null", "/dev/null")
 
-        cv = types.Pair(
-            optional_pair=True, subtypes=(types.Port(), types.Port())
-        )
+        cv = types.Pair(optional_pair=True, subtypes=(types.Port(), types.Port()))
         result = cv.deserialize("443")
         assert result == (443, 443)
 
     def test_deserialize_with_custom_subtypes_optional_separator_mixed_types(
         self,
     ):
-        cv = types.Pair(
-            optional_pair=True, subtypes=(types.String(), types.Integer())
-        )
+        cv = types.Pair(optional_pair=True, subtypes=(types.String(), types.Integer()))
 
         errmsg = re.escape("invalid literal for int() with base 10")
 
@@ -761,14 +708,10 @@ class TestPair:
         assert result == "tmp|/tmp"
         result = cv.serialize(("null", None))
         assert result == "null|"
-        result = cv.serialize(
-            (None, types._ExpandedPath("/dev/null", "/dev/null"))
-        )
+        result = cv.serialize((None, types._ExpandedPath("/dev/null", "/dev/null")))
         assert result == "|/dev/null"
 
-    @pytest.mark.parametrize(
-        "sep", ("!", "@", "#", "$", "%", "^", "&", "*", "/", "\\")
-    )
+    @pytest.mark.parametrize("sep", ("!", "@", "#", "$", "%", "^", "&", "*", "/", "\\"))
     def test_serialize_with_custom_separator(self, sep: str):
         cv = types.Pair(separator=sep)
         result = cv.serialize(("abc", "def"))
@@ -778,9 +721,7 @@ class TestPair:
         result = cv.serialize((None, "abc"))
         assert result == f"{sep}abc"
 
-        cv = types.Pair(
-            separator=sep, subtypes=(types.String(), types.Integer())
-        )
+        cv = types.Pair(separator=sep, subtypes=(types.String(), types.Integer()))
         result = cv.serialize(("abc", 42))
         assert result == f"abc{sep}42"
         result = cv.serialize(("abc", None))
@@ -795,9 +736,7 @@ class TestPair:
         assert result == f"tmp{sep}/tmp"
         result = cv.serialize(("null", None))
         assert result == f"null{sep}"
-        result = cv.serialize(
-            (None, types._ExpandedPath("/dev/null", "/dev/null"))
-        )
+        result = cv.serialize((None, types._ExpandedPath("/dev/null", "/dev/null")))
         assert result == f"{sep}/dev/null"
 
     def test_serialize_returns_single_value_with_optional_pair(self):
@@ -832,9 +771,7 @@ class TestPair:
 
         cv = types.Pair(
             subtypes=(
-                types.Pair(
-                    separator="*", subtypes=(types.Float(), types.Float())
-                ),
+                types.Pair(separator="*", subtypes=(types.Float(), types.Float())),
                 types.String(),
             ),
         )
@@ -857,11 +794,7 @@ class TestPair:
                 types.String(),
             ),
         )
-        errmsg = (
-            "^"
-            + re.escape("Config value must include '|' separator: abc")
-            + "$"
-        )
+        errmsg = "^" + re.escape("Config value must include '|' separator: abc") + "$"
         with pytest.raises(ValueError, match=errmsg):
             cv.deserialize("abc|def|ghi")
 
@@ -872,11 +805,7 @@ class TestPair:
                 types.String(),
             ),
         )
-        errmsg = (
-            "^"
-            + re.escape("Config value must include '|' separator: abc")
-            + "$"
-        )
+        errmsg = "^" + re.escape("Config value must include '|' separator: abc") + "$"
         with pytest.raises(ValueError, match=errmsg):
             cv.deserialize("abc|def|ghi")
 
@@ -887,11 +816,7 @@ class TestPair:
                 types.Pair(),
             ),
         )
-        errmsg = (
-            "^"
-            + re.escape("Config value must include '|' separator: def")
-            + "$"
-        )
+        errmsg = "^" + re.escape("Config value must include '|' separator: def") + "$"
         with pytest.raises(ValueError, match=errmsg):
             cv.deserialize("abc|def")
 
@@ -901,11 +826,7 @@ class TestPair:
                 types.Pair(separator="#"),
             ),
         )
-        errmsg = (
-            "^"
-            + re.escape("Config value must include '|' separator: abc")
-            + "$"
-        )
+        errmsg = "^" + re.escape("Config value must include '|' separator: abc") + "$"
         with pytest.raises(ValueError, match=errmsg):
             cv.deserialize("abc|def|ghi#jkl")
 
@@ -925,11 +846,7 @@ class TestPair:
                 types.Pair(optional=True),
             ),
         )
-        errmsg = (
-            "^"
-            + re.escape("Config value must include '|' separator: abc")
-            + "$"
-        )
+        errmsg = "^" + re.escape("Config value must include '|' separator: abc") + "$"
         with pytest.raises(ValueError, match=errmsg):
             cv.deserialize("abc|def|")
 
@@ -995,11 +912,7 @@ class TestPair:
                 types.Pair(optional_pair=True),
             ),
         )
-        errmsg = (
-            "^"
-            + re.escape("Config value must include '|' separator: abc")
-            + "$"
-        )
+        errmsg = "^" + re.escape("Config value must include '|' separator: abc") + "$"
         with pytest.raises(ValueError, match=errmsg):
             cv.deserialize("abc|def|ghi")
 
@@ -1296,7 +1209,7 @@ class TestLogColor:
 
 
 class TestLogLevel:
-    levels = {
+    levels: ClassVar[dict[str, int]] = {
         "critical": logging.CRITICAL,
         "error": logging.ERROR,
         "warning": logging.WARNING,

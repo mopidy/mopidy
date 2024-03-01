@@ -1,6 +1,7 @@
 import json
 import unittest
 
+import pytest
 from mopidy.models import (
     Album,
     Artist,
@@ -84,14 +85,14 @@ class GenericReplaceTest(unittest.TestCase):
     def test_replace_track_with_basic_values(self):
         track = Track(name="foo", uri="bar")
         other = track.replace(name="baz")
-        assert "baz" == other.name
-        assert "bar" == other.uri
+        assert other.name == "baz"
+        assert other.uri == "bar"
 
     def test_replace_track_with_missing_values(self):
         track = Track(uri="bar")
         other = track.replace(name="baz")
-        assert "baz" == other.name
-        assert "bar" == other.uri
+        assert other.name == "baz"
+        assert other.uri == "bar"
 
     def test_replace_track_with_private_internal_value(self):
         artist1 = Artist(name="foo")
@@ -101,7 +102,7 @@ class GenericReplaceTest(unittest.TestCase):
         assert artist2 in other.artists
 
     def test_replace_track_with_invalid_key(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             Track().replace(invalid_key=True)
 
     def test_replace_track_to_remove(self):
@@ -114,29 +115,30 @@ class RefTest(unittest.TestCase):
         uri = "an_uri"
         ref = Ref(uri=uri)
         assert ref.uri == uri
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             ref.uri = None
 
     def test_name(self):
         name = "a name"
         ref = Ref(name=name)
         assert ref.name == name
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             ref.name = None
 
     # TODO: add these for the more of the models?
     def test_del_name(self):
         ref = Ref(name="foo")
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             del ref.name
 
     def test_invalid_kwarg(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             Ref(foo="baz")
 
     def test_repr_without_results(self):
-        assert "Ref(name='foo', type='artist', uri='uri')" == repr(
-            Ref(uri="uri", name="foo", type="artist")
+        assert (
+            repr(Ref(uri="uri", name="foo", type="artist"))
+            == "Ref(name='foo', type='artist', uri='uri')"
         )
 
     def test_serialize_without_results(self):
@@ -193,23 +195,23 @@ class ImageTest(unittest.TestCase):
         uri = "an_uri"
         image = Image(uri=uri)
         assert image.uri == uri
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             image.uri = None
 
     def test_width(self):
         image = Image(width=100)
         assert image.width == 100
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             image.width = None
 
     def test_height(self):
         image = Image(height=100)
         assert image.height == 100
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             image.height = None
 
     def test_invalid_kwarg(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             Image(foo="baz")
 
 
@@ -218,38 +220,36 @@ class ArtistTest(unittest.TestCase):
         uri = "an_uri"
         artist = Artist(uri=uri)
         assert artist.uri == uri
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             artist.uri = None
 
     def test_name(self):
         name = "a name"
         artist = Artist(name=name)
         assert artist.name == name
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             artist.name = None
 
     def test_musicbrainz_id(self):
         mb_id = "mb-id"
         artist = Artist(musicbrainz_id=mb_id)
         assert artist.musicbrainz_id == mb_id
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             artist.musicbrainz_id = None
 
     def test_invalid_kwarg(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             Artist(foo="baz")
 
     def test_invalid_kwarg_with_name_matching_method(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             Artist(replace="baz")
 
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             Artist(serialize="baz")
 
     def test_repr(self):
-        assert "Artist(name='name', uri='uri')" == repr(
-            Artist(uri="uri", name="name")
-        )
+        assert repr(Artist(uri="uri", name="name")) == "Artist(name='name', uri='uri')"
 
     def test_serialize(self):
         self.assertDictEqual(
@@ -273,21 +273,21 @@ class ArtistTest(unittest.TestCase):
         artist = Artist(uri="uri", name="name").serialize()
         artist["foo"] = "foo"
         serialized = json.dumps(artist)
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             json.loads(serialized, object_hook=model_json_decoder)
 
     def test_to_json_and_back_with_field_matching_method(self):
         artist = Artist(uri="uri", name="name").serialize()
         artist["copy"] = "foo"
         serialized = json.dumps(artist)
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             json.loads(serialized, object_hook=model_json_decoder)
 
     def test_to_json_and_back_with_field_matching_internal_field(self):
         artist = Artist(uri="uri", name="name").serialize()
         artist["__mro__"] = "foo"
         serialized = json.dumps(artist)
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             json.loads(serialized, object_hook=model_json_decoder)
 
     def test_eq_name(self):
@@ -350,21 +350,21 @@ class AlbumTest(unittest.TestCase):
         uri = "an_uri"
         album = Album(uri=uri)
         assert album.uri == uri
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             album.uri = None
 
     def test_name(self):
         name = "a name"
         album = Album(name=name)
         assert album.name == name
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             album.name = None
 
     def test_artists(self):
         artist = Artist()
         album = Album(artists=[artist])
         assert artist in album.artists
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             album.artists = None
 
     def test_artists_none(self):
@@ -374,43 +374,41 @@ class AlbumTest(unittest.TestCase):
         num_tracks = 11
         album = Album(num_tracks=num_tracks)
         assert album.num_tracks == num_tracks
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             album.num_tracks = None
 
     def test_num_discs(self):
         num_discs = 2
         album = Album(num_discs=num_discs)
         assert album.num_discs == num_discs
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             album.num_discs = None
 
     def test_date(self):
         date = "1977-01-01"
         album = Album(date=date)
         assert album.date == date
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             album.date = None
 
     def test_musicbrainz_id(self):
         mb_id = "mb-id"
         album = Album(musicbrainz_id=mb_id)
         assert album.musicbrainz_id == mb_id
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             album.musicbrainz_id = None
 
     def test_invalid_kwarg(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             Album(foo="baz")
 
     def test_repr_without_artists(self):
-        assert "Album(name='name', uri='uri')" == repr(
-            Album(uri="uri", name="name")
-        )
+        assert repr(Album(uri="uri", name="name")) == "Album(name='name', uri='uri')"
 
     def test_repr_with_artists(self):
         assert (
-            "Album(artists=[Artist(name='foo')], name='name', uri='uri')"
-            == repr(Album(uri="uri", name="name", artists=[Artist(name="foo")]))
+            repr(Album(uri="uri", name="name", artists=[Artist(name="foo")]))
+            == "Album(artists=[Artist(name='foo')], name='name', uri='uri')"
         )
 
     def test_serialize_without_artists(self):
@@ -568,21 +566,21 @@ class TrackTest(unittest.TestCase):
         uri = "an_uri"
         track = Track(uri=uri)
         assert track.uri == uri
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             track.uri = None
 
     def test_name(self):
         name = "a name"
         track = Track(name=name)
         assert track.name == name
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             track.name = None
 
     def test_artists(self):
         artists = [Artist(name="name1"), Artist(name="name2")]
         track = Track(artists=artists)
         assert set(track.artists) == set(artists)
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             track.artists = None
 
     def test_artists_none(self):
@@ -592,7 +590,7 @@ class TrackTest(unittest.TestCase):
         artists = [Artist(name="name1"), Artist(name="name2")]
         track = Track(composers=artists)
         assert set(track.composers) == set(artists)
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             track.composers = None
 
     def test_composers_none(self):
@@ -602,7 +600,7 @@ class TrackTest(unittest.TestCase):
         artists = [Artist(name="name1"), Artist(name="name2")]
         track = Track(performers=artists)
         assert set(track.performers) == set(artists)
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             track.performers = None
 
     def test_performers_none(self):
@@ -612,64 +610,62 @@ class TrackTest(unittest.TestCase):
         album = Album()
         track = Track(album=album)
         assert track.album == album
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             track.album = None
 
     def test_track_no(self):
         track_no = 7
         track = Track(track_no=track_no)
         assert track.track_no == track_no
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             track.track_no = None
 
     def test_disc_no(self):
         disc_no = 2
         track = Track(disc_no=disc_no)
         assert track.disc_no == disc_no
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             track.disc_no = None
 
     def test_date(self):
         date = "1977-01-01"
         track = Track(date=date)
         assert track.date == date
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             track.date = None
 
     def test_length(self):
         length = 137000
         track = Track(length=length)
         assert track.length == length
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             track.length = None
 
     def test_bitrate(self):
         bitrate = 160
         track = Track(bitrate=bitrate)
         assert track.bitrate == bitrate
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             track.bitrate = None
 
     def test_musicbrainz_id(self):
         mb_id = "mb-id"
         track = Track(musicbrainz_id=mb_id)
         assert track.musicbrainz_id == mb_id
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             track.musicbrainz_id = None
 
     def test_invalid_kwarg(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             Track(foo="baz")
 
     def test_repr_without_artists(self):
-        assert "Track(name='name', uri='uri')" == repr(
-            Track(uri="uri", name="name")
-        )
+        assert repr(Track(uri="uri", name="name")) == "Track(name='name', uri='uri')"
 
     def test_repr_with_artists(self):
         assert (
-            "Track(artists=[Artist(name='foo')], name='name', uri='uri')"
-            == repr(Track(uri="uri", name="name", artists=[Artist(name="foo")]))
+            repr(Track(uri="uri", name="name", artists=[Artist(name="foo")]))
+            == "Track(artists=[Artist(name='foo')], name='name', uri='uri')"
         )
 
     def test_serialize_without_artists(self):
@@ -911,18 +907,18 @@ class TlTrackTest(unittest.TestCase):
         tlid = 123
         tl_track = TlTrack(tlid=tlid)
         assert tl_track.tlid == tlid
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             tl_track.tlid = None
 
     def test_track(self):
         track = Track()
         tl_track = TlTrack(track=track)
         assert tl_track.track == track
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             tl_track.track = None
 
     def test_invalid_kwarg(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             TlTrack(foo="baz")
 
     def test_positional_args(self):
@@ -941,8 +937,9 @@ class TlTrackTest(unittest.TestCase):
         assert track2 == track
 
     def test_repr(self):
-        assert "TlTrack(tlid=123, track=Track(uri='uri'))" == repr(
-            TlTrack(tlid=123, track=Track(uri="uri"))
+        assert (
+            repr(TlTrack(tlid=123, track=Track(uri="uri")))
+            == "TlTrack(tlid=123, track=Track(uri='uri'))"
         )
 
     def test_serialize(self):
@@ -990,21 +987,21 @@ class PlaylistTest(unittest.TestCase):
         uri = "an_uri"
         playlist = Playlist(uri=uri)
         assert playlist.uri == uri
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             playlist.uri = None
 
     def test_name(self):
         name = "a name"
         playlist = Playlist(name=name)
         assert playlist.name == name
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             playlist.name = None
 
     def test_tracks(self):
         tracks = [Track(), Track(), Track()]
         playlist = Playlist(tracks=tracks)
         assert list(playlist.tracks) == tracks
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             playlist.tracks = None
 
     def test_length(self):
@@ -1016,7 +1013,7 @@ class PlaylistTest(unittest.TestCase):
         last_modified = 1390942873000
         playlist = Playlist(last_modified=last_modified)
         assert playlist.last_modified == last_modified
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             playlist.last_modified = None
 
     def test_with_new_uri(self):
@@ -1082,20 +1079,18 @@ class PlaylistTest(unittest.TestCase):
         assert new_playlist.last_modified == new_last_modified
 
     def test_invalid_kwarg(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             Playlist(foo="baz")
 
     def test_repr_without_tracks(self):
-        assert "Playlist(name='name', uri='uri')" == repr(
-            Playlist(uri="uri", name="name")
+        assert (
+            repr(Playlist(uri="uri", name="name")) == "Playlist(name='name', uri='uri')"
         )
 
     def test_repr_with_tracks(self):
         assert (
-            "Playlist(name='name', tracks=[Track(name='foo')], uri='uri')"
-            == repr(
-                Playlist(uri="uri", name="name", tracks=[Track(name="foo")])
-            )
+            repr(Playlist(uri="uri", name="name", tracks=[Track(name="foo")]))
+            == "Playlist(name='name', tracks=[Track(name='foo')], uri='uri')"
         )
 
     def test_serialize_without_tracks(self):
@@ -1149,12 +1144,8 @@ class PlaylistTest(unittest.TestCase):
 
     def test_eq(self):
         tracks = [Track()]
-        playlist1 = Playlist(
-            uri="uri", name="name", tracks=tracks, last_modified=1
-        )
-        playlist2 = Playlist(
-            uri="uri", name="name", tracks=tracks, last_modified=1
-        )
+        playlist1 = Playlist(uri="uri", name="name", tracks=tracks, last_modified=1)
+        playlist2 = Playlist(uri="uri", name="name", tracks=tracks, last_modified=1)
         assert playlist1 == playlist2
         assert hash(playlist1) == hash(playlist2)
 
@@ -1210,36 +1201,36 @@ class SearchResultTest(unittest.TestCase):
         uri = "an_uri"
         result = SearchResult(uri=uri)
         assert result.uri == uri
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             result.uri = None
 
     def test_tracks(self):
         tracks = [Track(), Track(), Track()]
         result = SearchResult(tracks=tracks)
         assert list(result.tracks) == tracks
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             result.tracks = None
 
     def test_artists(self):
         artists = [Artist(), Artist(), Artist()]
         result = SearchResult(artists=artists)
         assert list(result.artists) == artists
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             result.artists = None
 
     def test_albums(self):
         albums = [Album(), Album(), Album()]
         result = SearchResult(albums=albums)
         assert list(result.albums) == albums
-        with self.assertRaises(AttributeError):
+        with pytest.raises(AttributeError):
             result.albums = None
 
     def test_invalid_kwarg(self):
-        with self.assertRaises(TypeError):
+        with pytest.raises(TypeError):
             SearchResult(foo="baz")
 
     def test_repr_without_results(self):
-        assert "SearchResult(uri='uri')" == repr(SearchResult(uri="uri"))
+        assert repr(SearchResult(uri="uri")) == "SearchResult(uri='uri')"
 
     def test_serialize_without_results(self):
         self.assertDictEqual(

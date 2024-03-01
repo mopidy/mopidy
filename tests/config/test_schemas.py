@@ -8,7 +8,7 @@ from tests import any_unicode
 
 
 class ConfigSchemaTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.schema = schemas.ConfigSchema("test")
         self.schema["foo"] = mock.Mock()
         self.schema["bar"] = mock.Mock()
@@ -88,8 +88,8 @@ class MapConfigSchemaTest(unittest.TestCase):
         schema = schemas.MapConfigSchema("test", types.LogLevel())
         result, errors = schema.deserialize({"foo.bar": "DEBUG", "baz": "INFO"})
 
-        assert logging.DEBUG == result["foo.bar"]
-        assert logging.INFO == result["baz"]
+        assert result["foo.bar"] == logging.DEBUG
+        assert result["baz"] == logging.INFO
 
 
 class DidYouMeanTest(unittest.TestCase):

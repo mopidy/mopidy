@@ -1,17 +1,185 @@
 [build-system]
-requires = ["setuptools >= 30.3.0", "wheel"]
+requires = ["setuptools >= 66", "setuptools-scm >= 7.1"]
+build-backend = "setuptools.build_meta"
 
 
-[tool.black]
-target-version = ["py37", "py38", "py39", "py310"]
-line-length = 80
+[project]
+name = "Mopidy"
+description = "Mopidy is an extensible music server written in Python"
+readme = "README.rst"
+requires-python = ">= 3.11"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Stein Magnus Jodal", email = "stein.magnus@jodal.no" }]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: No Input/Output (Daemon)",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Sound/Audio :: Players",
+]
+dynamic = ["version"]
+dependencies = [
+    "pygobject >= 3.42",
+    "pykka >= 4.0",
+    "requests >= 2.28",
+    "setuptools >= 66",
+    "tornado >= 6.2",
+]
+
+[project.optional-dependencies]
+docs = [
+    "pygraphviz >= 0.20",
+    "sphinx >= 5.3",
+    "sphinx-autodoc-typehints >= 1.12",
+    "sphinx-rtd-theme >= 1.2",
+]
+lint = ["ruff == 0.3.0"]
+test = ["pytest >= 7.2", "pytest-cov >= 4.0", "responses >= 0.18"]
+typing = [
+    "pygobject-stubs",
+    "pyright == 1.1.350",
+    "types-requests",
+    "types-setuptools",
+]
+dev = ["mopidy[docs,lint,test,typing]", "tox"]
+
+[project.urls]
+Homepage = "https://mopidy.com/"
+Documentation = "https://docs.mopidy.com/"
+"Discourse forum" = "https://discourse.mopidy.com/"
+"Zulip chat" = "https://mopidy.zulipchat.com/"
+Source = "https://github.com/mopidy/mopidy"
+Issues = "https://github.com/mopidy/mopidy/issues"
+
+[project.scripts]
+mopidy = "mopidy.__main__:main"
+
+[project.entry-points."mopidy.ext"]
+file = "mopidy.file:Extension"
+http = "mopidy.http:Extension"
+m3u = "mopidy.m3u:Extension"
+softwaremixer = "mopidy.softwaremixer:Extension"
+stream = "mopidy.stream:Extension"
 
 
-[tool.isort]
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
-line_length = 80
-known_tests = "tests"
-sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,TESTS,LOCALFOLDER"
+[tool.pyright]
+pythonVersion = "3.11"
+# Use venv from parent directory, to share it with any extensions:
+venvPath = "../"
+venv = ".venv"
+typeCheckingMode = "standard"
+# Not all dependencies have type hints:
+reportMissingTypeStubs = false
+# Already covered by flake8-self:
+reportPrivateImportUsage = false
+
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error::DeprecationWarning:mopidy[.*]",
+    "ignore::PendingDeprecationWarning:mopidy[.*]",
+    "ignore::DeprecationWarning:mopidy[.*]",
+]
+
+
+[tool.ruff]
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "A",   # flake8-builtins
+    "ANN", # flake8-annotations
+    "ARG", # flake8-unused-arguments
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "C90", # mccabe
+    "D",   # pydocstyle
+    "DTZ", # flake8-datetimez
+    "E",   # pycodestyle
+    "ERA", # eradicate
+    "F",   # pyflakes
+    "FBT", # flake8-boolean-trap
+    "I",   # isort
+    "INP", # flake8-no-pep420
+    "ISC", # flake8-implicit-str-concat
+    "N",   # pep8-naming
+    "PGH", # pygrep-hooks
+    "PIE", # flake8-pie
+    "PLC", # pylint convention
+    "PLE", # pylint error
+    "PLR", # pylint refactor
+    "PLW", # pylint warning
+    "PT",  # flake8-pytest-style
+    "PTH", # flake8-use-pathlib
+    "Q",   # flake8-quotes
+    "RET", # flake8-return
+    "RSE", # flake8-raise
+    "RUF", # ruff
+    "SIM", # flake8-simplify
+    "SLF", # flake8-self
+    "T20", # flake8-print
+    "TCH", # flake8-type-checking
+    "TID", # flake8-tidy-imports
+    "TRY", # tryceratops
+    "UP",  # pyupgrade
+    "W",   # pycodestyle
+]
+ignore = [
+    "A002",    # builtin-argument-shadowing  # TODO
+    "A003",    # builtin-attribute-shadowing
+    "ANN",     # flake8-annotations  # TODO
+    "ANN101",  # missing-type-self
+    "ANN102",  # missing-type-cls
+    "ANN401",  # any-type
+    "D100",    # undocumented-public-module  # TODO
+    "D101",    # undocumented-public-class  # TODO
+    "D102",    # undocumented-public-method  # TODO
+    "D103",    # undocumented-public-function  # TODO
+    "D104",    # undocumented-public-package  # TODO
+    "D105",    # undocumented-magic-method
+    "D107",    # undocumented-public-init  # TODO
+    "D203",    # one-blank-line-before-class
+    "D205",    # blank-line-after-summary  # TODO
+    "D213",    # multi-line-summary-second-line
+    "D401",    # non-imperative-mood  # TODO
+    "FBT001",  # boolean-positional-arg-in-function-definition  # TODO
+    "FBT002",  # boolean-default-value-in-function-definition  # TODO
+    "FBT003",  # boolean-positional-value-in-function-call  # TODO
+    "ISC001",  # single-line-implicit-string-concatenation
+    "PLR2004", # magic-value-comparison
+    "PLW2901", # redefined-loop-name
+    "RET504",  # unnecessary-assign
+    "SLF001",  # private-member-access  # TODO
+    "TCH003",  # typing-only-standard-library-import
+    "TRY003",  # raise-vanilla-args
+    "TRY400",  # error-instead-of-exception
+]
+
+[tool.ruff.lint.per-file-ignores]
+"docs/*" = [
+    "D",      # pydocstyle
+    "INP001", # flake8-no-pep420
+]
+"src/mopidy/internal/*" = [
+    "D", # pydocstyle
+]
+"tests/*" = [
+    "ANN",     # flake8-annotations
+    "ARG",     # flake8-unused-arguments
+    "D",       # pydocstyle
+    "FBT",     # flake8-boolean-trap
+    "PLR0913", # too-many-arguments
+    "PT007",   # pytest-parametrize-values-wrong-type  # TODO
+    "PT009",   # pytest-unittest-assertion  # TODO
+    "PT011",   # pytest-raises-too-broad  # TODO
+    "SLF001",  # private-member-access
+    "TRY002",  # raise-vanilla-class
+]
+
+
+[tool.setuptools_scm]

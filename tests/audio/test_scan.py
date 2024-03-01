@@ -8,7 +8,7 @@ from tests import path_to_data_dir
 
 
 class ScannerTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.errors = {}
         self.result = {}
 
@@ -42,7 +42,7 @@ class ScannerTest(unittest.TestCase):
     def test_tags_is_set(self):
         self.scan(self.find("scanner/simple"))
 
-        assert list(self.result.values())[0].tags
+        assert next(iter(self.result.values())).tags
 
     def test_errors_is_not_set(self):
         self.scan(self.find("scanner/simple"))
@@ -91,7 +91,7 @@ class ScannerTest(unittest.TestCase):
 
     def test_other_media_is_ignored(self):
         self.scan(self.find("scanner/image"))
-        assert not list(self.result.values())[0].playable
+        assert not next(iter(self.result.values())).playable
 
     def test_log_file_that_gst_thinks_is_mpeg_1_is_ignored(self):
         self.scan([path_to_data_dir("scanner/example.log")])

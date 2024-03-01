@@ -1,13 +1,14 @@
 import unittest
 from unittest import mock
 
+import pytest
 from mopidy import backend, core
 from mopidy.internal import validation
 from mopidy.models import Image, Ref, SearchResult, Track
 
 
 class BaseCoreLibraryTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         dummy1_root = Ref.directory(uri="dummy1:directory", name="dummy1")
         self.backend1 = mock.Mock()
         self.backend1.uri_schemes.get.return_value = ["dummy1"]
@@ -36,7 +37,9 @@ class BaseCoreLibraryTest(unittest.TestCase):
         self.backend3.has_library_browse.return_value.get.return_value = False
 
         self.core = core.Core(
-            mixer=None, backends=[self.backend1, self.backend2, self.backend3]
+            config={},
+            mixer=None,
+            backends=[self.backend1, self.backend2, self.backend3],
         )
 
 
@@ -339,11 +342,11 @@ class GetDistinctTest(BaseCoreLibraryTest):
         )
 
     def test_any_field_raises_valueerror(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             self.core.library.get_distinct("any")
 
     def test_unknown_tag_in_query_raises_valueerror(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             self.core.library.get_distinct("album", {"track": ["a"]})
 
     def test_track_name_field_maps_to_track_for_backwards_compatibility(self):
@@ -402,23 +405,23 @@ class GetDistinctTest(BaseCoreLibraryTest):
 
 
 class LegacyFindExactToSearchLibraryTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.backend = mock.Mock()
         self.backend.actor_ref.actor_class.__name__ = "DummyBackend"
         self.backend.uri_schemes.get.return_value = ["dummy"]
         self.backend.library = mock.Mock(spec=backend.LibraryProvider)
-        self.core = core.Core(mixer=None, backends=[self.backend])
+        self.core = core.Core(config={}, mixer=None, backends=[self.backend])
 
     def test_core_search_call_backend_search_with_exact(self):
         self.core.library.search(query={"any": ["a"]})
         self.backend.library.search.assert_called_once_with(
-            query=dict(any=["a"]), uris=None, exact=False
+            query={"any": ["a"]}, uris=None, exact=False
         )
 
     def test_core_search_with_exact_call_backend_search_with_exact(self):
         self.core.library.search(query={"any": ["a"]}, exact=True)
         self.backend.library.search.assert_called_once_with(
-            query=dict(any=["a"]), uris=None, exact=True
+            query={"any": ["a"]}, uris=None, exact=True
         )
 
     def test_core_search_with_handles_legacy_backend(self):
@@ -428,7 +431,7 @@ class LegacyFindExactToSearchLibraryTest(unittest.TestCase):
 
 
 class MockBackendCoreLibraryBase(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         dummy_root = Ref.directory(uri="dummy:directory", name="dummy")
 
         self.library = mock.Mock(spec=backend.LibraryProvider)
@@ -439,7 +442,7 @@ class MockBackendCoreLibraryBase(unittest.TestCase):
         self.backend.uri_schemes.get.return_value = ["dummy"]
         self.backend.library = self.library
 
-        self.core = core.Core(mixer=None, backends=[self.backend])
+        self.core = core.Core(config={}, mixer=None, backends=[self.backend])
 
 
 @mock.patch("mopidy.core.library.logger")
@@ -584,7 +587,7 @@ class SearchBadBackendTest(MockBackendCoreLibraryBase):
         # TODO: is this behavior desired? Do we need to continue handling
         # LookupError case specially.
         self.library.search.return_value.get.side_effect = LookupError
-        with self.assertRaises(LookupError):
+        with pytest.raises(LookupError):
             self.core.library.search(query={"any": ["foo"]})
 
     def test_backend_returns_none(self, logger):

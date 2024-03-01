@@ -1,0 +1,24 @@
+# Run `pre-commit install` to install the pre-commit hooks.
+#
+# Run `pre-commit autoupdate` to update all the plugins here.
+#
+# See https://pre-commit.com for more information.
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: check-toml
+  - repo: local
+    hooks:
+      - id: ruff
+        name: ruff check
+        entry: ruff
+        language: system
+        types: [python]
+      - id: ruff-format
+        name: ruff format
+        entry: ruff format
+        language: system
+        types: [python]

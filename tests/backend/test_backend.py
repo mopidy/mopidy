@@ -1,5 +1,6 @@
 import unittest
 
+import pytest
 from mopidy import backend
 
 from tests import dummy_backend
@@ -13,13 +14,13 @@ class LibraryTest(unittest.TestCase):
 
 
 class PlaylistsTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         self.provider = backend.PlaylistsProvider(backend=None)
 
     def test_as_list_default_impl(self):
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             self.provider.as_list()
 
     def test_get_items_default_impl(self):
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             self.provider.get_items("some uri")

@@ -1,5 +1,4 @@
 import pytest
-
 from mopidy.internal import playlists
 
 BAD = b"foobarbaz"
@@ -85,7 +84,7 @@ EXPECTED = ["file:///tmp/foo", "file:///tmp/bar", "file:///tmp/baz"]
 
 
 @pytest.mark.parametrize(
-    "detect_fn, data",
+    ("detect_fn", "data"),
     [
         (playlists.detect_extm3u_header, EXTM3U),
         (playlists.detect_pls_header, PLS),
@@ -104,7 +103,6 @@ def test_detect_from_valid_header(detect_fn, data):
         playlists.detect_extm3u_header,
         playlists.detect_pls_header,
         playlists.detect_asx_header,
-        playlists.detect_asx_header,
         playlists.detect_xspf_header,
     ],
 )
@@ -113,7 +111,7 @@ def test_detect_from_invalid_header(detect_fn):
 
 
 @pytest.mark.parametrize(
-    "parse_fn, data",
+    ("parse_fn", "data"),
     [
         (playlists.parse_extm3u, EXTM3U),
         (playlists.parse_pls, PLS),

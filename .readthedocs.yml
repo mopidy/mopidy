@@ -5,6 +5,10 @@ build:
   tools:
     python: "3.11"
   apt_packages:
+    # pyobject dependencies
+    - libcairo2-dev
+    - libgirepository1.0-dev
+    # Diagrams in docs
     - graphviz
 
 python:

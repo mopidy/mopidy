@@ -2,7 +2,6 @@ import unittest
 from unittest import mock
 
 import pykka
-
 from mopidy import core
 from mopidy.internal import deprecation
 from mopidy.models import Track
@@ -12,7 +11,7 @@ from tests import dummy_backend
 
 @mock.patch.object(core.CoreListener, "send")
 class BackendEventsTest(unittest.TestCase):
-    def setUp(self):  # noqa: N802
+    def setUp(self):
         config = {"core": {"max_tracklist_length": 10000}}
 
         self.backend = dummy_backend.create_proxy()
@@ -24,7 +23,7 @@ class BackendEventsTest(unittest.TestCase):
         with deprecation.ignore():
             self.core = core.Core.start(config, backends=[self.backend]).proxy()
 
-    def tearDown(self):  # noqa: N802
+    def tearDown(self):
         pykka.ActorRegistry.stop_all()
 
     def test_forwards_backend_playlists_loaded_event_to_frontends(self, send):
