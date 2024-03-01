@@ -34,7 +34,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 project = "Mopidy"
-copyright = "2009-2023, Stein Magnus Jodal and contributors"  # noqa: A001
+copyright = "2009-2024, Stein Magnus Jodal and contributors"  # noqa: A001
 
 
 release = version("Mopidy")
