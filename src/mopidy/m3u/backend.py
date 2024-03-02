@@ -7,7 +7,7 @@ import pykka
 from mopidy import backend
 from mopidy.types import UriScheme
 
-from . import playlists
+from . import library, playlists
 
 if TYPE_CHECKING:
     from mopidy.audio import AudioProxy
@@ -24,3 +24,4 @@ class M3UBackend(pykka.ThreadingActor, backend.Backend):
     ) -> None:
         super().__init__()
         self.playlists = playlists.M3UPlaylistsProvider(self, config)
+        self.library = library.M3ULibraryProvider(self, self.playlists)

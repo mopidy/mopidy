@@ -51,6 +51,12 @@ def path_to_ref(path: Path) -> Ref:
     return Ref.playlist(uri=path_to_uri(path), name=name_from_path(path))
 
 
+def refs_to_tracks(refs: Iterable[Ref | Track] | None)-> list[Track]:
+    if refs is None:
+        refs = []
+    return [Track(uri=item.uri, name=item.name) for item in refs]
+
+
 def load_items(
     fp: IO[str],
     basedir: Path,
@@ -96,11 +102,9 @@ def playlist(
     items: Iterable[Ref | Track] | None = None,
     mtime: float | None = None,
 ) -> Playlist:
-    if items is None:
-        items = []
     return Playlist(
         uri=path_to_uri(path),
         name=name_from_path(path),
-        tracks=[Track(uri=item.uri, name=item.name) for item in items],
+        tracks=refs_to_tracks(items),
         last_modified=(int(mtime * 1000) if mtime else None),
     )
