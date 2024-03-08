@@ -17,44 +17,45 @@ class TracklistTest(unittest.TestCase):
             Track(uri="dummy1:c", name="bar"),
         ]
 
-        def lookup(uri):
+        def lookup_many(uris):
             future = mock.Mock()
-            future.get.return_value = [t for t in self.tracks if t.uri == uri]
+            future.get.return_value = {
+                uri: [t for t in self.tracks if t.uri == uri] for uri in uris
+            }
             return future
 
         self.backend = mock.Mock()
         self.backend.uri_schemes.get.return_value = ["dummy1"]
         self.library = mock.Mock(spec=backend.LibraryProvider)
-        self.library.lookup.side_effect = lookup
+        self.library.lookup_many.side_effect = lookup_many
         self.backend.library = self.library
 
         self.core = core.Core(config, mixer=None, backends=[self.backend])
         self.tl_tracks = self.core.tracklist.add(uris=[t.uri for t in self.tracks])
 
     def test_add_by_uri_looks_up_uri_in_library(self):
-        self.library.lookup.reset_mock()
+        self.library.lookup_many.reset_mock()
         self.core.tracklist.clear()
 
         tl_tracks = self.core.tracklist.add(uris=["dummy1:a"])
 
-        self.library.lookup.assert_called_once_with("dummy1:a")
+        self.library.lookup_many.assert_called_once_with(["dummy1:a"])
         assert len(tl_tracks) == 1
         assert self.tracks[0] == tl_tracks[0].track
         assert tl_tracks == self.core.tracklist.get_tl_tracks()[(-1):]
 
     def test_add_by_uris_looks_up_uris_in_library(self):
-        self.library.lookup.reset_mock()
+        self.library.lookup_many.reset_mock()
         self.core.tracklist.clear()
 
         tl_tracks = self.core.tracklist.add(uris=[t.uri for t in self.tracks])
 
-        self.library.lookup.assert_has_calls(
-            [
-                mock.call("dummy1:a"),
-                mock.call("dummy1:b"),
-                mock.call("dummy1:c"),
-            ]
-        )
+        self.library.lookup_many.assert_called_with([
+            "dummy1:a",
+            "dummy1:b",
+            "dummy1:c",
+        ])
+
         assert len(tl_tracks) == 3
         assert self.tracks[0] == tl_tracks[0].track
         assert self.tracks[1] == tl_tracks[1].track

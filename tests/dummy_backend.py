@@ -44,9 +44,8 @@ class DummyLibraryProvider(backend.LibraryProvider):
     def get_distinct(self, field, query=None):
         return self.dummy_get_distinct_result.get(field, set())
 
-    def lookup(self, uri):
-        uri = Ref.track(uri=uri).uri
-        return [t for t in self.dummy_library if uri == t.uri]
+    def lookup_many(self, uris):
+        return {uri: [t for t in self.dummy_library if uri == t.uri] for uri in uris}
 
     def refresh(self, uri=None):
         pass

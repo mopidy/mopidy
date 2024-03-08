@@ -230,23 +230,23 @@ class LibraryController:
         """
         validation.check_uris(uris)
 
-        futures = {}
+        futures = {
+            backend: backend.library.lookup_many(backend_uris)
+            for (backend, backend_uris) in self._get_backends_to_uris(uris).items()
+            if backend_uris
+        }
         results = {u: [] for u in uris}
 
-        # TODO: lookup(uris) to backend APIs
-        for backend, backend_uris in self._get_backends_to_uris(uris).items():
-            if backend_uris:
-                for u in backend_uris:
-                    futures[(backend, u)] = backend.library.lookup(u)
-
-        for (backend, u), future in futures.items():
+        for backend, future in futures.items():
             with _backend_error_handling(backend):
                 result = future.get()
                 if result is not None:
-                    validation.check_instances(result, Track)
-                    # TODO Consider making Track.uri field mandatory, and
-                    # then remove this filtering of tracks without URIs.
-                    results[u] = [r for r in result if r.uri]
+                    validation.check_instance(result, Mapping)
+                    for uri, tracks in result.items():
+                        # TODO Consider making Track.uri field mandatory, and
+                        # then remove this filtering of tracks without URIs.
+                        validation.check_instances(tracks, Track)
+                        results[uri] = [track for track in tracks if track.uri]
 
         return results
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, ClassVar
 
 import pykka
@@ -137,12 +138,24 @@ class LibraryProvider:
         """
         return {}
 
-    def lookup(self, uri: Uri) -> list[Track]:
+    def lookup_many(self, uris: Iterable[Uri]) -> dict[Uri, list[Track]]:
         """See :meth:`mopidy.core.LibraryController.lookup`.
 
         *MUST be implemented by subclass.*
         """
+        results = {}
+        for uri in uris:
+            results[uri] = self.lookup(uri)
+
+        return results
+
+    def lookup(self, uri: Uri) -> list[Track]:
+        """See :meth:`mopidy.core.LibraryController.lookup`.
+
+        *MUST be implemented by subclass if :meth:`lookup_many` is not implemented.*
+        """
         raise NotImplementedError
+
 
     def refresh(self, uri: Uri | None = None) -> None:
         """See :meth:`mopidy.core.LibraryController.refresh`.
@@ -467,7 +480,7 @@ class LibraryProviderProxy:
     browse = proxy_method(LibraryProvider.browse)
     get_distinct = proxy_method(LibraryProvider.get_distinct)
     get_images = proxy_method(LibraryProvider.get_images)
-    lookup = proxy_method(LibraryProvider.lookup)
+    lookup_many = proxy_method(LibraryProvider.lookup_many)
     refresh = proxy_method(LibraryProvider.refresh)
     search = proxy_method(LibraryProvider.search)
 
