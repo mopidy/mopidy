@@ -101,6 +101,6 @@ def playlist(
     return Playlist(
         uri=path_to_uri(path),
         name=name_from_path(path),
-        tracks=[Track(uri=item.uri, name=item.name) for item in items],
+        tracks=tuple(Track(uri=item.uri, name=item.name) for item in items),
         last_modified=(int(mtime * 1000) if mtime else None),
     )

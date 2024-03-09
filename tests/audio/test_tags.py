@@ -229,7 +229,7 @@ class TagsToTrackTest(unittest.TestCase):
 
     def test_missing_track_artist_name(self):
         del self.tags["artist"]
-        self.check(self.track.replace(artists=[]))
+        self.check(self.track.replace(artists=frozenset()))
 
     def test_multiple_track_artist_name(self):
         self.tags["artist"] = ["name1", "name2"]
@@ -247,7 +247,7 @@ class TagsToTrackTest(unittest.TestCase):
 
     def test_missing_track_composer_name(self):
         del self.tags["composer"]
-        self.check(self.track.replace(composers=[]))
+        self.check(self.track.replace(composers=frozenset()))
 
     def test_multiple_track_composer_name(self):
         self.tags["composer"] = ["composer1", "composer2"]
@@ -256,7 +256,7 @@ class TagsToTrackTest(unittest.TestCase):
 
     def test_missing_track_performer_name(self):
         del self.tags["performer"]
-        self.check(self.track.replace(performers=[]))
+        self.check(self.track.replace(performers=frozenset()))
 
     def test_multiple_track_performe_name(self):
         self.tags["performer"] = ["performer1", "performer2"]
@@ -300,7 +300,7 @@ class TagsToTrackTest(unittest.TestCase):
 
     def test_missing_album_artist_name(self):
         del self.tags["album-artist"]
-        album = self.track.album.replace(artists=[])
+        album = self.track.album.replace(artists=frozenset())
         self.check(self.track.replace(album=album))
 
     def test_multiple_album_artist_name(self):
