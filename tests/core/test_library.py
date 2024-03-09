@@ -205,12 +205,14 @@ class CoreLibraryTest(BaseCoreLibraryTest):
             "dummy2:b": [track4],
         }
 
-        result = self.core.library.lookup(uris=[
-            "dummy1:a",
-            "dummy1:b",
-            "dummy2:a",
-            "dummy2:b",
-        ])
+        result = self.core.library.lookup(
+            uris=[
+                "dummy1:a",
+                "dummy1:b",
+                "dummy2:a",
+                "dummy2:b",
+            ]
+        )
 
         self.library1.lookup_many.assert_called_once_with(["dummy1:a", "dummy1:b"])
         self.library2.lookup_many.assert_called_once_with(["dummy2:a", "dummy2:b"])

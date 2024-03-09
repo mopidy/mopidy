@@ -50,11 +50,13 @@ class TracklistTest(unittest.TestCase):
 
         tl_tracks = self.core.tracklist.add(uris=[t.uri for t in self.tracks])
 
-        self.library.lookup_many.assert_called_with([
-            "dummy1:a",
-            "dummy1:b",
-            "dummy1:c",
-        ])
+        self.library.lookup_many.assert_called_with(
+            [
+                "dummy1:a",
+                "dummy1:b",
+                "dummy1:c",
+            ]
+        )
 
         assert len(tl_tracks) == 3
         assert self.tracks[0] == tl_tracks[0].track
