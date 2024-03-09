@@ -128,3 +128,20 @@ class CoreState(
 
     # State of the tracklist controller.
     tracklist: TracklistState
+
+
+class StoredState(
+    BaseModel,
+    kw_only=True,
+    frozen=True,
+):
+    """State of the core that is persisted to disk.
+
+    Internally used for save/load state.
+    """
+
+    # The version of the state file. Read-only.
+    version: str
+
+    # The state of the core. Read-only.
+    state: CoreState
