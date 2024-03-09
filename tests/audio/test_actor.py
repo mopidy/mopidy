@@ -6,9 +6,9 @@ from unittest import mock
 import pykka
 
 from mopidy import audio
-from mopidy.audio.constants import PlaybackState
 from mopidy.internal import path
 from mopidy.internal.gi import Gst
+from mopidy.types import PlaybackState
 from tests import dummy_audio, path_to_data_dir
 
 # We want to make sure both our real audio class and the fake one behave

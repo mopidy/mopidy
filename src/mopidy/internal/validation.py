@@ -5,9 +5,9 @@ from collections.abc import Iterable, Mapping
 from typing import Any, Literal, TypeVar, Union, get_args
 
 from mopidy import exceptions
-from mopidy.audio.constants import PlaybackState
 from mopidy.types import (
     DistinctField,
+    PlaybackState,
     Query,
     QueryValue,
     SearchField,
