@@ -564,7 +564,7 @@ class PlaybackController:
                 self._start_paused = True
             if state.state in (PlaybackState.PLAYING, PlaybackState.PAUSED):
                 self._start_at_position = DurationMs(state.time_position)
-                self.play(tlid=state.tlid)
+                self.play(tlid=TracklistId(state.tlid))
 
 
 class PlaybackControllerProxy:

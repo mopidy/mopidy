@@ -589,7 +589,7 @@ class TracklistController:
 
     def _save_state(self) -> TracklistState:
         return TracklistState(
-            tl_tracks=self._tl_tracks,
+            tl_tracks=tuple(self._tl_tracks),
             next_tlid=self._next_tlid,
             consume=self.get_consume(),
             random=self.get_random(),
@@ -609,7 +609,7 @@ class TracklistController:
                 self.set_repeat(state.repeat)
                 self.set_single(state.single)
             if "tracklist" in coverage:
-                self._next_tlid = max(state.next_tlid, self._next_tlid)
+                self._next_tlid = max(TracklistId(state.next_tlid), self._next_tlid)
                 self._tl_tracks = list(state.tl_tracks)
                 self._increase_version()
 
