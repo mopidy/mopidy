@@ -69,7 +69,7 @@ def load_items(
             uri = path_to_uri(path, scheme="file")
         else:
             # TODO: ensure this is urlencoded
-            uri = line  # do *not* extract name from (stream?) URI path
+            uri = Uri(line)  # do *not* extract name from (stream?) URI path
         refs.append(Ref.track(uri=uri, name=name))
         name = None
     return refs
