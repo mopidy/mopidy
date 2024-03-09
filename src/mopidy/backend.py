@@ -149,6 +149,10 @@ class LibraryProvider:
         """See :meth:`mopidy.core.LibraryController.lookup`.
 
         *MUST be implemented by subclass if :meth:`lookup_many` is not implemented.*
+
+        .. deprecated:: 4.0
+            Implement :meth:`lookup_many` instead. If :meth:`lookup_many` is
+            implemented, Mopidy will never call this method on a backend.
         """
         raise NotImplementedError
 

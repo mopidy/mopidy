@@ -82,7 +82,13 @@ Backend API
 
 Changes to the Backend API may affect Mopidy backend extensions.
 
-- Added :meth:`mopidy.backend.LibraryProvider.lookup_many` to take a list of URIs and return a mapping of URIs to tracks. If this method is not implemented then repeated calls to :meth:`mopidy.backend.LibraryProvider.lookup` will be used as a fallback.
+- Added :meth:`mopidy.backend.LibraryProvider.lookup_many` to take a list of
+  URIs and return a mapping of URIs to tracks. If this method is not implemented
+  then repeated calls to :meth:`mopidy.backend.LibraryProvider.lookup` will be
+  used as a fallback.
+
+- Deprecated :meth:`mopidy.backend.LibraryProvider.lookup`. Extensions should
+  implement :meth:`mopidy.backend.LibraryProvider.lookup_many` instead.
 
 Models
 ------
