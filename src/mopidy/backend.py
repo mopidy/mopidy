@@ -143,11 +143,7 @@ class LibraryProvider:
 
         *MUST be implemented by subclass.*
         """
-        results = {}
-        for uri in uris:
-            results[uri] = self.lookup(uri)
-
-        return results
+        return {uri: self.lookup(uri) for uri in uris}
 
     def lookup(self, uri: Uri) -> list[Track]:
         """See :meth:`mopidy.core.LibraryController.lookup`.
@@ -155,7 +151,6 @@ class LibraryProvider:
         *MUST be implemented by subclass if :meth:`lookup_many` is not implemented.*
         """
         raise NotImplementedError
-
 
     def refresh(self, uri: Uri | None = None) -> None:
         """See :meth:`mopidy.core.LibraryController.refresh`.
