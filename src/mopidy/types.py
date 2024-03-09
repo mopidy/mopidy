@@ -15,6 +15,7 @@ DateOrYear = Date | Year
 
 
 # Integer types
+NonNegativeInt = NewType("NonNegativeInt", int)
 Percentage = NewType("Percentage", int)
 DurationMs = NewType("DurationMs", int)
 
