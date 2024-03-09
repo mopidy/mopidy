@@ -113,13 +113,13 @@ def test_invalid_kwarg():
 
 
 def test_repr_without_tracks():
-    assert repr(Playlist(uri="uri", name="name")) == "Playlist(name='name', uri='uri')"
+    assert repr(Playlist(uri="uri", name="name")) == "Playlist(uri='uri', name='name')"
 
 
 def test_repr_with_tracks():
     assert (
         repr(Playlist(uri="uri", name="name", tracks=(Track(name="foo"),)))
-        == "Playlist(name='name', tracks=[Track(name='foo')], uri='uri')"
+        == "Playlist(uri='uri', name='name', tracks=(Track(name='foo'),))"
     )
 
 

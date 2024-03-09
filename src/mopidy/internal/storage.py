@@ -1,10 +1,9 @@
 import gzip
-import json
 import logging
 import pathlib
 import tempfile
 
-from mopidy import models
+import msgspec
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +24,7 @@ def load(path):
         return {}
     try:
         with gzip.open(str(path), "rb") as fp:
-            return json.load(fp, object_hook=models.model_json_decoder)
+            return msgspec.json.decode(fp.read())
     except (OSError, ValueError) as exc:
         logger.warning(f"Loading JSON failed: {exc}")
         return {}
@@ -50,14 +49,9 @@ def dump(path, data):
     tmp_path = pathlib.Path(tmp.name)
 
     try:
-        data_string = json.dumps(
-            data,
-            cls=models.ModelJSONEncoder,
-            indent=2,
-            separators=(",", ": "),
-        )
+        data_string = msgspec.json.format(msgspec.json.encode(data))
         with gzip.GzipFile(fileobj=tmp, mode="wb") as fp:
-            fp.write(data_string.encode())
+            fp.write(data_string)
         tmp_path.rename(path)
     finally:
         if tmp_path.exists():

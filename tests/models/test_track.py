@@ -105,13 +105,13 @@ def test_invalid_kwarg():
 
 
 def test_repr_without_artists():
-    assert repr(Track(uri="uri", name="name")) == "Track(name='name', uri='uri')"
+    assert repr(Track(uri="uri", name="name")) == "Track(uri='uri', name='name')"
 
 
 def test_repr_with_artists():
     assert (
-        repr(Track(uri="uri", name="name", artists=[Artist(name="foo")]))
-        == "Track(artists=[Artist(name='foo')], name='name', uri='uri')"
+        repr(Track(uri="uri", name="name", artists=frozenset({Artist(name="foo")})))
+        == "Track(uri='uri', name='name', artists=frozenset({Artist(name='foo')}))"
     )
 
 

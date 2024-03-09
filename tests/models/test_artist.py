@@ -41,7 +41,7 @@ def test_invalid_kwarg_with_name_matching_method():
 
 
 def test_repr():
-    assert repr(Artist(uri="uri", name="name")) == "Artist(name='name', uri='uri')"
+    assert repr(Artist(uri="uri", name="name")) == "Artist(uri='uri', name='name')"
 
 
 def test_serialize():

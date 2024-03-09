@@ -1,6 +1,9 @@
 import json
+from typing import Any
 
-from mopidy.models import immutable
+import msgspec
+
+from mopidy.models._base import BaseModel, ModelRegistry
 
 
 class ModelJSONEncoder(json.JSONEncoder):
@@ -9,18 +12,21 @@ class ModelJSONEncoder(json.JSONEncoder):
     Usage::
 
         >>> import json
-        >>> json.dumps({'a_track': Track(name='name')}, cls=ModelJSONEncoder)
+        >>> json.dumps(
+        ...     {'a_track': Track(name='name')},
+        ...     cls=ModelJSONEncoder,
+        ... )
         '{"a_track": {"__model__": "Track", "name": "name"}}'
 
     """
 
-    def default(self, o):
-        if isinstance(o, immutable.ValidatedImmutableObject):
+    def default(self, o) -> Any:
+        if isinstance(o, BaseModel):
             return o.serialize()
         return json.JSONEncoder.default(self, o)
 
 
-def model_json_decoder(dct):
+def model_json_decoder(dct) -> Any:
     """Automatically deserialize Mopidy models from JSON.
 
     Usage::
@@ -28,13 +34,12 @@ def model_json_decoder(dct):
         >>> import json
         >>> json.loads(
         ...     '{"a_track": {"__model__": "Track", "name": "name"}}',
-        ...     object_hook=model_json_decoder)
+        ...     object_hook=model_json_decoder,
+        ... )
         {u'a_track': Track(artists=[], name=u'name')}
 
     """
-    if "__model__" in dct:
-        model_name = dct.pop("__model__")
-        if model_name in immutable._models:
-            cls = immutable._models[model_name]
-            return cls(**dct)
+    if model_name := dct.get("__model__"):
+        model = ModelRegistry.get(model_name)
+        return msgspec.convert(dct, type=model)
     return dct

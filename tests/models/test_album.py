@@ -65,13 +65,13 @@ def test_invalid_kwarg():
 
 
 def test_repr_without_artists():
-    assert repr(Album(uri="uri", name="name")) == "Album(name='name', uri='uri')"
+    assert repr(Album(uri="uri", name="name")) == "Album(uri='uri', name='name')"
 
 
 def test_repr_with_artists():
     assert (
-        repr(Album(uri="uri", name="name", artists=[Artist(name="foo")]))
-        == "Album(artists=[Artist(name='foo')], name='name', uri='uri')"
+        repr(Album(uri="uri", name="name", artists=frozenset({Artist(name="foo")})))
+        == "Album(uri='uri', name='name', artists=frozenset({Artist(name='foo')}))"
     )
 
 

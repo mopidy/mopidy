@@ -34,7 +34,7 @@ def test_invalid_kwarg():
 def test_repr_without_results():
     assert (
         repr(Ref(uri="uri", name="foo", type="artist"))
-        == "Ref(name='foo', type='artist', uri='uri')"
+        == "Ref(uri='uri', name='foo', type='artist')"
     )
 
 
