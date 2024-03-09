@@ -54,7 +54,7 @@ class PlaybackController:
             self._audio.set_about_to_finish_callback(self._on_about_to_finish_callback)
 
     def _get_backend(self, tl_track: TlTrack | None) -> BackendProxy | None:
-        if tl_track is None:
+        if tl_track is None or tl_track.track.uri is None:
             return None
         uri_scheme = UriScheme(urllib.parse.urlparse(tl_track.track.uri).scheme)
         return self.backends.with_playback.get(uri_scheme, None)

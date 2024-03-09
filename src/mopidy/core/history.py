@@ -44,8 +44,9 @@ class HistoryController:
         if track.name is not None:
             name_parts.append(track.name)
         name = " - ".join(name_parts)
+        if track.uri is None:
+            return
         ref = Ref.track(uri=track.uri, name=name)
-
         self._history.insert(0, (timestamp, ref))
 
     def get_length(self) -> int:
