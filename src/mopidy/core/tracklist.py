@@ -12,6 +12,7 @@ from mopidy.core import listener
 from mopidy.internal import deprecation, validation
 from mopidy.internal.models import TracklistState
 from mopidy.models import TlTrack, Track
+from mopidy.types import TracklistId
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
 class TracklistController:
     def __init__(self, core: Core) -> None:
         self.core = core
-        self._next_tlid: int = 1
+        self._next_tlid: TracklistId = TracklistId(1)
         self._tl_tracks: list[TlTrack] = []
         self._version: int = 0
 
@@ -398,7 +399,7 @@ class TracklistController:
                 raise exceptions.TracklistFull(msg)
 
             tl_track = TlTrack(self._next_tlid, track)
-            self._next_tlid += 1
+            self._next_tlid = TracklistId(self._next_tlid + 1)
             if at_position is not None:
                 self._tl_tracks.insert(at_position, tl_track)
                 at_position += 1
