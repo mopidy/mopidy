@@ -131,6 +131,24 @@ def check_integer(
         )
 
 
+def check_offset_str(
+    arg: str,
+    current_pos: int,
+    msg: str = "Offsets must be an integer with a prefix of '+' or '-'",
+) -> int:
+    if not arg.startswith(("+", "-")):
+        raise exceptions.ValidationError(msg)
+
+    try:
+        offset = int(arg[1:])
+    except ValueError as e:
+        raise exceptions.ValidationError(msg) from e
+
+    if arg[0] == "+":
+        return current_pos + 1 + offset
+    return max(0, current_pos - offset)
+
+
 def check_query(
     arg: Query[SearchField] | Query[TracklistField],
     fields: Iterable[str] | None = None,

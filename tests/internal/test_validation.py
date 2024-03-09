@@ -1,3 +1,5 @@
+import re
+
 import pytest
 from mopidy import exceptions
 from mopidy.internal import validation
@@ -118,6 +120,33 @@ def test_check_values_error_message():
     with pytest.raises(exceptions.ValidationError) as excinfo:
         validation.check_query({"any": "abc"})
     assert 'Expected "any" to be list of strings, not' in str(excinfo.value)
+
+
+def test_check_offset_str_positive_offset():
+    assert validation.check_offset_str("+0", 6) == 7
+    assert validation.check_offset_str("+1", 4) == 6
+    assert validation.check_offset_str("+3", 0) == 4
+
+
+def test_check_offset_str_negative_offset():
+    assert validation.check_offset_str("-0", 0) == 0
+    assert validation.check_offset_str("-0", 1) == 1
+    assert validation.check_offset_str("-1", 1) == 0
+    assert validation.check_offset_str("-1", 2) == 1
+    assert validation.check_offset_str("-2", 4) == 2
+    assert validation.check_offset_str("-4", 3) == 0
+
+
+def test_check_offset_str_invalid_string():
+    err_msg = re.escape("Offsets must be an integer with a prefix of '+' or '-'")
+    with pytest.raises(exceptions.ValidationError, match=err_msg):
+        validation.check_offset_str("foo", 4)
+
+
+def test_check_offset_str_invalid_number():
+    err_msg = re.escape("Offsets must be an integer with a prefix of '+' or '-'")
+    with pytest.raises(exceptions.ValidationError, match=err_msg):
+        validation.check_offset_str("+1.5", 8)
 
 
 def test_check_uri_with_valid_values():
