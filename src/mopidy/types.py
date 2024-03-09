@@ -8,6 +8,12 @@ if TYPE_CHECKING:
     from typing import TypeAlias
 
 
+# Date types
+Date = NewType("Date", str)
+Year = NewType("Year", str)
+DateOrYear = Date | Year
+
+
 # Integer types
 Percentage = NewType("Percentage", int)
 DurationMs = NewType("DurationMs", int)
