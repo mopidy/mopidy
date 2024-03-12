@@ -191,7 +191,7 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
         assert isinstance(response, jsonrpc.Response)
         assert response.id == 1
         assert response.result == "Hello, world!"
-        assert response.error is None
+        assert response.error is msgspec.UNSET
 
     def test_call_method_on_plain_object(self) -> None:
         request = jsonrpc.Request.build(method="calc.model", id=1)
@@ -200,17 +200,17 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
         assert isinstance(response, jsonrpc.Response)
         assert response.id == 1
         assert response.result == "TI83"
-        assert response.error is None
+        assert response.error is msgspec.UNSET
 
     def test_call_method_which_returns_dict_from_plain_object(self) -> None:
         request = jsonrpc.Request.build(method="calc.describe", id=1)
         response = self.wrapper.handle_data(request)
 
         assert isinstance(response, jsonrpc.Response)
-        assert response.result is not None
+        assert response.result is not msgspec.UNSET
         assert "add" in response.result
         assert "sub" in response.result
-        assert response.error is None
+        assert response.error is msgspec.UNSET
 
     def test_call_method_on_actor_root(self) -> None:
         request = jsonrpc.Request.build(method="core.get_uri_schemes", id=1)
@@ -219,7 +219,7 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
         assert isinstance(response, jsonrpc.Response)
         assert response.id == 1
         assert response.result == ["dummy"]
-        assert response.error is None
+        assert response.error is msgspec.UNSET
 
     def test_call_method_on_actor_member(self) -> None:
         request = jsonrpc.Request.build(method="core.playback.get_time_position", id=1)
@@ -227,7 +227,7 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
 
         assert isinstance(response, jsonrpc.Response)
         assert response.result == 0
-        assert response.error is None
+        assert response.error is msgspec.UNSET
 
     def test_call_method_which_is_a_directly_mounted_actor_member(self) -> None:
         # 'get_uri_schemes' isn't a regular callable, but a Pykka
@@ -240,7 +240,7 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
         assert isinstance(response, jsonrpc.Response)
         assert response.id == 1
         assert response.result == ["dummy"]
-        assert response.error is None
+        assert response.error is msgspec.UNSET
 
     def test_call_method_with_positional_params(self) -> None:
         request = jsonrpc.Request.build(method="calc.add", params=[3, 4], id=1)
@@ -248,9 +248,9 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
 
         assert isinstance(response, jsonrpc.Response)
         assert response.result == 7
-        assert response.error is None
+        assert response.error is msgspec.UNSET
 
-    def test_call_methods_with_named_params(self) -> None:
+    def test_call_method_with_named_params(self) -> None:
         request = jsonrpc.Request.build(
             method="calc.add", params={"a": 3, "b": 4}, id=1
         )
@@ -258,7 +258,19 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
 
         assert isinstance(response, jsonrpc.Response)
         assert response.result == 7
-        assert response.error is None
+        assert response.error is msgspec.UNSET
+
+    def test_call_method_with_none_response(self) -> None:
+        assert self.calc.get_mem() is None
+
+        request = jsonrpc.Request.build(method="calc.set_mem", params=[37], id=1)
+        response = self.wrapper.handle_data(request)
+
+        assert isinstance(response, jsonrpc.Response)
+        assert response.result is None
+
+        json = msgspec.json.encode(response)
+        assert json == b'{"jsonrpc":"2.0","id":1,"result":null}'
 
 
 class JsonRpcSingleNotificationTest(JsonRpcTestBase):
@@ -340,9 +352,9 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         response = self.wrapper.handle_data(request)
 
         assert isinstance(response, jsonrpc.Response)
-        assert response.result is None
+        assert response.result is msgspec.UNSET
 
-        assert response.error is not None
+        assert isinstance(response.error, jsonrpc.ErrorResponseDetails)
         assert response.error.code == 0
         assert response.error.message == "Application error"
 
@@ -365,7 +377,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         assert response
         response = msgspec.json.decode(response, type=jsonrpc.Response)
         assert response.id is None
-        assert response.error is not None
+        assert isinstance(response.error, jsonrpc.ErrorResponseDetails)
         assert response.error.code == (-32600)
         assert response.error.message == "Invalid Request"
         assert response.error.data == "Object missing required field `jsonrpc`"
@@ -383,7 +395,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         assert response
         response = msgspec.json.decode(response, type=jsonrpc.Response)
         assert response.id is None
-        assert response.error is not None
+        assert isinstance(response.error, jsonrpc.ErrorResponseDetails)
         assert response.error.code == (-32600)
         assert response.error.message == "Invalid Request"
         assert response.error.data == "Invalid enum value '3.0' - at `$.jsonrpc`"
@@ -400,7 +412,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         assert response
         response = msgspec.json.decode(response, type=jsonrpc.Response)
         assert response.id is None
-        assert response.error is not None
+        assert isinstance(response.error, jsonrpc.ErrorResponseDetails)
         assert response.error.code == (-32600)
         assert response.error.message == "Invalid Request"
         assert response.error.data == "Object missing required field `method`"
@@ -418,7 +430,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         assert response
         response = msgspec.json.decode(response, type=jsonrpc.Response)
         assert response.id is None
-        assert response.error is not None
+        assert isinstance(response.error, jsonrpc.ErrorResponseDetails)
         assert response.error.code == (-32600)
         assert response.error.message == "Invalid Request"
         assert response.error.data == "Expected `str`, got `int` - at `$.method`"
@@ -437,7 +449,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         assert response
         response = msgspec.json.decode(response, type=jsonrpc.Response)
         assert response.id is None
-        assert response.error is not None
+        assert isinstance(response.error, jsonrpc.ErrorResponseDetails)
         assert response.error.code == (-32600)
         assert response.error.message == "Invalid Request"
         assert (
@@ -450,7 +462,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         response = self.wrapper.handle_data(request)
 
         assert isinstance(response, jsonrpc.Response)
-        assert response.error is not None
+        assert isinstance(response.error, jsonrpc.ErrorResponseDetails)
         assert response.error.code == (-32601)
         assert response.error.message == "Method not found"
         assert (
@@ -462,7 +474,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         response = self.wrapper.handle_data(request)
 
         assert isinstance(response, jsonrpc.Response)
-        assert response.error is not None
+        assert isinstance(response.error, jsonrpc.ErrorResponseDetails)
         assert response.error.code == (-32601)
         assert response.error.message == "Method not found"
         assert response.error.data == "No object found at 'bogus'"
@@ -472,7 +484,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         response = self.wrapper.handle_data(request)
 
         assert isinstance(response, jsonrpc.Response)
-        assert response.error is not None
+        assert isinstance(response.error, jsonrpc.ErrorResponseDetails)
         assert response.error.code == (-32601)
         assert response.error.message == "Method not found"
         assert response.error.data == "Object mounted at 'core' has no member 'bogus'"
@@ -482,7 +494,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         response = self.wrapper.handle_data(request)
 
         assert isinstance(response, jsonrpc.Response)
-        assert response.error is not None
+        assert isinstance(response.error, jsonrpc.ErrorResponseDetails)
         assert response.error.code == (-32601)
         assert response.error.message == "Method not found"
         assert response.error.data == "Private methods are not exported"
@@ -494,7 +506,7 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         response = self.wrapper.handle_data(request)
 
         assert isinstance(response, jsonrpc.Response)
-        assert response.error is not None
+        assert isinstance(response.error, jsonrpc.ErrorResponseDetails)
         assert response.error.code == (-32602)
         assert response.error.message == "Invalid params"
 
@@ -518,7 +530,7 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
         response = msgspec.json.decode(response, type=jsonrpc.Response)
         assert isinstance(response, jsonrpc.Response)
         assert response.id is None
-        assert response.error is not None
+        assert isinstance(response.error, jsonrpc.ErrorResponseDetails)
         assert response.error.code == (-32600)
         assert response.error.message == "Invalid Request"
         assert response.error.data == "Batch list cannot be empty"
@@ -530,7 +542,7 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
         assert response
         response = msgspec.json.decode(response, type=jsonrpc.Response)
         assert response.id is None
-        assert response.error is not None
+        assert isinstance(response.error, jsonrpc.ErrorResponseDetails)
         assert response.error.code == (-32600)
         assert response.error.message == "Invalid Request"
         assert response.error.data == "Expected `object`, got `int` - at `$[0]`"
@@ -550,7 +562,7 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
         assert len(response) == 3
         response = response[2]
         assert response.id == "3"
-        assert response.error is not None
+        assert isinstance(response.error, jsonrpc.ErrorResponseDetails)
         assert response.error.code == (-32601)
         assert response.error.message == "Method not found"
         assert (
@@ -603,7 +615,7 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
         response = {row.id: row for row in response}
         assert response["1"].result is False
         assert response["2"].result is None
-        assert response["5"].error is not None
+        assert isinstance(response["5"].error, jsonrpc.ErrorResponseDetails)
         assert response["5"].error.code == (-32601)
         assert response["9"].result is False
 

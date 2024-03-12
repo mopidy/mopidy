@@ -50,8 +50,8 @@ class ErrorResponseDetails(msgspec.Struct, kw_only=True, omit_defaults=True):
 class Response(msgspec.Struct, kw_only=True, omit_defaults=True):
     jsonrpc: Literal["2.0"]
     id: RequestId | None  # None is allowed, but it must be set explicitly.
-    result: Any | None = None
-    error: ErrorResponseDetails | None = None
+    result: Any | msgspec.UnsetType = msgspec.UNSET
+    error: ErrorResponseDetails | None | msgspec.UnsetType = msgspec.UNSET
 
     @classmethod
     def as_success(cls, id: RequestId, result: Any) -> Self:
