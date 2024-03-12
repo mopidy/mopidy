@@ -115,7 +115,9 @@ def test_load_items(contents, basedir, expected):
 
 def test_dump_items():
     assert dumps([]) == ""
-    assert dumps([Ref.track(uri="file:///test.mp3")]) == ("file:///test.mp3\n")
+    assert dumps([Ref.track(uri="file:///test.mp3", name=None)]) == (
+        "file:///test.mp3\n"
+    )
     assert dumps([Ref.track(uri="file:///test.mp3", name="test")]) == (
         "#EXTM3U\n#EXTINF:-1,test\nfile:///test.mp3\n"
     )
@@ -136,9 +138,11 @@ def test_playlist():
     path = pathlib.Path("test.m3u")
 
     assert playlist(path) == Playlist(uri="m3u:test.m3u", name="test")
-    assert playlist(path, [Ref(uri="file:///test.mp3")], 1) == Playlist(
+    assert playlist(
+        path, [Ref.track(uri="file:///test.mp3", name="test")], 1
+    ) == Playlist(
         uri="m3u:test.m3u",
         name="test",
-        tracks=[Track(uri="file:///test.mp3")],
+        tracks=(Track(uri="file:///test.mp3", name="test"),),
         last_modified=1000,
     )

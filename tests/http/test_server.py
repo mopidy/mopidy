@@ -114,7 +114,7 @@ class MopidyRPCHandlerTest(HttpServerTest):
             "error": {
                 "message": "Invalid Request",
                 "code": (-32600),
-                "data": "'jsonrpc' member must be included",
+                "data": "Object missing required field `jsonrpc`",
             },
         } == tornado.escape.json_decode(response.body)
 

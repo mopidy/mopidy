@@ -69,7 +69,7 @@ def load_items(
             uri = path_to_uri(path, scheme="file")
         else:
             # TODO: ensure this is urlencoded
-            uri = line  # do *not* extract name from (stream?) URI path
+            uri = Uri(line)  # do *not* extract name from (stream?) URI path
         refs.append(Ref.track(uri=uri, name=name))
         name = None
     return refs
@@ -101,6 +101,6 @@ def playlist(
     return Playlist(
         uri=path_to_uri(path),
         name=name_from_path(path),
-        tracks=[Track(uri=item.uri, name=item.name) for item in items],
+        tracks=tuple(Track(uri=item.uri, name=item.name) for item in items),
         last_modified=(int(mtime * 1000) if mtime else None),
     )

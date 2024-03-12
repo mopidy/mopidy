@@ -10,7 +10,7 @@ import pytest
 from mopidy.audio import PlaybackState
 from mopidy.core import Core, CoreListener
 from mopidy.internal import models, storage
-from mopidy.models import Track
+from mopidy.models import Ref, TlTrack, Track
 
 from tests import dummy_mixer
 
@@ -198,19 +198,20 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
 
         assert self.state_file.is_file()
         reload_data = storage.load(self.state_file)
-        data = {}
-        data["version"] = mopidy.__version__
-        data["state"] = models.CoreState(
-            tracklist=models.TracklistState(
-                repeat=False,
-                random=False,
-                consume=False,
-                single=False,
-                next_tlid=1,
+        data = models.StoredState(
+            version=mopidy.__version__,
+            state=models.CoreState(
+                tracklist=models.TracklistState(
+                    repeat=False,
+                    random=False,
+                    consume=False,
+                    single=False,
+                    next_tlid=1,
+                ),
+                history=models.HistoryState(),
+                playback=models.PlaybackState(state="stopped", time_position=0),
+                mixer=models.MixerState(),
             ),
-            history=models.HistoryState(),
-            playback=models.PlaybackState(state="stopped", time_position=0),
-            mixer=models.MixerState(),
         )
         assert data == reload_data
 
@@ -230,31 +231,39 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
         assert self.core.history.get_length() == 0
 
     def test_load_state_with_data(self):
-        data = {}
-        data["version"] = mopidy.__version__
-        data["state"] = models.CoreState(
-            tracklist=models.TracklistState(
-                repeat=True,
-                random=True,
-                consume=False,
-                single=False,
-                tl_tracks=[models.TlTrack(tlid=12, track=Track(uri="a:a"))],
-                next_tlid=14,
+        data = models.StoredState(
+            version=mopidy.__version__,
+            state=models.CoreState(
+                tracklist=models.TracklistState(
+                    repeat=True,
+                    random=True,
+                    consume=False,
+                    single=False,
+                    tl_tracks=[TlTrack(tlid=12, track=Track(uri="a:a"))],
+                    next_tlid=14,
+                ),
+                history=models.HistoryState(
+                    history=[
+                        models.HistoryTrack(
+                            timestamp=12,
+                            track=Ref.track(uri="a:a", name="a"),
+                        ),
+                        models.HistoryTrack(
+                            timestamp=13,
+                            track=Ref.track(uri="a:b", name="b"),
+                        ),
+                    ]
+                ),
+                playback=models.PlaybackState(
+                    tlid=12,
+                    state="paused",
+                    time_position=432,
+                ),
+                mixer=models.MixerState(
+                    volume=12,
+                    mute=True,
+                ),
             ),
-            history=models.HistoryState(
-                history=[
-                    models.HistoryTrack(
-                        timestamp=12,
-                        track=models.Ref.track(uri="a:a", name="a"),
-                    ),
-                    models.HistoryTrack(
-                        timestamp=13,
-                        track=models.Ref.track(uri="a:b", name="b"),
-                    ),
-                ]
-            ),
-            playback=models.PlaybackState(tlid=12, state="paused", time_position=432),
-            mixer=models.MixerState(mute=True, volume=12),
         )
         storage.dump(self.state_file, data)
 
@@ -273,7 +282,26 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
         assert self.core.history.get_length() == 2
 
     def test_delete_state_file_on_restore(self):
-        data = {}
+        data = models.StoredState(
+            version="1",
+            state=models.CoreState(
+                tracklist=models.TracklistState(
+                    repeat=True,
+                    random=True,
+                    consume=False,
+                    single=False,
+                    next_tlid=12,
+                    tl_tracks=[TlTrack(tlid=12, track=Track(uri="a:a"))],
+                ),
+                history=models.HistoryState(),
+                playback=models.PlaybackState(
+                    tlid=12,
+                    state="paused",
+                    time_position=432,
+                ),
+                mixer=models.MixerState(),
+            ),
+        )
         storage.dump(self.state_file, data)
         assert self.state_file.is_file()
 

@@ -147,6 +147,9 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         pass  # nothing to do
 
     def save(self, playlist: Playlist) -> Playlist | None:
+        if playlist.uri is None:
+            logger.debug("Playlist has no URI, cannot save")
+            return None
         path = translator.uri_to_path(playlist.uri)
         if not self._is_in_basedir(path):
             logger.debug("Ignoring path outside playlist dir: %s", playlist.uri)

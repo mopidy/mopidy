@@ -13,15 +13,15 @@ class HttpEventsTest(unittest.TestCase):
     def test_track_playback_paused_is_broadcasted(self, broadcast):
         actor.on_event("track_playback_paused", self.io_loop, foo="bar")
 
-        self.assertDictEqual(
-            json.loads(str(broadcast.call_args[0][0])),
-            {"event": "track_playback_paused", "foo": "bar"},
-        )
+        assert json.loads(broadcast.call_args[0][0]) == {
+            "event": "track_playback_paused",
+            "foo": "bar",
+        }
 
     def test_track_playback_resumed_is_broadcasted(self, broadcast):
         actor.on_event("track_playback_resumed", self.io_loop, foo="bar")
 
-        self.assertDictEqual(
-            json.loads(str(broadcast.call_args[0][0])),
-            {"event": "track_playback_resumed", "foo": "bar"},
-        )
+        assert json.loads(broadcast.call_args[0][0]) == {
+            "event": "track_playback_resumed",
+            "foo": "bar",
+        }

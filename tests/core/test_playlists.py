@@ -73,7 +73,7 @@ class PlaylistTest(BasePlaylistsTest):
         assert self.plr1b in result
 
     def test_get_items_selects_the_matching_backend(self):
-        ref = Ref.track()
+        ref = Ref.track(uri="uri", name="Foo")
         self.sp2.get_items.return_value.get.return_value = [ref]
 
         result = self.core.playlists.get_items("dummy2:pl:a")

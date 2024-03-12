@@ -24,6 +24,7 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
+    "msgspec >= 0.18.6",
     "pygobject >= 3.42",
     "pykka >= 4.0",
     "requests >= 2.28",
