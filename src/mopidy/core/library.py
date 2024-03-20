@@ -12,7 +12,7 @@ from pykka.typing import proxy_method
 
 from mopidy import exceptions
 from mopidy.internal import deprecation, validation
-from mopidy.models import Image, Ref, SearchResult, Track
+from mopidy.models import Image, Ref, RefType, SearchResult, Track
 from mopidy.types import DistinctField, Query, SearchField, Uri, UriScheme
 
 if TYPE_CHECKING:
@@ -349,6 +349,18 @@ class LibraryController:
                 )
 
         return results
+
+    def identify(self, uri: Uri) -> RefType | None:
+        """Identify the type of resource the given URI points to.
+
+        :param uri: The URI to identify
+        """
+        backend = self._get_backend(uri)
+        if not backend:
+            return None
+
+        with _backend_error_handling(backend):
+            return backend.library.identify(uri).get()
 
 
 def _normalize_query(query: Query[SearchField]) -> Query[SearchField]:
