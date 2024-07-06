@@ -38,7 +38,7 @@ docs = [
     "sphinx-autodoc-typehints >= 1.12",
     "sphinx-rtd-theme >= 1.2",
 ]
-lint = ["ruff == 0.3.0"]
+lint = ["ruff == 0.5.0"]
 test = ["pytest >= 7.2", "pytest-cov >= 4.0", "responses >= 0.18"]
 typing = [
     "pygobject-stubs",
