@@ -278,17 +278,17 @@ class MockBackendCorePlaylistsBase(unittest.TestCase):
 class AsListBadBackendsTest(MockBackendCorePlaylistsBase):
     def test_backend_raises_exception(self, logger):
         self.playlists.as_list.return_value.get.side_effect = Exception
-        assert [] == self.core.playlists.as_list()
+        assert self.core.playlists.as_list() == []
         logger.exception.assert_called_with(mock.ANY, "DummyBackend")
 
     def test_backend_returns_none(self, logger):
         self.playlists.as_list.return_value.get.return_value = None
-        assert [] == self.core.playlists.as_list()
+        assert self.core.playlists.as_list() == []
         assert not logger.error.called
 
     def test_backend_returns_wrong_type(self, logger):
         self.playlists.as_list.return_value.get.return_value = "abc"
-        assert [] == self.core.playlists.as_list()
+        assert self.core.playlists.as_list() == []
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
 

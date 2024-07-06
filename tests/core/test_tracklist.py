@@ -258,7 +258,7 @@ class TracklistSaveLoadStateTest(unittest.TestCase):
         assert self.core.tracklist.get_random() is False
         assert self.core.tracklist._next_tlid == 1
         assert self.core.tracklist.get_length() == 0
-        assert [] == self.core.tracklist.get_tl_tracks()
+        assert self.core.tracklist.get_tl_tracks() == []
         assert self.core.tracklist.get_version() == old_version
 
     def test_load_tracklist_only(self):

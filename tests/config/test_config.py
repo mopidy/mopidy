@@ -8,19 +8,19 @@ from tests import path_to_data_dir
 
 class LoadConfigTest(unittest.TestCase):
     def test_load_nothing(self):
-        assert {} == config._load([], [], [])
+        assert config._load([], [], []) == {}
 
     def test_load_missing_file(self):
         file0 = path_to_data_dir("file0.conf")
         result = config._load([file0], [], [])
-        assert {} == result
+        assert result == {}
 
     @mock.patch("os.access")
     def test_load_nonreadable_file(self, access_mock):
         access_mock.return_value = False
         file1 = path_to_data_dir("file1.conf")
         result = config._load([file1], [], [])
-        assert {} == result
+        assert result == {}
 
     def test_load_single_default(self):
         default = b"[foo]\nbar = baz"
@@ -103,33 +103,33 @@ class ValidateTest(unittest.TestCase):
 
     def test_empty_config_no_schemas(self):
         conf, errors = config._validate({}, [])
-        assert {} == conf
-        assert {} == errors
+        assert conf == {}
+        assert errors == {}
 
     def test_config_no_schemas(self):
         raw_config = {"foo": {"bar": "baz"}}
         conf, errors = config._validate(raw_config, [])
-        assert {} == conf
-        assert {} == errors
+        assert conf == {}
+        assert errors == {}
 
     def test_empty_config_single_schema(self):
         conf, errors = config._validate({}, [self.schema])
-        assert {"foo": {"bar": None}} == conf
-        assert {"foo": {"bar": "config key not found."}} == errors
+        assert conf == {"foo": {"bar": None}}
+        assert errors == {"foo": {"bar": "config key not found."}}
 
     def test_config_single_schema(self):
         raw_config = {"foo": {"bar": "baz"}}
         conf, errors = config._validate(raw_config, [self.schema])
-        assert {"foo": {"bar": "baz"}} == conf
-        assert {} == errors
+        assert conf == {"foo": {"bar": "baz"}}
+        assert errors == {}
 
     def test_config_single_schema_config_error(self):
         raw_config = {"foo": {"bar": "baz"}}
         self.schema["bar"] = mock.Mock()
         self.schema["bar"].deserialize.side_effect = ValueError("bad")
         conf, errors = config._validate(raw_config, [self.schema])
-        assert {"foo": {"bar": None}} == conf
-        assert {"foo": {"bar": "bad"}} == errors
+        assert conf == {"foo": {"bar": None}}
+        assert errors == {"foo": {"bar": "bad"}}
 
     # TODO: add more tests
 

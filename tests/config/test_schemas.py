@@ -22,42 +22,42 @@ class ConfigSchemaTest(unittest.TestCase):
         del self.values["foo"]
 
         result, errors = self.schema.deserialize(self.values)
-        assert {"foo": any_unicode} == errors
+        assert errors == {"foo": any_unicode}
         assert result.pop("foo") is None
         assert result.pop("bar") is not None
         assert result.pop("baz") is not None
-        assert {} == result
+        assert result == {}
 
     def test_deserialize_with_extra_value(self):
         self.values["extra"] = "123"
 
         result, errors = self.schema.deserialize(self.values)
-        assert {"extra": any_unicode} == errors
+        assert errors == {"extra": any_unicode}
         assert result.pop("foo") is not None
         assert result.pop("bar") is not None
         assert result.pop("baz") is not None
-        assert {} == result
+        assert result == {}
 
     def test_deserialize_with_deserialization_error(self):
         self.schema["foo"].deserialize.side_effect = ValueError("failure")
 
         result, errors = self.schema.deserialize(self.values)
-        assert {"foo": "failure"} == errors
+        assert errors == {"foo": "failure"}
         assert result.pop("foo") is None
         assert result.pop("bar") is not None
         assert result.pop("baz") is not None
-        assert {} == result
+        assert result == {}
 
     def test_deserialize_with_multiple_deserialization_errors(self):
         self.schema["foo"].deserialize.side_effect = ValueError("failure")
         self.schema["bar"].deserialize.side_effect = ValueError("other")
 
         result, errors = self.schema.deserialize(self.values)
-        assert {"foo": "failure", "bar": "other"} == errors
+        assert errors == {"foo": "failure", "bar": "other"}
         assert result.pop("foo") is None
         assert result.pop("bar") is None
         assert result.pop("baz") is not None
-        assert {} == result
+        assert result == {}
 
     def test_deserialize_deserialization_unknown_and_missing_errors(self):
         self.values["extra"] = "123"
@@ -79,7 +79,7 @@ class ConfigSchemaTest(unittest.TestCase):
         self.schema["foo"] = types.Deprecated()
 
         result, errors = self.schema.deserialize(self.values)
-        assert ["bar", "baz"] == sorted(result.keys())
+        assert sorted(result.keys()) == ["bar", "baz"]
         assert "foo" not in errors
 
 

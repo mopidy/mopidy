@@ -108,7 +108,7 @@ class MopidyRPCHandlerTest(HttpServerTest):
             headers={"Content-Type": "application/json"},
         )
 
-        assert {
+        assert tornado.escape.json_decode(response.body) == {
             "jsonrpc": "2.0",
             "id": None,
             "error": {
@@ -116,7 +116,7 @@ class MopidyRPCHandlerTest(HttpServerTest):
                 "code": (-32600),
                 "data": "'jsonrpc' member must be included",
             },
-        } == tornado.escape.json_decode(response.body)
+        }
 
     def test_should_return_parse_error(self):
         cmd = "{[[[]}"
@@ -128,11 +128,11 @@ class MopidyRPCHandlerTest(HttpServerTest):
             headers={"Content-Type": "application/json"},
         )
 
-        assert {
+        assert tornado.escape.json_decode(response.body) == {
             "jsonrpc": "2.0",
             "id": None,
             "error": {"message": "Parse error", "code": (-32700)},
-        } == tornado.escape.json_decode(response.body)
+        }
 
     def test_should_return_mopidy_version(self):
         cmd = tornado.escape.json_encode(
@@ -151,11 +151,11 @@ class MopidyRPCHandlerTest(HttpServerTest):
             headers={"Content-Type": "application/json"},
         )
 
-        assert {
+        assert tornado.escape.json_decode(response.body) == {
             "jsonrpc": "2.0",
             "id": 1,
             "result": mopidy.__version__,
-        } == tornado.escape.json_decode(response.body)
+        }
 
 
 class MopidyRPCHandlerNoCSRFProtectionTest(HttpServerTest):

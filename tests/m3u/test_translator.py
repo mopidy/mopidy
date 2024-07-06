@@ -110,7 +110,7 @@ def test_load_items(contents, basedir, expected):
     if expected is not None:
         assert [Ref.track(uri=expected[0], name=expected[1])] == result
     else:
-        assert [] == result
+        assert result == []
 
 
 def test_dump_items():
