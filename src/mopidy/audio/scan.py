@@ -109,13 +109,13 @@ def _setup_pipeline(uri: str, proxy_config=None) -> tuple[Gst.Pipeline, utils.Si
     return pipeline, signals
 
 
-def _has_src_pads(element):
+def _has_src_pads(element) -> bool:
     pads = []
     element.iterate_src_pads().foreach(pads.append)
     return bool(pads)
 
 
-def _has_dynamic_src_pad(element):
+def _has_dynamic_src_pad(element) -> bool:
     for template in element.get_pad_template_list():
         if (
             template.direction == Gst.PadDirection.SRC
@@ -125,7 +125,7 @@ def _has_dynamic_src_pad(element):
     return False
 
 
-def _setup_decodebin(element, pad, pipeline, signals):
+def _setup_decodebin(element, pad, pipeline, signals) -> None:  # noqa: ARG001
     typefind = Gst.ElementFactory.make("typefind")
     if typefind is None:
         raise exceptions.AudioException("Failed to create GStreamer typefind element.")
@@ -134,9 +134,9 @@ def _setup_decodebin(element, pad, pipeline, signals):
     if decodebin is None:
         raise exceptions.AudioException("Failed to create GStreamer decodebin element.")
 
-    for element in (typefind, decodebin):
-        pipeline.add(element)
-        element.sync_state_with_parent()
+    for el in (typefind, decodebin):
+        pipeline.add(el)
+        el.sync_state_with_parent()
 
     pad.link(typefind.get_static_pad("sink"))
     typefind.link(decodebin)
