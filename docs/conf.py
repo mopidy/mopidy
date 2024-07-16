@@ -1,5 +1,6 @@
 """Mopidy documentation build configuration file"""
 
+import os
 from importlib.metadata import version
 
 # -- Custom Sphinx setup ------------------------------------------------------
@@ -41,7 +42,7 @@ release = version("Mopidy")
 version = ".".join(release.split(".")[:2])
 
 # To make the build reproducible, avoid using today's date in the manpages
-today = "2021"
+today = "2024"
 
 exclude_trees = ["_build"]
 
@@ -61,6 +62,9 @@ html_split_index = False
 html_show_sourcelink = True
 
 htmlhelp_basename = "Mopidy"
+
+# Set canonical URL from the Read the Docs Domain
+html_baseurl = os.environ.get("READTHEDOCS_CANONICAL_URL", "")
 
 
 # -- Options for LaTeX output -------------------------------------------------
