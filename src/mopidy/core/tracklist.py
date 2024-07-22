@@ -341,10 +341,10 @@ class TracklistController:
         # 1 - len(tracks) Thus 'position - 1' will always be within the list.
         return self._tl_tracks[position - 1]
 
-    def add(  # noqa: C901
+    def add(  # noqa: C901, PLR0912
         self,
         tracks: Iterable[Track] | None = None,
-        at_position: int | None = None,
+        at_position: int | str | None = None,
         uris: Iterable[Uri] | None = None,
     ) -> list[TlTrack]:
         """Add tracks to the tracklist.
@@ -355,7 +355,16 @@ class TracklistController:
 
         If ``at_position`` is given, the tracks are inserted at the given
         position in the tracklist. If ``at_position`` is not given, the tracks
-        are appended to the end of the tracklist.
+        are appended to the end of the tracklist. To insert tracks at the
+        beginning of the tracklist, pass ``0``. Supply a negative integer to
+        calculate a position from the end of the tracklist, as opposed to the
+        beginning of the tracklist.
+
+        The ``at_position`` argument also accepts offset values, supplied as a
+        string. They take the form "+N" or "-N". For example, "+0" will insert
+        new tracks directly after the current track, and "-2" will insert new
+        tracks two positions above the current track. The syntax matches MPD's
+        support for offset values.
 
         Triggers the :meth:`mopidy.core.CoreListener.tracklist_changed` event.
 
@@ -365,6 +374,9 @@ class TracklistController:
 
         .. versionadded:: 1.0
             The ``uris`` argument.
+
+        .. versionchanged:: 4.0
+            The ``at_position`` argument now accepts offset values.
 
         .. deprecated:: 1.0
             The ``tracks`` argument. Use ``uris``.
@@ -376,7 +388,6 @@ class TracklistController:
             validation.check_instances(tracks, Track)
         if uris is not None:
             validation.check_uris(uris)
-        validation.check_integer(at_position or 0)
 
         if tracks:
             deprecation.warn("core.tracklist.add:tracks_arg")
@@ -390,6 +401,27 @@ class TracklistController:
 
         tl_tracks = []
         max_length = self.core._config["core"]["max_tracklist_length"]
+
+        if at_position is not None:
+            if isinstance(at_position, str):
+                current_index = self.index()
+                if current_index is None:
+                    raise exceptions.ValidationError(
+                        "Cannot use offset when no track is playing."
+                    )
+                at_position = validation.check_offset_str(
+                    at_position,
+                    current_index,
+                    msg=(
+                        "Expected an integer, or a string representing "
+                        "an offset from the current track, with a prefix of '+' or '-'."
+                    ),
+                )
+            elif not isinstance(at_position, int):
+                raise exceptions.ValidationError(
+                    "Expected an integer, or a string representing "
+                    "an offset from the current track, with a prefix of '+' or '-'.",
+                )
 
         for track in tracks:
             if self.get_length() >= max_length:
