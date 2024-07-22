@@ -203,16 +203,14 @@ class TracklistSaveLoadStateTest(unittest.TestCase):
         consume = True
         next_tlid = len(tl_tracks) + 1
         self.core.tracklist.set_consume(consume)
-        target = TracklistState(
+        assert self.core.tracklist._save_state() == TracklistState(
             consume=consume,
             repeat=False,
             single=False,
             random=False,
             next_tlid=next_tlid,
-            tl_tracks=tl_tracks,
+            tl_tracks=tuple(tl_tracks),
         )
-        value = self.core.tracklist._save_state()
-        assert target == value
 
     def test_load(self):
         old_version = self.core.tracklist.get_version()

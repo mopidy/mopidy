@@ -22,6 +22,8 @@ Dependencies
 
 - GStreamer >= 1.22.0 is now required.
 
+- msgspec >= 0.18.6 is now required.
+
 - PyGObject >= 3.42 is now an explicit Python dependency, and not something we
   assume you'll install together with GStreamer.
 
@@ -95,7 +97,11 @@ Models
 
 Changes to the data models may affect any Mopidy extension or client.
 
-- No changes so far.
+- Our models are now based on the `msgspec <https://jcristharif.com/msgspec/>`_
+  library, which means that they are now fully typed. Memory usage should be
+  similar, but JSON encodding/decoding a lot faster. This change might cause
+  issues in extensions that have not been tested and updated to work with Mopidy
+  4.0.
 
 Audio API
 ---------

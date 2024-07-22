@@ -1,4 +1,5 @@
 import unittest
+from typing import cast
 from unittest import mock
 
 import pykka
@@ -21,7 +22,9 @@ class BackendEventsTest(unittest.TestCase):
         ]
 
         with deprecation.ignore():
-            self.core = core.Core.start(config, backends=[self.backend]).proxy()
+            self.core = cast(
+                core.CoreProxy, core.Core.start(config, backends=[self.backend]).proxy()
+            )
 
     def tearDown(self):
         pykka.ActorRegistry.stop_all()

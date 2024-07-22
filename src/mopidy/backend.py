@@ -282,10 +282,12 @@ class PlaybackProvider:
 
         :param track: the track to play
         """
+        if track.uri is None:
+            return False
         uri = self.translate_uri(track.uri)
         if uri != track.uri:
             logger.debug("Backend translated URI from %s to %s", track.uri, uri)
-        if not uri:
+        if uri is None:
             return False
         self.audio.set_source_setup_callback(self.on_source_setup).get()
         self.audio.set_uri(

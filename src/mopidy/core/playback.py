@@ -12,13 +12,14 @@ from mopidy.audio import PlaybackState
 from mopidy.core import listener
 from mopidy.exceptions import CoreError
 from mopidy.internal import models, validation
-from mopidy.types import DurationMs, UriScheme
+from mopidy.models import TlTrack
+from mopidy.types import DurationMs, TracklistId, UriScheme
 
 if TYPE_CHECKING:
     from mopidy.audio.actor import AudioProxy
     from mopidy.backend import BackendProxy
     from mopidy.core.actor import Backends, Core
-    from mopidy.models import TlTrack, Track
+    from mopidy.models import Track
     from mopidy.types import Uri
 
 logger = logging.getLogger(__name__)
@@ -53,7 +54,7 @@ class PlaybackController:
             self._audio.set_about_to_finish_callback(self._on_about_to_finish_callback)
 
     def _get_backend(self, tl_track: TlTrack | None) -> BackendProxy | None:
-        if tl_track is None:
+        if tl_track is None or tl_track.track.uri is None:
             return None
         uri_scheme = UriScheme(urllib.parse.urlparse(tl_track.track.uri).scheme)
         return self.backends.with_playback.get(uri_scheme, None)
@@ -79,18 +80,24 @@ class PlaybackController:
 
         Returns a :class:`mopidy.models.Track` or :class:`None`.
         """
-        return getattr(self.get_current_tl_track(), "track", None)
+        match self.get_current_tl_track():
+            case TlTrack(_tlid, track):
+                return track
+            case None:
+                return None
 
-    def get_current_tlid(self) -> int | None:
-        """Get the currently playing or selected TLID.
+    def get_current_tlid(self) -> TracklistId | None:
+        """Get the currently playing or selected tracklist ID.
 
         Extracted from :meth:`get_current_tl_track` for convenience.
 
-        Returns a :class:`int` or :class:`None`.
-
         .. versionadded:: 1.1
         """
-        return getattr(self.get_current_tl_track(), "tlid", None)
+        match self.get_current_tl_track():
+            case TlTrack(tlid, _track):
+                return tlid
+            case None:
+                return None
 
     def get_stream_title(self) -> str | None:
         """Get the current stream title or :class:`None`."""
@@ -282,7 +289,7 @@ class PlaybackController:
 
     def play(
         self,
-        tlid: int | None = None,
+        tlid: TracklistId | None = None,
     ) -> None:
         """Play a track from the tracklist, specified by the tracklist ID.
 
