@@ -31,7 +31,7 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
 
         blacklist = config["stream"]["metadata_blacklist"]
         self._blacklist_re = re.compile(
-            rf"^({"|".join(fnmatch.translate(u) for u in blacklist)})$"
+            rf"^({'|'.join(fnmatch.translate(u) for u in blacklist)})$"
         )
 
         self._timeout = config["stream"]["timeout"]
