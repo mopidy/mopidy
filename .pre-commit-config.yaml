@@ -12,9 +12,9 @@ repos:
       - id: check-toml
   - repo: local
     hooks:
-      - id: ruff
+      - id: ruff-check
         name: ruff check
-        entry: ruff
+        entry: ruff check
         language: system
         types: [python]
       - id: ruff-format
