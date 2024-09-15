@@ -5,6 +5,7 @@ used in tests of the frontends.
 """
 
 import pykka
+
 from mopidy import backend
 from mopidy.models import Playlist, Ref, SearchResult
 

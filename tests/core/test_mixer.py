@@ -3,9 +3,9 @@ from unittest import mock
 
 import pykka
 import pytest
+
 from mopidy import core, mixer
 from mopidy.internal.models import MixerState
-
 from tests import dummy_mixer
 
 

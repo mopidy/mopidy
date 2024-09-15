@@ -2,8 +2,8 @@ import unittest
 from unittest import mock
 
 import pytest
-from mopidy import backend
 
+from mopidy import backend
 from tests import dummy_backend
 
 

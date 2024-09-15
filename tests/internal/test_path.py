@@ -4,6 +4,7 @@ import tempfile
 import unittest
 
 import pytest
+
 from mopidy.internal import path
 from mopidy.internal.gi import GLib
 

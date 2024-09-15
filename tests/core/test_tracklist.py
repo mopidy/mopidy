@@ -2,6 +2,7 @@ import unittest
 from unittest import mock
 
 import pytest
+
 from mopidy import backend, core
 from mopidy.internal.models import TracklistState
 from mopidy.models import TlTrack, Track

@@ -4,9 +4,10 @@ import urllib
 from pathlib import Path
 from unittest import mock
 
-import mopidy
 import tornado.testing
 import tornado.wsgi
+
+import mopidy
 from mopidy.http import actor, handlers
 
 

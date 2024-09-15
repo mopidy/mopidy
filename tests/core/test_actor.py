@@ -4,14 +4,14 @@ import tempfile
 import unittest
 from unittest import mock
 
-import mopidy
 import pykka
 import pytest
+
+import mopidy
 from mopidy.audio import PlaybackState
 from mopidy.core import Core, CoreListener
 from mopidy.internal import models, storage
 from mopidy.models import Track
-
 from tests import dummy_mixer
 
 

@@ -3,6 +3,7 @@ import unittest
 from unittest import mock
 
 import pytest
+
 from mopidy import commands
 
 

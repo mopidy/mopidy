@@ -3,7 +3,6 @@ import unittest
 from unittest import mock
 
 from mopidy.config import schemas, types
-
 from tests import any_unicode
 
 

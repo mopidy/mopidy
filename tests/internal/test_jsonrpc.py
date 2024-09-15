@@ -4,9 +4,9 @@ from unittest import mock
 
 import pykka
 import pytest
+
 from mopidy import core, models
 from mopidy.internal import deprecation, jsonrpc
-
 from tests import dummy_backend
 
 
