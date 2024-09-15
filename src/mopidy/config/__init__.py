@@ -197,8 +197,10 @@ def format_initial(extensions_data: list[ExtensionData]) -> str:
 
     versions = [f"Mopidy {mopidy.__version__}"]
     extensions_data = sorted(extensions_data, key=lambda d: d.extension.dist_name)
-    for data in extensions_data:
-        versions.append(f"{data.extension.dist_name} {data.extension.version}")
+    versions.extend(
+        f"{data.extension.dist_name} {data.extension.version}"
+        for data in extensions_data
+    )
 
     header = _INITIAL_HELP.strip().format(versions="\n#   ".join(versions))
     formatted_config = _format(
