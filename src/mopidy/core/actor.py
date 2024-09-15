@@ -181,7 +181,7 @@ class Core(
                 ]
             if len(coverage):
                 self._load_state(coverage)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Restore state: Unexpected error: %s", str(e))
 
     def _teardown(self) -> None:
@@ -193,7 +193,7 @@ class Core(
                 and self._config["core"]["restore_state"]
             ):
                 self._save_state()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Unexpected error while saving state: %s", str(e))
 
     def _get_data_dir(self) -> Path:

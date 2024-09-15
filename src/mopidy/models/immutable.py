@@ -143,7 +143,7 @@ class _ValidatedImmutableObjectMeta(type, Generic[T]):
         name: str,
         bases: tuple[type, ...],
         attrs: dict[str, Any],
-    ) -> _ValidatedImmutableObjectMeta:
+    ) -> _ValidatedImmutableObjectMeta:  # noqa: PYI019
         fields = {}
 
         for base in bases:  # Copy parent fields over to our state

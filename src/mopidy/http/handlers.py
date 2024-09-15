@@ -117,7 +117,7 @@ def _send_broadcast(
     # to succeed, so catch everything.
     try:
         client.write_message(msg)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         logger.debug(
             f"Broadcast of WebSocket message to "
             f"{client.request.remote_ip} failed: {exc}",
@@ -180,7 +180,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                     self.request.remote_ip,
                     response,
                 )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error(f"WebSocket request error: {exc}")
             self.close()
 
@@ -265,8 +265,8 @@ class JsonRpcHandler(tornado.web.RequestHandler):
                     self.request.remote_ip,
                     response,
                 )
-        except Exception as e:
-            logger.error("HTTP JSON-RPC request error: %s", e)
+        except Exception as exc:  # noqa: BLE001
+            logger.error("HTTP JSON-RPC request error: %s", exc)
             self.write_error(500)
 
     def set_extra_headers(self) -> None:

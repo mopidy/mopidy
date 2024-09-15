@@ -87,9 +87,9 @@ def setup_logging(
         path = config["logging"]["config_file"]
         try:
             logging.config.fileConfig(path, disable_existing_loggers=False)
-        except Exception as e:
+        except Exception as exc:  # noqa: BLE001
             # Catch everything as logging does not specify what can go wrong.
-            logger.error("Loading logging config %r failed. %s", path, e)
+            logger.error("Loading logging config %r failed. %s", path, exc)
 
     loglevels = config.get("loglevels", {})
 
@@ -206,7 +206,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
             self.stream.write(message)
             self.stream.write(getattr(self, "terminator", "\n"))
             self.flush()
-        except Exception:
+        except Exception:  # noqa: BLE001
             self.handleError(record)
 
     def format(self, record: LogRecord) -> str:
