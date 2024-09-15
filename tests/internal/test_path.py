@@ -176,7 +176,7 @@ class ExpandPathTest(unittest.TestCase):
     def test_empty_path(self):
         result = path.expand_path("")
 
-        assert result == pathlib.Path().resolve()
+        assert result == pathlib.Path.cwd()
 
     def test_absolute_path(self):
         result = path.expand_path("/tmp/foo")
