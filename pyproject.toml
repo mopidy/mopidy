@@ -118,7 +118,6 @@ ignore = [
     "FIX003",  # line-contains-fixme
     "FIX004",  # line-contains-hack
     "G004",    # logging-f-string
-    "ISC001",  # single-line-implicit-string-concatenation
     "PLR2004", # magic-value-comparison
     "PLW2901", # redefined-loop-name
     "RET504",  # unnecessary-assign
@@ -130,6 +129,10 @@ ignore = [
     "TCH003",  # typing-only-standard-library-import
     "TRY003",  # raise-vanilla-args
     "TRY400",  # error-instead-of-exception
+    #
+    # Conflicting with `ruff format`
+    "COM812", # missing-trailing-comma
+    "ISC001", # single-line-implicit-string-concatenation
 ]
 
 [tool.ruff.lint.per-file-ignores]
