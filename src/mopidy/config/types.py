@@ -56,6 +56,8 @@ class DeprecatedValue:
 
 
 class _TransformedValue(str):
+    __slots__ = ("original",)
+
     def __new__(cls, _original, transformed):
         return super().__new__(cls, transformed)
 
