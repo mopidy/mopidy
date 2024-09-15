@@ -15,7 +15,7 @@ class ModelJSONEncoder(json.JSONEncoder):
     """
 
     def default(self, o):
-        if isinstance(o, immutable.ImmutableObject):
+        if isinstance(o, immutable.ValidatedImmutableObject):
             return o.serialize()
         return json.JSONEncoder.default(self, o)
 

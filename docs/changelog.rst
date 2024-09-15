@@ -97,7 +97,9 @@ Models
 
 Changes to the data models may affect any Mopidy extension or client.
 
-- No changes so far.
+- The :class:`mopidy.models.ImmutableObject` class has been removed. Mopidy
+  itself replaced this class with another implementation in v1.0.5 nine years
+  ago.
 
 Audio API
 ---------

@@ -82,9 +82,6 @@ Data model API
 Data model helpers
 ==================
 
-.. autoclass:: mopidy.models.ImmutableObject
-    :members:
-
 .. autoclass:: mopidy.models.ValidatedImmutableObject
     :members: replace
 
