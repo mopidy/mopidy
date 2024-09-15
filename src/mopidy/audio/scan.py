@@ -1,9 +1,8 @@
-import collections
 import logging
 import time
 from enum import IntEnum
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, NamedTuple, cast
 
 from mopidy import exceptions
 from mopidy.audio import tags as tags_lib
@@ -26,10 +25,14 @@ class GstAutoplugSelectResult(IntEnum):
     SKIP = 2
 
 
-_Result = collections.namedtuple(
-    "_Result",
-    ("uri", "tags", "duration", "seekable", "mime", "playable"),
-)
+class _Result(NamedTuple):
+    uri: str
+    tags: dict[str, Any]
+    duration: int | None
+    seekable: bool
+    mime: str | None
+    playable: bool
+
 
 logger = logging.getLogger(__name__)
 
@@ -47,11 +50,19 @@ class Scanner:
     :type event: int
     """
 
-    def __init__(self, timeout=1000, proxy_config=None):
+    def __init__(
+        self,
+        timeout: int = 1000,
+        proxy_config: dict[str, Any] | None = None,
+    ) -> None:
         self._timeout_ms = int(timeout)
         self._proxy_config = proxy_config or {}
 
-    def scan(self, uri, timeout=None):
+    def scan(
+        self,
+        uri: str,
+        timeout: float | None = None,
+    ) -> _Result:
         """Scan the given uri collecting relevant metadata.
 
         :param uri: URI of the resource to scan.
