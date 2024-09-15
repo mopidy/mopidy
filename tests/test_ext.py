@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 
 from mopidy import config, exceptions, ext
-from tests import IsA, any_unicode
+from tests import IsA, any_str
 
 
 class DummyExtension(ext.Extension):
@@ -95,7 +95,7 @@ class TestLoadExtensions:
             any_testextension,
             mock_entry_point,
             IsA(config.ConfigSchema),
-            any_unicode,
+            any_str,
             None,
         )
         assert ext.load_extensions() == [expected]

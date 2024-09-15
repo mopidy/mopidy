@@ -25,4 +25,3 @@ class IsA:
 
 any_int = IsA(int)
 any_str = IsA(str)
-any_unicode = any_str  # TODO remove
