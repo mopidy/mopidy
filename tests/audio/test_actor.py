@@ -95,27 +95,27 @@ class AudioTest(BaseTest):
 
     @unittest.SkipTest
     def test_deliver_data(self):
-        pass  # TODO
+        pass  # TODO: Implement test
 
     @unittest.SkipTest
     def test_end_of_data_stream(self):
-        pass  # TODO
+        pass  # TODO: Implement test
 
     @unittest.SkipTest
     def test_set_mute(self):
-        pass  # TODO Probably needs a fakemixer with a mixer track
+        pass  # TODO: Implement test
 
     @unittest.SkipTest
     def test_set_state_encapsulation(self):
-        pass  # TODO
+        pass  # TODO: Implement test
 
     @unittest.SkipTest
     def test_set_position(self):
-        pass  # TODO
+        pass  # TODO: Implement test
 
     @unittest.SkipTest
     def test_invalid_output_raises_error(self):
-        pass  # TODO
+        pass  # TODO: Implement test
 
 
 class AudioDummyTest(DummyMixin, AudioTest):
@@ -522,15 +522,15 @@ class MixerTest(BaseTest):
 
     @unittest.SkipTest
     def test_set_state_encapsulation(self):
-        pass  # TODO
+        pass  # TODO: Implement test
 
     @unittest.SkipTest
     def test_set_position(self):
-        pass  # TODO
+        pass  # TODO: Implement test
 
     @unittest.SkipTest
     def test_invalid_output_raises_error(self):
-        pass  # TODO
+        pass  # TODO: Implement test
 
 
 class AudioStateTest(unittest.TestCase):

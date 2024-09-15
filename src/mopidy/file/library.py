@@ -145,7 +145,7 @@ class FileLibraryProvider(backend.LibraryProvider):
             if len(media_dir_split) == 2:
                 name = media_dir_split[1]
             else:
-                # TODO Mpd client should accept / in dir name
+                # TODO: MPD client should accept `/` in dir name
                 name = media_dir_split[0].replace(os.sep, "+")
 
             yield MediaDir(path=local_path, name=name)

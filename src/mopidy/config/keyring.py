@@ -8,7 +8,7 @@ except ImportError:
     dbus = None
 
 
-# XXX: Hack to workaround introspection bug caused by gnome-keyring, should be
+# HACK: Hack to workaround introspection bug caused by gnome-keyring, should be
 # fixed by version 3.5 per:
 # https://git.gnome.org/browse/gnome-keyring/commit/?id=5dccbe88eb94eea9934e2b7
 EMPTY_STRING = dbus.String("", variant_level=1) if dbus else ""

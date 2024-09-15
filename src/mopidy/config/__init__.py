@@ -43,7 +43,7 @@ if TYPE_CHECKING:
 
 
 __all__ = [
-    # TODO List everything that is reexported, not just the unused parts.
+    # TODO: List everything that is reexported, not just the unused parts.
     "ConfigValue",
     "Float",
     "List",

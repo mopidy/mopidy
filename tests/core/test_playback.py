@@ -307,8 +307,8 @@ class TestPreviousHandling(BaseTest):
         [
             (False, False, False, False, 0, None),
             (False, False, False, False, 1, 0),
-            (True, False, False, False, 0, 0),  # FIXME: #1694
-            (True, False, False, False, 1, 1),  # FIXME: #1694
+            (True, False, False, False, 0, 0),  # TODO: #1694
+            (True, False, False, False, 1, 1),  # TODO: #1694
         ],
     )
     def test_previous_all_modes(self, repeat, random, single, consume, index, result):

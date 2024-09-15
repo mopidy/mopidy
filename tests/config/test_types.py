@@ -442,7 +442,7 @@ class TestBoolean:
         assert result == "false"
 
     def test_serialize_none_as_false(self):
-        # TODO We should consider making `None` an invalid value, but we have
+        # TODO: We should consider making `None` an invalid value, but we have
         # existing code that assumes it to work like False.
 
         cv = types.Boolean()

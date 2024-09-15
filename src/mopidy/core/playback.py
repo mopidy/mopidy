@@ -270,7 +270,7 @@ class PlaybackController:
                 logger.info("No playable track in the list.")
                 break
 
-        # TODO return result?
+        # TODO: return result?
 
     def pause(self) -> None:
         """Pause playback."""

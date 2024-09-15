@@ -103,7 +103,7 @@ class TracklistTest(unittest.TestCase):
         with pytest.raises(ValueError):
             self.core.tracklist.filter({"uri": "a"})
 
-    # TODO Extract tracklist tests from the local backend tests
+    # TODO: Extract tracklist tests from the local backend tests
 
 
 class TracklistIndexTest(unittest.TestCase):

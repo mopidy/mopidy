@@ -44,7 +44,7 @@ _GST_STATE_MAPPING: dict[Gst.State, PlaybackState] = {
 class _Outputs(Gst.Bin):
     def __init__(self):
         Gst.Bin.__init__(self)
-        # TODO gst1: Set 'outputs' as the Bin name for easier debugging
+        # TODO(gst1): Set 'outputs' as the Bin name for easier debugging
 
         tee = Gst.ElementFactory.make("tee")
         if tee is None:
@@ -59,7 +59,7 @@ class _Outputs(Gst.Bin):
         self.add_pad(ghost_pad)
 
     def add_output(self, description) -> None:
-        # XXX This only works for pipelines not in use until #790 gets done.
+        # NOTE: This only works for pipelines not in use until #790 gets done.
         try:
             output = Gst.parse_bin_from_description(
                 description,
@@ -202,7 +202,7 @@ class _Handler:
         )
 
         if new_state == Gst.State.READY and pending_state == Gst.State.NULL:
-            # XXX: We're not called on the last state change when going down to
+            # HACK: We're not called on the last state change when going down to
             # NULL, so we rewrite the second to last call to get the expected
             # behavior.
             new_state = Gst.State.NULL
@@ -219,7 +219,7 @@ class _Handler:
 
         target_state = _GST_STATE_MAPPING.get(self._audio._target_state)
         if target_state is None:
-            # XXX: Workaround for #1430, to be fixed properly by #1222.
+            # HACK: Workaround for #1430, to be fixed properly by #1222.
             logger.warning("Race condition happened. See #1222 and #1430.")
             return
         if target_state == new_state:
@@ -588,7 +588,7 @@ class Audio(pykka.ThreadingActor):
         """
         assert self._playbin
 
-        # XXX: Hack to workaround issue on Mac OS X where volume level
+        # HACK: Hack to workaround issue on Mac OS X where volume level
         # does not persist between track changes. mopidy/mopidy#886
         current_volume = self.mixer.get_volume() if self.mixer is not None else None
 

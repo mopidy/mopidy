@@ -126,7 +126,7 @@ def _send_broadcast(
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
-    # XXX This set is shared by all WebSocketHandler objects. This isn't
+    # NOTE: This set is shared by all WebSocketHandler objects. This isn't
     # optimal, but there's currently no use case for having more than one of
     # these anyway.
     clients: ClassVar[set[WebSocketHandler]] = set()

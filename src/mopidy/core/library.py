@@ -243,7 +243,7 @@ class LibraryController:
                 if result is not None:
                     validation.check_instance(result, Mapping)
                     for uri, tracks in result.items():
-                        # TODO Consider making Track.uri field mandatory, and
+                        # TODO: Consider making Track.uri field mandatory, and
                         # then remove this filtering of tracks without URIs.
                         validation.check_instances(tracks, Track)
                         results[uri] = [track for track in tracks if track.uri]

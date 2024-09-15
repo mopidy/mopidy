@@ -179,7 +179,7 @@ def _unwrap_stream(  # noqa: PLR0911  # TODO: cleanup the return value of this.
             )
             return uri, None
 
-        # TODO Test streams and return first that seems to be playable
+        # TODO: Test streams and return first that seems to be playable
         new_uri = uris[0]
         logger.debug("Parsed playlist (%s) and found new URI: %s", uri, new_uri)
         uri = Uri(urllib.parse.urljoin(uri, new_uri))

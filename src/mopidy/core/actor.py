@@ -116,7 +116,7 @@ class Core(
         new_state: PlaybackState,
         target_state: PlaybackState | None,
     ) -> None:
-        # XXX: This is a temporary fix for issue #232 while we wait for a more
+        # NOTE: This is a temporary fix for issue #232 while we wait for a more
         # permanent solution with the implementation of issue #234. When the
         # Spotify play token is lost, the Spotify backend pauses audio
         # playback, but mopidy.core doesn't know this, so we need to update
