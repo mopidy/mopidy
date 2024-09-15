@@ -9,7 +9,7 @@ on:
 jobs:
   main:
     name: "Test: Python 3.12"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     # The container should be automatically updated from time to time.
     container: ubuntu:devel
