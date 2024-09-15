@@ -1,12 +1,11 @@
 from mopidy.models import fields
-from mopidy.models.immutable import ImmutableObject, ValidatedImmutableObject
+from mopidy.models.immutable import ValidatedImmutableObject
 from mopidy.models.serialize import ModelJSONEncoder, model_json_decoder
 
 __all__ = [
     "Album",
     "Artist",
     "Image",
-    "ImmutableObject",
     "model_json_decoder",
     "ModelJSONEncoder",
     "Playlist",

@@ -14,7 +14,7 @@ T = TypeVar("T", bound="type")
 _models = {}
 
 
-class ImmutableObject:
+class _ImmutableObject:
     """Superclass for immutable objects whose fields can only be modified via the
     constructor.
 
@@ -123,10 +123,10 @@ class ImmutableObject:
         for key, value in self._items():
             if isinstance(value, set | frozenset | list | tuple):
                 value = [
-                    v.serialize() if isinstance(v, ImmutableObject) else v
+                    v.serialize() if isinstance(v, _ImmutableObject) else v
                     for v in value
                 ]
-            elif isinstance(value, ImmutableObject):
+            elif isinstance(value, _ImmutableObject):
                 value = value.serialize()
             if not (isinstance(value, list) and len(value) == 0):
                 data[key] = value
@@ -175,7 +175,7 @@ class _ValidatedImmutableObjectMeta(type, Generic[T]):
 
 
 class ValidatedImmutableObject(
-    ImmutableObject,
+    _ImmutableObject,
     metaclass=_ValidatedImmutableObjectMeta,
 ):
     """Superclass for immutable objects whose fields can only be modified via the
