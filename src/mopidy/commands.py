@@ -198,7 +198,7 @@ class Command:
             result.append(formatter.format_help())
 
         for childname, child in self._children.items():
-            child._subhelp(" ".join((name, childname)), result)
+            child._subhelp(f"{name} {childname}", result)
 
     def parse(self, args: list[str], prog: str | None = None) -> argparse.Namespace:
         """Parse command line arguments.
@@ -253,7 +253,7 @@ class Command:
             result._args,
             result,
             overrides,
-            " ".join([prog, child]),
+            f"{prog} {child}",
         )
 
     def run(
