@@ -123,10 +123,8 @@ def get_verbosity_level(
     else:
         result = base_verbosity_level + (logging_config["verbosity"] or 0)
 
-    if result < min(LOG_LEVELS.keys()):
-        result = min(LOG_LEVELS.keys())
-    if result > max(LOG_LEVELS.keys()):
-        result = max(LOG_LEVELS.keys())
+    result = max(result, min(LOG_LEVELS.keys()))
+    result = min(result, max(LOG_LEVELS.keys()))
 
     return result
 

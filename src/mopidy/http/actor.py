@@ -98,7 +98,7 @@ def on_event(name: str, io_loop: tornado.ioloop.IOLoop, **data: Any) -> None:
 class HttpServer(threading.Thread):
     name = "HttpServer"
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         config: Config,
         core: CoreProxy,
