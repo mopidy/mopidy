@@ -2,27 +2,35 @@ from __future__ import annotations
 
 import enum
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Literal, NewType, TypeVar
+from typing import TYPE_CHECKING, Annotated, Literal, NewType, TypeVar
+
+import msgspec
 
 if TYPE_CHECKING:
     from typing import TypeAlias
 
 
 # Date types
-Date = NewType("Date", str)
-Year = NewType("Year", str)
+Date = NewType("Date", Annotated[str, msgspec.Meta(pattern=r"^\d{4}-\d{2}-\d{2}$")])
+Year = NewType("Year", Annotated[str, msgspec.Meta(pattern=r"^\d{4}$")])
 DateOrYear = Date | Year
 
 
 # Integer types
-NonNegativeInt = NewType("NonNegativeInt", int)
-Percentage = NewType("Percentage", int)
-DurationMs = NewType("DurationMs", int)
+NonNegativeInt = NewType("NonNegativeInt", Annotated[int, msgspec.Meta(ge=0)])
+Percentage = NewType("Percentage", Annotated[int, msgspec.Meta(ge=0, le=100)])
+DurationMs = NewType("DurationMs", Annotated[int, msgspec.Meta(ge=0)])
 
 
 # URI types
-Uri = NewType("Uri", str)
-UriScheme = NewType("UriScheme", str)
+Uri = NewType(
+    "Uri",
+    Annotated[str, msgspec.Meta(pattern=r"^[a-zA-Z][a-zA-Z0-9+\-.]*:.*$")],
+)
+UriScheme = NewType(
+    "UriScheme",
+    Annotated[str, msgspec.Meta(pattern=r"^[a-zA-Z][a-zA-Z0-9+\-.]*$")],
+)
 
 
 # Query types
@@ -57,7 +65,7 @@ SearchQuery: TypeAlias = dict[SearchField, Iterable[QueryValue]]
 
 
 # Tracklist types
-TracklistId = NewType("TracklistId", int)
+TracklistId = NewType("TracklistId", Annotated[int, msgspec.Meta(ge=0)])
 TracklistField: TypeAlias = Literal[
     "tlid",
     "uri",
