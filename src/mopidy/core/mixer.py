@@ -114,12 +114,16 @@ class MixerController:
         return False
 
     def _save_state(self) -> MixerState:
-        return MixerState(volume=self.get_volume(), mute=self.get_mute())
+        return MixerState(
+            volume=self.get_volume(),
+            mute=self.get_mute(),
+        )
 
     def _load_state(self, state: MixerState, coverage: Iterable[str]) -> None:
         if state and "mixer" in coverage:
-            self.set_mute(state.mute)
-            if state.volume:
+            if state.mute is not None:
+                self.set_mute(state.mute)
+            if state.volume is not None:
                 self.set_volume(Percentage(state.volume))
 
 

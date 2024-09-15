@@ -57,7 +57,7 @@ def get_unix_socket_path(socket_path: str) -> pathlib.Path | None:
     return pathlib.Path(match.group(1))
 
 
-def path_to_uri(path: str | PathLike[str]) -> str:
+def path_to_uri(path: str | PathLike[str]) -> Uri:
     """
     Convert OS specific path to file:// URI.
 
@@ -67,7 +67,7 @@ def path_to_uri(path: str | PathLike[str]) -> str:
 
     Returns a file:// URI as an unicode string.
     """
-    return pathlib.Path(path).as_uri()
+    return Uri(pathlib.Path(path).as_uri())
 
 
 def uri_to_path(uri: Uri | str) -> pathlib.Path:

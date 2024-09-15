@@ -12,6 +12,7 @@ from mopidy.core import listener
 from mopidy.internal import deprecation, validation
 from mopidy.internal.models import TracklistState
 from mopidy.models import TlTrack, Track
+from mopidy.types import TracklistId
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
 class TracklistController:
     def __init__(self, core: Core) -> None:
         self.core = core
-        self._next_tlid: int = 1
+        self._next_tlid: TracklistId = TracklistId(1)
         self._tl_tracks: list[TlTrack] = []
         self._version: int = 0
 
@@ -398,7 +399,7 @@ class TracklistController:
                 raise exceptions.TracklistFull(msg)
 
             tl_track = TlTrack(self._next_tlid, track)
-            self._next_tlid += 1
+            self._next_tlid = TracklistId(self._next_tlid + 1)
             if at_position is not None:
                 self._tl_tracks.insert(at_position, tl_track)
                 at_position += 1
@@ -589,7 +590,7 @@ class TracklistController:
 
     def _save_state(self) -> TracklistState:
         return TracklistState(
-            tl_tracks=self._tl_tracks,
+            tl_tracks=tuple(self._tl_tracks),
             next_tlid=self._next_tlid,
             consume=self.get_consume(),
             random=self.get_random(),
@@ -609,7 +610,7 @@ class TracklistController:
                 self.set_repeat(state.repeat)
                 self.set_single(state.single)
             if "tracklist" in coverage:
-                self._next_tlid = max(state.next_tlid, self._next_tlid)
+                self._next_tlid = max(TracklistId(state.next_tlid), self._next_tlid)
                 self._tl_tracks = list(state.tl_tracks)
                 self._increase_version()
 

@@ -44,8 +44,9 @@ class HistoryController:
         if track.name is not None:
             name_parts.append(track.name)
         name = " - ".join(name_parts)
+        if track.uri is None:
+            return
         ref = Ref.track(uri=track.uri, name=name)
-
         self._history.insert(0, (timestamp, ref))
 
     def get_length(self) -> int:
@@ -64,14 +65,14 @@ class HistoryController:
         # 500 tracks a 3 minutes -> 24 hours history
         count_max = 500
         count = 1
-        history_list = []
+        history_list: list[HistoryTrack] = []
         for timestamp, track in self._history:
             history_list.append(HistoryTrack(timestamp=timestamp, track=track))
             count += 1
             if count_max < count:
                 logger.info("Limiting history to %s tracks", count_max)
                 break
-        return HistoryState(history=history_list)
+        return HistoryState(history=tuple(history_list))
 
     def _load_state(self, state: HistoryState, coverage: Iterable[str]) -> None:
         if state and "history" in coverage:
