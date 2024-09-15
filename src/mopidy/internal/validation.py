@@ -37,7 +37,7 @@ PLAYBACK_STATES: set[str] = {ps.value for ps in PlaybackState}
 FIELD_TYPES: dict[str, type] = {
     "album": str,
     "albumartist": str,
-    "any": int | str,
+    "any": int | str,  # pyright: ignore[reportAssignmentType]
     "artist": str,
     "comment": str,
     "composer": str,

@@ -226,4 +226,7 @@ class ValidatedImmutableObject(
         other = super().replace(**kwargs)
         if hasattr(self, "_hash"):
             object.__delattr__(other, "_hash")
-        return self._instances.setdefault(weakref.ref(other), other)
+        return self._instances.setdefault(  # pyright: ignore[reportCallIssue]
+            weakref.ref(other),  # pyright: ignore[reportArgumentType]
+            other,
+        )

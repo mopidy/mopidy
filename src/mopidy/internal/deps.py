@@ -121,7 +121,7 @@ def pkg_info(
         return DepInfo(
             name=pkg_name,
             version=distribution.version,
-            path=distribution.locate_file("."),
+            path=distribution.locate_file("."),  # pyright: ignore[reportArgumentType]
             dependencies=dependencies,
         )
     except metadata.PackageNotFoundError:
