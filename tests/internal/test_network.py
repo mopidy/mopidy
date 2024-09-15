@@ -26,10 +26,10 @@ class FormatHostnameTest(unittest.TestCase):
     @patch("mopidy.internal.network.has_ipv6", True)
     def test_format_hostname_prefixes_ipv4_addresses_when_ipv6_available(self):
         network.has_ipv6 = True
-        assert network.format_hostname("0.0.0.0") == "::ffff:0.0.0.0"
+        assert network.format_hostname("0.0.0.0") == "::ffff:0.0.0.0"  # noqa: S104
         assert network.format_hostname("1.0.0.1") == "::ffff:1.0.0.1"
 
     @patch("mopidy.internal.network.has_ipv6", False)
     def test_format_hostname_does_nothing_when_only_ipv4_available(self):
         network.has_ipv6 = False
-        assert network.format_hostname("0.0.0.0") == "0.0.0.0"
+        assert network.format_hostname("0.0.0.0") == "0.0.0.0"  # noqa: S104

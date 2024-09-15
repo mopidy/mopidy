@@ -9,9 +9,8 @@ import mopidy
 class HelpTest(unittest.TestCase):
     def test_help_has_mopidy_options(self):
         mopidy_dir = Path(mopidy.__file__).parent
-        args = [sys.executable, "-m", "mopidy", "--help"]
-        process = subprocess.Popen(
-            args,
+        process = subprocess.Popen(  # noqa: S603
+            [sys.executable, "-m", "mopidy", "--help"],
             stdout=subprocess.PIPE,
             cwd=mopidy_dir.parent,
         )

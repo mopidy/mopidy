@@ -91,44 +91,7 @@ filterwarnings = [
 target-version = "py311"
 
 [tool.ruff.lint]
-select = [
-    "A",   # flake8-builtins
-    "ANN", # flake8-annotations
-    "ARG", # flake8-unused-arguments
-    "B",   # flake8-bugbear
-    "C4",  # flake8-comprehensions
-    "C90", # mccabe
-    "D",   # pydocstyle
-    "DTZ", # flake8-datetimez
-    "E",   # pycodestyle
-    "ERA", # eradicate
-    "F",   # pyflakes
-    "FBT", # flake8-boolean-trap
-    "I",   # isort
-    "INP", # flake8-no-pep420
-    "ISC", # flake8-implicit-str-concat
-    "N",   # pep8-naming
-    "PGH", # pygrep-hooks
-    "PIE", # flake8-pie
-    "PLC", # pylint convention
-    "PLE", # pylint error
-    "PLR", # pylint refactor
-    "PLW", # pylint warning
-    "PT",  # flake8-pytest-style
-    "PTH", # flake8-use-pathlib
-    "Q",   # flake8-quotes
-    "RET", # flake8-return
-    "RSE", # flake8-raise
-    "RUF", # ruff
-    "SIM", # flake8-simplify
-    "SLF", # flake8-self
-    "T20", # flake8-print
-    "TCH", # flake8-type-checking
-    "TID", # flake8-tidy-imports
-    "TRY", # tryceratops
-    "UP",  # pyupgrade
-    "W",   # pycodestyle
-]
+select = ["ALL"]
 ignore = [
     "A002",    # builtin-argument-shadowing  # TODO
     "A003",    # builtin-attribute-shadowing
@@ -150,11 +113,19 @@ ignore = [
     "FBT001",  # boolean-positional-arg-in-function-definition  # TODO
     "FBT002",  # boolean-default-value-in-function-definition  # TODO
     "FBT003",  # boolean-positional-value-in-function-call  # TODO
+    "FIX002",  # line-contains-todo
+    "FIX003",  # line-contains-fixme
+    "FIX004",  # line-contains-hack
+    "G004",    # logging-f-string
     "ISC001",  # single-line-implicit-string-concatenation
     "PLR2004", # magic-value-comparison
     "PLW2901", # redefined-loop-name
     "RET504",  # unnecessary-assign
+    "S101",    # assert  # TODO
+    "S314",    # suspicious-xml-element-tree-usage -- ElementTree is safe given expat >= 2.6.1
     "SLF001",  # private-member-access  # TODO
+    "TD002",   # missing-todo-author
+    "TD003",   # missing-todo-link
     "TCH003",  # typing-only-standard-library-import
     "TRY003",  # raise-vanilla-args
     "TRY400",  # error-instead-of-exception
@@ -177,6 +148,8 @@ ignore = [
     "PT007",   # pytest-parametrize-values-wrong-type  # TODO
     "PT009",   # pytest-unittest-assertion  # TODO
     "PT011",   # pytest-raises-too-broad  # TODO
+    "S101",    # assert
+    "S108",    # hardcoded-temp-file
     "SLF001",  # private-member-access
     "TRY002",  # raise-vanilla-class
 ]
