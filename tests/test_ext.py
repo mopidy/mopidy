@@ -22,7 +22,7 @@ any_testextension = IsA(DummyExtension)
 
 
 class TestExtension:
-    @pytest.fixture()
+    @pytest.fixture
     def extension(self):
         class MyExtension(ext.Extension):
             dist_name = "Mopidy-Foo"
@@ -72,7 +72,7 @@ class TestExtension:
 
 
 class TestLoadExtensions:
-    @pytest.fixture()
+    @pytest.fixture
     def iter_entry_points_mock(self, request):
         patcher = mock.patch.object(metadata, "entry_points")
         iter_entry_points = patcher.start()
@@ -80,7 +80,7 @@ class TestLoadExtensions:
         yield iter_entry_points
         patcher.stop()
 
-    @pytest.fixture()
+    @pytest.fixture
     def mock_entry_point(self, iter_entry_points_mock):
         entry_point = mock.Mock()
         entry_point.load = mock.Mock(return_value=DummyExtension)
@@ -147,7 +147,7 @@ class TestLoadExtensions:
 
 
 class TestValidateExtensionData:
-    @pytest.fixture()
+    @pytest.fixture
     def ext_data(self):
         extension = DummyExtension()
         entry_point = mock.Mock()

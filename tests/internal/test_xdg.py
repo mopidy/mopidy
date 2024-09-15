@@ -7,7 +7,7 @@ import pytest
 from mopidy.internal import xdg
 
 
-@pytest.fixture()
+@pytest.fixture
 def environ():
     patcher = mock.patch.dict(os.environ, clear=True)
     yield patcher.start()

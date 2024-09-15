@@ -8,7 +8,7 @@ from mopidy.stream import actor
 from tests import path_to_data_dir
 
 
-@pytest.fixture()
+@pytest.fixture
 def config():
     return {
         "proxy": {},
@@ -21,12 +21,12 @@ def config():
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def audio():
     return mock.Mock()
 
 
-@pytest.fixture()
+@pytest.fixture
 def track_uri():
     return path.path_to_uri(path_to_data_dir("song1.wav"))
 

@@ -20,7 +20,7 @@ http://foo.bar/baz
 """.strip()
 
 
-@pytest.fixture()
+@pytest.fixture
 def config():
     return {
         "proxy": {},
@@ -33,24 +33,24 @@ def config():
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def audio():
     return mock.Mock()
 
 
-@pytest.fixture()
+@pytest.fixture
 def scanner():
     patcher = mock.patch.object(scan, "Scanner")
     yield patcher.start()()
     patcher.stop()
 
 
-@pytest.fixture()
+@pytest.fixture
 def backend(audio, config, scanner):
     return actor.StreamBackend(audio=audio, config=config)
 
 
-@pytest.fixture()
+@pytest.fixture
 def provider(backend):
     return backend.playback
 
