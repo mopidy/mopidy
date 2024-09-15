@@ -43,6 +43,7 @@ SearchField: TypeAlias = DistinctField | Literal["any"]
 SearchQuery: TypeAlias = dict[SearchField, Iterable[QueryValue]]
 
 # Tracklist types
+TracklistId = NewType("TracklistId", int)
 TracklistField: TypeAlias = Literal[
     "tlid",
     "uri",
