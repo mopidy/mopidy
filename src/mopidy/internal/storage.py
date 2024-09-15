@@ -43,13 +43,18 @@ def dump(path, data):
 
     # TODO: cleanup directory/basename.* files.
     tmp = tempfile.NamedTemporaryFile(
-        prefix=path.name + ".", dir=str(path.parent), delete=False
+        prefix=path.name + ".",
+        dir=str(path.parent),
+        delete=False,
     )
     tmp_path = pathlib.Path(tmp.name)
 
     try:
         data_string = json.dumps(
-            data, cls=models.ModelJSONEncoder, indent=2, separators=(",", ": ")
+            data,
+            cls=models.ModelJSONEncoder,
+            indent=2,
+            separators=(",", ": "),
         )
         with gzip.GzipFile(fileobj=tmp, mode="wb") as fp:
             fp.write(data_string.encode())

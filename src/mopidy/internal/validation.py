@@ -27,7 +27,8 @@ def get_literals(literal_type: Any) -> set[str]:
     if hasattr(literal_type, "__origin__") and literal_type.__origin__ is Literal:
         return set(get_args(literal_type))
 
-    raise ValueError("Provided type is neither a Union nor a Literal type.")
+    msg = "Provided type is neither a Union nor a Literal type."
+    raise ValueError(msg)
 
 
 T = TypeVar("T")
@@ -37,7 +38,7 @@ PLAYBACK_STATES: set[str] = {ps.value for ps in PlaybackState}
 FIELD_TYPES: dict[str, type] = {
     "album": str,
     "albumartist": str,
-    "any": int | str,
+    "any": int | str,  # pyright: ignore[reportAssignmentType]
     "artist": str,
     "comment": str,
     "composer": str,
@@ -120,15 +121,14 @@ def check_integer(
     max: int | None = None,
 ) -> None:
     if not isinstance(arg, int):
-        raise exceptions.ValidationError(f"Expected an integer, not {arg!r}")
+        msg = f"Expected an integer, not {arg!r}"
+        raise exceptions.ValidationError(msg)
     if min is not None and arg < min:
-        raise exceptions.ValidationError(
-            f"Expected number larger or equal to {min}, not {arg!r}"
-        )
+        msg = f"Expected number larger or equal to {min}, not {arg!r}"
+        raise exceptions.ValidationError(msg)
     if max is not None and arg > max:
-        raise exceptions.ValidationError(
-            f"Expected number smaller or equal to {max}, not {arg!r}"
-        )
+        msg = f"Expected number smaller or equal to {max}, not {arg!r}"
+        raise exceptions.ValidationError(msg)
 
 
 def check_query(
@@ -142,7 +142,8 @@ def check_query(
     # TODO: normalize blank -> [] or just remove field?
 
     if not isinstance(arg, Mapping):
-        raise exceptions.ValidationError(f"Expected a query dictionary, not {arg!r}")
+        msg = f"Expected a query dictionary, not {arg!r}"
+        raise exceptions.ValidationError(msg)
 
     for key, value in arg.items():
         check_choice(

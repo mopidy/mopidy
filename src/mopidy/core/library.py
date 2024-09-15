@@ -213,9 +213,8 @@ class LibraryController:
                 validation.check_instance(future.get(), Mapping)
                 for uri, images in future.get().items():
                     if uri not in uris:
-                        raise exceptions.ValidationError(
-                            f"Got unknown image URI: {uri}"
-                        )
+                        msg = f"Got unknown image URI: {uri}"
+                        raise exceptions.ValidationError(msg)
                     validation.check_instances(images, Image)
                     results[uri] += tuple(images)
         return results
@@ -243,7 +242,7 @@ class LibraryController:
                 if result is not None:
                     validation.check_instance(result, Mapping)
                     for uri, tracks in result.items():
-                        # TODO Consider making Track.uri field mandatory, and
+                        # TODO: Consider making Track.uri field mandatory, and
                         # then remove this filtering of tracks without URIs.
                         validation.check_instances(tracks, Track)
                         results[uri] = [track for track in tracks if track.uri]
@@ -324,7 +323,9 @@ class LibraryController:
         futures = {}
         for backend, backend_uris in self._get_backends_to_uris(uris).items():
             futures[backend] = backend.library.search(
-                query=query, uris=backend_uris, exact=exact
+                query=query,
+                uris=backend_uris,
+                exact=exact,
             )
 
         # Some of our tests check for LookupError to catch bad queries. This is
@@ -369,7 +370,7 @@ def _normalize_query(query: Query[SearchField]) -> Query[SearchField]:
         logger.warning(
             "A client or frontend made a library search with an empty query. "
             "This is strongly discouraged. Please check what sent this query "
-            "and file a bug."
+            "and file a bug.",
         )
     return query
 

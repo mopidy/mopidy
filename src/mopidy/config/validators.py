@@ -24,7 +24,8 @@ def validate_required(value: Any, required: bool) -> None:
     the raw string, _not_ the converted value.
     """
     if required and not value:
-        raise ValueError("must be set.")
+        msg = "must be set."
+        raise ValueError(msg)
 
 
 def validate_choice(value: T, choices: Iterable[T] | None) -> None:
@@ -34,7 +35,8 @@ def validate_choice(value: T, choices: Iterable[T] | None) -> None:
     """
     if choices is not None and value not in choices:
         names = ", ".join(repr(c) for c in choices)
-        raise ValueError(f"must be one of {names}, not {value}.")
+        msg = f"must be one of {names}, not {value}."
+        raise ValueError(msg)
 
 
 def validate_minimum(value: CT, minimum: CT | None) -> None:
@@ -43,7 +45,8 @@ def validate_minimum(value: CT, minimum: CT | None) -> None:
     Normally called in :meth:`~mopidy.config.types.ConfigValue.deserialize`.
     """
     if minimum is not None and value < minimum:
-        raise ValueError(f"{value!r} must be larger than {minimum!r}.")
+        msg = f"{value!r} must be larger than {minimum!r}."
+        raise ValueError(msg)
 
 
 def validate_maximum(value: CT, maximum: CT | None) -> None:
@@ -52,4 +55,5 @@ def validate_maximum(value: CT, maximum: CT | None) -> None:
     Normally called in :meth:`~mopidy.config.types.ConfigValue.deserialize`.
     """
     if maximum is not None and value > maximum:
-        raise ValueError(f"{value!r} must be smaller than {maximum!r}.")
+        msg = f"{value!r} must be smaller than {maximum!r}."
+        raise ValueError(msg)

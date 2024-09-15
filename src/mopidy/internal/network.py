@@ -13,7 +13,7 @@ def try_ipv6_socket() -> bool:
         socket.socket(socket.AF_INET6).close()
     except OSError as exc:
         logger.debug(
-            f"Platform supports IPv6, but socket creation failed, disabling: {exc}"
+            f"Platform supports IPv6, but socket creation failed, disabling: {exc}",
         )
         return False
     else:

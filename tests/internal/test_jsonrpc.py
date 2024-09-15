@@ -4,9 +4,9 @@ from unittest import mock
 
 import pykka
 import pytest
+
 from mopidy import core, models
 from mopidy.internal import deprecation, jsonrpc
-
 from tests import dummy_backend
 
 
@@ -43,7 +43,8 @@ class Calculator:
         return "Grand Unified Theory"
 
     def fail(self):
-        raise ValueError("What did you expect?")
+        msg = "What did you expect?"
+        raise ValueError(msg)
 
 
 class JsonRpcTestBase(unittest.TestCase):
@@ -637,7 +638,7 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
                 "core.playback": core.PlaybackController,
                 "core.playlists": core.PlaylistsController,
                 "core.tracklist": core.TracklistController,
-            }
+            },
         )
 
         methods = inspector.describe()

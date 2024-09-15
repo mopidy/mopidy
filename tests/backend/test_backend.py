@@ -2,8 +2,8 @@ import unittest
 from unittest import mock
 
 import pytest
-from mopidy import backend
 
+from mopidy import backend
 from tests import dummy_backend
 
 
@@ -23,7 +23,7 @@ class LibraryTest(unittest.TestCase):
             [
                 mock.call("dummy1:a"),
                 mock.call("dummy1:b"),
-            ]
+            ],
         )
 
 

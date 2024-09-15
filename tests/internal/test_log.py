@@ -1,8 +1,9 @@
 import pytest
+
 from mopidy.internal import log
 
 
-@pytest.fixture()
+@pytest.fixture
 def config():
     return {
         "verbosity": 2,

@@ -4,14 +4,14 @@ import tempfile
 import unittest
 from unittest import mock
 
-import mopidy
 import pykka
 import pytest
+
+import mopidy
 from mopidy.audio import PlaybackState
 from mopidy.core import Core, CoreListener
 from mopidy.internal import models, storage
 from mopidy.models import Track
-
 from tests import dummy_mixer
 
 
@@ -179,7 +179,7 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
                 "max_tracklist_length": 10000,
                 "restore_state": True,
                 "data_dir": self.temp_dir,
-            }
+            },
         }
 
         self.mixer = dummy_mixer.create_proxy()
@@ -251,7 +251,7 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
                         timestamp=13,
                         track=models.Ref.track(uri="a:b", name="b"),
                     ),
-                ]
+                ],
             ),
             playback=models.PlaybackState(tlid=12, state="paused", time_position=432),
             mixer=models.MixerState(mute=True, volume=12),

@@ -1,22 +1,22 @@
 from unittest import mock
 
 import pytest
-from mopidy.file import backend
 
+from mopidy.file import backend
 from tests import path_to_data_dir
 
 
-@pytest.fixture()
+@pytest.fixture
 def media_dirs():
     return [str(path_to_data_dir(""))]
 
 
-@pytest.fixture()
+@pytest.fixture
 def follow_symlinks():
     return False
 
 
-@pytest.fixture()
+@pytest.fixture
 def config(media_dirs, follow_symlinks):
     return {
         "proxy": {},
@@ -30,6 +30,6 @@ def config(media_dirs, follow_symlinks):
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def provider(config):
     return backend.FileBackend(audio=mock.Mock(), config=config).library

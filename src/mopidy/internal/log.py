@@ -87,14 +87,16 @@ def setup_logging(
         path = config["logging"]["config_file"]
         try:
             logging.config.fileConfig(path, disable_existing_loggers=False)
-        except Exception as e:
+        except Exception as exc:  # noqa: BLE001
             # Catch everything as logging does not specify what can go wrong.
-            logger.error("Loading logging config %r failed. %s", path, e)
+            logger.error("Loading logging config %r failed. %s", path, exc)
 
     loglevels = config.get("loglevels", {})
 
     verbosity_level = get_verbosity_level(
-        config["logging"], base_verbosity_level, args_verbosity_level
+        config["logging"],
+        base_verbosity_level,
+        args_verbosity_level,
     )
     verbosity_filter = VerbosityFilter(verbosity_level, loglevels)
 
@@ -123,10 +125,8 @@ def get_verbosity_level(
     else:
         result = base_verbosity_level + (logging_config["verbosity"] or 0)
 
-    if result < min(LOG_LEVELS.keys()):
-        result = min(LOG_LEVELS.keys())
-    if result > max(LOG_LEVELS.keys()):
-        result = max(LOG_LEVELS.keys())
+    result = max(result, min(LOG_LEVELS.keys()))
+    result = min(result, max(LOG_LEVELS.keys()))
 
     return result
 
@@ -206,7 +206,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
             self.stream.write(message)
             self.stream.write(getattr(self, "terminator", "\n"))
             self.flush()
-        except Exception:
+        except Exception:  # noqa: BLE001
             self.handleError(record)
 
     def format(self, record: LogRecord) -> str:

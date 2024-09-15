@@ -1,6 +1,7 @@
 import unittest
 
 import pytest
+
 from mopidy.core import HistoryController
 from mopidy.internal.models import HistoryState, HistoryTrack
 from mopidy.models import Artist, Ref, Track
@@ -85,7 +86,7 @@ class CoreHistorySaveLoadStateTest(unittest.TestCase):
                 HistoryTrack(timestamp=34, track=self.refs[0]),
                 HistoryTrack(timestamp=45, track=self.refs[2]),
                 HistoryTrack(timestamp=56, track=self.refs[1]),
-            ]
+            ],
         )
         coverage = ["history"]
         self.history._load_state(state, coverage)

@@ -116,12 +116,12 @@ def pkg_info(
                             pkg_name=name,
                             depth=depth + 1,
                             seen_pkgs=seen_pkgs,
-                        )
+                        ),
                     )
         return DepInfo(
             name=pkg_name,
             version=distribution.version,
-            path=distribution.locate_file("."),
+            path=distribution.locate_file("."),  # pyright: ignore[reportArgumentType]
             dependencies=dependencies,
         )
     except metadata.PackageNotFoundError:
@@ -144,13 +144,11 @@ def gstreamer_info() -> DepInfo:
 
     other.append("Relevant elements:")
     other.append("  Found:")
-    for element in found_elements:
-        other.append(f"    {element}")
+    other.extend(f"    {element}" for element in found_elements)
     if not found_elements:
         other.append("    none")
     other.append("  Not found:")
-    for element in missing_elements:
-        other.append(f"    {element}")
+    other.extend(f"    {element}" for element in missing_elements)
     if not missing_elements:
         other.append("    none")
 

@@ -2,12 +2,13 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-import mopidy
 import pytest
 import tornado.httpclient
 import tornado.testing
 import tornado.web
 import tornado.websocket
+
+import mopidy
 from mopidy.http import handlers
 
 
@@ -22,8 +23,8 @@ class StaticFileHandlerTest(tornado.testing.AsyncHTTPTestCase):
                         "path": Path(__file__).parent,
                         "default_filename": "test_handlers.py",
                     },
-                )
-            ]
+                ),
+            ],
         )
 
     def test_static_handler(self):
@@ -54,8 +55,8 @@ class WebSocketHandlerTest(tornado.testing.AsyncHTTPTestCase):
                         "allowed_origins": frozenset(),
                         "csrf_protection": True,
                     },
-                )
-            ]
+                ),
+            ],
         )
 
     def connection(self, **kwargs):
@@ -131,8 +132,8 @@ class JsonRpcHandlerTestBase(tornado.testing.AsyncHTTPTestCase):
                         "allowed_origins": set(),
                         "csrf_protection": self.csrf_protection,
                     },
-                )
-            ]
+                ),
+            ],
         )
 
     def assert_extra_response_headers(self, headers):
@@ -210,7 +211,7 @@ class JsonRpcHandlerTestCSRFEnabled(JsonRpcHandlerTestBase):
 
     def test_post_with_origin_ok_sets_cors_headers(self):
         self.headers.update(
-            {"Content-Type": "application/json", "Origin": "http://foobar:6680"}
+            {"Content-Type": "application/json", "Origin": "http://foobar:6680"},
         )
         response = self.fetch("/rpc", method="POST", body="hi", headers=self.headers)
 
@@ -255,17 +256,23 @@ class CheckOriginTests(unittest.TestCase):
 
     def test_same_host_origin_allowed(self):
         assert handlers.check_origin(
-            "http://localhost:6680", self.headers, self.allowed
+            "http://localhost:6680",
+            self.headers,
+            self.allowed,
         )
 
     def test_different_host_origin_blocked(self):
         assert not handlers.check_origin(
-            "http://other:6680", self.headers, self.allowed
+            "http://other:6680",
+            self.headers,
+            self.allowed,
         )
 
     def test_different_port_blocked(self):
         assert not handlers.check_origin(
-            "http://localhost:80", self.headers, self.allowed
+            "http://localhost:80",
+            self.headers,
+            self.allowed,
         )
 
     def test_extra_origin_allowed(self):

@@ -4,9 +4,10 @@ import urllib
 from pathlib import Path
 from unittest import mock
 
-import mopidy
 import tornado.testing
 import tornado.wsgi
+
+import mopidy
 from mopidy.http import actor, handlers
 
 
@@ -20,7 +21,7 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
                 "allowed_origins": frozenset(),
                 "csrf_protection": True,
                 "default_app": "mopidy",
-            }
+            },
         }
 
     def get_app(self):
@@ -38,7 +39,7 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
                     apps=testapps,
                     statics=teststatics,
                 ),
-            }
+            },
         ]
 
         http_server = actor.HttpServer(
@@ -141,7 +142,7 @@ class MopidyRPCHandlerTest(HttpServerTest):
                 "params": [],
                 "jsonrpc": "2.0",
                 "id": 1,
-            }
+            },
         )
 
         response = self.fetch(
@@ -171,7 +172,7 @@ class MopidyRPCHandlerNoCSRFProtectionTest(HttpServerTest):
                 "params": [],
                 "jsonrpc": "2.0",
                 "id": 1,
-            }
+            },
         )
 
     def test_should_ignore_incorrect_content_type(self):
@@ -186,7 +187,10 @@ class MopidyRPCHandlerNoCSRFProtectionTest(HttpServerTest):
 
     def test_should_ignore_missing_content_type(self):
         response = self.fetch(
-            "/mopidy/rpc", method="POST", body=self.get_cmd(), headers={}
+            "/mopidy/rpc",
+            method="POST",
+            body=self.get_cmd(),
+            headers={},
         )
 
         assert response.code == 200
@@ -219,7 +223,7 @@ class HttpServerWithStaticFilesTest(tornado.testing.AsyncHTTPTestCase):
                 "port": 6680,
                 "zeroconf": "",
                 "default_app": "static",
-            }
+            },
         }
         core = mock.Mock()
 
@@ -227,7 +231,7 @@ class HttpServerWithStaticFilesTest(tornado.testing.AsyncHTTPTestCase):
             {
                 "name": "static",
                 "path": Path(__file__).parent,
-            }
+            },
         ]
 
         http_server = actor.HttpServer(
@@ -278,14 +282,18 @@ class HttpServerWithWsgiAppTest(tornado.testing.AsyncHTTPTestCase):
                 "port": 6680,
                 "zeroconf": "",
                 "default_app": "wsgi",
-            }
+            },
         }
         core = mock.Mock()
 
         apps = [{"name": "wsgi", "factory": wsgi_app_factory}]
 
         http_server = actor.HttpServer(
-            config=config, core=core, sockets=[], apps=apps, statics=[]
+            config=config,
+            core=core,
+            sockets=[],
+            apps=apps,
+            statics=[],
         )
 
         return tornado.web.Application(http_server._get_request_handlers())
@@ -319,14 +327,18 @@ class HttpServerWithAppDefaultApp(tornado.testing.AsyncHTTPTestCase):
                 "port": 6680,
                 "zeroconf": "",
                 "default_app": "default_app",
-            }
+            },
         }
         core = mock.Mock()
 
         apps = [{"name": "default_app", "factory": default_webapp_factory}]
 
         http_server = actor.HttpServer(
-            config=config, core=core, sockets=[], apps=apps, statics=[]
+            config=config,
+            core=core,
+            sockets=[],
+            apps=apps,
+            statics=[],
         )
 
         return tornado.web.Application(http_server._get_request_handlers())
@@ -351,7 +363,7 @@ class HttpServerWithStaticDefaultApp(tornado.testing.AsyncHTTPTestCase):
                 "port": 6680,
                 "zeroconf": "",
                 "default_app": "default_app",
-            }
+            },
         }
         core = mock.Mock()
 
@@ -359,7 +371,7 @@ class HttpServerWithStaticDefaultApp(tornado.testing.AsyncHTTPTestCase):
             {
                 "name": "default_app",
                 "path": Path(__file__).parent,
-            }
+            },
         ]
 
         http_server = actor.HttpServer(
@@ -446,11 +458,15 @@ class HttpServerTestLoginWithSecureCookie(tornado.testing.AsyncHTTPTestCase):
             {
                 "name": "cookie_secret",
                 "factory": cookie_secret_app_factory,
-            }
+            },
         ]
 
         http_server = actor.HttpServer(
-            config=config, core=core, sockets=[], apps=apps, statics=[]
+            config=config,
+            core=core,
+            sockets=[],
+            apps=apps,
+            statics=[],
         )
 
         return tornado.web.Application(

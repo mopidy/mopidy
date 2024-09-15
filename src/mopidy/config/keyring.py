@@ -8,7 +8,7 @@ except ImportError:
     dbus = None
 
 
-# XXX: Hack to workaround introspection bug caused by gnome-keyring, should be
+# HACK: Hack to workaround introspection bug caused by gnome-keyring, should be
 # fixed by version 3.5 per:
 # https://git.gnome.org/browse/gnome-keyring/commit/?id=5dccbe88eb94eea9934e2b7
 EMPTY_STRING = dbus.String("", variant_level=1) if dbus else ""
@@ -75,7 +75,9 @@ def set(  # noqa: A001, PLR0911
     """
     if not dbus:
         logger.debug(
-            "Saving %s/%s to keyring failed. (dbus not installed)", section, key
+            "Saving %s/%s to keyring failed. (dbus not installed)",
+            section,
+            key,
         )
         return False
 
@@ -104,7 +106,7 @@ def set(  # noqa: A001, PLR0911
 
     session = service.OpenSession("plain", EMPTY_STRING)[1]
     secret = dbus.Struct(
-        (session, "", dbus.ByteArray(value), "plain/text; charset=utf8")
+        (session, "", dbus.ByteArray(value), "plain/text; charset=utf8"),
     )
     label = f"mopidy: {section}/{key}"
     attributes = {"service": "mopidy", "section": section, "key": key}

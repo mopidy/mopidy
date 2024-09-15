@@ -76,15 +76,15 @@ class Core(
         self.backends = Backends(backends or [])
 
         self.library = pykka.traversable(
-            LibraryController(backends=self.backends, core=self)
+            LibraryController(backends=self.backends, core=self),
         )
         self.history = pykka.traversable(HistoryController())
         self.mixer = pykka.traversable(MixerController(mixer=mixer))
         self.playback = pykka.traversable(
-            PlaybackController(audio=audio, backends=self.backends, core=self)
+            PlaybackController(audio=audio, backends=self.backends, core=self),
         )
         self.playlists = pykka.traversable(
-            PlaylistsController(backends=self.backends, core=self)
+            PlaylistsController(backends=self.backends, core=self),
         )
         self.tracklist = pykka.traversable(TracklistController(core=self))
 
@@ -116,7 +116,7 @@ class Core(
         new_state: PlaybackState,
         target_state: PlaybackState | None,
     ) -> None:
-        # XXX: This is a temporary fix for issue #232 while we wait for a more
+        # NOTE: This is a temporary fix for issue #232 while we wait for a more
         # permanent solution with the implementation of issue #234. When the
         # Spotify play token is lost, the Spotify backend pauses audio
         # playback, but mopidy.core doesn't know this, so we need to update
@@ -181,7 +181,7 @@ class Core(
                 ]
             if len(coverage):
                 self._load_state(coverage)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Restore state: Unexpected error: %s", str(e))
 
     def _teardown(self) -> None:
@@ -193,7 +193,7 @@ class Core(
                 and self._config["core"]["restore_state"]
             ):
                 self._save_state()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.warning("Unexpected error while saving state: %s", str(e))
 
     def _get_data_dir(self) -> Path:
@@ -286,10 +286,11 @@ class Backends(list):
 
             for scheme in b.uri_schemes.get():
                 if scheme in backends_by_scheme:
-                    raise AssertionError(
+                    msg = (
                         f"Cannot add URI scheme {scheme!r} for {name(b)}, "
                         f"it is already handled by {name(backends_by_scheme[scheme])}"
                     )
+                    raise AssertionError(msg)
                 backends_by_scheme[scheme] = b
 
                 if has_library:

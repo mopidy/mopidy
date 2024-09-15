@@ -2,6 +2,7 @@ import unittest
 from unittest import mock
 
 import pytest
+
 from mopidy import backend, core
 from mopidy.internal.models import TracklistState
 from mopidy.models import TlTrack, Track
@@ -55,7 +56,7 @@ class TracklistTest(unittest.TestCase):
                 "dummy1:a",
                 "dummy1:b",
                 "dummy1:c",
-            ]
+            ],
         )
 
         assert len(tl_tracks) == 3
@@ -102,7 +103,7 @@ class TracklistTest(unittest.TestCase):
         with pytest.raises(ValueError):
             self.core.tracklist.filter({"uri": "a"})
 
-    # TODO Extract tracklist tests from the local backend tests
+    # TODO: Extract tracklist tests from the local backend tests
 
 
 class TracklistIndexTest(unittest.TestCase):

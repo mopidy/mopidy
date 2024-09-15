@@ -3,6 +3,7 @@ from unittest import mock
 import pytest
 import requests
 import responses
+
 from mopidy.internal import http
 
 TIMEOUT = 1000
@@ -10,12 +11,12 @@ URI = "http://example.com/foo.txt"
 BODY = "This is the contents of foo.txt."
 
 
-@pytest.fixture()
+@pytest.fixture
 def session():
     return requests.Session()
 
 
-@pytest.fixture()
+@pytest.fixture
 def session_mock():
     return mock.Mock(spec=requests.Session)
 

@@ -56,6 +56,8 @@ class DeprecatedValue:
 
 
 class _TransformedValue(str):
+    __slots__ = ("original",)
+
     def __new__(cls, _original, transformed):
         return super().__new__(cls, transformed)
 
@@ -249,7 +251,8 @@ class Boolean(ConfigValue[bool]):
             return True
         if result.lower() in self.false_values:
             return False
-        raise ValueError(f"invalid value for boolean: {result!r}")
+        msg = f"invalid value for boolean: {result!r}"
+        raise ValueError(msg)
 
     def serialize(
         self,
@@ -260,7 +263,8 @@ class Boolean(ConfigValue[bool]):
             return "true"
         if value in (False, None):
             return "false"
-        raise ValueError(f"{value!r} is not a boolean")
+        msg = f"{value!r} is not a boolean"
+        raise ValueError(msg)
 
 
 class Pair(ConfigValue[tuple[K, V]]):
@@ -296,9 +300,10 @@ class Pair(ConfigValue[tuple[K, V]]):
         elif self._optional_pair:
             values = (raw_value, raw_value)
         else:
-            raise ValueError(
+            msg = (
                 f"Config value must include {self._separator!r} separator: {raw_value}"
             )
+            raise ValueError(msg)
 
         return cast(
             tuple[K, V],
@@ -309,13 +314,16 @@ class Pair(ConfigValue[tuple[K, V]]):
         )
 
     def serialize(
-        self, value: tuple[K, V], display: bool = False
+        self,
+        value: tuple[K, V],
+        display: bool = False,
     ) -> str | DeprecatedValue:
         serialized_first_value = self._subtypes[0].serialize(value[0], display=display)
         serialized_second_value = self._subtypes[1].serialize(value[1], display=display)
 
         if isinstance(serialized_first_value, DeprecatedValue) or isinstance(
-            serialized_second_value, DeprecatedValue
+            serialized_second_value,
+            DeprecatedValue,
         ):
             return DeprecatedValue()
 
@@ -370,7 +378,9 @@ class List(ConfigValue[tuple[V, ...] | frozenset[V]]):
         return cast(tuple[V, ...] | frozenset[V], values)
 
     def serialize(
-        self, value: tuple[V, ...] | frozenset[V], display: bool = False
+        self,
+        value: tuple[V, ...] | frozenset[V],
+        display: bool = False,
     ) -> str:
         if not value:
             return ""
@@ -449,7 +459,8 @@ class Hostname(ConfigValue[str]):
         try:
             socket.getaddrinfo(raw_value, None)
         except OSError as exc:
-            raise ValueError("must be a resolveable hostname or valid IP") from exc
+            msg = "must be a resolveable hostname or valid IP"
+            raise ValueError(msg) from exc
 
         return raw_value
 
@@ -463,7 +474,10 @@ class Port(Integer):
 
     def __init__(self, choices=None, optional=False):
         super().__init__(
-            minimum=0, maximum=2**16 - 1, choices=choices, optional=optional
+            minimum=0,
+            maximum=2**16 - 1,
+            choices=choices,
+            optional=optional,
         )
 
 

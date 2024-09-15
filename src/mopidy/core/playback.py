@@ -191,7 +191,7 @@ class PlaybackController:
                 attr_path=("playback", "_on_about_to_finish"),
                 args=(),
                 kwargs={},
-            )
+            ),
         )
 
     def _on_about_to_finish(self) -> None:
@@ -270,7 +270,7 @@ class PlaybackController:
                 logger.info("No playable track in the list.")
                 break
 
-        # TODO return result?
+        # TODO: return result?
 
     def pause(self) -> None:
         """Pause playback."""
@@ -384,7 +384,8 @@ class PlaybackController:
             self._pending_tl_track = None
             return True
 
-        raise CoreError(f"Unknown playback state: {state}")
+        msg = f"Unknown playback state: {state}"
+        raise CoreError(msg)
 
     def previous(self) -> None:
         """Change to the previous track.
@@ -540,7 +541,9 @@ class PlaybackController:
     ) -> None:
         logger.debug("Triggering playback state change event")
         listener.CoreListener.send(
-            "playback_state_changed", old_state=old_state, new_state=new_state
+            "playback_state_changed",
+            old_state=old_state,
+            new_state=new_state,
         )
 
     def _trigger_seeked(self, time_position: int) -> None:

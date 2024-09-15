@@ -20,8 +20,8 @@ except ValueError:
 
         Please see https://docs.mopidy.com/en/latest/installation/ for
         instructions on how to install the required dependencies.
-    """
-        )
+    """,
+        ),
     )
     raise
 
@@ -37,7 +37,7 @@ REQUIRED_GST_VERSION_DISPLAY = ".".join(map(str, REQUIRED_GST_VERSION))
 if Gst.version() < REQUIRED_GST_VERSION:
     sys.exit(
         f"ERROR: Mopidy requires GStreamer >= {REQUIRED_GST_VERSION_DISPLAY}, "
-        f"but found {Gst.version_string()}."
+        f"but found {Gst.version_string()}.",
     )
 
 

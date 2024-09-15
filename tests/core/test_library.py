@@ -2,6 +2,7 @@ import unittest
 from unittest import mock
 
 import pytest
+
 from mopidy import backend, core
 from mopidy.internal import validation
 from mopidy.models import Image, Ref, SearchResult, Track
@@ -68,7 +69,7 @@ class CoreLibraryTest(BaseCoreLibraryTest):
 
     def test_get_images_returns_images(self):
         self.library1.get_images.return_value.get.return_value = {
-            "dummy1:track": [Image(uri="uri")]
+            "dummy1:track": [Image(uri="uri")],
         }
 
         result = self.core.library.get_images(["dummy1:track"])
@@ -76,14 +77,14 @@ class CoreLibraryTest(BaseCoreLibraryTest):
 
     def test_get_images_merges_results(self):
         self.library1.get_images.return_value.get.return_value = {
-            "dummy1:track": [Image(uri="uri1")]
+            "dummy1:track": [Image(uri="uri1")],
         }
         self.library2.get_images.return_value.get.return_value = {
-            "dummy2:track": [Image(uri="uri2")]
+            "dummy2:track": [Image(uri="uri2")],
         }
 
         result = self.core.library.get_images(
-            ["dummy1:track", "dummy2:track", "dummy3:track", "dummy4:track"]
+            ["dummy1:track", "dummy2:track", "dummy3:track", "dummy4:track"],
         )
         expected = {
             "dummy1:track": (Image(uri="uri1"),),
@@ -211,7 +212,7 @@ class CoreLibraryTest(BaseCoreLibraryTest):
                 "dummy1:b",
                 "dummy2:a",
                 "dummy2:b",
-            ]
+            ],
         )
 
         self.library1.lookup_many.assert_called_once_with(["dummy1:a", "dummy1:b"])
@@ -262,32 +263,44 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         assert result1 in result
         assert result2 in result
         self.library1.search.assert_called_once_with(
-            query={"any": ["a"]}, uris=None, exact=False
+            query={"any": ["a"]},
+            uris=None,
+            exact=False,
         )
         self.library2.search.assert_called_once_with(
-            query={"any": ["a"]}, uris=None, exact=False
+            query={"any": ["a"]},
+            uris=None,
+            exact=False,
         )
 
     def test_search_with_uris_selects_dummy1_backend(self):
         self.core.library.search(
-            query={"any": ["a"]}, uris=["dummy1:", "dummy1:foo", "dummy3:"]
+            query={"any": ["a"]},
+            uris=["dummy1:", "dummy1:foo", "dummy3:"],
         )
 
         self.library1.search.assert_called_once_with(
-            query={"any": ["a"]}, uris=["dummy1:", "dummy1:foo"], exact=False
+            query={"any": ["a"]},
+            uris=["dummy1:", "dummy1:foo"],
+            exact=False,
         )
         assert not self.library2.search.called
 
     def test_search_with_uris_selects_both_backends(self):
         self.core.library.search(
-            query={"any": ["a"]}, uris=["dummy1:", "dummy1:foo", "dummy2:"]
+            query={"any": ["a"]},
+            uris=["dummy1:", "dummy1:foo", "dummy2:"],
         )
 
         self.library1.search.assert_called_once_with(
-            query={"any": ["a"]}, uris=["dummy1:", "dummy1:foo"], exact=False
+            query={"any": ["a"]},
+            uris=["dummy1:", "dummy1:foo"],
+            exact=False,
         )
         self.library2.search.assert_called_once_with(
-            query={"any": ["a"]}, uris=["dummy2:"], exact=False
+            query={"any": ["a"]},
+            uris=["dummy2:"],
+            exact=False,
         )
 
     def test_search_filters_out_none(self):
@@ -302,10 +315,14 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         assert result1 in result
         assert None not in result
         self.library1.search.assert_called_once_with(
-            query={"any": ["a"]}, uris=None, exact=False
+            query={"any": ["a"]},
+            uris=None,
+            exact=False,
         )
         self.library2.search.assert_called_once_with(
-            query={"any": ["a"]}, uris=None, exact=False
+            query={"any": ["a"]},
+            uris=None,
+            exact=False,
         )
 
     def test_search_accepts_query_dict_instead_of_kwargs(self):
@@ -322,16 +339,22 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         assert result1 in result
         assert result2 in result
         self.library1.search.assert_called_once_with(
-            query={"any": ["a"]}, uris=None, exact=False
+            query={"any": ["a"]},
+            uris=None,
+            exact=False,
         )
         self.library2.search.assert_called_once_with(
-            query={"any": ["a"]}, uris=None, exact=False
+            query={"any": ["a"]},
+            uris=None,
+            exact=False,
         )
 
     def test_search_normalises_bad_queries(self):
         self.core.library.search({"any": "foobar"})
         self.library1.search.assert_called_once_with(
-            query={"any": ["foobar"]}, uris=None, exact=False
+            query={"any": ["foobar"]},
+            uris=None,
+            exact=False,
         )
 
 
@@ -372,7 +395,8 @@ class GetDistinctTest(BaseCoreLibraryTest):
     def test_checks_field_is_valid(self, check_choice_mock):
         self.core.library.get_distinct("artist")
         check_choice_mock.assert_called_with(
-            "artist", validation.DISTINCT_FIELDS.keys()
+            "artist",
+            validation.DISTINCT_FIELDS.keys(),
         )
 
     def test_any_field_raises_valueerror(self):
@@ -402,7 +426,8 @@ class GetDistinctTest(BaseCoreLibraryTest):
 
         assert self.core.library.get_distinct("track") == {result1}
         deprecate_warn_mock.assert_called_once_with(
-            "core.library.get_distinct:field_arg:track", pending=mock.ANY
+            "core.library.get_distinct:field_arg:track",
+            pending=mock.ANY,
         )
 
     @mock.patch("mopidy.core.library.logger")
@@ -449,13 +474,17 @@ class LegacyFindExactToSearchLibraryTest(unittest.TestCase):
     def test_core_search_call_backend_search_with_exact(self):
         self.core.library.search(query={"any": ["a"]})
         self.backend.library.search.assert_called_once_with(
-            query={"any": ["a"]}, uris=None, exact=False
+            query={"any": ["a"]},
+            uris=None,
+            exact=False,
         )
 
     def test_core_search_with_exact_call_backend_search_with_exact(self):
         self.core.library.search(query={"any": ["a"]}, exact=True)
         self.backend.library.search.assert_called_once_with(
-            query={"any": ["a"]}, uris=None, exact=True
+            query={"any": ["a"]},
+            uris=None,
+            exact=True,
         )
 
     def test_core_search_with_handles_legacy_backend(self):
@@ -587,7 +616,7 @@ class LookupByUrisBadBackendTest(MockBackendCoreLibraryBase):
     def test_backend_returns_wrong_type(self, logger):
         uri = "dummy:/1"
         self.library.lookup_many.return_value.get.return_value = [
-            Track(uri=uri, name="abc")
+            Track(uri=uri, name="abc"),
         ]
         assert self.core.library.lookup(uris=[uri]) == {uri: []}
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)

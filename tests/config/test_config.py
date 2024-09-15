@@ -2,7 +2,6 @@ import unittest
 from unittest import mock
 
 from mopidy import config, ext
-
 from tests import path_to_data_dir
 
 
@@ -234,7 +233,7 @@ class PostProcessorTest(unittest.TestCase):
         assert result == "# foobar"
 
         result = config._postprocess(
-            "[__COMMENTS__]\n__SEMICOLON0__ = foo\n__HASH1__ = bar"
+            "[__COMMENTS__]\n__SEMICOLON0__ = foo\n__HASH1__ = bar",
         )
         assert result == "; foo\n# bar"
 
@@ -243,13 +242,13 @@ class PostProcessorTest(unittest.TestCase):
             "[__COMMENTS__]\n"
             "__SEMICOLON0__ = foo\n"
             "__INLINE1__ = bar\n"
-            "__INLINE2__ = baz"
+            "__INLINE2__ = baz",
         )
         assert result == "; foo ; bar ; baz"
 
     def test_inline_semicolon_comment(self):
         result = config._postprocess(
-            "[__COMMENTS__]\n[section]\nfoo = bar\n__INLINE0__ = baz"
+            "[__COMMENTS__]\n[section]\nfoo = bar\n__INLINE0__ = baz",
         )
         assert result == "[section]\nfoo = bar ; baz"
 
@@ -266,7 +265,7 @@ class PostProcessorTest(unittest.TestCase):
             "[__COMMENTS__]\n"
             "[section]\n"
             "__SECTION0__ = foobar\n"
-            "__INLINE1__ = baz"
+            "__INLINE1__ = baz",
         )
         assert result == "[section] foobar ; baz"
 

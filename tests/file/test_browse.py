@@ -1,6 +1,6 @@
 import pytest
-from mopidy.internal import path
 
+from mopidy.internal import path
 from tests import path_to_data_dir
 
 

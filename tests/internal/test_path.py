@@ -4,6 +4,7 @@ import tempfile
 import unittest
 
 import pytest
+
 from mopidy.internal import path
 from mopidy.internal.gi import GLib
 
@@ -125,7 +126,7 @@ class GetOrCreateFileTest(unittest.TestCase):
 class GetUnixSocketPathTest(unittest.TestCase):
     def test_correctly_matched_socket_path(self):
         assert path.get_unix_socket_path("unix:/tmp/mopidy.socket") == pathlib.Path(
-            "/tmp/mopidy.socket"
+            "/tmp/mopidy.socket",
         )
 
     def test_correctly_no_match_socket_path(self):
@@ -175,7 +176,7 @@ class ExpandPathTest(unittest.TestCase):
     def test_empty_path(self):
         result = path.expand_path("")
 
-        assert result == pathlib.Path().resolve()
+        assert result == pathlib.Path.cwd()
 
     def test_absolute_path(self):
         result = path.expand_path("/tmp/foo")

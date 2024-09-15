@@ -20,6 +20,9 @@ jobs:
             python: "3.12"
             tox: py312
             coverage: true
+          - name: "Test: Python 3.13"
+            python: "3.13"
+            tox: py313
           - name: "Lint: pyright"
             python: "3.12"
             tox: pyright
@@ -34,7 +37,7 @@ jobs:
             tox: docs
 
     name: ${{ matrix.name }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     container: ghcr.io/mopidy/ci:latest
 
     steps:
@@ -45,6 +48,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           cache: pip
+          allow-prereleases: true
       - run: python -m pip install tox
       - run: python -m tox -e ${{ matrix.tox }}
         if: ${{ ! matrix.coverage }}

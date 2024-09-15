@@ -6,10 +6,10 @@ import unittest
 from typing import Any, ClassVar
 
 import pykka
+
 from mopidy import core
 from mopidy.m3u.backend import M3UBackend
 from mopidy.models import Playlist, Track
-
 from tests import dummy_audio, path_to_data_dir
 from tests.m3u import generate_song
 
@@ -23,7 +23,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
             "default_encoding": "latin-1",
             "default_extension": ".m3u",
             "playlists_dir": path_to_data_dir(""),
-        }
+        },
     }
 
     def setUp(self):

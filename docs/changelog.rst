@@ -18,7 +18,9 @@ old versions of our dependencies and a number of deprecated APIs.
 Dependencies
 ------------
 
-- Python >= 3.11 is now required. Python 3.7-3.10 are no longer supported.
+- Python >= 3.11 is now required.
+  Support for 3.7-3.10 have been dropped,
+  while Python 3.13 has been included in the testing matrix.
 
 - GStreamer >= 1.22.0 is now required.
 

@@ -1,6 +1,7 @@
 import re
 
 import pytest
+
 from mopidy import httpclient
 
 

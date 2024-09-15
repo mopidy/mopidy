@@ -41,7 +41,7 @@ class TestDeps:
                                 version="0.6",
                             ),
                         ],
-                    )
+                    ),
                 ],
             ),
         ]
@@ -115,7 +115,7 @@ class TestDeps:
         dist_setuptools.name = "setuptools"
         dist_setuptools.version = "0.6"
         dist_setuptools.locate_file = mock.MagicMock(
-            return_value=Path("/tmp/example/setuptools/main.py")
+            return_value=Path("/tmp/example/setuptools/main.py"),
         )
         dist_setuptools.requires = []
 
@@ -123,7 +123,7 @@ class TestDeps:
         dist_pykka.name = "Pykka"
         dist_pykka.version = "1.1"
         dist_pykka.locate_file = mock.MagicMock(
-            return_value=Path("/tmp/example/pykka/main.py")
+            return_value=Path("/tmp/example/pykka/main.py"),
         )
         dist_pykka.requires = [f"{dist_setuptools.name}==0.6"]
 
@@ -131,7 +131,7 @@ class TestDeps:
         dist_mopidy.name = "Mopidy"
         dist_mopidy.version = "0.13"
         dist_mopidy.locate_file = mock.MagicMock(
-            return_value=Path("/tmp/example/mopidy/no_name.py")
+            return_value=Path("/tmp/example/mopidy/no_name.py"),
         )
         dist_mopidy.requires = [f"{dist_pykka.name}==1.1"]
 

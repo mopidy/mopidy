@@ -34,22 +34,23 @@ class ImmutableObject:
     def __init__(self, *_args, **kwargs):
         for key, value in kwargs.items():
             if not self._is_valid_field(key):
-                raise TypeError(
-                    f"__init__() got an unexpected keyword argument {key!r}"
-                )
+                msg = f"__init__() got an unexpected keyword argument {key!r}"
+                raise TypeError(msg)
             self._set_field(key, value)
 
     def __setattr__(self, name, value):
         if name.startswith("_"):
             object.__setattr__(self, name, value)
         else:
-            raise AttributeError("Object is immutable.")
+            msg = "Object is immutable."
+            raise AttributeError(msg)
 
     def __delattr__(self, name):
         if name.startswith("_"):
             object.__delattr__(self, name)
         else:
-            raise AttributeError("Object is immutable.")
+            msg = "Object is immutable."
+            raise AttributeError(msg)
 
     def _is_valid_field(self, name):
         return hasattr(self, name) and not callable(getattr(self, name))
@@ -85,7 +86,9 @@ class ImmutableObject:
         return all(
             a == b
             for a, b in itertools.zip_longest(
-                self._items(), other._items(), fillvalue=object()
+                self._items(),
+                other._items(),
+                fillvalue=object(),
             )
         )
 
@@ -109,7 +112,8 @@ class ImmutableObject:
         other = copy.copy(self)
         for key, value in kwargs.items():
             if not self._is_valid_field(key):
-                raise TypeError(f"replace() got an unexpected keyword argument {key!r}")
+                msg = f"replace() got an unexpected keyword argument {key!r}"
+                raise TypeError(msg)
             other._set_field(key, value)
         return other
 
@@ -139,7 +143,7 @@ class _ValidatedImmutableObjectMeta(type, Generic[T]):
         name: str,
         bases: tuple[type, ...],
         attrs: dict[str, Any],
-    ) -> _ValidatedImmutableObjectMeta:
+    ) -> _ValidatedImmutableObjectMeta:  # noqa: PYI019
         fields = {}
 
         for base in bases:  # Copy parent fields over to our state
@@ -171,7 +175,8 @@ class _ValidatedImmutableObjectMeta(type, Generic[T]):
 
 
 class ValidatedImmutableObject(
-    ImmutableObject, metaclass=_ValidatedImmutableObjectMeta
+    ImmutableObject,
+    metaclass=_ValidatedImmutableObjectMeta,
 ):
     """Superclass for immutable objects whose fields can only be modified via the
     constructor. Fields should be :class:`Field` instances to ensure type
@@ -226,4 +231,7 @@ class ValidatedImmutableObject(
         other = super().replace(**kwargs)
         if hasattr(self, "_hash"):
             object.__delattr__(other, "_hash")
-        return self._instances.setdefault(weakref.ref(other), other)
+        return self._instances.setdefault(  # pyright: ignore[reportCallIssue]
+            weakref.ref(other),  # pyright: ignore[reportArgumentType]
+            other,
+        )

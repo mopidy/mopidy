@@ -70,7 +70,8 @@ class Zeroconf:
                 )
                 self.display_hostname = f"{self.server.GetHostName()}"
                 self.name = string.Template(name).safe_substitute(
-                    hostname=self.display_hostname, port=port
+                    hostname=self.display_hostname,
+                    port=port,
                 )
             except dbus.exceptions.DBusException as e:
                 logger.debug("%s: Server failed: %s", self, e)
@@ -109,7 +110,8 @@ class Zeroconf:
 
             self.group = dbus.Interface(
                 self.bus.get_object(
-                    "org.freedesktop.Avahi", self.server.EntryGroupNew()
+                    "org.freedesktop.Avahi",
+                    self.server.EntryGroupNew(),
                 ),
                 "org.freedesktop.Avahi.EntryGroup",
             )

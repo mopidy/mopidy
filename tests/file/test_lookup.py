@@ -1,9 +1,9 @@
 from unittest import mock
 
 import pytest
+
 from mopidy import exceptions
 from mopidy.internal import path
-
 from tests import path_to_data_dir
 
 

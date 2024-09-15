@@ -21,7 +21,8 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
         super().__init__()
 
         self._scanner = scan.Scanner(
-            timeout=config["stream"]["timeout"], proxy_config=config["proxy"]
+            timeout=config["stream"]["timeout"],
+            proxy_config=config["proxy"],
         )
 
         self._session = http.get_requests_session(
@@ -31,7 +32,7 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
 
         blacklist = config["stream"]["metadata_blacklist"]
         self._blacklist_re = re.compile(
-            rf"^({'|'.join(fnmatch.translate(u) for u in blacklist)})$"
+            rf"^({'|'.join(fnmatch.translate(u) for u in blacklist)})$",
         )
 
         self._timeout = config["stream"]["timeout"]
@@ -45,7 +46,7 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
             logger.warning(
                 'The stream/protocols config value includes the "file" '
                 'protocol. "file" playback is now handled by Mopidy-File. '
-                "Please remove it from the stream/protocols config."
+                "Please remove it from the stream/protocols config.",
             )
             uri_schemes -= {UriScheme("file")}
         StreamBackend.uri_schemes = sorted(uri_schemes)
@@ -71,7 +72,8 @@ class StreamLibraryProvider(backend.LibraryProvider):
 
         if scan_result:
             track = tags.convert_tags_to_track(scan_result.tags).replace(
-                uri=uri, length=scan_result.duration
+                uri=uri,
+                length=scan_result.duration,
             )
         else:
             logger.warning("Problem looking up %s", uri)
@@ -177,7 +179,7 @@ def _unwrap_stream(  # noqa: PLR0911  # TODO: cleanup the return value of this.
             )
             return uri, None
 
-        # TODO Test streams and return first that seems to be playable
+        # TODO: Test streams and return first that seems to be playable
         new_uri = uris[0]
         logger.debug("Parsed playlist (%s) and found new URI: %s", uri, new_uri)
         uri = Uri(urllib.parse.urljoin(uri, new_uri))

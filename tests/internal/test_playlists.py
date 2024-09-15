@@ -1,4 +1,5 @@
 import pytest
+
 from mopidy.internal import playlists
 
 BAD = b"foobarbaz"

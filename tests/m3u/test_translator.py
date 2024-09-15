@@ -2,6 +2,7 @@ import io
 import pathlib
 
 import pytest
+
 from mopidy.m3u import translator
 from mopidy.m3u.translator import path_to_uri
 from mopidy.models import Playlist, Ref, Track
@@ -25,7 +26,7 @@ def dumps(items):
         ("./test.m3u", None, "m3u:test.m3u"),
         ("foo/../test.m3u", None, "m3u:test.m3u"),
         ("Test Playlist.m3u", None, "m3u:Test%20Playlist.m3u"),
-        ("test.mp3", "file", "file:///test.mp3"),
+        ("/test.mp3", "file", "file:///test.mp3"),
     ],
 )
 def test_path_to_uri(path, scheme, expected):

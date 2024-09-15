@@ -4,11 +4,11 @@ from typing import ClassVar
 from unittest import mock
 
 import pykka
+
 from mopidy import audio
 from mopidy.audio.constants import PlaybackState
 from mopidy.internal import path
 from mopidy.internal.gi import Gst
-
 from tests import dummy_audio, path_to_data_dir
 
 # We want to make sure both our real audio class and the fake one behave
@@ -95,27 +95,27 @@ class AudioTest(BaseTest):
 
     @unittest.SkipTest
     def test_deliver_data(self):
-        pass  # TODO
+        pass  # TODO: Implement test
 
     @unittest.SkipTest
     def test_end_of_data_stream(self):
-        pass  # TODO
+        pass  # TODO: Implement test
 
     @unittest.SkipTest
     def test_set_mute(self):
-        pass  # TODO Probably needs a fakemixer with a mixer track
+        pass  # TODO: Implement test
 
     @unittest.SkipTest
     def test_set_state_encapsulation(self):
-        pass  # TODO
+        pass  # TODO: Implement test
 
     @unittest.SkipTest
     def test_set_position(self):
-        pass  # TODO
+        pass  # TODO: Implement test
 
     @unittest.SkipTest
     def test_invalid_output_raises_error(self):
-        pass  # TODO
+        pass  # TODO: Implement test
 
 
 class AudioDummyTest(DummyMixin, AudioTest):
@@ -522,15 +522,15 @@ class MixerTest(BaseTest):
 
     @unittest.SkipTest
     def test_set_state_encapsulation(self):
-        pass  # TODO
+        pass  # TODO: Implement test
 
     @unittest.SkipTest
     def test_set_position(self):
-        pass  # TODO
+        pass  # TODO: Implement test
 
     @unittest.SkipTest
     def test_invalid_output_raises_error(self):
-        pass  # TODO
+        pass  # TODO: Implement test
 
 
 class AudioStateTest(unittest.TestCase):
@@ -542,20 +542,28 @@ class AudioStateTest(unittest.TestCase):
 
     def test_state_does_not_change_when_in_gst_ready_state(self):
         self.audio._handler.on_playbin_state_changed(
-            Gst.State.NULL, Gst.State.READY, Gst.State.VOID_PENDING
+            Gst.State.NULL,
+            Gst.State.READY,
+            Gst.State.VOID_PENDING,
         )
 
         assert self.audio.state == audio.PlaybackState.STOPPED
 
     def test_state_changes_from_stopped_to_playing_on_play(self):
         self.audio._handler.on_playbin_state_changed(
-            Gst.State.NULL, Gst.State.READY, Gst.State.PLAYING
+            Gst.State.NULL,
+            Gst.State.READY,
+            Gst.State.PLAYING,
         )
         self.audio._handler.on_playbin_state_changed(
-            Gst.State.READY, Gst.State.PAUSED, Gst.State.PLAYING
+            Gst.State.READY,
+            Gst.State.PAUSED,
+            Gst.State.PLAYING,
         )
         self.audio._handler.on_playbin_state_changed(
-            Gst.State.PAUSED, Gst.State.PLAYING, Gst.State.VOID_PENDING
+            Gst.State.PAUSED,
+            Gst.State.PLAYING,
+            Gst.State.VOID_PENDING,
         )
 
         assert self.audio.state == audio.PlaybackState.PLAYING
@@ -564,7 +572,9 @@ class AudioStateTest(unittest.TestCase):
         self.audio.state = audio.PlaybackState.PLAYING
 
         self.audio._handler.on_playbin_state_changed(
-            Gst.State.PLAYING, Gst.State.PAUSED, Gst.State.VOID_PENDING
+            Gst.State.PLAYING,
+            Gst.State.PAUSED,
+            Gst.State.VOID_PENDING,
         )
 
         assert self.audio.state == audio.PlaybackState.PAUSED
@@ -573,10 +583,14 @@ class AudioStateTest(unittest.TestCase):
         self.audio.state = audio.PlaybackState.PLAYING
 
         self.audio._handler.on_playbin_state_changed(
-            Gst.State.PLAYING, Gst.State.PAUSED, Gst.State.NULL
+            Gst.State.PLAYING,
+            Gst.State.PAUSED,
+            Gst.State.NULL,
         )
         self.audio._handler.on_playbin_state_changed(
-            Gst.State.PAUSED, Gst.State.READY, Gst.State.NULL
+            Gst.State.PAUSED,
+            Gst.State.READY,
+            Gst.State.NULL,
         )
         # We never get the following call, so the logic must work without it
         # self.audio._handler.on_playbin_state_changed(

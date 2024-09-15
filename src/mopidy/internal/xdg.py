@@ -18,13 +18,13 @@ def get_dirs() -> dict[str, pathlib.Path]:
 
     dirs = {
         "XDG_CACHE_DIR": pathlib.Path(
-            os.getenv("XDG_CACHE_HOME", "~/.cache")
+            os.getenv("XDG_CACHE_HOME", "~/.cache"),
         ).expanduser(),
         "XDG_CONFIG_DIR": pathlib.Path(
-            os.getenv("XDG_CONFIG_HOME", "~/.config")
+            os.getenv("XDG_CONFIG_HOME", "~/.config"),
         ).expanduser(),
         "XDG_DATA_DIR": pathlib.Path(
-            os.getenv("XDG_DATA_HOME", "~/.local/share")
+            os.getenv("XDG_DATA_HOME", "~/.local/share"),
         ).expanduser(),
     }
 

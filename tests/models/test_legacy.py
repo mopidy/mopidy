@@ -1,6 +1,7 @@
 import unittest
 
 import pytest
+
 from mopidy.models import ImmutableObject
 
 

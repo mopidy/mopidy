@@ -43,7 +43,7 @@ if TYPE_CHECKING:
 
 
 __all__ = [
-    # TODO List everything that is reexported, not just the unused parts.
+    # TODO: List everything that is reexported, not just the unused parts.
     "ConfigValue",
     "Float",
     "List",
@@ -197,12 +197,18 @@ def format_initial(extensions_data: list[ExtensionData]) -> str:
 
     versions = [f"Mopidy {mopidy.__version__}"]
     extensions_data = sorted(extensions_data, key=lambda d: d.extension.dist_name)
-    for data in extensions_data:
-        versions.append(f"{data.extension.dist_name} {data.extension.version}")
+    versions.extend(
+        f"{data.extension.dist_name} {data.extension.version}"
+        for data in extensions_data
+    )
 
     header = _INITIAL_HELP.strip().format(versions="\n#   ".join(versions))
     formatted_config = _format(
-        config=config, comments={}, schemas=schemas, display=False, disable=True
+        config=config,
+        comments={},
+        schemas=schemas,
+        display=False,
+        disable=True,
     )
     return header + "\n\n" + formatted_config
 
@@ -249,13 +255,13 @@ def _load_file(
 ) -> None:
     if not file_path.exists():
         logger.debug(
-            f"Loading config from {file_path.as_uri()} failed; it does not exist"
+            f"Loading config from {file_path.as_uri()} failed; it does not exist",
         )
         return
     if not os.access(str(file_path), os.R_OK):
         logger.warning(
             f"Loading config from {file_path.as_uri()} failed; "
-            f"read permission missing"
+            f"read permission missing",
         )
         return
 
@@ -266,13 +272,13 @@ def _load_file(
     except configparser.MissingSectionHeaderError:
         logger.warning(
             f"Loading config from {file_path.as_uri()} failed; "
-            f"it does not have a config section"
+            f"it does not have a config section",
         )
     except configparser.ParsingError as e:
         linenos = ", ".join(str(lineno) for lineno, line in e.errors)
         logger.warning(
             f"Config file {file_path.as_uri()} has errors; "
-            f"line {linenos} has been ignored"
+            f"line {linenos} has been ignored",
         )
     except OSError:
         # TODO: if this is the initial load of logging config we might not
@@ -300,7 +306,7 @@ def _validate(
     for section in sections:
         logger.warning(
             f"Ignoring config section {section!r} "
-            f"because no matching extension was found"
+            f"because no matching extension was found",
         )
 
     return cast(Config, config), errors
@@ -332,7 +338,7 @@ def _format(
             if comment:
                 output[-1] += "  ; " + comment.capitalize()
             if disable:
-                output[-1] = re.sub(r"^", "#", output[-1], flags=re.M)
+                output[-1] = re.sub(r"^", "#", output[-1], flags=re.MULTILINE)
         output.append("")
     return "\n".join(output).strip()
 
@@ -357,7 +363,8 @@ def _preprocess(config_string: str) -> str:
             case ";":
                 return f"__SEMICOLON{next(counter):d}__ ="
             case _:
-                raise AssertionError(f"Unexpected comment type: {match.group(1)!r}")
+                msg = f"Unexpected comment type: {match.group(1)!r}"
+                raise AssertionError(msg)
 
     def inlinecomments(_match) -> str:
         return f"\n__INLINE{next(counter):d}__ ="

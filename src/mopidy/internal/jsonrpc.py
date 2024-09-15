@@ -108,7 +108,8 @@ class JsonRpcWrapper:
         encoders: list[type[json.JSONEncoder]] | None = None,
     ):
         if "" in objects:
-            raise AttributeError("The empty string is not allowed as an object mount")
+            msg = "The empty string is not allowed as an object mount"
+            raise AttributeError(msg)
         self.objects = objects
         self.decoder = get_combined_json_decoder(decoders or [])
         self.encoder = get_combined_json_encoder(encoders or [])
@@ -158,7 +159,7 @@ class JsonRpcWrapper:
     ) -> JsonRpcErrorResponse | list[JsonRpcResponse] | None:
         if not requests:
             return JsonRpcInvalidRequestError(
-                data="Batch list cannot be empty"
+                data="Batch list cannot be empty",
             ).get_response()
 
         responses: list[JsonRpcResponse] = []
@@ -198,7 +199,7 @@ class JsonRpcWrapper:
                         "type": exc.__class__.__name__,
                         "message": str(exc),
                         "traceback": traceback.format_exc(),
-                    }
+                    },
                 ) from exc
             except Exception as exc:
                 raise JsonRpcApplicationError(
@@ -206,7 +207,7 @@ class JsonRpcWrapper:
                         "type": exc.__class__.__name__,
                         "message": str(exc),
                         "traceback": traceback.format_exc(),
-                    }
+                    },
                 ) from exc
         except JsonRpcError as exc:
             if "id" not in request or request["id"] is None:
@@ -235,7 +236,7 @@ class JsonRpcWrapper:
         if isinstance(params, dict):  # pyright: ignore[reportUnnecessaryIsInstance]
             return [], params
         raise JsonRpcInvalidRequestError(
-            data="'params', if given, must be an array or an object"
+            data="'params', if given, must be an array or an object",
         )
 
     def _get_method(self, method_path: str) -> Callable[..., Any]:
@@ -247,7 +248,7 @@ class JsonRpcWrapper:
 
         if "." not in method_path:
             raise JsonRpcMethodNotFoundError(
-                data=f"Could not find object mount in method name {method_path!r}"
+                data=f"Could not find object mount in method name {method_path!r}",
             )
 
         mount, method_name = method_path.rsplit(".", 1)
@@ -259,14 +260,14 @@ class JsonRpcWrapper:
             obj = self.objects[mount]
         except KeyError as exc:
             raise JsonRpcMethodNotFoundError(
-                data=f"No object found at {mount!r}"
+                data=f"No object found at {mount!r}",
             ) from exc
 
         try:
             return getattr(obj, method_name)
         except AttributeError as exc:
             raise JsonRpcMethodNotFoundError(
-                data=f"Object mounted at {mount!r} has no member {method_name!r}"
+                data=f"Object mounted at {mount!r} has no member {method_name!r}",
             ) from exc
 
     def _unwrap_result(self, result: pykka.Future[T] | T) -> T:
@@ -371,7 +372,8 @@ class JsonRpcInspector:
 
     def __init__(self, objects: dict[str, Callable[..., Any]]) -> None:
         if "" in objects:
-            raise AttributeError("The empty string is not allowed as an object mount")
+            msg = "The empty string is not allowed as an object mount"
+            raise AttributeError(msg)
         self.objects = objects
 
     def describe(self) -> dict[str, Any]:

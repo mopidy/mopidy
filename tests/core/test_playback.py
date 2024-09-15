@@ -3,11 +3,11 @@ from unittest import mock
 
 import pykka
 import pytest
+
 from mopidy import backend, core
 from mopidy.internal import deprecation
 from mopidy.internal.models import PlaybackState
 from mopidy.models import Track
-
 from tests import dummy_audio, dummy_backend
 
 
@@ -58,7 +58,7 @@ class MyTestBackend(dummy_backend.DummyBackend):
 
 class BaseTest:
     config: ClassVar[dict[str, dict[str, int]]] = {
-        "core": {"max_tracklist_length": 10000}
+        "core": {"max_tracklist_length": 10000},
     }
     tracks: ClassVar[list[Track]] = [
         Track(uri="dummy:a", length=1234, name="foo"),
@@ -70,7 +70,9 @@ class BaseTest:
         self.audio = dummy_audio.create_proxy(config=self.config, mixer=None)
         self.backend = MyTestBackend.start(audio=self.audio, config=self.config).proxy()
         self.core = core.Core(
-            audio=self.audio, backends=[self.backend], config=self.config
+            audio=self.audio,
+            backends=[self.backend],
+            config=self.config,
         )
         self.playback = self.core.playback
 
@@ -305,8 +307,8 @@ class TestPreviousHandling(BaseTest):
         [
             (False, False, False, False, 0, None),
             (False, False, False, False, 1, 0),
-            (True, False, False, False, 0, 0),  # FIXME: #1694
-            (True, False, False, False, 1, 1),  # FIXME: #1694
+            (True, False, False, False, 0, 0),  # TODO: #1694
+            (True, False, False, False, 1, 1),  # TODO: #1694
         ],
     )
     def test_previous_all_modes(self, repeat, random, single, consume, index, result):
@@ -799,7 +801,7 @@ class TestEventEmission(BaseTest):
         # triggered as we have to switch back to the previous track.
         # The correct behavior would be to only emit seeked.
         assert listener_mock.send.mock_calls == [
-            mock.call("seeked", time_position=1000)
+            mock.call("seeked", time_position=1000),
         ]
 
     def test_previous_emits_events(self, listener_mock):
@@ -1034,7 +1036,9 @@ class TestBackendSelection:
         ]
 
         self.core = core.Core(
-            config, mixer=None, backends=[self.backend1, self.backend2]
+            config,
+            mixer=None,
+            backends=[self.backend1, self.backend2],
         )
 
         with deprecation.ignore():
@@ -1170,7 +1174,7 @@ class TestCorePlaybackWithOldBackend:
         b.playback = mock.Mock(spec=backend.PlaybackProvider)
         b.playback.play.side_effect = TypeError
         b.library.lookup_many.return_value.get.return_value = {
-            "dummy1:a": [Track(uri="dummy1:a", length=40000)]
+            "dummy1:a": [Track(uri="dummy1:a", length=40000)],
         }
 
         c = core.Core(config, mixer=None, backends=[b])

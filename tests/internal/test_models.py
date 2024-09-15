@@ -2,6 +2,7 @@ import json
 import unittest
 
 import pytest
+
 from mopidy.internal.models import (
     HistoryState,
     HistoryTrack,

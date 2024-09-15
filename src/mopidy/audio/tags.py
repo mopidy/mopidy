@@ -62,7 +62,9 @@ gstreamer-GstTagList.html
             if isinstance(value, GLib.Date):
                 try:
                     date = datetime.date(
-                        value.get_year(), value.get_month(), value.get_day()
+                        value.get_year(),
+                        value.get_month(),
+                        value.get_day(),
                     )
                     result[tag].append(date.isoformat())
                 except ValueError:
@@ -138,10 +140,15 @@ def convert_tags_to_track(tags):
     track_kwargs["composers"] = _artists(tags, Gst.TAG_COMPOSER)
     track_kwargs["performers"] = _artists(tags, Gst.TAG_PERFORMER)
     track_kwargs["artists"] = _artists(
-        tags, Gst.TAG_ARTIST, "musicbrainz-artistid", "musicbrainz-sortname"
+        tags,
+        Gst.TAG_ARTIST,
+        "musicbrainz-artistid",
+        "musicbrainz-sortname",
     )
     album_kwargs["artists"] = _artists(
-        tags, Gst.TAG_ALBUM_ARTIST, "musicbrainz-albumartistid"
+        tags,
+        Gst.TAG_ALBUM_ARTIST,
+        "musicbrainz-albumartistid",
     )
 
     track_kwargs["genre"] = "; ".join(tags.get(Gst.TAG_GENRE, []))

@@ -89,7 +89,7 @@ def make_jsonrpc_wrapper(core_actor: CoreProxy) -> jsonrpc.JsonRpcWrapper:
             "core.playback": core.PlaybackController,
             "core.playlists": core.PlaylistsController,
             "core.tracklist": core.TracklistController,
-        }
+        },
     )
     return jsonrpc.JsonRpcWrapper(
         objects={
@@ -117,16 +117,16 @@ def _send_broadcast(
     # to succeed, so catch everything.
     try:
         client.write_message(msg)
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001
         logger.debug(
             f"Broadcast of WebSocket message to "
-            f"{client.request.remote_ip} failed: {exc}"
+            f"{client.request.remote_ip} failed: {exc}",
         )
         # TODO: should this do the same cleanup as the on_message code?
 
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
-    # XXX This set is shared by all WebSocketHandler objects. This isn't
+    # NOTE: This set is shared by all WebSocketHandler objects. This isn't
     # optimal, but there's currently no use case for having more than one of
     # these anyway.
     clients: ClassVar[set[WebSocketHandler]] = set()
@@ -180,7 +180,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                     self.request.remote_ip,
                     response,
                 )
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             logger.error(f"WebSocket request error: {exc}")
             self.close()
 
@@ -265,8 +265,8 @@ class JsonRpcHandler(tornado.web.RequestHandler):
                     self.request.remote_ip,
                     response,
                 )
-        except Exception as e:
-            logger.error("HTTP JSON-RPC request error: %s", e)
+        except Exception as exc:  # noqa: BLE001
+            logger.error("HTTP JSON-RPC request error: %s", exc)
             self.write_error(500)
 
     def set_extra_headers(self) -> None:

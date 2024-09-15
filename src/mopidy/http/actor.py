@@ -53,7 +53,8 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
                 statics=self.statics,
             )
         except OSError as exc:
-            raise exceptions.FrontendError("HTTP server startup failed.") from exc
+            msg = "HTTP server startup failed."
+            raise exceptions.FrontendError(msg) from exc
 
         self.zeroconf_name = config["http"]["zeroconf"]
         self.zeroconf_http = None
@@ -65,7 +66,9 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
 
         if self.zeroconf_name:
             self.zeroconf_http = zeroconf.Zeroconf(
-                name=self.zeroconf_name, stype="_http._tcp", port=self.port
+                name=self.zeroconf_name,
+                stype="_http._tcp",
+                port=self.port,
             )
             self.zeroconf_mopidy_http = zeroconf.Zeroconf(
                 name=self.zeroconf_name,
@@ -98,7 +101,7 @@ def on_event(name: str, io_loop: tornado.ioloop.IOLoop, **data: Any) -> None:
 class HttpServer(threading.Thread):
     name = "HttpServer"
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         config: Config,
         core: CoreProxy,
@@ -151,7 +154,7 @@ class HttpServer(threading.Thread):
             formatting.indent(
                 "\n".join(
                     f"{path!r}: {handler!r}" for (path, handler, *_) in request_handlers
-                )
+                ),
             ),
         )
 
@@ -183,7 +186,7 @@ class HttpServer(threading.Thread):
                     f"/{static['name']}/(.*)",
                     handlers.StaticFileHandler,
                     {"path": static["path"], "default_filename": "index.html"},
-                )
+                ),
             )
             logger.debug("Loaded static HTTP extension: %s", static["name"])
         return result
@@ -202,7 +205,7 @@ class HttpServer(threading.Thread):
                 r"/",
                 tornado.web.RedirectHandler,
                 {"url": f"/{default_app}/", "permanent": False},
-            )
+            ),
         ]
 
     def _get_cookie_secret(self) -> str:
@@ -214,6 +217,6 @@ class HttpServer(threading.Thread):
             cookie_secret = file_path.read_text().strip()
             if not cookie_secret:
                 logging.error(
-                    f"HTTP server could not find cookie secret in {file_path}"
+                    f"HTTP server could not find cookie secret in {file_path}",
                 )
         return cookie_secret

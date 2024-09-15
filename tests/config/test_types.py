@@ -6,6 +6,7 @@ from typing import ClassVar
 from unittest import mock
 
 import pytest
+
 from mopidy.config import types
 from mopidy.internal import log
 
@@ -233,7 +234,7 @@ class TestSecret:
 
     def test_deserialize_utilises_transformer(self):
         cv = types.Secret(
-            transformer=lambda value: codecs.decode(value, encoding="rot13")
+            transformer=lambda value: codecs.decode(value, encoding="rot13"),
         )
 
         result = cv.deserialize("zbcvql")
@@ -441,7 +442,7 @@ class TestBoolean:
         assert result == "false"
 
     def test_serialize_none_as_false(self):
-        # TODO We should consider making `None` an invalid value, but we have
+        # TODO: We should consider making `None` an invalid value, but we have
         # existing code that assumes it to work like False.
 
         cv = types.Boolean()
@@ -570,7 +571,9 @@ class TestPair:
     @pytest.mark.parametrize("optional", (True, False))
     @pytest.mark.parametrize("optional_pair", (True, False))
     def test_deserialize_enforces_required_pair_values(
-        self, optional: bool, optional_pair: bool
+        self,
+        optional: bool,
+        optional_pair: bool,
     ):
         cv = types.Pair(optional=optional, optional_pair=optional_pair)
 
@@ -586,7 +589,10 @@ class TestPair:
     @pytest.mark.parametrize("optional_pair", (True, False))
     @pytest.mark.parametrize("sep", ("!", "@", "#", "$", "%", "^", "&", "*", "/", "\\"))
     def test_deserialize_enforces_required_pair_values_with_custom_separator(
-        self, optional: bool, optional_pair: bool, sep: str
+        self,
+        optional: bool,
+        optional_pair: bool,
+        sep: str,
     ):
         cv = types.Pair(optional=optional, optional_pair=optional_pair, separator=sep)
 
@@ -679,7 +685,7 @@ class TestPair:
         assert result == (None, "def")
 
         cv = types.Pair(
-            subtypes=(types.String(optional=True), types.String(optional=True))
+            subtypes=(types.String(optional=True), types.String(optional=True)),
         )
         result = cv.deserialize("|")
         assert result == (None, None)
@@ -835,7 +841,7 @@ class TestPair:
             subtypes=(
                 types.Pair(optional=True),
                 types.Pair(),
-            )
+            ),
         )
         result = cv.deserialize("|abc|def")
         assert result == (None, ("abc", "def"))
@@ -892,7 +898,7 @@ class TestPair:
             subtypes=(
                 types.String(),
                 types.Pair(optional_pair=True),
-            )
+            ),
         )
         result = cv.deserialize("abc|def")
         assert result == ("abc", ("def", "def"))
