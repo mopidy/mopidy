@@ -336,7 +336,7 @@ def _format(
             if comment:
                 output[-1] += "  ; " + comment.capitalize()
             if disable:
-                output[-1] = re.sub(r"^", "#", output[-1], flags=re.M)
+                output[-1] = re.sub(r"^", "#", output[-1], flags=re.MULTILINE)
         output.append("")
     return "\n".join(output).strip()
 
