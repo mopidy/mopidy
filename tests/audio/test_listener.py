@@ -19,7 +19,9 @@ class AudioListenerTest(unittest.TestCase):
         )
 
         self.listener.state_changed.assert_called_with(
-            old_state="stopped", new_state="playing", target_state=None
+            old_state="stopped",
+            new_state="playing",
+            target_state=None,
         )
 
     def test_listener_has_default_impl_for_reached_end_of_stream(self):

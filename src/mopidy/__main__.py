@@ -100,13 +100,13 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
             if not ext.validate_extension_data(data):
                 config[extension.ext_name] = {"enabled": False}
                 config_errors[extension.ext_name] = {
-                    "enabled": "extension disabled by self check."
+                    "enabled": "extension disabled by self check.",
                 }
                 extensions_status["validate"].append(extension)
             elif not config[extension.ext_name]["enabled"]:
                 config[extension.ext_name] = {"enabled": False}
                 config_errors[extension.ext_name] = {
-                    "enabled": "extension disabled by user config."
+                    "enabled": "extension disabled by user config.",
                 }
                 extensions_status["disabled"].append(extension)
             elif config_errors.get(extension.ext_name):
@@ -119,7 +119,8 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
                 extensions_status["enabled"].append(extension)
 
         log_extension_info(
-            [d.extension for d in extensions_data], extensions_status["enabled"]
+            [d.extension for d in extensions_data],
+            extensions_status["enabled"],
         )
 
         # Config and deps commands are simply special cased for now.
@@ -162,7 +163,7 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
                 # collections.Sequence to provide a RO view.
                 logger.exception(
                     f"Extension {extension.ext_name} failed during setup. "
-                    f"This might have left the registry in a bad state."
+                    f"This might have left the registry in a bad state.",
                 )
 
         # Anything that wants to exit after this point must use
@@ -207,7 +208,7 @@ def create_initial_config_file(config_files, extensions_data):
         logger.info(f"Initialized {config_file.as_uri()} with default config")
     except OSError as exc:
         logger.warning(
-            f"Unable to initialize {config_file.as_uri()} with default config: {exc}"
+            f"Unable to initialize {config_file.as_uri()} with default config: {exc}",
         )
 
 
@@ -242,7 +243,7 @@ def check_config_errors(
             del errors[section]["enabled"]
             logger.warning(
                 f"Found {section} configuration errors. "
-                f"The extension has been automatically disabled:"
+                f"The extension has been automatically disabled:",
             )
         else:
             continue
@@ -253,7 +254,7 @@ def check_config_errors(
     if extensions_status["config"]:
         logger.warning(
             "Please fix the extension configuration errors or "
-            "disable the extensions to silence these messages."
+            "disable the extensions to silence these messages.",
         )
 
     if fatal_errors:

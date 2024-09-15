@@ -75,7 +75,9 @@ def set(  # noqa: A001, PLR0911
     """
     if not dbus:
         logger.debug(
-            "Saving %s/%s to keyring failed. (dbus not installed)", section, key
+            "Saving %s/%s to keyring failed. (dbus not installed)",
+            section,
+            key,
         )
         return False
 
@@ -104,7 +106,7 @@ def set(  # noqa: A001, PLR0911
 
     session = service.OpenSession("plain", EMPTY_STRING)[1]
     secret = dbus.Struct(
-        (session, "", dbus.ByteArray(value), "plain/text; charset=utf8")
+        (session, "", dbus.ByteArray(value), "plain/text; charset=utf8"),
     )
     label = f"mopidy: {section}/{key}"
     attributes = {"service": "mopidy", "section": section, "key": key}

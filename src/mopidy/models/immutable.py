@@ -35,7 +35,7 @@ class ImmutableObject:
         for key, value in kwargs.items():
             if not self._is_valid_field(key):
                 raise TypeError(
-                    f"__init__() got an unexpected keyword argument {key!r}"
+                    f"__init__() got an unexpected keyword argument {key!r}",
                 )
             self._set_field(key, value)
 
@@ -85,7 +85,9 @@ class ImmutableObject:
         return all(
             a == b
             for a, b in itertools.zip_longest(
-                self._items(), other._items(), fillvalue=object()
+                self._items(),
+                other._items(),
+                fillvalue=object(),
             )
         )
 
@@ -171,7 +173,8 @@ class _ValidatedImmutableObjectMeta(type, Generic[T]):
 
 
 class ValidatedImmutableObject(
-    ImmutableObject, metaclass=_ValidatedImmutableObjectMeta
+    ImmutableObject,
+    metaclass=_ValidatedImmutableObjectMeta,
 ):
     """Superclass for immutable objects whose fields can only be modified via the
     constructor. Fields should be :class:`Field` instances to ensure type

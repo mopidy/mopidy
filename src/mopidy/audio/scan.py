@@ -27,7 +27,8 @@ class GstAutoplugSelectResult(IntEnum):
 
 
 _Result = collections.namedtuple(
-    "_Result", ("uri", "tags", "duration", "seekable", "mime", "playable")
+    "_Result",
+    ("uri", "tags", "duration", "seekable", "mime", "playable"),
 )
 
 logger = logging.getLogger(__name__)
@@ -211,7 +212,7 @@ def _autoplug_select(
     factory: Gst.ElementFactory,
 ) -> GstAutoplugSelectResult:
     if factory.list_is_type(
-        GstElementFactoryListType.DECODER | GstElementFactoryListType.AUDIO
+        GstElementFactoryListType.DECODER | GstElementFactoryListType.AUDIO,
     ):
         struct = Gst.Structure.new_empty("have-audio")
 
@@ -228,7 +229,7 @@ def _autoplug_select(
     if not factory.list_is_type(
         GstElementFactoryListType.DEMUXER
         | GstElementFactoryListType.DEPAYLOADER
-        | GstElementFactoryListType.PARSER
+        | GstElementFactoryListType.PARSER,
     ):
         return GstAutoplugSelectResult.EXPOSE
     return GstAutoplugSelectResult.TRY

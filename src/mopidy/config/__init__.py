@@ -202,7 +202,11 @@ def format_initial(extensions_data: list[ExtensionData]) -> str:
 
     header = _INITIAL_HELP.strip().format(versions="\n#   ".join(versions))
     formatted_config = _format(
-        config=config, comments={}, schemas=schemas, display=False, disable=True
+        config=config,
+        comments={},
+        schemas=schemas,
+        display=False,
+        disable=True,
     )
     return header + "\n\n" + formatted_config
 
@@ -249,13 +253,13 @@ def _load_file(
 ) -> None:
     if not file_path.exists():
         logger.debug(
-            f"Loading config from {file_path.as_uri()} failed; it does not exist"
+            f"Loading config from {file_path.as_uri()} failed; it does not exist",
         )
         return
     if not os.access(str(file_path), os.R_OK):
         logger.warning(
             f"Loading config from {file_path.as_uri()} failed; "
-            f"read permission missing"
+            f"read permission missing",
         )
         return
 
@@ -266,13 +270,13 @@ def _load_file(
     except configparser.MissingSectionHeaderError:
         logger.warning(
             f"Loading config from {file_path.as_uri()} failed; "
-            f"it does not have a config section"
+            f"it does not have a config section",
         )
     except configparser.ParsingError as e:
         linenos = ", ".join(str(lineno) for lineno, line in e.errors)
         logger.warning(
             f"Config file {file_path.as_uri()} has errors; "
-            f"line {linenos} has been ignored"
+            f"line {linenos} has been ignored",
         )
     except OSError:
         # TODO: if this is the initial load of logging config we might not
@@ -300,7 +304,7 @@ def _validate(
     for section in sections:
         logger.warning(
             f"Ignoring config section {section!r} "
-            f"because no matching extension was found"
+            f"because no matching extension was found",
         )
 
     return cast(Config, config), errors

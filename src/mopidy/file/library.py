@@ -102,7 +102,8 @@ class FileLibraryProvider(backend.LibraryProvider):
         try:
             result = self._scanner.scan(uri)
             track = tags.convert_tags_to_track(result.tags).replace(
-                uri=uri, length=result.duration
+                uri=uri,
+                length=result.duration,
             )
         except exceptions.ScannerError as e:
             logger.warning("Failed looking up %s: %s", uri, e)
@@ -152,7 +153,8 @@ class FileLibraryProvider(backend.LibraryProvider):
     def _get_media_dirs_refs(self) -> Generator[Ref, Any, None]:
         for media_dir in self._media_dirs:
             yield Ref.directory(
-                name=media_dir["name"], uri=path.path_to_uri(media_dir["path"])
+                name=media_dir["name"],
+                uri=path.path_to_uri(media_dir["path"]),
             )
 
     def _is_in_basedir(self, local_path) -> bool:

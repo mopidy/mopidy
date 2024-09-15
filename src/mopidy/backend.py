@@ -116,7 +116,9 @@ class LibraryProvider:
         return []
 
     def get_distinct(
-        self, field: DistinctField, query: Query[SearchField] | None = None
+        self,
+        field: DistinctField,
+        query: Query[SearchField] | None = None,
     ) -> set[str]:
         """See :meth:`mopidy.core.LibraryController.get_distinct`.
 

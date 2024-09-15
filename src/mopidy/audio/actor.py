@@ -62,12 +62,13 @@ class _Outputs(Gst.Bin):
         # XXX This only works for pipelines not in use until #790 gets done.
         try:
             output = Gst.parse_bin_from_description(
-                description, ghost_unlinked_pads=True
+                description,
+                ghost_unlinked_pads=True,
             )
         except GLib.Error as exc:
             logger.error('Failed to create audio output "%s": %s', description, exc)
             raise exceptions.AudioException(
-                f"Failed to create audio output {description!r}"
+                f"Failed to create audio output {description!r}",
             ) from exc
 
         self._add(output)
@@ -143,7 +144,8 @@ class _Handler:
     def setup_event_handling(self, pad) -> None:
         self._pad = pad
         self._event_handler_id = pad.add_probe(
-            Gst.PadProbeType.EVENT_BOTH, self.on_pad_event
+            Gst.PadProbeType.EVENT_BOTH,
+            self.on_pad_event,
         )
 
     def teardown_message_handling(self) -> None:
@@ -462,7 +464,7 @@ class Audio(pykka.ThreadingActor):
             fakesink = Gst.ElementFactory.make("fakesink")
             if fakesink is None:
                 raise exceptions.AudioException(
-                    "Failed to create GStreamer fakesink element."
+                    "Failed to create GStreamer fakesink element.",
                 )
             self._outputs = fakesink
         else:
@@ -483,7 +485,7 @@ class Audio(pykka.ThreadingActor):
         audio_sink = Gst.ElementFactory.make("bin", "audio-sink")
         if audio_sink is None:
             raise exceptions.AudioException(
-                "Failed to create GStreamer bin 'audio-sink'."
+                "Failed to create GStreamer bin 'audio-sink'.",
             )
         audio_sink = cast(Gst.Bin, audio_sink)
 
@@ -494,7 +496,7 @@ class Audio(pykka.ThreadingActor):
         volume = Gst.ElementFactory.make("volume")
         if volume is None:
             raise exceptions.AudioException(
-                "Failed to create GStreamer volume element."
+                "Failed to create GStreamer volume element.",
             )
 
         # Queue element to buy us time between the about-to-finish event and
@@ -547,13 +549,14 @@ class Audio(pykka.ThreadingActor):
         source: Gst.Element,
     ) -> None:
         gst_logger.debug(
-            "Got source-setup signal: element=%s", source.__class__.__name__
+            "Got source-setup signal: element=%s",
+            source.__class__.__name__,
         )
 
         source_factory = source.get_factory()
         if source_factory is None:
             raise exceptions.AudioException(
-                "Failed to get factory from GStreamer source."
+                "Failed to get factory from GStreamer source.",
             )
 
         if self._source_setup_callback:
@@ -597,7 +600,7 @@ class Audio(pykka.ThreadingActor):
         if live_stream and download:
             logger.warning(
                 "Ambiguous buffering flags: "
-                "'live_stream' and 'download' should not both be set."
+                "'live_stream' and 'download' should not both be set.",
             )
 
         self._pending_uri = uri
@@ -661,7 +664,9 @@ class Audio(pykka.ThreadingActor):
         # Since elements are not allowed to act on the seek event, only modify
         # it, this should be safe to do.
         return self._queue.seek_simple(
-            Gst.Format.TIME, Gst.SeekFlags.FLUSH, gst_position
+            Gst.Format.TIME,
+            Gst.SeekFlags.FLUSH,
+            gst_position,
         )
 
     def start_playback(self) -> bool:

@@ -143,7 +143,9 @@ class CommandParsingTest(unittest.TestCase):
         with pytest.raises(SystemExit):
             cmd.parse([])
         self.exit_mock.assert_called_once_with(
-            mock.ANY, mock.ANY, "usage: foo --bar BAR"
+            mock.ANY,
+            mock.ANY,
+            "usage: foo --bar BAR",
         )
 
         self.exit_mock.reset_mock()
@@ -151,7 +153,9 @@ class CommandParsingTest(unittest.TestCase):
             cmd.parse([], prog="baz")
 
         self.exit_mock.assert_called_once_with(
-            mock.ANY, mock.ANY, "usage: baz --bar BAR"
+            mock.ANY,
+            mock.ANY,
+            "usage: baz --bar BAR",
         )
 
     def test_missing_required(self):
@@ -203,7 +207,9 @@ class CommandParsingTest(unittest.TestCase):
             cmd.parse(["--help"], prog="foo")
 
         self.exit_mock.assert_called_once_with(
-            1, "unrecognized arguments: --help", "usage: foo"
+            1,
+            "unrecognized arguments: --help",
+            "usage: foo",
         )
 
     def test_invalid_subcommand(self):
@@ -214,7 +220,9 @@ class CommandParsingTest(unittest.TestCase):
             cmd.parse(["bar"], prog="foo")
 
         self.exit_mock.assert_called_once_with(
-            1, "unrecognized command: bar", "usage: foo"
+            1,
+            "unrecognized command: bar",
+            "usage: foo",
         )
 
     def test_set(self):
@@ -367,7 +375,10 @@ class HelpTest(unittest.TestCase):
     def test_subcommand_with_options_shown(self):
         child = commands.Command()
         child.add_argument(
-            "-h", "--help", action="store_true", help="show this message"
+            "-h",
+            "--help",
+            action="store_true",
+            help="show this message",
         )
 
         cmd = commands.Command()
@@ -400,7 +411,10 @@ class HelpTest(unittest.TestCase):
         child = commands.Command()
         child.help = "  some text about everything this command does."
         child.add_argument(
-            "-h", "--help", action="store_true", help="show this message"
+            "-h",
+            "--help",
+            action="store_true",
+            help="show this message",
         )
 
         cmd = commands.Command()
@@ -422,7 +436,10 @@ class HelpTest(unittest.TestCase):
         child = commands.Command()
         child.add_child("baz", subchild)
         child.add_argument(
-            "-h", "--help", action="store_true", help="show this message"
+            "-h",
+            "--help",
+            action="store_true",
+            help="show this message",
         )
 
         cmd = commands.Command()

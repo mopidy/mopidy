@@ -23,7 +23,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
             "default_encoding": "latin-1",
             "default_extension": ".m3u",
             "playlists_dir": path_to_data_dir(""),
-        }
+        },
     }
 
     def setUp(self):

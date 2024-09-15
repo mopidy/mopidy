@@ -123,11 +123,11 @@ def check_integer(
         raise exceptions.ValidationError(f"Expected an integer, not {arg!r}")
     if min is not None and arg < min:
         raise exceptions.ValidationError(
-            f"Expected number larger or equal to {min}, not {arg!r}"
+            f"Expected number larger or equal to {min}, not {arg!r}",
         )
     if max is not None and arg > max:
         raise exceptions.ValidationError(
-            f"Expected number smaller or equal to {max}, not {arg!r}"
+            f"Expected number smaller or equal to {max}, not {arg!r}",
         )
 
 

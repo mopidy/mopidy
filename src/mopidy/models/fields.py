@@ -55,11 +55,11 @@ class Field(Generic[T]):
         """Validate and possibly modify the field value before assignment."""
         if self._type and not isinstance(value, self._type):
             raise TypeError(
-                f"Expected {self._name} to be a {self._type}, not {value!r}"
+                f"Expected {self._name} to be a {self._type}, not {value!r}",
             )
         if self._choices and value not in self._choices:
             raise TypeError(
-                f"Expected {self._name} to be a one of {self._choices}, not {value!r}"
+                f"Expected {self._name} to be a one of {self._choices}, not {value!r}",
             )
         return value
 
@@ -165,11 +165,11 @@ class Integer(Field[int]):
         value = super().validate(value)
         if self._min is not None and value < self._min:
             raise ValueError(
-                f"Expected {self._name} to be at least {self._min}, not {value:d}"
+                f"Expected {self._name} to be at least {self._min}, not {value:d}",
             )
         if self._max is not None and value > self._max:
             raise ValueError(
-                f"Expected {self._name} to be at most {self._max}, not {value:d}"
+                f"Expected {self._name} to be at most {self._max}, not {value:d}",
             )
         return value
 
@@ -204,12 +204,12 @@ class Collection(Field[tuple[V, ...] | frozenset[V]]):
         if isinstance(value, str):
             raise TypeError(
                 f"Expected {self._name} to be a collection of "
-                f"{self._type.__name__}, not {value!r}"
+                f"{self._type.__name__}, not {value!r}",
             )
         for v in value:
             if not isinstance(v, self._type):
                 raise TypeError(
                     f"Expected {self._name} to be a collection of "
-                    f"{self._type.__name__}, not {value!r}"
+                    f"{self._type.__name__}, not {value!r}",
                 )
         return self._default.__class__(value)

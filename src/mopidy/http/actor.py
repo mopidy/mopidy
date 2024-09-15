@@ -65,7 +65,9 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
 
         if self.zeroconf_name:
             self.zeroconf_http = zeroconf.Zeroconf(
-                name=self.zeroconf_name, stype="_http._tcp", port=self.port
+                name=self.zeroconf_name,
+                stype="_http._tcp",
+                port=self.port,
             )
             self.zeroconf_mopidy_http = zeroconf.Zeroconf(
                 name=self.zeroconf_name,
@@ -151,7 +153,7 @@ class HttpServer(threading.Thread):
             formatting.indent(
                 "\n".join(
                     f"{path!r}: {handler!r}" for (path, handler, *_) in request_handlers
-                )
+                ),
             ),
         )
 
@@ -183,7 +185,7 @@ class HttpServer(threading.Thread):
                     f"/{static['name']}/(.*)",
                     handlers.StaticFileHandler,
                     {"path": static["path"], "default_filename": "index.html"},
-                )
+                ),
             )
             logger.debug("Loaded static HTTP extension: %s", static["name"])
         return result
@@ -202,7 +204,7 @@ class HttpServer(threading.Thread):
                 r"/",
                 tornado.web.RedirectHandler,
                 {"url": f"/{default_app}/", "permanent": False},
-            )
+            ),
         ]
 
     def _get_cookie_secret(self) -> str:
@@ -214,6 +216,6 @@ class HttpServer(threading.Thread):
             cookie_secret = file_path.read_text().strip()
             if not cookie_secret:
                 logging.error(
-                    f"HTTP server could not find cookie secret in {file_path}"
+                    f"HTTP server could not find cookie secret in {file_path}",
                 )
         return cookie_secret

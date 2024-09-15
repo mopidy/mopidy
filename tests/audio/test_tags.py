@@ -207,7 +207,7 @@ class TagsToTrackTest(unittest.TestCase):
     def test_missing_track_date(self):
         del self.tags["date"]
         self.check(
-            self.track.replace(album=self.track.album.replace(date=None), date=None)
+            self.track.replace(album=self.track.album.replace(date=None), date=None),
         )
 
     def test_multiple_track_date(self):

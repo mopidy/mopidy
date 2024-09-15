@@ -89,7 +89,7 @@ def make_jsonrpc_wrapper(core_actor: CoreProxy) -> jsonrpc.JsonRpcWrapper:
             "core.playback": core.PlaybackController,
             "core.playlists": core.PlaylistsController,
             "core.tracklist": core.TracklistController,
-        }
+        },
     )
     return jsonrpc.JsonRpcWrapper(
         objects={
@@ -120,7 +120,7 @@ def _send_broadcast(
     except Exception as exc:
         logger.debug(
             f"Broadcast of WebSocket message to "
-            f"{client.request.remote_ip} failed: {exc}"
+            f"{client.request.remote_ip} failed: {exc}",
         )
         # TODO: should this do the same cleanup as the on_message code?
 

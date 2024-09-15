@@ -94,7 +94,9 @@ def setup_logging(
     loglevels = config.get("loglevels", {})
 
     verbosity_level = get_verbosity_level(
-        config["logging"], base_verbosity_level, args_verbosity_level
+        config["logging"],
+        base_verbosity_level,
+        args_verbosity_level,
     )
     verbosity_filter = VerbosityFilter(verbosity_level, loglevels)
 

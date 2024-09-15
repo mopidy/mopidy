@@ -43,7 +43,7 @@ def config_override_type(value: str) -> tuple[str, str, str]:
         return (section.strip(), key.strip(), value.strip())
     except ValueError as exc:
         raise argparse.ArgumentTypeError(
-            f"{value} must have the format section/key=value"
+            f"{value} must have the format section/key=value",
         ) from exc
 
 
@@ -251,7 +251,10 @@ class Command:
             self.exit(1, f"unrecognized command: {child}", usage)
 
         return self._children[child]._parse(
-            result._args, result, overrides, " ".join([prog, child])
+            result._args,
+            result,
+            overrides,
+            " ".join([prog, child]),
         )
 
     def run(
@@ -289,7 +292,10 @@ class RootCommand(Command):
         super().__init__()
         self.set(base_verbosity_level=0)
         self.add_argument(
-            "-h", "--help", action="help", help="Show this message and exit"
+            "-h",
+            "--help",
+            action="help",
+            help="Show this message and exit",
         )
         self.add_argument(
             "--version",
@@ -491,7 +497,10 @@ class RootCommand(Command):
         core = cast(
             CoreProxy,
             Core.start(
-                config=config, mixer=mixer, backends=backends, audio=audio
+                config=config,
+                mixer=mixer,
+                backends=backends,
+                audio=audio,
             ).proxy(),
         )
         call = ProxyCall(attr_path=("_setup",), args=(), kwargs={})

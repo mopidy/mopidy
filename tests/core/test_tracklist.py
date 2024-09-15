@@ -56,7 +56,7 @@ class TracklistTest(unittest.TestCase):
                 "dummy1:a",
                 "dummy1:b",
                 "dummy1:c",
-            ]
+            ],
         )
 
         assert len(tl_tracks) == 3

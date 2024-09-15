@@ -191,7 +191,7 @@ class PlaybackController:
                 attr_path=("playback", "_on_about_to_finish"),
                 args=(),
                 kwargs={},
-            )
+            ),
         )
 
     def _on_about_to_finish(self) -> None:
@@ -540,7 +540,9 @@ class PlaybackController:
     ) -> None:
         logger.debug("Triggering playback state change event")
         listener.CoreListener.send(
-            "playback_state_changed", old_state=old_state, new_state=new_state
+            "playback_state_changed",
+            old_state=old_state,
+            new_state=new_state,
         )
 
     def _trigger_seeked(self, time_position: int) -> None:

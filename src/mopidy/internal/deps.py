@@ -116,7 +116,7 @@ def pkg_info(
                             pkg_name=name,
                             depth=depth + 1,
                             seen_pkgs=seen_pkgs,
-                        )
+                        ),
                     )
         return DepInfo(
             name=pkg_name,

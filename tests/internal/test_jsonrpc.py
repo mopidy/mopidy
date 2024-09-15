@@ -637,7 +637,7 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
                 "core.playback": core.PlaybackController,
                 "core.playlists": core.PlaylistsController,
                 "core.tracklist": core.TracklistController,
-            }
+            },
         )
 
         methods = inspector.describe()

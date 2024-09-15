@@ -23,7 +23,7 @@ class LibraryTest(unittest.TestCase):
             [
                 mock.call("dummy1:a"),
                 mock.call("dummy1:b"),
-            ]
+            ],
         )
 
 

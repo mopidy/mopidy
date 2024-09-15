@@ -76,15 +76,15 @@ class Core(
         self.backends = Backends(backends or [])
 
         self.library = pykka.traversable(
-            LibraryController(backends=self.backends, core=self)
+            LibraryController(backends=self.backends, core=self),
         )
         self.history = pykka.traversable(HistoryController())
         self.mixer = pykka.traversable(MixerController(mixer=mixer))
         self.playback = pykka.traversable(
-            PlaybackController(audio=audio, backends=self.backends, core=self)
+            PlaybackController(audio=audio, backends=self.backends, core=self),
         )
         self.playlists = pykka.traversable(
-            PlaylistsController(backends=self.backends, core=self)
+            PlaylistsController(backends=self.backends, core=self),
         )
         self.tracklist = pykka.traversable(TracklistController(core=self))
 
@@ -288,7 +288,7 @@ class Backends(list):
                 if scheme in backends_by_scheme:
                     raise AssertionError(
                         f"Cannot add URI scheme {scheme!r} for {name(b)}, "
-                        f"it is already handled by {name(backends_by_scheme[scheme])}"
+                        f"it is already handled by {name(backends_by_scheme[scheme])}",
                     )
                 backends_by_scheme[scheme] = b
 

@@ -542,20 +542,28 @@ class AudioStateTest(unittest.TestCase):
 
     def test_state_does_not_change_when_in_gst_ready_state(self):
         self.audio._handler.on_playbin_state_changed(
-            Gst.State.NULL, Gst.State.READY, Gst.State.VOID_PENDING
+            Gst.State.NULL,
+            Gst.State.READY,
+            Gst.State.VOID_PENDING,
         )
 
         assert self.audio.state == audio.PlaybackState.STOPPED
 
     def test_state_changes_from_stopped_to_playing_on_play(self):
         self.audio._handler.on_playbin_state_changed(
-            Gst.State.NULL, Gst.State.READY, Gst.State.PLAYING
+            Gst.State.NULL,
+            Gst.State.READY,
+            Gst.State.PLAYING,
         )
         self.audio._handler.on_playbin_state_changed(
-            Gst.State.READY, Gst.State.PAUSED, Gst.State.PLAYING
+            Gst.State.READY,
+            Gst.State.PAUSED,
+            Gst.State.PLAYING,
         )
         self.audio._handler.on_playbin_state_changed(
-            Gst.State.PAUSED, Gst.State.PLAYING, Gst.State.VOID_PENDING
+            Gst.State.PAUSED,
+            Gst.State.PLAYING,
+            Gst.State.VOID_PENDING,
         )
 
         assert self.audio.state == audio.PlaybackState.PLAYING
@@ -564,7 +572,9 @@ class AudioStateTest(unittest.TestCase):
         self.audio.state = audio.PlaybackState.PLAYING
 
         self.audio._handler.on_playbin_state_changed(
-            Gst.State.PLAYING, Gst.State.PAUSED, Gst.State.VOID_PENDING
+            Gst.State.PLAYING,
+            Gst.State.PAUSED,
+            Gst.State.VOID_PENDING,
         )
 
         assert self.audio.state == audio.PlaybackState.PAUSED
@@ -573,10 +583,14 @@ class AudioStateTest(unittest.TestCase):
         self.audio.state = audio.PlaybackState.PLAYING
 
         self.audio._handler.on_playbin_state_changed(
-            Gst.State.PLAYING, Gst.State.PAUSED, Gst.State.NULL
+            Gst.State.PLAYING,
+            Gst.State.PAUSED,
+            Gst.State.NULL,
         )
         self.audio._handler.on_playbin_state_changed(
-            Gst.State.PAUSED, Gst.State.READY, Gst.State.NULL
+            Gst.State.PAUSED,
+            Gst.State.READY,
+            Gst.State.NULL,
         )
         # We never get the following call, so the logic must work without it
         # self.audio._handler.on_playbin_state_changed(

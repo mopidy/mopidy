@@ -297,7 +297,7 @@ class Pair(ConfigValue[tuple[K, V]]):
             values = (raw_value, raw_value)
         else:
             raise ValueError(
-                f"Config value must include {self._separator!r} separator: {raw_value}"
+                f"Config value must include {self._separator!r} separator: {raw_value}",
             )
 
         return cast(
@@ -309,13 +309,16 @@ class Pair(ConfigValue[tuple[K, V]]):
         )
 
     def serialize(
-        self, value: tuple[K, V], display: bool = False
+        self,
+        value: tuple[K, V],
+        display: bool = False,
     ) -> str | DeprecatedValue:
         serialized_first_value = self._subtypes[0].serialize(value[0], display=display)
         serialized_second_value = self._subtypes[1].serialize(value[1], display=display)
 
         if isinstance(serialized_first_value, DeprecatedValue) or isinstance(
-            serialized_second_value, DeprecatedValue
+            serialized_second_value,
+            DeprecatedValue,
         ):
             return DeprecatedValue()
 
@@ -370,7 +373,9 @@ class List(ConfigValue[tuple[V, ...] | frozenset[V]]):
         return cast(tuple[V, ...] | frozenset[V], values)
 
     def serialize(
-        self, value: tuple[V, ...] | frozenset[V], display: bool = False
+        self,
+        value: tuple[V, ...] | frozenset[V],
+        display: bool = False,
     ) -> str:
         if not value:
             return ""
@@ -463,7 +468,10 @@ class Port(Integer):
 
     def __init__(self, choices=None, optional=False):
         super().__init__(
-            minimum=0, maximum=2**16 - 1, choices=choices, optional=optional
+            minimum=0,
+            maximum=2**16 - 1,
+            choices=choices,
+            optional=optional,
         )
 
 

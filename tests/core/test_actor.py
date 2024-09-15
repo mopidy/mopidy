@@ -179,7 +179,7 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
                 "max_tracklist_length": 10000,
                 "restore_state": True,
                 "data_dir": self.temp_dir,
-            }
+            },
         }
 
         self.mixer = dummy_mixer.create_proxy()
@@ -251,7 +251,7 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
                         timestamp=13,
                         track=models.Ref.track(uri="a:b", name="b"),
                     ),
-                ]
+                ],
             ),
             playback=models.PlaybackState(tlid=12, state="paused", time_position=432),
             mixer=models.MixerState(mute=True, volume=12),

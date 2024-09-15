@@ -19,7 +19,7 @@ def get_or_create_dir(dir_path: str | PathLike[str]) -> pathlib.Path:
     if dir_path.is_file():
         raise OSError(
             f"A file with the same name as the desired dir, "
-            f"{dir_path!r}, already exists."
+            f"{dir_path!r}, already exists.",
         )
     if not dir_path.is_dir():
         logger.info(f"Creating dir {dir_path.as_uri()}")

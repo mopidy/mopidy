@@ -144,7 +144,8 @@ class RefTest(unittest.TestCase):
 
     def test_serialize_without_results(self):
         self.assertDictEqual(
-            {"__model__": "Ref", "uri": "uri"}, Ref(uri="uri").serialize()
+            {"__model__": "Ref", "uri": "uri"},
+            Ref(uri="uri").serialize(),
         )
 
     def test_to_json_and_back(self):

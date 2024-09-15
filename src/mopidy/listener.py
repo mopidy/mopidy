@@ -24,7 +24,7 @@ def send(cls, event, **kwargs):
                 attr_path=("on_event",),
                 args=(event,),
                 kwargs=kwargs,
-            )
+            ),
         )
 
 
@@ -44,5 +44,7 @@ class Listener:
         except Exception:
             # Ensure we don't crash the actor due to "bad" events.
             logger.exception(
-                "Triggering event failed: %s(%s)", event, ", ".join(kwargs)
+                "Triggering event failed: %s(%s)",
+                event,
+                ", ".join(kwargs),
             )
