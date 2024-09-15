@@ -36,7 +36,8 @@ class ScannerTest(unittest.TestCase):
             if path.suffix != ".mp3":
                 continue
             if not result.playable and result.mime == "audio/mpeg":
-                raise unittest.SkipTest("Missing MP3 support?")
+                msg = "Missing MP3 support?"
+                raise unittest.SkipTest(msg)
 
     def test_tags_is_set(self):
         self.scan(self.find("scanner/simple"))

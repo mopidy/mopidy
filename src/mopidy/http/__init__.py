@@ -36,7 +36,8 @@ class Extension(ext.Extension):
         try:
             import tornado.web  # noqa: F401 (Imported to test if available)
         except ImportError as exc:
-            raise exceptions.ExtensionError("tornado library not found") from exc
+            msg = "tornado library not found"
+            raise exceptions.ExtensionError(msg) from exc
 
     def setup(self, registry: ext.Registry) -> None:
         from .actor import HttpFrontend

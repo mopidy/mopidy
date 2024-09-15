@@ -213,9 +213,8 @@ class LibraryController:
                 validation.check_instance(future.get(), Mapping)
                 for uri, images in future.get().items():
                     if uri not in uris:
-                        raise exceptions.ValidationError(
-                            f"Got unknown image URI: {uri}",
-                        )
+                        msg = f"Got unknown image URI: {uri}"
+                        raise exceptions.ValidationError(msg)
                     validation.check_instances(images, Image)
                     results[uri] += tuple(images)
         return results

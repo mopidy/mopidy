@@ -15,4 +15,5 @@ def test_file_init():
             extension.setup(registry)
             assert registry["backend"][0] == FileBackend
             return
-    raise AssertionError("Mopidy-File not loaded!")
+    msg = "Mopidy-File not loaded!"
+    raise AssertionError(msg)

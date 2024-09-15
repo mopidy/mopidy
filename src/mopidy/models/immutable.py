@@ -34,22 +34,23 @@ class ImmutableObject:
     def __init__(self, *_args, **kwargs):
         for key, value in kwargs.items():
             if not self._is_valid_field(key):
-                raise TypeError(
-                    f"__init__() got an unexpected keyword argument {key!r}",
-                )
+                msg = f"__init__() got an unexpected keyword argument {key!r}"
+                raise TypeError(msg)
             self._set_field(key, value)
 
     def __setattr__(self, name, value):
         if name.startswith("_"):
             object.__setattr__(self, name, value)
         else:
-            raise AttributeError("Object is immutable.")
+            msg = "Object is immutable."
+            raise AttributeError(msg)
 
     def __delattr__(self, name):
         if name.startswith("_"):
             object.__delattr__(self, name)
         else:
-            raise AttributeError("Object is immutable.")
+            msg = "Object is immutable."
+            raise AttributeError(msg)
 
     def _is_valid_field(self, name):
         return hasattr(self, name) and not callable(getattr(self, name))
@@ -111,7 +112,8 @@ class ImmutableObject:
         other = copy.copy(self)
         for key, value in kwargs.items():
             if not self._is_valid_field(key):
-                raise TypeError(f"replace() got an unexpected keyword argument {key!r}")
+                msg = f"replace() got an unexpected keyword argument {key!r}"
+                raise TypeError(msg)
             other._set_field(key, value)
         return other
 

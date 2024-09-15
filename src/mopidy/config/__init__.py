@@ -361,7 +361,8 @@ def _preprocess(config_string: str) -> str:
             case ";":
                 return f"__SEMICOLON{next(counter):d}__ ="
             case _:
-                raise AssertionError(f"Unexpected comment type: {match.group(1)!r}")
+                msg = f"Unexpected comment type: {match.group(1)!r}"
+                raise AssertionError(msg)
 
     def inlinecomments(_match) -> str:
         return f"\n__INLINE{next(counter):d}__ ="

@@ -87,7 +87,8 @@ class Scanner:
 def _setup_pipeline(uri: str, proxy_config=None) -> tuple[Gst.Pipeline, utils.Signals]:
     src = Gst.Element.make_from_uri(Gst.URIType.SRC, uri)
     if not src:
-        raise exceptions.ScannerError(f"GStreamer can not open: {uri}")
+        msg = f"GStreamer can not open: {uri}"
+        raise exceptions.ScannerError(msg)
 
     if proxy_config:
         utils.setup_proxy(src, proxy_config)
@@ -96,7 +97,8 @@ def _setup_pipeline(uri: str, proxy_config=None) -> tuple[Gst.Pipeline, utils.Si
 
     pipeline = Gst.ElementFactory.make("pipeline")
     if pipeline is None:
-        raise exceptions.AudioException("Failed to create GStreamer pipeline element.")
+        msg = "Failed to create GStreamer pipeline element."
+        raise exceptions.AudioException(msg)
     pipeline = cast(Gst.Pipeline, pipeline)
     pipeline.add(src)
 
@@ -105,7 +107,8 @@ def _setup_pipeline(uri: str, proxy_config=None) -> tuple[Gst.Pipeline, utils.Si
     elif _has_dynamic_src_pad(src):
         signals.connect(src, "pad-added", _setup_decodebin, pipeline, signals)
     else:
-        raise exceptions.ScannerError("No pads found in source element.")
+        msg = "No pads found in source element."
+        raise exceptions.ScannerError(msg)
 
     return pipeline, signals
 
@@ -129,11 +132,13 @@ def _has_dynamic_src_pad(element) -> bool:
 def _setup_decodebin(element, pad, pipeline, signals) -> None:  # noqa: ARG001
     typefind = Gst.ElementFactory.make("typefind")
     if typefind is None:
-        raise exceptions.AudioException("Failed to create GStreamer typefind element.")
+        msg = "Failed to create GStreamer typefind element."
+        raise exceptions.AudioException(msg)
 
     decodebin = Gst.ElementFactory.make("decodebin")
     if decodebin is None:
-        raise exceptions.AudioException("Failed to create GStreamer decodebin element.")
+        msg = "Failed to create GStreamer decodebin element."
+        raise exceptions.AudioException(msg)
 
     for el in (typefind, decodebin):
         pipeline.add(el)
@@ -159,11 +164,13 @@ def _have_type(
 
     element_bus = element.get_bus()
     if element_bus is None:
-        raise exceptions.AudioException("Failed to get bus of GStreamer element.")
+        msg = "Failed to get bus of GStreamer element."
+        raise exceptions.AudioException(msg)
 
     message = Gst.Message.new_application(element, struct)
     if message is None:
-        raise exceptions.AudioException("Failed to create GStreamer message.")
+        msg = "Failed to create GStreamer message."
+        raise exceptions.AudioException(msg)
 
     element_bus.post(message)
 
@@ -175,7 +182,8 @@ def _pad_added(
 ) -> None:
     fakesink = Gst.ElementFactory.make("fakesink")
     if fakesink is None:
-        raise exceptions.AudioException("Failed to create GStreamer fakesink element.")
+        msg = "Failed to create GStreamer fakesink element."
+        raise exceptions.AudioException(msg)
 
     fakesink.set_property("sync", False)
 
@@ -183,7 +191,8 @@ def _pad_added(
     fakesink.sync_state_with_parent()
     fakesink_sink = fakesink.get_static_pad("sink")
     if fakesink_sink is None:
-        raise exceptions.AudioException("Failed to get sink pad of GStreamer fakesink.")
+        msg = "Failed to get sink pad of GStreamer fakesink."
+        raise exceptions.AudioException(msg)
     pad.link(fakesink_sink)
 
     raw_caps = Gst.Caps.from_string("audio/x-raw")
@@ -196,11 +205,13 @@ def _pad_added(
 
         element_bus = element.get_bus()
         if element_bus is None:
-            raise exceptions.AudioException("Failed to get bus of GStreamer element.")
+            msg = "Failed to get bus of GStreamer element."
+            raise exceptions.AudioException(msg)
 
         message = Gst.Message.new_application(element, struct)
         if message is None:
-            raise exceptions.AudioException("Failed to create GStreamer message.")
+            msg = "Failed to create GStreamer message."
+            raise exceptions.AudioException(msg)
 
         element_bus.post(message)
 
@@ -218,11 +229,13 @@ def _autoplug_select(
 
         element_bus = element.get_bus()
         if element_bus is None:
-            raise exceptions.AudioException("Failed to get bus of GStreamer element.")
+            msg = "Failed to get bus of GStreamer element."
+            raise exceptions.AudioException(msg)
 
         message = Gst.Message.new_application(element, struct)
         if message is None:
-            raise exceptions.AudioException("Failed to create GStreamer message.")
+            msg = "Failed to create GStreamer message."
+            raise exceptions.AudioException(msg)
 
         element_bus.post(message)
 
@@ -356,7 +369,8 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
         timeout = timeout_ms - (int(time.time() * 1000) - start)
 
-    raise exceptions.ScannerError(f"Timeout after {timeout_ms:d}ms")
+    msg = f"Timeout after {timeout_ms:d}ms"
+    raise exceptions.ScannerError(msg)
 
 
 if __name__ == "__main__":

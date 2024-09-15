@@ -43,7 +43,8 @@ class Calculator:
         return "Grand Unified Theory"
 
     def fail(self):
-        raise ValueError("What did you expect?")
+        msg = "What did you expect?"
+        raise ValueError(msg)
 
 
 class JsonRpcTestBase(unittest.TestCase):

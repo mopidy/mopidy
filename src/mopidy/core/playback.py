@@ -384,7 +384,8 @@ class PlaybackController:
             self._pending_tl_track = None
             return True
 
-        raise CoreError(f"Unknown playback state: {state}")
+        msg = f"Unknown playback state: {state}"
+        raise CoreError(msg)
 
     def previous(self) -> None:
         """Change to the previous track.

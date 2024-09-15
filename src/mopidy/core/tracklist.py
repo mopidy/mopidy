@@ -370,7 +370,8 @@ class TracklistController:
             The ``tracks`` argument. Use ``uris``.
         """
         if sum(o is not None for o in [tracks, uris]) != 1:
-            raise ValueError('Exactly one of "tracks" or "uris" must be set')
+            msg = 'Exactly one of "tracks" or "uris" must be set'
+            raise ValueError(msg)
 
         if tracks is not None:
             validation.check_instances(tracks, Track)
@@ -393,9 +394,8 @@ class TracklistController:
 
         for track in tracks:
             if self.get_length() >= max_length:
-                raise exceptions.TracklistFull(
-                    f"Tracklist may contain at most {max_length:d} tracks.",
-                )
+                msg = f"Tracklist may contain at most {max_length:d} tracks."
+                raise exceptions.TracklistFull(msg)
 
             tl_track = TlTrack(self._next_tlid, track)
             self._next_tlid += 1
@@ -469,15 +469,20 @@ class TracklistController:
 
         # TODO: use validation helpers?
         if start >= end:
-            raise AssertionError("start must be smaller than end")
+            msg = "start must be smaller than end"
+            raise AssertionError(msg)
         if start < 0:
-            raise AssertionError("start must be at least zero")
+            msg = "start must be at least zero"
+            raise AssertionError(msg)
         if end > len(tl_tracks):
-            raise AssertionError("end can not be larger than tracklist length")
+            msg = "end can not be larger than tracklist length"
+            raise AssertionError(msg)
         if to_position < 0:
-            raise AssertionError("to_position must be at least zero")
+            msg = "to_position must be at least zero"
+            raise AssertionError(msg)
         if to_position > len(tl_tracks):
-            raise AssertionError("to_position can not be larger than tracklist length")
+            msg = "to_position can not be larger than tracklist length"
+            raise AssertionError(msg)
 
         new_tl_tracks = tl_tracks[:start] + tl_tracks[end:]
         for tl_track in tl_tracks[start:end]:
@@ -517,13 +522,16 @@ class TracklistController:
 
         # TOOD: use validation helpers?
         if start is not None and end is not None and start >= end:
-            raise AssertionError("start must be smaller than end")
+            msg = "start must be smaller than end"
+            raise AssertionError(msg)
 
         if start is not None and start < 0:
-            raise AssertionError("start must be at least zero")
+            msg = "start must be at least zero"
+            raise AssertionError(msg)
 
         if end is not None and end > len(tl_tracks):
-            raise AssertionError("end can not be larger than tracklist length")
+            msg = "end can not be larger than tracklist length"
+            raise AssertionError(msg)
 
         before = tl_tracks[: start or 0]
         shuffled = tl_tracks[start:end]

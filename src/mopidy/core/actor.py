@@ -286,10 +286,11 @@ class Backends(list):
 
             for scheme in b.uri_schemes.get():
                 if scheme in backends_by_scheme:
-                    raise AssertionError(
+                    msg = (
                         f"Cannot add URI scheme {scheme!r} for {name(b)}, "
-                        f"it is already handled by {name(backends_by_scheme[scheme])}",
+                        f"it is already handled by {name(backends_by_scheme[scheme])}"
                     )
+                    raise AssertionError(msg)
                 backends_by_scheme[scheme] = b
 
                 if has_library:

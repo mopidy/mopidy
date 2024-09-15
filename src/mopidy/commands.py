@@ -42,9 +42,8 @@ def config_override_type(value: str) -> tuple[str, str, str]:
         key, value = remainder.split("=", 1)
         return (section.strip(), key.strip(), value.strip())
     except ValueError as exc:
-        raise argparse.ArgumentTypeError(
-            f"{value} must have the format section/key=value",
-        ) from exc
+        msg = f"{value} must have the format section/key=value"
+        raise argparse.ArgumentTypeError(msg) from exc
 
 
 class _ParserError(Exception):

@@ -17,10 +17,11 @@ XDG_DIRS = xdg.get_dirs()
 def get_or_create_dir(dir_path: str | PathLike[str]) -> pathlib.Path:
     dir_path = expand_path(dir_path)
     if dir_path.is_file():
-        raise OSError(
+        msg = (
             f"A file with the same name as the desired dir, "
-            f"{dir_path!r}, already exists.",
+            f"{dir_path!r}, already exists."
         )
+        raise OSError(msg)
     if not dir_path.is_dir():
         logger.info(f"Creating dir {dir_path.as_uri()}")
         dir_path.mkdir(mode=0o755, parents=True)
@@ -86,7 +87,8 @@ def expand_path(path: bytes | str | PathLike[str]) -> pathlib.Path:
     for xdg_var, xdg_dir in XDG_DIRS.items():
         path = path.replace("$" + xdg_var, str(xdg_dir))
     if "$" in path:
-        raise ValueError(f"Unexpanded '$...' in path {path!r}")
+        msg = f"Unexpanded '$...' in path {path!r}"
+        raise ValueError(msg)
 
     return pathlib.Path(path).expanduser().resolve()
 

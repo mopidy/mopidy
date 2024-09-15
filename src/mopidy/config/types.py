@@ -249,7 +249,8 @@ class Boolean(ConfigValue[bool]):
             return True
         if result.lower() in self.false_values:
             return False
-        raise ValueError(f"invalid value for boolean: {result!r}")
+        msg = f"invalid value for boolean: {result!r}"
+        raise ValueError(msg)
 
     def serialize(
         self,
@@ -260,7 +261,8 @@ class Boolean(ConfigValue[bool]):
             return "true"
         if value in (False, None):
             return "false"
-        raise ValueError(f"{value!r} is not a boolean")
+        msg = f"{value!r} is not a boolean"
+        raise ValueError(msg)
 
 
 class Pair(ConfigValue[tuple[K, V]]):
@@ -296,9 +298,10 @@ class Pair(ConfigValue[tuple[K, V]]):
         elif self._optional_pair:
             values = (raw_value, raw_value)
         else:
-            raise ValueError(
-                f"Config value must include {self._separator!r} separator: {raw_value}",
+            msg = (
+                f"Config value must include {self._separator!r} separator: {raw_value}"
             )
+            raise ValueError(msg)
 
         return cast(
             tuple[K, V],
@@ -454,7 +457,8 @@ class Hostname(ConfigValue[str]):
         try:
             socket.getaddrinfo(raw_value, None)
         except OSError as exc:
-            raise ValueError("must be a resolveable hostname or valid IP") from exc
+            msg = "must be a resolveable hostname or valid IP"
+            raise ValueError(msg) from exc
 
         return raw_value
 

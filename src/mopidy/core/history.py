@@ -31,7 +31,8 @@ class HistoryController:
         :param track: track to add
         """
         if not isinstance(track, Track):
-            raise TypeError("Only Track objects can be added to the history")
+            msg = "Only Track objects can be added to the history"
+            raise TypeError(msg)
 
         timestamp = int(time.time() * 1000)
 

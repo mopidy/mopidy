@@ -53,7 +53,8 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
                 statics=self.statics,
             )
         except OSError as exc:
-            raise exceptions.FrontendError("HTTP server startup failed.") from exc
+            msg = "HTTP server startup failed."
+            raise exceptions.FrontendError(msg) from exc
 
         self.zeroconf_name = config["http"]["zeroconf"]
         self.zeroconf_http = None

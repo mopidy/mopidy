@@ -184,9 +184,8 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         if not path.is_absolute():
             path = self._abspath(path)
         if not self._is_in_basedir(path):
-            raise BackendError(
-                f"Path {path!r} is not inside playlist dir {self._playlists_dir!r}",
-            )
+            msg = f"Path {path!r} is not inside playlist dir {self._playlists_dir!r}"
+            raise BackendError(msg)
         if "w" in mode:
             return replace(path, mode, encoding=encoding, errors="replace")
         return path.open(mode, encoding=encoding, errors="replace")
