@@ -376,7 +376,7 @@ class Inspector:
             raise AttributeError(msg)
         self.objects = objects
 
-    def describe(self) -> dict[str, Any]:
+    def describe(self) -> dict[str, MethodDescription]:
         """
         Inspects the object and returns a data structure which describes the
         available properties and methods.
