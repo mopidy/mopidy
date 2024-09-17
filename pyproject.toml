@@ -40,7 +40,12 @@ docs = [
     "sphinx-rtd-theme >= 1.2",
 ]
 lint = ["ruff == 0.6.5"]
-test = ["pytest >= 7.2", "pytest-cov >= 4.0", "responses >= 0.18"]
+test = [
+    "pytest >= 7.2",
+    "pytest-cov >= 4.0",
+    "pytest-mock >= 3.8",
+    "responses >= 0.18",
+]
 typing = [
     "pygobject-stubs",
     "pyright == 1.1.380",

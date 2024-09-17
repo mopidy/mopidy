@@ -58,7 +58,7 @@ class JsonRpcTestBase(unittest.TestCase):
                 backends=[self.backend],
             ).proxy()
 
-        self.jrw = jsonrpc.JsonRpcWrapper(
+        self.jrw = jsonrpc.Wrapper(
             objects={
                 "hello": lambda: "Hello, world!",
                 "calc": self.calc,
@@ -78,7 +78,7 @@ class JsonRpcTestBase(unittest.TestCase):
 class JsonRpcSetupTest(JsonRpcTestBase):
     def test_empty_object_mounts_is_not_allowed(self):
         with pytest.raises(AttributeError):
-            jsonrpc.JsonRpcWrapper(objects={"": Calculator()})
+            jsonrpc.Wrapper(objects={"": Calculator()})
 
 
 class JsonRpcSerializationTest(JsonRpcTestBase):
@@ -583,10 +583,10 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
 class JsonRpcInspectorTest(JsonRpcTestBase):
     def test_empty_object_mounts_is_not_allowed(self):
         with pytest.raises(AttributeError):
-            jsonrpc.JsonRpcInspector(objects={"": Calculator})
+            jsonrpc.Inspector(objects={"": Calculator})
 
     def test_can_describe_method_on_root(self):
-        inspector = jsonrpc.JsonRpcInspector({"hello": lambda: "Hello, world!"})
+        inspector = jsonrpc.Inspector({"hello": lambda: "Hello, world!"})
 
         methods = inspector.describe()
 
@@ -594,7 +594,7 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
         assert len(methods["hello"]["params"]) == 0
 
     def test_inspector_can_describe_an_object_with_methods(self):
-        inspector = jsonrpc.JsonRpcInspector({"calc": Calculator})
+        inspector = jsonrpc.Inspector({"calc": Calculator})
 
         methods = inspector.describe()
 
@@ -631,7 +631,7 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
         assert params[4]["kwargs"] is True
 
     def test_inspector_can_describe_a_bunch_of_large_classes(self):
-        inspector = jsonrpc.JsonRpcInspector(
+        inspector = jsonrpc.Inspector(
             {
                 "core.get_uri_schemes": core.Core.get_uri_schemes,
                 "core.library": core.LibraryController,

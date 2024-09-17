@@ -78,8 +78,8 @@ def make_mopidy_app_factory(
     return mopidy_app_factory
 
 
-def make_jsonrpc_wrapper(core_actor: CoreProxy) -> jsonrpc.JsonRpcWrapper:
-    inspector = jsonrpc.JsonRpcInspector(
+def make_jsonrpc_wrapper(core_actor: CoreProxy) -> jsonrpc.Wrapper:
+    inspector = jsonrpc.Inspector(
         objects={
             "core.get_uri_schemes": core.Core.get_uri_schemes,
             "core.get_version": core.Core.get_version,
@@ -91,7 +91,7 @@ def make_jsonrpc_wrapper(core_actor: CoreProxy) -> jsonrpc.JsonRpcWrapper:
             "core.tracklist": core.TracklistController,
         },
     )
-    return jsonrpc.JsonRpcWrapper(
+    return jsonrpc.Wrapper(
         objects={
             "core.describe": inspector.describe,
             "core.get_uri_schemes": core_actor.get_uri_schemes,
