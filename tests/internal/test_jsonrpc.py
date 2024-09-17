@@ -1,5 +1,6 @@
 import json
 import unittest
+from typing import Any, Never
 from unittest import mock
 
 import pykka
@@ -11,44 +12,51 @@ from tests import dummy_backend
 
 
 class Calculator:
-    def __init__(self):
+    def __init__(self) -> None:
         self._mem = None
 
-    def model(self):
+    def model(self) -> str:
         return "TI83"
 
-    def add(self, a, b):
+    def add(self, a: int, b: int) -> int:
         """Returns the sum of the given numbers"""
         return a + b
 
-    def sub(self, a, b):
+    def sub(self, a: int, b: int) -> int:
         return a - b
 
-    def set_mem(self, value):
+    def set_mem(self, value: Any) -> None:
         self._mem = value
 
-    def get_mem(self):
+    def get_mem(self) -> Any | None:
         return self._mem
 
-    def describe(self):
+    def describe(self) -> dict[str, str]:
         return {
             "add": "Returns the sum of the terms",
             "sub": "Returns the diff of the terms",
         }
 
-    def take_it_all(self, a, b, c=True, *args, **kwargs):
+    def take_it_all(
+        self,
+        a: Any,
+        b: Any,
+        c: bool = True,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         pass
 
-    def _secret(self):
+    def _secret(self) -> str:
         return "Grand Unified Theory"
 
-    def fail(self):
+    def fail(self) -> Never:
         msg = "What did you expect?"
         raise ValueError(msg)
 
 
 class JsonRpcTestBase(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.backend = dummy_backend.create_proxy()
         self.calc = Calculator()
 
@@ -58,7 +66,7 @@ class JsonRpcTestBase(unittest.TestCase):
                 backends=[self.backend],
             ).proxy()
 
-        self.jrw = jsonrpc.Wrapper(
+        self.wrapper = jsonrpc.Wrapper(
             objects={
                 "hello": lambda: "Hello, world!",
                 "calc": self.calc,
@@ -71,42 +79,44 @@ class JsonRpcTestBase(unittest.TestCase):
             decoders=[models.model_json_decoder],
         )
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         pykka.ActorRegistry.stop_all()
 
 
 class JsonRpcSetupTest(JsonRpcTestBase):
-    def test_empty_object_mounts_is_not_allowed(self):
+    def test_empty_object_mounts_is_not_allowed(self) -> None:
         with pytest.raises(AttributeError):
             jsonrpc.Wrapper(objects={"": Calculator()})
 
 
 class JsonRpcSerializationTest(JsonRpcTestBase):
-    def test_handle_json_converts_from_and_to_json(self):
-        self.jrw.handle_data = mock.Mock()
-        self.jrw.handle_data.return_value = {"foo": "response"}
+    def test_handle_json_converts_from_and_to_json(self) -> None:
+        self.wrapper.handle_data = mock.Mock()
+        self.wrapper.handle_data.return_value = {"foo": "response"}
 
         request = '{"foo": "request"}'
-        response = self.jrw.handle_json(request)
+        response = self.wrapper.handle_json(request)
 
-        self.jrw.handle_data.assert_called_once_with({"foo": "request"})
+        self.wrapper.handle_data.assert_called_once_with({"foo": "request"})
         assert response == '{"foo": "response"}'
 
-    def test_handle_json_decodes_mopidy_models(self):
-        self.jrw.handle_data = mock.Mock()
-        self.jrw.handle_data.return_value = []
+    def test_handle_json_decodes_mopidy_models(self) -> None:
+        self.wrapper.handle_data = mock.Mock()
+        self.wrapper.handle_data.return_value = []
 
         request = '{"foo": {"__model__": "Artist", "name": "bar"}}'
-        self.jrw.handle_json(request)
+        self.wrapper.handle_json(request)
 
-        self.jrw.handle_data.assert_called_once_with({"foo": models.Artist(name="bar")})
+        self.wrapper.handle_data.assert_called_once_with(
+            {"foo": models.Artist(name="bar")}
+        )
 
-    def test_handle_json_encodes_mopidy_models(self):
-        self.jrw.handle_data = mock.Mock()
-        self.jrw.handle_data.return_value = {"foo": models.Artist(name="bar")}
+    def test_handle_json_encodes_mopidy_models(self) -> None:
+        self.wrapper.handle_data = mock.Mock()
+        self.wrapper.handle_data.return_value = {"foo": models.Artist(name="bar")}
 
         request = "[]"
-        response = json.loads(self.jrw.handle_json(request))
+        response = json.loads(self.wrapper.handle_json(request))
 
         assert "foo" in response
         assert "__model__" in response["foo"]
@@ -114,15 +124,15 @@ class JsonRpcSerializationTest(JsonRpcTestBase):
         assert "name" in response["foo"]
         assert response["foo"]["name"] == "bar"
 
-    def test_handle_json_returns_nothing_for_notices(self):
+    def test_handle_json_returns_nothing_for_notices(self) -> None:
         request = '{"jsonrpc": "2.0", "method": "core.get_uri_schemes"}'
-        response = self.jrw.handle_json(request)
+        response = self.wrapper.handle_json(request)
 
         assert response is None
 
-    def test_invalid_json_command_causes_parse_error(self):
+    def test_invalid_json_command_causes_parse_error(self) -> None:
         request = '{"jsonrpc": "2.0", "method": "foobar, "params": "bar", "baz]'
-        response = self.jrw.handle_json(request)
+        response = self.wrapper.handle_json(request)
         response = json.loads(response)
 
         assert response["jsonrpc"] == "2.0"
@@ -130,12 +140,12 @@ class JsonRpcSerializationTest(JsonRpcTestBase):
         assert error["code"] == (-32700)
         assert error["message"] == "Parse error"
 
-    def test_invalid_json_batch_causes_parse_error(self):
+    def test_invalid_json_batch_causes_parse_error(self) -> None:
         request = """[
             {"jsonrpc": "2.0", "method": "sum", "params": [1,2,4], "id": "1"},
             {"jsonrpc": "2.0", "method"
         ]"""
-        response = self.jrw.handle_json(request)
+        response = self.wrapper.handle_json(request)
         response = json.loads(response)
 
         assert response["jsonrpc"] == "2.0"
@@ -145,39 +155,39 @@ class JsonRpcSerializationTest(JsonRpcTestBase):
 
 
 class JsonRpcSingleCommandTest(JsonRpcTestBase):
-    def test_call_method_on_root(self):
+    def test_call_method_on_root(self) -> None:
         request = {
             "jsonrpc": "2.0",
             "method": "hello",
             "id": 1,
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert response["jsonrpc"] == "2.0"
         assert response["id"] == 1
         assert "error" not in response
         assert response["result"] == "Hello, world!"
 
-    def test_call_method_on_plain_object(self):
+    def test_call_method_on_plain_object(self) -> None:
         request = {
             "jsonrpc": "2.0",
             "method": "calc.model",
             "id": 1,
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert response["jsonrpc"] == "2.0"
         assert response["id"] == 1
         assert "error" not in response
         assert response["result"] == "TI83"
 
-    def test_call_method_which_returns_dict_from_plain_object(self):
+    def test_call_method_which_returns_dict_from_plain_object(self) -> None:
         request = {
             "jsonrpc": "2.0",
             "method": "calc.describe",
             "id": 1,
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert response["jsonrpc"] == "2.0"
         assert response["id"] == 1
@@ -185,30 +195,30 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
         assert "add" in response["result"]
         assert "sub" in response["result"]
 
-    def test_call_method_on_actor_root(self):
+    def test_call_method_on_actor_root(self) -> None:
         request = {
             "jsonrpc": "2.0",
             "method": "core.get_uri_schemes",
             "id": 1,
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert response["jsonrpc"] == "2.0"
         assert response["id"] == 1
         assert "error" not in response
         assert response["result"] == ["dummy"]
 
-    def test_call_method_on_actor_member(self):
+    def test_call_method_on_actor_member(self) -> None:
         request = {
             "jsonrpc": "2.0",
             "method": "core.playback.get_time_position",
             "id": 1,
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert response["result"] == 0
 
-    def test_call_method_which_is_a_directly_mounted_actor_member(self):
+    def test_call_method_which_is_a_directly_mounted_actor_member(self) -> None:
         # 'get_uri_schemes' isn't a regular callable, but a Pykka
         # CallableProxy. This test checks that CallableProxy objects are
         # threated by JsonRpcWrapper like any other callable.
@@ -218,47 +228,47 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
             "method": "get_uri_schemes",
             "id": 1,
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert response["jsonrpc"] == "2.0"
         assert response["id"] == 1
         assert "error" not in response
         assert response["result"] == ["dummy"]
 
-    def test_call_method_with_positional_params(self):
+    def test_call_method_with_positional_params(self) -> None:
         request = {
             "jsonrpc": "2.0",
             "method": "calc.add",
             "params": [3, 4],
             "id": 1,
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert response["result"] == 7
 
-    def test_call_methods_with_named_params(self):
+    def test_call_method_with_named_params(self) -> None:
         request = {
             "jsonrpc": "2.0",
             "method": "calc.add",
             "params": {"a": 3, "b": 4},
             "id": 1,
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert response["result"] == 7
 
 
 class JsonRpcSingleNotificationTest(JsonRpcTestBase):
-    def test_notification_does_not_return_a_result(self):
+    def test_notification_does_not_return_a_result(self) -> None:
         request = {
             "jsonrpc": "2.0",
             "method": "core.get_uri_schemes",
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert response is None
 
-    def test_notification_makes_an_observable_change(self):
+    def test_notification_makes_an_observable_change(self) -> None:
         assert self.calc.get_mem() is None
 
         request = {
@@ -266,24 +276,24 @@ class JsonRpcSingleNotificationTest(JsonRpcTestBase):
             "method": "calc.set_mem",
             "params": [37],
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert response is None
         assert self.calc.get_mem() == 37
 
-    def test_notification_unknown_method_returns_nothing(self):
+    def test_notification_unknown_method_returns_nothing(self) -> None:
         request = {
             "jsonrpc": "2.0",
             "method": "bogus",
             "params": ["bogus"],
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert response is None
 
 
 class JsonRpcBatchTest(JsonRpcTestBase):
-    def test_batch_of_only_commands_returns_all(self):
+    def test_batch_of_only_commands_returns_all(self) -> None:
         self.core.tracklist.set_random(True).get()
 
         request = [
@@ -291,7 +301,7 @@ class JsonRpcBatchTest(JsonRpcTestBase):
             {"jsonrpc": "2.0", "method": "core.tracklist.get_random", "id": 2},
             {"jsonrpc": "2.0", "method": "core.tracklist.get_single", "id": 3},
         ]
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert len(response) == 3
 
@@ -300,7 +310,7 @@ class JsonRpcBatchTest(JsonRpcTestBase):
         assert response[2]["result"] is True
         assert response[3]["result"] is False
 
-    def test_batch_of_commands_and_notifications_returns_some(self):
+    def test_batch_of_commands_and_notifications_returns_some(self) -> None:
         self.core.tracklist.set_random(True).get()
 
         request = [
@@ -308,7 +318,7 @@ class JsonRpcBatchTest(JsonRpcTestBase):
             {"jsonrpc": "2.0", "method": "core.tracklist.get_random", "id": 2},
             {"jsonrpc": "2.0", "method": "core.tracklist.get_single", "id": 3},
         ]
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert len(response) == 2
 
@@ -317,7 +327,7 @@ class JsonRpcBatchTest(JsonRpcTestBase):
         assert response[2]["result"] is True
         assert response[3]["result"] is False
 
-    def test_batch_of_only_notifications_returns_nothing(self):
+    def test_batch_of_only_notifications_returns_nothing(self) -> None:
         self.core.tracklist.set_random(True).get()
 
         request = [
@@ -325,20 +335,20 @@ class JsonRpcBatchTest(JsonRpcTestBase):
             {"jsonrpc": "2.0", "method": "core.tracklist.get_random"},
             {"jsonrpc": "2.0", "method": "core.tracklist.get_single"},
         ]
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert response is None
 
 
 class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
-    def test_application_error_response(self):
+    def test_application_error_response(self) -> None:
         request = {
             "jsonrpc": "2.0",
             "method": "calc.fail",
             "params": [],
             "id": 1,
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert "result" not in response
 
@@ -352,12 +362,12 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         assert "traceback" in data
         assert "Traceback (most recent call last):" in data["traceback"]
 
-    def test_missing_jsonrpc_member_causes_invalid_request_error(self):
+    def test_missing_jsonrpc_member_causes_invalid_request_error(self) -> None:
         request = {
             "method": "core.get_uri_schemes",
             "id": 1,
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert response["id"] is None
         error = response["error"]
@@ -365,13 +375,13 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         assert error["message"] == "Invalid Request"
         assert error["data"] == "'jsonrpc' member must be included"
 
-    def test_wrong_jsonrpc_version_causes_invalid_request_error(self):
+    def test_wrong_jsonrpc_version_causes_invalid_request_error(self) -> None:
         request = {
             "jsonrpc": "3.0",
             "method": "core.get_uri_schemes",
             "id": 1,
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert response["id"] is None
         error = response["error"]
@@ -379,12 +389,12 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         assert error["message"] == "Invalid Request"
         assert error["data"] == "'jsonrpc' value must be '2.0'"
 
-    def test_missing_method_member_causes_invalid_request_error(self):
+    def test_missing_method_member_causes_invalid_request_error(self) -> None:
         request = {
             "jsonrpc": "2.0",
             "id": 1,
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert response["id"] is None
         error = response["error"]
@@ -392,13 +402,13 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         assert error["message"] == "Invalid Request"
         assert error["data"] == "'method' member must be included"
 
-    def test_invalid_method_value_causes_invalid_request_error(self):
+    def test_invalid_method_value_causes_invalid_request_error(self) -> None:
         request = {
             "jsonrpc": "2.0",
             "method": 1,
             "id": 1,
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert response["id"] is None
         error = response["error"]
@@ -406,14 +416,14 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         assert error["message"] == "Invalid Request"
         assert error["data"] == "'method' must be a string"
 
-    def test_invalid_params_value_causes_invalid_request_error(self):
+    def test_invalid_params_value_causes_invalid_request_error(self) -> None:
         request = {
             "jsonrpc": "2.0",
             "method": "core.get_uri_schemes",
             "params": "foobar",
             "id": 1,
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert response["id"] is None
         error = response["error"]
@@ -421,66 +431,66 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         assert error["message"] == "Invalid Request"
         assert error["data"] == "'params', if given, must be an array or an object"
 
-    def test_method_on_without_object_causes_unknown_method_error(self):
+    def test_method_on_without_object_causes_unknown_method_error(self) -> None:
         request = {
             "jsonrpc": "2.0",
             "method": "bogus",
             "id": 1,
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         error = response["error"]
         assert error["code"] == (-32601)
         assert error["message"] == "Method not found"
         assert error["data"] == "Could not find object mount in method name 'bogus'"
 
-    def test_method_on_unknown_object_causes_unknown_method_error(self):
+    def test_method_on_unknown_object_causes_unknown_method_error(self) -> None:
         request = {
             "jsonrpc": "2.0",
             "method": "bogus.bogus",
             "id": 1,
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         error = response["error"]
         assert error["code"] == (-32601)
         assert error["message"] == "Method not found"
         assert error["data"] == "No object found at 'bogus'"
 
-    def test_unknown_method_on_known_object_causes_unknown_method_error(self):
+    def test_unknown_method_on_known_object_causes_unknown_method_error(self) -> None:
         request = {
             "jsonrpc": "2.0",
             "method": "core.bogus",
             "id": 1,
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         error = response["error"]
         assert error["code"] == (-32601)
         assert error["message"] == "Method not found"
         assert error["data"] == "Object mounted at 'core' has no member 'bogus'"
 
-    def test_private_method_causes_unknown_method_error(self):
+    def test_private_method_causes_unknown_method_error(self) -> None:
         request = {
             "jsonrpc": "2.0",
             "method": "core._secret",
             "id": 1,
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         error = response["error"]
         assert error["code"] == (-32601)
         assert error["message"] == "Method not found"
         assert error["data"] == "Private methods are not exported"
 
-    def test_invalid_params_causes_invalid_params_error(self):
+    def test_invalid_params_causes_invalid_params_error(self) -> None:
         request = {
             "jsonrpc": "2.0",
             "method": "core.get_uri_schemes",
             "params": ["bogus"],
             "id": 1,
         }
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         error = response["error"]
         assert error["code"] == (-32602)
@@ -497,9 +507,9 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
 
 
 class JsonRpcBatchErrorTest(JsonRpcTestBase):
-    def test_empty_batch_list_causes_invalid_request_error(self):
+    def test_empty_batch_list_causes_invalid_request_error(self) -> None:
         request = []
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert response["id"] is None
         error = response["error"]
@@ -507,9 +517,9 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
         assert error["message"] == "Invalid Request"
         assert error["data"] == "Batch list cannot be empty"
 
-    def test_batch_with_invalid_command_causes_invalid_request_error(self):
+    def test_batch_with_invalid_command_causes_invalid_request_error(self) -> None:
         request = [1]
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert len(response) == 1
         response = response[0]
@@ -519,9 +529,9 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
         assert error["message"] == "Invalid Request"
         assert error["data"] == "Request must be an object"
 
-    def test_batch_with_invalid_commands_causes_invalid_request_error(self):
+    def test_batch_with_invalid_commands_causes_invalid_request_error(self) -> None:
         request = [1, 2, 3]
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert len(response) == 3
         response = response[2]
@@ -531,7 +541,7 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
         assert error["message"] == "Invalid Request"
         assert error["data"] == "Request must be an object"
 
-    def test_batch_of_both_successful_and_failing_requests(self):
+    def test_batch_of_both_successful_and_failing_requests(self) -> None:
         request = [
             # Call with positional params
             {
@@ -569,7 +579,7 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
                 "id": "9",
             },
         ]
-        response = self.jrw.handle_data(request)
+        response = self.wrapper.handle_data(request)
 
         assert len(response) == 5
         response = {row["id"]: row for row in response}
@@ -581,11 +591,11 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
 
 
 class JsonRpcInspectorTest(JsonRpcTestBase):
-    def test_empty_object_mounts_is_not_allowed(self):
+    def test_empty_object_mounts_is_not_allowed(self) -> None:
         with pytest.raises(AttributeError):
             jsonrpc.Inspector(objects={"": Calculator})
 
-    def test_can_describe_method_on_root(self):
+    def test_can_describe_method_on_root(self) -> None:
         inspector = jsonrpc.Inspector({"hello": lambda: "Hello, world!"})
 
         methods = inspector.describe()
@@ -593,7 +603,7 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
         assert "hello" in methods
         assert len(methods["hello"]["params"]) == 0
 
-    def test_inspector_can_describe_an_object_with_methods(self):
+    def test_inspector_can_describe_an_object_with_methods(self) -> None:
         inspector = jsonrpc.Inspector({"calc": Calculator})
 
         methods = inspector.describe()
@@ -630,7 +640,7 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
         assert "default" not in params[4]
         assert params[4]["kwargs"] is True
 
-    def test_inspector_can_describe_a_bunch_of_large_classes(self):
+    def test_inspector_can_describe_a_bunch_of_large_classes(self) -> None:
         inspector = jsonrpc.Inspector(
             {
                 "core.get_uri_schemes": core.Core.get_uri_schemes,
