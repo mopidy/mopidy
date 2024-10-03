@@ -100,6 +100,13 @@ Models
 
 Changes to the data models may affect any Mopidy extension or client.
 
+- The models are now based on Pydantic data classes, which means:
+
+  - All models fields and the `replace()` method should work as before, so
+    unless your extension modifies or adds models, this should not affect you.
+
+  - Models are now type-checked at runtime. This should help catch bugs early.
+
 - The :class:`mopidy.models.ImmutableObject` class has been removed. Mopidy
   itself replaced this class with another implementation in v1.0.5 nine years
   ago.

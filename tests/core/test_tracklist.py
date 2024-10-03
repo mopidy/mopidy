@@ -133,7 +133,7 @@ class TracklistIndexTest(unittest.TestCase):
         assert self.core.tracklist.index(self.tl_tracks[2]) == 2
 
     def test_index_returns_none_if_item_not_found(self):
-        tl_track = TlTrack(0, Track())
+        tl_track = TlTrack(1, Track())
         assert self.core.tracklist.index(tl_track) is None
 
     def test_index_returns_none_if_called_with_none(self):
