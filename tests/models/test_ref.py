@@ -1,13 +1,14 @@
+import pydantic
 import pytest
 
-from mopidy.models import Ref
+from mopidy.models import Ref, RefType
 
 
 def test_uri():
     uri = "an_uri"
     ref = Ref.track(uri=uri, name="Foo")
     assert ref.uri == uri
-    with pytest.raises(AttributeError):
+    with pytest.raises(pydantic.ValidationError):
         ref.uri = None
 
 
@@ -15,26 +16,26 @@ def test_name():
     name = "a name"
     ref = Ref.track(uri="uri", name=name)
     assert ref.name == name
-    with pytest.raises(AttributeError):
+    with pytest.raises(pydantic.ValidationError):
         ref.name = None
 
 
 # TODO: add these for the more of the models?
 def test_del_name():
     ref = Ref.track(uri="foo", name="foo")
-    with pytest.raises(AttributeError):
+    with pytest.raises(pydantic.ValidationError):
         del ref.name
 
 
 def test_invalid_kwarg():
-    with pytest.raises(TypeError):
+    with pytest.raises(pydantic.ValidationError):
         Ref(foo="baz")
 
 
 def test_repr_without_results():
     assert (
-        repr(Ref(uri="uri", name="foo", type="artist"))
-        == "Ref(name='foo', type='artist', uri='uri')"
+        repr(Ref(uri="uri", name="foo", type=RefType.ARTIST))
+        == "Ref(uri='uri', name='foo', type=ARTIST)"
     )
 
 
