@@ -27,7 +27,7 @@ Dependencies
 - PyGObject >= 3.42 is now an explicit Python dependency, and not something we
   assume you'll install together with GStreamer.
 
-- Pykka >= 4.0 is now required.
+- Pykka >= 4.1 is now required.
 
 - Pydantic >= 2.9 is now required. This is a new dependency for Mopidy to
   replace our custom data models.
