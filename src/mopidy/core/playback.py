@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from mopidy.audio.actor import AudioProxy
     from mopidy.backend import BackendProxy
     from mopidy.core.actor import Backends, Core
-    from mopidy.models import TlTrack, Track
+    from mopidy.models import Track
     from mopidy.types import Uri
 
 logger = logging.getLogger(__name__)
@@ -80,7 +80,11 @@ class PlaybackController:
 
         Returns a :class:`mopidy.models.Track` or :class:`None`.
         """
-        return getattr(self.get_current_tl_track(), "track", None)
+        match self.get_current_tl_track():
+            case TlTrack(_tlid, track):
+                return track
+            case None:
+                return None
 
     def get_current_tlid(self) -> TracklistId | None:
         """Get the currently playing or selected tracklist ID.
@@ -89,7 +93,11 @@ class PlaybackController:
 
         .. versionadded:: 1.1
         """
-        return getattr(self.get_current_tl_track(), "tlid", None)
+        match self.get_current_tl_track():
+            case TlTrack(tlid, _track):
+                return tlid
+            case None:
+                return None
 
     def get_stream_title(self) -> str | None:
         """Get the current stream title or :class:`None`."""
