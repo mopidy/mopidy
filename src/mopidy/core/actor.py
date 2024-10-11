@@ -21,8 +21,8 @@ from mopidy.core.mixer import MixerController
 from mopidy.core.playback import PlaybackController
 from mopidy.core.playlists import PlaylistsController
 from mopidy.core.tracklist import TracklistController
-from mopidy.internal import path, storage, validation
-from mopidy.internal.models import CoreState
+from mopidy.internal import path, storage
+from mopidy.internal.models import CoreState, StoredState
 
 if TYPE_CHECKING:
     from mopidy.config import Config
@@ -210,13 +210,14 @@ class Core(
         state_file = self._get_state_file()
         logger.info("Saving state to %s", state_file)
 
-        data = {}
-        data["version"] = mopidy.__version__
-        data["state"] = CoreState(
-            tracklist=self.tracklist._save_state(),
-            history=self.history._save_state(),
-            playback=self.playback._save_state(),
-            mixer=self.mixer._save_state(),
+        data = StoredState(
+            version=mopidy.__version__,
+            state=CoreState(
+                tracklist=self.tracklist._save_state(),
+                history=self.history._save_state(),
+                playback=self.playback._save_state(),
+                mixer=self.mixer._save_state(),
+            ),
         )
         storage.dump(state_file, data)
         logger.debug("Saving state done")
@@ -248,14 +249,12 @@ class Core(
         except OSError:
             logger.info("Failed to delete %s", state_file)
 
-        if "state" in data:
-            core_state = data["state"]
-            validation.check_instance(core_state, CoreState)
-            self.history._load_state(core_state.history, coverage)
-            self.tracklist._load_state(core_state.tracklist, coverage)
-            self.mixer._load_state(core_state.mixer, coverage)
+        if data is not None:
+            self.history._load_state(data.state.history, coverage)
+            self.tracklist._load_state(data.state.tracklist, coverage)
+            self.mixer._load_state(data.state.mixer, coverage)
             # playback after tracklist
-            self.playback._load_state(core_state.playback, coverage)
+            self.playback._load_state(data.state.playback, coverage)
         logger.debug("Loading state done")
 
 
