@@ -136,15 +136,15 @@ def gstreamer_info() -> DepInfo:
 
     found_elements = []
     missing_elements = []
-    for name, status in _gstreamer_check_elements():
-        if status:
-            found_elements.append(name)
+    for name, version in _gstreamer_check_elements():
+        if version:
+            found_elements.append((name, version))
         else:
             missing_elements.append(name)
 
     other.append("Relevant elements:")
     other.append("  Found:")
-    other.extend(f"    {element}" for element in found_elements)
+    other.extend(f"    {element}: {version}" for (element, version) in found_elements)
     if not found_elements:
         other.append("    none")
     other.append("  Not found:")
@@ -197,8 +197,14 @@ def _gstreamer_check_elements():
         # Shoutcast output
         "shout2send",
     ]
-    known_elements = [
-        factory.get_name()
+
+    def get_version(factory: Gst.PluginFeature):
+        if plugin := factory.get_plugin():
+            return plugin.get_version()
+        return "unknown"
+
+    known_elements = {
+        factory.get_name(): get_version(factory)
         for factory in Gst.Registry.get().get_feature_list(Gst.ElementFactory)
-    ]
-    return [(element, element in known_elements) for element in elements_to_check]
+    }
+    return [(element, known_elements.get(element)) for element in elements_to_check]
