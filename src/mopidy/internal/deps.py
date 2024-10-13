@@ -166,6 +166,8 @@ def _gstreamer_check_elements():
         "uridecodebin",
         # External HTTP streams
         "souphttpsrc",
+        # Spotify
+        "spotifyaudiosrc",
         # Audio sinks
         "alsasink",
         "osssink",
