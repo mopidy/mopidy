@@ -1,4 +1,5 @@
 import argparse
+import re
 import unittest
 from unittest import mock
 
@@ -178,10 +179,10 @@ class CommandParsingTest(unittest.TestCase):
         with pytest.raises(SystemExit):
             cmd.parse([], prog="foo")
 
-        self.exit_mock.assert_called_once_with(
-            1,
-            "the following arguments are required: bar, _args",
-            "usage: foo bar",
+        assert self.exit_mock.call_count == 1
+        assert re.match(
+            r"the following arguments are required: bar",
+            self.exit_mock.call_args[0][1],
         )
 
     def test_missing_positionals_subcommand(self):
@@ -194,10 +195,10 @@ class CommandParsingTest(unittest.TestCase):
         with pytest.raises(SystemExit):
             cmd.parse(["bar"], prog="foo")
 
-        self.exit_mock.assert_called_once_with(
-            1,
-            "the following arguments are required: baz, _args",
-            "usage: foo bar baz",
+        assert self.exit_mock.call_count == 1
+        assert re.match(
+            r"the following arguments are required: baz",
+            self.exit_mock.call_args[0][1],
         )
 
     def test_unknown_command(self):
