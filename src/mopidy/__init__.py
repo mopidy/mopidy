@@ -11,4 +11,4 @@ if not sys.version_info >= (3, 11):
 
 warnings.filterwarnings("ignore", "could not open display")
 
-__version__ = version("Mopidy")
+__version__ = version("mopidy")
