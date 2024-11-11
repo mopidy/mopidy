@@ -13,7 +13,7 @@ import tornado.web
 import tornado.websocket
 
 import mopidy
-from mopidy import core, models
+from mopidy import core
 from mopidy.http.types import HttpConfig
 from mopidy.internal import jsonrpc
 
@@ -103,8 +103,6 @@ def make_jsonrpc_wrapper(core_actor: CoreProxy) -> jsonrpc.Wrapper:
             "core.playlists": core_actor.playlists,
             "core.tracklist": core_actor.tracklist,
         },
-        decoders=[models.model_json_decoder],
-        encoders=[models.ModelJSONEncoder],
     )
 
 
