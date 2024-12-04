@@ -163,9 +163,9 @@ ignore = [
 ]
 
 
-[tool.setuptools.packages.find]
-# Include all data files from src/ in the wheel build:
-where = ["src"]
+[tool.setuptools.package-data]
+"*" = ["*.conf"]
+"mopidy.http.data" = ["*"]
 
 
 [tool.setuptools_scm]
