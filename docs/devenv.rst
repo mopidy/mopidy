@@ -230,7 +230,7 @@ To learn more, see the `tox documentation <https://tox.readthedocs.io/>`_ .
 
 Before submitting a pull request, we recommend running::
 
-    tox -e ci
+    tox
 
 This will locally run similar tests to what we use in our CI runs and help us to
 merge high-quality contributions.

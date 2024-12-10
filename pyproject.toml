@@ -169,3 +169,55 @@ ignore = [
 
 
 [tool.setuptools_scm]
+
+
+[tool.tox]
+requires = ["tox >= 4.21"]
+env_list = [
+    "3.11",
+    "3.12",
+    "3.13",
+    "docs",
+    "pyright",
+    "ruff-lint",
+    "ruff-format",
+]
+
+[tool.tox.env_run_base]
+deps = [".[test]"]
+commands = [
+    [
+        "pytest",
+        "--basetemp={envtmpdir}",
+        "--cov=mopidy",
+        "--cov-report=term-missing",
+        "{posargs}",
+    ],
+]
+
+[tool.tox.env.docs]
+deps = [".[docs]"]
+changedir = "docs"
+commands = [
+    [
+        "sphinx-build",
+        "--builder",
+        "html",
+        "--doctree-dir",
+        "{envtmpdir}/doctrees",
+        ".",
+        "{envtmpdir}/html",
+    ],
+]
+
+[tool.tox.env.pyright]
+deps = [".[typing]"]
+commands = [["pyright", "{posargs:src}"]]
+
+[tool.tox.env.ruff-lint]
+deps = [".[lint]"]
+commands = [["ruff", "check", "{posargs:.}"]]
+
+[tool.tox.env.ruff-format]
+deps = [".[lint]"]
+commands = [["ruff", "format", "--check", "{posargs:.}"]]
