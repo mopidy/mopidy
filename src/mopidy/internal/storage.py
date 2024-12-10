@@ -42,7 +42,7 @@ def dump(path, data):
     """
 
     # TODO: cleanup directory/basename.* files.
-    tmp = tempfile.NamedTemporaryFile(
+    tmp = tempfile.NamedTemporaryFile(  # noqa: SIM115
         prefix=path.name + ".",
         dir=str(path.parent),
         delete=False,

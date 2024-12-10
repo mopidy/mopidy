@@ -38,7 +38,7 @@ docs = [
     "sphinx-autodoc-typehints >= 1.12",
     "sphinx-rtd-theme >= 1.2",
 ]
-lint = ["ruff == 0.6.5"]
+lint = ["ruff == 0.8.2"]
 test = [
     "pytest >= 7.2",
     "pytest-cov >= 4.0",
@@ -101,8 +101,6 @@ ignore = [
     "A002",    # builtin-argument-shadowing  # TODO
     "A003",    # builtin-attribute-shadowing
     "ANN",     # flake8-annotations  # TODO
-    "ANN101",  # missing-type-self
-    "ANN102",  # missing-type-cls
     "ANN401",  # any-type
     "D100",    # undocumented-public-module  # TODO
     "D101",    # undocumented-public-class  # TODO
@@ -130,7 +128,7 @@ ignore = [
     "SLF001",  # private-member-access  # TODO
     "TD002",   # missing-todo-author
     "TD003",   # missing-todo-link
-    "TCH003",  # typing-only-standard-library-import
+    "TC003",   # typing-only-standard-library-import
     "TRY003",  # raise-vanilla-args
     "TRY400",  # error-instead-of-exception
     #

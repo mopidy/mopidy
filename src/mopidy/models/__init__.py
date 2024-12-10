@@ -6,7 +6,6 @@ __all__ = [
     "Album",
     "Artist",
     "Image",
-    "model_json_decoder",
     "ModelJSONEncoder",
     "Playlist",
     "Ref",
@@ -14,6 +13,7 @@ __all__ = [
     "TlTrack",
     "Track",
     "ValidatedImmutableObject",
+    "model_json_decoder",
 ]
 
 

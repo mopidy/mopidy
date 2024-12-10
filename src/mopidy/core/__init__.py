@@ -9,8 +9,8 @@ from .tracklist import TracklistController, TracklistControllerProxy
 
 __all__ = [
     "Core",
-    "CoreProxy",
     "CoreListener",
+    "CoreProxy",
     "HistoryController",
     "HistoryControllerProxy",
     "LibraryController",
