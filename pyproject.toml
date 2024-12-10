@@ -51,7 +51,7 @@ typing = [
     "types-requests >= 2.28",
     "types-setuptools >= 66",
 ]
-dev = ["mopidy[docs,lint,test,typing]", "tox"]
+dev = ["mopidy[docs,lint,test,typing]", "tox >= 4.21"]
 
 [project.urls]
 Homepage = "https://mopidy.com/"
