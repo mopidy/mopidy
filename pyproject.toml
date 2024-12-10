@@ -46,10 +46,10 @@ test = [
     "responses >= 0.18",
 ]
 typing = [
-    "pygobject-stubs",
+    "pygobject-stubs >= 2.12.0",
     "pyright == 1.1.380",
-    "types-requests",
-    "types-setuptools",
+    "types-requests >= 2.28",
+    "types-setuptools >= 66",
 ]
 dev = ["mopidy[docs,lint,test,typing]", "tox"]
 
