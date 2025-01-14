@@ -444,7 +444,7 @@ class RootCommand(Command):
         config: config_lib.Config,
         mixer: MixerProxy | None,
     ) -> AudioProxy:
-        logger.info("Starting Mopidy audio")
+        logger.info("Starting Mopidy audio: %s", Audio.__name__)
         return cast(AudioProxy, Audio.start(config=config, mixer=mixer).proxy())
 
     def start_backends(
