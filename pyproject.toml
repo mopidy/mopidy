@@ -170,6 +170,7 @@ ignore = [
     "ANN",     # flake8-annotations
     "ARG",     # flake8-unused-arguments
     "D",       # pydocstyle
+    "E402",    # module level import not at top of file (required for pytest importorskips)  # TODO
     "FBT",     # flake8-boolean-trap
     "PLR0913", # too-many-arguments
     "PT007",   # pytest-parametrize-values-wrong-type  # TODO
