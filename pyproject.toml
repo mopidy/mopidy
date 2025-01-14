@@ -15,6 +15,7 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
+    "platformdirs ~= 4.3.6",
     "pydantic >= 2.9",
     "pygobject >= 3.42, <= 3.50.0",
     "pykka >= 4.1",

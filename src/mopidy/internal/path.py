@@ -118,3 +118,18 @@ def is_path_inside_base_dir(
         return False
     else:
         return True
+
+
+def get_config_dirs():
+    try:
+        from mopidy.internal.gi import GLib
+
+        yield from GLib.get_system_config_dirs()
+        yield GLib.get_user_config_dir()
+    except (ImportError, ValueError):
+        pass
+
+    import platformdirs
+
+    yield platformdirs.site_config_dir()
+    yield platformdirs.user_config_dir()
