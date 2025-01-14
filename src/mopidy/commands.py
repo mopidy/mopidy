@@ -4,7 +4,6 @@ import argparse
 import collections
 import contextlib
 import logging
-import signal
 import sys
 from collections.abc import Generator, Iterable, Sequence
 from pathlib import Path
@@ -21,11 +20,11 @@ from pykka.messages import ProxyCall
 import mopidy
 from mopidy import config as config_lib
 from mopidy import exceptions
+from mopidy import loop as loop_lib
 from mopidy.audio import Audio, AudioProxy
 from mopidy.backend import BackendActor, BackendProxy
 from mopidy.core import Core, CoreProxy
 from mopidy.internal import deps, process, timer
-from mopidy.internal.gi import GLib
 from mopidy.mixer import MixerActor, MixerProxy
 from mopidy.types import Percentage
 
@@ -343,13 +342,8 @@ class RootCommand(Command):
         *_args: Any,
         **_kwargs: Any,
     ) -> int:
-        def on_sigterm(loop) -> bool:
-            logger.info("GLib mainloop got SIGTERM. Exiting...")
-            loop.quit()
-            return GLib.SOURCE_REMOVE
-
-        loop = GLib.MainLoop()
-        GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, on_sigterm, loop)
+        loop_cls = loop_lib.get_loop_class()
+        loop = loop_cls()
 
         mixer_class = self.get_mixer_class(config, args.registry["mixer"])
         backend_classes: list[type[BackendActor]] = args.registry["backend"]
@@ -367,7 +361,7 @@ class RootCommand(Command):
             backends = self.start_backends(config, backend_classes, audio)
             core = self.start_core(config, mixer, backends, audio)
             self.start_frontends(config, frontend_classes, core)
-            logger.info("Starting GLib mainloop")
+            logger.info("Starting %s", loop)
             loop.run()
         except (
             exceptions.BackendError,
