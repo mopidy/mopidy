@@ -17,11 +17,15 @@ dynamic = ["version"]
 dependencies = [
     "platformdirs ~= 4.3.6",
     "pydantic >= 2.9",
-    "pygobject >= 3.42, <= 3.50.0",
     "pykka >= 4.1",
     "requests >= 2.28",
     "setuptools >= 66",
     "tornado >= 6.2",
+]
+
+[project.optional-dependencies]
+gobject = [
+    "pygobject >= 3.42, <= 3.50.0",
 ]
 
 [project.urls]
@@ -201,6 +205,7 @@ env_list = [
 package = "wheel"
 wheel_build_env = ".pkg"
 dependency_groups = ["tests"]
+extras = ["gobject"]
 commands = [
     [
         "pytest",
