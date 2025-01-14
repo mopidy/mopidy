@@ -9,6 +9,7 @@ import pykka
 from mopidy import audio as audio_lib
 from mopidy import backend, exceptions, stream
 from mopidy.audio import scan, tags
+from mopidy.audio.base.scan import ScanResult
 from mopidy.internal import http, playlists
 from mopidy.models import Track
 from mopidy.types import Uri, UriScheme
@@ -107,7 +108,7 @@ def _unwrap_stream(  # noqa: PLR0911  # TODO: cleanup the return value of this.
     timeout: float,
     scanner: scan.Scanner,
     requests_session,
-) -> tuple[Uri | None, scan._Result | None]:
+) -> tuple[Uri | None, ScanResult | None]:
     """Get a stream URI from a playlist URI, ``uri``.
 
     Unwraps nested playlists until something that's not a playlist is found or
