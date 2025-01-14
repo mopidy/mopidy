@@ -4,8 +4,9 @@ from importlib import metadata
 from pathlib import Path
 from unittest import mock
 
+import pytest
+
 from mopidy.internal import deps
-from mopidy.internal.gi import Gst, gi
 
 
 class TestDeps:
@@ -88,19 +89,23 @@ class TestDeps:
         assert "platform.py" not in str(result.path)
 
     def test_gstreamer_info(self):
+        gi_lib = pytest.importorskip(
+            "mopidy.internal.gi", reason="test requires GObject"
+        )
         result = deps.gstreamer_info()
 
         assert result.name == "GStreamer"
         assert result.version
-        assert ".".join(map(str, Gst.version())) == result.version
+        assert ".".join(map(str, gi_lib.Gst.version())) == result.version
         assert "gi" in str(result.path)
         assert "__init__.py" not in str(result.path)
         assert result.other
         assert "Python wrapper: python-gi" in result.other
-        assert gi.__version__ in result.other
+        assert gi_lib.gi.__version__ in result.other
         assert "Relevant elements:" in result.other
 
     def test_gstreamer_check_elements(self):
+        pytest.importorskip("mopidy.internal.gi", reason="test requires GObject")
         with mock.patch(
             "mopidy.internal.deps._gstreamer_check_elements",
             return_val=("test1", True),
