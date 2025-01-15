@@ -1,4 +1,5 @@
 import logging
+import os
 import pathlib
 import re
 import urllib.parse
@@ -133,3 +134,31 @@ def get_config_dirs():
 
     yield platformdirs.site_config_dir()
     yield platformdirs.user_config_dir()
+
+
+# Backport of https://github.com/python/cpython/blob/599be687ec7327c30c6469cf743aa4ee9e82232d/Lib/pathlib/_local.py#L1221-L1243
+def path_from_file_uri(uri: str) -> pathlib.Path:
+    """Return a new path from the given 'file' URI."""
+    if not uri.startswith("file:"):
+        msg = f"URI does not start with 'file:': {uri!r}"
+        raise ValueError(msg)
+    path = uri[5:]
+    if path[:3] == "///":
+        # Remove empty authority
+        path = path[2:]
+    elif path[:12] == "//localhost/":
+        # Remove 'localhost' authority
+        path = path[11:]
+    if path[:3] == "///" or (path[:1] == "/" and path[2:3] in ":|"):
+        # Remove slash before DOS device/UNC path
+        path = path[1:]
+    if path[1:2] == "|":
+        # Replace bar with colon in DOS drive
+        path = path[:1] + ":" + path[2:]
+    from urllib.parse import unquote_to_bytes
+
+    path = pathlib.Path(os.fsdecode(unquote_to_bytes(path)))
+    if not path.is_absolute():
+        msg = f"URI is not absolute: {uri!r}"
+        raise ValueError(msg)
+    return path
