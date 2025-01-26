@@ -4,7 +4,7 @@
 Authors
 *******
 
-Mopidy is copyright 2009-2024 Stein Magnus Jodal and contributors. Mopidy is
+Mopidy is copyright 2009-2025 Stein Magnus Jodal and contributors. Mopidy is
 licensed under the `Apache License, Version 2.0
 <http://www.apache.org/licenses/LICENSE-2.0>`_.
 

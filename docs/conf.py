@@ -35,14 +35,14 @@ source_suffix = ".rst"
 master_doc = "index"
 
 project = "Mopidy"
-copyright = "2009-2024, Stein Magnus Jodal and contributors"  # noqa: A001
+copyright = "2009-2025, Stein Magnus Jodal and contributors"  # noqa: A001
 
 
 release = version("Mopidy")
 version = ".".join(release.split(".")[:2])
 
 # To make the build reproducible, avoid using today's date in the manpages
-today = "2024"
+today = "2025"
 
 exclude_trees = ["_build"]
 
