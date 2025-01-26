@@ -132,7 +132,11 @@ class MopidyRPCHandlerTest(HttpServerTest):
         assert tornado.escape.json_decode(response.body) == {
             "jsonrpc": "2.0",
             "id": None,
-            "error": {"message": "Parse error", "code": (-32700)},
+            "error": {
+                "message": "Parse error",
+                "code": (-32700),
+                "data": None,
+            },
         }
 
     def test_should_return_mopidy_version(self):
