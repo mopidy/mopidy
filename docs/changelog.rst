@@ -107,9 +107,21 @@ Changes to the data models may affect any Mopidy extension or client.
 
   - Models are now type-checked at runtime. This should help catch bugs early.
 
-- The :class:`mopidy.models.ImmutableObject` class has been removed. Mopidy
-  itself replaced this class with another implementation in v1.0.5 nine years
-  ago.
+- Since we now use Pydantic to convert data models to and from JSON, the old
+  model machinery has been removed. This includes the following:
+
+  - :class:`mopidy.models.ImmutableObject` -- Not used by Mopidy since v1.0.5 nine
+    years ago.
+  - :class:`mopidy.models.ValidatedImmutableObject` -- The old base class for all models.
+  - :class:`mopidy.models.ModelJSONEncoder`
+  - :func:`mopidy.models.model_json_decoder`
+  - :class:`mopidy.models.fields.Collection`
+  - :class:`mopidy.models.fields.Date`
+  - :class:`mopidy.models.fields.Field`
+  - :class:`mopidy.models.fields.Identifier`
+  - :class:`mopidy.models.fields.Integer`
+  - :class:`mopidy.models.fields.String`
+  - :class:`mopidy.models.fields.URI`
 
 Audio API
 ---------
