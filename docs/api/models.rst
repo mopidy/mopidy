@@ -77,34 +77,3 @@ Data model API
 
 .. autoclass:: mopidy.models.SearchResult
     :members:
-
-
-Data model helpers
-==================
-
-.. autoclass:: mopidy.models.ValidatedImmutableObject
-    :members: replace
-
-Data model (de)serialization
-----------------------------
-
-.. autofunction:: mopidy.models.model_json_decoder
-
-.. autoclass:: mopidy.models.ModelJSONEncoder
-
-Data model field types
-----------------------
-
-.. autoclass:: mopidy.models.fields.Field
-
-.. autoclass:: mopidy.models.fields.String
-
-.. autoclass:: mopidy.models.fields.Identifier
-
-.. autoclass:: mopidy.models.fields.URI
-
-.. autoclass:: mopidy.models.fields.Date
-
-.. autoclass:: mopidy.models.fields.Integer
-
-.. autoclass:: mopidy.models.fields.Collection
