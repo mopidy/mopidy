@@ -52,6 +52,7 @@ def test_lookup_respects_blacklist_globbing(audio, config, track_uri):
 
 
 def test_lookup_converts_uri_metadata_to_track(audio, config, track_uri):
+    pytest.importorskip("mopidy.internal.gi", reason="test requires GStreamer")
     backend = actor.StreamBackend(audio=audio, config=config)
 
     result = backend.library.lookup(track_uri)
