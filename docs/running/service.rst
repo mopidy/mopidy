@@ -217,7 +217,7 @@ System service and PipeWire
 =============================
 
 When using PipeWire, you'll encounter a situation analogous to the one
-described for PulseAudio: You must configure PipeWire and Mopidy so
+described for PulseAudio. You must configure PipeWire and Mopidy so
 that Mopidy sends the audio to the PipeWire server already running as
 your main user.
 
