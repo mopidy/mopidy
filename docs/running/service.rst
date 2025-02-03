@@ -213,6 +213,7 @@ instead of adding any config to Mopidy add this to
 
     default-server=127.0.0.1
 
+
 System service and PipeWire
 =============================
 
@@ -225,7 +226,7 @@ First make sure that `pipewire-pulse` is installed; It's the PipeWire
 PulseAudio replacement.
 
 Check whether a configuration file for `pipewire-pulse` is available
-(may depends on the Linux distribution but
+(may depend on the Linux distribution but
 :file:`/etc/pipewire/pipewire-pulse.conf` is standard); If not, copy
 from :file:`/usr/share/pipewire/pipewire-pulse.conf`. Then modify that
 file for `pipewire-pulse` to accept sound over TCP from localhost
