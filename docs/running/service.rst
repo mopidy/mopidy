@@ -227,7 +227,7 @@ PulseAudio replacement.
 Check whether a configuration file for `pipewire-pulse` is available
 (may depends on the Linux distribution but
 :file:`/etc/pipewire/pipewire-pulse.conf` is standard); If not, copy
-from :file:`usr/share/pipewire/pipewire-pulse.conf`. Then modify that
+from :file:`/usr/share/pipewire/pipewire-pulse.conf`. Then modify that
 file for `pipewire-pulse` to accept sound over TCP from localhost
 (note the uncommented line with ``"tcp:4713"``)::
 
