@@ -212,3 +212,44 @@ instead of adding any config to Mopidy add this to
 :file:`~mopidy/.pulse/client.conf`::
 
     default-server=127.0.0.1
+
+
+System service and PipeWire
+=============================
+
+When using PipeWire, you'll encounter a situation analogous to the one
+described for PulseAudio. You must configure PipeWire and Mopidy so
+that Mopidy sends the audio to the PipeWire server already running as
+your main user.
+
+First make sure that `pipewire-pulse` is installed; It's the PipeWire
+PulseAudio replacement.
+
+Check whether a configuration file for `pipewire-pulse` is available
+(may depend on the Linux distribution but
+:file:`/etc/pipewire/pipewire-pulse.conf` is standard); If not, copy
+from :file:`/usr/share/pipewire/pipewire-pulse.conf`. Then modify that
+file for `pipewire-pulse` to accept sound over TCP from localhost
+(note the uncommented line with ``"tcp:4713"``)::
+
+    pulse.properties = {
+        # the addresses this server listens on
+        server.address = [
+            "unix:native"
+            #"unix:/tmp/something"
+            "tcp:4713"
+            #"tcp:[::]:9999"
+            #"tcp:127.0.0.1:8888"
+        ]
+
+Next, configure Mopidy to use this `pipewire-pulse` server:
+
+.. code-block:: ini
+
+    [audio]
+    output = pulsesink server=127.0.0.1
+
+After this, restart both PipeWire and Mopidy::
+
+    systemctl --user restart pipewire pipewire-pulse
+    sudo systemctl restart mopidy
