@@ -1,140 +1,165 @@
-from mopidy.internal import validation
-from mopidy.models import Ref, TlTrack, fields
-from mopidy.models.immutable import ValidatedImmutableObject
+from typing import Literal
+
+from pydantic.fields import Field
+from pydantic.types import NonNegativeInt
+
+from mopidy.models import Ref, TlTrack
+from mopidy.models._base import BaseModel
+from mopidy.types import DurationMs, Percentage, TracklistId
+from mopidy.types import PlaybackState as PlaybackStateEnum
 
 
-class HistoryTrack(ValidatedImmutableObject):
+class HistoryTrack(BaseModel):
+    """A track that has been played back at a given timestamp.
+
+    Internally used for save/load state.
     """
-    A history track. Wraps a :class:`Ref` and its timestamp.
 
-    :param timestamp: the timestamp
-    :type timestamp: int
-    :param track: the track reference
-    :type track: :class:`Ref`
-    """
+    model: Literal["HistoryTrack"] = Field(
+        default="HistoryTrack",
+        repr=False,
+        alias="__model__",
+    )
 
-    # The timestamp. Read-only.
-    timestamp = fields.Integer()
+    # The timestamp when the track was played. Read-only.
+    timestamp: NonNegativeInt
 
     # The track reference. Read-only.
-    track = fields.Field(type=Ref)
+    track: Ref
 
 
-class HistoryState(ValidatedImmutableObject):
+class HistoryState(BaseModel):
     """
     State of the history controller.
-    Internally used for save/load state.
 
-    :param history: the track history
-    :type history: list of :class:`HistoryTrack`
+    Internally used for save/load state.
     """
 
-    # The tracks. Read-only.
-    history = fields.Collection(type=HistoryTrack, container=tuple)
+    model: Literal["HistoryState"] = Field(
+        default="HistoryState",
+        repr=False,
+        alias="__model__",
+    )
+
+    # The track history. Read-only.
+    history: tuple[HistoryTrack, ...] = ()
 
 
-class MixerState(ValidatedImmutableObject):
+class MixerState(BaseModel):
     """
     State of the mixer controller.
-    Internally used for save/load state.
 
-    :param volume: the volume
-    :type volume: int
-    :param mute: the mute state
-    :type mute: int
+    Internally used for save/load state.
     """
+
+    model: Literal["MixerState"] = Field(
+        default="MixerState",
+        repr=False,
+        alias="__model__",
+    )
 
     # The volume. Read-only.
-    volume = fields.Integer(min=0, max=100)
+    volume: Percentage | None = None
 
     # The mute state. Read-only.
-    mute = fields.Boolean(default=False)
+    mute: bool | None = None
 
 
-class PlaybackState(ValidatedImmutableObject):
+class PlaybackState(BaseModel):
     """
     State of the playback controller.
-    Internally used for save/load state.
 
-    :param tlid: current track tlid
-    :type tlid: int
-    :param time_position: play position
-    :type time_position: int
-    :param state: playback state
-    :type state: :class:`validation.PLAYBACK_STATES`
+    Internally used for save/load state.
     """
+
+    model: Literal["PlaybackState"] = Field(
+        default="PlaybackState",
+        repr=False,
+        alias="__model__",
+    )
 
     # The tlid of current playing track. Read-only.
-    tlid = fields.Integer(min=1)
+    tlid: TracklistId | None = Field(default=None, ge=1)
 
-    # The playback position. Read-only.
-    time_position = fields.Integer(min=0)
+    # The playback position in milliseconds. Read-only.
+    time_position: DurationMs = DurationMs(0)
 
     # The playback state. Read-only.
-    state = fields.Field(choices=validation.PLAYBACK_STATES)
+    state: PlaybackStateEnum = PlaybackStateEnum.STOPPED
 
 
-class TracklistState(ValidatedImmutableObject):
+class TracklistState(BaseModel):
     """
     State of the tracklist controller.
-    Internally used for save/load state.
 
-    :param repeat: the repeat mode
-    :type repeat: bool
-    :param consume: the consume mode
-    :type consume: bool
-    :param random: the random mode
-    :type random: bool
-    :param single: the single mode
-    :type single: bool
-    :param next_tlid: the id for the next added track
-    :type next_tlid: int
-    :param tl_tracks: the list of tracks
-    :type tl_tracks: list of :class:`TlTrack`
+    Internally used for save/load state.
     """
+
+    model: Literal["TracklistState"] = Field(
+        default="TracklistState",
+        repr=False,
+        alias="__model__",
+    )
 
     # The repeat mode. Read-only.
-    repeat = fields.Boolean()
+    repeat: bool = False
 
     # The consume mode. Read-only.
-    consume = fields.Boolean()
+    consume: bool = False
 
     # The random mode. Read-only.
-    random = fields.Boolean()
+    random: bool = False
 
     # The single mode. Read-only.
-    single = fields.Boolean()
+    single: bool = False
 
     # The id of the track to play. Read-only.
-    next_tlid = fields.Integer(min=0)
+    next_tlid: TracklistId = TracklistId(1)
 
     # The list of tracks. Read-only.
-    tl_tracks = fields.Collection(type=TlTrack, container=tuple)
+    tl_tracks: tuple[TlTrack, ...] = ()
 
 
-class CoreState(ValidatedImmutableObject):
+class CoreState(BaseModel):
     """
     State of all Core controller.
-    Internally used for save/load state.
 
-    :param history: State of the history controller
-    :type history: :class:`HistorState`
-    :param mixer: State of the mixer controller
-    :type mixer: :class:`MixerState`
-    :param playback: State of the playback controller
-    :type playback: :class:`PlaybackState`
-    :param tracklist: State of the tracklist controller
-    :type tracklist: :class:`TracklistState`
+    Internally used for save/load state.
     """
 
+    model: Literal["CoreState"] = Field(
+        default="CoreState",
+        repr=False,
+        alias="__model__",
+    )
+
     # State of the history controller.
-    history = fields.Field(type=HistoryState)
+    history: HistoryState = Field(default_factory=HistoryState)
 
     # State of the mixer controller.
-    mixer = fields.Field(type=MixerState)
+    mixer: MixerState = Field(default_factory=MixerState)
 
     # State of the playback controller.
-    playback = fields.Field(type=PlaybackState)
+    playback: PlaybackState = Field(default_factory=PlaybackState)
 
     # State of the tracklist controller.
-    tracklist = fields.Field(type=TracklistState)
+    tracklist: TracklistState = Field(default_factory=TracklistState)
+
+
+class StoredState(BaseModel):
+    """State of the core that is persisted to disk.
+
+    Internally used for save/load state.
+    """
+
+    model: Literal["StoredState"] = Field(
+        default="StoredState",
+        repr=False,
+        alias="__model__",
+    )
+
+    # The version of the state file. Read-only.
+    version: str
+
+    # The state of the core. Read-only.
+    state: CoreState

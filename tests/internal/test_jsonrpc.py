@@ -1,6 +1,6 @@
 import json
 import unittest
-from typing import Any, Never
+from typing import Any, Never, cast
 from unittest import mock
 
 import pykka
@@ -61,10 +61,13 @@ class JsonRpcTestBase(unittest.TestCase):
         self.calc = Calculator()
 
         with deprecation.ignore():
-            self.core = core.Core.start(
-                config={},
-                backends=[self.backend],
-            ).proxy()
+            self.core = cast(
+                core.CoreProxy,
+                core.Core.start(
+                    config={},
+                    backends=[self.backend],
+                ).proxy(),
+            )
 
         self.wrapper = jsonrpc.Wrapper(
             objects={
@@ -75,8 +78,6 @@ class JsonRpcTestBase(unittest.TestCase):
                 "core.tracklist": self.core.tracklist,
                 "get_uri_schemes": self.core.get_uri_schemes,
             },
-            encoders=[models.ModelJSONEncoder],
-            decoders=[models.model_json_decoder],
         )
 
     def tearDown(self) -> None:
@@ -92,37 +93,45 @@ class JsonRpcSetupTest(JsonRpcTestBase):
 class JsonRpcSerializationTest(JsonRpcTestBase):
     def test_handle_json_converts_from_and_to_json(self) -> None:
         self.wrapper.handle_data = mock.Mock()
-        self.wrapper.handle_data.return_value = {"foo": "response"}
+        self.wrapper.handle_data.return_value = jsonrpc.SuccessResponse(
+            id=1, result="foo"
+        )
 
-        request = '{"foo": "request"}'
+        request = b'{"foo": "request"}'
         response = self.wrapper.handle_json(request)
 
         self.wrapper.handle_data.assert_called_once_with({"foo": "request"})
-        assert response == '{"foo": "response"}'
+        assert response == b'{"jsonrpc":"2.0","id":1,"result":"foo"}'
 
-    def test_handle_json_decodes_mopidy_models(self) -> None:
-        self.wrapper.handle_data = mock.Mock()
-        self.wrapper.handle_data.return_value = []
+    def test_request_decoding_decodes_mopidy_models(self) -> None:
+        request_dict = {
+            "jsonrpc": "2.0",
+            "method": "calc.set_mem",
+            "params": [{"__model__": "Artist", "name": "bar"}],
+        }
 
-        request = '{"foo": {"__model__": "Artist", "name": "bar"}}'
-        self.wrapper.handle_json(request)
+        request = jsonrpc.Request.model_validate(request_dict)
 
-        self.wrapper.handle_data.assert_called_once_with(
-            {"foo": models.Artist(name="bar")}
-        )
+        assert isinstance(request.params, list)
+        assert request.params[0] == models.Artist(name="bar")
 
     def test_handle_json_encodes_mopidy_models(self) -> None:
         self.wrapper.handle_data = mock.Mock()
-        self.wrapper.handle_data.return_value = {"foo": models.Artist(name="bar")}
+        self.wrapper.handle_data.return_value = jsonrpc.SuccessResponse(
+            id=1,
+            result=models.Artist(name="bar"),
+        )
 
         request = "[]"
-        response = json.loads(self.wrapper.handle_json(request))
+        response = self.wrapper.handle_json(request)
 
-        assert "foo" in response
-        assert "__model__" in response["foo"]
-        assert response["foo"]["__model__"] == "Artist"
-        assert "name" in response["foo"]
-        assert response["foo"]["name"] == "bar"
+        assert response is not None
+        response = json.loads(response)
+        assert "result" in response
+        assert "__model__" in response["result"]
+        assert response["result"]["__model__"] == "Artist"
+        assert "name" in response["result"]
+        assert response["result"]["name"] == "bar"
 
     def test_handle_json_returns_nothing_for_notices(self) -> None:
         request = '{"jsonrpc": "2.0", "method": "core.get_uri_schemes"}'
@@ -133,8 +142,9 @@ class JsonRpcSerializationTest(JsonRpcTestBase):
     def test_invalid_json_command_causes_parse_error(self) -> None:
         request = '{"jsonrpc": "2.0", "method": "foobar, "params": "bar", "baz]'
         response = self.wrapper.handle_json(request)
-        response = json.loads(response)
 
+        assert response is not None
+        response = json.loads(response)
         assert response["jsonrpc"] == "2.0"
         error = response["error"]
         assert error["code"] == (-32700)
@@ -146,8 +156,9 @@ class JsonRpcSerializationTest(JsonRpcTestBase):
             {"jsonrpc": "2.0", "method"
         ]"""
         response = self.wrapper.handle_json(request)
-        response = json.loads(response)
 
+        assert response is not None
+        response = json.loads(response)
         assert response["jsonrpc"] == "2.0"
         error = response["error"]
         assert error["code"] == (-32700)
@@ -163,10 +174,10 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
         }
         response = self.wrapper.handle_data(request)
 
-        assert response["jsonrpc"] == "2.0"
-        assert response["id"] == 1
-        assert "error" not in response
-        assert response["result"] == "Hello, world!"
+        assert isinstance(response, jsonrpc.SuccessResponse)
+        assert response.jsonrpc == "2.0"
+        assert response.id == 1
+        assert response.result == "Hello, world!"
 
     def test_call_method_on_plain_object(self) -> None:
         request = {
@@ -176,10 +187,8 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
         }
         response = self.wrapper.handle_data(request)
 
-        assert response["jsonrpc"] == "2.0"
-        assert response["id"] == 1
-        assert "error" not in response
-        assert response["result"] == "TI83"
+        assert isinstance(response, jsonrpc.SuccessResponse)
+        assert response.result == "TI83"
 
     def test_call_method_which_returns_dict_from_plain_object(self) -> None:
         request = {
@@ -189,11 +198,9 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
         }
         response = self.wrapper.handle_data(request)
 
-        assert response["jsonrpc"] == "2.0"
-        assert response["id"] == 1
-        assert "error" not in response
-        assert "add" in response["result"]
-        assert "sub" in response["result"]
+        assert isinstance(response, jsonrpc.SuccessResponse)
+        assert "add" in response.result
+        assert "sub" in response.result
 
     def test_call_method_on_actor_root(self) -> None:
         request = {
@@ -203,10 +210,8 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
         }
         response = self.wrapper.handle_data(request)
 
-        assert response["jsonrpc"] == "2.0"
-        assert response["id"] == 1
-        assert "error" not in response
-        assert response["result"] == ["dummy"]
+        assert isinstance(response, jsonrpc.SuccessResponse)
+        assert response.result == ["dummy"]
 
     def test_call_method_on_actor_member(self) -> None:
         request = {
@@ -216,7 +221,8 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
         }
         response = self.wrapper.handle_data(request)
 
-        assert response["result"] == 0
+        assert isinstance(response, jsonrpc.SuccessResponse)
+        assert response.result == 0
 
     def test_call_method_which_is_a_directly_mounted_actor_member(self) -> None:
         # 'get_uri_schemes' isn't a regular callable, but a Pykka
@@ -230,10 +236,8 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
         }
         response = self.wrapper.handle_data(request)
 
-        assert response["jsonrpc"] == "2.0"
-        assert response["id"] == 1
-        assert "error" not in response
-        assert response["result"] == ["dummy"]
+        assert isinstance(response, jsonrpc.SuccessResponse)
+        assert response.result == ["dummy"]
 
     def test_call_method_with_positional_params(self) -> None:
         request = {
@@ -244,7 +248,8 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
         }
         response = self.wrapper.handle_data(request)
 
-        assert response["result"] == 7
+        assert isinstance(response, jsonrpc.SuccessResponse)
+        assert response.result == 7
 
     def test_call_method_with_named_params(self) -> None:
         request = {
@@ -255,7 +260,8 @@ class JsonRpcSingleCommandTest(JsonRpcTestBase):
         }
         response = self.wrapper.handle_data(request)
 
-        assert response["result"] == 7
+        assert isinstance(response, jsonrpc.SuccessResponse)
+        assert response.result == 7
 
 
 class JsonRpcSingleNotificationTest(JsonRpcTestBase):
@@ -303,12 +309,15 @@ class JsonRpcBatchTest(JsonRpcTestBase):
         ]
         response = self.wrapper.handle_data(request)
 
+        assert isinstance(response, list)
         assert len(response) == 3
-
-        response = {row["id"]: row for row in response}
-        assert response[1]["result"] is False
-        assert response[2]["result"] is True
-        assert response[3]["result"] is False
+        response_1, response_2, response_3 = response
+        assert isinstance(response_1, jsonrpc.SuccessResponse)
+        assert response_1.result is False
+        assert isinstance(response_2, jsonrpc.SuccessResponse)
+        assert response_2.result is True
+        assert isinstance(response_3, jsonrpc.SuccessResponse)
+        assert response_3.result is False
 
     def test_batch_of_commands_and_notifications_returns_some(self) -> None:
         self.core.tracklist.set_random(True).get()
@@ -320,21 +329,25 @@ class JsonRpcBatchTest(JsonRpcTestBase):
         ]
         response = self.wrapper.handle_data(request)
 
+        assert isinstance(response, list)
         assert len(response) == 2
 
-        response = {row["id"]: row for row in response}
-        assert 1 not in response
-        assert response[2]["result"] is True
-        assert response[3]["result"] is False
+        response_2, response_3 = response
+        assert isinstance(response_2, jsonrpc.SuccessResponse)
+        assert response_2.id == 2
+        assert response_2.result is True
+        assert isinstance(response_3, jsonrpc.SuccessResponse)
+        assert response_3.id == 3
+        assert response_3.result is False
 
     def test_batch_of_only_notifications_returns_nothing(self) -> None:
         self.core.tracklist.set_random(True).get()
-
         request = [
             {"jsonrpc": "2.0", "method": "core.tracklist.get_repeat"},
             {"jsonrpc": "2.0", "method": "core.tracklist.get_random"},
             {"jsonrpc": "2.0", "method": "core.tracklist.get_single"},
         ]
+
         response = self.wrapper.handle_data(request)
 
         assert response is None
@@ -350,13 +363,12 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         }
         response = self.wrapper.handle_data(request)
 
-        assert "result" not in response
+        assert isinstance(response, jsonrpc.ErrorResponse)
+        assert response.error.code == 0
+        assert response.error.message == "Application error"
 
-        error = response["error"]
-        assert error["code"] == 0
-        assert error["message"] == "Application error"
-
-        data = error["data"]
+        data = response.error.data
+        assert isinstance(data, dict)
         assert data["type"] == "ValueError"
         assert "What did you expect?" in data["message"]
         assert "traceback" in data
@@ -369,11 +381,11 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         }
         response = self.wrapper.handle_data(request)
 
-        assert response["id"] is None
-        error = response["error"]
-        assert error["code"] == (-32600)
-        assert error["message"] == "Invalid Request"
-        assert error["data"] == "'jsonrpc' member must be included"
+        assert isinstance(response, jsonrpc.ErrorResponse)
+        assert response.id is None
+        assert response.error.code == (-32600)
+        assert response.error.message == "Invalid Request"
+        assert response.error.data == "'jsonrpc' member must be included"
 
     def test_wrong_jsonrpc_version_causes_invalid_request_error(self) -> None:
         request = {
@@ -383,11 +395,11 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         }
         response = self.wrapper.handle_data(request)
 
-        assert response["id"] is None
-        error = response["error"]
-        assert error["code"] == (-32600)
-        assert error["message"] == "Invalid Request"
-        assert error["data"] == "'jsonrpc' value must be '2.0'"
+        assert isinstance(response, jsonrpc.ErrorResponse)
+        assert response.id is None
+        assert response.error.code == (-32600)
+        assert response.error.message == "Invalid Request"
+        assert response.error.data == "'jsonrpc' value must be '2.0'"
 
     def test_missing_method_member_causes_invalid_request_error(self) -> None:
         request = {
@@ -396,11 +408,11 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         }
         response = self.wrapper.handle_data(request)
 
-        assert response["id"] is None
-        error = response["error"]
-        assert error["code"] == (-32600)
-        assert error["message"] == "Invalid Request"
-        assert error["data"] == "'method' member must be included"
+        assert isinstance(response, jsonrpc.ErrorResponse)
+        assert response.id is None
+        assert response.error.code == (-32600)
+        assert response.error.message == "Invalid Request"
+        assert response.error.data == "'method' member must be included"
 
     def test_invalid_method_value_causes_invalid_request_error(self) -> None:
         request = {
@@ -410,11 +422,11 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         }
         response = self.wrapper.handle_data(request)
 
-        assert response["id"] is None
-        error = response["error"]
-        assert error["code"] == (-32600)
-        assert error["message"] == "Invalid Request"
-        assert error["data"] == "'method' must be a string"
+        assert isinstance(response, jsonrpc.ErrorResponse)
+        assert response.id is None
+        assert response.error.code == (-32600)
+        assert response.error.message == "Invalid Request"
+        assert response.error.data == "'method' must be a string"
 
     def test_invalid_params_value_causes_invalid_request_error(self) -> None:
         request = {
@@ -425,11 +437,13 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         }
         response = self.wrapper.handle_data(request)
 
-        assert response["id"] is None
-        error = response["error"]
-        assert error["code"] == (-32600)
-        assert error["message"] == "Invalid Request"
-        assert error["data"] == "'params', if given, must be an array or an object"
+        assert isinstance(response, jsonrpc.ErrorResponse)
+        assert response.id is None
+        assert response.error.code == (-32600)
+        assert response.error.message == "Invalid Request"
+        assert (
+            response.error.data == "'params', if given, must be an array or an object"
+        )
 
     def test_method_on_without_object_causes_unknown_method_error(self) -> None:
         request = {
@@ -439,10 +453,12 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         }
         response = self.wrapper.handle_data(request)
 
-        error = response["error"]
-        assert error["code"] == (-32601)
-        assert error["message"] == "Method not found"
-        assert error["data"] == "Could not find object mount in method name 'bogus'"
+        assert isinstance(response, jsonrpc.ErrorResponse)
+        assert response.error.code == (-32601)
+        assert response.error.message == "Method not found"
+        assert (
+            response.error.data == "Could not find object mount in method name 'bogus'"
+        )
 
     def test_method_on_unknown_object_causes_unknown_method_error(self) -> None:
         request = {
@@ -452,10 +468,10 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         }
         response = self.wrapper.handle_data(request)
 
-        error = response["error"]
-        assert error["code"] == (-32601)
-        assert error["message"] == "Method not found"
-        assert error["data"] == "No object found at 'bogus'"
+        assert isinstance(response, jsonrpc.ErrorResponse)
+        assert response.error.code == (-32601)
+        assert response.error.message == "Method not found"
+        assert response.error.data == "No object found at 'bogus'"
 
     def test_unknown_method_on_known_object_causes_unknown_method_error(self) -> None:
         request = {
@@ -465,10 +481,10 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         }
         response = self.wrapper.handle_data(request)
 
-        error = response["error"]
-        assert error["code"] == (-32601)
-        assert error["message"] == "Method not found"
-        assert error["data"] == "Object mounted at 'core' has no member 'bogus'"
+        assert isinstance(response, jsonrpc.ErrorResponse)
+        assert response.error.code == (-32601)
+        assert response.error.message == "Method not found"
+        assert response.error.data == "Object mounted at 'core' has no member 'bogus'"
 
     def test_private_method_causes_unknown_method_error(self) -> None:
         request = {
@@ -478,10 +494,10 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         }
         response = self.wrapper.handle_data(request)
 
-        error = response["error"]
-        assert error["code"] == (-32601)
-        assert error["message"] == "Method not found"
-        assert error["data"] == "Private methods are not exported"
+        assert isinstance(response, jsonrpc.ErrorResponse)
+        assert response.error.code == (-32601)
+        assert response.error.message == "Method not found"
+        assert response.error.data == "Private methods are not exported"
 
     def test_invalid_params_causes_invalid_params_error(self) -> None:
         request = {
@@ -492,11 +508,12 @@ class JsonRpcSingleCommandErrorTest(JsonRpcTestBase):
         }
         response = self.wrapper.handle_data(request)
 
-        error = response["error"]
-        assert error["code"] == (-32602)
-        assert error["message"] == "Invalid params"
+        assert isinstance(response, jsonrpc.ErrorResponse)
+        assert response.error.code == (-32602)
+        assert response.error.message == "Invalid params"
 
-        data = error["data"]
+        data = response.error.data
+        assert isinstance(data, dict)
         assert data["type"] == "TypeError"
         assert (
             "get_uri_schemes() takes 1 positional argument but 2 were given"
@@ -511,35 +528,33 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
         request = []
         response = self.wrapper.handle_data(request)
 
-        assert response["id"] is None
-        error = response["error"]
-        assert error["code"] == (-32600)
-        assert error["message"] == "Invalid Request"
-        assert error["data"] == "Batch list cannot be empty"
+        assert isinstance(response, jsonrpc.Response)
+        assert response.id is None
+        assert response.error.code == (-32600)
+        assert response.error.message == "Invalid Request"
+        assert response.error.data == "Batch list cannot be empty"
 
     def test_batch_with_invalid_command_causes_invalid_request_error(self) -> None:
         request = [1]
         response = self.wrapper.handle_data(request)
 
+        assert isinstance(response, list)
         assert len(response) == 1
-        response = response[0]
-        assert response["id"] is None
-        error = response["error"]
-        assert error["code"] == (-32600)
-        assert error["message"] == "Invalid Request"
-        assert error["data"] == "Request must be an object"
+        assert response[0].id is None
+        assert response[0].error.code == (-32600)
+        assert response[0].error.message == "Invalid Request"
+        assert response[0].error.data == "Request must be an object"
 
     def test_batch_with_invalid_commands_causes_invalid_request_error(self) -> None:
         request = [1, 2, 3]
         response = self.wrapper.handle_data(request)
 
+        assert isinstance(response, list)
         assert len(response) == 3
-        response = response[2]
-        assert response["id"] is None
-        error = response["error"]
-        assert error["code"] == (-32600)
-        assert error["message"] == "Invalid Request"
-        assert error["data"] == "Request must be an object"
+        assert response[2].id is None
+        assert response[2].error.code == (-32600)
+        assert response[2].error.message == "Invalid Request"
+        assert response[2].error.data == "Request must be an object"
 
     def test_batch_of_both_successful_and_failing_requests(self) -> None:
         request = [
@@ -579,15 +594,27 @@ class JsonRpcBatchErrorTest(JsonRpcTestBase):
                 "id": "9",
             },
         ]
+
         response = self.wrapper.handle_data(request)
 
+        assert isinstance(response, list)
         assert len(response) == 5
-        response = {row["id"]: row for row in response}
-        assert response["1"]["result"] is False
-        assert response["2"]["result"] is None
-        assert response[None]["error"]["code"] == (-32600)
-        assert response["5"]["error"]["code"] == (-32601)
-        assert response["9"]["result"] is False
+        response_1, response_2, response_none, response_5, response_9 = response
+        assert isinstance(response_1, jsonrpc.SuccessResponse)
+        assert response_1.id == "1"
+        assert response_1.result is False
+        assert isinstance(response_2, jsonrpc.SuccessResponse)
+        assert response_2.id == "2"
+        assert response_2.result is None
+        assert isinstance(response_none, jsonrpc.ErrorResponse)
+        assert response_none.id is None
+        assert response_none.error.code == (-32600)
+        assert isinstance(response_5, jsonrpc.ErrorResponse)
+        assert response_5.id == "5"
+        assert response_5.error.code == (-32601)
+        assert isinstance(response_9, jsonrpc.SuccessResponse)
+        assert response_9.id == "9"
+        assert response_9.result is False
 
 
 class JsonRpcInspectorTest(JsonRpcTestBase):
@@ -601,7 +628,7 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
         methods = inspector.describe()
 
         assert "hello" in methods
-        assert len(methods["hello"]["params"]) == 0
+        assert len(methods["hello"].params) == 0
 
     def test_inspector_can_describe_an_object_with_methods(self) -> None:
         inspector = jsonrpc.Inspector({"calc": Calculator})
@@ -609,9 +636,7 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
         methods = inspector.describe()
 
         assert "calc.add" in methods
-        assert (
-            methods["calc.add"]["description"] == "Returns the sum of the given numbers"
-        )
+        assert methods["calc.add"].description == "Returns the sum of the given numbers"
 
         assert "calc.sub" in methods
         assert "calc.take_it_all" in methods
@@ -619,26 +644,29 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
         assert "calc.__init__" not in methods
 
         method = methods["calc.take_it_all"]
-        assert "params" in method
+        params = method.params
 
-        params = method["params"]
+        assert params[0].name == "a"
+        assert params[0].default is jsonrpc.Unset
+        assert params[0].model_dump_json() == '{"name":"a"}'
 
-        assert params[0]["name"] == "a"
-        assert "default" not in params[0]
+        assert params[1].name == "b"
+        assert params[1].default is jsonrpc.Unset
+        assert params[1].model_dump_json() == '{"name":"b"}'
 
-        assert params[1]["name"] == "b"
-        assert "default" not in params[1]
+        assert params[2].name == "c"
+        assert params[2].default is True
+        assert params[2].model_dump_json() == '{"name":"c","default":true}'
 
-        assert params[2]["name"] == "c"
-        assert params[2]["default"] is True
+        assert params[3].name == "args"
+        assert params[3].default is jsonrpc.Unset
+        assert params[3].varargs is True
+        assert params[3].model_dump_json() == '{"name":"args","varargs":true}'
 
-        assert params[3]["name"] == "args"
-        assert "default" not in params[3]
-        assert params[3]["varargs"] is True
-
-        assert params[4]["name"] == "kwargs"
-        assert "default" not in params[4]
-        assert params[4]["kwargs"] is True
+        assert params[4].name == "kwargs"
+        assert params[4].default is jsonrpc.Unset
+        assert params[4].kwargs is True
+        assert params[4].model_dump_json() == '{"name":"kwargs","kwargs":true}'
 
     def test_inspector_can_describe_a_bunch_of_large_classes(self) -> None:
         inspector = jsonrpc.Inspector(
@@ -654,16 +682,16 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
         methods = inspector.describe()
 
         assert "core.get_uri_schemes" in methods
-        assert len(methods["core.get_uri_schemes"]["params"]) == 0
+        assert len(methods["core.get_uri_schemes"].params) == 0
 
         assert "core.library.lookup" in methods
-        assert methods["core.library.lookup"]["params"][0]["name"] == "uris"
+        assert methods["core.library.lookup"].params[0].name == "uris"
 
         assert "core.playback.next" in methods
-        assert len(methods["core.playback.next"]["params"]) == 0
+        assert len(methods["core.playback.next"].params) == 0
 
         assert "core.playlists.as_list" in methods
-        assert len(methods["core.playlists.as_list"]["params"]) == 0
+        assert len(methods["core.playlists.as_list"].params) == 0
 
         assert "core.tracklist.filter" in methods
-        assert methods["core.tracklist.filter"]["params"][0]["name"] == "criteria"
+        assert methods["core.tracklist.filter"].params[0].name == "criteria"
