@@ -69,6 +69,7 @@ Lastly, there are Mopidy clients implemented as standalone
 applications:
 
 - `Argos <https://github.com/orontee/argos>`_
+- `Mopicon <https://github.com/nerk/mopicon>`_
 
 .. _mpd-clients:
 
