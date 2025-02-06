@@ -1,3 +1,5 @@
+import enum
+
 from mopidy.models import fields
 from mopidy.models.immutable import ValidatedImmutableObject
 from mopidy.models.serialize import ModelJSONEncoder, model_json_decoder
@@ -9,12 +11,21 @@ __all__ = [
     "ModelJSONEncoder",
     "Playlist",
     "Ref",
+    "RefType",
     "SearchResult",
     "TlTrack",
     "Track",
     "ValidatedImmutableObject",
     "model_json_decoder",
 ]
+
+
+class RefType(enum.StrEnum):
+    ALBUM = "album"
+    ARTIST = "artist"
+    DIRECTORY = "directory"
+    PLAYLIST = "playlist"
+    TRACK = "track"
 
 
 class Ref(ValidatedImmutableObject):
