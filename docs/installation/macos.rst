@@ -55,7 +55,7 @@ To list all the extensions available from our tap, you can run::
     brew search mopidy
 
 If you cannot find the extension you want in the Homebrew search result,
-you caninstall it from PyPI using ``pip`` instead.
+you can install it from PyPI using ``pip`` instead.
 Even if Mopidy itself is installed from Homebrew it will correctly detect and
 use extensions from PyPI installed globally on your system using::
 
