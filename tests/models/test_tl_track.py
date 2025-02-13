@@ -1,3 +1,4 @@
+import pydantic
 import pytest
 
 from mopidy.models import TlTrack, Track
@@ -8,7 +9,7 @@ def test_tlid():
     track = Track()
     tl_track = TlTrack(tlid=tlid, track=track)
     assert tl_track.tlid == tlid
-    with pytest.raises(AttributeError):
+    with pytest.raises(pydantic.ValidationError):
         tl_track.tlid = None
 
 
@@ -17,7 +18,7 @@ def test_track():
     track = Track()
     tl_track = TlTrack(tlid=tlid, track=track)
     assert tl_track.track == track
-    with pytest.raises(AttributeError):
+    with pytest.raises(pydantic.ValidationError):
         tl_track.track = None
 
 
@@ -44,9 +45,11 @@ def test_iteration():
 
 
 def test_repr():
-    assert (
-        repr(TlTrack(tlid=123, track=Track(uri="uri")))
-        == "TlTrack(tlid=123, track=Track(uri='uri'))"
+    assert repr(TlTrack(tlid=123, track=Track(uri="uri"))) == (
+        "TlTrack(tlid=123, track=Track(uri='uri', name=None, artists=frozenset(), "
+        "album=None, composers=frozenset(), performers=frozenset(), genre=None, "
+        "track_no=None, disc_no=None, date=None, length=None, bitrate=None, "
+        "comment=None, musicbrainz_id=None, last_modified=None))"
     )
 
 

@@ -1,16 +1,11 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal
+from typing import Any, Literal, TypeAlias
 
 from mopidy import listener
-
-if TYPE_CHECKING:
-    from typing import TypeAlias
-
-    from mopidy.audio import PlaybackState
-    from mopidy.models import Playlist, TlTrack
-    from mopidy.types import DurationMs, Percentage, Uri
-
+from mopidy.audio import PlaybackState
+from mopidy.models import Playlist, TlTrack
+from mopidy.types import DurationMs, Percentage, Uri
 
 CoreEvent: TypeAlias = Literal[
     "track_playback_paused",
@@ -29,6 +24,12 @@ CoreEvent: TypeAlias = Literal[
     "stream_title_changed",
 ]
 
+# A union of all possible data types for the core events. This is used to create
+# Pydantic TypeAdapter's to serialize the events to JSON.
+CoreEventData: TypeAlias = (
+    DurationMs | Percentage | PlaybackState | Playlist | TlTrack | Uri | bool | str
+)
+
 
 class CoreListener(listener.Listener):
     """Marker interface for recipients of events sent by the core actor.
@@ -45,7 +46,7 @@ class CoreListener(listener.Listener):
         """Helper to allow calling of core listener events."""
         listener.send(CoreListener, event, **kwargs)
 
-    def on_event(self, event: CoreEvent, **kwargs: Any) -> None:
+    def on_event(self, event: CoreEvent, **kwargs: CoreEventData) -> None:
         """Called on all events.
 
         *MAY* be implemented by actor. By default, this method forwards the
