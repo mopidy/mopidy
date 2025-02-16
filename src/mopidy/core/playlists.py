@@ -11,7 +11,7 @@ from pykka.typing import proxy_method
 from mopidy import exceptions
 from mopidy.core import listener
 from mopidy.internal import validation
-from mopidy.models import Playlist, Ref
+from mopidy.models import Playlist, Ref, Track
 from mopidy.types import UriScheme
 
 logger = logging.getLogger(__name__)
@@ -273,6 +273,22 @@ class PlaylistsController:
             return result
 
         return None
+
+    def append_track(self, uri: Uri, track: Track):
+        """Add a track at the end of the given playlist.
+
+        Returns the saved playlist or :class:`None` on failure.
+
+        Could be overriden in subclass if it makes sense for the given backend.
+
+        :param uri: the uri of the playlist to modify
+        :param track: the track to append
+        """
+        uri_scheme = UriScheme(urllib.parse.urlparse(uri).scheme)
+        backend = self.backends.with_playlists.get(uri_scheme, None)
+        if not backend:
+            return None
+        return backend.playlists.append_track(uri, track)
 
 
 class PlaylistsControllerProxy:

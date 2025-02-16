@@ -435,6 +435,25 @@ class PlaylistsProvider:
         """
         raise NotImplementedError
 
+    def append_track(self, uri: Uri, track: Track) -> Playlist | None:
+        """Add a track at the end of the given playlist.
+
+        Returns the saved playlist or :class:`None` on failure.
+
+        Could be overriden in subclass if it makes sense for the given backend.
+
+        :param uri: the uri of the playlist to modify
+        :param track: the track to append
+        """
+        playlist = self.lookup(uri)
+        if playlist is None:
+            return None
+        new_tracks = [*playlist.tracks, track]
+        new_playlist = playlist.replace(
+            tracks=new_tracks,
+        )
+        return self.save(new_playlist)
+
 
 class BackendListener(listener.Listener):
     """Marker interface for recipients of events sent by the backend actors.
@@ -511,3 +530,4 @@ class PlaylistsProviderProxy:
     lookup = proxy_method(PlaylistsProvider.lookup)
     refresh = proxy_method(PlaylistsProvider.refresh)
     save = proxy_method(PlaylistsProvider.save)
+    append_track = proxy_method(PlaylistsProvider.append_track)
