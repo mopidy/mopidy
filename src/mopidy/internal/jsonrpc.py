@@ -1,9 +1,9 @@
 import inspect
-import json
 import traceback
 from collections.abc import Callable
 from typing import Any, Literal, TypeAlias, TypeVar
 
+import pydantic_core
 import pykka
 from pydantic import (
     BaseModel,
@@ -184,7 +184,7 @@ class Wrapper:
         :rtype: string or :class:`None`
         """
         try:
-            request = json.loads(request_json)
+            request = pydantic_core.from_json(request_json)
         except ValueError:
             response = ParseError().get_response()
         else:
