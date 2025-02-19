@@ -54,7 +54,7 @@ pass a lot less data over the network when using tracklist IDs in API calls.
 Root object
 ^^^^^^^^^^^
 
-- The :class:`mopidy.core.Core` class now requires the `config` argument to be
+- The :class:`mopidy.core.Core` class now requires the ``config`` argument to be
   present. As this argument is provided by Mopidy itself at runtime, this
   should only affect the setup of extension's test suites.
 
@@ -102,7 +102,7 @@ Changes to the data models may affect any Mopidy extension or client.
 
 - The models are now based on Pydantic data classes, which means:
 
-  - All models fields and the `replace()` method should work as before, so
+  - All models fields and the ``replace()`` method should work as before, so
     unless your extension modifies or adds models, this should not affect you.
 
   - Models are now type-checked at runtime. This should help catch bugs early.
