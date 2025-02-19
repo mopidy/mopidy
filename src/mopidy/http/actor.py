@@ -16,8 +16,7 @@ import tornado.websocket
 from pydantic import TypeAdapter
 
 from mopidy import exceptions, zeroconf
-from mopidy.core import CoreListener
-from mopidy.core.listener import CoreEvent, CoreEventData
+from mopidy.core import CoreEvent, CoreEventData, CoreListener
 from mopidy.http import Extension, handlers
 from mopidy.internal import formatting, network
 
