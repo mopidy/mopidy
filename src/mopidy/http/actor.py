@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 import secrets
 import socket
 import threading
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 import pykka
 import tornado.httpserver
@@ -14,9 +13,10 @@ import tornado.ioloop
 import tornado.netutil
 import tornado.web
 import tornado.websocket
+from pydantic import TypeAdapter
 
-from mopidy import exceptions, models, zeroconf
-from mopidy.core import CoreListener
+from mopidy import exceptions, zeroconf
+from mopidy.core import CoreEvent, CoreEventData, CoreListener
 from mopidy.http import Extension, handlers
 from mopidy.internal import formatting, network
 
@@ -27,6 +27,9 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__name__)
+
+
+CoreEventTypeAdapter = TypeAdapter(dict[str, CoreEventData])
 
 
 class HttpFrontend(pykka.ThreadingActor, CoreListener):
@@ -86,15 +89,19 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
 
         self.server.stop()
 
-    def on_event(self, event: str, **data: Any) -> None:
+    def on_event(self, event: CoreEvent, **data: CoreEventData) -> None:
         assert self.server.io_loop
         on_event(event, self.server.io_loop, **data)
 
 
-def on_event(name: str, io_loop: tornado.ioloop.IOLoop, **data: Any) -> None:
+def on_event(
+    name: CoreEvent,
+    io_loop: tornado.ioloop.IOLoop,
+    **data: CoreEventData,
+) -> None:
     event = data
     event["event"] = name
-    message = json.dumps(event, cls=models.ModelJSONEncoder)
+    message = CoreEventTypeAdapter.dump_json(event)
     handlers.WebSocketHandler.broadcast(message, io_loop)
 
 

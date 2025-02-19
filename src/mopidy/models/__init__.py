@@ -1,253 +1,232 @@
-from mopidy.models import fields
-from mopidy.models.immutable import ValidatedImmutableObject
-from mopidy.models.serialize import ModelJSONEncoder, model_json_decoder
+import enum
+from collections.abc import Iterator
+from typing import Any, ClassVar, Literal, Self
+
+from pydantic.fields import Field
+from pydantic.types import UUID4, NonNegativeInt
+
+from mopidy.models._base import BaseModel
+from mopidy.types import DateOrYear, DurationMs, TracklistId, Uri
 
 __all__ = [
     "Album",
     "Artist",
     "Image",
-    "ModelJSONEncoder",
     "Playlist",
     "Ref",
+    "RefType",
     "SearchResult",
     "TlTrack",
     "Track",
-    "ValidatedImmutableObject",
-    "model_json_decoder",
 ]
 
 
-class Ref(ValidatedImmutableObject):
-    """Model to represent URI references with a human friendly name and type
-    attached. This is intended for use a lightweight object "free" of metadata
-    that can be passed around instead of using full blown models.
+class RefType(enum.StrEnum):
+    ALBUM = "album"
+    ARTIST = "artist"
+    DIRECTORY = "directory"
+    PLAYLIST = "playlist"
+    TRACK = "track"
 
-    :param uri: object URI
-    :type uri: string
-    :param name: object name
-    :type name: string
-    :param type: object type
-    :type type: string
+    def __repr__(self) -> str:
+        return self.name
+
+
+class Ref(BaseModel):
+    """Model to represent URI references with a human friendly name and type.
+
+    This is intended for use a lightweight object "free" of metadata
+    that can be passed around instead of using full blown models.
     """
 
+    model: Literal["Ref"] = Field(
+        default="Ref",
+        repr=False,
+        alias="__model__",
+    )
+
     #: The object URI. Read-only.
-    uri = fields.URI()
+    uri: Uri
 
     #: The object name. Read-only.
-    name = fields.String()
+    name: str | None = None
 
     #: The object type, e.g. "artist", "album", "track", "playlist",
     #: "directory". Read-only.
-    type = fields.Identifier()  # TODO: consider locking this down.
+    type: RefType
 
-    #: Constant used for comparison with the :attr:`type` field.
-    ALBUM = "album"
-
-    #: Constant used for comparison with the :attr:`type` field.
-    ARTIST = "artist"
-
-    #: Constant used for comparison with the :attr:`type` field.
-    DIRECTORY = "directory"
-
-    #: Constant used for comparison with the :attr:`type` field.
-    PLAYLIST = "playlist"
-
-    #: Constant used for comparison with the :attr:`type` field.
-    TRACK = "track"
+    # For backwards compatibility with Mopidy < 4, we define the `RefType` enum
+    # values as class variables.
+    ALBUM: ClassVar[Literal[RefType.ALBUM]] = RefType.ALBUM
+    ARTIST: ClassVar[Literal[RefType.ARTIST]] = RefType.ARTIST
+    DIRECTORY: ClassVar[Literal[RefType.DIRECTORY]] = RefType.DIRECTORY
+    PLAYLIST: ClassVar[Literal[RefType.PLAYLIST]] = RefType.PLAYLIST
+    TRACK: ClassVar[Literal[RefType.TRACK]] = RefType.TRACK
 
     @classmethod
-    def album(cls, **kwargs):
-        """Create a :class:`Ref` with ``type`` :attr:`ALBUM`."""
-        kwargs["type"] = Ref.ALBUM
-        return cls(**kwargs)
+    def album(cls, *, uri: Uri, name: str | None) -> Self:
+        """Create a :class:`Ref` with ``type`` :attr:`~RefType.ALBUM`."""
+        return cls(uri=uri, name=name, type=RefType.ALBUM)
 
     @classmethod
-    def artist(cls, **kwargs):
-        """Create a :class:`Ref` with ``type`` :attr:`ARTIST`."""
-        kwargs["type"] = Ref.ARTIST
-        return cls(**kwargs)
+    def artist(cls, *, uri: Uri, name: str | None) -> Self:
+        """Create a :class:`Ref` with ``type`` :attr:`~RefType.ARTIST`."""
+        return cls(uri=uri, name=name, type=RefType.ARTIST)
 
     @classmethod
-    def directory(cls, **kwargs):
-        """Create a :class:`Ref` with ``type`` :attr:`DIRECTORY`."""
-        kwargs["type"] = Ref.DIRECTORY
-        return cls(**kwargs)
+    def directory(cls, *, uri: Uri, name: str | None) -> Self:
+        """Create a :class:`Ref` with ``type`` :attr:`~RefType.DIRECTORY`."""
+        return cls(uri=uri, name=name, type=RefType.DIRECTORY)
 
     @classmethod
-    def playlist(cls, **kwargs):
-        """Create a :class:`Ref` with ``type`` :attr:`PLAYLIST`."""
-        kwargs["type"] = Ref.PLAYLIST
-        return cls(**kwargs)
+    def playlist(cls, *, uri: Uri, name: str | None) -> Self:
+        """Create a :class:`Ref` with ``type`` :attr:`~RefType.PLAYLIST`."""
+        return cls(uri=uri, name=name, type=RefType.PLAYLIST)
 
     @classmethod
-    def track(cls, **kwargs):
-        """Create a :class:`Ref` with ``type`` :attr:`TRACK`."""
-        kwargs["type"] = Ref.TRACK
-        return cls(**kwargs)
+    def track(cls, *, uri: Uri, name: str | None) -> Self:
+        """Create a :class:`Ref` with ``type`` :attr:`~RefType.TRACK`."""
+        return cls(uri=uri, name=name, type=RefType.TRACK)
 
 
-class Image(ValidatedImmutableObject):
-    """:param string uri: URI of the image
-    :param int width: Optional width of image or :class:`None`
-    :param int height: Optional height of image or :class:`None`
-    """
+class Image(BaseModel):
+    """An image with a URI and dimensions."""
+
+    model: Literal["Image"] = Field(
+        default="Image",
+        repr=False,
+        alias="__model__",
+    )
 
     #: The image URI. Read-only.
-    uri = fields.URI()
+    uri: Uri
 
     #: Optional width of the image or :class:`None`. Read-only.
-    width = fields.Integer(min=0)
+    width: NonNegativeInt | None = None
 
     #: Optional height of the image or :class:`None`. Read-only.
-    height = fields.Integer(min=0)
+    height: NonNegativeInt | None = None
 
 
-class Artist(ValidatedImmutableObject):
-    """:param uri: artist URI
-    :type uri: string
-    :param name: artist name
-    :type name: string
-    :param sortname: artist name for sorting
-    :type sortname: string
-    :param musicbrainz_id: MusicBrainz ID
-    :type musicbrainz_id: string
-    """
+class Artist(BaseModel):
+    """An artist."""
+
+    model: Literal["Artist"] = Field(
+        default="Artist",
+        repr=False,
+        alias="__model__",
+    )
 
     #: The artist URI. Read-only.
-    uri = fields.URI()
+    uri: Uri | None = None
 
     #: The artist name. Read-only.
-    name = fields.String()
+    name: str | None = None
 
-    #: Artist name for better sorting, e.g. with articles stripped
-    sortname = fields.String()
+    #: Artist name for better sorting, e.g. with articles stripped. Read only.
+    sortname: str | None = None
 
     #: The MusicBrainz ID of the artist. Read-only.
-    musicbrainz_id = fields.Identifier()
+    musicbrainz_id: UUID4 | None = None
 
 
-class Album(ValidatedImmutableObject):
-    """:param uri: album URI
-    :type uri: string
-    :param name: album name
-    :type name: string
-    :param artists: album artists
-    :type artists: list of :class:`Artist`
-    :param num_tracks: number of tracks in album
-    :type num_tracks: integer or :class:`None` if unknown
-    :param num_discs: number of discs in album
-    :type num_discs: integer or :class:`None` if unknown
-    :param date: album release date (YYYY or YYYY-MM-DD)
-    :type date: string
-    :param musicbrainz_id: MusicBrainz ID
-    :type musicbrainz_id: string
-    """
+class Album(BaseModel):
+    """An album."""
+
+    model: Literal["Album"] = Field(
+        default="Album",
+        repr=False,
+        alias="__model__",
+    )
 
     #: The album URI. Read-only.
-    uri = fields.URI()
+    uri: Uri | None = None
 
     #: The album name. Read-only.
-    name = fields.String()
+    name: str | None = None
 
     #: A set of album artists. Read-only.
-    artists = fields.Collection(type=Artist, container=frozenset)
+    artists: frozenset[Artist] = frozenset()
 
     #: The number of tracks in the album. Read-only.
-    num_tracks = fields.Integer(min=0)
+    num_tracks: NonNegativeInt | None = None
 
     #: The number of discs in the album. Read-only.
-    num_discs = fields.Integer(min=0)
+    num_discs: NonNegativeInt | None = None
 
     #: The album release date. Read-only.
-    date = fields.Date()
+    date: DateOrYear | None = Field(
+        default=None,
+        pattern=r"^\d{4}(-\d{2}-\d{2})?$",
+    )
 
     #: The MusicBrainz ID of the album. Read-only.
-    musicbrainz_id = fields.Identifier()
+    musicbrainz_id: UUID4 | None = None
 
 
-class Track(ValidatedImmutableObject):
-    """:param uri: track URI
-    :type uri: string
-    :param name: track name
-    :type name: string
-    :param artists: track artists
-    :type artists: list of :class:`Artist`
-    :param album: track album
-    :type album: :class:`Album`
-    :param composers: track composers
-    :type composers: list of :class:`Artist`
-    :param performers: track performers
-    :type performers: list of :class:`Artist`
-    :param genre: track genre
-    :type genre: string
-    :param track_no: track number in album
-    :type track_no: integer or :class:`None` if unknown
-    :param disc_no: disc number in album
-    :type disc_no: integer or :class:`None` if unknown
-    :param date: track release date (YYYY or YYYY-MM-DD)
-    :type date: string
-    :param length: track length in milliseconds
-    :type length: integer or :class:`None` if there is no duration
-    :param bitrate: bitrate in kbit/s
-    :type bitrate: integer
-    :param comment: track comment
-    :type comment: string
-    :param musicbrainz_id: MusicBrainz ID
-    :type musicbrainz_id: string
-    :param last_modified: Represents last modification time
-    :type last_modified: integer or :class:`None` if unknown
-    """
+class Track(BaseModel):
+    """A track."""
+
+    model: Literal["Track"] = Field(
+        default="Track",
+        repr=False,
+        alias="__model__",
+    )
 
     #: The track URI. Read-only.
-    uri = fields.URI()
+    uri: Uri | None = None
 
     #: The track name. Read-only.
-    name = fields.String()
+    name: str | None = None
 
     #: A set of track artists. Read-only.
-    artists = fields.Collection(type=Artist, container=frozenset)
+    artists: frozenset[Artist] = frozenset()
 
     #: The track :class:`Album`. Read-only.
-    album = fields.Field(type=Album)
+    album: Album | None = None
 
     #: A set of track composers. Read-only.
-    composers = fields.Collection(type=Artist, container=frozenset)
+    composers: frozenset[Artist] = frozenset()
 
-    #: A set of track performers`. Read-only.
-    performers = fields.Collection(type=Artist, container=frozenset)
+    #: A set of track performers. Read-only.
+    performers: frozenset[Artist] = frozenset()
 
     #: The track genre. Read-only.
-    genre = fields.String()
+    genre: str | None = None
 
     #: The track number in the album. Read-only.
-    track_no = fields.Integer(min=0)
+    track_no: NonNegativeInt | None = None
 
     #: The disc number in the album. Read-only.
-    disc_no = fields.Integer(min=0)
+    disc_no: NonNegativeInt | None = None
 
     #: The track release date. Read-only.
-    date = fields.Date()
+    date: DateOrYear | None = Field(
+        default=None,
+        pattern=r"^\d{4}(-\d{2}-\d{2})?$",
+    )
 
-    #: The track length in milliseconds. Read-only.
-    length = fields.Integer(min=0)
+    #: The track length in milliseconds or :class:`None` if there is no duration.
+    #: Read-only.
+    length: DurationMs | None = None
 
     #: The track's bitrate in kbit/s. Read-only.
-    bitrate = fields.Integer(min=0)
+    bitrate: NonNegativeInt | None = None
 
     #: The track comment. Read-only.
-    comment = fields.String()
+    comment: str | None = None
 
     #: The MusicBrainz ID of the track. Read-only.
-    musicbrainz_id = fields.Identifier()
+    musicbrainz_id: UUID4 | None = None
 
     #: Integer representing when the track was last modified. Exact meaning
     #: depends on source of track. For local files this is the modification
     #: time in milliseconds since Unix epoch. For other backends it could be an
     #: equivalent timestamp or simply a version counter.
-    last_modified = fields.Integer(min=0)
+    last_modified: NonNegativeInt | None = None
 
 
-class TlTrack(ValidatedImmutableObject):
+class TlTrack(BaseModel):
     """A tracklist track. Wraps a regular track and it's tracklist ID.
 
     The use of :class:`TlTrack` allows the same track to appear multiple times
@@ -260,84 +239,77 @@ class TlTrack(ValidatedImmutableObject):
     This class also supports iteration, so your extract its values like this::
 
         (tlid, track) = tl_track
-
-    :param tlid: tracklist ID
-    :type tlid: int
-    :param track: the track
-    :type track: :class:`Track`
     """
+
+    model: Literal["TlTrack"] = Field(
+        default="TlTrack",
+        repr=False,
+        alias="__model__",
+    )
 
     #: The tracklist ID. Read-only.
-    tlid = fields.Integer(min=0)
+    tlid: TracklistId = Field(..., ge=1)
 
     #: The track. Read-only.
-    track = fields.Field(type=Track)
+    track: Track
 
-    def __init__(self, *args, **kwargs):
-        if len(args) == 2 and len(kwargs) == 0:
-            kwargs["tlid"] = args[0]
-            kwargs["track"] = args[1]
-            args = []
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        tlid: TracklistId,
+        track: Track,
+        **_: Any,
+    ) -> None:
+        super().__init__(tlid=tlid, track=track)  # pyright: ignore[reportCallIssue]
 
-    def __iter__(self):
-        return iter([self.tlid, self.track])
+    def __iter__(self) -> Iterator[TracklistId | Track]:  # pyright: ignore[reportIncompatibleMethodOverride]
+        return iter((self.tlid, self.track))
 
 
-class Playlist(ValidatedImmutableObject):
-    """:param uri: playlist URI
-    :type uri: string
-    :param name: playlist name
-    :type name: string
-    :param tracks: playlist's tracks
-    :type tracks: list of :class:`Track` elements
-    :param last_modified:
-        playlist's modification time in milliseconds since Unix epoch
-    :type last_modified: int
-    """
+class Playlist(BaseModel):
+    """A playlist."""
+
+    model: Literal["Playlist"] = Field(
+        default="Playlist",
+        repr=False,
+        alias="__model__",
+    )
 
     #: The playlist URI. Read-only.
-    uri = fields.URI()
+    uri: Uri | None = None
 
     #: The playlist name. Read-only.
-    name = fields.String()
+    name: str | None = None
 
     #: The playlist's tracks. Read-only.
-    tracks = fields.Collection(type=Track, container=tuple)
+    tracks: tuple[Track, ...] = ()
 
     #: The playlist modification time in milliseconds since Unix epoch.
     #: Read-only.
-    #:
-    #: Integer, or :class:`None` if unknown.
-    last_modified = fields.Integer(min=0)
-
-    # TODO: def insert(self, pos, track): ... ?
+    last_modified: NonNegativeInt | None = None
 
     @property
-    def length(self):
+    def length(self) -> NonNegativeInt:
         """The number of tracks in the playlist. Read-only."""
         return len(self.tracks)
 
 
-class SearchResult(ValidatedImmutableObject):
-    """:param uri: search result URI
-    :type uri: string
-    :param tracks: matching tracks
-    :type tracks: list of :class:`Track` elements
-    :param artists: matching artists
-    :type artists: list of :class:`Artist` elements
-    :param albums: matching albums
-    :type albums: list of :class:`Album` elements
-    """
+class SearchResult(BaseModel):
+    """A search result."""
+
+    model: Literal["SearchResult"] = Field(
+        default="SearchResult",
+        repr=False,
+        alias="__model__",
+    )
 
     #: The search result URI. Read-only.
-    uri = fields.URI()
+    uri: Uri | None = None
 
     #: The tracks matching the search query. Read-only.
-    tracks = fields.Collection(type=Track, container=tuple)
+    tracks: tuple[Track, ...] = ()
 
     #: The artists matching the search query. Read-only.
-    artists = fields.Collection(type=Artist, container=tuple)
+    artists: tuple[Artist, ...] = ()
 
     #: The albums matching the search query. Read-only.
-    albums = fields.Collection(type=Album, container=tuple)
+    albums: tuple[Album, ...] = ()

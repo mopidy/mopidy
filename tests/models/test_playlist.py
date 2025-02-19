@@ -1,3 +1,4 @@
+import pydantic
 import pytest
 
 from mopidy.models import Playlist, Track
@@ -7,7 +8,7 @@ def test_uri():
     uri = "an_uri"
     playlist = Playlist(uri=uri)
     assert playlist.uri == uri
-    with pytest.raises(AttributeError):
+    with pytest.raises(pydantic.ValidationError):
         playlist.uri = None
 
 
@@ -15,7 +16,7 @@ def test_name():
     name = "a name"
     playlist = Playlist(name=name)
     assert playlist.name == name
-    with pytest.raises(AttributeError):
+    with pytest.raises(pydantic.ValidationError):
         playlist.name = None
 
 
@@ -23,7 +24,7 @@ def test_tracks():
     tracks = [Track(), Track(), Track()]
     playlist = Playlist(tracks=tracks)
     assert list(playlist.tracks) == tracks
-    with pytest.raises(AttributeError):
+    with pytest.raises(pydantic.ValidationError):
         playlist.tracks = None
 
 
@@ -37,7 +38,7 @@ def test_last_modified():
     last_modified = 1390942873000
     playlist = Playlist(last_modified=last_modified)
     assert playlist.last_modified == last_modified
-    with pytest.raises(AttributeError):
+    with pytest.raises(pydantic.ValidationError):
         playlist.last_modified = None
 
 
@@ -108,18 +109,24 @@ def test_with_new_last_modified():
 
 
 def test_invalid_kwarg():
-    with pytest.raises(TypeError):
+    with pytest.raises(pydantic.ValidationError):
         Playlist(foo="baz")
 
 
 def test_repr_without_tracks():
-    assert repr(Playlist(uri="uri", name="name")) == "Playlist(name='name', uri='uri')"
+    assert (
+        repr(Playlist(uri="uri", name="name"))
+        == "Playlist(uri='uri', name='name', tracks=(), last_modified=None)"
+    )
 
 
 def test_repr_with_tracks():
-    assert (
-        repr(Playlist(uri="uri", name="name", tracks=(Track(name="foo"),)))
-        == "Playlist(name='name', tracks=[Track(name='foo')], uri='uri')"
+    assert repr(Playlist(uri="uri", name="name", tracks=[Track(name="foo")])) == (
+        "Playlist(uri='uri', name='name', tracks=(Track(uri=None, name='foo', "
+        "artists=frozenset(), album=None, composers=frozenset(), "
+        "performers=frozenset(), genre=None, track_no=None, disc_no=None, date=None, "
+        "length=None, bitrate=None, comment=None, musicbrainz_id=None, "
+        "last_modified=None),), last_modified=None)"
     )
 
 
@@ -128,6 +135,7 @@ def test_serialize_without_tracks():
         "__model__": "Playlist",
         "uri": "uri",
         "name": "name",
+        "tracks": [],
     }
 
 

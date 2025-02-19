@@ -1,58 +1,125 @@
 import inspect
-import json
 import traceback
 from collections.abc import Callable
-from typing import Any, Literal, TypeAlias, TypedDict, TypeVar
+from typing import Any, Literal, TypeAlias, TypeVar
 
+import pydantic_core
 import pykka
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    SerializerFunctionWrapHandler,
+    TypeAdapter,
+    field_serializer,
+    model_serializer,
+)
+from pydantic_core import PydanticUndefined, PydanticUndefinedType
+
+from mopidy import models
 
 T = TypeVar("T")
 
 
-class Notification(TypedDict):
-    jsonrpc: Literal["2.0"]
-    method: str
-    params: list[Any] | dict[str, Any]
+class UnsetType:
+    pass
+
+
+Unset = UnsetType()
 
 
 RequestId: TypeAlias = str | int | float
+Param: TypeAlias = (
+    # The complex types we support in the core API:
+    models.Artist
+    | models.Album
+    | models.Track
+    | models.Playlist
+    | models.Ref
+    | models.Image
+    # This covers any primitive JSON types:
+    | Any
+)
 
 
-class Request(Notification):
-    id: RequestId | None
+class Request(BaseModel):
+    jsonrpc: Literal["2.0"] = "2.0"
+    id: RequestId | None = None
+    method: str
+    params: list[Param] | dict[str, Param] = Field(default_factory=list)
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
 
-class ErrorDetails(TypedDict, total=False):
+RequestTypeAdapter = TypeAdapter(Request | list[Request])
+RequestDict: TypeAlias = dict[str, Any]
+
+
+class ErrorDetails(BaseModel):
     code: int
     message: str
-    data: Any | None
+    data: Any | None = None
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
 
-class ErrorResponse(TypedDict):
-    jsonrpc: Literal["2.0"]
+class ErrorResponse(BaseModel):
+    jsonrpc: Literal["2.0"] = "2.0"
     id: RequestId | None
     error: ErrorDetails
 
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
-class SuccessResponse(TypedDict):
-    jsonrpc: Literal["2.0"]
+
+class SuccessResponse(BaseModel):
+    jsonrpc: Literal["2.0"] = "2.0"
     id: RequestId
     result: Any
 
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
-Response: TypeAlias = ErrorResponse | SuccessResponse
+
+Response: TypeAlias = SuccessResponse | ErrorResponse
+ResponseTypeAdapter = TypeAdapter(Response | list[Response])
 
 
-class ParamDescription(TypedDict, total=False):
+class ParamDescription(BaseModel):
     name: str
-    default: Any
-    varargs: bool
-    kwargs: bool
+    default: Any = Unset
+    varargs: Any = Unset
+    kwargs: Any = Unset
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    @field_serializer("default", when_used="json")
+    def serialize_default(self, _nxt: SerializerFunctionWrapHandler):
+        return None if self.default is Unset else self.default
+
+    @field_serializer("varargs", when_used="json")
+    def serialize_varargs(self, _nxt: SerializerFunctionWrapHandler):
+        return None if self.varargs is Unset else self.varargs
+
+    @field_serializer("kwargs", when_used="json")
+    def serialize_kwargs(self, _nxt: SerializerFunctionWrapHandler):
+        return None if self.kwargs is Unset else self.kwargs
+
+    @model_serializer(mode="wrap", when_used="json")
+    def serialize_model(self, nxt: SerializerFunctionWrapHandler):
+        serialized = nxt(self)
+        if self.default is Unset:
+            del serialized["default"]
+        if self.varargs is Unset:
+            del serialized["varargs"]
+        if self.kwargs is Unset:
+            del serialized["kwargs"]
+        return serialized
 
 
-class MethodDescription(TypedDict):
+class MethodDescription(BaseModel):
     description: str | None
     params: list[ParamDescription]
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
 
 class Wrapper:
@@ -94,27 +161,18 @@ class Wrapper:
     :param objects: mapping between mounting points and exposed functions or
         class instances
     :type objects: dict
-    :param decoders: object builders to be used by :func`json.loads`
-    :type decoders: list of functions taking a dict and returning a dict
-    :param encoders: object serializers to be used by :func:`json.dumps`
-    :type encoders: list of :class:`json.JSONEncoder` subclasses with the
-        method :meth:`default` implemented
     """
 
     def __init__(
         self,
         objects: dict[str, Any],
-        decoders: list[Callable[[dict[Any, Any]], Any]] | None = None,
-        encoders: list[type[json.JSONEncoder]] | None = None,
     ):
         if "" in objects:
             msg = "The empty string is not allowed as an object mount"
             raise AttributeError(msg)
         self.objects = objects
-        self.decoder = get_combined_json_decoder(decoders or [])
-        self.encoder = get_combined_json_encoder(encoders or [])
 
-    def handle_json(self, request_json: str) -> str | None:
+    def handle_json(self, request_json: str | bytes) -> bytes | None:
         """
         Handles an incoming request encoded as a JSON string.
 
@@ -126,18 +184,18 @@ class Wrapper:
         :rtype: string or :class:`None`
         """
         try:
-            request: Request = json.loads(request_json, object_hook=self.decoder)
+            request = pydantic_core.from_json(request_json)
         except ValueError:
             response = ParseError().get_response()
         else:
             response = self.handle_data(request)
         if response is None:
             return None
-        return json.dumps(response, cls=self.encoder)
+        return ResponseTypeAdapter.dump_json(response, by_alias=True)
 
     def handle_data(
         self,
-        request: Request | list[Request],
+        request: RequestDict | list[RequestDict],
     ) -> Response | list[Response] | None:
         """
         Handles an incoming request in the form of a Python data structure.
@@ -155,8 +213,8 @@ class Wrapper:
 
     def _handle_batch(
         self,
-        requests: list[Request],
-    ) -> ErrorResponse | list[Response] | None:
+        requests: list[RequestDict],
+    ) -> Response | list[Response] | None:
         if not requests:
             return InvalidRequestError(
                 data="Batch list cannot be empty",
@@ -170,29 +228,30 @@ class Wrapper:
 
         return responses or None
 
-    def _handle_single_request(self, request: Request) -> Response | None:
+    def _handle_single_request(self, request_dict: RequestDict) -> Response | None:
         try:
-            self._validate_request(request)
-            args, kwargs = self._get_params(request)
+            request = self._validate_request(request_dict)
         except InvalidRequestError as exc:
             return exc.get_response()
+        else:
+            args, kwargs = self._get_params(request)
 
         try:
-            method = self._get_method(request["method"])
+            method = self._get_method(request.method)
 
             try:
                 result = method(*args, **kwargs)
 
-                if "id" not in request or request["id"] is None:
+                if request.id is None:
                     # Request is a notification, so we don't need to respond
                     return None
 
                 result = self._unwrap_result(result)
-                return {
-                    "jsonrpc": "2.0",
-                    "id": request["id"],
-                    "result": result,
-                }
+                return SuccessResponse(
+                    jsonrpc="2.0",
+                    id=request.id,
+                    result=result,
+                )
             except TypeError as exc:
                 raise InvalidParamsError(
                     data={
@@ -210,34 +269,36 @@ class Wrapper:
                     },
                 ) from exc
         except JsonRpcError as exc:
-            if "id" not in request or request["id"] is None:
+            if request.id is None:
                 # Request is a notification, so we don't need to respond
                 return None
-            return exc.get_response(request["id"])
+            return exc.get_response(request.id)
 
-    def _validate_request(self, request: Request) -> None:
-        if not isinstance(request, dict):  # pyright: ignore[reportUnnecessaryIsInstance]
+    def _validate_request(self, request_dict: RequestDict) -> Request:
+        if not isinstance(request_dict, dict):  # pyright: ignore[reportUnnecessaryIsInstance]
             raise InvalidRequestError(data="Request must be an object")
-        if "jsonrpc" not in request:
+        if "jsonrpc" not in request_dict:
             raise InvalidRequestError(data="'jsonrpc' member must be included")
-        if request["jsonrpc"] != "2.0":
+        if request_dict["jsonrpc"] != "2.0":
             raise InvalidRequestError(data="'jsonrpc' value must be '2.0'")
-        if "method" not in request:
+        if "method" not in request_dict:
             raise InvalidRequestError(data="'method' member must be included")
-        if not isinstance(request["method"], str):  # pyright: ignore[reportUnnecessaryIsInstance]
+        if not isinstance(request_dict["method"], str):  # pyright: ignore[reportUnnecessaryIsInstance]
             raise InvalidRequestError(data="'method' must be a string")
+        if "params" in request_dict and not isinstance(
+            request_dict["params"], list | dict
+        ):
+            raise InvalidRequestError(
+                data="'params', if given, must be an array or an object",
+            )
+        return Request.model_validate(request_dict)
 
     def _get_params(self, request: Request) -> tuple[list[Any], dict[Any, Any]]:
-        if "params" not in request:
-            return [], {}
-        params = request["params"]
-        if isinstance(params, list):
-            return params, {}
-        if isinstance(params, dict):  # pyright: ignore[reportUnnecessaryIsInstance]
-            return [], params
-        raise InvalidRequestError(
-            data="'params', if given, must be an array or an object",
-        )
+        match request.params:
+            case list():
+                return request.params, {}
+            case dict():
+                return [], request.params
 
     def _get_method(self, method_path: str) -> Callable[..., Any]:
         if callable(self.objects.get(method_path, None)):
@@ -287,14 +348,15 @@ class JsonRpcError(Exception):
         self,
         request_id: RequestId | None = None,
     ) -> ErrorResponse:
-        response: ErrorResponse = {
-            "jsonrpc": "2.0",
-            "id": request_id,
-            "error": {"code": self.code, "message": self.message},
-        }
-        if self.data:
-            response["error"]["data"] = self.data
-        return response
+        return ErrorResponse(
+            jsonrpc="2.0",
+            id=request_id,
+            error=ErrorDetails(
+                code=self.code,
+                message=self.message,
+                data=self.data,
+            ),
+        )
 
 
 class ParseError(JsonRpcError):
@@ -320,32 +382,6 @@ class InvalidParamsError(JsonRpcError):
 class ApplicationError(JsonRpcError):
     code = 0
     message = "Application error"
-
-
-def get_combined_json_decoder(
-    decoders: list[Callable[[dict[Any, Any]], Any]],
-) -> Callable[[dict[Any, Any]], Any]:
-    def decode(dct: dict[Any, Any]) -> dict[Any, Any]:
-        for decoder in decoders:
-            dct = decoder(dct)
-        return dct
-
-    return decode
-
-
-def get_combined_json_encoder(
-    encoders: list[type[json.JSONEncoder]],
-) -> type[json.JSONEncoder]:
-    class JsonRpcEncoder(json.JSONEncoder):
-        def default(self, o: Any) -> Any:
-            for encoder in encoders:
-                try:
-                    return encoder().default(o)
-                except TypeError:
-                    pass  # Try next encoder
-            return json.JSONEncoder.default(self, o)
-
-    return JsonRpcEncoder
 
 
 class Inspector:
@@ -406,10 +442,10 @@ class Inspector:
         return methods
 
     def _describe_method(self, method: Callable[..., Any]) -> MethodDescription:
-        return {
-            "description": inspect.getdoc(method),
-            "params": self._describe_params(method),
-        }
+        return MethodDescription(
+            description=inspect.getdoc(method),
+            params=self._describe_params(method),
+        )
 
     def _describe_params(
         self,
@@ -417,26 +453,24 @@ class Inspector:
     ) -> list[ParamDescription]:
         argspec = inspect.getfullargspec(method)
 
-        defaults = list(argspec.defaults) if argspec.defaults else []
-        num_args_without_default = len(argspec.args) - len(defaults)
-        no_defaults = [None] * num_args_without_default
-        defaults = no_defaults + defaults
+        with_defaults: list[Any] = list(argspec.defaults) if argspec.defaults else []
+        num_args_without_default = len(argspec.args) - len(with_defaults)
+        without_defaults: list[PydanticUndefinedType] = [
+            PydanticUndefined
+        ] * num_args_without_default
+        defaults = without_defaults + with_defaults
 
         params: list[ParamDescription] = []
 
-        for arg, _default in zip(argspec.args, defaults, strict=True):
+        for arg, default in zip(argspec.args, defaults, strict=True):
             if arg == "self":
                 continue
-            params.append({"name": arg})
-
-        if argspec.defaults:
-            for i, default in enumerate(reversed(argspec.defaults)):
-                params[len(params) - i - 1]["default"] = default
+            params.append(ParamDescription(name=arg, default=default))
 
         if argspec.varargs:
-            params.append({"name": argspec.varargs, "varargs": True})
+            params.append(ParamDescription(name=argspec.varargs, varargs=True))
 
         if argspec.varkw:
-            params.append({"name": argspec.varkw, "kwargs": True})
+            params.append(ParamDescription(name=argspec.varkw, kwargs=True))
 
         return params
