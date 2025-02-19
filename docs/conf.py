@@ -30,10 +30,6 @@ extensions = [
     "sphinx_rtd_theme",
 ]
 
-templates_path = ["_templates"]
-source_suffix = ".rst"
-master_doc = "index"
-
 project = "Mopidy"
 copyright = "2009-2025, Stein Magnus Jodal and contributors"  # noqa: A001
 
