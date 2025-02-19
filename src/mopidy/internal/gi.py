@@ -8,8 +8,8 @@ import gi
 try:
     gi.require_version("Gst", "1.0")
     gi.require_version("GstPbutils", "1.0")
-except ValueError:
-    print(  # noqa: T201
+except ValueError as ve:
+    raise ImportError(
         textwrap.dedent(
             """
         ERROR: A GObject based library was not found.
@@ -22,8 +22,7 @@ except ValueError:
         instructions on how to install the required dependencies.
     """,
         ),
-    )
-    raise
+    ) from ve
 
 from gi.repository import GLib, GObject, Gst, GstPbutils
 

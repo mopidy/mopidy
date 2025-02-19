@@ -2,13 +2,15 @@ import logging
 import time
 from enum import IntEnum
 from pathlib import Path
-from typing import Any, NamedTuple, cast
+from typing import Any, cast
 
 from mopidy import exceptions
-from mopidy.audio import tags as tags_lib
-from mopidy.audio import utils
+from mopidy.audio.base.scan import ScannerBase, ScanResult
+from mopidy.audio.gst import utils
 from mopidy.internal import log
 from mopidy.internal.gi import Gst, GstPbutils
+
+from . import tags as tags_lib
 
 
 class GstElementFactoryListType(IntEnum):
@@ -25,14 +27,7 @@ class GstAutoplugSelectResult(IntEnum):
     SKIP = 2
 
 
-class _Result(NamedTuple):
-    uri: str
-    tags: dict[str, Any]
-    duration: int | None
-    seekable: bool
-    mime: str | None
-    playable: bool
-
+_Result = ScanResult  # Compatibility re-export
 
 logger = logging.getLogger(__name__)
 
@@ -42,41 +37,12 @@ def _trace(*args, **kwargs):
 
 
 # TODO: replace with a scan(uri, timeout=1000, proxy_config=None)?
-class Scanner:
-    """Helper to get tags and other relevant info from URIs.
-
-    :param timeout: timeout for scanning a URI in ms
-    :param proxy_config: dictionary containing proxy config strings.
-    :type event: int
-    """
-
-    def __init__(
-        self,
-        timeout: int = 1000,
-        proxy_config: dict[str, Any] | None = None,
-    ) -> None:
-        self._timeout_ms = int(timeout)
-        self._proxy_config = proxy_config or {}
-
+class Scanner(ScannerBase):
     def scan(
         self,
         uri: str,
         timeout: float | None = None,
-    ) -> _Result:
-        """Scan the given uri collecting relevant metadata.
-
-        :param uri: URI of the resource to scan.
-        :type uri: string
-        :param timeout: timeout for scanning a URI in ms. Defaults to the
-            ``timeout`` value used when creating the scanner.
-        :type timeout: int
-        :return: A named tuple containing
-            ``(uri, tags, duration, seekable, mime)``.
-            ``tags`` is a dictionary of lists for all the tags we found.
-            ``duration`` is the length of the URI in milliseconds, or
-            :class:`None` if the URI has no duration. ``seekable`` is boolean.
-            indicating if a seek would succeed.
-        """
+    ) -> ScanResult:
         timeout = int(timeout or self._timeout_ms)
         tags, duration, seekable, mime = None, None, None, None
         pipeline, signals = _setup_pipeline(uri, self._proxy_config)
@@ -90,7 +56,7 @@ class Scanner:
             pipeline.set_state(Gst.State.NULL)
             del pipeline
 
-        return _Result(uri, tags, duration, seekable, mime, have_audio)
+        return ScanResult(uri, tags, duration, seekable, mime, have_audio)
 
 
 # Turns out it's _much_ faster to just create a new pipeline for every as

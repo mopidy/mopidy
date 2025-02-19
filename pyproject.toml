@@ -24,7 +24,7 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
-    "pygobject >= 3.42",
+    "platformdirs ~= 4.3.6",
     "pykka >= 4.0",
     "requests >= 2.28",
     "setuptools >= 66",
@@ -32,6 +32,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+gobject = [
+    "pygobject >= 3.42",
+]
+
 docs = [
     "pygraphviz >= 0.20",
     "sphinx >= 5.3",
@@ -149,6 +153,7 @@ ignore = [
     "ANN",     # flake8-annotations
     "ARG",     # flake8-unused-arguments
     "D",       # pydocstyle
+    "E402",    # module level import not at top of file (required for pytest importorskips)  # TODO
     "FBT",     # flake8-boolean-trap
     "PLR0913", # too-many-arguments
     "PT007",   # pytest-parametrize-values-wrong-type  # TODO
@@ -182,7 +187,7 @@ env_list = [
 ]
 
 [tool.tox.env_run_base]
-deps = [".[test]"]
+deps = [".[test,gobject]"]
 commands = [
     [
         "pytest",
