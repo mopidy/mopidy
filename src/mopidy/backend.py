@@ -14,7 +14,7 @@ from mopidy import listener
 if TYPE_CHECKING:
     from mopidy.audio.actor import AudioProxy
     from mopidy.internal.gi import Gst
-    from mopidy.models import Image, Playlist, Ref, SearchResult, Track
+    from mopidy.models import Image, Playlist, Ref, RefType, SearchResult, Track
     from mopidy.types import (
         DistinctField,
         DurationMs,
@@ -176,6 +176,13 @@ class LibraryProvider:
 
         .. versionadded:: 1.0
             The ``exact`` param which replaces the old ``find_exact``.
+        """
+        return None
+
+    def identify(self, uri: Uri) -> RefType | None:
+        """See :meth:`mopidy.core.LibraryController.lookup`.
+
+        *MAY be implemented by subclass.*
         """
         return None
 
@@ -486,6 +493,7 @@ class LibraryProviderProxy:
     lookup_many = proxy_method(LibraryProvider.lookup_many)
     refresh = proxy_method(LibraryProvider.refresh)
     search = proxy_method(LibraryProvider.search)
+    identify = proxy_method(LibraryProvider.identify)
 
 
 class PlaybackProviderProxy:
