@@ -30,10 +30,6 @@ extensions = [
     "sphinx_rtd_theme",
 ]
 
-templates_path = ["_templates"]
-source_suffix = ".rst"
-master_doc = "index"
-
 project = "Mopidy"
 copyright = "2009-2025, Stein Magnus Jodal and contributors"  # noqa: A001
 
@@ -120,7 +116,7 @@ extlinks = {
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
-    "pykka": ("https://pykka.readthedocs.io/en/latest/", None),
+    "pykka": ("https://pykka.readthedocs.io/stable/", None),
     "tornado": ("https://www.tornadoweb.org/en/stable/", None),
 }
 

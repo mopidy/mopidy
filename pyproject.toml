@@ -34,7 +34,9 @@ dependencies = [
 [project.optional-dependencies]
 docs = [
     "pygraphviz >= 0.20",
-    "sphinx >= 5.3",
+    # Remove upper bound on sphinx once
+    # https://github.com/tox-dev/sphinx-autodoc-typehints/issues/523 is fixed.
+    "sphinx >= 5.3, <8.2",
     "sphinx-autodoc-typehints >= 1.12",
     "sphinx-rtd-theme >= 1.2",
 ]
