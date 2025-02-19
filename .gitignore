@@ -21,3 +21,5 @@ mopidy.log*
 nosetests.xml
 tmp/
 xunit-*.xml
+.pdm-python
+pdm.lock

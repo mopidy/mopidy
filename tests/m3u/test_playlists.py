@@ -358,6 +358,17 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
         assert item_refs is None
 
+    def test_append_track(self):
+        track_a = Track(uri="dummy:a", name="A", length=60000)
+        playlist = self.core.playlists.create("test")
+        playlist = self.core.playlists.save(playlist.replace(tracks=[track_a]))
+
+        track_b = Track(uri="dummy:b", name="B", length=60000)
+        self.core.playlists.append_track(playlist.uri, track_b)
+
+        playlist = self.core.playlists.lookup(playlist.uri)
+        assert len(playlist.tracks) == 2
+
 
 class M3UPlaylistsProviderBaseDirectoryTest(M3UPlaylistsProviderTest):
     def setUp(self):
