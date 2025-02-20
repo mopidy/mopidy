@@ -214,14 +214,4 @@ commands = [["ruff", "format", "--check", "{posargs:.}"]]
 
 [tool.tox.env.docs]
 dependency_groups = ["docs"]
-commands = [
-    [
-        "sphinx-build",
-        "--builder",
-        "html",
-        "--doctree-dir",
-        "{envtmpdir}{/}doctrees",
-        "docs",
-        "{envtmpdir}{/}html",
-    ],
-]
+commands = [["sphinx-build", "docs", "{envtmpdir}"]]
