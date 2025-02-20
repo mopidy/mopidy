@@ -1,8 +1,3 @@
-[build-system]
-requires = ["setuptools >= 66", "setuptools-scm >= 7.1"]
-build-backend = "setuptools.build_meta"
-
-
 [project]
 name = "mopidy"
 description = "Mopidy is an extensible music server written in Python"
@@ -16,10 +11,6 @@ classifiers = [
     "Intended Audience :: End Users/Desktop",
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
     "Topic :: Multimedia :: Sound/Audio :: Players",
 ]
 dynamic = ["version"]
@@ -31,28 +22,6 @@ dependencies = [
     "setuptools >= 66",
     "tornado >= 6.2",
 ]
-
-[project.optional-dependencies]
-docs = [
-    "pygraphviz >= 0.20",
-    "sphinx >= 5.3",
-    "sphinx-autodoc-typehints >= 1.12",
-    "sphinx-rtd-theme >= 1.2",
-]
-lint = ["ruff == 0.8.2"]
-test = [
-    "pytest >= 7.2",
-    "pytest-cov >= 4.0",
-    "pytest-mock >= 3.8",
-    "responses >= 0.18",
-]
-typing = [
-    "pygobject-stubs >= 2.12.0",
-    "pyright == 1.1.380",
-    "types-requests >= 2.28",
-    "types-setuptools >= 66",
-]
-dev = ["mopidy[docs,lint,test,typing]", "tox >= 4.21"]
 
 [project.urls]
 Homepage = "https://mopidy.com/"
@@ -71,6 +40,40 @@ http = "mopidy.http:Extension"
 m3u = "mopidy.m3u:Extension"
 softwaremixer = "mopidy.softwaremixer:Extension"
 stream = "mopidy.stream:Extension"
+
+
+[build-system]
+requires = ["setuptools >= 66", "setuptools-scm >= 7.1"]
+build-backend = "setuptools.build_meta"
+
+
+[dependency-groups]
+dev = [
+    "tox >= 4.21",
+    { include-group = "docs" },
+    { include-group = "ruff" },
+    { include-group = "tests" },
+    { include-group = "typing" },
+]
+docs = [
+    "pygraphviz >= 0.20",
+    "sphinx >= 5.3",
+    "sphinx-autodoc-typehints >= 1.12",
+    "sphinx-rtd-theme >= 1.2",
+]
+ruff = ["ruff == 0.8.2"]
+tests = [
+    "pytest >= 7.2",
+    "pytest-cov >= 4.0",
+    "pytest-mock >= 3.8",
+    "responses >= 0.18",
+]
+typing = [
+    "pygobject-stubs >= 2.12.0",
+    "pyright == 1.1.394",
+    "types-requests >= 2.28",
+    "types-setuptools >= 66",
+]
 
 
 [tool.pyright]
@@ -171,19 +174,20 @@ ignore = [
 
 
 [tool.tox]
-requires = ["tox >= 4.21"]
 env_list = [
     "3.11",
     "3.12",
     "3.13",
     "docs",
     "pyright",
-    "ruff-lint",
+    "ruff-check",
     "ruff-format",
 ]
 
 [tool.tox.env_run_base]
-deps = [".[test]"]
+package = "wheel"
+wheel_build_env = ".pkg"
+dependency_groups = ["tests"]
 commands = [
     [
         "pytest",
@@ -195,28 +199,29 @@ commands = [
 ]
 
 [tool.tox.env.docs]
-deps = [".[docs]"]
-changedir = "docs"
+dependency_groups = ["docs"]
 commands = [
     [
         "sphinx-build",
         "--builder",
         "html",
         "--doctree-dir",
-        "{envtmpdir}/doctrees",
-        ".",
-        "{envtmpdir}/html",
+        "{envtmpdir}{/}doctrees",
+        "docs",
+        "{envtmpdir}{/}html",
     ],
 ]
 
 [tool.tox.env.pyright]
-deps = [".[typing]"]
+dependency_groups = ["typing"]
 commands = [["pyright", "{posargs:src}"]]
 
-[tool.tox.env.ruff-lint]
-deps = [".[lint]"]
+[tool.tox.env.ruff-check]
+skip_install = true
+dependency_groups = ["ruff"]
 commands = [["ruff", "check", "{posargs:.}"]]
 
 [tool.tox.env.ruff-format]
-deps = [".[lint]"]
+skip_install = true
+dependency_groups = ["ruff"]
 commands = [["ruff", "format", "--check", "{posargs:.}"]]
