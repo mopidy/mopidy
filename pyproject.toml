@@ -178,10 +178,10 @@ env_list = [
     "3.11",
     "3.12",
     "3.13",
-    "docs",
     "pyright",
     "ruff-check",
     "ruff-format",
+    "docs",
 ]
 
 [tool.tox.env_run_base]
@@ -198,20 +198,6 @@ commands = [
     ],
 ]
 
-[tool.tox.env.docs]
-dependency_groups = ["docs"]
-commands = [
-    [
-        "sphinx-build",
-        "--builder",
-        "html",
-        "--doctree-dir",
-        "{envtmpdir}{/}doctrees",
-        "docs",
-        "{envtmpdir}{/}html",
-    ],
-]
-
 [tool.tox.env.pyright]
 dependency_groups = ["typing"]
 commands = [["pyright", "{posargs:src}"]]
@@ -225,3 +211,17 @@ commands = [["ruff", "check", "{posargs:.}"]]
 skip_install = true
 dependency_groups = ["ruff"]
 commands = [["ruff", "format", "--check", "{posargs:.}"]]
+
+[tool.tox.env.docs]
+dependency_groups = ["docs"]
+commands = [
+    [
+        "sphinx-build",
+        "--builder",
+        "html",
+        "--doctree-dir",
+        "{envtmpdir}{/}doctrees",
+        "docs",
+        "{envtmpdir}{/}html",
+    ],
+]
