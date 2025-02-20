@@ -4,33 +4,39 @@ on:
   pull_request:
   push:
     branches:
-      - develop
       - main
 
 jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hynek/build-and-inspect-python-package@v2
+
   main:
     strategy:
       fail-fast: false
       matrix:
         include:
-          - name: "Test: Python 3.11"
+          - name: "pytest (3.11)"
             python: "3.11"
             tox: "3.11"
-          - name: "Test: Python 3.12"
+          - name: "pytest (3.12)"
             python: "3.12"
             tox: "3.12"
-          - name: "Test: Python 3.13"
+          - name: "pytest (3.13)"
             python: "3.13"
             tox: "3.13"
             coverage: true
-          - name: "Lint: pyright"
-            python: "3.12"
+          - name: "pyright"
+            python: "3.13"
             tox: "pyright"
-          - name: "Lint: ruff lint"
-            python: "3.12"
-            tox: "ruff-lint"
-          - name: "Lint: ruff format"
-            python: "3.12"
+          - name: "ruff check"
+            python: "3.13"
+            tox: "ruff-check"
+          - name: "ruff format"
+            python: "3.13"
             tox: "ruff-format"
           - name: "Docs"
             python: "3.12"
@@ -54,7 +60,7 @@ jobs:
         if: ${{ ! matrix.coverage }}
       - run: python -m tox -e ${{ matrix.tox }} -- --cov-report=xml
         if: ${{ matrix.coverage }}
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         if: ${{ matrix.coverage }}
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
