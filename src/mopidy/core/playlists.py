@@ -133,6 +133,7 @@ class PlaylistsController:
         :param uri_scheme: use the backend matching the URI scheme
         """
         if uri_scheme in self.backends.with_playlists:
+            assert uri_scheme is not None
             backends = [self.backends.with_playlists[uri_scheme]]
         else:
             backends = self.backends.with_playlists.values()
