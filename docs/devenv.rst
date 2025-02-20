@@ -264,9 +264,9 @@ tests. This makes for a very quick code-test cycle::
     pytest -f    # or --looponfail
 
 With the help of the pytest-cov plugin, we can get a report on what parts of
-the given module, ``mopidy`` in this example, are covered by the test suite::
+the given module are covered by the test suite::
 
-    pytest --cov=mopidy --cov-report=term-missing
+    pytest --cov
 
 .. note::
 

@@ -76,6 +76,16 @@ typing = [
 ]
 
 
+[tool.coverage.paths]
+source = ["src/", "*/site-packages/"]
+
+[tool.coverage.run]
+source_pkgs = ["mopidy"]
+
+[tool.coverage.report]
+show_missing = true
+
+
 [tool.pyright]
 pythonVersion = "3.11"
 # Use venv from parent directory, to share it with any extensions:
@@ -191,10 +201,9 @@ dependency_groups = ["tests"]
 commands = [
     [
         "pytest",
+        "--cov",
         "--basetemp={envtmpdir}",
-        "--cov=mopidy",
-        "--cov-report=term-missing",
-        "{posargs}",
+        { replace = "posargs", extend = true },
     ],
 ]
 
