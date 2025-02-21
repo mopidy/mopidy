@@ -113,7 +113,7 @@ inherits from Mopidy's extension base class, :class:`mopidy.ext.Extension`. This
 is the class referred to in the ``project.entry-points`` part of
 ``pyproject.toml``.
 
-Any imports of other files in your extension, outside of Mopidy and it's core
+Any imports of other files in your extension, outside of Mopidy and its core
 requirements, should be kept inside methods. This ensures that this file can be
 imported without raising :exc:`ImportError` exceptions for missing dependencies,
 etc.
