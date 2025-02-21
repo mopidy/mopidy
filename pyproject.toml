@@ -114,6 +114,7 @@ select = ["ALL"]
 ignore = [
     "A002",    # builtin-argument-shadowing  # TODO
     "A003",    # builtin-attribute-shadowing
+    "A005",    # stdlib-module-shadowing
     "ANN",     # flake8-annotations  # TODO
     "ANN401",  # any-type
     "D100",    # undocumented-public-module  # TODO
