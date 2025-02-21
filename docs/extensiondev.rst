@@ -6,20 +6,45 @@ Extension development
 
 Mopidy started as simply an MPD server that could play music from Spotify.
 Early on, Mopidy got multiple "frontends" to expose Mopidy to more than just MPD
-clients: for example the scrobbler frontend that scrobbles your listening
-history to your Last.fm account, the MPRIS frontend that integrates Mopidy into the
-Ubuntu Sound Menu, and the HTTP server and JavaScript player API making web
-based Mopidy clients possible. In Mopidy 0.9 we added support for multiple
-music sources without stopping and reconfiguring Mopidy: for example the local
-backend for playing music from your disk, the stream backend for playing
-Internet radio streams, and the Spotify and SoundCloud backends, for playing
-music directly from those services.
+clients, including:
+
+- the scrobbler frontend that scrobbles your listening history to your Last.fm
+  account,
+- the MPRIS frontend that integrates Mopidy into the Ubuntu Sound Menu, and
+- the HTTP server and JavaScript player API making web based Mopidy clients
+  possible.
+
+In Mopidy 0.9 we added support for multiple music sources without stopping and
+reconfiguring Mopidy, introducing:
+
+- the local backend for playing music from your disk,
+- the stream backend for playing Internet radio streams, and
+- the Spotify and SoundCloud backends, for playing music directly from those
+  services.
 
 All of these are examples of what you can accomplish by creating a Mopidy
-extension. If you want to create your own Mopidy extension for something that
-does not exist yet, this guide to extension development will help you get your
-extension running in no time, and make it feel the way users would expect your
-extension to behave.
+extension.
+
+If you want to create your own Mopidy extension for something that does not
+exist yet, this guide to extension development will help you get your extension
+running in no time, and make it feel the way users would expect your extension
+to behave.
+
+
+Extension project template
+==========================
+
+We've made a `Copier <https://copier.readthedocs.io/>`_ project template for
+`creating new Mopidy extensions
+<https://github.com/mopidy/mopidy-ext-template>`_.
+
+By running a single command,
+you're asked a few questions about the name of your extension, and then your
+answers are used to create a folder structure similar to the above, with all the
+needed files and most of the details filled in for you.
+
+See the readme of `mopidy-ext-template
+<https://github.com/mopidy/mopidy-ext-template>`_ for further details.
 
 
 Anatomy of an extension
@@ -31,11 +56,9 @@ integrate with Mopidy. So, for example, if you plan to add support for a service
 named Soundspot to Mopidy, you would name your extension's Python package
 ``mopidy_soundspot``.
 
-The extension must be shipped with a ``setup.py`` file and be registered on
-`PyPI <https://pypi.org/>`_.  The name of the distribution on PyPI would
-be something like "Mopidy-Soundspot". Make sure to include the name "Mopidy"
-somewhere in that name and that you check the capitalization. This is the name
-users will use when they install your extension from PyPI.
+The extension must be registered on `PyPI <https://pypi.org/>`_. The name of the
+distribution on PyPI would be something like "mopidy-soundspot". This is the
+name users will use when they install your extension from PyPI.
 
 Mopidy extensions must be licensed under an Apache 2.0 (like Mopidy itself),
 BSD, MIT or more liberal license to be able to be enlisted in the Mopidy
@@ -46,244 +69,110 @@ Combining this together, we get the following folder structure for our
 extension, Mopidy-Soundspot::
 
     mopidy-soundspot/           # The Git repo root
+        pyproject.toml          # Project metadata and build configuration
         LICENSE                 # The license text
-        MANIFEST.in             # List of data files to include in PyPI package
-        README.rst              # Document what it is and how to use it
-        mopidy_soundspot/       # Your code
+        README.md               # Document what it is and how to use it
+        src/
+            mopidy_soundspot/   # Your code
+                __init__.py
+                ext.conf        # Default config for the extension
+                ...
+        tests/
             __init__.py
-            ext.conf            # Default config for the extension
-            ...
-        setup.py                # Installation script
+            test_extension.py   # Tests for the extension
 
-Example content for the most important files follows below.
+See the above project template for examples of each of the files.
 
 
-cookiecutter project template
-=============================
+Extension registration
+======================
 
-We've also made a `cookiecutter <https://cookiecutter.readthedocs.io/>`_
-project template for `creating new Mopidy extensions
-<https://github.com/mopidy/cookiecutter-mopidy-ext>`_. If you install
-cookiecutter and run a single command, you're asked a few questions about the
-name of your extension, etc. This is used to create a folder structure similar
-to the above, with all the needed files and most of the details filled in for
-you. This saves you a lot of tedious work and copy-pasting from this howto. See
-the readme of `cookiecutter-mopidy-ext
-<https://github.com/mopidy/cookiecutter-mopidy-ext>`_ for further details.
+For Mopidy to find your extension, the extension must register an `entry point
+<https://packaging.python.org/en/latest/specifications/entry-points/>`_ of the
+``mopidy.ext`` type.
 
+This is done by adding a section like this to your
+``pyproject.toml`` file:
 
-Example README.rst
-==================
+.. code-block:: toml
 
-The README file should quickly explain what the extension does, how to install
-it, and how to configure it. It should also contain a link to a tarball of the
-latest development version of the extension. It's important that this link ends
-with ``#egg=Mopidy-Something-dev`` for installation using
-``pip install Mopidy-Something==dev`` to work.
+    [project.entry-points."mopidy.ext"]
+    soundspot = "mopidy_soundspot:Extension"
 
-.. code-block:: rst
-
-    ****************
-    Mopidy-Soundspot
-    ****************
-
-    `Mopidy <https://mopidy.com/>`_ extension for playing music from
-    `Soundspot <http://soundspot.example.com/>`_.
-
-    Requires a Soundspot Platina subscription and the pysoundspot library.
+In this example, the first part, ``soundspot``, is your extensions "short name",
+which is used to identify your extension in the Mopidy configuration file. The
+second part, ``mopidy_soundspot:Extension``, is the fully qualified name of your
+Python module and extension class.
 
 
-    Installation
-    ============
+Extension class
+===============
 
-    Install by running::
+The root of your Python package should have a class named ``Extension`` which
+inherits from Mopidy's extension base class, :class:`mopidy.ext.Extension`. This
+is the class referred to in the ``project.entry-points`` part of
+``pyproject.toml``.
 
-        sudo pip install Mopidy-Soundspot
-
-    Or, if available, install the Debian/Ubuntu package from `apt.mopidy.com
-    <https://apt.mopidy.com/>`_.
-
-
-    Configuration
-    =============
-
-    Before starting Mopidy, you must add your Soundspot username and password
-    to the Mopidy configuration file::
-
-        [soundspot]
-        username = alice
-        password = secret
-
-
-    Project resources
-    =================
-
-    - `Source code <https://github.com/mopidy/mopidy-soundspot>`_
-    - `Issue tracker <https://github.com/mopidy/mopidy-soundspot/issues>`_
-    - `Development branch tarball <https://github.com/mopidy/mopidy-soundspot/tarball/master#egg=Mopidy-Soundspot-dev>`_
-
-
-    Changelog
-    =========
-
-    v0.1.0 (2013-09-17)
-    -------------------
-
-    - Initial release.
-
-
-Example setup.py
-================
-
-The ``setup.py`` file must use setuptools, and not distutils. This is because
-Mopidy extensions use setuptools' entry point functionality to register
-themselves as available Mopidy extensions when they are installed on your
-system.
-
-The example below also includes a couple of convenient tricks for reading the
-package version from the source code so that it is defined in a single place,
-and to reuse the README file as the long description of the package for the
-PyPI registration.
-
-The package must have ``install_requires`` on ``setuptools`` and ``Mopidy >=
-0.14`` (or a newer version, if your extension requires it), in addition to any
-other dependencies required by your extension. If you implement a Mopidy
-frontend or backend, you'll need to include ``Pykka >= 1.1`` in the
-requirements. The ``entry_points`` part must be included. The ``mopidy.ext``
-part cannot be changed, but the innermost string should be changed. It's format
-is ``ext_name = package_name:Extension``.  ``ext_name`` should be a short name
-for your extension, typically the part after "Mopidy-" in lowercase. This name
-is used e.g. to name the config section for your extension. The
-``package_name:Extension`` part is simply the Python path to the extension
-class that will connect the rest of the dots.
-
-::
-
-    import re
-    from setuptools import setup, find_packages
-
-
-    def get_version(filename):
-        content = open(filename).read()
-        metadata = dict(re.findall("__([a-z]+)__ = '([^']+)'", content))
-        return metadata['version']
-
-
-    setup(
-        name='Mopidy-Soundspot',
-        version=get_version('mopidy_soundspot/__init__.py'),
-        url='https://github.com/your-account/mopidy-soundspot',
-        license='Apache License, Version 2.0',
-        author='Your Name',
-        author_email='your-email@example.com',
-        description='Very short description',
-        long_description=open('README.rst').read(),
-        packages=find_packages(exclude=['tests', 'tests.*']),
-        zip_safe=False,
-        include_package_data=True,
-        install_requires=[
-            'setuptools',
-            'Mopidy >= 0.14',
-            'Pykka >= 1.1',
-            'pysoundspot',
-        ],
-        entry_points={
-            'mopidy.ext': [
-                'soundspot = mopidy_soundspot:Extension',
-            ],
-        },
-        classifiers=[
-            'Environment :: No Input/Output (Daemon)',
-            'Intended Audience :: End Users/Desktop',
-            'License :: OSI Approved :: Apache Software License',
-            'Operating System :: OS Independent',
-            'Programming Language :: Python :: 2',
-            'Topic :: Multimedia :: Sound/Audio :: Players',
-        ],
-    )
-
-To make sure your README, license file and default config file is included in
-the package that is uploaded to PyPI, we'll also need to add a ``MANIFEST.in``
-file::
-
-    include LICENSE
-    include MANIFEST.in
-    include README.rst
-    include mopidy_soundspot/ext.conf
-
-For details on the ``MANIFEST.in`` file format, check out the `distutils docs
-<https://docs.python.org/2/distutils/sourcedist.html#manifest-template>`_.
-`check-manifest <https://pypi.org/project/check-manifest>`_ is a very
-useful tool to check your ``MANIFEST.in`` file for completeness.
-
-
-Example __init__.py
-===================
-
-The ``__init__.py`` file should be placed inside the ``mopidy_soundspot``
-Python package.
-
-The root of your Python package should have an ``__version__`` attribute with a
-:pep:`386` compliant version number, for example "0.1". Next, it should have a
-class named ``Extension`` which inherits from Mopidy's extension base class,
-:class:`mopidy.ext.Extension`. This is the class referred to in the
-``entry_points`` part of ``setup.py``. Any imports of other files in your
-extension, outside of Mopidy and it's core requirements, should be kept inside
-methods. This ensures that this file can be imported without raising
-:exc:`ImportError` exceptions for missing dependencies, etc.
+Any imports of other files in your extension, outside of Mopidy and its core
+requirements, should be kept inside methods. This ensures that this file can be
+imported without raising :exc:`ImportError` exceptions for missing dependencies,
+etc.
 
 The default configuration for the extension is defined by the
 ``get_default_config()`` method in the ``Extension`` class which returns a
-:mod:`ConfigParser` compatible config section. The config section's name must
-be the same as the extension's short name, as defined in the ``entry_points``
-part of ``setup.py``, for example ``soundspot``. All extensions must include
-an ``enabled`` config which normally should default to ``true``. Provide good
-defaults for all config values so that as few users as possible will need to
-change them. The exception is if the config value has security implications; in
-that case you should default to the most secure configuration. Leave any
-configurations that don't have meaningful defaults blank, like ``username``
-and ``password``. In the example below, we've chosen to maintain the default
-config as a separate file named ``ext.conf``. This makes it easy to include the
-default config in documentation without duplicating it.
+:mod:`ConfigParser` compatible config section. The config section's name must be
+the same as the extension's short name, as defined in the
+```project.entry-points`` part of ``pyproject.toml``, for example ``soundspot``.
 
-This is ``mopidy_soundspot/__init__.py``::
+All extensions must include an ``enabled`` config which normally should default
+to ``true``.
+
+Provide good defaults for all config values so that as few users as possible
+will need to change them. The exception is if the config value has security
+implications; in that case you should default to the most secure configuration.
+
+Leave any configurations that don't have meaningful defaults blank, like
+``username`` and ``password``. In the example below, we've chosen to maintain
+the default config as a separate file named ``ext.conf``. This makes it easy to
+include the default config in documentation without duplicating it.
+
+This is ``src/mopidy_soundspot/__init__.py``::
 
     import logging
-    import os
+    import pathlib
+    from importlib.metadata import version
 
     from mopidy import config, exceptions, ext
 
-
-    __version__ = '0.1'
+    __version__ = version('mopidy-soundspot')
 
     # If you need to log, use loggers named after the current Python module
     logger = logging.getLogger(__name__)
 
 
     class Extension(ext.Extension):
-
-        dist_name = 'Mopidy-Soundspot'
-        ext_name = 'soundspot'
+        dist_name = "Mopidy-Soundspot"
+        ext_name = "soundspot"
         version = __version__
 
         def get_default_config(self):
-            conf_file = os.path.join(os.path.dirname(__file__), 'ext.conf')
-            return config.read(conf_file)
+            return config.read(pathlib.Path(__file__).parent / "ext.conf")
 
         def get_config_schema(self):
-            schema = super(Extension, self).get_config_schema()
-            schema['username'] = config.String()
-            schema['password'] = config.Secret()
+            schema = super().get_config_schema()
+            schema["username"] = config.String()
+            schema["password"] = config.Secret()
             return schema
 
         def get_command(self):
+            # To extend the `mopidy` command line interface:
             from .commands import SoundspotCommand
             return SoundspotCommand()
 
         def validate_environment(self):
             # Any manual checks of the environment to fail early.
-            # Dependencies described by setup.py are checked by Mopidy, so you
-            # should not check their presence here.
+            # Dependencies described by pyproject.toml are checked by Mopidy, so
+            # you should not check their presence here.
             pass
 
         def setup(self, registry):
@@ -301,7 +190,7 @@ This is ``mopidy_soundspot/__init__.py``::
             # Or nothing to register e.g. command extension
             pass
 
-And this is ``mopidy_soundspot/ext.conf``:
+And this is ``src/mopidy_soundspot/ext.conf``:
 
 .. code-block:: ini
 
@@ -332,7 +221,8 @@ passed a reference to the core API when it's created. See the
 
     class SoundspotFrontend(pykka.ThreadingActor, core.CoreListener):
         def __init__(self, config, core):
-            super(SoundspotFrontend, self).__init__()
+            super().__init__()
+            self.config = config
             self.core = core
 
         # Your frontend implementation
@@ -358,7 +248,8 @@ details.
 
     class SoundspotBackend(pykka.ThreadingActor, backend.Backend):
         def __init__(self, config, audio):
-            super(SoundspotBackend, self).__init__()
+            super().__init__()
+            self.config = config
             self.audio = audio
 
         # Your backend implementation
@@ -381,11 +272,11 @@ more details.
 
 
     class SoundspotCommand(commands.Command):
-        help = 'Some text that will show up in --help'
+        help = "Some text that will show up in --help"
 
         def __init__(self):
-            super(SoundspotCommand, self).__init__()
-            self.add_argument('--foo')
+            super().__init__()
+            self.add_argument("--foo")
 
         def run(self, args, config, extensions):
            # Your command implementation
@@ -395,21 +286,10 @@ more details.
 Example web application
 =======================
 
-As of Mopidy 0.19, extensions can use Mopidy's built-in web server to host
-static web clients as well as Tornado and WSGI web applications. For several
-examples, see the :ref:`http-server-api` docs or explore with the
-`Mopidy-API-Explorer <https://mopidy.com/ext/api-explorer>`_ extension.
-
-
-Running an extension
-====================
-
-Once your extension is ready to go, to see it in action you'll need to register
-it with Mopidy. Typically this is done by running ``python setup.py install``
-from your extension's Git repo root directory. While developing your extension
-and to avoid doing this every time you make a change, you can instead run
-``python setup.py develop`` to effectively link Mopidy directly with your
-development files.
+Extensions can use Mopidy's built-in web server to host static web clients as
+well as WSGI web applications. For several examples, see the
+:ref:`http-server-api` docs or explore with the `Mopidy-API-Explorer
+<https://mopidy.com/ext/api-explorer>`_ extension.
 
 
 Python conventions
@@ -427,8 +307,9 @@ When writing an extension, you should only use APIs documented at
 at any time and are not something extensions should use.
 
 Mopidy performs type checking to help catch extension bugs. This applies to
-both frontend calls into core and return values from backends. Additionally
+both frontend calls into core and return values from backends. Additionally,
 model fields always get validated to further guard against bad data.
+
 
 Logging in extensions
 =====================
@@ -440,9 +321,6 @@ as this will be visible in Mopidy's debug log::
 
     import logging
 
-    logger = logging.getLogger('mopidy_soundspot')
-
-    # Or even better, use the Python module name as the logger name:
     logger = logging.getLogger(__name__)
 
 When logging at logging level ``info`` or higher (i.e. ``warning``, ``error``,
@@ -479,7 +357,7 @@ If you make HTTP requests please make sure to respect the :ref:`proxy configs
 configured by the Mopidy user. To make this easier for extension developers,
 the helper function :func:`mopidy.httpclient.format_proxy` was added in Mopidy
 1.1. This function returns the proxy settings `formatted the way Requests
-expects <https://2.python-requests.org/en/master/user/advanced/#proxies>`__.
+expects <https://requests.readthedocs.io/en/latest/user/advanced/#proxies>`__.
 
 User-Agent strings
 ------------------
@@ -495,20 +373,47 @@ an example of how to use it::
     ...     f'{mopidy_soundspot.Extension.dist_name}/'
     ...     f'{mopidy_soundspot.__version__}'
     ... )
-    'Mopidy-SoundSpot/2.0.0 Mopidy/3.0.0 Python/3.9.2'
+    'Mopidy-SoundSpot/2.0.0 Mopidy/4.0.0 Python/3.13.2'
 
-Example using Requests sessions
--------------------------------
+Examples
+--------
 
-Most Mopidy extensions that make HTTP requests use the `Requests
-<https://2.python-requests.org/>`_ library to do so. When using Requests, the
-most convenient way to make sure the proxy and User-Agent header is set
-properly is to create a Requests session object and use that object to make all
-your HTTP requests::
+Most Mopidy extensions that make HTTP requests use either the `httpx
+<https://www.python-httpx.org/>`_ or `Requests
+<https://requests.readthedocs.io/>`_ library to do so.
 
+Example using HTTPX
+~~~~~~~~~~~~~~~~~~~
+
+If you're using HTTPX, you can create a session object like this:
+
+    import httpx
     from mopidy import httpclient
 
+    import mopidy_soundspot
+
+    client = httpx.Client(
+        proxy=httpclient.format_proxy(proxy_config),
+        headers={
+            "user-agent": httpclient.format_user_agent(
+                f"{mopidy_soundspot.Extension.dist_name}/{mopidy_soundspot.__version__}"
+            ),
+        }
+    )
+    response = client.get("https://example.com")
+
+For further details, see HTTPX' docs on `clients
+<https://www.python-httpx.org/advanced/clients/>`__.
+
+Example using Requests
+~~~~~~~~~~~~~~~~~~~~~~
+
+When using Requests, the most convenient way to make sure the proxy and
+User-Agent header is set properly is to create a Requests session object and use
+that object to make all your HTTP requests::
+
     import requests
+    from mopidy import httpclient
 
     import mopidy_soundspot
 
@@ -518,8 +423,8 @@ your HTTP requests::
         full_user_agent = httpclient.format_user_agent(user_agent)
 
         session = requests.Session()
-        session.proxies.update({'http': proxy, 'https': proxy})
-        session.headers.update({'user-agent': full_user_agent})
+        session.proxies.update({"http": proxy, "https": proxy})
+        session.headers.update({"user-agent": full_user_agent})
 
         return session
 
@@ -527,18 +432,16 @@ your HTTP requests::
     # ``mopidy_config`` is the config object passed to your frontend/backend
     # constructor
     session = get_requests_session(
-        proxy_config=mopidy_config['proxy'],
+        proxy_config=mopidy_config["proxy"],
         user_agent=(
-            f'{mopidy_soundspot.Extension.dist_name}/{mopidy_soundspot.__version__}'
+            f"{mopidy_soundspot.Extension.dist_name}/{mopidy_soundspot.__version__}"
         )
     )
-
-    response = session.get('https://example.com')
-    # Now do something with ``response`` and/or make further requests using the
-    # ``session`` object.
+    response = session.get("https://example.com")
 
 For further details, see Requests' docs on `session objects
-<https://2.python-requests.org/en/master/user/advanced/#session-objects>`__.
+<https://requests.readthedocs.io/en/latest/user/advanced/#proxies>`__.
+
 
 Testing extensions
 ==================
@@ -550,6 +453,7 @@ extension in some unanticipated way.
 
 Before getting started, it is important to familiarize yourself with the
 Python `mock library <https://docs.python.org/dev/library/unittest.mock.html>`_.
+
 When it comes to running tests, Mopidy typically makes use of testing tools
 like `tox <https://tox.readthedocs.io/>`_ and
 `pytest <https://docs.pytest.org/>`_.
@@ -558,7 +462,7 @@ Testing approach
 ----------------
 
 To a large extent the testing approach to follow depends on how your extension
-is structured, which parts of Mopidy it interacts with, and if it uses any 3rd
+is structured, which parts of Mopidy it interacts with, and if it uses any third
 party APIs or makes any HTTP requests to the outside world.
 
 The sections that follow contain code extracts that highlight some of the
@@ -568,8 +472,8 @@ everything from instantiating various controllers, reading configuration files,
 and simulating events that your extension can listen to.
 
 In general your tests should cover the extension definition, the relevant
-Mopidy controllers, and the Pykka backend and / or frontend actors that form
-part of the extension.
+Mopidy controllers, and the backend and/or frontend Pykka actors that form part
+of the extension.
 
 Testing the extension definition
 --------------------------------
@@ -643,19 +547,16 @@ file, and mocking the audio actor::
 The following libraries might be useful for mocking any HTTP requests that
 your extension makes:
 
+- `pytest-httpx <https://pypi.org/project/pytest-httpx/>`_ - A pytest plugin for
+  mocking HTTPX requests.
 - `responses <https://pypi.org/project/responses>`_ - A utility library for
-  mocking out the requests Python library.
+  mocking out the Requests Python library.
 - `vcrpy <https://pypi.org/project/vcrpy>`_ - Automatically mock your HTTP
   interactions to simplify and speed up testing.
 
-At the very least, you'll probably want to patch ``requests`` or any other web
-API's that you use to avoid any unintended HTTP requests from being made by
-your backend during testing::
-
-    from mock import patch
-    @mock.patch('requests.get',
-                mock.Mock(side_effect=Exception('Intercepted unintended HTTP call')))
-
+At the very least, you'll probably want to mock out the API's that you use to
+avoid any unintended requests from being made by your backend during
+testing.
 
 Backend tests should also ensure that:
 
@@ -675,7 +576,6 @@ Backend tests should also ensure that:
 
         assert isinstance(backend.library, library.MyLibraryProvider)
         assert isinstance(backend.playback, playback.MyPlaybackProvider)
-
 
 Once you have a backend instance to work with, testing the various playback,
 library, and other providers is straight forward and should not require any
@@ -702,27 +602,25 @@ Because most frontends will interact with the Mopidy core, it will most likely
 be necessary to have a full core running for testing purposes::
 
     self.core = core.Core.start(
-                config, backends=[get_backend(config)]).proxy()
-
+        config,
+        backends=[get_backend(config)],
+    ).proxy()
 
 It may be advisable to take a quick look at the
-`Pykka API <https://pykka.readthedocs.io/en/latest/>`_ at this point to make sure that
+`Pykka API <https://pykka.readthedocs.io/>`_ at this point to make sure that
 you are familiar with ``ThreadingActor``, ``ThreadingFuture``, and the
-``proxies`` that allow you to access the attributes and methods of the actor
+"proxies" that allow you to access the attributes and methods of the actor
 directly.
 
 You'll also need a list of :class:`~mopidy.models.Track` and a list of URIs in
 order to populate the core with some simple tracks that can be used for
 testing::
 
-    class BaseTest(unittest.TestCase):
-        tracks = [
-            models.Track(uri='my_scheme:track:id1', length=40000),  # Regular track
-            models.Track(uri='my_scheme:track:id2', length=None),   # No duration
-        ]
-
+    tracks = [
+        models.Track(uri='my_scheme:track:id1', length=40000),  # Regular track
+        models.Track(uri='my_scheme:track:id2', length=None),   # No duration
+    ]
     uris = [ 'my_scheme:track:id1', 'my_scheme:track:id2']
-
 
 In the ``setup()`` method of your test class, you will then probably need to
 monkey patch looking up tracks in the library (so that it will always use the
@@ -742,7 +640,6 @@ lists that you defined), and then populate the core's tracklist::
 With all of that done you should finally be ready to instantiate your frontend::
 
     self.frontend = frontend.MyFrontend.start(config(), self.core).proxy()
-
 
 Keep in mind that the normal core and frontend methods will usually return
 ``pykka.ThreadingFuture`` objects, so you will need to add ``.get()`` at
@@ -765,7 +662,6 @@ actor, may look something like this::
 
     self.send_mock.side_effect = send
 
-
 Once all of the events have been captured, a method like
 ``replay_events()`` can be called at the relevant points in the code to have
 the events fire::
@@ -776,7 +672,6 @@ the events fire::
                 break
             event, kwargs = self.events.pop(0)
             frontend.on_event(event, **kwargs).get()
-
 
 For further details and examples, refer to the
 `/tests <https://github.com/mopidy/mopidy/tree/main/tests>`_

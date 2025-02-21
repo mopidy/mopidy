@@ -66,20 +66,9 @@ How to setup this release workflow
 If you maintain a Mopidy extension, you're encouraged to adopt the same
 procedure.
 
-To setup this on your own repo, you must:
-
-#. Copy ``.github/workflows/release.yml`` from the Mopidy
-   `cookiecutter project
-   <https://github.com/mopidy/cookiecutter-mopidy-ext/blob/main/%7B%7Bcookiecutter.repo_name%7D%7D/.github/workflows/release.yml>`_.
-
-#. Create an API token in your account settings at PyPI with scope to access
-   the extension's PyPI package.
-
-#. Copy the token to a new secret called ``PYPI_TOKEN`` in your GitHub repo's
-   settings. Ignore the section titled "Using this token" on PyPI.
-
-With the ``release.yml`` file and the ``PYPI_TOKEN`` secret in place, releases
-should automatically be uploaded to PyPI when you follow the procedure above.
+See the `extension project template
+<https://github.com/mopidy/mopidy-ext-template/>`_ and specifically the
+generated project's README for further instructions.
 
 
 Releasing Mopidy itself
@@ -144,7 +133,7 @@ Post-release
 ------------
 
 #. Make sure the new tag is built by
-   `Read the Docs <https://readthedocs.org/projects/mopidy/builds/>`_,
+   `Read the Docs <https://app.readthedocs.org/projects/mopidy/>`_,
    and that the `"stable" version <https://docs.mopidy.com/stable/>`_
    shows the newly released version.
 
