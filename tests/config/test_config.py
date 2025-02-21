@@ -185,8 +185,7 @@ class PreProcessorTest(unittest.TestCase):
     def test_initial_comment_inline_handling(self):
         result = config._preprocess("; foo ; bar ; baz")
         assert result == (
-            "[__COMMENTS__]\n__SEMICOLON0__ = foo\n"
-            "__INLINE1__ = bar\n__INLINE2__ = baz"
+            "[__COMMENTS__]\n__SEMICOLON0__ = foo\n__INLINE1__ = bar\n__INLINE2__ = baz"
         )
 
     def test_inline_semicolon_comment(self):
@@ -262,10 +261,7 @@ class PostProcessorTest(unittest.TestCase):
 
     def test_section_extra_text_inline_semicolon(self):
         result = config._postprocess(
-            "[__COMMENTS__]\n"
-            "[section]\n"
-            "__SECTION0__ = foobar\n"
-            "__INLINE1__ = baz",
+            "[__COMMENTS__]\n[section]\n__SECTION0__ = foobar\n__INLINE1__ = baz",
         )
         assert result == "[section] foobar ; baz"
 

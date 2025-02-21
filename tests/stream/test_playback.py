@@ -201,8 +201,7 @@ class TestTranslateURI:
         assert result is None
 
         assert (
-            f"Unwrapping stream from URI ({PLAYLIST_URI}) failed: "
-            f"error downloading URI"
+            f"Unwrapping stream from URI ({PLAYLIST_URI}) failed: error downloading URI"
         ) in caplog.text
 
     @responses.activate

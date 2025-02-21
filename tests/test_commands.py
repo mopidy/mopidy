@@ -386,10 +386,7 @@ class HelpTest(unittest.TestCase):
         cmd.add_child("bar", child)
 
         expected = (
-            "usage: foo\n\n"
-            "COMMANDS:\n\n"
-            "bar [-h]\n\n"
-            "    -h, --help  show this message"
+            "usage: foo\n\nCOMMANDS:\n\nbar [-h]\n\n    -h, --help  show this message"
         )
         assert expected == cmd.format_help("foo").strip()
 
@@ -401,10 +398,7 @@ class HelpTest(unittest.TestCase):
         cmd.add_child("bar", child)
 
         expected = (
-            "usage: foo\n\n"
-            "COMMANDS:\n\n"
-            "bar baz\n\n"
-            "    baz  the great and wonderful"
+            "usage: foo\n\nCOMMANDS:\n\nbar baz\n\n    baz  the great and wonderful"
         )
         assert expected == cmd.format_help("foo").strip()
 

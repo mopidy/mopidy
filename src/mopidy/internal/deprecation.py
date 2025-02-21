@@ -13,8 +13,7 @@ _MESSAGES = {
         "tracklist.eot_track() is pending deprecation, use tracklist.get_eot_tlid()"
     ),
     "core.tracklist.next_track": (
-        "tracklist.next_track() is pending deprecation, use "
-        "tracklist.get_next_tlid()"
+        "tracklist.next_track() is pending deprecation, use tracklist.get_next_tlid()"
     ),
     "core.tracklist.previous_track": (
         "tracklist.previous_track() is pending deprecation, use "

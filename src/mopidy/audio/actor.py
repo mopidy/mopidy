@@ -227,8 +227,7 @@ class _Handler:
             target_state = None
 
         logger.debug(
-            "Audio event: state_changed(old_state=%s, new_state=%s, "
-            "target_state=%s)",
+            "Audio event: state_changed(old_state=%s, new_state=%s, target_state=%s)",
             old_state,
             new_state,
             target_state,
