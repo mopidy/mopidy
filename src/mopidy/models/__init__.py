@@ -64,27 +64,27 @@ class Ref(BaseModel):
     TRACK: ClassVar[Literal[RefType.TRACK]] = RefType.TRACK
 
     @classmethod
-    def album(cls, *, uri: Uri, name: str | None) -> Self:
+    def album(cls, *, uri: Uri, name: str | None = None) -> Self:
         """Create a :class:`Ref` with ``type`` :attr:`~RefType.ALBUM`."""
         return cls(uri=uri, name=name, type=RefType.ALBUM)
 
     @classmethod
-    def artist(cls, *, uri: Uri, name: str | None) -> Self:
+    def artist(cls, *, uri: Uri, name: str | None = None) -> Self:
         """Create a :class:`Ref` with ``type`` :attr:`~RefType.ARTIST`."""
         return cls(uri=uri, name=name, type=RefType.ARTIST)
 
     @classmethod
-    def directory(cls, *, uri: Uri, name: str | None) -> Self:
+    def directory(cls, *, uri: Uri, name: str | None = None) -> Self:
         """Create a :class:`Ref` with ``type`` :attr:`~RefType.DIRECTORY`."""
         return cls(uri=uri, name=name, type=RefType.DIRECTORY)
 
     @classmethod
-    def playlist(cls, *, uri: Uri, name: str | None) -> Self:
+    def playlist(cls, *, uri: Uri, name: str | None = None) -> Self:
         """Create a :class:`Ref` with ``type`` :attr:`~RefType.PLAYLIST`."""
         return cls(uri=uri, name=name, type=RefType.PLAYLIST)
 
     @classmethod
-    def track(cls, *, uri: Uri, name: str | None) -> Self:
+    def track(cls, *, uri: Uri, name: str | None = None) -> Self:
         """Create a :class:`Ref` with ``type`` :attr:`~RefType.TRACK`."""
         return cls(uri=uri, name=name, type=RefType.TRACK)
 
