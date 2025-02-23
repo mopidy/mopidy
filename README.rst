@@ -54,7 +54,7 @@ used to select playlists from Spotify.
 .. _Mopidy-MPD: https://mopidy.com/ext/mpd/
 .. _Raspberry Pi: https://www.raspberrypi.org/
 .. _Pirate Audio: https://shop.pimoroni.com/collections/pirate-audio
-.. _Pi Musicbox: https://www.pimusicbox.com/
+.. _Pi Musicbox: https://pimusicbox.github.io/
 
 
 **Getting started**
