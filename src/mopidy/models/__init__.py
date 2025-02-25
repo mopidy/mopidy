@@ -3,7 +3,7 @@ from collections.abc import Iterator
 from typing import Any, ClassVar, Literal, Self
 
 from pydantic.fields import Field
-from pydantic.types import UUID4, NonNegativeInt
+from pydantic.types import UUID, NonNegativeInt
 
 from mopidy.models._base import BaseModel
 from mopidy.types import DateOrYear, DurationMs, TracklistId, Uri
@@ -127,7 +127,7 @@ class Artist(BaseModel):
     sortname: str | None = None
 
     #: The MusicBrainz ID of the artist. Read-only.
-    musicbrainz_id: UUID4 | None = None
+    musicbrainz_id: UUID | None = None
 
 
 class Album(BaseModel):
@@ -161,7 +161,7 @@ class Album(BaseModel):
     )
 
     #: The MusicBrainz ID of the album. Read-only.
-    musicbrainz_id: UUID4 | None = None
+    musicbrainz_id: UUID | None = None
 
 
 class Track(BaseModel):
@@ -217,7 +217,7 @@ class Track(BaseModel):
     comment: str | None = None
 
     #: The MusicBrainz ID of the track. Read-only.
-    musicbrainz_id: UUID4 | None = None
+    musicbrainz_id: UUID | None = None
 
     #: Integer representing when the track was last modified. Exact meaning
     #: depends on source of track. For local files this is the modification
