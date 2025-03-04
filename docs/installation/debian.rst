@@ -44,11 +44,11 @@ Install from apt.mopidy.com
 
        sudo mkdir -p /etc/apt/keyrings
        sudo wget -q -O /etc/apt/keyrings/mopidy-archive-keyring.gpg \
-         https://apt.mopidy.com/mopidy.gpg
+         https://apt.mopidy.com/mopidy-archive-keyring.gpg
 
 #. Add the APT repo to your package sources::
 
-       sudo wget -q -O /etc/apt/sources.list.d/mopidy.list https://apt.mopidy.com/bookworm.list
+       sudo wget -q -O /etc/apt/sources.list.d/mopidy.sources https://apt.mopidy.com/bookworm.sources
 
 #. Install Mopidy and all dependencies::
 
