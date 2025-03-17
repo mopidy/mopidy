@@ -84,7 +84,10 @@ source_pkgs = ["mopidy"]
 
 [tool.coverage.report]
 show_missing = true
-
+exclude_also = [
+    'if TYPE_CHECKING:',
+    'raise NotImplementedError',
+]
 
 [tool.pyright]
 pythonVersion = "3.11"
