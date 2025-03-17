@@ -47,7 +47,6 @@ class Scanner:
 
     :param timeout: timeout for scanning a URI in ms
     :param proxy_config: dictionary containing proxy config strings.
-    :type event: int
     """
 
     def __init__(
@@ -78,19 +77,17 @@ class Scanner:
             indicating if a seek would succeed.
         """
         timeout = int(timeout or self._timeout_ms)
-        tags, duration, seekable, mime = None, None, None, None
         pipeline, signals = _setup_pipeline(uri, self._proxy_config)
 
         try:
             _start_pipeline(pipeline)
             tags, mime, have_audio, duration = _process(pipeline, timeout)
             seekable = _query_seekable(pipeline)
+            return _Result(uri, tags, duration, seekable, mime, have_audio)
         finally:
             signals.clear()
             pipeline.set_state(Gst.State.NULL)
             del pipeline
-
-        return _Result(uri, tags, duration, seekable, mime, have_audio)
 
 
 # Turns out it's _much_ faster to just create a new pipeline for every as

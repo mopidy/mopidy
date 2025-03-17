@@ -41,7 +41,7 @@ class ConfigSchema(collections.OrderedDict):
 
     Schemas are set up by assigning config keys with config values to
     instances. Once setup :meth:`deserialize` can be called with a dict of
-    values to process. For convienience we also support :meth:`format` method
+    values to process. For convenience we also support :meth:`format` method
     that can used for converting the values to a dict that can be printed and
     :meth:`serialize` for converting the values to a form suitable for
     persistence.

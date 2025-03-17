@@ -150,7 +150,7 @@ def _collection(bus):
 
 
 # NOTE: Hack to probe if a given collection actually exists. Needed to work
-# around an introspection bug in setting passwords for non-existant aliases.
+# around an introspection bug in setting passwords for non-existent aliases.
 def _collection_exists(bus, path):
     assert dbus
     try:

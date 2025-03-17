@@ -31,8 +31,8 @@ def test_format_proxy(config, expected):
 
 def test_format_proxy_without_auth():
     config = {"username": "user", "password": "pass", "hostname": "proxy.lan"}
-    formated_proxy = httpclient.format_proxy(config, auth=False)
-    assert formated_proxy == "http://proxy.lan:80"
+    formatted_proxy = httpclient.format_proxy(config, auth=False)
+    assert formatted_proxy == "http://proxy.lan:80"
 
 
 @pytest.mark.parametrize(

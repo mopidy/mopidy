@@ -67,7 +67,7 @@ class ValidateRequiredTest:
         validators.validate_required(" foo ", True)
         validators.validate_required([1], True)
 
-    def test_blocks_when_required_and_emtpy(self):
+    def test_blocks_when_required_and_empty(self):
         with pytest.raises(ValueError):
             validators.validate_required("", True)
         with pytest.raises(ValueError):

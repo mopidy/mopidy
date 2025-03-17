@@ -133,6 +133,7 @@ def get_verbosity_level(
 
 class VerbosityFilter(logging.Filter):
     def __init__(self, verbosity_level: int, loglevels: dict[LogLevelName, int]):
+        super().__init__()
         self.verbosity_level = verbosity_level
         self.loglevels = loglevels
 

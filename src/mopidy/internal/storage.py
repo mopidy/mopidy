@@ -32,6 +32,7 @@ def dump(path: pathlib.Path, data: StoredState) -> None:
     Serialize data to file.
 
     :param path: full path to export file
+    :param data: data to serialize
     """
 
     # TODO: cleanup directory/basename.* files.

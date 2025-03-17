@@ -161,7 +161,7 @@ guys. Thanks to everyone that has contributed!
 
 **Commands**
 
-- The ``mopidy-convert-config`` tool for migrating the ``setings.py``
+- The ``mopidy-convert-config`` tool for migrating the ``settings.py``
   configuration file used by Mopidy up until 0.14 to the new config file format
   has been removed after over a year of trusty service. If you still need to
   convert your old ``settings.py`` configuration file, do so using and older
@@ -2591,7 +2591,7 @@ Enjoy the best alpha release of Mopidy ever :-)
   - :meth:`mopidy.backends.BaseCurrentPlaylistController.add()` now returns the
     ``cp_track`` added to the current playlist.
   - :meth:`mopidy.backends.BaseCurrentPlaylistController.remove()` now takes
-    criterias, just like
+    criteria, just like
     :meth:`mopidy.backends.BaseCurrentPlaylistController.get()`.
   - :meth:`mopidy.backends.BaseCurrentPlaylistController.get()` now returns a
     ``cp_track``.
