@@ -415,7 +415,7 @@ through :mod:`importlib`::
 
 Every extension will have a ``README.rst`` file. It may contain information
 about extra dependencies required, development process, etc. Extensions usually
-have a changelog in their GitHub relases page.
+have a changelog in their GitHub releases page.
 
 
 Upgrading extensions

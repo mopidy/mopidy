@@ -38,7 +38,7 @@ version of Tornado, we're doing a minor version bump of Mopidy.
   PR: :issue:`1792`)
 
 - Core: Trigger :meth:`mopidy.core.CoreListener.stream_title_changed` event
-  on recieving a ``title`` audio tag that differs from the current track's
+  on receiving a ``title`` audio tag that differs from the current track's
   :attr:`mopidy.models.Track.name`. (Fixes: :issue:`1746`, PR: :issue:`1751`)
 
 - Stream: Support playlists containing relative URIs. (Fixes: :issue:`1785`,

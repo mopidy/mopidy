@@ -521,7 +521,7 @@ class TracklistController:
         """
         tl_tracks = self._tl_tracks
 
-        # TOOD: use validation helpers?
+        # TODO: use validation helpers?
         if start is not None and end is not None and start >= end:
             msg = "start must be smaller than end"
             raise AssertionError(msg)

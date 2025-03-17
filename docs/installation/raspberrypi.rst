@@ -6,7 +6,7 @@ Raspberry Pi
 
 Mopidy runs on all versions of `Raspberry Pi <https://www.raspberrypi.org/>`_.
 However, note that the later models are significantly more powerful than
-the Raspberry Pi 1 and Raspberry Pi Zero; Mopidy will run noticably faster on
+the Raspberry Pi 1 and Raspberry Pi Zero; Mopidy will run noticeably faster on
 the later models.
 
 .. warning:: Update needed

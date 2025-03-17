@@ -459,7 +459,7 @@ class Hostname(ConfigValue[str]):
         try:
             socket.getaddrinfo(raw_value, None)
         except OSError as exc:
-            msg = "must be a resolveable hostname or valid IP"
+            msg = "must be a resolvable hostname or valid IP"
             raise ValueError(msg) from exc
 
         return raw_value

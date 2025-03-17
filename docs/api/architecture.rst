@@ -37,7 +37,7 @@ does. See :ref:`frontend-api` for more details.
 Core
 ====
 
-The core is organized as a set of controllers with responsiblity for separate
+The core is organized as a set of controllers with responsibility for separate
 sets of functionality.
 
 The core is the single actor that the frontends send their requests to. For
@@ -72,7 +72,7 @@ See :ref:`core-api` for more details.
 Backends
 ========
 
-The backends are organized as a set of providers with responsiblity for
+The backends are organized as a set of providers with responsibility for
 separate sets of functionality, similar to the core actor.
 
 Anything specific to i.e. Spotify integration or local storage is contained in

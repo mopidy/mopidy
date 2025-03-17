@@ -97,7 +97,7 @@ Bug fix release.
   ``$XDG_DATA_DIR/mopidy/m3u`` to unset, which now means the extension's data
   dir. This does not change the defaults for desktop users, only system
   services installed from packages that properly set :confval:`core/data_dir`,
-  like the Debian and Arch pakages. (Fixes: :issue:`1259`, PR: :issue:`1266`)
+  like the Debian and Arch packages. (Fixes: :issue:`1259`, PR: :issue:`1266`)
 
 - Stream: Expand nested playlists to find the stream URI. This used to work,
   but regressed in 1.1.0 with the extraction of stream playlist parsing from
@@ -886,7 +886,7 @@ Audio
     us to detect playlists before we try to decode them.
 
   - Refactored scanner to create a new pipeline per track, this is needed as
-    reseting decodebin is much slower than tearing it down and making a fresh
+    resetting decodebin is much slower than tearing it down and making a fresh
     one.
 
 - Move and rename helper for converting tags to tracks.

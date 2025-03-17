@@ -97,7 +97,7 @@ class CommandParsingTest(unittest.TestCase):
         result = cmd.parse(["foo", "baz", "bep", "bop"])
         assert result.bar == ["baz", "bep", "bop"]
 
-    def test_result_stores_choosen_command(self):
+    def test_result_stores_chosen_command(self):
         child = commands.Command()
 
         cmd = commands.Command()
@@ -233,7 +233,7 @@ class CommandParsingTest(unittest.TestCase):
         result = cmd.parse([])
         assert result.foo == "bar"
 
-    def test_set_propegate(self):
+    def test_set_propagate(self):
         child = commands.Command()
 
         cmd = commands.Command()
@@ -308,7 +308,7 @@ class HelpTest(unittest.TestCase):
         assert cmd.format_help().strip() == "usage: foo"
         assert cmd.format_help("bar").strip() == "usage: bar"
 
-    def test_command_without_documenation_or_options(self):
+    def test_command_without_documentation_or_options(self):
         cmd = commands.Command()
         assert cmd.format_help("bar").strip() == "usage: bar"
 
@@ -510,7 +510,7 @@ class HelpTest(unittest.TestCase):
 
 
 class RunTest(unittest.TestCase):
-    def test_default_implmentation_raises_error(self):
+    def test_default_implementation_raises_error(self):
         with pytest.raises(NotImplementedError):
             commands.Command().run(args=None, config=None)
 

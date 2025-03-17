@@ -55,7 +55,7 @@ Issue guidelines
    <https://github.com/mopidy/mopidy/issues>`_. If there is, see if there is
    anything you can add to help reproduce or fix the issue.
 
-#. If there is no exising issue matching your bug or feature request, create a
+#. If there is no existing issue matching your bug or feature request, create a
    `new issue <https://github.com/mopidy/mopidy/issues/new>`_. Please include
    as much relevant information as possible. If it's a bug, including how to
    reproduce the bug and any relevant logs or error messages.

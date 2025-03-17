@@ -88,7 +88,7 @@ class _HelpAction(argparse.Action):
 class Command:
     """Command parser and runner for building trees of commands.
 
-    This class provides a wraper around :class:`argparse.ArgumentParser`
+    This class provides a wrapper around :class:`argparse.ArgumentParser`
     for handling this type of command line application in a better way than
     argparse's own sub-parser handling.
     """
@@ -324,7 +324,7 @@ class RootCommand(Command):
             dest="config_files",
             type=config_files_type,
             metavar="FILES",
-            help="config files to use, colon seperated, later files override",
+            help="config files to use, colon separated, later files override",
         )
         self.add_argument(
             "-o",

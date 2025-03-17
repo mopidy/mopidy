@@ -33,7 +33,7 @@ Installing extensions
 =====================
 
 If you want to use any Mopidy extensions, you need to install additional
-packages.  Note that as of Feburary 2020, only Mopidy-MPD (automatically
+packages.  Note that as of February 2020, only Mopidy-MPD (automatically
 installed) and Mopidy-Spotify (RPMFusion-nonfree) are packaged.
 
 To install ``mopidy-spotify`` from RPMFusion-nonfree, simply run::

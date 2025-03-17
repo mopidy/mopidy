@@ -200,7 +200,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
 
         assert len(self.core.playlists.as_list()) == 0
 
-    def test_delete_non_existant_playlist(self):
+    def test_delete_non_existent_playlist(self):
         self.core.playlists.delete("m3u:unknown")
 
     def test_delete_playlist_removes_it_from_the_collection(self):
