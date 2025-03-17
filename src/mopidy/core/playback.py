@@ -12,7 +12,6 @@ from mopidy.audio import PlaybackState
 from mopidy.core import listener
 from mopidy.exceptions import CoreError
 from mopidy.internal import models, validation
-from mopidy.models import TlTrack
 from mopidy.types import DurationMs, TracklistId, UriScheme
 
 if TYPE_CHECKING:
