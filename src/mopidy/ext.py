@@ -257,7 +257,7 @@ def load_extensions() -> list[ExtensionData]:
 def validate_extension_data(data: ExtensionData) -> bool:  # noqa: PLR0911
     """Verify extension's dependencies and environment.
 
-    :param extensions: an extension to check
+    :param data: an extension to check
     :returns: if extension should be run
     """
     logger.debug("Validating extension: %s", data.extension.ext_name)

@@ -47,7 +47,6 @@ class Scanner:
 
     :param timeout: timeout for scanning a URI in ms
     :param proxy_config: dictionary containing proxy config strings.
-    :type event: int
     """
 
     def __init__(

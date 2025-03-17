@@ -36,7 +36,6 @@ class Backend:
     This will make Mopidy print the error message and exit so that the user can
     fix the issue.
 
-    :param config: the entire Mopidy configuration
     :param audio: actor proxy for the audio subsystem
     """
 

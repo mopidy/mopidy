@@ -120,6 +120,7 @@ class Command:
         """Add a child parser to consider using.
 
         :param name: name to use for the sub-command that is being added.
+        :param command: the command to add.
         """
         self._children[name] = command
 
