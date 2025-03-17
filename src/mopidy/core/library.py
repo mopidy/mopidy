@@ -58,7 +58,7 @@ class LibraryController:
         uris: Iterable[Uri] | None,
     ) -> dict[BackendProxy, list[Uri] | None]:
         if not uris:
-            return {b: None for b in self.backends.with_library.values()}
+            return dict.fromkeys(self.backends.with_library.values())
 
         result: dict[BackendProxy, list[Uri] | None] = collections.defaultdict(list)
         for uri in uris:
@@ -205,7 +205,7 @@ class LibraryController:
             if backend_uris
         }
 
-        results: dict[Uri, tuple[Image, ...]] = {uri: () for uri in uris}
+        results: dict[Uri, tuple[Image, ...]] = dict.fromkeys(uris, ())
         for backend, future in futures.items():
             with _backend_error_handling(backend):
                 if future.get() is None:

@@ -61,7 +61,7 @@ docs = [
     "sphinx-autodoc-typehints >= 1.12",
     "sphinx-rtd-theme >= 1.2",
 ]
-ruff = ["ruff == 0.9.9"]
+ruff = ["ruff == 0.11.0"]
 tests = [
     "pytest >= 7.2",
     "pytest-cov >= 4.0",
@@ -144,6 +144,7 @@ ignore = [
     "TD002",   # missing-todo-author
     "TD003",   # missing-todo-link
     "TC003",   # typing-only-standard-library-import
+    "TC006",   # runtime-cast-value
     "TRY003",  # raise-vanilla-args
     "TRY400",  # error-instead-of-exception
     #
