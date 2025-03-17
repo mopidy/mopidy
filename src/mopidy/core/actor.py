@@ -32,6 +32,7 @@ if TYPE_CHECKING:
     from mopidy.core.playback import PlaybackControllerProxy
     from mopidy.core.playlists import PlaylistsControllerProxy
     from mopidy.core.tracklist import TracklistControllerProxy
+    from mopidy.mixer import MixerProxy
     from mopidy.types import Uri
 
 logger = logging.getLogger(__name__)
@@ -65,7 +66,7 @@ class Core(
         self,
         config: Config,
         *,
-        mixer: mixer.MixerProxy | None = None,
+        mixer: MixerProxy | None = None,
         backends: Iterable[backend.BackendProxy],
         audio: audio.AudioProxy | None = None,
     ) -> None:
