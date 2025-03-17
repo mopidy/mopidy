@@ -12,7 +12,7 @@ def get_dirs() -> dict[str, pathlib.Path]:
     Additional keys, like ``XDG_MUSIC_DIR``, may be available if the
     ``$XDG_CONFIG_DIR/user-dirs.dirs`` file exists and is parseable.
 
-    See http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
+    See https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
     for the XDG Base Directory specification.
     """
 

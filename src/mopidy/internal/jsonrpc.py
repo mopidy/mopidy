@@ -156,7 +156,7 @@ class Wrapper:
     and its value unwrapped before the JSON-RPC wrapper returns the response.
 
     For further details on the JSON-RPC 2.0 spec, see
-    http://www.jsonrpc.org/specification
+    https://www.jsonrpc.org/specification
 
     :param objects: mapping between mounting points and exposed functions or
         class instances
