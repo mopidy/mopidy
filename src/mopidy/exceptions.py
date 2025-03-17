@@ -1,6 +1,6 @@
 class MopidyException(Exception):  # noqa: N818
-    def __init__(self, message, *args, **kwargs):
-        super().__init__(message, *args, **kwargs)
+    def __init__(self, message, *args):
+        super().__init__(message, *args)
         self._message = message
 
     @property
