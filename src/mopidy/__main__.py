@@ -9,8 +9,12 @@ from typing import TYPE_CHECKING, TypedDict, cast
 import pykka.debug
 
 import mopidy
-from mopidy import commands, ext
-from mopidy import config as config_lib
+from mopidy import (
+    commands,
+    config as config_lib,
+    ext,
+    loop as loop_lib,
+)
 from mopidy.internal import log, path, process
 from mopidy.internal.gi import (
     GLib,
@@ -36,6 +40,9 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__name__)
+
+# Ensure that the asyncio loop is created before anything else is loaded
+loop = loop_lib.get_or_create_loop()
 
 
 def main() -> int:  # noqa: C901, PLR0912, PLR0915
@@ -111,9 +118,9 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
                 extensions_status["disabled"].append(extension)
             elif config_errors.get(extension.ext_name):
                 config[extension.ext_name]["enabled"] = False
-                config_errors[extension.ext_name]["enabled"] = (
-                    "extension disabled due to config errors."
-                )
+                config_errors[extension.ext_name][
+                    "enabled"
+                ] = "extension disabled due to config errors."
                 extensions_status["config"].append(extension)
             else:
                 extensions_status["enabled"].append(extension)
@@ -183,6 +190,8 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
     except Exception:
         logger.exception("Unhandled exception")
         raise
+    finally:
+        loop_lib.stop_loop(loop)
 
 
 def create_core_dirs(config):

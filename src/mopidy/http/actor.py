@@ -15,7 +15,7 @@ import tornado.web
 import tornado.websocket
 from pydantic import TypeAdapter
 
-from mopidy import exceptions, zeroconf
+from mopidy import exceptions, loop, zeroconf
 from mopidy.core import CoreEvent, CoreEventData, CoreListener
 from mopidy.http import Extension, handlers
 from mopidy.internal import formatting, network
@@ -131,7 +131,7 @@ class HttpServer(threading.Thread):
     def run(self) -> None:
         # Since we start Tornado in a another thread than the main thread,
         # we must explicitly create an asyncio loop for the current thread.
-        asyncio.set_event_loop(asyncio.new_event_loop())
+        asyncio.set_event_loop(loop.get_or_create_loop())
 
         self.app = tornado.web.Application(
             self._get_request_handlers(),  # pyright: ignore[reportArgumentType]
