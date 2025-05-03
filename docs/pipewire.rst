@@ -22,4 +22,4 @@ After that is set, configure mopidy to use the pipewire-pulse server (the ports 
     [audio]
     output = pulsesink server=127.0.0.1:4713
 
-Restart the pipewire-pulse service mopidy, this should be enough to get it working.
+Restart the pipewire-pulse service and mopidy, this should be enough to get it working.
