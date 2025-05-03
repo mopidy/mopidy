@@ -108,6 +108,7 @@ watch out for announcements on the `Discourse forum
     :maxdepth: 1
 
     audiosinks
+    pipewire
     icecast
     upnp
 
