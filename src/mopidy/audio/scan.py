@@ -335,10 +335,21 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
                 and (
                     (structure := missing_message.get_structure())
                     and (caps := structure.get_value("detail"))
-                    and (mime := caps.get_structure(0).get_name())
                 )
             ):
-                return tags, mime, have_audio, duration
+                # gstreamer 1.25.0 to 1.26.2 (inclusive) broke the accessing
+                # `caps.get_structure(0).get_name()`, but allow wrapping the
+                # object in a context manager. with gstreamer 1.24.x one can
+                # not use the structure as a context manager at all. version
+                # 1.26.3 will supposedly revert it to the previous behaviour.
+                struct = caps.get_structure(0)
+                try:
+                    mime = struct.get_name()
+                except AttributeError:
+                    with struct as _struct:
+                        mime = _struct.get_name()
+                if mime:
+                    return tags, mime, have_audio, duration
             raise exceptions.ScannerError(str(error))
         elif msg.type == Gst.MessageType.EOS:
             return tags, mime, have_audio, duration
