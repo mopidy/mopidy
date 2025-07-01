@@ -84,10 +84,7 @@ source_pkgs = ["mopidy"]
 
 [tool.coverage.report]
 show_missing = true
-exclude_also = [
-    'if TYPE_CHECKING:',
-    'raise NotImplementedError',
-]
+exclude_also = ['if TYPE_CHECKING:', 'raise NotImplementedError']
 
 [tool.pyright]
 pythonVersion = "3.11"
@@ -224,7 +221,7 @@ commands = [["ruff", "check", "{posargs:.}"]]
 [tool.tox.env.ruff-format]
 skip_install = true
 dependency_groups = ["ruff"]
-commands = [["ruff", "format", "--check", "{posargs:.}"]]
+commands = [["ruff", "format", "--check", "--diff", "{posargs:.}"]]
 
 [tool.tox.env.docs]
 dependency_groups = ["docs"]
