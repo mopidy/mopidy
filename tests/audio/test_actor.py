@@ -1,3 +1,11 @@
+import pytest
+
+pytest.importorskip(
+    # TODO: split or refactor this test module so it doesn't require GObject
+    "mopidy.internal.gi",
+    reason="test requires GObject",
+)
+
 import threading
 import unittest
 from typing import ClassVar
