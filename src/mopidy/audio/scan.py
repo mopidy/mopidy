@@ -279,6 +279,19 @@ def _query_seekable(pipeline: Gst.Pipeline) -> bool:
     return query.parse_seeking()[1]
 
 
+def _get_structure_name(struct: Gst.Structure) -> str:
+    # gstreamer 1.25.0 to 1.26.2 (inclusive) broke the accessing
+    # `caps.get_structure(0).get_name()`, but allow wrapping the
+    # object in a context manager. with gstreamer 1.24.x one can
+    # not use the structure as a context manager at all. Fixed in
+    # version 1.26.3 where both methods are supported.
+    try:
+        return struct.get_name()
+    except AttributeError:
+        with struct as _struct:  # type: ignore[reportGeneralTypeIssues]
+            return _struct.get_name()
+
+
 def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
     pipeline: Gst.Pipeline,
     timeout_ms: int,
@@ -319,10 +332,10 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
             if GstPbutils.is_missing_plugin_message(msg):
                 missing_message = msg
         elif msg.type == Gst.MessageType.APPLICATION:
-            if structure and structure.get_name() == "have-type":
+            if structure and _get_structure_name(structure) == "have-type":
                 caps = cast(Gst.Structure | None, structure.get_value("caps"))
                 if caps:
-                    mime = caps.get_name()
+                    mime = _get_structure_name(caps)
                     if mime.startswith("text/") or mime == "application/xml":
                         return tags, mime, have_audio, duration
             elif structure and structure.get_name() == "have-audio":
@@ -335,21 +348,10 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
                 and (
                     (structure := missing_message.get_structure())
                     and (caps := structure.get_value("detail"))
+                    and (mime := _get_structure_name(caps.get_structure(0)))
                 )
             ):
-                # gstreamer 1.25.0 to 1.26.2 (inclusive) broke the accessing
-                # `caps.get_structure(0).get_name()`, but allow wrapping the
-                # object in a context manager. with gstreamer 1.24.x one can
-                # not use the structure as a context manager at all. version
-                # 1.26.3 will supposedly revert it to the previous behaviour.
-                struct = caps.get_structure(0)
-                try:
-                    mime = struct.get_name()
-                except AttributeError:
-                    with struct as _struct:
-                        mime = _struct.get_name()
-                if mime:
-                    return tags, mime, have_audio, duration
+                return tags, mime, have_audio, duration
             raise exceptions.ScannerError(str(error))
         elif msg.type == Gst.MessageType.EOS:
             return tags, mime, have_audio, duration
