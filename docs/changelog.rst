@@ -146,6 +146,12 @@ Extension support
   that have already been listed. This reduces the length of the command's output
   drastically. (PR: :issue:`2152`)
 
+Audio
+-----
+
+- Workaround GStreamer `Gst.Structure().get_name()` regression for versions v1.26.0
+  to v1.26.2 (inclusive). (PR: :issue:`2094`)
+
 Internals
 ---------
 
