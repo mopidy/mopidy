@@ -320,12 +320,9 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
                 missing_message = msg
         elif msg.type == Gst.MessageType.APPLICATION:
             if structure and structure.get_name() == "have-type":
-                caps = cast(Gst.Caps | None, structure.get_value("caps"))
+                caps = cast(Gst.Structure | None, structure.get_value("caps"))
                 if caps:
-                    mime = cast(
-                        str,
-                        caps.get_name(),  # pyright: ignore[reportAttributeAccessIssue]
-                    )
+                    mime = caps.get_name()
                     if mime.startswith("text/") or mime == "application/xml":
                         return tags, mime, have_audio, duration
             elif structure and structure.get_name() == "have-audio":
