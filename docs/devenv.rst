@@ -163,7 +163,10 @@ use as well. These can be installed into the active virtualenv by running::
 Note that this is the same command as you used to install Mopidy from the Git
 repo, with the addition of the ``[dev]`` suffix after ``.``. This makes pip
 install the "dev" set of extra dependencies. Exactly what the "dev" set
-includes are defined in :file:`pyproject.toml`.
+includes are defined in :file:`pyproject.toml`. Since pip v25.1 you can
+instead do::
+
+    pip install --upgrade --group dev --editable .
 
 To upgrade the development tools in the future, just rerun the exact same
 command.
