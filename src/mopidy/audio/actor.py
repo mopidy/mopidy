@@ -412,18 +412,30 @@ class Audio(pykka.ThreadingActor):
 
     def on_start(self) -> None:
         self._thread = threading.current_thread()
-        try:
-            self._setup_preferences()
-            self._setup_playbin()
-            self._setup_outputs()
-            self._setup_audio_sink()
-        except GLib.Error:
-            logger.exception("Unknown GLib error on audio startup.")
-            process.exit_process()
+        self._setup_pipeline(setup_sink=True)
 
     def on_stop(self) -> None:
         self._teardown_mixer()
         self._teardown_playbin()
+
+    def _setup_pipeline(self, setup_sink: bool = False) -> None:
+        self._thread = threading.current_thread()
+        try:
+            self._setup_preferences()
+            playbin = self._setup_playbin()
+            self._setup_outputs()
+
+            if setup_sink:
+                # TODO Setting the audio_sink from the `set_uri` context causes
+                # a deadlock in recent versions of GStreamer (>= 1.25.x). That's
+                # the reason for the extra `setup_sink` parameter. The downside
+                # is that native volume control is not available when the
+                # playbin is re-initialized from the `set_uri` context.
+                audio_sink = self._build_audio_sink()
+                playbin.set_property("audio-sink", audio_sink)
+        except GLib.Error:
+            logger.exception("Unknown GLib error on audio startup.")
+            process.exit_process()
 
     def _setup_preferences(self) -> None:
         # TODO: move out of audio actor?
@@ -433,12 +445,19 @@ class Audio(pykka.ThreadingActor):
         if jacksink:
             jacksink.set_rank(Gst.Rank.SECONDARY)
 
-    def _setup_playbin(self) -> None:
+    def _setup_playbin(self):
+        # Destroy and re-create the playbin element on each start.
+        # This prevents race conditions and deadlocks when reusing pipelines
+        # with recent GStreamer versions.
+        # TODO: Does this have to be thread-safe and wrapped in a lock?
+        if self._playbin:
+            self._playbin.set_state(Gst.State.NULL)
+            del self._playbin
+
         playbin = Gst.ElementFactory.make("playbin")
         if playbin is None:
             msg = "Failed to create GStreamer playbin."
             raise exceptions.AudioException(msg)
-        playbin.set_property("flags", _GST_PLAY_FLAGS_AUDIO)
 
         # TODO: turn into config values...
         playbin.set_property("buffer-size", 5 << 20)  # 5MB
@@ -449,6 +468,7 @@ class Audio(pykka.ThreadingActor):
 
         self._playbin = playbin
         self._handler.setup_message_handling(playbin)
+        return playbin
 
     def _teardown_playbin(self) -> None:
         self._handler.teardown_message_handling()
@@ -478,9 +498,7 @@ class Audio(pykka.ThreadingActor):
 
         self._handler.setup_event_handling(self._outputs.get_static_pad("sink"))
 
-    def _setup_audio_sink(self) -> None:
-        assert self._playbin
-
+    def _build_audio_sink(self):
         if self._outputs is None:
             msg = "Audio outputs must be set up before audio sinks."
             raise TypeError(msg)
@@ -529,8 +547,8 @@ class Audio(pykka.ThreadingActor):
         ghost_pad = Gst.GhostPad.new("sink", queue_sink)
         audio_sink.add_pad(ghost_pad)
 
-        self._playbin.set_property("audio-sink", audio_sink)
         self._queue = queue
+        return audio_sink
 
     def _teardown_mixer(self) -> None:
         if self.mixer:
@@ -608,7 +626,15 @@ class Audio(pykka.ThreadingActor):
         self._pending_uri = uri
         self._pending_tags = {}
         self._live_stream = live_stream
-        self._playbin.set_property("flags", flags)
+
+        # Reset the pipeline settings before setting the URI
+        self._setup_pipeline()
+
+        # Only set the flags if they differ from the current ones.
+        current_flags = self._playbin.get_property("flags")
+        if current_flags != flags:
+            self._playbin.set_property("flags", flags)
+
         self._playbin.set_property("uri", uri)
 
         if self.mixer is not None and current_volume is not None:
