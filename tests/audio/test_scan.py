@@ -1,7 +1,8 @@
 import unittest
 
+import pytest
+
 from mopidy import exceptions
-from mopidy.audio import scan
 from mopidy.internal.path import path_to_uri
 from tests import path_to_data_dir
 
@@ -19,6 +20,9 @@ class ScannerTest(unittest.TestCase):
             yield dir_path / file_path
 
     def scan(self, paths):
+        scan = pytest.importorskip(
+            "mopidy.audio.gst.scan", reason="test requires GStreamer"
+        )
         scanner = scan.Scanner()
         for path in paths:
             uri = path_to_uri(path)

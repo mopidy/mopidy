@@ -1,91 +1,31 @@
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, cast
+import pykka
+from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
 
-from mopidy import httpclient
-from mopidy.internal.gi import Gst
-from mopidy.types import DurationMs, UriScheme
-
-if TYPE_CHECKING:
-    from collections.abc import Iterable
-
-    from mopidy.config import ProxyConfig
+from mopidy.audio.base.audio import AudioBase
 
 
-def millisecond_to_clocktime(value: DurationMs) -> int:
-    """Convert a millisecond time to internal GStreamer time."""
-    return value * Gst.MSECOND
+class BaseAudioProxy(ActorMemberMixin, pykka.ActorProxy[AudioBase]):
+    pass
 
 
-def clocktime_to_millisecond(value: int) -> DurationMs:
-    """Convert an internal GStreamer time to millisecond time."""
-    return DurationMs(value // Gst.MSECOND)
+def _make_audio_proxy(Audio):  # noqa: N803 (we want this to look like a classname)
+    class AudioProxy(ActorMemberMixin, pykka.ActorProxy[Audio]):
+        """Audio layer wrapped in a Pykka actor proxy."""
 
+        state = proxy_field(Audio.state)
+        set_uri = proxy_method(Audio.set_uri)
+        set_source_setup_callback = proxy_method(Audio.set_source_setup_callback)
+        set_about_to_finish_callback = proxy_method(Audio.set_about_to_finish_callback)
+        get_position = proxy_method(Audio.get_position)
+        set_position = proxy_method(Audio.set_position)
+        start_playback = proxy_method(Audio.start_playback)
+        pause_playback = proxy_method(Audio.pause_playback)
+        prepare_change = proxy_method(Audio.prepare_change)
+        stop_playback = proxy_method(Audio.stop_playback)
+        wait_for_state_change = proxy_method(Audio.wait_for_state_change)
+        enable_sync_handler = proxy_method(Audio.enable_sync_handler)
+        get_current_tags = proxy_method(Audio.get_current_tags)
 
-def supported_uri_schemes(uri_schemes: Iterable[UriScheme]) -> set[UriScheme]:
-    """Determine which URIs we can actually support from provided whitelist.
-
-    :param uri_schemes: list/set of URIs to check support for.
-    """
-    supported_schemes = set()
-    registry = Gst.Registry.get()
-
-    for factory in registry.get_feature_list(Gst.ElementFactory):
-        factory = cast(Gst.ElementFactory, factory)
-        for uri_protocol in factory.get_uri_protocols():
-            uri_scheme = UriScheme(uri_protocol)
-            if uri_scheme in uri_schemes:
-                supported_schemes.add(uri_scheme)
-
-    return supported_schemes
-
-
-def setup_proxy(element: Gst.Element, config: ProxyConfig) -> None:
-    """Configure a GStreamer element with proxy settings.
-
-    :param element: element to setup proxy in.
-    :param config: proxy settings to use.
-    """
-    if not hasattr(element.props, "proxy") or not config.get("hostname"):
-        return
-
-    element.set_property("proxy", httpclient.format_proxy(config, auth=False))
-    element.set_property("proxy-id", config.get("username"))
-    element.set_property("proxy-pw", config.get("password"))
-
-
-class Signals:
-    """Helper for tracking gobject signal registrations."""
-
-    def __init__(self) -> None:
-        self._ids: dict[tuple[Gst.Element, str], int] = {}
-
-    def connect(
-        self,
-        element: Gst.Element,
-        event: str,
-        func: Callable,
-        *args: Any,
-    ) -> None:
-        """Connect a function + args to signal event on an element.
-
-        Each event may only be handled by one callback in this implementation.
-        """
-        if (element, event) in self._ids:
-            raise AssertionError
-        self._ids[(element, event)] = element.connect(event, func, *args)
-
-    def disconnect(self, element: Gst.Element, event: str) -> None:
-        """Disconnect whatever handler we have for an element+event pair.
-
-        Does nothing it the handler has already been removed.
-        """
-        signal_id = self._ids.pop((element, event), None)
-        if signal_id is not None:
-            element.disconnect(signal_id)
-
-    def clear(self) -> None:
-        """Clear all registered signal handlers."""
-        for element, event in list(self._ids):
-            element.disconnect(self._ids.pop((element, event)))
+    return AudioProxy
