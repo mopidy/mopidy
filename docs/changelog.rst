@@ -162,6 +162,8 @@ Internals
 
 - Switched from mypy to pyright for type checking.
 
+- Check config errors before creating core directories. (PR: :issue:`2208`)
+
 
 v3.4.2 (2023-11-01)
 ===================
