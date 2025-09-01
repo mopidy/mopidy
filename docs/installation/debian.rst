@@ -21,15 +21,10 @@ Distribution and architecture support
 
 The packages in the apt.mopidy.com archive are built for:
 
+- **Debian 13 (Trixie)**,
+  which also works on Ubuntu 25.10 or newer.
 - **Debian 12 (Bookworm)**,
   which also works for Ubuntu 23.10 and Raspberry Pi OS 2023-10-10 or newer.
-
-The few packages that are compiled are available for multiple CPU
-architectures:
-
-- **amd64**
-- **i386**
-- **armhf**, compatible with all Raspberry Pi models.
 
 This is just what we currently support, not a promise to continue to support
 the same in the future. We *will* drop support for older distributions and
@@ -46,7 +41,11 @@ Install from apt.mopidy.com
        sudo wget -q -O /etc/apt/keyrings/mopidy-archive-keyring.gpg \
          https://apt.mopidy.com/mopidy-archive-keyring.gpg
 
-#. Add the APT repo to your package sources::
+#. Add the APT repo to your package sources. For Trixie::
+
+       sudo wget -q -O /etc/apt/sources.list.d/mopidy.sources https://apt.mopidy.com/trixie.sources
+
+  Or, for Bookworm::
 
        sudo wget -q -O /etc/apt/sources.list.d/mopidy.sources https://apt.mopidy.com/bookworm.sources
 
