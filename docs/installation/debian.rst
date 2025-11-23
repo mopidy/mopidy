@@ -4,16 +4,16 @@
 Debian/Ubuntu
 *************
 
-If you run a Debian based Linux distribution, like Ubuntu or Raspbian, the
-easiest way to install Mopidy is from the
+If you run a Debian based Linux distribution, like Ubuntu or Raspberry Pi OS,
+the easiest way to install Mopidy is from the
 `Mopidy APT archive <https://apt.mopidy.com/>`_.
 When installing from the APT archive, you will automatically get updates to
 Mopidy in the same way as you get updates to the rest of your system.
 
 If you're on a Raspberry Pi running Debian or Raspberry Pi OS, the following
 instructions will work for you as well. If you're setting up a Raspberry Pi
-from scratch, we have a guide for installing Debian/Raspbian and Mopidy. See
-:ref:`raspberrypi-installation`.
+from scratch, we have a guide for installing Debian/Raspberry Pi OS and Mopidy.
+See :ref:`raspberrypi-installation`.
 
 
 Distribution and architecture support
@@ -22,7 +22,7 @@ Distribution and architecture support
 The packages in the apt.mopidy.com archive are built for:
 
 - **Debian 13 (Trixie)**,
-  which also works on Ubuntu 25.10 or newer.
+  which also works on Ubuntu 25.10 and Raspberry Pi OS 2025-10-01 or newer.
 - **Debian 12 (Bookworm)**,
   which also works for Ubuntu 23.10 and Raspberry Pi OS 2023-10-10 or newer.
 

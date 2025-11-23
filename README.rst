@@ -34,7 +34,7 @@ systems, you can control the music from any phone, tablet, or computer.
 **Mopidy on Raspberry Pi**
 
 The `Raspberry Pi`_ is a popular device to run Mopidy on, either using
-Raspbian, Ubuntu, or Arch Linux.
+Raspberry Pi OS, Ubuntu, or Arch Linux.
 Pimoroni recommends Mopidy for use with their `Pirate Audio`_ audio gear for
 Raspberry Pi.
 Mopidy is also a significant building block in the `Pi Musicbox`_ integrated

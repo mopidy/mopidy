@@ -10,7 +10,7 @@ way to run Mopidy for most users.
 
 The exact way Mopidy behaves when it runs as a service might vary depending
 on your operating system or distribution.
-The following applies to Debian, Ubuntu, Raspbian, and Arch Linux.
+The following applies to Debian, Ubuntu, Raspberry Pi OS, and Arch Linux.
 Hopefully, other distributions packaging Mopidy will make sure this works
 the same way on their distribution.
 
