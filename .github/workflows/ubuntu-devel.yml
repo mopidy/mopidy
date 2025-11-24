@@ -22,12 +22,11 @@ jobs:
             git \
             python3 \
             tox \
-            gstreamer1.0-plugins-bad \
             gstreamer1.0-plugins-good \
             gstreamer1.0-plugins-ugly \
             python3-gst-1.0 \
             libcairo2-dev \
             libgirepository-2.0-dev \
             libglib2.0-dev
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: tox -e py313
