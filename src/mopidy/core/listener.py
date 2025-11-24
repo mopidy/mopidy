@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from typing import Any, Literal, TypeAlias
+from typing import Any, Literal
 
 from mopidy import listener
 from mopidy.audio import PlaybackState
 from mopidy.models import Playlist, TlTrack
 from mopidy.types import DurationMs, Percentage, Uri
 
-CoreEvent: TypeAlias = Literal[
+type CoreEvent = Literal[
     "track_playback_paused",
     "track_playback_resumed",
     "track_playback_started",
@@ -26,7 +26,7 @@ CoreEvent: TypeAlias = Literal[
 
 # A union of all possible data types for the core events. This is used to create
 # Pydantic TypeAdapter's to serialize the events to JSON.
-CoreEventData: TypeAlias = (
+type CoreEventData = (
     DurationMs | Percentage | PlaybackState | Playlist | TlTrack | Uri | bool | str
 )
 

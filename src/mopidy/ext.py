@@ -12,13 +12,13 @@ from mopidy.internal import path
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
-    from typing import Any, TypeAlias
+    from typing import Any
 
     from mopidy.commands import Command
     from mopidy.config import ConfigSchema
 
-    Config = dict[str, dict[str, Any]]
-    RegistryEntry: TypeAlias = type[Any] | dict[str, Any]
+    type Config = dict[str, dict[str, Any]]
+    type RegistryEntry = type[Any] | dict[str, Any]
 
 logger = logging.getLogger(__name__)
 

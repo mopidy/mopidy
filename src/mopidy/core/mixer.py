@@ -3,7 +3,7 @@ from __future__ import annotations
 import contextlib
 import logging
 from collections.abc import Generator, Iterable
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from pykka.typing import proxy_method
 
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 @contextlib.contextmanager
-def _mixer_error_handling(mixer: MixerProxy) -> Generator[None, Any, None]:
+def _mixer_error_handling(mixer: MixerProxy) -> Generator[None]:
     try:
         yield
     except exceptions.ValidationError as e:

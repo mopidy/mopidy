@@ -4,19 +4,15 @@ import copy
 import logging
 import time
 from collections.abc import Iterable
-from typing import TYPE_CHECKING
 
 from pykka.typing import proxy_method
 
 from mopidy.internal.models import HistoryState, HistoryTrack
 from mopidy.models import Ref, Track
 
-if TYPE_CHECKING:
-    from typing import TypeAlias
-
 logger = logging.getLogger(__name__)
 
-History: TypeAlias = list[tuple[int, Ref]]
+type History = list[tuple[int, Ref]]
 
 
 class HistoryController:

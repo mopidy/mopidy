@@ -7,13 +7,11 @@ from typing import TYPE_CHECKING, Any, TypedDict
 import tornado.web
 
 if TYPE_CHECKING:
-    from typing import TypeAlias
-
     from mopidy.core.actor import CoreProxy
     from mopidy.ext import Config
 
 
-RequestRule: TypeAlias = tuple[str, type[tornado.web.RequestHandler], dict[str, Any]]
+type RequestRule = tuple[str, type[tornado.web.RequestHandler], dict[str, Any]]
 
 
 class HttpConfig(TypedDict):

@@ -16,6 +16,10 @@ from mopidy.types import (
 
 
 def get_literals(literal_type: Any) -> set[str]:
+    # Check if it's a TypeAliasType (created with type ... = ...)
+    if hasattr(literal_type, "__value__"):
+        literal_type = literal_type.__value__
+
     # Check if it's a union
     if hasattr(literal_type, "__origin__") and literal_type.__origin__ is Union:
         literals = set()
