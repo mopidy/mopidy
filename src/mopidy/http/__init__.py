@@ -34,15 +34,15 @@ class Extension(ext.Extension):
 
     def validate_environment(self) -> None:
         try:
-            import tornado.web  # noqa: F401 (Imported to test if available)
+            import tornado.web  # noqa: F401, PLC0415 (Imported to test if available)
         except ImportError as exc:
             msg = "tornado library not found"
             raise exceptions.ExtensionError(msg) from exc
 
     def setup(self, registry: ext.Registry) -> None:
-        from .actor import HttpFrontend
-        from .handlers import make_mopidy_app_factory
-        from .types import HttpApp, HttpStatic
+        from .actor import HttpFrontend  # noqa: PLC0415
+        from .handlers import make_mopidy_app_factory  # noqa: PLC0415
+        from .types import HttpApp, HttpStatic  # noqa: PLC0415
 
         HttpFrontend.apps = cast(list[HttpApp], registry["http:app"])
         HttpFrontend.statics = cast(list[HttpStatic], registry["http:static"])

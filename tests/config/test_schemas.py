@@ -89,6 +89,7 @@ class MapConfigSchemaTest(unittest.TestCase):
 
         assert result["foo.bar"] == logging.DEBUG
         assert result["baz"] == logging.INFO
+        assert not errors
 
 
 class DidYouMeanTest(unittest.TestCase):

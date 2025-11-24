@@ -58,7 +58,7 @@ def fetch() -> list[tuple[str, str, bytes]]:  # noqa: PLR0911
     result = []
     secrets = service.GetSecrets(items, session, byte_arrays=True)
     for item_path, values in secrets.items():
-        session_path, parameters, value, content_type = values
+        _session_path, _parameters, value, _content_type = values
         attrs = _item_attributes(bus, item_path)
         result.append((attrs["section"], attrs["key"], bytes(value)))
     return result
@@ -116,7 +116,7 @@ def set(  # noqa: A001, PLR0911
     }
 
     try:
-        item, prompt = collection.CreateItem(properties, secret, True)
+        _item, prompt = collection.CreateItem(properties, secret, True)
     except dbus.exceptions.DBusException as e:
         # TODO: catch IsLocked errors etc.
         logger.debug("Saving %s/%s to keyring failed. (%s)", section, key, e)

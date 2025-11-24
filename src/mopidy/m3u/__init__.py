@@ -25,6 +25,6 @@ class Extension(ext.Extension):
         return schema
 
     def setup(self, registry: ext.Registry) -> None:
-        from .backend import M3UBackend
+        from .backend import M3UBackend  # noqa: PLC0415
 
         registry.add("backend", M3UBackend)
