@@ -7,7 +7,7 @@ build:
   apt_packages:
     # pyobject dependencies
     - libcairo2-dev
-    - libgirepository1.0-dev
+    - libgirepository-2.0-dev
     # Diagrams in docs
     - graphviz
   jobs:
