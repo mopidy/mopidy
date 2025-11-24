@@ -2,7 +2,7 @@
 name = "mopidy"
 description = "Mopidy is an extensible music server written in Python"
 readme = "README.rst"
-requires-python = ">= 3.11"
+requires-python = ">= 3.13"
 license = { text = "Apache-2.0" }
 authors = [{ name = "Stein Magnus Jodal", email = "stein.magnus@jodal.no" }]
 classifiers = [
@@ -86,7 +86,7 @@ exclude_also = ['if TYPE_CHECKING:', 'raise NotImplementedError']
 
 
 [tool.pyright]
-pythonVersion = "3.11"
+pythonVersion = "3.13"
 # Use venv from parent directory, to share it with any extensions:
 venvPath = "../"
 venv = ".venv"
@@ -106,7 +106,7 @@ filterwarnings = [
 
 
 [tool.ruff]
-target-version = "py311"
+target-version = "py313"
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -186,9 +186,8 @@ ignore = [
 
 [tool.tox]
 env_list = [
-    "3.11",
-    "3.12",
     "3.13",
+    "3.14",
     "pyright",
     "ruff-check",
     "ruff-format",
