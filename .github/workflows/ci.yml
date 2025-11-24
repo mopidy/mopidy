@@ -48,7 +48,7 @@ jobs:
       - uses: actions/checkout@v6
       - name: Fix home dir permissions to enable pip caching
         run: chown -R root /github/home
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
           cache: pip
