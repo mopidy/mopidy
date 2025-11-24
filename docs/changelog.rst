@@ -22,7 +22,7 @@ Dependencies
   Support for 3.7-3.10 have been dropped,
   while Python 3.13 has been included in the testing matrix.
 
-- GStreamer >= 1.22.0 is now required.
+- GStreamer >= 1.26.2 is now required.
 
 - PyGObject >= 3.50 is now an explicit Python dependency, and not something we
   assume you'll install together with GStreamer.
