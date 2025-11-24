@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 def _backend_error_handling(
     backend: BackendProxy,
     reraise: None | (type[Exception] | tuple[type[Exception], ...]) = None,
-) -> Generator[None, Any, None]:
+) -> Generator[None]:
     try:
         yield
     except exceptions.ValidationError as e:

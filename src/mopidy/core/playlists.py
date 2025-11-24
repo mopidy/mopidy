@@ -4,7 +4,7 @@ import contextlib
 import logging
 import urllib.parse
 from collections.abc import Generator
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from pykka.typing import proxy_method
 
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 def _backend_error_handling(
     backend: BackendProxy,
     reraise: None | (type[Exception] | tuple[type[Exception], ...]) = None,
-) -> Generator[None, Any, None]:
+) -> Generator[None]:
     try:
         yield
     except exceptions.ValidationError as e:

@@ -273,7 +273,7 @@ class Command:
 
 
 @contextlib.contextmanager
-def _actor_error_handling(name) -> Generator[None, Any, None]:
+def _actor_error_handling(name) -> Generator[None]:
     try:
         yield
     except exceptions.BackendError as exc:

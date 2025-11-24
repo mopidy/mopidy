@@ -40,7 +40,7 @@ def replace(
     mode: str = "w+b",
     encoding: str | None = None,
     errors: str | None = None,
-) -> Generator[IO[Any], None, None]:
+) -> Generator[IO[Any]]:
     (fd, tempname) = tempfile.mkstemp(dir=str(path.parent))
     tempname = Path(tempname)
     try:

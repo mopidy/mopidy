@@ -2,7 +2,7 @@ import logging
 import os
 import pathlib
 from collections.abc import Generator
-from typing import Any, TypedDict, cast
+from typing import TypedDict, cast
 
 from mopidy import backend, exceptions
 from mopidy import config as config_lib
@@ -125,7 +125,7 @@ class FileLibraryProvider(backend.LibraryProvider):
             uri = Uri("file:root")
         return Ref.directory(name="Files", uri=uri)
 
-    def _get_media_dirs(self, config) -> Generator[MediaDir, Any, None]:
+    def _get_media_dirs(self, config) -> Generator[MediaDir]:
         for entry in config["file"]["media_dirs"]:
             media_dir_split = entry.split("|", 1)
             local_path = path.expand_path(media_dir_split[0])
@@ -152,7 +152,7 @@ class FileLibraryProvider(backend.LibraryProvider):
 
             yield MediaDir(path=local_path, name=name)
 
-    def _get_media_dirs_refs(self) -> Generator[Ref, Any, None]:
+    def _get_media_dirs_refs(self) -> Generator[Ref]:
         for media_dir in self._media_dirs:
             yield Ref.directory(
                 name=media_dir["name"],

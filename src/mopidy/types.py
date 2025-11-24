@@ -2,11 +2,7 @@ from __future__ import annotations
 
 import enum
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Literal, NewType, TypeVar
-
-if TYPE_CHECKING:
-    from typing import TypeAlias
-
+from typing import Literal, NewType, TypeVar
 
 # Date types
 Date = NewType("Date", str)
@@ -26,12 +22,12 @@ UriScheme = NewType("UriScheme", str)
 
 # Query types
 F = TypeVar("F")
-QueryValue: TypeAlias = str | int
-Query: TypeAlias = dict[F, Iterable[QueryValue]]
+type QueryValue = str | int
+type Query[F] = dict[F, Iterable[QueryValue]]
 
 
 # Types for distinct queries
-DistinctField: TypeAlias = Literal[
+type DistinctField = Literal[
     "uri",
     "track_name",
     "album",
@@ -51,13 +47,13 @@ DistinctField: TypeAlias = Literal[
 
 
 # Types for search queries
-SearchField: TypeAlias = DistinctField | Literal["any"]
-SearchQuery: TypeAlias = dict[SearchField, Iterable[QueryValue]]
+type SearchField = DistinctField | Literal["any"]
+type SearchQuery = dict[SearchField, Iterable[QueryValue]]
 
 
 # Tracklist types
 TracklistId = NewType("TracklistId", int)
-TracklistField: TypeAlias = Literal[
+type TracklistField = Literal[
     "tlid",
     "uri",
     "name",
@@ -68,7 +64,7 @@ TracklistField: TypeAlias = Literal[
 
 
 # Superset of all fields that can be used in a query
-QueryField: TypeAlias = DistinctField | SearchField | TracklistField
+type QueryField = DistinctField | SearchField | TracklistField
 
 
 # Playback types

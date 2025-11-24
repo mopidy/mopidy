@@ -6,30 +6,14 @@ import logging
 import re
 import socket
 from abc import ABC, abstractmethod
-from collections.abc import Callable
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    AnyStr,
-    ClassVar,
-    Generic,
-    Literal,
-    TypeVar,
-    cast,
-)
+from collections.abc import Callable, Iterable
+from typing import Any, AnyStr, ClassVar, Literal, cast
 
 from mopidy.config import validators
 from mopidy.internal import log, path
 
-if TYPE_CHECKING:
-    from collections.abc import Iterable
 
-T = TypeVar("T")
-K = TypeVar("K", bound="ConfigValue")
-V = TypeVar("V", bound="ConfigValue")
-
-
-def decode(value: AnyStr) -> str:
+def decode(value: bytes | str) -> str:
     result = (
         value.decode(errors="surrogateescape") if isinstance(value, bytes) else value
     )
@@ -40,7 +24,7 @@ def decode(value: AnyStr) -> str:
     return result
 
 
-def encode(value: AnyStr) -> str:
+def encode(value: bytes | str) -> str:
     result = (
         value.decode(errors="surrogateescape") if isinstance(value, bytes) else value
     )
@@ -65,7 +49,7 @@ class _TransformedValue(str):
         self.original = original
 
 
-class ConfigValue(ABC, Generic[T]):
+class ConfigValue[T](ABC):
     """Represents a config key's value and how to handle it.
 
     Normally you will only be interacting with sub-classes for config values
@@ -267,7 +251,7 @@ class Boolean(ConfigValue[bool]):
         raise ValueError(msg)
 
 
-class Pair(ConfigValue[tuple[K, V]]):
+class Pair[K: ConfigValue, V: ConfigValue](ConfigValue[tuple[K, V]]):
     """Pair value.
 
     The value is expected to be a pair of elements, separated by a specified delimiter.
@@ -337,7 +321,7 @@ class Pair(ConfigValue[tuple[K, V]]):
         return f"{serialized_first_value}{self._separator}{serialized_second_value}"
 
 
-class List(ConfigValue[tuple[V, ...] | frozenset[V]]):
+class List[V: ConfigValue](ConfigValue[tuple[V, ...] | frozenset[V]]):
     """List value.
 
     Supports elements split by commas or newlines. Newlines take precedence and

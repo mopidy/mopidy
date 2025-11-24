@@ -3,7 +3,6 @@ import pathlib
 import re
 import urllib.parse
 from os import PathLike
-from typing import AnyStr
 
 from mopidy.internal import xdg
 from mopidy.types import Uri
@@ -31,7 +30,7 @@ def get_or_create_dir(dir_path: str | PathLike[str]) -> pathlib.Path:
 def get_or_create_file(
     file_path: str | PathLike[str],
     mkdir: bool = True,
-    content: AnyStr | None = None,
+    content: bytes | str | None = None,
 ) -> pathlib.Path:
     file_path = expand_path(file_path)
     if file_path.is_file():

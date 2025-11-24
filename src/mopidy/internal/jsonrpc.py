@@ -1,7 +1,7 @@
 import inspect
 import traceback
 from collections.abc import Callable
-from typing import Any, Literal, TypeAlias, TypeVar
+from typing import Any, Literal, TypeVar
 
 import pydantic_core
 import pykka
@@ -28,8 +28,8 @@ class UnsetType:
 Unset = UnsetType()
 
 
-RequestId: TypeAlias = str | int | float
-Param: TypeAlias = (
+RequestId = str | int | float
+Param = (
     # The complex types we support in the core API:
     models.Artist
     | models.Album
@@ -52,7 +52,7 @@ class Request(BaseModel):
 
 
 RequestTypeAdapter = TypeAdapter(Request | list[Request])
-RequestDict: TypeAlias = dict[str, Any]
+RequestDict = dict[str, Any]
 
 
 class ErrorDetails(BaseModel):
@@ -79,7 +79,7 @@ class SuccessResponse(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
 
-Response: TypeAlias = SuccessResponse | ErrorResponse
+Response = SuccessResponse | ErrorResponse
 ResponseTypeAdapter = TypeAdapter(Response | list[Response])
 
 

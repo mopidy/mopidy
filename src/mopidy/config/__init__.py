@@ -32,14 +32,12 @@ from mopidy.config.types import (
 from mopidy.internal import path
 
 if TYPE_CHECKING:
-    from typing import TypeAlias
-
     from mopidy.ext import ExtensionData
     from mopidy.internal.log import LogColorName, LogLevelName
 
-    ConfigErrors: TypeAlias = dict[str, dict[str, Any]]
-    ConfigSchemas: TypeAlias = list[ConfigSchema | MapConfigSchema]
-    RawConfig: TypeAlias = dict[str, dict[str, Any]]
+    type ConfigErrors = dict[str, dict[str, Any]]
+    type ConfigSchemas = list[ConfigSchema | MapConfigSchema]
+    type RawConfig = dict[str, dict[str, Any]]
 
 
 __all__ = [
