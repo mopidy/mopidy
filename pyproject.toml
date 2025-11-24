@@ -19,7 +19,7 @@ dependencies = [
     "pygobject >= 3.50",
     "pykka >= 4.1",
     "requests >= 2.32",
-    "tornado >= 6.2",
+    "tornado >= 6.4",
 ]
 
 [project.urls]
