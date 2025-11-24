@@ -19,7 +19,6 @@ dependencies = [
     "pygobject >= 3.50",
     "pykka >= 4.1",
     "requests >= 2.32",
-    "setuptools >= 66",
     "tornado >= 6.2",
 ]
 
@@ -43,7 +42,7 @@ stream = "mopidy.stream:Extension"
 
 
 [build-system]
-requires = ["setuptools >= 66", "setuptools-scm >= 7.1"]
+requires = ["setuptools >= 78", "setuptools-scm >= 8.2"]
 build-backend = "setuptools.build_meta"
 
 
@@ -72,7 +71,6 @@ typing = [
     "pygobject-stubs >= 2.12.0",
     "pyright == 1.1.394",
     "types-requests >= 2.32",
-    "types-setuptools >= 66",
 ]
 
 

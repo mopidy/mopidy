@@ -34,12 +34,10 @@ Dependencies
 
 - Requests >= 2.32 is now required.
 
-- Setuptools >= 66 is now required.
-
 - Tornado >= 6.2 is now required.
 
 - Replaced :mod:`pkg_resources` with :mod:`importlib.metadata` from Python's
-  standard library.
+  standard library, removing the runtime dependency on setuptools.
 
 Core API
 --------
