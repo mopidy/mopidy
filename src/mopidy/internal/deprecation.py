@@ -27,7 +27,7 @@ _MESSAGES = {
 }
 
 
-def warn(msg_id, pending=False):
+def warn(msg_id: str, pending: bool = False) -> None:
     category = PendingDeprecationWarning if pending else DeprecationWarning
     warnings.warn(_MESSAGES.get(msg_id, msg_id), category, stacklevel=2)
 

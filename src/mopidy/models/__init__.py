@@ -1,9 +1,10 @@
 import enum
 from collections.abc import Iterator
 from typing import Any, ClassVar, Literal, Self
+from uuid import UUID
 
 from pydantic.fields import Field
-from pydantic.types import UUID, NonNegativeInt
+from pydantic.types import NonNegativeInt
 
 from mopidy.models._base import BaseModel
 from mopidy.types import DateOrYear, DurationMs, TracklistId, Uri

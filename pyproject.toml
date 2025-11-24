@@ -68,8 +68,8 @@ tests = [
     "responses >= 0.25",
 ]
 typing = [
-    "pygobject-stubs >= 2.12.0",
-    "pyright == 1.1.394",
+    "pygobject-stubs >= 2.14.0",
+    "pyright == 1.1.407",
     "types-requests >= 2.32",
 ]
 
@@ -83,6 +83,7 @@ source_pkgs = ["mopidy"]
 [tool.coverage.report]
 show_missing = true
 exclude_also = ['if TYPE_CHECKING:', 'raise NotImplementedError']
+
 
 [tool.pyright]
 pythonVersion = "3.11"
