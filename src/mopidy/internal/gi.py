@@ -31,7 +31,7 @@ Gst.init([])
 GLib.set_prgname("mopidy")
 GLib.set_application_name("Mopidy")
 
-REQUIRED_GST_VERSION = (1, 22, 0)
+REQUIRED_GST_VERSION = (1, 26, 2)
 REQUIRED_GST_VERSION_DISPLAY = ".".join(map(str, REQUIRED_GST_VERSION))
 
 if Gst.version() < REQUIRED_GST_VERSION:

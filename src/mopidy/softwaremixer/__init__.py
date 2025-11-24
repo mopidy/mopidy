@@ -16,6 +16,6 @@ class Extension(ext.Extension):
         return super().get_config_schema()
 
     def setup(self, registry):
-        from .mixer import SoftwareMixer
+        from .mixer import SoftwareMixer  # noqa: PLC0415
 
         registry.add("mixer", SoftwareMixer)

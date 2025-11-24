@@ -15,12 +15,11 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
-    "pydantic >= 2.9",
-    "pygobject >= 3.42, <= 3.50.0",
+    "pydantic >= 2.10",
+    "pygobject >= 3.50",
     "pykka >= 4.1",
-    "requests >= 2.28",
-    "setuptools >= 66",
-    "tornado >= 6.2",
+    "requests >= 2.32",
+    "tornado >= 6.4",
 ]
 
 [project.urls]
@@ -43,36 +42,35 @@ stream = "mopidy.stream:Extension"
 
 
 [build-system]
-requires = ["setuptools >= 66", "setuptools-scm >= 7.1"]
+requires = ["setuptools >= 78", "setuptools-scm >= 8.2"]
 build-backend = "setuptools.build_meta"
 
 
 [dependency-groups]
 dev = [
-    "tox >= 4.21",
+    "tox >= 4.25",
     { include-group = "docs" },
     { include-group = "ruff" },
     { include-group = "tests" },
     { include-group = "typing" },
 ]
 docs = [
-    "pygraphviz >= 0.20",
-    "sphinx >= 5.3",
-    "sphinx-autodoc-typehints >= 1.12",
-    "sphinx-rtd-theme >= 1.2",
+    "pygraphviz >= 1.14",
+    "sphinx >= 8.1",
+    "sphinx-autodoc-typehints >= 2.3",
+    "sphinx-rtd-theme >= 3.0",
 ]
-ruff = ["ruff == 0.11.0"]
+ruff = ["ruff == 0.14.6"]
 tests = [
-    "pytest >= 7.2",
-    "pytest-cov >= 4.0",
-    "pytest-mock >= 3.8",
-    "responses >= 0.18",
+    "pytest >= 8.3",
+    "pytest-cov >= 5.0",
+    "pytest-mock >= 3.14",
+    "responses >= 0.25",
 ]
 typing = [
-    "pygobject-stubs >= 2.12.0",
-    "pyright == 1.1.394",
-    "types-requests >= 2.28",
-    "types-setuptools >= 66",
+    "pygobject-stubs >= 2.14.0",
+    "pyright == 1.1.407",
+    "types-requests >= 2.32",
 ]
 
 
@@ -85,6 +83,7 @@ source_pkgs = ["mopidy"]
 [tool.coverage.report]
 show_missing = true
 exclude_also = ['if TYPE_CHECKING:', 'raise NotImplementedError']
+
 
 [tool.pyright]
 pythonVersion = "3.11"

@@ -23,6 +23,6 @@ class Extension(ext.Extension):
         pass
 
     def setup(self, registry):
-        from .actor import StreamBackend
+        from .actor import StreamBackend  # noqa: PLC0415
 
         registry.add("backend", StreamBackend)

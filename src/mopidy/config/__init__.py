@@ -193,7 +193,7 @@ def format_initial(extensions_data: list[ExtensionData]) -> str:
     schemas = _schemas[:]
     schemas.extend(d.extension.get_config_schema() for d in extensions_data)
 
-    config, errors = _validate(raw_config, schemas)
+    config, _errors = _validate(raw_config, schemas)
 
     versions = [f"Mopidy {mopidy.__version__}"]
     extensions_data = sorted(extensions_data, key=lambda d: d.extension.dist_name)

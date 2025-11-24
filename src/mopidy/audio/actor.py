@@ -405,7 +405,7 @@ class Audio(pykka.ThreadingActor):
         self._signals = utils.Signals()
 
         if mixer and self._config["audio"]["mixer"] == "software":
-            from mopidy.softwaremixer.mixer import SoftwareMixerProxy
+            from mopidy.softwaremixer.mixer import SoftwareMixerProxy  # noqa: PLC0415
 
             mixer = cast(SoftwareMixerProxy, mixer)
             self.mixer = pykka.traversable(SoftwareMixerAdapter(mixer))

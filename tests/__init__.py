@@ -6,7 +6,7 @@ def path_to_data_dir(name):
     return path.resolve()
 
 
-class IsA:
+class IsA:  # noqa: PLW1641
     def __init__(self, klass):
         self.klass = klass
 

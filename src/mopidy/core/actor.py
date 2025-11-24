@@ -180,7 +180,7 @@ class Core(
                     "mixer",
                     "history",
                 ]
-            if len(coverage):
+            if coverage:
                 self._load_state(coverage)
         except Exception as e:  # noqa: BLE001
             logger.warning("Restore state: Unexpected error: %s", str(e))

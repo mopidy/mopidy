@@ -33,12 +33,13 @@ please see :ref:`contributing`.
 
        sudo dnf install -y gcc python3-devel python3-pip
 
-#. Then you'll need to install GStreamer >= 1.22.0.
+#. Then you'll need to install GStreamer >= 1.26.2.
    GStreamer is packaged for most popular Linux distributions.
    Search for GStreamer in your package manager and make sure to install the
    "good" and "ugly" plugin sets, as well as the Python bindings.
    To be able to build the Python bindings from source,
-   also install the development headers for ``libcairo2`` and ``libgirepository1.0``.
+   also install the development headers for ``libcairo2`` and
+   ``libgirepository-2.0``.
 
    **Debian/Ubuntu**
 
@@ -51,7 +52,7 @@ please see :ref:`contributing`.
            gstreamer1.0-plugins-ugly \
            gstreamer1.0-tools \
            libcairo2-dev \
-           libgirepository1.0-dev \
+           libgirepository-2.0-dev \
            python3-gst-1.0
 
    **Arch Linux**

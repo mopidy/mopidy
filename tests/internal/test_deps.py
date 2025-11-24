@@ -35,12 +35,6 @@ class TestDeps:
                     deps.DepInfo(
                         name="pylast",
                         version="0.5",
-                        dependencies=[
-                            deps.DepInfo(
-                                name="setuptools",
-                                version="0.6",
-                            ),
-                        ],
                     ),
                 ],
             ),
@@ -55,13 +49,11 @@ class TestDeps:
         assert "foo: not found" in result
         assert "mopidy: 4.13" in result
         assert "  pylast: 0.5" in result
-        assert "    setuptools: 0.6" in result
 
     def test_format_dependency_list_real(self):
         result = deps.format_dependency_list()
         assert "Python 3." in result
         assert "mopidy:" in result
-        assert "setuptools:" in result
 
     def test_executable_info(self):
         result = deps.executable_info()

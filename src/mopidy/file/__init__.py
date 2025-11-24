@@ -25,6 +25,6 @@ class Extension(ext.Extension):
         return schema
 
     def setup(self, registry) -> None:
-        from .backend import FileBackend
+        from .backend import FileBackend  # noqa: PLC0415
 
         registry.add("backend", FileBackend)

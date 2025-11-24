@@ -5,13 +5,14 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   build:
     name: Build
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: hynek/build-and-inspect-python-package@v2
 
   main:
@@ -47,7 +48,7 @@ jobs:
     container: ghcr.io/mopidy/ci:latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Fix home dir permissions to enable pip caching
         run: chown -R root /github/home
       - uses: actions/setup-python@v5

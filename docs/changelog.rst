@@ -22,24 +22,22 @@ Dependencies
   Support for 3.7-3.10 have been dropped,
   while Python 3.13 has been included in the testing matrix.
 
-- GStreamer >= 1.22.0 is now required.
+- GStreamer >= 1.26.2 is now required.
 
-- PyGObject >= 3.42 is now an explicit Python dependency, and not something we
+- PyGObject >= 3.50 is now an explicit Python dependency, and not something we
   assume you'll install together with GStreamer.
 
 - Pykka >= 4.1 is now required.
 
-- Pydantic >= 2.9 is now required. This is a new dependency for Mopidy to
+- Pydantic >= 2.10 is now required. This is a new dependency for Mopidy to
   replace our custom data models.
 
-- Requests >= 2.28 is now required.
+- Requests >= 2.32 is now required.
 
-- Setuptools >= 66 is now required.
-
-- Tornado >= 6.2 is now required.
+- Tornado >= 6.4 is now required.
 
 - Replaced :mod:`pkg_resources` with :mod:`importlib.metadata` from Python's
-  standard library.
+  standard library, removing the runtime dependency on setuptools.
 
 Core API
 --------

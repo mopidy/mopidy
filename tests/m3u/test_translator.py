@@ -4,7 +4,7 @@ import pathlib
 import pytest
 
 from mopidy.m3u import translator
-from mopidy.m3u.translator import path_to_uri
+from mopidy.m3u.translator import path_from_name, path_to_ref, path_to_uri, playlist
 from mopidy.models import Playlist, Ref, Track
 
 
@@ -64,8 +64,6 @@ def test_name_from_path(path, expected):
 
 
 def test_path_from_name():
-    from mopidy.m3u.translator import path_from_name
-
     assert path_from_name("test") == pathlib.Path("test")
     assert path_from_name("test", ".m3u") == pathlib.Path("test.m3u")
     assert path_from_name("foo/bar", sep="-") == pathlib.Path("foo-bar")
@@ -79,8 +77,6 @@ def test_path_from_name():
     ],
 )
 def test_path_to_ref(path, expected):
-    from mopidy.m3u.translator import path_to_ref
-
     result = path_to_ref(pathlib.Path(path))
     assert Ref.playlist(uri=expected[0], name=expected[1]) == result
 
@@ -134,8 +130,6 @@ def test_dump_items():
 
 
 def test_playlist():
-    from mopidy.m3u.translator import playlist
-
     path = pathlib.Path("test.m3u")
 
     assert playlist(path) == Playlist(uri="m3u:test.m3u", name="test")
