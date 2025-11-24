@@ -12,10 +12,7 @@ import mopidy
 from mopidy import commands, ext
 from mopidy import config as config_lib
 from mopidy.internal import log, path, process
-from mopidy.internal.gi import (
-    GLib,
-    Gst,  # noqa: F401 (imported to test GStreamer presence)
-)
+from mopidy.internal.path import get_config_dirs
 
 try:
     # Make GLib's mainloop the event loop for python-dbus
@@ -69,7 +66,7 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
 
         default_config_files = [
             (Path(base) / "mopidy" / "mopidy.conf").resolve()
-            for base in [*GLib.get_system_config_dirs(), GLib.get_user_config_dir()]
+            for base in get_config_dirs()
         ]
         config_files = [
             Path(f) for f in args.config_files or []

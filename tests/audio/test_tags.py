@@ -1,3 +1,7 @@
+import pytest
+
+pytest.importorskip("mopidy.internal.gi", reason="test requires GObject")
+
 import unittest
 
 from mopidy.audio import tags

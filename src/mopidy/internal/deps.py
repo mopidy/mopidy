@@ -9,7 +9,6 @@ from os import PathLike
 from pathlib import Path
 
 from mopidy.internal import formatting
-from mopidy.internal.gi import Gst, gi
 
 
 @dataclass
@@ -131,6 +130,11 @@ def pkg_info(
 
 
 def gstreamer_info() -> DepInfo:
+    try:
+        from mopidy.internal.gi import Gst, gi
+    except Exception as exc:  # noqa: BLE001
+        return DepInfo("GStreamer", other=f"Not importable: {exc}")
+
     other: list[str] = []
     other.append(f"Python wrapper: python-gi {gi.__version__}")
 
@@ -161,6 +165,8 @@ def gstreamer_info() -> DepInfo:
 
 
 def _gstreamer_check_elements():
+    from mopidy.internal.gi import Gst
+
     elements_to_check = [
         # Core playback
         "uridecodebin",

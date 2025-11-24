@@ -6,7 +6,6 @@ import unittest
 import pytest
 
 from mopidy.internal import path
-from mopidy.internal.gi import GLib
 
 
 class GetOrCreateDirTest(unittest.TestCase):
@@ -194,7 +193,10 @@ class ExpandPathTest(unittest.TestCase):
         assert result == pathlib.Path("./foo").resolve()
 
     def test_xdg_subsititution(self):
-        expected = GLib.get_user_data_dir() + "/foo"
+        gi_lib = pytest.importorskip(
+            "mopidy.internal.gi", reason="test requires GObject"
+        )
+        expected = gi_lib.GLib.get_user_data_dir() + "/foo"
         result = path.expand_path("$XDG_DATA_DIR/foo")
 
         assert str(result) == expected

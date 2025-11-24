@@ -9,6 +9,7 @@ from tests import path_to_data_dir
 
 @pytest.mark.parametrize("track_uri", [path.path_to_uri(path_to_data_dir("song1.wav"))])
 def test_lookup(provider, track_uri):
+    pytest.importorskip("mopidy.internal.gi", reason="test requires GStreamer")
     result = provider.lookup(track_uri)
 
     assert len(result) == 1
