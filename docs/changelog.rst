@@ -29,7 +29,7 @@ Dependencies
 
 - Pykka >= 4.1 is now required.
 
-- Pydantic >= 2.9 is now required. This is a new dependency for Mopidy to
+- Pydantic >= 2.10 is now required. This is a new dependency for Mopidy to
   replace our custom data models.
 
 - Requests >= 2.28 is now required.

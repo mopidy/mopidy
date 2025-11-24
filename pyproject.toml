@@ -15,7 +15,7 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
-    "pydantic >= 2.9",
+    "pydantic >= 2.10",
     "pygobject >= 3.50",
     "pykka >= 4.1",
     "requests >= 2.28",
