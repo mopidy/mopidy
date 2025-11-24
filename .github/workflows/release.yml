@@ -14,11 +14,10 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
+      - uses: hynek/build-and-inspect-python-package@v2
+        id: build
+      - uses: actions/download-artifact@v4
         with:
-          python-version: "3.14"
-      - name: "Install dependencies"
-        run: python3 -m pip install build
-      - name: "Build package"
-        run: python3 -m build
+          name: ${{ steps.build.outputs.artifact-name }}
+          path: dist
       - uses: pypa/gh-action-pypi-publish@release/v1
