@@ -32,7 +32,7 @@ Dependencies
 - Pydantic >= 2.10 is now required. This is a new dependency for Mopidy to
   replace our custom data models.
 
-- Requests >= 2.28 is now required.
+- Requests >= 2.32 is now required.
 
 - Setuptools >= 66 is now required.
 

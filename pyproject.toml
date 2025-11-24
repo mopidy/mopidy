@@ -18,7 +18,7 @@ dependencies = [
     "pydantic >= 2.10",
     "pygobject >= 3.50",
     "pykka >= 4.1",
-    "requests >= 2.28",
+    "requests >= 2.32",
     "setuptools >= 66",
     "tornado >= 6.2",
 ]
@@ -71,7 +71,7 @@ tests = [
 typing = [
     "pygobject-stubs >= 2.12.0",
     "pyright == 1.1.394",
-    "types-requests >= 2.28",
+    "types-requests >= 2.32",
     "types-setuptools >= 66",
 ]
 
