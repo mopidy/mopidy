@@ -4,6 +4,7 @@ import asyncio
 import logging
 import secrets
 import socket
+import textwrap
 import threading
 from typing import TYPE_CHECKING, ClassVar
 
@@ -17,7 +18,7 @@ from pydantic import TypeAdapter
 
 from mopidy import exceptions, zeroconf
 from mopidy.core import CoreEvent, CoreEventData, CoreListener
-from mopidy.internal import formatting, network
+from mopidy.internal import network
 
 from . import Extension, handlers
 
@@ -159,11 +160,12 @@ class HttpServer(threading.Thread):
         request_handlers.extend(self._get_default_request_handlers())
 
         logger.debug(
-            "HTTP routes from extensions: %s",
-            formatting.indent(
-                "\n".join(
+            "HTTP routes from extensions:\n%s",
+            textwrap.indent(
+                text="\n".join(
                     f"{path!r}: {handler!r}" for (path, handler, *_) in request_handlers
                 ),
+                prefix="    ",
             ),
         )
 
