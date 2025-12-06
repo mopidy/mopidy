@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, override
 
 from mopidy.commands import Command
-from mopidy.internal import formatting
 from mopidy.internal.gi import Gst, gi
 
 if TYPE_CHECKING:
@@ -86,14 +85,18 @@ def _format_dependency(dep: DepInfo) -> str:
         lines.append(f"{dep.name}: {dep.version}{source}")
 
     if dep.other:
-        details = formatting.indent(dep.other, places=4)
-        lines.append(f"  Detailed information: {details}")
+        lines.append("  Detailed information:")
+        lines.append(_indent(dep.other, places=4))
 
     for sub_dep in dep.dependencies:
         sub_dep_lines = _format_dependency(sub_dep)
-        lines.append(formatting.indent(sub_dep_lines, places=2, singles=True))
+        lines.append(_indent(sub_dep_lines, places=2))
 
     return "\n".join(lines)
+
+
+def _indent(value: str, *, places: int) -> str:
+    return "\n".join(" " * places + line for line in value.splitlines())
 
 
 def executable_info() -> DepInfo:

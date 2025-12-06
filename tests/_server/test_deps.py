@@ -45,7 +45,7 @@ def test_format_dependency_list():
     assert "Platform: Loonix 7.0.1" in result
     assert "pykka: 5.1 from /foo/bar" in result
     assert "/baz.py" not in result
-    assert "Detailed information: Quux" in result
+    assert "Detailed information:\n    Quux" in result
     assert "foo: not found" in result
     assert "mopidy: 4.13" in result
     assert "  pylast: 0.5" in result
