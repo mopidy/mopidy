@@ -157,7 +157,6 @@ def pkg_info(
 
 def gstreamer_info() -> DepInfo:
     other: list[str] = []
-    other.append(f"Python wrapper: python-gi {gi.__version__}")
 
     found_elements = []
     missing_elements = []
@@ -167,15 +166,14 @@ def gstreamer_info() -> DepInfo:
         else:
             missing_elements.append(name)
 
-    other.append("Relevant elements:")
-    other.append("  Found:")
-    other.extend(f"    {element}: {version}" for (element, version) in found_elements)
+    other.append("Available elements:")
+    other.extend(f"  {element}: {version}" for (element, version) in found_elements)
     if not found_elements:
-        other.append("    none")
-    other.append("  Not found:")
-    other.extend(f"    {element}" for element in missing_elements)
+        other.append("  none")
+    other.append("Elements not found:")
+    other.extend(f"  {element}" for element in missing_elements)
     if not missing_elements:
-        other.append("    none")
+        other.append("  none")
 
     return DepInfo(
         name="GStreamer",

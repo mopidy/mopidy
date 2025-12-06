@@ -6,7 +6,7 @@ from pathlib import Path
 from pytest_mock import MockFixture
 
 from mopidy._server import deps
-from mopidy.internal.gi import Gst, gi
+from mopidy.internal.gi import Gst
 
 
 def test_format_dependency_list():
@@ -93,9 +93,7 @@ def test_gstreamer_info():
     assert "gi" in str(result.path)
     assert "__init__.py" not in str(result.path)
     assert result.other
-    assert "Python wrapper: python-gi" in result.other
-    assert gi.__version__ in result.other
-    assert "Relevant elements:" in result.other
+    assert "Available elements:" in result.other
 
 
 def test_gstreamer_check_elements(mocker: MockFixture):
@@ -108,7 +106,7 @@ def test_gstreamer_check_elements(mocker: MockFixture):
     result = deps.gstreamer_info()
 
     assert result.other
-    assert "    none" in result.other
+    assert "  none" in result.other
 
 
 def test_pkg_info(mocker: MockFixture):
