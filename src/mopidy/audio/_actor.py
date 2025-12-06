@@ -11,8 +11,13 @@ from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
 
 from mopidy import exceptions
 from mopidy.audio import tags as tags_lib
-from mopidy.audio import utils
 from mopidy.audio._listener import AudioListener
+from mopidy.audio._utils import (
+    Signals,
+    clocktime_to_millisecond,
+    millisecond_to_clocktime,
+    setup_proxy,
+)
 from mopidy.internal import process
 from mopidy.internal.gi import GLib, Gst, GstPbutils
 from mopidy.types import DurationMs, Percentage, PlaybackState
@@ -92,14 +97,14 @@ class SoftwareMixerAdapter:
     _element: Gst.Element | None
     _last_volume: int | None
     _last_mute: bool | None
-    _signals: utils.Signals
+    _signals: Signals
 
     def __init__(self, mixer: SoftwareMixerProxy) -> None:
         self._mixer = mixer
         self._element = None
         self._last_volume = None
         self._last_mute = None
-        self._signals = utils.Signals()
+        self._signals = Signals()
 
     def setup(self, element, mixer_ref) -> None:
         self._element = element
@@ -402,7 +407,7 @@ class Audio(pykka.ThreadingActor):
         self._source_setup_callback: Callable | None = None
 
         self._handler = _Handler(self)
-        self._signals = utils.Signals()
+        self._signals = Signals()
 
         if mixer and self._config["audio"]["mixer"] == "software":
             from mopidy.softwaremixer.mixer import SoftwareMixerProxy  # noqa: PLC0415
@@ -571,7 +576,7 @@ class Audio(pykka.ThreadingActor):
             # source = cast(GstApp.AppSrc, source)  # noqa: ERA001
             source.set_live(True)  # pyright: ignore[reportAttributeAccessIssue]
 
-        utils.setup_proxy(source, self._config["proxy"])
+        setup_proxy(source, self._config["proxy"])
 
     def set_uri(
         self,
@@ -648,7 +653,7 @@ class Audio(pykka.ThreadingActor):
             logger.debug("Position query failed")
             return DurationMs(0)
 
-        return utils.clocktime_to_millisecond(position)
+        return clocktime_to_millisecond(position)
 
     def set_position(self, position: DurationMs) -> bool:
         """Set position in milliseconds.
@@ -658,7 +663,7 @@ class Audio(pykka.ThreadingActor):
         assert self._queue
 
         # TODO: double check seek flags in use.
-        gst_position = utils.millisecond_to_clocktime(position)
+        gst_position = millisecond_to_clocktime(position)
         gst_logger.debug("Sending flushing seek: position=%r", gst_position)
         # Send seek event to the queue not the playbin. The default behavior
         # for bins is to forward this event to all sinks. Which results in
