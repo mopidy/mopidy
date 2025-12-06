@@ -15,7 +15,7 @@ from mopidy.internal import models, validation
 from mopidy.types import DurationMs, TracklistId, UriScheme
 
 if TYPE_CHECKING:
-    from mopidy.audio.actor import AudioProxy
+    from mopidy.audio import AudioProxy
     from mopidy.backend import BackendProxy
     from mopidy.core.actor import Backends, Core
     from mopidy.models import TlTrack, Track

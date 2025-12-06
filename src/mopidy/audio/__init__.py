@@ -1,6 +1,6 @@
+from mopidy.audio._actor import Audio, AudioProxy
 from mopidy.types import PlaybackState
 
-from .actor import Audio, AudioProxy
 from .listener import AudioListener
 from .utils import supported_uri_schemes
 
