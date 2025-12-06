@@ -20,7 +20,7 @@ Configuration
 
 See :ref:`config` for general help on configuring Mopidy.
 
-.. literalinclude:: ../../src/mopidy/file/ext.conf
+.. literalinclude:: ../../src/mopidy/_exts/file/ext.conf
     :language: ini
 
 .. confval:: file/enabled

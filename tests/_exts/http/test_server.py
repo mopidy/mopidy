@@ -8,7 +8,7 @@ import tornado.testing
 import tornado.wsgi
 
 import mopidy
-from mopidy.http import actor, handlers
+from mopidy._exts.http import actor, handlers
 
 
 class HttpServerTest(tornado.testing.AsyncHTTPTestCase):

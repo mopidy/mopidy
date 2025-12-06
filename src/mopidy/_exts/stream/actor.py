@@ -7,11 +7,13 @@ import urllib.parse
 import pykka
 
 from mopidy import audio as audio_lib
-from mopidy import backend, exceptions, stream
+from mopidy import backend, exceptions
 from mopidy.audio import scan, tags
 from mopidy.internal import http, playlists
 from mopidy.models import Track
 from mopidy.types import Uri, UriScheme
+
+from . import Extension
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +29,7 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
 
         self._session = http.get_requests_session(
             proxy_config=config["proxy"],
-            user_agent=(f"{stream.Extension.dist_name}/{stream.Extension.version}"),
+            user_agent=(f"{Extension.dist_name}/{Extension.version}"),
         )
 
         blacklist = config["stream"]["metadata_blacklist"]

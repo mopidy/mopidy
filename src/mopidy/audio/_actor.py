@@ -23,9 +23,9 @@ from mopidy.internal.gi import GLib, Gst, GstPbutils
 from mopidy.types import DurationMs, Percentage, PlaybackState
 
 if TYPE_CHECKING:
+    from mopidy._exts.softwaremixer.mixer import SoftwareMixerProxy
     from mopidy.config import Config
     from mopidy.mixer import MixerProxy
-    from mopidy.softwaremixer.mixer import SoftwareMixerProxy
 
 logger = logging.getLogger(__name__)
 
@@ -410,9 +410,7 @@ class Audio(pykka.ThreadingActor):
         self._signals = Signals()
 
         if mixer and self._config["audio"]["mixer"] == "software":
-            from mopidy.softwaremixer.mixer import SoftwareMixerProxy  # noqa: PLC0415
-
-            mixer = cast(SoftwareMixerProxy, mixer)
+            mixer = cast("SoftwareMixerProxy", mixer)
             self.mixer = pykka.traversable(SoftwareMixerAdapter(mixer))
 
     def on_start(self) -> None:

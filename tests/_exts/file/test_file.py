@@ -1,8 +1,8 @@
 """Test file (except browse and lookup)"""
 
 from mopidy import ext
-from mopidy.file import Extension
-from mopidy.file.backend import FileBackend
+from mopidy._exts.file import Extension
+from mopidy._exts.file.backend import FileBackend
 
 
 def test_file_init():

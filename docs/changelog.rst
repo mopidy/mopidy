@@ -170,6 +170,14 @@ Internals
 
 - Switched from mypy to pyright for type checking.
 
+- Moved bundled extensions to the private package :mod:`mopidy._exts`. The removed modules are:
+
+  - :mod:`mopidy.file`
+  - :mod:`mopidy.http`
+  - :mod:`mopidy.m3u`
+  - :mod:`mopidy.softwaremixer`
+  - :mod:`mopidy.stream`
+
 
 v3.4.2 (2023-11-01)
 ===================

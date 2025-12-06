@@ -3,8 +3,13 @@ import pathlib
 
 import pytest
 
-from mopidy.m3u import translator
-from mopidy.m3u.translator import path_from_name, path_to_ref, path_to_uri, playlist
+from mopidy._exts.m3u import translator
+from mopidy._exts.m3u.translator import (
+    path_from_name,
+    path_to_ref,
+    path_to_uri,
+    playlist,
+)
 from mopidy.models import Playlist, Ref, Track
 
 

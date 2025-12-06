@@ -7,8 +7,8 @@ import requests.exceptions
 import responses
 
 from mopidy import exceptions
+from mopidy._exts.stream import actor
 from mopidy.audio import scan
-from mopidy.stream import actor
 
 TIMEOUT = 1000
 PLAYLIST_URI = "http://example.com/listen.m3u"

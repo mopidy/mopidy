@@ -6,8 +6,9 @@ import pykka
 from mopidy import backend
 from mopidy.audio import AudioProxy
 from mopidy.config import Config
-from mopidy.file import library
 from mopidy.types import UriScheme
+
+from . import library
 
 logger = logging.getLogger(__name__)
 
