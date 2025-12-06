@@ -147,8 +147,8 @@ Extension support
 Audio
 -----
 
-- Workaround GStreamer `Gst.Structure().get_name()` regression for versions v1.26.0
-  to v1.26.2 (inclusive). (PR: :issue:`2094`)
+- Workaround GStreamer ``Gst.Structure().get_name()`` regression for versions
+  v1.26.0 to v1.26.2 (inclusive). (PR: :issue:`2094`)
 
 Internals
 ---------
