@@ -12,7 +12,7 @@ from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
 from mopidy import exceptions
 from mopidy.audio import tags as tags_lib
 from mopidy.audio import utils
-from mopidy.audio.listener import AudioListener
+from mopidy.audio._listener import AudioListener
 from mopidy.internal import process
 from mopidy.internal.gi import GLib, Gst, GstPbutils
 from mopidy.types import DurationMs, Percentage, PlaybackState

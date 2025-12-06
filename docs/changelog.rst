@@ -130,6 +130,7 @@ Changes to the Audio API may affect a few Mopidy backend extensions.
   :mod:`mopidy.audio`. Update your imports accordingly. The removed modules are:
 
   - :mod:`mopidy.audio.actor`
+  - :mod:`mopidy.audio.listener`
 
 - Removed APIs only used by Mopidy-Spotify's bespoke audio delivery mechanism,
   which has not been used since Spotify shut down their libspotify APIs in

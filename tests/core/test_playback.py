@@ -83,7 +83,7 @@ class BaseTest:
             self.core.tracklist.add(self.tracks)
 
         self.events = []
-        self.patcher = mock.patch("mopidy.audio.listener.AudioListener.send")
+        self.patcher = mock.patch("mopidy.audio.AudioListener.send")
         self.send_mock = self.patcher.start()
 
         def send(event, **kwargs):

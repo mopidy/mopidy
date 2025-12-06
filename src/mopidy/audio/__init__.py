@@ -1,7 +1,7 @@
 from mopidy.audio._actor import Audio, AudioProxy
+from mopidy.audio._listener import AudioListener
 from mopidy.types import PlaybackState
 
-from .listener import AudioListener
 from .utils import supported_uri_schemes
 
 __all__ = [
