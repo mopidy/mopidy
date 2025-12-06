@@ -11,6 +11,9 @@ import pykka.debug
 import mopidy
 from mopidy import commands, ext
 from mopidy import config as config_lib
+from mopidy._server.config import ConfigCommand
+from mopidy._server.deps import DepsCommand
+from mopidy._server.root import RootCommand
 from mopidy.internal import log, path, process
 from mopidy.internal.gi import (
     GLib,
@@ -50,9 +53,9 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
     try:
         registry = ext.Registry()
 
-        root_cmd = commands.RootCommand()
-        config_cmd = commands.ConfigCommand()
-        deps_cmd = commands.DepsCommand()
+        root_cmd = RootCommand()
+        config_cmd = ConfigCommand()
+        deps_cmd = DepsCommand()
 
         root_cmd.set(extension=None, registry=registry)
         root_cmd.add_child("config", config_cmd)
@@ -124,14 +127,14 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
         )
 
         # Config and deps commands are simply special cased for now.
-        if isinstance(args.command, commands.ConfigCommand):
+        if isinstance(args.command, ConfigCommand):
             return args.command.run(
                 args=args,
                 config=config,
                 errors=config_errors,
                 schemas=[d.config_schema for d in extensions_data],
             )
-        if isinstance(args.command, commands.DepsCommand):
+        if isinstance(args.command, DepsCommand):
             return args.command.run(
                 args=args,
                 config=config,

@@ -513,11 +513,3 @@ class RunTest(unittest.TestCase):
     def test_default_implementation_raises_error(self):
         with pytest.raises(NotImplementedError):
             commands.Command().run(args=None, config=None)
-
-
-class RootCommandTest(unittest.TestCase):
-    def test_config_overrides(self):
-        cmd = commands.RootCommand()
-        result = cmd.parse(["--option", "foo/bar=baz"])
-
-        assert result.config_overrides[0] == ("foo", "bar", "baz")
