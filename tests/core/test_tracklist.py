@@ -4,7 +4,7 @@ from unittest import mock
 import pytest
 
 from mopidy import backend, core
-from mopidy.internal.models import TracklistState
+from mopidy.internal.models import TracklistControllerState
 from mopidy.models import TlTrack, Track
 
 
@@ -204,7 +204,7 @@ class TracklistSaveLoadStateTest(unittest.TestCase):
         consume = True
         next_tlid = len(tl_tracks) + 1
         self.core.tracklist.set_consume(consume)
-        assert self.core.tracklist._save_state() == TracklistState(
+        assert self.core.tracklist._save_state() == TracklistControllerState(
             consume=consume,
             repeat=False,
             single=False,
@@ -215,7 +215,7 @@ class TracklistSaveLoadStateTest(unittest.TestCase):
 
     def test_load(self):
         old_version = self.core.tracklist.get_version()
-        target = TracklistState(
+        target = TracklistControllerState(
             consume=False,
             repeat=True,
             single=True,
@@ -241,7 +241,7 @@ class TracklistSaveLoadStateTest(unittest.TestCase):
 
     def test_load_mode_only(self):
         old_version = self.core.tracklist.get_version()
-        target = TracklistState(
+        target = TracklistControllerState(
             consume=False,
             repeat=True,
             single=True,
@@ -262,7 +262,7 @@ class TracklistSaveLoadStateTest(unittest.TestCase):
 
     def test_load_tracklist_only(self):
         old_version = self.core.tracklist.get_version()
-        target = TracklistState(
+        target = TracklistControllerState(
             consume=False,
             repeat=True,
             single=True,

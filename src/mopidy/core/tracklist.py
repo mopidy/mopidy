@@ -10,7 +10,7 @@ from pykka.typing import proxy_method
 from mopidy import exceptions
 from mopidy.core import listener
 from mopidy.internal import deprecation, validation
-from mopidy.internal.models import TracklistState
+from mopidy.internal.models import TracklistControllerState
 from mopidy.models import TlTrack, Track
 from mopidy.types import TracklistId
 
@@ -588,8 +588,8 @@ class TracklistController:
         logger.debug("Triggering options changed event")
         listener.CoreListener.send("options_changed")
 
-    def _save_state(self) -> TracklistState:
-        return TracklistState(
+    def _save_state(self) -> TracklistControllerState:
+        return TracklistControllerState(
             tl_tracks=tuple(self._tl_tracks),
             next_tlid=self._next_tlid,
             consume=self.get_consume(),
@@ -600,7 +600,7 @@ class TracklistController:
 
     def _load_state(
         self,
-        state: TracklistState,
+        state: TracklistControllerState,
         coverage: Iterable[str],
     ) -> None:
         if state:

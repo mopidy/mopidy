@@ -6,7 +6,7 @@ import pytest
 
 from mopidy import backend, core
 from mopidy.internal import deprecation
-from mopidy.internal.models import PlaybackState
+from mopidy.internal.models import PlaybackControllerState
 from mopidy.models import Track
 from tests import dummy_audio, dummy_backend
 
@@ -1216,7 +1216,9 @@ class TestCorePlaybackSaveLoadState(BaseTest):
         self.core.playback.play(tl_tracks[1].tlid)
         self.replay_events()
 
-        state = PlaybackState(time_position=0, state="playing", tlid=tl_tracks[1].tlid)
+        state = PlaybackControllerState(
+            time_position=0, state="playing", tlid=tl_tracks[1].tlid
+        )
         value = self.core.playback._save_state()
 
         assert state == value
@@ -1228,7 +1230,9 @@ class TestCorePlaybackSaveLoadState(BaseTest):
         self.replay_events()
         assert self.core.playback.get_state() == "stopped"
 
-        state = PlaybackState(time_position=0, state="playing", tlid=tl_tracks[2].tlid)
+        state = PlaybackControllerState(
+            time_position=0, state="playing", tlid=tl_tracks[2].tlid
+        )
         coverage = ["play-last"]
         self.core.playback._load_state(state, coverage)
         self.replay_events()
@@ -1243,7 +1247,9 @@ class TestCorePlaybackSaveLoadState(BaseTest):
         self.replay_events()
         assert self.core.playback.get_state() == "stopped"
 
-        state = PlaybackState(time_position=0, state="playing", tlid=tl_tracks[2].tlid)
+        state = PlaybackControllerState(
+            time_position=0, state="playing", tlid=tl_tracks[2].tlid
+        )
         coverage = ["other"]
         self.core.playback._load_state(state, coverage)
         self.replay_events()

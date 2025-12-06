@@ -5,7 +5,7 @@ import pykka
 import pytest
 
 from mopidy import core, mixer
-from mopidy.internal.models import MixerState
+from mopidy.internal.models import MixerControllerState
 from tests import dummy_mixer
 
 
@@ -178,7 +178,7 @@ class CoreMixerSaveLoadStateTest(unittest.TestCase):
     def test_save_mute(self):
         volume = 32
         mute = False
-        target = MixerState(volume=volume, mute=mute)
+        target = MixerControllerState(volume=volume, mute=mute)
         self.core.mixer.set_volume(volume)
         self.core.mixer.set_mute(mute)
         value = self.core.mixer._save_state()
@@ -187,7 +187,7 @@ class CoreMixerSaveLoadStateTest(unittest.TestCase):
     def test_save_unmute(self):
         volume = 33
         mute = True
-        target = MixerState(volume=volume, mute=mute)
+        target = MixerControllerState(volume=volume, mute=mute)
         self.core.mixer.set_volume(volume)
         self.core.mixer.set_mute(mute)
         value = self.core.mixer._save_state()
@@ -196,7 +196,7 @@ class CoreMixerSaveLoadStateTest(unittest.TestCase):
     def test_load(self):
         self.core.mixer.set_volume(11)
         volume = 45
-        target = MixerState(volume=volume)
+        target = MixerControllerState(volume=volume)
         coverage = ["mixer"]
         self.core.mixer._load_state(target, coverage)
         assert volume == self.core.mixer.get_volume()
@@ -204,7 +204,7 @@ class CoreMixerSaveLoadStateTest(unittest.TestCase):
     def test_load_not_covered(self):
         self.core.mixer.set_volume(21)
         self.core.mixer.set_mute(True)
-        target = MixerState(volume=56, mute=False)
+        target = MixerControllerState(volume=56, mute=False)
         coverage = ["other"]
         self.core.mixer._load_state(target, coverage)
         assert self.core.mixer.get_volume() == 21
@@ -213,7 +213,7 @@ class CoreMixerSaveLoadStateTest(unittest.TestCase):
     def test_load_mute_on(self):
         self.core.mixer.set_mute(False)
         assert self.core.mixer.get_mute() is False
-        target = MixerState(mute=True)
+        target = MixerControllerState(mute=True)
         coverage = ["mixer"]
         self.core.mixer._load_state(target, coverage)
         assert self.core.mixer.get_mute() is True
@@ -221,7 +221,7 @@ class CoreMixerSaveLoadStateTest(unittest.TestCase):
     def test_load_mute_off(self):
         self.core.mixer.set_mute(True)
         assert self.core.mixer.get_mute() is True
-        target = MixerState(mute=False)
+        target = MixerControllerState(mute=False)
         coverage = ["mixer"]
         self.core.mixer._load_state(target, coverage)
         assert self.core.mixer.get_mute() is False

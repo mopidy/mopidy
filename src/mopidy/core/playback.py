@@ -549,14 +549,16 @@ class PlaybackController:
         logger.debug("Triggering seeked event")
         listener.CoreListener.send("seeked", time_position=time_position)
 
-    def _save_state(self) -> models.PlaybackState:
-        return models.PlaybackState(
+    def _save_state(self) -> models.PlaybackControllerState:
+        return models.PlaybackControllerState(
             tlid=self.get_current_tlid(),
             time_position=self.get_time_position(),
             state=self.get_state(),
         )
 
-    def _load_state(self, state: models.PlaybackState, coverage: Iterable[str]) -> None:
+    def _load_state(
+        self, state: models.PlaybackControllerState, coverage: Iterable[str]
+    ) -> None:
         if state and "play-last" in coverage and state.tlid is not None:
             if state.state == PlaybackState.PAUSED:
                 self._start_paused = True
