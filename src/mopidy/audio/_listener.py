@@ -5,8 +5,7 @@ from typing import TYPE_CHECKING, Any
 from mopidy import listener
 
 if TYPE_CHECKING:
-    from mopidy.audio import PlaybackState
-    from mopidy.types import DurationMs, Uri
+    from mopidy.types import DurationMs, PlaybackState, Uri
 
 
 class AudioListener(listener.Listener):
@@ -69,11 +68,11 @@ class AudioListener(listener.Listener):
         *MAY* be implemented by actor.
 
         :param old_state: the state before the change
-        :type old_state: :class:`mopidy.audio.PlaybackState`
+        :type old_state: :class:`mopidy.types.PlaybackState`
         :param new_state: the state after the change
-        :type new_state: :class:`mopidy.audio.PlaybackState`
+        :type new_state: :class:`mopidy.types.PlaybackState`
         :param target_state: the intended state
-        :type target_state: :class:`mopidy.audio.PlaybackState`
+        :type target_state: :class:`mopidy.types.PlaybackState`
             or :class:`None` if this is a final state.
         """
 

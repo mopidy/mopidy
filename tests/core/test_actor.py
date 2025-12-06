@@ -8,11 +8,10 @@ import pykka
 import pytest
 
 import mopidy
-from mopidy.audio import PlaybackState
 from mopidy.core import Core, CoreListener
 from mopidy.internal import models, storage
 from mopidy.models import Track
-from mopidy.types import DurationMs, Percentage, TracklistId, Uri
+from mopidy.types import DurationMs, Percentage, PlaybackState, TracklistId, Uri
 from tests import dummy_mixer
 
 

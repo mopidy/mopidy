@@ -133,6 +133,9 @@ Changes to the Audio API may affect a few Mopidy backend extensions.
   - :mod:`mopidy.audio.listener`
   - :mod:`mopidy.audio.utils`
 
+- Moved :class:`mopidy.audio.PlaybackState` to
+  :class:`mopidy.types.PlaybackState`.
+
 - Removed APIs only used by Mopidy-Spotify's bespoke audio delivery mechanism,
   which has not been used since Spotify shut down their libspotify APIs in
   May 2022. The removed functions/methods are:

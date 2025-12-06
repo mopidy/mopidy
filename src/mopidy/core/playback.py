@@ -8,11 +8,10 @@ from typing import TYPE_CHECKING
 from pykka.messages import ProxyCall
 from pykka.typing import proxy_method
 
-from mopidy.audio import PlaybackState
 from mopidy.core import listener
 from mopidy.exceptions import CoreError
 from mopidy.internal import models, validation
-from mopidy.types import DurationMs, TracklistId, UriScheme
+from mopidy.types import DurationMs, PlaybackState, TracklistId, UriScheme
 
 if TYPE_CHECKING:
     from mopidy.audio import AudioProxy

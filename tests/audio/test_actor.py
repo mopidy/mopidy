@@ -538,7 +538,7 @@ class AudioStateTest(unittest.TestCase):
         self.audio = audio.Audio(config=None, mixer=None)
 
     def test_state_starts_as_stopped(self):
-        assert self.audio.state == audio.PlaybackState.STOPPED
+        assert self.audio.state == PlaybackState.STOPPED
 
     def test_state_does_not_change_when_in_gst_ready_state(self):
         self.audio._handler.on_playbin_state_changed(
@@ -547,7 +547,7 @@ class AudioStateTest(unittest.TestCase):
             Gst.State.VOID_PENDING,
         )
 
-        assert self.audio.state == audio.PlaybackState.STOPPED
+        assert self.audio.state == PlaybackState.STOPPED
 
     def test_state_changes_from_stopped_to_playing_on_play(self):
         self.audio._handler.on_playbin_state_changed(
@@ -566,10 +566,10 @@ class AudioStateTest(unittest.TestCase):
             Gst.State.VOID_PENDING,
         )
 
-        assert self.audio.state == audio.PlaybackState.PLAYING
+        assert self.audio.state == PlaybackState.PLAYING
 
     def test_state_changes_from_playing_to_paused_on_pause(self):
-        self.audio.state = audio.PlaybackState.PLAYING
+        self.audio.state = PlaybackState.PLAYING
 
         self.audio._handler.on_playbin_state_changed(
             Gst.State.PLAYING,
@@ -577,10 +577,10 @@ class AudioStateTest(unittest.TestCase):
             Gst.State.VOID_PENDING,
         )
 
-        assert self.audio.state == audio.PlaybackState.PAUSED
+        assert self.audio.state == PlaybackState.PAUSED
 
     def test_state_changes_from_playing_to_stopped_on_stop(self):
-        self.audio.state = audio.PlaybackState.PLAYING
+        self.audio.state = PlaybackState.PLAYING
 
         self.audio._handler.on_playbin_state_changed(
             Gst.State.PLAYING,
@@ -596,7 +596,7 @@ class AudioStateTest(unittest.TestCase):
         # self.audio._handler.on_playbin_state_changed(
         #     Gst.State.READY, Gst.State.NULL, Gst.State.VOID_PENDING)
 
-        assert self.audio.state == audio.PlaybackState.STOPPED
+        assert self.audio.state == PlaybackState.STOPPED
 
 
 class AudioBufferingTest(unittest.TestCase):
