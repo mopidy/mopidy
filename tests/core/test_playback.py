@@ -8,6 +8,7 @@ from mopidy import backend, core
 from mopidy.internal import deprecation
 from mopidy.internal.models import PlaybackControllerState
 from mopidy.models import Track
+from mopidy.types import PlaybackState
 from tests import dummy_audio, dummy_backend
 
 
@@ -850,19 +851,19 @@ class TestUnplayableURI(BaseTest):
 
     def test_pause_changes_state_even_if_track_is_unplayable(self):
         self.core.playback.pause()
-        assert self.core.playback.get_state() == core.PlaybackState.PAUSED
+        assert self.core.playback.get_state() == PlaybackState.PAUSED
 
     def test_resume_does_nothing_if_track_is_unplayable(self):
-        self.core.playback.set_state(core.PlaybackState.PAUSED)
+        self.core.playback.set_state(PlaybackState.PAUSED)
         self.core.playback.resume()
 
-        assert self.core.playback.get_state() == core.PlaybackState.PAUSED
+        assert self.core.playback.get_state() == PlaybackState.PAUSED
 
     def test_stop_changes_state_even_if_track_is_unplayable(self):
-        self.core.playback.set_state(core.PlaybackState.PAUSED)
+        self.core.playback.set_state(PlaybackState.PAUSED)
         self.core.playback.stop()
 
-        assert self.core.playback.get_state() == core.PlaybackState.STOPPED
+        assert self.core.playback.get_state() == PlaybackState.STOPPED
 
     def test_time_position_returns_0_if_track_is_unplayable(self):
         result = self.core.playback.get_time_position()
@@ -870,7 +871,7 @@ class TestUnplayableURI(BaseTest):
         assert result == 0
 
     def test_seek_fails_for_unplayable_track(self):
-        self.core.playback.set_state(core.PlaybackState.PLAYING)
+        self.core.playback.set_state(PlaybackState.PLAYING)
         success = self.core.playback.seek(1000)
 
         assert not success
@@ -905,7 +906,7 @@ class TestSeek(BaseTest):
         self.replay_events()
 
         self.core.playback.seek(1000)
-        assert self.core.playback.get_state() == core.PlaybackState.PLAYING
+        assert self.core.playback.get_state() == PlaybackState.PLAYING
 
     def test_seek_paused_stay_paused(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -917,7 +918,7 @@ class TestSeek(BaseTest):
         self.replay_events()
 
         self.core.playback.seek(1000)
-        assert self.core.playback.get_state() == core.PlaybackState.PAUSED
+        assert self.core.playback.get_state() == PlaybackState.PAUSED
 
     def test_seek_race_condition_after_about_to_finish(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -938,7 +939,7 @@ class TestSeek(BaseTest):
 
         self.core.playback.seek(1000)
         self.replay_events()
-        assert self.core.playback.get_state() == core.PlaybackState.PLAYING
+        assert self.core.playback.get_state() == PlaybackState.PLAYING
 
 
 class TestStream(BaseTest):

@@ -1,8 +1,9 @@
 import unittest
 from unittest import mock
 
-from mopidy.core import CoreListener, PlaybackState
+from mopidy.core import CoreListener
 from mopidy.models import Playlist, TlTrack, Track
+from mopidy.types import PlaybackState
 
 
 class CoreListenerTest(unittest.TestCase):

@@ -3,7 +3,7 @@ from ._history import HistoryController, HistoryControllerProxy
 from ._library import LibraryController, LibraryControllerProxy
 from ._listener import CoreEvent, CoreEventData, CoreListener
 from ._mixer import MixerController, MixerControllerProxy
-from ._playback import PlaybackController, PlaybackControllerProxy, PlaybackState
+from ._playback import PlaybackController, PlaybackControllerProxy
 from ._playlists import PlaylistsController, PlaylistsControllerProxy
 from ._tracklist import TracklistController, TracklistControllerProxy
 
@@ -21,7 +21,6 @@ __all__ = [
     "MixerControllerProxy",
     "PlaybackController",
     "PlaybackControllerProxy",
-    "PlaybackState",
     "PlaylistsController",
     "PlaylistsControllerProxy",
     "TracklistController",
