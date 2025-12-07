@@ -2,8 +2,8 @@ from ._actor import Core, CoreProxy
 from ._history import HistoryController, HistoryControllerProxy
 from ._library import LibraryController, LibraryControllerProxy
 from ._mixer import MixerController, MixerControllerProxy
+from ._playback import PlaybackController, PlaybackControllerProxy, PlaybackState
 from .listener import CoreEvent, CoreEventData, CoreListener
-from .playback import PlaybackController, PlaybackControllerProxy, PlaybackState
 from .playlists import PlaylistsController, PlaylistsControllerProxy
 from .tracklist import TracklistController, TracklistControllerProxy
 

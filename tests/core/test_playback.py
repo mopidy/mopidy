@@ -528,7 +528,7 @@ class TestCurrentAndPendingTlTrack(BaseTest):
         assert self.playback.get_current_tl_track() is None
 
 
-@mock.patch("mopidy.core.playback.listener.CoreListener", spec=core.CoreListener)
+@mock.patch("mopidy.core.listener.CoreListener", spec=core.CoreListener)
 class TestEventEmission(BaseTest):
     maxDiff = None
 

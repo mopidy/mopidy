@@ -155,7 +155,7 @@ class CoreActorTest(unittest.TestCase):
     def test_version(self):
         assert self.core.get_version() == mopidy.__version__
 
-    @mock.patch("mopidy.core.playback.listener.CoreListener", spec=CoreListener)
+    @mock.patch("mopidy.core.listener.CoreListener", spec=CoreListener)
     def test_state_changed(self, listener_mock):
         self.core.state_changed(None, PlaybackState.PAUSED, None)
 
