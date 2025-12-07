@@ -8,11 +8,12 @@ from typing import TYPE_CHECKING
 from pykka.typing import proxy_method
 
 from mopidy import exceptions
-from mopidy.core import listener
 from mopidy.internal import deprecation, validation
 from mopidy.internal.models import TracklistControllerState
 from mopidy.models import TlTrack, Track
 from mopidy.types import TracklistId
+
+from ._listener import CoreListener
 
 logger = logging.getLogger(__name__)
 
@@ -583,11 +584,11 @@ class TracklistController:
             self._shuffled = []
 
         logger.debug("Triggering event: tracklist_changed()")
-        listener.CoreListener.send("tracklist_changed")
+        CoreListener.send("tracklist_changed")
 
     def _trigger_options_changed(self) -> None:
         logger.debug("Triggering options changed event")
-        listener.CoreListener.send("options_changed")
+        CoreListener.send("options_changed")
 
     def _save_state(self) -> TracklistControllerState:
         return TracklistControllerState(

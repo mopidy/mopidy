@@ -13,13 +13,13 @@ from pykka.typing import ActorMemberMixin, proxy_method
 
 import mopidy
 from mopidy import audio, backend, mixer
-from mopidy.core.listener import CoreListener
 from mopidy.internal import path, storage
 from mopidy.internal.models import CoreControllersState, StoredState
 from mopidy.types import PlaybackState
 
 from ._history import HistoryController
 from ._library import LibraryController
+from ._listener import CoreListener
 from ._mixer import MixerController
 from ._playback import PlaybackController
 from ._playlists import PlaylistsController

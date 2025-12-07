@@ -8,10 +8,11 @@ from typing import TYPE_CHECKING
 from pykka.messages import ProxyCall
 from pykka.typing import proxy_method
 
-from mopidy.core import listener
 from mopidy.exceptions import CoreError
 from mopidy.internal import models, validation
 from mopidy.types import DurationMs, PlaybackState, TracklistId, UriScheme
+
+from ._listener import CoreListener
 
 if TYPE_CHECKING:
     from mopidy.audio import AudioProxy
@@ -486,7 +487,7 @@ class PlaybackController:
         logger.debug("Triggering track playback paused event")
         if self.get_current_tl_track() is None:
             return
-        listener.CoreListener.send(
+        CoreListener.send(
             "track_playback_paused",
             tl_track=self.get_current_tl_track(),
             time_position=self.get_time_position(),
@@ -496,7 +497,7 @@ class PlaybackController:
         logger.debug("Triggering track playback resumed event")
         if self.get_current_tl_track() is None:
             return
-        listener.CoreListener.send(
+        CoreListener.send(
             "track_playback_resumed",
             tl_track=self.get_current_tl_track(),
             time_position=self.get_time_position(),
@@ -512,7 +513,7 @@ class PlaybackController:
             return
         self.core.tracklist._mark_playing(tl_track)
         self.core.history._add_track(tl_track.track)
-        listener.CoreListener.send("track_playback_started", tl_track=tl_track)
+        CoreListener.send("track_playback_started", tl_track=tl_track)
 
     def _trigger_track_playback_ended(self, time_position_before_stop: int) -> None:
         tl_track = self.get_current_tl_track()
@@ -526,7 +527,7 @@ class PlaybackController:
         self._previous = False
 
         # TODO: Use the lowest of track duration and position.
-        listener.CoreListener.send(
+        CoreListener.send(
             "track_playback_ended",
             tl_track=tl_track,
             time_position=time_position_before_stop,
@@ -538,7 +539,7 @@ class PlaybackController:
         new_state: PlaybackState,
     ) -> None:
         logger.debug("Triggering playback state change event")
-        listener.CoreListener.send(
+        CoreListener.send(
             "playback_state_changed",
             old_state=old_state,
             new_state=new_state,
@@ -547,7 +548,7 @@ class PlaybackController:
     def _trigger_seeked(self, time_position: int) -> None:
         # TODO: Trigger this from audio events?
         logger.debug("Triggering seeked event")
-        listener.CoreListener.send("seeked", time_position=time_position)
+        CoreListener.send("seeked", time_position=time_position)
 
     def _save_state(self) -> models.PlaybackControllerState:
         return models.PlaybackControllerState(
