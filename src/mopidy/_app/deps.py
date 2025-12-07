@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import platform
 import re
 import sys
@@ -7,9 +8,32 @@ from dataclasses import dataclass, field
 from importlib import metadata
 from os import PathLike
 from pathlib import Path
+from typing import TYPE_CHECKING, Any, override
 
-from mopidy.internal import formatting
+from mopidy.commands import Command
 from mopidy.internal.gi import Gst, gi
+
+if TYPE_CHECKING:
+    from mopidy.config import Config
+
+
+class DepsCommand(Command):
+    help = "Show dependencies and debug information."
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.set(base_verbosity_level=-1)
+
+    @override
+    def run(
+        self,
+        args: argparse.Namespace,
+        config: Config,
+        *_args: Any,
+        **_kwargs: Any,
+    ) -> int:
+        print(format_dependency_list())  # noqa: T201
+        return 0
 
 
 @dataclass
@@ -44,7 +68,7 @@ def format_dependency_list(dependencies: list[DepInfo] | None = None) -> str:
                     pkg_name=pkg_name,
                     seen_pkgs=seen_pkgs,
                 )
-                for pkg_name in ext_pkg_names
+                for pkg_name in sorted(ext_pkg_names)
             ],
             gstreamer_info(),
         ]
@@ -61,14 +85,18 @@ def _format_dependency(dep: DepInfo) -> str:
         lines.append(f"{dep.name}: {dep.version}{source}")
 
     if dep.other:
-        details = formatting.indent(dep.other, places=4)
-        lines.append(f"  Detailed information: {details}")
+        lines.append("  Detailed information:")
+        lines.append(_indent(dep.other, places=4))
 
     for sub_dep in dep.dependencies:
         sub_dep_lines = _format_dependency(sub_dep)
-        lines.append(formatting.indent(sub_dep_lines, places=2, singles=True))
+        lines.append(_indent(sub_dep_lines, places=2))
 
     return "\n".join(lines)
+
+
+def _indent(value: str, *, places: int) -> str:
+    return "\n".join(" " * places + line for line in value.splitlines())
 
 
 def executable_info() -> DepInfo:
@@ -132,7 +160,6 @@ def pkg_info(
 
 def gstreamer_info() -> DepInfo:
     other: list[str] = []
-    other.append(f"Python wrapper: python-gi {gi.__version__}")
 
     found_elements = []
     missing_elements = []
@@ -142,15 +169,14 @@ def gstreamer_info() -> DepInfo:
         else:
             missing_elements.append(name)
 
-    other.append("Relevant elements:")
-    other.append("  Found:")
-    other.extend(f"    {element}: {version}" for (element, version) in found_elements)
+    other.append("Available elements:")
+    other.extend(f"  {element}: {version}" for (element, version) in found_elements)
     if not found_elements:
-        other.append("    none")
-    other.append("  Not found:")
-    other.extend(f"    {element}" for element in missing_elements)
+        other.append("  none")
+    other.append("Elements not found:")
+    other.extend(f"  {element}" for element in missing_elements)
     if not missing_elements:
-        other.append("    none")
+        other.append("  none")
 
     return DepInfo(
         name="GStreamer",
