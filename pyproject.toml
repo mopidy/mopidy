@@ -68,7 +68,7 @@ tests = [
     "responses >= 0.25",
 ]
 typing = [
-    "pygobject-stubs >= 2.14.0",
+    "pygobject-stubs >= 2.14.0, != 2.15.0",
     "pyright == 1.1.407",
     "types-requests >= 2.32",
 ]
