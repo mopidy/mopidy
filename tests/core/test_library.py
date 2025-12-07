@@ -418,17 +418,13 @@ class GetDistinctTest(BaseCoreLibraryTest):
         self.library2.get_distinct.assert_called_with("track", None)
         assert result == {result1}
 
-    @mock.patch("mopidy.internal.deprecation.warn")
-    def test_track_field_is_deprecated(self, deprecate_warn_mock):
+    def test_track_field_is_deprecated(self):
         result1 = "bar"
         self.library1.get_distinct.return_value.get.return_value = {result1}
         self.library2.get_distinct.return_value.get.return_value = {}
 
-        assert self.core.library.get_distinct("track") == {result1}
-        deprecate_warn_mock.assert_called_once_with(
-            "core.library.get_distinct:field_arg:track",
-            pending=mock.ANY,
-        )
+        with pytest.deprecated_call():
+            assert self.core.library.get_distinct("track") == {result1}
 
     @mock.patch.object(core._library, "logger")
     def test_validate_integer_results(self, logger_mock):
