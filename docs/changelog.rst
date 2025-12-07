@@ -141,6 +141,12 @@ Audio API
 
 Changes to the Audio API may affect a few Mopidy backend extensions.
 
+- The old audio actor has been split into a :class:`mopidy.audio.Audio`
+  interface with the API used by core and backends, and a
+  :class:`mopidy.audio.GstAudio` implementation using GStreamer.
+  The API is still very specific to GStreamer, but this split makes it a bit
+  easier to mock out the audio layer in tests.
+
 - The audio API is no longer exported from submodules, just from
   :mod:`mopidy.audio`. Update your imports accordingly. The removed modules are:
 

@@ -5,10 +5,7 @@ import contextlib
 import logging
 import signal
 from collections.abc import Generator
-from typing import (
-    Any,
-    cast,
-)
+from typing import Any, cast
 
 import pykka
 from pykka import ThreadingActor
@@ -17,7 +14,7 @@ from pykka.messages import ProxyCall
 import mopidy
 from mopidy import config as config_lib
 from mopidy import exceptions
-from mopidy.audio import Audio, AudioProxy
+from mopidy.audio import AudioProxy, GstAudio
 from mopidy.backend import BackendActor, BackendProxy
 from mopidy.commands import Command, config_files_type, config_override_type
 from mopidy.core import Core, CoreProxy
@@ -193,7 +190,7 @@ class RootCommand(Command):
         mixer: MixerProxy | None,
     ) -> AudioProxy:
         logger.info("Starting Mopidy audio")
-        return cast(AudioProxy, Audio.start(config=config, mixer=mixer).proxy())
+        return cast(AudioProxy, GstAudio.start(config=config, mixer=mixer).proxy())
 
     def start_backends(
         self,
@@ -286,7 +283,7 @@ class RootCommand(Command):
 
     def stop_audio(self) -> None:
         logger.info("Stopping Mopidy audio")
-        process.stop_actors_by_class(Audio)
+        process.stop_actors_by_class(GstAudio)
 
     def stop_mixer(self, mixer_class: type[MixerActor]) -> None:
         logger.info("Stopping Mopidy mixer")
