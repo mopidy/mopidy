@@ -68,7 +68,7 @@ def format_dependency_list(dependencies: list[DepInfo] | None = None) -> str:
                     pkg_name=pkg_name,
                     seen_pkgs=seen_pkgs,
                 )
-                for pkg_name in ext_pkg_names
+                for pkg_name in sorted(ext_pkg_names)
             ],
             gstreamer_info(),
         ]
