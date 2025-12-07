@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import configparser
-import itertools
 import logging
 import os
 import pathlib
@@ -338,55 +337,6 @@ def _format(
                 output[-1] = re.sub(r"^", "#", output[-1], flags=re.MULTILINE)
         output.append("")
     return "\n".join(output).strip()
-
-
-def _preprocess(config_string: str) -> str:
-    """Convert a raw config into a form that preserves comments etc."""
-    results = ["[__COMMENTS__]"]
-    counter = itertools.count(0)
-
-    section_re = re.compile(r"^(\[[^\]]+\])\s*(.+)$")
-    blank_line_re = re.compile(r"^\s*$")
-    comment_re = re.compile(r"^(#|;)")
-    inline_comment_re = re.compile(r" ;")
-
-    def newlines(_match) -> str:
-        return f"__BLANK{next(counter):d}__ ="
-
-    def comments(match) -> str:
-        match match.group(1):
-            case "#":
-                return f"__HASH{next(counter):d}__ ="
-            case ";":
-                return f"__SEMICOLON{next(counter):d}__ ="
-            case _:
-                msg = f"Unexpected comment type: {match.group(1)!r}"
-                raise AssertionError(msg)
-
-    def inlinecomments(_match) -> str:
-        return f"\n__INLINE{next(counter):d}__ ="
-
-    def sections(match) -> str:
-        return f"{match.group(1)}\n__SECTION{next(counter):d}__ = {match.group(2)}"
-
-    for line in config_string.splitlines():
-        line = blank_line_re.sub(newlines, line)
-        line = section_re.sub(sections, line)
-        line = comment_re.sub(comments, line)
-        line = inline_comment_re.sub(inlinecomments, line)
-        results.append(line)
-    return "\n".join(results)
-
-
-def _postprocess(config_string: str) -> str:
-    """Converts a preprocessed config back to original form."""
-    flags = re.IGNORECASE | re.MULTILINE
-    result = re.sub(r"^\[__COMMENTS__\](\n|$)", "", config_string, flags=flags)
-    result = re.sub(r"\n__INLINE\d+__ =(.*)$", r" ;\g<1>", result, flags=flags)
-    result = re.sub(r"^__HASH\d+__ =(.*)$", r"#\g<1>", result, flags=flags)
-    result = re.sub(r"^__SEMICOLON\d+__ =(.*)$", r";\g<1>", result, flags=flags)
-    result = re.sub(r"\n__SECTION\d+__ =(.*)$", r"\g<1>", result, flags=flags)
-    return re.sub(r"^__BLANK\d+__ =$", "", result, flags=flags)
 
 
 class Proxy(Mapping):
