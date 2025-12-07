@@ -26,7 +26,7 @@ from mopidy.types import Percentage
 logger = logging.getLogger(__name__)
 
 
-class RootCommand(Command):
+class ServerCommand(Command):
     def __init__(self) -> None:
         super().__init__()
         self.set(base_verbosity_level=0)

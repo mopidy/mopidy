@@ -1,8 +1,8 @@
-from mopidy._app import root
+from mopidy._app import server
 
 
 def test_config_overrides():
-    cmd = root.RootCommand()
+    cmd = server.ServerCommand()
     result = cmd.parse(["--option", "foo/bar=baz"])
 
     assert result.config_overrides[0] == ("foo", "bar", "baz")

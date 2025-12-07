@@ -19,7 +19,7 @@ from mopidy.internal.gi import (
 
 from .config import ConfigCommand
 from .deps import DepsCommand
-from .root import RootCommand
+from .server import ServerCommand
 
 try:
     # Make GLib's mainloop the event loop for python-dbus
@@ -54,22 +54,22 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
     try:
         registry = ext.Registry()
 
-        root_cmd = RootCommand()
+        server_cmd = ServerCommand()
         config_cmd = ConfigCommand()
         deps_cmd = DepsCommand()
 
-        root_cmd.set(extension=None, registry=registry)
-        root_cmd.add_child("config", config_cmd)
-        root_cmd.add_child("deps", deps_cmd)
+        server_cmd.set(extension=None, registry=registry)
+        server_cmd.add_child("config", config_cmd)
+        server_cmd.add_child("deps", deps_cmd)
 
         extensions_data = ext.load_extensions()
 
         for data in extensions_data:
             if data.command:  # TODO: check isinstance?
                 data.command.set(extension=data.extension)
-                root_cmd.add_child(data.extension.ext_name, data.command)
+                server_cmd.add_child(data.extension.ext_name, data.command)
 
-        args = root_cmd.parse(sys.argv[1:])
+        args = server_cmd.parse(sys.argv[1:])
 
         default_config_files = [
             (Path(base) / "mopidy" / "mopidy.conf").resolve()
@@ -179,7 +179,7 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
                 config=proxied_config,
             )
         except NotImplementedError:
-            print(root_cmd.format_help())  # noqa: T201
+            print(server_cmd.format_help())  # noqa: T201
             return 1
 
     except KeyboardInterrupt:
