@@ -1,11 +1,11 @@
-from .actor import Core, CoreProxy
-from .history import HistoryController, HistoryControllerProxy
-from .library import LibraryController, LibraryControllerProxy
-from .listener import CoreEvent, CoreEventData, CoreListener
-from .mixer import MixerController, MixerControllerProxy
-from .playback import PlaybackController, PlaybackControllerProxy, PlaybackState
-from .playlists import PlaylistsController, PlaylistsControllerProxy
-from .tracklist import TracklistController, TracklistControllerProxy
+from ._actor import Core, CoreProxy
+from ._history import HistoryController, HistoryControllerProxy
+from ._library import LibraryController, LibraryControllerProxy
+from ._listener import CoreEvent, CoreEventData, CoreListener
+from ._mixer import MixerController, MixerControllerProxy
+from ._playback import PlaybackController, PlaybackControllerProxy, PlaybackState
+from ._playlists import PlaylistsController, PlaylistsControllerProxy
+from ._tracklist import TracklistController, TracklistControllerProxy
 
 __all__ = [
     "Core",

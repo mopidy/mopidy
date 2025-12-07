@@ -391,7 +391,7 @@ class GetDistinctTest(BaseCoreLibraryTest):
         assert result1 in result
         assert len(result) == 1
 
-    @mock.patch.object(core.library.validation, "check_choice")
+    @mock.patch.object(core._library.validation, "check_choice")
     def test_checks_field_is_valid(self, check_choice_mock):
         self.core.library.get_distinct("artist")
         check_choice_mock.assert_called_with(
@@ -430,7 +430,7 @@ class GetDistinctTest(BaseCoreLibraryTest):
             pending=mock.ANY,
         )
 
-    @mock.patch("mopidy.core.library.logger")
+    @mock.patch.object(core._library, "logger")
     def test_validate_integer_results(self, logger_mock):
         result1 = 99
         self.library1.get_distinct.return_value.get.return_value = {result1}
@@ -443,7 +443,7 @@ class GetDistinctTest(BaseCoreLibraryTest):
         assert self.core.library.get_distinct("uri") == set()
         logger_mock.error.assert_called_once()
 
-    @mock.patch("mopidy.core.library.logger")
+    @mock.patch.object(core._library, "logger")
     def test_wrong_result_types_removed_and_logged(self, logger_mock):
         result1 = 99
         self.library1.get_distinct.return_value.get.return_value = {result1}
@@ -508,7 +508,7 @@ class MockBackendCoreLibraryBase(unittest.TestCase):
         self.core = core.Core(config={}, mixer=None, backends=[self.backend])
 
 
-@mock.patch("mopidy.core.library.logger")
+@mock.patch.object(core._library, "logger")
 class BrowseBadBackendTest(MockBackendCoreLibraryBase):
     def test_backend_raises_exception_for_root(self, logger):
         # Might happen if root_directory is a property for some weird reason.
@@ -537,7 +537,7 @@ class BrowseBadBackendTest(MockBackendCoreLibraryBase):
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
 
-@mock.patch("mopidy.core.library.logger")
+@mock.patch.object(core._library, "logger")
 class GetDistinctBadBackendTest(MockBackendCoreLibraryBase):
     def test_backend_raises_exception(self, logger):
         self.library.get_distinct.return_value.get.side_effect = Exception
@@ -560,7 +560,7 @@ class GetDistinctBadBackendTest(MockBackendCoreLibraryBase):
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
 
-@mock.patch("mopidy.core.library.logger")
+@mock.patch.object(core._library, "logger")
 class GetImagesBadBackendTest(MockBackendCoreLibraryBase):
     def test_backend_raises_exception(self, logger):
         uri = "dummy:/1"
@@ -599,7 +599,7 @@ class GetImagesBadBackendTest(MockBackendCoreLibraryBase):
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
 
-@mock.patch("mopidy.core.library.logger")
+@mock.patch.object(core._library, "logger")
 class LookupByUrisBadBackendTest(MockBackendCoreLibraryBase):
     def test_backend_raises_exception(self, logger):
         uri = "dummy:/1"
@@ -628,7 +628,7 @@ class LookupByUrisBadBackendTest(MockBackendCoreLibraryBase):
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
 
-@mock.patch("mopidy.core.library.logger")
+@mock.patch.object(core._library, "logger")
 class RefreshBadBackendTest(MockBackendCoreLibraryBase):
     def test_backend_raises_exception(self, logger):
         self.library.refresh.return_value.get.side_effect = Exception
@@ -641,7 +641,7 @@ class RefreshBadBackendTest(MockBackendCoreLibraryBase):
         logger.exception.assert_called_with(mock.ANY, "DummyBackend")
 
 
-@mock.patch("mopidy.core.library.logger")
+@mock.patch.object(core._library, "logger")
 class SearchBadBackendTest(MockBackendCoreLibraryBase):
     def test_backend_raises_exception(self, logger):
         self.library.search.return_value.get.side_effect = Exception

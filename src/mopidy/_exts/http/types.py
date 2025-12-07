@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, TypedDict
 import tornado.web
 
 if TYPE_CHECKING:
-    from mopidy.core.actor import CoreProxy
+    from mopidy.core import CoreProxy
     from mopidy.ext import Config
 
 

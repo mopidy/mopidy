@@ -8,7 +8,7 @@ import pykka
 import pytest
 
 import mopidy
-from mopidy.core import Core, CoreListener
+from mopidy import core
 from mopidy.internal import models, storage
 from mopidy.models import Track
 from mopidy.types import DurationMs, Percentage, PlaybackState, TracklistId, Uri
@@ -70,7 +70,7 @@ class CoreActorTest(unittest.TestCase):
             has_playlists=True,
         )
 
-        self.core = Core(
+        self.core = core.Core(
             config={},
             mixer=None,
             backends=[self.backend1, self.backend2],
@@ -105,17 +105,17 @@ class CoreActorTest(unittest.TestCase):
             has_playlists=False,
         )
 
-        core = Core(
+        core_instance = core.Core(
             config={},
             mixer=None,
             backends=[backend3, self.backend1, self.backend2],
         )
 
-        assert core.backends == [self.backend1, self.backend2]
-        assert list(core.backends.with_library.keys()) == ["dummy1", "dummy2"]
-        assert list(core.backends.with_library_browse.keys()) == ["dummy1"]
-        assert list(core.backends.with_playback.keys()) == []
-        assert list(core.backends.with_playlists.keys()) == ["dummy2"]
+        assert core_instance.backends == [self.backend1, self.backend2]
+        assert list(core_instance.backends.with_library.keys()) == ["dummy1", "dummy2"]
+        assert list(core_instance.backends.with_library_browse.keys()) == ["dummy1"]
+        assert list(core_instance.backends.with_playback.keys()) == []
+        assert list(core_instance.backends.with_playlists.keys()) == ["dummy2"]
 
     def test_exclude_backend_from_sublists_on_error_when_not_first(self):
         backend3 = make_backend_mock(
@@ -127,17 +127,17 @@ class CoreActorTest(unittest.TestCase):
             has_playlists=False,
         )
 
-        core = Core(
+        core_instance = core.Core(
             config={},
             mixer=None,
             backends=[self.backend1, backend3, self.backend2],
         )
 
-        assert core.backends == [self.backend1, self.backend2]
-        assert list(core.backends.with_library.keys()) == ["dummy1", "dummy2"]
-        assert list(core.backends.with_library_browse.keys()) == ["dummy1"]
-        assert list(core.backends.with_playback.keys()) == []
-        assert list(core.backends.with_playlists.keys()) == ["dummy2"]
+        assert core_instance.backends == [self.backend1, self.backend2]
+        assert list(core_instance.backends.with_library.keys()) == ["dummy1", "dummy2"]
+        assert list(core_instance.backends.with_library_browse.keys()) == ["dummy1"]
+        assert list(core_instance.backends.with_playback.keys()) == []
+        assert list(core_instance.backends.with_playlists.keys()) == ["dummy2"]
 
     def test_backends_with_colliding_uri_schemes_fails(self):
         self.backend2.uri_schemes.get.return_value = ["dummy1", "dummy2"]
@@ -146,7 +146,7 @@ class CoreActorTest(unittest.TestCase):
             AssertionError,
             match="Cannot add URI scheme 'dummy1' for B2, it is already handled by B1",
         ):
-            Core(
+            core.Core(
                 config={},
                 mixer=None,
                 backends=[self.backend1, self.backend2],
@@ -155,7 +155,7 @@ class CoreActorTest(unittest.TestCase):
     def test_version(self):
         assert self.core.get_version() == mopidy.__version__
 
-    @mock.patch("mopidy.core.playback.listener.CoreListener", spec=CoreListener)
+    @mock.patch.object(core._playback, "CoreListener", spec=core.CoreListener)
     def test_state_changed(self, listener_mock):
         self.core.state_changed(None, PlaybackState.PAUSED, None)
 
@@ -183,7 +183,7 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
         }
 
         self.mixer = dummy_mixer.create_proxy()
-        self.core = Core(
+        self.core = core.Core(
             config=config,
             mixer=self.mixer,
             backends=[],

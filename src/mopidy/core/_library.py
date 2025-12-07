@@ -17,7 +17,8 @@ from mopidy.types import DistinctField, Query, SearchField, Uri, UriScheme
 
 if TYPE_CHECKING:
     from mopidy.backend import BackendProxy
-    from mopidy.core.actor import Backends, Core
+
+    from ._actor import Backends, Core
 
 logger = logging.getLogger(__name__)
 

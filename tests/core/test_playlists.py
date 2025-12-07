@@ -274,7 +274,7 @@ class MockBackendCorePlaylistsBase(unittest.TestCase):
         )
 
 
-@mock.patch("mopidy.core.playlists.logger")
+@mock.patch.object(core._playlists, "logger")
 class AsListBadBackendsTest(MockBackendCorePlaylistsBase):
     def test_backend_raises_exception(self, logger):
         self.playlists.as_list.return_value.get.side_effect = Exception
@@ -292,7 +292,7 @@ class AsListBadBackendsTest(MockBackendCorePlaylistsBase):
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
 
-@mock.patch("mopidy.core.playlists.logger")
+@mock.patch.object(core._playlists, "logger")
 class GetItemsBadBackendsTest(MockBackendCorePlaylistsBase):
     def test_backend_raises_exception(self, logger):
         self.playlists.get_items.return_value.get.side_effect = Exception
@@ -310,7 +310,7 @@ class GetItemsBadBackendsTest(MockBackendCorePlaylistsBase):
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
 
-@mock.patch("mopidy.core.playlists.logger")
+@mock.patch.object(core._playlists, "logger")
 class CreateBadBackendsTest(MockBackendCorePlaylistsBase):
     def test_backend_raises_exception(self, logger):
         self.playlists.create.return_value.get.side_effect = Exception
@@ -328,7 +328,7 @@ class CreateBadBackendsTest(MockBackendCorePlaylistsBase):
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
 
-@mock.patch("mopidy.core.playlists.logger")
+@mock.patch("mopidy.core._playlists.logger")
 class DeleteBadBackendsTest(MockBackendCorePlaylistsBase):
     def test_backend_raises_exception(self, logger):
         self.playlists.delete.return_value.get.side_effect = Exception
@@ -336,7 +336,7 @@ class DeleteBadBackendsTest(MockBackendCorePlaylistsBase):
         logger.exception.assert_called_with(mock.ANY, "DummyBackend")
 
 
-@mock.patch("mopidy.core.playlists.logger")
+@mock.patch("mopidy.core._playlists.logger")
 class LookupBadBackendsTest(MockBackendCorePlaylistsBase):
     def test_backend_raises_exception(self, logger):
         self.playlists.lookup.return_value.get.side_effect = Exception
@@ -354,24 +354,24 @@ class LookupBadBackendsTest(MockBackendCorePlaylistsBase):
         logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
 
 
-@mock.patch("mopidy.core.playlists.logger")
+@mock.patch.object(core._playlists, "logger")
 class RefreshBadBackendsTest(MockBackendCorePlaylistsBase):
-    @mock.patch("mopidy.core.listener.CoreListener.send")
-    def test_backend_raises_exception(self, send, logger):
+    @mock.patch.object(core.CoreListener, "send")
+    def test_backend_raises_exception(self, send_mock, logger):
         self.playlists.refresh.return_value.get.side_effect = Exception
         self.core.playlists.refresh()
-        assert not send.called
+        assert not send_mock.called
         logger.exception.assert_called_with(mock.ANY, "DummyBackend")
 
-    @mock.patch("mopidy.core.listener.CoreListener.send")
-    def test_backend_raises_exception_called_with_uri(self, send, logger):
+    @mock.patch.object(core.CoreListener, "send")
+    def test_backend_raises_exception_called_with_uri(self, send_mock, logger):
         self.playlists.refresh.return_value.get.side_effect = Exception
         self.core.playlists.refresh("dummy")
-        assert not send.called
+        assert not send_mock.called
         logger.exception.assert_called_with(mock.ANY, "DummyBackend")
 
 
-@mock.patch("mopidy.core.playlists.logger")
+@mock.patch.object(core._playlists, "logger")
 class SaveBadBackendsTest(MockBackendCorePlaylistsBase):
     def test_backend_raises_exception(self, logger):
         playlist = Playlist(uri="dummy:/1")
