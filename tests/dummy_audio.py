@@ -4,10 +4,15 @@ This class implements the audio API in the simplest way possible. It is used in
 tests of the core and backends.
 """
 
+from typing import TYPE_CHECKING, cast, override
+
 import pykka
 
 from mopidy import audio
-from mopidy.types import PlaybackState
+from mopidy.types import DurationMs, PlaybackState
+
+if TYPE_CHECKING:
+    from mopidy.internal.gi import Gst
 
 
 def create_proxy(config=None, mixer=None):
@@ -15,11 +20,11 @@ def create_proxy(config=None, mixer=None):
 
 
 # TODO: reset position on track change?
-class DummyAudio(pykka.ThreadingActor):
+class DummyAudio(audio.Audio, pykka.ThreadingActor):
     def __init__(self, config=None, mixer=None):
         super().__init__()
         self.state = PlaybackState.STOPPED
-        self._position = 0
+        self._position = DurationMs(0)
         self._source_setup_callback = None
         self._about_to_finish_callback = None
         self._uri = None
@@ -28,48 +33,60 @@ class DummyAudio(pykka.ThreadingActor):
         self._tags = {}
         self._bad_uris = set()
 
+    @override
     def set_uri(self, uri, live_stream=False, download=False):
         assert self._uri is None, "prepare change not called before set"
-        self._position = 0
+        self._position = DurationMs(0)
         self._uri = uri
         self._stream_changed = True
         self._live_stream = live_stream
         self._tags = {}
 
+    @override
+    def set_source_setup_callback(self, callback):
+        self._source_setup_callback = callback
+
+    @override
+    def set_about_to_finish_callback(self, callback):
+        self._about_to_finish_callback = callback
+
+    @override
     def get_position(self):
         return self._position
 
+    @override
     def set_position(self, position):
         self._position = position
         audio.AudioListener.send("position_changed", position=position)
         return True
 
+    @override
     def start_playback(self):
         return self._change_state(PlaybackState.PLAYING)
 
+    @override
     def pause_playback(self):
         return self._change_state(PlaybackState.PAUSED)
 
+    @override
     def prepare_change(self):
         self._uri = None
         self._source_setup_callback = None
         return True
 
+    @override
     def stop_playback(self):
         return self._change_state(PlaybackState.STOPPED)
 
+    @override
     def get_current_tags(self):
         return self._tags
 
-    def set_source_setup_callback(self, callback):
-        self._source_setup_callback = callback
-
-    def set_about_to_finish_callback(self, callback):
-        self._about_to_finish_callback = callback
-
+    @override
     def enable_sync_handler(self):
         pass
 
+    @override
     def wait_for_state_change(self):
         pass
 
@@ -113,7 +130,7 @@ class DummyAudio(pykka.ThreadingActor):
         # This needs to be called from outside the actor or we lock up.
         def wrapper():
             if self._source_setup_callback:
-                self._source_setup_callback()
+                self._source_setup_callback(cast("Gst.Element", None))
 
         return wrapper
 

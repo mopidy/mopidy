@@ -53,6 +53,7 @@ class BaseTest(unittest.TestCase):
 
 class DummyMixin:
     audio_class = dummy_audio.DummyAudio
+    audio: pykka.ActorProxy[dummy_audio.DummyAudio]
 
     def possibly_trigger_fake_playback_error(self, uri):
         self.audio.trigger_fake_playback_failure(uri)
