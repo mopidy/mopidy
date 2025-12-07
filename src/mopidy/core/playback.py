@@ -8,14 +8,13 @@ from typing import TYPE_CHECKING
 from pykka.messages import ProxyCall
 from pykka.typing import proxy_method
 
-from mopidy.audio import PlaybackState
 from mopidy.core import listener
 from mopidy.exceptions import CoreError
 from mopidy.internal import models, validation
-from mopidy.types import DurationMs, TracklistId, UriScheme
+from mopidy.types import DurationMs, PlaybackState, TracklistId, UriScheme
 
 if TYPE_CHECKING:
-    from mopidy.audio.actor import AudioProxy
+    from mopidy.audio import AudioProxy
     from mopidy.backend import BackendProxy
     from mopidy.core.actor import Backends, Core
     from mopidy.models import TlTrack, Track
@@ -549,14 +548,16 @@ class PlaybackController:
         logger.debug("Triggering seeked event")
         listener.CoreListener.send("seeked", time_position=time_position)
 
-    def _save_state(self) -> models.PlaybackState:
-        return models.PlaybackState(
+    def _save_state(self) -> models.PlaybackControllerState:
+        return models.PlaybackControllerState(
             tlid=self.get_current_tlid(),
             time_position=self.get_time_position(),
             state=self.get_state(),
         )
 
-    def _load_state(self, state: models.PlaybackState, coverage: Iterable[str]) -> None:
+    def _load_state(
+        self, state: models.PlaybackControllerState, coverage: Iterable[str]
+    ) -> None:
         if state and "play-last" in coverage and state.tlid is not None:
             if state.state == PlaybackState.PAUSED:
                 self._start_paused = True

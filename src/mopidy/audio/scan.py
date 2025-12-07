@@ -6,7 +6,7 @@ from typing import Any, NamedTuple, cast
 
 from mopidy import exceptions
 from mopidy.audio import tags as tags_lib
-from mopidy.audio import utils
+from mopidy.audio._utils import Signals, setup_proxy
 from mopidy.internal import log
 from mopidy.internal.gi import Gst, GstPbutils
 
@@ -92,16 +92,16 @@ class Scanner:
 
 # Turns out it's _much_ faster to just create a new pipeline for every as
 # decodebins and other elements don't seem to take well to being reused.
-def _setup_pipeline(uri: str, proxy_config=None) -> tuple[Gst.Pipeline, utils.Signals]:
+def _setup_pipeline(uri: str, proxy_config=None) -> tuple[Gst.Pipeline, Signals]:
     src = Gst.Element.make_from_uri(Gst.URIType.SRC, uri)
     if not src:
         msg = f"GStreamer can not open: {uri}"
         raise exceptions.ScannerError(msg)
 
     if proxy_config:
-        utils.setup_proxy(src, proxy_config)
+        setup_proxy(src, proxy_config)
 
-    signals = utils.Signals()
+    signals = Signals()
 
     pipeline = Gst.ElementFactory.make("pipeline")
     if pipeline is None:

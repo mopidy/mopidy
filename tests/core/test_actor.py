@@ -8,11 +8,10 @@ import pykka
 import pytest
 
 import mopidy
-from mopidy.audio import PlaybackState
 from mopidy.core import Core, CoreListener
 from mopidy.internal import models, storage
 from mopidy.models import Track
-from mopidy.types import DurationMs, Percentage, TracklistId, Uri
+from mopidy.types import DurationMs, Percentage, PlaybackState, TracklistId, Uri
 from tests import dummy_mixer
 
 
@@ -201,8 +200,8 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
         reload_data = storage.load(self.state_file)
         data = models.StoredState(
             version=mopidy.__version__,
-            state=models.CoreState(
-                tracklist=models.TracklistState(
+            state=models.CoreControllersState(
+                tracklist=models.TracklistControllerState(
                     repeat=False,
                     random=False,
                     consume=False,
@@ -210,11 +209,11 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
                     next_tlid=TracklistId(1),
                 ),
                 history=models.HistoryState(),
-                playback=models.PlaybackState(
+                playback=models.PlaybackControllerState(
                     state=PlaybackState.STOPPED,
                     time_position=DurationMs(0),
                 ),
-                mixer=models.MixerState(),
+                mixer=models.MixerControllerState(),
             ),
         )
         assert data == reload_data
@@ -237,8 +236,8 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
     def test_load_state_with_data(self):
         data = models.StoredState(
             version=mopidy.__version__,
-            state=models.CoreState(
-                tracklist=models.TracklistState(
+            state=models.CoreControllersState(
+                tracklist=models.TracklistControllerState(
                     repeat=True,
                     random=True,
                     consume=False,
@@ -263,12 +262,12 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
                         ),
                     ),
                 ),
-                playback=models.PlaybackState(
+                playback=models.PlaybackControllerState(
                     tlid=TracklistId(12),
                     state=PlaybackState.PAUSED,
                     time_position=DurationMs(432),
                 ),
-                mixer=models.MixerState(mute=True, volume=Percentage(12)),
+                mixer=models.MixerControllerState(mute=True, volume=Percentage(12)),
             ),
         )
         storage.dump(self.state_file, data)
@@ -290,7 +289,7 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
     def test_delete_state_file_on_restore(self):
         data = models.StoredState(
             version=mopidy.__version__,
-            state=models.CoreState(),
+            state=models.CoreControllersState(),
         )
         storage.dump(self.state_file, data)
         assert self.state_file.is_file()

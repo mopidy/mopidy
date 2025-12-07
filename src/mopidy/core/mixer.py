@@ -9,7 +9,7 @@ from pykka.typing import proxy_method
 
 from mopidy import exceptions
 from mopidy.internal import validation
-from mopidy.internal.models import MixerState
+from mopidy.internal.models import MixerControllerState
 from mopidy.types import Percentage
 
 if TYPE_CHECKING:
@@ -113,13 +113,13 @@ class MixerController:
 
         return False
 
-    def _save_state(self) -> MixerState:
-        return MixerState(
+    def _save_state(self) -> MixerControllerState:
+        return MixerControllerState(
             volume=self.get_volume(),
             mute=self.get_mute(),
         )
 
-    def _load_state(self, state: MixerState, coverage: Iterable[str]) -> None:
+    def _load_state(self, state: MixerControllerState, coverage: Iterable[str]) -> None:
         if state and "mixer" in coverage:
             if state.mute is not None:
                 self.set_mute(state.mute)

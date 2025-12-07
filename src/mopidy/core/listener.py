@@ -3,9 +3,8 @@ from __future__ import annotations
 from typing import Any, Literal
 
 from mopidy import listener
-from mopidy.audio import PlaybackState
 from mopidy.models import Playlist, TlTrack
-from mopidy.types import DurationMs, Percentage, Uri
+from mopidy.types import DurationMs, Percentage, PlaybackState, Uri
 
 type CoreEvent = Literal[
     "track_playback_paused",

@@ -13,7 +13,6 @@ from pykka.typing import ActorMemberMixin, proxy_method
 
 import mopidy
 from mopidy import audio, backend, mixer
-from mopidy.audio import PlaybackState
 from mopidy.core.history import HistoryController
 from mopidy.core.library import LibraryController
 from mopidy.core.listener import CoreListener
@@ -22,7 +21,8 @@ from mopidy.core.playback import PlaybackController
 from mopidy.core.playlists import PlaylistsController
 from mopidy.core.tracklist import TracklistController
 from mopidy.internal import path, storage
-from mopidy.internal.models import CoreState, StoredState
+from mopidy.internal.models import CoreControllersState, StoredState
+from mopidy.types import PlaybackState
 
 if TYPE_CHECKING:
     from mopidy.config import Config
@@ -213,7 +213,7 @@ class Core(
 
         data = StoredState(
             version=mopidy.__version__,
-            state=CoreState(
+            state=CoreControllersState(
                 tracklist=self.tracklist._save_state(),
                 history=self.history._save_state(),
                 playback=self.playback._save_state(),

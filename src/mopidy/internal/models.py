@@ -5,8 +5,7 @@ from pydantic.types import NonNegativeInt
 
 from mopidy.models import Ref, TlTrack
 from mopidy.models._base import BaseModel
-from mopidy.types import DurationMs, Percentage, TracklistId
-from mopidy.types import PlaybackState as PlaybackStateEnum
+from mopidy.types import DurationMs, Percentage, PlaybackState, TracklistId
 
 
 class HistoryTrack(BaseModel):
@@ -45,7 +44,7 @@ class HistoryState(BaseModel):
     history: tuple[HistoryTrack, ...] = ()
 
 
-class MixerState(BaseModel):
+class MixerControllerState(BaseModel):
     """
     State of the mixer controller.
 
@@ -65,7 +64,7 @@ class MixerState(BaseModel):
     mute: bool | None = None
 
 
-class PlaybackState(BaseModel):
+class PlaybackControllerState(BaseModel):
     """
     State of the playback controller.
 
@@ -85,10 +84,10 @@ class PlaybackState(BaseModel):
     time_position: DurationMs = DurationMs(0)
 
     # The playback state. Read-only.
-    state: PlaybackStateEnum = PlaybackStateEnum.STOPPED
+    state: PlaybackState = PlaybackState.STOPPED
 
 
-class TracklistState(BaseModel):
+class TracklistControllerState(BaseModel):
     """
     State of the tracklist controller.
 
@@ -120,9 +119,9 @@ class TracklistState(BaseModel):
     tl_tracks: tuple[TlTrack, ...] = ()
 
 
-class CoreState(BaseModel):
+class CoreControllersState(BaseModel):
     """
-    State of all Core controller.
+    State of all Core controllers.
 
     Internally used for save/load state.
     """
@@ -137,13 +136,15 @@ class CoreState(BaseModel):
     history: HistoryState = Field(default_factory=HistoryState)
 
     # State of the mixer controller.
-    mixer: MixerState = Field(default_factory=MixerState)
+    mixer: MixerControllerState = Field(default_factory=MixerControllerState)
 
     # State of the playback controller.
-    playback: PlaybackState = Field(default_factory=PlaybackState)
+    playback: PlaybackControllerState = Field(default_factory=PlaybackControllerState)
 
     # State of the tracklist controller.
-    tracklist: TracklistState = Field(default_factory=TracklistState)
+    tracklist: TracklistControllerState = Field(
+        default_factory=TracklistControllerState
+    )
 
 
 class StoredState(BaseModel):
@@ -162,4 +163,4 @@ class StoredState(BaseModel):
     version: str
 
     # The state of the core. Read-only.
-    state: CoreState
+    state: CoreControllersState
