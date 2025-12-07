@@ -1,5 +1,5 @@
 from ._actor import Core, CoreProxy
-from .history import HistoryController, HistoryControllerProxy
+from ._history import HistoryController, HistoryControllerProxy
 from .library import LibraryController, LibraryControllerProxy
 from .listener import CoreEvent, CoreEventData, CoreListener
 from .mixer import MixerController, MixerControllerProxy
