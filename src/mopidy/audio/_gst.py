@@ -4,13 +4,13 @@ import logging
 import os
 import threading
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, cast, override
 
 import pykka
-from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
 
 from mopidy import exceptions
 from mopidy.audio import tags as tags_lib
+from mopidy.audio._api import Audio
 from mopidy.audio._listener import AudioListener
 from mopidy.audio._utils import (
     Signals,
@@ -92,7 +92,7 @@ class _Outputs(Gst.Bin):
         self._tee.link(queue)
 
 
-class SoftwareMixerAdapter:
+class _SoftwareMixerAdapter:
     _mixer: SoftwareMixerProxy
     _element: Gst.Element | None
     _last_volume: int | None
@@ -134,7 +134,7 @@ class SoftwareMixerAdapter:
 
 
 class _Handler:
-    def __init__(self, audio: Audio) -> None:
+    def __init__(self, audio: GstAudio) -> None:
         self._audio = audio
         self._element = None
         self._pad = None
@@ -375,14 +375,11 @@ class _Handler:
 
 
 # TODO: create a player class which replaces the actors internals
-class Audio(pykka.ThreadingActor):
+class GstAudio(Audio, pykka.ThreadingActor):
     """Audio output through `GStreamer <https://gstreamer.freedesktop.org/>`_."""
 
-    #: The GStreamer state mapped to :class:`mopidy.types.PlaybackState`
-    state: PlaybackState = PlaybackState.STOPPED
-
     #: The software mixing interface :class:`mopidy.audio.actor.SoftwareMixerAdapter`
-    mixer: SoftwareMixerAdapter | None = None
+    mixer: _SoftwareMixerAdapter | None = None
 
     def __init__(
         self,
@@ -411,7 +408,7 @@ class Audio(pykka.ThreadingActor):
 
         if mixer and self._config["audio"]["mixer"] == "software":
             mixer = cast("SoftwareMixerProxy", mixer)
-            self.mixer = pykka.traversable(SoftwareMixerAdapter(mixer))
+            self.mixer = pykka.traversable(_SoftwareMixerAdapter(mixer))
 
     def on_start(self) -> None:
         self._thread = threading.current_thread()
@@ -576,21 +573,13 @@ class Audio(pykka.ThreadingActor):
 
         setup_proxy(source, self._config["proxy"])
 
+    @override
     def set_uri(
         self,
         uri: str,
         live_stream: bool = False,
         download: bool = False,
     ) -> None:
-        """Set URI of audio to be played.
-
-        You *MUST* call :meth:`prepare_change` before calling this method.
-
-        :param uri: the URI to play
-        :param live_stream: disables buffering, reducing latency for stream,
-            and discarding data when paused
-        :param download: enables "download" buffering mode
-        """
         assert self._playbin
 
         # HACK: Hack to workaround issue on Mac OS X where volume level
@@ -617,30 +606,22 @@ class Audio(pykka.ThreadingActor):
         if self.mixer is not None and current_volume is not None:
             self.mixer.set_volume(current_volume)
 
-    def set_source_setup_callback(self, callback: Callable) -> None:
-        """Configure audio to use a source-setup callback.
-
-        This should be used to modify source-specific properties such as login
-        details.
-
-        :param callback: Callback to run when we setup the source.
-        """
+    @override
+    def set_source_setup_callback(
+        self,
+        callback: Callable[[Gst.Element], None],
+    ) -> None:
         self._source_setup_callback = callback
 
-    def set_about_to_finish_callback(self, callback: Callable) -> None:
-        """Configure audio to use an about-to-finish callback.
-
-        This should be used to achieve gapless playback. For this to work the
-        callback *MUST* call :meth:`set_uri` with the new URI to play and
-        block until this call has been made. :meth:`prepare_change` is not
-        needed before :meth:`set_uri` in this one special case.
-
-        :param callback: Callback to run when we need the next URI.
-        """
+    @override
+    def set_about_to_finish_callback(
+        self,
+        callback: Callable[[], None],
+    ) -> None:
         self._about_to_finish_callback = callback
 
+    @override
     def get_position(self) -> DurationMs:
-        """Get position in milliseconds."""
         assert self._playbin
 
         success, position = self._playbin.query_position(Gst.Format.TIME)
@@ -653,11 +634,8 @@ class Audio(pykka.ThreadingActor):
 
         return clocktime_to_millisecond(position)
 
+    @override
     def set_position(self, position: DurationMs) -> bool:
-        """Set position in milliseconds.
-
-        :param position: the position in milliseconds
-        """
         assert self._queue
 
         # TODO: double check seek flags in use.
@@ -674,63 +652,25 @@ class Audio(pykka.ThreadingActor):
             gst_position,
         )
 
+    @override
     def start_playback(self) -> bool:
-        """Notify GStreamer that it should start playback.
-
-        Returns :class:`True` if successful, else :class:`False`.
-        """
         return self._set_state(Gst.State.PLAYING)
 
+    @override
     def pause_playback(self) -> bool:
-        """Notify GStreamer that it should pause playback.
-
-        Returns :class:`True` if successful, else :class:`False`.
-        """
         return self._set_state(Gst.State.PAUSED)
 
+    @override
     def prepare_change(self) -> bool:
-        """Notify GStreamer that we are about to change state of playback.
-
-        This function *MUST* be called before changing URIs or doing
-        changes like updating data that is being pushed. The reason for this
-        is that GStreamer will reset all its state when it changes to
-        :attr:`Gst.State.READY`.
-        """
+        # This function *MUST* be called before changing URIs or doing
+        # changes like updating data that is being pushed. The reason for this
+        # is that GStreamer will reset all its state when it changes to
+        # :attr:`Gst.State.READY`.
         return self._set_state(Gst.State.READY)
 
+    @override
     def stop_playback(self) -> bool:
-        """Notify GStreamer that it should stop playback.
-
-        Returns :class:`True` if successful, else :class:`False`.
-        """
         return self._set_state(Gst.State.NULL)
-
-    def wait_for_state_change(self) -> None:
-        """Block until any pending state changes are complete.
-
-        Should only be used by tests.
-        """
-        assert self._playbin
-
-        self._playbin.get_state(timeout=Gst.CLOCK_TIME_NONE)
-
-    def enable_sync_handler(self) -> None:
-        """Enable manual processing of messages from bus.
-
-        Should only be used by tests.
-        """
-        assert self._playbin
-
-        def sync_handler(bus, message):
-            self._handler.on_message(bus, message)
-            return Gst.BusSyncReply.DROP
-
-        bus = self._playbin.get_bus()
-        if bus is None:
-            msg = "Failed to get bus from GStreamer playbin."
-            raise exceptions.AudioException(msg)
-
-        bus.set_sync_handler(sync_handler)
 
     def _set_state(self, state: Gst.State) -> bool:
         """Internal method for setting the raw GStreamer state.
@@ -772,33 +712,30 @@ class Audio(pykka.ThreadingActor):
         # of faking it in the message handling when result=OK
         return True
 
+    @override
     def get_current_tags(self) -> dict[str, list[Any]]:
-        """Get the currently playing media's tags.
-
-        If no tags have been found, or nothing is playing this returns an empty
-        dictionary. For each set of tags we collect a tags_changed event is
-        emitted with the keys of the changed tags. After such calls users may
-        call this function to get the updated values.
-        """
         # TODO: should this be a (deep) copy? most likely yes
         # TODO: should we return None when stopped?
         # TODO: support only fetching keys we care about?
         return self._tags
 
+    @override
+    def wait_for_state_change(self) -> None:
+        assert self._playbin
 
-class AudioProxy(ActorMemberMixin, pykka.ActorProxy[Audio]):
-    """Audio layer wrapped in a Pykka actor proxy."""
+        self._playbin.get_state(timeout=Gst.CLOCK_TIME_NONE)
 
-    state = proxy_field(Audio.state)
-    set_uri = proxy_method(Audio.set_uri)
-    set_source_setup_callback = proxy_method(Audio.set_source_setup_callback)
-    set_about_to_finish_callback = proxy_method(Audio.set_about_to_finish_callback)
-    get_position = proxy_method(Audio.get_position)
-    set_position = proxy_method(Audio.set_position)
-    start_playback = proxy_method(Audio.start_playback)
-    pause_playback = proxy_method(Audio.pause_playback)
-    prepare_change = proxy_method(Audio.prepare_change)
-    stop_playback = proxy_method(Audio.stop_playback)
-    wait_for_state_change = proxy_method(Audio.wait_for_state_change)
-    enable_sync_handler = proxy_method(Audio.enable_sync_handler)
-    get_current_tags = proxy_method(Audio.get_current_tags)
+    @override
+    def enable_sync_handler(self) -> None:
+        assert self._playbin
+
+        def sync_handler(bus, message):
+            self._handler.on_message(bus, message)
+            return Gst.BusSyncReply.DROP
+
+        bus = self._playbin.get_bus()
+        if bus is None:
+            msg = "Failed to get bus from GStreamer playbin."
+            raise exceptions.AudioException(msg)
+
+        bus.set_sync_handler(sync_handler)

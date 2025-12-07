@@ -22,7 +22,7 @@ class BaseTest(unittest.TestCase):
         path.path_to_uri(path_to_data_dir("song2.wav")),
     ]
 
-    audio_class = audio.Audio
+    audio_class = audio.GstAudio
 
     def setUp(self):
         config = {
@@ -535,7 +535,7 @@ class MixerTest(BaseTest):
 
 class AudioStateTest(unittest.TestCase):
     def setUp(self):
-        self.audio = audio.Audio(config=None, mixer=None)
+        self.audio = audio.GstAudio(config=None, mixer=None)
 
     def test_state_starts_as_stopped(self):
         assert self.audio.state == PlaybackState.STOPPED
@@ -601,7 +601,7 @@ class AudioStateTest(unittest.TestCase):
 
 class AudioBufferingTest(unittest.TestCase):
     def setUp(self):
-        self.audio = audio.Audio(config=None, mixer=None)
+        self.audio = audio.GstAudio(config=None, mixer=None)
         self.audio._playbin = mock.Mock(spec=["set_state"])
 
     def test_pause_when_buffer_empty(self):
@@ -657,7 +657,7 @@ class AudioBufferingTest(unittest.TestCase):
 class AudioLiveTest(unittest.TestCase):
     def setUp(self):
         config = {"proxy": {}}
-        self.audio = audio.Audio(config=config, mixer=None)
+        self.audio = audio.GstAudio(config=config, mixer=None)
         self.audio._playbin = mock.Mock(spec=["set_property"])
 
         self.source = mock.MagicMock()
@@ -680,7 +680,7 @@ class AudioLiveTest(unittest.TestCase):
 
 class DownloadBufferingTest(unittest.TestCase):
     def setUp(self):
-        self.audio = audio.Audio(config=None, mixer=None)
+        self.audio = audio.GstAudio(config=None, mixer=None)
         self.audio._playbin = mock.Mock(spec=["set_property"])
 
     def test_download_flag_is_passed_to_playbin_if_download_buffering_is_enabled(
@@ -705,7 +705,7 @@ class DownloadBufferingTest(unittest.TestCase):
 class SourceSetupCallbackTest(unittest.TestCase):
     def setUp(self):
         config = {"proxy": {}}
-        self.audio = audio.Audio(config=config, mixer=None)
+        self.audio = audio.GstAudio(config=config, mixer=None)
         self.audio._playbin = mock.Mock(spec=["set_property"])
 
         self.source = mock.MagicMock()
