@@ -483,6 +483,7 @@ class LibraryProviderProxy:
     get_distinct = proxy_method(LibraryProvider.get_distinct)
     get_images = proxy_method(LibraryProvider.get_images)
     lookup_many = proxy_method(LibraryProvider.lookup_many)
+    lookup = proxy_method(LibraryProvider.lookup)
     refresh = proxy_method(LibraryProvider.refresh)
     search = proxy_method(LibraryProvider.search)
 
