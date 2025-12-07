@@ -512,27 +512,6 @@ class AudioDummyEventTest(DummyMixin, AudioEventTest):
     """Exercise the AudioEventTest against our mock audio classes."""
 
 
-# TODO: move to mixer tests...
-class MixerTest(BaseTest):
-    @unittest.SkipTest
-    def test_set_mute(self):
-        for value in (True, False):
-            assert self.audio.set_mute(value).get()
-            assert self.audio.get_mute().get() == value
-
-    @unittest.SkipTest
-    def test_set_state_encapsulation(self):
-        pass  # TODO: Implement test
-
-    @unittest.SkipTest
-    def test_set_position(self):
-        pass  # TODO: Implement test
-
-    @unittest.SkipTest
-    def test_invalid_output_raises_error(self):
-        pass  # TODO: Implement test
-
-
 class AudioStateTest(unittest.TestCase):
     def setUp(self):
         self.audio = audio.GstAudio(config=None, mixer=None)

@@ -19,7 +19,6 @@ class DummyAudio(pykka.ThreadingActor):
     def __init__(self, config=None, mixer=None):
         super().__init__()
         self.state = PlaybackState.STOPPED
-        self._volume = 0
         self._position = 0
         self._source_setup_callback = None
         self._about_to_finish_callback = None
@@ -58,13 +57,6 @@ class DummyAudio(pykka.ThreadingActor):
 
     def stop_playback(self):
         return self._change_state(PlaybackState.STOPPED)
-
-    def get_volume(self):
-        return self._volume
-
-    def set_volume(self, volume):
-        self._volume = volume
-        return True
 
     def get_current_tags(self):
         return self._tags
