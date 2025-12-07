@@ -3,8 +3,8 @@ from ._history import HistoryController, HistoryControllerProxy
 from ._library import LibraryController, LibraryControllerProxy
 from ._mixer import MixerController, MixerControllerProxy
 from ._playback import PlaybackController, PlaybackControllerProxy, PlaybackState
+from ._playlists import PlaylistsController, PlaylistsControllerProxy
 from .listener import CoreEvent, CoreEventData, CoreListener
-from .playlists import PlaylistsController, PlaylistsControllerProxy
 from .tracklist import TracklistController, TracklistControllerProxy
 
 __all__ = [

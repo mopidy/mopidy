@@ -14,7 +14,6 @@ from pykka.typing import ActorMemberMixin, proxy_method
 import mopidy
 from mopidy import audio, backend, mixer
 from mopidy.core.listener import CoreListener
-from mopidy.core.playlists import PlaylistsController
 from mopidy.core.tracklist import TracklistController
 from mopidy.internal import path, storage
 from mopidy.internal.models import CoreControllersState, StoredState
@@ -24,10 +23,10 @@ from ._history import HistoryController
 from ._library import LibraryController
 from ._mixer import MixerController
 from ._playback import PlaybackController
+from ._playlists import PlaylistsController
 
 if TYPE_CHECKING:
     from mopidy.config import Config
-    from mopidy.core.playlists import PlaylistsControllerProxy
     from mopidy.core.tracklist import TracklistControllerProxy
     from mopidy.mixer import MixerProxy
     from mopidy.types import Uri
@@ -36,6 +35,7 @@ if TYPE_CHECKING:
     from ._library import LibraryControllerProxy
     from ._mixer import MixerControllerProxy
     from ._playback import PlaybackControllerProxy
+    from ._playlists import PlaylistsControllerProxy
 
 logger = logging.getLogger(__name__)
 
