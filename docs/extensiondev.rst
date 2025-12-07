@@ -385,7 +385,7 @@ Most Mopidy extensions that make HTTP requests use either the `httpx
 Example using HTTPX
 ~~~~~~~~~~~~~~~~~~~
 
-If you're using HTTPX, you can create a session object like this:
+If you're using HTTPX, you can create a session object like this::
 
     import httpx
     from mopidy import httpclient
