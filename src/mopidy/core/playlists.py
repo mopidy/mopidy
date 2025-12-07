@@ -18,8 +18,9 @@ logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from mopidy.backend import BackendProxy
-    from mopidy.core.actor import Backends, Core
     from mopidy.types import Uri
+
+    from ._actor import Backends, Core
 
 
 @contextlib.contextmanager

@@ -17,8 +17,9 @@ from mopidy.types import TracklistId
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from mopidy.core.actor import Core
     from mopidy.types import Query, TracklistField, Uri
+
+    from ._actor import Core
 
 
 class TracklistController:

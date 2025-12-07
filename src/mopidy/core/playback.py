@@ -16,9 +16,10 @@ from mopidy.types import DurationMs, PlaybackState, TracklistId, UriScheme
 if TYPE_CHECKING:
     from mopidy.audio import AudioProxy
     from mopidy.backend import BackendProxy
-    from mopidy.core.actor import Backends, Core
     from mopidy.models import TlTrack, Track
     from mopidy.types import Uri
+
+    from ._actor import Backends, Core
 
 logger = logging.getLogger(__name__)
 

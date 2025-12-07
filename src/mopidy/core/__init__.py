@@ -1,4 +1,4 @@
-from .actor import Core, CoreProxy
+from ._actor import Core, CoreProxy
 from .history import HistoryController, HistoryControllerProxy
 from .library import LibraryController, LibraryControllerProxy
 from .listener import CoreEvent, CoreEventData, CoreListener

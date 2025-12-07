@@ -23,7 +23,7 @@ from mopidy.internal import network
 from . import Extension, handlers
 
 if TYPE_CHECKING:
-    from mopidy.core.actor import CoreProxy
+    from mopidy.core import CoreProxy
     from mopidy.ext import Config
 
     from .types import HttpApp, HttpStatic, RequestRule
