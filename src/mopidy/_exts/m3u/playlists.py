@@ -13,9 +13,9 @@ from typing import IO, TYPE_CHECKING, Any, cast
 from mopidy import backend
 from mopidy.exceptions import BackendError
 from mopidy.internal import path
-from mopidy.m3u.types import M3UConfig
 
 from . import Extension, translator
+from .types import M3UConfig
 
 if TYPE_CHECKING:
     from mopidy.backend import Backend

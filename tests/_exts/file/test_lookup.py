@@ -18,7 +18,7 @@ def test_lookup(provider, track_uri):
     assert track.name == "song1.wav"
 
     with mock.patch(
-        "mopidy.file.library.tags.convert_tags_to_track",
+        "mopidy._exts.file.library.tags.convert_tags_to_track",
         side_effect=exceptions.ScannerError("test"),
     ):
         result = provider.lookup(track_uri)

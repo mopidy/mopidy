@@ -17,13 +17,15 @@ from pydantic import TypeAdapter
 
 from mopidy import exceptions, zeroconf
 from mopidy.core import CoreEvent, CoreEventData, CoreListener
-from mopidy.http import Extension, handlers
 from mopidy.internal import formatting, network
+
+from . import Extension, handlers
 
 if TYPE_CHECKING:
     from mopidy.core.actor import CoreProxy
     from mopidy.ext import Config
-    from mopidy.http.types import HttpApp, HttpStatic, RequestRule
+
+    from .types import HttpApp, HttpStatic, RequestRule
 
 
 logger = logging.getLogger(__name__)

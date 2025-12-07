@@ -1,5 +1,5 @@
 from mopidy import config as config_lib
-from mopidy.http import Extension
+from mopidy._exts.http import Extension
 
 
 def test_get_default_config():

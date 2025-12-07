@@ -9,7 +9,7 @@ import tornado.web
 import tornado.websocket
 
 import mopidy
-from mopidy.http import handlers
+from mopidy._exts.http import handlers
 
 
 class StaticFileHandlerTest(tornado.testing.AsyncHTTPTestCase):

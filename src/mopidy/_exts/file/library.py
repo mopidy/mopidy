@@ -7,11 +7,12 @@ from typing import TypedDict, cast
 from mopidy import backend, exceptions
 from mopidy import config as config_lib
 from mopidy.audio import scan, tags
-from mopidy.file import Extension
-from mopidy.file.types import FileConfig
 from mopidy.internal import path
 from mopidy.models import Ref, Track
 from mopidy.types import Uri
+
+from . import Extension
+from .types import FileConfig
 
 logger = logging.getLogger(__name__)
 

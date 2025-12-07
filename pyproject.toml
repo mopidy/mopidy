@@ -34,11 +34,11 @@ Issues = "https://github.com/mopidy/mopidy/issues"
 mopidy = "mopidy.__main__:main"
 
 [project.entry-points."mopidy.ext"]
-file = "mopidy.file:Extension"
-http = "mopidy.http:Extension"
-m3u = "mopidy.m3u:Extension"
-softwaremixer = "mopidy.softwaremixer:Extension"
-stream = "mopidy.stream:Extension"
+file = "mopidy._exts.file:Extension"
+http = "mopidy._exts.http:Extension"
+m3u = "mopidy._exts.m3u:Extension"
+softwaremixer = "mopidy._exts.softwaremixer:Extension"
+stream = "mopidy._exts.stream:Extension"
 
 
 [build-system]

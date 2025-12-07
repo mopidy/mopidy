@@ -14,8 +14,9 @@ import tornado.websocket
 
 import mopidy
 from mopidy import core
-from mopidy.http.types import HttpConfig
 from mopidy.internal import jsonrpc
+
+from .types import HttpConfig
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable
@@ -23,7 +24,8 @@ if TYPE_CHECKING:
 
     from mopidy.core.actor import CoreProxy
     from mopidy.ext import Config
-    from mopidy.http.types import HttpApp, HttpStatic, RequestRule
+
+    from .types import HttpApp, HttpStatic, RequestRule
 
 
 logger = logging.getLogger(__name__)

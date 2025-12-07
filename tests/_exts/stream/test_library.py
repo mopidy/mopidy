@@ -2,9 +2,9 @@ from unittest import mock
 
 import pytest
 
+from mopidy._exts.stream import actor
 from mopidy.internal import path
 from mopidy.models import Track
-from mopidy.stream import actor
 from tests import path_to_data_dir
 
 
