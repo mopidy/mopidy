@@ -4,8 +4,8 @@ from ._library import LibraryController, LibraryControllerProxy
 from ._mixer import MixerController, MixerControllerProxy
 from ._playback import PlaybackController, PlaybackControllerProxy, PlaybackState
 from ._playlists import PlaylistsController, PlaylistsControllerProxy
+from ._tracklist import TracklistController, TracklistControllerProxy
 from .listener import CoreEvent, CoreEventData, CoreListener
-from .tracklist import TracklistController, TracklistControllerProxy
 
 __all__ = [
     "Core",
