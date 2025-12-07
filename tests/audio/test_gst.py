@@ -148,7 +148,7 @@ class DummyAudioListener(pykka.ThreadingActor, audio.AudioListener):
 class AudioEventTest(BaseTest):
     def setUp(self):
         super().setUp()
-        self.audio.enable_sync_handler().get()
+        self.audio.testing_gst__enable_sync_handler().get()
         self.listener = DummyAudioListener.start().proxy()
 
     def tearDown(self):
@@ -170,7 +170,7 @@ class AudioEventTest(BaseTest):
         self.audio.set_uri(self.uris[0])
         self.audio.start_playback()
 
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
         self.assert_event(
             "state_changed",
             old_state=PlaybackState.STOPPED,
@@ -183,7 +183,7 @@ class AudioEventTest(BaseTest):
         self.audio.set_uri(self.uris[0])
         self.audio.pause_playback()
 
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
         self.assert_event(
             "state_changed",
             old_state=PlaybackState.STOPPED,
@@ -196,11 +196,11 @@ class AudioEventTest(BaseTest):
         self.audio.set_uri(self.uris[0])
         self.audio.pause_playback()
 
-        self.audio.wait_for_state_change()
+        self.audio.testing_gst__wait_for_state_change()
         self.listener.clear_events()
         self.audio.start_playback()
 
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
         self.assert_event(
             "state_changed",
             old_state=PlaybackState.PAUSED,
@@ -213,11 +213,11 @@ class AudioEventTest(BaseTest):
         self.audio.set_uri(self.uris[0])
         self.audio.pause_playback()
 
-        self.audio.wait_for_state_change()
+        self.audio.testing_gst__wait_for_state_change()
         self.listener.clear_events()
         self.audio.stop_playback()
 
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
         self.assert_event(
             "state_changed",
             old_state=PlaybackState.PAUSED,
@@ -230,11 +230,11 @@ class AudioEventTest(BaseTest):
         self.audio.set_uri(self.uris[0])
         self.audio.start_playback()
 
-        self.audio.wait_for_state_change()
+        self.audio.testing_gst__wait_for_state_change()
         self.listener.clear_events()
         self.audio.pause_playback()
 
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
         self.assert_event(
             "state_changed",
             old_state=PlaybackState.PLAYING,
@@ -247,11 +247,11 @@ class AudioEventTest(BaseTest):
         self.audio.set_uri(self.uris[0])
         self.audio.start_playback()
 
-        self.audio.wait_for_state_change()
+        self.audio.testing_gst__wait_for_state_change()
         self.listener.clear_events()
         self.audio.stop_playback()
 
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
         self.assert_event(
             "state_changed",
             old_state=PlaybackState.PLAYING,
@@ -267,7 +267,7 @@ class AudioEventTest(BaseTest):
 
         # Since we are going from stopped to playing, the state change is
         # enough to ensure the stream changed.
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
         self.assert_event("stream_changed", uri=self.uris[0])
 
     def test_stream_changed_event_on_multiple_changes(self):
@@ -276,14 +276,14 @@ class AudioEventTest(BaseTest):
         self.listener.clear_events()
         self.audio.start_playback()
 
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
         self.assert_event("stream_changed", uri=self.uris[0])
 
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[1])
         self.audio.pause_playback()
 
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
         self.assert_event("stream_changed", uri=self.uris[1])
 
     def test_stream_changed_event_on_playing_to_paused(self):
@@ -292,13 +292,13 @@ class AudioEventTest(BaseTest):
         self.listener.clear_events()
         self.audio.start_playback()
 
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
         self.assert_event("stream_changed", uri=self.uris[0])
 
         self.listener.clear_events()
         self.audio.pause_playback()
 
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
         self.assert_not_event("stream_changed", uri=self.uris[0])
 
     def test_stream_changed_event_on_paused_to_stopped(self):
@@ -306,20 +306,20 @@ class AudioEventTest(BaseTest):
         self.audio.set_uri(self.uris[0])
         self.audio.pause_playback()
 
-        self.audio.wait_for_state_change()
+        self.audio.testing_gst__wait_for_state_change()
         self.listener.clear_events()
         self.audio.stop_playback()
 
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
         self.assert_event("stream_changed", uri=None)
 
     def test_position_changed_on_pause(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.pause_playback()
-        self.audio.wait_for_state_change()
+        self.audio.testing_gst__wait_for_state_change()
 
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
         self.assert_event("position_changed", position=0)
 
     def test_stream_changed_event_on_paused_to_playing(self):
@@ -328,22 +328,22 @@ class AudioEventTest(BaseTest):
         self.listener.clear_events()
         self.audio.pause_playback()
 
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
         self.assert_event("stream_changed", uri=self.uris[0])
 
         self.listener.clear_events()
         self.audio.start_playback()
 
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
         self.assert_not_event("stream_changed", uri=self.uris[0])
 
     def test_position_changed_on_play(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.start_playback()
-        self.audio.wait_for_state_change()
+        self.audio.testing_gst__wait_for_state_change()
 
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
         self.assert_event("position_changed", position=0)
 
     def test_position_changed_on_seek_while_stopped(self):
@@ -351,7 +351,7 @@ class AudioEventTest(BaseTest):
         self.audio.set_uri(self.uris[0])
         self.audio.set_position(2000)
 
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
         self.assert_not_event("position_changed", position=0)
 
     def test_position_changed_on_seek_after_play(self):
@@ -359,11 +359,11 @@ class AudioEventTest(BaseTest):
         self.audio.set_uri(self.uris[0])
         self.audio.start_playback()
 
-        self.audio.wait_for_state_change()
+        self.audio.testing_gst__wait_for_state_change()
         self.listener.clear_events()
         self.audio.set_position(2000)
 
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
         self.assert_event("position_changed", position=2000)
 
     def test_position_changed_on_seek_after_pause(self):
@@ -371,18 +371,18 @@ class AudioEventTest(BaseTest):
         self.audio.set_uri(self.uris[0])
         self.audio.pause_playback()
 
-        self.audio.wait_for_state_change()
+        self.audio.testing_gst__wait_for_state_change()
         self.listener.clear_events()
         self.audio.set_position(2000)
 
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
         self.assert_event("position_changed", position=2000)
 
     def test_tags_changed_on_playback(self):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.start_playback()
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
 
         self.assert_event("tags_changed", tags=mock.ANY)
 
@@ -397,7 +397,7 @@ class AudioEventTest(BaseTest):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.pause_playback().get()
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
 
         if not event.wait(timeout=1.0):
             self.fail("Stream changed not reached within deadline")
@@ -410,7 +410,7 @@ class AudioEventTest(BaseTest):
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.start_playback()
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
 
         self.possibly_trigger_fake_about_to_finish()
         if not event.wait(timeout=1.0):
@@ -433,10 +433,10 @@ class AudioEventTest(BaseTest):
         self.audio.start_playback()
 
         self.possibly_trigger_fake_about_to_finish()
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
 
         self.possibly_trigger_fake_about_to_finish()
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
         if not event.wait(timeout=1.0):
             self.fail("EOS not received")
 
@@ -462,7 +462,7 @@ class AudioEventTest(BaseTest):
         self.audio.start_playback()
 
         self.possibly_trigger_fake_source_setup()
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
 
         mock_callback.assert_called_once()
 
@@ -478,7 +478,7 @@ class AudioEventTest(BaseTest):
         self.audio.start_playback()
 
         self.possibly_trigger_fake_about_to_finish()
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
 
         if not event.wait(timeout=1.0):
             self.fail("EOS not received")
@@ -499,7 +499,7 @@ class AudioEventTest(BaseTest):
         self.audio.start_playback()
 
         self.possibly_trigger_fake_about_to_finish()
-        self.audio.wait_for_state_change().get()
+        self.audio.testing_gst__wait_for_state_change().get()
 
         if not event.wait(timeout=1.0):
             self.fail("EOS not received")

@@ -720,13 +720,13 @@ class GstAudio(Audio, pykka.ThreadingActor):
         return self._tags
 
     @override
-    def wait_for_state_change(self) -> None:
+    def testing_gst__wait_for_state_change(self) -> None:
         assert self._playbin
 
         self._playbin.get_state(timeout=Gst.CLOCK_TIME_NONE)
 
     @override
-    def enable_sync_handler(self) -> None:
+    def testing_gst__enable_sync_handler(self) -> None:
         assert self._playbin
 
         def sync_handler(bus, message):

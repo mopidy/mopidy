@@ -122,23 +122,17 @@ class Audio:
         """
         raise NotImplementedError
 
-    # --- GStreamer testing helpers ---
-
-    # TODO: Rename to add "testing_gst__" prefix?
-    def wait_for_state_change(self) -> None:
+    def testing_gst__wait_for_state_change(self) -> None:
         """Block until any pending playback state changes are complete.
 
-        Should only be used by tests.
+        Not part of the API. Only for testing of GstAudio.
         """
-        raise NotImplementedError
 
-    # TODO: Rename to add "testing_gst__" prefix?
-    def enable_sync_handler(self) -> None:
+    def testing_gst__enable_sync_handler(self) -> None:
         """Enable manual processing of messages from bus.
 
-        Should only be used by tests.
+        Not part of the API. Only for testing of GstAudio.
         """
-        raise NotImplementedError
 
 
 class AudioActor(pykka.ThreadingActor, Audio):
@@ -159,5 +153,9 @@ class AudioProxy(ActorMemberMixin, pykka.ActorProxy[AudioActor]):
     prepare_change = proxy_method(Audio.prepare_change)
     stop_playback = proxy_method(Audio.stop_playback)
     get_current_tags = proxy_method(Audio.get_current_tags)
-    wait_for_state_change = proxy_method(Audio.wait_for_state_change)
-    enable_sync_handler = proxy_method(Audio.enable_sync_handler)
+    testing_gst__wait_for_state_change = proxy_method(
+        Audio.testing_gst__wait_for_state_change
+    )
+    testing_gst__enable_sync_handler = proxy_method(
+        Audio.testing_gst__enable_sync_handler
+    )

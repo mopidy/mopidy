@@ -82,14 +82,6 @@ class DummyAudio(audio.Audio, pykka.ThreadingActor):
     def get_current_tags(self):
         return self._tags
 
-    @override
-    def enable_sync_handler(self):
-        pass
-
-    @override
-    def wait_for_state_change(self):
-        pass
-
     def _change_state(self, new_state):
         if not self._uri:
             return False
