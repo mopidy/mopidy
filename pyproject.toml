@@ -31,7 +31,7 @@ Source = "https://github.com/mopidy/mopidy"
 Issues = "https://github.com/mopidy/mopidy/issues"
 
 [project.scripts]
-mopidy = "mopidy._server.main:main"
+mopidy = "mopidy._app.main:main"
 
 [project.entry-points."mopidy.ext"]
 file = "mopidy._exts.file:Extension"

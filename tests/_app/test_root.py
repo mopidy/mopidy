@@ -1,4 +1,4 @@
-from mopidy._server import root
+from mopidy._app import root
 
 
 def test_config_overrides():

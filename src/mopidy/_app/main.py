@@ -11,14 +11,15 @@ import pykka.debug
 import mopidy
 from mopidy import commands, ext
 from mopidy import config as config_lib
-from mopidy._server.config import ConfigCommand
-from mopidy._server.deps import DepsCommand
-from mopidy._server.root import RootCommand
 from mopidy.internal import log, path, process
 from mopidy.internal.gi import (
     GLib,
     Gst,  # noqa: F401 (imported to test GStreamer presence)
 )
+
+from .config import ConfigCommand
+from .deps import DepsCommand
+from .root import RootCommand
 
 try:
     # Make GLib's mainloop the event loop for python-dbus

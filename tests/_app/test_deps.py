@@ -5,7 +5,7 @@ from pathlib import Path
 
 from pytest_mock import MockFixture
 
-from mopidy._server import deps
+from mopidy._app import deps
 from mopidy.internal.gi import Gst
 
 
