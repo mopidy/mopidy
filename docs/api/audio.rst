@@ -36,8 +36,8 @@ Audio scanner
 .. autoclass:: mopidy.audio.scan.Scanner
     :members:
 
+
 Audio utils
 ===========
 
-.. automodule:: mopidy.audio.utils
-    :members:
+.. autofunction:: mopidy.audio.supported_uri_schemes
