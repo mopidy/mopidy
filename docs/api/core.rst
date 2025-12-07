@@ -135,7 +135,7 @@ Playback states
 .. automethod:: mopidy.core.PlaybackController.get_state
 .. automethod:: mopidy.core.PlaybackController.set_state
 
-.. class:: mopidy.core.PlaybackState
+.. class:: mopidy.types.PlaybackState
 
   .. attribute:: STOPPED
     :annotation: = 'stopped'

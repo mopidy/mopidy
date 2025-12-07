@@ -114,9 +114,9 @@ class CoreListener(listener.Listener):
         *MAY* be implemented by actor.
 
         :param old_state: the state before the change
-        :type old_state: string from :class:`mopidy.core.PlaybackState` field
+        :type old_state: string from :class:`mopidy.types.PlaybackState` field
         :param new_state: the state after the change
-        :type new_state: string from :class:`mopidy.core.PlaybackState` field
+        :type new_state: string from :class:`mopidy.types.PlaybackState` field
         """
 
     def tracklist_changed(self) -> None:

@@ -61,6 +61,9 @@ pass a lot less data over the network when using tracklist IDs in API calls.
   - :mod:`mopidy.core.playlists`
   - :mod:`mopidy.core.tracklist`
 
+- Moved :class:`mopidy.core.PlaybackState` to
+  :class:`mopidy.types.PlaybackState`.
+
 Root object
 ^^^^^^^^^^^
 
