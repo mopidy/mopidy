@@ -49,6 +49,18 @@ full ``TlTrack`` objects as API arguments with tracklist IDs, ``tlid``.
 This is especially relevant for remote clients, like web clients, which may
 pass a lot less data over the network when using tracklist IDs in API calls.
 
+- The core API is no longer exported from submodules, just from
+  :mod:`mopidy.core`. Update your imports accordingly. The removed modules are:
+
+  - :mod:`mopidy.core.actor`
+  - :mod:`mopidy.core.history`
+  - :mod:`mopidy.core.library`
+  - :mod:`mopidy.core.listener`
+  - :mod:`mopidy.core.mixer`
+  - :mod:`mopidy.core.playback`
+  - :mod:`mopidy.core.playlists`
+  - :mod:`mopidy.core.tracklist`
+
 Root object
 ^^^^^^^^^^^
 
