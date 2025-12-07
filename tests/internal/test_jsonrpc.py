@@ -7,7 +7,7 @@ import pykka
 import pytest
 
 from mopidy import core, models
-from mopidy.internal import deprecation, jsonrpc
+from mopidy.internal import jsonrpc
 from tests import dummy_backend
 
 
@@ -60,14 +60,13 @@ class JsonRpcTestBase(unittest.TestCase):
         self.backend = dummy_backend.create_proxy()
         self.calc = Calculator()
 
-        with deprecation.ignore():
-            self.core = cast(
-                core.CoreProxy,
-                core.Core.start(
-                    config={},
-                    backends=[self.backend],
-                ).proxy(),
-            )
+        self.core = cast(
+            core.CoreProxy,
+            core.Core.start(
+                config={},
+                backends=[self.backend],
+            ).proxy(),
+        )
 
         self.wrapper = jsonrpc.Wrapper(
             objects={
