@@ -82,7 +82,6 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
             args.config_overrides,
         )
 
-        create_core_dirs(config)
         create_initial_config_file(config_files, extensions_data)
 
         log.setup_logging(config, args.base_verbosity_level, args.verbosity_level)
@@ -142,6 +141,8 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
         if not extensions_status["enabled"]:
             logger.error("No extension enabled, exiting...")
             sys.exit(1)
+
+        create_core_dirs(config)
 
         # Read-only config from here on, please.
         proxied_config = cast(config_lib.Config, config_lib.Proxy(config))
