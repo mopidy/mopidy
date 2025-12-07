@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import random
+import warnings
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
 
@@ -202,7 +203,8 @@ class TracklistController:
         """
         current_tl_track = self.core.playback.get_current_tl_track()
 
-        with deprecation.ignore("core.tracklist.eot_track"):
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=DeprecationWarning)
             eot_tl_track = self.eot_track(current_tl_track)
 
         return getattr(eot_tl_track, "tlid", None)
@@ -243,7 +245,8 @@ class TracklistController:
         """
         current_tl_track = self.core.playback.get_current_tl_track()
 
-        with deprecation.ignore("core.tracklist.next_track"):
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=DeprecationWarning)
             next_tl_track = self.next_track(current_tl_track)
 
         return getattr(next_tl_track, "tlid", None)
@@ -310,7 +313,8 @@ class TracklistController:
         """
         current_tl_track = self.core.playback.get_current_tl_track()
 
-        with deprecation.ignore("core.tracklist.previous_track"):
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=DeprecationWarning)
             previous_tl_track = self.previous_track(current_tl_track)
 
         return getattr(previous_tl_track, "tlid", None)
