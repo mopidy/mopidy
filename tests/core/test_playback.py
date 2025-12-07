@@ -5,7 +5,6 @@ import pykka
 import pytest
 
 from mopidy import backend, core
-from mopidy.internal import deprecation
 from mopidy.internal.models import PlaybackControllerState
 from mopidy.models import Track
 from mopidy.types import PlaybackState
@@ -80,7 +79,7 @@ class BaseTest:
         # We don't have a core actor running, so call about to finish directly.
         self.audio.set_about_to_finish_callback(self.playback._on_about_to_finish)
 
-        with deprecation.ignore():
+        with pytest.deprecated_call():
             self.core.tracklist.add(self.tracks)
 
         self.events = []
@@ -254,7 +253,7 @@ class TestNextHandling(BaseTest):
     def test_next_skips_over_change_track_error(self):
         # Trigger an exception in translate_uri.
         track = Track(uri="dummy:error", length=1234)
-        with deprecation.ignore():
+        with pytest.deprecated_call():
             self.core.tracklist.add(tracks=[track], at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -270,7 +269,7 @@ class TestNextHandling(BaseTest):
     def test_next_skips_over_change_track_unplayable(self):
         # Make translate_uri return None.
         track = Track(uri="dummy:unplayable", length=1234)
-        with deprecation.ignore():
+        with pytest.deprecated_call():
             self.core.tracklist.add(tracks=[track], at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -364,7 +363,7 @@ class TestPreviousHandling(BaseTest):
     def test_previous_skips_over_change_track_error(self):
         # Trigger an exception in translate_uri.
         track = Track(uri="dummy:error", length=1234)
-        with deprecation.ignore():
+        with pytest.deprecated_call():
             self.core.tracklist.add(tracks=[track], at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -380,7 +379,7 @@ class TestPreviousHandling(BaseTest):
     def test_previous_skips_over_change_track_unplayable(self):
         # Makes translate_uri return None.
         track = Track(uri="dummy:unplayable", length=1234)
-        with deprecation.ignore():
+        with pytest.deprecated_call():
             self.core.tracklist.add(tracks=[track], at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -406,7 +405,7 @@ class TestOnAboutToFinish(BaseTest):
     def test_on_about_to_finish_skips_over_change_track_error(self):
         # Trigger an exception in translate_uri.
         track = Track(uri="dummy:error", length=1234)
-        with deprecation.ignore():
+        with pytest.deprecated_call():
             self.core.tracklist.add(tracks=[track], at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -421,7 +420,7 @@ class TestOnAboutToFinish(BaseTest):
     def test_on_about_to_finish_skips_over_change_track_unplayable(self):
         # Makes translate_uri return None.
         track = Track(uri="dummy:unplayable", length=1234)
-        with deprecation.ignore():
+        with pytest.deprecated_call():
             self.core.tracklist.add(tracks=[track], at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
@@ -890,7 +889,7 @@ class TestSeek(BaseTest):
     def test_seek_fails_for_track_without_duration(self):
         track = self.tracks[0].replace(length=None)
         self.core.tracklist.clear()
-        with deprecation.ignore():
+        with pytest.deprecated_call():
             self.core.tracklist.add(tracks=[track])
 
         self.core.playback.play()
@@ -1000,7 +999,7 @@ class TestStream(BaseTest):
 class TestBug1871Regression(BaseTest):
     def test(self):
         track = Track(uri="dummy:d", length=1234, name="baz")
-        with deprecation.ignore():
+        with pytest.deprecated_call():
             self.core.tracklist.add(tracks=[track], at_position=1)
 
         self.core.playback.play()
@@ -1042,7 +1041,7 @@ class TestBackendSelection:
             backends=[self.backend1, self.backend2],
         )
 
-        with deprecation.ignore():
+        with pytest.deprecated_call():
             self.tl_tracks = self.core.tracklist.add(tracks=self.tracks)
 
     def trigger_stream_changed(self):
@@ -1198,7 +1197,7 @@ class TestBug1177Regression:
         track2 = Track(uri="dummy:b", length=40000)
 
         c = core.Core(config, mixer=None, backends=[b])
-        with deprecation.ignore():
+        with pytest.deprecated_call():
             c.tracklist.add(tracks=[track1, track2])
 
         c.playback.play()
@@ -1307,7 +1306,7 @@ class TestEndlessLoop(BaseTest):
 
     def test_play(self):
         self.core.tracklist.clear()
-        with deprecation.ignore():
+        with pytest.deprecated_call():
             self.core.tracklist.add(tracks=self.tracks_play)
 
         self.backend.playback.reset_call_limit().get()
@@ -1321,7 +1320,7 @@ class TestEndlessLoop(BaseTest):
 
     def test_next(self):
         self.core.tracklist.clear()
-        with deprecation.ignore():
+        with pytest.deprecated_call():
             self.core.tracklist.add(tracks=self.tracks_other)
 
         self.backend.playback.reset_call_limit().get()
@@ -1338,7 +1337,7 @@ class TestEndlessLoop(BaseTest):
 
     def test_previous(self):
         self.core.tracklist.clear()
-        with deprecation.ignore():
+        with pytest.deprecated_call():
             self.core.tracklist.add(tracks=self.tracks_other)
 
         self.backend.playback.reset_call_limit().get()
@@ -1355,7 +1354,7 @@ class TestEndlessLoop(BaseTest):
 
     def test_on_about_to_finish(self):
         self.core.tracklist.clear()
-        with deprecation.ignore():
+        with pytest.deprecated_call():
             self.core.tracklist.add(tracks=self.tracks_other)
 
         self.backend.playback.reset_call_limit().get()

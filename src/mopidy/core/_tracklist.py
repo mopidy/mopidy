@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import logging
 import random
+import warnings
 from collections.abc import Iterable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, overload
+from warnings import deprecated
 
 from pykka.typing import proxy_method
 
 from mopidy import exceptions
-from mopidy.internal import deprecation, validation
+from mopidy.internal import validation
 from mopidy.internal.models import TracklistControllerState
 from mopidy.models import TlTrack, Track
 from mopidy.types import TracklistId
@@ -202,11 +204,13 @@ class TracklistController:
         """
         current_tl_track = self.core.playback.get_current_tl_track()
 
-        with deprecation.ignore("core.tracklist.eot_track"):
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=DeprecationWarning)
             eot_tl_track = self.eot_track(current_tl_track)
 
         return getattr(eot_tl_track, "tlid", None)
 
+    @deprecated("Use core.tracklist.get_eot_tlid()")
     def eot_track(self, tl_track: TlTrack | None) -> TlTrack | None:
         """The track that will be played after the given track.
 
@@ -217,7 +221,6 @@ class TracklistController:
 
         :param tl_track: the reference track
         """
-        deprecation.warn("core.tracklist.eot_track")
         if tl_track is not None:
             validation.check_instance(tl_track, TlTrack)
         if self.get_single() and self.get_repeat():
@@ -243,11 +246,13 @@ class TracklistController:
         """
         current_tl_track = self.core.playback.get_current_tl_track()
 
-        with deprecation.ignore("core.tracklist.next_track"):
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=DeprecationWarning)
             next_tl_track = self.next_track(current_tl_track)
 
         return getattr(next_tl_track, "tlid", None)
 
+    @deprecated("Use core.tracklist.get_next_tlid()")
     def next_track(self, tl_track: TlTrack | None) -> TlTrack | None:
         """The track that will be played if calling
         :meth:`mopidy.core.PlaybackController.next()`.
@@ -262,7 +267,6 @@ class TracklistController:
 
         :param tl_track: the reference track
         """
-        deprecation.warn("core.tracklist.next_track")
         if tl_track is not None:
             validation.check_instance(tl_track, TlTrack)
 
@@ -310,11 +314,13 @@ class TracklistController:
         """
         current_tl_track = self.core.playback.get_current_tl_track()
 
-        with deprecation.ignore("core.tracklist.previous_track"):
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=DeprecationWarning)
             previous_tl_track = self.previous_track(current_tl_track)
 
         return getattr(previous_tl_track, "tlid", None)
 
+    @deprecated("Use core.tracklist.get_previous_tlid()")
     def previous_track(self, tl_track: TlTrack | None) -> TlTrack | None:
         """Returns the track that will be played if calling
         :meth:`mopidy.core.PlaybackController.previous()`.
@@ -328,7 +334,6 @@ class TracklistController:
 
         :param tl_track: the reference track
         """
-        deprecation.warn("core.tracklist.previous_track")
         if tl_track is not None:
             validation.check_instance(tl_track, TlTrack)
 
@@ -344,9 +349,29 @@ class TracklistController:
         # 1 - len(tracks) Thus 'position - 1' will always be within the list.
         return self._tl_tracks[position - 1]
 
+    @overload
+    @deprecated("tracks argument is deprecated, use uris argument instead.")
+    def add(
+        self,
+        tracks: Iterable[Track],
+        *,
+        at_position: int | None = None,
+        uris: None = None,
+    ) -> list[TlTrack]: ...
+
+    @overload
+    def add(
+        self,
+        tracks: None = None,
+        *,
+        at_position: int | None = None,
+        uris: Iterable[Uri],
+    ) -> list[TlTrack]: ...
+
     def add(  # noqa: C901
         self,
         tracks: Iterable[Track] | None = None,
+        *,
         at_position: int | None = None,
         uris: Iterable[Uri] | None = None,
     ) -> list[TlTrack]:
@@ -383,7 +408,11 @@ class TracklistController:
         validation.check_integer(at_position or 0)
 
         if tracks:
-            deprecation.warn("core.tracklist.add:tracks_arg")
+            warnings.warn(
+                "tracks argument is deprecated, use uris argument instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
 
         if tracks is None:
             tracks = []

@@ -5,7 +5,6 @@ from unittest import mock
 import pykka
 
 from mopidy import core
-from mopidy.internal import deprecation
 from mopidy.models import Track
 from tests import dummy_backend
 
@@ -21,11 +20,10 @@ class BackendEventsTest(unittest.TestCase):
             Track(uri="dummy:b"),
         ]
 
-        with deprecation.ignore():
-            self.core = cast(
-                core.CoreProxy,
-                core.Core.start(config, backends=[self.backend]).proxy(),
-            )
+        self.core = cast(
+            core.CoreProxy,
+            core.Core.start(config, backends=[self.backend]).proxy(),
+        )
 
     def tearDown(self):
         pykka.ActorRegistry.stop_all()

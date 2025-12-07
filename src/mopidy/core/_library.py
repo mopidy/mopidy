@@ -5,13 +5,15 @@ import contextlib
 import logging
 import operator
 import urllib.parse
+import warnings
 from collections.abc import Generator, Iterable, Mapping
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
+from warnings import deprecated
 
 from pykka.typing import proxy_method
 
 from mopidy import exceptions
-from mopidy.internal import deprecation, validation
+from mopidy.internal import validation
 from mopidy.models import Image, Ref, SearchResult, Track
 from mopidy.types import DistinctField, Query, SearchField, Uri, UriScheme
 
@@ -133,9 +135,24 @@ class LibraryController:
 
         return []
 
+    @overload
+    @deprecated("Field 'track' is deprecated, use 'track_name' instead.")
+    def get_distinct(
+        self,
+        field: Literal["track"],
+        query: Query[SearchField] | None = None,
+    ) -> set[Any]: ...
+
+    @overload
     def get_distinct(
         self,
         field: DistinctField,
+        query: Query[SearchField] | None = None,
+    ) -> set[Any]: ...
+
+    def get_distinct(
+        self,
+        field: DistinctField | Literal["track"],
         query: Query[SearchField] | None = None,
     ) -> set[Any]:
         """List distinct values for a given field from the library.
@@ -157,9 +174,10 @@ class LibraryController:
         .. versionadded:: 1.0
         """
         if field == "track":
-            deprecation.warn(
-                f"core.library.get_distinct:field_arg:{field}",
-                pending=False,
+            warnings.warn(
+                "Field 'track' is deprecated, use 'track_name' instead.",
+                DeprecationWarning,
+                stacklevel=2,
             )
             field_type = str
         else:
