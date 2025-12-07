@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, override
 
 from mopidy.commands import Command
-from mopidy.internal.gi import Gst, gi
+from mopidy.internal.gi import Gst
 
 if TYPE_CHECKING:
     from mopidy.config import Config
@@ -32,101 +32,93 @@ class DepsCommand(Command):
         *_args: Any,
         **_kwargs: Any,
     ) -> int:
-        print(format_dependency_list())  # noqa: T201
+        print("\n".join(dep.format() for dep in get_dependencies()))  # noqa: T201
         return 0
 
 
 @dataclass
-class DepInfo:
+class Dependency:
     name: str
     version: str | None = None
     path: PathLike[str] | None = None
-    dependencies: list[DepInfo] = field(default_factory=list)
+    dependencies: list[Dependency] = field(default_factory=list)
     other: str | None = None
 
+    def format(self) -> str:
+        return "\n".join(
+            [
+                (
+                    (
+                        f"{self.name}: {self.version}"
+                        + (f" from {self.path}" if self.path else "")
+                    )
+                    if self.version
+                    else f"{self.name}: not found"
+                ),
+                *(
+                    (" " * 2 + line for line in self.other.splitlines())
+                    if self.other
+                    else []
+                ),
+                *(
+                    " " * 2 + line
+                    for dep in self.dependencies
+                    for line in dep.format().splitlines()
+                ),
+            ]
+        )
 
-def format_dependency_list(dependencies: list[DepInfo] | None = None) -> str:
-    if dependencies is None:
-        seen_pkgs = set()
-        ext_pkg_names = {
-            ext_pkg_name
-            for ep in metadata.entry_points(group="mopidy.ext")
-            if ep.dist is not None
-            and (ext_pkg_name := ep.dist.name.lower())
-            and ext_pkg_name != "mopidy"
+
+def get_dependencies() -> list[Dependency]:
+    seen_pkg_names = set[str]()
+    extension_pkg_names = sorted(
+        {
+            python_pkg_name
+            for entry_point in metadata.entry_points(group="mopidy.ext")
+            if entry_point.dist is not None
+            and (python_pkg_name := entry_point.dist.name.lower())
+            and python_pkg_name != "mopidy"
         }
-        dependencies = [
-            executable_info(),
-            platform_info(),
-            python_info(),
-            pkg_info(
-                pkg_name="mopidy",
-                seen_pkgs=seen_pkgs,
-            ),
-            *[
-                pkg_info(
-                    pkg_name=pkg_name,
-                    seen_pkgs=seen_pkgs,
-                )
-                for pkg_name in sorted(ext_pkg_names)
-            ],
-            gstreamer_info(),
-        ]
-    return "\n".join(_format_dependency(dep) for dep in dependencies)
-
-
-def _format_dependency(dep: DepInfo) -> str:
-    lines = []
-
-    if dep.version is None:
-        lines.append(f"{dep.name}: not found")
-    else:
-        source = f" from {dep.path}" if dep.path else ""
-        lines.append(f"{dep.name}: {dep.version}{source}")
-
-    if dep.other:
-        lines.append("  Detailed information:")
-        lines.append(_indent(dep.other, places=4))
-
-    for sub_dep in dep.dependencies:
-        sub_dep_lines = _format_dependency(sub_dep)
-        lines.append(_indent(sub_dep_lines, places=2))
-
-    return "\n".join(lines)
-
-
-def _indent(value: str, *, places: int) -> str:
-    return "\n".join(" " * places + line for line in value.splitlines())
-
-
-def executable_info() -> DepInfo:
-    return DepInfo(
-        name="Executable",
-        version=sys.argv[0],
     )
+    return [
+        Dependency(
+            name="Executable",
+            version=sys.argv[0],
+        ),
+        Dependency(
+            name="Platform",
+            version=platform.platform(),
+        ),
+        Dependency(
+            name="Python",
+            version=f"{platform.python_implementation()} {platform.python_version()}",
+            path=Path(platform.__file__).parent,
+        ),
+        python_pkg(
+            pkg_name="mopidy",
+            seen_pkg_names=seen_pkg_names,
+        ),
+        *[
+            python_pkg(
+                pkg_name=pkg_name,
+                seen_pkg_names=seen_pkg_names,
+            )
+            for pkg_name in extension_pkg_names
+        ],
+        Dependency(
+            name="GStreamer",
+            version=".".join(map(str, Gst.version())),
+            other=gstreamer_info(),
+        ),
+    ]
 
 
-def platform_info() -> DepInfo:
-    return DepInfo(
-        name="Platform",
-        version=platform.platform(),
-    )
-
-
-def python_info() -> DepInfo:
-    return DepInfo(
-        name="Python",
-        version=f"{platform.python_implementation()} {platform.python_version()}",
-        path=Path(platform.__file__).parent,
-    )
-
-
-def pkg_info(
+def python_pkg(
     *,
     pkg_name: str,
     depth: int = 0,
-    seen_pkgs: set[str],
-) -> DepInfo:
+    seen_pkg_names: set[str],
+) -> Dependency:
     try:
         dependencies = []
         distribution = metadata.distribution(pkg_name)
@@ -136,69 +128,45 @@ def pkg_info(
                     continue
                 if match := re.match("[a-zA-Z0-9_-]+", raw):
                     name = match.group(0).lower()
-                    if depth > 0 and name in seen_pkgs:
+                    if depth > 0 and name in seen_pkg_names:
                         continue
-                    seen_pkgs.add(name)
+                    seen_pkg_names.add(name)
                     dependencies.append(
-                        pkg_info(
+                        python_pkg(
                             pkg_name=name,
                             depth=depth + 1,
-                            seen_pkgs=seen_pkgs,
+                            seen_pkg_names=seen_pkg_names,
                         ),
                     )
-        return DepInfo(
+        return Dependency(
             name=pkg_name,
             version=distribution.version,
             path=distribution.locate_file("."),  # pyright: ignore[reportArgumentType]
             dependencies=dependencies,
         )
     except metadata.PackageNotFoundError:
-        return DepInfo(
+        return Dependency(
             name=pkg_name,
         )
 
 
-def gstreamer_info() -> DepInfo:
-    other: list[str] = []
-
-    found_elements = []
-    missing_elements = []
-    for name, version in _gstreamer_check_elements():
-        if version:
-            found_elements.append((name, version))
-        else:
-            missing_elements.append(name)
-
-    other.append("Available elements:")
-    other.extend(f"  {element}: {version}" for (element, version) in found_elements)
-    if not found_elements:
-        other.append("  none")
-    other.append("Elements not found:")
-    other.extend(f"  {element}" for element in missing_elements)
-    if not missing_elements:
-        other.append("  none")
-
-    return DepInfo(
-        name="GStreamer",
-        version=".".join(map(str, Gst.version())),
-        path=Path(gi.__file__).parent,
-        other="\n".join(other),
-    )
-
-
-def _gstreamer_check_elements():
+def gstreamer_info() -> str:
     elements_to_check = [
         # Core playback
         "uridecodebin",
+        #
         # External HTTP streams
         "souphttpsrc",
+        #
         # Spotify
         "spotifyaudiosrc",
+        #
         # Audio sinks
         "alsasink",
         "osssink",
         "oss4sink",
         "pulsesink",
+        #
         # MP3 encoding and decoding
         #
         # One of flump3dec, mad, and mpg123audiodec is required for MP3
@@ -210,6 +178,7 @@ def _gstreamer_check_elements():
         "mad",
         "mpegaudioparse",
         "mpg123audiodec",
+        #
         # Ogg Vorbis encoding and decoding
         "vorbisdec",
         "vorbisenc",
@@ -217,20 +186,36 @@ def _gstreamer_check_elements():
         "oggdemux",
         "oggmux",
         "oggparse",
+        #
         # Flac decoding
         "flacdec",
         "flacparse",
+        #
         # Shoutcast output
         "shout2send",
     ]
 
-    def get_version(factory: Gst.PluginFeature):
-        if plugin := factory.get_plugin():
-            return plugin.get_version()
-        return "unknown"
-
-    known_elements = {
-        factory.get_name(): get_version(factory)
+    all_known_elements = {
+        factory.get_name(): plugin.get_version()
         for factory in Gst.Registry.get().get_feature_list(Gst.ElementFactory)
+        if (plugin := factory.get_plugin())
     }
-    return [(element, known_elements.get(element)) for element in elements_to_check]
+    found_elements = [
+        (element, version)
+        for element in elements_to_check
+        if (version := all_known_elements.get(element))
+    ]
+    missing_elements = [
+        element for element in elements_to_check if element not in all_known_elements
+    ]
+
+    return "\n".join(
+        [
+            "Available elements:",
+            *(f"  {element}: {version}" for (element, version) in found_elements),
+            *(["  none"] if not found_elements else []),
+            "Missing elements:",
+            *(f"  {element}" for element in missing_elements),
+            *(["  none"] if not missing_elements else []),
+        ]
+    )
