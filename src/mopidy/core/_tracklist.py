@@ -163,7 +163,7 @@ class TracklistController:
     def index(
         self,
         tl_track: TlTrack | None = None,
-        tlid: int | None = None,
+        tlid: TracklistId | None = None,
     ) -> int | None:
         """The position of the given track in the tracklist.
 
@@ -195,7 +195,7 @@ class TracklistController:
                     return i
         return None
 
-    def get_eot_tlid(self) -> int | None:
+    def get_eot_tlid(self) -> TracklistId | None:
         """The TLID of the track that will be played after the current track.
 
         Not necessarily the same TLID as returned by :meth:`get_next_tlid`.
@@ -233,7 +233,7 @@ class TracklistController:
         # shared.
         return self.next_track(tl_track)
 
-    def get_next_tlid(self) -> int | None:
+    def get_next_tlid(self) -> TracklistId | None:
         """The tlid of the track that will be played if calling
         :meth:`mopidy.core.PlaybackController.next()`.
 
@@ -302,7 +302,7 @@ class TracklistController:
 
         return self._tl_tracks[next_index]
 
-    def get_previous_tlid(self) -> int | None:
+    def get_previous_tlid(self) -> TracklistId | None:
         """Returns the TLID of the track that will be played if calling
         :meth:`mopidy.core.PlaybackController.previous()`.
 
