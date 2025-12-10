@@ -7,8 +7,7 @@ import operator
 import urllib.parse
 import warnings
 from collections.abc import Generator, Iterable, Mapping
-from typing import TYPE_CHECKING, Any, Literal, cast, overload
-from warnings import deprecated
+from typing import TYPE_CHECKING, Any, cast
 
 from pykka.typing import proxy_method
 
@@ -135,24 +134,9 @@ class LibraryController:
 
         return []
 
-    @overload
-    @deprecated("Field 'track' is deprecated, use 'track_name' instead.")
-    def get_distinct(
-        self,
-        field: Literal["track"],
-        query: Query[SearchField] | None = None,
-    ) -> set[Any]: ...
-
-    @overload
     def get_distinct(
         self,
         field: DistinctField,
-        query: Query[SearchField] | None = None,
-    ) -> set[Any]: ...
-
-    def get_distinct(
-        self,
-        field: DistinctField | Literal["track"],
         query: Query[SearchField] | None = None,
     ) -> set[Any]:
         """List distinct values for a given field from the library.
