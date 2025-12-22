@@ -70,6 +70,7 @@ tests = [
 typing = [
     "pygobject-stubs >= 2.14.0, != 2.15.0",
     "pyright == 1.1.407",
+    "ty == 0.0.5",
     "types-requests >= 2.32",
 ]
 
@@ -191,6 +192,7 @@ env_list = [
     "pyright",
     "ruff-check",
     "ruff-format",
+    "ty",
     "docs",
 ]
 
@@ -220,6 +222,10 @@ commands = [["ruff", "check", "{posargs:.}"]]
 skip_install = true
 dependency_groups = ["ruff"]
 commands = [["ruff", "format", "--check", "--diff", "{posargs:.}"]]
+
+[tool.tox.env.ty]
+dependency_groups = ["typing"]
+commands = [["ty", "check", "{posargs:src}"]]
 
 [tool.tox.env.docs]
 dependency_groups = ["docs"]
