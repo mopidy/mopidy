@@ -3,7 +3,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 try:
-    import dbus  # pyright: ignore[reportMissingImports]
+    import dbus  # pyright: ignore[reportMissingImports]  # ty:ignore[unresolved-import]
 except ImportError:
     dbus = None
 

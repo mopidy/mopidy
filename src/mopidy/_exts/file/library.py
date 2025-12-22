@@ -31,7 +31,8 @@ class FileLibraryProvider(backend.LibraryProvider):
     def __init__(self, backend: backend.Backend, config: config_lib.Config) -> None:
         super().__init__(backend)
 
-        ext_config = cast(FileConfig, config[Extension.ext_name])
+        config_dict = cast(config_lib.ConfigDict, config)
+        ext_config = cast(FileConfig, config_dict[Extension.ext_name])
 
         self._media_dirs = list(self._get_media_dirs(config))
         self._show_dotfiles = ext_config["show_dotfiles"]

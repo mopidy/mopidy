@@ -25,7 +25,7 @@ except ValueError:
     )
     raise
 
-from gi.repository import GLib, GObject, Gst, GstPbutils
+from gi.repository import GLib, GObject, Gst, GstBase, GstPbutils
 
 Gst.init([])
 GLib.set_prgname("mopidy")
@@ -45,6 +45,7 @@ __all__ = [
     "GLib",
     "GObject",
     "Gst",
+    "GstBase",
     "GstPbutils",
     "gi",
 ]

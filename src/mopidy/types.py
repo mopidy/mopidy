@@ -7,7 +7,7 @@ from typing import Literal, NewType, TypeVar
 # Date types
 Date = NewType("Date", str)
 Year = NewType("Year", str)
-DateOrYear = Date | Year
+type DateOrYear = Date | Year
 
 
 # Integer types

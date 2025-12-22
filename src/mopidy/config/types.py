@@ -98,6 +98,8 @@ class String(ConfigValue[str]):
     Is decoded as utf-8, and \n and \t escapes should work and be preserved.
     """
 
+    _choices: Iterable[str] | None
+
     def __init__(
         self,
         optional: bool = False,
@@ -121,7 +123,7 @@ class String(ConfigValue[str]):
             transformed_value = transformer(result)
             result = _TransformedValue(result, transformed_value)
 
-        validators.validate_choice(result, self._choices)
+        validators.validate_choice(str(result), self._choices)
         return result
 
     def serialize(self, value: str, display: bool = False) -> str:
@@ -251,7 +253,10 @@ class Boolean(ConfigValue[bool]):
         raise ValueError(msg)
 
 
-class Pair[K: ConfigValue, V: ConfigValue](ConfigValue[tuple[K, V]]):
+class Pair[
+    K: ConfigValue = String,
+    V: ConfigValue = String,
+](ConfigValue[tuple[K, V]]):
     """Pair value.
 
     The value is expected to be a pair of elements, separated by a specified delimiter.
@@ -266,7 +271,7 @@ class Pair[K: ConfigValue, V: ConfigValue](ConfigValue[tuple[K, V]]):
         optional: bool = False,
         optional_pair: bool = False,
         separator: str = "|",
-        subtypes: tuple[K, V] = (String(), String()),
+        subtypes: tuple[K, V] = (String(), String()),  # ty:ignore[invalid-parameter-default]
     ) -> None:
         self._required = not optional
         self._optional_pair = optional_pair
@@ -321,7 +326,7 @@ class Pair[K: ConfigValue, V: ConfigValue](ConfigValue[tuple[K, V]]):
         return f"{serialized_first_value}{self._separator}{serialized_second_value}"
 
 
-class List[V: ConfigValue](ConfigValue[tuple[V, ...] | frozenset[V]]):
+class List[V: ConfigValue = String](ConfigValue[tuple[V, ...] | frozenset[V]]):
     """List value.
 
     Supports elements split by commas or newlines. Newlines take precedence and
@@ -332,11 +337,13 @@ class List[V: ConfigValue](ConfigValue[tuple[V, ...] | frozenset[V]]):
     serialized output being unstable.
     """
 
+    _subtype: V
+
     def __init__(
         self,
         optional: bool = False,
         unique: bool = False,
-        subtype: V = String(),  # noqa: B008
+        subtype: V = String(),  # noqa: B008  # ty:ignore[invalid-parameter-default]
     ) -> None:
         self._required = not optional
         self._unique = unique
@@ -371,7 +378,7 @@ class List[V: ConfigValue](ConfigValue[tuple[V, ...] | frozenset[V]]):
 
         # This is necessary for backwards-compatibility, in case subclasses
         # aren't calling their parent constructor.
-        subtype: V = getattr(self, "_subtype", String())  # pyright: ignore[reportAssignmentType]
+        subtype = cast(V, getattr(self, "_subtype", String()))
 
         serialized_values = []
         for item in value:

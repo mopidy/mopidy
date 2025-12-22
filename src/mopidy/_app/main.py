@@ -4,7 +4,7 @@ import logging
 import signal
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, TypedDict, cast
+from typing import TypedDict, cast
 
 import pykka.debug
 
@@ -23,23 +23,22 @@ from .server import ServerCommand
 
 try:
     # Make GLib's mainloop the event loop for python-dbus
-    import dbus.mainloop.glib  # pyright: ignore[reportMissingImports]
+    import dbus.mainloop.glib  # pyright: ignore[reportMissingImports]  # ty:ignore[unresolved-import]
 
     dbus.mainloop.glib.threads_init()
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 except ImportError:
     pass
 
-if TYPE_CHECKING:
-
-    class ExtensionsStatus(TypedDict):
-        validate: list[ext.Extension]
-        config: list[ext.Extension]
-        disabled: list[ext.Extension]
-        enabled: list[ext.Extension]
-
 
 logger = logging.getLogger(__name__)
+
+
+class ExtensionsStatus(TypedDict):
+    validate: list[ext.Extension]
+    config: list[ext.Extension]
+    disabled: list[ext.Extension]
+    enabled: list[ext.Extension]
 
 
 def main() -> int:  # noqa: C901, PLR0912, PLR0915
@@ -100,21 +99,24 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
         for data in extensions_data:
             extension = data.extension
 
+            # Cast config to dict for access to extension config
+            config_dict = cast(config_lib.ConfigDict, config)
+
             # TODO: factor out all of this to a helper that can be tested
             if not ext.validate_extension_data(data):
-                config[extension.ext_name] = {"enabled": False}
+                config_dict[extension.ext_name] = {"enabled": False}
                 config_errors[extension.ext_name] = {
                     "enabled": "extension disabled by self check.",
                 }
                 extensions_status["validate"].append(extension)
-            elif not config[extension.ext_name]["enabled"]:
-                config[extension.ext_name] = {"enabled": False}
+            elif not config_dict[extension.ext_name]["enabled"]:
+                config_dict[extension.ext_name] = {"enabled": False}
                 config_errors[extension.ext_name] = {
                     "enabled": "extension disabled by user config.",
                 }
                 extensions_status["disabled"].append(extension)
             elif config_errors.get(extension.ext_name):
-                config[extension.ext_name]["enabled"] = False
+                config_dict[extension.ext_name]["enabled"] = False
                 config_errors[extension.ext_name]["enabled"] = (
                     "extension disabled due to config errors."
                 )
@@ -232,7 +234,7 @@ def check_config_errors(
     extension_names = {}
     all_extension_names = set()
 
-    for state in extensions_status:
+    for state in ("validate", "config", "disabled", "enabled"):
         extension_names[state] = {e.ext_name for e in extensions_status[state]}
         all_extension_names.update(extension_names[state])
 

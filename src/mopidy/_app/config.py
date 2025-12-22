@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import argparse
-from typing import Any
+from typing import Any, cast
 
 from mopidy import config as config_lib
 from mopidy.commands import Command
@@ -19,10 +19,11 @@ class ConfigCommand(Command):
         args: argparse.Namespace,  # noqa: ARG002
         config: config_lib.Config,
         *_args: Any,
-        errors: config_lib.ConfigErrors,
-        schemas: config_lib.ConfigSchemas,
-        **_kwargs: Any,
+        **kwargs: Any,
     ) -> int:
+        errors = cast(config_lib.ConfigErrors, kwargs.pop("errors"))
+        schemas = cast(config_lib.ConfigSchemas, kwargs.pop("schemas"))
+
         data = config_lib.format(config, schemas, errors)
 
         # Throw away all bytes that are not valid UTF-8 before printing

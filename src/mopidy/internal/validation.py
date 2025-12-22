@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import urllib.parse
 from collections.abc import Iterable, Mapping
+from types import UnionType
 from typing import Any, Literal, TypeVar, Union, get_args
 
 from mopidy import exceptions
@@ -39,10 +40,10 @@ T = TypeVar("T")
 
 PLAYBACK_STATES: set[str] = {ps.value for ps in PlaybackState}
 
-FIELD_TYPES: dict[str, type] = {
+FIELD_TYPES: dict[str, type | UnionType] = {
     "album": str,
     "albumartist": str,
-    "any": int | str,  # pyright: ignore[reportAssignmentType]
+    "any": int | str,
     "artist": str,
     "comment": str,
     "composer": str,
@@ -60,11 +61,13 @@ FIELD_TYPES: dict[str, type] = {
     "track_no": int,
     "uri": str,
 }
-DISTINCT_FIELDS: dict[str, type] = {
+DISTINCT_FIELDS: dict[str, type | UnionType] = {
     x: FIELD_TYPES[x] for x in get_literals(DistinctField)
 }
-SEARCH_FIELDS: dict[str, type] = {x: FIELD_TYPES[x] for x in get_literals(SearchField)}
-TRACKLIST_FIELDS: dict[str, type] = {
+SEARCH_FIELDS: dict[str, type | UnionType] = {
+    x: FIELD_TYPES[x] for x in get_literals(SearchField)
+}
+TRACKLIST_FIELDS: dict[str, type | UnionType] = {
     x: FIELD_TYPES[x] for x in get_literals(TracklistField) - {"tlid"}
 }
 
@@ -85,8 +88,8 @@ def _check_iterable(
 
 
 def check_choice(
-    arg: T,
-    choices: Iterable[T],
+    arg: str,
+    choices: Iterable[str],
     msg: str = "Expected one of {choices}, not {arg!r}",
 ) -> None:
     if arg not in choices:
@@ -111,12 +114,13 @@ def check_instance(
 
 def check_instances(
     arg: Iterable[Any],
-    cls: type,
+    cls: type | UnionType,
     msg: str = "Expected a list of {name}, not {arg!r}",
 ) -> None:
-    _check_iterable(arg, msg, name=cls.__name__)
+    name = cls.__name__ if isinstance(cls, type) else str(cls)
+    _check_iterable(arg, msg, name=name)
     if not all(isinstance(instance, cls) for instance in arg):
-        raise exceptions.ValidationError(msg.format(arg=arg, name=cls.__name__))
+        raise exceptions.ValidationError(msg.format(arg=arg, name=name))
 
 
 def check_integer(
