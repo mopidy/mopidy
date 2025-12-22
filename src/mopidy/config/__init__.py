@@ -50,6 +50,9 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
+type ConfigDict = dict[str, dict[str, Any]]
+
+
 class Config(TypedDict):
     core: CoreConfig
     logging: LoggingConfig

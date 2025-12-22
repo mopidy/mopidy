@@ -260,9 +260,9 @@ class TlTrack(BaseModel):
         track: Track,
         **_: Any,
     ) -> None:
-        super().__init__(tlid=tlid, track=track)  # pyright: ignore[reportCallIssue]
+        super().__init__(tlid=tlid, track=track)  # pyright: ignore[reportCallIssue]  # ty:ignore[unknown-argument]
 
-    def __iter__(self) -> Iterator[TracklistId | Track]:  # pyright: ignore[reportIncompatibleMethodOverride]
+    def __iter__(self) -> Iterator[TracklistId | Track]:  # pyright: ignore[reportIncompatibleMethodOverride]  # ty:ignore[invalid-method-override]
         return iter((self.tlid, self.track))
 
 

@@ -19,7 +19,7 @@ from mopidy.audio._utils import (
     setup_proxy,
 )
 from mopidy.internal import process
-from mopidy.internal.gi import GLib, Gst, GstPbutils
+from mopidy.internal.gi import GLib, Gst, GstBase, GstPbutils
 from mopidy.types import DurationMs, Percentage, PlaybackState
 
 if TYPE_CHECKING:
@@ -567,9 +567,8 @@ class GstAudio(Audio, pykka.ThreadingActor):
 
         if self._live_stream and hasattr(source.props, "is_live"):
             gst_logger.debug("Enabling live stream mode")
-            # TODO(typing): Once pygobject-stubs includes GstApp, cast to AppSrc:
-            # source = cast(GstApp.AppSrc, source)  # noqa: ERA001
-            source.set_live(True)  # pyright: ignore[reportAttributeAccessIssue]
+            source = cast(GstBase.BaseSrc, source)
+            source.set_live(True)
 
         setup_proxy(source, self._config["proxy"])
 

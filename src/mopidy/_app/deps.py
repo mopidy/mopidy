@@ -92,7 +92,7 @@ def get_dependencies() -> list[Dependency]:
         Dependency(
             name="Python",
             version=f"{platform.python_implementation()} {platform.python_version()}",
-            path=Path(platform.__file__).parent,
+            path=Path(platform.__file__).parent if platform.__file__ else None,
         ),
         python_pkg(
             pkg_name="mopidy",
@@ -141,7 +141,7 @@ def python_pkg(
         return Dependency(
             name=pkg_name,
             version=distribution.version,
-            path=distribution.locate_file("."),  # pyright: ignore[reportArgumentType]
+            path=Path(str(distribution.locate_file("."))),
             dependencies=dependencies,
         )
     except metadata.PackageNotFoundError:
