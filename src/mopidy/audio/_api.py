@@ -9,7 +9,7 @@ from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
 from mopidy.types import DurationMs, PlaybackState
 
 if TYPE_CHECKING:
-    from mopidy.internal.gi import Gst
+    from mopidy._lib.gi import Gst
 
 
 class Audio:

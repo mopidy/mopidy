@@ -6,7 +6,7 @@ from pathlib import Path
 from pytest_mock import MockFixture
 
 from mopidy._app import deps
-from mopidy.internal.gi import Gst
+from mopidy._lib.gi import Gst
 
 
 def test_dependency_format():

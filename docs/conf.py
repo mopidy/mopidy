@@ -87,7 +87,7 @@ man_pages = [
 
 autodoc_mock_imports = [
     "dbus",
-    "mopidy.internal.gi",
+    "mopidy._libs.gi",
 ]
 
 typehints_document_rtype = True

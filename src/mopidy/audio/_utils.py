@@ -4,7 +4,7 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, cast
 
 from mopidy import httpclient
-from mopidy.internal.gi import Gst
+from mopidy._lib.gi import Gst
 from mopidy.types import DurationMs, UriScheme
 
 if TYPE_CHECKING:

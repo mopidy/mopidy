@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any, cast, override
 import pykka
 
 from mopidy import exceptions
+from mopidy._lib.gi import GLib, Gst, GstBase, GstPbutils
 from mopidy.audio import tags as tags_lib
 from mopidy.audio._api import Audio
 from mopidy.audio._listener import AudioListener
@@ -19,7 +20,6 @@ from mopidy.audio._utils import (
     setup_proxy,
 )
 from mopidy.internal import process
-from mopidy.internal.gi import GLib, Gst, GstBase, GstPbutils
 from mopidy.types import DurationMs, Percentage, PlaybackState
 
 if TYPE_CHECKING:

@@ -5,10 +5,10 @@ from pathlib import Path
 from typing import Any, NamedTuple, cast
 
 from mopidy import exceptions
+from mopidy._lib.gi import Gst, GstPbutils
 from mopidy.audio import tags as tags_lib
 from mopidy.audio._utils import Signals, setup_proxy
 from mopidy.internal import log
-from mopidy.internal.gi import Gst, GstPbutils
 
 
 class GstElementFactoryListType(IntEnum):

@@ -5,8 +5,8 @@ import unittest
 
 import pytest
 
+from mopidy._lib.gi import GLib
 from mopidy.internal import path
-from mopidy.internal.gi import GLib
 
 
 class GetOrCreateDirTest(unittest.TestCase):

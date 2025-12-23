@@ -6,8 +6,8 @@ from unittest import mock
 import pykka
 
 from mopidy import audio
+from mopidy._lib.gi import Gst
 from mopidy.internal import path
-from mopidy.internal.gi import Gst
 from mopidy.types import PlaybackState
 from tests import dummy_audio, path_to_data_dir
 

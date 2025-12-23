@@ -10,8 +10,8 @@ from os import PathLike
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, override
 
+from mopidy._lib.gi import Gst
 from mopidy.commands import Command
-from mopidy.internal.gi import Gst
 
 if TYPE_CHECKING:
     from mopidy.config import Config

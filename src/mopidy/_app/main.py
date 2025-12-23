@@ -11,11 +11,11 @@ import pykka.debug
 import mopidy
 from mopidy import commands, ext
 from mopidy import config as config_lib
-from mopidy.internal import log, path, process
-from mopidy.internal.gi import (
+from mopidy._lib.gi import (
     GLib,
     Gst,  # noqa: F401 (imported to test GStreamer presence)
 )
+from mopidy.internal import log, path, process
 
 from .config import ConfigCommand
 from .deps import DepsCommand

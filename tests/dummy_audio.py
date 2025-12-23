@@ -12,7 +12,7 @@ from mopidy import audio
 from mopidy.types import DurationMs, PlaybackState
 
 if TYPE_CHECKING:
-    from mopidy.internal.gi import Gst
+    from mopidy._lib.gi import Gst
 
 
 def create_proxy(config=None, mixer=None):

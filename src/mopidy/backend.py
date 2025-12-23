@@ -12,8 +12,8 @@ from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
 from mopidy import listener
 
 if TYPE_CHECKING:
+    from mopidy._lib.gi import Gst
     from mopidy.audio import AudioProxy
-    from mopidy.internal.gi import Gst
     from mopidy.models import Image, Playlist, Ref, SearchResult, Track
     from mopidy.types import (
         DistinctField,
