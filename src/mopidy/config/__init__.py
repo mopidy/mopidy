@@ -9,7 +9,7 @@ from collections.abc import Iterator, Mapping
 from typing import TYPE_CHECKING, Any, TypedDict, cast
 
 import mopidy
-from mopidy.config import keyring
+from mopidy.config import _keyring
 from mopidy.config.schemas import ConfigSchema, MapConfigSchema
 from mopidy.config.types import (
     Boolean,
@@ -166,7 +166,7 @@ def load(
     config_dir = pathlib.Path(__file__).parent
     defaults = [read(config_dir / "default.conf")]
     defaults.extend(ext_defaults)
-    raw_config = _load(files, defaults, keyring.fetch() + (overrides or []))
+    raw_config = _load(files, defaults, _keyring.fetch() + (overrides or []))
 
     schemas = _schemas[:]
     schemas.extend(ext_schemas)

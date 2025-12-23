@@ -204,3 +204,7 @@ Internals
   - :mod:`mopidy.m3u`
   - :mod:`mopidy.softwaremixer`
   - :mod:`mopidy.stream`
+
+- Renamed modules to be explicitly private:
+
+  - :mod:`mopidy.config.keyring`
