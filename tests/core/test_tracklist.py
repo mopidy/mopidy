@@ -4,7 +4,7 @@ from unittest import mock
 import pytest
 
 from mopidy import backend, core
-from mopidy.internal.models import TracklistControllerState
+from mopidy.core._state_storage import TracklistControllerState
 from mopidy.models import TlTrack, Track
 
 

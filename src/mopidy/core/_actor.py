@@ -13,8 +13,7 @@ from pykka.typing import ActorMemberMixin, proxy_method
 
 import mopidy
 from mopidy import audio, backend, mixer
-from mopidy.internal import path, storage
-from mopidy.internal.models import CoreControllersState, StoredState
+from mopidy.internal import path
 from mopidy.types import PlaybackState
 
 from ._history import HistoryController
@@ -23,6 +22,7 @@ from ._listener import CoreListener
 from ._mixer import MixerController
 from ._playback import PlaybackController
 from ._playlists import PlaylistsController
+from ._state_storage import CoreControllersState, StoredState
 from ._tracklist import TracklistController
 
 if TYPE_CHECKING:
@@ -213,7 +213,7 @@ class Core(
         state_file = self._get_state_file()
         logger.info("Saving state to %s", state_file)
 
-        data = StoredState(
+        state = StoredState(
             version=mopidy.__version__,
             state=CoreControllersState(
                 tracklist=self.tracklist._save_state(),
@@ -222,7 +222,7 @@ class Core(
                 mixer=self.mixer._save_state(),
             ),
         )
-        storage.dump(state_file, data)
+        state.dump(state_file)
         logger.debug("Saving state done")
 
     def _load_state(self, coverage: Iterable[str]) -> None:
@@ -244,7 +244,7 @@ class Core(
         state_file = self._get_state_file()
         logger.info("Loading state from %s", state_file)
 
-        data = storage.load(state_file)
+        data = StoredState.load(state_file)
 
         try:
             # Try only once. If something goes wrong, the next start is clean.

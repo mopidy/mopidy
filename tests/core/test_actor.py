@@ -9,8 +9,16 @@ import pytest
 
 import mopidy
 from mopidy import core
-from mopidy.internal import models, storage
-from mopidy.models import Track
+from mopidy.core._state_storage import (
+    CoreControllersState,
+    HistoryState,
+    HistoryTrack,
+    MixerControllerState,
+    PlaybackControllerState,
+    StoredState,
+    TracklistControllerState,
+)
+from mopidy.models import Ref, TlTrack, Track
 from mopidy.types import DurationMs, Percentage, PlaybackState, TracklistId, Uri
 from tests import dummy_mixer
 
@@ -197,23 +205,23 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
         self.core._teardown()
 
         assert self.state_file.is_file()
-        reload_data = storage.load(self.state_file)
-        data = models.StoredState(
+        reload_data = StoredState.load(self.state_file)
+        data = StoredState(
             version=mopidy.__version__,
-            state=models.CoreControllersState(
-                tracklist=models.TracklistControllerState(
+            state=CoreControllersState(
+                tracklist=TracklistControllerState(
                     repeat=False,
                     random=False,
                     consume=False,
                     single=False,
                     next_tlid=TracklistId(1),
                 ),
-                history=models.HistoryState(),
-                playback=models.PlaybackControllerState(
+                history=HistoryState(),
+                playback=PlaybackControllerState(
                     state=PlaybackState.STOPPED,
                     time_position=DurationMs(0),
                 ),
-                mixer=models.MixerControllerState(),
+                mixer=MixerControllerState(),
             ),
         )
         assert data == reload_data
@@ -234,43 +242,43 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
         assert self.core.history.get_length() == 0
 
     def test_load_state_with_data(self):
-        data = models.StoredState(
+        state = StoredState(
             version=mopidy.__version__,
-            state=models.CoreControllersState(
-                tracklist=models.TracklistControllerState(
+            state=CoreControllersState(
+                tracklist=TracklistControllerState(
                     repeat=True,
                     random=True,
                     consume=False,
                     single=False,
                     tl_tracks=(
-                        models.TlTrack(
+                        TlTrack(
                             tlid=TracklistId(12),
                             track=Track(uri=Uri("a:a")),
                         ),
                     ),
                     next_tlid=TracklistId(14),
                 ),
-                history=models.HistoryState(
+                history=HistoryState(
                     history=(
-                        models.HistoryTrack(
+                        HistoryTrack(
                             timestamp=DurationMs(12),
-                            track=models.Ref.track(uri=Uri("a:a"), name="a"),
+                            track=Ref.track(uri=Uri("a:a"), name="a"),
                         ),
-                        models.HistoryTrack(
+                        HistoryTrack(
                             timestamp=13,
-                            track=models.Ref.track(uri=Uri("a:b"), name="b"),
+                            track=Ref.track(uri=Uri("a:b"), name="b"),
                         ),
                     ),
                 ),
-                playback=models.PlaybackControllerState(
+                playback=PlaybackControllerState(
                     tlid=TracklistId(12),
                     state=PlaybackState.PAUSED,
                     time_position=DurationMs(432),
                 ),
-                mixer=models.MixerControllerState(mute=True, volume=Percentage(12)),
+                mixer=MixerControllerState(mute=True, volume=Percentage(12)),
             ),
         )
-        storage.dump(self.state_file, data)
+        state.dump(self.state_file)
 
         self.core._setup()
 
@@ -287,11 +295,11 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
         assert self.core.history.get_length() == 2
 
     def test_delete_state_file_on_restore(self):
-        data = models.StoredState(
+        state = StoredState(
             version=mopidy.__version__,
-            state=models.CoreControllersState(),
+            state=CoreControllersState(),
         )
-        storage.dump(self.state_file, data)
+        state.dump(self.state_file)
         assert self.state_file.is_file()
 
         self.core._setup()

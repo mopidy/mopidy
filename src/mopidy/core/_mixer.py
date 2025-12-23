@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING
 from pykka.typing import proxy_method
 
 from mopidy import exceptions
+from mopidy.core._state_storage import MixerControllerState
 from mopidy.internal import validation
-from mopidy.internal.models import MixerControllerState
 from mopidy.types import Percentage
 
 if TYPE_CHECKING:
