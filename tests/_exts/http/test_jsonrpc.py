@@ -7,7 +7,7 @@ import pykka
 import pytest
 
 from mopidy import core, models
-from mopidy.internal import jsonrpc
+from mopidy._exts.http import jsonrpc
 from tests import dummy_backend
 
 

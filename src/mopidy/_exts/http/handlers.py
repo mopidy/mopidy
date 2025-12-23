@@ -14,8 +14,8 @@ import tornado.websocket
 
 import mopidy
 from mopidy import core
-from mopidy.internal import jsonrpc
 
+from . import jsonrpc
 from .types import HttpConfig
 
 if TYPE_CHECKING:
