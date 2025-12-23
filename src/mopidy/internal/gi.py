@@ -7,6 +7,7 @@ import gi
 
 try:
     gi.require_version("Gst", "1.0")
+    gi.require_version("GstBase", "1.0")
     gi.require_version("GstPbutils", "1.0")
 except ValueError:
     print(  # noqa: T201
