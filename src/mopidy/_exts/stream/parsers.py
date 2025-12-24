@@ -1,11 +1,12 @@
 import configparser
 import io
+from collections.abc import Generator
 from xml.etree import ElementTree as ET
 
 from mopidy.internal import validation
 
 
-def parse(data):
+def parse_playlist(data: bytes) -> list[str]:
     handlers = {
         detect_extm3u_header: parse_extm3u,
         detect_pls_header: parse_pls,
@@ -18,43 +19,43 @@ def parse(data):
     return list(parse_urilist(data))  # Fallback
 
 
-def detect_extm3u_header(data):
+def detect_extm3u_header(data: bytes) -> bool:
     return data[0:7].upper() == b"#EXTM3U"
 
 
-def detect_pls_header(data):
+def detect_pls_header(data: bytes) -> bool:
     return data[0:10].lower() == b"[playlist]"
 
 
-def detect_xspf_header(data):
+def detect_xspf_header(data: bytes) -> bool:
     data = data[0:150]
     if b"xspf" not in data.lower():
         return False
 
     try:
-        data = io.BytesIO(data)
-        for _event, element in ET.iterparse(data, events=["start"]):
+        fh = io.BytesIO(data)
+        for _event, element in ET.iterparse(fh, events=["start"]):
             return element.tag.lower() == "{http://xspf.org/ns/0/}playlist"
     except ET.ParseError:
         pass
     return False
 
 
-def detect_asx_header(data):
+def detect_asx_header(data: bytes) -> bool:
     data = data[0:50]
     if b"asx" not in data.lower():
         return False
 
     try:
-        data = io.BytesIO(data)
-        for _event, element in ET.iterparse(data, events=["start"]):
+        fh = io.BytesIO(data)
+        for _event, element in ET.iterparse(fh, events=["start"]):
             return element.tag.lower() == "asx"
     except ET.ParseError:
         pass
     return False
 
 
-def parse_extm3u(data):
+def parse_extm3u(data: bytes) -> Generator[str]:
     # TODO: convert non URIs to file URIs.
     found_header = False
     for line in data.splitlines():
@@ -74,7 +75,7 @@ def parse_extm3u(data):
         yield line.strip()
 
 
-def parse_pls(data):
+def parse_pls(data: bytes) -> Generator[str]:
     # TODO: convert non URIs to file URIs.
     try:
         cp = configparser.RawConfigParser(strict=False)
@@ -89,7 +90,7 @@ def parse_pls(data):
             yield cp.get(section, f"file{i + 1}").strip("\"'")
 
 
-def parse_xspf(data):
+def parse_xspf(data: bytes) -> Generator[str]:
     element = None
     try:
         # Last element will be root.
@@ -102,11 +103,12 @@ def parse_xspf(data):
 
     ns = "http://xspf.org/ns/0/"
     path = f"{{{ns}}}tracklist/{{{ns}}}track"
-    for track in element.iterfind(path):
-        yield track.findtext(f"{{{ns}}}location")
+    for track in element.iterfind(str(path)):
+        if result := track.findtext(f"{{{ns}}}location"):
+            yield result
 
 
-def parse_asx(data):
+def parse_asx(data: bytes) -> Generator[str]:
     element = None
     try:
         # Last element will be root.
@@ -124,7 +126,7 @@ def parse_asx(data):
         yield entry.get("href", "").strip()
 
 
-def parse_urilist(data):
+def parse_urilist(data: bytes) -> Generator[str]:
     for line in data.splitlines():
         if not line.strip() or line.startswith(b"#"):
             continue

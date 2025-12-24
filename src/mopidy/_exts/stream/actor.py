@@ -9,11 +9,12 @@ import pykka
 from mopidy import audio as audio_lib
 from mopidy import backend, exceptions
 from mopidy.audio import scan, tags
-from mopidy.internal import http, playlists
+from mopidy.internal import http
 from mopidy.models import Track
 from mopidy.types import Uri, UriScheme
 
 from . import Extension
+from .parsers import parse_playlist
 
 logger = logging.getLogger(__name__)
 
@@ -173,7 +174,7 @@ def _unwrap_stream(  # noqa: PLR0911  # TODO: cleanup the return value of this.
             )
             return None, None
 
-        uris = playlists.parse(content)
+        uris = parse_playlist(content)
         if not uris:
             logger.debug(
                 "Failed parsing URI (%s) as playlist; found potential stream.",
