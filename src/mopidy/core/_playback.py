@@ -8,9 +8,9 @@ from typing import TYPE_CHECKING
 from pykka.messages import ProxyCall
 from pykka.typing import proxy_method
 
+from mopidy.core import _validation as validation
 from mopidy.core._state_storage import PlaybackControllerState
 from mopidy.exceptions import CoreError
-from mopidy.internal import validation
 from mopidy.types import DurationMs, PlaybackState, TracklistId, UriScheme
 
 from ._listener import CoreListener

@@ -10,8 +10,8 @@ from warnings import deprecated
 from pykka.typing import proxy_method
 
 from mopidy import exceptions
+from mopidy.core import _validation as validation
 from mopidy.core._state_storage import TracklistControllerState
-from mopidy.internal import validation
 from mopidy.models import TlTrack, Track
 from mopidy.types import TracklistId
 

@@ -16,7 +16,7 @@ from mopidy.types import (
 )
 
 
-def get_literals(literal_type: Any) -> set[str]:
+def _get_literals(literal_type: Any) -> set[str]:
     # Check if it's a TypeAliasType (created with type ... = ...)
     if hasattr(literal_type, "__value__"):
         literal_type = literal_type.__value__
@@ -25,7 +25,7 @@ def get_literals(literal_type: Any) -> set[str]:
     if hasattr(literal_type, "__origin__") and literal_type.__origin__ is Union:
         literals = set()
         for arg in get_args(literal_type):
-            literals.update(get_literals(arg))
+            literals.update(_get_literals(arg))
         return literals
 
     # Check if it's a literal
@@ -62,13 +62,13 @@ FIELD_TYPES: dict[str, type | UnionType] = {
     "uri": str,
 }
 DISTINCT_FIELDS: dict[str, type | UnionType] = {
-    x: FIELD_TYPES[x] for x in get_literals(DistinctField)
+    x: FIELD_TYPES[x] for x in _get_literals(DistinctField)
 }
 SEARCH_FIELDS: dict[str, type | UnionType] = {
-    x: FIELD_TYPES[x] for x in get_literals(SearchField)
+    x: FIELD_TYPES[x] for x in _get_literals(SearchField)
 }
 TRACKLIST_FIELDS: dict[str, type | UnionType] = {
-    x: FIELD_TYPES[x] for x in get_literals(TracklistField) - {"tlid"}
+    x: FIELD_TYPES[x] for x in _get_literals(TracklistField) - {"tlid"}
 }
 
 
@@ -78,7 +78,7 @@ def _check_iterable(
     msg,
     **kwargs: Any,
 ) -> None:
-    """Ensure we have an iterable which is not a string or an iterator"""
+    """Ensure we have an iterable which is not a string or an iterator."""
     if isinstance(arg, str):
         raise exceptions.ValidationError(msg.format(arg=arg, **kwargs))
     if not isinstance(arg, Iterable):

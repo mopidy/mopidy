@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any, cast
 from pykka.typing import proxy_method
 
 from mopidy import exceptions
-from mopidy.internal import validation
+from mopidy.core import _validation as validation
 from mopidy.models import Image, Ref, SearchResult, Track
 from mopidy.types import DistinctField, Query, SearchField, Uri, UriScheme
 

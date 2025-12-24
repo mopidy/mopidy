@@ -1,9 +1,8 @@
 import configparser
 import io
+import urllib.parse
 from collections.abc import Generator
 from xml.etree import ElementTree as ET
-
-from mopidy.internal import validation
 
 
 def parse_playlist(data: bytes) -> list[str]:
@@ -137,8 +136,10 @@ def parse_urilist(data: bytes) -> Generator[str]:
             continue
 
         try:
-            validation.check_uri(line)
+            result = urllib.parse.urlparse(line)
         except ValueError:
+            continue
+        if result.scheme == "":
             continue
 
         yield line.strip()
