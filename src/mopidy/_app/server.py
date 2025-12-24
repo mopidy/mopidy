@@ -14,12 +14,13 @@ from pykka.messages import ProxyCall
 import mopidy
 from mopidy import config as config_lib
 from mopidy import exceptions
+from mopidy._lib import process
 from mopidy._lib.gi import GLib
 from mopidy.audio import AudioProxy, GstAudio
 from mopidy.backend import BackendActor, BackendProxy
 from mopidy.commands import Command, config_files_type, config_override_type
 from mopidy.core import Core, CoreProxy
-from mopidy.internal import process, timer
+from mopidy.internal import timer
 from mopidy.mixer import MixerActor, MixerProxy
 from mopidy.types import Percentage
 
