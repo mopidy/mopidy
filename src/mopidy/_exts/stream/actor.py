@@ -9,11 +9,10 @@ import pykka
 from mopidy import audio as audio_lib
 from mopidy import backend, exceptions
 from mopidy.audio import scan, tags
-from mopidy.internal import http
 from mopidy.models import Track
 from mopidy.types import Uri, UriScheme
 
-from . import Extension
+from . import Extension, http
 from .parsers import parse_playlist
 
 logger = logging.getLogger(__name__)

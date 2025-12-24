@@ -208,3 +208,4 @@ Internals
 - Renamed modules to be explicitly private:
 
   - :mod:`mopidy.config.keyring`
+  - :mod:`mopidy.internal.*`
