@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 
 def try_ipv6_socket() -> bool:
-    """Determine if system really supports IPv6"""
+    """Determine if system really supports IPv6."""
     if not socket.has_ipv6:
         return False
     try:
