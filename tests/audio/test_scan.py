@@ -1,8 +1,8 @@
 import unittest
 
 from mopidy import exceptions
+from mopidy._lib.paths import path_to_uri
 from mopidy.audio import scan
-from mopidy.internal.path import path_to_uri
 from tests import path_to_data_dir
 
 

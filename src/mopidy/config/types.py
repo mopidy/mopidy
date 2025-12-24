@@ -9,8 +9,9 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable
 from typing import Any, AnyStr, ClassVar, Literal, cast
 
+from mopidy._lib import paths
 from mopidy.config import validators
-from mopidy.internal import log, path
+from mopidy.internal import log
 
 
 def decode(value: bytes | str) -> str:
@@ -442,7 +443,7 @@ class Hostname(ConfigValue[str]):
         if not raw_value:
             return None
 
-        socket_path = path.get_unix_socket_path(raw_value)
+        socket_path = paths.get_unix_socket_path(raw_value)
         if socket_path is not None:
             path_str = Path(not self._required).deserialize(str(socket_path))
             return f"unix:{path_str}"
@@ -494,7 +495,7 @@ class Path(ConfigValue[_ExpandedPath]):
 
     def deserialize(self, value: AnyStr) -> _ExpandedPath | None:
         raw_value = decode(value).strip()
-        expanded = path.expand_path(raw_value)
+        expanded = paths.expand_path(raw_value)
         validators.validate_required(raw_value, self._required)
         validators.validate_required(expanded, self._required)
         if not raw_value or expanded is None:

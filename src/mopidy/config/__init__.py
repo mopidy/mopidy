@@ -9,6 +9,7 @@ from collections.abc import Iterator, Mapping
 from typing import TYPE_CHECKING, Any, TypedDict, cast
 
 import mopidy
+from mopidy._lib import paths
 from mopidy.config import _keyring
 from mopidy.config.schemas import ConfigSchema, MapConfigSchema
 from mopidy.config.types import (
@@ -28,7 +29,6 @@ from mopidy.config.types import (
     Secret,
     String,
 )
-from mopidy.internal import path
 
 if TYPE_CHECKING:
     from mopidy.ext import ExtensionData
@@ -230,7 +230,7 @@ def _load(
 
     # Load config from a series of config files
     for f in files:
-        f = path.expand_path(f)
+        f = paths.expand_path(f)
         if f.is_dir():
             for g in f.iterdir():
                 if g.is_file() and g.suffix == ".conf":

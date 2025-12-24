@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 
 from mopidy._exts.stream import actor
-from mopidy.internal import path
+from mopidy._lib import paths
 from mopidy.models import Track
 from tests import path_to_data_dir
 
@@ -28,7 +28,7 @@ def audio():
 
 @pytest.fixture
 def track_uri():
-    return path.path_to_uri(path_to_data_dir("song1.wav"))
+    return paths.path_to_uri(path_to_data_dir("song1.wav"))
 
 
 def test_lookup_ignores_unknown_scheme(audio, config):
@@ -44,7 +44,7 @@ def test_lookup_respects_blacklist(audio, config, track_uri):
 
 
 def test_lookup_respects_blacklist_globbing(audio, config, track_uri):
-    blacklist_glob = path.path_to_uri(path_to_data_dir("")) + "*"
+    blacklist_glob = paths.path_to_uri(path_to_data_dir("")) + "*"
     config["stream"]["metadata_blacklist"].append(blacklist_glob)
     backend = actor.StreamBackend(audio=audio, config=config)
 

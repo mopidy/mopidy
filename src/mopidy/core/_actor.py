@@ -13,7 +13,7 @@ from pykka.typing import ActorMemberMixin, proxy_method
 
 import mopidy
 from mopidy import audio, backend, mixer
-from mopidy.internal import path
+from mopidy._lib import paths
 from mopidy.types import PlaybackState
 
 from ._history import HistoryController
@@ -201,8 +201,8 @@ class Core(
 
     def _get_data_dir(self) -> Path:
         # get or create data director for core
-        data_dir_path = path.expand_path(self._config["core"]["data_dir"]) / "core"
-        path.get_or_create_dir(data_dir_path)
+        data_dir_path = paths.expand_path(self._config["core"]["data_dir"]) / "core"
+        paths.get_or_create_dir(data_dir_path)
         return data_dir_path
 
     def _get_state_file(self) -> Path:

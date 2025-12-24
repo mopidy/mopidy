@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, NamedTuple
 
 from mopidy import config as config_lib
 from mopidy import exceptions
-from mopidy.internal import path
+from mopidy._lib import paths
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -88,8 +88,8 @@ class Extension:
         :return: pathlib.Path
         """
         cls.check_attr()
-        cache_dir_path = path.expand_path(config["core"]["cache_dir"]) / cls.ext_name
-        path.get_or_create_dir(cache_dir_path)
+        cache_dir_path = paths.expand_path(config["core"]["cache_dir"]) / cls.ext_name
+        paths.get_or_create_dir(cache_dir_path)
         return cache_dir_path
 
     @classmethod
@@ -100,8 +100,8 @@ class Extension:
         :return: pathlib.Path
         """
         cls.check_attr()
-        config_dir_path = path.expand_path(config["core"]["config_dir"]) / cls.ext_name
-        path.get_or_create_dir(config_dir_path)
+        config_dir_path = paths.expand_path(config["core"]["config_dir"]) / cls.ext_name
+        paths.get_or_create_dir(config_dir_path)
         return config_dir_path
 
     @classmethod
@@ -114,8 +114,8 @@ class Extension:
         :returns: pathlib.Path
         """
         cls.check_attr()
-        data_dir_path = path.expand_path(config["core"]["data_dir"]) / cls.ext_name
-        path.get_or_create_dir(data_dir_path)
+        data_dir_path = paths.expand_path(config["core"]["data_dir"]) / cls.ext_name
+        paths.get_or_create_dir(data_dir_path)
         return data_dir_path
 
     def get_command(self) -> Command | None:

@@ -6,7 +6,7 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import IO
 
-from mopidy.internal import path
+from mopidy._lib import paths
 from mopidy.models import Playlist, Ref, Track
 from mopidy.types import Uri
 
@@ -25,7 +25,7 @@ def path_to_uri(
 
 def uri_to_path(uri: Uri) -> Path:
     """Convert URI to file path."""
-    return path.uri_to_path(uri)
+    return paths.uri_to_path(uri)
 
 
 def name_from_path(path: Path) -> str | None:

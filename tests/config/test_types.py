@@ -1291,7 +1291,7 @@ class TestHostname:
         assert cv.deserialize(" ") is None
         assert getaddrinfo_mock.call_count == 0
 
-    @mock.patch("mopidy.internal.path.expand_path")
+    @mock.patch("mopidy._lib.paths.expand_path")
     def test_deserialize_with_unix_socket(self, expand_path_mock):
         cv = types.Hostname()
 

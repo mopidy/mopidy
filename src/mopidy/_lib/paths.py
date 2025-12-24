@@ -57,8 +57,7 @@ def get_unix_socket_path(socket_path: str) -> pathlib.Path | None:
 
 
 def path_to_uri(path: str | PathLike[str]) -> Uri:
-    """
-    Convert OS specific path to file:// URI.
+    """Convert OS specific path to file:// URI.
 
     Accepts either unicode strings or bytestrings. The encoding of any
     bytestring will be maintained so that :func:`uri_to_path` can return the
@@ -70,9 +69,7 @@ def path_to_uri(path: str | PathLike[str]) -> Uri:
 
 
 def uri_to_path(uri: Uri | str) -> pathlib.Path:
-    """
-    Convert an URI to a OS specific path.
-    """
+    """Convert an URI to a OS specific path."""
     bytes_path = urllib.parse.unquote_to_bytes(urllib.parse.urlsplit(uri).path)
     unicode_path = bytes_path.decode(errors="surrogateescape")
     return pathlib.Path(unicode_path)

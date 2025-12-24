@@ -394,7 +394,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
 if __name__ == "__main__":
     import sys
 
-    from mopidy.internal import path
+    from mopidy._lib import paths
 
     logging.basicConfig(
         format="%(asctime)-15s %(levelname)s %(message)s",
@@ -404,7 +404,7 @@ if __name__ == "__main__":
     scanner = Scanner(5000)
     for uri in sys.argv[1:]:
         if not Gst.uri_is_valid(uri):
-            uri = path.path_to_uri(Path(uri).resolve())
+            uri = paths.path_to_uri(Path(uri).resolve())
         try:
             result = scanner.scan(uri)
             for key in ("uri", "mime", "duration", "playable", "seekable"):

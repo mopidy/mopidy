@@ -225,7 +225,7 @@ class TestValidateExtensionData:
         config = {"core": {"cache_dir": core_cache_dir}}
         extension = ext_data.extension
 
-        with mock.patch.object(ext.path, "get_or_create_dir"):
+        with mock.patch.object(ext.paths, "get_or_create_dir"):
             cache_dir = extension.get_cache_dir(config)
 
         expected = pathlib.Path(core_cache_dir).resolve() / extension.ext_name
@@ -236,7 +236,7 @@ class TestValidateExtensionData:
         config = {"core": {"config_dir": core_config_dir}}
         extension = ext_data.extension
 
-        with mock.patch.object(ext.path, "get_or_create_dir"):
+        with mock.patch.object(ext.paths, "get_or_create_dir"):
             config_dir = extension.get_config_dir(config)
 
         expected = pathlib.Path(core_config_dir).resolve() / extension.ext_name
@@ -247,7 +247,7 @@ class TestValidateExtensionData:
         config = {"core": {"data_dir": core_data_dir}}
         extension = ext_data.extension
 
-        with mock.patch.object(ext.path, "get_or_create_dir"):
+        with mock.patch.object(ext.paths, "get_or_create_dir"):
             data_dir = extension.get_data_dir(config)
 
         expected = pathlib.Path(core_data_dir).resolve() / extension.ext_name
