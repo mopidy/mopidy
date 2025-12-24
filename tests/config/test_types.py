@@ -7,8 +7,8 @@ from unittest import mock
 
 import pytest
 
+from mopidy._lib import logs
 from mopidy.config import types
-from mopidy.internal import log
 
 
 @pytest.mark.parametrize(
@@ -1221,7 +1221,7 @@ class TestLogLevel:
         "warning": logging.WARNING,
         "info": logging.INFO,
         "debug": logging.DEBUG,
-        "trace": log.TRACE_LOG_LEVEL,
+        "trace": logs.TRACE_LOG_LEVEL,
         "all": logging.NOTSET,
     }
 

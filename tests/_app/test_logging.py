@@ -1,6 +1,6 @@
 import pytest
 
-from mopidy.internal import log
+from mopidy._app.logging import LOG_LEVELS, get_verbosity_level
 
 
 @pytest.fixture
@@ -14,27 +14,27 @@ def config():
 
 
 def test_get_verbosity_level_args(config):
-    assert log.get_verbosity_level(config, 2, 1) == 3
+    assert get_verbosity_level(config, 2, 1) == 3
 
 
 def test_get_verbosity_level_args_negative(config):
-    assert log.get_verbosity_level(config, 3, -1) == 2
+    assert get_verbosity_level(config, 3, -1) == 2
 
 
 def test_get_verbosity_level_config(config):
-    assert log.get_verbosity_level(config, 2, 0) == 4
+    assert get_verbosity_level(config, 2, 0) == 4
 
 
 def test_get_verbosity_level_config_none(config):
     config["verbosity"] = None
-    assert log.get_verbosity_level(config, 2, 0) == 2
+    assert get_verbosity_level(config, 2, 0) == 2
 
 
 def test_get_verbosity_level_min(config):
-    level = log.get_verbosity_level(config, 1, -9)
-    assert log.LOG_LEVELS[level]
+    level = get_verbosity_level(config, 1, -9)
+    assert LOG_LEVELS[level]
 
 
 def test_get_verbosity_level_max(config):
-    level = log.get_verbosity_level(config, 1, 9)
-    assert log.LOG_LEVELS[level]
+    level = get_verbosity_level(config, 1, 9)
+    assert LOG_LEVELS[level]

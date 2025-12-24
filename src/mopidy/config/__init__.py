@@ -22,7 +22,9 @@ from mopidy.config.types import (
     Integer,
     List,
     LogColor,
+    LogColorName,
     LogLevel,
+    LogLevelName,
     Pair,
     Path,
     Port,
@@ -32,7 +34,6 @@ from mopidy.config.types import (
 
 if TYPE_CHECKING:
     from mopidy.ext import ExtensionData
-    from mopidy.internal.log import LogColorName, LogLevelName
 
     type ConfigErrors = dict[str, dict[str, Any]]
     type ConfigSchemas = list[ConfigSchema | MapConfigSchema]

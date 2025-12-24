@@ -5,10 +5,10 @@ from pathlib import Path
 from typing import Any, NamedTuple, cast
 
 from mopidy import exceptions
+from mopidy._lib import logs
 from mopidy._lib.gi import Gst, GstPbutils
 from mopidy.audio import tags as tags_lib
 from mopidy.audio._utils import Signals, setup_proxy
-from mopidy.internal import log
 
 
 class GstElementFactoryListType(IntEnum):
@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 
 def _trace(*args, **kwargs):
-    logger.log(log.TRACE_LOG_LEVEL, *args, **kwargs)
+    logger.log(logs.TRACE_LOG_LEVEL, *args, **kwargs)
 
 
 # TODO: replace with a scan(uri, timeout=1000, proxy_config=None)?
@@ -322,7 +322,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
         structure = msg.get_structure()
 
-        if logger.isEnabledFor(log.TRACE_LOG_LEVEL) and structure:
+        if logger.isEnabledFor(logs.TRACE_LOG_LEVEL) and structure:
             debug_text = structure.to_string()
             if len(debug_text) > 77:
                 debug_text = debug_text[:77] + "..."
@@ -398,7 +398,7 @@ if __name__ == "__main__":
 
     logging.basicConfig(
         format="%(asctime)-15s %(levelname)s %(message)s",
-        level=log.TRACE_LOG_LEVEL,
+        level=logs.TRACE_LOG_LEVEL,
     )
 
     scanner = Scanner(5000)

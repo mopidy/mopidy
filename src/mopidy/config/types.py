@@ -7,11 +7,10 @@ import re
 import socket
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable
-from typing import Any, AnyStr, ClassVar, Literal, cast
+from typing import Any, AnyStr, ClassVar, Literal, cast, get_args
 
-from mopidy._lib import paths
+from mopidy._lib import logs, paths
 from mopidy.config import validators
-from mopidy.internal import log
 
 
 def decode(value: bytes | str) -> str:
@@ -390,17 +389,41 @@ class List[V: ConfigValue = String](ConfigValue[tuple[V, ...] | frozenset[V]]):
         return "\n  " + "\n  ".join(serialized_values)
 
 
-class LogColor(ConfigValue[log.LogColorName]):
-    def deserialize(self, value: AnyStr) -> log.LogColorName:
+LogColorName = Literal[
+    "black",
+    "red",
+    "green",
+    "yellow",
+    "blue",
+    "magenta",
+    "cyan",
+    "white",
+]
+_LOG_COLOR_NAMES = get_args(LogColorName)
+
+
+class LogColor(ConfigValue[LogColorName]):
+    def deserialize(self, value: AnyStr) -> LogColorName:
         raw_value = decode(value).lower()
-        validators.validate_choice(raw_value, log.COLORS)
-        raw_value = cast(log.LogColorName, raw_value)
+        validators.validate_choice(raw_value, _LOG_COLOR_NAMES)
+        raw_value = cast(LogColorName, raw_value)
         return raw_value
 
-    def serialize(self, value: log.LogColorName, display: bool = False) -> str:
-        if value.lower() in log.COLORS:
+    def serialize(self, value: LogColorName, display: bool = False) -> str:
+        if value.lower() in _LOG_COLOR_NAMES:
             return encode(value.lower())
         return ""
+
+
+LogLevelName = Literal[
+    "critical",
+    "error",
+    "warning",
+    "info",
+    "debug",
+    "trace",
+    "all",
+]
 
 
 class LogLevel(ConfigValue[int]):
@@ -410,20 +433,20 @@ class LogLevel(ConfigValue[int]):
     ``trace``, or ``all``, with any casing.
     """
 
-    levels: ClassVar[dict[log.LogLevelName, int]] = {
+    levels: ClassVar[dict[LogLevelName, int]] = {
         "critical": logging.CRITICAL,
         "error": logging.ERROR,
         "warning": logging.WARNING,
         "info": logging.INFO,
         "debug": logging.DEBUG,
-        "trace": log.TRACE_LOG_LEVEL,
+        "trace": logs.TRACE_LOG_LEVEL,
         "all": logging.NOTSET,
     }
 
     def deserialize(self, value: AnyStr) -> int | None:
         raw_value = decode(value).lower()
         validators.validate_choice(raw_value, self.levels.keys())
-        raw_value = cast(log.LogLevelName, raw_value)
+        raw_value = cast(LogLevelName, raw_value)
         return self.levels.get(raw_value)
 
     def serialize(self, value: int, display: bool = False) -> str:

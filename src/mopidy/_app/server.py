@@ -14,13 +14,12 @@ from pykka.messages import ProxyCall
 import mopidy
 from mopidy import config as config_lib
 from mopidy import exceptions
-from mopidy._lib import process
+from mopidy._lib import logs, process
 from mopidy._lib.gi import GLib
 from mopidy.audio import AudioProxy, GstAudio
 from mopidy.backend import BackendActor, BackendProxy
 from mopidy.commands import Command, config_files_type, config_override_type
 from mopidy.core import Core, CoreProxy
-from mopidy.internal import timer
 from mopidy.mixer import MixerActor, MixerProxy
 from mopidy.types import Percentage
 
@@ -208,7 +207,7 @@ class ServerCommand(Command):
         for backend_class in backend_classes:
             with (
                 _actor_error_handling(backend_class.__name__),
-                timer.time_logger(backend_class.__name__),
+                logs.log_time_spent(backend_class.__name__),
             ):
                 backend = cast(
                     BackendProxy,
@@ -261,7 +260,7 @@ class ServerCommand(Command):
         for frontend_class in frontend_classes:
             with (
                 _actor_error_handling(frontend_class.__name__),
-                timer.time_logger(frontend_class.__name__),
+                logs.log_time_spent(frontend_class.__name__),
             ):
                 frontend_class.start(config=config, core=core)
 

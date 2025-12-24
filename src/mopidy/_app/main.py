@@ -16,10 +16,10 @@ from mopidy._lib.gi import (
     GLib,
     Gst,  # noqa: F401 (imported to test GStreamer presence)
 )
-from mopidy.internal import log
 
 from .config import ConfigCommand
 from .deps import DepsCommand
+from .logging import bootstrap_delayed_logging, setup_logging
 from .server import ServerCommand
 
 try:
@@ -43,7 +43,7 @@ class ExtensionsStatus(TypedDict):
 
 
 def main() -> int:  # noqa: C901, PLR0912, PLR0915
-    log.bootstrap_delayed_logging()
+    bootstrap_delayed_logging()
     logger.info(f"Starting Mopidy {mopidy.__version__}")
 
     signal.signal(signal.SIGTERM, process.sigterm_handler)
@@ -89,7 +89,7 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
         create_core_dirs(config)
         create_initial_config_file(config_files, extensions_data)
 
-        log.setup_logging(config, args.base_verbosity_level, args.verbosity_level)
+        setup_logging(config, args.base_verbosity_level, args.verbosity_level)
 
         extensions_status: ExtensionsStatus = {
             "validate": [],
