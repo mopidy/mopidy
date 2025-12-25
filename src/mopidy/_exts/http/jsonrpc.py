@@ -123,8 +123,7 @@ class MethodDescription(BaseModel):
 
 
 class Wrapper:
-    """
-    Wrap objects and make them accessible through JSON-RPC 2.0 messaging.
+    """Wrap objects and make them accessible through JSON-RPC 2.0 messaging.
 
     This class takes responsibility of communicating with the objects and
     processing of JSON-RPC 2.0 messages. The transport of the messages over
@@ -173,8 +172,7 @@ class Wrapper:
         self.objects = objects
 
     def handle_json(self, request_json: str | bytes) -> bytes | None:
-        """
-        Handles an incoming request encoded as a JSON string.
+        """Handles an incoming request encoded as a JSON string.
 
         Returns a response as a JSON string for commands, and :class:`None` for
         notifications.
@@ -197,8 +195,7 @@ class Wrapper:
         self,
         request: RequestDict | list[RequestDict],
     ) -> Response | list[Response] | None:
-        """
-        Handles an incoming request in the form of a Python data structure.
+        """Handles an incoming request in the form of a Python data structure.
 
         Returns a Python data structure for commands, or a :class:`None` for
         notifications.
@@ -385,8 +382,7 @@ class ApplicationError(JsonRpcError):
 
 
 class Inspector:
-    """
-    Inspects a group of classes and functions to create a description of what
+    """Inspects a group of classes and functions to create a description of what
     methods they can expose over JSON-RPC 2.0.
 
     To inspect one or more classes, add them all to the objects mapping. The
@@ -413,8 +409,7 @@ class Inspector:
         self.objects = objects
 
     def describe(self) -> dict[str, MethodDescription]:
-        """
-        Inspects the object and returns a data structure which describes the
+        """Inspects the object and returns a data structure which describes the
         available properties and methods.
         """
         methods: dict[str, MethodDescription] = {}

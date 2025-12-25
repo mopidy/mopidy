@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 from pykka.typing import proxy_method
 
 from mopidy import exceptions
-from mopidy.internal import validation
+from mopidy.core import _validation as validation
 from mopidy.models import Playlist, Ref
 from mopidy.types import UriScheme
 

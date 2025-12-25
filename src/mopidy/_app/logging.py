@@ -2,34 +2,18 @@ from __future__ import annotations
 
 import logging
 import logging.config
-import logging.handlers
 import platform
-from logging import LogRecord
-from typing import TYPE_CHECKING, ClassVar, Literal
+from typing import TYPE_CHECKING, ClassVar, get_args
+
+from mopidy._lib.logs import TRACE_LOG_LEVEL
+from mopidy.config.types import LogColorName
 
 if TYPE_CHECKING:
     from mopidy.config import Config, LoggingConfig
+    from mopidy.config.types import LogLevelName
 
-LogLevelName = Literal[
-    "critical",
-    "error",
-    "warning",
-    "info",
-    "debug",
-    "trace",
-    "all",
-]
+logger = logging.getLogger(__name__)
 
-LogColorName = Literal[
-    "black",
-    "red",
-    "green",
-    "yellow",
-    "blue",
-    "magenta",
-    "cyan",
-    "white",
-]
 
 LOG_LEVELS: dict[int, dict[str, int]] = {
     -1: {"root": logging.ERROR, "mopidy": logging.WARNING},
@@ -40,20 +24,14 @@ LOG_LEVELS: dict[int, dict[str, int]] = {
     4: {"root": logging.NOTSET, "mopidy": logging.NOTSET},
 }
 
-# Custom log level which has even lower priority than DEBUG
-TRACE_LOG_LEVEL = 5
-logging.addLevelName(TRACE_LOG_LEVEL, "TRACE")
-
-logger = logging.getLogger(__name__)
-
 
 class DelayedHandler(logging.Handler):
     def __init__(self) -> None:
         logging.Handler.__init__(self)
         self._released = False
-        self._buffer: list[LogRecord] = []
+        self._buffer: list[logging.LogRecord] = []
 
-    def handle(self, record: LogRecord) -> bool:
+    def handle(self, record: logging.LogRecord) -> bool:
         if not self._released:
             self._buffer.append(record)
         return True
@@ -137,7 +115,7 @@ class VerbosityFilter(logging.Filter):
         self.verbosity_level = verbosity_level
         self.loglevels = loglevels
 
-    def filter(self, record: LogRecord) -> bool:
+    def filter(self, record: logging.LogRecord) -> bool:
         for name, required_log_level in self.loglevels.items():
             if record.name == name or record.name.startswith(name + "."):
                 return record.levelno >= required_log_level
@@ -149,22 +127,8 @@ class VerbosityFilter(logging.Filter):
         return record.levelno >= required_log_level
 
 
-#: Available log colors.
-COLORS: list[LogColorName] = [
-    "black",
-    "red",
-    "green",
-    "yellow",
-    "blue",
-    "magenta",
-    "cyan",
-    "white",
-]
-
-
 class ColorizingStreamHandler(logging.StreamHandler):
-    """
-    Stream handler which colorizes the log using ANSI escape sequences.
+    """Stream handler which colorizes the log using ANSI escape sequences.
 
     Does nothing on Windows, which doesn't support ANSI escape sequences.
 
@@ -184,6 +148,10 @@ class ColorizingStreamHandler(logging.StreamHandler):
         logging.ERROR: (None, "red", False),
         logging.CRITICAL: ("red", "white", True),
     }
+
+    # Color names
+    color_names = get_args(LogColorName)
+
     # Map logger name to foreground colors
     logger_map: dict[LogLevelName, LogColorName]
 
@@ -201,7 +169,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
         isatty = getattr(self.stream, "isatty", None)
         return isatty is not None and isatty()
 
-    def emit(self, record: LogRecord) -> None:
+    def emit(self, record: logging.LogRecord) -> None:
         try:
             message = self.format(record)
             self.stream.write(message)
@@ -210,7 +178,7 @@ class ColorizingStreamHandler(logging.StreamHandler):
         except Exception:  # noqa: BLE001
             self.handleError(record)
 
-    def format(self, record: LogRecord) -> str:
+    def format(self, record: logging.LogRecord) -> str:
         message = logging.StreamHandler.format(self, record)
         if not self.is_tty or self.is_windows:
             return message
@@ -230,10 +198,10 @@ class ColorizingStreamHandler(logging.StreamHandler):
         bold: bool = False,
     ) -> str:
         params = []
-        if bg in COLORS:
-            params.append(str(COLORS.index(bg) + 40))
-        if fg in COLORS:
-            params.append(str(COLORS.index(fg) + 30))
+        if bg in self.color_names:
+            params.append(str(self.color_names.index(bg) + 40))
+        if fg in self.color_names:
+            params.append(str(self.color_names.index(fg) + 30))
         if bold:
             params.append("1")
         if params:

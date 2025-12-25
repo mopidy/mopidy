@@ -6,8 +6,8 @@ from typing import TypedDict, cast
 
 from mopidy import backend, exceptions
 from mopidy import config as config_lib
+from mopidy._lib import paths
 from mopidy.audio import scan, tags
-from mopidy.internal import path
 from mopidy.models import Ref, Track
 from mopidy.types import Uri
 
@@ -48,7 +48,7 @@ class FileLibraryProvider(backend.LibraryProvider):
     def browse(self, uri: Uri) -> list[Ref]:  # noqa: C901
         logger.debug("Browsing files at: %s", uri)
         result = []
-        local_path = path.uri_to_path(uri)
+        local_path = paths.uri_to_path(uri)
 
         if str(local_path) == "root":
             return list(self._get_media_dirs_refs())
@@ -60,13 +60,13 @@ class FileLibraryProvider(backend.LibraryProvider):
                 uri,
             )
             return []
-        if path.uri_to_path(uri).is_file():
+        if paths.uri_to_path(uri).is_file():
             logger.error("Rejected attempt to browse file (%s)", uri)
             return []
 
         for dir_entry in local_path.iterdir():
             child_path = dir_entry.resolve()
-            uri = path.path_to_uri(child_path)
+            uri = paths.path_to_uri(child_path)
 
             if not self._show_dotfiles and dir_entry.name.startswith("."):
                 continue
@@ -99,7 +99,7 @@ class FileLibraryProvider(backend.LibraryProvider):
 
     def lookup(self, uri: Uri) -> list[Track]:
         logger.debug("Looking up file URI: %s", uri)
-        local_path = path.uri_to_path(uri)
+        local_path = paths.uri_to_path(uri)
 
         try:
             result = self._scanner.scan(uri)
@@ -122,7 +122,7 @@ class FileLibraryProvider(backend.LibraryProvider):
         if not self._media_dirs:
             return None
         if len(self._media_dirs) == 1:
-            uri = path.path_to_uri(self._media_dirs[0]["path"])
+            uri = paths.path_to_uri(self._media_dirs[0]["path"])
         else:
             uri = Uri("file:root")
         return Ref.directory(name="Files", uri=uri)
@@ -130,7 +130,7 @@ class FileLibraryProvider(backend.LibraryProvider):
     def _get_media_dirs(self, config) -> Generator[MediaDir]:
         for entry in config["file"]["media_dirs"]:
             media_dir_split = entry.split("|", 1)
-            local_path = path.expand_path(media_dir_split[0])
+            local_path = paths.expand_path(media_dir_split[0])
 
             if local_path is None:
                 logger.debug(
@@ -158,11 +158,11 @@ class FileLibraryProvider(backend.LibraryProvider):
         for media_dir in self._media_dirs:
             yield Ref.directory(
                 name=media_dir["name"],
-                uri=path.path_to_uri(media_dir["path"]),
+                uri=paths.path_to_uri(media_dir["path"]),
             )
 
     def _is_in_basedir(self, local_path) -> bool:
         return any(
-            path.is_path_inside_base_dir(local_path, media_dir["path"])
+            paths.is_path_inside_base_dir(local_path, media_dir["path"])
             for media_dir in self._media_dirs
         )

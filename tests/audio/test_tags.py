@@ -1,7 +1,7 @@
 import unittest
 
+from mopidy._lib.gi import GLib, GObject, Gst
 from mopidy.audio import tags
-from mopidy.internal.gi import GLib, GObject, Gst
 from mopidy.models import Album, Artist, Track
 
 

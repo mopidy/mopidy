@@ -5,7 +5,7 @@ import pykka
 import pytest
 
 from mopidy import backend, core
-from mopidy.internal.models import PlaybackControllerState
+from mopidy.core._state_storage import PlaybackControllerState
 from mopidy.models import Track
 from mopidy.types import PlaybackState
 from tests import dummy_audio, dummy_backend

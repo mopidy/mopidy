@@ -4,7 +4,7 @@ from unittest import mock
 import pytest
 
 from mopidy import backend, core
-from mopidy.internal import validation
+from mopidy.core import _validation as validation
 from mopidy.models import Image, Ref, SearchResult, Track
 
 

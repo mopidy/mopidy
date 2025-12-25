@@ -9,7 +9,8 @@ from collections.abc import Iterator, Mapping
 from typing import TYPE_CHECKING, Any, TypedDict, cast
 
 import mopidy
-from mopidy.config import keyring
+from mopidy._lib import paths
+from mopidy.config import _keyring
 from mopidy.config.schemas import ConfigSchema, MapConfigSchema
 from mopidy.config.types import (
     Boolean,
@@ -21,18 +22,18 @@ from mopidy.config.types import (
     Integer,
     List,
     LogColor,
+    LogColorName,
     LogLevel,
+    LogLevelName,
     Pair,
     Path,
     Port,
     Secret,
     String,
 )
-from mopidy.internal import path
 
 if TYPE_CHECKING:
     from mopidy.ext import ExtensionData
-    from mopidy.internal.log import LogColorName, LogLevelName
 
     type ConfigErrors = dict[str, dict[str, Any]]
     type ConfigSchemas = list[ConfigSchema | MapConfigSchema]
@@ -166,7 +167,7 @@ def load(
     config_dir = pathlib.Path(__file__).parent
     defaults = [read(config_dir / "default.conf")]
     defaults.extend(ext_defaults)
-    raw_config = _load(files, defaults, keyring.fetch() + (overrides or []))
+    raw_config = _load(files, defaults, _keyring.fetch() + (overrides or []))
 
     schemas = _schemas[:]
     schemas.extend(ext_schemas)
@@ -230,7 +231,7 @@ def _load(
 
     # Load config from a series of config files
     for f in files:
-        f = path.expand_path(f)
+        f = paths.expand_path(f)
         if f.is_dir():
             for g in f.iterdir():
                 if g.is_file() and g.suffix == ".conf":

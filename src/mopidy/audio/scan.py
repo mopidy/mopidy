@@ -5,10 +5,10 @@ from pathlib import Path
 from typing import Any, NamedTuple, cast
 
 from mopidy import exceptions
+from mopidy._lib import logs
+from mopidy._lib.gi import Gst, GstPbutils
 from mopidy.audio import tags as tags_lib
 from mopidy.audio._utils import Signals, setup_proxy
-from mopidy.internal import log
-from mopidy.internal.gi import Gst, GstPbutils
 
 
 class GstElementFactoryListType(IntEnum):
@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 
 def _trace(*args, **kwargs):
-    logger.log(log.TRACE_LOG_LEVEL, *args, **kwargs)
+    logger.log(logs.TRACE_LOG_LEVEL, *args, **kwargs)
 
 
 # TODO: replace with a scan(uri, timeout=1000, proxy_config=None)?
@@ -322,7 +322,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
         structure = msg.get_structure()
 
-        if logger.isEnabledFor(log.TRACE_LOG_LEVEL) and structure:
+        if logger.isEnabledFor(logs.TRACE_LOG_LEVEL) and structure:
             debug_text = structure.to_string()
             if len(debug_text) > 77:
                 debug_text = debug_text[:77] + "..."
@@ -394,17 +394,17 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
 if __name__ == "__main__":
     import sys
 
-    from mopidy.internal import path
+    from mopidy._lib import paths
 
     logging.basicConfig(
         format="%(asctime)-15s %(levelname)s %(message)s",
-        level=log.TRACE_LOG_LEVEL,
+        level=logs.TRACE_LOG_LEVEL,
     )
 
     scanner = Scanner(5000)
     for uri in sys.argv[1:]:
         if not Gst.uri_is_valid(uri):
-            uri = path.path_to_uri(Path(uri).resolve())
+            uri = paths.path_to_uri(Path(uri).resolve())
         try:
             result = scanner.scan(uri)
             for key in ("uri", "mime", "duration", "playable", "seekable"):

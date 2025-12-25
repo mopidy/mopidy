@@ -11,8 +11,8 @@ from pathlib import Path
 from typing import IO, TYPE_CHECKING, Any, cast
 
 from mopidy import backend
+from mopidy._lib import paths
 from mopidy.exceptions import BackendError
-from mopidy.internal import path
 
 from . import Extension, translator
 from .types import M3UConfig
@@ -68,12 +68,12 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         ext_config = cast(M3UConfig, config[Extension.ext_name])
 
         self._playlists_dir = (
-            path.expand_path(ext_config["playlists_dir"])
+            paths.expand_path(ext_config["playlists_dir"])
             if ext_config["playlists_dir"]
             else Extension.get_data_dir(config)
         )
         self._base_dir = (
-            path.expand_path(ext_config["base_dir"])
+            paths.expand_path(ext_config["base_dir"])
             if ext_config["base_dir"]
             else self._playlists_dir
         )
@@ -176,7 +176,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
 
     def _is_in_basedir(self, local_path: Path) -> bool:
         local_path = self._abspath(local_path)
-        return path.is_path_inside_base_dir(local_path, self._playlists_dir)
+        return paths.is_path_inside_base_dir(local_path, self._playlists_dir)
 
     def _open(
         self,

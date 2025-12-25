@@ -7,7 +7,7 @@ from collections.abc import Iterable
 
 from pykka.typing import proxy_method
 
-from mopidy.internal.models import HistoryState, HistoryTrack
+from mopidy.core._state_storage import HistoryState, HistoryTrack
 from mopidy.models import Ref, Track
 
 logger = logging.getLogger(__name__)

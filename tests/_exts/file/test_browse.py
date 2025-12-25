@@ -1,6 +1,6 @@
 import pytest
 
-from mopidy.internal import path
+from mopidy._lib import paths
 from tests import path_to_data_dir
 
 
@@ -10,8 +10,8 @@ from tests import path_to_data_dir
     [
         ("file:root", None),
         ("not_in_data_path", "WARNING"),
-        (path.path_to_uri(path_to_data_dir("song1.wav")), "ERROR"),
-        (path.path_to_uri(path_to_data_dir("")), None),
+        (paths.path_to_uri(path_to_data_dir("song1.wav")), "ERROR"),
+        (paths.path_to_uri(path_to_data_dir("")), None),
     ],
 )
 def test_file_browse(provider, uri, levelname, caplog):

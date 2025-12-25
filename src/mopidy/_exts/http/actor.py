@@ -18,9 +18,8 @@ from pydantic import TypeAdapter
 
 from mopidy import exceptions, zeroconf
 from mopidy.core import CoreEvent, CoreEventData, CoreListener
-from mopidy.internal import network
 
-from . import Extension, handlers
+from . import Extension, handlers, network
 
 if TYPE_CHECKING:
     from mopidy.core import CoreProxy

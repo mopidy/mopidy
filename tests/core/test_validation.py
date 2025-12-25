@@ -1,7 +1,7 @@
 import pytest
 
 from mopidy import exceptions
-from mopidy.internal import validation
+from mopidy.core import _validation as validation
 
 
 def test_check_boolean_with_valid_values():

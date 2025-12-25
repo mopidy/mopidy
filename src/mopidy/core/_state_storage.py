@@ -1,11 +1,19 @@
+from __future__ import annotations
+
+import gzip
+import logging
+import pathlib
+import tempfile
 from typing import Literal
 
 from pydantic.fields import Field
-from pydantic.types import NonNegativeInt
+from pydantic.types import NonNegativeInt  # noqa: TC002
 
-from mopidy.models import Ref, TlTrack
+from mopidy.models import Ref, TlTrack  # noqa: TC001
 from mopidy.models._base import BaseModel
 from mopidy.types import DurationMs, Percentage, PlaybackState, TracklistId
+
+logger = logging.getLogger(__name__)
 
 
 class HistoryTrack(BaseModel):
@@ -28,8 +36,7 @@ class HistoryTrack(BaseModel):
 
 
 class HistoryState(BaseModel):
-    """
-    State of the history controller.
+    """State of the history controller.
 
     Internally used for save/load state.
     """
@@ -45,8 +52,7 @@ class HistoryState(BaseModel):
 
 
 class MixerControllerState(BaseModel):
-    """
-    State of the mixer controller.
+    """State of the mixer controller.
 
     Internally used for save/load state.
     """
@@ -65,8 +71,7 @@ class MixerControllerState(BaseModel):
 
 
 class PlaybackControllerState(BaseModel):
-    """
-    State of the playback controller.
+    """State of the playback controller.
 
     Internally used for save/load state.
     """
@@ -88,8 +93,7 @@ class PlaybackControllerState(BaseModel):
 
 
 class TracklistControllerState(BaseModel):
-    """
-    State of the tracklist controller.
+    """State of the tracklist controller.
 
     Internally used for save/load state.
     """
@@ -120,8 +124,7 @@ class TracklistControllerState(BaseModel):
 
 
 class CoreControllersState(BaseModel):
-    """
-    State of all Core controllers.
+    """State of all Core controllers.
 
     Internally used for save/load state.
     """
@@ -164,3 +167,36 @@ class StoredState(BaseModel):
 
     # The state of the core. Read-only.
     state: CoreControllersState
+
+    @staticmethod
+    def load(path: pathlib.Path) -> StoredState | None:
+        """Load state from file."""
+        # TODO: raise an exception in case of error?
+        if not path.is_file():
+            logger.info("File does not exist: %s", path)
+            return None
+        try:
+            with gzip.open(str(path), "rb") as fp:
+                return StoredState.model_validate_json(fp.read())
+        except (OSError, ValueError) as exc:
+            logger.warning(f"Loading JSON failed: {exc}")
+            return None
+
+    def dump(self, path: pathlib.Path) -> None:
+        """Dump state to file."""
+        # TODO: cleanup directory/basename.* files.
+        tmp = tempfile.NamedTemporaryFile(  # noqa: SIM115
+            prefix=path.name + ".",
+            dir=str(path.parent),
+            delete=False,
+        )
+        tmp_path = pathlib.Path(tmp.name)
+
+        try:
+            data_string = self.model_dump_json(indent=2, by_alias=True)
+            with gzip.GzipFile(fileobj=tmp, mode="wb") as fp:
+                fp.write(data_string.encode())
+            tmp_path.rename(path)
+        finally:
+            if tmp_path.exists():
+                tmp_path.unlink()

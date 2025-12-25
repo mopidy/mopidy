@@ -5,7 +5,7 @@ import pykka
 import pytest
 
 from mopidy import core, mixer
-from mopidy.internal.models import MixerControllerState
+from mopidy.core._state_storage import MixerControllerState
 from tests import dummy_mixer
 
 

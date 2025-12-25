@@ -6,8 +6,8 @@ from unittest import mock
 import pykka
 
 from mopidy import audio
-from mopidy.internal import path
-from mopidy.internal.gi import Gst
+from mopidy._lib import paths
+from mopidy._lib.gi import Gst
 from mopidy.types import PlaybackState
 from tests import dummy_audio, path_to_data_dir
 
@@ -18,8 +18,8 @@ from tests import dummy_audio, path_to_data_dir
 
 class BaseTest(unittest.TestCase):
     uris: ClassVar[list[str]] = [
-        path.path_to_uri(path_to_data_dir("song1.wav")),
-        path.path_to_uri(path_to_data_dir("song2.wav")),
+        paths.path_to_uri(path_to_data_dir("song1.wav")),
+        paths.path_to_uri(path_to_data_dir("song2.wav")),
     ]
 
     audio_class = audio.GstAudio
@@ -35,7 +35,7 @@ class BaseTest(unittest.TestCase):
             },
             "proxy": {"hostname": ""},
         }
-        self.song_uri = path.path_to_uri(path_to_data_dir("song1.wav"))
+        self.song_uri = paths.path_to_uri(path_to_data_dir("song1.wav"))
         self.audio = self.audio_class.start(config=config, mixer=None).proxy()
 
     def tearDown(self):

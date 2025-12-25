@@ -7,8 +7,8 @@ from unittest import mock
 
 import pytest
 
+from mopidy._lib import logs
 from mopidy.config import types
-from mopidy.internal import log
 
 
 @pytest.mark.parametrize(
@@ -1221,7 +1221,7 @@ class TestLogLevel:
         "warning": logging.WARNING,
         "info": logging.INFO,
         "debug": logging.DEBUG,
-        "trace": log.TRACE_LOG_LEVEL,
+        "trace": logs.TRACE_LOG_LEVEL,
         "all": logging.NOTSET,
     }
 
@@ -1291,7 +1291,7 @@ class TestHostname:
         assert cv.deserialize(" ") is None
         assert getaddrinfo_mock.call_count == 0
 
-    @mock.patch("mopidy.internal.path.expand_path")
+    @mock.patch("mopidy._lib.paths.expand_path")
     def test_deserialize_with_unix_socket(self, expand_path_mock):
         cv = types.Hostname()
 

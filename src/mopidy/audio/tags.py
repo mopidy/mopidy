@@ -3,8 +3,8 @@ import datetime
 import logging
 import numbers
 
-from mopidy.internal import log
-from mopidy.internal.gi import GLib, Gst
+from mopidy._lib import logs
+from mopidy._lib.gi import GLib, Gst
 from mopidy.models import Album, Artist, Track
 
 logger = logging.getLogger(__name__)
@@ -86,7 +86,7 @@ gstreamer-GstTagList.html
                     result[tag].append(data)
             else:
                 logger.log(
-                    log.TRACE_LOG_LEVEL,
+                    logs.TRACE_LOG_LEVEL,
                     "Ignoring unknown tag data: %r = %r",
                     tag,
                     value,
