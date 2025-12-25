@@ -161,6 +161,10 @@ Changes to the Audio API may affect a few Mopidy backend extensions.
 - Moved :class:`mopidy.audio.PlaybackState` to
   :class:`mopidy.types.PlaybackState`.
 
+- The :func:`mopidy.audio.tags.convert_tags_to_track` function now requires the
+  track ``uri`` as an argument, so that it can construct valid
+  :class:`~mopidy.models.Track` objects.
+
 - Removed APIs only used by Mopidy-Spotify's bespoke audio delivery mechanism,
   which has not been used since Spotify shut down their libspotify APIs in
   May 2022. The removed functions/methods are:

@@ -103,7 +103,8 @@ class FileLibraryProvider(backend.LibraryProvider):
 
         try:
             result = self._scanner.scan(uri)
-            track = tags.convert_tags_to_track(result.tags).replace(
+            track = tags.convert_tags_to_track(
+                result.tags,
                 uri=uri,
                 length=result.duration,
             )
