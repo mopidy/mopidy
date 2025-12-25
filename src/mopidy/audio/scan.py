@@ -10,6 +10,7 @@ from mopidy._lib.gi import Gst, GstPbutils
 from mopidy.audio import tags as tags_lib
 from mopidy.audio._utils import Signals, setup_proxy
 from mopidy.config import ProxyConfig
+from mopidy.types import DurationMs
 
 
 class GstElementFactoryListType(IntEnum):
@@ -29,7 +30,7 @@ class GstAutoplugSelectResult(IntEnum):
 class _Result(NamedTuple):
     uri: str
     tags: dict[str, Any]
-    duration: int | None
+    duration: DurationMs | None
     seekable: bool
     mime: str | None
     playable: bool
@@ -252,14 +253,14 @@ def _start_pipeline(pipeline: Gst.Pipeline) -> None:
         pipeline.set_state(Gst.State.PLAYING)
 
 
-def _query_duration(pipeline: Gst.Pipeline) -> tuple[bool, int | None]:
+def _query_duration(pipeline: Gst.Pipeline) -> tuple[bool, DurationMs | None]:
     success, duration = pipeline.query_duration(Gst.Format.TIME)
     if not success:
         duration = None  # Make sure error case preserves None.
     elif duration < 0:
         duration = None  # Stream without duration.
     else:
-        duration = int(duration // Gst.MSECOND)
+        duration = DurationMs(int(duration // Gst.MSECOND))
     return success, duration
 
 
@@ -285,7 +286,7 @@ def _get_structure_name(struct: Gst.Structure) -> str:
 def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
     pipeline: Gst.Pipeline,
     timeout_ms: int,
-) -> tuple[dict[str, Any], str | None, bool, int | None]:
+) -> tuple[dict[str, Any], str | None, bool, DurationMs | None]:
     bus = pipeline.get_bus()
     tags = {}
     mime: str | None = None
