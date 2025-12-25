@@ -34,7 +34,7 @@ class FileLibraryProvider(backend.LibraryProvider):
         config_dict = cast(config_lib.ConfigDict, config)
         ext_config = cast(FileConfig, config_dict[Extension.ext_name])
 
-        self._media_dirs = list(self._get_media_dirs(config))
+        self._media_dirs = list(self._get_media_dirs(config_dict))
         self._show_dotfiles = ext_config["show_dotfiles"]
         self._excluded_file_extensions = tuple(
             file_ext.lower() for file_ext in ext_config["excluded_file_extensions"]
@@ -90,8 +90,8 @@ class FileLibraryProvider(backend.LibraryProvider):
             elif child_path.is_file():
                 result.append(Ref.track(name=dir_entry.name, uri=uri))
 
-        def order(item):
-            return (item.type != Ref.DIRECTORY, item.name)
+        def order(ref: Ref) -> tuple:
+            return (ref.type != Ref.DIRECTORY, ref.name)
 
         result.sort(key=order)
 
@@ -127,7 +127,7 @@ class FileLibraryProvider(backend.LibraryProvider):
             uri = Uri("file:root")
         return Ref.directory(name="Files", uri=uri)
 
-    def _get_media_dirs(self, config) -> Generator[MediaDir]:
+    def _get_media_dirs(self, config: config_lib.ConfigDict) -> Generator[MediaDir]:
         for entry in config["file"]["media_dirs"]:
             media_dir_split = entry.split("|", 1)
             local_path = paths.expand_path(media_dir_split[0])
@@ -161,7 +161,7 @@ class FileLibraryProvider(backend.LibraryProvider):
                 uri=paths.path_to_uri(media_dir["path"]),
             )
 
-    def _is_in_basedir(self, local_path) -> bool:
+    def _is_in_basedir(self, local_path: pathlib.Path) -> bool:
         return any(
             paths.is_path_inside_base_dir(local_path, media_dir["path"])
             for media_dir in self._media_dirs

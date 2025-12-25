@@ -1,19 +1,20 @@
 import _thread
 import logging
 import threading
+from types import FrameType
 
 import pykka
 
 logger = logging.getLogger(__name__)
 
 
-def exit_process():
+def exit_process() -> None:
     logger.debug("Interrupting main...")
     _thread.interrupt_main()
     logger.debug("Interrupted main")
 
 
-def sigterm_handler(_signum, _frame):
+def sigterm_handler(_signum: int, _frame: FrameType | None) -> None:
     """A :mod:`signal` handler which will exit the program on signal.
 
     This function is not called when the process' main thread is running a GLib
@@ -27,14 +28,14 @@ def sigterm_handler(_signum, _frame):
     exit_process()
 
 
-def stop_actors_by_class(klass):
+def stop_actors_by_class(klass: type[pykka.Actor]) -> None:
     actors = pykka.ActorRegistry.get_by_class(klass)
     logger.debug("Stopping %d instance(s) of %s", len(actors), klass.__name__)
     for actor in actors:
         actor.stop()
 
 
-def stop_remaining_actors():
+def stop_remaining_actors() -> None:
     num_actors = len(pykka.ActorRegistry.get_all())
     while num_actors:
         logger.error("There are actor threads still running, this is probably a bug")

@@ -3,10 +3,12 @@
 import os
 from importlib.metadata import version
 
+from sphinx.application import Sphinx
+
 # -- Custom Sphinx setup ------------------------------------------------------
 
 
-def setup(app):
+def setup(app: Sphinx) -> None:
     # Add custom Sphinx object type for Mopidy's config values
     app.add_object_type(
         "confval",

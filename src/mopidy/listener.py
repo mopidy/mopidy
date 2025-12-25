@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import logging
+from typing import Any
 
 import pykka
 from pykka.messages import ProxyCall
@@ -6,8 +9,8 @@ from pykka.messages import ProxyCall
 logger = logging.getLogger(__name__)
 
 
-def send(cls, event, **kwargs):
-    listeners = pykka.ActorRegistry.get_by_class(cls)
+def send(cls: type[Listener], event: str, **kwargs: Any) -> None:
+    listeners = pykka.ActorRegistry.get_by_class(cls)  # pyright: ignore[reportArgumentType]  # ty:ignore[invalid-argument-type]
     logger.debug("Sending %s to %s: %s", event, cls.__name__, kwargs)
     for listener in listeners:
         # Save time by calling methods on Pykka actor without creating a
@@ -29,7 +32,7 @@ def send(cls, event, **kwargs):
 
 
 class Listener:
-    def on_event(self, event, **kwargs):
+    def on_event(self, event: Any, **kwargs: Any) -> None:
         """Called on all events.
 
         *MAY* be implemented by actor. By default, this method forwards the

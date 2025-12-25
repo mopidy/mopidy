@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import logging
 import string
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -12,12 +15,15 @@ _AVAHI_IF_UNSPEC = -1
 _AVAHI_PROTO_UNSPEC = -1
 _AVAHI_PUBLISHFLAGS_NONE = 0
 
+# Workaround for dbus not having types
+type Array = Any
+
 
 def _is_loopback_address(host: str) -> bool:
     return host.startswith(("127.", "::ffff:127.")) or host == "::1"
 
 
-def _convert_text_list_to_dbus_format(text_list: list[str]):
+def _convert_text_list_to_dbus_format(text_list: list[str]) -> Array:
     assert dbus
     array = dbus.Array(signature="ay")
     for text in text_list:

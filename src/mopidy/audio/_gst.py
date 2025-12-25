@@ -7,9 +7,10 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, cast, override
 
 import pykka
+from pykka.typing import proxy_method
 
 from mopidy import exceptions
-from mopidy._lib import process
+from mopidy._lib import logs, process
 from mopidy._lib.gi import GLib, Gst, GstBase, GstPbutils
 from mopidy.audio import tags as tags_lib
 from mopidy.audio._api import Audio
@@ -46,7 +47,7 @@ _GST_STATE_MAPPING: dict[Gst.State, PlaybackState] = {
 
 # TODO: expose this as a property on audio when #790 gets further along.
 class _Outputs(Gst.Bin):
-    def __init__(self):
+    def __init__(self) -> None:
         Gst.Bin.__init__(self)
         # TODO(gst1): Set 'outputs' as the Bin name for easier debugging
 
@@ -64,7 +65,7 @@ class _Outputs(Gst.Bin):
         ghost_pad = Gst.GhostPad.new("sink", tee_sink)
         self.add_pad(ghost_pad)
 
-    def add_output(self, description) -> None:
+    def add_output(self, description: str) -> None:
         # NOTE: This only works for pipelines not in use until #790 gets done.
         try:
             output = Gst.parse_bin_from_description(
@@ -79,7 +80,7 @@ class _Outputs(Gst.Bin):
         self._add(output)
         logger.info('Audio output set to "%s"', description)
 
-    def _add(self, element) -> None:
+    def _add(self, element: Gst.Element) -> None:
         self.add(element)
 
         queue = Gst.ElementFactory.make("queue")
@@ -92,7 +93,7 @@ class _Outputs(Gst.Bin):
         self._tee.link(queue)
 
 
-class _SoftwareMixerAdapter:
+class GstSoftwareMixerAdapter:
     _mixer: SoftwareMixerProxy
     _element: Gst.Element | None
     _last_volume: int | None
@@ -106,9 +107,13 @@ class _SoftwareMixerAdapter:
         self._last_mute = None
         self._signals = Signals()
 
-    def setup(self, element, mixer_ref) -> None:
+    def setup(
+        self,
+        element: Gst.Element,
+        gst_mixer: GstSoftwareMixerAdapterProxy,
+    ) -> None:
         self._element = element
-        self._mixer.setup(mixer_ref)
+        self._mixer.setup(gst_mixer)
 
     def teardown(self) -> None:
         self._signals.clear()
@@ -133,21 +138,28 @@ class _SoftwareMixerAdapter:
         self._mixer.trigger_mute_changed(self.get_mute())
 
 
+class GstSoftwareMixerAdapterProxy:
+    get_volume = proxy_method(GstSoftwareMixerAdapter.get_volume)
+    set_volume = proxy_method(GstSoftwareMixerAdapter.set_volume)
+    get_mute = proxy_method(GstSoftwareMixerAdapter.get_mute)
+    set_mute = proxy_method(GstSoftwareMixerAdapter.set_mute)
+
+
 class _Handler:
     def __init__(self, audio: GstAudio) -> None:
         self._audio = audio
-        self._element = None
-        self._pad = None
-        self._message_handler_id = None
-        self._event_handler_id = None
+        self._element: Gst.Element | None = None
+        self._pad: Gst.Pad | None = None
+        self._message_handler_id: int | None = None
+        self._event_handler_id: int | None = None
 
-    def setup_message_handling(self, element) -> None:
+    def setup_message_handling(self, element: Gst.Element) -> None:
         self._element = element
-        bus = element.get_bus()
-        bus.add_signal_watch()
-        self._message_handler_id = bus.connect("message", self.on_message)
+        if (bus := element.get_bus()) is not None:
+            bus.add_signal_watch()
+            self._message_handler_id = bus.connect("message", self.on_message)
 
-    def setup_event_handling(self, pad) -> None:
+    def setup_event_handling(self, pad: Gst.Pad) -> None:
         self._pad = pad
         self._event_handler_id = pad.add_probe(
             Gst.PadProbeType.EVENT_BOTH,
@@ -155,18 +167,18 @@ class _Handler:
         )
 
     def teardown_message_handling(self) -> None:
-        if self._element is not None:
-            bus = self._element.get_bus()
+        if self._element is not None and (bus := self._element.get_bus()) is not None:
             bus.remove_signal_watch()
-            bus.disconnect(self._message_handler_id)
+            if self._message_handler_id is not None:
+                bus.disconnect(self._message_handler_id)
         self._message_handler_id = None
 
     def teardown_event_handling(self) -> None:
-        if self._pad is not None:
+        if self._pad is not None and self._event_handler_id is not None:
             self._pad.remove_probe(self._event_handler_id)
         self._event_handler_id = None
 
-    def on_message(self, _bus, msg) -> None:  # noqa: C901
+    def on_message(self, _bus: Gst.Bus, msg: Gst.Message) -> None:  # noqa: C901
         if msg.type == Gst.MessageType.STATE_CHANGED:
             if msg.src != self._element:
                 return
@@ -193,13 +205,23 @@ class _Handler:
         elif msg.type == Gst.MessageType.STREAM_START:
             self.on_stream_start()
 
-    def on_pad_event(self, _pad, pad_probe_info):
-        event = pad_probe_info.get_event()
+    def on_pad_event(
+        self,
+        _pad: Gst.Pad,
+        pad_probe_info: Gst.PadProbeInfo,
+    ) -> Gst.PadProbeReturn:
+        if (event := pad_probe_info.get_event()) is None:
+            return Gst.PadProbeReturn.OK
         if event.type == Gst.EventType.SEGMENT:
             self.on_segment(event.parse_segment())
         return Gst.PadProbeReturn.OK
 
-    def on_playbin_state_changed(self, old_state, new_state, pending_state):
+    def on_playbin_state_changed(
+        self,
+        old_state: Gst.State,
+        new_state: Gst.State,
+        pending_state: Gst.State,
+    ) -> None:
         gst_logger.debug(
             "Got STATE_CHANGED bus message: old=%s new=%s pending=%s",
             old_state.value_name,
@@ -220,30 +242,30 @@ class _Handler:
         if new_state == Gst.State.READY:
             return  # Ignore READY state as it's GStreamer specific
 
-        new_state = _GST_STATE_MAPPING[new_state]
-        old_state, self._audio.state = self._audio.state, new_state
+        new_playback_state = _GST_STATE_MAPPING[new_state]
+        old_playback_state, self._audio.state = self._audio.state, new_playback_state
 
-        target_state = _GST_STATE_MAPPING.get(self._audio._target_state)
-        if target_state is None:
+        target_playback_state = _GST_STATE_MAPPING.get(self._audio._target_state)
+        if target_playback_state is None:
             # HACK: Workaround for #1430, to be fixed properly by #1222.
             logger.warning("Race condition happened. See #1222 and #1430.")
             return
-        if target_state == new_state:
-            target_state = None
+        if target_playback_state == new_playback_state:
+            target_playback_state = None
 
         logger.debug(
             "Audio event: state_changed(old_state=%s, new_state=%s, target_state=%s)",
-            old_state,
-            new_state,
-            target_state,
+            old_playback_state,
+            new_playback_state,
+            target_playback_state,
         )
         AudioListener.send(
             "state_changed",
-            old_state=old_state,
-            new_state=new_state,
-            target_state=target_state,
+            old_state=old_playback_state,
+            new_state=new_playback_state,
+            target_state=target_playback_state,
         )
-        if new_state == PlaybackState.STOPPED:
+        if new_playback_state == PlaybackState.STOPPED:
             logger.debug("Audio event: stream_changed(uri=None)")
             AudioListener.send("stream_changed", uri=None)
 
@@ -255,7 +277,11 @@ class _Handler:
                 file_name="mopidy",
             )
 
-    def on_buffering(self, percent, structure=None):
+    def on_buffering(
+        self,
+        percent: int,
+        structure: Gst.Structure | None = None,
+    ) -> None:
         assert self._audio._playbin
 
         if self._audio._target_state < Gst.State.PAUSED:
@@ -267,7 +293,7 @@ class _Handler:
             if buffering_mode == Gst.BufferingMode.LIVE:
                 return  # Live sources stall in paused.
 
-        level = logging.getLevelName("TRACE")
+        level = logs.TRACE_LOG_LEVEL
         if percent < 10 and not self._audio._buffering:
             self._audio._playbin.set_state(Gst.State.PAUSED)
             self._audio._buffering = True
@@ -280,27 +306,27 @@ class _Handler:
 
         gst_logger.log(level, "Got BUFFERING bus message: percent=%d%%", percent)
 
-    def on_end_of_stream(self):
+    def on_end_of_stream(self) -> None:
         gst_logger.debug("Got EOS (end of stream) bus message.")
         logger.debug("Audio event: reached_end_of_stream()")
         self._audio._tags = {}
         AudioListener.send("reached_end_of_stream")
 
-    def on_error(self, error, debug):
+    def on_error(self, error: GLib.Error, debug: str) -> None:
         gst_logger.error(f"GStreamer error: {error.message}")
         gst_logger.debug(f"Got ERROR bus message: error={error!r} debug={debug!r}")
 
         # TODO: is this needed?
         self._audio.stop_playback()
 
-    def on_warning(self, error, debug):
+    def on_warning(self, error: GLib.Error, debug: str) -> None:
         gst_logger.warning(f"GStreamer warning: {error.message}")
         gst_logger.debug(f"Got WARNING bus message: error={error!r} debug={debug!r}")
 
-    def on_async_done(self):
+    def on_async_done(self) -> None:
         gst_logger.debug("Got ASYNC_DONE bus message.")
 
-    def on_tag(self, taglist):
+    def on_tag(self, taglist: Gst.TagList) -> None:
         tags = tags_lib.convert_taglist(taglist)
         gst_logger.debug(f"Got TAG bus message: tags={tags_lib.repr_tags(tags)}")
 
@@ -322,7 +348,7 @@ class _Handler:
             logger.debug("Audio event: tags_changed(tags=%r)", changed)
             AudioListener.send("tags_changed", tags=changed)
 
-    def on_missing_plugin(self, msg):
+    def on_missing_plugin(self, msg: Gst.Message) -> None:
         desc = GstPbutils.missing_plugin_message_get_description(msg)
         debug = GstPbutils.missing_plugin_message_get_installer_detail(msg)
         gst_logger.debug("Got missing-plugin bus message: description=%r", desc)
@@ -336,7 +362,7 @@ class _Handler:
         # can provide a 'mopidy install-missing-plugins' if the system has the
         # required helper installed?
 
-    def on_stream_start(self):
+    def on_stream_start(self) -> None:
         assert self._audio._playbin
 
         gst_logger.debug("Got STREAM_START bus message")
@@ -356,7 +382,7 @@ class _Handler:
             self._audio._playbin.send_event(self._audio._pending_metadata)
             self._audio._pending_metadata = None
 
-    def on_segment(self, segment):
+    def on_segment(self, segment: Gst.Segment) -> None:
         gst_logger.debug(
             "Got SEGMENT pad event: "
             "rate=%(rate)s format=%(format)s start=%(start)s stop=%(stop)s "
@@ -378,8 +404,7 @@ class _Handler:
 class GstAudio(Audio, pykka.ThreadingActor):
     """Audio output through `GStreamer <https://gstreamer.freedesktop.org/>`_."""
 
-    #: The software mixing interface :class:`mopidy.audio.actor.SoftwareMixerAdapter`
-    mixer: _SoftwareMixerAdapter | None = None
+    mixer: GstSoftwareMixerAdapter | None = None
 
     def __init__(
         self,
@@ -408,7 +433,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
 
         if mixer and self._config["audio"]["mixer"] == "software":
             mixer = cast("SoftwareMixerProxy", mixer)
-            self.mixer = pykka.traversable(_SoftwareMixerAdapter(mixer))
+            self.mixer = pykka.traversable(GstSoftwareMixerAdapter(mixer))
 
     def on_start(self) -> None:
         self._thread = threading.current_thread()
@@ -476,7 +501,8 @@ class GstAudio(Audio, pykka.ThreadingActor):
             except exceptions.AudioException:
                 process.exit_process()  # TODO: move this up the chain
 
-        self._handler.setup_event_handling(self._outputs.get_static_pad("sink"))
+        if sink_pad := self._outputs.get_static_pad("sink"):
+            self._handler.setup_event_handling(sink_pad)
 
     def _setup_audio_sink(self) -> None:
         assert self._playbin
@@ -728,7 +754,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
     def testing_gst__enable_sync_handler(self) -> None:
         assert self._playbin
 
-        def sync_handler(bus, message):
+        def sync_handler(bus: Gst.Bus, message: Gst.Message) -> Gst.BusSyncReply:
             self._handler.on_message(bus, message)
             return Gst.BusSyncReply.DROP
 

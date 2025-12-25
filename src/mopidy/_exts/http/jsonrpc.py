@@ -92,19 +92,19 @@ class ParamDescription(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     @field_serializer("default", when_used="json")
-    def serialize_default(self, _nxt: SerializerFunctionWrapHandler):
+    def serialize_default(self, _nxt: SerializerFunctionWrapHandler) -> Any | None:
         return None if self.default is Unset else self.default
 
     @field_serializer("varargs", when_used="json")
-    def serialize_varargs(self, _nxt: SerializerFunctionWrapHandler):
+    def serialize_varargs(self, _nxt: SerializerFunctionWrapHandler) -> Any | None:
         return None if self.varargs is Unset else self.varargs
 
     @field_serializer("kwargs", when_used="json")
-    def serialize_kwargs(self, _nxt: SerializerFunctionWrapHandler):
+    def serialize_kwargs(self, _nxt: SerializerFunctionWrapHandler) -> Any | None:
         return None if self.kwargs is Unset else self.kwargs
 
     @model_serializer(mode="wrap", when_used="json")
-    def serialize_model(self, nxt: SerializerFunctionWrapHandler):
+    def serialize_model(self, nxt: SerializerFunctionWrapHandler) -> Any:
         serialized = nxt(self)
         if self.default is Unset:
             del serialized["default"]
@@ -165,7 +165,7 @@ class Wrapper:
     def __init__(
         self,
         objects: dict[str, Any],
-    ):
+    ) -> None:
         if "" in objects:
             msg = "The empty string is not allowed as an object mount"
             raise AttributeError(msg)

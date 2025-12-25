@@ -5,7 +5,7 @@ import collections
 import sys
 from collections.abc import Iterable, Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, NoReturn
+from typing import TYPE_CHECKING, Any, NoReturn, override
 
 if TYPE_CHECKING:
     from mopidy import config as config_lib
@@ -26,7 +26,7 @@ def config_override_type(value: str) -> tuple[str, str, str]:
 
 
 class _ParserError(Exception):
-    def __init__(self, message) -> None:
+    def __init__(self, message: str) -> None:
         self.message = message
 
 
@@ -35,11 +35,12 @@ class _HelpError(Exception):
 
 
 class _ArgumentParser(argparse.ArgumentParser):
-    def error(self, message) -> NoReturn:
+    def error(self, message: str) -> NoReturn:
         raise _ParserError(message)
 
 
 class _HelpAction(argparse.Action):
+    @override
     def __init__(
         self,
         option_strings: Sequence[str],
@@ -54,12 +55,13 @@ class _HelpAction(argparse.Action):
             help=help,
         )
 
+    @override
     def __call__(
         self,
-        parser,  # noqa: ARG002
-        namespace,  # noqa: ARG002
-        values,  # noqa: ARG002
-        option_string=None,  # noqa: ARG002
+        parser: argparse.ArgumentParser,
+        namespace: argparse.Namespace,
+        values: str | Sequence[Any] | None,
+        option_string: str | None = None,
     ) -> NoReturn:
         raise _HelpError
 
@@ -131,7 +133,7 @@ class Command:
         prog = prog or Path(sys.argv[0]).name
         return self._usage(actions, prog) + "\n"
 
-    def _usage(self, actions: Iterable[argparse.Action], prog) -> str:
+    def _usage(self, actions: Iterable[argparse.Action], prog: str) -> str:
         formatter = argparse.HelpFormatter(prog)
         formatter.add_usage(None, actions, [])
         return formatter.format_help().strip()

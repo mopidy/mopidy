@@ -74,8 +74,8 @@ TRACKLIST_FIELDS: dict[str, type | UnionType] = {
 
 # TODO: _check_iterable(check, msg, **kwargs) + [check(a) for a in arg]?
 def _check_iterable(
-    arg,
-    msg,
+    arg: Iterable[Any],
+    msg: str,
     **kwargs: Any,
 ) -> None:
     """Ensure we have an iterable which is not a string or an iterator."""
@@ -175,7 +175,7 @@ def _check_query_value(
 
 def check_uri(
     arg: str,
-    msg="Expected a valid URI, not {arg!r}",
+    msg: str = "Expected a valid URI, not {arg!r}",
 ) -> None:
     if not isinstance(arg, str):
         raise exceptions.ValidationError(msg.format(arg=arg))
@@ -185,7 +185,7 @@ def check_uri(
 
 def check_uris(
     arg: Iterable[str],
-    msg="Expected a list of URIs, not {arg!r}",
+    msg: str = "Expected a list of URIs, not {arg!r}",
 ) -> None:
     _check_iterable(arg, msg)
     [check_uri(a, msg) for a in arg]

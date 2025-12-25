@@ -347,7 +347,7 @@ class Proxy(Mapping):
     def __init__(self, data: Config | dict[str, Any]) -> None:
         self._data = data
 
-    def __getitem__(self, key) -> Any:
+    def __getitem__(self, key: Any) -> Any:
         item = self._data.__getitem__(key)
         if isinstance(item, dict):
             return Proxy(item)

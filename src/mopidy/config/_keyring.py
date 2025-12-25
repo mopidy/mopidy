@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import logging
+from typing import Any, cast
 
 logger = logging.getLogger(__name__)
 
@@ -6,6 +9,10 @@ try:
     import dbus  # pyright: ignore[reportMissingImports]  # ty:ignore[unresolved-import]
 except ImportError:
     dbus = None
+
+# Workaround for dbus not having types
+type Bus = Any
+type Interface = Any
 
 
 # HACK: Hack to workaround introspection bug caused by gnome-keyring, should be
@@ -26,7 +33,7 @@ def fetch() -> list[tuple[str, str, bytes]]:  # noqa: PLR0911
         return []
 
     try:
-        bus = dbus.SessionBus()
+        bus = cast(Bus, dbus.SessionBus())
     except dbus.exceptions.DBusException as e:
         logger.debug("%s (%s)", FETCH_ERROR, e)
         return []
@@ -82,7 +89,7 @@ def set(  # noqa: A001, PLR0911
         return False
 
     try:
-        bus = dbus.SessionBus()
+        bus = cast(Bus, dbus.SessionBus())
     except dbus.exceptions.DBusException as e:
         logger.debug("Saving %s/%s to keyring failed. (%s)", section, key, e)
         return False
@@ -130,7 +137,7 @@ def set(  # noqa: A001, PLR0911
     return False
 
 
-def _service(bus):
+def _service(bus: Bus) -> Interface:
     return _interface(bus, "/org/freedesktop/secrets", "org.freedesktop.Secret.Service")
 
 
@@ -139,7 +146,7 @@ def _service(bus):
 # if all else fails. We should probably create a keyring/collection setting
 # that allows users to set this so they have control over where their secrets
 # get stored.
-def _collection(bus):
+def _collection(bus: Bus) -> Interface | None:
     for name in "aliases/default", "collection/login", "collection/session":
         path = "/org/freedesktop/secrets/" + name
         if _collection_exists(bus, path):
@@ -151,7 +158,7 @@ def _collection(bus):
 
 # NOTE: Hack to probe if a given collection actually exists. Needed to work
 # around an introspection bug in setting passwords for non-existent aliases.
-def _collection_exists(bus, path):
+def _collection_exists(bus: Bus, path: str) -> bool:
     assert dbus
     try:
         item = _interface(bus, path, "org.freedesktop.DBus.Properties")
@@ -166,17 +173,17 @@ def _collection_exists(bus, path):
 # '/', but we would then also have to arrange to setup signals to wait until
 # this has been completed. So for now we just dismiss the prompt and expect
 # keyrings to be unlocked.
-def _prompt(bus, path):
+def _prompt(bus: Bus, path: str) -> Interface:
     return _interface(bus, path, "Prompt")
 
 
-def _item_attributes(bus, path):
+def _item_attributes(bus: Bus, path: str) -> dict[str, str]:
     item = _interface(bus, path, "org.freedesktop.DBus.Properties")
     result = item.Get("org.freedesktop.Secret.Item", "Attributes")
     return {str(k): str(v) for k, v in result.items()}
 
 
-def _interface(bus, path, interface):
+def _interface(bus: Bus, path: str, interface: str) -> Interface:
     assert dbus
     obj = bus.get_object("org.freedesktop.secrets", path)
     return dbus.Interface(obj, interface)

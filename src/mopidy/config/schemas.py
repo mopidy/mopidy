@@ -1,10 +1,11 @@
 import collections
+from collections.abc import Iterable
 from typing import Any
 
 from mopidy.config import types
 
 
-def _did_you_mean(name, choices):
+def _did_you_mean(name: str, choices: Iterable[str]) -> str | None:
     """Suggest most likely setting based on levenshtein."""
     if not choices:
         return None
@@ -18,7 +19,7 @@ def _did_you_mean(name, choices):
     return None
 
 
-def _levenshtein(a, b):
+def _levenshtein(a: str, b: str) -> int:
     """Calculates the Levenshtein distance between a and b."""
     n, m = len(a), len(b)
     if n > m:

@@ -12,7 +12,7 @@ logging.addLevelName(TRACE_LOG_LEVEL, "TRACE")
 
 
 @contextlib.contextmanager
-def log_time_spent(name, level=TRACE_LOG_LEVEL) -> Generator[None]:
+def log_time_spent(name: str, level: int = TRACE_LOG_LEVEL) -> Generator[None]:
     start = time.time()
     yield
     logger.log(level, "%s took %dms", name, (time.time() - start) * 1000)
