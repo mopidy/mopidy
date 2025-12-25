@@ -158,9 +158,6 @@ ignore = [
     "D",      # pydocstyle
     "INP001", # flake8-no-pep420
 ]
-"src/mopidy/internal/*" = [
-    "D", # pydocstyle
-]
 "tests/*" = [
     "ANN",     # flake8-annotations
     "ARG",     # flake8-unused-arguments
