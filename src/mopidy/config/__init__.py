@@ -35,9 +35,10 @@ from mopidy.config.types import (
 if TYPE_CHECKING:
     from mopidy.ext import ExtensionData
 
-    type ConfigErrors = dict[str, dict[str, Any]]
-    type ConfigSchemas = list[ConfigSchema | MapConfigSchema]
-    type RawConfig = dict[str, dict[str, Any]]
+
+type ConfigErrors = dict[str, dict[str, Any]]
+type ConfigSchemas = list[ConfigSchema | MapConfigSchema]
+type RawConfig = dict[str, dict[str, Any]]
 
 
 __all__ = [
