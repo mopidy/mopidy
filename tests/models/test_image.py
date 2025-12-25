@@ -1,31 +1,27 @@
 import pydantic
 import pytest
 
-from mopidy.models import Image
+from mopidy.types import Uri
+from tests.factories import ImageFactory
 
 
 def test_uri():
     uri = "an_uri"
-    image = Image(uri=uri)
+    image = ImageFactory.build(uri=uri)
     assert image.uri == uri
     with pytest.raises(pydantic.ValidationError):
-        image.uri = None
+        image.uri = Uri("")
 
 
 def test_width():
-    image = Image(uri="uri", width=100)
+    image = ImageFactory.build(uri="uri", width=100)
     assert image.width == 100
     with pytest.raises(pydantic.ValidationError):
         image.width = None
 
 
 def test_height():
-    image = Image(uri="uri", height=100)
+    image = ImageFactory.build(uri="uri", height=100)
     assert image.height == 100
     with pytest.raises(pydantic.ValidationError):
         image.height = None
-
-
-def test_invalid_kwarg():
-    with pytest.raises(pydantic.ValidationError):
-        Image(uri="uri", foo="baz")

@@ -1,31 +1,31 @@
 import pydantic
 import pytest
 
-from mopidy.models import Artist, Track
+from tests.factories import ArtistFactory, TrackFactory
 
 
 def test_replace_track_with_basic_values():
-    track = Track(name="foo", uri="bar")
+    track = TrackFactory.build(uri="bar", name="foo")
 
     other = track.replace(name="baz")
 
-    assert other.name == "baz"
     assert other.uri == "bar"
+    assert other.name == "baz"
 
 
 def test_replace_track_with_missing_values():
-    track = Track(uri="bar")
+    track = TrackFactory.build(uri="bar")
 
     other = track.replace(name="baz")
 
-    assert other.name == "baz"
     assert other.uri == "bar"
+    assert other.name == "baz"
 
 
 def test_replace_track_with_private_internal_value():
-    artist1 = Artist(name="foo")
-    artist2 = Artist(name="bar")
-    track = Track(artists=[artist1])
+    artist1 = ArtistFactory.build(name="foo")
+    artist2 = ArtistFactory.build(name="bar")
+    track = TrackFactory.build(artists=[artist1])
 
     other = track.replace(artists=[artist2])
 
@@ -34,4 +34,4 @@ def test_replace_track_with_private_internal_value():
 
 def test_replace_track_with_invalid_key():
     with pytest.raises(pydantic.ValidationError):
-        Track().replace(invalid_key=True)
+        TrackFactory.build().replace(invalid_key=True)

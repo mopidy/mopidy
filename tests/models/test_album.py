@@ -4,11 +4,13 @@ import pydantic
 import pytest
 
 from mopidy.models import Album, Artist
+from mopidy.types import Uri
+from tests.factories import AlbumFactory, ArtistFactory
 
 
 def test_uri():
     uri = "an_uri"
-    album = Album(uri=uri)
+    album = AlbumFactory.build(uri=uri)
     assert album.uri == uri
     with pytest.raises(pydantic.ValidationError):
         album.uri = None
@@ -16,23 +18,23 @@ def test_uri():
 
 def test_name():
     name = "a name"
-    album = Album(name=name)
+    album = AlbumFactory.build(name=name)
     assert album.name == name
     with pytest.raises(pydantic.ValidationError):
         album.name = None
 
 
 def test_artists():
-    artist = Artist()
-    album = Album(artists=[artist])
+    artist = ArtistFactory.build()
+    album = AlbumFactory.build(artists=[artist])
     assert artist in album.artists
     with pytest.raises(pydantic.ValidationError):
-        album.artists = None
+        album.artists = frozenset()
 
 
 def test_num_tracks():
     num_tracks = 11
-    album = Album(num_tracks=num_tracks)
+    album = AlbumFactory.build(num_tracks=num_tracks)
     assert album.num_tracks == num_tracks
     with pytest.raises(pydantic.ValidationError):
         album.num_tracks = None
@@ -40,7 +42,7 @@ def test_num_tracks():
 
 def test_num_discs():
     num_discs = 2
-    album = Album(num_discs=num_discs)
+    album = AlbumFactory.build(num_discs=num_discs)
     assert album.num_discs == num_discs
     with pytest.raises(pydantic.ValidationError):
         album.num_discs = None
@@ -48,7 +50,7 @@ def test_num_discs():
 
 def test_date():
     date = "1977-01-01"
-    album = Album(date=date)
+    album = AlbumFactory.build(date=date)
     assert album.date == date
     with pytest.raises(pydantic.ValidationError):
         album.date = None
@@ -56,7 +58,7 @@ def test_date():
 
 def test_musicbrainz_id():
     mb_id = "0383dadf-2a4e-4d10-a46a-e9e041da8eb3"
-    album = Album(musicbrainz_id=mb_id)
+    album = AlbumFactory.build(musicbrainz_id=mb_id)
     assert album.musicbrainz_id == UUID(mb_id)
     with pytest.raises(pydantic.ValidationError):
         album.musicbrainz_id = None
@@ -64,18 +66,26 @@ def test_musicbrainz_id():
 
 def test_invalid_kwarg():
     with pytest.raises(pydantic.ValidationError):
-        Album(foo="baz")
+        AlbumFactory.build(foo="baz")
 
 
 def test_repr_without_artists():
-    assert repr(Album(uri="uri", name="name")) == (
+    assert repr(
+        Album(uri=Uri("uri"), name="name"),
+    ) == (
         "Album(uri='uri', name='name', artists=frozenset(), num_tracks=None, "
         "num_discs=None, date=None, musicbrainz_id=None)"
     )
 
 
 def test_repr_with_artists():
-    assert repr(Album(uri="uri", name="name", artists=[Artist(name="foo")])) == (
+    assert repr(
+        Album(
+            uri=Uri("uri"),
+            name="name",
+            artists=frozenset({Artist(name="foo")}),
+        )
+    ) == (
         "Album(uri='uri', name='name', artists=frozenset({Artist(uri=None, "
         "name='foo', sortname=None, musicbrainz_id=None)}), num_tracks=None, "
         "num_discs=None, date=None, musicbrainz_id=None)"
@@ -83,7 +93,10 @@ def test_repr_with_artists():
 
 
 def test_serialize_without_artists():
-    assert Album(uri="uri", name="name").serialize() == {
+    assert Album(
+        uri=Uri("uri"),
+        name="name",
+    ).serialize() == {
         "__model__": "Album",
         "uri": "uri",
         "name": "name",
@@ -93,7 +106,11 @@ def test_serialize_without_artists():
 
 def test_serialize_with_artists():
     artist = Artist(name="foo")
-    assert Album(uri="uri", name="name", artists={artist}).serialize() == {
+    assert Album(
+        uri=Uri("uri"),
+        name="name",
+        artists=frozenset({artist}),
+    ).serialize() == {
         "__model__": "Album",
         "uri": "uri",
         "name": "name",
