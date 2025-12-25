@@ -7,7 +7,7 @@ import re
 import socket
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable
-from typing import Any, AnyStr, ClassVar, Literal, cast, get_args
+from typing import Any, AnyStr, ClassVar, Literal, Self, cast, get_args
 
 from mopidy._lib import logs, paths
 from mopidy.config import validators
@@ -42,10 +42,10 @@ class DeprecatedValue:
 class _TransformedValue(str):
     __slots__ = ("original",)
 
-    def __new__(cls, _original, transformed):
+    def __new__(cls, _original: str, transformed: str) -> Self:
         return super().__new__(cls, transformed)
 
-    def __init__(self, original, _transformed):
+    def __init__(self, original: str, _transformed: str) -> None:
         self.original = original
 
 
@@ -487,7 +487,11 @@ class Port(Integer):
     allocate a port for us.
     """
 
-    def __init__(self, choices=None, optional=False):
+    def __init__(
+        self,
+        choices: Iterable[int] | None = None,
+        optional: bool = False,
+    ) -> None:
         super().__init__(
             minimum=0,
             maximum=2**16 - 1,
@@ -513,7 +517,7 @@ class Path(ConfigValue[_ExpandedPath]):
     - ``$XDG_MUSIC_DIR`` according to the XDG spec
     """
 
-    def __init__(self, optional=False):
+    def __init__(self, optional: bool = False) -> None:
         self._required = not optional
 
     def deserialize(self, value: AnyStr) -> _ExpandedPath | None:
@@ -523,7 +527,7 @@ class Path(ConfigValue[_ExpandedPath]):
         validators.validate_required(expanded, self._required)
         if not raw_value or expanded is None:
             return None
-        return _ExpandedPath(raw_value, expanded)
+        return _ExpandedPath(raw_value, str(expanded))
 
     def serialize(
         self,

@@ -2,6 +2,7 @@ import collections
 import datetime
 import logging
 import numbers
+from typing import Any
 
 from mopidy._lib import logs
 from mopidy._lib.gi import GLib, Gst
@@ -10,19 +11,16 @@ from mopidy.models import Album, Artist, Track
 logger = logging.getLogger(__name__)
 
 
-def repr_tags(taglist, max_bytes=10):
+def repr_tags(tags: dict[str, list[Any]], max_bytes: int = 10) -> str:
     """Returns a printable representation of a :class:`Gst.TagList`.
 
     Tag values of type bytes are truncated to the specified length to avoid
     large amounts of output when logging.
 
-    :param taglist: A GStreamer taglist to be represented.
-    :type taglist: :class:`Gst.TagList`
+    :param tags: A converted taglist to be represented.
     :param max_bytes: The maximum number of bytes to show for bytes tag values.
-    :type max_bytes: int
-    :rtype: string
     """
-    result = dict(taglist)
+    result = dict(tags)
     for tag_values in result.values():
         for i, val in enumerate(tag_values):
             if isinstance(val, bytes) and len(val) > max_bytes:
@@ -30,7 +28,7 @@ def repr_tags(taglist, max_bytes=10):
     return repr(result)
 
 
-def convert_taglist(taglist):
+def convert_taglist(taglist: Gst.TagList) -> dict[str, list[Any]]:
     """Convert a :class:`Gst.TagList` to plain Python types.
 
     Knows how to convert:
@@ -96,7 +94,7 @@ gstreamer-GstTagList.html
     return result
 
 
-def _extract_sample_data(sample):
+def _extract_sample_data(sample: Gst.Sample) -> bytes | None:
     buf = sample.get_buffer()
     if not buf:
         return None
@@ -106,7 +104,7 @@ def _extract_sample_data(sample):
 # Fix for https://github.com/mopidy/mopidy/issues/1827
 # Using GstBuffer.extract_dup() is a memory leak in versions of PyGObject prior
 # to v3.36.0. As a workaround we use the GstMemory APIs instead.
-def _extract_buffer_data(buf):
+def _extract_buffer_data(buf: Gst.Buffer) -> bytes | None:
     mem = buf.get_all_memory()
     if not mem:
         return None
@@ -127,7 +125,7 @@ def _extract_buffer_data(buf):
 
 # TODO: split based on "stream" and "track" based conversion? i.e. handle data
 # from radios in it's own helper instead?
-def convert_tags_to_track(tags):
+def convert_tags_to_track(tags: dict[str, Any]) -> Track:
     """Convert our normalized tags to a track.
 
     :param  tags: dictionary of tag keys with a list of values
@@ -190,7 +188,12 @@ def convert_tags_to_track(tags):
     return Track(**track_kwargs)
 
 
-def _artists(tags, artist_name, artist_id=None, artist_sortname=None):
+def _artists(
+    tags: dict[str, Any],
+    artist_name: str,
+    artist_id: str | None = None,
+    artist_sortname: str | None = None,
+) -> list[Artist] | None:
     # Name missing, don't set artist
     if not tags.get(artist_name):
         return None

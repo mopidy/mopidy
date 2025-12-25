@@ -3,12 +3,15 @@ import logging
 import re
 import time
 import urllib.parse
+from typing import cast
 
 import pykka
+import requests
 
 from mopidy import audio as audio_lib
 from mopidy import backend, exceptions
-from mopidy.audio import scan, tags
+from mopidy.audio import AudioProxy, scan, tags
+from mopidy.config import Config, ConfigDict
 from mopidy.models import Track
 from mopidy.types import Uri, UriScheme
 
@@ -19,11 +22,12 @@ logger = logging.getLogger(__name__)
 
 
 class StreamBackend(pykka.ThreadingActor, backend.Backend):
-    def __init__(self, config, audio) -> None:
+    def __init__(self, config: Config, audio: AudioProxy) -> None:
         super().__init__()
 
+        config_dict = cast(ConfigDict, config)
         self._scanner = scan.Scanner(
-            timeout=config["stream"]["timeout"],
+            timeout=config_dict["stream"]["timeout"],
             proxy_config=config["proxy"],
         )
 
@@ -32,19 +36,24 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
             user_agent=(f"{Extension.dist_name}/{Extension.version}"),
         )
 
-        blacklist = config["stream"]["metadata_blacklist"]
+        blacklist = config_dict["stream"]["metadata_blacklist"]
         self._blacklist_re = re.compile(
             rf"^({'|'.join(fnmatch.translate(u) for u in blacklist)})$",
         )
 
-        self._timeout = config["stream"]["timeout"]
+        self._timeout = config_dict["stream"]["timeout"]
 
         self.library = StreamLibraryProvider(backend=self)
         self.playback = StreamPlaybackProvider(audio=audio, backend=self)
         self.playlists = None
 
-        uri_schemes = audio_lib.supported_uri_schemes(config["stream"]["protocols"])
-        if UriScheme("file") in StreamBackend.uri_schemes and config["file"]["enabled"]:
+        uri_schemes = audio_lib.supported_uri_schemes(
+            config_dict["stream"]["protocols"]
+        )
+        if (
+            UriScheme("file") in StreamBackend.uri_schemes
+            and config_dict["file"]["enabled"]
+        ):
             logger.warning(
                 'The stream/protocols config value includes the "file" '
                 'protocol. "file" playback is now handled by Mopidy-File. '
@@ -108,7 +117,7 @@ def _unwrap_stream(  # noqa: PLR0911  # TODO: cleanup the return value of this.
     uri: Uri,
     timeout: float,
     scanner: scan.Scanner,
-    requests_session,
+    requests_session: requests.Session,
 ) -> tuple[Uri | None, scan._Result | None]:
     """Get a stream URI from a playlist URI, ``uri``.
 

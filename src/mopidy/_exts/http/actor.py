@@ -6,7 +6,7 @@ import secrets
 import socket
 import textwrap
 import threading
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 import pykka
 import tornado.httpserver
@@ -38,6 +38,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
     apps: ClassVar[list[HttpApp]] = []
     statics: ClassVar[list[HttpStatic]] = []
 
+    @override
     def __init__(self, config: Config, core: CoreProxy) -> None:
         super().__init__()
 
@@ -65,6 +66,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         self.zeroconf_http = None
         self.zeroconf_mopidy_http = None
 
+    @override
     def on_start(self) -> None:
         logger.info("HTTP server running at [%s]:%s", self.hostname, self.port)
         self.server.start()
@@ -83,6 +85,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
             self.zeroconf_http.publish()
             self.zeroconf_mopidy_http.publish()
 
+    @override
     def on_stop(self) -> None:
         if self.zeroconf_http:
             self.zeroconf_http.unpublish()
@@ -91,7 +94,12 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
 
         self.server.stop()
 
-    def on_event(self, event: CoreEvent, **data: CoreEventData) -> None:
+    @override
+    def on_event(
+        self,
+        event: CoreEvent,
+        **data: CoreEventData,
+    ) -> None:
         assert self.server.io_loop
         on_event(event, self.server.io_loop, **data)
 

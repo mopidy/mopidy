@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from typing import override
 
 import mopidy
 from mopidy import config, ext
@@ -24,7 +25,8 @@ class Extension(ext.Extension):
         schema["metadata_timeout"] = config.Integer(optional=True)
         return schema
 
-    def setup(self, registry) -> None:
+    @override
+    def setup(self, registry: ext.Registry) -> None:
         from .backend import FileBackend  # noqa: PLC0415
 
         registry.add("backend", FileBackend)

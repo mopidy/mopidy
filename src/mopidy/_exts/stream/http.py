@@ -29,7 +29,12 @@ def get_requests_session(
     return session
 
 
-def download(session, uri, timeout=1.0, chunk_size=4096):
+def download(
+    session: requests.Session,
+    uri: str,
+    timeout: float = 1.0,
+    chunk_size: int = 4096,
+) -> bytes | None:
     try:
         response = session.get(uri, stream=True, timeout=timeout)
     except requests.exceptions.Timeout:

@@ -192,13 +192,16 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
         raise
 
 
-def create_core_dirs(config):
+def create_core_dirs(config: config_lib.Config) -> None:
     paths.get_or_create_dir(config["core"]["cache_dir"])
     paths.get_or_create_dir(config["core"]["config_dir"])
     paths.get_or_create_dir(config["core"]["data_dir"])
 
 
-def create_initial_config_file(config_files, extensions_data):
+def create_initial_config_file(
+    config_files: list[Path],
+    extensions_data: list[ext.ExtensionData],
+) -> None:
     """Initialize whatever the last config file is with defaults."""
     config_file = paths.expand_path(config_files[-1])
 
@@ -219,7 +222,10 @@ def create_initial_config_file(config_files, extensions_data):
         )
 
 
-def log_extension_info(all_extensions, enabled_extensions):
+def log_extension_info(
+    all_extensions: list[ext.Extension],
+    enabled_extensions: list[ext.Extension],
+) -> None:
     # TODO: distinguish disabled vs blocked by env?
     enabled_names = {e.ext_name for e in enabled_extensions}
     disabled_names = {e.ext_name for e in all_extensions} - enabled_names

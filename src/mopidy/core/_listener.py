@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Any, Literal, override
 
 from mopidy import listener
 from mopidy.models import Playlist, TlTrack
@@ -45,7 +45,12 @@ class CoreListener(listener.Listener):
         """Helper to allow calling of core listener events."""
         listener.send(CoreListener, event, **kwargs)
 
-    def on_event(self, event: CoreEvent, **kwargs: CoreEventData) -> None:
+    @override
+    def on_event(
+        self,
+        event: CoreEvent,
+        **kwargs: CoreEventData,
+    ) -> None:
         """Called on all events.
 
         *MAY* be implemented by actor. By default, this method forwards the

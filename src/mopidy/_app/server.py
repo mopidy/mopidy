@@ -82,7 +82,7 @@ class ServerCommand(Command):
         *_args: Any,
         **_kwargs: Any,
     ) -> int:
-        def on_sigterm(loop) -> bool:
+        def on_sigterm(loop: GLib.MainLoop) -> bool:
             logger.info("GLib mainloop got SIGTERM. Exiting...")
             loop.quit()
             return GLib.SOURCE_REMOVE
@@ -196,7 +196,7 @@ class ServerCommand(Command):
         self,
         config: config_lib.Config,
         backend_classes: list[type[BackendActor]],
-        audio,
+        audio: AudioProxy,
     ) -> list[BackendProxy]:
         logger.info(
             "Starting Mopidy backends: %s",
@@ -291,7 +291,7 @@ class ServerCommand(Command):
 
 
 @contextlib.contextmanager
-def _actor_error_handling(name) -> Generator[None]:
+def _actor_error_handling(name: str) -> Generator[None]:
     try:
         yield
     except exceptions.BackendError as exc:
