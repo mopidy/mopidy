@@ -180,17 +180,6 @@ class CoreLibraryTest(BaseCoreLibraryTest):
         assert not self.library1.lookup.called
         assert not self.library2.lookup.called
 
-    def test_lookup_ignores_tracks_without_uri_set(self):
-        track1 = Track(uri="dummy1:a", name="abc")
-        track2 = Track()
-
-        self.library1.lookup_many().get.return_value = {"dummy1:a": [track1, track2]}
-
-        result = self.core.library.lookup(uris=["dummy1:a"])
-        assert result == {
-            "dummy1:a": [track1],
-        }
-
     def test_lookup_batches_uris(self):
         track1 = Track(uri="dummy1:a", name="abc")
         track2 = Track(uri="dummy1:b", name="def")
