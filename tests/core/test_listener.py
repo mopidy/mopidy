@@ -2,14 +2,15 @@ import unittest
 from unittest import mock
 
 from mopidy.core import CoreListener
-from mopidy.models import Playlist, TlTrack, Track
-from mopidy.types import PlaybackState
+from mopidy.models import TlTrack
+from mopidy.types import PlaybackState, Uri
+from tests.factories import PlaylistFactory, TrackFactory
 
 
 class CoreListenerTest(unittest.TestCase):
     def setUp(self):
         self.listener = CoreListener()
-        self.tl_track = TlTrack(tlid=1, track=Track())
+        self.tl_track = TlTrack(tlid=1, track=TrackFactory.build())
 
     def test_on_event_forwards_to_specific_handler(self):
         self.listener.track_playback_paused = mock.Mock()
@@ -46,10 +47,10 @@ class CoreListenerTest(unittest.TestCase):
         self.listener.playlists_loaded()
 
     def test_listener_has_default_impl_for_playlist_changed(self):
-        self.listener.playlist_changed(Playlist())
+        self.listener.playlist_changed(PlaylistFactory.build())
 
     def test_listener_has_default_impl_for_playlist_deleted(self):
-        self.listener.playlist_deleted(Playlist())
+        self.listener.playlist_deleted(Uri("dummy:playlist"))
 
     def test_listener_has_default_impl_for_options_changed(self):
         self.listener.options_changed()
