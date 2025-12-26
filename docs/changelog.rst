@@ -116,6 +116,9 @@ Models
 
 Changes to the data models may affect any Mopidy extension or client.
 
+- The ``Track`` and ``Playlist`` models now requires the ``uri`` field to always
+  be set. (Fixes: :issue:`2190`, PR: :issue:`2229`)
+
 - The models are now based on Pydantic data classes, which means:
 
   - All models fields and the ``replace()`` method should work as before, so

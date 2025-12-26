@@ -18,7 +18,7 @@ class Playlist(BaseModel):
     )
 
     #: The playlist URI. Read-only.
-    uri: Uri | None = None
+    uri: Uri
 
     #: The playlist name. Read-only.
     name: str | None = None
