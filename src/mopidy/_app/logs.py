@@ -53,6 +53,7 @@ def bootstrap_delayed_logging() -> None:
 
 
 def setup_logging(
+    *,
     config: Config,
     base_verbosity_level: int,
     args_verbosity_level: int,

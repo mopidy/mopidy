@@ -1,6 +1,6 @@
 import pytest
 
-from mopidy._app.logging import LOG_LEVELS, get_verbosity_level
+from mopidy._app.logs import LOG_LEVELS, get_verbosity_level
 
 
 @pytest.fixture

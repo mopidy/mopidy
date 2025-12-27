@@ -15,6 +15,8 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
+    "cyclopts >= 3.12",
+    "platformdirs >= 4.3",
     "pydantic >= 2.10",
     "pygobject >= 3.50",
     "pykka >= 4.1",
@@ -31,7 +33,7 @@ Source = "https://github.com/mopidy/mopidy"
 Issues = "https://github.com/mopidy/mopidy/issues"
 
 [project.scripts]
-mopidy = "mopidy._app.main:main"
+mopidy = "mopidy._app.cli:app.meta"
 
 [project.entry-points."mopidy.ext"]
 file = "mopidy._exts.file:Extension"
@@ -71,7 +73,7 @@ tests = [
 typing = [
     "pygobject-stubs >= 2.14.0, != 2.15.0",
     "pyright == 1.1.407",
-    "ty == 0.0.5",
+    "ty == 0.0.8",
     "types-requests >= 2.32",
 ]
 
