@@ -7,7 +7,7 @@ from mopidy.models._base import BaseModel
 from mopidy.types import Uri
 
 
-class RefType(enum.StrEnum):
+class ModelType(enum.StrEnum):
     ALBUM = "album"
     ARTIST = "artist"
     DIRECTORY = "directory"
@@ -39,37 +39,37 @@ class Ref(BaseModel):
 
     #: The object type, e.g. "artist", "album", "track", "playlist",
     #: "directory". Read-only.
-    type: RefType
+    type: ModelType
 
-    # For backwards compatibility with Mopidy < 4, we define the `RefType` enum
-    # values as class variables.
-    ALBUM: ClassVar[Literal[RefType.ALBUM]] = RefType.ALBUM
-    ARTIST: ClassVar[Literal[RefType.ARTIST]] = RefType.ARTIST
-    DIRECTORY: ClassVar[Literal[RefType.DIRECTORY]] = RefType.DIRECTORY
-    PLAYLIST: ClassVar[Literal[RefType.PLAYLIST]] = RefType.PLAYLIST
-    TRACK: ClassVar[Literal[RefType.TRACK]] = RefType.TRACK
+    # For backwards compatibility with Mopidy < 4, we define the `ModelType`
+    # enum values as class variables.
+    ALBUM: ClassVar[Literal[ModelType.ALBUM]] = ModelType.ALBUM
+    ARTIST: ClassVar[Literal[ModelType.ARTIST]] = ModelType.ARTIST
+    DIRECTORY: ClassVar[Literal[ModelType.DIRECTORY]] = ModelType.DIRECTORY
+    PLAYLIST: ClassVar[Literal[ModelType.PLAYLIST]] = ModelType.PLAYLIST
+    TRACK: ClassVar[Literal[ModelType.TRACK]] = ModelType.TRACK
 
     @classmethod
     def album(cls, *, uri: Uri, name: str | None = None) -> Self:
-        """Create a :class:`Ref` with ``type`` :attr:`~RefType.ALBUM`."""
-        return cls(uri=uri, name=name, type=RefType.ALBUM)
+        """Create a :class:`Ref` with ``type`` :attr:`~ModelType.ALBUM`."""
+        return cls(uri=uri, name=name, type=ModelType.ALBUM)
 
     @classmethod
     def artist(cls, *, uri: Uri, name: str | None = None) -> Self:
-        """Create a :class:`Ref` with ``type`` :attr:`~RefType.ARTIST`."""
-        return cls(uri=uri, name=name, type=RefType.ARTIST)
+        """Create a :class:`Ref` with ``type`` :attr:`~ModelType.ARTIST`."""
+        return cls(uri=uri, name=name, type=ModelType.ARTIST)
 
     @classmethod
     def directory(cls, *, uri: Uri, name: str | None = None) -> Self:
-        """Create a :class:`Ref` with ``type`` :attr:`~RefType.DIRECTORY`."""
-        return cls(uri=uri, name=name, type=RefType.DIRECTORY)
+        """Create a :class:`Ref` with ``type`` :attr:`~ModelType.DIRECTORY`."""
+        return cls(uri=uri, name=name, type=ModelType.DIRECTORY)
 
     @classmethod
     def playlist(cls, *, uri: Uri, name: str | None = None) -> Self:
-        """Create a :class:`Ref` with ``type`` :attr:`~RefType.PLAYLIST`."""
-        return cls(uri=uri, name=name, type=RefType.PLAYLIST)
+        """Create a :class:`Ref` with ``type`` :attr:`~ModelType.PLAYLIST`."""
+        return cls(uri=uri, name=name, type=ModelType.PLAYLIST)
 
     @classmethod
     def track(cls, *, uri: Uri, name: str | None = None) -> Self:
-        """Create a :class:`Ref` with ``type`` :attr:`~RefType.TRACK`."""
-        return cls(uri=uri, name=name, type=RefType.TRACK)
+        """Create a :class:`Ref` with ``type`` :attr:`~ModelType.TRACK`."""
+        return cls(uri=uri, name=name, type=ModelType.TRACK)

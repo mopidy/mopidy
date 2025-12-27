@@ -6,9 +6,9 @@ from mopidy.models import (
     Album,
     Artist,
     Image,
+    ModelType,
     Playlist,
     Ref,
-    RefType,
     SearchResult,
     TlTrack,
     Track,
@@ -112,14 +112,14 @@ class RefFactory(ModelFactory[Ref]):
     __set_as_default_factory_for_type__ = True
     __faker__ = faker
 
-    type = Use(faker.enum, RefType)
+    type = Use(faker.enum, ModelType)
     uri = PostGenerated(
         lambda field, values: faker.lexify(text=f"dummy:{values['type']}:????")
     )
     name = PostGenerated(
         lambda field, values: (
             faker.name()
-            if values["type"] == RefType.ARTIST
+            if values["type"] == ModelType.ARTIST
             else faker.sentence(nb_words=3)
         )
     )
