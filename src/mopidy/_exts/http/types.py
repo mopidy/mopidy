@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, Any, TypedDict
 import tornado.web
 
 if TYPE_CHECKING:
+    from mopidy.config import Config
     from mopidy.core import CoreProxy
-    from mopidy.ext import Config
 
 
 type RequestRule = tuple[str, type[tornado.web.RequestHandler], dict[str, Any]]

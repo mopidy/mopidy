@@ -22,8 +22,8 @@ if TYPE_CHECKING:
     from collections.abc import Awaitable
     from typing import ClassVar
 
+    from mopidy.config import Config
     from mopidy.core import CoreProxy
-    from mopidy.ext import Config
 
     from .types import HttpApp, HttpStatic, RequestRule
 

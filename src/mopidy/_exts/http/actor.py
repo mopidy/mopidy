@@ -22,8 +22,8 @@ from mopidy.core import CoreEvent, CoreEventData, CoreListener
 from . import Extension, handlers, network
 
 if TYPE_CHECKING:
+    from mopidy.config import Config
     from mopidy.core import CoreProxy
-    from mopidy.ext import Config
 
     from .types import HttpApp, HttpStatic, RequestRule
 

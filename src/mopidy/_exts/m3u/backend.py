@@ -11,7 +11,7 @@ from . import playlists
 
 if TYPE_CHECKING:
     from mopidy.audio import AudioProxy
-    from mopidy.ext import Config
+    from mopidy.config import Config
 
 
 class M3UBackend(pykka.ThreadingActor, backend.Backend):

@@ -19,7 +19,7 @@ from .types import M3UConfig
 
 if TYPE_CHECKING:
     from mopidy.backend import Backend
-    from mopidy.ext import Config
+    from mopidy.config import Config
     from mopidy.models import Playlist, Ref
     from mopidy.types import Uri
 
