@@ -11,6 +11,7 @@ from typing import Any, AnyStr, ClassVar, Literal, Self, cast, get_args
 
 from mopidy._lib import logs, paths
 from mopidy.config import validators
+from mopidy.config._types import LogColorName, LogLevelName
 
 
 def decode(value: bytes | str) -> str:
@@ -389,16 +390,6 @@ class List[V: ConfigValue = String](ConfigValue[tuple[V, ...] | frozenset[V]]):
         return "\n  " + "\n  ".join(serialized_values)
 
 
-LogColorName = Literal[
-    "black",
-    "red",
-    "green",
-    "yellow",
-    "blue",
-    "magenta",
-    "cyan",
-    "white",
-]
 _LOG_COLOR_NAMES = get_args(LogColorName)
 
 
@@ -413,17 +404,6 @@ class LogColor(ConfigValue[LogColorName]):
         if value.lower() in _LOG_COLOR_NAMES:
             return encode(value.lower())
         return ""
-
-
-LogLevelName = Literal[
-    "critical",
-    "error",
-    "warning",
-    "info",
-    "debug",
-    "trace",
-    "all",
-]
 
 
 class LogLevel(ConfigValue[int]):

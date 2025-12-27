@@ -17,7 +17,7 @@ from mopidy._lib.gi import (
     Gst,  # noqa: F401 (imported to test GStreamer presence)
 )
 
-from .config import ConfigCommand
+from .config import ConfigCommand, ConfigErrors, ReadOnlyDict, format_initial, load
 from .deps import DepsCommand
 from .extensions import load_extensions, validate_extension_data
 from .logging import bootstrap_delayed_logging, setup_logging
@@ -76,7 +76,7 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
             Path(f) for f in args.config_files or []
         ] or default_config_files
 
-        config, config_errors = config_lib.load(
+        config, config_errors = load(
             config_files,
             [d.config_schema for d in extensions_data],
             [d.config_defaults for d in extensions_data],
@@ -148,7 +148,7 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
             sys.exit(1)
 
         # Read-only config from here on, please.
-        proxied_config = cast(config_lib.Config, config_lib.Proxy(config))
+        proxied_config = cast(config_lib.Config, ReadOnlyDict(config))
 
         if args.extension and args.extension not in extensions_status["enabled"]:
             logger.error(
@@ -206,7 +206,7 @@ def create_initial_config_file(
         return
 
     try:
-        default = config_lib.format_initial(extensions_data)
+        default = format_initial(extensions_data)
         paths.get_or_create_file(
             config_file,
             mkdir=False,
@@ -231,7 +231,7 @@ def log_extension_info(
 
 
 def check_config_errors(
-    errors: config_lib.ConfigErrors,
+    errors: ConfigErrors,
     extensions_status: ExtensionsStatus,
 ) -> None:
     fatal_errors = []

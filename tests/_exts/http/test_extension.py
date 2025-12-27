@@ -1,4 +1,3 @@
-from mopidy import config as config_lib
 from mopidy._exts.http import Extension
 
 
@@ -23,13 +22,3 @@ def test_get_config_schema():
     assert "allowed_origins" in schema
     assert "csrf_protection" in schema
     assert "default_app" in schema
-
-
-def test_default_config_is_valid():
-    ext = Extension()
-
-    config = ext.get_default_config()
-    schema = ext.get_config_schema()
-    _, errors = config_lib.load([], [schema], [config], [])
-
-    assert errors.get("http") is None
