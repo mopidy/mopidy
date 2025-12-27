@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import pathlib
 from collections.abc import Iterator, Mapping
-from typing import Any, Literal, TypedDict, overload, override
+from contextvars import ContextVar
+from typing import Any, ClassVar, Literal, TypedDict, overload, override
 
 LogColorName = Literal[
     "black",
@@ -26,6 +27,22 @@ LogLevelName = Literal[
 
 
 class Config(Mapping):
+    _instance: ClassVar[ContextVar[Config | None]] = ContextVar("Config", default=None)
+
+    @classmethod
+    def get_global(cls) -> Config:
+        if (instance := cls._instance.get()) is None:
+            msg = f"{cls} not set in context"
+            raise RuntimeError(msg)
+        return instance
+
+    @classmethod
+    def set_global(cls, instance: Config) -> None:
+        if cls._instance.get() is not None:
+            msg = f"{cls} already set in context"
+            raise RuntimeError(msg)
+        cls._instance.set(instance)
+
     def __init__(self, data: dict[str, dict[str, Any]]) -> None:
         self._data = data
 
