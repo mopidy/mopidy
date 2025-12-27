@@ -6,7 +6,7 @@ import secrets
 import socket
 import textwrap
 import threading
-from typing import TYPE_CHECKING, ClassVar, override
+from typing import TYPE_CHECKING, ClassVar, cast, override
 
 import pykka
 import tornado.httpserver
@@ -17,9 +17,11 @@ import tornado.websocket
 from pydantic import TypeAdapter
 
 from mopidy import exceptions, zeroconf
+from mopidy.config import ConfigDict
 from mopidy.core import CoreEvent, CoreEventData, CoreListener
 
 from . import Extension, handlers, network
+from .types import HttpConfig
 
 if TYPE_CHECKING:
     from mopidy.config import Config
@@ -42,9 +44,11 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
     def __init__(self, config: Config, core: CoreProxy) -> None:
         super().__init__()
 
-        self.hostname = network.format_hostname(config["http"]["hostname"])
-        self.port = config["http"]["port"]
-        tornado_hostname = config["http"]["hostname"]
+        config_dict = cast(ConfigDict, config)
+        http_config = cast(HttpConfig, config_dict[Extension.ext_name])
+        self.hostname = network.format_hostname(http_config["hostname"])
+        self.port = http_config["port"]
+        tornado_hostname = http_config["hostname"]
         if tornado_hostname == "::":
             tornado_hostname = None
 
@@ -62,7 +66,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
             msg = "HTTP server startup failed."
             raise exceptions.FrontendError(msg) from exc
 
-        self.zeroconf_name = config["http"]["zeroconf"]
+        self.zeroconf_name = http_config["zeroconf"]
         self.zeroconf_http = None
         self.zeroconf_mopidy_http = None
 
@@ -212,7 +216,9 @@ class HttpServer(threading.Thread):
     def _get_default_request_handlers(self) -> list[RequestRule]:
         sites = [app["name"] for app in self.apps + self.statics]
 
-        default_app = self.config["http"]["default_app"]
+        config_dict = cast(ConfigDict, self.config)
+        http_config = cast(HttpConfig, config_dict[Extension.ext_name])
+        default_app = http_config["default_app"]
         if default_app not in sites:
             logger.warning(f"HTTP server's default app {default_app!r} not found")
             default_app = "mopidy"

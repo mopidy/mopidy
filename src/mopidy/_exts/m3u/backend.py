@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, override
 
 import pykka
 
@@ -17,10 +17,7 @@ if TYPE_CHECKING:
 class M3UBackend(pykka.ThreadingActor, backend.Backend):
     uri_schemes: ClassVar[list[UriScheme]] = [UriScheme("m3u")]
 
-    def __init__(
-        self,
-        config: Config,
-        audio: AudioProxy,  # noqa: ARG002
-    ) -> None:
+    @override
+    def __init__(self, config: Config, audio: AudioProxy) -> None:
         super().__init__()
         self.playlists = playlists.M3UPlaylistsProvider(self, config)

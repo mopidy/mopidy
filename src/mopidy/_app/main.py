@@ -4,7 +4,7 @@ import logging
 import signal
 import sys
 from pathlib import Path
-from typing import TypedDict, cast
+from typing import TYPE_CHECKING, cast
 
 import pykka.debug
 
@@ -19,8 +19,12 @@ from mopidy._lib.gi import (
 
 from .config import ConfigCommand
 from .deps import DepsCommand
+from .extensions import load_extensions, validate_extension_data
 from .logging import bootstrap_delayed_logging, setup_logging
 from .server import ServerCommand
+
+if TYPE_CHECKING:
+    from .extensions import ExtensionData, ExtensionsStatus
 
 try:
     # Make GLib's mainloop the event loop for python-dbus
@@ -33,13 +37,6 @@ except ImportError:
 
 
 logger = logging.getLogger(__name__)
-
-
-class ExtensionsStatus(TypedDict):
-    validate: list[ext.Extension]
-    config: list[ext.Extension]
-    disabled: list[ext.Extension]
-    enabled: list[ext.Extension]
 
 
 def main() -> int:  # noqa: C901, PLR0912, PLR0915
@@ -62,7 +59,7 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
         server_cmd.add_child("config", config_cmd)
         server_cmd.add_child("deps", deps_cmd)
 
-        extensions_data = ext.load_extensions()
+        extensions_data = load_extensions()
 
         for data in extensions_data:
             if data.command:  # TODO: check isinstance?
@@ -104,7 +101,7 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
             config_dict = cast(config_lib.ConfigDict, config)
 
             # TODO: factor out all of this to a helper that can be tested
-            if not ext.validate_extension_data(data):
+            if not validate_extension_data(data):
                 config_dict[extension.ext_name] = {"enabled": False}
                 config_errors[extension.ext_name] = {
                     "enabled": "extension disabled by self check.",
@@ -200,7 +197,7 @@ def create_core_dirs(config: config_lib.Config) -> None:
 
 def create_initial_config_file(
     config_files: list[Path],
-    extensions_data: list[ext.ExtensionData],
+    extensions_data: list[ExtensionData],
 ) -> None:
     """Initialize whatever the last config file is with defaults."""
     config_file = paths.expand_path(config_files[-1])

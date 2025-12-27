@@ -12,6 +12,7 @@ from typing import IO, TYPE_CHECKING, Any, cast
 
 from mopidy import backend
 from mopidy._lib import paths
+from mopidy.config import ConfigDict
 from mopidy.exceptions import BackendError
 
 from . import Extension, translator
@@ -65,7 +66,8 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
     def __init__(self, backend: Backend, config: Config) -> None:
         super().__init__(backend)
 
-        ext_config = cast(M3UConfig, config[Extension.ext_name])
+        config_dict = cast(ConfigDict, config)
+        ext_config = cast(M3UConfig, config_dict[Extension.ext_name])
 
         self._playlists_dir = (
             paths.expand_path(ext_config["playlists_dir"])
