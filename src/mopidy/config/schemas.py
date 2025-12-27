@@ -37,7 +37,7 @@ def _levenshtein(a: str, b: str) -> int:
     return current[n]
 
 
-class ConfigSchema(collections.OrderedDict):
+class ConfigSchema(collections.UserDict):
     """Logical group of config values that correspond to a config section.
 
     Schemas are set up by assigning config keys with config values to
@@ -48,8 +48,12 @@ class ConfigSchema(collections.OrderedDict):
     persistence.
     """
 
-    def __init__(self, name: str) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        name: str,
+        data: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(data or {})
         self.name = name
 
     def deserialize(
