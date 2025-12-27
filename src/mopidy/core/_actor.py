@@ -14,7 +14,7 @@ from pykka.typing import ActorMemberMixin, proxy_method
 import mopidy
 from mopidy import audio, backend, mixer
 from mopidy._lib import paths
-from mopidy.types import PlaybackState
+from mopidy.types import PlaybackState, UriScheme
 
 from ._history import HistoryController
 from ._library import LibraryController
@@ -93,7 +93,7 @@ class Core(
 
         self.audio = audio
 
-    def get_uri_schemes(self) -> list[backend.UriScheme]:
+    def get_uri_schemes(self) -> list[UriScheme]:
         """Get list of URI schemes we can handle."""
         futures = [b.uri_schemes for b in self.backends]
         results = pykka.get_all(futures)
@@ -265,12 +265,12 @@ class Backends(list):
     def __init__(self, backends: Iterable[backend.BackendProxy]) -> None:
         super().__init__(backends)
 
-        self.with_library: dict[backend.UriScheme, backend.BackendProxy] = {}
-        self.with_library_browse: dict[backend.UriScheme, backend.BackendProxy] = {}
-        self.with_playback: dict[backend.UriScheme, backend.BackendProxy] = {}
-        self.with_playlists: dict[backend.UriScheme, backend.BackendProxy] = {}
+        self.with_library: dict[UriScheme, backend.BackendProxy] = {}
+        self.with_library_browse: dict[UriScheme, backend.BackendProxy] = {}
+        self.with_playback: dict[UriScheme, backend.BackendProxy] = {}
+        self.with_playlists: dict[UriScheme, backend.BackendProxy] = {}
 
-        backends_by_scheme: dict[backend.UriScheme, backend.BackendProxy] = {}
+        backends_by_scheme: dict[UriScheme, backend.BackendProxy] = {}
 
         def name(backend_proxy: backend.BackendProxy) -> str:
             return backend_proxy.actor_ref.actor_class.__name__

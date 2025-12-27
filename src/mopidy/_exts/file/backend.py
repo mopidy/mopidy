@@ -1,5 +1,5 @@
 import logging
-from typing import ClassVar
+from typing import ClassVar, override
 
 import pykka
 
@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 class FileBackend(pykka.ThreadingActor, backend.Backend):
     uri_schemes: ClassVar[list[UriScheme]] = [UriScheme("file")]
 
+    @override
     def __init__(self, config: Config, audio: AudioProxy) -> None:
         super().__init__()
         self.library = library.FileLibraryProvider(backend=self, config=config)
