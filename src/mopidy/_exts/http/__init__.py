@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class Extension(ext.Extension):
-    dist_name = "Mopidy-HTTP"
+    dist_name = "mopidy-http"
     ext_name = "http"
     version = mopidy.__version__
 
