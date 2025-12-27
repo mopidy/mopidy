@@ -8,7 +8,8 @@ from mopidy._lib import paths
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from mopidy.commands import Command
+    import cyclopts
+
     from mopidy.config import ConfigSchema
 
     from ._registry import Registry
@@ -101,11 +102,20 @@ class Extension:
         paths.get_or_create_dir(data_dir_path)
         return data_dir_path
 
-    def get_command(self) -> Command | None:
+    def get_command(self) -> cyclopts.App | None:
         """Command to expose to command line users running ``mopidy``.
 
-        :returns:
-          Instance of a :class:`~mopidy.commands.Command` class.
+        This method should return a `cyclopts.App` instance. The app
+        will be mounted as the ``mopidy <ext_name>`` command. It can have
+        subcommands on its own, e.g. ``mopidy local scan``. Please refer to the
+        cyclopts docs for details on how to implement this.
+
+        .. note::
+
+            In Mopidy < 4.0, this method returned a custom ``Command`` class,
+            which is no longer supported.
+
+        :returns: cyclopts.App
         """
 
     def validate_environment(self) -> None:

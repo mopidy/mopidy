@@ -64,6 +64,7 @@ docs = [
 ]
 ruff = ["ruff == 0.14.6"]
 tests = [
+    "dirty-equals >= 0.9",
     "polyfactory >= 3.1",
     "pytest >= 8.3",
     "pytest-cov >= 5.0",
