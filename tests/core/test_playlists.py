@@ -3,19 +3,49 @@ from unittest import mock
 
 from mopidy import backend, core
 from mopidy.models import Playlist, Ref, Track
+from mopidy.types import Uri
+from tests.factories import PlaylistFactory
 
 
 class BasePlaylistsTest(unittest.TestCase):
     def setUp(self):
-        self.plr1a = Ref.playlist(name="A", uri="dummy1:pl:a")
-        self.plr1b = Ref.playlist(name="B", uri="dummy1:pl:b")
-        self.plr2a = Ref.playlist(name="A", uri="dummy2:pl:a")
-        self.plr2b = Ref.playlist(name="B", uri="dummy2:pl:b")
+        self.plr1a = Ref.playlist(
+            uri=Uri("dummy1:pl:a"),
+            name="A",
+        )
+        self.plr1b = Ref.playlist(
+            uri=Uri("dummy1:pl:b"),
+            name="B",
+        )
+        self.plr2a = Ref.playlist(
+            uri=Uri("dummy2:pl:a"),
+            name="A",
+        )
+        self.plr2b = Ref.playlist(
+            uri=Uri("dummy2:pl:b"),
+            name="B",
+        )
 
-        self.pl1a = Playlist(name="A", tracks=[Track(uri="dummy1:t:a")])
-        self.pl1b = Playlist(name="B", tracks=[Track(uri="dummy1:t:b")])
-        self.pl2a = Playlist(name="A", tracks=[Track(uri="dummy2:t:a")])
-        self.pl2b = Playlist(name="B", tracks=[Track(uri="dummy2:t:b")])
+        self.pl1a = Playlist(
+            uri=Uri("dummy1:pl:a"),
+            name="A",
+            tracks=[Track(uri="dummy1:t:a")],
+        )
+        self.pl1b = Playlist(
+            uri=Uri("dummy1:pl:b"),
+            name="B",
+            tracks=[Track(uri="dummy1:t:b")],
+        )
+        self.pl2a = Playlist(
+            uri=Uri("dummy2:pl:a"),
+            name="A",
+            tracks=[Track(uri="dummy2:t:a")],
+        )
+        self.pl2b = Playlist(
+            uri=Uri("dummy2:pl:b"),
+            name="B",
+            tracks=[Track(uri="dummy2:t:b")],
+        )
 
         self.sp1 = mock.Mock(spec=backend.PlaylistsProvider)
         self.sp1.as_list.return_value.get.return_value = [
@@ -90,7 +120,7 @@ class PlaylistTest(BasePlaylistsTest):
         assert not self.sp2.delete.called
 
     def test_create_without_uri_scheme_uses_first_backend(self):
-        playlist = Playlist()
+        playlist = PlaylistFactory.build()
         self.sp1.create.return_value.get.return_value = playlist
 
         result = self.core.playlists.create("foo")
@@ -100,7 +130,7 @@ class PlaylistTest(BasePlaylistsTest):
         assert not self.sp2.create.called
 
     def test_create_without_uri_scheme_ignores_none_result(self):
-        playlist = Playlist()
+        playlist = PlaylistFactory.build()
         self.sp1.create.return_value.get.return_value = None
         self.sp2.create.return_value.get.return_value = playlist
 
@@ -111,7 +141,7 @@ class PlaylistTest(BasePlaylistsTest):
         self.sp2.create.assert_called_once_with("foo")
 
     def test_create_without_uri_scheme_ignores_exception(self):
-        playlist = Playlist()
+        playlist = PlaylistFactory.build()
         self.sp1.create.return_value.get.side_effect = Exception
         self.sp2.create.return_value.get.return_value = playlist
 
@@ -122,7 +152,7 @@ class PlaylistTest(BasePlaylistsTest):
         self.sp2.create.assert_called_once_with("foo")
 
     def test_create_with_uri_scheme_selects_the_matching_backend(self):
-        playlist = Playlist()
+        playlist = PlaylistFactory.build()
         self.sp2.create.return_value.get.return_value = playlist
 
         result = self.core.playlists.create("foo", uri_scheme="dummy2")
@@ -132,7 +162,7 @@ class PlaylistTest(BasePlaylistsTest):
         self.sp2.create.assert_called_once_with("foo")
 
     def test_create_with_unsupported_uri_scheme_uses_first_backend(self):
-        playlist = Playlist()
+        playlist = PlaylistFactory.build()
         self.sp1.create.return_value.get.return_value = playlist
 
         result = self.core.playlists.create("foo", uri_scheme="dummy3")
@@ -223,7 +253,7 @@ class PlaylistTest(BasePlaylistsTest):
         assert not self.sp2.save.called
 
     def test_save_selects_the_dummy2_backend(self):
-        playlist = Playlist(uri="dummy2:a")
+        playlist = PlaylistFactory.build(uri="dummy2:a")
         self.sp2.save.return_value.get.return_value = playlist
 
         result = self.core.playlists.save(playlist)
@@ -233,21 +263,21 @@ class PlaylistTest(BasePlaylistsTest):
         self.sp2.save.assert_called_once_with(playlist)
 
     def test_save_does_nothing_if_playlist_uri_is_unset(self):
-        result = self.core.playlists.save(Playlist())
+        result = self.core.playlists.save(PlaylistFactory.build())
 
         assert result is None
         assert not self.sp1.save.called
         assert not self.sp2.save.called
 
     def test_save_does_nothing_if_playlist_uri_has_unknown_scheme(self):
-        result = self.core.playlists.save(Playlist(uri="foobar:a"))
+        result = self.core.playlists.save(PlaylistFactory.build(uri="foobar:a"))
 
         assert result is None
         assert not self.sp1.save.called
         assert not self.sp2.save.called
 
     def test_save_ignores_backend_without_playlist_support(self):
-        result = self.core.playlists.save(Playlist(uri="dummy3:a"))
+        result = self.core.playlists.save(PlaylistFactory.build(uri="dummy3:a"))
 
         assert result is None
         assert not self.sp1.save.called

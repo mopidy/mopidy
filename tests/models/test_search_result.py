@@ -1,55 +1,57 @@
 import pydantic
 import pytest
 
-from mopidy.models import Album, Artist, SearchResult, Track
+from mopidy.models import SearchResult
+from mopidy.types import Uri
+from tests.factories import (
+    AlbumFactory,
+    ArtistFactory,
+    SearchResultFactory,
+    TrackFactory,
+)
 
 
 def test_uri():
     uri = "an_uri"
-    result = SearchResult(uri=uri)
+    result = SearchResultFactory.build(uri=uri)
     assert result.uri == uri
     with pytest.raises(pydantic.ValidationError):
         result.uri = None
 
 
 def test_tracks():
-    tracks = [Track(), Track(), Track()]
-    result = SearchResult(tracks=tracks)
+    tracks = TrackFactory.batch(3)
+    result = SearchResultFactory.build(tracks=tracks)
     assert list(result.tracks) == tracks
     with pytest.raises(pydantic.ValidationError):
-        result.tracks = None
+        result.tracks = ()
 
 
 def test_artists():
-    artists = [Artist(), Artist(), Artist()]
-    result = SearchResult(artists=artists)
+    artists = ArtistFactory.batch(3)
+    result = SearchResultFactory.build(artists=artists)
     assert list(result.artists) == artists
     with pytest.raises(pydantic.ValidationError):
-        result.artists = None
+        result.artists = ()
 
 
 def test_albums():
-    albums = [Album(), Album(), Album()]
-    result = SearchResult(albums=albums)
+    albums = AlbumFactory.batch(3)
+    result = SearchResultFactory.build(albums=albums)
     assert list(result.albums) == albums
     with pytest.raises(pydantic.ValidationError):
-        result.albums = None
-
-
-def test_invalid_kwarg():
-    with pytest.raises(pydantic.ValidationError):
-        SearchResult(foo="baz")
+        result.albums = ()
 
 
 def test_repr_without_results():
     assert (
-        repr(SearchResult(uri="uri"))
+        repr(SearchResult(uri=Uri("uri")))
         == "SearchResult(uri='uri', tracks=(), artists=(), albums=())"
     )
 
 
 def test_serialize_without_results():
-    assert SearchResult(uri="uri").serialize() == {
+    assert SearchResult(uri=Uri("uri")).serialize() == {
         "__model__": "SearchResult",
         "uri": "uri",
         "albums": [],

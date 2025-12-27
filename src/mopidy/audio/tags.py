@@ -7,6 +7,7 @@ from typing import Any
 from mopidy._lib import logs
 from mopidy._lib.gi import GLib, Gst
 from mopidy.models import Album, Artist, Track
+from mopidy.types import DurationMs, Uri
 
 logger = logging.getLogger(__name__)
 
@@ -125,7 +126,13 @@ def _extract_buffer_data(buf: Gst.Buffer) -> bytes | None:
 
 # TODO: split based on "stream" and "track" based conversion? i.e. handle data
 # from radios in it's own helper instead?
-def convert_tags_to_track(tags: dict[str, Any]) -> Track:
+def convert_tags_to_track(
+    tags: dict[str, Any],
+    *,
+    uri: Uri,
+    length: DurationMs | None = None,
+    last_modified: int | None = None,
+) -> Track:
     """Convert our normalized tags to a track.
 
     :param  tags: dictionary of tag keys with a list of values
@@ -185,7 +192,12 @@ def convert_tags_to_track(tags: dict[str, Any]) -> Track:
     if album_kwargs.get("name"):
         track_kwargs["album"] = Album(**album_kwargs)
 
-    return Track(**track_kwargs)
+    return Track(
+        **track_kwargs,
+        uri=uri,
+        length=length,
+        last_modified=last_modified,
+    )
 
 
 def _artists(

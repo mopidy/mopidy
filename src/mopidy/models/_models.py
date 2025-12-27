@@ -93,7 +93,7 @@ class Track(BaseModel):
     )
 
     #: The track URI. Read-only.
-    uri: Uri | None = None
+    uri: Uri
 
     #: The track name. Read-only.
     name: str | None = None

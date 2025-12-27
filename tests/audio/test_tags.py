@@ -3,6 +3,7 @@ import unittest
 from mopidy._lib.gi import GLib, GObject, Gst
 from mopidy.audio import tags
 from mopidy.models import Album, Artist, Track
+from mopidy.types import DurationMs, Uri
 
 
 class TestReprTags:
@@ -141,22 +142,28 @@ class TagsToTrackTest(unittest.TestCase):
         )
 
         self.track = Track(
+            uri=Uri("dummy:track:test"),
             name="track",
-            date="2006-01-01",
+            artists=[artist],
+            album=album,
+            composers=[composer],
+            performers=[performer],
             genre="genre",
             track_no=1,
             disc_no=2,
+            length=DurationMs(12345),
+            date="2006-01-01",
+            bitrate=1000,
             comment="comment",
             musicbrainz_id="a69ac038-02cc-4b2c-8bd2-9ac386faec19",
-            album=album,
-            bitrate=1000,
-            artists=[artist],
-            composers=[composer],
-            performers=[performer],
         )
 
     def check(self, expected):
-        actual = tags.convert_tags_to_track(self.tags)
+        actual = tags.convert_tags_to_track(
+            self.tags,
+            uri=Uri("dummy:track:test"),
+            length=12345,
+        )
         assert expected == actual
 
     def test_track(self):

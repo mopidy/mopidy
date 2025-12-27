@@ -82,7 +82,8 @@ class StreamLibraryProvider(backend.LibraryProvider):
         )
 
         if scan_result:
-            track = tags.convert_tags_to_track(scan_result.tags).replace(
+            track = tags.convert_tags_to_track(
+                scan_result.tags,
                 uri=uri,
                 length=scan_result.duration,
             )
