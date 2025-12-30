@@ -114,7 +114,7 @@ class TestTranslateURI:
         assert (
             responses.calls[0]
             .request.headers["User-Agent"]
-            .startswith("Mopidy-Stream/")
+            .startswith("mopidy-stream/")
         )
 
     @responses.activate
