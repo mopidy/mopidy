@@ -33,14 +33,14 @@ extensions = [
 ]
 
 project = "Mopidy"
-copyright = "2009-2025, Stein Magnus Jodal and contributors"  # noqa: A001
+copyright = "2009-2026, Stein Magnus Jodal and contributors"  # noqa: A001
 
 
 release = version("Mopidy")
 version = ".".join(release.split(".")[:2])
 
 # To make the build reproducible, avoid using today's date in the manpages
-today = "2025"
+today = "2026"
 
 exclude_trees = ["_build"]
 
