@@ -104,7 +104,8 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
         event: CoreEvent,
         **data: CoreEventData,
     ) -> None:
-        assert self.server.io_loop
+        if not self.server.io_loop:
+            return
         on_event(event, self.server.io_loop, **data)
 
 
