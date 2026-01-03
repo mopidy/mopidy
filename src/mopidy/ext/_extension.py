@@ -62,7 +62,7 @@ class Extension:
             raise AttributeError(msg)
 
     @classmethod
-    def get_cache_dir(cls, config: config_lib.Config | config_lib.ConfigDict) -> Path:
+    def get_cache_dir(cls, config: config_lib.Config) -> Path:
         """Get or create cache directory for the extension.
 
         Use this directory to cache data that can safely be thrown away.
@@ -76,7 +76,7 @@ class Extension:
         return cache_dir_path
 
     @classmethod
-    def get_config_dir(cls, config: config_lib.Config | config_lib.ConfigDict) -> Path:
+    def get_config_dir(cls, config: config_lib.Config) -> Path:
         """Get or create configuration directory for the extension.
 
         :param config: the Mopidy config object
@@ -88,7 +88,7 @@ class Extension:
         return config_dir_path
 
     @classmethod
-    def get_data_dir(cls, config: config_lib.Config | config_lib.ConfigDict) -> Path:
+    def get_data_dir(cls, config: config_lib.Config) -> Path:
         """Get or create data directory for the extension.
 
         Use this directory to store data that should be persistent.

@@ -97,24 +97,21 @@ def main() -> int:  # noqa: C901, PLR0912, PLR0915
         for data in extensions_data:
             extension = data.extension
 
-            # Cast config to dict for access to extension config
-            config_dict = cast(config_lib.ConfigDict, config)
-
             # TODO: factor out all of this to a helper that can be tested
             if not validate_extension_data(data):
-                config_dict[extension.ext_name] = {"enabled": False}
+                config[extension.ext_name] = {"enabled": False}
                 config_errors[extension.ext_name] = {
                     "enabled": "extension disabled by self check.",
                 }
                 extensions_status["validate"].append(extension)
-            elif not config_dict[extension.ext_name]["enabled"]:
-                config_dict[extension.ext_name] = {"enabled": False}
+            elif not config[extension.ext_name]["enabled"]:
+                config[extension.ext_name] = {"enabled": False}
                 config_errors[extension.ext_name] = {
                     "enabled": "extension disabled by user config.",
                 }
                 extensions_status["disabled"].append(extension)
             elif config_errors.get(extension.ext_name):
-                config_dict[extension.ext_name]["enabled"] = False
+                config[extension.ext_name]["enabled"] = False
                 config_errors[extension.ext_name]["enabled"] = (
                     "extension disabled due to config errors."
                 )

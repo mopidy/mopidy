@@ -24,8 +24,6 @@ LogLevelName = Literal[
     "all",
 ]
 
-type ConfigDict = dict[str, dict[str, Any]]
-
 
 class Config(Mapping):
     def __init__(self, data: dict[str, dict[str, Any]]) -> None:
