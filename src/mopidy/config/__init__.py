@@ -5,7 +5,6 @@ import pathlib
 from mopidy.config._types import (
     AudioConfig,
     Config,
-    ConfigDict,
     CoreConfig,
     LoggingConfig,
     ProxyConfig,
@@ -33,7 +32,6 @@ __all__ = [
     "AudioConfig",
     "Boolean",
     "Config",
-    "ConfigDict",
     "ConfigSchema",
     "ConfigValue",
     "CoreConfig",

@@ -31,10 +31,9 @@ class FileLibraryProvider(backend.LibraryProvider):
     def __init__(self, backend: backend.Backend, config: config_lib.Config) -> None:
         super().__init__(backend)
 
-        config_dict = cast(config_lib.ConfigDict, config)
-        ext_config = cast(FileConfig, config_dict[Extension.ext_name])
+        ext_config = cast(FileConfig, config[Extension.ext_name])
 
-        self._media_dirs = list(self._get_media_dirs(config_dict))
+        self._media_dirs = list(self._get_media_dirs(config))
         self._show_dotfiles = ext_config["show_dotfiles"]
         self._excluded_file_extensions = tuple(
             file_ext.lower() for file_ext in ext_config["excluded_file_extensions"]
@@ -128,7 +127,7 @@ class FileLibraryProvider(backend.LibraryProvider):
             uri = Uri("file:root")
         return Ref.directory(name="Files", uri=uri)
 
-    def _get_media_dirs(self, config: config_lib.ConfigDict) -> Generator[MediaDir]:
+    def _get_media_dirs(self, config: config_lib.Config) -> Generator[MediaDir]:
         for entry in config["file"]["media_dirs"]:
             media_dir_split = entry.split("|", 1)
             local_path = paths.expand_path(media_dir_split[0])

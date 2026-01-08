@@ -17,7 +17,6 @@ import tornado.websocket
 from pydantic import TypeAdapter
 
 from mopidy import exceptions, zeroconf
-from mopidy.config import ConfigDict
 from mopidy.core import CoreEvent, CoreEventData, CoreListener
 
 from . import Extension, handlers, network
@@ -44,8 +43,7 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
     def __init__(self, config: Config, core: CoreProxy) -> None:
         super().__init__()
 
-        config_dict = cast(ConfigDict, config)
-        http_config = cast(HttpConfig, config_dict[Extension.ext_name])
+        http_config = cast(HttpConfig, config[Extension.ext_name])
         self.hostname = network.format_hostname(http_config["hostname"])
         self.port = http_config["port"]
         tornado_hostname = http_config["hostname"]
@@ -217,8 +215,7 @@ class HttpServer(threading.Thread):
     def _get_default_request_handlers(self) -> list[RequestRule]:
         sites = [app["name"] for app in self.apps + self.statics]
 
-        config_dict = cast(ConfigDict, self.config)
-        http_config = cast(HttpConfig, config_dict[Extension.ext_name])
+        http_config = cast(HttpConfig, self.config[Extension.ext_name])
         default_app = http_config["default_app"]
         if default_app not in sites:
             logger.warning(f"HTTP server's default app {default_app!r} not found")

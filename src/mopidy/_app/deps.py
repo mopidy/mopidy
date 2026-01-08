@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import argparse
 import platform
 import re
 import sys
@@ -8,32 +7,12 @@ from dataclasses import dataclass, field
 from importlib import metadata
 from os import PathLike
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, override
 
 from mopidy._lib.gi import Gst
-from mopidy.commands import Command
-
-if TYPE_CHECKING:
-    from mopidy.config import Config
 
 
-class DepsCommand(Command):
-    help = "Show dependencies and debug information."
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.set(base_verbosity_level=-1)
-
-    @override
-    def run(
-        self,
-        args: argparse.Namespace,
-        config: Config,
-        *_args: Any,
-        **_kwargs: Any,
-    ) -> int:
-        print("\n".join(dep.format() for dep in get_dependencies()))  # noqa: T201
-        return 0
+def command() -> None:
+    print("\n".join(dep.format() for dep in get_dependencies()))  # noqa: T201
 
 
 @dataclass

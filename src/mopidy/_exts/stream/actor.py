@@ -3,7 +3,6 @@ import logging
 import re
 import time
 import urllib.parse
-from typing import cast
 
 import pykka
 import requests
@@ -11,7 +10,7 @@ import requests
 from mopidy import audio as audio_lib
 from mopidy import backend, exceptions
 from mopidy.audio import AudioProxy, scan, tags
-from mopidy.config import Config, ConfigDict
+from mopidy.config import Config
 from mopidy.models import Track
 from mopidy.types import Uri, UriScheme
 
@@ -25,9 +24,8 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
     def __init__(self, config: Config, audio: AudioProxy) -> None:
         super().__init__()
 
-        config_dict = cast(ConfigDict, config)
         self._scanner = scan.Scanner(
-            timeout=config_dict["stream"]["timeout"],
+            timeout=config["stream"]["timeout"],
             proxy_config=config["proxy"],
         )
 
@@ -36,24 +34,19 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
             user_agent=(f"{Extension.dist_name}/{Extension.version}"),
         )
 
-        blacklist = config_dict["stream"]["metadata_blacklist"]
+        blacklist = config["stream"]["metadata_blacklist"]
         self._blacklist_re = re.compile(
             rf"^({'|'.join(fnmatch.translate(u) for u in blacklist)})$",
         )
 
-        self._timeout = config_dict["stream"]["timeout"]
+        self._timeout = config["stream"]["timeout"]
 
         self.library = StreamLibraryProvider(backend=self)
         self.playback = StreamPlaybackProvider(audio=audio, backend=self)
         self.playlists = None
 
-        uri_schemes = audio_lib.supported_uri_schemes(
-            config_dict["stream"]["protocols"]
-        )
-        if (
-            UriScheme("file") in StreamBackend.uri_schemes
-            and config_dict["file"]["enabled"]
-        ):
+        uri_schemes = audio_lib.supported_uri_schemes(config["stream"]["protocols"])
+        if UriScheme("file") in StreamBackend.uri_schemes and config["file"]["enabled"]:
             logger.warning(
                 'The stream/protocols config value includes the "file" '
                 'protocol. "file" playback is now handled by Mopidy-File. '

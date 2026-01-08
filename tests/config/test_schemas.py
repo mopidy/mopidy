@@ -2,8 +2,9 @@ import logging
 import unittest
 from unittest import mock
 
+from dirty_equals import IsStr
+
 from mopidy.config import schemas, types
-from tests import any_str
 
 
 class ConfigSchemaTest(unittest.TestCase):
@@ -21,7 +22,7 @@ class ConfigSchemaTest(unittest.TestCase):
         del self.values["foo"]
 
         result, errors = self.schema.deserialize(self.values)
-        assert errors == {"foo": any_str}
+        assert errors == {"foo": IsStr}
         assert result.pop("foo") is None
         assert result.pop("bar") is not None
         assert result.pop("baz") is not None
@@ -31,7 +32,7 @@ class ConfigSchemaTest(unittest.TestCase):
         self.values["extra"] = "123"
 
         result, errors = self.schema.deserialize(self.values)
-        assert errors == {"extra": any_str}
+        assert errors == {"extra": IsStr}
         assert result.pop("foo") is not None
         assert result.pop("bar") is not None
         assert result.pop("baz") is not None

@@ -1,159 +1,296 @@
 from __future__ import annotations
 
 import logging
+from collections import UserDict
+from contextvars import ContextVar
+from dataclasses import dataclass
+from enum import StrEnum
 from importlib import metadata
-from typing import TYPE_CHECKING, Any, NamedTuple, TypedDict
+from importlib.metadata import EntryPoint
+from typing import TYPE_CHECKING, ClassVar, cast
 
-from mopidy import config as config_lib
 from mopidy import exceptions
+from mopidy.config import Config, types
 from mopidy.ext import Extension
 
 if TYPE_CHECKING:
-    from mopidy.commands import Command
+    import cyclopts
+
+    from mopidy._app.config import ConfigErrors
+    from mopidy.config.schemas import ConfigSchema, MapConfigSchema
 
 logger = logging.getLogger(__name__)
 
 
-class ExtensionsStatus(TypedDict):
-    validate: list[Extension]
-    config: list[Extension]
-    disabled: list[Extension]
-    enabled: list[Extension]
+class ExtensionStatus(StrEnum):
+    ENABLED = "enabled"
+    DISABLED = "disabled"
+    STOPPED_BY_LOAD_ERROR = "stopped_by_load_error"
+    STOPPED_BY_CONFIG_ERROR = "stopped_by_config_error"
+    STOPPED_BY_SELF_CHECK = "stopped_by_self_check"
 
 
-class ExtensionData(NamedTuple):
-    extension: Extension
-    entry_point: Any
-    config_schema: config_lib.ConfigSchema
-    config_defaults: Any
-    command: Command | None
+@dataclass
+class ExtensionRecord:
+    ext_name: str
+    entry_point: EntryPoint
+    status: ExtensionStatus
 
+    extension: Extension | None = None
+    dist_name: str | None = None
+    version: str | None = None
+    config_schema: ConfigSchema | None = None
+    config_defaults: str | None = None
+    command: cyclopts.App | None = None
 
-def load_extensions() -> list[ExtensionData]:
-    """Find all installed extensions.
+    @classmethod
+    def load(cls, entry_point: EntryPoint) -> ExtensionRecord:
+        if not (extension := cls._load_entry_point(entry_point)):
+            return ExtensionRecord(
+                ext_name=entry_point.name,
+                entry_point=entry_point,
+                status=ExtensionStatus.STOPPED_BY_LOAD_ERROR,
+            )
+        return cls._load_extension(entry_point, extension)
 
-    :returns: list of installed extensions
-    """
-    installed_extensions = []
+    @staticmethod
+    def _load_entry_point(entry_point: EntryPoint) -> Extension | None:
+        logger.debug(
+            f"Loading {entry_point.group!r} entry point "
+            f"{entry_point.name!r} from {entry_point.value!r}"
+        )
 
-    for entry_point in metadata.entry_points(group="mopidy.ext"):
-        logger.debug("Loading entry point: %s", entry_point)
+        if entry_point.group != "mopidy.ext":
+            logger.error(
+                f"Entry point {entry_point.name!r} is in invalid group "
+                f"{entry_point.group!r}, expected 'mopidy.ext'"
+            )
+            return None
+
         try:
             extension_class = entry_point.load()
         except Exception:
-            logger.exception(f"Failed to load extension {entry_point.name}.")
-            continue
-
-        try:
-            if not issubclass(extension_class, Extension):
-                raise TypeError  # noqa: TRY301
-        except TypeError:
-            logger.error(
-                "Entry point %s did not contain a valid extension class: %r",
-                entry_point.name,
-                extension_class,
+            logger.exception(
+                f"Loading of extension entry point {entry_point.name!r} failed"
             )
-            continue
+            return None
+
+        if not issubclass(extension_class, Extension):
+            logger.error(
+                f"Entry point {entry_point.name!r} did not contain "
+                f"a valid extension class: {extension_class!r}"
+            )
+            return None
+
+        extension_class = cast(type[Extension], extension_class)
 
         try:
             extension = extension_class()
-            # Ensure required extension attributes are present after try block
-            _ = extension.dist_name
-            _ = extension.ext_name
-            _ = extension.version
-            extension_data = ExtensionData(
-                entry_point=entry_point,
-                extension=extension,
-                config_schema=extension.get_config_schema(),
-                config_defaults=extension.get_default_config(),
-                command=extension.get_command(),
-            )
         except Exception:
             logger.exception(
-                "Setup of extension from entry point %s failed, ignoring extension.",
-                entry_point.name,
+                f"Instantiating extension from entry point {entry_point.name!r} failed"
             )
-            continue
+            return None
+        else:
+            return extension
 
-        installed_extensions.append(extension_data)
+    @classmethod
+    def _load_extension(
+        cls,
+        entry_point: EntryPoint,
+        extension: Extension,
+    ) -> ExtensionRecord:
+        stopped_record = ExtensionRecord(
+            ext_name=entry_point.name,
+            entry_point=entry_point,
+            status=ExtensionStatus.STOPPED_BY_LOAD_ERROR,
+            extension=extension,
+        )
+
+        if extension.ext_name != entry_point.name:
+            logger.error(
+                f"Entry point name {entry_point.name!r} does not match "
+                f"extension's ext_name {extension.ext_name!r}"
+            )
+            return stopped_record
+
+        if not (config_schema := cls._load_config_schema(extension)):
+            return stopped_record
+
+        if not (config_defaults := extension.get_default_config()):
+            logger.error(
+                f"Extension {extension.ext_name!r} does not have a default config"
+            )
+            return stopped_record
+
+        try:
+            command = extension.get_command()
+        except Exception:
+            logger.exception(
+                f"Loading command for extension {extension.ext_name!r} failed"
+            )
+            return stopped_record
 
         logger.debug("Loaded extension: %s %s", extension.dist_name, extension.version)
-
-    names = (ed.extension.ext_name for ed in installed_extensions)
-    logger.debug("Discovered extensions: %s", ", ".join(names))
-    return installed_extensions
-
-
-def validate_extension_data(data: ExtensionData) -> bool:  # noqa: PLR0911
-    """Verify extension's dependencies and environment.
-
-    :param data: an extension to check
-    :returns: if extension should be run
-    """
-    logger.debug("Validating extension: %s", data.extension.ext_name)
-
-    if data.extension.ext_name != data.entry_point.name:
-        logger.warning(
-            "Disabled extension %(ep)s: entry point name (%(ep)s) "
-            "does not match extension name (%(ext)s)",
-            {"ep": data.entry_point.name, "ext": data.extension.ext_name},
+        return ExtensionRecord(
+            ext_name=entry_point.name,
+            entry_point=entry_point,
+            status=ExtensionStatus.ENABLED,
+            extension=extension,
+            dist_name=extension.dist_name,
+            version=extension.version,
+            config_schema=config_schema,
+            config_defaults=config_defaults,
+            command=command,
         )
-        return False
 
-    try:
-        data.entry_point.load()
-    except ModuleNotFoundError as exc:
-        logger.info(
-            "Disabled extension %s: Exception %s",
-            data.extension.ext_name,
-            exc,
-        )
-        # Remark: There are no version check, so any version is accepted
-        # this is a difference to pkg_resources, and affect debugging.
-        return False
-
-    try:
-        data.extension.validate_environment()
-    except exceptions.ExtensionError as exc:
-        logger.info("Disabled extension %s: %s", data.extension.ext_name, exc)
-        return False
-    except Exception:
-        logger.exception(
-            "Validating extension %s failed with an exception.",
-            data.extension.ext_name,
-        )
-        return False
-
-    if not data.config_schema:
-        logger.error(
-            "Extension %s does not have a config schema, disabling.",
-            data.extension.ext_name,
-        )
-        return False
-
-    if not isinstance(data.config_schema.get("enabled"), config_lib.Boolean):
-        logger.error(
-            'Extension %s does not have the required "enabled" config'
-            " option, disabling.",
-            data.extension.ext_name,
-        )
-        return False
-
-    for key, value in data.config_schema.items():
-        if not isinstance(value, config_lib.ConfigValue):
+    @staticmethod
+    def _load_config_schema(extension: Extension) -> ConfigSchema | None:
+        if not (config_schema := extension.get_config_schema()):
             logger.error(
-                "Extension %s config schema contains an invalid value"
-                ' for the option "%s", disabling.',
-                data.extension.ext_name,
-                key,
+                f"Extension {extension.ext_name!r} does not have a config schema",
+            )
+            return None
+
+        if not isinstance(config_schema.get("enabled"), types.Boolean):
+            logger.error(
+                f"Extension {extension.ext_name!r} does not have "
+                "the required 'enabled' config option"
+            )
+            return None
+
+        for key, value in config_schema.items():
+            if not isinstance(value, types.ConfigValue):
+                logger.error(
+                    f"Extension {extension.ext_name!r} config schema contains "
+                    f"an invalid value for the option {key!r}"
+                )
+                return None
+
+        return config_schema
+
+    def check_config_and_env(
+        self,
+        *,
+        config: Config,
+        config_errors: ConfigErrors,
+    ) -> str | None:
+        if self.status == ExtensionStatus.STOPPED_BY_LOAD_ERROR:
+            return None  # Skip config checks until load errors are resolved.
+
+        if not config[self.ext_name]["enabled"]:
+            self.status = ExtensionStatus.DISABLED
+            return "Extension disabled by user config"
+
+        if config_errors.get(self.ext_name):
+            self.status = ExtensionStatus.STOPPED_BY_CONFIG_ERROR
+            return "Extension stopped due to config errors"
+
+        if not self._self_check():
+            self.status = ExtensionStatus.STOPPED_BY_SELF_CHECK
+            return "Extension stopped by self-check"
+
+        return None
+
+    def _self_check(self) -> bool:
+        if self.extension is None:
+            return False
+        logger.debug(f"Running {self.ext_name!r} extension self-check")
+        try:
+            self.extension.validate_environment()
+        except exceptions.ExtensionError as exc:
+            logger.info(f"Extension {self.ext_name!r} disabled by self-check: {exc}")
+            return False
+        except Exception:
+            logger.exception(
+                f"Extension {self.ext_name!r} self-check failed unexpectedly"
             )
             return False
+        else:
+            return True
 
-    if not data.config_defaults:
-        logger.error(
-            "Extension %s does not have a default config, disabling.",
-            data.extension.ext_name,
-        )
-        return False
+    def init_command(self, app: cyclopts.App) -> None:
+        if self.command is None:
+            return
+        app.command(self.command, name=self.ext_name)
 
-    return True
+
+class ExtensionManager(UserDict[str, ExtensionRecord]):
+    _instance: ClassVar[ContextVar[ExtensionManager | None]] = ContextVar(
+        "ExtensionManager", default=None
+    )
+    data: dict[str, ExtensionRecord]
+
+    @classmethod
+    def get_global(cls) -> ExtensionManager:
+        if (instance := cls._instance.get()) is None:
+            msg = f"{cls.__name__} not set in context"
+            raise RuntimeError(msg)
+        return instance
+
+    @classmethod
+    def set_global(cls, instance: ExtensionManager) -> None:
+        if cls._instance.get() is not None:
+            msg = f"{cls.__name__} already set in context"
+            raise RuntimeError(msg)
+        cls._instance.set(instance)
+
+    @classmethod
+    def discover(cls) -> ExtensionManager:
+        result = {
+            entry_point.name: record
+            for entry_point in metadata.entry_points(group="mopidy.ext")
+            if (record := ExtensionRecord.load(entry_point)) is not None
+        }
+        result = dict(sorted(result.items()))
+        logger.debug("Discovered extensions: %s", ", ".join(result.keys()))
+        return ExtensionManager(result)
+
+    def with_status(self, *status: ExtensionStatus) -> dict[str, ExtensionRecord]:
+        return {k: v for k, v in self.data.items() if v.status in status}
+
+    @property
+    def config_schemas(self) -> list[ConfigSchema | MapConfigSchema]:
+        return [
+            record.config_schema
+            for record in self.data.values()
+            if record.config_schema is not None
+        ]
+
+    @property
+    def config_defaults(self) -> list[str]:
+        return [
+            record.config_defaults
+            for record in self.data.values()
+            if record.config_defaults is not None
+        ]
+
+    def check_config_and_env(
+        self,
+        *,
+        config: Config,
+        config_errors: ConfigErrors,
+    ) -> dict[str, str | None]:
+        errors: dict[str, str | None] = {}
+        for record in self.data.values():
+            errors[record.ext_name] = record.check_config_and_env(
+                config=config,
+                config_errors=config_errors,
+            )
+        return errors
+
+    def log_summary(self) -> None:
+        if names := self.with_status(ExtensionStatus.ENABLED).keys():
+            logger.info(f"Enabled extensions: {', '.join(names)}")
+        if names := self.with_status(ExtensionStatus.DISABLED).keys():
+            logger.info(f"Disabled extensions: {', '.join(names)}")
+        if names := self.with_status(ExtensionStatus.STOPPED_BY_LOAD_ERROR).keys():
+            logger.warning(f"Extensions which failed to load: {', '.join(names)}")
+        if names := self.with_status(ExtensionStatus.STOPPED_BY_CONFIG_ERROR).keys():
+            logger.warning(f"Extensions with config errors: {', '.join(names)}")
+        if names := self.with_status(ExtensionStatus.STOPPED_BY_SELF_CHECK).keys():
+            logger.warning(f"Extensions which failed self-check: {', '.join(names)}")
+
+    def init_commands(self, app: cyclopts.App) -> None:
+        for record in self.with_status(ExtensionStatus.ENABLED).values():
+            record.init_command(app)

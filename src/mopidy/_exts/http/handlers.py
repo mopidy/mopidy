@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from collections.abc import Awaitable
     from typing import ClassVar
 
-    from mopidy.config import ConfigDict
+    from mopidy.config import Config
     from mopidy.core import CoreProxy
 
     from .types import HttpApp, HttpStatic, RequestRule
@@ -35,8 +35,8 @@ def make_mopidy_app_factory(
     *,
     apps: list[HttpApp],
     statics: list[HttpStatic],
-) -> Callable[[ConfigDict, CoreProxy], list[RequestRule]]:
-    def mopidy_app_factory(config: ConfigDict, core: CoreProxy) -> list[RequestRule]:
+) -> Callable[[Config, CoreProxy], list[RequestRule]]:
+    def mopidy_app_factory(config: Config, core: CoreProxy) -> list[RequestRule]:
         http_config = cast(HttpConfig, config["http"])
         if not http_config["csrf_protection"]:
             logger.warning("HTTP Cross-Site Request Forgery protection is disabled")

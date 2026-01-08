@@ -5,6 +5,7 @@ import pathlib
 import re
 import urllib.parse
 from os import PathLike
+from typing import Literal
 
 from mopidy.types import Uri
 
@@ -92,6 +93,7 @@ def get_or_create_file(
     file_path: str | PathLike[str],
     mkdir: bool = True,
     content: bytes | str | None = None,
+    errors: Literal["strict", "ignore", "surrogateescape"] = "strict",
 ) -> pathlib.Path:
     file_path = expand_path(file_path)
     if file_path.is_file():
@@ -102,7 +104,7 @@ def get_or_create_file(
     file_path.touch(exist_ok=False)
     match content:
         case str():
-            file_path.write_text(content)
+            file_path.write_text(content, errors=errors)
         case bytes():
             file_path.write_bytes(content)
         case None:

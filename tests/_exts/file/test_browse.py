@@ -6,25 +6,35 @@ from tests import path_to_data_dir
 
 @pytest.mark.parametrize("follow_symlinks", [True, False])
 @pytest.mark.parametrize(
-    ("uri", "levelname"),
+    ("uri", "expected_error"),
     [
-        ("file:root", None),
-        ("not_in_data_path", "WARNING"),
-        (paths.path_to_uri(path_to_data_dir("song1.wav")), "ERROR"),
-        (paths.path_to_uri(path_to_data_dir("")), None),
+        (
+            "file:root",
+            None,
+        ),
+        (
+            "not_in_data_path",
+            "Rejected attempt to browse path",
+        ),
+        (
+            paths.path_to_uri(path_to_data_dir("song1.wav")),
+            "Rejected attempt to browse file",
+        ),
+        (
+            paths.path_to_uri(path_to_data_dir("")),
+            None,
+        ),
     ],
 )
-def test_file_browse(provider, uri, levelname, caplog):
+def test_file_browse(provider, uri, expected_error, caplog):
     result = provider.browse(uri)
-    assert isinstance(result, list)
-    if levelname:
-        assert len(result) == 0
-        record = caplog.records[0]
-        assert record.levelname == levelname
-        assert "Rejected attempt" in record.message
-        return
 
-    assert len(result) >= 1
+    assert isinstance(result, list)
+    if expected_error:
+        assert len(result) == 0
+        assert expected_error in caplog.text
+    else:
+        assert len(result) >= 1
 
 
 @pytest.mark.parametrize(

@@ -1,157 +1,189 @@
-import unittest
-from unittest import mock
+from pathlib import Path
 
-from mopidy import config, ext
-from mopidy._app.config import format_initial, load_raw_config, validate_raw_config
-from mopidy._app.extensions import ExtensionData
-from tests import path_to_data_dir
+import pytest
 
-
-class LoadRawConfigTest(unittest.TestCase):
-    def test_load_nothing(self):
-        assert load_raw_config([], [], []) == {}
-
-    def test_load_missing_file(self):
-        file0 = path_to_data_dir("file0.conf")
-        result = load_raw_config([file0], [], [])
-        assert result == {}
-
-    @mock.patch("os.access")
-    def test_load_nonreadable_file(self, access_mock):
-        access_mock.return_value = False
-        file1 = path_to_data_dir("file1.conf")
-        result = load_raw_config([file1], [], [])
-        assert result == {}
-
-    def test_load_single_default(self):
-        default = b"[foo]\nbar = baz"
-        expected = {"foo": {"bar": "baz"}}
-        result = load_raw_config([], [default], [])
-        assert expected == result
-
-    def test_load_ignore_inline_comment(self):
-        default = b"[foo]\nbar = baz ; my_comment"
-        expected = {"foo": {"bar": "baz"}}
-        result = load_raw_config([], [default], [])
-        assert expected == result
-
-    def test_unicode_default(self):
-        default = "[foo]\nbar = æøå"
-        expected = {"foo": {"bar": "æøå"}}
-        result = load_raw_config([], [default], [])
-        assert expected == result
-
-    def test_load_defaults(self):
-        default1 = b"[foo]\nbar = baz"
-        default2 = b"[foo2]\n"
-        expected = {"foo": {"bar": "baz"}, "foo2": {}}
-        result = load_raw_config([], [default1, default2], [])
-        assert expected == result
-
-    def test_load_single_override(self):
-        override = ("foo", "bar", "baz")
-        expected = {"foo": {"bar": "baz"}}
-        result = load_raw_config([], [], [override])
-        assert expected == result
-
-    def test_load_overrides(self):
-        override1 = ("foo", "bar", "baz")
-        override2 = ("foo2", "bar", "baz")
-        expected = {"foo": {"bar": "baz"}, "foo2": {"bar": "baz"}}
-        result = load_raw_config([], [], [override1, override2])
-        assert expected == result
-
-    def test_load_single_file(self):
-        file1 = path_to_data_dir("file1.conf")
-        expected = {"foo": {"bar": "baz"}}
-        result = load_raw_config([file1], [], [])
-        assert expected == result
-
-    def test_load_files(self):
-        file1 = path_to_data_dir("file1.conf")
-        file2 = path_to_data_dir("file2.conf")
-        expected = {"foo": {"bar": "baz"}, "foo2": {"bar": "baz"}}
-        result = load_raw_config([file1, file2], [], [])
-        assert expected == result
-
-    def test_load_directory(self):
-        directory = path_to_data_dir("conf1.d")
-        expected = {"foo": {"bar": "baz"}, "foo2": {"bar": "baz"}}
-        result = load_raw_config([directory], [], [])
-        assert expected == result
-
-    def test_load_directory_only_conf_files(self):
-        directory = path_to_data_dir("conf2.d")
-        expected = {"foo": {"bar": "baz"}}
-        result = load_raw_config([directory], [], [])
-        assert expected == result
-
-    def test_load_file_with_utf8(self):
-        expected = {"foo": {"bar": "æøå"}}
-        result = load_raw_config([path_to_data_dir("file3.conf")], [], [])
-        assert expected == result
-
-    def test_load_file_with_error(self):
-        expected = {"foo": {"bar": "baz"}}
-        result = load_raw_config([path_to_data_dir("file4.conf")], [], [])
-        assert expected == result
+import mopidy
+from mopidy._app.config import ConfigLoader
+from mopidy._app.extensions import ExtensionManager
 
 
-class ValidateRawConfigTest(unittest.TestCase):
-    def setUp(self):
-        self.schema = config.ConfigSchema("foo")
-        self.schema["bar"] = config.String()
+def test_load_raw_config():
+    config_loader = ConfigLoader.only_defaults(extensions=None)
 
-    def test_empty_config_no_schemas(self):
-        conf, errors = validate_raw_config({}, [])
-        assert conf == {}
-        assert errors == {}
-
-    def test_config_no_schemas(self):
-        raw_config = {"foo": {"bar": "baz"}}
-        conf, errors = validate_raw_config(raw_config, [])
-        assert conf == {}
-        assert errors == {}
-
-    def test_empty_config_single_schema(self):
-        conf, errors = validate_raw_config({}, [self.schema])
-        assert conf == {"foo": {"bar": None}}
-        assert errors == {"foo": {"bar": "config key not found."}}
-
-    def test_config_single_schema(self):
-        raw_config = {"foo": {"bar": "baz"}}
-        conf, errors = validate_raw_config(raw_config, [self.schema])
-        assert conf == {"foo": {"bar": "baz"}}
-        assert errors == {}
-
-    def test_config_single_schema_config_error(self):
-        raw_config = {"foo": {"bar": "baz"}}
-        self.schema["bar"] = mock.Mock()
-        self.schema["bar"].deserialize.side_effect = ValueError("bad")
-        conf, errors = validate_raw_config(raw_config, [self.schema])
-        assert conf == {"foo": {"bar": None}}
-        assert errors == {"foo": {"bar": "bad"}}
-
-    # TODO: add more tests
+    assert config_loader.raw_config == {
+        "audio": {
+            "buffer_time": "",
+            "mixer": "software",
+            "mixer_volume": "",
+            "output": "autoaudiosink",
+        },
+        "core": {
+            "cache_dir": "$XDG_CACHE_DIR/mopidy",
+            "config_dir": "$XDG_CONFIG_DIR/mopidy",
+            "data_dir": "$XDG_DATA_DIR/mopidy",
+            "max_tracklist_length": "10000",
+            "restore_state": "false",
+        },
+        "logging": {
+            "color": "true",
+            "config_file": "",
+            "format": (
+                "%(levelname)-8s %(asctime)s [%(process)d:%(threadName)s] %(name)s\\n  "
+                "%(message)s"
+            ),
+            "verbosity": "0",
+        },
+        "proxy": {
+            "hostname": "",
+            "password": "",
+            "port": "",
+            "scheme": "",
+            "username": "",
+        },
+    }
 
 
-def test_format_initial():
-    extension = ext.Extension()
-    extension.dist_name = "Mopidy-Foo"
-    extension.ext_name = "foo"
-    extension.version = "0.1"
-    extension.get_default_config = lambda: None
-    extensions_data = [
-        ExtensionData(
-            extension=extension,
-            entry_point=None,
-            config_schema=None,
-            config_defaults=None,
-            command=None,
+def test_validate_config():
+    config_loader = ConfigLoader.only_defaults(extensions=None)
+    config_manager = config_loader.validate()
+
+    assert config_manager.config == {
+        "audio": {
+            "buffer_time": None,
+            "mixer": "software",
+            "mixer_volume": None,
+            "output": "autoaudiosink",
+        },
+        "core": {
+            "cache_dir": str(Path("~/.cache/mopidy").expanduser()),
+            "config_dir": str(Path("~/.config/mopidy").expanduser()),
+            "data_dir": str(Path("~/.local/share/mopidy").expanduser()),
+            "max_tracklist_length": 10000,
+            "restore_state": False,
+        },
+        "logging": {
+            "color": True,
+            "config_file": None,
+            "format": (
+                "%(levelname)-8s %(asctime)s [%(process)d:%(threadName)s] %(name)s\n"
+                "  %(message)s"
+            ),
+            "verbosity": 0,
+        },
+        "proxy": {
+            "hostname": None,
+            "password": None,
+            "port": None,
+            "scheme": None,
+            "username": None,
+        },
+    }
+
+
+def test_format_config():
+    config_loader = ConfigLoader.only_defaults(extensions=None)
+    config_manager = config_loader.validate()
+
+    assert config_manager.format(
+        with_header=True,
+        hide_secrets=True,
+        comment_out_defaults=True,
+    ).splitlines() == [
+        "# For further information about options in this file see:",
+        "#   https://docs.mopidy.com/",
+        "#",
+        "# The initial commented out values reflect the defaults as of:",
+        f"#   mopidy {mopidy.__version__}",
+        "#",
+        "# Available options and defaults might have changed since then,",
+        "# run `mopidy config` to see the current effective config and",
+        "# `mopidy --version` to check the current version.",
+        "",
+        "[core]",
+        "#cache_dir = $XDG_CACHE_DIR/mopidy",
+        "#config_dir = $XDG_CONFIG_DIR/mopidy",
+        "#data_dir = $XDG_DATA_DIR/mopidy",
+        "#max_tracklist_length = 10000",
+        "#restore_state = false",
+        "",
+        "[logging]",
+        "#verbosity = 0",
+        (
+            "#format = "
+            r"%(levelname)-8s %(asctime)s [%(process)d:%(threadName)s] %(name)s\n"
+            "  %(message)s"
         ),
+        "#color = true",
+        "#config_file = ",
+        "",
+        "[audio]",
+        "#mixer = software",
+        "#mixer_volume = ",
+        "#output = autoaudiosink",
+        "#buffer_time = ",
+        "",
+        "[proxy]",
+        "#scheme = ",
+        "#hostname = ",
+        "#port = ",
+        "#username = ",
+        "#password = ",
     ]
 
-    result = format_initial(extensions_data)
 
-    assert "# For further information" in result
-    assert "[foo]\n" in result
+def test_config_is_read_only():
+    config_loader = ConfigLoader.only_defaults(extensions=None)
+    config_manager = config_loader.validate()
+    config = config_manager.config
+
+    with pytest.raises(
+        TypeError,
+        match="'ConfigSection' object does not support item assignment",
+    ):
+        config["core"]["max_tracklist_length"] = 20000
+
+
+def test_config_overrides():
+    config_loader = ConfigLoader(
+        paths=[],
+        overrides={
+            "core": {
+                "max_tracklist_length": "5000",
+                "restore_state": "true",
+            },
+        },
+        extensions=ExtensionManager(),
+    )
+    config_manager = config_loader.validate()
+
+    # core/max_tracklist_length defaults to 10000
+    assert config_loader.raw_config["core"]["max_tracklist_length"] == "5000"
+    assert config_manager.config["core"]["max_tracklist_length"] == 5000
+
+    # core/restore_state defaults to false
+    assert config_loader.raw_config["core"]["restore_state"] == "true"
+    assert config_manager.config["core"]["restore_state"] is True
+
+
+def test_config_errors():
+    config_loader = ConfigLoader(
+        paths=[],
+        overrides={
+            "core": {
+                "max_tracklist_length": "not-an-integer",
+            },
+        },
+        extensions=ExtensionManager(),
+    )
+    config_manager = config_loader.validate()
+
+    # Raw config retains the invalid string
+    assert config_loader.raw_config["core"]["max_tracklist_length"] == "not-an-integer"
+
+    # Validation errors describes the problem
+    assert "core" in config_manager.errors
+    assert "max_tracklist_length" in config_manager.errors["core"]
+    assert (
+        config_manager.errors["core"]["max_tracklist_length"]
+        == "invalid literal for int() with base 10: 'not-an-integer'"
+    )
