@@ -103,7 +103,7 @@ app.meta.group_parameters = Group("Global parameters", sort_key=0)
 
 
 @app.meta.default
-def meta(
+def launcher(
     *tokens: Annotated[
         str,
         Parameter(show=False, allow_leading_hyphen=True),
