@@ -38,16 +38,18 @@ Install from apt.mopidy.com
 #. Add the archive's GPG key::
 
        sudo mkdir -p /etc/apt/keyrings
-       sudo wget -q -O /etc/apt/keyrings/mopidy-archive-keyring.gpg \
-         https://apt.mopidy.com/mopidy-archive-keyring.gpg
+       wget -q -O - https://apt.mopidy.com/mopidy.gpg | \
+         sudo tee /etc/apt/keyrings/mopidy-archive-keyring.gpg > /dev/null
 
 #. Add the APT repo to your package sources. For Trixie::
 
-       sudo wget -q -O /etc/apt/sources.list.d/mopidy.sources https://apt.mopidy.com/trixie.sources
+       wget -q -O - https://apt.mopidy.com/trixie.sources | \
+         sudo tee /etc/apt/sources.list.d/mopidy.sources > /dev/null
 
   Or, for Bookworm::
 
-       sudo wget -q -O /etc/apt/sources.list.d/mopidy.sources https://apt.mopidy.com/bookworm.sources
+       wget -q -O - https://apt.mopidy.com/bookworm.sources | \
+         sudo tee /etc/apt/sources.list.d/mopidy.sources > /dev/null
 
 #. Install Mopidy and all dependencies::
 
