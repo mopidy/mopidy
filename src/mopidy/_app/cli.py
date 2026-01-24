@@ -116,6 +116,14 @@ def launcher(
         ConfigOverrides | None,
         Parameter(converter=config_overrides_converter),
     ] = None,
+    quiet: Annotated[
+        bool,
+        Parameter(
+            name=("--quiet", "-q"),
+            help="Decrease amount of output to a minimum.",
+            negative="",
+        ),
+    ] = False,
     verbosity_level: Annotated[
         int,
         Parameter(
@@ -165,7 +173,7 @@ def launcher(
         logs.setup_logging(
             config=config_manager.config,
             base_verbosity_level=-1 if subcommand in ("deps", "config") else 0,
-            args_verbosity_level=verbosity_level,
+            args_verbosity_level=-1 if quiet else verbosity_level,
         )
 
         # Check extensions
