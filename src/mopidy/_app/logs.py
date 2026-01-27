@@ -9,7 +9,7 @@ from mopidy._lib.logs import TRACE_LOG_LEVEL
 from mopidy.config.types import LogColorName
 
 if TYPE_CHECKING:
-    from mopidy.config import Config, LoggingConfig
+    from mopidy.config import Config
     from mopidy.config.types import LogLevelName
 
 logger = logging.getLogger(__name__)
@@ -55,8 +55,7 @@ def bootstrap_delayed_logging() -> None:
 def setup_logging(
     *,
     config: Config,
-    base_verbosity_level: int,
-    args_verbosity_level: int,
+    verbosity_level: int,
 ) -> None:
     logging.captureWarnings(True)
 
@@ -70,14 +69,13 @@ def setup_logging(
             # Catch everything as logging does not specify what can go wrong.
             logger.error("Loading logging config %r failed. %s", path, exc)
 
-    loglevels = config.get("loglevels", {})
-
-    verbosity_level = get_verbosity_level(
-        config["logging"],
-        base_verbosity_level,
-        args_verbosity_level,
+    verbosity_filter = VerbosityFilter(
+        verbosity_level=get_verbosity_level(
+            config_value=config["logging"]["verbosity"],
+            cli_value=verbosity_level,
+        ),
+        loglevels=config.get("loglevels", {}),
     )
-    verbosity_filter = VerbosityFilter(verbosity_level, loglevels)
 
     formatter = logging.Formatter(config["logging"]["format"])
 
@@ -95,24 +93,20 @@ def setup_logging(
 
 
 def get_verbosity_level(
-    logging_config: LoggingConfig,
-    base_verbosity_level: int,
-    args_verbosity_level: int,
+    *,
+    config_value: int | None,
+    cli_value: int,
 ) -> int:
-    if args_verbosity_level:
-        result = base_verbosity_level + args_verbosity_level
-    else:
-        result = base_verbosity_level + (logging_config["verbosity"] or 0)
-
+    result = cli_value or config_value or 0
     result = max(result, min(LOG_LEVELS.keys()))
     result = min(result, max(LOG_LEVELS.keys()))
-
     return result
 
 
 class VerbosityFilter(logging.Filter):
     def __init__(
         self,
+        *,
         verbosity_level: int,
         loglevels: dict[LogLevelName, int],
     ) -> None:

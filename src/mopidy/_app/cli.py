@@ -169,11 +169,9 @@ def launcher(
         process.create_app_dirs(config_manager.config)
 
         # Start regular logging
-        subcommand = next((t for t in tokens if not t.startswith("-")), "root")
         logs.setup_logging(
             config=config_manager.config,
-            base_verbosity_level=-1 if subcommand in ("deps", "config") else 0,
-            args_verbosity_level=-1 if quiet else verbosity_level,
+            verbosity_level=-1 if quiet else verbosity_level,
         )
 
         # Check extensions
