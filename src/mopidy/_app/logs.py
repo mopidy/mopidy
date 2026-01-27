@@ -16,9 +16,9 @@ logger = logging.getLogger(__name__)
 
 
 LOG_LEVELS: dict[int, dict[str, int]] = {
-    -1: {"root": logging.ERROR, "mopidy": logging.WARNING},
-    0: {"root": logging.ERROR, "mopidy": logging.INFO},
-    1: {"root": logging.WARNING, "mopidy": logging.DEBUG},
+    -1: {"root": logging.ERROR, "mopidy": logging.ERROR},
+    0: {"root": logging.ERROR, "mopidy": logging.WARNING},
+    1: {"root": logging.WARNING, "mopidy": logging.INFO},
     2: {"root": logging.INFO, "mopidy": logging.DEBUG},
     3: {"root": logging.DEBUG, "mopidy": logging.DEBUG},
     4: {"root": logging.NOTSET, "mopidy": logging.NOTSET},
