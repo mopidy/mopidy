@@ -59,10 +59,9 @@ def setup_logging(
 ) -> None:
     logging.captureWarnings(True)
 
-    if config["logging"]["config_file"]:
+    if path := config["logging"]["config_file"]:
         # Logging config from file must be read before other handlers are
         # added. If not, the other handlers will have no effect.
-        path = config["logging"]["config_file"]
         try:
             logging.config.fileConfig(path, disable_existing_loggers=False)
         except Exception as exc:  # noqa: BLE001
