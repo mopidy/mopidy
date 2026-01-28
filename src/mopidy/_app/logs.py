@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import logging
 import logging.config
+import logging.handlers
 import platform
-from typing import TYPE_CHECKING, ClassVar, get_args
+from contextvars import ContextVar
+from typing import TYPE_CHECKING, ClassVar, get_args, override
 
 from mopidy._lib.logs import TRACE_LOG_LEVEL
 from mopidy.config.types import LogColorName
@@ -25,31 +27,32 @@ LOG_LEVELS: dict[int, dict[str, int]] = {
 }
 
 
-class DelayedHandler(logging.Handler):
+class DelayedHandler(logging.handlers.MemoryHandler):
     def __init__(self) -> None:
-        logging.Handler.__init__(self)
-        self._released = False
-        self._buffer: list[logging.LogRecord] = []
+        super().__init__(
+            # Flush all records immediately.
+            flushLevel=logging.NOTSET,
+            # Ensure we have enough space for all logging from early startup,
+            # until we set the target handler to flush to.
+            capacity=1000,
+        )
 
-    def handle(self, record: logging.LogRecord) -> bool:
-        if not self._released:
-            self._buffer.append(record)
-        return True
-
-    def release_delayed_logs(self) -> None:
-        self._released = True
-        root = logging.getLogger("")
-        while self._buffer:
-            root.handle(self._buffer.pop(0))
+    @override
+    def shouldFlush(self, record: logging.LogRecord) -> bool:
+        return self.target is not None
 
 
-_delayed_handler = DelayedHandler()
+_delayed_handler_ctx = ContextVar[DelayedHandler | None](
+    "delayed_handler",
+    default=None,
+)
 
 
 def bootstrap_delayed_logging() -> None:
     root = logging.getLogger("")
     root.setLevel(logging.NOTSET)
-    root.addHandler(_delayed_handler)
+    root.addHandler(delayed_handler := DelayedHandler())
+    _delayed_handler_ctx.set(delayed_handler)
 
 
 def setup_logging(
@@ -86,9 +89,8 @@ def setup_logging(
     handler.addFilter(verbosity_filter)
     handler.setFormatter(formatter)
 
-    logging.getLogger("").addHandler(handler)
-
-    _delayed_handler.release_delayed_logs()
+    if delayed_handler := _delayed_handler_ctx.get():
+        delayed_handler.setTarget(handler)
 
 
 def get_verbosity_level(
