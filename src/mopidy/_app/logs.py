@@ -6,6 +6,10 @@ import logging.handlers
 from contextvars import ContextVar
 from typing import TYPE_CHECKING, override
 
+from rich.console import Console
+from rich.highlighter import NullHighlighter
+from rich.logging import RichHandler
+
 if TYPE_CHECKING:
     from mopidy.config import Config
     from mopidy.config.types import LogLevelName
@@ -77,7 +81,25 @@ def setup_logging(
 
     formatter = logging.Formatter(config["logging"]["format"])
 
-    handler = logging.StreamHandler()
+    handler = RichHandler(
+        console=Console(
+            no_color=not config["logging"]["color"],
+        ),
+        # Omit repeated times in "interactive" mode, making it easier to parse
+        # the log output.
+        omit_repeated_times=config["logging"]["color"],
+        # Disable showing the path of the log record, as we show the logger name
+        # instead.
+        show_path=False,
+        # Enable colorization of different parts of the log message.
+        markup=True,
+        # Disable colorization of stack traces.
+        highlighter=NullHighlighter(),
+        # Shorten the timestamp to save space. When running as a system service,
+        # journald will add its own timestamp, so this is only used for
+        # development.
+        log_time_format="%H:%M:%S",
+    )
     handler.addFilter(verbosity_filter)
     handler.setFormatter(formatter)
 
