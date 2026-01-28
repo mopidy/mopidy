@@ -7,11 +7,11 @@ import re
 import socket
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable
-from typing import Any, AnyStr, ClassVar, Literal, Self, cast, get_args
+from typing import Any, AnyStr, ClassVar, Literal, Self, cast
 
 from mopidy._lib import logs, paths
 from mopidy.config import validators
-from mopidy.config._types import LogColorName, LogLevelName
+from mopidy.config._types import LogLevelName
 
 
 def decode(value: bytes | str) -> str:
@@ -388,22 +388,6 @@ class List[V: ConfigValue = String](ConfigValue[tuple[V, ...] | frozenset[V]]):
                 serialized_values.append(serialized_value)
 
         return "\n  " + "\n  ".join(serialized_values)
-
-
-_LOG_COLOR_NAMES = get_args(LogColorName)
-
-
-class LogColor(ConfigValue[LogColorName]):
-    def deserialize(self, value: AnyStr) -> LogColorName:
-        raw_value = decode(value).lower()
-        validators.validate_choice(raw_value, _LOG_COLOR_NAMES)
-        raw_value = cast(LogColorName, raw_value)
-        return raw_value
-
-    def serialize(self, value: LogColorName, display: bool = False) -> str:
-        if value.lower() in _LOG_COLOR_NAMES:
-            return encode(value.lower())
-        return ""
 
 
 class LogLevel(ConfigValue[int]):

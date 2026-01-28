@@ -58,10 +58,6 @@ app_schemas: list[ConfigSchema | MapConfigSchema] = [
         "loglevels",
         types.LogLevel(),
     ),
-    MapConfigSchema(
-        "logcolors",
-        types.LogColor(),
-    ),
     ConfigSchema(
         "audio",
         {

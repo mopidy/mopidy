@@ -5,16 +5,6 @@ from collections.abc import Iterator, Mapping
 from contextvars import ContextVar
 from typing import Any, ClassVar, Literal, TypedDict, overload, override
 
-LogColorName = Literal[
-    "black",
-    "red",
-    "green",
-    "yellow",
-    "blue",
-    "magenta",
-    "cyan",
-    "white",
-]
 LogLevelName = Literal[
     "critical",
     "error",
@@ -53,10 +43,6 @@ class Config(Mapping):
     @overload
     def __getitem__(self, key: Literal["loglevels"]) -> dict[LogLevelName, int]: ...
     @overload
-    def __getitem__(
-        self, key: Literal["logcolors"]
-    ) -> dict[LogLevelName, LogColorName]: ...
-    @overload
     def __getitem__(self, key: Literal["audio"]) -> AudioConfig: ...
     @overload
     def __getitem__(self, key: Literal["proxy"]) -> ProxyConfig: ...
@@ -71,7 +57,6 @@ class Config(Mapping):
         | CoreConfig
         | LoggingConfig
         | dict[LogLevelName, int]
-        | dict[LogLevelName, LogColorName]
         | AudioConfig
         | ProxyConfig
     ):
