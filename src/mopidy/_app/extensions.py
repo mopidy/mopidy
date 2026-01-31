@@ -212,7 +212,14 @@ class ExtensionRecord:
     def init_command(self, app: cyclopts.App) -> None:
         if self.command is None:
             return
-        app.command(self.command, name=self.ext_name)
+        try:
+            app.command(self.command, name=self.ext_name)
+        except Exception as e:
+            logger.exception(
+                "Registering command for extension %r failed: %s; skipping command",
+                self.ext_name,
+                e,
+            )
 
 
 class ExtensionManager(UserDict[str, ExtensionRecord]):
