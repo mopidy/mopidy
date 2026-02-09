@@ -62,7 +62,7 @@ docs = [
     "sphinx-autodoc-typehints >= 2.3",
     "sphinx-rtd-theme >= 3.0",
 ]
-ruff = ["ruff == 0.14.6"]
+ruff = ["ruff == 0.15.0"]
 tests = [
     "dirty-equals >= 0.9",
     "polyfactory >= 3.1",
