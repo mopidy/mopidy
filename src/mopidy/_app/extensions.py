@@ -212,7 +212,10 @@ class ExtensionRecord:
     def init_command(self, app: cyclopts.App) -> None:
         if self.command is None:
             return
-        app.command(self.command, name=self.ext_name)
+        try:
+            app.command(self.command, name=self.ext_name)
+        except Exception:
+            logger.exception(f"Loading command for extension {self.ext_name!r} failed")
 
 
 class ExtensionManager(UserDict[str, ExtensionRecord]):
