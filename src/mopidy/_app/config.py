@@ -168,7 +168,7 @@ class ConfigLoader:
             )
             return
         if not os.access(str(file_path), os.R_OK):
-            logger.warning(
+            logger.info(
                 f"Loading config from {file_path.as_uri()} failed; "
                 "read permission missing"
             )
