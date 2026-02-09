@@ -62,7 +62,7 @@ docs = [
     "sphinx-autodoc-typehints >= 2.3",
     "sphinx-rtd-theme >= 3.0",
 ]
-ruff = ["ruff == 0.14.6"]
+ruff = ["ruff == 0.15.0"]
 tests = [
     "dirty-equals >= 0.9",
     "polyfactory >= 3.1",
@@ -73,8 +73,8 @@ tests = [
 ]
 typing = [
     "pygobject-stubs >= 2.14.0, != 2.15.0",
-    "pyright == 1.1.407",
-    "ty == 0.0.8",
+    "pyright == 1.1.408",
+    "ty == 0.0.14",
     "types-requests >= 2.32",
 ]
 
