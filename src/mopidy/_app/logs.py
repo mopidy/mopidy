@@ -2,82 +2,82 @@ from __future__ import annotations
 
 import logging
 import logging.config
+import logging.handlers
 import platform
-from typing import TYPE_CHECKING, ClassVar, get_args
+from contextvars import ContextVar
+from typing import TYPE_CHECKING, ClassVar, get_args, override
 
 from mopidy._lib.logs import TRACE_LOG_LEVEL
 from mopidy.config.types import LogColorName
 
 if TYPE_CHECKING:
-    from mopidy.config import Config, LoggingConfig
+    from mopidy.config import Config
     from mopidy.config.types import LogLevelName
 
 logger = logging.getLogger(__name__)
 
 
 LOG_LEVELS: dict[int, dict[str, int]] = {
-    -1: {"root": logging.ERROR, "mopidy": logging.WARNING},
-    0: {"root": logging.ERROR, "mopidy": logging.INFO},
-    1: {"root": logging.WARNING, "mopidy": logging.DEBUG},
+    -1: {"root": logging.ERROR, "mopidy": logging.ERROR},
+    0: {"root": logging.ERROR, "mopidy": logging.WARNING},
+    1: {"root": logging.WARNING, "mopidy": logging.INFO},
     2: {"root": logging.INFO, "mopidy": logging.DEBUG},
     3: {"root": logging.DEBUG, "mopidy": logging.DEBUG},
     4: {"root": logging.NOTSET, "mopidy": logging.NOTSET},
 }
 
 
-class DelayedHandler(logging.Handler):
+class DelayedHandler(logging.handlers.MemoryHandler):
     def __init__(self) -> None:
-        logging.Handler.__init__(self)
-        self._released = False
-        self._buffer: list[logging.LogRecord] = []
+        super().__init__(
+            # Flush all records immediately.
+            flushLevel=logging.NOTSET,
+            # Ensure we have enough space for all logging from early startup,
+            # until we set the target handler to flush to.
+            capacity=1000,
+        )
 
-    def handle(self, record: logging.LogRecord) -> bool:
-        if not self._released:
-            self._buffer.append(record)
-        return True
-
-    def release_delayed_logs(self) -> None:
-        self._released = True
-        root = logging.getLogger("")
-        while self._buffer:
-            root.handle(self._buffer.pop(0))
+    @override
+    def shouldFlush(self, record: logging.LogRecord) -> bool:
+        return self.target is not None
 
 
-_delayed_handler = DelayedHandler()
+_delayed_handler_ctx = ContextVar[DelayedHandler | None](
+    "delayed_handler",
+    default=None,
+)
 
 
 def bootstrap_delayed_logging() -> None:
     root = logging.getLogger("")
     root.setLevel(logging.NOTSET)
-    root.addHandler(_delayed_handler)
+    root.addHandler(delayed_handler := DelayedHandler())
+    _delayed_handler_ctx.set(delayed_handler)
 
 
 def setup_logging(
     *,
     config: Config,
-    base_verbosity_level: int,
-    args_verbosity_level: int,
+    verbosity_level: int,
 ) -> None:
     logging.captureWarnings(True)
 
-    if config["logging"]["config_file"]:
+    if path := config["logging"]["config_file"]:
         # Logging config from file must be read before other handlers are
         # added. If not, the other handlers will have no effect.
-        path = config["logging"]["config_file"]
         try:
             logging.config.fileConfig(path, disable_existing_loggers=False)
         except Exception as exc:  # noqa: BLE001
             # Catch everything as logging does not specify what can go wrong.
             logger.error("Loading logging config %r failed. %s", path, exc)
 
-    loglevels = config.get("loglevels", {})
-
-    verbosity_level = get_verbosity_level(
-        config["logging"],
-        base_verbosity_level,
-        args_verbosity_level,
+    verbosity_filter = VerbosityFilter(
+        verbosity_level=get_verbosity_level(
+            config_value=config["logging"]["verbosity"],
+            cli_value=verbosity_level,
+        ),
+        loglevels=config.get("loglevels", {}),
     )
-    verbosity_filter = VerbosityFilter(verbosity_level, loglevels)
 
     formatter = logging.Formatter(config["logging"]["format"])
 
@@ -89,30 +89,25 @@ def setup_logging(
     handler.addFilter(verbosity_filter)
     handler.setFormatter(formatter)
 
-    logging.getLogger("").addHandler(handler)
-
-    _delayed_handler.release_delayed_logs()
+    if delayed_handler := _delayed_handler_ctx.get():
+        delayed_handler.setTarget(handler)
 
 
 def get_verbosity_level(
-    logging_config: LoggingConfig,
-    base_verbosity_level: int,
-    args_verbosity_level: int,
+    *,
+    config_value: int | None,
+    cli_value: int,
 ) -> int:
-    if args_verbosity_level:
-        result = base_verbosity_level + args_verbosity_level
-    else:
-        result = base_verbosity_level + (logging_config["verbosity"] or 0)
-
+    result = cli_value or config_value or 0
     result = max(result, min(LOG_LEVELS.keys()))
     result = min(result, max(LOG_LEVELS.keys()))
-
     return result
 
 
 class VerbosityFilter(logging.Filter):
     def __init__(
         self,
+        *,
         verbosity_level: int,
         loglevels: dict[LogLevelName, int],
     ) -> None:
