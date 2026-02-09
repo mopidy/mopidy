@@ -214,12 +214,8 @@ class ExtensionRecord:
             return
         try:
             app.command(self.command, name=self.ext_name)
-        except Exception as e:
-            logger.exception(
-                "Registering command for extension %r failed: %s; skipping command",
-                self.ext_name,
-                e,
-            )
+        except Exception:
+            logger.exception(f"Loading command for extension {self.ext_name!r} failed")
 
 
 class ExtensionManager(UserDict[str, ExtensionRecord]):
