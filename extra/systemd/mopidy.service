@@ -11,7 +11,7 @@ After=sound.target
 
 [Service]
 User=mopidy
-ExecStart=/usr/bin/mopidy --config /usr/share/mopidy/conf.d:/etc/mopidy/mopidy.conf
+ExecStart=/usr/bin/mopidy --config /usr/share/mopidy/conf.d:/etc/mopidy/mopidy.conf --verbose
 
 [Install]
 WantedBy=multi-user.target
