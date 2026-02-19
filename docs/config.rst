@@ -63,7 +63,7 @@ below.
 
 This is the default configuration for Mopidy itself:
 
-.. literalinclude:: ../src/mopidy/config/default.conf
+.. literalinclude:: ../src/mopidy/_app/default.conf
     :language: ini
 
 
