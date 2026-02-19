@@ -42,6 +42,38 @@ the latest Debian stable release, Debian 13 Trixie.
 
 - Tornado >= 6.4 is now required.
 
+Data models
+-----------
+
+Changes to the data models may affect any Mopidy extension or client.
+
+- The ``Track`` and ``Playlist`` models now requires the ``uri`` field to always
+  be set. (Fixes: :issue:`2190`, PR: :issue:`2229`)
+
+- The models are now based on Pydantic data classes, which means:
+
+  - All models fields and the ``replace()`` method should work as before, so
+    unless your extension modifies or adds models, this should not affect you.
+
+  - Models are now type-checked at runtime. This should help catch bugs early.
+
+- Since we now use Pydantic to convert data models to and from JSON, the old
+  model machinery has been removed. This includes the following:
+
+  - :class:`mopidy.models.ImmutableObject` -- Not used by Mopidy since v1.0.5
+    ten years ago.
+  - :class:`mopidy.models.ValidatedImmutableObject` -- The old base class for
+    all models.
+  - :class:`mopidy.models.ModelJSONEncoder`
+  - :func:`mopidy.models.model_json_decoder`
+  - :class:`mopidy.models.fields.Collection`
+  - :class:`mopidy.models.fields.Date`
+  - :class:`mopidy.models.fields.Field`
+  - :class:`mopidy.models.fields.Identifier`
+  - :class:`mopidy.models.fields.Integer`
+  - :class:`mopidy.models.fields.String`
+  - :class:`mopidy.models.fields.URI`
+
 Core API
 --------
 
@@ -111,37 +143,6 @@ Changes to the Backend API may affect Mopidy backend extensions.
 - Deprecated :meth:`mopidy.backend.LibraryProvider.lookup`. Extensions should
   implement :meth:`mopidy.backend.LibraryProvider.lookup_many` instead.
 
-Models
-------
-
-Changes to the data models may affect any Mopidy extension or client.
-
-- The ``Track`` and ``Playlist`` models now requires the ``uri`` field to always
-  be set. (Fixes: :issue:`2190`, PR: :issue:`2229`)
-
-- The models are now based on Pydantic data classes, which means:
-
-  - All models fields and the ``replace()`` method should work as before, so
-    unless your extension modifies or adds models, this should not affect you.
-
-  - Models are now type-checked at runtime. This should help catch bugs early.
-
-- Since we now use Pydantic to convert data models to and from JSON, the old
-  model machinery has been removed. This includes the following:
-
-  - :class:`mopidy.models.ImmutableObject` -- Not used by Mopidy since v1.0.5
-    ten years ago.
-  - :class:`mopidy.models.ValidatedImmutableObject` -- The old base class for
-    all models.
-  - :class:`mopidy.models.ModelJSONEncoder`
-  - :func:`mopidy.models.model_json_decoder`
-  - :class:`mopidy.models.fields.Collection`
-  - :class:`mopidy.models.fields.Date`
-  - :class:`mopidy.models.fields.Field`
-  - :class:`mopidy.models.fields.Identifier`
-  - :class:`mopidy.models.fields.Integer`
-  - :class:`mopidy.models.fields.String`
-  - :class:`mopidy.models.fields.URI`
 
 Audio API
 ---------
