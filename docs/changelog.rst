@@ -38,6 +38,9 @@ the latest Debian stable release, Debian 13 Trixie.
 - Pydantic >= 2.10 is now required. This is a new dependency for Mopidy to
   replace our custom data models.
 
+- Cyclopts >= 3.12 is now required. This is a new dependency for Mopidy to build
+  the command line interfaces, replacing our use of :mod:`argparse`.
+
 - Requests >= 2.32 is now required.
 
 - Tornado >= 6.4 is now required.
@@ -179,6 +182,19 @@ Changes to the Audio API may affect a few Mopidy backend extensions.
   - :func:`mopidy.audio.calculate_duration`
   - :func:`mopidy.audio.create_buffer`
   - :func:`mopidy.audio.millisecond_to_clocktime`
+
+Extension API
+-------------
+
+- Breaking change for extensions with their own CLI commands:
+
+  The :mod:`mopidy.commands` module which extended on :mod:`argparse` to let
+  extensions add their own CLI subcommands has been removed. We now use new
+  dependency Cyclopts to build command line interfaces. The extensions
+  maintained by the core team, including ``mopidy-local`` and
+  ``mopidy-spotify``, has been updated to use Cyclopts. The migration is pretty
+  straight forward, but feel free to reach out for help with migrating your
+  extension. (PR: :issue:`2234`)
 
 Extension support
 -----------------
