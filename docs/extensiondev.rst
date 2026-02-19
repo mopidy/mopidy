@@ -166,8 +166,8 @@ This is ``src/mopidy_soundspot/__init__.py``::
 
         def get_command(self):
             # To extend the `mopidy` command line interface:
-            from .commands import SoundspotCommand
-            return SoundspotCommand()
+            from .commands import app
+            return app
 
         def validate_environment(self):
             # Any manual checks of the environment to fail early.
@@ -263,24 +263,23 @@ such as scanning for media, adding a command is the way to go. Your top level
 command name will always match your extension name, but you are free to add
 sub-commands with names of your choosing.
 
-The skeleton of a command would look like this. See :ref:`commands-api` for
-more details.
+The skeleton of a ``mopidy soundspot reticulate`` command would look like this.
+See the `Cyclopts documentation <https://cyclopts.readthedocs.io/>`_ for more
+details.
 
 ::
 
-    from mopidy import commands
+    import cyclopts
 
+    app = cyclopts.App(help="Some text that will show up in --help")
 
-    class SoundspotCommand(commands.Command):
-        help = "Some text that will show up in --help"
+    @app.command(help="Reticulate the Soundspot library.")
+    def reticulate(*, degrees: int) -> None:
+        # Your command implementation
+        print("Reticulating {degrees} degrees...")
 
-        def __init__(self):
-            super().__init__()
-            self.add_argument("--foo")
-
-        def run(self, args, config, extensions):
-           # Your command implementation
-           return 0
+To register your commands, make sure to return the ``app`` instance from your
+:meth:`~mopidy.ext.Extension.get_commands()` implementation.
 
 
 Example web application
