@@ -12,8 +12,9 @@ For older releases, see :ref:`history`.
 v4.0.0 (UNRELEASED)
 ===================
 
-Mopidy 4.0 is a backward-incompatible release because we've dropped support for
-old versions of our dependencies and a number of deprecated APIs.
+Mopidy 4.0 is a major release because we've dropped support for old versions of
+our dependencies, removed a number of deprecated APIs, and rebuilt both our data
+models and app startup sequence.
 
 Dependencies
 ------------
@@ -92,7 +93,9 @@ This is especially relevant for remote clients, like web clients, which may
 pass a lot less data over the network when using tracklist IDs in API calls.
 
 - The core API is no longer exported from submodules, just from
-  :mod:`mopidy.core`. Update your imports accordingly. The removed modules are:
+  :mod:`mopidy.core`. Update your imports accordingly. (PR: :issue:`2221`)
+
+  The removed modules are:
 
   - :mod:`mopidy.core.actor`
   - :mod:`mopidy.core.history`
@@ -116,7 +119,7 @@ Root object
 Library controller
 ^^^^^^^^^^^^^^^^^^
 
-- No changes so far.
+- No changes.
 
 Playback controller
 ^^^^^^^^^^^^^^^^^^^
@@ -130,12 +133,12 @@ Playback controller
 Playlist controller
 ^^^^^^^^^^^^^^^^^^^
 
-- No changes so far.
+- No changes.
 
 Tracklist controller
 ^^^^^^^^^^^^^^^^^^^^
 
-- No changes so far.
+- No changes.
 
 Backend API
 -----------
@@ -160,7 +163,7 @@ Changes to the Audio API may affect a few Mopidy backend extensions.
   interface with the API used by core and backends, and a
   :class:`mopidy.audio.GstAudio` implementation using GStreamer.
   The API is still very specific to GStreamer, but this split makes it a bit
-  easier to mock out the audio layer in tests.
+  easier to mock out the audio layer in tests. (PR: :issue:`2224`)
 
 - The audio API is no longer exported from submodules, just from
   :mod:`mopidy.audio`. Update your imports accordingly. The removed modules are:
@@ -187,7 +190,7 @@ Changes to the Audio API may affect a few Mopidy backend extensions.
   - :func:`mopidy.audio.create_buffer`
   - :func:`mopidy.audio.millisecond_to_clocktime`
 
-Extension API
+Commands API
 -------------
 
 - Breaking change for extensions with their own CLI commands:
@@ -200,8 +203,12 @@ Extension API
   straight forward, but feel free to reach out for help with migrating your
   extension. (PR: :issue:`2234`)
 
-Commands
---------
+CLI
+---
+
+- Everything in the the app startup from CLI invocation to having a running
+  server has been rebuilt. The code is now hopefully a lot easier to follow and
+  maintain going forwards. (PR: :issue:`2234`)
 
 - Previously, different commands had different default logging levels. Now all
   commands, including :command:`mopidy` itself, only emits logs from warning level
@@ -223,19 +230,29 @@ Audio
 - Workaround GStreamer ``Gst.Structure().get_name()`` regression for versions
   v1.26.0 to v1.26.2 (inclusive). (PR: :issue:`2094`)
 
+Type hints
+----------
+
+- Added type hints to most of the source code. We now have a public
+  :mod:`mopidy.types` module with types that are useful both for Mopidy core and
+  extensions. This module will probably see tweaks going forward, and should not
+  be considered entirely stable yet, but feel free to use the module's types in
+  ``if TYPE_CHECKING:`` code blocks to aid the type checking of your extensions.
+
+- Switched from mypy to pyright and ty for type checking. The jury is still out
+  on which we'll use long-term. (PR: :issue:`2226`)
+
 Internals
 ---------
 
-- Dropped split between the ``main`` and ``develop`` branches. We now use
-  ``main`` for all development, and have removed the ``develop`` branch.
+- Dropped split between the ``main`` and ``develop`` branches in our development
+  process. We now use ``main`` for all development, and have removed the
+  ``develop`` branch.
 
-- Added type hints to most of the source code.
+- Moved bundled extensions to the private package :mod:`mopidy._exts`. (PR:
+  :issue:`2218`)
 
-- Switched from mypy to pyright and ty for type checking. The jury is still out
-  on which we'll use long-term.
-
-- Moved bundled extensions to the private package :mod:`mopidy._exts`. The
-  removed modules are:
+  The removed modules are:
 
   - :mod:`mopidy.file`
   - :mod:`mopidy.http`
@@ -243,7 +260,9 @@ Internals
   - :mod:`mopidy.softwaremixer`
   - :mod:`mopidy.stream`
 
-- Renamed modules to be explicitly private:
+- Renamed modules to be explicitly private. (PR: :issue:`2227`)
+
+  The removed modules are:
 
   - :mod:`mopidy.config.keyring`
   - :mod:`mopidy.internal.*`
