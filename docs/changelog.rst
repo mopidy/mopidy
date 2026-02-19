@@ -41,6 +41,10 @@ the latest Debian stable release, Debian 13 Trixie.
 - Cyclopts >= 3.12 is now required. This is a new dependency for Mopidy to build
   the command line interfaces, replacing our use of :mod:`argparse`.
 
+- Rich >= 3.9 is now required. This is a new dependency for Mopidy transitively
+  via Cyclopts, which we've started to use directly as well to handle colorized
+  log output.
+
 - Requests >= 2.32 is now required.
 
 - Tornado >= 6.4 is now required.
@@ -196,8 +200,18 @@ Extension API
   straight forward, but feel free to reach out for help with migrating your
   extension. (PR: :issue:`2234`)
 
-Extension support
------------------
+Commands
+--------
+
+- Previously, different commands had different default logging levels. Now all
+  commands, including :command:`mopidy` itself, only emits logs from warning level
+  and higher by default. To decrease the logging level and get more verbose log
+  output, add `-v` to the root command one or more times. (PR: :issue:`2239`)
+
+- Support for custom log colors via the ``logcolors`` config section has
+  been removed. Log output to terminals are now colorized using Rich, which
+  hopefully leads to a more pleasant and readable log output. Log colors can
+  still be disabled by changing :confval:`loggging/colors`. (PR: :issue:`2241`)
 
 - The command :command:`mopidy deps` no longer repeats transitive dependencies
   that have already been listed. This reduces the length of the command's output
