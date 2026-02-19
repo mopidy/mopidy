@@ -1187,33 +1187,6 @@ class TestList:
         assert result == "\n  7#1\n  8#2\n  9#3"
 
 
-class TestLogColor:
-    def test_deserialize(self):
-        cv = types.LogColor()
-
-        assert cv.deserialize(b"RED") == "red"
-        assert cv.deserialize("RED") == "red"
-        assert cv.deserialize(b"red") == "red"
-        assert cv.deserialize("red") == "red"
-
-    def test_deserialize_enforces_choices(self):
-        cv = types.LogColor()
-
-        with pytest.raises(ValueError):
-            cv.deserialize("golden")
-
-    def test_serialize(self):
-        cv = types.LogColor()
-
-        assert cv.serialize("red") == "red"
-        assert cv.serialize("blue") == "blue"
-
-    def test_serialize_ignores_unknown_color(self):
-        cv = types.LogColor()
-
-        assert cv.serialize("golden") == ""
-
-
 class TestLogLevel:
     levels: ClassVar[dict[str, int]] = {
         "critical": logging.CRITICAL,

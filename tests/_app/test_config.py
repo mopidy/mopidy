@@ -28,8 +28,8 @@ def test_load_raw_config():
             "color": "true",
             "config_file": "",
             "format": (
-                "%(levelname)-8s %(asctime)s [%(process)d:%(threadName)s] %(name)s\\n  "
-                "%(message)s"
+                "[dim green]%(threadName)s[/dim green] "
+                "[dim yellow]%(name)s[/dim yellow]\\n%(message)s"
             ),
             "verbosity": "0",
         },
@@ -65,8 +65,8 @@ def test_validate_config():
             "color": True,
             "config_file": None,
             "format": (
-                "%(levelname)-8s %(asctime)s [%(process)d:%(threadName)s] %(name)s\n"
-                "  %(message)s"
+                "[dim green]%(threadName)s[/dim green] "
+                "[dim yellow]%(name)s[/dim yellow]\n%(message)s"
             ),
             "verbosity": 0,
         },
@@ -110,8 +110,8 @@ def test_format_config():
         "#verbosity = 0",
         (
             "#format = "
-            r"%(levelname)-8s %(asctime)s [%(process)d:%(threadName)s] %(name)s\n"
-            "  %(message)s"
+            "[dim green]%(threadName)s[/dim green] "
+            "[dim yellow]%(name)s[/dim yellow]\\n%(message)s"
         ),
         "#color = true",
         "#config_file = ",

@@ -21,6 +21,7 @@ dependencies = [
     "pygobject >= 3.50",
     "pykka >= 4.1",
     "requests >= 2.32",
+    "rich >= 13.9",
     "tornado >= 6.4",
 ]
 
