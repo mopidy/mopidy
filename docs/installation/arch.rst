@@ -5,13 +5,13 @@ Arch Linux
 **********
 
 If you are running Arch Linux, you can install
-`mopidy <https://www.archlinux.org/packages/community/any/mopidy/>`_
-from the "Community" repository, as well as
+`mopidy <https://www.archlinux.org/packages/extra/any/mopidy/>`_
+from the "Extra" repository, as well as
 many extensions from AUR.
 
 
-Install from Community
-======================
+Install from Extra
+==================
 
 #. To install Mopidy with all dependencies, you can use::
 
