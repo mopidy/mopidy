@@ -58,6 +58,8 @@ dev = [
     { include-group = "typing" },
 ]
 docs = [
+    "mkdocstrings-python>=2.0.3",
+    "zensical>=0.0.24",
 ]
 ruff = ["ruff == 0.15.0"]
 tests = [
