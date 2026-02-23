@@ -8,11 +8,22 @@ from mopidy.types import Uri
 
 
 class ModelType(enum.StrEnum):
+    """Enumeration of model types."""
+
     ALBUM = "album"
+    """An album."""
+
     ARTIST = "artist"
+    """An artist."""
+
     DIRECTORY = "directory"
+    """A directory."""
+
     PLAYLIST = "playlist"
+    """A playlist."""
+
     TRACK = "track"
+    """A track."""
 
     def __repr__(self) -> str:
         return self.name
@@ -31,15 +42,14 @@ class Ref(BaseModel):
         alias="__model__",
     )
 
-    #: The object URI. Read-only.
     uri: Uri
+    """The object URI."""
 
-    #: The object name. Read-only.
     name: str | None = None
+    """The object name."""
 
-    #: The object type, e.g. "artist", "album", "track", "playlist",
-    #: "directory". Read-only.
     type: ModelType
+    """The object type, e.g. "artist", "album", "track", "playlist", "directory"."""
 
     # For backwards compatibility with Mopidy < 4, we define the `ModelType`
     # enum values as class variables.
@@ -51,25 +61,25 @@ class Ref(BaseModel):
 
     @classmethod
     def album(cls, *, uri: Uri, name: str | None = None) -> Self:
-        """Create a :class:`Ref` with ``type`` :attr:`~ModelType.ALBUM`."""
+        """Create a Ref with type [ALBUM][mopidy.models.ModelType.ALBUM]."""
         return cls(uri=uri, name=name, type=ModelType.ALBUM)
 
     @classmethod
     def artist(cls, *, uri: Uri, name: str | None = None) -> Self:
-        """Create a :class:`Ref` with ``type`` :attr:`~ModelType.ARTIST`."""
+        """Create a Ref with type [ARTIST][mopidy.models.ModelType.ARTIST]."""
         return cls(uri=uri, name=name, type=ModelType.ARTIST)
 
     @classmethod
     def directory(cls, *, uri: Uri, name: str | None = None) -> Self:
-        """Create a :class:`Ref` with ``type`` :attr:`~ModelType.DIRECTORY`."""
+        """Create a Ref with type [DIRECTORY][mopidy.models.ModelType.DIRECTORY]."""
         return cls(uri=uri, name=name, type=ModelType.DIRECTORY)
 
     @classmethod
     def playlist(cls, *, uri: Uri, name: str | None = None) -> Self:
-        """Create a :class:`Ref` with ``type`` :attr:`~ModelType.PLAYLIST`."""
+        """Create a Ref with type [PLAYLIST][mopidy.models.ModelType.PLAYLIST]."""
         return cls(uri=uri, name=name, type=ModelType.PLAYLIST)
 
     @classmethod
     def track(cls, *, uri: Uri, name: str | None = None) -> Self:
-        """Create a :class:`Ref` with ``type`` :attr:`~ModelType.TRACK`."""
+        """Create a Ref with type [TRACK][mopidy.models.ModelType.TRACK]."""
         return cls(uri=uri, name=name, type=ModelType.TRACK)

@@ -24,8 +24,8 @@ class Audio:
     necessary.
     """
 
-    #: The GStreamer state mapped to :class:`mopidy.types.PlaybackState`
     state: PlaybackState = PlaybackState.STOPPED
+    """The GStreamer state mapped to :class:`mopidy.types.PlaybackState`."""
 
     def set_uri(
         self,
