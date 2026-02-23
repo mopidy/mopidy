@@ -58,10 +58,6 @@ dev = [
     { include-group = "typing" },
 ]
 docs = [
-    "pygraphviz >= 1.14",
-    "sphinx >= 8.1",
-    "sphinx-autodoc-typehints >= 2.3",
-    "sphinx-rtd-theme >= 3.0",
 ]
 ruff = ["ruff == 0.15.0"]
 tests = [
@@ -158,10 +154,6 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"docs/*" = [
-    "D",      # pydocstyle
-    "INP001", # flake8-no-pep420
-]
 "tests/*" = [
     "ANN",     # flake8-annotations
     "ARG",     # flake8-unused-arguments

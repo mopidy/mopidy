@@ -6,6 +6,5 @@
 /.venv/
 /build/
 /dist/
-/docs/_build/
 __pycache__/
 mopidy.log*
