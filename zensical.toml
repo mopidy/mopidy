@@ -54,6 +54,37 @@ nav = [
             "guides/extensiondev.md",
         ]},
     ]},
+    {"Reference" = [
+        "reference/index.md",
+        "reference/command.md",
+        "reference/glossary.md",
+        {"Concepts" = [
+            "reference/architecture.md",
+            "reference/models.md",
+            "reference/types.md",
+        ]},
+        {"Framework APIs" = [
+            "reference/core.md",
+            "reference/frontend.md",
+            "reference/backend.md",
+            "reference/ext.md",
+            "reference/exceptions.md",
+        ]},
+        {"Web" = [
+            "reference/http-server.md",
+            "reference/http.md",
+            "reference/js.md",
+        ]},
+        {"Audio" = [
+            "reference/audio.md",
+            "reference/mixer.md",
+        ]},
+        {"Utilities" = [
+            "reference/config.md",
+            "reference/httpclient.md",
+            "reference/zeroconf.md",
+        ]},
+    ]},
 ]
 
 [project.theme]
