@@ -36,6 +36,24 @@ nav = [
             "ext/softwaremixer.md",
         ]},
     ]},
+    {"Guides" = [
+        "guides/index.md",
+        {"Hardware" = [
+            "guides/raspberrypi.md",
+        ]},
+        {"Audio output" = [
+            "guides/audiosinks.md",
+            "guides/icecast.md",
+            "guides/pulseaudio.md",
+            "guides/pipewire.md",
+        ]},
+        {"Remote control" = [
+            "guides/upnp.md",
+        ]},
+        {"Development" = [
+            "guides/extensiondev.md",
+        ]},
+    ]},
 ]
 
 [project.theme]
