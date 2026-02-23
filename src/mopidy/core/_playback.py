@@ -105,19 +105,20 @@ class PlaybackController:
     def set_state(self, new_state: PlaybackState) -> None:
         """Set the playback state.
 
-        Must be :attr:`PLAYING`, :attr:`PAUSED`, or :attr:`STOPPED`.
+        Must be `PLAYING`, `PAUSED`, or `STOPPED`.
 
         Possible states and transitions:
 
-        .. digraph:: state_transitions
-
-            "STOPPED" -> "PLAYING" [ label="play" ]
-            "STOPPED" -> "PAUSED" [ label="pause" ]
-            "PLAYING" -> "STOPPED" [ label="stop" ]
-            "PLAYING" -> "PAUSED" [ label="pause" ]
-            "PLAYING" -> "PLAYING" [ label="play" ]
-            "PAUSED" -> "PLAYING" [ label="resume" ]
-            "PAUSED" -> "STOPPED" [ label="stop" ]
+        ``` mermaid
+        graph LR
+            STOPPED -->|play| PLAYING;
+            STOPPED -->|pause| PAUSED;
+            PLAYING -->|stop| STOPPED;
+            PLAYING -->|pause| PAUSED;
+            PLAYING -->|play| PLAYING;
+            PAUSED -->|resume| PLAYING;
+            PAUSED -->|stop| STOPPED;
+        ```
         """
         validation.check_choice(new_state, validation.PLAYBACK_STATES)
 
