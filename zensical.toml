@@ -10,6 +10,22 @@ edit_uri = "edit/main/docs/"
 repo_url = "https://github.com/mopidy/mopidy"
 use_directory_urls = true
 nav = [
+    {"Get started" = [
+        "index.md",
+        {"Installation" = [
+            "installation/index.md",
+            {"System packages" = "installation/packages.md"},
+            "installation/manual.md",
+        ]},
+        {"Usage" = [
+            "usage/index.md",
+            "usage/service.md",
+            "usage/terminal.md",
+            "usage/config.md",
+            "usage/clients.md",
+            "usage/troubleshooting.md",
+        ]},
+    ]},
 ]
 
 [project.theme]
