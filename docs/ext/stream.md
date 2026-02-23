@@ -1,0 +1,56 @@
+# mopidy-stream
+
+mopidy-stream is an extension for playing streaming music. It is bundled with
+Mopidy and enabled by default.
+
+This backend does not provide a library or playlist storage. It simply accepts
+any URI added to Mopidy's tracklist that matches any of the protocols in the
+[`stream/protocols`](#streamprotocols) config value. It then tries to retrieve metadata
+and play back the URI using GStreamer. For example, if you're using an MPD
+client, you'll just have to find your clients "add URI" interface, and provide
+it with the URI of a stream.
+
+In addition to playing streams, the extension also understands how to extract
+streams from a lot of playlist formats. This is convenient as most Internet
+radio stations links to playlists instead of directly to the radio streams.
+
+If you're having trouble playing back a stream, see [Troubleshooting](../usage/troubleshooting.md)
+for how to check if you have all relevant GStreamer plugins installed.
+
+## Configuration
+
+See [Configuration](../usage/config.md) for general help on configuring Mopidy.
+
+```ini title="mopidy.conf"
+[stream]
+enabled = true
+protocols =
+    http
+    https
+    mms
+    rtmp
+    rtmps
+    rtsp
+timeout = 5000
+metadata_blacklist =
+```
+
+### stream/enabled
+
+If the stream extension should be enabled or not.
+
+### stream/protocols
+
+Whitelist of URI schemas to allow streaming from. Values should be
+separated by either comma or newline.
+
+### stream/timeout
+
+Number of milliseconds before giving up looking up stream metadata.
+
+### stream/metadata_blacklist
+
+List of URI globs to not fetch metadata from before playing. This feature
+is typically needed for play once URIs provided by certain streaming
+providers. Regular POSIX glob semantics apply, so `http://*.example.com/*`
+would match all example.com sub-domains.

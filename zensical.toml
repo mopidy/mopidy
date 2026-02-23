@@ -26,6 +26,16 @@ nav = [
             "usage/troubleshooting.md",
         ]},
     ]},
+    {"Extensions" = [
+        "ext/index.md",
+        {"Bundled extensions" = [
+            "ext/file.md",
+            "ext/m3u.md",
+            "ext/stream.md",
+            "ext/http.md",
+            "ext/softwaremixer.md",
+        ]},
+    ]},
 ]
 
 [project.theme]
