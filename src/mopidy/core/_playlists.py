@@ -47,6 +47,8 @@ def _backend_error_handling(
 
 
 class PlaylistsController:
+    """Manages stored playlists."""
+
     def __init__(self, backends: Backends, core: Core) -> None:
         self.backends = backends
         self.core = core

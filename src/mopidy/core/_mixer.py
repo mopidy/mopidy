@@ -36,6 +36,8 @@ def _mixer_error_handling(mixer: MixerProxy) -> Generator[None]:
 
 
 class MixerController:
+    """Manages volume and muting."""
+
     def __init__(self, mixer: MixerProxy | None) -> None:
         self._mixer = mixer
 

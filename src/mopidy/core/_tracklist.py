@@ -26,6 +26,8 @@ if TYPE_CHECKING:
 
 
 class TracklistController:
+    """Manages the queued tracks."""
+
     def __init__(self, core: Core) -> None:
         self.core = core
         self._next_tlid: TracklistId = TracklistId(1)

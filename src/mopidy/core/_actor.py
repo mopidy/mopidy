@@ -44,23 +44,31 @@ class Core(
     backend.BackendListener,
     mixer.MixerListener,
 ):
+    """The main object of the Core API.
+
+    The core layer sits inbetween the frontends and the backends.
+
+    The core API is the interface that is used by frontends like mopidy-http and
+    mopidy-mpd to control music playback.
+    """
+
     library: LibraryController
-    """An instance of :class:`~mopidy.core.LibraryController`"""
+    """The library controller."""
 
     history: HistoryController
-    """An instance of :class:`~mopidy.core.HistoryController`"""
+    """The history controller."""
 
     mixer: MixerController
-    """An instance of :class:`~mopidy.core.MixerController`"""
+    """The mixer controller."""
 
     playback: PlaybackController
-    """An instance of :class:`~mopidy.core.PlaybackController`"""
+    """The playback controller."""
 
     playlists: PlaylistsController
-    """An instance of :class:`~mopidy.core.PlaylistsController`"""
+    """The playlists controller."""
 
     tracklist: TracklistController
-    """An instance of :class:`~mopidy.core.TracklistController`"""
+    """The tracklist controller."""
 
     def __init__(
         self,

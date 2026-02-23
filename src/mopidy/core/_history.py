@@ -16,6 +16,8 @@ type History = list[tuple[int, Ref]]
 
 
 class HistoryController:
+    """Keeps record of what tracks have been played."""
+
     def __init__(self) -> None:
         self._history: History = []
 

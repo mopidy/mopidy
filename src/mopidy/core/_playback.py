@@ -27,6 +27,8 @@ logger = logging.getLogger(__name__)
 
 
 class PlaybackController:
+    """Manages playback state and the currently playing track."""
+
     def __init__(
         self,
         audio: AudioProxy | None,
