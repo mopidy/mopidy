@@ -224,4 +224,4 @@ commands = [["ty", "check", "{posargs:src}"]]
 
 [tool.tox.env.docs]
 dependency_groups = ["docs"]
-commands = [["sphinx-build", "docs", "{envtmpdir}"]]
+commands = [["zensical", "build", "--clean"]]
