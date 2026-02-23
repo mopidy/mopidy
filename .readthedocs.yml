@@ -1,20 +1,24 @@
 version: 2
 
 build:
-  os: "ubuntu-24.04"
+  os: ubuntu-24.04
   tools:
-    python: "3.13"
+    python: latest
   apt_packages:
     # pyobject dependencies
     - libcairo2-dev
     - libgirepository-2.0-dev
-    # Diagrams in docs
-    - graphviz
   jobs:
     post_create_environment:
       - pip install uv
     post_install:
       - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH uv sync --all-extras --group docs --link-mode copy
+    build:
+      html:
+        - zensical build
+    post_build:
+      - mkdir -p $READTHEDOCS_OUTPUT/html/
+      - cp -r site/* $READTHEDOCS_OUTPUT/html/
 
 sphinx:
   configuration: docs/conf.py
