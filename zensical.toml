@@ -85,6 +85,21 @@ nav = [
             "reference/zeroconf.md",
         ]},
     ]},
+    {"About" = [
+        "about/index.md",
+        "changelog/index.md",
+        "about/versioning.md",
+        {"Contribute" = [
+            "about/contributing.md",
+            "about/devenv.md",
+            "about/codestyle.md",
+            "about/releasing.md",
+        ]},
+        {"Credits" = [
+            "about/authors.md",
+            "about/sponsors.md",
+        ]},
+    ]}
 ]
 
 [project.theme]
