@@ -83,7 +83,7 @@ def config_paths_converter(_: type, tokens: Sequence[Token]) -> list[Path]:
 )
 def config_overrides_converter(
     _: type, tokens: Sequence[Token]
-) -> dict[str, dict[str, str]]:
+) -> list[dict[str, dict[str, str]]]:
     result = defaultdict(dict)
     for token in tokens:
         if "=" not in token.value:
@@ -95,7 +95,7 @@ def config_overrides_converter(
             raise ValueError(msg)
         section, key = key.split("/", 1)
         result[section][key] = value
-    return result
+    return [result]
 
 
 app = App(name="mopidy")
@@ -113,7 +113,7 @@ def launcher(
         Parameter(converter=config_paths_converter),
     ] = config_paths_default(),  # noqa: B008
     config_overrides: Annotated[
-        ConfigOverrides | None,
+        list[ConfigOverrides] | None,
         Parameter(converter=config_overrides_converter),
     ] = None,
     quiet: Annotated[
@@ -158,7 +158,7 @@ def launcher(
         # Resolve current config
         config_manager = ConfigLoader(
             paths=config_paths,
-            overrides=config_overrides,
+            overrides=config_overrides[0] if config_overrides else None,
             extensions=extensions,
         ).validate()
 
