@@ -44,12 +44,33 @@ def test_config_overrides_converter() -> None:
             Token(value="section2/keyA=value2A"),
             Token(value="section1/keyB=value1B"),
         ],
-    ) == {
-        "section1": {
-            "keyA": "value1A",
-            "keyB": "value1B",
-        },
-        "section2": {
-            "keyA": "value2A",
-        },
+    ) == [
+        {
+            "section1": {
+                "keyA": "value1A",
+                "keyB": "value1B",
+            },
+            "section2": {
+                "keyA": "value2A",
+            },
+        }
+    ]
+
+
+def test_config_overrides_multiple_values() -> None:
+    args = [
+        "run",
+        "-o",
+        "http/port=1111",
+        "-o",
+        "http/hostname=127.0.0.1",
+    ]
+
+    _, bound, _ = cli.app.meta.parse_args(args)
+
+    assert bound.arguments["config_overrides"][0] == {
+        "http": {
+            "port": "1111",
+            "hostname": "127.0.0.1",
+        }
     }
