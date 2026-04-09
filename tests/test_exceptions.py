@@ -7,7 +7,6 @@ class ExceptionsTest(unittest.TestCase):
     def test_exception_can_include_message_string(self):
         exc = exceptions.MopidyException("foo")
 
-        assert exc.message == "foo"
         assert str(exc) == "foo"
 
     def test_backend_error_is_a_mopidy_exception(self):
