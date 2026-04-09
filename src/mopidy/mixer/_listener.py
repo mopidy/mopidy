@@ -28,7 +28,8 @@ class MixerListener(listener.Listener):
 
         *MAY* be implemented by actor.
 
-        :param volume: the new volume
+        Args:
+            volume: The new volume.
         """
 
     def mute_changed(self, mute: bool) -> None:
@@ -36,6 +37,6 @@ class MixerListener(listener.Listener):
 
         *MAY* be implemented by actor.
 
-        :param mute: :class:`True` if muted, :class:`False` if not muted
-        :type mute: bool
+        Args:
+            mute: `True` if muted, `False` if not muted.
         """

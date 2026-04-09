@@ -21,19 +21,16 @@ class Mixer:
     """Audio mixer API.
 
     If the mixer has problems during initialization it should raise
-    :exc:`mopidy.exceptions.MixerError` with a descriptive error message. This
-    will make Mopidy print the error message and exit so that the user can fix
-    the issue.
-
-    :param config: the entire Mopidy configuration
+    [MixerError][mopidy.exceptions.MixerError] with a descriptive error
+    message. This will make Mopidy print the error message and exit so that
+    the user can fix the issue.
     """
 
     name: ClassVar[str] = ""
-    """
-    Name of the mixer.
+    """Name of the mixer.
 
     Used when configuring what mixer to use. Should match the
-    :attr:`~mopidy.ext.Extension.ext_name` of the extension providing the
+    [ext_name][mopidy.ext.Extension.ext_name] of the extension providing the
     mixer.
     """
 
@@ -49,7 +46,7 @@ class Mixer:
             Minimum volume, usually silent.
         100:
             Maximum volume.
-        :class:`None`:
+        `None`:
             Volume is unknown.
 
         *MAY be implemented by subclass.*
@@ -61,18 +58,16 @@ class Mixer:
 
         *MAY be implemented by subclass.*
 
-        Returns :class:`True` if successful, :class:`False` otherwise.
-
-        :param volume: Volume in the range [0..100]
+        Returns `True` if successful, `False` otherwise.
         """
         return False
 
     def trigger_volume_changed(self, volume: Percentage) -> None:
-        """Send ``volume_changed`` event to all mixer listeners.
+        """Send `volume_changed` event to all mixer listeners.
 
         This method should be called by subclasses when the volume is changed,
-        either because of a call to :meth:`set_volume` or because of any
-        external entity changing the volume.
+        either because of a call to [set_volume][] or because of any external
+        entity changing the volume.
         """
         logger.debug("Mixer event: volume_changed(volume=%d)", volume)
         MixerListener.send("volume_changed", volume=volume)
@@ -82,8 +77,7 @@ class Mixer:
 
         *MAY be implemented by subclass.*
 
-        Returns :class:`True` if muted, :class:`False` if unmuted, and
-        :class:`None` if unknown.
+        Returns `True` if muted, `False` if unmuted, and `None` if unknown.
         """
         return None
 
@@ -92,18 +86,16 @@ class Mixer:
 
         *MAY be implemented by subclass.*
 
-        Returns :class:`True` if successful, :class:`False` otherwise.
-
-        :param mute: :class:`True` to mute, :class:`False` to unmute
+        Returns `True` if successful, `False` otherwise.
         """
         return False
 
     def trigger_mute_changed(self, mute: bool) -> None:
-        """Send ``mute_changed`` event to all mixer listeners.
+        """Send `mute_changed` event to all mixer listeners.
 
         This method should be called by subclasses when the mute state is
-        changed, either because of a call to :meth:`set_mute` or because of
-        any external entity changing the mute state.
+        changed, either because of a call to [set_mute][] or because of any
+        external entity changing the mute state.
         """
         logger.debug("Mixer event: mute_changed(mute=%s)", mute)
         MixerListener.send("mute_changed", mute=mute)
