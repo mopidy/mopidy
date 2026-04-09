@@ -36,14 +36,13 @@ class Zeroconf:
 
     Currently, this only works on Linux using Avahi via D-Bus.
 
-    :param str name: human readable name of the service, e.g. 'MPD on neptune'
-    :param str stype: service type, e.g. '_mpd._tcp'
-    :param int port: TCP port of the service, e.g. 6600
-    :param str domain: local network domain name, defaults to ''
-    :param str host: interface to advertise the service on, defaults to ''
-    :param text: extra information depending on ``stype``, defaults to empty
-        list
-    :type text: list of str
+    Args:
+        name: Human readable name of the service, e.g. `'MPD on neptune'`.
+        stype: Service type, e.g. `'_mpd._tcp'`.
+        port: TCP port of the service, e.g. `6600`.
+        domain: Local network domain name, defaults to `''`.
+        host: Interface to advertise the service on, defaults to `''`.
+        text: Extra information depending on `stype`, defaults to empty list.
     """
 
     def __init__(  # noqa: PLR0913
