@@ -15,11 +15,11 @@ logger = logging.getLogger(__name__)
 def get_xdg_dirs() -> dict[str, pathlib.Path]:
     """Returns a dict of all the known XDG Base Directories for the current user.
 
-    The keys ``XDG_CACHE_DIR``, ``XDG_CONFIG_DIR``, and ``XDG_DATA_DIR`` is
+    The keys `XDG_CACHE_DIR`, `XDG_CONFIG_DIR`, and `XDG_DATA_DIR` is
     always available.
 
-    Additional keys, like ``XDG_MUSIC_DIR``, may be available if the
-    ``$XDG_CONFIG_DIR/user-dirs.dirs`` file exists and is parseable.
+    Additional keys, like `XDG_MUSIC_DIR`, may be available if the
+    `$XDG_CONFIG_DIR/user-dirs.dirs` file exists and is parseable.
 
     See https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
     for the XDG Base Directory specification.
