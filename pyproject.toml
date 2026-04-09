@@ -128,10 +128,6 @@ ignore = [
     "D104",    # undocumented-public-package  # TODO
     "D105",    # undocumented-magic-method
     "D107",    # undocumented-public-init  # TODO
-    "D203",    # one-blank-line-before-class
-    "D205",    # blank-line-after-summary  # TODO
-    "D213",    # multi-line-summary-second-line
-    "D401",    # non-imperative-mood  # TODO
     "FBT001",  # boolean-positional-arg-in-function-definition  # TODO
     "FBT002",  # boolean-default-value-in-function-definition  # TODO
     "FBT003",  # boolean-positional-value-in-function-call  # TODO
@@ -172,6 +168,9 @@ ignore = [
     "SLF001",  # private-member-access
     "TRY002",  # raise-vanilla-class
 ]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 
 [tool.rumdl.global]
