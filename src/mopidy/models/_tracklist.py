@@ -18,9 +18,11 @@ class TlTrack(BaseModel):
     arguments must be provided, and they must appear in the order they are
     listed here.
 
-    This class also supports iteration, so your extract its values like this::
+    This class also supports iteration, so you can extract its values like this:
 
-        (tlid, track) = tl_track
+    ```python
+    (tlid, track) = tl_track
+    ```
     """
 
     model: Literal["TlTrack"] = Field(
