@@ -22,11 +22,7 @@ logger = logging.getLogger(__name__)
 
 @pykka.traversable
 class PlaybackProvider:
-    """A playback provider provides audio playback control.
-
-    :param audio: the audio actor
-    :param backend: the backend
-    """
+    """A playback provider provides audio playback control."""
 
     def __init__(self, audio: AudioProxy, backend: Backend) -> None:
         self.audio = audio
@@ -37,7 +33,7 @@ class PlaybackProvider:
 
         *MAY be reimplemented by subclass.*
 
-        Returns :class:`True` if successful, else :class:`False`.
+        Returns `True` if successful, else `False`.
         """
         return self.audio.pause_playback().get()
 
@@ -46,7 +42,7 @@ class PlaybackProvider:
 
         *MAY be reimplemented by subclass.*
 
-        Returns :class:`True` if successful, else :class:`False`.
+        Returns `True` if successful, else `False`.
         """
         return self.audio.start_playback().get()
 
@@ -67,11 +63,12 @@ class PlaybackProvider:
         *MAY be reimplemented by subclass.*
 
         This is very likely the *only* thing you need to override as a backend
-        author. Typically this is where you convert any Mopidy specific URI
-        to a real URI and then return it. If you can't convert the URI just
-        return :class:`None`.
+        author. Typically this is where you convert any Mopidy-specific URI to
+        a real URI and then return it. If you can't convert the URI just return
+        `None`.
 
-        :param uri: the URI to translate
+        Args:
+            uri: The URI to translate.
         """
         return uri
 
@@ -82,8 +79,6 @@ class PlaybackProvider:
 
         Playing a source as a live stream disables buffering, which reduces
         latency before playback starts, and discards data when paused.
-
-        :param uri: the URI
         """
         return False
 
@@ -94,20 +89,18 @@ class PlaybackProvider:
 
         When streaming a fixed length file, the entire file can be buffered
         to improve playback performance.
-
-        :param uri: the URI
         """
         return False
 
     def on_source_setup(self, source: Gst.Element) -> None:
-        """Called when a new GStreamer source is created, allowing us to configure
-        the source. This runs in the audio thread so should not block.
+        """Called when a new GStreamer source is created, to allow configuration.
+
+        This runs in the audio thread so should not block.
 
         *MAY be reimplemented by subclass.*
 
-        :param source: the GStreamer source element
-
-        .. versionadded:: 3.4
+        Args:
+            source: The GStreamer source element.
         """
 
     def change_track(self, track: Track) -> bool:
@@ -115,14 +108,15 @@ class PlaybackProvider:
 
         *MAY be reimplemented by subclass.*
 
-        It is unlikely it makes sense for any backends to override
-        this. For most practical purposes it should be considered an internal
-        call between backends and core that backend authors should not touch.
+        It is unlikely it makes sense for any backends to override this. For
+        most practical purposes it should be considered an internal call between
+        backends and core that backend authors should not touch.
 
-        The default implementation will call :meth:`translate_uri` which
-        is what you want to implement.
+        The default implementation will call [translate_uri][], which is what
+        you want to implement.
 
-        :param track: the track to play
+        Args:
+            track: The track to play.
         """
         uri = self.translate_uri(track.uri)
         if uri != track.uri:
@@ -142,7 +136,7 @@ class PlaybackProvider:
 
         *MAY be reimplemented by subclass.*
 
-        Returns :class:`True` if successful, else :class:`False`.
+        Returns `True` if successful, else `False`.
         """
         return self.audio.start_playback().get()
 
@@ -151,9 +145,7 @@ class PlaybackProvider:
 
         *MAY be reimplemented by subclass.*
 
-        Returns :class:`True` if successful, else :class:`False`.
-
-        :param time_position: time position in milliseconds
+        Returns `True` if successful, else `False`.
         """
         return self.audio.set_position(time_position).get()
 
@@ -165,7 +157,7 @@ class PlaybackProvider:
         Should not be used for tracking if tracks have been played or when we
         are done playing them.
 
-        Returns :class:`True` if successful, else :class:`False`.
+        Returns `True` if successful, else `False`.
         """
         return self.audio.stop_playback().get()
 

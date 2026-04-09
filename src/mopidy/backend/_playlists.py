@@ -17,9 +17,7 @@ class PlaylistsProvider:
     """A playlist provider exposes a collection of playlists.
 
     The methods can create/change/delete playlists in this collection, and
-    lookup of any playlist the backend knows about.
-
-    :param backend: backend the controller is a part of
+    look up any playlist the backend knows about.
     """
 
     def __init__(self, backend: Backend) -> None:
@@ -28,67 +26,51 @@ class PlaylistsProvider:
     def as_list(self) -> list[Ref]:
         """Get a list of the currently available playlists.
 
-        Returns a list of :class:`~mopidy.models.Ref` objects referring to the
+        Returns a list of [Ref][mopidy.models.Ref] objects referring to the
         playlists. In other words, no information about the playlists' content
         is given.
-
-        .. versionadded:: 1.0
         """
         raise NotImplementedError
 
     def get_items(self, uri: Uri) -> list[Ref] | None:
-        """Get the items in a playlist specified by ``uri``.
+        """Get the items in a playlist specified by `uri`.
 
-        Returns a list of :class:`~mopidy.models.Ref` objects referring to the
-        playlist's items.
-
-        If a playlist with the given ``uri`` doesn't exist, it returns
-        :class:`None`.
-
-        .. versionadded:: 1.0
+        Returns a list of [Ref][mopidy.models.Ref] objects referring to the
+        playlist's items, or `None` if the playlist doesn't exist.
         """
         raise NotImplementedError
 
     def create(self, name: str) -> Playlist | None:
         """Create a new empty playlist with the given name.
 
-        Returns a new playlist with the given name and an URI, or :class:`None`
-        on failure.
+        Returns a new playlist with the given name and a URI, or `None` on
+        failure.
 
         *MUST be implemented by subclass.*
-
-        :param name: name of the new playlist
         """
         raise NotImplementedError
 
     def delete(self, uri: Uri) -> bool:
         """Delete playlist identified by the URI.
 
-        Returns :class:`True` if deleted, :class:`False` otherwise.
+        Returns `True` if deleted, `False` otherwise.
 
         *MUST be implemented by subclass.*
-
-        :param uri: URI of the playlist to delete
-
-        .. versionchanged:: 2.2
-            Return type defined.
         """
         raise NotImplementedError
 
     def lookup(self, uri: Uri) -> Playlist | None:
-        """Lookup playlist with given URI in both the set of playlists and in any
-        other playlist source.
+        """Look up playlist with given URI.
 
-        Returns the playlists or :class:`None` if not found.
+        Searches both the set of playlists and any other playlist sources.
+        Returns the playlist or `None` if not found.
 
         *MUST be implemented by subclass.*
-
-        :param uri: playlist URI
         """
         raise NotImplementedError
 
     def refresh(self) -> None:
-        """Refresh the playlists in :attr:`playlists`.
+        """Refresh the playlists.
 
         *MUST be implemented by subclass.*
         """
@@ -97,14 +79,12 @@ class PlaylistsProvider:
     def save(self, playlist: Playlist) -> Playlist | None:
         """Save the given playlist.
 
-        The playlist must have an ``uri`` attribute set. To create a new
-        playlist with an URI, use :meth:`create`.
+        The playlist must have a `uri` attribute set. To create a new playlist
+        with a URI, use [create][].
 
-        Returns the saved playlist or :class:`None` on failure.
+        Returns the saved playlist or `None` on failure.
 
         *MUST be implemented by subclass.*
-
-        :param playlist: the playlist to save
         """
         raise NotImplementedError
 
