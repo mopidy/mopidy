@@ -34,7 +34,8 @@ class AudioListener(listener.Listener):
 
         *MAY* be implemented by actor.
 
-        :param string uri: URI the stream has started playing.
+        Args:
+            uri: URI the stream has started playing.
         """
 
     def position_changed(self, position: DurationMs) -> None:
@@ -42,7 +43,8 @@ class AudioListener(listener.Listener):
 
         *MAY* be implemented by actor.
 
-        :param int position: Position in milliseconds.
+        Args:
+            position: Position in milliseconds.
         """
 
     def state_changed(
@@ -67,13 +69,11 @@ class AudioListener(listener.Listener):
 
         *MAY* be implemented by actor.
 
-        :param old_state: the state before the change
-        :type old_state: :class:`mopidy.types.PlaybackState`
-        :param new_state: the state after the change
-        :type new_state: :class:`mopidy.types.PlaybackState`
-        :param target_state: the intended state
-        :type target_state: :class:`mopidy.types.PlaybackState`
-            or :class:`None` if this is a final state.
+        Args:
+            old_state: The state before the change.
+            new_state: The state after the change.
+            target_state: The intended state, or `None` if this is a final
+                state.
         """
 
     def tags_changed(self, tags: set[str]) -> None:
@@ -88,6 +88,6 @@ class AudioListener(listener.Listener):
 
         *MAY* be implemented by actor.
 
-        :param tags: The tags that have just been updated.
-        :type tags: :class:`set` of strings
+        Args:
+            tags: The tags that have just been updated.
         """

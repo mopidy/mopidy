@@ -690,7 +690,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
         # This function *MUST* be called before changing URIs or doing
         # changes like updating data that is being pushed. The reason for this
         # is that GStreamer will reset all its state when it changes to
-        # :attr:`Gst.State.READY`.
+        # `Gst.State.READY`.
         return self._set_state(Gst.State.READY)
 
     @override
@@ -700,22 +700,11 @@ class GstAudio(Audio, pykka.ThreadingActor):
     def _set_state(self, state: Gst.State) -> bool:
         """Internal method for setting the raw GStreamer state.
 
-        .. digraph:: gst_state_transitions
+        Returns `True` if successful, else `False`.
 
-            graph [rankdir="LR"];
-            node [fontsize=10];
-
-            "NULL" -> "READY"
-            "PAUSED" -> "PLAYING"
-            "PAUSED" -> "READY"
-            "PLAYING" -> "PAUSED"
-            "READY" -> "NULL"
-            "READY" -> "PAUSED"
-
-        Returns :class:`True` if successful, else :class:`False`.
-
-        :param state: State to set playbin to. One of: `Gst.State.NULL`,
-            `Gst.State.READY`, `Gst.State.PAUSED` and `Gst.State.PLAYING`.
+        Args:
+            state: State to set playbin to. One of: `Gst.State.NULL`,
+                `Gst.State.READY`, `Gst.State.PAUSED` and `Gst.State.PLAYING`.
         """
         assert self._playbin
 

@@ -13,13 +13,14 @@ logger = logging.getLogger(__name__)
 
 
 def repr_tags(tags: dict[str, list[Any]], max_bytes: int = 10) -> str:
-    """Returns a printable representation of a :class:`Gst.TagList`.
+    """Returns a printable representation of a `Gst.TagList`.
 
     Tag values of type bytes are truncated to the specified length to avoid
     large amounts of output when logging.
 
-    :param tags: A converted taglist to be represented.
-    :param max_bytes: The maximum number of bytes to show for bytes tag values.
+    Args:
+        tags: A converted taglist to be represented.
+        max_bytes: The maximum number of bytes to show for bytes tag values.
     """
     result = dict(tags)
     for tag_values in result.values():
@@ -30,7 +31,7 @@ def repr_tags(tags: dict[str, list[Any]], max_bytes: int = 10) -> str:
 
 
 def convert_taglist(taglist: Gst.TagList) -> dict[str, list[Any]]:
-    """Convert a :class:`Gst.TagList` to plain Python types.
+    """Convert a `Gst.TagList` to plain Python types.
 
     Knows how to convert:
 
@@ -41,14 +42,11 @@ def convert_taglist(taglist: Gst.TagList) -> dict[str, list[Any]]:
     - Booleans
 
     Unknown types will be ignored and trace logged. Tag keys are all strings
-    defined as part GStreamer under GstTagList_.
+    defined as part of GStreamer's
+    [GstTagList](https://developer.gnome.org/gstreamer/stable/gstreamer-GstTagList.html).
 
-    .. _GstTagList: https://developer.gnome.org/gstreamer/stable/\
-gstreamer-GstTagList.html
-
-    :param taglist: A GStreamer taglist to be converted.
-    :type taglist: :class:`Gst.TagList`
-    :rtype: dictionary of tag keys with a list of values.
+    Args:
+        taglist: A GStreamer taglist to be converted.
     """
     result = collections.defaultdict(list)
 
@@ -133,12 +131,7 @@ def convert_tags_to_track(
     length: DurationMs | None = None,
     last_modified: int | None = None,
 ) -> Track:
-    """Convert our normalized tags to a track.
-
-    :param  tags: dictionary of tag keys with a list of values
-    :type tags: :class:`dict`
-    :rtype: :class:`mopidy.models.Track`
-    """
+    """Convert our normalized tags to a track."""
     album_kwargs = {}
     track_kwargs = {}
 
