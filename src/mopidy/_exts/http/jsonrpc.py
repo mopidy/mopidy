@@ -134,32 +134,36 @@ class Wrapper:
     "mounts".
 
     To expose objects, add them all to the objects mapping. The key in the
-    mapping is used as the object's mounting point in the exposed API::
+    mapping is used as the object's mounting point in the exposed API:
 
-       jrw = JsonRpcWrapper(objects={
-           'foo': foo,
-           'hello': lambda: 'Hello, world!',
-       })
+    ```python
+    jrw = JsonRpcWrapper(objects={
+        'foo': foo,
+        'hello': lambda: 'Hello, world!',
+    })
+    ```
 
     This will export the Python callables on the left as the JSON-RPC 2.0
-    method names on the right::
+    method names on the right:
 
-        foo.bar() -> foo.bar
-        foo.baz() -> foo.baz
-        lambda    -> hello
+    ```
+    foo.bar() -> foo.bar
+    foo.baz() -> foo.baz
+    lambda    -> hello
+    ```
 
     Only the public methods of the mounted objects, or functions/methods
     included directly in the mapping, will be exposed.
 
-    If a method returns a :class:`pykka.Future`, the future will be completed
+    If a method returns a `pykka.Future`, the future will be completed
     and its value unwrapped before the JSON-RPC wrapper returns the response.
 
     For further details on the JSON-RPC 2.0 spec, see
     https://www.jsonrpc.org/specification
 
-    :param objects: mapping between mounting points and exposed functions or
-        class instances
-    :type objects: dict
+    Args:
+        objects: Mapping between mounting points and exposed functions or
+            class instances.
     """
 
     def __init__(
@@ -174,12 +178,11 @@ class Wrapper:
     def handle_json(self, request_json: str | bytes) -> bytes | None:
         """Handles an incoming request encoded as a JSON string.
 
-        Returns a response as a JSON string for commands, and :class:`None` for
+        Returns a response as a JSON string for commands, and `None` for
         notifications.
 
-        :param request_json: the serialized JSON-RPC request
-        :type request_json: string
-        :rtype: string or :class:`None`
+        Args:
+            request_json: The serialized JSON-RPC request.
         """
         try:
             request = pydantic_core.from_json(request_json)
@@ -197,12 +200,11 @@ class Wrapper:
     ) -> Response | list[Response] | None:
         """Handles an incoming request in the form of a Python data structure.
 
-        Returns a Python data structure for commands, or a :class:`None` for
+        Returns a Python data structure for commands, or `None` for
         notifications.
 
-        :param request: the unserialized JSON-RPC request
-        :type request: dict
-        :rtype: dict, list, or :class:`None`
+        Args:
+            request: The unserialized JSON-RPC request.
         """
         if isinstance(request, list):
             return self._handle_batch(request)
@@ -382,24 +384,28 @@ class ApplicationError(JsonRpcError):
 
 
 class Inspector:
-    """Inspects a group of classes and functions to create a description of what
+    """Inspects classes and functions to create a JSON-RPC 2.0 description.
+
+    Inspects a group of classes and functions to create a description of what
     methods they can expose over JSON-RPC 2.0.
 
     To inspect one or more classes, add them all to the objects mapping. The
     key in the mapping is used as the classes' mounting point in the exposed
-    API::
+    API:
 
-        inspector = Inspector(objects={
-            'foo': Foo,
-            'hello': lambda: 'Hello, world!',
-        })
+    ```python
+    inspector = Inspector(objects={
+        'foo': Foo,
+        'hello': lambda: 'Hello, world!',
+    })
+    ```
 
     Since the inspector is based on inspecting classes and not instances, it
     will not include methods added dynamically. The wrapper works with
     instances, and it will thus export dynamically added methods as well.
 
-    :param objects: mapping between mounts and exposed functions or classes
-    :type objects: dict
+    Args:
+        objects: Mapping between mounts and exposed functions or classes.
     """
 
     def __init__(self, objects: dict[str, Callable[..., Any]]) -> None:
@@ -409,8 +415,10 @@ class Inspector:
         self.objects = objects
 
     def describe(self) -> dict[str, MethodDescription]:
-        """Inspects the object and returns a data structure which describes the
-        available properties and methods.
+        """Inspects the object and returns a description of its API.
+
+        Returns a data structure which describes the available properties and
+        methods.
         """
         methods: dict[str, MethodDescription] = {}
         for mount, obj in self.objects.items():
