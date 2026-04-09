@@ -6,18 +6,18 @@ from typing import Literal, NewType, TypeVar
 
 # Date types
 Date = NewType("Date", str)
-"""A date string on the form ``YYYY-MM-DD``."""
+"""A date string on the form `YYYY-MM-DD`."""
 
 Year = NewType("Year", str)
-"""A year string on the form ``YYYY``."""
+"""A year string on the form `YYYY`."""
 
 type DateOrYear = Date | Year
-"""A :class:`Date` or :class:`Year`."""
+"""A [Date][mopidy.types.Date] or [Year][mopidy.types.Year]."""
 
 
 # Integer types
 Percentage = NewType("Percentage", int)
-"""An integer in the range 0–100 representing a percentage."""
+"""An integer in the range 0-100 representing a percentage."""
 
 DurationMs = NewType("DurationMs", int)
 """A duration in milliseconds."""
@@ -28,7 +28,7 @@ Uri = NewType("Uri", str)
 """A URI string identifying a resource, e.g. a track or stream."""
 
 UriScheme = NewType("UriScheme", str)
-"""The scheme part of a URI, e.g. ``spotify`` or ``file``."""
+"""The scheme part of a URI, e.g. `spotify` or `file`."""
 
 
 # Query types
@@ -37,7 +37,7 @@ type QueryValue = str | int
 """A single query value; either a string or an integer."""
 
 type Query[F] = dict[F, Iterable[QueryValue]]
-"""A query mapping field names to lists of :class:`QueryValue`."""
+"""A query mapping field names to lists of [QueryValue][mopidy.types.QueryValue]."""
 
 
 # Types for distinct queries
@@ -58,15 +58,17 @@ type DistinctField = Literal[
     "musicbrainz_artistid",
     "musicbrainz_trackid",
 ]
-"""A field name that can be used in a :meth:`~mopidy.core.LibraryController.get_distinct` query."""
+"""Field name for [get_distinct][mopidy.core.LibraryController.get_distinct]."""
 
 
 # Types for search queries
 type SearchField = DistinctField | Literal["any"]
-"""A field name that can be used in a :meth:`~mopidy.core.LibraryController.search` query."""
+"""Field name for [search][mopidy.core.LibraryController.search]."""
 
 type SearchQuery = dict[SearchField, Iterable[QueryValue]]
-"""A search query mapping :class:`SearchField` names to lists of :class:`QueryValue`."""
+"""A search query mapping [SearchField][mopidy.types.SearchField] names
+to lists of [QueryValue][mopidy.types.QueryValue].
+"""
 
 
 # Tracklist types
