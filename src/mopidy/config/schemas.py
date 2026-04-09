@@ -41,11 +41,10 @@ class ConfigSchema(collections.UserDict):
     """Logical group of config values that correspond to a config section.
 
     Schemas are set up by assigning config keys with config values to
-    instances. Once setup :meth:`deserialize` can be called with a dict of
-    values to process. For convenience we also support :meth:`format` method
+    instances. Once setup [deserialize][] can be called with a dict of
+    values to process. For convenience we also support [format][] method
     that can used for converting the values to a dict that can be printed and
-    :meth:`serialize` for converting the values to a form suitable for
-    persistence.
+    [serialize][] for converting the values to a form suitable for persistence.
     """
 
     def __init__(
@@ -60,7 +59,7 @@ class ConfigSchema(collections.UserDict):
         self,
         values: dict[str, Any],
     ) -> tuple[dict[str, Any], dict[str, Any]]:
-        """Validates the given ``values`` using the config schema.
+        """Validates the given `values` using the config schema.
 
         Returns a tuple with cleaned values and errors.
         """
@@ -93,9 +92,9 @@ class ConfigSchema(collections.UserDict):
         values: dict[str, Any],
         display: bool = False,
     ) -> dict[str, Any]:
-        """Converts the given ``values`` to a format suitable for persistence.
+        """Converts the given `values` to a format suitable for persistence.
 
-        If ``display`` is :class:`True` secret config values, like passwords,
+        If `display` is `True` secret config values, like passwords,
         will be masked out.
 
         Returns a dict of config keys and values.
@@ -110,7 +109,7 @@ class ConfigSchema(collections.UserDict):
 class MapConfigSchema:
     """Schema for handling multiple unknown keys with the same type.
 
-    Does not sub-class :class:`ConfigSchema`, but implements the same
+    Does not sub-class [ConfigSchema][], but implements the same
     serialize/deserialize interface.
     """
 

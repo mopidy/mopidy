@@ -18,10 +18,11 @@ if TYPE_CHECKING:
 
 
 def validate_required(value: Any, required: bool) -> None:
-    """Validate that ``value`` is set if ``required``.
+    """Validate that `value` is set if `required`.
 
-    Normally called in :meth:`~mopidy.config.types.ConfigValue.deserialize` on
-    the raw string, _not_ the converted value.
+    Normally called in
+    [ConfigValue.deserialize][mopidy.config.types.ConfigValue.deserialize]
+    on the raw string, _not_ the converted value.
     """
     if required and not value:
         msg = "must be set."
@@ -29,9 +30,10 @@ def validate_required(value: Any, required: bool) -> None:
 
 
 def validate_choice(value: T, choices: Iterable[T] | None) -> None:
-    """Validate that ``value`` is one of the ``choices``.
+    """Validate that `value` is one of the `choices`.
 
-    Normally called in :meth:`~mopidy.config.types.ConfigValue.deserialize`.
+    Normally called in
+    [ConfigValue.deserialize][mopidy.config.types.ConfigValue.deserialize].
     """
     if choices is not None and value not in choices:
         names = ", ".join(repr(c) for c in choices)
@@ -40,9 +42,10 @@ def validate_choice(value: T, choices: Iterable[T] | None) -> None:
 
 
 def validate_minimum(value: CT, minimum: CT | None) -> None:
-    """Validate that ``value`` is at least ``minimum``.
+    """Validate that `value` is at least `minimum`.
 
-    Normally called in :meth:`~mopidy.config.types.ConfigValue.deserialize`.
+    Normally called in
+    [ConfigValue.deserialize][mopidy.config.types.ConfigValue.deserialize].
     """
     if minimum is not None and value < minimum:
         msg = f"{value!r} must be larger than {minimum!r}."
@@ -50,9 +53,10 @@ def validate_minimum(value: CT, minimum: CT | None) -> None:
 
 
 def validate_maximum(value: CT, maximum: CT | None) -> None:
-    """Validate that ``value`` is at most ``maximum``.
+    """Validate that `value` is at most `maximum`.
 
-    Normally called in :meth:`~mopidy.config.types.ConfigValue.deserialize`.
+    Normally called in
+    [ConfigValue.deserialize][mopidy.config.types.ConfigValue.deserialize].
     """
     if maximum is not None and value > maximum:
         msg = f"{value!r} must be smaller than {maximum!r}."

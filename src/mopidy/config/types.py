@@ -63,7 +63,7 @@ class ConfigValue[T](ABC):
     2. Serializing a value back to a string that can be stored in a config.
     3. Formatting a value to a printable form (useful for masking secrets).
 
-    :class:`None` values should not be deserialized, serialized or formatted,
+    `None` values should not be deserialized, serialized or formatted,
     the code interacting with the config should simply skip None config values.
     """
 
@@ -216,11 +216,9 @@ class Float(ConfigValue[float]):
 class Boolean(ConfigValue[bool]):
     """Boolean value.
 
-    Accepts ``1``, ``yes``, ``true``, and ``on`` with any casing as
-    :class:`True`.
+    Accepts `1`, `yes`, `true`, and `on` with any casing as `True`.
 
-    Accepts ``0``, ``no``, ``false``, and ``off`` with any casing as
-    :class:`False`.
+    Accepts `0`, `no`, `false`, and `off` with any casing as `False`.
     """
 
     true_values = ("1", "yes", "true", "on")
@@ -393,8 +391,8 @@ class List[V: ConfigValue = String](ConfigValue[tuple[V, ...] | frozenset[V]]):
 class LogLevel(ConfigValue[int]):
     """Log level value.
 
-    Expects one of ``critical``, ``error``, ``warning``, ``info``, ``debug``,
-    ``trace``, or ``all``, with any casing.
+    Expects one of `critical`, `error`, `warning`, `info`, `debug`,
+    `trace`, or `all`, with any casing.
     """
 
     levels: ClassVar[dict[LogLevelName, int]] = {
@@ -474,11 +472,11 @@ class Path(ConfigValue[_ExpandedPath]):
 
     The following expansions of the path will be done:
 
-    - ``~`` to the current user's home directory
-    - ``$XDG_CACHE_DIR`` according to the XDG spec
-    - ``$XDG_CONFIG_DIR`` according to the XDG spec
-    - ``$XDG_DATA_DIR`` according to the XDG spec
-    - ``$XDG_MUSIC_DIR`` according to the XDG spec
+    - `~` to the current user's home directory
+    - `$XDG_CACHE_DIR` according to the XDG spec
+    - `$XDG_CONFIG_DIR` according to the XDG spec
+    - `$XDG_DATA_DIR` according to the XDG spec
+    - `$XDG_MUSIC_DIR` according to the XDG spec
     """
 
     def __init__(self, optional: bool = False) -> None:
