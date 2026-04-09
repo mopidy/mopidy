@@ -245,9 +245,9 @@ class Core(
     def _load_state(self, coverage: Iterable[str]) -> None:
         """Restore state from disk.
 
-        Load state from disk and restore it. Parameter ``coverage``
+        Load state from disk and restore it. Parameter `coverage`
         limits the amount of data to restore. Possible
-        values for ``coverage`` (list of one or more of):
+        values for `coverage` (list of one or more of):
 
             - 'tracklist' fill the tracklist
             - 'mode' set tracklist properties (consume, random, repeat, single)
@@ -255,8 +255,8 @@ class Core(
             - 'mixer' set mixer volume and mute state
             - 'history' restore history
 
-        :param coverage: amount of data to restore
-        :type coverage: list of strings
+        Args:
+            coverage: List of items to restore.
         """
         state_file = self._get_state_file()
         logger.info("Loading state from %s", state_file)

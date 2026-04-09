@@ -56,8 +56,9 @@ class CoreListener(listener.Listener):
         *MAY* be implemented by actor. By default, this method forwards the
         event to the specific event methods.
 
-        :param event: the event name
-        :param kwargs: any other arguments to the specific event handlers
+        Args:
+            event: The event name.
+            kwargs: Any other arguments to the specific event handlers.
         """
         # Just delegate to parent, entry mostly for docs.
         super().on_event(event, **kwargs)
@@ -71,8 +72,9 @@ class CoreListener(listener.Listener):
 
         *MAY* be implemented by actor.
 
-        :param tl_track: the track that was playing when playback paused
-        :param time_position: the time position in milliseconds
+        Args:
+            tl_track: The track that was playing when playback paused.
+            time_position: The time position in milliseconds.
         """
 
     def track_playback_resumed(
@@ -84,8 +86,9 @@ class CoreListener(listener.Listener):
 
         *MAY* be implemented by actor.
 
-        :param tl_track: the track that was playing when playback resumed
-        :param time_position: the time position in milliseconds
+        Args:
+            tl_track: The track that was playing when playback resumed.
+            time_position: The time position in milliseconds.
         """
 
     def track_playback_started(self, tl_track: TlTrack) -> None:
@@ -93,7 +96,8 @@ class CoreListener(listener.Listener):
 
         *MAY* be implemented by actor.
 
-        :param tl_track: the track that just started playing
+        Args:
+            tl_track: The track that just started playing.
         """
 
     def track_playback_ended(
@@ -105,8 +109,9 @@ class CoreListener(listener.Listener):
 
         *MAY* be implemented by actor.
 
-        :param tl_track: the track that was played before playback stopped
-        :param time_position: the time position in milliseconds
+        Args:
+            tl_track: The track that was played before playback stopped.
+            time_position: The time position in milliseconds.
         """
 
     def playback_state_changed(
@@ -118,10 +123,9 @@ class CoreListener(listener.Listener):
 
         *MAY* be implemented by actor.
 
-        :param old_state: the state before the change
-        :type old_state: string from :class:`mopidy.types.PlaybackState` field
-        :param new_state: the state after the change
-        :type new_state: string from :class:`mopidy.types.PlaybackState` field
+        Args:
+            old_state: The state before the change.
+            new_state: The state after the change.
         """
 
     def tracklist_changed(self) -> None:
@@ -141,8 +145,8 @@ class CoreListener(listener.Listener):
 
         *MAY* be implemented by actor.
 
-        :param playlist: the changed playlist
-        :type playlist: :class:`mopidy.models.Playlist`
+        Args:
+            playlist: The changed playlist.
         """
 
     def playlist_deleted(self, uri: Uri) -> None:
@@ -150,8 +154,8 @@ class CoreListener(listener.Listener):
 
         *MAY* be implemented by actor.
 
-        :param uri: the URI of the deleted playlist
-        :type uri: string
+        Args:
+            uri: The URI of the deleted playlist.
         """
 
     def options_changed(self) -> None:
@@ -165,8 +169,8 @@ class CoreListener(listener.Listener):
 
         *MAY* be implemented by actor.
 
-        :param volume: the new volume in the range [0..100]
-        :type volume: int
+        Args:
+            volume: The new volume in the range [0..100].
         """
 
     def mute_changed(self, mute: bool) -> None:
@@ -174,18 +178,19 @@ class CoreListener(listener.Listener):
 
         *MAY* be implemented by actor.
 
-        :param mute: the new mute state
-        :type mute: boolean
+        Args:
+            mute: The new mute state.
         """
 
     def seeked(self, time_position: DurationMs) -> None:
-        """Called whenever the time position changes by an unexpected amount, e.g.
-        at seek to a new time position.
+        """Called whenever the time position changes by an unexpected amount.
+
+        For example, at seek to a new time position.
 
         *MAY* be implemented by actor.
 
-        :param time_position: the position that was seeked to in milliseconds
-        :type time_position: int
+        Args:
+            time_position: The position that was seeked to in milliseconds.
         """
 
     def stream_title_changed(self, title: str) -> None:
@@ -193,6 +198,6 @@ class CoreListener(listener.Listener):
 
         *MAY* be implemented by actor.
 
-        :param title: the new stream title
-        :type title: string
+        Args:
+            title: The new stream title.
         """

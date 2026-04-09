@@ -74,35 +74,38 @@ class LibraryController:
         return result
 
     def browse(self, uri: Uri | None) -> list[Ref]:
-        """Browse directories and tracks at the given ``uri``.
+        """Browse directories and tracks at the given `uri`.
 
-        ``uri`` is a string which represents some directory belonging to a
-        backend. To get the initial root directories for backends pass
-        :class:`None` as the URI.
+        `uri` is a string which represents some directory belonging to a
+        backend. To get the initial root directories for backends pass `None`
+        as the URI.
 
-        Returns a list of :class:`mopidy.models.Ref` objects for the
-        directories and tracks at the given ``uri``.
+        Returns a list of [Ref][mopidy.models.Ref] objects for the
+        directories and tracks at the given `uri`.
 
-        The :class:`~mopidy.models.Ref` objects representing tracks keep the
-        track's original URI. A matching pair of objects can look like this::
+        The [Ref][] objects representing tracks keep the track's original URI.
+        A matching pair of objects can look like this:
 
-            Track(uri='dummy:/foo.mp3', name='foo', artists=..., album=...)
-            Ref.track(uri='dummy:/foo.mp3', name='foo')
+        ```
+        Track(uri='dummy:/foo.mp3', name='foo', artists=..., album=...)
+        Ref.track(uri='dummy:/foo.mp3', name='foo')
+        ```
 
-        The :class:`~mopidy.models.Ref` objects representing directories have
-        backend specific URIs. These are opaque values, so no one but the
-        backend that created them should try and derive any meaning from them.
-        The only valid exception to this is checking the scheme, as it is used
-        to route browse requests to the correct backend.
+        The [Ref][] objects representing directories have backend specific
+        URIs. These are opaque values, so no one but the backend that created
+        them should try and derive any meaning from them. The only valid
+        exception to this is checking the scheme, as it is used to route
+        browse requests to the correct backend.
 
-        For example, the dummy library's ``/bar`` directory could be returned
-        like this::
+        For example, the dummy library's `/bar` directory could be returned
+        like this:
 
-            Ref.directory(uri='dummy:directory:/bar', name='bar')
+        ```
+        Ref.directory(uri='dummy:directory:/bar', name='bar')
+        ```
 
-        :param uri: URI to browse
-
-        .. versionadded:: 0.18
+        Args:
+            uri: URI to browse.
         """
         if uri is None:
             return self._roots()
@@ -149,15 +152,13 @@ class LibraryController:
 
         Returns set of values corresponding to the requested field type.
 
-        :param field: Any one of ``uri``, ``track_name``, ``album``,
-            ``artist``, ``albumartist``, ``composer``, ``performer``,
-            ``track_no``, ``genre``, ``date``, ``comment``, ``disc_no``,
-            ``musicbrainz_albumid``, ``musicbrainz_artistid``, or
-            ``musicbrainz_trackid``.
-        :param query: Query to use for limiting results, see
-            :meth:`search` for details about the query format.
-
-        .. versionadded:: 1.0
+        Args:
+            field: Any one of `uri`, `track_name`, `album`, `artist`,
+                `albumartist`, `composer`, `performer`, `track_no`, `genre`,
+                `date`, `comment`, `disc_no`, `musicbrainz_albumid`,
+                `musicbrainz_artistid`, or `musicbrainz_trackid`.
+            query: Query to use for limiting results, see [search][] for
+                details about the query format.
         """
         if field == "track":
             warnings.warn(
@@ -198,9 +199,8 @@ class LibraryController:
         Unknown URIs or URIs the corresponding backend couldn't find anything
         for will simply return an empty list for that URI.
 
-        :param uris: list of URIs to find images for
-
-        .. versionadded:: 1.0
+        Args:
+            uris: List of URIs to find images for.
         """
         validation.check_uris(uris)
 
@@ -230,7 +230,8 @@ class LibraryController:
         If the URI expands to multiple tracks, the returned list will contain
         them all.
 
-        :param uris: track URIs
+        Args:
+            uris: Track URIs.
         """
         validation.check_uris(uris)
 
@@ -255,7 +256,8 @@ class LibraryController:
     def refresh(self, uri: Uri | None = None) -> None:
         """Refresh library. Limit to URI and below if an URI is given.
 
-        :param uri: directory or track URI
+        Args:
+            uri: Directory or track URI.
         """
         if uri is not None:
             validation.check_uri(uri)
@@ -281,14 +283,14 @@ class LibraryController:
         uris: Iterable[Uri] | None = None,
         exact: bool = False,
     ) -> list[SearchResult]:
-        """Search the library for tracks where ``field`` contains ``values``.
+        """Search the library for tracks where `field` contains `values`.
 
-        If ``uris`` is given, the search is limited to results from within the
-        URI roots. For example passing ``uris=['file:']`` will limit the search
+        If `uris` is given, the search is limited to results from within the
+        URI roots. For example passing `uris=['file:']` will limit the search
         to the local backend.
 
-        Examples::
-
+        Examples:
+            ```python
             # Returns results matching 'a' in any backend
             search({'any': ['a']})
 
@@ -305,13 +307,12 @@ class LibraryController:
 
             # Returns results matching artist 'xyz' and 'abc' in any backend
             search({'artist': ['xyz', 'abc']})
+            ```
 
-        :param query: one or more queries to search for
-        :param uris: zero or more URI roots to limit the search to
-        :param exact: if the search should use exact matching
-
-        .. versionadded:: 1.0
-            The ``exact`` keyword argument.
+        Args:
+            query: One or more queries to search for.
+            uris: Zero or more URI roots to limit the search to.
+            exact: If the search should use exact matching.
         """
         query = _normalize_query(query)
 
