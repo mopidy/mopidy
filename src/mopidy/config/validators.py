@@ -1,17 +1,15 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Protocol, TypeVar
+from typing import TYPE_CHECKING, Any, Protocol
 
 if TYPE_CHECKING:
     from abc import abstractmethod
     from collections.abc import Iterable
+    from typing import Self
 
     class Comparable(Protocol):
         @abstractmethod
-        def __lt__(self: CT, other: CT, /) -> bool: ...
-
-    T = TypeVar("T")
-    CT = TypeVar("CT", bound=Comparable)
+        def __lt__(self, other: Self, /) -> bool: ...
 
 
 # TODO: add validate regexp?
@@ -29,7 +27,7 @@ def validate_required(value: Any, required: bool) -> None:
         raise ValueError(msg)
 
 
-def validate_choice(value: T, choices: Iterable[T] | None) -> None:
+def validate_choice[T](value: T, choices: Iterable[T] | None) -> None:
     """Validate that `value` is one of the `choices`.
 
     Normally called in
@@ -41,7 +39,7 @@ def validate_choice(value: T, choices: Iterable[T] | None) -> None:
         raise ValueError(msg)
 
 
-def validate_minimum(value: CT, minimum: CT | None) -> None:
+def validate_minimum[CT: Comparable](value: CT, minimum: CT | None) -> None:
     """Validate that `value` is at least `minimum`.
 
     Normally called in
@@ -52,7 +50,7 @@ def validate_minimum(value: CT, minimum: CT | None) -> None:
         raise ValueError(msg)
 
 
-def validate_maximum(value: CT, maximum: CT | None) -> None:
+def validate_maximum[CT: Comparable](value: CT, maximum: CT | None) -> None:
     """Validate that `value` is at most `maximum`.
 
     Normally called in
