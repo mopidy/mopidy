@@ -20,12 +20,6 @@ build:
       - mkdir -p $READTHEDOCS_OUTPUT/html/
       - cp -r site/* $READTHEDOCS_OUTPUT/html/
 
-sphinx:
-  configuration: docs/conf.py
-  builder: dirhtml
-
-formats: all
-
 # Page redirects for the new docs site
 #
 # When the new Zensical-based docs replace the old Sphinx docs on ReadTheDocs,
