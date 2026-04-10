@@ -4,7 +4,6 @@ Only APIs documented here are public and open for use by Mopidy extensions.
 
 - [mopidy command](command.md) — command-line reference for the `mopidy`
   executable.
-- [Glossary](glossary.md) — definitions of terms used throughout the docs.
 
 ## Concepts
 
