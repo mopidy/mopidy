@@ -38,9 +38,9 @@ class Listener:
         *MAY* be implemented by actor. By default, this method forwards the
         event to the specific event methods.
 
-        :param event: the event name
-        :type event: string
-        :param kwargs: any other arguments to the specific event handlers
+        Args:
+            event: The event name.
+            kwargs: Any other arguments to the specific event handlers.
         """
         try:
             getattr(self, event)(**kwargs)

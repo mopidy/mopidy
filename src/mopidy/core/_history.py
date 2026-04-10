@@ -16,15 +16,18 @@ type History = list[tuple[int, Ref]]
 
 
 class HistoryController:
+    """Keeps record of what tracks have been played."""
+
     def __init__(self) -> None:
         self._history: History = []
 
     def _add_track(self, track: Track) -> None:
         """Add track to the playback history.
 
-        Internal method for :class:`mopidy.core.PlaybackController`.
+        Internal method for [PlaybackController][mopidy.core.PlaybackController].
 
-        :param track: track to add
+        Args:
+            track: The track to add.
         """
         if not isinstance(track, Track):
             msg = "Only Track objects can be added to the history"

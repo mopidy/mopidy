@@ -27,6 +27,8 @@ logger = logging.getLogger(__name__)
 
 
 class PlaybackController:
+    """Manages playback state and the currently playing track."""
+
     def __init__(
         self,
         audio: AudioProxy | None,
@@ -63,7 +65,7 @@ class PlaybackController:
     def get_current_tl_track(self) -> TlTrack | None:
         """Get the currently playing or selected track.
 
-        Returns a :class:`mopidy.models.TlTrack` or :class:`None`.
+        Returns a [TlTrack][mopidy.models.TlTrack] or `None`.
         """
         return self._current_tl_track
 
@@ -77,23 +79,21 @@ class PlaybackController:
     def get_current_track(self) -> Track | None:
         """Get the currently playing or selected track.
 
-        Extracted from :meth:`get_current_tl_track` for convenience.
+        Extracted from [get_current_tl_track][] for convenience.
 
-        Returns a :class:`mopidy.models.Track` or :class:`None`.
+        Returns a [Track][mopidy.models.Track] or `None`.
         """
         return getattr(self.get_current_tl_track(), "track", None)
 
     def get_current_tlid(self) -> TracklistId | None:
         """Get the currently playing or selected tracklist ID.
 
-        Extracted from :meth:`get_current_tl_track` for convenience.
-
-        .. versionadded:: 1.1
+        Extracted from [get_current_tl_track][] for convenience.
         """
         return getattr(self.get_current_tl_track(), "tlid", None)
 
     def get_stream_title(self) -> str | None:
-        """Get the current stream title or :class:`None`."""
+        """Get the current stream title or `None`."""
         return self._stream_title
 
     def get_state(self) -> PlaybackState:
@@ -103,19 +103,20 @@ class PlaybackController:
     def set_state(self, new_state: PlaybackState) -> None:
         """Set the playback state.
 
-        Must be :attr:`PLAYING`, :attr:`PAUSED`, or :attr:`STOPPED`.
+        Must be `PLAYING`, `PAUSED`, or `STOPPED`.
 
         Possible states and transitions:
 
-        .. digraph:: state_transitions
-
-            "STOPPED" -> "PLAYING" [ label="play" ]
-            "STOPPED" -> "PAUSED" [ label="pause" ]
-            "PLAYING" -> "STOPPED" [ label="stop" ]
-            "PLAYING" -> "PAUSED" [ label="pause" ]
-            "PLAYING" -> "PLAYING" [ label="play" ]
-            "PAUSED" -> "PLAYING" [ label="resume" ]
-            "PAUSED" -> "STOPPED" [ label="stop" ]
+        ``` mermaid
+        graph LR
+            STOPPED -->|play| PLAYING;
+            STOPPED -->|pause| PAUSED;
+            PLAYING -->|stop| STOPPED;
+            PLAYING -->|pause| PAUSED;
+            PLAYING -->|play| PLAYING;
+            PAUSED -->|resume| PLAYING;
+            PAUSED -->|stop| STOPPED;
+        ```
         """
         validation.check_choice(new_state, validation.PLAYBACK_STATES)
 
@@ -238,7 +239,7 @@ class PlaybackController:
     def _on_tracklist_change(self) -> None:
         """Tell the playback controller that the current playlist has changed.
 
-        Used by :class:`mopidy.core.TracklistController`.
+        Used by [TracklistController][mopidy.core.TracklistController].
         """
         tl_tracks = self.core.tracklist.get_tl_tracks()
         if not tl_tracks:
@@ -291,10 +292,8 @@ class PlaybackController:
         If no tracklist ID is provided, resume playback of the currently
         active track.
 
-        .. versionremoved:: 4.0
-            The ``tl_track`` argument. Use ``tlid`` instead.
-
-        :param tlid: Tracklist ID of the track to play
+        Args:
+            tlid: Tracklist ID of the track to play.
         """
         if tlid is None and self.get_state() == PlaybackState.PAUSED:
             self.resume()
@@ -427,9 +426,10 @@ class PlaybackController:
     def seek(self, time_position: DurationMs) -> bool:
         """Seeks to time position given in milliseconds.
 
-        Returns :class:`True` if successful, else :class:`False`.
+        Returns `True` if successful, else `False`.
 
-        :param time_position: time position in milliseconds
+        Args:
+            time_position: Time position in milliseconds.
         """
         # TODO: seek needs to take pending tracks into account :(
         validation.check_integer(time_position)

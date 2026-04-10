@@ -53,16 +53,16 @@ build-backend = "setuptools.build_meta"
 dev = [
     "tox >= 4.25",
     { include-group = "docs" },
+    { include-group = "rumdl" },
     { include-group = "ruff" },
     { include-group = "tests" },
     { include-group = "typing" },
 ]
 docs = [
-    "pygraphviz >= 1.14",
-    "sphinx >= 8.1",
-    "sphinx-autodoc-typehints >= 2.3",
-    "sphinx-rtd-theme >= 3.0",
+    "mkdocstrings-python>=2.0.3",
+    "zensical>=0.0.24",
 ]
+rumdl = ["rumdl"]
 ruff = ["ruff == 0.15.0"]
 tests = [
     "dirty-equals >= 0.9",
@@ -128,10 +128,6 @@ ignore = [
     "D104",    # undocumented-public-package  # TODO
     "D105",    # undocumented-magic-method
     "D107",    # undocumented-public-init  # TODO
-    "D203",    # one-blank-line-before-class
-    "D205",    # blank-line-after-summary  # TODO
-    "D213",    # multi-line-summary-second-line
-    "D401",    # non-imperative-mood  # TODO
     "FBT001",  # boolean-positional-arg-in-function-definition  # TODO
     "FBT002",  # boolean-default-value-in-function-definition  # TODO
     "FBT003",  # boolean-positional-value-in-function-call  # TODO
@@ -158,10 +154,6 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"docs/*" = [
-    "D",      # pydocstyle
-    "INP001", # flake8-no-pep420
-]
 "tests/*" = [
     "ANN",     # flake8-annotations
     "ARG",     # flake8-unused-arguments
@@ -175,6 +167,19 @@ ignore = [
     "S108",    # hardcoded-temp-file
     "SLF001",  # private-member-access
     "TRY002",  # raise-vanilla-class
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+
+[tool.rumdl.global]
+flavor = "mkdocs"
+disable = [
+    "MD013",  # Line length too strict for docs with long URLs
+    "MD014",  # Dollar signs before commands without output is common in docs
+    "MD036",  # Bold text used legitimately as labels within list items
+    "MD051",  # False positives on cross-page fragment links
 ]
 
 
@@ -191,6 +196,7 @@ env_list = [
     "3.13",
     "3.14",
     "pyright",
+    "rumdl",
     "ruff-check",
     "ruff-format",
     "ty",
@@ -214,6 +220,11 @@ commands = [
 dependency_groups = ["typing"]
 commands = [["pyright", "{posargs:src}"]]
 
+[tool.tox.env.rumdl]
+skip_install = true
+dependency_groups = ["rumdl"]
+commands = [["rumdl", "check", "docs/"]]
+
 [tool.tox.env.ruff-check]
 skip_install = true
 dependency_groups = ["ruff"]
@@ -230,4 +241,4 @@ commands = [["ty", "check", "{posargs:src}"]]
 
 [tool.tox.env.docs]
 dependency_groups = ["docs"]
-commands = [["sphinx-build", "docs", "{envtmpdir}"]]
+commands = [["zensical", "build", "--clean"]]

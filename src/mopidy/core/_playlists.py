@@ -47,25 +47,22 @@ def _backend_error_handling(
 
 
 class PlaylistsController:
+    """Manages stored playlists."""
+
     def __init__(self, backends: Backends, core: Core) -> None:
         self.backends = backends
         self.core = core
 
     def get_uri_schemes(self) -> list[UriScheme]:
-        """Get the list of URI schemes that support playlists.
-
-        .. versionadded:: 2.0
-        """
+        """Get the list of URI schemes that support playlists."""
         return sorted(self.backends.with_playlists.keys())
 
     def as_list(self) -> list[Ref]:
         """Get a list of the currently available playlists.
 
-        Returns a list of :class:`~mopidy.models.Ref` objects referring to the
+        Returns a list of [Ref][mopidy.models.Ref] objects referring to the
         playlists. In other words, no information about the playlists' content
         is given.
-
-        .. versionadded:: 1.0
         """
         futures = {
             backend: backend.playlists.as_list()
@@ -90,15 +87,12 @@ class PlaylistsController:
         return results
 
     def get_items(self, uri: Uri) -> list[Ref] | None:
-        """Get the items in a playlist specified by ``uri``.
+        """Get the items in a playlist specified by `uri`.
 
-        Returns a list of :class:`~mopidy.models.Ref` objects referring to the
+        Returns a list of [Ref][mopidy.models.Ref] objects referring to the
         playlist's items.
 
-        If a playlist with the given ``uri`` doesn't exist, it returns
-        :class:`None`.
-
-        .. versionadded:: 1.0
+        If a playlist with the given `uri` doesn't exist, it returns `None`.
         """
         validation.check_uri(uri)
 
@@ -123,16 +117,17 @@ class PlaylistsController:
     ) -> Playlist | None:
         """Create a new playlist.
 
-        If ``uri_scheme`` matches an URI scheme handled by a current backend,
-        that backend is asked to create the playlist. If ``uri_scheme`` is
-        :class:`None` or doesn't match a current backend, the first backend is
-        asked to create the playlist.
+        If `uri_scheme` matches an URI scheme handled by a current backend,
+        that backend is asked to create the playlist. If `uri_scheme` is
+        `None` or doesn't match a current backend, the first backend is asked
+        to create the playlist.
 
         All new playlists must be created by calling this method, and **not**
-        by creating new instances of :class:`mopidy.models.Playlist`.
+        by creating new instances of [Playlist][mopidy.models.Playlist].
 
-        :param name: name of the new playlist
-        :param uri_scheme: use the backend matching the URI scheme
+        Args:
+            name: Name of the new playlist.
+            uri_scheme: Use the backend matching the URI scheme.
         """
         if uri_scheme in self.backends.with_playlists:
             assert uri_scheme is not None
@@ -157,12 +152,10 @@ class PlaylistsController:
         If the URI doesn't match the URI schemes handled by the current
         backends, nothing happens.
 
-        Returns :class:`True` if deleted, :class:`False` otherwise.
+        Returns `True` if deleted, `False` otherwise.
 
-        :param uri: URI of the playlist to delete
-
-        .. versionchanged:: 2.2
-            Return type defined.
+        Args:
+            uri: URI of the playlist to delete.
         """
         validation.check_uri(uri)
 
@@ -186,10 +179,13 @@ class PlaylistsController:
         return success
 
     def lookup(self, uri: Uri) -> Playlist | None:
-        """Lookup playlist with given URI in both the set of playlists and in any
-        other playlist sources. Returns :class:`None` if not found.
+        """Lookup playlist with given URI.
 
-        :param uri: playlist URI
+        Searches both the set of playlists and any other playlist sources.
+        Returns `None` if not found.
+
+        Args:
+            uri: Playlist URI.
         """
         uri_scheme = UriScheme(urllib.parse.urlparse(uri).scheme)
         backend = self.backends.with_playlists.get(uri_scheme, None)
@@ -207,14 +203,15 @@ class PlaylistsController:
     # TODO: there is an inconsistency between library.refresh(uri) and this
     # call, not sure how to sort this out.
     def refresh(self, uri_scheme: UriScheme | None = None) -> None:
-        """Refresh the playlists in :attr:`playlists`.
+        """Refresh the playlists.
 
-        If ``uri_scheme`` is :class:`None`, all backends are asked to refresh.
-        If ``uri_scheme`` is an URI scheme handled by a backend, only that
-        backend is asked to refresh. If ``uri_scheme`` doesn't match any
+        If `uri_scheme` is `None`, all backends are asked to refresh.
+        If `uri_scheme` is an URI scheme handled by a backend, only that
+        backend is asked to refresh. If `uri_scheme` doesn't match any
         current backend, nothing happens.
 
-        :param uri_scheme: limit to the backend matching the URI scheme
+        Args:
+            uri_scheme: Limit to the backend matching the URI scheme.
         """
         # TODO: check: uri_scheme is None or uri_scheme?
 
@@ -240,10 +237,10 @@ class PlaylistsController:
     def save(self, playlist: Playlist) -> Playlist | None:
         """Save the playlist.
 
-        For a playlist to be saveable, it must have the ``uri`` attribute set.
-        You must not set the ``uri`` attribute yourself, but use playlist
-        objects returned by :meth:`create` or retrieved from :attr:`playlists`,
-        which will always give you saveable playlists.
+        For a playlist to be saveable, it must have the `uri` attribute set.
+        You must not set the `uri` attribute yourself, but use playlist
+        objects returned by [create][] or retrieved from playlists, which will
+        always give you saveable playlists.
 
         The method returns the saved playlist. The return playlist may differ
         from the saved playlist. E.g. if the playlist name was changed, the
@@ -252,9 +249,10 @@ class PlaylistsController:
         returned playlist instead.
 
         If the playlist's URI isn't set or doesn't match the URI scheme of a
-        current backend, nothing is done and :class:`None` is returned.
+        current backend, nothing is done and `None` is returned.
 
-        :param playlist: the playlist
+        Args:
+            playlist: The playlist.
         """
         validation.check_instance(playlist, Playlist)
 

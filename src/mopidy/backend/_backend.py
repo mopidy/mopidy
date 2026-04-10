@@ -18,36 +18,44 @@ class Backend:
     """Backend API.
 
     If the backend has problems during initialization it should raise
-    :exc:`mopidy.exceptions.BackendError` with a descriptive error message.
-    This will make Mopidy print the error message and exit so that the user can
-    fix the issue.
+    [BackendError][mopidy.exceptions.BackendError] with a descriptive error
+    message. This will make Mopidy print the error message and exit so that
+    the user can fix the issue.
 
-    :param audio: actor proxy for the audio subsystem
+    Args:
+        audio: Actor proxy for the audio subsystem.
     """
 
-    #: Actor proxy to an instance of :class:`mopidy.audio.Audio`.
-    #:
-    #: Should be passed to the backend constructor as the kwarg ``audio``,
-    #: which will then set this field.
     audio: AudioProxy
+    """Actor proxy to an instance of [Audio][mopidy.audio.Audio].
 
-    #: The library provider. An instance of
-    #: :class:`~mopidy.backend.LibraryProvider`, or :class:`None` if
-    #: the backend doesn't provide a library.
+    Should be passed to the backend constructor as the kwarg `audio`,
+    which will then set this field.
+    """
+
     library: LibraryProvider | None = None
+    """The library provider.
 
-    #: The playback provider. An instance of
-    #: :class:`~mopidy.backend.PlaybackProvider`, or :class:`None` if
-    #: the backend doesn't provide playback.
+    An instance of [LibraryProvider][], or `None` if the backend doesn't
+    provide a library.
+    """
+
     playback: PlaybackProvider | None = None
+    """The playback provider.
 
-    #: The playlists provider. An instance of
-    #: :class:`~mopidy.backend.PlaylistsProvider`, or class:`None` if
-    #: the backend doesn't provide playlists.
+    An instance of [PlaybackProvider][], or `None` if the backend doesn't
+    provide playback.
+    """
+
     playlists: PlaylistsProvider | None = None
+    """The playlists provider.
 
-    #: List of URI schemes this backend can handle.
+    An instance of [PlaylistsProvider][], or `None` if the backend doesn't
+    provide playlists.
+    """
+
     uri_schemes: ClassVar[list[UriScheme]] = []
+    """List of URI schemes this backend can handle."""
 
     # Because the providers is marked as pykka.traversable(), we can't get()
     # them from another actor, and need helper methods to check if the

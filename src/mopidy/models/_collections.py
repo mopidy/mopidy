@@ -17,22 +17,21 @@ class Playlist(BaseModel):
         alias="__model__",
     )
 
-    #: The playlist URI. Read-only.
     uri: Uri
+    """The playlist URI."""
 
-    #: The playlist name. Read-only.
     name: str | None = None
+    """The playlist name."""
 
-    #: The playlist's tracks. Read-only.
     tracks: tuple[Track, ...] = ()
+    """The playlist's tracks."""
 
-    #: The playlist modification time in milliseconds since Unix epoch.
-    #: Read-only.
     last_modified: NonNegativeInt | None = None
+    """The playlist modification time in milliseconds since Unix epoch."""
 
     @property
     def length(self) -> NonNegativeInt:
-        """The number of tracks in the playlist. Read-only."""
+        """The number of tracks in the playlist."""
         return len(self.tracks)
 
 
@@ -45,14 +44,14 @@ class SearchResult(BaseModel):
         alias="__model__",
     )
 
-    #: The search result URI. Read-only.
     uri: Uri | None = None
+    """The search result URI."""
 
-    #: The tracks matching the search query. Read-only.
     tracks: tuple[Track, ...] = ()
+    """The tracks matching the search query."""
 
-    #: The artists matching the search query. Read-only.
     artists: tuple[Artist, ...] = ()
+    """The artists matching the search query."""
 
-    #: The albums matching the search query. Read-only.
     albums: tuple[Album, ...] = ()
+    """The albums matching the search query."""

@@ -26,7 +26,8 @@ def clocktime_to_millisecond(value: int) -> DurationMs:
 def supported_uri_schemes(uri_schemes: Iterable[UriScheme]) -> set[UriScheme]:
     """Determine which URIs we can actually support from provided whitelist.
 
-    :param uri_schemes: list/set of URIs to check support for.
+    Args:
+        uri_schemes: List/set of URIs to check support for.
     """
     supported_schemes = set()
     registry = Gst.Registry.get()
@@ -44,8 +45,9 @@ def supported_uri_schemes(uri_schemes: Iterable[UriScheme]) -> set[UriScheme]:
 def setup_proxy(element: Gst.Element, config: ProxyConfig) -> None:
     """Configure a GStreamer element with proxy settings.
 
-    :param element: element to setup proxy in.
-    :param config: proxy settings to use.
+    Args:
+        element: Element to setup proxy in.
+        config: Proxy settings to use.
     """
     if not hasattr(element.props, "proxy") or not config.get("hostname"):
         return

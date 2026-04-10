@@ -17,29 +17,24 @@ if TYPE_CHECKING:
 
 @pykka.traversable
 class LibraryProvider:
-    """A library provider provides a library of music to Mopidy.
-
-    :param backend: backend the controller is a part of
-    """
+    """A library provider provides a library of music to Mopidy."""
 
     root_directory: Ref | None = None
-    """
-    :class:`mopidy.models.Ref.directory` instance with a URI and name set
-    representing the root of this library's browse tree. URIs must
-    use one of the schemes supported by the backend, and name should
-    be set to a human friendly value.
+    """A [Ref.directory][mopidy.models.Ref.directory] with a URI and name set,
+    representing the root of this library's browse tree. URIs must use one of
+    the schemes supported by the backend, and name should be set to a
+    human-friendly value.
 
-    *MUST be set by any class that implements* :meth:`LibraryProvider.browse`.
+    *MUST be set by any class that implements* [browse][].
     """
 
     def __init__(self, backend: Backend) -> None:
         self.backend = backend
 
     def browse(self, uri: Uri) -> list[Ref]:
-        """See :meth:`mopidy.core.LibraryController.browse`.
+        """See [mopidy.core.LibraryController.browse][].
 
-        If you implement this method, make sure to also set
-        :attr:`root_directory`.
+        If you implement this method, make sure to also set [root_directory][].
 
         *MAY be implemented by subclass.*
         """
@@ -50,7 +45,7 @@ class LibraryProvider:
         field: DistinctField,
         query: Query[SearchField] | None = None,
     ) -> set[str]:
-        """See :meth:`mopidy.core.LibraryController.get_distinct`.
+        """See [mopidy.core.LibraryController.get_distinct][].
 
         *MAY be implemented by subclass.*
 
@@ -62,7 +57,7 @@ class LibraryProvider:
         return set()
 
     def get_images(self, uris: list[Uri]) -> dict[Uri, list[Image]]:
-        """See :meth:`mopidy.core.LibraryController.get_images`.
+        """See [mopidy.core.LibraryController.get_images][].
 
         *MAY be implemented by subclass.*
 
@@ -71,25 +66,24 @@ class LibraryProvider:
         return {}
 
     def lookup_many(self, uris: Iterable[Uri]) -> dict[Uri, list[Track]]:
-        """See :meth:`mopidy.core.LibraryController.lookup`.
+        """See [mopidy.core.LibraryController.lookup][].
 
         *MUST be implemented by subclass.*
         """
         return {uri: self.lookup(uri) for uri in uris}
 
     def lookup(self, uri: Uri) -> list[Track]:
-        """See :meth:`mopidy.core.LibraryController.lookup`.
+        """See [mopidy.core.LibraryController.lookup][].
 
-        *MUST be implemented by subclass if :meth:`lookup_many` is not implemented.*
+        *MUST be implemented by subclass if [lookup_many][] is not implemented.*
 
-        .. deprecated:: 4.0
-            Implement :meth:`lookup_many` instead. If :meth:`lookup_many` is
-            implemented, Mopidy will never call this method on a backend.
+        Deprecated: Implement [lookup_many][] instead. If [lookup_many][] is
+        implemented, Mopidy will never call this method on a backend.
         """
         raise NotImplementedError
 
     def refresh(self, uri: Uri | None = None) -> None:
-        """See :meth:`mopidy.core.LibraryController.refresh`.
+        """See [mopidy.core.LibraryController.refresh][].
 
         *MAY be implemented by subclass.*
         """
@@ -100,12 +94,9 @@ class LibraryProvider:
         uris: list[Uri] | None = None,
         exact: bool = False,
     ) -> SearchResult | None:
-        """See :meth:`mopidy.core.LibraryController.search`.
+        """See [mopidy.core.LibraryController.search][].
 
         *MAY be implemented by subclass.*
-
-        .. versionadded:: 1.0
-            The ``exact`` param which replaces the old ``find_exact``.
         """
         return None
 

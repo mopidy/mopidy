@@ -1,0 +1,242 @@
+[project]
+site_name = "Mopidy"
+site_description = "Mopidy is an extensible music server written in Python."
+site_author = "Stein Magnus Jodal and contributors"
+site_url = "https://docs.mopidy.com/"
+copyright = """
+Copyright &copy; 2009-2026 Stein Magnus Jodal and contributors
+"""
+edit_uri = "edit/main/docs/"
+repo_url = "https://github.com/mopidy/mopidy"
+use_directory_urls = true
+nav = [
+    {"Get started" = [
+        "index.md",
+        {"Installation" = [
+            "installation/index.md",
+            {"System packages" = "installation/packages.md"},
+            "installation/manual.md",
+        ]},
+        {"Usage" = [
+            "usage/index.md",
+            "usage/service.md",
+            "usage/terminal.md",
+            "usage/config.md",
+            "usage/clients.md",
+            "usage/troubleshooting.md",
+        ]},
+    ]},
+    {"Extensions" = [
+        "ext/index.md",
+        {"Bundled extensions" = [
+            "ext/file.md",
+            "ext/m3u.md",
+            "ext/stream.md",
+            "ext/http.md",
+            "ext/softwaremixer.md",
+        ]},
+    ]},
+    {"Guides" = [
+        "guides/index.md",
+        {"Hardware" = [
+            "guides/raspberrypi.md",
+        ]},
+        {"Audio output" = [
+            "guides/audiosinks.md",
+            "guides/icecast.md",
+            "guides/pulseaudio.md",
+            "guides/pipewire.md",
+        ]},
+        {"Remote control" = [
+            "guides/upnp.md",
+        ]},
+        {"Development" = [
+            "guides/extensiondev.md",
+        ]},
+    ]},
+    {"Reference" = [
+        "reference/index.md",
+        "reference/command.md",
+        {"Concepts" = [
+            "reference/architecture.md",
+            "reference/models.md",
+            "reference/types.md",
+        ]},
+        {"Framework APIs" = [
+            "reference/core.md",
+            "reference/frontend.md",
+            "reference/backend.md",
+            "reference/ext.md",
+            "reference/exceptions.md",
+        ]},
+        {"Web" = [
+            "reference/http-server.md",
+            "reference/http.md",
+            "reference/js.md",
+        ]},
+        {"Audio" = [
+            "reference/audio.md",
+            "reference/mixer.md",
+        ]},
+        {"Utilities" = [
+            "reference/config.md",
+            "reference/httpclient.md",
+            "reference/zeroconf.md",
+        ]},
+    ]},
+    {"About" = [
+        "about/index.md",
+        "changelog/index.md",
+        "about/versioning.md",
+        {"Contribute" = [
+            "about/contributing.md",
+            "about/devenv.md",
+            "about/codestyle.md",
+            "about/releasing.md",
+        ]},
+        {"Credits" = [
+            "about/authors.md",
+            "about/sponsors.md",
+        ]},
+    ]}
+]
+
+[project.theme]
+language = "en"
+logo = "images/logo.png"
+features = [
+    "content.action.edit",
+    "content.action.view",
+    "content.code.annotate",
+    "content.code.copy",
+    "content.code.select",
+    "content.footnote.tooltips",
+    "content.tabs.link",
+    "content.tooltips",
+    "navigation.footer",
+    "navigation.indexes",
+    "navigation.instant",
+    "navigation.instant.prefetch",
+    "navigation.path",
+    "navigation.sections",
+    "navigation.tabs",
+    "navigation.top",
+    "navigation.tracking",
+    "search.highlight",
+]
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme)"
+toggle.icon = "lucide/sun-moon"
+toggle.name = "Switch to light mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+primary = "blue"
+palette.primary = "green"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+primary = "blue"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to system preference"
+
+[project.theme.font]
+text = "Asap"
+#code = "Jetbrains Mono"
+
+[project.theme.icon]
+repo = "fontawesome/brands/github"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/github"
+link = "https://github.com/mopidy/mopidy"
+
+[project.plugins.mkdocstrings]
+default_handler = "python"
+
+[project.plugins.mkdocstrings.handlers.python]
+inventories = ["https://docs.python.org/3/objects.inv"]
+paths = ["src"]
+
+[project.plugins.mkdocstrings.handlers.python.options]
+show_source = false
+
+# Docstrings
+docstring_options.ignore_init_summary = true
+docstring_section_style = "list"
+docstring_style = "google"
+
+# Cross-references
+relative_crossrefs = true
+scoped_crossrefs = true
+signature_crossrefs = true
+unwrap_annotated = true
+
+# Members
+filters = "public"
+inherited_members = true
+summary = true
+
+# Headings
+heading_level = 1
+parameter_headings = true
+type_parameter_headings = true
+show_root_heading = true
+show_root_full_path = true
+show_symbol_type_heading = true
+show_symbol_type_toc = true
+
+# Signatures
+line_length = 80
+merge_init_into_class = true
+separate_signature = true
+show_signature_annotations = true
+show_signature_type_parameters = true
+
+[project.markdown_extensions.pymdownx.blocks.admonition]
+[project.markdown_extensions.pymdownx.blocks.tab]
+alternate_style = true
+
+[project.markdown_extensions.pymdownx.details]
+# Better admonition support
+
+[project.markdown_extensions.pymdownx.highlight]
+[project.markdown_extensions.pymdownx.inlinehilite]
+# Inline highlight of code snippets ala `#!python range(10)`
+
+[project.markdown_extensions.pymdownx.keys]
+# More visual rendering of keyboard shortcuts
+
+[project.markdown_extensions.pymdownx.magiclink]
+repo_url_shorthand = true
+provider = "github"
+user = "mopidy"
+repo = "mopidy"
+# With this, #123 links to issues and !123 links to PRs.
+#
+[project.markdown_extensions.abbr]
+# Term definitions in docs/includes/abbreviations.md are injected on every
+# page via snippets.auto_append, showing tooltips wherever terms appear.
+
+[project.markdown_extensions.def_list]
+# Renders definition lists (term\n: definition) as styled <dl> HTML.
+
+[project.markdown_extensions.pymdownx.snippets]
+# Include snippets from other files with --8<--
+# base_path includes the project root so AUTHORS etc. can be referenced
+base_path = ["."]
+auto_append = ["docs/includes/abbreviations.md"]
+
+[project.markdown_extensions.pymdownx.superfences]
+# Better code block support
+custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" }
+]
+
+[project.markdown_extensions.tables]
+# Nice data tables, used e.g. for config values.

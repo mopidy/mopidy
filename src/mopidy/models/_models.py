@@ -17,14 +17,14 @@ class Image(BaseModel):
         alias="__model__",
     )
 
-    #: The image URI. Read-only.
     uri: Uri
+    """The image URI."""
 
-    #: Optional width of the image or :class:`None`. Read-only.
     width: NonNegativeInt | None = None
+    """Width of the image in pixels."""
 
-    #: Optional height of the image or :class:`None`. Read-only.
     height: NonNegativeInt | None = None
+    """Height of the image in pixels."""
 
 
 class Artist(BaseModel):
@@ -36,17 +36,17 @@ class Artist(BaseModel):
         alias="__model__",
     )
 
-    #: The artist URI. Read-only.
     uri: Uri | None = None
+    """The artist URI."""
 
-    #: The artist name. Read-only.
     name: str | None = None
+    """The artist name."""
 
-    #: Artist name for better sorting, e.g. with articles stripped. Read only.
     sortname: str | None = None
+    """Artist name for better sorting, e.g. with articles stripped."""
 
-    #: The MusicBrainz ID of the artist. Read-only.
     musicbrainz_id: UUID | None = None
+    """The MusicBrainz ID of the artist."""
 
 
 class Album(BaseModel):
@@ -58,33 +58,33 @@ class Album(BaseModel):
         alias="__model__",
     )
 
-    #: The album URI. Read-only.
     uri: Uri | None = None
+    """The album URI."""
 
-    #: The album name. Read-only.
     name: str | None = None
+    """The album name."""
 
-    #: A set of album artists. Read-only.
     artists: frozenset[Artist] = frozenset()
+    """A set of album artists."""
 
-    #: The number of tracks in the album. Read-only.
     num_tracks: NonNegativeInt | None = None
+    """The number of tracks in the album."""
 
-    #: The number of discs in the album. Read-only.
     num_discs: NonNegativeInt | None = None
+    """The number of discs in the album."""
 
-    #: The album release date. Read-only.
     date: DateOrYear | None = Field(
         default=None,
         pattern=r"^\d{4}(-\d{2}-\d{2})?$",
     )
+    """The album release date. A string formatted as "YYYY" or "YYYY-MM-DD"."""
 
-    #: The MusicBrainz ID of the album. Read-only.
     musicbrainz_id: UUID | None = None
+    """The MusicBrainz ID of the album."""
 
 
 class Track(BaseModel):
-    """A track."""
+    """An audio track."""
 
     model: Literal["Track"] = Field(
         default="Track",
@@ -92,54 +92,56 @@ class Track(BaseModel):
         alias="__model__",
     )
 
-    #: The track URI. Read-only.
     uri: Uri
+    """The track URI."""
 
-    #: The track name. Read-only.
     name: str | None = None
+    """The track name."""
 
-    #: A set of track artists. Read-only.
     artists: frozenset[Artist] = frozenset()
+    """A set of track artists."""
 
-    #: The track :class:`Album`. Read-only.
     album: Album | None = None
+    """The track album."""
 
-    #: A set of track composers. Read-only.
     composers: frozenset[Artist] = frozenset()
+    """A set of track composers."""
 
-    #: A set of track performers. Read-only.
     performers: frozenset[Artist] = frozenset()
+    """A set of track performers."""
 
-    #: The track genre. Read-only.
     genre: str | None = None
+    """The track genre."""
 
-    #: The track number in the album. Read-only.
     track_no: NonNegativeInt | None = None
+    """The track number in the album."""
 
-    #: The disc number in the album. Read-only.
     disc_no: NonNegativeInt | None = None
+    """The disc number in the album."""
 
-    #: The track release date. Read-only.
     date: DateOrYear | None = Field(
         default=None,
         pattern=r"^\d{4}(-\d{2}-\d{2})?$",
     )
+    """The track release date. A string formatted as "YYYY" or "YYYY-MM-DD"."""
 
-    #: The track length in milliseconds or :class:`None` if there is no duration.
-    #: Read-only.
     length: DurationMs | None = None
+    """The track length in milliseconds."""
 
-    #: The track's bitrate in kbit/s. Read-only.
     bitrate: NonNegativeInt | None = None
+    """The track's bitrate in kbit/s."""
 
-    #: The track comment. Read-only.
     comment: str | None = None
+    """The track comment."""
 
-    #: The MusicBrainz ID of the track. Read-only.
     musicbrainz_id: UUID | None = None
+    """The MusicBrainz ID of the track."""
 
-    #: Integer representing when the track was last modified. Exact meaning
-    #: depends on source of track. For local files this is the modification
-    #: time in milliseconds since Unix epoch. For other backends it could be an
-    #: equivalent timestamp or simply a version counter.
     last_modified: NonNegativeInt | None = None
+    """
+    Integer representing when the track was last modified.
+
+    Exact meaning depends on source of track. For local files this is the
+    modification time in milliseconds since Unix epoch. For other backends
+    it could be an equivalent timestamp or simply a version counter.
+    """

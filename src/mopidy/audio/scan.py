@@ -47,8 +47,9 @@ def _trace(*args: Any, **kwargs: Any) -> None:
 class Scanner:
     """Helper to get tags and other relevant info from URIs.
 
-    :param timeout: timeout for scanning a URI in ms
-    :param proxy_config: dictionary containing proxy config strings.
+    Args:
+        timeout: Timeout for scanning a URI in milliseconds.
+        proxy_config: Dictionary containing proxy config strings.
     """
 
     def __init__(
@@ -64,19 +65,15 @@ class Scanner:
         uri: str,
         timeout: float | None = None,
     ) -> _Result:
-        """Scan the given uri collecting relevant metadata.
+        """Scan the given URI collecting relevant metadata.
 
-        :param uri: URI of the resource to scan.
-        :type uri: string
-        :param timeout: timeout for scanning a URI in ms. Defaults to the
-            ``timeout`` value used when creating the scanner.
-        :type timeout: int
-        :return: A named tuple containing
-            ``(uri, tags, duration, seekable, mime)``.
-            ``tags`` is a dictionary of lists for all the tags we found.
-            ``duration`` is the length of the URI in milliseconds, or
-            :class:`None` if the URI has no duration. ``seekable`` is boolean.
-            indicating if a seek would succeed.
+        Args:
+            uri: URI of the resource to scan.
+            timeout: Timeout for scanning in milliseconds. Defaults to the
+                `timeout` value used when creating the scanner.
+
+        Returns:
+            Named tuple: `uri`, `tags`, `duration`, `seekable`, `mime`, `playable`.
         """
         timeout = int(timeout or self._timeout_ms)
         pipeline, signals = _setup_pipeline(uri, self._proxy_config)

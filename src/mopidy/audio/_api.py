@@ -24,8 +24,8 @@ class Audio:
     necessary.
     """
 
-    #: The GStreamer state mapped to :class:`mopidy.types.PlaybackState`
     state: PlaybackState = PlaybackState.STOPPED
+    """The GStreamer state mapped to [PlaybackState][mopidy.types.PlaybackState]."""
 
     def set_uri(
         self,
@@ -35,12 +35,13 @@ class Audio:
     ) -> None:
         """Set URI of audio to be played.
 
-        You *MUST* call :meth:`prepare_change` before calling this method.
+        You *MUST* call [prepare_change][] before calling this method.
 
-        :param uri: the URI to play
-        :param live_stream: disables buffering, reducing latency for stream,
-            and discarding data when paused
-        :param download: enables "download" buffering mode
+        Args:
+            uri: The URI to play.
+            live_stream: Disables buffering, reducing latency for streams,
+                and discarding data when paused.
+            download: Enables "download" buffering mode.
         """
         raise NotImplementedError
 
@@ -53,7 +54,8 @@ class Audio:
         This should be used to modify source-specific properties such as login
         details.
 
-        :param callback: Callback to run when we setup the source.
+        Args:
+            callback: Callback to run when we set up the source.
         """
         raise NotImplementedError
 
@@ -64,11 +66,12 @@ class Audio:
         """Configure audio to use an about-to-finish callback.
 
         This should be used to achieve gapless playback. For this to work the
-        callback *MUST* call :meth:`set_uri` with the new URI to play and
-        block until this call has been made. :meth:`prepare_change` is not
-        needed before :meth:`set_uri` in this one special case.
+        callback *MUST* call [set_uri][] with the new URI to play and block
+        until this call has been made. [prepare_change][] is not needed before
+        [set_uri][] in this one special case.
 
-        :param callback: Callback to run when we need the next URI.
+        Args:
+            callback: Callback to run when we need the next URI.
         """
         raise NotImplementedError
 
@@ -77,23 +80,20 @@ class Audio:
         raise NotImplementedError
 
     def set_position(self, position: DurationMs) -> bool:
-        """Set position in milliseconds.
-
-        :param position: the position in milliseconds
-        """
+        """Set position in milliseconds."""
         raise NotImplementedError
 
     def start_playback(self) -> bool:
         """Start playback.
 
-        Returns :class:`True` if successful, else :class:`False`.
+        Returns `True` if successful, else `False`.
         """
         raise NotImplementedError
 
     def pause_playback(self) -> bool:
         """Pause playback.
 
-        Returns :class:`True` if successful, else :class:`False`.
+        Returns `True` if successful, else `False`.
         """
         raise NotImplementedError
 
@@ -108,7 +108,7 @@ class Audio:
     def stop_playback(self) -> bool:
         """Stop playback.
 
-        Returns :class:`True` if successful, else :class:`False`.
+        Returns `True` if successful, else `False`.
         """
         raise NotImplementedError
 

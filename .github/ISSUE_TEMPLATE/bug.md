@@ -20,6 +20,7 @@ A clear and concise description of what you expected to happen.
 
 **Environment**
 Please complete the following information:
+
 - Operating system (e.g. Debian Buster, Ubuntu 20.04)
 - [Running Mopidy](https://docs.mopidy.com/en/latest/running/) as a service or in the terminal?
 - Your config (output of `sudo mopidyctl config`)

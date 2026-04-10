@@ -11,16 +11,18 @@ from mopidy.types import TracklistId
 class TlTrack(BaseModel):
     """A tracklist track. Wraps a regular track and it's tracklist ID.
 
-    The use of :class:`TlTrack` allows the same track to appear multiple times
+    The use of TlTrack allows the same track to appear multiple times
     in the tracklist.
 
     This class also accepts it's parameters as positional arguments. Both
     arguments must be provided, and they must appear in the order they are
     listed here.
 
-    This class also supports iteration, so your extract its values like this::
+    This class also supports iteration, so you can extract its values like this:
 
-        (tlid, track) = tl_track
+    ```python
+    (tlid, track) = tl_track
+    ```
     """
 
     model: Literal["TlTrack"] = Field(
@@ -29,11 +31,11 @@ class TlTrack(BaseModel):
         alias="__model__",
     )
 
-    #: The tracklist ID. Read-only.
     tlid: TracklistId = Field(..., ge=1)
+    """The tracklist ID."""
 
-    #: The track. Read-only.
     track: Track
+    """The track."""
 
     def __init__(
         self,

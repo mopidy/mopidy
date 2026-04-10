@@ -30,13 +30,13 @@ def create_app_dirs(config: Config) -> None:
 
 
 def sigterm_handler(_signum: int, _frame: FrameType | None) -> None:
-    """A :mod:`signal` handler which will exit the program on signal.
+    """A signal handler which will exit the program on SIGTERM.
 
     This function is not called when the process' main thread is running a GLib
     mainloop. In that case, the GLib mainloop must listen for SIGTERM signals
     and quit itself.
 
-    For Mopidy subcommands that does not run the GLib mainloop, this handler
+    For Mopidy subcommands that do not run the GLib mainloop, this handler
     ensures a proper shutdown of the process on SIGTERM.
     """
     logger.info("Got SIGTERM signal. Exiting...")

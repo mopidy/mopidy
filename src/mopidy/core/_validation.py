@@ -3,7 +3,7 @@ from __future__ import annotations
 import urllib.parse
 from collections.abc import Iterable, Mapping
 from types import UnionType
-from typing import Any, Literal, TypeVar, Union, get_args
+from typing import Any, Literal, Union, get_args
 
 from mopidy import exceptions
 from mopidy.types import (
@@ -35,8 +35,6 @@ def _get_literals(literal_type: Any) -> set[str]:
     msg = "Provided type is neither a Union nor a Literal type."
     raise ValueError(msg)
 
-
-T = TypeVar("T")
 
 PLAYBACK_STATES: set[str] = {ps.value for ps in PlaybackState}
 
@@ -103,7 +101,7 @@ def check_boolean(
     check_instance(arg, bool, msg=msg)
 
 
-def check_instance(
+def check_instance[T](
     arg: T,
     cls: type[T],
     msg: str = "Expected a {name} instance, not {arg!r}",

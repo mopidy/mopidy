@@ -15,11 +15,11 @@ logger = logging.getLogger(__name__)
 def get_xdg_dirs() -> dict[str, pathlib.Path]:
     """Returns a dict of all the known XDG Base Directories for the current user.
 
-    The keys ``XDG_CACHE_DIR``, ``XDG_CONFIG_DIR``, and ``XDG_DATA_DIR`` is
+    The keys `XDG_CACHE_DIR`, `XDG_CONFIG_DIR`, and `XDG_DATA_DIR` is
     always available.
 
-    Additional keys, like ``XDG_MUSIC_DIR``, may be available if the
-    ``$XDG_CONFIG_DIR/user-dirs.dirs`` file exists and is parseable.
+    Additional keys, like `XDG_MUSIC_DIR`, may be available if the
+    `$XDG_CONFIG_DIR/user-dirs.dirs` file exists and is parseable.
 
     See https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
     for the XDG Base Directory specification.
@@ -42,14 +42,13 @@ def get_xdg_dirs() -> dict[str, pathlib.Path]:
 
 
 def _get_xdg_user_dirs(xdg_config_dir: pathlib.Path) -> dict[str, pathlib.Path]:
-    """Returns a dict of XDG dirs read from
-    ``$XDG_CONFIG_HOME/user-dirs.dirs``.
+    """Returns a dict of XDG dirs read from `$XDG_CONFIG_HOME/user-dirs.dirs`.
 
-    This is used at import time for most users of :mod:`mopidy`. By rolling our
-    own implementation instead of using :meth:`glib.get_user_special_dir` we
-    make it possible for many extensions to run their test suites, which are
-    importing parts of :mod:`mopidy`, in a virtualenv with global site-packages
-    disabled, and thus no :mod:`glib` available.
+    This is used at import time for most users of Mopidy. By rolling our own
+    implementation instead of using `glib.get_user_special_dir` we make it
+    possible for many extensions to run their test suites, which are importing
+    parts of Mopidy, in a virtualenv with global site-packages disabled, and
+    thus no `glib` available.
     """
     dirs_file = xdg_config_dir / "user-dirs.dirs"
 
@@ -123,10 +122,10 @@ def path_to_uri(path: str | PathLike[str]) -> Uri:
     """Convert OS specific path to file:// URI.
 
     Accepts either unicode strings or bytestrings. The encoding of any
-    bytestring will be maintained so that :func:`uri_to_path` can return the
-    same bytestring.
+    bytestring will be maintained so that [uri_to_path][] can return the same
+    bytestring.
 
-    Returns a file:// URI as an unicode string.
+    Returns a file:// URI as a unicode string.
     """
     return Uri(pathlib.Path(path).as_uri())
 

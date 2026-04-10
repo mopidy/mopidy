@@ -36,13 +36,15 @@ def _mixer_error_handling(mixer: MixerProxy) -> Generator[None]:
 
 
 class MixerController:
+    """Manages volume and muting."""
+
     def __init__(self, mixer: MixerProxy | None) -> None:
         self._mixer = mixer
 
     def get_volume(self) -> Percentage | None:
         """Get the volume.
 
-        Integer in range [0..100] or :class:`None` if unknown.
+        Integer in range [0..100] or `None` if unknown.
 
         The volume scale is linear.
         """
@@ -64,7 +66,7 @@ class MixerController:
 
         The volume scale is linear.
 
-        Returns :class:`True` if call is successful, otherwise :class:`False`.
+        Returns `True` if call is successful, otherwise `False`.
         """
         validation.check_integer(volume, min=0, max=100)
 
@@ -81,8 +83,7 @@ class MixerController:
     def get_mute(self) -> bool | None:
         """Get mute state.
 
-        :class:`True` if muted, :class:`False` unmuted, :class:`None` if
-        unknown.
+        `True` if muted, `False` if unmuted, `None` if unknown.
         """
         if self._mixer is None:
             return None
@@ -98,9 +99,9 @@ class MixerController:
     def set_mute(self, mute: bool) -> bool:
         """Set mute state.
 
-        :class:`True` to mute, :class:`False` to unmute.
+        `True` to mute, `False` to unmute.
 
-        Returns :class:`True` if call is successful, otherwise :class:`False`.
+        Returns `True` if call is successful, otherwise `False`.
         """
         validation.check_boolean(mute)
         if self._mixer is None:

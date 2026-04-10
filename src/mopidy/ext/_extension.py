@@ -21,36 +21,30 @@ class Extension:
     dist_name: str
     """The extension's distribution name, as registered on PyPI
 
-    Example: ``mopidy-soundspot``
+    Example: `mopidy-soundspot`
     """
 
     ext_name: str
     """The extension's short name, as used in setup.py and as config section
     name
 
-    Example: ``soundspot``
+    Example: `soundspot`
     """
 
     version: str
-    """The extension's version
+    """The extension's version.
 
-    Should match the :attr:`__version__` attribute on the extension's main
-    Python module and the version registered on PyPI.
+    Should match the `__version__` attribute on the extension's main Python
+    module and the version registered on PyPI.
     """
 
     def get_default_config(self) -> str:
-        """The extension's default config as a text string.
-
-        :returns: str
-        """
+        """The extension's default config as a text string."""
         msg = 'Add at least a config section with "enabled = true"'
         raise NotImplementedError(msg)
 
     def get_config_schema(self) -> ConfigSchema:
-        """The extension's config validation schema.
-
-        :returns: :class:`~mopidy.config.schemas.ConfigSchema`
-        """
+        """The extension's config validation schema."""
         schema = config_lib.ConfigSchema(self.ext_name)
         schema["enabled"] = config_lib.Boolean()
         return schema
@@ -60,9 +54,6 @@ class Extension:
         """Get or create cache directory for the extension.
 
         Use this directory to cache data that can safely be thrown away.
-
-        :param config: the Mopidy config object
-        :return: pathlib.Path
         """
         cache_dir_path = paths.expand_path(config["core"]["cache_dir"]) / cls.ext_name
         paths.get_or_create_dir(cache_dir_path)
@@ -70,11 +61,7 @@ class Extension:
 
     @classmethod
     def get_config_dir(cls, config: config_lib.Config) -> Path:
-        """Get or create configuration directory for the extension.
-
-        :param config: the Mopidy config object
-        :return: pathlib.Path
-        """
+        """Get or create configuration directory for the extension."""
         config_dir_path = paths.expand_path(config["core"]["config_dir"]) / cls.ext_name
         paths.get_or_create_dir(config_dir_path)
         return config_dir_path
@@ -84,60 +71,58 @@ class Extension:
         """Get or create data directory for the extension.
 
         Use this directory to store data that should be persistent.
-
-        :param config: the Mopidy config object
-        :returns: pathlib.Path
         """
         data_dir_path = paths.expand_path(config["core"]["data_dir"]) / cls.ext_name
         paths.get_or_create_dir(data_dir_path)
         return data_dir_path
 
     def get_command(self) -> cyclopts.App | None:
-        """Command to expose to command line users running ``mopidy``.
+        """Command to expose to command line users running `mopidy`.
 
-        This method should return a `cyclopts.App` instance. The app
-        will be mounted as the ``mopidy <ext_name>`` command. It can have
-        subcommands on its own, e.g. ``mopidy local scan``. Please refer to the
-        cyclopts docs for details on how to implement this.
+        This method should return a `cyclopts.App` instance. The app will be
+        mounted as the `mopidy <ext_name>` command. It can have subcommands on
+        its own, e.g. `mopidy local scan`. Please refer to the cyclopts docs
+        for details on how to implement this.
 
-        .. note::
-
-            In Mopidy < 4.0, this method returned a custom ``Command`` class,
-            which is no longer supported.
-
-        :returns: cyclopts.App
+        /// note
+        In Mopidy < 4.0, this method returned a custom `Command` class,
+        which is no longer supported.
+        ///
         """
 
     def validate_environment(self) -> None:
-        """Checks if the extension can run in the current environment.
+        """Check if the extension can run in the current environment.
 
-        Dependencies described by :file:`setup.py` are checked by Mopidy, so
-        you should not check their presence here.
+        Dependencies described by `setup.py` are checked by Mopidy, so you
+        should not check their presence here.
 
-        If a problem is found, raise :exc:`~mopidy.exceptions.ExtensionError`
-        with a message explaining the issue.
+        If a problem is found, raise
+        [ExtensionError][mopidy.exceptions.ExtensionError] with a message
+        explaining the issue.
 
-        :raises: :exc:`~mopidy.exceptions.ExtensionError`
-        :returns: :class:`None`
+        Raises:
+            ExtensionError: If the environment is not suitable.
         """
 
     def setup(self, registry: Registry) -> None:
-        """Register the extension's components in the extension :class:`Registry`.
+        """Register the extension's components in the extension [Registry][].
 
-        For example, to register a backend::
+        For example, to register a backend:
 
-            def setup(self, registry):
-                from .backend import SoundspotBackend
-                registry.add('backend', SoundspotBackend)
+        ```python
+        def setup(self, registry):
+            from .backend import SoundspotBackend
+            registry.add('backend', SoundspotBackend)
+        ```
 
-        See :class:`Registry` for a list of registry keys with a special
-        meaning. Mopidy will instantiate and start any classes registered under
-        the ``frontend`` and ``backend`` registry keys.
+        See [Registry][] for a list of registry keys with a special meaning.
+        Mopidy will instantiate and start any classes registered under the
+        `frontend` and `backend` registry keys.
 
         This method can also be used for other setup tasks not involving the
         extension registry.
 
-        :param registry: the extension registry
-        :type registry: :class:`Registry`
+        Args:
+            registry: The extension registry.
         """
         raise NotImplementedError

@@ -113,10 +113,10 @@ def _unwrap_stream(  # noqa: PLR0911  # TODO: cleanup the return value of this.
     scanner: scan.Scanner,
     requests_session: requests.Session,
 ) -> tuple[Uri | None, scan._Result | None]:
-    """Get a stream URI from a playlist URI, ``uri``.
+    """Get a stream URI from a playlist URI, `uri`.
 
     Unwraps nested playlists until something that's not a playlist is found or
-    the ``timeout`` is reached.
+    the `timeout` is reached.
     """
     original_uri = uri
     seen_uris = set()
