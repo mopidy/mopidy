@@ -4,8 +4,8 @@ import re
 import time
 import urllib.parse
 
+import httpx
 import pykka
-import requests
 
 from mopidy import audio as audio_lib
 from mopidy import backend, exceptions
@@ -29,7 +29,7 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
             proxy_config=config["proxy"],
         )
 
-        self._session = http.get_requests_session(
+        self._http_client = http.get_httpx_client(
             proxy_config=config["proxy"],
             user_agent=(f"{Extension.dist_name}/{Extension.version}"),
         )
@@ -55,6 +55,9 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
             uri_schemes -= {UriScheme("file")}
         StreamBackend.uri_schemes = sorted(uri_schemes)
 
+    def on_stop(self) -> None:
+        self._http_client.close()
+
 
 class StreamLibraryProvider(backend.LibraryProvider):
     backend: StreamBackend
@@ -71,7 +74,7 @@ class StreamLibraryProvider(backend.LibraryProvider):
             uri,
             timeout=self.backend._timeout,
             scanner=self.backend._scanner,
-            requests_session=self.backend._session,
+            http_client=self.backend._http_client,
         )
 
         if scan_result:
@@ -102,7 +105,7 @@ class StreamPlaybackProvider(backend.PlaybackProvider):
             uri,
             timeout=self.backend._timeout,
             scanner=self.backend._scanner,
-            requests_session=self.backend._session,
+            http_client=self.backend._http_client,
         )
         return unwrapped_uri
 
@@ -111,7 +114,7 @@ def _unwrap_stream(  # noqa: PLR0911  # TODO: cleanup the return value of this.
     uri: Uri,
     timeout: float,
     scanner: scan.Scanner,
-    requests_session: requests.Session,
+    http_client: httpx.Client,
 ) -> tuple[Uri | None, scan._Result | None]:
     """Get a stream URI from a playlist URI, `uri`.
 
@@ -166,7 +169,7 @@ def _unwrap_stream(  # noqa: PLR0911  # TODO: cleanup the return value of this.
                 timeout,
             )
             return None, None
-        content = http.download(requests_session, uri, timeout=download_timeout / 1000)
+        content = http.download(http_client, uri, timeout=download_timeout / 1000)
 
         if content is None:
             logger.info(

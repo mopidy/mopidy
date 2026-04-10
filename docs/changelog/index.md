@@ -47,7 +47,7 @@ the latest Debian stable release, Debian 13 Trixie.
   via Cyclopts, which we've started to use directly as well to handle colorized
   log output.
 
-- Requests >= 2.32 is now required.
+- Replaced Requests with HTTPX. HTTPX >= 0.28.1 is now required.
 
 - Tornado >= 6.4 is now required.
 

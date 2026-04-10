@@ -2,9 +2,9 @@ import logging
 from pathlib import Path
 from unittest import mock
 
+import httpx
 import pytest
-import requests.exceptions
-import responses
+from pytest_httpx import HTTPXMock
 
 from mopidy import exceptions
 from mopidy._exts.stream import actor
@@ -56,8 +56,9 @@ def provider(backend):
 
 
 class TestTranslateURI:
-    @responses.activate
-    def test_audio_stream_returns_same_uri(self, scanner, provider):
+    def test_audio_stream_returns_same_uri(
+        self, httpx_mock: HTTPXMock, scanner, provider
+    ):
         scanner.scan.side_effect = [
             # Set playable to False to test detection by mimetype
             mock.Mock(mime="audio/mpeg", playable=False),
@@ -68,8 +69,9 @@ class TestTranslateURI:
         scanner.scan.assert_called_once_with(STREAM_URI, timeout=mock.ANY)
         assert result == STREAM_URI
 
-    @responses.activate
-    def test_playable_ogg_stream_is_not_considered_a_playlist(self, scanner, provider):
+    def test_playable_ogg_stream_is_not_considered_a_playlist(
+        self, httpx_mock: HTTPXMock, scanner, provider
+    ):
         scanner.scan.side_effect = [
             # Set playable to True to ignore detection as possible playlist
             mock.Mock(mime="application/ogg", playable=True),
@@ -80,8 +82,9 @@ class TestTranslateURI:
         scanner.scan.assert_called_once_with(STREAM_URI, timeout=mock.ANY)
         assert result == STREAM_URI
 
-    @responses.activate
-    def test_text_playlist_with_mpeg_stream(self, scanner, provider, caplog):
+    def test_text_playlist_with_mpeg_stream(
+        self, httpx_mock: HTTPXMock, scanner, provider, caplog
+    ):
         caplog.set_level(logging.DEBUG)
         scanner.scan.side_effect = [
             # Scanning playlist
@@ -89,11 +92,11 @@ class TestTranslateURI:
             # Scanning stream
             mock.Mock(mime="audio/mpeg", playable=True),
         ]
-        responses.add(
-            responses.GET,
-            PLAYLIST_URI,
-            body=BODY,
-            content_type="audio/x-mpegurl",
+        httpx_mock.add_response(
+            url=PLAYLIST_URI,
+            status_code=200,
+            text=BODY,
+            headers={"content-type": "audio/x-mpegurl"},
         )
 
         result = provider.translate_uri(PLAYLIST_URI)
@@ -110,26 +113,25 @@ class TestTranslateURI:
         assert f"Unwrapping stream from URI: {STREAM_URI}" in caplog.text
         assert f"Unwrapped potential audio/mpeg stream: {STREAM_URI}" in caplog.text
 
-        # Check proper Requests session setup
-        assert (
-            responses.calls[0]
-            .request.headers["User-Agent"]
-            .startswith("mopidy-stream/")
-        )
+        # Check proper HTTPX client setup
+        request = httpx_mock.get_request()
+        assert request is not None
+        assert request.headers["User-Agent"].startswith("mopidy-stream/")
 
-    @responses.activate
-    def test_xml_playlist_with_mpeg_stream(self, scanner, provider):
+    def test_xml_playlist_with_mpeg_stream(
+        self, httpx_mock: HTTPXMock, scanner, provider
+    ):
         scanner.scan.side_effect = [
             # Scanning playlist
             mock.Mock(mime="application/xspf+xml", playable=False),
             # Scanning stream
             mock.Mock(mime="audio/mpeg", playable=True),
         ]
-        responses.add(
-            responses.GET,
-            PLAYLIST_URI,
-            body=BODY,
-            content_type="application/xspf+xml",
+        httpx_mock.add_response(
+            url=PLAYLIST_URI,
+            status_code=200,
+            text=BODY,
+            headers={"content-type": "application/xspf+xml"},
         )
 
         result = provider.translate_uri(PLAYLIST_URI)
@@ -140,8 +142,9 @@ class TestTranslateURI:
         ]
         assert result == STREAM_URI
 
-    @responses.activate
-    def test_scan_fails_but_playlist_parsing_succeeds(self, scanner, provider, caplog):
+    def test_scan_fails_but_playlist_parsing_succeeds(
+        self, httpx_mock: HTTPXMock, scanner, provider, caplog
+    ):
         caplog.set_level(logging.DEBUG)
         scanner.scan.side_effect = [
             # Scanning playlist
@@ -149,11 +152,11 @@ class TestTranslateURI:
             # Scanning stream
             mock.Mock(mime="audio/mpeg", playable=True),
         ]
-        responses.add(
-            responses.GET,
-            PLAYLIST_URI,
-            body=BODY,
-            content_type="audio/x-mpegurl",
+        httpx_mock.add_response(
+            url=PLAYLIST_URI,
+            status_code=200,
+            text=BODY,
+            headers={"content-type": "audio/x-mpegurl"},
         )
 
         result = provider.translate_uri(PLAYLIST_URI)
@@ -164,15 +167,16 @@ class TestTranslateURI:
         assert f"Unwrapped potential audio/mpeg stream: {STREAM_URI}" in caplog.text
         assert result == STREAM_URI
 
-    @responses.activate
-    def test_scan_fails_and_playlist_parsing_fails(self, scanner, provider, caplog):
+    def test_scan_fails_and_playlist_parsing_fails(
+        self, httpx_mock: HTTPXMock, scanner, provider, caplog
+    ):
         caplog.set_level(logging.DEBUG)
         scanner.scan.side_effect = exceptions.ScannerError("some failure")
-        responses.add(
-            responses.GET,
-            STREAM_URI,
-            body=b"some audio data",
-            content_type="audio/mpeg",
+        httpx_mock.add_response(
+            url=STREAM_URI,
+            status_code=200,
+            content=b"some audio data",
+            headers={"content-type": "audio/mpeg"},
         )
 
         result = provider.translate_uri(STREAM_URI)
@@ -185,16 +189,13 @@ class TestTranslateURI:
         )
         assert result == STREAM_URI
 
-    @responses.activate
-    def test_failed_download_returns_none(self, scanner, provider, caplog):
+    def test_failed_download_returns_none(
+        self, httpx_mock: HTTPXMock, scanner, provider, caplog
+    ):
         caplog.set_level(logging.DEBUG)
         scanner.scan.side_effect = [mock.Mock(mime="text/foo", playable=False)]
 
-        responses.add(
-            responses.GET,
-            PLAYLIST_URI,
-            body=requests.exceptions.HTTPError("Kaboom"),
-        )
+        httpx_mock.add_exception(httpx.HTTPError("Kaboom"), url=PLAYLIST_URI)
 
         result = provider.translate_uri(PLAYLIST_URI)
 
@@ -204,15 +205,17 @@ class TestTranslateURI:
             f"Unwrapping stream from URI ({PLAYLIST_URI}) failed: error downloading URI"
         ) in caplog.text
 
-    @responses.activate
-    def test_playlist_references_itself(self, scanner, provider, caplog):
+    def test_playlist_references_itself(
+        self, httpx_mock: HTTPXMock, scanner, provider, caplog
+    ):
         caplog.set_level(logging.DEBUG)
         scanner.scan.side_effect = [mock.Mock(mime="text/foo", playable=False)]
-        responses.add(
-            responses.GET,
-            PLAYLIST_URI,
-            body=BODY.replace(STREAM_URI, PLAYLIST_URI),
-            content_type="audio/x-mpegurl",
+        httpx_mock.add_response(
+            url=PLAYLIST_URI,
+            status_code=200,
+            text=BODY.replace(STREAM_URI, PLAYLIST_URI),
+            headers={"content-type": "audio/x-mpegurl"},
+            is_reusable=True,
         )
 
         result = provider.translate_uri(PLAYLIST_URI)
@@ -227,8 +230,9 @@ class TestTranslateURI:
         ) in caplog.text
         assert result is None
 
-    @responses.activate
-    def test_playlist_with_relative_mpeg_stream(self, scanner, provider, caplog):
+    def test_playlist_with_relative_mpeg_stream(
+        self, httpx_mock: HTTPXMock, scanner, provider, caplog
+    ):
         caplog.set_level(logging.DEBUG)
         scanner.scan.side_effect = [
             # Scanning playlist
@@ -236,11 +240,11 @@ class TestTranslateURI:
             # Scanning stream
             mock.Mock(mime="audio/mpeg", playable=True),
         ]
-        responses.add(
-            responses.GET,
-            PLAYLIST_URI,
-            body=BODY.replace(STREAM_URI, Path(STREAM_URI).name),
-            content_type="audio/x-mpegurl",
+        httpx_mock.add_response(
+            url=PLAYLIST_URI,
+            status_code=200,
+            text=BODY.replace(STREAM_URI, Path(STREAM_URI).name),
+            headers={"content-type": "audio/x-mpegurl"},
         )
 
         result = provider.translate_uri(PLAYLIST_URI)
