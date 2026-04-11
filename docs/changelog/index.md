@@ -32,6 +32,9 @@ the latest Debian stable release, Debian 13 Trixie.
 - PyGObject >= 3.50 is now an explicit Python dependency. Previously we assumed
   that you would install this together with your GStreamer installation.
 
+    We also added a workaround to not crash when using PyGObject < 3.55.3
+    together with GLib >= 2.88. (!2248)
+
 - Pykka >= 4.1 is now required.
 
 - Pydantic >= 2.10 is now required. This is a new dependency for Mopidy to
