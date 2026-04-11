@@ -52,6 +52,15 @@ Changes to the data models may affect any Mopidy extension or client.
 Changes to the Audio API only affect the few Mopidy backend extensions that
 interface with the audio layer themselves.
 
+- Upgraded playback from using GStreamer's `playbin` element to using the newer
+  `playbin3` element.
+
+    `playbin` is in maintenance-only mode upstream, while `playbin3` is the
+    recommended playback element and is designed to reuse decoders across track
+    changes for lower CPU and memory use. All of Mopidy's existing signals,
+    properties, and bus messages are supported unchanged, so this should
+    hopefully be an uneventful upgrade. (#2127, !2250)
+
 - [`convert_tags_to_track()`][mopidy.audio.tags.convert_tags_to_track]
   now raises [`ScannerError`][mopidy.exceptions.ScannerError] if the tags can't
   be coerced into a valid [`Track`][mopidy.models.Track]. The `file` and
