@@ -1,8 +1,8 @@
 from unittest import mock
 
+import httpx
 import pytest
-import requests
-import responses
+from pytest_httpx import HTTPXMock
 
 from mopidy._exts.stream import http
 
@@ -12,31 +12,28 @@ BODY = "This is the contents of foo.txt."
 
 
 @pytest.fixture
-def session():
-    return requests.Session()
+def client():
+    client = httpx.Client()
+    yield client
+    client.close()
 
 
-@pytest.fixture
-def session_mock():
-    return mock.Mock(spec=requests.Session)
+def test_download_on_server_side_error(httpx_mock: HTTPXMock, client, caplog):
+    httpx_mock.add_response(url=URI, status_code=500, text=BODY)
 
-
-@responses.activate
-def test_download_on_server_side_error(session, caplog):
-    responses.add(responses.GET, URI, body=BODY, status=500)
-
-    result = http.download(session, URI)
+    result = http.download(client, URI)
 
     assert result is None
     assert "Problem downloading" in caplog.text
 
 
-def test_download_times_out_if_connection_times_out(session_mock, caplog):
-    session_mock.get.side_effect = requests.exceptions.Timeout
+def test_download_times_out_if_connection_times_out(
+    httpx_mock: HTTPXMock, client, caplog
+):
+    httpx_mock.add_exception(httpx.TimeoutException("timed out"), url=URI)
 
-    result = http.download(session_mock, URI, timeout=1.0)
+    result = http.download(client, URI, timeout=1.0)
 
-    session_mock.get.assert_called_once_with(URI, timeout=1.0, stream=True)
     assert result is None
     assert (
         f"Download of {URI!r} failed due to connection timeout after 1.000s"
@@ -44,14 +41,13 @@ def test_download_times_out_if_connection_times_out(session_mock, caplog):
     )
 
 
-@responses.activate
-def test_download_times_out_if_download_is_slow(session, caplog):
-    responses.add(responses.GET, URI, body=BODY, content_type="text/plain")
+def test_download_times_out_if_download_is_slow(httpx_mock: HTTPXMock, client, caplog):
+    httpx_mock.add_response(url=URI, status_code=200, text=BODY)
 
     with mock.patch.object(http, "time") as time_mock:
         time_mock.time.side_effect = [0, TIMEOUT + 1]
 
-        result = http.download(session, URI)
+        result = http.download(client, URI)
 
     assert result is None
     assert (

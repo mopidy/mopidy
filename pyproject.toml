@@ -16,11 +16,11 @@ classifiers = [
 dynamic = ["version"]
 dependencies = [
     "cyclopts >= 3.12",
+    "httpx >= 0.28.1",
     "platformdirs >= 4.3",
     "pydantic >= 2.10",
     "pygobject >= 3.50",
     "pykka >= 4.1",
-    "requests >= 2.32",
     "rich >= 13.9",
     "tornado >= 6.4",
 ]
@@ -69,14 +69,13 @@ tests = [
     "polyfactory >= 3.1",
     "pytest >= 8.3",
     "pytest-cov >= 5.0",
+    "pytest-httpx >= 0.35",
     "pytest-mock >= 3.14",
-    "responses >= 0.25",
 ]
 typing = [
     "pygobject-stubs >= 2.14.0, != 2.15.0",
     "pyright == 1.1.408",
     "ty == 0.0.14",
-    "types-requests >= 2.32",
 ]
 
 
