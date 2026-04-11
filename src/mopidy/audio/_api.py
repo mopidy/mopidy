@@ -15,8 +15,8 @@ if TYPE_CHECKING:
 class Audio:
     """Audio output API.
 
-    There is only a single implementation of this API, using `GStreamer
-    <https://gstreamer.freedesktop.org/>`_.
+    There is only a single implementation of this API, using
+    [GStreamer](https://gstreamer.freedesktop.org/).
 
     The primary motivation for defining this API separate from the
     implementation is to make it a bit easier to mock the audio layer in tests.

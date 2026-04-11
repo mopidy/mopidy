@@ -402,7 +402,7 @@ class _Handler:
 
 # TODO: create a player class which replaces the actors internals
 class GstAudio(Audio, pykka.ThreadingActor):
-    """Audio output through `GStreamer <https://gstreamer.freedesktop.org/>`_."""
+    """Audio output through [GStreamer](https://gstreamer.freedesktop.org/)."""
 
     mixer: GstSoftwareMixerAdapter | None = None
 
