@@ -111,6 +111,15 @@ reference](../reference/media.md) has an example.
 
 ### Other changes
 
+- Media: Upgrade the media reader pipeline from using the `typefind` and
+  `decodebin` GStreamer elements to using `parsebin`.
+
+    `parsebin` is the modern parsing stage also used internally by
+    `uridecodebin3`. It demuxes and parses streams without ever plugging
+    decoders, which is exactly what the media reader wants. This replaces the
+    previous custom `autoplug-select` callback that faked the same behavior on
+    top of `decodebin`. (#2127, !2338)
+
 - Audio: Handle all GStreamer bus messages on the audio actor thread. Before,
   the GLib main loop thread and the actor thread changed the audio state at the
   same time, with no synchronization. The "Race condition happened" warning
