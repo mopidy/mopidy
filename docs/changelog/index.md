@@ -22,19 +22,23 @@ For older releases, see:
 
 ## v4.0.2 (2026-08-19)
 
-- Models: The `musicbrainz_id` fields on [`Album`][mopidy.models.Album],
+### Data models
+
+Changes to the data models may affect any Mopidy extension or client.
+
+- The `musicbrainz_id` fields on [`Album`][mopidy.models.Album],
   [`Artist`][mopidy.models.Artist], and [`Track`][mopidy.models.Track] are again
   typed as `str` instead of `UUID`, like in Mopidy < 4.0, to allow scanning
   collections using alternative identifiers, or multiple identifiers in the same
   field. (!2283)
 
-- Models: The `date` field on [`Album`][mopidy.models.Album] and
+- The `date` field on [`Album`][mopidy.models.Album] and
   [`Track`][mopidy.models.Track] now also accepts the `YYYY-MM` format, in
   addition to `YYYY` and `YYYY-MM-DD`. GStreamer emits `YYYY-MM` for files that
   only have a year and a month in their date tag, and such files were previously
   rejected. (!2283)
 
-- Types: Deprecated `mopidy.types.Date`, `mopidy.types.Year`, and
+- Deprecated `mopidy.types.Date`, `mopidy.types.Year`, and
   `mopidy.types.DateOrYear`. They are replaced by a single
   [`mopidy.types.ReleaseDate`][mopidy.types.ReleaseDate] type, covering all
   three supported date formats. The old names remain importable, but they are
@@ -43,7 +47,12 @@ For older releases, see:
   behave as strings, and instantiating them emits a `DeprecationWarning`. They
   will be removed in a future release. (!2283)
 
-- Audio: [`convert_tags_to_track()`][mopidy.audio.tags.convert_tags_to_track]
+### Audio API
+
+Changes to the Audio API only affect the few Mopidy backend extensions that
+interface with the audio layer themselves.
+
+- [`convert_tags_to_track()`][mopidy.audio.tags.convert_tags_to_track]
   now raises [`ScannerError`][mopidy.exceptions.ScannerError] if the tags can't
   be coerced into a valid [`Track`][mopidy.models.Track]. The `file` and
   `stream` backends catch this per URI and fall back to a track with just the
