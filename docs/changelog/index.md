@@ -61,6 +61,15 @@ interface with the audio layer themselves.
     properties, and bus messages are supported unchanged, so this should
     hopefully be an uneventful upgrade. (#2127, !2250)
 
+- Upgraded the scanner pipeline from using the `typefind` and `decodebin`
+  GStreamer elements to using `parsebin`.
+
+    `parsebin` is the modern parsing stage also used internally by
+    `uridecodebin3`. It demuxes and parses streams without ever plugging
+    decoders, which is exactly what the scanner wants. This replaces the
+    previous custom `autoplug-select` callback that faked the same behaviour on
+    top of `decodebin`. (#2127, !2250)
+
 - [`convert_tags_to_track()`][mopidy.audio.tags.convert_tags_to_track]
   now raises [`ScannerError`][mopidy.exceptions.ScannerError] if the tags can't
   be coerced into a valid [`Track`][mopidy.models.Track]. The `file` and
