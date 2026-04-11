@@ -1,6 +1,5 @@
 import logging
 import time
-from enum import IntEnum
 from pathlib import Path
 from typing import Any, NamedTuple, cast
 
@@ -11,20 +10,6 @@ from mopidy.audio import tags as tags_lib
 from mopidy.audio._utils import Signals, setup_proxy
 from mopidy.config import ProxyConfig
 from mopidy.types import DurationMs
-
-
-class GstElementFactoryListType(IntEnum):
-    DECODER = 1 << 0
-    AUDIO = 1 << 50
-    DEMUXER = 1 << 5
-    DEPAYLOADER = 1 << 8
-    PARSER = 1 << 6
-
-
-class GstAutoplugSelectResult(IntEnum):
-    TRY = 0
-    EXPOSE = 1
-    SKIP = 2
 
 
 class _Result(NamedTuple):
@@ -113,9 +98,9 @@ def _setup_pipeline(
     pipeline.add(src)
 
     if static_src_pad := src.get_static_pad("src"):
-        _setup_decodebin(src, static_src_pad, pipeline, signals)
+        _setup_parsebin(src, static_src_pad, pipeline, signals)
     elif _has_dynamic_src_pad(src):
-        signals.connect(src, "pad-added", _setup_decodebin, pipeline, signals)
+        signals.connect(src, "pad-added", _setup_parsebin, pipeline, signals)
     else:
         msg = "No pads found in source element."
         raise exceptions.ScannerError(msg)
@@ -133,52 +118,26 @@ def _has_dynamic_src_pad(element: Gst.Element) -> bool:
     return False
 
 
-def _setup_decodebin(
+def _setup_parsebin(
     element: Gst.Element,  # noqa: ARG001
     pad: Gst.Pad,
     pipeline: Gst.Pipeline,
     signals: Signals,
 ) -> None:
-    if (typefind := Gst.ElementFactory.make("typefind")) is None:
-        msg = "Failed to create GStreamer typefind element."
+    if (parsebin := Gst.ElementFactory.make("parsebin")) is None:
+        msg = "Failed to create GStreamer parsebin element."
         raise exceptions.AudioException(msg)
 
-    if (decodebin := Gst.ElementFactory.make("decodebin")) is None:
-        msg = "Failed to create GStreamer decodebin element."
-        raise exceptions.AudioException(msg)
+    pipeline.add(parsebin)
+    parsebin.sync_state_with_parent()
 
-    for el in (typefind, decodebin):
-        pipeline.add(el)
-        el.sync_state_with_parent()
-
-    if (sink_pad := typefind.get_static_pad("sink")) is None:
-        msg = "Failed to get sink pad of GStreamer typefind element."
+    if (sink_pad := parsebin.get_static_pad("sink")) is None:
+        msg = "Failed to get sink pad of GStreamer parsebin element."
         raise exceptions.AudioException(msg)
 
     pad.link(sink_pad)
-    typefind.link(decodebin)
 
-    signals.connect(typefind, "have-type", _have_type, decodebin)
-    signals.connect(decodebin, "pad-added", _pad_added, pipeline)
-    signals.connect(decodebin, "autoplug-select", _autoplug_select)
-
-
-def _have_type(
-    element: Gst.Element,
-    _probability: int,
-    caps: Gst.Caps,
-    decodebin: Gst.Bin,
-) -> None:
-    decodebin.set_property("sink-caps", caps)
-    struct = Gst.Structure.new_empty("have-type")
-    struct.set_value("caps", caps.get_structure(0))
-
-    if (element_bus := element.get_bus()) is None:
-        msg = "Failed to get bus of GStreamer element."
-        raise exceptions.AudioException(msg)
-
-    message = Gst.Message.new_application(element, struct)
-    element_bus.post(message)
+    signals.connect(parsebin, "pad-added", _pad_added, pipeline)
 
 
 def _pad_added(
@@ -186,6 +145,23 @@ def _pad_added(
     pad: Gst.Pad,
     pipeline: Gst.Pipeline,
 ) -> None:
+    pad_caps = pad.get_current_caps() or pad.query_caps()
+
+    if (element_bus := element.get_bus()) is None:
+        msg = "Failed to get bus of GStreamer element."
+        raise exceptions.AudioException(msg)
+
+    if pad_caps is not None and pad_caps.get_size() > 0:
+        struct = pad_caps.get_structure(0)
+
+        have_type = Gst.Structure.new_empty("have-type")
+        have_type.set_value("caps", struct)
+        element_bus.post(Gst.Message.new_application(element, have_type))
+
+        if _get_structure_name(struct).startswith("audio/"):
+            have_audio = Gst.Structure.new_empty("have-audio")
+            element_bus.post(Gst.Message.new_application(element, have_audio))
+
     if (fakesink := Gst.ElementFactory.make("fakesink")) is None:
         msg = "Failed to create GStreamer fakesink element."
         raise exceptions.AudioException(msg)
@@ -200,48 +176,6 @@ def _pad_added(
         raise exceptions.AudioException(msg)
 
     pad.link(fakesink_sink)
-
-    raw_caps = Gst.Caps.from_string("audio/x-raw")
-    assert raw_caps
-
-    if pad.query_caps().is_subset(raw_caps):
-        # Probably won't happen due to autoplug-select fix, but lets play it
-        # safe until we've tested more.
-        struct = Gst.Structure.new_empty("have-audio")
-
-        if (element_bus := element.get_bus()) is None:
-            msg = "Failed to get bus of GStreamer element."
-            raise exceptions.AudioException(msg)
-
-        message = Gst.Message.new_application(element, struct)
-        element_bus.post(message)
-
-
-def _autoplug_select(
-    element: Gst.Element,
-    _pad: Gst.Pad,
-    _caps: Gst.Caps,
-    factory: Gst.ElementFactory,
-) -> GstAutoplugSelectResult:
-    if factory.list_is_type(
-        GstElementFactoryListType.DECODER | GstElementFactoryListType.AUDIO,
-    ):
-        struct = Gst.Structure.new_empty("have-audio")
-
-        if (element_bus := element.get_bus()) is None:
-            msg = "Failed to get bus of GStreamer element."
-            raise exceptions.AudioException(msg)
-
-        message = Gst.Message.new_application(element, struct)
-        element_bus.post(message)
-
-    if not factory.list_is_type(
-        GstElementFactoryListType.DEMUXER
-        | GstElementFactoryListType.DEPAYLOADER
-        | GstElementFactoryListType.PARSER,
-    ):
-        return GstAutoplugSelectResult.EXPOSE
-    return GstAutoplugSelectResult.TRY
 
 
 def _start_pipeline(pipeline: Gst.Pipeline) -> None:
