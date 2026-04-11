@@ -33,7 +33,7 @@ at the time of writing.
 
     - Support for 3.7-3.12 has been dropped. Python 3.13-3.14 has been added to
       the testing matrix.
-    
+
     - setuptools is no longer a runtime dependency, as we've replaced the use of
       `pkg_resources` with `importlib.metadata` from Python's standard library.
 
@@ -42,10 +42,10 @@ at the time of writing.
     - PyGObject >= 3.50 is now an explicit Python dependency. Previously we
       assumed that you would install this together with your GStreamer
       installation.
-    
+
     - Added a workaround for GStreamer's `Gst.Structure().get_name()` regression
       for versions v1.26.1 to v1.26.2 inclusive. (!2094)
-    
+
     - We also added a workaround to not crash when using PyGObject < 3.55.3
       together with GLib >= 2.88. (!2248)
 
@@ -211,7 +211,7 @@ interface with the audio layer themselves.
     - `mopidy.audio.actor`
     - `mopidy.audio.listener`
     - `mopidy.audio.utils`
-    
+
 - The old audio actor has been split into a [`Audio`][mopidy.audio.Audio]
   interface with the API used by core and backends, and a
   [`GstAudio`][mopidy.audio.GstAudio] implementation using GStreamer.
