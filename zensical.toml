@@ -57,6 +57,7 @@ nav = [
     {"Reference" = [
         "reference/index.md",
         "reference/command.md",
+        "reference/glossary.md",
         {"Concepts" = [
             "reference/architecture.md",
             "reference/models.md",
@@ -219,18 +220,10 @@ user = "mopidy"
 repo = "mopidy"
 # With this, #123 links to issues and !123 links to PRs.
 #
-[project.markdown_extensions.abbr]
-# Term definitions in docs/includes/abbreviations.md are injected on every
-# page via snippets.auto_append, showing tooltips wherever terms appear.
-
-[project.markdown_extensions.def_list]
-# Renders definition lists (term\n: definition) as styled <dl> HTML.
-
 [project.markdown_extensions.pymdownx.snippets]
 # Include snippets from other files with --8<--
 # base_path includes the project root so AUTHORS etc. can be referenced
 base_path = ["."]
-auto_append = ["docs/includes/abbreviations.md"]
 
 [project.markdown_extensions.pymdownx.superfences]
 # Better code block support
