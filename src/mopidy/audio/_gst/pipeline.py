@@ -150,9 +150,9 @@ class GstPipeline:
         on_about_to_finish: Callable[[Gst.Element], None],
         on_source_setup: Callable[[Gst.Element, Gst.Element], None],
     ) -> Gst.Element:
-        playbin = Gst.ElementFactory.make("playbin")
+        playbin = Gst.ElementFactory.make("playbin3")
         if playbin is None:
-            msg = "Failed to create GStreamer playbin."
+            msg = "Failed to create GStreamer playbin3."
             raise exceptions.AudioException(msg)
         playbin.set_property("flags", GST_PLAY_FLAGS_AUDIO)
 
