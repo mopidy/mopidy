@@ -19,6 +19,15 @@ For older releases, see:
     properties, and bus messages are supported unchanged, so this should
     hopefully be an uneventful upgrade. (#2127, !2250)
 
+- Audio: Upgraded the scanner pipeline from using the `typefind` and `decodebin`
+  GStreamer elements to using `parsebin`.
+
+    `parsebin` is the modern parsing stage also used internally by
+    `uridecodebin3`. It demuxes and parses streams without ever plugging
+    decoders, which is exactly what the scanner wants. This replaces the
+    previous custom `autoplug-select` callback that faked the same behaviour on
+    top of `decodebin`. (#2127, !2250)
+
 ## v4.0.4 (2026-09-13)
 
 - Deps: Fix support for Cyclopts 3.12, the version in Debian stable. Cyclopts
