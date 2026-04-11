@@ -264,7 +264,7 @@ interface with the audio layer themselves.
 
     - `mopidy.file`
     - `mopidy.http`
-    - `mopidy.m2u`
+    - `mopidy.m3u`
     - `mopidy.softwaremixer`
     - `mopidy.stream`
 
