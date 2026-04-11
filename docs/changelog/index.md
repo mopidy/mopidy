@@ -8,6 +8,19 @@ For older releases, see:
 [Changelog 1.x](1.x.md) ·
 [Changelog 0.x](0.x.md)
 
+## v4.1.0 (UNRELEASED)
+
+### Audio API
+
+- Upgraded playback from using GStreamer's `playbin` element to using the newer
+  `playbin3` element.
+
+    `playbin` is in maintenance-only mode upstream, while `playbin3` is the
+    recommended playback element and is designed to reuse decoders across track
+    changes for lower CPU and memory use. All of Mopidy's existing signals,
+    properties, and bus messages are supported unchanged, so this should
+    hopefully be an uneventful upgrade. (#2127, !2250)
+
 ## v4.0.0 (2026-04-25)
 
 Mopidy 4.0 is a major release bringing very few functional changes, but mostly
