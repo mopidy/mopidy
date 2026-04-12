@@ -38,8 +38,9 @@ nav = [
     ]},
     {"Guides" = [
         "guides/index.md",
-        {"Hardware" = [
+        {"Setup guides" = [
             "guides/raspberrypi.md",
+            "guides/debian.md",
         ]},
         {"Audio output" = [
             "guides/audiosinks.md",
