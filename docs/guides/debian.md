@@ -222,7 +222,7 @@ README](https://github.com/mopidy/mopidy-spotify), you also need to install the
 `gst-plugins-spotify` GStreamer plugin. Pick the latest version of the plugin
 prebuilt as a Debian package for the arm64 architecture from
 [kingosticks/gst-plugins-rs-build](https://github.com/kingosticks/gst-plugins-rs-build/releases),
-and install it using `dpkg`:
+and install it using `apt`:
 
 ```console
 $ sudo wget https://github.com/kingosticks/gst-plugins-rs-build/releases/download/gst-plugin-spotify_0.15.0-alpha.1-4/gst-plugin-spotify_0.15.0.alpha.1-4_arm64.deb
