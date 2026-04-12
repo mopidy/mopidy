@@ -3,10 +3,12 @@
 
 Step-by-step guides for specific use cases beyond the basic setup.
 
-## Hardware
+## Setup guides
 
 - [Raspberry Pi](raspberrypi.md) — set up Raspberry Pi OS and Mopidy on a
   Raspberry Pi.
+- [Spotify on Debian](debian.md) — set up Mopidy with Spotify
+  support on Debian-based systems, like Ubuntu and Raspberry Pi OS.
 
 ## Audio output
 
