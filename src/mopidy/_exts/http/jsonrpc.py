@@ -52,6 +52,18 @@ class Request(BaseModel):
 RequestTypeAdapter = TypeAdapter(Request | list[Request])
 RequestDict = dict[str, Any]
 
+    @property
+    def args(self) -> list[Any]:
+        if isinstance(self.params, list):
+            return self.params
+        return []
+
+    @property
+    def kwargs(self) -> dict[str, Any]:
+        if isinstance(self.params, dict):
+            return self.params
+        return {}
+
 
 class ErrorDetails(BaseModel):
     code: int
@@ -230,14 +242,12 @@ class Wrapper:
             request = self._validate_request(request_dict)
         except InvalidRequestError as exc:
             return exc.get_response()
-        else:
-            args, kwargs = self._get_params(request)
 
         try:
             method = self._get_method(request.method)
 
             try:
-                result = method(*args, **kwargs)
+                result = method(*request.args, **request.kwargs)
 
                 if request.id is None:
                     # Request is a notification, so we don't need to respond
@@ -289,13 +299,6 @@ class Wrapper:
                 data="'params', if given, must be an array or an object",
             )
         return Request.model_validate(request_dict)
-
-    def _get_params(self, request: Request) -> tuple[list[Any], dict[Any, Any]]:
-        match request.params:
-            case list():
-                return request.params, {}
-            case dict():
-                return [], request.params
 
     def _get_method(self, method_path: str) -> Callable[..., Any]:
         if callable(self.objects.get(method_path, None)):
