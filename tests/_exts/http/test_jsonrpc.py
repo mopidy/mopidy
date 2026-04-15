@@ -114,6 +114,27 @@ class JsonRpcSerializationTest(JsonRpcTestBase):
         assert isinstance(request.params, list)
         assert request.params[0] == models.Artist(name="bar")
 
+    def test_request_decoding_decodes_nested_mopidy_models(self) -> None:
+        request_dict = {
+            "jsonrpc": "2.0",
+            "method": "core.tracklist.add",
+            "params": {
+                "tracks": [
+                    {"__model__": "Track", "uri": "dummy:uri", "name": "Test"},
+                ],
+            },
+        }
+
+        request = jsonrpc.Request.model_validate(request_dict)
+
+        assert isinstance(request.params, dict)
+        tracks = request.params["tracks"]
+        assert isinstance(tracks, list)
+        assert len(tracks) == 1
+        assert isinstance(tracks[0], models.Track)
+        assert tracks[0].uri == "dummy:uri"
+        assert tracks[0].name == "Test"
+
     def test_handle_json_encodes_mopidy_models(self) -> None:
         self.wrapper.handle_data = mock.Mock()
         self.wrapper.handle_data.return_value = jsonrpc.SuccessResponse(

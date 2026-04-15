@@ -1,7 +1,7 @@
 import inspect
 import traceback
 from collections.abc import Callable
-from typing import Any, Literal, TypeVar
+from typing import Any, Literal
 
 import pydantic_core
 import pykka
@@ -12,47 +12,57 @@ from pydantic import (
     SerializerFunctionWrapHandler,
     TypeAdapter,
     field_serializer,
+    field_validator,
     model_serializer,
 )
 from pydantic_core import PydanticUndefined, PydanticUndefinedType
 
 from mopidy import models
 
-T = TypeVar("T")
-
-
-class UnsetType:
-    pass
-
-
-Unset = UnsetType()
-
+MODEL_MAP: dict[str, type[BaseModel]] = {
+    name: getattr(models, name) for name in models.__all__
+}
 
 RequestId = str | int | float
-Param = (
-    # The complex types we support in the core API:
-    models.Artist
-    | models.Album
-    | models.Track
-    | models.Playlist
-    | models.Ref
-    | models.Image
-    # This covers any primitive JSON types:
-    | Any
-)
+RequestDict = dict[str, Any]
 
 
 class Request(BaseModel):
     jsonrpc: Literal["2.0"] = "2.0"
     id: RequestId | None = None
     method: str
-    params: list[Param] | dict[str, Param] = Field(default_factory=list)
+    params: list[Any] | dict[str, Any] = Field(default_factory=list)
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
+    @field_validator("params", mode="before")
+    @classmethod
+    def _deserialize_models(cls, data: Any) -> Any:
+        match data:
+            case dict():
+                if "__model__" in data:
+                    model_class = MODEL_MAP.get(data["__model__"])
+                    if model_class is not None:
+                        return model_class.model_validate(data)
+                return {
+                    key: cls._deserialize_models(value) for key, value in data.items()
+                }
+            case list():
+                return [cls._deserialize_models(item) for item in data]
+            case _:
+                return data
 
-RequestTypeAdapter = TypeAdapter(Request | list[Request])
-RequestDict = dict[str, Any]
+    @property
+    def args(self) -> list[Any]:
+        if isinstance(self.params, list):
+            return self.params
+        return []
+
+    @property
+    def kwargs(self) -> dict[str, Any]:
+        if isinstance(self.params, dict):
+            return self.params
+        return {}
 
 
 class ErrorDetails(BaseModel):
@@ -81,6 +91,13 @@ class SuccessResponse(BaseModel):
 
 Response = SuccessResponse | ErrorResponse
 ResponseTypeAdapter = TypeAdapter(Response | list[Response])
+
+
+class UnsetType:
+    pass
+
+
+Unset = UnsetType()
 
 
 class ParamDescription(BaseModel):
@@ -232,14 +249,12 @@ class Wrapper:
             request = self._validate_request(request_dict)
         except InvalidRequestError as exc:
             return exc.get_response()
-        else:
-            args, kwargs = self._get_params(request)
 
         try:
             method = self._get_method(request.method)
 
             try:
-                result = method(*args, **kwargs)
+                result = method(*request.args, **request.kwargs)
 
                 if request.id is None:
                     # Request is a notification, so we don't need to respond
@@ -292,13 +307,6 @@ class Wrapper:
             )
         return Request.model_validate(request_dict)
 
-    def _get_params(self, request: Request) -> tuple[list[Any], dict[Any, Any]]:
-        match request.params:
-            case list():
-                return request.params, {}
-            case dict():
-                return [], request.params
-
     def _get_method(self, method_path: str) -> Callable[..., Any]:
         if callable(self.objects.get(method_path, None)):
             # The mounted object is the callable
@@ -330,7 +338,7 @@ class Wrapper:
                 data=f"Object mounted at {mount!r} has no member {method_name!r}",
             ) from exc
 
-    def _unwrap_result(self, result: pykka.Future[T] | T) -> T:
+    def _unwrap_result[T](self, result: pykka.Future[T] | T) -> T:
         if isinstance(result, pykka.Future):
             return result.get()  # pyright: ignore[reportUnknownVariableType]
         return result
