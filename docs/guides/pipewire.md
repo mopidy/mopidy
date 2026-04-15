@@ -16,15 +16,12 @@ If not, copy from `/usr/share/pipewire/pipewire-pulse.conf`.
 Then modify that file for `pipewire-pulse` to accept sound over TCP from
 localhost (note the uncommented line with `"tcp:4713"`):
 
-```text title="pipewire-pulse.conf"
+```text title="pipewire-pulse.conf" hl_lines="5"
 pulse.properties = {
     # the addresses this server listens on
     server.address = [
         "unix:native"
-        #"unix:/tmp/something"
         "tcp:4713"
-        #"tcp:[::]:9999"
-        #"tcp:127.0.0.1:8888"
     ]
 ```
 
