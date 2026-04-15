@@ -12,45 +12,45 @@ from pydantic import (
     SerializerFunctionWrapHandler,
     TypeAdapter,
     field_serializer,
+    field_validator,
     model_serializer,
 )
 from pydantic_core import PydanticUndefined, PydanticUndefinedType
 
 from mopidy import models
 
-
-class UnsetType:
-    pass
-
-
-Unset = UnsetType()
-
+MODEL_MAP: dict[str, type[BaseModel]] = {
+    name: getattr(models, name) for name in models.__all__
+}
 
 RequestId = str | int | float
-Param = (
-    # The complex types we support in the core API:
-    models.Artist
-    | models.Album
-    | models.Track
-    | models.Playlist
-    | models.Ref
-    | models.Image
-    # This covers any primitive JSON types:
-    | Any
-)
+RequestDict = dict[str, Any]
 
 
 class Request(BaseModel):
     jsonrpc: Literal["2.0"] = "2.0"
     id: RequestId | None = None
     method: str
-    params: list[Param] | dict[str, Param] = Field(default_factory=list)
+    params: list[Any] | dict[str, Any] = Field(default_factory=list)
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
-
-RequestTypeAdapter = TypeAdapter(Request | list[Request])
-RequestDict = dict[str, Any]
+    @field_validator("params", mode="before")
+    @classmethod
+    def _deserialize_models(cls, data: Any) -> Any:
+        match data:
+            case dict():
+                if "__model__" in data:
+                    model_class = MODEL_MAP.get(data["__model__"])
+                    if model_class is not None:
+                        return model_class.model_validate(data)
+                return {
+                    key: cls._deserialize_models(value) for key, value in data.items()
+                }
+            case list():
+                return [cls._deserialize_models(item) for item in data]
+            case _:
+                return data
 
     @property
     def args(self) -> list[Any]:
@@ -91,6 +91,13 @@ class SuccessResponse(BaseModel):
 
 Response = SuccessResponse | ErrorResponse
 ResponseTypeAdapter = TypeAdapter(Response | list[Response])
+
+
+class UnsetType:
+    pass
+
+
+Unset = UnsetType()
 
 
 class ParamDescription(BaseModel):
