@@ -1,7 +1,7 @@
 import inspect
 import traceback
 from collections.abc import Callable
-from typing import Any, Literal, TypeVar
+from typing import Any, Literal
 
 import pydantic_core
 import pykka
@@ -17,8 +17,6 @@ from pydantic import (
 from pydantic_core import PydanticUndefined, PydanticUndefinedType
 
 from mopidy import models
-
-T = TypeVar("T")
 
 
 class UnsetType:
@@ -330,7 +328,7 @@ class Wrapper:
                 data=f"Object mounted at {mount!r} has no member {method_name!r}",
             ) from exc
 
-    def _unwrap_result(self, result: pykka.Future[T] | T) -> T:
+    def _unwrap_result[T](self, result: pykka.Future[T] | T) -> T:
         if isinstance(result, pykka.Future):
             return result.get()  # pyright: ignore[reportUnknownVariableType]
         return result
