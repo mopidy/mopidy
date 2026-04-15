@@ -103,7 +103,18 @@ class PlaybackController:
     def set_state(self, new_state: PlaybackState) -> None:
         """Set the playback state.
 
-        Must be `PLAYING`, `PAUSED`, or `STOPPED`.
+        /// warning | Internal API
+        This method is only for use by Mopidy itself and extension's test suites
+        if it cannot be avoided.
+
+        Frontends and clients must use the [`play()`][play], [`pause()`][pause],
+        [`resume()`][resume], and [`stop()`][stop] methods to change the
+        playback state.
+        ///
+
+        This method only maintains core's playback state and emits
+        `playback_state_changed` events. It has no effect on the underlying
+        backend or audio layers.
 
         Possible states and transitions:
 
