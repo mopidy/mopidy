@@ -403,9 +403,9 @@ through `importlib`:
 $ pip install --editable .
 ```
 
-Every extension will have a `README.rst` file. It may contain information
-about extra dependencies required, development process, etc. Extensions usually
-have a changelog in their GitHub releases page.
+Every extension will have a `README.md` file. It may contain information about
+extra dependencies required, development process, etc. Extensions usually have a
+changelog in their GitHub Releases page.
 
 ### Upgrading extensions
 
