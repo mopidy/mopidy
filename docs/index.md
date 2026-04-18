@@ -22,17 +22,16 @@ news, see [mopidy.com](https://mopidy.com/).
 
 ## Getting help
 
-If you get stuck, you can get help at our [Discourse
-forum](https://discourse.mopidy.com/) or in the `#mopidy-users` stream on
-[Zulip chat](https://mopidy.zulipchat.com/).
+If you get stuck, ask for help on the [Discourse
+forum](https://discourse.mopidy.com/).
 
 If you stumble into a bug or have a feature request, please create an issue in
 the [issue tracker](https://github.com/mopidy/mopidy/issues). If you're unsure
-if it's a bug or not, ask for help in the forum or the chat first. The [source
+if it's a bug or not, ask on the forum first. The [source
 code](https://github.com/mopidy/mopidy) may also be of help.
 
 ## Getting involved
 
-If you want to stay up to date on Mopidy developments, you can follow the
-`#mopidy-dev` stream on [Zulip chat](https://mopidy.zulipchat.com/) or watch
-out for announcements on the [Discourse forum](https://discourse.mopidy.com/).
+To follow and discuss Mopidy development, see the [Development
+category](https://discourse.mopidy.com/c/dev/10) on the Discourse forum, or
+the `#mopidy-dev` stream on [Zulip chat](https://mopidy.zulipchat.com/).
