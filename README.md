@@ -8,6 +8,7 @@ controlled from any MPD or web client on your phone, tablet, or computer.
 [![CI build status](https://img.shields.io/github/actions/workflow/status/mopidy/mopidy/ci.yml)](https://github.com/mopidy/mopidy/actions/workflows/ci.yml)
 [![Read the Docs build status](https://img.shields.io/readthedocs/mopidy)](https://docs.mopidy.com/)
 [![Test coverage](https://img.shields.io/codecov/c/github/mopidy/mopidy)](https://codecov.io/gh/mopidy/mopidy)
+[![Packaging status](https://repology.org/badge/tiny-repos/mopidy.svg)](https://repology.org/project/mopidy/versions)
 [![Discourse forum](https://img.shields.io/badge/forum-discourse-brightgreen)](https://discourse.mopidy.com/)
 
 ## Install
