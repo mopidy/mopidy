@@ -3,6 +3,7 @@ import logging
 import re
 import time
 import urllib.parse
+from typing import override
 
 import httpx
 import pykka
@@ -21,8 +22,9 @@ logger = logging.getLogger(__name__)
 
 
 class StreamBackend(pykka.ThreadingActor, backend.Backend):
-    def __init__(self, config: Config, audio: AudioProxy) -> None:
-        super().__init__()
+    @override
+    def __init__(self, *, config: Config, audio: AudioProxy) -> None:
+        super().__init__(config=config, audio=audio)
 
         self._scanner = scan.Scanner(
             timeout=config["stream"]["timeout"],
@@ -55,6 +57,7 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
             uri_schemes -= {UriScheme("file")}
         StreamBackend.uri_schemes = sorted(uri_schemes)
 
+    @override
     def on_stop(self) -> None:
         self._http_client.close()
 
@@ -62,6 +65,7 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
 class StreamLibraryProvider(backend.LibraryProvider):
     backend: StreamBackend
 
+    @override
     def lookup(self, uri: Uri) -> list[Track]:
         if urllib.parse.urlsplit(uri).scheme not in self.backend.uri_schemes:
             return []
@@ -93,6 +97,7 @@ class StreamLibraryProvider(backend.LibraryProvider):
 class StreamPlaybackProvider(backend.PlaybackProvider):
     backend: StreamBackend
 
+    @override
     def translate_uri(self, uri: Uri) -> Uri | None:
         if urllib.parse.urlsplit(uri).scheme not in self.backend.uri_schemes:
             return None

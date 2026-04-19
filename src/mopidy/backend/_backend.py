@@ -7,6 +7,7 @@ from pykka.typing import ActorMemberMixin, proxy_field, proxy_method
 
 if TYPE_CHECKING:
     from mopidy.audio import AudioProxy
+    from mopidy.config import Config
     from mopidy.types import UriScheme
 
     from ._library import LibraryProvider, LibraryProviderProxy
@@ -23,14 +24,8 @@ class Backend:
     the user can fix the issue.
 
     Args:
+        config: The global config object.
         audio: Actor proxy for the audio subsystem.
-    """
-
-    audio: AudioProxy
-    """Actor proxy to an instance of [Audio][mopidy.audio.Audio].
-
-    Should be passed to the backend constructor as the kwarg `audio`,
-    which will then set this field.
     """
 
     library: LibraryProvider | None = None
@@ -56,6 +51,14 @@ class Backend:
 
     uri_schemes: ClassVar[list[UriScheme]] = []
     """List of URI schemes this backend can handle."""
+
+    def __init__(
+        self,
+        *,
+        config: Config,  # noqa: ARG002
+        audio: AudioProxy,  # noqa: ARG002
+    ) -> None:
+        super().__init__()
 
     # Because the providers is marked as pykka.traversable(), we can't get()
     # them from another actor, and need helper methods to check if the
