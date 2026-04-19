@@ -155,8 +155,20 @@ text = "Asap"
 repo = "fontawesome/brands/github"
 
 [[project.extra.social]]
+icon = "fontawesome/solid/house"
+link = "https://mopidy.com/"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/discourse"
+link = "https://discourse.mopidy.com/"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/zulip"
+link = "https://mopidy.zulipchat.com/"
+
+[[project.extra.social]]
 icon = "fontawesome/brands/github"
-link = "https://github.com/mopidy/mopidy"
+link = "https://github.com/mopidy"
 
 [project.plugins.mkdocstrings]
 default_handler = "python"
