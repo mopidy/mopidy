@@ -148,7 +148,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         core: CoreProxy,
         allowed_origins: set[str],
         csrf_protection: bool | None,
-    ) -> None:
+    ) -> None:  # ty:ignore[invalid-method-override]
         self.jsonrpc = make_jsonrpc_wrapper(core)
         self.allowed_origins = allowed_origins
         self.csrf_protection = csrf_protection
@@ -221,16 +221,16 @@ class JsonRpcHandler(tornado.web.RequestHandler):
         core: CoreProxy,
         allowed_origins: set[str],
         csrf_protection: bool | None,
-    ) -> None:
+    ) -> None:  # ty:ignore[invalid-method-override]
         self.jsonrpc = make_jsonrpc_wrapper(core)
         self.allowed_origins = allowed_origins
         self.csrf_protection = csrf_protection
 
-    def head(self) -> Awaitable[None] | None:
+    def head(self) -> Awaitable[None] | None:  # ty:ignore[invalid-method-override]
         self.set_extra_headers()
         self.finish()
 
-    def post(self) -> Awaitable[None] | None:
+    def post(self) -> Awaitable[None] | None:  # ty:ignore[invalid-method-override]
         if self.csrf_protection:
             # This "non-standard" Content-Type requirement forces browsers to
             # automatically issue a preflight OPTIONS request before this one.
@@ -278,9 +278,9 @@ class JsonRpcHandler(tornado.web.RequestHandler):
         self.set_header("Access-Control-Allow-Origin", f"{origin}")
         self.set_header("Access-Control-Allow-Headers", "Content-Type")
 
-    def options(self) -> Awaitable[None] | None:
+    def options(self) -> Awaitable[None] | None:  # ty:ignore[invalid-method-override]
         if self.csrf_protection:
-            origin = cast(str | None, self.request.headers.get("Origin"))
+            origin = self.request.headers.get("Origin")
             if not check_origin(origin, self.request.headers, self.allowed_origins):
                 self.set_status(403, f"Access denied for origin {origin}")
                 return
@@ -293,14 +293,14 @@ class JsonRpcHandler(tornado.web.RequestHandler):
 
 
 class ClientListHandler(tornado.web.RequestHandler):
-    def initialize(self, apps: list[HttpApp], statics: list[HttpStatic]) -> None:
+    def initialize(self, apps: list[HttpApp], statics: list[HttpStatic]) -> None:  # ty:ignore[invalid-method-override]
         self.apps = apps
         self.statics = statics
 
     def get_template_path(self) -> str:
         return str(Path(__file__).parent)
 
-    def get(self) -> Awaitable[None] | None:
+    def get(self) -> Awaitable[None] | None:  # ty:ignore[invalid-method-override]
         set_mopidy_headers(self)
 
         names = set()

@@ -59,11 +59,11 @@ dev = [
     { include-group = "typing" },
 ]
 docs = [
-    "mkdocstrings-python>=2.0.3",
-    "zensical>=0.0.24",
+    "mkdocstrings-python >= 2.0.1",
+    "zensical >= 0.0.33",
 ]
-rumdl = ["rumdl"]
-ruff = ["ruff == 0.15.0"]
+rumdl = ["rumdl >= 0.1.74"]
+ruff = ["ruff == 0.15.11"]
 tests = [
     "dirty-equals >= 0.9",
     "polyfactory >= 3.1",
@@ -75,7 +75,7 @@ tests = [
 typing = [
     "pygobject-stubs >= 2.14.0, != 2.15.0",
     "pyright == 1.1.408",
-    "ty == 0.0.14",
+    "ty == 0.0.31",
 ]
 
 
