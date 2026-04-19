@@ -186,6 +186,15 @@ Changes to the Core API affect Mopidy frontends and clients.
 
 Changes to the Backend API affect Mopidy backend extensions.
 
+- Document that [`Backend`][mopidy.backend.Backend] is instantiated with two
+  keyword arguments, `config` and `audio`. (!2253)
+
+- Remove the attribute `Backend.audio` from the documentation. Mopidy core does
+  not rely on a backend exposing this attribute, and the default backend
+  constructor does not set this attribute. How the `config` and `audio`
+  arguments are used is up to the backend implementation, but they are provided
+  for backends to use if they need them. (!2253)
+
 - Added
   [`LibraryProvider.lookup_many()`][mopidy.backend.LibraryProvider.lookup_many]
   to take a list of URIs and return a mapping of URIs to tracks. If this method
