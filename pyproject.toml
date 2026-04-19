@@ -62,7 +62,7 @@ docs = [
     "mkdocstrings-python>=2.0.3",
     "zensical>=0.0.24",
 ]
-rumdl = ["rumdl"]
+rumdl = ["rumdl >= 0.1.74"]
 ruff = ["ruff == 0.15.0"]
 tests = [
     "dirty-equals >= 0.9",
