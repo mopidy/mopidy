@@ -268,15 +268,15 @@ def _query_seekable(pipeline: Gst.Pipeline) -> bool:
 
 
 def _get_structure_name(struct: Gst.Structure) -> str:
-    # gstreamer 1.25.0 to 1.26.2 (inclusive) broke the accessing
+    # GStreamer 1.25.0 to 1.26.2 (inclusive) broke the accessing
     # `caps.get_structure(0).get_name()`, but allow wrapping the
-    # object in a context manager. with gstreamer 1.24.x one can
+    # object in a context manager. With GStreamer 1.24.x one can
     # not use the structure as a context manager at all. Fixed in
     # version 1.26.3 where both methods are supported.
     try:
         return struct.get_name()
     except AttributeError:
-        with struct as _struct:  # type: ignore[reportGeneralTypeIssues]
+        with struct as _struct:  # type: ignore[reportGeneralTypeIssues]  # ty:ignore[invalid-context-manager]
             return _struct.get_name()
 
 
