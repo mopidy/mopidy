@@ -3,6 +3,7 @@ import logging
 import re
 import time
 import urllib.parse
+from typing import override
 
 import httpx
 import pykka
@@ -21,8 +22,9 @@ logger = logging.getLogger(__name__)
 
 
 class StreamBackend(pykka.ThreadingActor, backend.Backend):
-    def __init__(self, config: Config, audio: AudioProxy) -> None:
-        super().__init__()
+    @override
+    def __init__(self, *, config: Config, audio: AudioProxy) -> None:
+        super().__init__(config=config, audio=audio)
 
         self._scanner = scan.Scanner(
             timeout=config["stream"]["timeout"],

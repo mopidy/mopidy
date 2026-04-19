@@ -18,6 +18,6 @@ class M3UBackend(pykka.ThreadingActor, backend.Backend):
     uri_schemes: ClassVar[list[UriScheme]] = [UriScheme("m3u")]
 
     @override
-    def __init__(self, config: Config, audio: AudioProxy) -> None:
-        super().__init__()
+    def __init__(self, *, config: Config, audio: AudioProxy) -> None:
+        super().__init__(config=config, audio=audio)
         self.playlists = playlists.M3UPlaylistsProvider(self, config)

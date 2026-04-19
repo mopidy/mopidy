@@ -17,8 +17,8 @@ class FileBackend(pykka.ThreadingActor, backend.Backend):
     uri_schemes: ClassVar[list[UriScheme]] = [UriScheme("file")]
 
     @override
-    def __init__(self, config: Config, audio: AudioProxy) -> None:
-        super().__init__()
+    def __init__(self, *, config: Config, audio: AudioProxy) -> None:
+        super().__init__(config=config, audio=audio)
         self.library = library.FileLibraryProvider(backend=self, config=config)
         self.playback = backend.PlaybackProvider(audio=audio, backend=self)
         self.playlists = None
