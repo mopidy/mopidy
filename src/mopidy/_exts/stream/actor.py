@@ -57,6 +57,7 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
             uri_schemes -= {UriScheme("file")}
         StreamBackend.uri_schemes = sorted(uri_schemes)
 
+    @override
     def on_stop(self) -> None:
         self._http_client.close()
 
@@ -64,6 +65,7 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
 class StreamLibraryProvider(backend.LibraryProvider):
     backend: StreamBackend
 
+    @override
     def lookup(self, uri: Uri) -> list[Track]:
         if urllib.parse.urlsplit(uri).scheme not in self.backend.uri_schemes:
             return []
@@ -95,6 +97,7 @@ class StreamLibraryProvider(backend.LibraryProvider):
 class StreamPlaybackProvider(backend.PlaybackProvider):
     backend: StreamBackend
 
+    @override
     def translate_uri(self, uri: Uri) -> Uri | None:
         if urllib.parse.urlsplit(uri).scheme not in self.backend.uri_schemes:
             return None

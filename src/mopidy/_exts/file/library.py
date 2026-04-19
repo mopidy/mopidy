@@ -2,7 +2,7 @@ import logging
 import os
 import pathlib
 from collections.abc import Generator
-from typing import TypedDict, cast
+from typing import TypedDict, cast, override
 
 from mopidy import backend, exceptions
 from mopidy import config as config_lib
@@ -44,6 +44,7 @@ class FileLibraryProvider(backend.LibraryProvider):
 
         self.root_directory = self._get_root_directory()
 
+    @override
     def browse(self, uri: Uri) -> list[Ref]:  # noqa: C901
         logger.debug("Browsing files at: %s", uri)
         result = []
@@ -96,6 +97,7 @@ class FileLibraryProvider(backend.LibraryProvider):
 
         return result
 
+    @override
     def lookup(self, uri: Uri) -> list[Track]:
         logger.debug("Looking up file URI: %s", uri)
         local_path = paths.uri_to_path(uri)

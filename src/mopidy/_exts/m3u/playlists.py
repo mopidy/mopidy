@@ -8,7 +8,7 @@ import os
 import tempfile
 from collections.abc import Generator
 from pathlib import Path
-from typing import IO, TYPE_CHECKING, Any, cast
+from typing import IO, TYPE_CHECKING, Any, cast, override
 
 from mopidy import backend
 from mopidy._lib import paths
@@ -81,6 +81,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         self._default_encoding = ext_config["default_encoding"]
         self._default_extension = ext_config["default_extension"]
 
+    @override
     def as_list(self) -> list[Ref]:
         result = []
         for entry in self._playlists_dir.iterdir():
@@ -93,6 +94,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         result.sort(key=operator.attrgetter("name"))
         return result
 
+    @override
     def create(self, name: str) -> Playlist | None:
         path = translator.path_from_name(name.strip(), self._default_extension)
         try:
@@ -104,6 +106,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         else:
             return translator.playlist(path, [], mtime)
 
+    @override
     def delete(self, uri: Uri) -> bool:
         path = translator.uri_to_path(uri)
         if not self._is_in_basedir(path):
@@ -117,6 +120,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         else:
             return True
 
+    @override
     def get_items(self, uri: Uri) -> list[Ref] | None:
         path = translator.uri_to_path(uri)
         if not self._is_in_basedir(path):
@@ -130,6 +134,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         else:
             return items
 
+    @override
     def lookup(self, uri: Uri) -> Playlist | None:
         path = translator.uri_to_path(uri)
         if not self._is_in_basedir(path):
@@ -144,9 +149,11 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         else:
             return translator.playlist(path, items, mtime)
 
+    @override
     def refresh(self) -> None:
         pass  # nothing to do
 
+    @override
     def save(self, playlist: Playlist) -> Playlist | None:
         if playlist.uri is None:
             logger.debug("Playlist has no URI, cannot save")
