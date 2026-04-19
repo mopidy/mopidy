@@ -59,8 +59,8 @@ dev = [
     { include-group = "typing" },
 ]
 docs = [
-    "mkdocstrings-python>=2.0.3",
-    "zensical>=0.0.24",
+    "mkdocstrings-python >= 2.0.1",
+    "zensical >= 0.0.33",
 ]
 rumdl = ["rumdl >= 0.1.74"]
 ruff = ["ruff == 0.15.11"]
