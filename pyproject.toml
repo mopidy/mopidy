@@ -63,7 +63,7 @@ docs = [
     "zensical>=0.0.24",
 ]
 rumdl = ["rumdl >= 0.1.74"]
-ruff = ["ruff == 0.15.0"]
+ruff = ["ruff == 0.15.11"]
 tests = [
     "dirty-equals >= 0.9",
     "polyfactory >= 3.1",
