@@ -2,7 +2,7 @@
 site_name = "Mopidy"
 site_description = "Mopidy is an extensible music server written in Python."
 site_author = "Stein Magnus Jodal and contributors"
-site_url = "https://docs.mopidy.com/"
+site_url = "https://docs.mopidy.com/stable/"
 copyright = """
 Copyright &copy; 2009-2026 Stein Magnus Jodal and contributors
 """
