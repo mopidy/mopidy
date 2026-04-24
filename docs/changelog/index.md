@@ -8,7 +8,7 @@ For older releases, see:
 [Changelog 1.x](1.x.md) ·
 [Changelog 0.x](0.x.md)
 
-## v4.0.0 (UNRELEASED)
+## v4.0.0 (2026-04-25)
 
 Mopidy 4.0 is a major release bringing very few functional changes, but mostly
 focusing on modernizations to Mopidy's tech stack to keep it maintainable going
