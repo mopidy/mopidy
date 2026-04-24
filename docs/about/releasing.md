@@ -10,49 +10,32 @@ key individuals, and as a stepping stone to more automation.
 Extensions that are maintained in the Mopidy organization use a quite
 stream-lined release procedure.
 
-- Make sure that everything has been merged into the `main` branch on
-  GitHub, and that all CI checks are green.
+1. Make sure that everything has been merged into the `main` branch on
+   GitHub, and that all CI checks are green.
 
-- Perform any manual tests you feel are required.
+1. Perform any manual tests you feel are required.
 
-- Bump the version in `setup.cfg` in line with [our strategy](../about/versioning.md).
-  For example, to `2.0.2`.
+1. Go to the GitHub repository's releases page, e.g.
+   `https://github.com/mopidy/mopidy-foo/releases`.
 
-- Commit the bumped version:
+1. In the "choose a tag" dropdown, create a new tag, e.g. `v0.1.0`.
 
-    ```console
-    $ git commit -m "Release v2.0.2"
-    ```
+1. Add a title, e.g. `v0.1.0`, and a description of the changes.
 
-- Tag the commit with an annotated tag:
+1. Decide if the release is a pre-release (alpha, beta, or release candidate) or
+   should be marked as the latest release, and click "Publish release".
 
-    ```console
-    $ git tag -a -m "Release v2.0.2" v2.0.2
-    ```
-
-    It is encouraged to use `-s` to sign the tag if you have a GnuPG setup.
-
-- Push to GitHub:
-
-    ```console
-    $ git push origin main --follow-tags
-    ```
-
-- Go to the GitHub repository's tags page, e.g.
-  `https://github.com/mopidy/mopidy-foo/tags`. Find the tag and select
-  "Create release" in the tag's dropdown menu.
-
-- Copy the tag, e.g. `v2.0.2` into the "title" field. Write a changelog
-  entry in the description field, and hit "Publish release".
-
-- GitHub Actions now builds the package and uploads it to PyPI.
+1. Once the release is created, the `release.yml` GitHub Actions workflow builds
+   the package and uploads it to PyPI.
 
 This procedure has several benefits:
 
 - Everyone with commit access can make releases.
+
 - No one, except those with direct PyPI access, can make releases without
   also leaving the source code of what they released publicly available on
   GitHub, creating an audit log in case of any malicious actions.
+
 - The changelog can be amended post-release through the GitHub Releases UI.
 
 The primary drawback of this procedure is that there is no obvious way to
@@ -85,48 +68,13 @@ is maintained in the Git repo.
 
 ### Release
 
-- Select a version number in line with [our strategy](../about/versioning.md),
-  e.g. `v3.3.0` in the following examples.
+1. Select a version number in line with [our strategy](../about/versioning.md).
 
-- Update the release in `docs/changelog/index.md` with the right version number
-  and release date.
+1. Update the release in `docs/changelog/index.md` with the right version number
+   and release date. Commit and push it.
 
-- Commit the final touches to the changelog:
-
-    ```console
-    $ git commit -m "Release v3.3.0"
-    ```
-
-- Tag the commit with an annotated tag:
-
-    ```console
-    $ git tag -a -m "Release v3.3.0" v3.3.0
-    ```
-
-    It is encouraged to use `-s` to sign the tag if you have a GnuPG setup.
-
-- Verify that Mopidy reports the new version number:
-
-    ```console
-    $ mopidy --version
-    ```
-
-    If it doesn't, check that you've properly tagged the release.
-
-- Push to GitHub:
-
-    ```console
-    $ git push origin main --follow-tags
-    ```
-
-- Go to the GitHub repository's
-  [tags page](https://github.com/mopidy/mopidy/tags).
-  Find the tag and select "Create release" in the tag's dropdown menu.
-
-- Copy the tag, e.g. `v3.3.0` into the "title" field. Write a changelog
-  entry in the description field, and hit "Publish release".
-
-- GitHub Actions now builds the package and uploads it to PyPI.
+1. Release the new version exactly like you would do for an extension, with the
+   addition of linking from the release to the changelog entry in the docs.
 
 ### Post-release
 
