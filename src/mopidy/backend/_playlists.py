@@ -40,6 +40,23 @@ class PlaylistsProvider:
         """
         raise NotImplementedError
 
+    def lookup(self, uri: Uri) -> Playlist | None:
+        """Look up playlist with given URI.
+
+        Searches both the set of playlists and any other playlist sources.
+        Returns the playlist or `None` if not found.
+
+        *MUST be implemented by subclass.*
+        """
+        raise NotImplementedError
+
+    def refresh(self) -> None:
+        """Refresh the playlists.
+
+        *MUST be implemented by subclass.*
+        """
+        raise NotImplementedError
+
     def create(self, name: str) -> Playlist | None:
         """Create a new empty playlist with the given name.
 
@@ -54,23 +71,6 @@ class PlaylistsProvider:
         """Delete playlist identified by the URI.
 
         Returns `True` if deleted, `False` otherwise.
-
-        *MUST be implemented by subclass.*
-        """
-        raise NotImplementedError
-
-    def lookup(self, uri: Uri) -> Playlist | None:
-        """Look up playlist with given URI.
-
-        Searches both the set of playlists and any other playlist sources.
-        Returns the playlist or `None` if not found.
-
-        *MUST be implemented by subclass.*
-        """
-        raise NotImplementedError
-
-    def refresh(self) -> None:
-        """Refresh the playlists.
 
         *MUST be implemented by subclass.*
         """
