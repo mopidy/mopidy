@@ -56,7 +56,7 @@ class LibraryProvider:
         """
         return set()
 
-    def get_images(self, uris: list[Uri]) -> dict[Uri, list[Image]]:
+    def get_images(self, uris: Iterable[Uri]) -> dict[Uri, list[Image]]:
         """See [mopidy.core.LibraryController.get_images][].
 
         *MAY be implemented by subclass.*
@@ -91,7 +91,7 @@ class LibraryProvider:
     def search(
         self,
         query: Query[SearchField],
-        uris: list[Uri] | None = None,
+        uris: Iterable[Uri] | None = None,
         exact: bool = False,
     ) -> SearchResult | None:
         """See [mopidy.core.LibraryController.search][].
