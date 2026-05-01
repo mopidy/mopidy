@@ -29,4 +29,6 @@ jobs:
             python3-gst-1.0 \
             tox
       - uses: actions/checkout@v6
+      - name: Configure git safe directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - run: tox -e py314
