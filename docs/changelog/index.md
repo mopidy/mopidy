@@ -8,6 +8,10 @@ For older releases, see:
 [Changelog 1.x](1.x.md) ·
 [Changelog 0.x](0.x.md)
 
+## v4.0.1 (UNRELEASED)
+
+- Deps: Require cycleopts >= 4.3 (!2257)
+
 ## v4.0.0 (2026-04-25)
 
 Mopidy 4.0 is a major release bringing very few functional changes, but mostly
