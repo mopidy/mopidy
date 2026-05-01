@@ -8,7 +8,7 @@ on:
 
 jobs:
   main:
-    name: "Test: Python 3.13"
+    name: "Test: Python 3.14"
     runs-on: ubuntu-24.04
 
     # The container should be automatically updated from time to time.
@@ -20,13 +20,13 @@ jobs:
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y \
             git \
-            python3 \
-            tox \
             gstreamer1.0-plugins-good \
             gstreamer1.0-plugins-ugly \
-            python3-gst-1.0 \
             libcairo2-dev \
             libgirepository-2.0-dev \
-            libglib2.0-dev
+            libglib2.0-dev \
+            python3 \
+            python3-gst-1.0 \
+            tox
       - uses: actions/checkout@v6
-      - run: tox -e py313
+      - run: tox -e py314
