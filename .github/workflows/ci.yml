@@ -20,6 +20,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - name: "pytest (3.13-lowest)"
+            python: "3.13"
+            tox: "3.13-lowest"
           - name: "pytest (3.13)"
             python: "3.13"
             tox: "3.13"
@@ -59,7 +62,7 @@ jobs:
           python-version: ${{ matrix.python }}
           cache: pip
           allow-prereleases: true
-      - run: python -m pip install tox
+      - run: python -m pip install tox tox-uv
       - run: python -m tox -e ${{ matrix.tox }}
         if: ${{ ! matrix.coverage }}
       - run: python -m tox -e ${{ matrix.tox }} -- --cov-report=xml
