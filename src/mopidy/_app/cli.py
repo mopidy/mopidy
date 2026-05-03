@@ -124,14 +124,15 @@ def launcher(
             negative="",
         ),
     ] = False,
-    verbosity_level: Annotated[
-        int,
+    verbosity: Annotated[
+        tuple[bool, ...],
         Parameter(
+            # NOTE: When upgrading to cyclopts >= 4.1, this can be changed to a
+            # field of type int with Parameter(count=True).
             name=("--verbose", "-v"),
             help="Increase amount of output. Repeat up to four times for more.",
-            count=True,
         ),
-    ] = 0,
+    ] = (),
 ) -> None:
     """Common setup for all Mopidy commands.
 
@@ -169,6 +170,7 @@ def launcher(
         process.create_app_dirs(config_manager.config)
 
         # Start regular logging
+        verbosity_level = sum(verbosity)
         logs.setup_logging(
             config=config_manager.config,
             verbosity_level=-1 if quiet else verbosity_level,
