@@ -8,9 +8,18 @@ For older releases, see:
 [Changelog 1.x](1.x.md) ·
 [Changelog 0.x](0.x.md)
 
-## v4.0.1 (UNRELEASED)
+## v4.0.1 (2026-05-16)
 
-- Deps: Require cycleopts >= 4.3 (!2257)
+- Deps: Fix support for Cyclopts >= 3.12, < 4.3. We accidentally relied on
+  features not present in the minimum supported version, 3.12. (!2257, !2261)
+
+- Deps: Require Tornado >= 6.4.2, as this is the exact version in Debian stable
+  and we rely on testing improvements that landed in 6.4.1. (!2260)
+
+- Core API type hints: Change `LibraryProvider` methods to accept `Iterable`
+  instead of `list`. (!2255)
+
+- Dev: Add tox env for running tests on lowest supported versions of deps (!2259)
 
 ## v4.0.0 (2026-04-25)
 
