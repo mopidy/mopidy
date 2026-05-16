@@ -52,6 +52,7 @@ build-backend = "setuptools.build_meta"
 [dependency-groups]
 dev = [
     "tox >= 4.25",
+    "tox-uv >= 1.25",
     { include-group = "docs" },
     { include-group = "rumdl" },
     { include-group = "ruff" },
@@ -192,6 +193,7 @@ disable = [
 
 [tool.tox]
 env_list = [
+    "3.13-lowest",
     "3.13",
     "3.14",
     "pyright",
@@ -214,6 +216,10 @@ commands = [
         { replace = "posargs", extend = true },
     ],
 ]
+
+[tool.tox.env."3.13-lowest"]
+base_python = ["python3.13"]
+uv_resolution = "lowest-direct"
 
 [tool.tox.env.pyright]
 dependency_groups = ["typing"]
