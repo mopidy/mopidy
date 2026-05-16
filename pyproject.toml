@@ -15,7 +15,7 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
-    "cyclopts >= 4.3",
+    "cyclopts >= 3.12",
     "httpx >= 0.28.1",
     "platformdirs >= 4.3",
     "pydantic >= 2.10",

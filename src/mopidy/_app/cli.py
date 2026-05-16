@@ -54,33 +54,12 @@ def config_paths_display(value: list[Path]) -> str:
     return ", ".join(str(path) for path in value)
 
 
-@Parameter(
-    name="--config",
-    help=(
-        "Config files to use. "
-        "Repeat parameter or separate values with colon to use multiple files. "
-        "Later files have higher precedence."
-    ),
-    show_default=config_paths_display,
-    negative="",
-    n_tokens=1,
-)
 def config_paths_converter(_: type, tokens: Sequence[Token]) -> list[Path]:
     return [
         Path(path).expanduser() for token in tokens for path in token.value.split(":")
     ]
 
 
-@Parameter(
-    name=("--option", "-o"),
-    help=(
-        "Override config values. "
-        "Repeat parameter to override multiple values. "
-        "Format: SECTION/KEY=VALUE."
-    ),
-    negative="",
-    n_tokens=1,
-)
 def config_overrides_converter(
     _: type, tokens: Sequence[Token]
 ) -> list[dict[str, dict[str, str]]]:
@@ -110,11 +89,36 @@ def launcher(
     ],
     config_paths: Annotated[
         list[Path],
-        Parameter(converter=config_paths_converter),
+        Parameter(
+            # NOTE: When upgrading to cyclopts >= 4.3, this can be moved to a
+            # @Parameter decorator on the config_paths_converter function, with
+            # Parameter(n_tokens=1).
+            name="--config",
+            help=(
+                "Config files to use. "
+                "Repeat parameter or separate values with colon to use multiple files. "
+                "Later files have higher precedence."
+            ),
+            show_default=config_paths_display,
+            negative="",
+            converter=config_paths_converter,
+        ),
     ] = config_paths_default(),  # noqa: B008
     config_overrides: Annotated[
         list[ConfigOverrides] | None,
-        Parameter(converter=config_overrides_converter),
+        Parameter(
+            # NOTE: When upgrading to cyclopts >= 4.3, this can be moved to a
+            # @Parameter decorator on the config_overrides_converter function,
+            # with Parameter(n_tokens=1).
+            name=("--option", "-o"),
+            help=(
+                "Override config values. "
+                "Repeat parameter to override multiple values. "
+                "Format: SECTION/KEY=VALUE."
+            ),
+            negative="",
+            converter=config_overrides_converter,
+        ),
     ] = None,
     quiet: Annotated[
         bool,
@@ -124,14 +128,15 @@ def launcher(
             negative="",
         ),
     ] = False,
-    verbosity_level: Annotated[
-        int,
+    verbosity: Annotated[
+        tuple[bool, ...],
         Parameter(
+            # NOTE: When upgrading to cyclopts >= 4.1, this can be changed to a
+            # field of type int with Parameter(count=True).
             name=("--verbose", "-v"),
             help="Increase amount of output. Repeat up to four times for more.",
-            count=True,
         ),
-    ] = 0,
+    ] = (),
 ) -> None:
     """Common setup for all Mopidy commands.
 
@@ -169,6 +174,7 @@ def launcher(
         process.create_app_dirs(config_manager.config)
 
         # Start regular logging
+        verbosity_level = sum(verbosity)
         logs.setup_logging(
             config=config_manager.config,
             verbosity_level=-1 if quiet else verbosity_level,
