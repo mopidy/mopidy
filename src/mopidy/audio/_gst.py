@@ -459,9 +459,9 @@ class GstAudio(Audio, pykka.ThreadingActor):
             jacksink.set_rank(Gst.Rank.SECONDARY)
 
     def _setup_playbin(self) -> None:
-        playbin = Gst.ElementFactory.make("playbin")
+        playbin = Gst.ElementFactory.make("playbin3")
         if playbin is None:
-            msg = "Failed to create GStreamer playbin."
+            msg = "Failed to create GStreamer playbin3."
             raise exceptions.AudioException(msg)
         playbin.set_property("flags", _GST_PLAY_FLAGS_AUDIO)
 
