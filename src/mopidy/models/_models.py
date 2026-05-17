@@ -77,7 +77,7 @@ class Album(BaseModel):
         default=None,
         pattern=r"^\d{4}((-\d{2})+)?$",
     )
-    """The album release date. A string formatted as "YYYY", "YYYY-MM", or" "YYYY-MM-DD"."""
+    """The album date. A string formatted as "YYYY", "YYYY-MM", or" "YYYY-MM-DD"."""
 
     musicbrainz_id: str | None = None
     """The MusicBrainz ID of the album."""
@@ -123,7 +123,7 @@ class Track(BaseModel):
         default=None,
         pattern=r"^\d{4}((-\d{2})+)?$",
     )
-    """The track release date. A string formatted as "YYYY", "YYYY-MM", or" "YYYY-MM-DD"."""
+    """The track date. A string formatted as "YYYY", "YYYY-MM", or" "YYYY-MM-DD"."""
 
     length: DurationMs | None = None
     """The track length in milliseconds."""
