@@ -45,7 +45,7 @@ class Artist(BaseModel):
     sortname: str | None = None
     """Artist name for better sorting, e.g. with articles stripped."""
 
-    musicbrainz_id: UUID | None = None
+    musicbrainz_id: str | None = None
     """The MusicBrainz ID of the artist."""
 
 
@@ -75,11 +75,11 @@ class Album(BaseModel):
 
     date: DateOrYear | None = Field(
         default=None,
-        pattern=r"^\d{4}(-\d{2}-\d{2})?$",
+        pattern=r"^\d{4}((-\d{2})+)?$",
     )
-    """The album release date. A string formatted as "YYYY" or "YYYY-MM-DD"."""
+    """The album release date. A string formatted as "YYYY", "YYYY-MM", or" "YYYY-MM-DD"."""
 
-    musicbrainz_id: UUID | None = None
+    musicbrainz_id: str | None = None
     """The MusicBrainz ID of the album."""
 
 
@@ -121,9 +121,9 @@ class Track(BaseModel):
 
     date: DateOrYear | None = Field(
         default=None,
-        pattern=r"^\d{4}(-\d{2}-\d{2})?$",
+        pattern=r"^\d{4}((-\d{2})+)?$",
     )
-    """The track release date. A string formatted as "YYYY" or "YYYY-MM-DD"."""
+    """The track release date. A string formatted as "YYYY", "YYYY-MM", or" "YYYY-MM-DD"."""
 
     length: DurationMs | None = None
     """The track length in milliseconds."""
@@ -134,7 +134,7 @@ class Track(BaseModel):
     comment: str | None = None
     """The track comment."""
 
-    musicbrainz_id: UUID | None = None
+    musicbrainz_id: str | None = None
     """The MusicBrainz ID of the track."""
 
     last_modified: NonNegativeInt | None = None
