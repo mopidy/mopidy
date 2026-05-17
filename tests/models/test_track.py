@@ -1,5 +1,3 @@
-from uuid import UUID
-
 import pydantic
 import pytest
 
@@ -99,7 +97,7 @@ def test_bitrate():
 def test_musicbrainz_id():
     mb_id = "0383dadf-2a4e-4d10-a46a-e9e041da8eb3"
     track = TrackFactory.build(musicbrainz_id=mb_id)
-    assert track.musicbrainz_id == UUID(mb_id)
+    assert track.musicbrainz_id == mb_id
     with pytest.raises(pydantic.ValidationError):
         track.musicbrainz_id = None
 

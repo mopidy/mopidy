@@ -1,5 +1,3 @@
-from uuid import UUID
-
 import pydantic
 import pytest
 
@@ -27,7 +25,7 @@ def test_name():
 def test_musicbrainz_id():
     mb_id = "0383dadf-2a4e-4d10-a46a-e9e041da8eb3"
     artist = ArtistFactory.build(musicbrainz_id=mb_id)
-    assert artist.musicbrainz_id == UUID(mb_id)
+    assert artist.musicbrainz_id == mb_id
     with pytest.raises(pydantic.ValidationError):
         artist.musicbrainz_id = None
 
