@@ -1,5 +1,4 @@
 from typing import Literal
-from uuid import UUID
 
 from pydantic.fields import Field
 from pydantic.types import NonNegativeInt
