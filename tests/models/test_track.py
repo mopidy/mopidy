@@ -70,12 +70,20 @@ def test_disc_no():
         track.disc_no = None
 
 
-def test_date():
-    date = "1977-01-01"
+@pytest.mark.parametrize("date", ["1977", "1977-01", "1977-01-01"])
+def test_date(date):
     track = TrackFactory.build(date=date)
     assert track.date == date
     with pytest.raises(pydantic.ValidationError):
         track.date = None
+
+
+@pytest.mark.parametrize(
+    "date", ["77", "1977-1-1", "1977/01/01", "1977-01-01T00:00:00"]
+)
+def test_date_rejects_invalid(date):
+    with pytest.raises(pydantic.ValidationError):
+        TrackFactory.build(date=date)
 
 
 def test_length():

@@ -5,14 +5,8 @@ from collections.abc import Iterable
 from typing import Literal, NewType, TypeVar
 
 # Date types
-Date = NewType("Date", str)
-"""A date string on the form `YYYY-MM-DD`."""
-
-Year = NewType("Year", str)
-"""A year string on the form `YYYY`."""
-
-type DateOrYear = Date | Year
-"""A [Date][mopidy.types.Date] or [Year][mopidy.types.Year]."""
+ReleaseDate = NewType("ReleaseDate", str)
+"""A date string on the form `YYYY`, `YYYY-MM`, or `YYYY-MM-DD`."""
 
 
 # Integer types

@@ -16,6 +16,17 @@ For older releases, see:
   collections using alternative identifiers, or multiple identifiers in the same
   field.
 
+- Models: The `date` field on [`Album`][mopidy.models.Album] and
+  [`Track`][mopidy.models.Track] now also accepts the `YYYY-MM` format, in
+  addition to `YYYY` and `YYYY-MM-DD`. GStreamer emits `YYYY-MM` for files that
+  only have a year and a month in their date tag, and such files were previously
+  rejected.
+
+- Types: Removed `mopidy.types.Date`, `mopidy.types.Year`, and
+  `mopidy.types.DateOrYear`. They are replaced by a single
+  [`mopidy.types.ReleaseDate`][mopidy.types.ReleaseDate] type, covering all
+  three supported date formats.
+
 ## v4.0.1 (2026-05-16)
 
 - Deps: Fix support for Cyclopts >= 3.12, < 4.3. We accidentally relied on
