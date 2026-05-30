@@ -8,6 +8,14 @@ For older releases, see:
 [Changelog 1.x](1.x.md) ·
 [Changelog 0.x](0.x.md)
 
+## Unreleased
+
+- Models: The `musicbrainz_id` fields on [`Album`][mopidy.models.Album],
+  [`Artist`][mopidy.models.Artist], and [`Track`][mopidy.models.Track] are again
+  typed as `str` instead of `UUID`, like in Mopidy < 4.0, to allow scanning
+  collections using alternative identifiers, or multiple identifiers in the same
+  field.
+
 ## v4.0.1 (2026-05-16)
 
 - Deps: Fix support for Cyclopts >= 3.12, < 4.3. We accidentally relied on

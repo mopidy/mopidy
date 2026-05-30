@@ -1,5 +1,4 @@
 from typing import Literal
-from uuid import UUID
 
 from pydantic.fields import Field
 from pydantic.types import NonNegativeInt
@@ -45,7 +44,7 @@ class Artist(BaseModel):
     sortname: str | None = None
     """Artist name for better sorting, e.g. with articles stripped."""
 
-    musicbrainz_id: UUID | None = None
+    musicbrainz_id: str | None = None
     """The MusicBrainz ID of the artist."""
 
 
@@ -79,7 +78,7 @@ class Album(BaseModel):
     )
     """The album release date. A string formatted as "YYYY" or "YYYY-MM-DD"."""
 
-    musicbrainz_id: UUID | None = None
+    musicbrainz_id: str | None = None
     """The MusicBrainz ID of the album."""
 
 
@@ -134,7 +133,7 @@ class Track(BaseModel):
     comment: str | None = None
     """The track comment."""
 
-    musicbrainz_id: UUID | None = None
+    musicbrainz_id: str | None = None
     """The MusicBrainz ID of the track."""
 
     last_modified: NonNegativeInt | None = None
