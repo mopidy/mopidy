@@ -209,25 +209,29 @@ $ ncmpcpp -h <ip-address>
 
 The [mopidy-spotify](https://mopidy.com/ext/spotify/) extension isn't available
 in the APT repository, so if you want to use that, you can install it using pip.
-At the time of writing, we need to install an alpha version of the extension to
-get working Spotify playback.
 
 ```console
 $ sudo apt install python3-pip
-$ sudo python3 -m pip install --break-system-packages mopidy-spotify==v5.0.0a3
+$ sudo python3 -m pip install --break-system-packages mopidy-spotify
 ```
 
 As described in [mopidy-spotify's
 README](https://github.com/mopidy/mopidy-spotify), you also need to install the
-`gst-plugins-spotify` GStreamer plugin. Pick the latest version of the plugin
-prebuilt as a Debian package for the arm64 architecture from
-[kingosticks/gst-plugins-rs-build](https://github.com/kingosticks/gst-plugins-rs-build/releases),
-and install it using `apt`:
+`gst-plugin-spotify` GStreamer plugin.
+
+We're maintaining
+[gst-plugins-rs-build](https://github.com/mopidy/gst-plugins-rs-build) to
+provide prebuilt Debian packages for the `gst-plugin-spotify` plugin. To
+install it, add the apt.mopidy.com repository to your APT sources, as described
+above, and install the package using `apt`:
 
 ```console
-$ sudo wget https://github.com/kingosticks/gst-plugins-rs-build/releases/download/gst-plugin-spotify_0.15.0-alpha.1-4/gst-plugin-spotify_0.15.0.alpha.1-4_arm64.deb
-$ sudo apt install ./gst-plugin-spotify_0.15.0.alpha.1-4_arm64.deb
+$ sudo apt install gst-plugin-spotify
 ```
+
+Alternatively, pick the latest version of the plugin from
+the [gst-plugins-rs-build releases](https://github.com/mopidy/gst-plugins-rs-build/releases),
+and install it using `sudo apt ./path/to/package.deb`.
 
 You can now check that the plugin was installed correctly by running
 `gst-inspect-1.0 spotify`:
