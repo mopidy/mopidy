@@ -131,8 +131,8 @@ class FileLibraryProvider(backend.LibraryProvider):
 
     def _get_media_dirs(self, config: config_lib.Config) -> Generator[MediaDir]:
         for entry in config["file"]["media_dirs"]:
-            media_dir_split = entry.split("|", 1)
-            local_path = paths.expand_path(media_dir_split[0])
+            media_dir_split = entry.strip().split("|", 1)
+            local_path = paths.expand_path(media_dir_split[0].strip())
 
             if local_path is None:
                 logger.debug(
