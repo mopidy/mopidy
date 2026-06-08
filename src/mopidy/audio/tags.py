@@ -4,6 +4,7 @@ import logging
 import numbers
 from typing import Any
 
+from mopidy import exceptions
 from mopidy._lib import logs
 from mopidy._lib.gi import GLib, Gst
 from mopidy.models import Album, Artist, Track
@@ -131,7 +132,14 @@ def convert_tags_to_track(
     length: DurationMs | None = None,
     last_modified: int | None = None,
 ) -> Track:
-    """Convert our normalized tags to a track."""
+    """Convert our normalized tags to a track.
+
+    Raises:
+        exceptions.ScannerError: If the tags can't be coerced into a valid
+            `Track`. Callers scanning multiple URIs should catch this per URI,
+            so that a single file with broken tags doesn't fail the entire scan
+            or lookup.
+    """
     album_kwargs = {}
     track_kwargs = {}
 
@@ -181,16 +189,20 @@ def convert_tags_to_track(
     track_kwargs = {k: v for k, v in track_kwargs.items() if v}
     album_kwargs = {k: v for k, v in album_kwargs.items() if v}
 
-    # Only bother with album if we have a name to show.
-    if album_kwargs.get("name"):
-        track_kwargs["album"] = Album(**album_kwargs)
+    try:
+        # Only bother with album if we have a name to show.
+        if album_kwargs.get("name"):
+            track_kwargs["album"] = Album(**album_kwargs)
 
-    return Track(
-        **track_kwargs,
-        uri=uri,
-        length=length,
-        last_modified=last_modified,
-    )
+        return Track(
+            **track_kwargs,
+            uri=uri,
+            length=length,
+            last_modified=last_modified,
+        )
+    except ValueError as exc:
+        msg = f"Invalid tags: {exc}"
+        raise exceptions.ScannerError(msg) from exc
 
 
 def _artists(

@@ -27,6 +27,13 @@ For older releases, see:
   [`mopidy.types.ReleaseDate`][mopidy.types.ReleaseDate] type, covering all
   three supported date formats.
 
+- Audio: [`convert_tags_to_track()`][mopidy.audio.tags.convert_tags_to_track]
+  now raises [`ScannerError`][mopidy.exceptions.ScannerError] if the tags can't
+  be coerced into a valid [`Track`][mopidy.models.Track]. The `file` and
+  `stream` backends catch this per URI and fall back to a track with just the
+  URI, so that a single file with broken tags no longer fails the lookup of
+  every other URI in the same batch.
+
 ## v4.0.1 (2026-05-16)
 
 - Deps: Fix support for Cyclopts >= 3.12, < 4.3. We accidentally relied on

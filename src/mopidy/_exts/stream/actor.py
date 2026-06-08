@@ -82,11 +82,15 @@ class StreamLibraryProvider(backend.LibraryProvider):
         )
 
         if scan_result:
-            track = tags.convert_tags_to_track(
-                scan_result.tags,
-                uri=uri,
-                length=scan_result.duration,
-            )
+            try:
+                track = tags.convert_tags_to_track(
+                    scan_result.tags,
+                    uri=uri,
+                    length=scan_result.duration,
+                )
+            except exceptions.ScannerError as e:
+                logger.warning("Failed looking up %s: %s", uri, e)
+                track = Track(uri=uri)
         else:
             logger.warning("Problem looking up %s", uri)
             track = Track(uri=uri)
