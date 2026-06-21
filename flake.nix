@@ -62,6 +62,7 @@
               ];
             } ps)
             ++ [
+              ps.pygobject3
               ps.tox
               ps.ty
               ps."pygobject-stubs"
@@ -88,8 +89,19 @@
           cairoIncludeFlags = lib.concatMapStringsSep " " (path: "-I${path}") (
             lib.splitString ":" cairoIncludePath
           );
+          giTypelibPath = pkgs.lib.makeSearchPathOutput "lib" "lib/girepository-1.0" gstreamerRuntime;
+          gstPluginSystemPath = pkgs.lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" gstreamerRuntime;
         in
         {
+          checks.gst-smoke = pkgs.runCommand "gst-smoke" {
+            nativeBuildInputs = [ pythonEnv ] ++ gstreamerRuntime;
+          } ''
+            export GI_TYPELIB_PATH="${giTypelibPath}''${GI_TYPELIB_PATH:+:$GI_TYPELIB_PATH}"
+            export GST_PLUGIN_SYSTEM_PATH_1_0="${gstPluginSystemPath}''${GST_PLUGIN_SYSTEM_PATH_1_0:+:$GST_PLUGIN_SYSTEM_PATH_1_0}"
+            python -c 'import gi; gi.require_version("Gst", "1.0"); from gi.repository import Gst; print(Gst.version_string())'
+            touch "$out"
+          '';
+
           packages = {
             default = mopidy;
             mopidy = mopidy;
@@ -98,8 +110,8 @@
 
           devShells.default = pkgs.mkShell {
             packages = [
-              mopidy
               pythonEnv
+              mopidy
             ] ++ gstreamerRuntime ++ [
               pkgs.cairo
               pkgs.libxcb
@@ -124,13 +136,14 @@
               export CPPFLAGS="${cairoIncludeFlags} ''${CPPFLAGS:+$CPPFLAGS}"
               export NIX_CFLAGS_COMPILE="${cairoIncludeFlags} ''${NIX_CFLAGS_COMPILE:+$NIX_CFLAGS_COMPILE}"
               export PYTHONPATH="$PWD/src:${mopidy}/${python.sitePackages}''${PYTHONPATH:+:$PYTHONPATH}"
-              export GI_TYPELIB_PATH="${pkgs.lib.makeSearchPathOutput "lib" "lib/girepository-1.0" gstreamerRuntime}''${GI_TYPELIB_PATH:+:$GI_TYPELIB_PATH}"
-              export GST_PLUGIN_SYSTEM_PATH_1_0="${pkgs.lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" gstreamerRuntime}''${GST_PLUGIN_SYSTEM_PATH_1_0:+:$GST_PLUGIN_SYSTEM_PATH_1_0}"
+              export GI_TYPELIB_PATH="${giTypelibPath}''${GI_TYPELIB_PATH:+:$GI_TYPELIB_PATH}"
+              export GST_PLUGIN_SYSTEM_PATH_1_0="${gstPluginSystemPath}''${GST_PLUGIN_SYSTEM_PATH_1_0:+:$GST_PLUGIN_SYSTEM_PATH_1_0}"
             '';
           };
         };
     in
     {
+      checks = forAllSystems (system: (perSystem system).checks);
       packages = forAllSystems (system: (perSystem system).packages);
       devShells = forAllSystems (system: (perSystem system).devShells);
     };
