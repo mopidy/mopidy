@@ -63,7 +63,7 @@ def test_user_dirs_defaults_file_overrides_builtin_defaults(tmpdir):
         fh.write("MUSIC=Audio\n")
         fh.write("DOWNLOAD=Files\n")
 
-    result = paths._get_xdg_user_dirs(  # noqa: SLF001
+    result = paths._get_xdg_user_dirs(
         xdg_config_dir=Path("/does/not/exist"),
         xdg_defaults_dir=Path(tmpdir),
     )
@@ -82,7 +82,7 @@ def test_user_dirs_file_overrides_defaults_file(tmpdir):
     with (xdg_config_dir / "user-dirs.dirs").open("w") as fh:
         fh.write('XDG_MUSIC_DIR="$HOME/Music2"\n')
 
-    result = paths._get_xdg_user_dirs(  # noqa: SLF001
+    result = paths._get_xdg_user_dirs(
         xdg_config_dir=xdg_config_dir,
         xdg_defaults_dir=Path(tmpdir),
     )

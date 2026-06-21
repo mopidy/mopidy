@@ -226,4 +226,6 @@ def test_validate_defaults_with_xdg_user_dir_fallbacks():
         "$XDG_MUSIC_DIR|Music",
         "~/|Home",
     )
-    assert config_manager.config["m3u"]["base_dir"] == str(paths.XDG_DIRS["XDG_MUSIC_DIR"])
+    assert config_manager.config["m3u"]["base_dir"] == str(
+        paths.XDG_DIRS["XDG_MUSIC_DIR"]
+    )
