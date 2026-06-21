@@ -54,7 +54,40 @@ def test_user_dirs(environ, tmpdir):
     result = paths.get_xdg_dirs()
 
     assert result["XDG_MUSIC_DIR"] == Path("~/Music2").expanduser()
-    assert "XDG_DOWNLOAD_DIR" not in result
+    assert result["XDG_DOWNLOAD_DIR"] == Path("~/Downloads").expanduser()
+
+
+def test_user_dirs_defaults_file_overrides_builtin_defaults(tmpdir):
+    with (Path(tmpdir) / "user-dirs.defaults").open("w") as fh:
+        fh.write("# Some comments\n")
+        fh.write("MUSIC=Audio\n")
+        fh.write("DOWNLOAD=Files\n")
+
+    result = paths._get_xdg_user_dirs(  # noqa: SLF001
+        xdg_config_dir=Path("/does/not/exist"),
+        xdg_defaults_dir=Path(tmpdir),
+    )
+
+    assert result["XDG_MUSIC_DIR"] == Path("~/Audio").expanduser()
+    assert result["XDG_DOWNLOAD_DIR"] == Path("~/Files").expanduser()
+
+
+def test_user_dirs_file_overrides_defaults_file(tmpdir):
+    xdg_config_dir = Path(tmpdir) / "config"
+    xdg_config_dir.mkdir()
+
+    with (Path(tmpdir) / "user-dirs.defaults").open("w") as fh:
+        fh.write("MUSIC=Audio\n")
+
+    with (xdg_config_dir / "user-dirs.dirs").open("w") as fh:
+        fh.write('XDG_MUSIC_DIR="$HOME/Music2"\n')
+
+    result = paths._get_xdg_user_dirs(  # noqa: SLF001
+        xdg_config_dir=xdg_config_dir,
+        xdg_defaults_dir=Path(tmpdir),
+    )
+
+    assert result["XDG_MUSIC_DIR"] == Path("~/Music2").expanduser()
 
 
 def test_user_dirs_when_no_dirs_file(environ, tmpdir):
@@ -62,5 +95,5 @@ def test_user_dirs_when_no_dirs_file(environ, tmpdir):
 
     result = paths.get_xdg_dirs()
 
-    assert "XDG_MUSIC_DIR" not in result
-    assert "XDG_DOWNLOAD_DIR" not in result
+    assert result["XDG_MUSIC_DIR"] == Path("~/Music").expanduser()
+    assert result["XDG_DOWNLOAD_DIR"] == Path("~/Downloads").expanduser()

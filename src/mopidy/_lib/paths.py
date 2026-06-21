@@ -11,6 +11,18 @@ from mopidy.types import Uri
 
 logger = logging.getLogger(__name__)
 
+# https://cgit.freedesktop.org/xdg/xdg-user-dirs/tree/user-dirs.defaults
+XDG_USER_DIR_DEFAULTS = {
+    "XDG_DESKTOP_DIR": "Desktop",
+    "XDG_DOWNLOAD_DIR": "Downloads",
+    "XDG_TEMPLATES_DIR": "Templates",
+    "XDG_PUBLICSHARE_DIR": "Public",
+    "XDG_DOCUMENTS_DIR": "Documents",
+    "XDG_MUSIC_DIR": "Music",
+    "XDG_PICTURES_DIR": "Pictures",
+    "XDG_VIDEOS_DIR": "Videos",
+}
+
 
 def get_xdg_dirs() -> dict[str, pathlib.Path]:
     """Returns a dict of all the known XDG Base Directories for the current user.
@@ -41,17 +53,33 @@ def get_xdg_dirs() -> dict[str, pathlib.Path]:
     return dirs
 
 
-def _get_xdg_user_dirs(xdg_config_dir: pathlib.Path) -> dict[str, pathlib.Path]:
-    """Returns a dict of XDG dirs read from `$XDG_CONFIG_HOME/user-dirs.dirs`.
+def _read_xdg_user_dir_defaults(
+    xdg_defaults_dir: pathlib.Path,
+) -> dict[str, pathlib.Path]:
+    defaults_file = xdg_defaults_dir / "user-dirs.defaults"
+    home = pathlib.Path.home()
 
-    This is used at import time for most users of Mopidy. By rolling our own
-    implementation instead of using `glib.get_user_special_dir` we make it
-    possible for many extensions to run their test suites, which are importing
-    parts of Mopidy, in a virtualenv with global site-packages disabled, and
-    thus no `glib` available.
-    """
-    dirs_file = xdg_config_dir / "user-dirs.dirs"
+    result = {
+        key: (home / relative_path).resolve()
+        for key, relative_path in XDG_USER_DIR_DEFAULTS.items()
+    }
 
+    if not defaults_file.exists():
+        return result
+
+    for line in defaults_file.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        key, separator, value = line.partition("=")
+        if not separator:
+            continue
+        result[f"XDG_{key.strip()}_DIR"] = (home / value.strip()).resolve()
+
+    return result
+
+
+def _read_xdg_user_dirs(dirs_file: pathlib.Path) -> dict[str, pathlib.Path]:
     if not dirs_file.exists():
         return {}
 
@@ -71,6 +99,26 @@ def _get_xdg_user_dirs(xdg_config_dir: pathlib.Path) -> dict[str, pathlib.Path]:
             k = k.decode()
         result[k.upper()] = pathlib.Path(v).resolve()
 
+    return result
+
+
+def _get_xdg_user_dirs(
+    xdg_config_dir: pathlib.Path,
+    xdg_defaults_dir: pathlib.Path = pathlib.Path("/etc/xdg"),
+) -> dict[str, pathlib.Path]:
+    """Returns XDG user dirs from builtin, system, and user defaults.
+
+    Builtin defaults are overlaid by `$XDG_DEFAULTS_DIR/user-dirs.defaults`,
+    then by `$XDG_CONFIG_HOME/user-dirs.dirs`.
+
+    This is used at import time for most users of Mopidy. By rolling our own
+    implementation instead of using `glib.get_user_special_dir` we make it
+    possible for many extensions to run their test suites, which are importing
+    parts of Mopidy, in a virtualenv with global site-packages disabled, and
+    thus no `glib` available.
+    """
+    result = _read_xdg_user_dir_defaults(xdg_defaults_dir)
+    result.update(_read_xdg_user_dirs(xdg_config_dir / "user-dirs.dirs"))
     return result
 
 

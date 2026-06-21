@@ -1,10 +1,14 @@
+from importlib import metadata
 from pathlib import Path
 
 import pytest
 
 import mopidy
 from mopidy._app.config import ConfigLoader
-from mopidy._app.extensions import ExtensionManager
+from mopidy._app.extensions import ExtensionManager, ExtensionRecord, ExtensionStatus
+from mopidy._exts.file import Extension as FileExtension
+from mopidy._exts.m3u import Extension as M3UExtension
+from mopidy._lib import paths
 
 
 def test_load_raw_config():
@@ -187,3 +191,39 @@ def test_config_errors():
         config_manager.errors["core"]["max_tracklist_length"]
         == "invalid literal for int() with base 10: 'not-an-integer'"
     )
+
+
+def test_validate_defaults_with_xdg_user_dir_fallbacks():
+    file_extension = FileExtension()
+    m3u_extension = M3UExtension()
+    extensions = ExtensionManager(
+        {
+            "file": ExtensionRecord(
+                ext_name="file",
+                entry_point=metadata.EntryPoint("file", "mopidy:file", "mopidy.ext"),
+                status=ExtensionStatus.ENABLED,
+                extension=file_extension,
+                config_schema=file_extension.get_config_schema(),
+                config_defaults=file_extension.get_default_config(),
+            ),
+            "m3u": ExtensionRecord(
+                ext_name="m3u",
+                entry_point=metadata.EntryPoint("m3u", "mopidy:m3u", "mopidy.ext"),
+                status=ExtensionStatus.ENABLED,
+                extension=m3u_extension,
+                config_schema=m3u_extension.get_config_schema(),
+                config_defaults=m3u_extension.get_default_config(),
+            ),
+        }
+    )
+
+    config_loader = ConfigLoader.only_defaults(extensions=extensions)
+    config_manager = config_loader.validate()
+
+    assert "file" not in config_manager.errors
+    assert "m3u" not in config_manager.errors
+    assert config_manager.config["file"]["media_dirs"] == (
+        "$XDG_MUSIC_DIR|Music",
+        "~/|Home",
+    )
+    assert config_manager.config["m3u"]["base_dir"] == str(paths.XDG_DIRS["XDG_MUSIC_DIR"])
