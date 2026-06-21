@@ -72,6 +72,30 @@ def test_user_dirs_defaults_file_overrides_builtin_defaults(tmpdir):
     assert result["XDG_DOWNLOAD_DIR"] == Path("~/Files").expanduser()
 
 
+def test_user_dirs_defaults_file_ignores_absolute_paths(tmpdir):
+    with (Path(tmpdir) / "user-dirs.defaults").open("w") as fh:
+        fh.write("MUSIC=/srv/media\n")
+
+    result = paths._get_xdg_user_dirs(
+        xdg_config_dir=Path("/does/not/exist"),
+        xdg_defaults_dir=Path(tmpdir),
+    )
+
+    assert result["XDG_MUSIC_DIR"] == Path("~/Music").expanduser()
+
+
+def test_user_dirs_defaults_file_tolerates_whitespace_and_quotes(tmpdir):
+    with (Path(tmpdir) / "user-dirs.defaults").open("w") as fh:
+        fh.write(' MUSIC = "Audio Files"\n')
+
+    result = paths._get_xdg_user_dirs(
+        xdg_config_dir=Path("/does/not/exist"),
+        xdg_defaults_dir=Path(tmpdir),
+    )
+
+    assert result["XDG_MUSIC_DIR"] == Path("~/Audio Files").expanduser()
+
+
 def test_user_dirs_file_overrides_defaults_file(tmpdir):
     xdg_config_dir = Path(tmpdir) / "config"
     xdg_config_dir.mkdir()
@@ -88,6 +112,36 @@ def test_user_dirs_file_overrides_defaults_file(tmpdir):
     )
 
     assert result["XDG_MUSIC_DIR"] == Path("~/Music2").expanduser()
+
+
+def test_user_dirs_file_accepts_reasonably_sourceable_value_forms(tmpdir):
+    xdg_config_dir = Path(tmpdir) / "config"
+    xdg_config_dir.mkdir()
+
+    with (xdg_config_dir / "user-dirs.dirs").open("w") as fh:
+        fh.write("XDG_MUSIC_DIR=$HOME/Music\n")
+        fh.write(" XDG_DOWNLOAD_DIR = /srv/downloads\n")
+        fh.write('XDG_PICTURES_DIR="/srv/pictures"\n')
+
+    result = paths._read_xdg_user_dirs(xdg_config_dir / "user-dirs.dirs")
+
+    assert result["XDG_MUSIC_DIR"] == Path("~/Music").expanduser()
+    assert result["XDG_DOWNLOAD_DIR"] == Path("/srv/downloads")
+    assert result["XDG_PICTURES_DIR"] == Path("/srv/pictures")
+
+
+def test_user_dirs_file_ignores_unsupported_shell_forms(tmpdir):
+    xdg_config_dir = Path(tmpdir) / "config"
+    xdg_config_dir.mkdir()
+
+    with (xdg_config_dir / "user-dirs.dirs").open("w") as fh:
+        fh.write('XDG_MUSIC_DIR="$HOME"/Music\n')
+        fh.write('XDG_DOWNLOAD_DIR="${HOME}/Downloads"\n')
+
+    result = paths._read_xdg_user_dirs(xdg_config_dir / "user-dirs.dirs")
+
+    assert "XDG_MUSIC_DIR" not in result
+    assert "XDG_DOWNLOAD_DIR" not in result
 
 
 def test_user_dirs_when_no_dirs_file(environ, tmpdir):

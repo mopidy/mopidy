@@ -1,4 +1,3 @@
-import configparser
 import logging
 import os
 import pathlib
@@ -22,6 +21,84 @@ XDG_USER_DIR_DEFAULTS = {
     "XDG_PICTURES_DIR": "Pictures",
     "XDG_VIDEOS_DIR": "Videos",
 }
+
+XDG_USER_DIR_NAMES = {
+    name.removeprefix("XDG_").removesuffix("_DIR") for name in XDG_USER_DIR_DEFAULTS
+}
+
+
+def _unescape_xdg_user_dir_value(value: str) -> str:
+    """Decode backslash escapes from XDG user-dir values.
+
+    ``user-dirs.dirs`` is shell-sourceable, so quoted values may contain simple
+    backslash escapes even though Mopidy intentionally does not evaluate shell.
+    """
+    chars: list[str] = []
+    escaped = False
+
+    for char in value:
+        if escaped:
+            chars.append(char)
+            escaped = False
+            continue
+        if char == "\\":
+            escaped = True
+            continue
+        chars.append(char)
+
+    if escaped:
+        chars.append("\\")
+
+    return "".join(chars)
+
+
+def _parse_xdg_assignment_line(
+    line: str, substitutions: dict[str, str] | None = None
+) -> tuple[str, str] | None:
+    """Parse a simple ``KEY=VALUE`` assignment used by XDG user-dir files.
+
+    Both XDG helper files are line-oriented assignment files. We share the
+    minimal parsing here so the file-specific helpers can stay focused on the
+    rules that differ between the two formats.
+    """
+    key, separator, value = line.partition("=")
+    if not separator:
+        return None
+
+    key = key.strip()
+    value = value.strip()
+
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+        value = _unescape_xdg_user_dir_value(value[1:-1])
+
+    for old, new in (substitutions or {}).items():
+        value = value.replace(old, new, 1) if value.startswith(old) else value
+
+    return key, value
+
+
+def _parse_xdg_user_dir_line(
+    line: str, home: pathlib.Path
+) -> tuple[str, pathlib.Path] | None:
+    """Parse one ``user-dirs.dirs`` line into a resolved path.
+
+    We accept the documented forms plus a narrow shell-sourceable subset, but
+    still validate the result as either an absolute path or a ``$HOME``
+    descendant before treating it as an XDG user dir.
+    """
+    if parsed_line := _parse_xdg_assignment_line(line, {"$HOME": str(home)}):
+        key, value = parsed_line
+    else:
+        return None
+
+    if key not in XDG_USER_DIR_DEFAULTS:
+        return None
+    if value.startswith((str(home) + "/", "/")):
+        path = pathlib.Path(value).resolve()
+    else:
+        return None
+
+    return key, path
 
 
 def get_xdg_dirs() -> dict[str, pathlib.Path]:
@@ -56,6 +133,13 @@ def get_xdg_dirs() -> dict[str, pathlib.Path]:
 def _read_xdg_user_dir_defaults(
     xdg_defaults_dir: pathlib.Path,
 ) -> dict[str, pathlib.Path]:
+    """Read defaults from ``user-dirs.defaults(5)``.
+
+    The man page documents lines of the form ``NAME=VALUE``, where ``VALUE`` is
+    a relative path from the home directory. We also tolerate surrounding
+    whitespace and optional quoting so lightly hand-edited files still work,
+    while keeping the stricter "relative path only" rule from the format.
+    """
     defaults_file = xdg_defaults_dir / "user-dirs.defaults"
     home = pathlib.Path.home()
 
@@ -71,33 +155,44 @@ def _read_xdg_user_dir_defaults(
         line = line.strip()
         if not line or line.startswith("#"):
             continue
-        key, separator, value = line.partition("=")
-        if not separator:
+
+        if parsed_line := _parse_xdg_assignment_line(line):
+            key, value = parsed_line
+        else:
             continue
-        result[f"XDG_{key.strip()}_DIR"] = (home / value.strip()).resolve()
+
+        if key not in XDG_USER_DIR_NAMES:
+            continue
+        if not value or pathlib.Path(value).is_absolute():
+            continue
+        result[f"XDG_{key}_DIR"] = (home / value).resolve()
 
     return result
 
 
 def _read_xdg_user_dirs(dirs_file: pathlib.Path) -> dict[str, pathlib.Path]:
+    """Read user overrides from ``user-dirs.dirs(5)``.
+
+    The man page documents lines of the form ``XDG_NAME_DIR=VALUE``, where
+    ``VALUE`` must be quoted and be either ``"$HOME/Path"`` or ``"/Path"``.
+    We additionally accept a small shell-sourceable subset with surrounding
+    whitespace and unquoted ``$HOME/...`` or absolute paths so we stay tolerant
+    of realistic manual edits without trying to implement shell.
+    """
     if not dirs_file.exists():
         return {}
 
-    data = dirs_file.read_bytes()
-    data = b"[XDG_USER_DIRS]\n" + data
-    data = data.replace(b"$HOME", bytes(pathlib.Path.home()))
-    data = data.replace(b'"', b"")
-
-    config = configparser.RawConfigParser()
-    config.read_string(data.decode())
-
     result: dict[str, pathlib.Path] = {}
-    for k, v in config.items("XDG_USER_DIRS"):
-        if v is None:  # pyright: ignore[reportUnnecessaryComparison]
+    home = pathlib.Path.home()
+
+    for line in dirs_file.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
             continue
-        if isinstance(k, bytes):
-            k = k.decode()
-        result[k.upper()] = pathlib.Path(v).resolve()
+
+        if parsed_line := _parse_xdg_user_dir_line(line, home):
+            key, path = parsed_line
+            result[key] = path
 
     return result
 
@@ -115,7 +210,9 @@ def _get_xdg_user_dirs(
     implementation instead of using `glib.get_user_special_dir` we make it
     possible for many extensions to run their test suites, which are importing
     parts of Mopidy, in a virtualenv with global site-packages disabled, and
-    thus no `glib` available.
+    thus no `glib` available. The ordering mirrors the XDG tooling model so we
+    can honor builtin defaults, system defaults, and user overrides without a
+    runtime GLib dependency.
     """
     result = _read_xdg_user_dir_defaults(xdg_defaults_dir)
     result.update(_read_xdg_user_dirs(xdg_config_dir / "user-dirs.dirs"))
