@@ -10,6 +10,7 @@
     let
       lib = nixpkgs.lib;
       forAllSystems = lib.genAttrs lib.systems.flakeExposed;
+      # WARNING: Keep this in sync with the Mopidy release version.
       mopidyVersion = "4.0.0";
       project = pyproject-nix.lib.project.loadPyproject {
         projectRoot = ./.;
@@ -36,6 +37,10 @@
           mopidy = pyPkgs.buildPythonApplication (
             mopidyAttrs
             // {
+              # TODO: Find a better way to keep version tracking. Nix builds use
+              # a source snapshot without the Git metadata that setuptools-scm
+              # normally reads, so we currently have to pin and inject the
+              # version manually to avoid broken package versions.
               version = mopidyVersion;
 
               nativeBuildInputs = (mopidyAttrs.nativeBuildInputs or [ ]) ++ [
