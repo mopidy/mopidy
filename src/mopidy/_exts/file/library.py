@@ -131,7 +131,7 @@ class FileLibraryProvider(backend.LibraryProvider):
 
     def _get_media_dirs(self, config: config_lib.Config) -> Generator[MediaDir]:
         for entry in config["file"]["media_dirs"]:
-            media_dir_split = entry.split("|", 1)
+            media_dir_split = [part.strip() for part in entry.split("|", 1)]
             local_path = paths.expand_path(media_dir_split[0])
 
             if local_path is None:
@@ -144,7 +144,7 @@ class FileLibraryProvider(backend.LibraryProvider):
                 logger.warning(
                     "%s is not a directory. Please create the directory or "
                     "update the file/media_dirs config value.",
-                    local_path,
+                    local_path.as_uri(),
                 )
                 continue
 
