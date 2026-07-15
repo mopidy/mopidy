@@ -85,8 +85,11 @@ def parse_pls(data: bytes) -> Generator[str]:
     for section in cp.sections():
         if section.lower() != "playlist":
             continue
-        for i in range(cp.getint(section, "numberofentries")):
-            yield cp.get(section, f"file{i + 1}").strip("\"'")
+        num_entries = cp.getint(section, "numberofentries", fallback=0)
+        for i in range(num_entries):
+            uri = cp.get(section, f"file{i + 1}", fallback=None)
+            if uri:
+                yield uri.strip("\"'")
 
 
 def parse_xspf(data: bytes) -> Generator[str]:
