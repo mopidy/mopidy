@@ -261,7 +261,7 @@ def reticulate(*, degrees: int) -> None:
 ```
 
 To register your commands, make sure to return the `app` instance from your
-`mopidy.ext.Extension.get_commands()` implementation.
+`mopidy.ext.Extension.get_command()` implementation.
 
 ## Example web application
 
