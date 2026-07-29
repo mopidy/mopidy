@@ -309,7 +309,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
         structure = msg.get_structure()
 
-        if logger.isEnabledFor(logs.TRACE_LOG_LEVEL) and structure:
+        if logger.isEnabledFor(logs.TRACE_LOG_LEVEL) and structure is not None:
             debug_text = structure.to_string()
             if len(debug_text) > 77:
                 debug_text = debug_text[:77] + "..."
@@ -322,7 +322,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
         elif msg.type == Gst.MessageType.APPLICATION:
             if structure and _get_structure_name(structure) == "have-type":
                 caps = cast(Gst.Structure | None, structure.get_value("caps"))
-                if caps:
+                if caps is not None:
                     mime = _get_structure_name(caps)
                     if mime.startswith("text/") or mime == "application/xml":
                         return tags, mime, have_audio, duration
@@ -335,8 +335,8 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
                 missing_message
                 and not mime
                 and (
-                    (structure := missing_message.get_structure())
-                    and (caps := structure.get_value("detail"))
+                    ((structure := missing_message.get_structure()) is not None)
+                    and ((caps := structure.get_value("detail")) is not None)
                     and (mime := _get_structure_name(caps.get_structure(0)))
                 )
             ):
