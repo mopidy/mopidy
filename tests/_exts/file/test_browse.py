@@ -54,3 +54,16 @@ def test_file_root_directory(provider, expected):
         return
     assert ref.name == "Files"
     assert (ref.uri == "file:root") == expected
+
+
+@pytest.mark.parametrize(
+    "media_dirs",
+    [
+        [f"  {path_to_data_dir('')}  |  My Music  "],
+        [f"{path_to_data_dir('')} | My Music"],
+    ],
+)
+def test_media_dirs_whitespace_is_stripped(provider):
+    media_dir = provider._media_dirs[0]
+    assert media_dir["path"] == path_to_data_dir("")
+    assert media_dir["name"] == "My Music"
