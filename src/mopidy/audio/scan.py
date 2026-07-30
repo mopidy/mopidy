@@ -320,7 +320,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
                 missing_message = msg
 
         elif msg.type == Gst.MessageType.APPLICATION:
-            if structure and _get_structure_name(structure) == "have-type":
+            if structure is not None and _get_structure_name(structure) == "have-type":
                 caps = cast(Gst.Structure | None, structure.get_value("caps"))
                 if caps is not None:
                     mime = _get_structure_name(caps)
