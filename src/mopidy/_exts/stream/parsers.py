@@ -9,6 +9,7 @@ def parse_playlist(data: bytes) -> list[str]:
     handlers = {
         detect_extm3u_header: parse_extm3u,
         detect_pls_header: parse_pls,
+        detect_asx_reference_header: parse_asx_reference,
         detect_asx_header: parse_asx,
         detect_xspf_header: parse_xspf,
     }
@@ -24,6 +25,10 @@ def detect_extm3u_header(data: bytes) -> bool:
 
 def detect_pls_header(data: bytes) -> bool:
     return data[0:10].lower() == b"[playlist]"
+
+
+def detect_asx_reference_header(data: bytes) -> bool:
+    return data[0:11].lower() == b"[reference]"
 
 
 def detect_xspf_header(data: bytes) -> bool:
@@ -87,6 +92,25 @@ def parse_pls(data: bytes) -> Generator[str]:
             continue
         for i in range(cp.getint(section, "numberofentries")):
             yield cp.get(section, f"file{i + 1}").strip("\"'")
+
+
+def parse_asx_reference(data: bytes) -> Generator[str]:
+    try:
+        cp = configparser.RawConfigParser(strict=False)
+        cp.read_string(data.decode())
+    except configparser.Error:
+        return
+
+    for section in cp.sections():
+        if section.lower() != "reference":
+            continue
+        references = (
+            (int(option[3:]), cp.get(section, option))
+            for option in cp.options(section)
+            if option.startswith("ref") and option[3:].isdigit()
+        )
+        for _index, reference in sorted(references):
+            yield reference.strip("\"'")
 
 
 def parse_xspf(data: bytes) -> Generator[str]:
