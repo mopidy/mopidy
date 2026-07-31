@@ -326,7 +326,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
                     mime = _get_structure_name(caps)
                     if mime.startswith("text/") or mime == "application/xml":
                         return tags, mime, have_audio, duration
-            elif structure and structure.get_name() == "have-audio":
+            elif structure is not None and structure.get_name() == "have-audio":
                 have_audio = True
 
         elif msg.type == Gst.MessageType.ERROR:
