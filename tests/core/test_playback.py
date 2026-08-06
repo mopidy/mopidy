@@ -5,6 +5,7 @@ import pykka
 import pytest
 
 from mopidy import backend, core
+from mopidy.core import _playback as core_playback
 from mopidy.core._state_storage import PlaybackControllerState
 from mopidy.models import Track
 from mopidy.types import PlaybackState
@@ -1367,3 +1368,66 @@ class TestEndlessLoop(BaseTest):
         self.trigger_about_to_finish()
 
         assert not self.backend.playback.is_call_limit_reached().get()
+
+
+class TestStreamErrorHandling(BaseTest):
+    def test_stream_error_retries_current_track_and_recovers(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tl_track() == tl_tracks[0]
+        assert self.core.playback.get_state() == PlaybackState.PLAYING
+
+        self.core.on_event("stream_error", error="Error while sending data")
+        self.replay_events()
+
+        # A single error, within the retry budget, should recover playback
+        # of the same track rather than leaving core stopped/desynced.
+        assert self.core.playback.get_current_tl_track() == tl_tracks[0]
+        assert self.core.playback.get_state() == PlaybackState.PLAYING
+
+    def test_stream_error_gives_up_after_max_retries(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+
+        # Exhaust the retry budget without ever letting a retry succeed
+        # (no replay_events() in between, so _trigger_track_playback_started
+        # never fires to reset the counter).
+        for _ in range(core_playback.MAX_STREAM_ERROR_RETRIES):
+            self.core.on_event("stream_error", error="boom")
+            assert self.core.playback.get_state() != PlaybackState.STOPPED
+
+        # One error beyond the budget should give up and stop.
+        self.core.on_event("stream_error", error="boom")
+        assert self.core.playback.get_state() == PlaybackState.STOPPED
+
+    def test_stream_error_count_resets_after_successful_playback(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+
+        for _ in range(core_playback.MAX_STREAM_ERROR_RETRIES - 1):
+            self.core.on_event("stream_error", error="boom")
+
+        assert (
+            self.core.playback._stream_error_count
+            == core_playback.MAX_STREAM_ERROR_RETRIES - 1
+        )
+
+        # A genuine successful start (e.g. once a retry actually works)
+        # must reset the counter rather than carrying it forward, so a
+        # later, unrelated error isn't judged against an already-used-up
+        # budget.
+        self.core.playback._trigger_track_playback_started()
+        assert self.core.playback._stream_error_count == 0
+
+    def test_stream_error_with_no_current_track_does_nothing(self):
+        assert self.core.playback.get_current_tl_track() is None
+        assert self.core.playback.get_state() == PlaybackState.STOPPED
+
+        self.core.on_event("stream_error", error="boom")
+
+        assert self.core.playback.get_current_tl_track() is None
+        assert self.core.playback.get_state() == PlaybackState.STOPPED
