@@ -151,6 +151,10 @@ class JsonRpcHandlerTestBase(tornado.testing.AsyncHTTPTestCase):
             "Access-Control-Allow-Headers",
             "Content-Type",
         )
+        yield (
+            "Access-Control-Max-Age",
+            "86400",
+        )
 
     def test_head(self):
         response = self.fetch("/rpc", method="HEAD")

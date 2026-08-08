@@ -217,6 +217,7 @@ class MopidyRPCHandlerNoCSRFProtectionTest(HttpServerTest):
 
         assert "Access-Control-Allow-Origin" not in response.headers
         assert "Access-Control-Allow-Headers" not in response.headers
+        assert "Access-Control-Max-Age" not in response.headers
 
 
 class HttpServerWithStaticFilesTest(tornado.testing.AsyncHTTPTestCase):
