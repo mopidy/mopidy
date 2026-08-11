@@ -65,6 +65,7 @@ def make_mopidy_app_factory(
                 StaticFileHandler,
                 {
                     "path": str(Path(__file__).parent / "data"),
+                    "allowed_origins": http_config["allowed_origins"],
                 },
             ),
             (
@@ -198,7 +199,7 @@ def set_mopidy_headers(request_handler: tornado.web.RequestHandler) -> None:
 def check_origin(
     origin: str | None,
     request_headers: tornado.httputil.HTTPHeaders,
-    allowed_origins: set[str],
+    allowed_origins: set[str] | frozenset[str],
 ) -> bool:
     if origin is None:
         logger.warning("HTTP request denied for missing Origin header")
@@ -314,12 +315,26 @@ class ClientListHandler(tornado.web.RequestHandler):
 
 
 class StaticFileHandler(tornado.web.StaticFileHandler):
+    def initialize(
+        self,
+        path: str,
+        default_filename: str | None = None,
+        allowed_origins: set[str] | frozenset[str] = frozenset(),
+        ) -> None:
+        super().initialize(path, default_filename=default_filename)
+        self.allowed_origins = allowed_origins
     def set_extra_headers(
         self,
-        path: str,  # noqa: ARG002
-    ) -> None:
+        path: str, # noqa: ARG002
+        ) -> None:
         set_mopidy_headers(self)
-
+        origin = self.request.headers.get("Origin")
+        if origin is not None and check_origin(
+            origin,
+            self.request.headers,
+            self.allowed_origins,
+        ):
+            self.set_header("Access-Control-Allow-Origin", origin)
 
 class AddSlashHandler(tornado.web.RequestHandler):
     @tornado.web.addslash

@@ -226,6 +226,7 @@ class HttpServerWithStaticFilesTest(tornado.testing.AsyncHTTPTestCase):
                 "hostname": "127.0.0.1",
                 "port": 6680,
                 "zeroconf": "",
+                "allowed_origins": frozenset(),
                 "default_app": "static",
             },
         }
@@ -366,6 +367,7 @@ class HttpServerWithStaticDefaultApp(tornado.testing.AsyncHTTPTestCase):
                 "hostname": "127.0.0.1",
                 "port": 6680,
                 "zeroconf": "",
+                "allowed_origins": frozenset(),
                 "default_app": "default_app",
             },
         }
