@@ -38,6 +38,12 @@ Length3=213
 Version=2
 """
 
+ASX_REFERENCE = b"""[Reference]
+Ref1=file:///tmp/foo
+Ref2=file:///tmp/bar
+Ref3=file:///tmp/baz
+"""
+
 ASX = b"""<ASX version="3.0">
   <TITLE>Example</TITLE>
   <ENTRY>
@@ -89,6 +95,7 @@ EXPECTED = ["file:///tmp/foo", "file:///tmp/bar", "file:///tmp/baz"]
     [
         (parsers.detect_extm3u_header, EXTM3U),
         (parsers.detect_pls_header, PLS),
+        (parsers.detect_asx_reference_header, ASX_REFERENCE),
         (parsers.detect_asx_header, ASX),
         (parsers.detect_asx_header, SIMPLE_ASX),
         (parsers.detect_xspf_header, XSPF),
@@ -103,6 +110,7 @@ def test_detect_from_valid_header(detect_fn, data):
     [
         parsers.detect_extm3u_header,
         parsers.detect_pls_header,
+        parsers.detect_asx_reference_header,
         parsers.detect_asx_header,
         parsers.detect_xspf_header,
     ],
@@ -116,6 +124,7 @@ def test_detect_from_invalid_header(detect_fn):
     [
         (parsers.parse_extm3u, EXTM3U),
         (parsers.parse_pls, PLS),
+        (parsers.parse_asx_reference, ASX_REFERENCE),
         (parsers.parse_asx, ASX),
         (parsers.parse_asx, SIMPLE_ASX),
         (parsers.parse_xspf, XSPF),
@@ -131,6 +140,7 @@ def test_parse_given_format_from_valid_data(parse_fn, data):
     [
         parsers.parse_extm3u,
         parsers.parse_pls,
+        parsers.parse_asx_reference,
         parsers.parse_asx,
         parsers.parse_xspf,
         parsers.parse_urilist,
@@ -140,7 +150,10 @@ def test_parse_given_format_from_invalid_data(parse_fn):
     assert list(parse_fn(BAD)) == []
 
 
-@pytest.mark.parametrize("data", [URILIST, EXTM3U, PLS, ASX, SIMPLE_ASX, XSPF])
+@pytest.mark.parametrize(
+    "data",
+    [URILIST, EXTM3U, PLS, ASX_REFERENCE, ASX, SIMPLE_ASX, XSPF],
+)
 def test_parse_any_format_from_valid_data(data):
     assert parsers.parse_playlist(data) == EXPECTED
 
