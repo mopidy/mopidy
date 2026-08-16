@@ -22,10 +22,14 @@ For older releases, see:
   only have a year and a month in their date tag, and such files were previously
   rejected.
 
-- Types: Removed `mopidy.types.Date`, `mopidy.types.Year`, and
+- Types: Deprecated `mopidy.types.Date`, `mopidy.types.Year`, and
   `mopidy.types.DateOrYear`. They are replaced by a single
   [`mopidy.types.ReleaseDate`][mopidy.types.ReleaseDate] type, covering all
-  three supported date formats.
+  three supported date formats. The old names remain importable, but they are
+  now `str` subclasses instead of `NewType`s, so they are not assignable to
+  `ReleaseDate` and using them will fail type checking. At runtime they still
+  behave as strings, and instantiating them emits a `DeprecationWarning`. They
+  will be removed in a future release.
 
 - Audio: [`convert_tags_to_track()`][mopidy.audio.tags.convert_tags_to_track]
   now raises [`ScannerError`][mopidy.exceptions.ScannerError] if the tags can't

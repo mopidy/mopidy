@@ -3,10 +3,28 @@ from __future__ import annotations
 import enum
 from collections.abc import Iterable
 from typing import Literal, NewType, TypeVar
+from warnings import deprecated
 
 # Date types
 ReleaseDate = NewType("ReleaseDate", str)
 """A date string on the form `YYYY`, `YYYY-MM`, or `YYYY-MM-DD`."""
+
+
+@deprecated("Use ReleaseDate instead")
+class DateOrYear(str):
+    """Deprecated alias for [ReleaseDate][mopidy.types.ReleaseDate]."""
+
+    __slots__ = ()
+
+
+@deprecated("Use ReleaseDate instead")
+class Date(DateOrYear):  # ty: ignore[deprecated]
+    """Deprecated alias for [ReleaseDate][mopidy.types.ReleaseDate]."""
+
+
+@deprecated("Use ReleaseDate instead")
+class Year(DateOrYear):  # ty: ignore[deprecated]
+    """Deprecated alias for [ReleaseDate][mopidy.types.ReleaseDate]."""
 
 
 # Integer types
