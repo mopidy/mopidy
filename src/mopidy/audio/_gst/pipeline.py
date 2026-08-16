@@ -138,6 +138,8 @@ class GstPipeline:
         self._signals = Signals()
         self._event_handler_id: int | None = None
         self._pad: Gst.Pad | None = None
+        self._in_about_to_finish: bool = False
+        self._deferred_uri: tuple[str, int] | None = None
 
         self.playbin = self._make_playbin(on_about_to_finish, on_source_setup)
         self._setup_message_handling(on_bus_message)
@@ -150,6 +152,22 @@ class GstPipeline:
         on_about_to_finish: Callable[[Gst.Element], None],
         on_source_setup: Callable[[Gst.Element, Gst.Element], None],
     ) -> Gst.Element:
+        def about_to_finish_handler(element: Gst.Element) -> None:
+            # HACK: playbin3 sets up the next source synchronously when its
+            # 'uri' property is set. While this streaming thread is inside the
+            # about-to-finish handler, a write from another thread deadlocks on
+            # GStreamer's internal locks. set_uri() leaves the URI with us
+            # instead, and this thread sets it once the handler returns, which
+            # is where playbin3 expects it to happen.
+            self._in_about_to_finish = True
+            try:
+                on_about_to_finish(element)
+            finally:
+                self._in_about_to_finish = False
+                if (deferred_uri := self._deferred_uri) is not None:
+                    self._deferred_uri = None
+                    self._set_playbin_uri(*deferred_uri)
+
         playbin = Gst.ElementFactory.make("playbin3")
         if playbin is None:
             msg = "Failed to create GStreamer playbin3."
@@ -161,7 +179,7 @@ class GstPipeline:
         playbin.set_property("buffer-duration", 5 * Gst.SECOND)
 
         self._signals.connect(playbin, "source-setup", on_source_setup)
-        self._signals.connect(playbin, "about-to-finish", on_about_to_finish)
+        self._signals.connect(playbin, "about-to-finish", about_to_finish_handler)
 
         return playbin
 
@@ -313,14 +331,31 @@ class GstPipeline:
         return clocktime_to_millisecond(segment.position)
 
     def set_uri(self, uri: str, *, download: bool = False) -> None:
-        """Set the URI to play, and the buffering flags to use for it."""
+        """Set the URI to play, and the buffering flags to use for it.
+
+        While the about-to-finish handler runs, the URI is left for the
+        streaming thread to set once that handler returns.
+        """
         flags = GST_PLAY_FLAGS_AUDIO
         if download:
             flags |= GST_PLAY_FLAGS_DOWNLOAD
 
         logger.debug(f"Flags: {flags}")
+        if self._in_about_to_finish:
+            self._deferred_uri = (uri, flags)
+        else:
+            self._set_playbin_uri(uri, flags)
+
+    def _set_playbin_uri(self, uri: str, flags: int) -> None:
         self.playbin.set_property("flags", flags)
-        self.playbin.set_property("uri", uri)
+
+        # HACK: playbin3's 'uri' setter synchronously sets up the next source,
+        # which needs other GStreamer threads to run our Python callbacks, e.g.
+        # pad probes. PyGObject holds the GIL across `set_property()`, so those
+        # threads would be blocked on it and we'd deadlock.
+        # `Gst.util_set_object_arg()` is an introspected call, which PyGObject
+        # runs with the GIL released.
+        Gst.util_set_object_arg(self.playbin, "uri", uri)
 
     def set_state(self, state: GstState) -> bool:
         """Set the state of the playbin.
