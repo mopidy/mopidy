@@ -1,5 +1,3 @@
-from uuid import UUID
-
 import pydantic
 import pytest
 
@@ -72,12 +70,20 @@ def test_disc_no():
         track.disc_no = None
 
 
-def test_date():
-    date = "1977-01-01"
+@pytest.mark.parametrize("date", ["1977", "1977-01", "1977-01-01"])
+def test_date(date):
     track = TrackFactory.build(date=date)
     assert track.date == date
     with pytest.raises(pydantic.ValidationError):
         track.date = None
+
+
+@pytest.mark.parametrize(
+    "date", ["77", "1977-1-1", "1977/01/01", "1977-01-01T00:00:00"]
+)
+def test_date_rejects_invalid(date):
+    with pytest.raises(pydantic.ValidationError):
+        TrackFactory.build(date=date)
 
 
 def test_length():
@@ -99,7 +105,7 @@ def test_bitrate():
 def test_musicbrainz_id():
     mb_id = "0383dadf-2a4e-4d10-a46a-e9e041da8eb3"
     track = TrackFactory.build(musicbrainz_id=mb_id)
-    assert track.musicbrainz_id == UUID(mb_id)
+    assert track.musicbrainz_id == mb_id
     with pytest.raises(pydantic.ValidationError):
         track.musicbrainz_id = None
 

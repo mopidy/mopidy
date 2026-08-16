@@ -1,5 +1,8 @@
 import unittest
 
+import pytest
+
+from mopidy import exceptions
 from mopidy._lib.gi import GLib, GObject, Gst
 from mopidy.audio import tags
 from mopidy.models import Album, Artist, Track
@@ -74,6 +77,21 @@ class TestConvertTaglist:
 
         assert isinstance(result[Gst.TAG_DATE_TIME][0], str)
         assert result[Gst.TAG_DATE_TIME][0] == "2014-01-07T14:13:12Z"
+
+    def test_date_time_tag_partial(self):
+        # GStreamer emits partial dates when the tag only has a year, or a year
+        # and a month. Both must be accepted by the `date` field on our models.
+        taglist = self.make_taglist(
+            Gst.TAG_DATE_TIME,
+            [Gst.DateTime.new_y(2014)],
+        )
+        assert tags.convert_taglist(taglist)[Gst.TAG_DATE_TIME] == ["2014"]
+
+        taglist = self.make_taglist(
+            Gst.TAG_DATE_TIME,
+            [Gst.DateTime.new_ym(2014, 1)],
+        )
+        assert tags.convert_taglist(taglist)[Gst.TAG_DATE_TIME] == ["2014-01"]
 
     def test_string_tag(self):
         taglist = self.make_taglist(Gst.TAG_ARTIST, [b"ABBA", b"ACDC"])
@@ -231,6 +249,25 @@ class TagsToTrackTest(unittest.TestCase):
         del self.tags["date"]
         self.tags["datetime"] = ["2006-01-01T14:13:12Z"]
         self.check(self.track)
+
+    def test_year_month_datetime_instead_of_date(self):
+        del self.tags["date"]
+        self.tags["datetime"] = ["2006-01"]
+        self.check(
+            self.track.replace(
+                album=self.track.album.replace(date="2006-01"),
+                date="2006-01",
+            ),
+        )
+
+    def test_invalid_tags_raises_scanner_error(self):
+        self.tags["track-number"] = [-1]
+        with pytest.raises(exceptions.ScannerError):
+            tags.convert_tags_to_track(
+                self.tags,
+                uri=Uri("dummy:track:test"),
+                length=12345,
+            )
 
     def test_missing_track_comment(self):
         del self.tags["comment"]

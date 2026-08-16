@@ -1,5 +1,3 @@
-from uuid import UUID
-
 import pydantic
 import pytest
 
@@ -48,18 +46,26 @@ def test_num_discs():
         album.num_discs = None
 
 
-def test_date():
-    date = "1977-01-01"
+@pytest.mark.parametrize("date", ["1977", "1977-01", "1977-01-01"])
+def test_date(date):
     album = AlbumFactory.build(date=date)
     assert album.date == date
     with pytest.raises(pydantic.ValidationError):
         album.date = None
 
 
+@pytest.mark.parametrize(
+    "date", ["77", "1977-1-1", "1977/01/01", "1977-01-01T00:00:00"]
+)
+def test_date_rejects_invalid(date):
+    with pytest.raises(pydantic.ValidationError):
+        AlbumFactory.build(date=date)
+
+
 def test_musicbrainz_id():
     mb_id = "0383dadf-2a4e-4d10-a46a-e9e041da8eb3"
     album = AlbumFactory.build(musicbrainz_id=mb_id)
-    assert album.musicbrainz_id == UUID(mb_id)
+    assert album.musicbrainz_id == mb_id
     with pytest.raises(pydantic.ValidationError):
         album.musicbrainz_id = None
 

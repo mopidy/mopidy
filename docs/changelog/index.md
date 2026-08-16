@@ -8,6 +8,36 @@ For older releases, see:
 [Changelog 1.x](1.x.md) ·
 [Changelog 0.x](0.x.md)
 
+## Unreleased
+
+- Models: The `musicbrainz_id` fields on [`Album`][mopidy.models.Album],
+  [`Artist`][mopidy.models.Artist], and [`Track`][mopidy.models.Track] are again
+  typed as `str` instead of `UUID`, like in Mopidy < 4.0, to allow scanning
+  collections using alternative identifiers, or multiple identifiers in the same
+  field.
+
+- Models: The `date` field on [`Album`][mopidy.models.Album] and
+  [`Track`][mopidy.models.Track] now also accepts the `YYYY-MM` format, in
+  addition to `YYYY` and `YYYY-MM-DD`. GStreamer emits `YYYY-MM` for files that
+  only have a year and a month in their date tag, and such files were previously
+  rejected.
+
+- Types: Deprecated `mopidy.types.Date`, `mopidy.types.Year`, and
+  `mopidy.types.DateOrYear`. They are replaced by a single
+  [`mopidy.types.ReleaseDate`][mopidy.types.ReleaseDate] type, covering all
+  three supported date formats. The old names remain importable, but they are
+  now `str` subclasses instead of `NewType`s, so they are not assignable to
+  `ReleaseDate` and using them will fail type checking. At runtime they still
+  behave as strings, and instantiating them emits a `DeprecationWarning`. They
+  will be removed in a future release.
+
+- Audio: [`convert_tags_to_track()`][mopidy.audio.tags.convert_tags_to_track]
+  now raises [`ScannerError`][mopidy.exceptions.ScannerError] if the tags can't
+  be coerced into a valid [`Track`][mopidy.models.Track]. The `file` and
+  `stream` backends catch this per URI and fall back to a track with just the
+  URI, so that a single file with broken tags no longer fails the lookup of
+  every other URI in the same batch.
+
 ## v4.0.1 (2026-05-16)
 
 - Deps: Fix support for Cyclopts >= 3.12, < 4.3. We accidentally relied on
