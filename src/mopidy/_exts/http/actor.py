@@ -200,13 +200,18 @@ class HttpServer(threading.Thread):
 
     def _get_static_request_handlers(self) -> list[RequestRule]:
         result = []
+        http_config = cast(HttpConfig, self.config[Extension.ext_name])
         for static in self.statics:
             result.append((f"/{static['name']}", handlers.AddSlashHandler))
             result.append(
                 (
                     f"/{static['name']}/(.*)",
                     handlers.StaticFileHandler,
-                    {"path": static["path"], "default_filename": "index.html"},
+                    {
+                        "path": static["path"],
+                        "default_filename": "index.html",
+                        "allowed_origins": http_config["allowed_origins"],
+                    },
                 ),
             )
             logger.debug("Loaded static HTTP extension: %s", static["name"])

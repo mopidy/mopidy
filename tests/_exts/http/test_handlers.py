@@ -22,6 +22,7 @@ class StaticFileHandlerTest(tornado.testing.AsyncHTTPTestCase):
                     {
                         "path": Path(__file__).parent,
                         "default_filename": "test_handlers.py",
+                        "allowed_origins": frozenset({"allowed.example"}),
                     },
                 ),
             ],
@@ -40,6 +41,18 @@ class StaticFileHandlerTest(tornado.testing.AsyncHTTPTestCase):
         assert response.code == 200
         assert response.headers["X-Mopidy-Version"] == mopidy.__version__
         assert response.headers["Cache-Control"] == "no-cache"
+    def test_static_handler_sets_cors_header_for_allowed_origin(self):
+        response = self.fetch(
+            "/test_handlers.py",
+            method="GET",
+            headers={
+                "Host": "localhost:8888",
+                "Origin": "http://allowed.example",
+            },
+        )
+
+        assert response.code == 200
+        assert response.headers["Access-Control-Allow-Origin"] == "http://allowed.example"
 
 
 class WebSocketHandlerTest(tornado.testing.AsyncHTTPTestCase):
