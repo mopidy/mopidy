@@ -662,6 +662,11 @@ class DownloadBufferingTest(unittest.TestCase):
     def setUp(self):
         self.audio = audio.GstAudio(config=None, mixer=None)
         self.audio._playbin = mock.Mock(spec=["set_property"])
+        # The URI is set through Gst.util_set_object_arg(), which needs a real
+        # GObject to work on.
+        patcher = mock.patch.object(Gst, "util_set_object_arg")
+        self.set_object_arg = patcher.start()
+        self.addCleanup(patcher.stop)
 
     def test_download_flag_is_passed_to_playbin_if_download_buffering_is_enabled(
         self,
