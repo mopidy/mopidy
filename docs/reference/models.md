@@ -59,7 +59,7 @@ the data from the model you call it on. Example:
 
 ```pycon hl_lines="8"
 >>> from mopidy.models import Track
->>> track1 = Track(uri='an-uri', name='Christmas Carol', length=171)
+>>> track1 = Track(uri="an-uri", name="Christmas Carol", length=171)
 >>> track1
 Track(uri='an-uri', name='Christmas Carol', artists=frozenset(), album=None,
 composers=frozenset(), performers=frozenset(), genre=None, track_no=None,
