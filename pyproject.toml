@@ -76,7 +76,7 @@ tests = [
 typing = [
     "pygobject-stubs >= 2.14.0, != 2.15.0",
     "pyright == 1.1.411",
-    "ty == 0.0.31",
+    "ty == 0.0.72",
 ]
 
 

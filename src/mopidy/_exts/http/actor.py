@@ -20,13 +20,13 @@ from mopidy import exceptions, zeroconf
 from mopidy.core import CoreEvent, CoreEventData, CoreListener
 
 from . import Extension, handlers, network
-from .types import HttpConfig
+from .types import HttpConfig, RequestRule
 
 if TYPE_CHECKING:
     from mopidy.config import Config
     from mopidy.core import CoreProxy
 
-    from .types import HttpApp, HttpStatic, RequestRule
+    from .types import HttpApp, HttpStatic
 
 
 logger = logging.getLogger(__name__)
@@ -182,7 +182,7 @@ class HttpServer(threading.Thread):
         return request_handlers
 
     def _get_app_request_handlers(self) -> list[RequestRule]:
-        result = []
+        result = list[RequestRule]()
         for app in self.apps:
             try:
                 request_handlers = app["factory"](self.config, self.core)
@@ -191,15 +191,14 @@ class HttpServer(threading.Thread):
                 continue
 
             result.append((f"/{app['name']}", handlers.AddSlashHandler))
-            for handler in request_handlers:
-                handler = list(handler)
-                handler[0] = f"/{app['name']}{handler[0]}"
-                result.append(tuple(handler))
+            for rule in request_handlers:
+                prefixed_rule = (f"/{app['name']}{rule[0]}", *rule[1:])
+                result.append(cast("RequestRule", prefixed_rule))
             logger.debug("Loaded HTTP extension: %s", app["name"])
         return result
 
     def _get_static_request_handlers(self) -> list[RequestRule]:
-        result = []
+        result = list[RequestRule]()
         for static in self.statics:
             result.append((f"/{static['name']}", handlers.AddSlashHandler))
             result.append(

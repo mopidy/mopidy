@@ -11,7 +11,10 @@ if TYPE_CHECKING:
     from mopidy.core import CoreProxy
 
 
-type RequestRule = tuple[str, type[tornado.web.RequestHandler], dict[str, Any]]
+type RequestRule = (
+    tuple[str, type[tornado.web.RequestHandler]]
+    | tuple[str, type[tornado.web.RequestHandler], dict[str, Any]]
+)
 
 
 class HttpConfig(TypedDict):

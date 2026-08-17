@@ -276,7 +276,7 @@ def _get_structure_name(struct: Gst.Structure) -> str:
     try:
         return struct.get_name()
     except AttributeError:
-        with struct as _struct:  # type: ignore[reportGeneralTypeIssues]  # ty:ignore[invalid-context-manager]
+        with struct as _struct:  # type: ignore[reportGeneralTypeIssues]
             return _struct.get_name()
 
 

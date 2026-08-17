@@ -394,10 +394,10 @@ class List[V: ConfigValue = String](ConfigValue[tuple[V, ...] | frozenset[V]]):
         # aren't calling their parent constructor.
         subtype = cast(V, getattr(self, "_subtype", String()))
 
-        serialized_values = []
+        serialized_values = list[str]()
         for item in value:
             serialized_value = subtype.serialize(item, display=display)
-            if serialized_value:
+            if isinstance(serialized_value, str) and serialized_value:
                 serialized_values.append(serialized_value)
 
         return "\n  " + "\n  ".join(serialized_values)

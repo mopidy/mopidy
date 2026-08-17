@@ -115,13 +115,14 @@ class LibraryController:
         return self._browse(uri)
 
     def _roots(self) -> list[Ref]:
-        directories = set()
+        directories = set[Ref]()
         backends = self.backends.with_library_browse.values()
         futures = {b: b.library.root_directory for b in backends}
         for backend, future in futures.items():
             with _backend_error_handling(backend):
                 root = future.get()
                 validation.check_instance(root, Ref)
+                assert root is not None
                 directories.add(root)
         return sorted(directories, key=operator.attrgetter("name"))
 

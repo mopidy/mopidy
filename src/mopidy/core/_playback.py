@@ -222,7 +222,7 @@ class PlaybackController:
             # handled.
             pass
 
-        pending = self.core.tracklist.eot_track(self._current_tl_track)
+        pending = self.core.tracklist.eot_track(self._current_tl_track)  # ty: ignore[deprecated]
         # avoid endless loop if 'repeat' is 'true' and no track is playable
         # * 2 -> second run to get all playable track in a shuffled playlist
         count = self.core.tracklist.get_length() * 2
@@ -241,7 +241,7 @@ class PlaybackController:
                     )
 
             self.core.tracklist._mark_unplayable(pending)
-            pending = self.core.tracklist.eot_track(pending)
+            pending = self.core.tracklist.eot_track(pending)  # ty: ignore[deprecated]
             count -= 1
             if not count:
                 logger.info("No playable track in the list.")
@@ -272,7 +272,7 @@ class PlaybackController:
         count = self.core.tracklist.get_length() * 2
 
         while current:
-            pending = self.core.tracklist.next_track(current)
+            pending = self.core.tracklist.next_track(current)  # ty: ignore[deprecated]
             if self._change(pending, state):
                 break
             self.core.tracklist._mark_unplayable(pending)
@@ -325,7 +325,7 @@ class PlaybackController:
                 )
 
         current = self._pending_tl_track or self._current_tl_track
-        pending = tl_track or current or self.core.tracklist.next_track(None)
+        pending = tl_track or current or self.core.tracklist.next_track(None)  # ty: ignore[deprecated]
         # avoid endless loop if 'repeat' is 'true' and no track is playable
         # * 2 -> second run to get all playable track in a shuffled playlist
         count = self.core.tracklist.get_length() * 2
@@ -335,7 +335,7 @@ class PlaybackController:
                 break
             self.core.tracklist._mark_unplayable(pending)
             current = pending
-            pending = self.core.tracklist.next_track(current)
+            pending = self.core.tracklist.next_track(current)  # ty: ignore[deprecated]
             count -= 1
             if not count:
                 logger.info("No playable track in the list.")
@@ -411,7 +411,7 @@ class PlaybackController:
         count = self.core.tracklist.get_length() * 2
 
         while current:
-            pending = self.core.tracklist.previous_track(current)
+            pending = self.core.tracklist.previous_track(current)  # ty: ignore[deprecated]
             if self._change(pending, state):
                 break
             self.core.tracklist._mark_unplayable(pending)
