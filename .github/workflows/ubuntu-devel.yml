@@ -6,13 +6,19 @@ on:
     - cron: "20 18 * * 5"
   workflow_dispatch:
 
+# No permissions by default; each job requests what it needs.
+permissions: {}
+
 jobs:
   main:
     name: "Test: Python 3.14"
     runs-on: ubuntu-24.04
 
-    # The container should be automatically updated from time to time.
-    container: ubuntu:devel
+    # Deliberately unpinned: the container should be automatically updated
+    # from time to time.
+    container: ubuntu:devel # zizmor: ignore[unpinned-images]
+    permissions:
+      contents: read # Check out the repository.
 
     steps:
       - name: Install dependencies
@@ -28,7 +34,9 @@ jobs:
             python3 \
             python3-gst-1.0 \
             tox
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Configure git safe directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - run: tox -e py314
