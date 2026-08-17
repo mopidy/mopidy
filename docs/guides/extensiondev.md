@@ -129,6 +129,8 @@ import logging
 import pathlib
 from importlib.metadata import version
 
+import cyclopts
+
 from mopidy import config, exceptions, ext
 
 __version__ = version('mopidy-soundspot')
@@ -142,37 +144,40 @@ class Extension(ext.Extension):
     ext_name = "soundspot"
     version = __version__
 
-    def get_default_config(self):
+    def get_default_config(self) -> str:
         return config.read(pathlib.Path(__file__).parent / "ext.conf")
 
-    def get_config_schema(self):
+    def get_config_schema(self) -> config.ConfigSchema:
         schema = super().get_config_schema()
         schema["username"] = config.String()
         schema["password"] = config.Secret()
         return schema
 
-    def get_command(self):
+    def get_command(self) -> cyclopts.App:
         # To extend the `mopidy` command line interface:
-        from .commands import app
+        from .commands import app  # noqa: PLC0415
+
         return app
 
-    def validate_environment(self):
+    def validate_environment(self) -> None:
         # Any manual checks of the environment to fail early.
         # Dependencies described by pyproject.toml are checked by Mopidy, so
         # you should not check their presence here.
         pass
 
-    def setup(self, registry):
+    def setup(self, registry: ext.Registry) -> None:
         # You will typically only do one of the following things in a
         # single extension.
 
         # Register a frontend
-        from .frontend import SoundspotFrontend
-        registry.add('frontend', SoundspotFrontend)
+        from .frontend import SoundspotFrontend  # noqa: PLC0415
+
+        registry.add("frontend", SoundspotFrontend)
 
         # Register a backend
-        from .backend import SoundspotBackend
-        registry.add('backend', SoundspotBackend)
+        from .backend import SoundspotBackend  # noqa: PLC0415
+
+        registry.add("backend", SoundspotBackend)
 
         # Or nothing to register e.g. command extension
         pass

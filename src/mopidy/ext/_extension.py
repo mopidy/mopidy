@@ -110,9 +110,10 @@ class Extension:
         For example, to register a backend:
 
         ```python
-        def setup(self, registry):
+        def setup(self, registry: ext.Registry) -> None:
             from .backend import SoundspotBackend
-            registry.add('backend', SoundspotBackend)
+
+            registry.add("backend", SoundspotBackend)
         ```
 
         See [Registry][] for a list of registry keys with a special meaning.

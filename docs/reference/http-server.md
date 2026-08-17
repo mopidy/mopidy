@@ -43,7 +43,7 @@ from mopidy import ext
 class MyWebClientExtension(ext.Extension):
     ext_name = 'mywebclient'
 
-    def setup(self, registry):
+    def setup(self, registry: ext.Registry) -> None:
         registry.add('http:static', {
             'name': self.ext_name,
             'path': os.path.join(os.path.dirname(__file__), 'static'),
@@ -109,7 +109,7 @@ def my_app_factory(config, core):
 class MyWebClientExtension(ext.Extension):
     ext_name = 'mywebclient'
 
-    def setup(self, registry):
+    def setup(self, registry: ext.Registry) -> None:
         registry.add('http:app', {
             'name': self.ext_name,
             'factory': my_app_factory,
@@ -161,7 +161,7 @@ def my_app_factory(config, core):
 class MyWebClientExtension(ext.Extension):
     ext_name = 'mywebclient'
 
-    def setup(self, registry):
+    def setup(self, registry: ext.Registry) -> None:
         registry.add('http:app', {
             'name': self.ext_name,
             'factory': my_app_factory,
