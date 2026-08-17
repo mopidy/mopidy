@@ -121,6 +121,7 @@ ignore = [
     "A003",    # builtin-attribute-shadowing
     "A005",    # stdlib-module-shadowing
     "ANN401",  # any-type
+    "CPY",     # flake8-copyright
     "D100",    # undocumented-public-module  # TODO
     "D101",    # undocumented-public-class  # TODO
     "D102",    # undocumented-public-method  # TODO
