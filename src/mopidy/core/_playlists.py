@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 @contextlib.contextmanager
 def _backend_error_handling(
     backend: BackendProxy,
-    reraise: None | (type[Exception] | tuple[type[Exception], ...]) = None,
+    reraise: type[Exception] | tuple[type[Exception], ...] | None = None,
 ) -> Generator[None]:
     try:
         yield
