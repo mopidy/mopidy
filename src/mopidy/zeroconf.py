@@ -45,7 +45,7 @@ class Zeroconf:
         text: Extra information depending on `stype`, defaults to empty list.
     """
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913, PLR0917
         self,
         name: str,
         stype: str,

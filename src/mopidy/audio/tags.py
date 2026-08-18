@@ -140,8 +140,8 @@ def convert_tags_to_track(
             so that a single file with broken tags doesn't fail the entire scan
             or lookup.
     """
-    album_kwargs = {}
-    track_kwargs = {}
+    album_kwargs = dict[str, Any]()
+    track_kwargs = dict[str, Any]()
 
     track_kwargs["composers"] = _artists(tags, Gst.TAG_COMPOSER)
     track_kwargs["performers"] = _artists(tags, Gst.TAG_PERFORMER)

@@ -41,13 +41,16 @@ from mopidy import ext
 
 
 class MyWebClientExtension(ext.Extension):
-    ext_name = 'mywebclient'
+    ext_name = "mywebclient"
 
-    def setup(self, registry):
-        registry.add('http:static', {
-            'name': self.ext_name,
-            'path': os.path.join(os.path.dirname(__file__), 'static'),
-        })
+    def setup(self, registry: ext.Registry) -> None:
+        registry.add(
+            "http:static",
+            {
+                "name": self.ext_name,
+                "path": os.path.join(os.path.dirname(__file__), "static"),
+            },
+        )
 
     # See the Extension API for the full details on this class
 ```
@@ -95,25 +98,24 @@ class MyRequestHandler(tornado.web.RequestHandler):
         self.core = core
 
     def get(self):
-        self.write(
-            'Hello, world! This is Mopidy %s' %
-            self.core.get_version().get())
+        self.write("Hello, world! This is Mopidy %s" % self.core.get_version().get())
 
 
 def my_app_factory(config, core):
-    return [
-        ('/', MyRequestHandler, {'core': core})
-    ]
+    return [("/", MyRequestHandler, {"core": core})]
 
 
 class MyWebClientExtension(ext.Extension):
-    ext_name = 'mywebclient'
+    ext_name = "mywebclient"
 
-    def setup(self, registry):
-        registry.add('http:app', {
-            'name': self.ext_name,
-            'factory': my_app_factory,
-        })
+    def setup(self, registry: ext.Registry) -> None:
+        registry.add(
+            "http:app",
+            {
+                "name": self.ext_name,
+                "factory": my_app_factory,
+            },
+        )
 
     # See the Extension API for the full details on this class
 ```
@@ -143,29 +145,33 @@ from mopidy import ext
 def my_app_factory(config, core):
 
     def wsgi_app(environ, start_response):
-        status = '200 OK'
-        response_headers = [('Content-type', 'text/plain')]
+        status = "200 OK"
+        response_headers = [("Content-type", "text/plain")]
         start_response(status, response_headers)
-        return [
-            'Hello, world! This is Mopidy %s\n' %
-            self.core.get_version().get()
-        ]
+        return ["Hello, world! This is Mopidy %s\n" % self.core.get_version().get()]
 
     return [
-        ('(.*)', tornado.web.FallbackHandler, {
-            'fallback': tornado.wsgi.WSGIContainer(wsgi_app),
-        }),
+        (
+            "(.*)",
+            tornado.web.FallbackHandler,
+            {
+                "fallback": tornado.wsgi.WSGIContainer(wsgi_app),
+            },
+        ),
     ]
 
 
 class MyWebClientExtension(ext.Extension):
-    ext_name = 'mywebclient'
+    ext_name = "mywebclient"
 
-    def setup(self, registry):
-        registry.add('http:app', {
-            'name': self.ext_name,
-            'factory': my_app_factory,
-        })
+    def setup(self, registry: ext.Registry) -> None:
+        registry.add(
+            "http:app",
+            {
+                "name": self.ext_name,
+                "factory": my_app_factory,
+            },
+        )
 
     # See the Extension API for the full details on this class
 ```

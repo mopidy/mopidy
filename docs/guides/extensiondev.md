@@ -129,9 +129,11 @@ import logging
 import pathlib
 from importlib.metadata import version
 
+import cyclopts
+
 from mopidy import config, exceptions, ext
 
-__version__ = version('mopidy-soundspot')
+__version__ = version("mopidy-soundspot")
 
 # If you need to log, use loggers named after the current Python module
 logger = logging.getLogger(__name__)
@@ -142,37 +144,40 @@ class Extension(ext.Extension):
     ext_name = "soundspot"
     version = __version__
 
-    def get_default_config(self):
+    def get_default_config(self) -> str:
         return config.read(pathlib.Path(__file__).parent / "ext.conf")
 
-    def get_config_schema(self):
+    def get_config_schema(self) -> config.ConfigSchema:
         schema = super().get_config_schema()
         schema["username"] = config.String()
         schema["password"] = config.Secret()
         return schema
 
-    def get_command(self):
+    def get_command(self) -> cyclopts.App:
         # To extend the `mopidy` command line interface:
-        from .commands import app
+        from .commands import app  # noqa: PLC0415
+
         return app
 
-    def validate_environment(self):
+    def validate_environment(self) -> None:
         # Any manual checks of the environment to fail early.
         # Dependencies described by pyproject.toml are checked by Mopidy, so
         # you should not check their presence here.
         pass
 
-    def setup(self, registry):
+    def setup(self, registry: ext.Registry) -> None:
         # You will typically only do one of the following things in a
         # single extension.
 
         # Register a frontend
-        from .frontend import SoundspotFrontend
-        registry.add('frontend', SoundspotFrontend)
+        from .frontend import SoundspotFrontend  # noqa: PLC0415
+
+        registry.add("frontend", SoundspotFrontend)
 
         # Register a backend
-        from .backend import SoundspotBackend
-        registry.add('backend', SoundspotBackend)
+        from .backend import SoundspotBackend  # noqa: PLC0415
+
+        registry.add("backend", SoundspotBackend)
 
         # Or nothing to register e.g. command extension
         pass
@@ -253,6 +258,7 @@ details.
 import cyclopts
 
 app = cyclopts.App(help="Some text that will show up in --help")
+
 
 @app.command(help="Reticulate the Soundspot library.")
 def reticulate(*, degrees: int) -> None:
@@ -373,7 +379,7 @@ client = httpx.Client(
         "user-agent": httpclient.format_user_agent(
             f"{mopidy_soundspot.Extension.dist_name}/{mopidy_soundspot.__version__}"
         ),
-    }
+    },
 )
 response = client.get("https://example.com")
 ```
@@ -410,7 +416,7 @@ session = get_requests_session(
     proxy_config=mopidy_config["proxy"],
     user_agent=(
         f"{mopidy_soundspot.Extension.dist_name}/{mopidy_soundspot.__version__}"
-    )
+    ),
 )
 response = session.get("https://example.com")
 ```
@@ -463,28 +469,32 @@ def test_get_default_config():
     ext = Extension()
     config = ext.get_default_config()
 
-    assert '[my_extension]' in config
-    assert 'enabled = true' in config
-    assert 'param_1 = value_1' in config
-    assert 'param_2 = value_2' in config
-    assert 'param_n = value_n' in config
+    assert "[my_extension]" in config
+    assert "enabled = true" in config
+    assert "param_1 = value_1" in config
+    assert "param_2 = value_2" in config
+    assert "param_n = value_n" in config
+
 
 def test_get_config_schema():
     ext = Extension()
     schema = ext.get_config_schema()
 
-    assert 'enabled' in schema
-    assert 'param_1' in schema
-    assert 'param_2' in schema
-    assert 'param_n' in schema
+    assert "enabled" in schema
+    assert "param_1" in schema
+    assert "param_2" in schema
+    assert "param_n" in schema
+
 
 def test_setup():
     registry = mock.Mock()
 
     ext = Extension()
     ext.setup(registry)
-    calls = [mock.call('frontend', frontend_lib.MyFrontend),
-             mock.call('backend',  backend_lib.MyBackend)]
+    calls = [
+        mock.call("frontend", frontend_lib.MyFrontend),
+        mock.call("backend", backend_lib.MyBackend),
+    ]
     registry.add.assert_has_calls(calls, any_order=True)
 ```
 
@@ -497,21 +507,16 @@ file, and mocking the audio actor:
 @pytest.fixture
 def config():
     return {
-        'http': {
-            'hostname': '127.0.0.1',
-            'port': '6680'
+        "http": {"hostname": "127.0.0.1", "port": "6680"},
+        "proxy": {"hostname": "host_mock", "port": "port_mock"},
+        "my_extension": {
+            "enabled": True,
+            "param_1": "value_1",
+            "param_2": "value_2",
+            "param_n": "value_n",
         },
-        'proxy': {
-            'hostname': 'host_mock',
-            'port': 'port_mock'
-        },
-        'my_extension': {
-            'enabled': True,
-            'param_1': 'value_1',
-            'param_2': 'value_2',
-            'param_n': 'value_n',
-        }
     }
+
 
 def get_backend(config):
     return backend.MyBackend(config=config, audio=mock.Mock())
@@ -540,7 +545,7 @@ Backend tests should also ensure that:
 def test_uri_schemes(config):
     backend = get_backend(config)
 
-    assert 'my_scheme' in backend.uri_schemes
+    assert "my_scheme" in backend.uri_schemes
 
 
 def test_init_sets_up_the_providers(config):
@@ -590,10 +595,10 @@ testing:
 
 ```python
 tracks = [
-    models.Track(uri='my_scheme:track:id1', length=40000),  # Regular track
-    models.Track(uri='my_scheme:track:id2', length=None),   # No duration
+    models.Track(uri="my_scheme:track:id1", length=40000),  # Regular track
+    models.Track(uri="my_scheme:track:id2", length=None),  # No duration
 ]
-uris = [ 'my_scheme:track:id1', 'my_scheme:track:id2']
+uris = ["my_scheme:track:id1", "my_scheme:track:id2"]
 ```
 
 In the `setup()` method of your test class, you will then probably need to
@@ -607,6 +612,7 @@ def lookup(uris):
         if track.uri in result:
             result[track.uri].append(track)
     return result
+
 
 self.core.library.lookup = lookup
 self.tl_tracks = self.core.tracklist.add(uris=self.uris).get()
@@ -631,11 +637,13 @@ actor, may look something like this:
 
 ```python
 self.events = []
-self.patcher = mock.patch('mopidy.listener.send')
+self.patcher = mock.patch("mopidy.listener.send")
 self.send_mock = self.patcher.start()
+
 
 def send(cls, event, **kwargs):
     self.events.append((event, kwargs))
+
 
 self.send_mock.side_effect = send
 ```

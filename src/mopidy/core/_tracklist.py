@@ -204,7 +204,7 @@ class TracklistController:
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=DeprecationWarning)
-            eot_tl_track = self.eot_track(current_tl_track)
+            eot_tl_track = self.eot_track(current_tl_track)  # ty: ignore[deprecated]
 
         return getattr(eot_tl_track, "tlid", None)
 
@@ -229,7 +229,7 @@ class TracklistController:
         # Current difference between next and EOT handling is that EOT needs to
         # handle "single", with that out of the way the rest of the logic is
         # shared.
-        return self.next_track(tl_track)
+        return self.next_track(tl_track)  # ty: ignore[deprecated]
 
     def get_next_tlid(self) -> TracklistId | None:
         """The TLID of the next track.
@@ -246,7 +246,7 @@ class TracklistController:
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=DeprecationWarning)
-            next_tl_track = self.next_track(current_tl_track)
+            next_tl_track = self.next_track(current_tl_track)  # ty: ignore[deprecated]
 
         return getattr(next_tl_track, "tlid", None)
 
@@ -315,7 +315,7 @@ class TracklistController:
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=DeprecationWarning)
-            previous_tl_track = self.previous_track(current_tl_track)
+            previous_tl_track = self.previous_track(current_tl_track)  # ty: ignore[deprecated]
 
         return getattr(previous_tl_track, "tlid", None)
 
@@ -650,11 +650,11 @@ class TracklistControllerProxy:
     set_single = proxy_method(TracklistController.set_single)
     index = proxy_method(TracklistController.index)
     get_eot_tlid = proxy_method(TracklistController.get_eot_tlid)
-    eot_track = proxy_method(TracklistController.eot_track)
+    eot_track = proxy_method(TracklistController.eot_track)  # ty: ignore[deprecated]
     get_next_tlid = proxy_method(TracklistController.get_next_tlid)
-    next_track = proxy_method(TracklistController.next_track)
+    next_track = proxy_method(TracklistController.next_track)  # ty: ignore[deprecated]
     get_previous_tlid = proxy_method(TracklistController.get_previous_tlid)
-    previous_track = proxy_method(TracklistController.previous_track)
+    previous_track = proxy_method(TracklistController.previous_track)  # ty: ignore[deprecated]
     add = proxy_method(TracklistController.add)
     clear = proxy_method(TracklistController.clear)
     filter = proxy_method(TracklistController.filter)

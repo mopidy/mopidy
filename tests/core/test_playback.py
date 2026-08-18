@@ -210,7 +210,7 @@ class TestNextHandling(BaseTest):
             (True, False, False, False, 2, 0),
         ],
     )
-    def test_next_all_modes(self, repeat, random, single, consume, index, result):
+    def test_next_all_modes(self, *, repeat, random, single, consume, index, result):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
         self.core.playback.play(tl_tracks[index].tlid)
@@ -311,7 +311,9 @@ class TestPreviousHandling(BaseTest):
             (True, False, False, False, 1, 1),  # TODO: #1694
         ],
     )
-    def test_previous_all_modes(self, repeat, random, single, consume, index, result):
+    def test_previous_all_modes(
+        self, *, repeat, random, single, consume, index, result
+    ):
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
         self.core.playback.play(tl_tracks[index].tlid)

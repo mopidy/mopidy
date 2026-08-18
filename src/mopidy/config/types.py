@@ -1,5 +1,3 @@
-# ruff: noqa: ARG002
-
 from __future__ import annotations
 
 import logging
@@ -7,7 +5,7 @@ import re
 import socket
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable
-from typing import Any, AnyStr, ClassVar, Literal, Self, cast
+from typing import Any, AnyStr, ClassVar, Literal, Self, cast, override
 
 from mopidy._lib import logs, paths
 from mopidy.config import validators
@@ -72,7 +70,11 @@ class ConfigValue[T](ABC):
         """Cast raw string to appropriate type."""
         raise NotImplementedError
 
-    def serialize(self, value: T, display: bool = False) -> str | DeprecatedValue:
+    def serialize(
+        self,
+        value: T,
+        display: bool = False,  # noqa: ARG002
+    ) -> str | DeprecatedValue:
         """Convert value back to string for saving."""
         if value is None:
             return ""
@@ -86,9 +88,11 @@ class Deprecated(ConfigValue[Any]):
     not cause the config parser to crash.
     """
 
+    @override
     def deserialize(self, value: AnyStr) -> DeprecatedValue:
         return DeprecatedValue()
 
+    @override
     def serialize(self, value: Any, display: bool = False) -> DeprecatedValue:
         return DeprecatedValue()
 
@@ -111,6 +115,7 @@ class String(ConfigValue[str]):
         self._choices = choices
         self._transformer = transformer
 
+    @override
     def deserialize(self, value: AnyStr) -> str | None:
         result = decode(value).strip()
         validators.validate_required(result, self._required)
@@ -127,6 +132,7 @@ class String(ConfigValue[str]):
         validators.validate_choice(str(result), self._choices)
         return result
 
+    @override
     def serialize(self, value: str, display: bool = False) -> str:
         if value is None:
             return ""
@@ -147,7 +153,7 @@ class Secret(String):
     def __init__(
         self,
         optional: bool = False,
-        choices: None = None,
+        choices: None = None,  # noqa: ARG002
         transformer: Callable[[str], str] | None = None,
     ) -> None:
         super().__init__(
@@ -156,6 +162,7 @@ class Secret(String):
             transformer=transformer,
         )
 
+    @override
     def serialize(self, value: str, display: bool = False) -> str:
         if value is not None and display:
             return "********"
@@ -177,6 +184,7 @@ class Integer(ConfigValue[int]):
         self._maximum = maximum
         self._choices = choices
 
+    @override
     def deserialize(self, value: AnyStr) -> int | None:
         result = decode(value)
         validators.validate_required(result, self._required)
@@ -202,6 +210,7 @@ class Float(ConfigValue[float]):
         self._minimum = minimum
         self._maximum = maximum
 
+    @override
     def deserialize(self, value: AnyStr) -> float | None:
         result = decode(value)
         validators.validate_required(result, self._required)
@@ -227,6 +236,7 @@ class Boolean(ConfigValue[bool]):
     def __init__(self, optional: bool = False) -> None:
         self._required = not optional
 
+    @override
     def deserialize(self, value: AnyStr) -> bool | None:
         result = decode(value)
         validators.validate_required(result, self._required)
@@ -239,6 +249,7 @@ class Boolean(ConfigValue[bool]):
         msg = f"invalid value for boolean: {result!r}"
         raise ValueError(msg)
 
+    @override
     def serialize(
         self,
         value: bool,
@@ -277,6 +288,7 @@ class Pair[
         self._separator = separator
         self._subtypes = subtypes
 
+    @override
     def deserialize(self, value: AnyStr) -> tuple[K, V] | None:
         raw_value = decode(value).strip()
         validators.validate_required(raw_value, self._required)
@@ -301,6 +313,7 @@ class Pair[
             ),
         )
 
+    @override
     def serialize(
         self,
         value: tuple[K, V],
@@ -348,6 +361,7 @@ class List[V: ConfigValue = String](ConfigValue[tuple[V, ...] | frozenset[V]]):
         self._unique = unique
         self._subtype = subtype
 
+    @override
     def deserialize(self, value: AnyStr) -> tuple[V, ...] | frozenset[V]:
         raw_value = decode(value)
 
@@ -367,6 +381,7 @@ class List[V: ConfigValue = String](ConfigValue[tuple[V, ...] | frozenset[V]]):
         validators.validate_required(values, self._required)
         return cast(tuple[V, ...] | frozenset[V], values)
 
+    @override
     def serialize(
         self,
         value: tuple[V, ...] | frozenset[V],
@@ -379,10 +394,10 @@ class List[V: ConfigValue = String](ConfigValue[tuple[V, ...] | frozenset[V]]):
         # aren't calling their parent constructor.
         subtype = cast(V, getattr(self, "_subtype", String()))
 
-        serialized_values = []
+        serialized_values = list[str]()
         for item in value:
             serialized_value = subtype.serialize(item, display=display)
-            if serialized_value:
+            if isinstance(serialized_value, str) and serialized_value:
                 serialized_values.append(serialized_value)
 
         return "\n  " + "\n  ".join(serialized_values)
@@ -405,12 +420,14 @@ class LogLevel(ConfigValue[int]):
         "all": logging.NOTSET,
     }
 
+    @override
     def deserialize(self, value: AnyStr) -> int | None:
         raw_value = decode(value).lower()
         validators.validate_choice(raw_value, self.levels.keys())
         raw_value = cast(LogLevelName, raw_value)
         return self.levels.get(raw_value)
 
+    @override
     def serialize(self, value: int, display: bool = False) -> str:
         lookup = {v: k for k, v in self.levels.items()}
         return encode(lookup.get(value, ""))
@@ -422,6 +439,7 @@ class Hostname(ConfigValue[str]):
     def __init__(self, optional: bool = False) -> None:
         self._required = not optional
 
+    @override
     def deserialize(self, value: AnyStr, display: bool = False) -> str | None:
         raw_value = decode(value).strip()
         validators.validate_required(raw_value, self._required)
@@ -482,6 +500,7 @@ class Path(ConfigValue[_ExpandedPath]):
     def __init__(self, optional: bool = False) -> None:
         self._required = not optional
 
+    @override
     def deserialize(self, value: AnyStr) -> _ExpandedPath | None:
         raw_value = decode(value).strip()
         expanded = paths.expand_path(raw_value)
@@ -491,9 +510,10 @@ class Path(ConfigValue[_ExpandedPath]):
             return None
         return _ExpandedPath(raw_value, str(expanded))
 
+    @override
     def serialize(
         self,
-        value: None | (_ExpandedPath | bytes),
+        value: _ExpandedPath | bytes | None,
         display: bool = False,
     ) -> str:
         if value is None:
