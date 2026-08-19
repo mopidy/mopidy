@@ -8,7 +8,7 @@ For older releases, see:
 [Changelog 1.x](1.x.md) ·
 [Changelog 0.x](0.x.md)
 
-## Unreleased
+## v4.0.2 (2026-08-19)
 
 - Models: The `musicbrainz_id` fields on [`Album`][mopidy.models.Album],
   [`Artist`][mopidy.models.Artist], and [`Track`][mopidy.models.Track] are again
