@@ -118,15 +118,12 @@ so pay attention to the USE flags, e.g. `alsa`, `mp3`, etc.
 ///
 
 /// tab | macOS
+Homebrew bundles all GStreamer plugin sets and the Python bindings in the
+single `gstreamer` formula. The `cairo` and `gobject-introspection` formulas
+are needed to build PyGObject and pycairo from source:
 
 ```console
-$ brew install \
-    cairo \
-    gobject-introspection \
-    gst-python \
-    gst-plugins-base \
-    gst-plugins-good \
-    gst-plugins-ugly
+$ brew install gstreamer cairo gobject-introspection
 ```
 
 ///

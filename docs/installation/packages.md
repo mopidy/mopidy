@@ -203,13 +203,15 @@ and non-Python. To list available extensions:
 $ brew search mopidy
 ```
 
-If the extension you want is not in Homebrew, install it from PyPI using
-`pip`:
+If the extension you want is not in Homebrew, install it from PyPI into the
+`mopidy` formula's virtualenv:
 
 ```console
-$ python3 -m pip install ...
+$ $(brew --prefix mopidy)/libexec/bin/python -m pip install ...
 ```
 
+Note that extensions installed this way are not managed by Homebrew, and may
+need to be reinstalled after an upgrade of the `mopidy` formula.
 ///
 
 For a comprehensive index of available extensions, see the
