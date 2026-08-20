@@ -110,10 +110,10 @@ follow the instructions in the "Caveats" section:
 $ brew info mopidy
 ...
 ==> Caveats
-To have launchd start mopidy/mopidy/mopidy now and restart at login:
-    brew services start mopidy/mopidy/mopidy
-Or, if you don't want/need a background service, you can just run:
-    mopidy
+To start mopidy/mopidy/mopidy now and restart at login:
+  brew services start mopidy/mopidy/mopidy
+Or, if you don't want/need a background service you can just run:
+  /opt/homebrew/opt/mopidy/bin/mopidy
 ```
 
 See `brew services --help` for how to start/restart/stop the service.
