@@ -186,7 +186,7 @@ disable = [
 
 [tool.setuptools.package-data]
 "*" = ["*.conf"]
-"mopidy.http.data" = ["*"]
+"mopidy._exts.http.data" = ["*"]
 
 
 [tool.setuptools_scm]
