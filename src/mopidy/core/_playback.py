@@ -25,6 +25,10 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# Max consecutive stream_error recovery attempts for the same track before
+# giving up. Resets to zero as soon as a track starts playing successfully.
+MAX_STREAM_ERROR_RETRIES = 3
+
 
 class PlaybackController:
     """Manages playback state and the currently playing track."""
@@ -52,6 +56,8 @@ class PlaybackController:
 
         self._start_at_position: DurationMs | None = None
         self._start_paused: bool = False
+
+        self._stream_error_count = 0
 
         if self._audio:
             self._audio.set_about_to_finish_callback(self._on_about_to_finish_callback)
@@ -189,6 +195,44 @@ class PlaybackController:
             if self._start_paused:
                 self._start_paused = False
                 self.pause()
+
+    def _on_stream_error(self, error: str) -> None:
+        """Handle a GStreamer stream error by retrying the current track.
+
+        Addresses https://github.com/mopidy/mopidy/issues/1542: previously
+        a stream error (e.g. the audio sink's connection dying) just stopped
+        playback silently, with no attempt to recover and no way for core to
+        even distinguish this from a normal stop. This retries the current
+        track, which causes the backend to rebuild its output pipeline (and
+        thus e.g. re-establish a dropped TCP connection), bounded by
+        MAX_STREAM_ERROR_RETRIES to avoid retrying forever against a
+        persistently broken track or backend.
+        """
+        tl_track = self.get_current_tl_track()
+        if tl_track is None:
+            logger.error("Stream error with no current track, giving up: %s", error)
+            return
+
+        self._stream_error_count += 1
+        if self._stream_error_count > MAX_STREAM_ERROR_RETRIES:
+            logger.error(
+                "Stream error, giving up after %d attempts for %s: %s",
+                self._stream_error_count - 1,
+                tl_track.track.uri,
+                error,
+            )
+            self._stream_error_count = 0
+            self.stop()
+            return
+
+        logger.warning(
+            "Stream error, retrying (%d/%d) for %s: %s",
+            self._stream_error_count,
+            MAX_STREAM_ERROR_RETRIES,
+            tl_track.track.uri,
+            error,
+        )
+        self.play(tlid=tl_track.tlid)
 
     def _on_about_to_finish_callback(self) -> None:
         """Callback that performs a blocking actor call to the real callback.
@@ -518,6 +562,8 @@ class PlaybackController:
     def _trigger_track_playback_started(self) -> None:
         if self.get_current_tl_track() is None:
             return
+
+        self._stream_error_count = 0
 
         logger.debug("Triggering track playback started event")
         tl_track = self.get_current_tl_track()
