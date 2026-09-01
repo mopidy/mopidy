@@ -8,6 +8,18 @@ For older releases, see:
 [Changelog 1.x](1.x.md) ·
 [Changelog 0.x](0.x.md)
 
+## v4.0.3 (UNRELEASED)
+
+- Audio: Fix scanning of valid audio files. `Gst.Structure` has a `__len__()`
+  method, so an empty structure is falsy. The truthiness checks in the scanner
+  were replaced by explicit `is not None` tests. (#2278, !2280)
+
+- HTTP extension: Fix missing web client files in the wheel builds. The
+  `package-data` config was not updated when the bundled extensions moved to
+  `mopidy._exts`. (#2292, !2293)
+
+- Docs: Update the macOS install instructions for current Homebrew. (!2291)
+
 ## v4.0.2 (2026-08-19)
 
 - Models: The `musicbrainz_id` fields on [`Album`][mopidy.models.Album],
