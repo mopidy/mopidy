@@ -160,3 +160,24 @@ def test_parse_any_format_from_valid_data(data):
 
 def test_parse_from_invalid_data():
     assert parsers.parse_playlist(BAD) == []
+
+
+PLS_TOO_MANY_ENTRIES = b"""[Playlist]
+NumberOfEntries=3
+File1=file:///tmp/foo
+"""
+
+PLS_MISSING_NUMBER_OF_ENTRIES = b"""[Playlist]
+File1=file:///tmp/foo
+"""
+
+
+def test_parse_pls_with_more_entries_than_declared():
+    # A PLS declaring more entries than it contains (common with malformed
+    # playlists from internet radio stations) must not crash the parser.
+    assert list(parsers.parse_pls(PLS_TOO_MANY_ENTRIES)) == ["file:///tmp/foo"]
+
+
+def test_parse_pls_without_number_of_entries():
+    # A PLS section missing NumberOfEntries must not crash the parser.
+    assert list(parsers.parse_pls(PLS_MISSING_NUMBER_OF_ENTRIES)) == []
