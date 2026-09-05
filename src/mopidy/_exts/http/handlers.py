@@ -277,7 +277,6 @@ class JsonRpcHandler(tornado.web.RequestHandler):
     def set_cors_headers(self, origin: str) -> None:
         self.set_header("Access-Control-Allow-Origin", f"{origin}")
         self.set_header("Access-Control-Allow-Headers", "Content-Type")
-        self.set_header("Access-Control-Max-Age", "86400")
 
     def options(self) -> Awaitable[None] | None:  # ty:ignore[invalid-method-override]
         if self.csrf_protection:
@@ -288,6 +287,10 @@ class JsonRpcHandler(tornado.web.RequestHandler):
 
             assert origin
             self.set_cors_headers(origin)
+
+            # Let browsers cache this preflight response to avoid a preflight
+            # request before every request.
+            self.set_header("Access-Control-Max-Age", "7200")
 
         self.set_status(204)
         self.finish()
