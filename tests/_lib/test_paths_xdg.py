@@ -54,7 +54,7 @@ def test_user_dirs(environ, tmpdir):
     result = paths.get_xdg_dirs()
 
     assert result["XDG_MUSIC_DIR"] == Path("~/Music2").expanduser()
-    assert "XDG_DOWNLOAD_DIR" not in result
+    assert result["XDG_DOWNLOAD_DIR"] == Path("~/Downloads").expanduser()
 
 
 def test_user_dirs_when_no_dirs_file(environ, tmpdir):
@@ -62,5 +62,5 @@ def test_user_dirs_when_no_dirs_file(environ, tmpdir):
 
     result = paths.get_xdg_dirs()
 
-    assert "XDG_MUSIC_DIR" not in result
-    assert "XDG_DOWNLOAD_DIR" not in result
+    assert result["XDG_MUSIC_DIR"] == Path("~/Music").expanduser()
+    assert result["XDG_DOWNLOAD_DIR"] == Path("~/Downloads").expanduser()

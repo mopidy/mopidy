@@ -1,11 +1,11 @@
-import configparser
 import logging
-import os
 import pathlib
 import re
 import urllib.parse
 from os import PathLike
 from typing import Literal
+
+from platformdirs import PlatformDirs
 
 from mopidy.types import Uri
 
@@ -15,63 +15,24 @@ logger = logging.getLogger(__name__)
 def get_xdg_dirs() -> dict[str, pathlib.Path]:
     """Returns a dict of all the known XDG Base Directories for the current user.
 
-    The keys `XDG_CACHE_DIR`, `XDG_CONFIG_DIR`, and `XDG_DATA_DIR` is
-    always available.
-
-    Additional keys, like `XDG_MUSIC_DIR`, may be available if the
-    `$XDG_CONFIG_DIR/user-dirs.dirs` file exists and is parseable.
+    The base and user directories are always available. On Unix, user directory
+    overrides are read from `$XDG_CONFIG_HOME/user-dirs.dirs`.
 
     See https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
     for the XDG Base Directory specification.
     """
-    dirs = {
-        "XDG_CACHE_DIR": pathlib.Path(
-            os.getenv("XDG_CACHE_HOME", "~/.cache"),
-        ).expanduser(),
-        "XDG_CONFIG_DIR": pathlib.Path(
-            os.getenv("XDG_CONFIG_HOME", "~/.config"),
-        ).expanduser(),
-        "XDG_DATA_DIR": pathlib.Path(
-            os.getenv("XDG_DATA_HOME", "~/.local/share"),
-        ).expanduser(),
+    dirs = PlatformDirs()
+    return {
+        "XDG_CACHE_DIR": dirs.user_cache_path,
+        "XDG_CONFIG_DIR": dirs.user_config_path,
+        "XDG_DATA_DIR": dirs.user_data_path,
+        "XDG_DESKTOP_DIR": dirs.user_desktop_path,
+        "XDG_DOWNLOAD_DIR": dirs.user_downloads_path,
+        "XDG_DOCUMENTS_DIR": dirs.user_documents_path,
+        "XDG_MUSIC_DIR": dirs.user_music_path,
+        "XDG_PICTURES_DIR": dirs.user_pictures_path,
+        "XDG_VIDEOS_DIR": dirs.user_videos_path,
     }
-
-    dirs.update(_get_xdg_user_dirs(dirs["XDG_CONFIG_DIR"]))
-
-    return dirs
-
-
-def _get_xdg_user_dirs(xdg_config_dir: pathlib.Path) -> dict[str, pathlib.Path]:
-    """Returns a dict of XDG dirs read from `$XDG_CONFIG_HOME/user-dirs.dirs`.
-
-    This is used at import time for most users of Mopidy. By rolling our own
-    implementation instead of using `glib.get_user_special_dir` we make it
-    possible for many extensions to run their test suites, which are importing
-    parts of Mopidy, in a virtualenv with global site-packages disabled, and
-    thus no `glib` available.
-    """
-    dirs_file = xdg_config_dir / "user-dirs.dirs"
-
-    if not dirs_file.exists():
-        return {}
-
-    data = dirs_file.read_bytes()
-    data = b"[XDG_USER_DIRS]\n" + data
-    data = data.replace(b"$HOME", bytes(pathlib.Path.home()))
-    data = data.replace(b'"', b"")
-
-    config = configparser.RawConfigParser()
-    config.read_string(data.decode())
-
-    result: dict[str, pathlib.Path] = {}
-    for k, v in config.items("XDG_USER_DIRS"):
-        if v is None:  # pyright: ignore[reportUnnecessaryComparison]
-            continue
-        if isinstance(k, bytes):
-            k = k.decode()
-        result[k.upper()] = pathlib.Path(v).resolve()
-
-    return result
 
 
 def get_or_create_dir(dir_path: str | PathLike[str]) -> pathlib.Path:
