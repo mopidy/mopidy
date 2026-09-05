@@ -22,19 +22,23 @@ For older releases, see:
 
 ## v4.0.2 (2026-08-19)
 
-- Models: The `musicbrainz_id` fields on [`Album`][mopidy.models.Album],
+### Data models
+
+Changes to the data models may affect any Mopidy extension or client.
+
+- The `musicbrainz_id` fields on [`Album`][mopidy.models.Album],
   [`Artist`][mopidy.models.Artist], and [`Track`][mopidy.models.Track] are again
   typed as `str` instead of `UUID`, like in Mopidy < 4.0, to allow scanning
   collections using alternative identifiers, or multiple identifiers in the same
   field. (!2283)
 
-- Models: The `date` field on [`Album`][mopidy.models.Album] and
+- The `date` field on [`Album`][mopidy.models.Album] and
   [`Track`][mopidy.models.Track] now also accepts the `YYYY-MM` format, in
   addition to `YYYY` and `YYYY-MM-DD`. GStreamer emits `YYYY-MM` for files that
   only have a year and a month in their date tag, and such files were previously
   rejected. (!2283)
 
-- Types: Deprecated `mopidy.types.Date`, `mopidy.types.Year`, and
+- Deprecated `mopidy.types.Date`, `mopidy.types.Year`, and
   `mopidy.types.DateOrYear`. They are replaced by a single
   [`mopidy.types.ReleaseDate`][mopidy.types.ReleaseDate] type, covering all
   three supported date formats. The old names remain importable, but they are
@@ -43,7 +47,30 @@ For older releases, see:
   behave as strings, and instantiating them emits a `DeprecationWarning`. They
   will be removed in a future release. (!2283)
 
-- Audio: [`convert_tags_to_track()`][mopidy.audio.tags.convert_tags_to_track]
+### Audio API
+
+Changes to the Audio API only affect the few Mopidy backend extensions that
+interface with the audio layer themselves.
+
+- Upgraded playback from using GStreamer's `playbin` element to using the newer
+  `playbin3` element.
+
+    `playbin` is in maintenance-only mode upstream, while `playbin3` is the
+    recommended playback element and is designed to reuse decoders across track
+    changes for lower CPU and memory use. All of Mopidy's existing signals,
+    properties, and bus messages are supported unchanged, so this should
+    hopefully be an uneventful upgrade. (#2127, !2250)
+
+- Upgraded the scanner pipeline from using the `typefind` and `decodebin`
+  GStreamer elements to using `parsebin`.
+
+    `parsebin` is the modern parsing stage also used internally by
+    `uridecodebin3`. It demuxes and parses streams without ever plugging
+    decoders, which is exactly what the scanner wants. This replaces the
+    previous custom `autoplug-select` callback that faked the same behaviour on
+    top of `decodebin`. (#2127, !2250)
+
+- [`convert_tags_to_track()`][mopidy.audio.tags.convert_tags_to_track]
   now raises [`ScannerError`][mopidy.exceptions.ScannerError] if the tags can't
   be coerced into a valid [`Track`][mopidy.models.Track]. The `file` and
   `stream` backends catch this per URI and fall back to a track with just the

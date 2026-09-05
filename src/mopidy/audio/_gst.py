@@ -421,6 +421,8 @@ class GstAudio(Audio, pykka.ThreadingActor):
         self._pending_uri: str | None = None
         self._pending_tags: dict[str, list[Any]] | None = None
         self._pending_metadata = None
+        self._in_about_to_finish: bool = False
+        self._deferred_uri: tuple[str, int] | None = None
 
         self._playbin: Gst.Element | None = None
         self._outputs = None
@@ -459,9 +461,9 @@ class GstAudio(Audio, pykka.ThreadingActor):
             jacksink.set_rank(Gst.Rank.SECONDARY)
 
     def _setup_playbin(self) -> None:
-        playbin = Gst.ElementFactory.make("playbin")
+        playbin = Gst.ElementFactory.make("playbin3")
         if playbin is None:
-            msg = "Failed to create GStreamer playbin."
+            msg = "Failed to create GStreamer playbin3."
             raise exceptions.AudioException(msg)
         playbin.set_property("flags", _GST_PLAY_FLAGS_AUDIO)
 
@@ -568,9 +570,23 @@ class GstAudio(Audio, pykka.ThreadingActor):
             return
 
         gst_logger.debug("Got about-to-finish event.")
-        if self._about_to_finish_callback:
-            logger.debug("Running about-to-finish callback.")
-            self._about_to_finish_callback()
+
+        # HACK: playbin3 sets up the next source synchronously when its 'uri'
+        # property is set. If the actor thread does that while this streaming
+        # thread is blocked inside the about-to-finish signal handler, the two
+        # threads deadlock on GStreamer's internal locks. Let set_uri() hand
+        # the URI over to us instead, so the property is set from this thread,
+        # which is where playbin3 expects it to happen.
+        self._in_about_to_finish = True
+        try:
+            if self._about_to_finish_callback:
+                logger.debug("Running about-to-finish callback.")
+                self._about_to_finish_callback()
+        finally:
+            self._in_about_to_finish = False
+            if (deferred_uri := self._deferred_uri) is not None:
+                self._deferred_uri = None
+                self._set_playbin_uri(*deferred_uri)
 
     def _on_source_setup(
         self,
@@ -625,11 +641,29 @@ class GstAudio(Audio, pykka.ThreadingActor):
         self._pending_uri = uri
         self._pending_tags = {}
         self._live_stream = live_stream
-        self._playbin.set_property("flags", flags)
-        self._playbin.set_property("uri", uri)
+
+        if self._in_about_to_finish:
+            # Let the streaming thread set the URI once the about-to-finish
+            # callback returns, to avoid deadlocking with it.
+            self._deferred_uri = (uri, flags)
+        else:
+            self._set_playbin_uri(uri, flags)
 
         if self.mixer is not None and current_volume is not None:
             self.mixer.set_volume(current_volume)
+
+    def _set_playbin_uri(self, uri: str, flags: int) -> None:
+        assert self._playbin
+
+        self._playbin.set_property("flags", flags)
+
+        # HACK: playbin3's 'uri' setter synchronously sets up the next source,
+        # which needs other GStreamer threads to run our Python callbacks, e.g.
+        # bus sync handlers and pad probes. PyGObject holds the GIL across
+        # `set_property()`, so those threads would be blocked and we'd deadlock.
+        # `Gst.util_set_object_arg()` is an introspected call, which PyGObject
+        # runs with the GIL released.
+        Gst.util_set_object_arg(self._playbin, "uri", uri)
 
     @override
     def set_source_setup_callback(
