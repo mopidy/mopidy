@@ -41,6 +41,9 @@ jobs:
             python: "3.14"
             tox: "3.14"
             coverage: true
+          - name: "pytest (3.15)"
+            python: "3.15"
+            tox: "3.15"
           - name: "pyright"
             python: "3.14"
             tox: "pyright"
