@@ -5,7 +5,7 @@ import logging
 import urllib.parse
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, cast, override
 
 import tornado.escape
 import tornado.ioloop
@@ -318,9 +318,10 @@ class ClientListHandler(tornado.web.RequestHandler):
 
 
 class StaticFileHandler(tornado.web.StaticFileHandler):
+    @override
     def set_extra_headers(
         self,
-        path: str,  # noqa: ARG002
+        path: str,
     ) -> None:
         set_mopidy_headers(self)
 
