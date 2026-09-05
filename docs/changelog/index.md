@@ -18,6 +18,12 @@ For older releases, see:
   `package-data` config was not updated when the bundled extensions moved to
   `mopidy._exts`. (#2292, !2293)
 
+- HTTP extension: Fix `core.describe()` so that it lists all params of a method.
+  Keyword-only params, like `at_position` and `uris` on
+  [`core.tracklist.add()`][mopidy.core.TracklistController.add], were left out.
+  Deprecated methods were described with the `*args, **kwargs` of the wrapper
+  added by the `deprecated` decorator instead of their own params. (#2284, !2296)
+
 - Docs: Update the macOS install instructions for current Homebrew. (!2291)
 
 ## v4.0.2 (2026-08-19)

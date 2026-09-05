@@ -15,7 +15,6 @@ from pydantic import (
     field_validator,
     model_serializer,
 )
-from pydantic_core import PydanticUndefined, PydanticUndefinedType
 
 from mopidy import models
 
@@ -462,26 +461,21 @@ class Inspector:
         self,
         method: Callable[..., Any],
     ) -> list[ParamDescription]:
-        argspec = inspect.getfullargspec(method)
-
-        with_defaults: list[Any] = list(argspec.defaults) if argspec.defaults else []
-        num_args_without_default = len(argspec.args) - len(with_defaults)
-        without_defaults: list[PydanticUndefinedType] = [
-            PydanticUndefined
-        ] * num_args_without_default
-        defaults = without_defaults + with_defaults
-
         params: list[ParamDescription] = []
 
-        for arg, default in zip(argspec.args, defaults, strict=True):
-            if arg == "self":
+        for name, param in inspect.signature(method).parameters.items():
+            if name == "self":
                 continue
-            params.append(ParamDescription(name=arg, default=default))
-
-        if argspec.varargs:
-            params.append(ParamDescription(name=argspec.varargs, varargs=True))
-
-        if argspec.varkw:
-            params.append(ParamDescription(name=argspec.varkw, kwargs=True))
+            match param.kind:
+                case inspect.Parameter.VAR_POSITIONAL:
+                    params.append(ParamDescription(name=name, varargs=True))
+                case inspect.Parameter.VAR_KEYWORD:
+                    params.append(ParamDescription(name=name, kwargs=True))
+                case _ if param.default is inspect.Parameter.empty:
+                    params.append(ParamDescription(name=name))
+                case _:
+                    params.append(
+                        ParamDescription(name=name, default=param.default),
+                    )
 
         return params
