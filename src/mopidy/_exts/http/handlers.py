@@ -5,7 +5,7 @@ import logging
 import urllib.parse
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, cast, override
 
 import tornado.escape
 import tornado.ioloop
@@ -288,6 +288,10 @@ class JsonRpcHandler(tornado.web.RequestHandler):
             assert origin
             self.set_cors_headers(origin)
 
+            # Let browsers cache this preflight response to avoid a preflight
+            # request before every request.
+            self.set_header("Access-Control-Max-Age", "7200")
+
         self.set_status(204)
         self.finish()
 
@@ -314,9 +318,10 @@ class ClientListHandler(tornado.web.RequestHandler):
 
 
 class StaticFileHandler(tornado.web.StaticFileHandler):
+    @override
     def set_extra_headers(
         self,
-        path: str,  # noqa: ARG002
+        path: str,
     ) -> None:
         set_mopidy_headers(self)
 
