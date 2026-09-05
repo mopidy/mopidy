@@ -43,6 +43,8 @@ class Calculator:
         b: Any,
         c: bool = True,
         *args: Any,
+        d: Any,
+        e: bool = False,
         **kwargs: Any,
     ) -> None:
         pass
@@ -683,10 +685,18 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
         assert params[3].varargs is True
         assert params[3].model_dump_json() == '{"name":"args","varargs":true}'
 
-        assert params[4].name == "kwargs"
+        assert params[4].name == "d"
         assert params[4].default is jsonrpc.Unset
-        assert params[4].kwargs is True
-        assert params[4].model_dump_json() == '{"name":"kwargs","kwargs":true}'
+        assert params[4].model_dump_json() == '{"name":"d"}'
+
+        assert params[5].name == "e"
+        assert params[5].default is False
+        assert params[5].model_dump_json() == '{"name":"e","default":false}'
+
+        assert params[6].name == "kwargs"
+        assert params[6].default is jsonrpc.Unset
+        assert params[6].kwargs is True
+        assert params[6].model_dump_json() == '{"name":"kwargs","kwargs":true}'
 
     def test_inspector_can_describe_a_bunch_of_large_classes(self) -> None:
         inspector = jsonrpc.Inspector(
@@ -715,3 +725,18 @@ class JsonRpcInspectorTest(JsonRpcTestBase):
 
         assert "core.tracklist.filter" in methods
         assert methods["core.tracklist.filter"].params[0].name == "criteria"
+
+        # Keyword-only params are described too
+        assert "core.tracklist.add" in methods
+        assert [p.name for p in methods["core.tracklist.add"].params] == [
+            "tracks",
+            "at_position",
+            "uris",
+        ]
+
+        # Deprecated methods are described with their own params, not with the
+        # params of the wrapper added by the `deprecated` decorator
+        assert "core.tracklist.eot_track" in methods
+        assert [p.name for p in methods["core.tracklist.eot_track"].params] == [
+            "tl_track",
+        ]
