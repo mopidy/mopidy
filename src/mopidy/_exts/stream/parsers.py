@@ -98,7 +98,8 @@ def parse_pls(data: bytes) -> Generator[str]:
             if option.startswith("file") and option[4:].isdigit()
         )
         for _index, entry in sorted(entries):
-            yield entry.strip("\"'")
+            if uri := entry.strip("\"'"):
+                yield uri
 
 
 def parse_asx_reference(data: bytes) -> Generator[str]:

@@ -70,6 +70,13 @@ File2=file:///tmp/bar
 File1=file:///tmp/foo
 """
 
+MALFORMED_PLS_WITH_EMPTY_ENTRIES = b"""[Playlist]
+NumberOfEntries=3
+File1=
+File2=""
+File3=file:///tmp/foo
+"""
+
 ASX_REFERENCE = b"""[Reference]
 Ref1=file:///tmp/foo
 Ref2=file:///tmp/bar
@@ -226,6 +233,11 @@ def test_parse_from_invalid_data():
             MALFORMED_PLS_WITH_UNORDERED_ENTRIES,
             EXPECTED,
             id="with-unordered-entries",
+        ),
+        pytest.param(
+            MALFORMED_PLS_WITH_EMPTY_ENTRIES,
+            ["file:///tmp/foo"],
+            id="with-empty-entries",
         ),
     ],
 )
