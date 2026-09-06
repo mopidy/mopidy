@@ -112,10 +112,12 @@ class ScannerTest(unittest.TestCase):
         assert self.result[path].mime == "text/uri-list"
 
     def test_text_plain(self):
-        # GStreamer decode bin hardcodes bad handling of text plain :/
+        # GStreamer either fails to typefind plain text at all, or, since
+        # 1.28.5, types .txt as application/x-subtitle by extension.
+        # Neither outcome is playable.
         path = path_to_data_dir("scanner/plain.txt")
         self.scan([path])
-        assert path in self.errors
+        assert path in self.errors or not self.result[path].playable
 
     @unittest.SkipTest
     def test_song_without_time_is_handeled(self):
