@@ -39,6 +39,8 @@ def entry_point(mocker: MockerFixture) -> metadata.EntryPoint:
     entry_point.name = DummyExtension.ext_name
     entry_point.value = "mopidy_foobar:FoobarExtension"
     entry_point.load = mocker.Mock(return_value=DummyExtension)
+    entry_point.dist = mocker.Mock(spec=metadata.Distribution)
+    entry_point.dist.version = "3.2.1"
     return entry_point
 
 
@@ -56,7 +58,7 @@ def test_load(entry_point: metadata.EntryPoint):
 
     assert record.extension == IsInstance(DummyExtension)
     assert record.dist_name == DummyExtension.dist_name
-    assert record.version == DummyExtension.version
+    assert record.version == "3.2.1"
     assert record.config_schema == IsInstance(ConfigSchema)
     assert record.config_defaults == "[foobar]\nenabled = true"
     assert record.command == IsInstance(cyclopts.App)

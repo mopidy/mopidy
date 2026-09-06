@@ -5,7 +5,7 @@ from __future__ import annotations
 import platform
 from typing import TYPE_CHECKING
 
-import mopidy
+from mopidy._lib.version import get_version
 
 if TYPE_CHECKING:
     from mopidy.config import ProxyConfig
@@ -44,7 +44,7 @@ def format_user_agent(name: str | None = None) -> str:
     format `dist_name/version`), Mopidy version and Python version.
     """
     parts = [
-        f"Mopidy/{mopidy.__version__}",
+        f"Mopidy/{get_version()}",
         f"{platform.python_implementation()}/{platform.python_version()}",
     ]
     if name:

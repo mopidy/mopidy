@@ -10,6 +10,7 @@ import pykka
 
 from mopidy import audio as audio_lib
 from mopidy import backend, exceptions
+from mopidy._lib.version import get_version
 from mopidy.audio import AudioProxy, scan, tags
 from mopidy.config import Config
 from mopidy.models import Track
@@ -33,7 +34,7 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
 
         self._http_client = http.get_httpx_client(
             proxy_config=config["proxy"],
-            user_agent=(f"{Extension.dist_name}/{Extension.version}"),
+            user_agent=(f"{Extension.dist_name}/{get_version()}"),
         )
 
         blacklist = config["stream"]["metadata_blacklist"]

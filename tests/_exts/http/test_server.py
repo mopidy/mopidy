@@ -7,8 +7,8 @@ from unittest import mock
 import tornado.testing
 import tornado.wsgi
 
-import mopidy
 from mopidy._exts.http import actor, handlers
+from mopidy._lib.version import get_version
 
 
 class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
@@ -27,7 +27,7 @@ class HttpServerTest(tornado.testing.AsyncHTTPTestCase):
     def get_app(self):
         core = mock.Mock()
         core.get_version = mock.MagicMock(name="get_version")
-        core.get_version.return_value = mopidy.__version__
+        core.get_version.return_value = get_version()
 
         testapps = [{"name": "testapp"}]
         teststatics = [{"name": "teststatic"}]
@@ -69,7 +69,7 @@ class MopidyAppTest(HttpServerTest):
         assert "This web server is a part of the Mopidy music server." in body
         assert "testapp" in body
         assert "teststatic" in body
-        assert response.headers["X-Mopidy-Version"] == mopidy.__version__
+        assert response.headers["X-Mopidy-Version"] == get_version()
         assert response.headers["Cache-Control"] == "no-cache"
 
     def test_without_slash_should_redirect(self):
@@ -82,7 +82,7 @@ class MopidyAppTest(HttpServerTest):
         response = self.fetch("/mopidy/mopidy.css", method="GET")
 
         assert "html {" in response.body.decode()
-        assert response.headers["X-Mopidy-Version"] == mopidy.__version__
+        assert response.headers["X-Mopidy-Version"] == get_version()
         assert response.headers["Cache-Control"] == "no-cache"
 
 
@@ -159,7 +159,7 @@ class MopidyRPCHandlerTest(HttpServerTest):
         assert tornado.escape.json_decode(response.body) == {
             "jsonrpc": "2.0",
             "id": 1,
-            "result": mopidy.__version__,
+            "result": get_version(),
         }
 
 
@@ -259,7 +259,7 @@ class HttpServerWithStaticFilesTest(tornado.testing.AsyncHTTPTestCase):
         response = self.fetch("/static/test_server.py", method="GET")
 
         assert response.code == 200
-        assert response.headers["X-Mopidy-Version"] == mopidy.__version__
+        assert response.headers["X-Mopidy-Version"] == get_version()
         assert response.headers["Cache-Control"] == "no-cache"
 
 
@@ -415,7 +415,7 @@ class HttpServerWithInvalidDefaultApp(HttpServerTest):
 
         assert "testapp" in body
         assert "teststatic" in body
-        assert response.headers["X-Mopidy-Version"] == mopidy.__version__
+        assert response.headers["X-Mopidy-Version"] == get_version()
         assert response.headers["Cache-Control"] == "no-cache"
 
 
