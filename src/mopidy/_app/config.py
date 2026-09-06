@@ -11,9 +11,9 @@ from functools import cached_property
 from pathlib import Path
 from typing import Any, ClassVar
 
-import mopidy
 from mopidy._app.extensions import ExtensionManager, ExtensionStatus
 from mopidy._lib import paths
+from mopidy._lib.version import get_version
 from mopidy.config import Config, read, types
 from mopidy.config.schemas import ConfigSchema, MapConfigSchema
 
@@ -339,7 +339,7 @@ class ConfigManager:
     ) -> Generator[str]:
         if with_header:
             versions = [
-                f"mopidy {mopidy.__version__}",
+                f"mopidy {get_version()}",
                 *[
                     f"{r.dist_name} {r.version}"
                     for r in self._extensions.values()

@@ -3,12 +3,12 @@ from pathlib import Path
 
 import pytest
 
-import mopidy
 from mopidy._app.config import ConfigLoader
 from mopidy._app.extensions import ExtensionManager, ExtensionRecord, ExtensionStatus
 from mopidy._exts.file import Extension as FileExtension
 from mopidy._exts.m3u import Extension as M3UExtension
 from mopidy._lib import paths
+from mopidy._lib.version import get_version
 
 
 def test_load_raw_config():
@@ -97,7 +97,7 @@ def test_format_config():
         "#   https://docs.mopidy.com/",
         "#",
         "# The initial commented out values reflect the defaults as of:",
-        f"#   mopidy {mopidy.__version__}",
+        f"#   mopidy {get_version()}",
         "#",
         "# Available options and defaults might have changed since then,",
         "# run `mopidy config` to see the current effective config and",
