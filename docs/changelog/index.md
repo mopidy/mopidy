@@ -8,6 +8,12 @@ For older releases, see:
 [Changelog 1.x](1.x.md) ·
 [Changelog 0.x](0.x.md)
 
+## v4.1.0 (UNRELEASED)
+
+- Extensions: Deprecate the `Extension.version` class attribute. Mopidy now gets
+  the version from the distribution that registers the extension's entry point,
+  and no longer reads the attribute.
+
 ## v4.0.3 (2026-09-06)
 
 - Config: Use `platformdirs` to find the XDG user directories that path config

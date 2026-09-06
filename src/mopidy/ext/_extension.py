@@ -34,8 +34,10 @@ class Extension:
     version: str
     """The extension's version.
 
-    Should match the `__version__` attribute on the extension's main Python
-    module and the version registered on PyPI.
+    /// warning | Deprecated
+    Deprecated since Mopidy 4.1. Mopidy reads the version from the
+    distribution that registers the extension's entry point.
+    ///
     """
 
     def get_default_config(self) -> str:

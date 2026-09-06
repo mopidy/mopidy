@@ -2,7 +2,6 @@ import logging
 from pathlib import Path
 from typing import override
 
-import mopidy
 from mopidy import config, ext
 
 logger = logging.getLogger(__name__)
@@ -11,7 +10,6 @@ logger = logging.getLogger(__name__)
 class Extension(ext.Extension):
     dist_name = "mopidy-file"
     ext_name = "file"
-    version = mopidy.__version__
 
     def get_default_config(self) -> str:
         return config.read(Path(__file__).parent / "ext.conf")

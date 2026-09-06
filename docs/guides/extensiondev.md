@@ -127,22 +127,18 @@ include the default config in documentation without duplicating it.
 ```python title="mopidy-soundspot/src/mopidy_soundspot/__init__.py"
 import logging
 import pathlib
-from importlib.metadata import version
 
 import cyclopts
 
 from mopidy import config, exceptions, ext
-
-__version__ = version("mopidy-soundspot")
 
 # If you need to log, use loggers named after the current Python module
 logger = logging.getLogger(__name__)
 
 
 class Extension(ext.Extension):
-    dist_name = "Mopidy-Soundspot"
+    dist_name = "mopidy-soundspot"
     ext_name = "soundspot"
-    version = __version__
 
     def get_default_config(self) -> str:
         return config.read(pathlib.Path(__file__).parent / "ext.conf")
@@ -350,13 +346,12 @@ added the helper function [mopidy.httpclient.format_user_agent][]. Here's
 an example of how to use it:
 
 ```python
+>>> from importlib.metadata import version
 >>> from mopidy import httpclient
 >>> import mopidy_soundspot
->>> httpclient.format_user_agent(
-...     f'{mopidy_soundspot.Extension.dist_name}/'
-...     f'{mopidy_soundspot.__version__}'
-... )
-'Mopidy-SoundSpot/2.0.0 Mopidy/4.0.0 Python/3.13.2'
+>>> dist_name = mopidy_soundspot.Extension.dist_name
+>>> httpclient.format_user_agent(f'{dist_name}/{version(dist_name)}')
+'mopidy-soundspot/2.0.0 Mopidy/4.1.0 Python/3.13.2'
 ```
 
 ### Example using HTTPX
@@ -368,17 +363,19 @@ Most Mopidy extensions that make HTTP requests use either the
 If you're using HTTPX, you can create a session object like this:
 
 ```python
+from importlib.metadata import version
+
 import httpx
 from mopidy import httpclient
 
 import mopidy_soundspot
 
+dist_name = mopidy_soundspot.Extension.dist_name
+
 client = httpx.Client(
     proxy=httpclient.format_proxy(proxy_config),
     headers={
-        "user-agent": httpclient.format_user_agent(
-            f"{mopidy_soundspot.Extension.dist_name}/{mopidy_soundspot.__version__}"
-        ),
+        "user-agent": httpclient.format_user_agent(f"{dist_name}/{version(dist_name)}"),
     },
 )
 response = client.get("https://example.com")
@@ -393,6 +390,8 @@ User-Agent header is set properly is to create a Requests session object and use
 that object to make all your HTTP requests:
 
 ```python
+from importlib.metadata import version
+
 import requests
 from mopidy import httpclient
 
@@ -410,13 +409,13 @@ def get_requests_session(proxy_config, user_agent):
     return session
 
 
+dist_name = mopidy_soundspot.Extension.dist_name
+
 # mopidy_config is the config object passed to your frontend/backend
 # constructor
 session = get_requests_session(
     proxy_config=mopidy_config["proxy"],
-    user_agent=(
-        f"{mopidy_soundspot.Extension.dist_name}/{mopidy_soundspot.__version__}"
-    ),
+    user_agent=f"{dist_name}/{version(dist_name)}",
 )
 response = session.get("https://example.com")
 ```
