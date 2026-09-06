@@ -7,8 +7,8 @@ from unittest import mock
 import pykka
 import pytest
 
-import mopidy
 from mopidy import core
+from mopidy._lib.version import get_version
 from mopidy.core._state_storage import (
     CoreControllersState,
     HistoryState,
@@ -161,7 +161,7 @@ class CoreActorTest(unittest.TestCase):
             )
 
     def test_version(self):
-        assert self.core.get_version() == mopidy.__version__
+        assert self.core.get_version() == get_version()
 
     @mock.patch.object(core._playback, "CoreListener", spec=core.CoreListener)
     def test_state_changed(self, listener_mock):
@@ -207,7 +207,7 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
         assert self.state_file.is_file()
         reload_data = StoredState.load(self.state_file)
         data = StoredState(
-            version=mopidy.__version__,
+            version=get_version(),
             state=CoreControllersState(
                 tracklist=TracklistControllerState(
                     repeat=False,
@@ -243,7 +243,7 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
 
     def test_load_state_with_data(self):
         state = StoredState(
-            version=mopidy.__version__,
+            version=get_version(),
             state=CoreControllersState(
                 tracklist=TracklistControllerState(
                     repeat=True,
@@ -296,7 +296,7 @@ class CoreActorSaveLoadStateTest(unittest.TestCase):
 
     def test_delete_state_file_on_restore(self):
         state = StoredState(
-            version=mopidy.__version__,
+            version=get_version(),
             state=CoreControllersState(),
         )
         state.dump(self.state_file)

@@ -9,9 +9,9 @@ from typing import TYPE_CHECKING, override
 import pykka
 from pykka.typing import ActorMemberMixin, proxy_method
 
-import mopidy
 from mopidy import audio, backend, mixer
 from mopidy._lib import paths
+from mopidy._lib.version import get_version
 from mopidy.types import PlaybackState, UriScheme
 
 from ._history import HistoryController
@@ -108,7 +108,7 @@ class Core(
 
     def get_version(self) -> str:
         """Get version of the Mopidy core API."""
-        return mopidy.__version__
+        return get_version()
 
     # The methods below are not part of the public interface, but are just an
     # implementation of BackendListener and MixerListener.
@@ -231,7 +231,7 @@ class Core(
         logger.info("Saving state to %s", state_file)
 
         state = StoredState(
-            version=mopidy.__version__,
+            version=get_version(),
             state=CoreControllersState(
                 tracklist=self.tracklist._save_state(),
                 history=self.history._save_state(),

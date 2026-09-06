@@ -8,8 +8,8 @@ import tornado.testing
 import tornado.web
 import tornado.websocket
 
-import mopidy
 from mopidy._exts.http import handlers
+from mopidy._lib.version import get_version
 
 
 class StaticFileHandlerTest(tornado.testing.AsyncHTTPTestCase):
@@ -31,14 +31,14 @@ class StaticFileHandlerTest(tornado.testing.AsyncHTTPTestCase):
         response = self.fetch("/test_handlers.py", method="GET")
 
         assert response.code == 200
-        assert response.headers["X-Mopidy-Version"] == mopidy.__version__
+        assert response.headers["X-Mopidy-Version"] == get_version()
         assert response.headers["Cache-Control"] == "no-cache"
 
     def test_static_default_filename(self):
         response = self.fetch("/", method="GET")
 
         assert response.code == 200
-        assert response.headers["X-Mopidy-Version"] == mopidy.__version__
+        assert response.headers["X-Mopidy-Version"] == get_version()
         assert response.headers["Cache-Control"] == "no-cache"
 
 
@@ -138,7 +138,7 @@ class JsonRpcHandlerTestBase(tornado.testing.AsyncHTTPTestCase):
 
     def assert_extra_response_headers(self, headers):
         assert headers["Cache-Control"] == "no-cache"
-        assert headers["X-Mopidy-Version"] == mopidy.__version__
+        assert headers["X-Mopidy-Version"] == get_version()
         assert headers["Accept"] == "application/json"
         assert headers["Content-Type"] == "application/json; utf-8"
 
