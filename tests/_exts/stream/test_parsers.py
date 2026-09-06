@@ -47,6 +47,29 @@ NumberOfEntries=3
 File1=file:///tmp/foo
 """
 
+MALFORMED_PLS_WITH_TOO_FEW_ENTRIES = b"""[Playlist]
+NumberOfEntries=1
+File1=file:///tmp/foo
+File2=file:///tmp/bar
+File3=file:///tmp/baz
+"""
+
+MALFORMED_PLS_WITH_INVALID_NUMBER_OF_ENTRIES = b"""[Playlist]
+NumberOfEntries=three
+File1=file:///tmp/foo
+"""
+
+MALFORMED_PLS_WITH_HUGE_NUMBER_OF_ENTRIES = b"""[Playlist]
+NumberOfEntries=5000000
+File1=file:///tmp/foo
+"""
+
+MALFORMED_PLS_WITH_UNORDERED_ENTRIES = b"""[Playlist]
+File10=file:///tmp/baz
+File2=file:///tmp/bar
+File1=file:///tmp/foo
+"""
+
 ASX_REFERENCE = b"""[Reference]
 Ref1=file:///tmp/foo
 Ref2=file:///tmp/bar
@@ -176,13 +199,33 @@ def test_parse_from_invalid_data():
     [
         pytest.param(
             MALFORMED_PLS_WITHOUT_NUMBER_OF_ENTRIES,
-            [],
+            ["file:///tmp/foo"],
             id="without-number-of-entries",
         ),
         pytest.param(
             MALFORMED_PLS_WITH_TOO_MANY_ENTRIES,
             ["file:///tmp/foo"],
             id="with-too-many-entries",
+        ),
+        pytest.param(
+            MALFORMED_PLS_WITH_TOO_FEW_ENTRIES,
+            EXPECTED,
+            id="with-too-few-entries",
+        ),
+        pytest.param(
+            MALFORMED_PLS_WITH_INVALID_NUMBER_OF_ENTRIES,
+            ["file:///tmp/foo"],
+            id="with-invalid-number-of-entries",
+        ),
+        pytest.param(
+            MALFORMED_PLS_WITH_HUGE_NUMBER_OF_ENTRIES,
+            ["file:///tmp/foo"],
+            id="with-huge-number-of-entries",
+        ),
+        pytest.param(
+            MALFORMED_PLS_WITH_UNORDERED_ENTRIES,
+            EXPECTED,
+            id="with-unordered-entries",
         ),
     ],
 )
