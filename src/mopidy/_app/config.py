@@ -341,9 +341,9 @@ class ConfigManager:
             versions = [
                 f"mopidy {mopidy.__version__}",
                 *[
-                    f"{r.extension.dist_name} {r.extension.version}"
+                    f"{r.dist_name} {r.version}"
                     for r in self._extensions.values()
-                    if r.extension is not None
+                    if r.dist_name is not None
                 ],
             ]
             yield textwrap.dedent(f"""\
