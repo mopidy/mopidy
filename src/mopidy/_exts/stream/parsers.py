@@ -90,8 +90,16 @@ def parse_pls(data: bytes) -> Generator[str]:
     for section in cp.sections():
         if section.lower() != "playlist":
             continue
-        for i in range(cp.getint(section, "numberofentries")):
-            yield cp.get(section, f"file{i + 1}").strip("\"'")
+        # Malformed playlists often declare a NumberOfEntries that does not
+        # match the File keys they have. Use the File keys instead.
+        entries = (
+            (int(option[4:]), cp.get(section, option))
+            for option in cp.options(section)
+            if option.startswith("file") and option[4:].isdigit()
+        )
+        for _index, entry in sorted(entries):
+            if uri := entry.strip("\"'"):
+                yield uri
 
 
 def parse_asx_reference(data: bytes) -> Generator[str]:
@@ -110,7 +118,8 @@ def parse_asx_reference(data: bytes) -> Generator[str]:
             if option.startswith("ref") and option[3:].isdigit()
         )
         for _index, reference in sorted(references):
-            yield reference.strip("\"'")
+            if uri := reference.strip("\"'"):
+                yield uri
 
 
 def parse_xspf(data: bytes) -> Generator[str]:
