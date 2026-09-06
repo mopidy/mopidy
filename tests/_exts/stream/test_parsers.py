@@ -38,6 +38,15 @@ Length3=213
 Version=2
 """
 
+MALFORMED_PLS_WITHOUT_NUMBER_OF_ENTRIES = b"""[Playlist]
+File1=file:///tmp/foo
+"""
+
+MALFORMED_PLS_WITH_TOO_MANY_ENTRIES = b"""[Playlist]
+NumberOfEntries=3
+File1=file:///tmp/foo
+"""
+
 ASX_REFERENCE = b"""[Reference]
 Ref1=file:///tmp/foo
 Ref2=file:///tmp/bar
@@ -162,22 +171,20 @@ def test_parse_from_invalid_data():
     assert parsers.parse_playlist(BAD) == []
 
 
-PLS_TOO_MANY_ENTRIES = b"""[Playlist]
-NumberOfEntries=3
-File1=file:///tmp/foo
-"""
-
-PLS_MISSING_NUMBER_OF_ENTRIES = b"""[Playlist]
-File1=file:///tmp/foo
-"""
-
-
-def test_parse_pls_with_more_entries_than_declared():
-    # A PLS declaring more entries than it contains (common with malformed
-    # playlists from internet radio stations) must not crash the parser.
-    assert list(parsers.parse_pls(PLS_TOO_MANY_ENTRIES)) == ["file:///tmp/foo"]
-
-
-def test_parse_pls_without_number_of_entries():
-    # A PLS section missing NumberOfEntries must not crash the parser.
-    assert list(parsers.parse_pls(PLS_MISSING_NUMBER_OF_ENTRIES)) == []
+@pytest.mark.parametrize(
+    ("data", "expected"),
+    [
+        pytest.param(
+            MALFORMED_PLS_WITHOUT_NUMBER_OF_ENTRIES,
+            [],
+            id="without-number-of-entries",
+        ),
+        pytest.param(
+            MALFORMED_PLS_WITH_TOO_MANY_ENTRIES,
+            ["file:///tmp/foo"],
+            id="with-too-many-entries",
+        ),
+    ],
+)
+def test_parse_malformed_pls(data, expected):
+    assert list(parsers.parse_pls(data)) == expected
