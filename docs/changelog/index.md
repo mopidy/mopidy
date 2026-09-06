@@ -10,6 +10,11 @@ For older releases, see:
 
 ## v4.0.3 (UNRELEASED)
 
+- Config: Use `platformdirs` to find the XDG user directories that path config
+  values expand to. Values set in `$XDG_CONFIG_HOME/user-dirs.dirs` are kept.
+  Directories that are not set there, such as `$XDG_MUSIC_DIR`, now fall back to
+  the standard location, like `~/Music`, instead of staying unexpanded. (!2272)
+
 - Audio: Fix scanning of valid audio files. `Gst.Structure` has a `__len__()`
   method, so an empty structure is falsy. The truthiness checks in the scanner
   were replaced by explicit `is not None` tests. (#2278, !2280)
@@ -24,6 +29,10 @@ For older releases, see:
   Deprecated methods were described with the `*args, **kwargs` of the wrapper
   added by the `deprecated` decorator instead of their own params. (#2284, !2296)
 
+- HTTP extension: Set the `Access-Control-Max-Age` header on CORS preflight
+  responses. Browsers now cache the preflight result for two hours, instead of
+  sending a preflight request before every cross-origin request. (#2043, !2285)
+
 - Stream extension: Fix crash when a PLS playlist has a missing or invalid
   `NumberOfEntries`. The parser now ignores the declared count and uses the
   `File` keys that the playlist has, in numeric order. Entries that a too low
@@ -35,7 +44,12 @@ For older releases, see:
 
 - Docs: Update the macOS install instructions for current Homebrew. (!2291)
 
-- Dev: Add Python 3.15 to the test matrix, in tox and in CI.
+- Dev: Add Python 3.15 to the test matrix, in tox and in CI. (!2297)
+
+- Dev: Fix the scanner test for plain text files on GStreamer >= 1.28.5. That
+  version types `.txt` files as `application/x-subtitle` by extension, so the
+  scan no longer fails. The test now asserts that plain text is not playable.
+  (!2294)
 
 ## v4.0.2 (2026-08-19)
 
