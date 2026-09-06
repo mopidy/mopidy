@@ -24,6 +24,15 @@ For older releases, see:
   Deprecated methods were described with the `*args, **kwargs` of the wrapper
   added by the `deprecated` decorator instead of their own params. (#2284, !2296)
 
+- Stream extension: Fix crash when a PLS playlist has a missing or invalid
+  `NumberOfEntries`. The parser now ignores the declared count and uses the
+  `File` keys that the playlist has, in numeric order. Entries that a too low
+  count left out are now included. (!2276)
+
+- Stream extension: Skip entries with an empty value in PLS and ASX reference
+  playlists. An empty first entry resolved to the playlist URI itself, which
+  stopped the unwrapping and lost the valid entries after it. (!2276)
+
 - Docs: Update the macOS install instructions for current Homebrew. (!2291)
 
 - Dev: Add Python 3.15 to the test matrix, in tox and in CI.
