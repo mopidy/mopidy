@@ -118,7 +118,8 @@ def parse_asx_reference(data: bytes) -> Generator[str]:
             if option.startswith("ref") and option[3:].isdigit()
         )
         for _index, reference in sorted(references):
-            yield reference.strip("\"'")
+            if uri := reference.strip("\"'"):
+                yield uri
 
 
 def parse_xspf(data: bytes) -> Generator[str]:

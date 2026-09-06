@@ -83,6 +83,12 @@ Ref2=file:///tmp/bar
 Ref3=file:///tmp/baz
 """
 
+MALFORMED_ASX_REFERENCE_WITH_EMPTY_ENTRIES = b"""[Reference]
+Ref1=
+Ref2=""
+Ref3=file:///tmp/foo
+"""
+
 ASX = b"""<ASX version="3.0">
   <TITLE>Example</TITLE>
   <ENTRY>
@@ -243,3 +249,10 @@ def test_parse_from_invalid_data():
 )
 def test_parse_malformed_pls(data, expected):
     assert list(parsers.parse_pls(data)) == expected
+
+
+def test_parse_malformed_asx_reference():
+    # An entry with an empty value must be skipped, not give an empty URI.
+    assert list(
+        parsers.parse_asx_reference(MALFORMED_ASX_REFERENCE_WITH_EMPTY_ENTRIES)
+    ) == ["file:///tmp/foo"]
