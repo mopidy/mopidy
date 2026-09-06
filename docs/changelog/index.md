@@ -26,6 +26,8 @@ For older releases, see:
 
 - Docs: Update the macOS install instructions for current Homebrew. (!2291)
 
+- Dev: Add Python 3.15 to the test matrix, in tox and in CI.
+
 ## v4.0.2 (2026-08-19)
 
 - Models: The `musicbrainz_id` fields on [`Album`][mopidy.models.Album],
