@@ -67,26 +67,22 @@ jobs:
     container: ghcr.io/mopidy/ci:latest # zizmor: ignore[unpinned-images]
     permissions:
       contents: read # Check out the repository.
+    env:
+      PYTHON: ${{ matrix.python }}
+      TOX_ENV: ${{ matrix.tox }}
+      UV_PYTHON_PREFERENCE: only-managed
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Fix home dir permissions to enable pip caching
-        run: chown -R root /github/home
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
-          python-version: ${{ matrix.python }}
-          cache: pip
-          allow-prereleases: true
-      - run: python -m pip install tox tox-uv
-      - env:
-          TOX_ENV: ${{ matrix.tox }}
-        run: python -m tox -e "$TOX_ENV"
+          enable-cache: true
+      - run: uv python install "$PYTHON"
+      - run: uvx --python "$PYTHON" --with tox-uv tox -e "$TOX_ENV"
         if: ${{ ! matrix.coverage }}
-      - env:
-          TOX_ENV: ${{ matrix.tox }}
-        run: python -m tox -e "$TOX_ENV" -- --cov-report=xml
+      - run: uvx --python "$PYTHON" --with tox-uv tox -e "$TOX_ENV" -- --cov-report=xml
         if: ${{ matrix.coverage }}
       - uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         if: ${{ matrix.coverage }}
