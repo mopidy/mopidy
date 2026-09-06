@@ -8,7 +8,7 @@ For older releases, see:
 [Changelog 1.x](1.x.md) ·
 [Changelog 0.x](0.x.md)
 
-## v4.0.3 (UNRELEASED)
+## v4.0.3 (2026-09-06)
 
 - Config: Use `platformdirs` to find the XDG user directories that path config
   values expand to. Values set in `$XDG_CONFIG_HOME/user-dirs.dirs` are kept.
