@@ -3,7 +3,7 @@ from unittest import mock
 import pykka
 import pytest
 
-import mopidy
+from mopidy._lib.version import get_version
 from mopidy.core import Core, CoreListener
 from mopidy.core._state_storage import (
     CoreControllersState,
@@ -168,7 +168,7 @@ def test_backends_with_colliding_uri_schemes_fails(backend1, backend2):
 
 
 def test_version(core):
-    assert core.get_version() == mopidy.__version__
+    assert core.get_version() == get_version()
 
 
 def test_state_changed(core, mocker):
@@ -223,7 +223,7 @@ def test_save_state(core_with_state_file, state_file):
     assert state_file.is_file()
     reload_data = StoredState.load(state_file)
     data = StoredState(
-        version=mopidy.__version__,
+        version=get_version(),
         state=CoreControllersState(
             tracklist=TracklistControllerState(
                 repeat=False,
@@ -261,7 +261,7 @@ def test_load_state_no_file(core_with_state_file):
 
 def test_load_state_with_data(core_with_state_file, state_file):
     state = StoredState(
-        version=mopidy.__version__,
+        version=get_version(),
         state=CoreControllersState(
             tracklist=TracklistControllerState(
                 repeat=True,
@@ -315,7 +315,7 @@ def test_load_state_with_data(core_with_state_file, state_file):
 
 def test_delete_state_file_on_restore(core_with_state_file, state_file):
     state = StoredState(
-        version=mopidy.__version__,
+        version=get_version(),
         state=CoreControllersState(),
     )
     state.dump(state_file)
