@@ -9,3 +9,6 @@
 /site/
 __pycache__/
 mopidy.log*
+.envrc
+.direnv
+result

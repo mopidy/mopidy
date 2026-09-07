@@ -1,0 +1,24 @@
+name: Nix
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  flake-check:
+    # This workflow is intentionally separate from the main CI matrix.
+    # Its purpose is to warn us when the flake-backed development environment
+    # stops evaluating/building cleanly, so `nix shell`/`nix develop` keep working.
+    name: Keep Nix shell working
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: cachix/install-nix-action@v31
+      - name: Verify flake outputs used by the Nix shell
+        run: nix flake check
