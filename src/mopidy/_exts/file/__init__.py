@@ -23,6 +23,7 @@ class Extension(ext.Extension):
         schema["show_dotfiles"] = config.Boolean(optional=True)
         schema["follow_symlinks"] = config.Boolean(optional=True)
         schema["metadata_timeout"] = config.Integer(optional=True)
+        schema["skip_metadata"] = config.Boolean(optional=True)
         return schema
 
     @override

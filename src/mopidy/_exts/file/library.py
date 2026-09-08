@@ -42,6 +42,8 @@ class FileLibraryProvider(backend.LibraryProvider):
 
         self._scanner = scan.Scanner(timeout=ext_config["metadata_timeout"])
 
+        self._skip_metadata = ext_config["skip_metadata"]
+
         self.root_directory = self._get_root_directory()
 
     @override
@@ -102,15 +104,18 @@ class FileLibraryProvider(backend.LibraryProvider):
         logger.debug("Looking up file URI: %s", uri)
         local_path = paths.uri_to_path(uri)
 
-        try:
-            result = self._scanner.scan(uri)
-            track = tags.convert_tags_to_track(
-                result.tags,
-                uri=uri,
-                length=result.duration,
-            )
-        except exceptions.ScannerError as e:
-            logger.warning("Failed looking up %s: %s", uri, e)
+        if not self._skip_metadata:
+            try:
+                result = self._scanner.scan(uri)
+                track = tags.convert_tags_to_track(
+                    result.tags,
+                    uri=uri,
+                    length=result.duration,
+                )
+            except exceptions.ScannerError as e:
+                logger.warning("Failed looking up %s: %s", uri, e)
+                track = Track(uri=uri)
+        else:
             track = Track(uri=uri)
 
         if not track.name:
