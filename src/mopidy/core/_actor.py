@@ -126,6 +126,10 @@ class Core(
         self.playback._on_position_changed(position)
 
     @override
+    def stream_error(self, error: str) -> None:
+        self.playback._on_stream_error(error)
+
+    @override
     def state_changed(
         self,
         old_state: PlaybackState,

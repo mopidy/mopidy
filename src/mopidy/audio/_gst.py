@@ -316,6 +316,8 @@ class _Handler:
         gst_logger.error(f"GStreamer error: {error.message}")
         gst_logger.debug(f"Got ERROR bus message: error={error!r} debug={debug!r}")
 
+        AudioListener.send("stream_error", error=error.message)
+
         # TODO: is this needed?
         self._audio.stop_playback()
 
