@@ -8,6 +8,21 @@ For older releases, see:
 [Changelog 1.x](1.x.md) ·
 [Changelog 0.x](0.x.md)
 
+## v4.0.4 (UNRELEASED)
+
+- Deps: Fix support for Cyclopts 3.12, the version in Debian stable. Cyclopts
+  divides by the token count of the inner type when it converts a tuple, and a
+  `bool` has no tokens, so `mopidy --verbose` stopped with a
+  `ZeroDivisionError`. The systemd service passes `--verbose`, so Mopidy could
+  not start at all on Debian 13. The parameter is a list now, which works with
+  all supported Cyclopts versions. (!2300)
+
+- Docs: Install Mopidy-Spotify from the APT repository in the Debian guide, now
+  that the extension is packaged there. (!2299)
+
+- Packaging: Add `Keywords` to the desktop file and `Documentation` to the
+  systemd service, as Lintian asks for.
+
 ## v4.0.3 (2026-09-06)
 
 - Config: Use `platformdirs` to find the XDG user directories that path config
