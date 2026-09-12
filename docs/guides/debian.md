@@ -8,10 +8,8 @@ If you're using a Raspberry Pi, we recommend following the instructions in the
 [Raspberry Pi guide](../guides/raspberrypi.md) before following the instructions
 in this guide to install and configure Mopidy.
 
-In this guide, we'll show how to install Mopidy and the mopidy-mpd extension
-using the APT repository, and then how to install the mopidy-spotify extension
-using pip, since it's not available in the APT repository at the time of
-writing.
+In this guide, we'll show how to install Mopidy and both the mopidy-mpd and
+mopidy-spotify extensions from the APT repository.
 
 For any other extensions, please follow our [general installation
 instructions](../installation/index.md). The general instructions cover both
@@ -47,39 +45,66 @@ You can now run `mopidy deps` to check that everything is installed correctly:
 ```console
 $ mopidy deps
 Executable: /usr/bin/mopidy
-Platform: Linux-6.12.75+rpt-rpi-v8-aarch64-with-glibc2.41
+Platform: Linux-6.18.39+rpt-rpi-v8-aarch64-with-glibc2.41
 Python: CPython 3.13.5 from /usr/lib/python3.13
-Mopidy: 3.4.2 from /usr/lib/python3/dist-packages
-Mopidy-MPD: 3.3.0 from /usr/lib/python3/dist-packages
-GStreamer: 1.26.2.0 from /usr/lib/python3/dist-packages/gi
-  Detailed information:
-    Python wrapper: python-gi 3.50.0
-    Relevant elements:
-      Found:
-        uridecodebin
-        souphttpsrc
-        appsrc
-        alsasink
-        osssink
-        oss4sink
-        pulsesink
-        id3demux
-        id3v2mux
-        lamemp3enc
-        mpegaudioparse
-        mpg123audiodec
-        vorbisdec
-        vorbisenc
-        vorbisparse
-        oggdemux
-        oggmux
-        oggparse
-        flacdec
-        flacparse
-        shout2send
-      Not found:
-        flump3dec
-        mad
+mopidy: 4.0.3 from /usr/lib/python3/dist-packages
+  cyclopts: 3.12.0 from /usr/lib/python3/dist-packages
+    attrs: 25.3.0 from /usr/lib/python3/dist-packages
+    docstring-parser: 0.16 from /usr/lib/python3/dist-packages
+    importlib-metadata: not found
+    rich: 13.9.4 from /usr/lib/python3/dist-packages
+      markdown-it-py: 3.0.0 from /usr/lib/python3/dist-packages
+        mdurl: 0.1.2 from /usr/lib/python3/dist-packages
+      pygments: 2.18.0 from /usr/lib/python3/dist-packages
+      typing-extensions: 4.13.2 from /usr/lib/python3/dist-packages
+    rich-rst: 1.3.1 from /usr/lib/python3/dist-packages
+      docutils: 0.21.2 from /usr/lib/python3/dist-packages
+  httpx: 0.28.1 from /usr/lib/python3/dist-packages
+    anyio: 4.8.0 from /usr/lib/python3/dist-packages
+      exceptiongroup: not found
+      idna: 3.10 from /usr/lib/python3/dist-packages
+      sniffio: 1.3.1 from /usr/lib/python3/dist-packages
+      typing_extensions: 4.13.2 from /usr/lib/python3/dist-packages
+    certifi: 2025.1.31 from /usr/lib/python3/dist-packages
+    httpcore: 1.0.7 from /usr/lib/python3/dist-packages
+      h11: 0.14.0 from /usr/lib/python3/dist-packages
+  platformdirs: 4.3.7 from /usr/lib/python3/dist-packages
+  pydantic: 2.10.6 from /usr/lib/python3/dist-packages
+    annotated-types: 0.7.0 from /usr/lib/python3/dist-packages
+    pydantic-core: 2.27.2 from /usr/lib/python3/dist-packages
+  pygobject: 3.50.0 from /usr/lib/python3/dist-packages
+  pykka: 4.1.1 from /usr/lib/python3/dist-packages
+  rich: 13.9.4 from /usr/lib/python3/dist-packages
+  tornado: 6.4.2 from /usr/lib/python3/dist-packages
+mopidy-mpd: 4.0.1 from /usr/lib/python3/dist-packages
+  mopidy: 4.0.3 from /usr/lib/python3/dist-packages
+  pygobject: 3.50.0 from /usr/lib/python3/dist-packages
+  pykka: 4.1.1 from /usr/lib/python3/dist-packages
+GStreamer: 1.26.2.0
+  Available elements:
+    uridecodebin: 1.26.2
+    souphttpsrc: 1.26.2
+    alsasink: 1.26.2
+    osssink: 1.26.2
+    oss4sink: 1.26.2
+    pulsesink: 1.26.2
+    id3demux: 1.26.2
+    id3v2mux: 1.26.2
+    lamemp3enc: 1.26.2
+    mpegaudioparse: 1.26.2
+    mpg123audiodec: 1.26.2
+    vorbisdec: 1.26.2
+    vorbisenc: 1.26.2
+    vorbisparse: 1.26.2
+    oggdemux: 1.26.2
+    oggmux: 1.26.2
+    oggparse: 1.26.2
+    flacdec: 1.26.2
+    flacparse: 1.26.2
+    shout2send: 1.26.2
+  Missing elements:
+    flump3dec
+    mad
 ```
 
 ## Enable and start the service
@@ -207,31 +232,23 @@ $ ncmpcpp -h <ip-address>
 
 ## Install the Spotify extension
 
-The [mopidy-spotify](https://mopidy.com/ext/spotify/) extension isn't available
-in the APT repository, so if you want to use that, you can install it using pip.
+The [mopidy-spotify](https://mopidy.com/ext/spotify/) extension is in the same
+APT repository as Mopidy itself:
 
 ```console
-$ sudo apt install python3-pip
-$ sudo python3 -m pip install --break-system-packages mopidy-spotify
+$ sudo apt install mopidy-spotify
 ```
 
-As described in [mopidy-spotify's
-README](https://github.com/mopidy/mopidy-spotify), you also need to install the
-`gst-plugin-spotify` GStreamer plugin.
-
-We're maintaining
-[gst-plugins-rs-build](https://github.com/mopidy/gst-plugins-rs-build) to
-provide prebuilt Debian packages for the `gst-plugin-spotify` plugin. To
-install it, add the apt.mopidy.com repository to your APT sources, as described
-above, and install the package using `apt`:
-
-```console
-$ sudo apt install gst-plugin-spotify
-```
-
-Alternatively, pick the latest version of the plugin from
-the [gst-plugins-rs-build releases](https://github.com/mopidy/gst-plugins-rs-build/releases),
-and install it using `sudo apt ./path/to/package.deb`.
+/// note | The GStreamer Spotify plugin
+The extension needs the `gst-plugin-spotify` GStreamer plugin for the playback.
+The `mopidy-spotify` package depends on that plugin, so `apt` installs it for
+you. Debian does not have the plugin, so we maintain
+[gst-plugins-rs-build](https://github.com/mopidy/gst-plugins-rs-build) to build
+it, and the APT repository has it for amd64, arm64, armhf and riscv64. On any
+other architecture, you must build the plugin yourself, as described in the
+[gst-plugins-rs-build
+README](https://github.com/mopidy/gst-plugins-rs-build#readme).
+///
 
 You can now check that the plugin was installed correctly by running
 `gst-inspect-1.0 spotify`:
@@ -242,11 +259,11 @@ Plugin Details:
   Name                     spotify
   Description              GStreamer Spotify Plugin
   Filename                 /usr/lib/aarch64-linux-gnu/gstreamer-1.0/libgstspotify.so
-  Version                  0.15.0-alpha.1-3aab047
+  Version                  0.16.0-alpha-b9abdbc
   License                  MPL
   Source module            gst-plugin-spotify
   Documentation            https://gstreamer.freedesktop.org/documentation/spotify/
-  Source release date      2025-11-18
+  Source release date      2026-08-20
   Binary package           gst-plugin-spotify
   Origin URL               https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs
 
@@ -263,24 +280,25 @@ extension:
 ```console hl_lines="7-15"
 $ mopidy deps
 Executable: /usr/bin/mopidy
-Platform: Linux-6.12.75+rpt-rpi-v8-aarch64-with-glibc2.41
+Platform: Linux-6.18.39+rpt-rpi-v8-aarch64-with-glibc2.41
 Python: CPython 3.13.5 from /usr/lib/python3.13
-Mopidy: 3.4.2 from /usr/lib/python3/dist-packages
-Mopidy-MPD: 3.3.0 from /usr/lib/python3/dist-packages
-Mopidy-Spotify: 5.0.0a3 from /usr/local/lib/python3.13/dist-packages
-  Mopidy: 3.4.2 from /usr/lib/python3/dist-packages
-  Pykka: 4.1.1 from /usr/lib/python3/dist-packages
+mopidy: 4.0.3 from /usr/lib/python3/dist-packages
+  ...
+mopidy-mpd: 4.0.1 from /usr/lib/python3/dist-packages
+  ...
+mopidy-spotify: 5.0.1 from /usr/lib/python3/dist-packages
+  mopidy: 4.0.3 from /usr/lib/python3/dist-packages
+  pykka: 4.1.1 from /usr/lib/python3/dist-packages
   requests: 2.32.3 from /usr/lib/python3/dist-packages
-    charset-normalizer: 3.4.2 from /usr/lib/python3/dist-packages
-    idna: 3.10 from /usr/lib/python3/dist-packages
+    charset_normalizer: 3.4.2 from /usr/lib/python3/dist-packages
     urllib3: 2.3.0 from /usr/lib/python3/dist-packages
-    certifi: 2025.1.31 from /usr/lib/python3/dist-packages
-  setuptools: 82.0.1 from /usr/local/lib/python3.13/dist-packages
-GStreamer: 1.26.2.0 from /usr/lib/python3/dist-packages/gi
-  Detailed information:
-    Python wrapper: python-gi 3.50.0
-    Relevant elements:
-      ...
+GStreamer: 1.26.2.0
+  Available elements:
+    ...
+    spotifyaudiosrc: 0.16.0-alpha-b9abdbc
+    ...
+  Missing elements:
+    ...
 ```
 
 ## Authenticate with Spotify
