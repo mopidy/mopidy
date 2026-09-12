@@ -1,5 +1,6 @@
 [Unit]
 Description=Mopidy music server
+Documentation=https://docs.mopidy.com/
 After=avahi-daemon.service
 After=dbus.service
 After=network-online.target

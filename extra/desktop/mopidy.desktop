@@ -8,4 +8,5 @@ TryExec=mopidy
 Exec=mopidy
 Terminal=true
 Categories=AudioVideo;Audio;Player;ConsoleOnly;
+Keywords=music;audio;player;server;stream;radio;MPD;
 StartupNotify=true
