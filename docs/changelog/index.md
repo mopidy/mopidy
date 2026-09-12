@@ -8,7 +8,7 @@ For older releases, see:
 [Changelog 1.x](1.x.md) ·
 [Changelog 0.x](0.x.md)
 
-## v4.0.4 (UNRELEASED)
+## v4.0.4 (2026-09-13)
 
 - Deps: Fix support for Cyclopts 3.12, the version in Debian stable. Cyclopts
   divides by the token count of the inner type when it converts a tuple, and a
