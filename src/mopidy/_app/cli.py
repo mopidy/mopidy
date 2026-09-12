@@ -11,10 +11,10 @@ from typing import Annotated
 from cyclopts import App, Group, Parameter, Token
 from platformdirs import PlatformDirs
 
-import mopidy
 from mopidy._app import config, deps, logs, process, server
 from mopidy._app.config import ConfigLoader, ConfigManager, ConfigOverrides
 from mopidy._app.extensions import ExtensionManager, ExtensionStatus
+from mopidy._lib.version import get_version
 from mopidy.config import Config
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 def early_setup() -> ExtensionManager | None:
     try:
         logs.bootstrap_delayed_logging()
-        logger.info(f"Starting Mopidy {mopidy.__version__}")
+        logger.info(f"Starting Mopidy {get_version()}")
 
         # Setup signal handlers so we can always shut down cleanly
         process.setup_signal_handlers()
