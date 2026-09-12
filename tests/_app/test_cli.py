@@ -74,3 +74,17 @@ def test_config_overrides_multiple_values() -> None:
             "hostname": "127.0.0.1",
         }
     }
+
+
+def test_verbosity_from_repeated_parameters() -> None:
+    # Not given, so the parameter is absent from the bound arguments
+    _, bound, _ = cli.app.meta.parse_args(["run"])
+    assert sum(bound.arguments.get("verbosity") or []) == 0
+
+    # Given once
+    _, bound, _ = cli.app.meta.parse_args(["run", "-v"])
+    assert sum(bound.arguments["verbosity"] or []) == 1
+
+    # Given twice
+    _, bound, _ = cli.app.meta.parse_args(["run", "--verbose", "--verbose"])
+    assert sum(bound.arguments["verbosity"] or []) == 2

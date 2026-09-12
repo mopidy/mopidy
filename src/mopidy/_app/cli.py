@@ -129,14 +129,19 @@ def launcher(
         ),
     ] = False,
     verbosity: Annotated[
-        tuple[bool, ...],
+        list[bool] | None,
         Parameter(
+            # NOTE: Do not make this a tuple. cyclopts 3.12, which Debian 13
+            # has, divides by the token count of the inner type when it
+            # converts a tuple, and a bool has no tokens. That gives a
+            # ZeroDivisionError as soon as anyone passes --verbose.
+            #
             # NOTE: When upgrading to cyclopts >= 4.1, this can be changed to a
             # field of type int with Parameter(count=True).
             name=("--verbose", "-v"),
             help="Increase amount of output. Repeat up to four times for more.",
         ),
-    ] = (),
+    ] = None,
 ) -> None:
     """Common setup for all Mopidy commands.
 
@@ -174,7 +179,7 @@ def launcher(
         process.create_app_dirs(config_manager.config)
 
         # Start regular logging
-        verbosity_level = sum(verbosity)
+        verbosity_level = sum(verbosity or [])
         logs.setup_logging(
             config=config_manager.config,
             verbosity_level=-1 if quiet else verbosity_level,
