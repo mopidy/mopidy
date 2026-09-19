@@ -37,200 +37,6 @@ _GST_STATE_MAPPING: dict[Gst.State, PlaybackState] = {
 }
 
 
-class _GstMessageHandler:
-    def __init__(self, audio: GstAudio) -> None:
-        self._audio = audio
-
-    def on_message(self, _bus: Gst.Bus, msg: Gst.Message) -> None:  # noqa: C901
-        if msg.type == Gst.MessageType.STATE_CHANGED:
-            if (pipeline := self._audio._pipeline) is None or (
-                msg.src != pipeline.playbin
-            ):
-                return
-            old_state, new_state, pending_state = msg.parse_state_changed()
-            self.on_playbin_state_changed(old_state, new_state, pending_state)
-        elif msg.type == Gst.MessageType.BUFFERING:
-            self.on_buffering(msg.parse_buffering(), msg.get_structure())
-        elif msg.type == Gst.MessageType.EOS:
-            self.on_end_of_stream()
-        elif msg.type == Gst.MessageType.ERROR:
-            error, debug = msg.parse_error()
-            self.on_error(error, debug)
-        elif msg.type == Gst.MessageType.WARNING:
-            error, debug = msg.parse_warning()
-            self.on_warning(error, debug)
-        elif msg.type == Gst.MessageType.ASYNC_DONE:
-            self.on_async_done()
-        elif msg.type == Gst.MessageType.TAG:
-            taglist = msg.parse_tag()
-            self.on_tag(taglist)
-        elif msg.type == Gst.MessageType.ELEMENT:
-            if GstPbutils.is_missing_plugin_message(msg):
-                self.on_missing_plugin(msg)
-        elif msg.type == Gst.MessageType.STREAM_START:
-            self.on_stream_start()
-
-    def on_playbin_state_changed(
-        self,
-        old_state: Gst.State,
-        new_state: Gst.State,
-        pending_state: Gst.State,
-    ) -> None:
-        gst_logger.debug(
-            "Got STATE_CHANGED bus message: old=%s new=%s pending=%s",
-            old_state.value_name,
-            new_state.value_name,
-            pending_state.value_name,
-        )
-
-        if new_state == Gst.State.READY and pending_state == Gst.State.NULL:
-            # HACK: We're not called on the last state change when going down to
-            # NULL, so we rewrite the second to last call to get the expected
-            # behavior.
-            new_state = Gst.State.NULL
-            pending_state = Gst.State.VOID_PENDING
-
-        if pending_state != Gst.State.VOID_PENDING:
-            return  # Ignore intermediate state changes
-
-        if new_state == Gst.State.READY:
-            return  # Ignore READY state as it's GStreamer specific
-
-        new_playback_state = _GST_STATE_MAPPING[new_state]
-        old_playback_state, self._audio.state = self._audio.state, new_playback_state
-
-        target_playback_state = _GST_STATE_MAPPING.get(self._audio._target_state)
-        if target_playback_state is None:
-            # HACK: Workaround for #1430, to be fixed properly by #1222.
-            logger.warning("Race condition happened. See #1222 and #1430.")
-            return
-        if target_playback_state == new_playback_state:
-            target_playback_state = None
-
-        logger.debug(
-            "Audio event: state_changed(old_state=%s, new_state=%s, target_state=%s)",
-            old_playback_state,
-            new_playback_state,
-            target_playback_state,
-        )
-        AudioListener.send(
-            "state_changed",
-            old_state=old_playback_state,
-            new_state=new_playback_state,
-            target_state=target_playback_state,
-        )
-        if new_playback_state == PlaybackState.STOPPED:
-            logger.debug("Audio event: stream_changed(uri=None)")
-            AudioListener.send("stream_changed", uri=None)
-
-        if "GST_DEBUG_DUMP_DOT_DIR" in os.environ:
-            assert self._audio._pipeline
-            self._audio._pipeline.debug_to_dot_file("mopidy")
-
-    def on_buffering(
-        self,
-        percent: int,
-        structure: Gst.Structure | None = None,
-    ) -> None:
-        assert self._audio._pipeline
-
-        if self._audio._target_state < Gst.State.PAUSED:
-            gst_logger.debug("Skip buffering during track change.")
-            return
-
-        if structure is not None and structure.has_field("buffering-mode"):
-            buffering_mode = structure.get_enum("buffering-mode", Gst.BufferingMode)
-            if buffering_mode == Gst.BufferingMode.LIVE:
-                return  # Live sources stall in paused.
-
-        level = logs.TRACE_LOG_LEVEL
-        if percent < 10 and not self._audio._buffering:
-            self._audio._pipeline.set_state(Gst.State.PAUSED)
-            self._audio._buffering = True
-            level = logging.DEBUG
-        if percent == 100:
-            self._audio._buffering = False
-            if self._audio._target_state == Gst.State.PLAYING:
-                self._audio._pipeline.set_state(Gst.State.PLAYING)
-            level = logging.DEBUG
-
-        gst_logger.log(level, "Got BUFFERING bus message: percent=%d%%", percent)
-
-    def on_end_of_stream(self) -> None:
-        gst_logger.debug("Got EOS (end of stream) bus message.")
-        logger.debug("Audio event: reached_end_of_stream()")
-        self._audio._tags = {}
-        AudioListener.send("reached_end_of_stream")
-
-    def on_error(self, error: GLib.Error, debug: str) -> None:
-        gst_logger.error(f"GStreamer error: {error.message}")
-        gst_logger.debug(f"Got ERROR bus message: error={error!r} debug={debug!r}")
-
-        # TODO: is this needed?
-        self._audio.stop_playback()
-
-    def on_warning(self, error: GLib.Error, debug: str) -> None:
-        gst_logger.warning(f"GStreamer warning: {error.message}")
-        gst_logger.debug(f"Got WARNING bus message: error={error!r} debug={debug!r}")
-
-    def on_async_done(self) -> None:
-        gst_logger.debug("Got ASYNC_DONE bus message.")
-
-    def on_tag(self, taglist: Gst.TagList) -> None:
-        tags = tags_lib.convert_taglist(taglist)
-        gst_logger.debug(f"Got TAG bus message: tags={tags_lib.repr_tags(tags)}")
-
-        # Postpone emitting tags until stream start.
-        if self._audio._pending_tags is not None:
-            self._audio._pending_tags.update(tags)
-            return
-
-        # TODO: Add proper tests for only emitting changed tags.
-        unique = object()
-        changed = []
-        for key, value in tags.items():
-            # Update any tags that changed, and store changed keys.
-            if self._audio._tags.get(key, unique) != value:
-                self._audio._tags[key] = value
-                changed.append(key)
-
-        if changed:
-            logger.debug("Audio event: tags_changed(tags=%r)", changed)
-            AudioListener.send("tags_changed", tags=changed)
-
-    def on_missing_plugin(self, msg: Gst.Message) -> None:
-        desc = GstPbutils.missing_plugin_message_get_description(msg)
-        debug = GstPbutils.missing_plugin_message_get_installer_detail(msg)
-        gst_logger.debug("Got missing-plugin bus message: description=%r", desc)
-        logger.warning("Could not find a %s to handle media.", desc)
-        if GstPbutils.install_plugins_supported():
-            logger.info(
-                "You might be able to fix this by running: 'gst-installer \"%s\"'",
-                debug,
-            )
-        # TODO: store the missing plugins installer info in a file so we can
-        # can provide a 'mopidy install-missing-plugins' if the system has the
-        # required helper installed?
-
-    def on_stream_start(self) -> None:
-        gst_logger.debug("Got STREAM_START bus message")
-        uri = self._audio._pending_uri
-        logger.debug("Audio event: stream_changed(uri=%r)", uri)
-        AudioListener.send("stream_changed", uri=uri)
-
-        # Emit any postponed tags that we got after about-to-finish.
-        tags, self._audio._pending_tags = self._audio._pending_tags, None
-        self._audio._tags = tags or {}
-
-        if tags:
-            logger.debug("Audio event: tags_changed(tags=%r)", tags.keys())
-            AudioListener.send("tags_changed", tags=tags.keys())
-
-    def on_position(self, position: DurationMs) -> None:
-        logger.debug("Audio event: position_changed(position=%r)", position)
-        AudioListener.send("position_changed", position=position)
-
-
 # TODO: create a player class which replaces the actors internals
 class GstAudio(Audio, pykka.ThreadingActor):
     """Audio output through [GStreamer](https://gstreamer.freedesktop.org/)."""
@@ -256,8 +62,6 @@ class GstAudio(Audio, pykka.ThreadingActor):
         self._about_to_finish_callback: Callable | None = None
         self._source_setup_callback: Callable | None = None
 
-        self._handler = _GstMessageHandler(self)
-
         if mixer and self._config["audio"]["mixer"] == "software":
             mixer = cast("SoftwareMixerProxy", mixer)
             self.mixer = pykka.traversable(GstSoftwareMixerAdapter(mixer))
@@ -269,8 +73,8 @@ class GstAudio(Audio, pykka.ThreadingActor):
             self._setup_preferences()
             self._pipeline = GstPipeline(
                 self._config,
-                on_message=self._handler.on_message,
-                on_position=self._handler.on_position,
+                on_message=self._on_message,
+                on_position=self._on_position,
                 on_about_to_finish=self._on_about_to_finish,
                 on_source_setup=self._on_source_setup,
             )
@@ -328,6 +132,193 @@ class GstAudio(Audio, pykka.ThreadingActor):
             source.set_live(True)
 
         setup_proxy(source, self._config["proxy"])
+
+    def _on_message(self, _bus: Gst.Bus, msg: Gst.Message) -> None:  # noqa: C901
+        if msg.type == Gst.MessageType.STATE_CHANGED:
+            if (pipeline := self._pipeline) is None or (msg.src != pipeline.playbin):
+                return
+            old_state, new_state, pending_state = msg.parse_state_changed()
+            self._on_playbin_state_changed(old_state, new_state, pending_state)
+        elif msg.type == Gst.MessageType.BUFFERING:
+            self._on_buffering(msg.parse_buffering(), msg.get_structure())
+        elif msg.type == Gst.MessageType.EOS:
+            self._on_end_of_stream()
+        elif msg.type == Gst.MessageType.ERROR:
+            error, debug = msg.parse_error()
+            self._on_error(error, debug)
+        elif msg.type == Gst.MessageType.WARNING:
+            error, debug = msg.parse_warning()
+            self._on_warning(error, debug)
+        elif msg.type == Gst.MessageType.ASYNC_DONE:
+            self._on_async_done()
+        elif msg.type == Gst.MessageType.TAG:
+            taglist = msg.parse_tag()
+            self._on_tag(taglist)
+        elif msg.type == Gst.MessageType.ELEMENT:
+            if GstPbutils.is_missing_plugin_message(msg):
+                self._on_missing_plugin(msg)
+        elif msg.type == Gst.MessageType.STREAM_START:
+            self._on_stream_start()
+
+    def _on_playbin_state_changed(
+        self,
+        old_state: Gst.State,
+        new_state: Gst.State,
+        pending_state: Gst.State,
+    ) -> None:
+        gst_logger.debug(
+            "Got STATE_CHANGED bus message: old=%s new=%s pending=%s",
+            old_state.value_name,
+            new_state.value_name,
+            pending_state.value_name,
+        )
+
+        if new_state == Gst.State.READY and pending_state == Gst.State.NULL:
+            # HACK: We're not called on the last state change when going down to
+            # NULL, so we rewrite the second to last call to get the expected
+            # behavior.
+            new_state = Gst.State.NULL
+            pending_state = Gst.State.VOID_PENDING
+
+        if pending_state != Gst.State.VOID_PENDING:
+            return  # Ignore intermediate state changes
+
+        if new_state == Gst.State.READY:
+            return  # Ignore READY state as it's GStreamer specific
+
+        new_playback_state = _GST_STATE_MAPPING[new_state]
+        old_playback_state, self.state = self.state, new_playback_state
+
+        target_playback_state = _GST_STATE_MAPPING.get(self._target_state)
+        if target_playback_state is None:
+            # HACK: Workaround for #1430, to be fixed properly by #1222.
+            logger.warning("Race condition happened. See #1222 and #1430.")
+            return
+        if target_playback_state == new_playback_state:
+            target_playback_state = None
+
+        logger.debug(
+            "Audio event: state_changed(old_state=%s, new_state=%s, target_state=%s)",
+            old_playback_state,
+            new_playback_state,
+            target_playback_state,
+        )
+        AudioListener.send(
+            "state_changed",
+            old_state=old_playback_state,
+            new_state=new_playback_state,
+            target_state=target_playback_state,
+        )
+        if new_playback_state == PlaybackState.STOPPED:
+            logger.debug("Audio event: stream_changed(uri=None)")
+            AudioListener.send("stream_changed", uri=None)
+
+        if "GST_DEBUG_DUMP_DOT_DIR" in os.environ:
+            assert self._pipeline
+            self._pipeline.debug_to_dot_file("mopidy")
+
+    def _on_buffering(
+        self,
+        percent: int,
+        structure: Gst.Structure | None = None,
+    ) -> None:
+        assert self._pipeline
+
+        if self._target_state < Gst.State.PAUSED:
+            gst_logger.debug("Skip buffering during track change.")
+            return
+
+        if structure is not None and structure.has_field("buffering-mode"):
+            buffering_mode = structure.get_enum("buffering-mode", Gst.BufferingMode)
+            if buffering_mode == Gst.BufferingMode.LIVE:
+                return  # Live sources stall in paused.
+
+        level = logs.TRACE_LOG_LEVEL
+        if percent < 10 and not self._buffering:
+            self._pipeline.set_state(Gst.State.PAUSED)
+            self._buffering = True
+            level = logging.DEBUG
+        if percent == 100:
+            self._buffering = False
+            if self._target_state == Gst.State.PLAYING:
+                self._pipeline.set_state(Gst.State.PLAYING)
+            level = logging.DEBUG
+
+        gst_logger.log(level, "Got BUFFERING bus message: percent=%d%%", percent)
+
+    def _on_end_of_stream(self) -> None:
+        gst_logger.debug("Got EOS (end of stream) bus message.")
+        logger.debug("Audio event: reached_end_of_stream()")
+        self._tags = {}
+        AudioListener.send("reached_end_of_stream")
+
+    def _on_error(self, error: GLib.Error, debug: str) -> None:
+        gst_logger.error(f"GStreamer error: {error.message}")
+        gst_logger.debug(f"Got ERROR bus message: error={error!r} debug={debug!r}")
+
+        # TODO: is this needed?
+        self.stop_playback()
+
+    def _on_warning(self, error: GLib.Error, debug: str) -> None:
+        gst_logger.warning(f"GStreamer warning: {error.message}")
+        gst_logger.debug(f"Got WARNING bus message: error={error!r} debug={debug!r}")
+
+    def _on_async_done(self) -> None:
+        gst_logger.debug("Got ASYNC_DONE bus message.")
+
+    def _on_tag(self, taglist: Gst.TagList) -> None:
+        tags = tags_lib.convert_taglist(taglist)
+        gst_logger.debug(f"Got TAG bus message: tags={tags_lib.repr_tags(tags)}")
+
+        # Postpone emitting tags until stream start.
+        if self._pending_tags is not None:
+            self._pending_tags.update(tags)
+            return
+
+        # TODO: Add proper tests for only emitting changed tags.
+        unique = object()
+        changed = []
+        for key, value in tags.items():
+            # Update any tags that changed, and store changed keys.
+            if self._tags.get(key, unique) != value:
+                self._tags[key] = value
+                changed.append(key)
+
+        if changed:
+            logger.debug("Audio event: tags_changed(tags=%r)", changed)
+            AudioListener.send("tags_changed", tags=changed)
+
+    def _on_missing_plugin(self, msg: Gst.Message) -> None:
+        desc = GstPbutils.missing_plugin_message_get_description(msg)
+        debug = GstPbutils.missing_plugin_message_get_installer_detail(msg)
+        gst_logger.debug("Got missing-plugin bus message: description=%r", desc)
+        logger.warning("Could not find a %s to handle media.", desc)
+        if GstPbutils.install_plugins_supported():
+            logger.info(
+                "You might be able to fix this by running: 'gst-installer \"%s\"'",
+                debug,
+            )
+        # TODO: store the missing plugins installer info in a file so we can
+        # can provide a 'mopidy install-missing-plugins' if the system has the
+        # required helper installed?
+
+    def _on_stream_start(self) -> None:
+        gst_logger.debug("Got STREAM_START bus message")
+        uri = self._pending_uri
+        logger.debug("Audio event: stream_changed(uri=%r)", uri)
+        AudioListener.send("stream_changed", uri=uri)
+
+        # Emit any postponed tags that we got after about-to-finish.
+        tags, self._pending_tags = self._pending_tags, None
+        self._tags = tags or {}
+
+        if tags:
+            logger.debug("Audio event: tags_changed(tags=%r)", tags.keys())
+            AudioListener.send("tags_changed", tags=tags.keys())
+
+    def _on_position(self, position: DurationMs) -> None:
+        logger.debug("Audio event: position_changed(position=%r)", position)
+        AudioListener.send("position_changed", position=position)
 
     @override
     def set_uri(
@@ -433,4 +424,4 @@ class GstAudio(Audio, pykka.ThreadingActor):
     def testing_gst__enable_sync_handler(self) -> None:
         assert self._pipeline
 
-        self._pipeline.enable_sync_handler(self._handler.on_message)
+        self._pipeline.enable_sync_handler(self._on_message)

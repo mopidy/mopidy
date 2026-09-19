@@ -536,7 +536,7 @@ def test_state_starts_as_stopped(gst_audio):
 
 
 def test_state_does_not_change_when_in_gst_ready_state(gst_audio):
-    gst_audio._handler.on_playbin_state_changed(
+    gst_audio._on_playbin_state_changed(
         Gst.State.NULL,
         Gst.State.READY,
         Gst.State.VOID_PENDING,
@@ -546,17 +546,17 @@ def test_state_does_not_change_when_in_gst_ready_state(gst_audio):
 
 
 def test_state_changes_from_stopped_to_playing_on_play(gst_audio):
-    gst_audio._handler.on_playbin_state_changed(
+    gst_audio._on_playbin_state_changed(
         Gst.State.NULL,
         Gst.State.READY,
         Gst.State.PLAYING,
     )
-    gst_audio._handler.on_playbin_state_changed(
+    gst_audio._on_playbin_state_changed(
         Gst.State.READY,
         Gst.State.PAUSED,
         Gst.State.PLAYING,
     )
-    gst_audio._handler.on_playbin_state_changed(
+    gst_audio._on_playbin_state_changed(
         Gst.State.PAUSED,
         Gst.State.PLAYING,
         Gst.State.VOID_PENDING,
@@ -568,7 +568,7 @@ def test_state_changes_from_stopped_to_playing_on_play(gst_audio):
 def test_state_changes_from_playing_to_paused_on_pause(gst_audio):
     gst_audio.state = PlaybackState.PLAYING
 
-    gst_audio._handler.on_playbin_state_changed(
+    gst_audio._on_playbin_state_changed(
         Gst.State.PLAYING,
         Gst.State.PAUSED,
         Gst.State.VOID_PENDING,
@@ -580,18 +580,18 @@ def test_state_changes_from_playing_to_paused_on_pause(gst_audio):
 def test_state_changes_from_playing_to_stopped_on_stop(gst_audio):
     gst_audio.state = PlaybackState.PLAYING
 
-    gst_audio._handler.on_playbin_state_changed(
+    gst_audio._on_playbin_state_changed(
         Gst.State.PLAYING,
         Gst.State.PAUSED,
         Gst.State.NULL,
     )
-    gst_audio._handler.on_playbin_state_changed(
+    gst_audio._on_playbin_state_changed(
         Gst.State.PAUSED,
         Gst.State.READY,
         Gst.State.NULL,
     )
     # We never get the following call, so the logic must work without it
-    # gst_audio._handler.on_playbin_state_changed(
+    # gst_audio._on_playbin_state_changed(
     #     Gst.State.READY, Gst.State.NULL, Gst.State.VOID_PENDING)
 
     assert gst_audio.state == PlaybackState.STOPPED
@@ -602,7 +602,7 @@ def test_buffering_pause_when_buffer_empty(gst_audio, pipeline):
     pipeline.set_state.assert_called_with(Gst.State.PLAYING)
     pipeline.set_state.reset_mock()
 
-    gst_audio._handler.on_buffering(0)
+    gst_audio._on_buffering(0)
     pipeline.set_state.assert_called_with(Gst.State.PAUSED)
     assert gst_audio._buffering
 
@@ -612,7 +612,7 @@ def test_buffering_stay_paused_when_buffering_finished(gst_audio, pipeline):
     pipeline.set_state.assert_called_with(Gst.State.PAUSED)
     pipeline.set_state.reset_mock()
 
-    gst_audio._handler.on_buffering(100)
+    gst_audio._on_buffering(100)
     assert pipeline.set_state.call_count == 0
     assert not gst_audio._buffering
 
@@ -622,12 +622,12 @@ def test_buffering_change_to_paused_while_buffering(gst_audio, pipeline):
     pipeline.set_state.assert_called_with(Gst.State.PLAYING)
     pipeline.set_state.reset_mock()
 
-    gst_audio._handler.on_buffering(0)
+    gst_audio._on_buffering(0)
     pipeline.set_state.assert_called_with(Gst.State.PAUSED)
     gst_audio.pause_playback()
     pipeline.set_state.reset_mock()
 
-    gst_audio._handler.on_buffering(100)
+    gst_audio._on_buffering(100)
     assert pipeline.set_state.call_count == 0
     assert not gst_audio._buffering
 
@@ -637,7 +637,7 @@ def test_buffering_change_to_stopped_while_buffering(gst_audio, pipeline):
     pipeline.set_state.assert_called_with(Gst.State.PLAYING)
     pipeline.set_state.reset_mock()
 
-    gst_audio._handler.on_buffering(0)
+    gst_audio._on_buffering(0)
     pipeline.set_state.assert_called_with(Gst.State.PAUSED)
     pipeline.set_state.reset_mock()
 
