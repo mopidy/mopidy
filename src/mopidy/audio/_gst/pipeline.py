@@ -13,6 +13,7 @@ from mopidy.audio._gst.types import (
     GstEndOfStream,
     GstError,
     GstMissingPlugin,
+    GstState,
     GstStateChanged,
     GstStreamStart,
     GstTag,
@@ -259,7 +260,12 @@ class GstPipeline:
                 )
             case Gst.MessageType.STATE_CHANGED if message.src == self.playbin:
                 # Only the playbin's own state matters.
-                return GstStateChanged(*message.parse_state_changed())
+                old_state, new_state, pending_state = message.parse_state_changed()
+                return GstStateChanged(
+                    GstState(old_state),
+                    GstState(new_state),
+                    GstState(pending_state),
+                )
             case Gst.MessageType.STREAM_START:
                 return GstStreamStart()
             case Gst.MessageType.TAG:
@@ -318,20 +324,20 @@ class GstPipeline:
         self.playbin.set_property("flags", flags)
         self.playbin.set_property("uri", uri)
 
-    def set_state(self, state: Gst.State) -> bool:
-        """Set the raw GStreamer state of the playbin.
+    def set_state(self, state: GstState) -> bool:
+        """Set the state of the playbin.
 
         Returns `True` if successful, else `False`.
         """
-        result = self.playbin.set_state(state)
+        result = self.playbin.set_state(state.value)
         gst_logger.debug(
             "Changing state to %s: result=%s",
-            state.value_name,
+            state.name,
             result.value_name,
         )
 
         if result == Gst.StateChangeReturn.FAILURE:
-            logger.warning("Setting GStreamer state to %s failed", state.value_name)
+            logger.warning("Setting GStreamer state to %s failed", state.name)
             return False
         # TODO: at this point we could already emit stopped event instead
         # of faking it in the message handling when result=OK

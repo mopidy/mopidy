@@ -10,6 +10,7 @@ from mopidy import audio
 from mopidy._lib import paths
 from mopidy._lib.gi import Gst
 from mopidy.audio._gst.pipeline import GstPipeline
+from mopidy.audio._gst.types import GstState
 from mopidy.types import PlaybackState
 from tests import dummy_audio, path_to_data_dir
 
@@ -544,9 +545,9 @@ def test_state_starts_as_stopped(gst_audio):
 
 def test_state_does_not_change_when_in_gst_ready_state(gst_audio):
     gst_audio._on_gst_state_changed(
-        Gst.State.NULL,
-        Gst.State.READY,
-        Gst.State.VOID_PENDING,
+        GstState.NULL,
+        GstState.READY,
+        GstState.VOID_PENDING,
     )
 
     assert gst_audio.state == PlaybackState.STOPPED
@@ -554,19 +555,19 @@ def test_state_does_not_change_when_in_gst_ready_state(gst_audio):
 
 def test_state_changes_from_stopped_to_playing_on_play(gst_audio):
     gst_audio._on_gst_state_changed(
-        Gst.State.NULL,
-        Gst.State.READY,
-        Gst.State.PLAYING,
+        GstState.NULL,
+        GstState.READY,
+        GstState.PLAYING,
     )
     gst_audio._on_gst_state_changed(
-        Gst.State.READY,
-        Gst.State.PAUSED,
-        Gst.State.PLAYING,
+        GstState.READY,
+        GstState.PAUSED,
+        GstState.PLAYING,
     )
     gst_audio._on_gst_state_changed(
-        Gst.State.PAUSED,
-        Gst.State.PLAYING,
-        Gst.State.VOID_PENDING,
+        GstState.PAUSED,
+        GstState.PLAYING,
+        GstState.VOID_PENDING,
     )
 
     assert gst_audio.state == PlaybackState.PLAYING
@@ -576,9 +577,9 @@ def test_state_changes_from_playing_to_paused_on_pause(gst_audio):
     gst_audio.state = PlaybackState.PLAYING
 
     gst_audio._on_gst_state_changed(
-        Gst.State.PLAYING,
-        Gst.State.PAUSED,
-        Gst.State.VOID_PENDING,
+        GstState.PLAYING,
+        GstState.PAUSED,
+        GstState.VOID_PENDING,
     )
 
     assert gst_audio.state == PlaybackState.PAUSED
@@ -588,35 +589,35 @@ def test_state_changes_from_playing_to_stopped_on_stop(gst_audio):
     gst_audio.state = PlaybackState.PLAYING
 
     gst_audio._on_gst_state_changed(
-        Gst.State.PLAYING,
-        Gst.State.PAUSED,
-        Gst.State.NULL,
+        GstState.PLAYING,
+        GstState.PAUSED,
+        GstState.NULL,
     )
     gst_audio._on_gst_state_changed(
-        Gst.State.PAUSED,
-        Gst.State.READY,
-        Gst.State.NULL,
+        GstState.PAUSED,
+        GstState.READY,
+        GstState.NULL,
     )
     # We never get the following call, so the logic must work without it
     # gst_audio._on_gst_state_changed(
-    #     Gst.State.READY, Gst.State.NULL, Gst.State.VOID_PENDING)
+    #     GstState.READY, GstState.NULL, GstState.VOID_PENDING)
 
     assert gst_audio.state == PlaybackState.STOPPED
 
 
 def test_buffering_pause_when_buffer_empty(gst_audio, pipeline):
     gst_audio.start_playback()
-    pipeline.set_state.assert_called_with(Gst.State.PLAYING)
+    pipeline.set_state.assert_called_with(GstState.PLAYING)
     pipeline.set_state.reset_mock()
 
     gst_audio._on_gst_buffering(0, Gst.BufferingMode.STREAM)
-    pipeline.set_state.assert_called_with(Gst.State.PAUSED)
+    pipeline.set_state.assert_called_with(GstState.PAUSED)
     assert gst_audio._buffering
 
 
 def test_buffering_stay_paused_when_buffering_finished(gst_audio, pipeline):
     gst_audio.pause_playback()
-    pipeline.set_state.assert_called_with(Gst.State.PAUSED)
+    pipeline.set_state.assert_called_with(GstState.PAUSED)
     pipeline.set_state.reset_mock()
 
     gst_audio._on_gst_buffering(100, Gst.BufferingMode.STREAM)
@@ -626,11 +627,11 @@ def test_buffering_stay_paused_when_buffering_finished(gst_audio, pipeline):
 
 def test_buffering_change_to_paused_while_buffering(gst_audio, pipeline):
     gst_audio.start_playback()
-    pipeline.set_state.assert_called_with(Gst.State.PLAYING)
+    pipeline.set_state.assert_called_with(GstState.PLAYING)
     pipeline.set_state.reset_mock()
 
     gst_audio._on_gst_buffering(0, Gst.BufferingMode.STREAM)
-    pipeline.set_state.assert_called_with(Gst.State.PAUSED)
+    pipeline.set_state.assert_called_with(GstState.PAUSED)
     gst_audio.pause_playback()
     pipeline.set_state.reset_mock()
 
@@ -641,15 +642,15 @@ def test_buffering_change_to_paused_while_buffering(gst_audio, pipeline):
 
 def test_buffering_change_to_stopped_while_buffering(gst_audio, pipeline):
     gst_audio.start_playback()
-    pipeline.set_state.assert_called_with(Gst.State.PLAYING)
+    pipeline.set_state.assert_called_with(GstState.PLAYING)
     pipeline.set_state.reset_mock()
 
     gst_audio._on_gst_buffering(0, Gst.BufferingMode.STREAM)
-    pipeline.set_state.assert_called_with(Gst.State.PAUSED)
+    pipeline.set_state.assert_called_with(GstState.PAUSED)
     pipeline.set_state.reset_mock()
 
     gst_audio.stop_playback()
-    pipeline.set_state.assert_called_with(Gst.State.NULL)
+    pipeline.set_state.assert_called_with(GstState.NULL)
     assert not gst_audio._buffering
 
 

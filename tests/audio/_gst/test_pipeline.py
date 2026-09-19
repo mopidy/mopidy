@@ -12,6 +12,7 @@ from mopidy.audio._gst.pipeline import (
     GstPipeline,
     make_output_bin,
 )
+from mopidy.types import PlaybackState
 
 
 @pytest.fixture
@@ -60,7 +61,7 @@ def test_get_position_is_zero_before_playback(pipeline):
 
 
 def test_set_state_returns_true_on_success(pipeline):
-    assert pipeline.set_state(Gst.State.READY) is True
+    assert pipeline.set_state(types.GstState.READY) is True
 
 
 def test_make_output_bin_uses_a_fakesink_for_the_test_output():
@@ -112,9 +113,9 @@ def test_decode_bus_message_decodes_the_playbin_state_change(pipeline):
     )
 
     assert pipeline._decode_bus_message(message) == types.GstStateChanged(
-        old_state=Gst.State.NULL,
-        new_state=Gst.State.READY,
-        pending_state=Gst.State.PLAYING,
+        old_state=types.GstState.NULL,
+        new_state=types.GstState.READY,
+        pending_state=types.GstState.PLAYING,
     )
 
 
@@ -156,3 +157,19 @@ def test_decode_bus_message_drops_what_the_audio_layer_ignores(pipeline):
     message = Gst.Message.new_latency(pipeline.playbin)
 
     assert pipeline._decode_bus_message(message) is None
+
+
+def test_gst_state_maps_to_playback_state():
+    assert types.GstState.NULL.playback_state == PlaybackState.STOPPED
+    assert types.GstState.PAUSED.playback_state == PlaybackState.PAUSED
+    assert types.GstState.PLAYING.playback_state == PlaybackState.PLAYING
+
+
+def test_gst_state_has_no_playback_state_between_tracks():
+    assert types.GstState.READY.playback_state is None
+    assert types.GstState.VOID_PENDING.playback_state is None
+
+
+def test_gst_state_converts_both_ways():
+    assert types.GstState(Gst.State.PAUSED) is types.GstState.PAUSED
+    assert types.GstState.PAUSED.value == Gst.State.PAUSED
