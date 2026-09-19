@@ -96,16 +96,10 @@ class _Outputs(Gst.Bin):
 class GstSoftwareMixerAdapter:
     _mixer: SoftwareMixerProxy
     _element: Gst.Element | None
-    _last_volume: int | None
-    _last_mute: bool | None
-    _signals: Signals
 
     def __init__(self, mixer: SoftwareMixerProxy) -> None:
         self._mixer = mixer
         self._element = None
-        self._last_volume = None
-        self._last_mute = None
-        self._signals = Signals()
 
     def setup(
         self,
@@ -116,7 +110,6 @@ class GstSoftwareMixerAdapter:
         self._mixer.setup(gst_mixer)
 
     def teardown(self) -> None:
-        self._signals.clear()
         self._mixer.teardown()
 
     def get_volume(self) -> Percentage:
