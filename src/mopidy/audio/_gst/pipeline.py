@@ -5,7 +5,20 @@ from typing import TYPE_CHECKING, cast
 
 from mopidy import exceptions
 from mopidy._lib import process
-from mopidy._lib.gi import GLib, Gst
+from mopidy._lib.gi import GLib, Gst, GstPbutils
+from mopidy.audio import tags as tags_lib
+from mopidy.audio._gst.types import (
+    GstAsyncDone,
+    GstBuffering,
+    GstBusMessage,
+    GstEndOfStream,
+    GstError,
+    GstMissingPlugin,
+    GstStateChanged,
+    GstStreamStart,
+    GstTag,
+    GstWarning,
+)
 from mopidy.audio._utils import (
     Signals,
     clocktime_to_millisecond,
@@ -121,7 +134,7 @@ class GstPipeline:
         self,
         config: Config,
         *,
-        on_message: Callable[[Gst.Bus, Gst.Message], None],
+        on_bus_message: Callable[[GstBusMessage], None],
         on_position: Callable[[DurationMs], None],
         on_about_to_finish: Callable[[Gst.Element], None],
         on_source_setup: Callable[[Gst.Element, Gst.Element], None],
@@ -132,7 +145,7 @@ class GstPipeline:
         self._pad: Gst.Pad | None = None
 
         self.playbin = self._make_playbin(on_about_to_finish, on_source_setup)
-        self._setup_message_handling(on_message)
+        self._setup_message_handling(on_bus_message)
         self.output_bin = make_output_bin(self._config["audio"]["output"])
         self._setup_event_handling(on_position)
         self.queue, self.volume = self._make_audio_sink()
@@ -205,16 +218,60 @@ class GstPipeline:
 
     def _setup_message_handling(
         self,
-        on_message: Callable[[Gst.Bus, Gst.Message], None],
+        on_bus_message: Callable[[GstBusMessage], None],
     ) -> None:
-        def sync_handler(bus: Gst.Bus, message: Gst.Message) -> Gst.BusSyncReply:
-            on_message(bus, message)
+        def sync_handler(_bus: Gst.Bus, message: Gst.Message) -> Gst.BusSyncReply:
+            if (decoded := self._decode_bus_message(message)) is not None:
+                on_bus_message(decoded)
             return Gst.BusSyncReply.DROP
 
         if (bus := self.playbin.get_bus()) is None:
             return
 
         bus.set_sync_handler(sync_handler)
+
+    def _decode_bus_message(  # noqa: PLR0911
+        self,
+        message: Gst.Message,
+    ) -> GstBusMessage | None:
+        """Turn a bus message into one of our records, or drop it.
+
+        Runs on the GStreamer thread that posted the message. The parse
+        methods only read the structure the message already carries, so they
+        take no lock and cannot block that thread.
+        """
+        match message.type:
+            case Gst.MessageType.ASYNC_DONE:
+                return GstAsyncDone()
+            case Gst.MessageType.BUFFERING:
+                mode, _, _, _ = message.parse_buffering_stats()
+                return GstBuffering(message.parse_buffering(), mode)
+            case Gst.MessageType.EOS:
+                return GstEndOfStream()
+            case Gst.MessageType.ERROR:
+                return GstError(*message.parse_error())
+            case Gst.MessageType.ELEMENT if GstPbutils.is_missing_plugin_message(
+                message
+            ):
+                return GstMissingPlugin(
+                    description=GstPbutils.missing_plugin_message_get_description(
+                        message
+                    ),
+                    installer_detail=(
+                        GstPbutils.missing_plugin_message_get_installer_detail(message)
+                    ),
+                )
+            case Gst.MessageType.STATE_CHANGED if message.src == self.playbin:
+                # Only the playbin's own state matters.
+                return GstStateChanged(*message.parse_state_changed())
+            case Gst.MessageType.STREAM_START:
+                return GstStreamStart()
+            case Gst.MessageType.TAG:
+                return GstTag(tags_lib.convert_taglist(message.parse_tag()))
+            case Gst.MessageType.WARNING:
+                return GstWarning(*message.parse_warning())
+            case _:
+                return None
 
     def _setup_event_handling(
         self,
