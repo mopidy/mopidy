@@ -6,7 +6,12 @@ from typing import TYPE_CHECKING, cast
 from mopidy import exceptions
 from mopidy._lib import process
 from mopidy._lib.gi import GLib, Gst
-from mopidy.audio._utils import Signals
+from mopidy.audio._utils import (
+    Signals,
+    clocktime_to_millisecond,
+    millisecond_to_clocktime,
+)
+from mopidy.types import DurationMs
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -221,6 +226,57 @@ class GstPipeline:
             Gst.PadProbeType.EVENT_BOTH,
             on_pad_event,
         )
+
+    def set_state(self, state: Gst.State) -> bool:
+        """Set the raw GStreamer state of the playbin.
+
+        Returns `True` if successful, else `False`.
+        """
+        result = self.playbin.set_state(state)
+        gst_logger.debug(
+            "Changing state to %s: result=%s",
+            state.value_name,
+            result.value_name,
+        )
+
+        if result == Gst.StateChangeReturn.FAILURE:
+            logger.warning("Setting GStreamer state to %s failed", state.value_name)
+            return False
+        # TODO: at this point we could already emit stopped event instead
+        # of faking it in the message handling when result=OK
+        return True
+
+    def get_position(self) -> DurationMs:
+        """Get the position of the playbin in milliseconds."""
+        success, position = self.playbin.query_position(Gst.Format.TIME)
+
+        if not success:
+            # TODO: take state into account for this and possibly also return
+            # None as the unknown value instead of zero?
+            logger.debug("Position query failed")
+            return DurationMs(0)
+
+        return clocktime_to_millisecond(position)
+
+    def seek(self, position: DurationMs) -> bool:
+        """Seek to a position in milliseconds."""
+        # TODO: double check seek flags in use.
+        gst_position = millisecond_to_clocktime(position)
+        gst_logger.debug("Sending flushing seek: position=%r", gst_position)
+        # Send seek event to the queue not the playbin. The default behavior
+        # for bins is to forward this event to all sinks. Which results in
+        # duplicate seek events making it to appsrc (which we no longer use).
+        # Since elements are not allowed to act on the seek event, only modify
+        # it, this should be safe to do.
+        return self.queue.seek_simple(
+            Gst.Format.TIME,
+            Gst.SeekFlags.FLUSH,
+            gst_position,
+        )
+
+    def wait_for_state_change(self) -> None:
+        """Block until any pending state changes are complete."""
+        self.playbin.get_state(timeout=Gst.CLOCK_TIME_NONE)
 
     def enable_sync_handler(
         self,

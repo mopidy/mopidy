@@ -19,11 +19,7 @@ from mopidy.audio._gst.pipeline import (
     GstPipeline,
 )
 from mopidy.audio._listener import AudioListener
-from mopidy.audio._utils import (
-    clocktime_to_millisecond,
-    millisecond_to_clocktime,
-    setup_proxy,
-)
+from mopidy.audio._utils import setup_proxy
 from mopidy.types import DurationMs, PlaybackState
 
 if TYPE_CHECKING:
@@ -153,7 +149,7 @@ class _Handler:
         percent: int,
         structure: Gst.Structure | None = None,
     ) -> None:
-        assert self._audio._playbin
+        assert self._audio._pipeline
 
         if self._audio._target_state < Gst.State.PAUSED:
             gst_logger.debug("Skip buffering during track change.")
@@ -166,13 +162,13 @@ class _Handler:
 
         level = logs.TRACE_LOG_LEVEL
         if percent < 10 and not self._audio._buffering:
-            self._audio._playbin.set_state(Gst.State.PAUSED)
+            self._audio._pipeline.set_state(Gst.State.PAUSED)
             self._audio._buffering = True
             level = logging.DEBUG
         if percent == 100:
             self._audio._buffering = False
             if self._audio._target_state == Gst.State.PLAYING:
-                self._audio._playbin.set_state(Gst.State.PLAYING)
+                self._audio._pipeline.set_state(Gst.State.PLAYING)
             level = logging.DEBUG
 
         gst_logger.log(level, "Got BUFFERING bus message: percent=%d%%", percent)
@@ -322,10 +318,6 @@ class GstAudio(Audio, pykka.ThreadingActor):
     def _playbin(self) -> Gst.Element | None:
         return self._pipeline.playbin if self._pipeline else None
 
-    @property
-    def _queue(self) -> Gst.Element | None:
-        return self._pipeline.queue if self._pipeline else None
-
     def _setup_preferences(self) -> None:
         # TODO: move out of audio actor?
         # Fix for https://github.com/mopidy/mopidy/issues/604
@@ -418,35 +410,15 @@ class GstAudio(Audio, pykka.ThreadingActor):
 
     @override
     def get_position(self) -> DurationMs:
-        assert self._playbin
+        assert self._pipeline
 
-        success, position = self._playbin.query_position(Gst.Format.TIME)
-
-        if not success:
-            # TODO: take state into account for this and possibly also return
-            # None as the unknown value instead of zero?
-            logger.debug("Position query failed")
-            return DurationMs(0)
-
-        return clocktime_to_millisecond(position)
+        return self._pipeline.get_position()
 
     @override
     def set_position(self, position: DurationMs) -> bool:
-        assert self._queue
+        assert self._pipeline
 
-        # TODO: double check seek flags in use.
-        gst_position = millisecond_to_clocktime(position)
-        gst_logger.debug("Sending flushing seek: position=%r", gst_position)
-        # Send seek event to the queue not the playbin. The default behavior
-        # for bins is to forward this event to all sinks. Which results in
-        # duplicate seek events making it to appsrc (which we no longer use).
-        # Since elements are not allowed to act on the seek event, only modify
-        # it, this should be safe to do.
-        return self._queue.seek_simple(
-            Gst.Format.TIME,
-            Gst.SeekFlags.FLUSH,
-            gst_position,
-        )
+        return self._pipeline.seek(position)
 
     @override
     def start_playback(self) -> bool:
@@ -477,25 +449,13 @@ class GstAudio(Audio, pykka.ThreadingActor):
             state: State to set playbin to. One of: `Gst.State.NULL`,
                 `Gst.State.READY`, `Gst.State.PAUSED` and `Gst.State.PLAYING`.
         """
-        assert self._playbin
+        assert self._pipeline
 
         if state < Gst.State.PAUSED:
             self._buffering = False
 
         self._target_state = state
-        result = self._playbin.set_state(state)
-        gst_logger.debug(
-            "Changing state to %s: result=%s",
-            state.value_name,
-            result.value_name,
-        )
-
-        if result == Gst.StateChangeReturn.FAILURE:
-            logger.warning("Setting GStreamer state to %s failed", state.value_name)
-            return False
-        # TODO: at this point we could already emit stopped event instead
-        # of faking it in the message handling when result=OK
-        return True
+        return self._pipeline.set_state(state)
 
     @override
     def get_current_tags(self) -> dict[str, list[Any]]:
@@ -506,9 +466,9 @@ class GstAudio(Audio, pykka.ThreadingActor):
 
     @override
     def testing_gst__wait_for_state_change(self) -> None:
-        assert self._playbin
+        assert self._pipeline
 
-        self._playbin.get_state(timeout=Gst.CLOCK_TIME_NONE)
+        self._pipeline.wait_for_state_change()
 
     @override
     def testing_gst__enable_sync_handler(self) -> None:
