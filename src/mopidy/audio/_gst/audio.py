@@ -13,11 +13,7 @@ from mopidy._lib.gi import GLib, Gst, GstBase, GstPbutils
 from mopidy.audio import tags as tags_lib
 from mopidy.audio._api import Audio
 from mopidy.audio._gst.mixer import GstSoftwareMixerAdapter
-from mopidy.audio._gst.pipeline import (
-    GST_PLAY_FLAGS_AUDIO,
-    GST_PLAY_FLAGS_DOWNLOAD,
-    GstPipeline,
-)
+from mopidy.audio._gst.pipeline import GstPipeline
 from mopidy.audio._listener import AudioListener
 from mopidy.audio._utils import setup_proxy
 from mopidy.types import DurationMs, PlaybackState
@@ -47,7 +43,9 @@ class _Handler:
 
     def on_message(self, _bus: Gst.Bus, msg: Gst.Message) -> None:  # noqa: C901
         if msg.type == Gst.MessageType.STATE_CHANGED:
-            if msg.src != self._audio._playbin:
+            if (pipeline := self._audio._pipeline) is None or (
+                msg.src != pipeline.playbin
+            ):
                 return
             old_state, new_state, pending_state = msg.parse_state_changed()
             self.on_playbin_state_changed(old_state, new_state, pending_state)
@@ -137,12 +135,8 @@ class _Handler:
             AudioListener.send("stream_changed", uri=None)
 
         if "GST_DEBUG_DUMP_DOT_DIR" in os.environ:
-            assert self._audio._playbin
-            Gst.debug_bin_to_dot_file(
-                bin=cast(Gst.Bin, self._audio._playbin),
-                details=Gst.DebugGraphDetails.ALL,
-                file_name="mopidy",
-            )
+            assert self._audio._pipeline
+            self._audio._pipeline.debug_to_dot_file("mopidy")
 
     def on_buffering(
         self,
@@ -314,10 +308,6 @@ class GstAudio(Audio, pykka.ThreadingActor):
         if self._pipeline is not None:
             self._pipeline.teardown()
 
-    @property
-    def _playbin(self) -> Gst.Element | None:
-        return self._pipeline.playbin if self._pipeline else None
-
     def _setup_preferences(self) -> None:
         # TODO: move out of audio actor?
         # Fix for https://github.com/mopidy/mopidy/issues/604
@@ -368,17 +358,12 @@ class GstAudio(Audio, pykka.ThreadingActor):
         live_stream: bool = False,
         download: bool = False,
     ) -> None:
-        assert self._playbin
+        assert self._pipeline
 
         # HACK: Hack to workaround issue on Mac OS X where volume level
         # does not persist between track changes. mopidy/mopidy#886
         current_volume = self.mixer.get_volume() if self.mixer is not None else None
 
-        flags = GST_PLAY_FLAGS_AUDIO
-        if download:
-            flags |= GST_PLAY_FLAGS_DOWNLOAD
-
-        logger.debug(f"Flags: {flags}")
         if live_stream and download:
             logger.warning(
                 "Ambiguous buffering flags: "
@@ -388,8 +373,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
         self._pending_uri = uri
         self._pending_tags = {}
         self._live_stream = live_stream
-        self._playbin.set_property("flags", flags)
-        self._playbin.set_property("uri", uri)
+        self._pipeline.set_uri(uri, download=download)
 
         if self.mixer is not None and current_volume is not None:
             self.mixer.set_volume(current_volume)

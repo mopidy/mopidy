@@ -227,6 +227,16 @@ class GstPipeline:
             on_pad_event,
         )
 
+    def set_uri(self, uri: str, *, download: bool = False) -> None:
+        """Set the URI to play, and the buffering flags to use for it."""
+        flags = GST_PLAY_FLAGS_AUDIO
+        if download:
+            flags |= GST_PLAY_FLAGS_DOWNLOAD
+
+        logger.debug(f"Flags: {flags}")
+        self.playbin.set_property("flags", flags)
+        self.playbin.set_property("uri", uri)
+
     def set_state(self, state: Gst.State) -> bool:
         """Set the raw GStreamer state of the playbin.
 
@@ -272,6 +282,14 @@ class GstPipeline:
             Gst.Format.TIME,
             Gst.SeekFlags.FLUSH,
             gst_position,
+        )
+
+    def debug_to_dot_file(self, file_name: str) -> None:
+        """Write the graph to a dot file, for debugging."""
+        Gst.debug_bin_to_dot_file(
+            bin=cast(Gst.Bin, self.playbin),
+            details=Gst.DebugGraphDetails.ALL,
+            file_name=file_name,
         )
 
     def wait_for_state_change(self) -> None:
