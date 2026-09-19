@@ -128,7 +128,6 @@ class GstPipeline:
     ) -> None:
         self._config = config
         self._signals = Signals()
-        self._message_handler_id: int | None = None
         self._event_handler_id: int | None = None
         self._pad: Gst.Pad | None = None
 
@@ -208,11 +207,14 @@ class GstPipeline:
         self,
         on_message: Callable[[Gst.Bus, Gst.Message], None],
     ) -> None:
+        def sync_handler(bus: Gst.Bus, message: Gst.Message) -> Gst.BusSyncReply:
+            on_message(bus, message)
+            return Gst.BusSyncReply.DROP
+
         if (bus := self.playbin.get_bus()) is None:
             return
 
-        bus.add_signal_watch()
-        self._message_handler_id = bus.connect("message", on_message)
+        bus.set_sync_handler(sync_handler)
 
     def _setup_event_handling(
         self,
@@ -322,32 +324,9 @@ class GstPipeline:
         """Block until any pending state changes are complete."""
         self.playbin.get_state(timeout=Gst.CLOCK_TIME_NONE)
 
-    def enable_sync_handler(
-        self,
-        on_message: Callable[[Gst.Bus, Gst.Message], None],
-    ) -> None:
-        """Handle bus messages as they are posted, instead of on the main loop.
-
-        Not part of the API. Only for testing of GstAudio.
-        """
-
-        def sync_handler(bus: Gst.Bus, message: Gst.Message) -> Gst.BusSyncReply:
-            on_message(bus, message)
-            return Gst.BusSyncReply.DROP
-
-        bus = self.playbin.get_bus()
-        if bus is None:
-            msg = "Failed to get bus from GStreamer playbin."
-            raise exceptions.AudioException(msg)
-
-        bus.set_sync_handler(sync_handler)
-
     def teardown(self) -> None:
         if (bus := self.playbin.get_bus()) is not None:
-            bus.remove_signal_watch()
-            if self._message_handler_id is not None:
-                bus.disconnect(self._message_handler_id)
-        self._message_handler_id = None
+            bus.set_sync_handler(None)
 
         if self._pad is not None and self._event_handler_id is not None:
             self._pad.remove_probe(self._event_handler_id)

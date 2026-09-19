@@ -1,4 +1,5 @@
 import threading
+import time
 from typing import ClassVar
 from unittest import mock
 
@@ -149,11 +150,17 @@ class DummyAudioListener(pykka.ThreadingActor, audio.AudioListener):
 class TestAudioEvent(BaseTest):
     def setup_method(self):
         super().setup_method()
-        self.audio.testing_gst__enable_sync_handler().get()
         self.listener = DummyAudioListener.start().proxy()
 
     def assert_event(self, event, **kwargs):
-        assert (event, kwargs) in self.listener.get_events().get()
+        # Bus messages reach the listener through two actors now, so the
+        # event can arrive shortly after the state change completes.
+        deadline = time.monotonic() + 1.0
+        while (event, kwargs) not in self.listener.get_events().get():
+            if time.monotonic() > deadline:
+                msg = f"Event {event!r} with {kwargs!r} never arrived"
+                raise AssertionError(msg)
+            time.sleep(0.005)
 
     def assert_not_event(self, event, **kwargs):
         assert (event, kwargs) not in self.listener.get_events().get()

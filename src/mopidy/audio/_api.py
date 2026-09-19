@@ -128,12 +128,6 @@ class Audio:
         Not part of the API. Only for testing of GstAudio.
         """
 
-    def testing_gst__enable_sync_handler(self) -> None:
-        """Enable manual processing of messages from bus.
-
-        Not part of the API. Only for testing of GstAudio.
-        """
-
 
 class AudioActor(pykka.ThreadingActor, Audio):
     pass
@@ -155,7 +149,4 @@ class AudioProxy(ActorMemberMixin, pykka.ActorProxy[AudioActor]):
     get_current_tags = proxy_method(Audio.get_current_tags)
     testing_gst__wait_for_state_change = proxy_method(
         Audio.testing_gst__wait_for_state_change
-    )
-    testing_gst__enable_sync_handler = proxy_method(
-        Audio.testing_gst__enable_sync_handler
     )

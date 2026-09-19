@@ -73,7 +73,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
             self._setup_preferences()
             self._pipeline = GstPipeline(
                 self._config,
-                on_message=self._on_message,
+                on_message=self._tell_message,
                 on_position=self._on_position,
                 on_about_to_finish=self._on_about_to_finish,
                 on_source_setup=self._on_source_setup,
@@ -133,31 +133,49 @@ class GstAudio(Audio, pykka.ThreadingActor):
 
         setup_proxy(source, self._config["proxy"])
 
-    def _on_message(self, _bus: Gst.Bus, msg: Gst.Message) -> None:  # noqa: C901
-        if msg.type == Gst.MessageType.STATE_CHANGED:
-            if (pipeline := self._pipeline) is None or (msg.src != pipeline.playbin):
+    def _tell_message(self, _bus: Gst.Bus, gst_message: Gst.Message) -> None:
+        # Runs on whichever GStreamer thread posted the message. Hand it to
+        # the actor thread, so that all message handling is single threaded.
+        try:
+            self.actor_ref.tell({"gst_message": gst_message})
+        except pykka.ActorDeadError:
+            # The pipeline outlives the actor for a moment at teardown.
+            gst_logger.debug("Dropped bus message, the audio actor is gone.")
+
+    @override
+    def on_receive(self, message: Any) -> None:
+        if (gst_message := message.get("gst_message")) is not None:
+            self._on_message(gst_message)
+
+    def _on_message(self, gst_message: Gst.Message) -> None:  # noqa: C901
+        if gst_message.type == Gst.MessageType.STATE_CHANGED:
+            if (pipeline := self._pipeline) is None or (
+                gst_message.src != pipeline.playbin
+            ):
                 return
-            old_state, new_state, pending_state = msg.parse_state_changed()
+            old_state, new_state, pending_state = gst_message.parse_state_changed()
             self._on_playbin_state_changed(old_state, new_state, pending_state)
-        elif msg.type == Gst.MessageType.BUFFERING:
-            self._on_buffering(msg.parse_buffering(), msg.get_structure())
-        elif msg.type == Gst.MessageType.EOS:
+        elif gst_message.type == Gst.MessageType.BUFFERING:
+            self._on_buffering(
+                gst_message.parse_buffering(), gst_message.get_structure()
+            )
+        elif gst_message.type == Gst.MessageType.EOS:
             self._on_end_of_stream()
-        elif msg.type == Gst.MessageType.ERROR:
-            error, debug = msg.parse_error()
+        elif gst_message.type == Gst.MessageType.ERROR:
+            error, debug = gst_message.parse_error()
             self._on_error(error, debug)
-        elif msg.type == Gst.MessageType.WARNING:
-            error, debug = msg.parse_warning()
+        elif gst_message.type == Gst.MessageType.WARNING:
+            error, debug = gst_message.parse_warning()
             self._on_warning(error, debug)
-        elif msg.type == Gst.MessageType.ASYNC_DONE:
+        elif gst_message.type == Gst.MessageType.ASYNC_DONE:
             self._on_async_done()
-        elif msg.type == Gst.MessageType.TAG:
-            taglist = msg.parse_tag()
+        elif gst_message.type == Gst.MessageType.TAG:
+            taglist = gst_message.parse_tag()
             self._on_tag(taglist)
-        elif msg.type == Gst.MessageType.ELEMENT:
-            if GstPbutils.is_missing_plugin_message(msg):
-                self._on_missing_plugin(msg)
-        elif msg.type == Gst.MessageType.STREAM_START:
+        elif gst_message.type == Gst.MessageType.ELEMENT:
+            if GstPbutils.is_missing_plugin_message(gst_message):
+                self._on_missing_plugin(gst_message)
+        elif gst_message.type == Gst.MessageType.STREAM_START:
             self._on_stream_start()
 
     def _on_playbin_state_changed(
@@ -189,11 +207,12 @@ class GstAudio(Audio, pykka.ThreadingActor):
         new_playback_state = _GST_STATE_MAPPING[new_state]
         old_playback_state, self.state = self.state, new_playback_state
 
-        target_playback_state = _GST_STATE_MAPPING.get(self._target_state)
-        if target_playback_state is None:
-            # HACK: Workaround for #1430, to be fixed properly by #1222.
-            logger.warning("Race condition happened. See #1222 and #1430.")
+        if self._target_state == Gst.State.READY:
+            # READY is GStreamer specific and has no playback state of its
+            # own. We are between tracks, so there is no target to report.
             return
+
+        target_playback_state = _GST_STATE_MAPPING[self._target_state]
         if target_playback_state == new_playback_state:
             target_playback_state = None
 
@@ -419,9 +438,3 @@ class GstAudio(Audio, pykka.ThreadingActor):
         assert self._pipeline
 
         self._pipeline.wait_for_state_change()
-
-    @override
-    def testing_gst__enable_sync_handler(self) -> None:
-        assert self._pipeline
-
-        self._pipeline.enable_sync_handler(self._on_message)
