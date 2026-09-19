@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, cast, override
 
 import pykka
 
+from mopidy import exceptions
 from mopidy._lib import logs, process
 from mopidy._lib.gi import GLib, Gst, GstBase, GstPbutils
 from mopidy.audio import tags as tags_lib
@@ -21,6 +22,7 @@ from mopidy.audio._gst.types import (
     GstEndOfStream,
     GstError,
     GstMissingPlugin,
+    GstState,
     GstStateChanged,
     GstStreamStart,
     GstTag,
@@ -42,14 +44,7 @@ logger = logging.getLogger(__name__)
 # set_state() on a pipeline.
 gst_logger = logging.getLogger("mopidy.audio.gst")
 
-_GST_STATE_MAPPING: dict[Gst.State, PlaybackState] = {
-    Gst.State.PLAYING: PlaybackState.PLAYING,
-    Gst.State.PAUSED: PlaybackState.PAUSED,
-    Gst.State.NULL: PlaybackState.STOPPED,
-}
 
-
-# TODO: create a player class which replaces the actors internals
 class GstAudio(Audio, pykka.ThreadingActor):
     """Audio output through [GStreamer](https://gstreamer.freedesktop.org/)."""
 
@@ -63,7 +58,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
         super().__init__()
 
         self._config = config
-        self._target_state: Gst.State = Gst.State.NULL
+        self._target_state: GstState = GstState.NULL
         self._buffering: bool = False
         self._live_stream: bool = False
         self._tags: dict[str, list[Any]] = {}
@@ -92,8 +87,8 @@ class GstAudio(Audio, pykka.ThreadingActor):
             )
             if self.mixer:
                 self.mixer.setup(self._pipeline.volume, self.actor_ref.proxy().mixer)
-        except GLib.Error:
-            logger.exception("Unknown GLib error on audio startup.")
+        except (GLib.Error, exceptions.AudioException):
+            logger.exception("Failed to set up the audio pipeline.")
             process.exit_process()
 
     @override
@@ -178,39 +173,35 @@ class GstAudio(Audio, pykka.ThreadingActor):
 
     def _on_gst_state_changed(
         self,
-        old_state: Gst.State,
-        new_state: Gst.State,
-        pending_state: Gst.State,
+        old_state: GstState,
+        new_state: GstState,
+        pending_state: GstState,
     ) -> None:
         gst_logger.debug(
             "Got STATE_CHANGED bus message: old=%s new=%s pending=%s",
-            old_state.value_name,
-            new_state.value_name,
-            pending_state.value_name,
+            old_state.name,
+            new_state.name,
+            pending_state.name,
         )
 
-        if new_state == Gst.State.READY and pending_state == Gst.State.NULL:
+        if new_state == GstState.READY and pending_state == GstState.NULL:
             # HACK: We're not called on the last state change when going down to
             # NULL, so we rewrite the second to last call to get the expected
             # behavior.
-            new_state = Gst.State.NULL
-            pending_state = Gst.State.VOID_PENDING
+            new_state = GstState.NULL
+            pending_state = GstState.VOID_PENDING
 
-        if pending_state != Gst.State.VOID_PENDING:
+        if pending_state != GstState.VOID_PENDING:
             return  # Ignore intermediate state changes
 
-        if new_state == Gst.State.READY:
-            return  # Ignore READY state as it's GStreamer specific
+        if (new_playback_state := new_state.playback_state) is None:
+            return  # READY is GStreamer specific, Mopidy has no such state.
 
-        new_playback_state = _GST_STATE_MAPPING[new_state]
         old_playback_state, self.state = self.state, new_playback_state
 
-        if self._target_state == Gst.State.READY:
-            # READY is GStreamer specific and has no playback state of its
-            # own. We are between tracks, so there is no target to report.
-            return
+        if (target_playback_state := self._target_state.playback_state) is None:
+            return  # We are heading for READY, that is between tracks.
 
-        target_playback_state = _GST_STATE_MAPPING[self._target_state]
         if target_playback_state == new_playback_state:
             target_playback_state = None
 
@@ -237,7 +228,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
     def _on_gst_buffering(self, percent: int, mode: Gst.BufferingMode) -> None:
         assert self._pipeline
 
-        if self._target_state < Gst.State.PAUSED:
+        if self._target_state in (GstState.NULL, GstState.READY):
             gst_logger.debug("Skip buffering during track change.")
             return
 
@@ -246,13 +237,13 @@ class GstAudio(Audio, pykka.ThreadingActor):
 
         level = logs.TRACE_LOG_LEVEL
         if percent < 10 and not self._buffering:
-            self._pipeline.set_state(Gst.State.PAUSED)
+            self._pipeline.set_state(GstState.PAUSED)
             self._buffering = True
             level = logging.DEBUG
         if percent == 100:
             self._buffering = False
-            if self._target_state == Gst.State.PLAYING:
-                self._pipeline.set_state(Gst.State.PLAYING)
+            if self._target_state == GstState.PLAYING:
+                self._pipeline.set_state(GstState.PLAYING)
             level = logging.DEBUG
 
         gst_logger.log(level, "Got BUFFERING bus message: percent=%d%%", percent)
@@ -389,15 +380,15 @@ class GstAudio(Audio, pykka.ThreadingActor):
     def start_playback(self) -> bool:
         assert self._pipeline
 
-        self._target_state = Gst.State.PLAYING
-        return self._pipeline.set_state(Gst.State.PLAYING)
+        self._target_state = GstState.PLAYING
+        return self._pipeline.set_state(GstState.PLAYING)
 
     @override
     def pause_playback(self) -> bool:
         assert self._pipeline
 
-        self._target_state = Gst.State.PAUSED
-        return self._pipeline.set_state(Gst.State.PAUSED)
+        self._target_state = GstState.PAUSED
+        return self._pipeline.set_state(GstState.PAUSED)
 
     @override
     def prepare_change(self) -> bool:
@@ -408,16 +399,16 @@ class GstAudio(Audio, pykka.ThreadingActor):
         assert self._pipeline
 
         self._buffering = False
-        self._target_state = Gst.State.READY
-        return self._pipeline.set_state(Gst.State.READY)
+        self._target_state = GstState.READY
+        return self._pipeline.set_state(GstState.READY)
 
     @override
     def stop_playback(self) -> bool:
         assert self._pipeline
 
         self._buffering = False
-        self._target_state = Gst.State.NULL
-        return self._pipeline.set_state(Gst.State.NULL)
+        self._target_state = GstState.NULL
+        return self._pipeline.set_state(GstState.NULL)
 
     @override
     def get_current_tags(self) -> dict[str, list[Any]]:

@@ -4,7 +4,6 @@ import logging
 from typing import TYPE_CHECKING, cast
 
 from mopidy import exceptions
-from mopidy._lib import process
 from mopidy._lib.gi import GLib, Gst, GstPbutils
 from mopidy.audio import tags as tags_lib
 from mopidy.audio._gst.types import (
@@ -14,6 +13,7 @@ from mopidy.audio._gst.types import (
     GstEndOfStream,
     GstError,
     GstMissingPlugin,
+    GstState,
     GstStateChanged,
     GstStreamStart,
     GstTag,
@@ -42,13 +42,11 @@ GST_PLAY_FLAGS_AUDIO = 0x02
 GST_PLAY_FLAGS_DOWNLOAD = 0x80
 
 
-# TODO: expose this as a property on audio when #790 gets further along.
 class GstOutputBin(Gst.Bin):
     """A bin that sends its input to one or more audio outputs."""
 
     def __init__(self) -> None:
-        Gst.Bin.__init__(self)
-        # TODO(gst1): Set 'outputs' as the Bin name for easier debugging
+        Gst.Bin.__init__(self, name="outputs")
 
         tee = Gst.ElementFactory.make("tee")
         if tee is None:
@@ -65,7 +63,7 @@ class GstOutputBin(Gst.Bin):
         self.add_pad(ghost_pad)
 
     def add_output(self, description: str) -> None:
-        # NOTE: This only works for pipelines not in use until #790 gets done.
+        # NOTE: This only works while the pipeline is not running yet.
         try:
             output = Gst.parse_bin_from_description(
                 description,
@@ -104,10 +102,7 @@ def make_output_bin(output: str) -> Gst.Element:
         return fakesink
 
     output_bin = GstOutputBin()
-    try:
-        output_bin.add_output(output)
-    except exceptions.AudioException:
-        process.exit_process()  # TODO: move this up the chain
+    output_bin.add_output(output)
     return output_bin
 
 
@@ -191,9 +186,9 @@ class GstPipeline:
         # the actual switch, i.e. about to switch can block for longer thanks
         # to this queue.
 
-        # TODO: See if settings should be set to minimize latency. Previous
-        # setting breaks appsrc (which we no longer use), and settings before
-        # that broke on a few systems. So leave the default to play it safe.
+        # TODO: See if settings should be set to minimize latency. Earlier
+        # attempts at that broke on a few systems, so leave the default to
+        # play it safe.
         buffer_time = self._config["audio"]["buffer_time"]
         if buffer_time is not None and buffer_time > 0:
             queue.set_property("max-size-time", buffer_time * Gst.MSECOND)
@@ -263,7 +258,12 @@ class GstPipeline:
                 )
             case Gst.MessageType.STATE_CHANGED if message.src == self.playbin:
                 # Only the playbin's own state matters.
-                return GstStateChanged(*message.parse_state_changed())
+                old_state, new_state, pending_state = message.parse_state_changed()
+                return GstStateChanged(
+                    GstState(old_state),
+                    GstState(new_state),
+                    GstState(pending_state),
+                )
             case Gst.MessageType.STREAM_START:
                 return GstStreamStart()
             case Gst.MessageType.TAG:
@@ -322,20 +322,20 @@ class GstPipeline:
         self.playbin.set_property("flags", flags)
         self.playbin.set_property("uri", uri)
 
-    def set_state(self, state: Gst.State) -> bool:
-        """Set the raw GStreamer state of the playbin.
+    def set_state(self, state: GstState) -> bool:
+        """Set the state of the playbin.
 
         Returns `True` if successful, else `False`.
         """
-        result = self.playbin.set_state(state)
+        result = self.playbin.set_state(state.value)
         gst_logger.debug(
             "Changing state to %s: result=%s",
-            state.value_name,
+            state.name,
             result.value_name,
         )
 
         if result == Gst.StateChangeReturn.FAILURE:
-            logger.warning("Setting GStreamer state to %s failed", state.value_name)
+            logger.warning("Setting GStreamer state to %s failed", state.name)
             return False
         # TODO: at this point we could already emit stopped event instead
         # of faking it in the message handling when result=OK
@@ -359,10 +359,9 @@ class GstPipeline:
         gst_position = millisecond_to_clocktime(position)
         gst_logger.debug("Sending flushing seek: position=%r", gst_position)
         # Send seek event to the queue not the playbin. The default behavior
-        # for bins is to forward this event to all sinks. Which results in
-        # duplicate seek events making it to appsrc (which we no longer use).
-        # Since elements are not allowed to act on the seek event, only modify
-        # it, this should be safe to do.
+        # for bins is to forward this event to all sinks, which results in
+        # duplicate seek events. Since elements are not allowed to act on the
+        # seek event, only modify it, this should be safe to do.
         return self.queue.seek_simple(
             Gst.Format.TIME,
             Gst.SeekFlags.FLUSH,
