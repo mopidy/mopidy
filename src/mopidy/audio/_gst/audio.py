@@ -14,6 +14,18 @@ from mopidy.audio import tags as tags_lib
 from mopidy.audio._api import Audio
 from mopidy.audio._gst.mixer import GstSoftwareMixerAdapter
 from mopidy.audio._gst.pipeline import GstPipeline
+from mopidy.audio._gst.types import (
+    GstAsyncDone,
+    GstBuffering,
+    GstBusMessage,
+    GstEndOfStream,
+    GstError,
+    GstMissingPlugin,
+    GstStateChanged,
+    GstStreamStart,
+    GstTag,
+    GstWarning,
+)
 from mopidy.audio._listener import AudioListener
 from mopidy.audio._utils import setup_proxy
 from mopidy.types import DurationMs, PlaybackState
@@ -73,7 +85,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
             self._setup_preferences()
             self._pipeline = GstPipeline(
                 self._config,
-                on_message=self._tell_message,
+                on_bus_message=self._tell_message,
                 on_position=self._on_position,
                 on_about_to_finish=self._on_about_to_finish,
                 on_source_setup=self._on_source_setup,
@@ -133,50 +145,36 @@ class GstAudio(Audio, pykka.ThreadingActor):
 
         setup_proxy(source, self._config["proxy"])
 
-    def _tell_message(self, _bus: Gst.Bus, gst_message: Gst.Message) -> None:
+    def _tell_message(self, message: GstBusMessage) -> None:
         # Runs on whichever GStreamer thread posted the message. Hand it to
         # the actor thread, so that all message handling is single threaded.
         try:
-            self.actor_ref.tell({"gst_message": gst_message})
+            self.actor_ref.tell(message)
         except pykka.ActorDeadError:
             # The pipeline outlives the actor for a moment at teardown.
             gst_logger.debug("Dropped bus message, the audio actor is gone.")
 
     @override
     def on_receive(self, message: Any) -> None:
-        if (gst_message := message.get("gst_message")) is not None:
-            self._on_message(gst_message)
-
-    def _on_message(self, gst_message: Gst.Message) -> None:  # noqa: C901
-        if gst_message.type == Gst.MessageType.STATE_CHANGED:
-            if (pipeline := self._pipeline) is None or (
-                gst_message.src != pipeline.playbin
-            ):
-                return
-            old_state, new_state, pending_state = gst_message.parse_state_changed()
-            self._on_playbin_state_changed(old_state, new_state, pending_state)
-        elif gst_message.type == Gst.MessageType.BUFFERING:
-            self._on_buffering(
-                gst_message.parse_buffering(), gst_message.get_structure()
-            )
-        elif gst_message.type == Gst.MessageType.EOS:
-            self._on_end_of_stream()
-        elif gst_message.type == Gst.MessageType.ERROR:
-            error, debug = gst_message.parse_error()
-            self._on_error(error, debug)
-        elif gst_message.type == Gst.MessageType.WARNING:
-            error, debug = gst_message.parse_warning()
-            self._on_warning(error, debug)
-        elif gst_message.type == Gst.MessageType.ASYNC_DONE:
-            self._on_async_done()
-        elif gst_message.type == Gst.MessageType.TAG:
-            taglist = gst_message.parse_tag()
-            self._on_tag(taglist)
-        elif gst_message.type == Gst.MessageType.ELEMENT:
-            if GstPbutils.is_missing_plugin_message(gst_message):
-                self._on_missing_plugin(gst_message)
-        elif gst_message.type == Gst.MessageType.STREAM_START:
-            self._on_stream_start()
+        match message:
+            case GstAsyncDone():
+                self._on_async_done()
+            case GstBuffering(percent, mode):
+                self._on_buffering(percent, mode)
+            case GstEndOfStream():
+                self._on_end_of_stream()
+            case GstError(error, debug):
+                self._on_error(error, debug)
+            case GstMissingPlugin(description, installer_detail):
+                self._on_missing_plugin(description, installer_detail)
+            case GstStateChanged(old_state, new_state, pending_state):
+                self._on_playbin_state_changed(old_state, new_state, pending_state)
+            case GstStreamStart():
+                self._on_stream_start()
+            case GstTag(tags):
+                self._on_tag(tags)
+            case GstWarning(error, debug):
+                self._on_warning(error, debug)
 
     def _on_playbin_state_changed(
         self,
@@ -236,21 +234,15 @@ class GstAudio(Audio, pykka.ThreadingActor):
             assert self._pipeline
             self._pipeline.debug_to_dot_file("mopidy")
 
-    def _on_buffering(
-        self,
-        percent: int,
-        structure: Gst.Structure | None = None,
-    ) -> None:
+    def _on_buffering(self, percent: int, mode: Gst.BufferingMode) -> None:
         assert self._pipeline
 
         if self._target_state < Gst.State.PAUSED:
             gst_logger.debug("Skip buffering during track change.")
             return
 
-        if structure is not None and structure.has_field("buffering-mode"):
-            buffering_mode = structure.get_enum("buffering-mode", Gst.BufferingMode)
-            if buffering_mode == Gst.BufferingMode.LIVE:
-                return  # Live sources stall in paused.
+        if mode == Gst.BufferingMode.LIVE:
+            return  # Live sources stall in paused.
 
         level = logs.TRACE_LOG_LEVEL
         if percent < 10 and not self._buffering:
@@ -285,8 +277,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
     def _on_async_done(self) -> None:
         gst_logger.debug("Got ASYNC_DONE bus message.")
 
-    def _on_tag(self, taglist: Gst.TagList) -> None:
-        tags = tags_lib.convert_taglist(taglist)
+    def _on_tag(self, tags: dict[str, list[Any]]) -> None:
         gst_logger.debug(f"Got TAG bus message: tags={tags_lib.repr_tags(tags)}")
 
         # Postpone emitting tags until stream start.
@@ -307,15 +298,17 @@ class GstAudio(Audio, pykka.ThreadingActor):
             logger.debug("Audio event: tags_changed(tags=%r)", changed)
             AudioListener.send("tags_changed", tags=changed)
 
-    def _on_missing_plugin(self, msg: Gst.Message) -> None:
-        desc = GstPbutils.missing_plugin_message_get_description(msg)
-        debug = GstPbutils.missing_plugin_message_get_installer_detail(msg)
-        gst_logger.debug("Got missing-plugin bus message: description=%r", desc)
-        logger.warning("Could not find a %s to handle media.", desc)
+    def _on_missing_plugin(
+        self,
+        description: str,
+        installer_detail: str | None,
+    ) -> None:
+        gst_logger.debug("Got missing-plugin bus message: description=%r", description)
+        logger.warning("Could not find a %s to handle media.", description)
         if GstPbutils.install_plugins_supported():
             logger.info(
                 "You might be able to fix this by running: 'gst-installer \"%s\"'",
-                debug,
+                installer_detail,
             )
         # TODO: store the missing plugins installer info in a file so we can
         # can provide a 'mopidy install-missing-plugins' if the system has the

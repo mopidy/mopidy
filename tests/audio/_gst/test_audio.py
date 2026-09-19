@@ -609,7 +609,7 @@ def test_buffering_pause_when_buffer_empty(gst_audio, pipeline):
     pipeline.set_state.assert_called_with(Gst.State.PLAYING)
     pipeline.set_state.reset_mock()
 
-    gst_audio._on_buffering(0)
+    gst_audio._on_buffering(0, Gst.BufferingMode.STREAM)
     pipeline.set_state.assert_called_with(Gst.State.PAUSED)
     assert gst_audio._buffering
 
@@ -619,7 +619,7 @@ def test_buffering_stay_paused_when_buffering_finished(gst_audio, pipeline):
     pipeline.set_state.assert_called_with(Gst.State.PAUSED)
     pipeline.set_state.reset_mock()
 
-    gst_audio._on_buffering(100)
+    gst_audio._on_buffering(100, Gst.BufferingMode.STREAM)
     assert pipeline.set_state.call_count == 0
     assert not gst_audio._buffering
 
@@ -629,12 +629,12 @@ def test_buffering_change_to_paused_while_buffering(gst_audio, pipeline):
     pipeline.set_state.assert_called_with(Gst.State.PLAYING)
     pipeline.set_state.reset_mock()
 
-    gst_audio._on_buffering(0)
+    gst_audio._on_buffering(0, Gst.BufferingMode.STREAM)
     pipeline.set_state.assert_called_with(Gst.State.PAUSED)
     gst_audio.pause_playback()
     pipeline.set_state.reset_mock()
 
-    gst_audio._on_buffering(100)
+    gst_audio._on_buffering(100, Gst.BufferingMode.STREAM)
     assert pipeline.set_state.call_count == 0
     assert not gst_audio._buffering
 
@@ -644,7 +644,7 @@ def test_buffering_change_to_stopped_while_buffering(gst_audio, pipeline):
     pipeline.set_state.assert_called_with(Gst.State.PLAYING)
     pipeline.set_state.reset_mock()
 
-    gst_audio._on_buffering(0)
+    gst_audio._on_buffering(0, Gst.BufferingMode.STREAM)
     pipeline.set_state.assert_called_with(Gst.State.PAUSED)
     pipeline.set_state.reset_mock()
 
