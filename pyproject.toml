@@ -72,6 +72,7 @@ tests = [
     "pytest-cov >= 5.0",
     "pytest-httpx >= 0.35",
     "pytest-mock >= 3.14",
+    "pytest-repeat >= 0.9.3",
 ]
 typing = [
     "pygobject-stubs >= 2.14.0, != 2.15.0",
