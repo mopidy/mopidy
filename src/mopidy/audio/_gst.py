@@ -96,16 +96,10 @@ class _Outputs(Gst.Bin):
 class GstSoftwareMixerAdapter:
     _mixer: SoftwareMixerProxy
     _element: Gst.Element | None
-    _last_volume: int | None
-    _last_mute: bool | None
-    _signals: Signals
 
     def __init__(self, mixer: SoftwareMixerProxy) -> None:
         self._mixer = mixer
         self._element = None
-        self._last_volume = None
-        self._last_mute = None
-        self._signals = Signals()
 
     def setup(
         self,
@@ -116,7 +110,6 @@ class GstSoftwareMixerAdapter:
         self._mixer.setup(gst_mixer)
 
     def teardown(self) -> None:
-        self._signals.clear()
         self._mixer.teardown()
 
     def get_volume(self) -> Percentage:
@@ -363,8 +356,6 @@ class _Handler:
         # required helper installed?
 
     def on_stream_start(self) -> None:
-        assert self._audio._playbin
-
         gst_logger.debug("Got STREAM_START bus message")
         uri = self._audio._pending_uri
         logger.debug("Audio event: stream_changed(uri=%r)", uri)
@@ -377,10 +368,6 @@ class _Handler:
         if tags:
             logger.debug("Audio event: tags_changed(tags=%r)", tags.keys())
             AudioListener.send("tags_changed", tags=tags.keys())
-
-        if self._audio._pending_metadata:
-            self._audio._playbin.send_event(self._audio._pending_metadata)
-            self._audio._pending_metadata = None
 
     def on_segment(self, segment: Gst.Segment) -> None:
         gst_logger.debug(
@@ -420,7 +407,6 @@ class GstAudio(Audio, pykka.ThreadingActor):
         self._tags: dict[str, list[Any]] = {}
         self._pending_uri: str | None = None
         self._pending_tags: dict[str, list[Any]] | None = None
-        self._pending_metadata = None
 
         self._playbin: Gst.Element | None = None
         self._outputs = None
@@ -581,11 +567,6 @@ class GstAudio(Audio, pykka.ThreadingActor):
             "Got source-setup signal: element=%s",
             source.__class__.__name__,
         )
-
-        source_factory = source.get_factory()
-        if source_factory is None:
-            msg = "Failed to get factory from GStreamer source."
-            raise exceptions.AudioException(msg)
 
         if self._source_setup_callback:
             logger.debug("Running source-setup callback")
