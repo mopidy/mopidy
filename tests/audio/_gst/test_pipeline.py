@@ -6,8 +6,6 @@ from mopidy import exceptions
 from mopidy._lib.gi import GLib, Gst
 from mopidy.audio._gst import types
 from mopidy.audio._gst.pipeline import (
-    GST_PLAY_FLAGS_AUDIO,
-    GST_PLAY_FLAGS_DOWNLOAD,
     GstOutputBin,
     GstPipeline,
     make_output_bin,
@@ -34,11 +32,15 @@ def pipeline():
     pipeline.teardown()
 
 
+def test_playbin_plays_audio_only(pipeline):
+    assert pipeline.playbin.get_property("flags") == types.GstPlayFlags.AUDIO
+
+
 def test_download_flag_is_passed_to_playbin_if_download_buffering_is_enabled(pipeline):
     pipeline.set_uri("some:uri", download=True)
 
     flags = pipeline.playbin.get_property("flags")
-    assert flags == GST_PLAY_FLAGS_AUDIO | GST_PLAY_FLAGS_DOWNLOAD
+    assert flags == types.GstPlayFlags.AUDIO | types.GstPlayFlags.DOWNLOAD
 
 
 def test_download_flag_is_not_passed_to_playbin_if_download_buffering_is_disabled(
@@ -47,7 +49,7 @@ def test_download_flag_is_not_passed_to_playbin_if_download_buffering_is_disable
     pipeline.set_uri("some:uri", download=False)
 
     flags = pipeline.playbin.get_property("flags")
-    assert flags == GST_PLAY_FLAGS_AUDIO
+    assert flags == types.GstPlayFlags.AUDIO
 
 
 def test_set_uri_sets_the_uri_on_the_playbin(pipeline):

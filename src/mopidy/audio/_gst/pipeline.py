@@ -13,6 +13,7 @@ from mopidy.audio._gst.types import (
     GstEndOfStream,
     GstError,
     GstMissingPlugin,
+    GstPlayFlags,
     GstState,
     GstStateChanged,
     GstStreamStart,
@@ -37,9 +38,6 @@ logger = logging.getLogger(__name__)
 # as callbacks, event, messages and direct interaction with GStreamer such as
 # set_state() on a pipeline.
 gst_logger = logging.getLogger("mopidy.audio.gst")
-
-GST_PLAY_FLAGS_AUDIO = 0x02
-GST_PLAY_FLAGS_DOWNLOAD = 0x80
 
 
 class GstOutputBin(Gst.Bin):
@@ -154,7 +152,7 @@ class GstPipeline:
         if playbin is None:
             msg = "Failed to create GStreamer playbin."
             raise exceptions.AudioException(msg)
-        playbin.set_property("flags", GST_PLAY_FLAGS_AUDIO)
+        playbin.set_property("flags", GstPlayFlags.AUDIO)
 
         # TODO: turn into config values...
         playbin.set_property("buffer-size", 5 << 20)  # 5MB
@@ -314,9 +312,9 @@ class GstPipeline:
 
     def set_uri(self, uri: str, *, download: bool = False) -> None:
         """Set the URI to play, and the buffering flags to use for it."""
-        flags = GST_PLAY_FLAGS_AUDIO
+        flags = GstPlayFlags.AUDIO
         if download:
-            flags |= GST_PLAY_FLAGS_DOWNLOAD
+            flags |= GstPlayFlags.DOWNLOAD
 
         logger.debug(f"Flags: {flags}")
         self.playbin.set_property("flags", flags)
