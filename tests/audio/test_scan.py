@@ -1,124 +1,149 @@
-import unittest
+import pytest
 
 from mopidy import exceptions
 from mopidy._lib.paths import path_to_uri
-from mopidy.audio import scan
+from mopidy.audio.scan import Scanner
 from tests import path_to_data_dir
 
 
-class ScannerTest(unittest.TestCase):
-    def setUp(self):
-        self.errors = {}
-        self.result = {}
+def find(path):
+    dir_path = path_to_data_dir(path)
+    if not dir_path.is_dir():
+        return
+    for file_path in dir_path.iterdir():
+        yield dir_path / file_path
 
-    def find(self, path):
-        dir_path = path_to_data_dir(path)
-        if not dir_path.is_dir():
-            return
-        for file_path in dir_path.iterdir():
-            yield dir_path / file_path
 
-    def scan(self, paths):
-        scanner = scan.Scanner()
+@pytest.fixture
+def result():
+    return {}
+
+
+@pytest.fixture
+def errors():
+    return {}
+
+
+@pytest.fixture
+def scan(result, errors):
+    def scan(paths):
+        scanner = Scanner()
         for path in paths:
             uri = path_to_uri(path)
             try:
-                self.result[path] = scanner.scan(uri)
+                result[path] = scanner.scan(uri)
             except exceptions.ScannerError as error:
-                self.errors[path] = error
+                errors[path] = error
 
-    def check(self, name, key, value):
-        name = path_to_data_dir(name)
-        assert self.result[name].tags[key] == value
+    return scan
 
-    def check_if_missing_plugin(self):
-        for path, result in self.result.items():
-            if path.suffix != ".mp3":
-                continue
-            if not result.playable and result.mime == "audio/mpeg":
-                msg = "Missing MP3 support?"
-                raise unittest.SkipTest(msg)
 
-    def test_tags_is_set(self):
-        self.scan(self.find("scanner/simple"))
+def check(result, name, key, value):
+    name = path_to_data_dir(name)
+    assert result[name].tags[key] == value
 
-        assert next(iter(self.result.values())).tags
 
-    def test_errors_is_not_set(self):
-        self.scan(self.find("scanner/simple"))
+def check_if_missing_plugin(result):
+    for path, scan_result in result.items():
+        if path.suffix != ".mp3":
+            continue
+        if not scan_result.playable and scan_result.mime == "audio/mpeg":
+            msg = "Missing MP3 support?"
+            pytest.skip(msg)
 
-        self.check_if_missing_plugin()
 
-        assert not self.errors
+def test_tags_is_set(scan, result):
+    scan(find("scanner/simple"))
 
-    def test_duration_is_set(self):
-        self.scan(self.find("scanner/simple"))
+    assert next(iter(result.values())).tags
 
-        self.check_if_missing_plugin()
 
-        ogg = path_to_data_dir("scanner/simple/song1.ogg")
-        mp3 = path_to_data_dir("scanner/simple/song1.mp3")
-        assert self.result[mp3].duration == 4608
-        assert self.result[ogg].duration == 4704
+def test_errors_is_not_set(scan, result, errors):
+    scan(find("scanner/simple"))
 
-    def test_artist_is_set(self):
-        self.scan(self.find("scanner/simple"))
+    check_if_missing_plugin(result)
 
-        self.check_if_missing_plugin()
+    assert not errors
 
-        self.check("scanner/simple/song1.mp3", "artist", ["name"])
-        self.check("scanner/simple/song1.ogg", "artist", ["name"])
 
-    def test_album_is_set(self):
-        self.scan(self.find("scanner/simple"))
+def test_duration_is_set(scan, result):
+    scan(find("scanner/simple"))
 
-        self.check_if_missing_plugin()
+    check_if_missing_plugin(result)
 
-        self.check("scanner/simple/song1.mp3", "album", ["albumname"])
-        self.check("scanner/simple/song1.ogg", "album", ["albumname"])
+    ogg = path_to_data_dir("scanner/simple/song1.ogg")
+    mp3 = path_to_data_dir("scanner/simple/song1.mp3")
+    assert result[mp3].duration == 4608
+    assert result[ogg].duration == 4704
 
-    def test_track_is_set(self):
-        self.scan(self.find("scanner/simple"))
 
-        self.check_if_missing_plugin()
+def test_artist_is_set(scan, result):
+    scan(find("scanner/simple"))
 
-        self.check("scanner/simple/song1.mp3", "title", ["trackname"])
-        self.check("scanner/simple/song1.ogg", "title", ["trackname"])
+    check_if_missing_plugin(result)
 
-    def test_nonexistent_dir_does_not_fail(self):
-        self.scan(self.find("scanner/does-not-exist"))
-        assert not self.errors
+    check(result, "scanner/simple/song1.mp3", "artist", ["name"])
+    check(result, "scanner/simple/song1.ogg", "artist", ["name"])
 
-    def test_other_media_is_ignored(self):
-        self.scan(self.find("scanner/image"))
-        assert not next(iter(self.result.values())).playable
 
-    def test_log_file_that_gst_thinks_is_mpeg_1_is_ignored(self):
-        self.scan([path_to_data_dir("scanner/example.log")])
+def test_album_is_set(scan, result):
+    scan(find("scanner/simple"))
 
-        self.check_if_missing_plugin()
+    check_if_missing_plugin(result)
 
-        log = path_to_data_dir("scanner/example.log")
-        assert self.result[log].duration is None
+    check(result, "scanner/simple/song1.mp3", "album", ["albumname"])
+    check(result, "scanner/simple/song1.ogg", "album", ["albumname"])
 
-    def test_empty_wav_file(self):
-        self.scan([path_to_data_dir("scanner/empty.wav")])
-        wav = path_to_data_dir("scanner/empty.wav")
-        assert self.result[wav].duration == 0
 
-    def test_uri_list(self):
-        path = path_to_data_dir("scanner/playlist.m3u")
-        self.scan([path])
-        assert self.result[path].mime == "text/uri-list"
+def test_track_is_set(scan, result):
+    scan(find("scanner/simple"))
 
-    def test_text_plain(self):
-        # GStreamer either fails to typefind plain text at all, or, since
-        # 1.28.5, types .txt as application/x-subtitle by extension.
-        # Neither outcome is playable.
-        path = path_to_data_dir("scanner/plain.txt")
-        self.scan([path])
-        assert path in self.errors or not self.result[path].playable
+    check_if_missing_plugin(result)
 
-    @unittest.SkipTest
-    def test_song_without_time_is_handeled(self):
-        pass
+    check(result, "scanner/simple/song1.mp3", "title", ["trackname"])
+    check(result, "scanner/simple/song1.ogg", "title", ["trackname"])
+
+
+def test_nonexistent_dir_does_not_fail(scan, errors):
+    scan(find("scanner/does-not-exist"))
+    assert not errors
+
+
+def test_other_media_is_ignored(scan, result):
+    scan(find("scanner/image"))
+    assert not next(iter(result.values())).playable
+
+
+def test_log_file_that_gst_thinks_is_mpeg_1_is_ignored(scan, result):
+    scan([path_to_data_dir("scanner/example.log")])
+
+    check_if_missing_plugin(result)
+
+    log = path_to_data_dir("scanner/example.log")
+    assert result[log].duration is None
+
+
+def test_empty_wav_file(scan, result):
+    scan([path_to_data_dir("scanner/empty.wav")])
+    wav = path_to_data_dir("scanner/empty.wav")
+    assert result[wav].duration == 0
+
+
+def test_uri_list(scan, result):
+    path = path_to_data_dir("scanner/playlist.m3u")
+    scan([path])
+    assert result[path].mime == "text/uri-list"
+
+
+def test_text_plain(scan, result, errors):
+    # GStreamer either fails to typefind plain text at all, or, since
+    # 1.28.5, types .txt as application/x-subtitle by extension.
+    # Neither outcome is playable.
+    path = path_to_data_dir("scanner/plain.txt")
+    scan([path])
+    assert path in errors or not result[path].playable
+
+
+@pytest.mark.skip(reason="Not implemented")
+def test_song_without_time_is_handeled():
+    pass
