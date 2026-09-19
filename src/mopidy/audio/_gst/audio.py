@@ -85,10 +85,10 @@ class GstAudio(Audio, pykka.ThreadingActor):
             self._setup_preferences()
             self._pipeline = GstPipeline(
                 self._config,
-                on_bus_message=self._tell_message,
-                on_position=self._on_position,
-                on_about_to_finish=self._on_about_to_finish,
-                on_source_setup=self._on_source_setup,
+                on_bus_message=self._on_gst_bus_message,
+                on_position=self._on_gst_position,
+                on_about_to_finish=self._on_gst_about_to_finish,
+                on_source_setup=self._on_gst_source_setup,
             )
             if self.mixer:
                 self.mixer.setup(self._pipeline.volume, self.actor_ref.proxy().mixer)
@@ -114,7 +114,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
         if self.mixer:
             self.mixer.teardown()
 
-    def _on_about_to_finish(self, _element: Gst.Element) -> None:
+    def _on_gst_about_to_finish(self, _element: Gst.Element) -> None:
         if self._thread == threading.current_thread():
             logger.error("about-to-finish in actor, aborting to avoid deadlock.")
             return
@@ -124,7 +124,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
             logger.debug("Running about-to-finish callback.")
             self._about_to_finish_callback()
 
-    def _on_source_setup(
+    def _on_gst_source_setup(
         self,
         _element: Gst.Element,
         source: Gst.Element,
@@ -145,7 +145,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
 
         setup_proxy(source, self._config["proxy"])
 
-    def _tell_message(self, message: GstBusMessage) -> None:
+    def _on_gst_bus_message(self, message: GstBusMessage) -> None:
         # Runs on whichever GStreamer thread posted the message. Hand it to
         # the actor thread, so that all message handling is single threaded.
         try:
@@ -158,25 +158,25 @@ class GstAudio(Audio, pykka.ThreadingActor):
     def on_receive(self, message: Any) -> None:
         match message:
             case GstAsyncDone():
-                self._on_async_done()
+                self._on_gst_async_done()
             case GstBuffering(percent, mode):
-                self._on_buffering(percent, mode)
+                self._on_gst_buffering(percent, mode)
             case GstEndOfStream():
-                self._on_end_of_stream()
+                self._on_gst_end_of_stream()
             case GstError(error, debug):
-                self._on_error(error, debug)
+                self._on_gst_error(error, debug)
             case GstMissingPlugin(description, installer_detail):
-                self._on_missing_plugin(description, installer_detail)
+                self._on_gst_missing_plugin(description, installer_detail)
             case GstStateChanged(old_state, new_state, pending_state):
-                self._on_playbin_state_changed(old_state, new_state, pending_state)
+                self._on_gst_state_changed(old_state, new_state, pending_state)
             case GstStreamStart():
-                self._on_stream_start()
+                self._on_gst_stream_start()
             case GstTag(tags):
-                self._on_tag(tags)
+                self._on_gst_tag(tags)
             case GstWarning(error, debug):
-                self._on_warning(error, debug)
+                self._on_gst_warning(error, debug)
 
-    def _on_playbin_state_changed(
+    def _on_gst_state_changed(
         self,
         old_state: Gst.State,
         new_state: Gst.State,
@@ -234,7 +234,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
             assert self._pipeline
             self._pipeline.debug_to_dot_file("mopidy")
 
-    def _on_buffering(self, percent: int, mode: Gst.BufferingMode) -> None:
+    def _on_gst_buffering(self, percent: int, mode: Gst.BufferingMode) -> None:
         assert self._pipeline
 
         if self._target_state < Gst.State.PAUSED:
@@ -257,27 +257,27 @@ class GstAudio(Audio, pykka.ThreadingActor):
 
         gst_logger.log(level, "Got BUFFERING bus message: percent=%d%%", percent)
 
-    def _on_end_of_stream(self) -> None:
+    def _on_gst_end_of_stream(self) -> None:
         gst_logger.debug("Got EOS (end of stream) bus message.")
         logger.debug("Audio event: reached_end_of_stream()")
         self._tags = {}
         AudioListener.send("reached_end_of_stream")
 
-    def _on_error(self, error: GLib.Error, debug: str) -> None:
+    def _on_gst_error(self, error: GLib.Error, debug: str) -> None:
         gst_logger.error(f"GStreamer error: {error.message}")
         gst_logger.debug(f"Got ERROR bus message: error={error!r} debug={debug!r}")
 
         # TODO: is this needed?
         self.stop_playback()
 
-    def _on_warning(self, error: GLib.Error, debug: str) -> None:
+    def _on_gst_warning(self, error: GLib.Error, debug: str) -> None:
         gst_logger.warning(f"GStreamer warning: {error.message}")
         gst_logger.debug(f"Got WARNING bus message: error={error!r} debug={debug!r}")
 
-    def _on_async_done(self) -> None:
+    def _on_gst_async_done(self) -> None:
         gst_logger.debug("Got ASYNC_DONE bus message.")
 
-    def _on_tag(self, tags: dict[str, list[Any]]) -> None:
+    def _on_gst_tag(self, tags: dict[str, list[Any]]) -> None:
         gst_logger.debug(f"Got TAG bus message: tags={tags_lib.repr_tags(tags)}")
 
         # Postpone emitting tags until stream start.
@@ -298,7 +298,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
             logger.debug("Audio event: tags_changed(tags=%r)", changed)
             AudioListener.send("tags_changed", tags=changed)
 
-    def _on_missing_plugin(
+    def _on_gst_missing_plugin(
         self,
         description: str,
         installer_detail: str | None,
@@ -314,7 +314,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
         # can provide a 'mopidy install-missing-plugins' if the system has the
         # required helper installed?
 
-    def _on_stream_start(self) -> None:
+    def _on_gst_stream_start(self) -> None:
         gst_logger.debug("Got STREAM_START bus message")
         uri = self._pending_uri
         logger.debug("Audio event: stream_changed(uri=%r)", uri)
@@ -328,7 +328,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
             logger.debug("Audio event: tags_changed(tags=%r)", tags.keys())
             AudioListener.send("tags_changed", tags=tags.keys())
 
-    def _on_position(self, position: DurationMs) -> None:
+    def _on_gst_position(self, position: DurationMs) -> None:
         logger.debug("Audio event: position_changed(position=%r)", position)
         AudioListener.send("position_changed", position=position)
 
