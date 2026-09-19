@@ -8,6 +8,7 @@ import pytest
 from mopidy import audio
 from mopidy._lib import paths
 from mopidy._lib.gi import Gst
+from mopidy.audio._gst.pipeline import GstPipeline
 from mopidy.types import PlaybackState
 from tests import dummy_audio, path_to_data_dir
 
@@ -517,9 +518,10 @@ def gst_audio():
 
 
 @pytest.fixture
-def playbin(gst_audio):
-    gst_audio._playbin = mock.Mock(spec=["set_state", "set_property"])
-    return gst_audio._playbin
+def pipeline(gst_audio):
+    # The pipeline owns the elements, so inject a fake one.
+    gst_audio._pipeline = mock.Mock(spec=GstPipeline)
+    return gst_audio._pipeline
 
 
 @pytest.fixture
@@ -595,56 +597,56 @@ def test_state_changes_from_playing_to_stopped_on_stop(gst_audio):
     assert gst_audio.state == PlaybackState.STOPPED
 
 
-def test_buffering_pause_when_buffer_empty(gst_audio, playbin):
+def test_buffering_pause_when_buffer_empty(gst_audio, pipeline):
     gst_audio.start_playback()
-    playbin.set_state.assert_called_with(Gst.State.PLAYING)
-    playbin.set_state.reset_mock()
+    pipeline.set_state.assert_called_with(Gst.State.PLAYING)
+    pipeline.set_state.reset_mock()
 
     gst_audio._handler.on_buffering(0)
-    playbin.set_state.assert_called_with(Gst.State.PAUSED)
+    pipeline.set_state.assert_called_with(Gst.State.PAUSED)
     assert gst_audio._buffering
 
 
-def test_buffering_stay_paused_when_buffering_finished(gst_audio, playbin):
+def test_buffering_stay_paused_when_buffering_finished(gst_audio, pipeline):
     gst_audio.pause_playback()
-    playbin.set_state.assert_called_with(Gst.State.PAUSED)
-    playbin.set_state.reset_mock()
+    pipeline.set_state.assert_called_with(Gst.State.PAUSED)
+    pipeline.set_state.reset_mock()
 
     gst_audio._handler.on_buffering(100)
-    assert playbin.set_state.call_count == 0
+    assert pipeline.set_state.call_count == 0
     assert not gst_audio._buffering
 
 
-def test_buffering_change_to_paused_while_buffering(gst_audio, playbin):
+def test_buffering_change_to_paused_while_buffering(gst_audio, pipeline):
     gst_audio.start_playback()
-    playbin.set_state.assert_called_with(Gst.State.PLAYING)
-    playbin.set_state.reset_mock()
+    pipeline.set_state.assert_called_with(Gst.State.PLAYING)
+    pipeline.set_state.reset_mock()
 
     gst_audio._handler.on_buffering(0)
-    playbin.set_state.assert_called_with(Gst.State.PAUSED)
+    pipeline.set_state.assert_called_with(Gst.State.PAUSED)
     gst_audio.pause_playback()
-    playbin.set_state.reset_mock()
+    pipeline.set_state.reset_mock()
 
     gst_audio._handler.on_buffering(100)
-    assert playbin.set_state.call_count == 0
+    assert pipeline.set_state.call_count == 0
     assert not gst_audio._buffering
 
 
-def test_buffering_change_to_stopped_while_buffering(gst_audio, playbin):
+def test_buffering_change_to_stopped_while_buffering(gst_audio, pipeline):
     gst_audio.start_playback()
-    playbin.set_state.assert_called_with(Gst.State.PLAYING)
-    playbin.set_state.reset_mock()
+    pipeline.set_state.assert_called_with(Gst.State.PLAYING)
+    pipeline.set_state.reset_mock()
 
     gst_audio._handler.on_buffering(0)
-    playbin.set_state.assert_called_with(Gst.State.PAUSED)
-    playbin.set_state.reset_mock()
+    pipeline.set_state.assert_called_with(Gst.State.PAUSED)
+    pipeline.set_state.reset_mock()
 
     gst_audio.stop_playback()
-    playbin.set_state.assert_called_with(Gst.State.NULL)
+    pipeline.set_state.assert_called_with(Gst.State.NULL)
     assert not gst_audio._buffering
 
 
-def test_source_setup_not_live_mode(gst_audio, playbin, source):
+def test_source_setup_not_live_mode(gst_audio, source):
     gst_audio._live_stream = False
 
     gst_audio._on_source_setup("dummy", source)
@@ -652,7 +654,7 @@ def test_source_setup_not_live_mode(gst_audio, playbin, source):
     source.set_live.assert_not_called()
 
 
-def test_source_setup_live_mode(gst_audio, playbin, source):
+def test_source_setup_live_mode(gst_audio, source):
     gst_audio._live_stream = True
 
     gst_audio._on_source_setup("dummy", source)
@@ -660,23 +662,7 @@ def test_source_setup_live_mode(gst_audio, playbin, source):
     source.set_live.assert_called_with(True)
 
 
-def test_download_flag_is_passed_to_playbin_if_download_buffering_is_enabled(
-    gst_audio, playbin
-):
-    gst_audio.set_uri("some:uri", False, True)
-
-    playbin.set_property.assert_has_calls([mock.call("flags", 0x02 | 0x80)])
-
-
-def test_download_flag_is_not_passed_to_playbin_if_download_buffering_is_disabled(
-    gst_audio, playbin
-):
-    gst_audio.set_uri("some:uri", False, False)
-
-    playbin.set_property.assert_has_calls([mock.call("flags", 0x02)])
-
-
-def test_source_setup_callback(gst_audio, playbin, source):
+def test_source_setup_callback(gst_audio, source):
     mock_callback = mock.MagicMock()
     gst_audio.set_source_setup_callback(mock_callback)
 
