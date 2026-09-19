@@ -37,7 +37,7 @@ _GST_STATE_MAPPING: dict[Gst.State, PlaybackState] = {
 }
 
 
-class _Handler:
+class _GstMessageHandler:
     def __init__(self, audio: GstAudio) -> None:
         self._audio = audio
 
@@ -69,17 +69,6 @@ class _Handler:
                 self.on_missing_plugin(msg)
         elif msg.type == Gst.MessageType.STREAM_START:
             self.on_stream_start()
-
-    def on_pad_event(
-        self,
-        _pad: Gst.Pad,
-        pad_probe_info: Gst.PadProbeInfo,
-    ) -> Gst.PadProbeReturn:
-        if (event := pad_probe_info.get_event()) is None:
-            return Gst.PadProbeReturn.OK
-        if event.type == Gst.EventType.SEGMENT:
-            self.on_segment(event.parse_segment())
-        return Gst.PadProbeReturn.OK
 
     def on_playbin_state_changed(
         self,
@@ -237,22 +226,9 @@ class _Handler:
             logger.debug("Audio event: tags_changed(tags=%r)", tags.keys())
             AudioListener.send("tags_changed", tags=tags.keys())
 
-    def on_segment(self, segment: Gst.Segment) -> None:
-        gst_logger.debug(
-            "Got SEGMENT pad event: "
-            "rate=%(rate)s format=%(format)s start=%(start)s stop=%(stop)s "
-            "position=%(position)s",
-            {
-                "rate": segment.rate,
-                "format": Gst.Format.get_name(segment.format),
-                "start": segment.start,
-                "stop": segment.stop,
-                "position": segment.position,
-            },
-        )
-        position_ms = segment.position // Gst.MSECOND
-        logger.debug("Audio event: position_changed(position=%r)", position_ms)
-        AudioListener.send("position_changed", position=position_ms)
+    def on_position(self, position: DurationMs) -> None:
+        logger.debug("Audio event: position_changed(position=%r)", position)
+        AudioListener.send("position_changed", position=position)
 
 
 # TODO: create a player class which replaces the actors internals
@@ -280,7 +256,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
         self._about_to_finish_callback: Callable | None = None
         self._source_setup_callback: Callable | None = None
 
-        self._handler = _Handler(self)
+        self._handler = _GstMessageHandler(self)
 
         if mixer and self._config["audio"]["mixer"] == "software":
             mixer = cast("SoftwareMixerProxy", mixer)
@@ -293,7 +269,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
             self._pipeline = GstPipeline(
                 self._config,
                 on_message=self._handler.on_message,
-                on_pad_event=self._handler.on_pad_event,
+                on_position=self._handler.on_position,
                 on_about_to_finish=self._on_about_to_finish,
                 on_source_setup=self._on_source_setup,
             )

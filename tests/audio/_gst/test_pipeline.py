@@ -24,7 +24,7 @@ def pipeline():
     pipeline = GstPipeline(
         config,
         on_message=mock.Mock(),
-        on_pad_event=mock.Mock(),
+        on_position=mock.Mock(),
         on_about_to_finish=mock.Mock(),
         on_source_setup=mock.Mock(),
     )

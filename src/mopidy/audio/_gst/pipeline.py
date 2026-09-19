@@ -122,7 +122,7 @@ class GstPipeline:
         config: Config,
         *,
         on_message: Callable[[Gst.Bus, Gst.Message], None],
-        on_pad_event: Callable[[Gst.Pad, Gst.PadProbeInfo], Gst.PadProbeReturn],
+        on_position: Callable[[DurationMs], None],
         on_about_to_finish: Callable[[Gst.Element], None],
         on_source_setup: Callable[[Gst.Element, Gst.Element], None],
     ) -> None:
@@ -135,7 +135,7 @@ class GstPipeline:
         self.playbin = self._make_playbin(on_about_to_finish, on_source_setup)
         self._setup_message_handling(on_message)
         self.output_bin = make_output_bin(self._config["audio"]["output"])
-        self._setup_event_handling(on_pad_event)
+        self._setup_event_handling(on_position)
         self.queue, self.volume = self._make_audio_sink()
 
     def _make_playbin(
@@ -216,8 +216,18 @@ class GstPipeline:
 
     def _setup_event_handling(
         self,
-        on_pad_event: Callable[[Gst.Pad, Gst.PadProbeInfo], Gst.PadProbeReturn],
+        on_position: Callable[[DurationMs], None],
     ) -> None:
+        def on_pad_event(
+            _pad: Gst.Pad,
+            pad_probe_info: Gst.PadProbeInfo,
+        ) -> Gst.PadProbeReturn:
+            if (event := pad_probe_info.get_event()) is None:
+                return Gst.PadProbeReturn.OK
+            if event.type == Gst.EventType.SEGMENT:
+                on_position(self._decode_segment(event.parse_segment()))
+            return Gst.PadProbeReturn.OK
+
         if (pad := self.output_bin.get_static_pad("sink")) is None:
             return
 
@@ -226,6 +236,22 @@ class GstPipeline:
             Gst.PadProbeType.EVENT_BOTH,
             on_pad_event,
         )
+
+    @staticmethod
+    def _decode_segment(segment: Gst.Segment) -> DurationMs:
+        gst_logger.debug(
+            "Got SEGMENT pad event: "
+            "rate=%(rate)s format=%(format)s start=%(start)s stop=%(stop)s "
+            "position=%(position)s",
+            {
+                "rate": segment.rate,
+                "format": Gst.Format.get_name(segment.format),
+                "start": segment.start,
+                "stop": segment.stop,
+                "position": segment.position,
+            },
+        )
+        return clocktime_to_millisecond(segment.position)
 
     def set_uri(self, uri: str, *, download: bool = False) -> None:
         """Set the URI to play, and the buffering flags to use for it."""
