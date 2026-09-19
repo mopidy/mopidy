@@ -262,6 +262,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
             mixer = cast("SoftwareMixerProxy", mixer)
             self.mixer = pykka.traversable(GstSoftwareMixerAdapter(mixer))
 
+    @override
     def on_start(self) -> None:
         self._thread = threading.current_thread()
         try:
@@ -279,6 +280,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
             logger.exception("Unknown GLib error on audio startup.")
             process.exit_process()
 
+    @override
     def on_stop(self) -> None:
         self._teardown_mixer()
         if self._pipeline is not None:
