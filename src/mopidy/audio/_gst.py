@@ -568,11 +568,6 @@ class GstAudio(Audio, pykka.ThreadingActor):
             source.__class__.__name__,
         )
 
-        source_factory = source.get_factory()
-        if source_factory is None:
-            msg = "Failed to get factory from GStreamer source."
-            raise exceptions.AudioException(msg)
-
         if self._source_setup_callback:
             logger.debug("Running source-setup callback")
             self._source_setup_callback(source)
