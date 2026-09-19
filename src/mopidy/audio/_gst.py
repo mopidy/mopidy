@@ -363,8 +363,6 @@ class _Handler:
         # required helper installed?
 
     def on_stream_start(self) -> None:
-        assert self._audio._playbin
-
         gst_logger.debug("Got STREAM_START bus message")
         uri = self._audio._pending_uri
         logger.debug("Audio event: stream_changed(uri=%r)", uri)
@@ -377,10 +375,6 @@ class _Handler:
         if tags:
             logger.debug("Audio event: tags_changed(tags=%r)", tags.keys())
             AudioListener.send("tags_changed", tags=tags.keys())
-
-        if self._audio._pending_metadata:
-            self._audio._playbin.send_event(self._audio._pending_metadata)
-            self._audio._pending_metadata = None
 
     def on_segment(self, segment: Gst.Segment) -> None:
         gst_logger.debug(
@@ -420,7 +414,6 @@ class GstAudio(Audio, pykka.ThreadingActor):
         self._tags: dict[str, list[Any]] = {}
         self._pending_uri: str | None = None
         self._pending_tags: dict[str, list[Any]] | None = None
-        self._pending_metadata = None
 
         self._playbin: Gst.Element | None = None
         self._outputs = None
