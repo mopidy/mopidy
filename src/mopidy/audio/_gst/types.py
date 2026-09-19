@@ -11,6 +11,18 @@ if TYPE_CHECKING:
     from mopidy._lib.gi import GLib
 
 
+class GstPlayFlags(enum.IntFlag):
+    """The parts of a stream the playbin renders, and how it buffers them.
+
+    GStreamer's own `GstPlayFlags` has no Python class, because the type is
+    defined inside the playbin plugin and not in a library with GIR data.
+    These are the values Mopidy uses from its table.
+    """
+
+    AUDIO = 0x02
+    DOWNLOAD = 0x80
+
+
 class GstState(enum.Enum):
     """The states a GStreamer element can be in.
 
