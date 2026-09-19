@@ -518,8 +518,10 @@ def gst_audio():
 
 @pytest.fixture
 def playbin(gst_audio):
-    gst_audio._playbin = mock.Mock(spec=["set_state", "set_property"])
-    return gst_audio._playbin
+    # The pipeline owns the elements, so inject a fake one.
+    playbin = mock.Mock(spec=["set_state", "set_property"])
+    gst_audio._pipeline = mock.Mock(playbin=playbin)
+    return playbin
 
 
 @pytest.fixture
