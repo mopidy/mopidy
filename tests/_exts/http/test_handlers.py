@@ -1,10 +1,8 @@
-import unittest
 from pathlib import Path
 from unittest import mock
 
 import pytest
 import tornado.httpclient
-import tornado.testing
 import tornado.web
 import tornado.websocket
 
@@ -12,277 +10,321 @@ import mopidy
 from mopidy._exts.http import handlers
 
 
-class StaticFileHandlerTest(tornado.testing.AsyncHTTPTestCase):
-    def get_app(self):
-        return tornado.web.Application(
-            [
-                (
-                    r"/(.*)",
-                    handlers.StaticFileHandler,
-                    {
-                        "path": Path(__file__).parent,
-                        "default_filename": "test_handlers.py",
-                    },
-                ),
-            ],
-        )
-
-    def test_static_handler(self):
-        response = self.fetch("/test_handlers.py", method="GET")
-
-        assert response.code == 200
-        assert response.headers["X-Mopidy-Version"] == mopidy.__version__
-        assert response.headers["Cache-Control"] == "no-cache"
-
-    def test_static_default_filename(self):
-        response = self.fetch("/", method="GET")
-
-        assert response.code == 200
-        assert response.headers["X-Mopidy-Version"] == mopidy.__version__
-        assert response.headers["Cache-Control"] == "no-cache"
+@pytest.fixture
+def static_server(tornado_server):
+    app = tornado.web.Application(
+        [
+            (
+                r"/(.*)",
+                handlers.StaticFileHandler,
+                {
+                    "path": Path(__file__).parent,
+                    "default_filename": "test_handlers.py",
+                },
+            ),
+        ],
+    )
+    return tornado_server(app)
 
 
-class WebSocketHandlerTest(tornado.testing.AsyncHTTPTestCase):
-    def get_app(self):
-        self.core = mock.Mock()
-        return tornado.web.Application(
-            [
-                (
-                    r"/ws/?",
-                    handlers.WebSocketHandler,
-                    {
-                        "core": self.core,
-                        "allowed_origins": frozenset(),
-                        "csrf_protection": True,
-                    },
-                ),
-            ],
-        )
+def test_static_handler(static_server):
+    response = static_server.fetch("/test_handlers.py", method="GET")
 
-    def connection(self, **kwargs):
-        conn_kwargs = {
-            "url": self.get_url("/ws").replace("http", "ws"),
-        }
-        conn_kwargs.update(kwargs)
-        request = tornado.httpclient.HTTPRequest(**conn_kwargs)
-        return tornado.websocket.websocket_connect(request)
+    assert response.code == 200
+    assert response.headers["X-Mopidy-Version"] == mopidy.__version__
+    assert response.headers["Cache-Control"] == "no-cache"
 
-    @tornado.testing.gen_test
-    def test_invalid_json_rpc_request_doesnt_crash_handler(self):
+
+def test_static_default_filename(static_server):
+    response = static_server.fetch("/", method="GET")
+
+    assert response.code == 200
+    assert response.headers["X-Mopidy-Version"] == mopidy.__version__
+    assert response.headers["Cache-Control"] == "no-cache"
+
+
+@pytest.fixture
+def ws_server(tornado_server):
+    app = tornado.web.Application(
+        [
+            (
+                r"/ws/?",
+                handlers.WebSocketHandler,
+                {
+                    "core": mock.Mock(),
+                    "allowed_origins": frozenset(),
+                    "csrf_protection": True,
+                },
+            ),
+        ],
+    )
+    return tornado_server(app)
+
+
+def ws_connect(server, **kwargs):
+    conn_kwargs = {
+        "url": server.get_url("/ws").replace("http", "ws"),
+    }
+    conn_kwargs.update(kwargs)
+    request = tornado.httpclient.HTTPRequest(**conn_kwargs)
+    return tornado.websocket.websocket_connect(request)
+
+
+def test_ws_invalid_json_rpc_request_doesnt_crash_handler(ws_server):
+    async def run():
         # An uncaught error would result in no message, so this is just a
         # simplistic test to verify this.
-        conn = yield self.connection()
+        conn = await ws_connect(ws_server)
         conn.write_message("invalid request")
-        message = yield conn.read_message()
+        message = await conn.read_message()
         assert message
 
-    @tornado.testing.gen_test
-    def test_broadcast_makes_it_to_client(self):
-        conn = yield self.connection()
-        handlers.WebSocketHandler.broadcast("message", self.io_loop)
-        message = yield conn.read_message()
+    ws_server.run_sync(run)
+
+
+def test_ws_broadcast_makes_it_to_client(ws_server):
+    async def run():
+        conn = await ws_connect(ws_server)
+        handlers.WebSocketHandler.broadcast("message", ws_server.io_loop)
+        message = await conn.read_message()
         assert message == "message"
 
-    @tornado.testing.gen_test
-    def test_broadcast_to_client_that_just_closed_connection(self):
-        conn = yield self.connection()
-        conn.stream.close()
-        handlers.WebSocketHandler.broadcast("message", self.io_loop)
+    ws_server.run_sync(run)
 
-    @tornado.testing.gen_test
-    def test_broadcast_to_client_without_ws_connection_present(self):
-        yield self.connection()
+
+def test_ws_broadcast_to_client_that_just_closed_connection(ws_server):
+    async def run():
+        conn = await ws_connect(ws_server)
+        conn.stream.close()
+        handlers.WebSocketHandler.broadcast("message", ws_server.io_loop)
+
+    ws_server.run_sync(run)
+
+
+def test_ws_broadcast_to_client_without_ws_connection_present(ws_server):
+    async def run():
+        await ws_connect(ws_server)
         # Tornado checks for ws_connection and raises WebSocketClosedError
         # if it is missing, this test case simulates winning a race were
         # this has happened but we have not yet been removed from clients.
         for client in handlers.WebSocketHandler.clients:
             client.ws_connection = None
-        handlers.WebSocketHandler.broadcast("message", self.io_loop)
+        handlers.WebSocketHandler.broadcast("message", ws_server.io_loop)
 
-    @tornado.testing.gen_test
-    def test_good_origin(self):
+    ws_server.run_sync(run)
+
+
+def test_ws_good_origin(ws_server):
+    async def run():
         headers = {"Origin": "http://localhost", "Host": "localhost"}
-        conn = yield self.connection(headers=headers)
+        conn = await ws_connect(ws_server, headers=headers)
         assert conn
 
-    @tornado.testing.gen_test
-    def test_bad_origin(self):
+    ws_server.run_sync(run)
+
+
+def test_ws_bad_origin(ws_server):
+    async def run():
         headers = {"Origin": "http://foobar", "Host": "localhost"}
         with pytest.raises(tornado.httpclient.HTTPClientError) as exc_info:
-            _ = yield self.connection(headers=headers)
+            _ = await ws_connect(ws_server, headers=headers)
         assert exc_info.value.code == 403
 
+    ws_server.run_sync(run)
 
-class JsonRpcHandlerTestBase(tornado.testing.AsyncHTTPTestCase):
-    csrf_protection = True
 
-    def setUp(self):
-        super().setUp()
-        self.headers = {"Host": "localhost:6680"}
-
-    def get_app(self):
-        self.core = mock.Mock()
-        return tornado.web.Application(
+@pytest.fixture
+def start_rpc_server(tornado_server):
+    def start(*, csrf_protection):
+        app = tornado.web.Application(
             [
                 (
                     r"/rpc",
                     handlers.JsonRpcHandler,
                     {
-                        "core": self.core,
+                        "core": mock.Mock(),
                         "allowed_origins": set(),
-                        "csrf_protection": self.csrf_protection,
+                        "csrf_protection": csrf_protection,
                     },
                 ),
             ],
         )
+        return tornado_server(app)
 
-    def assert_extra_response_headers(self, headers):
-        assert headers["Cache-Control"] == "no-cache"
-        assert headers["X-Mopidy-Version"] == mopidy.__version__
-        assert headers["Accept"] == "application/json"
-        assert headers["Content-Type"] == "application/json; utf-8"
-
-    def get_cors_response_headers(self):
-        yield (
-            "Access-Control-Allow-Origin",
-            self.headers.get("Origin"),
-        )
-        yield (
-            "Access-Control-Allow-Headers",
-            "Content-Type",
-        )
-
-    def get_preflight_response_headers(self):
-        yield from self.get_cors_response_headers()
-        yield (
-            "Access-Control-Max-Age",
-            "7200",
-        )
-
-    def test_head(self):
-        response = self.fetch("/rpc", method="HEAD")
-
-        assert response.code == 200
-        self.assert_extra_response_headers(response.headers)
+    return start
 
 
-class JsonRpcHandlerTestCSRFEnabled(JsonRpcHandlerTestBase):
-    def test_options_sets_cors_headers(self):
-        self.headers.update({"Origin": "http://localhost:6680"})
-        response = self.fetch("/rpc", method="OPTIONS", headers=self.headers)
-
-        assert response.code == 204
-        for k, v in self.get_preflight_response_headers():
-            assert response.headers[k] == v
-
-    def test_options_bad_origin_forbidden(self):
-        self.headers.update({"Origin": "http://foo:6680"})
-        response = self.fetch("/rpc", method="OPTIONS", headers=self.headers)
-
-        assert response.code == 403
-        assert response.reason == "Access denied for origin http://foo:6680"
-        for k, _ in self.get_preflight_response_headers():
-            assert k not in response.headers
-
-    def test_options_no_origin_forbidden(self):
-        response = self.fetch("/rpc", method="OPTIONS", headers=self.headers)
-
-        assert response.code == 403
-        assert response.reason == "Access denied for origin None"
-        for k, _ in self.get_preflight_response_headers():
-            assert k not in response.headers
-
-    def test_post_no_content_type_unsupported(self):
-        response = self.fetch("/rpc", method="POST", body="hi", headers=self.headers)
-
-        assert response.code == 415
-        for k, _ in self.get_preflight_response_headers():
-            assert k not in response.headers
-
-    def test_post_wrong_content_type_unsupported(self):
-        self.headers.update({"Content-Type": "application/cats"})
-        response = self.fetch("/rpc", method="POST", body="hi", headers=self.headers)
-
-        assert response.code == 415
-        assert response.reason == "Content-Type must be application/json"
-        for k, _ in self.get_preflight_response_headers():
-            assert k not in response.headers
-
-    def test_post_no_origin_ok_but_doesnt_set_cors_headers(self):
-        self.headers.update({"Content-Type": "application/json"})
-        response = self.fetch("/rpc", method="POST", body="hi", headers=self.headers)
-
-        assert response.code == 200
-        for k, _ in self.get_preflight_response_headers():
-            assert k not in response.headers
-
-    def test_post_with_origin_ok_sets_cors_headers(self):
-        self.headers.update(
-            {"Content-Type": "application/json", "Origin": "http://foobar:6680"},
-        )
-        response = self.fetch("/rpc", method="POST", body="hi", headers=self.headers)
-
-        assert response.code == 200
-        self.assert_extra_response_headers(response.headers)
-        for k, v in self.get_cors_response_headers():
-            assert response.headers[k] == v
-        assert "Access-Control-Max-Age" not in response.headers
+@pytest.fixture
+def rpc_server(start_rpc_server):
+    return start_rpc_server(csrf_protection=True)
 
 
-class JsonRpcHandlerTestCSRFDisabled(JsonRpcHandlerTestBase):
-    csrf_protection = False
-
-    def test_options_no_origin_success(self):
-        response = self.fetch("/rpc", method="OPTIONS", headers=self.headers)
-
-        assert response.code == 204
-
-    def test_post_no_content_type_ok(self):
-        response = self.fetch("/rpc", method="POST", body="hi", headers=self.headers)
-
-        assert response.code == 200
-        for k, _ in self.get_preflight_response_headers():
-            assert k not in response.headers
+@pytest.fixture
+def rpc_server_no_csrf(start_rpc_server):
+    return start_rpc_server(csrf_protection=False)
 
 
-class CheckOriginTests(unittest.TestCase):
-    def setUp(self):
-        self.headers = {"Host": "localhost:6680"}
-        self.allowed = set()
+@pytest.fixture
+def headers():
+    return {"Host": "localhost:6680"}
 
-    def test_missing_origin_blocked(self):
-        assert not handlers.check_origin(None, self.headers, self.allowed)
 
-    def test_empty_origin_allowed(self):
-        assert handlers.check_origin("", self.headers, self.allowed)
+def assert_extra_response_headers(headers):
+    assert headers["Cache-Control"] == "no-cache"
+    assert headers["X-Mopidy-Version"] == mopidy.__version__
+    assert headers["Accept"] == "application/json"
+    assert headers["Content-Type"] == "application/json; utf-8"
 
-    def test_chrome_file_origin_allowed(self):
-        assert handlers.check_origin("file://", self.headers, self.allowed)
 
-    def test_firefox_null_origin_allowed(self):
-        assert handlers.check_origin("null", self.headers, self.allowed)
+def get_cors_response_headers(headers):
+    yield (
+        "Access-Control-Allow-Origin",
+        headers.get("Origin"),
+    )
+    yield (
+        "Access-Control-Allow-Headers",
+        "Content-Type",
+    )
 
-    def test_same_host_origin_allowed(self):
-        assert handlers.check_origin(
-            "http://localhost:6680",
-            self.headers,
-            self.allowed,
-        )
 
-    def test_different_host_origin_blocked(self):
-        assert not handlers.check_origin(
-            "http://other:6680",
-            self.headers,
-            self.allowed,
-        )
+def get_preflight_response_headers(headers):
+    yield from get_cors_response_headers(headers)
+    yield (
+        "Access-Control-Max-Age",
+        "7200",
+    )
 
-    def test_different_port_blocked(self):
-        assert not handlers.check_origin(
-            "http://localhost:80",
-            self.headers,
-            self.allowed,
-        )
 
-    def test_extra_origin_allowed(self):
-        self.allowed.add("other:6680")
-        assert handlers.check_origin("http://other:6680", self.headers, self.allowed)
+@pytest.mark.parametrize("csrf_protection", [True, False])
+def test_rpc_head(start_rpc_server, csrf_protection):
+    server = start_rpc_server(csrf_protection=csrf_protection)
+
+    response = server.fetch("/rpc", method="HEAD")
+
+    assert response.code == 200
+    assert_extra_response_headers(response.headers)
+
+
+def test_rpc_options_sets_cors_headers(rpc_server, headers):
+    headers.update({"Origin": "http://localhost:6680"})
+    response = rpc_server.fetch("/rpc", method="OPTIONS", headers=headers)
+
+    assert response.code == 204
+    for k, v in get_preflight_response_headers(headers):
+        assert response.headers[k] == v
+
+
+def test_rpc_options_bad_origin_forbidden(rpc_server, headers):
+    headers.update({"Origin": "http://foo:6680"})
+    response = rpc_server.fetch("/rpc", method="OPTIONS", headers=headers)
+
+    assert response.code == 403
+    assert response.reason == "Access denied for origin http://foo:6680"
+    for k, _ in get_preflight_response_headers(headers):
+        assert k not in response.headers
+
+
+def test_rpc_options_no_origin_forbidden(rpc_server, headers):
+    response = rpc_server.fetch("/rpc", method="OPTIONS", headers=headers)
+
+    assert response.code == 403
+    assert response.reason == "Access denied for origin None"
+    for k, _ in get_preflight_response_headers(headers):
+        assert k not in response.headers
+
+
+def test_rpc_post_no_content_type_unsupported(rpc_server, headers):
+    response = rpc_server.fetch("/rpc", method="POST", body="hi", headers=headers)
+
+    assert response.code == 415
+    for k, _ in get_preflight_response_headers(headers):
+        assert k not in response.headers
+
+
+def test_rpc_post_wrong_content_type_unsupported(rpc_server, headers):
+    headers.update({"Content-Type": "application/cats"})
+    response = rpc_server.fetch("/rpc", method="POST", body="hi", headers=headers)
+
+    assert response.code == 415
+    assert response.reason == "Content-Type must be application/json"
+    for k, _ in get_preflight_response_headers(headers):
+        assert k not in response.headers
+
+
+def test_rpc_post_no_origin_ok_but_doesnt_set_cors_headers(rpc_server, headers):
+    headers.update({"Content-Type": "application/json"})
+    response = rpc_server.fetch("/rpc", method="POST", body="hi", headers=headers)
+
+    assert response.code == 200
+    for k, _ in get_preflight_response_headers(headers):
+        assert k not in response.headers
+
+
+def test_rpc_post_with_origin_ok_sets_cors_headers(rpc_server, headers):
+    headers.update(
+        {"Content-Type": "application/json", "Origin": "http://foobar:6680"},
+    )
+    response = rpc_server.fetch("/rpc", method="POST", body="hi", headers=headers)
+
+    assert response.code == 200
+    assert_extra_response_headers(response.headers)
+    for k, v in get_cors_response_headers(headers):
+        assert response.headers[k] == v
+    assert "Access-Control-Max-Age" not in response.headers
+
+
+def test_rpc_no_csrf_options_no_origin_success(rpc_server_no_csrf, headers):
+    response = rpc_server_no_csrf.fetch("/rpc", method="OPTIONS", headers=headers)
+
+    assert response.code == 204
+
+
+def test_rpc_no_csrf_post_no_content_type_ok(rpc_server_no_csrf, headers):
+    response = rpc_server_no_csrf.fetch(
+        "/rpc",
+        method="POST",
+        body="hi",
+        headers=headers,
+    )
+
+    assert response.code == 200
+    for k, _ in get_preflight_response_headers(headers):
+        assert k not in response.headers
+
+
+@pytest.fixture
+def allowed():
+    return set()
+
+
+def test_check_origin_missing_origin_blocked(headers, allowed):
+    assert not handlers.check_origin(None, headers, allowed)
+
+
+def test_check_origin_empty_origin_allowed(headers, allowed):
+    assert handlers.check_origin("", headers, allowed)
+
+
+def test_check_origin_chrome_file_origin_allowed(headers, allowed):
+    assert handlers.check_origin("file://", headers, allowed)
+
+
+def test_check_origin_firefox_null_origin_allowed(headers, allowed):
+    assert handlers.check_origin("null", headers, allowed)
+
+
+def test_check_origin_same_host_origin_allowed(headers, allowed):
+    assert handlers.check_origin("http://localhost:6680", headers, allowed)
+
+
+def test_check_origin_different_host_origin_blocked(headers, allowed):
+    assert not handlers.check_origin("http://other:6680", headers, allowed)
+
+
+def test_check_origin_different_port_blocked(headers, allowed):
+    assert not handlers.check_origin("http://localhost:80", headers, allowed)
+
+
+def test_check_origin_extra_origin_allowed(headers, allowed):
+    allowed.add("other:6680")
+    assert handlers.check_origin("http://other:6680", headers, allowed)

@@ -2,10 +2,10 @@ import pathlib
 import platform
 import shutil
 import tempfile
-import unittest
 from typing import Any, ClassVar
 
 import pykka
+import pytest
 
 from mopidy import core
 from mopidy._exts.m3u.backend import M3UBackend
@@ -17,7 +17,7 @@ def generate_song(i):
     return f"dummy:track:song{i}"
 
 
-class M3UPlaylistsProviderTest(unittest.TestCase):
+class TestM3UPlaylistsProvider:
     backend_class = M3UBackend
     config: ClassVar[dict[str, dict[str, Any]]] = {
         "m3u": {
@@ -29,7 +29,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         },
     }
 
-    def setUp(self):
+    def setup_method(self):
         self.config["m3u"]["playlists_dir"] = pathlib.Path(tempfile.mkdtemp())
         self.playlists_dir = self.config["m3u"]["playlists_dir"]
         self.base_dir = self.config["m3u"]["base_dir"] or self.playlists_dir
@@ -38,7 +38,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         backend = M3UBackend.start(config=self.config, audio=audio).proxy()
         self.core = core.Core(config=self.config, backends=[backend])
 
-    def tearDown(self):
+    def teardown_method(self):
         pykka.ActorRegistry.stop_all()
 
         if self.playlists_dir.exists():
@@ -158,9 +158,9 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         assert playlist.name == result.name
         assert track.uri == result.tracks[0].uri
 
-    @unittest.skipIf(
+    @pytest.mark.skipif(
         platform.system() == "Darwin",
-        'macOS 10.13 raises IOError "Illegal byte sequence" on open.',
+        reason='macOS 10.13 raises IOError "Illegal byte sequence" on open.',
     )
     def test_load_playlist_with_nonfilesystem_encoding_of_filename(self):
         playlist_name = "øæå.m3u".encode("latin-1")
@@ -174,7 +174,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         result = self.core.playlists.as_list()
         assert result[0].name == "���"
 
-    @unittest.SkipTest
+    @pytest.mark.skip(reason="Not implemented")
     def test_playlists_dir_is_created(self):
         pass
 
@@ -362,7 +362,7 @@ class M3UPlaylistsProviderTest(unittest.TestCase):
         assert item_refs is None
 
 
-class M3UPlaylistsProviderBaseDirectoryTest(M3UPlaylistsProviderTest):
-    def setUp(self):
+class TestM3UPlaylistsProviderBaseDirectory(TestM3UPlaylistsProvider):
+    def setup_method(self):
         self.config["m3u"]["base_dir"] = pathlib.Path(tempfile.mkdtemp())
-        super().setUp()
+        super().setup_method()
