@@ -382,11 +382,17 @@ class GstAudio(Audio, pykka.ThreadingActor):
 
     @override
     def start_playback(self) -> bool:
-        return self._set_state(Gst.State.PLAYING)
+        assert self._pipeline
+
+        self._target_state = Gst.State.PLAYING
+        return self._pipeline.set_state(Gst.State.PLAYING)
 
     @override
     def pause_playback(self) -> bool:
-        return self._set_state(Gst.State.PAUSED)
+        assert self._pipeline
+
+        self._target_state = Gst.State.PAUSED
+        return self._pipeline.set_state(Gst.State.PAUSED)
 
     @override
     def prepare_change(self) -> bool:
@@ -394,28 +400,19 @@ class GstAudio(Audio, pykka.ThreadingActor):
         # changes like updating data that is being pushed. The reason for this
         # is that GStreamer will reset all its state when it changes to
         # `Gst.State.READY`.
-        return self._set_state(Gst.State.READY)
+        assert self._pipeline
+
+        self._buffering = False
+        self._target_state = Gst.State.READY
+        return self._pipeline.set_state(Gst.State.READY)
 
     @override
     def stop_playback(self) -> bool:
-        return self._set_state(Gst.State.NULL)
-
-    def _set_state(self, state: Gst.State) -> bool:
-        """Internal method for setting the raw GStreamer state.
-
-        Returns `True` if successful, else `False`.
-
-        Args:
-            state: State to set playbin to. One of: `Gst.State.NULL`,
-                `Gst.State.READY`, `Gst.State.PAUSED` and `Gst.State.PLAYING`.
-        """
         assert self._pipeline
 
-        if state < Gst.State.PAUSED:
-            self._buffering = False
-
-        self._target_state = state
-        return self._pipeline.set_state(state)
+        self._buffering = False
+        self._target_state = Gst.State.NULL
+        return self._pipeline.set_state(Gst.State.NULL)
 
     @override
     def get_current_tags(self) -> dict[str, list[Any]]:
