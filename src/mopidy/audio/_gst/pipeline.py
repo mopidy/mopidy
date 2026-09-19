@@ -4,7 +4,6 @@ import logging
 from typing import TYPE_CHECKING, cast
 
 from mopidy import exceptions
-from mopidy._lib import process
 from mopidy._lib.gi import GLib, Gst, GstPbutils
 from mopidy.audio import tags as tags_lib
 from mopidy.audio._gst.types import (
@@ -104,10 +103,7 @@ def make_output_bin(output: str) -> Gst.Element:
         return fakesink
 
     output_bin = GstOutputBin()
-    try:
-        output_bin.add_output(output)
-    except exceptions.AudioException:
-        process.exit_process()  # TODO: move this up the chain
+    output_bin.add_output(output)
     return output_bin
 
 

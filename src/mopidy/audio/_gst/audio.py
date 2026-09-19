@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, cast, override
 
 import pykka
 
+from mopidy import exceptions
 from mopidy._lib import logs, process
 from mopidy._lib.gi import GLib, Gst, GstBase, GstPbutils
 from mopidy.audio import tags as tags_lib
@@ -92,8 +93,8 @@ class GstAudio(Audio, pykka.ThreadingActor):
             )
             if self.mixer:
                 self.mixer.setup(self._pipeline.volume, self.actor_ref.proxy().mixer)
-        except GLib.Error:
-            logger.exception("Unknown GLib error on audio startup.")
+        except (GLib.Error, exceptions.AudioException):
+            logger.exception("Failed to set up the audio pipeline.")
             process.exit_process()
 
     @override

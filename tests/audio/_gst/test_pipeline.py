@@ -85,6 +85,11 @@ def test_output_bin_takes_more_than_one_output():
     assert output_bin.numchildren == 5  # tee, and a queue plus a bin per output
 
 
+def test_make_output_bin_raises_on_an_unknown_output():
+    with pytest.raises(exceptions.AudioException):
+        make_output_bin("definitelynotanelement")
+
+
 def test_output_bin_rejects_an_unknown_output():
     output_bin = GstOutputBin()
 
