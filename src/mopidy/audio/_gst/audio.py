@@ -14,6 +14,11 @@ from mopidy._lib.gi import GLib, Gst, GstBase, GstPbutils
 from mopidy.audio import tags as tags_lib
 from mopidy.audio._api import Audio
 from mopidy.audio._gst.mixer import GstSoftwareMixerAdapter
+from mopidy.audio._gst.pipeline import (
+    GST_PLAY_FLAGS_AUDIO,
+    GST_PLAY_FLAGS_DOWNLOAD,
+    make_output_bin,
+)
 from mopidy.audio._listener import AudioListener
 from mopidy.audio._utils import (
     Signals,
@@ -35,62 +40,11 @@ logger = logging.getLogger(__name__)
 # set_state() on a pipeline.
 gst_logger = logging.getLogger("mopidy.audio.gst")
 
-_GST_PLAY_FLAGS_AUDIO = 0x02
-_GST_PLAY_FLAGS_DOWNLOAD = 0x80
-
 _GST_STATE_MAPPING: dict[Gst.State, PlaybackState] = {
     Gst.State.PLAYING: PlaybackState.PLAYING,
     Gst.State.PAUSED: PlaybackState.PAUSED,
     Gst.State.NULL: PlaybackState.STOPPED,
 }
-
-
-# TODO: expose this as a property on audio when #790 gets further along.
-class _Outputs(Gst.Bin):
-    def __init__(self) -> None:
-        Gst.Bin.__init__(self)
-        # TODO(gst1): Set 'outputs' as the Bin name for easier debugging
-
-        tee = Gst.ElementFactory.make("tee")
-        if tee is None:
-            msg = "Failed to create GStreamer tee."
-            raise exceptions.AudioException(msg)
-        self._tee = tee
-        self.add(self._tee)
-
-        tee_sink = self._tee.get_static_pad("sink")
-        if tee_sink is None:
-            msg = "Failed to get sink from GStreamer tee."
-            raise exceptions.AudioException(msg)
-        ghost_pad = Gst.GhostPad.new("sink", tee_sink)
-        self.add_pad(ghost_pad)
-
-    def add_output(self, description: str) -> None:
-        # NOTE: This only works for pipelines not in use until #790 gets done.
-        try:
-            output = Gst.parse_bin_from_description(
-                description,
-                ghost_unlinked_pads=True,
-            )
-        except GLib.Error as exc:
-            logger.error('Failed to create audio output "%s": %s', description, exc)
-            msg = f"Failed to create audio output {description!r}"
-            raise exceptions.AudioException(msg) from exc
-
-        self._add(output)
-        logger.info('Audio output set to "%s"', description)
-
-    def _add(self, element: Gst.Element) -> None:
-        self.add(element)
-
-        queue = Gst.ElementFactory.make("queue")
-        if queue is None:
-            msg = "Failed to create GStreamer queue."
-            raise exceptions.AudioException(msg)
-        self.add(queue)
-
-        queue.link(element)
-        self._tee.link(queue)
 
 
 class _Handler:
@@ -404,7 +358,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
         if playbin is None:
             msg = "Failed to create GStreamer playbin."
             raise exceptions.AudioException(msg)
-        playbin.set_property("flags", _GST_PLAY_FLAGS_AUDIO)
+        playbin.set_property("flags", GST_PLAY_FLAGS_AUDIO)
 
         # TODO: turn into config values...
         playbin.set_property("buffer-size", 5 << 20)  # 5MB
@@ -425,22 +379,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
             self._playbin.set_state(Gst.State.NULL)
 
     def _setup_outputs(self) -> None:
-        # We don't want to use outputs for regular testing, so just install
-        # an unsynced fakesink when someone asks for a 'testoutput'.
-        if self._config["audio"]["output"] == "testoutput":
-            fakesink = Gst.ElementFactory.make("fakesink")
-            if fakesink is None:
-                msg = "Failed to create GStreamer fakesink element."
-                raise exceptions.AudioException(
-                    msg,
-                )
-            self._outputs = fakesink
-        else:
-            self._outputs = _Outputs()
-            try:
-                self._outputs.add_output(self._config["audio"]["output"])
-            except exceptions.AudioException:
-                process.exit_process()  # TODO: move this up the chain
+        self._outputs = make_output_bin(self._config["audio"]["output"])
 
         if sink_pad := self._outputs.get_static_pad("sink"):
             self._handler.setup_event_handling(sink_pad)
@@ -547,9 +486,9 @@ class GstAudio(Audio, pykka.ThreadingActor):
         # does not persist between track changes. mopidy/mopidy#886
         current_volume = self.mixer.get_volume() if self.mixer is not None else None
 
-        flags = _GST_PLAY_FLAGS_AUDIO
+        flags = GST_PLAY_FLAGS_AUDIO
         if download:
-            flags |= _GST_PLAY_FLAGS_DOWNLOAD
+            flags |= GST_PLAY_FLAGS_DOWNLOAD
 
         logger.debug(f"Flags: {flags}")
         if live_stream and download:
