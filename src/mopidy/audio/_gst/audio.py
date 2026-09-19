@@ -45,7 +45,6 @@ logger = logging.getLogger(__name__)
 gst_logger = logging.getLogger("mopidy.audio.gst")
 
 
-# TODO: create a player class which replaces the actors internals
 class GstAudio(Audio, pykka.ThreadingActor):
     """Audio output through [GStreamer](https://gstreamer.freedesktop.org/)."""
 

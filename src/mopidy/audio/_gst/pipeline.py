@@ -42,13 +42,11 @@ GST_PLAY_FLAGS_AUDIO = 0x02
 GST_PLAY_FLAGS_DOWNLOAD = 0x80
 
 
-# TODO: expose this as a property on audio when #790 gets further along.
 class GstOutputBin(Gst.Bin):
     """A bin that sends its input to one or more audio outputs."""
 
     def __init__(self) -> None:
-        Gst.Bin.__init__(self)
-        # TODO(gst1): Set 'outputs' as the Bin name for easier debugging
+        Gst.Bin.__init__(self, name="outputs")
 
         tee = Gst.ElementFactory.make("tee")
         if tee is None:
@@ -65,7 +63,7 @@ class GstOutputBin(Gst.Bin):
         self.add_pad(ghost_pad)
 
     def add_output(self, description: str) -> None:
-        # NOTE: This only works for pipelines not in use until #790 gets done.
+        # NOTE: This only works while the pipeline is not running yet.
         try:
             output = Gst.parse_bin_from_description(
                 description,
@@ -188,9 +186,9 @@ class GstPipeline:
         # the actual switch, i.e. about to switch can block for longer thanks
         # to this queue.
 
-        # TODO: See if settings should be set to minimize latency. Previous
-        # setting breaks appsrc (which we no longer use), and settings before
-        # that broke on a few systems. So leave the default to play it safe.
+        # TODO: See if settings should be set to minimize latency. Earlier
+        # attempts at that broke on a few systems, so leave the default to
+        # play it safe.
         buffer_time = self._config["audio"]["buffer_time"]
         if buffer_time is not None and buffer_time > 0:
             queue.set_property("max-size-time", buffer_time * Gst.MSECOND)
@@ -361,10 +359,9 @@ class GstPipeline:
         gst_position = millisecond_to_clocktime(position)
         gst_logger.debug("Sending flushing seek: position=%r", gst_position)
         # Send seek event to the queue not the playbin. The default behavior
-        # for bins is to forward this event to all sinks. Which results in
-        # duplicate seek events making it to appsrc (which we no longer use).
-        # Since elements are not allowed to act on the seek event, only modify
-        # it, this should be safe to do.
+        # for bins is to forward this event to all sinks, which results in
+        # duplicate seek events. Since elements are not allowed to act on the
+        # seek event, only modify it, this should be safe to do.
         return self.queue.seek_simple(
             Gst.Format.TIME,
             Gst.SeekFlags.FLUSH,
