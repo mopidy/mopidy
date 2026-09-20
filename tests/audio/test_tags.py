@@ -23,6 +23,12 @@ def test_repr_tags_max_bytes_two():
     assert result == "{'foo': [b'12...', b'56...', 'abcd', 67]}"
 
 
+def test_repr_tags_truncates_bytes_to_max_bytes():
+    assert tags.repr_tags({"image": [b"0123456789abcdef"]}, max_bytes=4) == (
+        "{'image': [b'0123...']}"
+    )
+
+
 def make_taglist(tag, values):
     taglist = Gst.TagList.new_empty()
 
@@ -104,6 +110,20 @@ def test_convert_taglist_string_tag():
     assert result[Gst.TAG_ARTIST][0] == "ABBA"
     assert isinstance(result[Gst.TAG_ARTIST][1], str)
     assert result[Gst.TAG_ARTIST][1] == "ACDC"
+
+
+def test_convert_taglist_sample_tag():
+    # Image tags carry a Gst.Sample, which is unwrapped to the raw bytes.
+    buf = Gst.Buffer.new_wrapped(b"fake image data")
+    value = GObject.Value()
+    value.init(Gst.Sample.__gtype__)
+    value.set_boxed(Gst.Sample.new(buf, None, None, None))
+    taglist = Gst.TagList.new_empty()
+    taglist.add_value(Gst.TagMergeMode.APPEND, "image", value)
+
+    result = tags.convert_taglist(taglist)
+
+    assert result["image"] == [b"fake image data"]
 
 
 def test_convert_taglist_integer_tag():
@@ -495,3 +515,15 @@ def test_convert_tags_to_track_missing_sortname(check, track_tags, track):
         musicbrainz_id="8760c5ac-ebcb-469f-b01d-ab7c8962ba95",
     )
     check(track.replace(artists=[artist]))
+
+
+def test_convert_tags_to_track_takes_a_length_and_a_last_modified():
+    track = tags.convert_tags_to_track(
+        {"title": ["a title"]},
+        uri=Uri("dummy:uri"),
+        length=DurationMs(4704),
+        last_modified=1234,
+    )
+
+    assert track.length == 4704
+    assert track.last_modified == 1234
