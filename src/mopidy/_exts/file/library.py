@@ -6,6 +6,7 @@ from typing import TypedDict, cast, override
 
 from mopidy import backend
 from mopidy import config as config_lib
+from mopidy._exts.stream.parsers import parse_playlist
 from mopidy._lib import paths
 from mopidy.media import MediaReader, MediaReaderError
 from mopidy.models import Ref, Track
@@ -104,8 +105,20 @@ class FileLibraryProvider(backend.LibraryProvider):
 
     @override
     def lookup(self, uri: Uri) -> list[Track]:
-        logger.debug("Looking up file URI: %s", uri)
         local_path = paths.uri_to_path(uri)
+
+        if uri.endswith((".pls", ".m3u")):
+            try:
+                data = local_path.read_bytes()
+            except OSError:
+                data = None
+
+            if data is not None:
+                uris = parse_playlist(data)
+                if uris:
+                    return [Track(uri=uris[0])]
+
+        logger.debug("Looking up file URI: %s", uri)
 
         try:
             track = self._media_reader.read_media_info(uri).track
