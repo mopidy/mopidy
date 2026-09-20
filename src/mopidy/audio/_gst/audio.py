@@ -28,8 +28,8 @@ from mopidy.audio._gst.types import (
     GstTag,
     GstWarning,
 )
+from mopidy.audio._gst.utils import setup_proxy
 from mopidy.audio._listener import AudioListener
-from mopidy.audio._utils import setup_proxy
 from mopidy.types import DurationMs, PlaybackState
 
 if TYPE_CHECKING:

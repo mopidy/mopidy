@@ -1,6 +1,6 @@
 from mopidy._lib.gi import Gst
 from mopidy.audio import supported_uri_schemes
-from mopidy.audio._utils import setup_proxy
+from mopidy.audio._gst.utils import setup_proxy
 from mopidy.types import UriScheme
 
 PROXY_CONFIG = {
