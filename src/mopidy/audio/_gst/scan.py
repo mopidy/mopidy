@@ -4,14 +4,21 @@ import dataclasses
 import logging
 import time
 from enum import IntEnum
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, cast, override
 
 from mopidy import exceptions
 from mopidy._lib import logs
 from mopidy._lib.gi import Gst, GstPbutils
 from mopidy.audio._gst import tags as tags_lib
 from mopidy.audio._gst.utils import Signals, setup_proxy
-from mopidy.types import DurationMs
+from mopidy.audio._scanner import (
+    MediaKind,
+    ScanImageData,
+    Scanner,
+    ScanResult,
+)
+from mopidy.models import Track
+from mopidy.types import DurationMs, Uri
 
 if TYPE_CHECKING:
     from mopidy.config import ProxyConfig
@@ -33,6 +40,23 @@ class GstAutoplugSelectResult(IntEnum):
     SKIP = 2
 
 
+PLAYLIST_MEDIA_TYPES = frozenset(
+    {
+        "application/x-scpls",
+        "application/xml",
+        "application/xspf+xml",
+        "audio/x-mpegurl",
+        "audio/x-scpls",
+        "text/uri-list",
+    }
+)
+"""The media types GStreamer typefinds the playlists we parse as.
+
+It only recognises some of them. PLS and ASX files fail the scan instead,
+and the caller finds those by parsing the URI itself.
+"""
+
+
 @dataclasses.dataclass(frozen=True)
 class GstScanData:
     """What one pass of the scanner pipeline found."""
@@ -46,6 +70,82 @@ class GstScanData:
 
 def _trace(*args: Any, **kwargs: Any) -> None:
     logger.log(logs.TRACE_LOG_LEVEL, *args, **kwargs)
+
+
+class GstScanner(Scanner):
+    """Scanner implemented with GStreamer.
+
+    Args:
+        timeout: Default timeout for scanning a URI, in milliseconds.
+        proxy_config: Proxy settings for the source elements.
+    """
+
+    def __init__(
+        self,
+        *,
+        timeout: DurationMs,
+        proxy_config: ProxyConfig | None = None,
+    ) -> None:
+        self._timeout = timeout
+        self._proxy_config = proxy_config or None
+
+    @override
+    def scan(self, uri: Uri, timeout: DurationMs | None = None) -> ScanResult:
+        data = scan_uri(
+            uri,
+            timeout_ms=int(timeout or self._timeout),
+            proxy_config=self._proxy_config,
+        )
+        return ScanResult(
+            uri=uri,
+            track=_convert_tags_to_track(data.tags, uri=uri, length=data.duration),
+            kind=_media_kind(data.mime, has_audio=data.has_audio),
+            media_type=data.mime,
+            playable=data.has_audio,
+            seekable=data.seekable,
+            images=_extract_images(data.tags),
+        )
+
+
+def _media_kind(media_type: str | None, *, has_audio: bool) -> MediaKind:
+    """Decide what the media is from what GStreamer made of it."""
+    if media_type in PLAYLIST_MEDIA_TYPES:
+        return MediaKind.PLAYLIST
+    if has_audio:
+        return MediaKind.AUDIO
+    if media_type is not None and (
+        media_type.startswith(("audio/", "video/")) or media_type == "application/ogg"
+    ):
+        # Recognised as media, even though nothing could decode it here.
+        return MediaKind.AUDIO
+    return MediaKind.OTHER
+
+
+def _convert_tags_to_track(
+    tags: dict[str, Any],
+    *,
+    uri: Uri,
+    length: DurationMs | None,
+) -> Track:
+    """Build a track from the tags, keeping what is usable when they are not.
+
+    A file with one bad tag still has a duration and a URI worth reporting,
+    so the tags are dropped rather than the whole scan.
+    """
+    try:
+        return tags_lib.convert_tags_to_track(tags, uri=uri, length=length)
+    except exceptions.ScannerError as exc:
+        logger.warning("Ignoring invalid tags on %s: %s", uri, exc)
+        return Track(uri=uri, length=length)
+
+
+def _extract_images(tags: dict[str, Any]) -> tuple[ScanImageData, ...]:
+    """Pull the images GStreamer found in the media out of the tags."""
+    return tuple(
+        ScanImageData(data=image)
+        for image in tags.get("image", []) + tags.get("preview-image", [])
+        if isinstance(image, bytes)
+    )
 
 
 def scan_uri(

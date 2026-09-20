@@ -8,10 +8,14 @@ object, not an actor, and it holds no state between calls.
 from __future__ import annotations
 
 import enum
+from typing import TYPE_CHECKING
 
 from mopidy.models import Track  # noqa: TC001
 from mopidy.models._base import BaseModel
 from mopidy.types import DurationMs, Uri  # noqa: TC001
+
+if TYPE_CHECKING:
+    from mopidy.config import Config
 
 
 class MediaKind(enum.StrEnum):
@@ -107,3 +111,19 @@ class Scanner:
                 scanning times out.
         """
         raise NotImplementedError
+
+
+def create_scanner(config: Config, *, timeout: DurationMs) -> Scanner:
+    """Create a scanner.
+
+    This is the one place that picks which scanner implementation to use.
+
+    Args:
+        config: The global config object.
+        timeout: Default timeout for scanning a URI, in milliseconds.
+    """
+    # Imported here so that this module, which is the interface, does not
+    # depend on an implementation of it.
+    from mopidy.audio._gst.scan import GstScanner  # noqa: PLC0415
+
+    return GstScanner(timeout=timeout, proxy_config=config["proxy"])
