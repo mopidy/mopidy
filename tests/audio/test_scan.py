@@ -161,7 +161,7 @@ def test_text_plain(scan, result, errors):
 
 
 def test_scan_uses_the_default_timeout(mocker):
-    process = mocker.patch("mopidy.audio.scan._process")
+    process = mocker.patch("mopidy.audio._gst.scan._process")
     process.return_value = ({}, None, False, None)
     uri = path_to_uri(path_to_data_dir("scanner/simple/song1.ogg"))
 
@@ -171,7 +171,7 @@ def test_scan_uses_the_default_timeout(mocker):
 
 
 def test_per_call_timeout_overrides_the_default(mocker):
-    process = mocker.patch("mopidy.audio.scan._process")
+    process = mocker.patch("mopidy.audio._gst.scan._process")
     process.return_value = ({}, None, False, None)
     uri = path_to_uri(path_to_data_dir("scanner/simple/song1.ogg"))
 
