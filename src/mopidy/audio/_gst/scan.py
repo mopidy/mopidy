@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, cast
 from mopidy import exceptions
 from mopidy._lib import logs
 from mopidy._lib.gi import Gst, GstPbutils
-from mopidy.audio import tags as tags_lib
+from mopidy.audio._gst import tags as tags_lib
 from mopidy.audio._gst.utils import Signals, setup_proxy
 from mopidy.types import DurationMs
 

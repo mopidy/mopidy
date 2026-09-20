@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, cast
 
 from mopidy import exceptions
 from mopidy._lib.gi import GLib, Gst, GstPbutils
-from mopidy.audio import tags as tags_lib
+from mopidy.audio._gst import tags as tags_lib
 from mopidy.audio._gst.types import (
     GstAsyncDone,
     GstBuffering,
