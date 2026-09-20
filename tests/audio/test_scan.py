@@ -5,6 +5,10 @@ from mopidy._lib.paths import path_to_uri
 from mopidy.audio.scan import Scanner
 from tests import path_to_data_dir
 
+# This module covers the deprecated scanner. The new one is covered by
+# tests/audio/_gst/test_scan.py.
+pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
+
 
 def find(path):
     dir_path = path_to_data_dir(path)

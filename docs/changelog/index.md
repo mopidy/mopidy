@@ -8,6 +8,38 @@ For older releases, see:
 [Changelog 1.x](1.x.md) ·
 [Changelog 0.x](0.x.md)
 
+## v4.1.0 (UNRELEASED)
+
+- Audio: Add a scanner API that carries Mopidy models instead of GStreamer
+  tags. [`create_scanner()`][mopidy.audio.create_scanner] returns a
+  [`Scanner`][mopidy.audio.Scanner], and its
+  [`scan()`][mopidy.audio.Scanner.scan] returns a
+  [`ScanResult`][mopidy.audio.ScanResult] with a ready
+  [`Track`][mopidy.models.Track], a [`MediaKind`][mopidy.audio.MediaKind]
+  saying whether this is audio, a playlist or neither, the media type,
+  whether the media is playable, whether it can be seeked, and any
+  embedded images.
+
+    Metadata that can't be coerced into a `Track` is left out, so a single bad
+    tag no longer fails the scan.
+
+- Audio: **Deprecated:** `mopidy.audio.tags.repr_tags()`,
+  `convert_taglist()` and `convert_tags_to_track()`. They convert GStreamer
+  taglists, so they are not part of the audio API. They are removed in Mopidy
+  5.0.
+
+    A scanner returns a [`Track`][mopidy.models.Track] in its
+    [`ScanResult`][mopidy.audio.ScanResult] now, which is what callers used
+    `convert_tags_to_track()` for. The other two have no public replacement.
+
+- Audio: **Deprecated:** `mopidy.audio.scan.Scanner`. Use
+  [`create_scanner()`][mopidy.audio.create_scanner] instead. The old class is
+  removed in Mopidy 5.0.
+
+    Backends that call `convert_tags_to_track()` on the scan result do not need
+    it any more, as the scanner builds the track itself. Backends that read the
+    media type to tell playlists from streams should read `kind` instead.
+
 ## v4.0.4 (2026-09-13)
 
 - Deps: Fix support for Cyclopts 3.12, the version in Debian stable. Cyclopts
