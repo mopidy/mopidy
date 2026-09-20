@@ -98,29 +98,7 @@ def _extract_sample_data(sample: Gst.Sample) -> bytes | None:
     buf = sample.get_buffer()
     if not buf:
         return None
-    return _extract_buffer_data(buf)
-
-
-# Fix for https://github.com/mopidy/mopidy/issues/1827
-# Using GstBuffer.extract_dup() is a memory leak in versions of PyGObject prior
-# to v3.36.0. As a workaround we use the GstMemory APIs instead.
-def _extract_buffer_data(buf: Gst.Buffer) -> bytes | None:
-    mem = buf.get_all_memory()
-    if not mem:
-        return None
-    success, info = mem.map(Gst.MapFlags.READ)
-    if not success:
-        return None
-    if isinstance(info.data, memoryview):  # noqa: SIM108
-        # We need to copy the data as the memoryview is released
-        # when we call mem.unmap()
-        data = bytes(info.data)
-    else:
-        # GStreamer Python bindings <= 1.16 return a copy of the
-        # data as bytes()
-        data = info.data
-    mem.unmap(info)
-    return data
+    return buf.extract_dup(0, buf.get_size())
 
 
 # TODO: split based on "stream" and "track" based conversion? i.e. handle data
