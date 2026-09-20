@@ -7,9 +7,9 @@ from typing import TypedDict, cast, override
 from mopidy import backend, exceptions
 from mopidy import config as config_lib
 from mopidy._lib import paths
-from mopidy.audio import scan, tags
+from mopidy.audio import create_scanner
 from mopidy.models import Ref, Track
-from mopidy.types import Uri
+from mopidy.types import DurationMs, Uri
 
 from . import Extension
 from .types import FileConfig
@@ -40,7 +40,10 @@ class FileLibraryProvider(backend.LibraryProvider):
         )
         self._follow_symlinks = ext_config["follow_symlinks"]
 
-        self._scanner = scan.Scanner(timeout=ext_config["metadata_timeout"])
+        self._scanner = create_scanner(
+            config,
+            timeout=DurationMs(ext_config["metadata_timeout"]),
+        )
 
         self.root_directory = self._get_root_directory()
 
@@ -103,12 +106,7 @@ class FileLibraryProvider(backend.LibraryProvider):
         local_path = paths.uri_to_path(uri)
 
         try:
-            result = self._scanner.scan(uri)
-            track = tags.convert_tags_to_track(
-                result.tags,
-                uri=uri,
-                length=result.duration,
-            )
+            track = self._scanner.scan(uri).track
         except exceptions.ScannerError as e:
             logger.warning("Failed looking up %s: %s", uri, e)
             track = Track(uri=uri)
