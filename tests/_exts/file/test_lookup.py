@@ -68,3 +68,15 @@ def test_lookup_unwraps_m3u_playlist(provider, tmp_path):
     tracks = provider.lookup(uri)
     assert len(tracks) == 1
     assert tracks[0].uri == "http://stream.example.com/listen.mp3"
+
+
+def test_lookup_unwraps_uppercase_pls_extension(provider, tmp_path):
+    pls_file = tmp_path / "TEST.PLS"
+    pls_file.write_text(
+        "[playlist]\nNumberOfEntries=1\nFile1=http://stream.example.com/listen.pls\n"
+    )
+
+    tracks = provider.lookup(f"file://{pls_file}")
+
+    assert len(tracks) == 1
+    assert tracks[0].uri == "http://stream.example.com/listen.pls"
