@@ -107,7 +107,7 @@ class FileLibraryProvider(backend.LibraryProvider):
     def lookup(self, uri: Uri) -> list[Track]:
         local_path = paths.uri_to_path(uri)
 
-        if uri.endswith((".pls", ".m3u")):
+        if uri.lower().endswith((".pls", ".m3u")):
             try:
                 data = local_path.read_bytes()
             except OSError:
