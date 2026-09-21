@@ -80,3 +80,27 @@ def test_lookup_unwraps_uppercase_pls_extension(provider, tmp_path):
 
     assert len(tracks) == 1
     assert tracks[0].uri == "http://stream.example.com/listen.pls"
+
+def test_lookup_empty_pls_falls_back_to_scanner(provider, tmp_path):
+    pls_file = tmp_path / "empty.pls"
+    pls_file.write_text("")
+    uri = f"file://{pls_file}"
+
+    tracks = provider.lookup(uri)
+
+    assert len(tracks) == 1
+    assert tracks[0].uri == uri
+    assert tracks[0].name == "empty.pls"
+
+
+def test_lookup_multi_entry_pls_returns_first_stream(provider, tmp_path):
+    pls_file = tmp_path / "multi.pls"
+    pls_file.write_text(
+        "[playlist]\nNumberOfEntries=2\n"
+        "File1=http://a.example.com/one\nFile2=http://b.example.com/two\n"
+    )
+
+    tracks = provider.lookup(f"file://{pls_file}")
+
+    assert len(tracks) == 1
+    assert tracks[0].uri == "http://a.example.com/one"
