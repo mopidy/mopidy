@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import logging
 import os
 import threading
@@ -45,6 +46,13 @@ logger = logging.getLogger(__name__)
 gst_logger = logging.getLogger("mopidy.audio.gst")
 
 
+@dataclasses.dataclass(frozen=True)
+class _PostedEndOfStream:
+    """An EOS, with the command count at the time GStreamer posted it."""
+
+    commands_at_post: int
+
+
 class GstAudio(Audio, pykka.ThreadingActor):
     """Audio output through [GStreamer](https://gstreamer.freedesktop.org/)."""
 
@@ -64,6 +72,10 @@ class GstAudio(Audio, pykka.ThreadingActor):
         self._tags: dict[str, list[Any]] = {}
         self._pending_uri: str | None = None
         self._pending_tags: dict[str, list[Any]] | None = None
+
+        # Counts the playback commands the actor has run. An EOS is stamped
+        # with this count when GStreamer posts it, see _on_gst_bus_message().
+        self._commands: int = 0
 
         self._pipeline: GstPipeline | None = None
         self._about_to_finish_callback: Callable | None = None
@@ -143,8 +155,13 @@ class GstAudio(Audio, pykka.ThreadingActor):
     def _on_gst_bus_message(self, message: GstBusMessage) -> None:
         # Runs on whichever GStreamer thread posted the message. Hand it to
         # the actor thread, so that all message handling is single threaded.
+        to_actor: GstBusMessage | _PostedEndOfStream = message
+        if isinstance(message, GstEndOfStream):
+            # Stamp the EOS now, so that the actor can tell whether a command
+            # ran between the post and the handling of it.
+            to_actor = _PostedEndOfStream(commands_at_post=self._commands)
         try:
-            self.actor_ref.tell(message)
+            self.actor_ref.tell(to_actor)
         except pykka.ActorDeadError:
             # The pipeline outlives the actor for a moment at teardown.
             gst_logger.debug("Dropped bus message, the audio actor is gone.")
@@ -156,8 +173,8 @@ class GstAudio(Audio, pykka.ThreadingActor):
                 self._on_gst_async_done()
             case GstBuffering(percent, mode):
                 self._on_gst_buffering(percent, mode)
-            case GstEndOfStream():
-                self._on_gst_end_of_stream()
+            case _PostedEndOfStream(commands_at_post):
+                self._on_gst_end_of_stream(commands_at_post)
             case GstError(error, debug):
                 self._on_gst_error(error, debug)
             case GstMissingPlugin(description, installer_detail):
@@ -248,11 +265,24 @@ class GstAudio(Audio, pykka.ThreadingActor):
 
         gst_logger.log(level, "Got BUFFERING bus message: percent=%d%%", percent)
 
-    def _on_gst_end_of_stream(self) -> None:
+    def _on_gst_end_of_stream(self, commands_at_post: int) -> None:
         gst_logger.debug("Got EOS (end of stream) bus message.")
         logger.debug("Audio event: reached_end_of_stream()")
         self._tags = {}
         AudioListener.send("reached_end_of_stream")
+
+        if commands_at_post != self._commands:
+            # A command reached the actor after GStreamer posted the EOS, so
+            # the EOS no longer describes the pipeline. Stopping now would
+            # undo a pause, or the next track that is already starting.
+            gst_logger.debug("Not stopping on EOS that predates a command.")
+            return
+
+        # EOS only reaches the bus when about-to-finish left no next URI, so
+        # playback is over. Take the pipeline down like stop_playback() does:
+        # left in PLAYING, the sink keeps its device or its PulseAudio stream
+        # open, uncorked and underrunning, until playback starts again.
+        self.stop_playback()
 
     def _on_gst_error(self, error: GLib.Error, debug: str) -> None:
         gst_logger.error(f"GStreamer error: {error.message}")
@@ -380,6 +410,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
     def start_playback(self) -> bool:
         assert self._pipeline
 
+        self._commands += 1
         self._target_state = GstState.PLAYING
         return self._pipeline.set_state(GstState.PLAYING)
 
@@ -387,6 +418,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
     def pause_playback(self) -> bool:
         assert self._pipeline
 
+        self._commands += 1
         self._target_state = GstState.PAUSED
         return self._pipeline.set_state(GstState.PAUSED)
 
@@ -398,6 +430,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
         # `Gst.State.READY`.
         assert self._pipeline
 
+        self._commands += 1
         self._buffering = False
         self._target_state = GstState.READY
         return self._pipeline.set_state(GstState.READY)
@@ -406,6 +439,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
     def stop_playback(self) -> bool:
         assert self._pipeline
 
+        self._commands += 1
         self._buffering = False
         self._target_state = GstState.NULL
         return self._pipeline.set_state(GstState.NULL)
