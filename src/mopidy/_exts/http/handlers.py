@@ -259,7 +259,8 @@ class JsonRpcHandler(tornado.web.RequestHandler):
         try:
             self.set_extra_headers()
             response = self.jsonrpc.handle_json(tornado.escape.native_str(data))
-            if response and self.write(response):
+            if response:
+                self.write(response)
                 logger.debug(
                     "Sent RPC message to %s: %r",
                     self.request.remote_ip,
