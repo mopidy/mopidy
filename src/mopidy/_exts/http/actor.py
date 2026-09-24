@@ -39,7 +39,6 @@ class HttpFrontend(pykka.ThreadingActor, CoreListener):
     apps: ClassVar[list[HttpApp]] = []
     statics: ClassVar[list[HttpStatic]] = []
 
-    @override
     def __init__(self, config: Config, core: CoreProxy) -> None:
         super().__init__()
 

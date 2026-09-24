@@ -1,11 +1,11 @@
 import collections
-from collections.abc import Iterable
+from collections.abc import Collection
 from typing import Any
 
 from mopidy.config import types
 
 
-def _did_you_mean(name: str, choices: Iterable[str]) -> str | None:
+def _did_you_mean(name: str, choices: Collection[str]) -> str | None:
     """Suggest most likely setting based on levenshtein."""
     if not choices:
         return None
