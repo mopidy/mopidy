@@ -6,8 +6,8 @@ import tornado.httpclient
 import tornado.web
 import tornado.websocket
 
-import mopidy
 from mopidy._exts.http import handlers
+from mopidy._lib.version import get_version
 
 
 @pytest.fixture
@@ -31,7 +31,7 @@ def test_static_handler(static_server):
     response = static_server.fetch("/test_handlers.py", method="GET")
 
     assert response.code == 200
-    assert response.headers["X-Mopidy-Version"] == mopidy.__version__
+    assert response.headers["X-Mopidy-Version"] == get_version()
     assert response.headers["Cache-Control"] == "no-cache"
 
 
@@ -39,7 +39,7 @@ def test_static_default_filename(static_server):
     response = static_server.fetch("/", method="GET")
 
     assert response.code == 200
-    assert response.headers["X-Mopidy-Version"] == mopidy.__version__
+    assert response.headers["X-Mopidy-Version"] == get_version()
     assert response.headers["Cache-Control"] == "no-cache"
 
 
@@ -171,7 +171,7 @@ def headers():
 
 def assert_extra_response_headers(headers):
     assert headers["Cache-Control"] == "no-cache"
-    assert headers["X-Mopidy-Version"] == mopidy.__version__
+    assert headers["X-Mopidy-Version"] == get_version()
     assert headers["Accept"] == "application/json"
     assert headers["Content-Type"] == "application/json; utf-8"
 

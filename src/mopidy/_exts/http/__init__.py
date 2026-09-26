@@ -2,7 +2,6 @@ import logging
 from pathlib import Path
 from typing import cast
 
-import mopidy
 from mopidy import config, exceptions, ext
 from mopidy.config import ConfigSchema
 
@@ -12,7 +11,6 @@ logger = logging.getLogger(__name__)
 class Extension(ext.Extension):
     dist_name = "mopidy-http"
     ext_name = "http"
-    version = mopidy.__version__
 
     def get_default_config(self) -> str:
         return config.read(Path(__file__).parent / "ext.conf")
