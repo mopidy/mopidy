@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, cast
 
 from mopidy import httpclient
@@ -8,7 +7,7 @@ from mopidy._lib.gi import Gst
 from mopidy.types import DurationMs, UriScheme
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Callable, Iterable
 
     from mopidy.config import ProxyConfig
 
@@ -21,25 +20,6 @@ def millisecond_to_clocktime(value: DurationMs) -> int:
 def clocktime_to_millisecond(value: int) -> DurationMs:
     """Convert an internal GStreamer time to millisecond time."""
     return DurationMs(value // Gst.MSECOND)
-
-
-def supported_uri_schemes(uri_schemes: Iterable[UriScheme]) -> set[UriScheme]:
-    """Determine which URIs we can actually support from provided whitelist.
-
-    Args:
-        uri_schemes: List/set of URIs to check support for.
-    """
-    supported_schemes = set()
-    registry = Gst.Registry.get()
-
-    for factory in registry.get_feature_list(Gst.ElementFactory):
-        factory = cast(Gst.ElementFactory, factory)
-        for uri_protocol in factory.get_uri_protocols():
-            uri_scheme = UriScheme(uri_protocol)
-            if uri_scheme in uri_schemes:
-                supported_schemes.add(uri_scheme)
-
-    return supported_schemes
 
 
 def setup_proxy(element: Gst.Element, config: ProxyConfig) -> None:
@@ -91,3 +71,22 @@ class Signals:
         """Clear all registered signal handlers."""
         for element, event in list(self._ids):
             element.disconnect(self._ids.pop((element, event)))
+
+
+def supported_uri_schemes(uri_schemes: Iterable[UriScheme]) -> set[UriScheme]:
+    """Determine which URIs we can actually support from provided whitelist.
+
+    Args:
+        uri_schemes: List/set of URIs to check support for.
+    """
+    supported_schemes = set()
+    registry = Gst.Registry.get()
+
+    for factory in registry.get_feature_list(Gst.ElementFactory):
+        factory = cast(Gst.ElementFactory, factory)
+        for uri_protocol in factory.get_uri_protocols():
+            uri_scheme = UriScheme(uri_protocol)
+            if uri_scheme in uri_schemes:
+                supported_schemes.add(uri_scheme)
+
+    return supported_schemes

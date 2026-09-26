@@ -10,10 +10,16 @@ import pykka
 
 from mopidy import audio as audio_lib
 from mopidy import backend, exceptions
-from mopidy.audio import AudioProxy, scan, tags
+from mopidy.audio import (
+    AudioProxy,
+    MediaKind,
+    Scanner,
+    ScanResult,
+    create_scanner,
+)
 from mopidy.config import Config
 from mopidy.models import Track
-from mopidy.types import Uri, UriScheme
+from mopidy.types import DurationMs, Uri, UriScheme
 
 from . import Extension, http
 from .parsers import parse_playlist
@@ -25,10 +31,7 @@ class StreamBackend(pykka.ThreadingActor, backend.Backend):
     def __init__(self, *, config: Config, audio: AudioProxy) -> None:
         super().__init__(config=config, audio=audio)
 
-        self._scanner = scan.Scanner(
-            timeout=config["stream"]["timeout"],
-            proxy_config=config["proxy"],
-        )
+        self._scanner = create_scanner(config, timeout=config["stream"]["timeout"])
 
         self._http_client = http.get_httpx_client(
             proxy_config=config["proxy"],
@@ -81,15 +84,9 @@ class StreamLibraryProvider(backend.LibraryProvider):
         )
 
         if scan_result:
-            try:
-                track = tags.convert_tags_to_track(
-                    scan_result.tags,
-                    uri=uri,
-                    length=scan_result.duration,
-                )
-            except exceptions.ScannerError as e:
-                logger.warning("Failed looking up %s: %s", uri, e)
-                track = Track(uri=uri)
+            # The scan followed the playlist to another URI, but the track is
+            # looked up under the URI the caller asked for.
+            track = scan_result.track.replace(uri=uri)
         else:
             logger.warning("Problem looking up %s", uri)
             track = Track(uri=uri)
@@ -121,9 +118,9 @@ class StreamPlaybackProvider(backend.PlaybackProvider):
 def _unwrap_stream(  # noqa: PLR0911  # TODO: cleanup the return value of this.
     uri: Uri,
     timeout: float,
-    scanner: scan.Scanner,
+    scanner: Scanner,
     http_client: httpx.Client,
-) -> tuple[Uri | None, scan._Result | None]:
+) -> tuple[Uri | None, ScanResult | None]:
     """Get a stream URI from a playlist URI, `uri`.
 
     Unwraps nested playlists until something that's not a playlist is found or
@@ -154,20 +151,18 @@ def _unwrap_stream(  # noqa: PLR0911  # TODO: cleanup the return value of this.
                     timeout,
                 )
                 return None, None
-            scan_result = scanner.scan(uri, timeout=scan_timeout)
+            scan_result = scanner.scan(uri, timeout=DurationMs(int(scan_timeout)))
         except exceptions.ScannerError as exc:
-            logger.debug("GStreamer failed scanning URI (%s): %s", uri, exc)
+            logger.debug("Failed scanning URI (%s): %s", uri, exc)
             scan_result = None
 
-        if scan_result is not None:
-            has_interesting_mime = (
-                scan_result.mime is not None
-                and not scan_result.mime.startswith("text/")
-                and not scan_result.mime.startswith("application/")
+        if scan_result is not None and scan_result.kind is MediaKind.AUDIO:
+            logger.debug(
+                "Unwrapped potential %s stream: %s",
+                scan_result.media_type,
+                uri,
             )
-            if scan_result.playable or has_interesting_mime:
-                logger.debug("Unwrapped potential %s stream: %s", scan_result.mime, uri)
-                return uri, scan_result
+            return uri, scan_result
 
         download_timeout = deadline - time.time()
         if download_timeout < 0:

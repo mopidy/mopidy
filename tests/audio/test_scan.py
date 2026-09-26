@@ -5,6 +5,10 @@ from mopidy._lib.paths import path_to_uri
 from mopidy.audio.scan import Scanner
 from tests import path_to_data_dir
 
+# This module covers the deprecated scanner. The new one is covered by
+# tests/audio/_gst/test_scan.py.
+pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
+
 
 def find(path):
     dir_path = path_to_data_dir(path)
@@ -52,6 +56,13 @@ def check_if_missing_plugin(result):
             pytest.skip(msg)
 
 
+def test_result_carries_the_scanned_uri(scan, result):
+    scan(find("scanner/simple"))
+
+    ogg = path_to_data_dir("scanner/simple/song1.ogg")
+    assert result[ogg].uri == path_to_uri(ogg)
+
+
 def test_tags_is_set(scan, result):
     scan(find("scanner/simple"))
 
@@ -75,6 +86,15 @@ def test_duration_is_set(scan, result):
     mp3 = path_to_data_dir("scanner/simple/song1.mp3")
     assert result[mp3].duration == 4608
     assert result[ogg].duration == 4704
+
+
+def test_seekable_is_set(scan, result):
+    scan(find("scanner/simple"))
+
+    check_if_missing_plugin(result)
+
+    ogg = path_to_data_dir("scanner/simple/song1.ogg")
+    assert result[ogg].seekable is True
 
 
 def test_artist_is_set(scan, result):
@@ -142,6 +162,26 @@ def test_text_plain(scan, result, errors):
     path = path_to_data_dir("scanner/plain.txt")
     scan([path])
     assert path in errors or not result[path].playable
+
+
+def test_scan_uses_the_default_timeout(mocker):
+    process = mocker.patch("mopidy.audio._gst.scan._process")
+    process.return_value = ({}, None, False, None)
+    uri = path_to_uri(path_to_data_dir("scanner/simple/song1.ogg"))
+
+    Scanner(timeout=4321).scan(uri)
+
+    assert process.call_args.args[1] == 4321
+
+
+def test_per_call_timeout_overrides_the_default(mocker):
+    process = mocker.patch("mopidy.audio._gst.scan._process")
+    process.return_value = ({}, None, False, None)
+    uri = path_to_uri(path_to_data_dir("scanner/simple/song1.ogg"))
+
+    Scanner(timeout=4321).scan(uri, timeout=1234)
+
+    assert process.call_args.args[1] == 1234
 
 
 @pytest.mark.skip(reason="Not implemented")

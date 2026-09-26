@@ -1,130 +1,62 @@
-import collections
-import datetime
-import logging
-import numbers
-from typing import Any
+"""The deprecated tag helpers.
 
-from mopidy import exceptions
-from mopidy._lib import logs
-from mopidy._lib.gi import GLib, Gst
-from mopidy.models import Album, Artist, Track
+These convert GStreamer taglists, so they moved in with the rest of the
+GStreamer code. A scanner returns a [Track][mopidy.models.Track] in its
+[ScanResult][mopidy.audio.ScanResult] now, which is what callers converted
+the tags to.
+"""
+
+from typing import Any
+from warnings import deprecated
+
+from mopidy._lib.gi import Gst
+from mopidy.audio._gst import tags as gst_tags
+from mopidy.models import Track
 from mopidy.types import DurationMs, Uri
 
-logger = logging.getLogger(__name__)
 
-
+@deprecated(
+    "mopidy.audio.tags.repr_tags() is deprecated since Mopidy 4.1 and will be "
+    "removed in Mopidy 5.0. It represents a GStreamer taglist, so it is not "
+    "part of the audio API. There is no public replacement."
+)
 def repr_tags(tags: dict[str, list[Any]], max_bytes: int = 10) -> str:
     """Returns a printable representation of a `Gst.TagList`.
 
-    Tag values of type bytes are truncated to the specified length to avoid
-    large amounts of output when logging.
+    !!! warning "Deprecated since Mopidy 4.1"
+
+        Removed in Mopidy 5.0, with no public replacement.
 
     Args:
         tags: A converted taglist to be represented.
         max_bytes: The maximum number of bytes to show for bytes tag values.
     """
-    result = dict(tags)
-    for tag_values in result.values():
-        for i, val in enumerate(tag_values):
-            if isinstance(val, bytes) and len(val) > max_bytes:
-                tag_values[i] = val[:max_bytes] + b"..."
-    return repr(result)
+    return gst_tags.repr_tags(tags, max_bytes)
 
 
+@deprecated(
+    "mopidy.audio.tags.convert_taglist() is deprecated since Mopidy 4.1 and "
+    "will be removed in Mopidy 5.0. It takes a GStreamer taglist, so it is "
+    "not part of the audio API. There is no public replacement."
+)
 def convert_taglist(taglist: Gst.TagList) -> dict[str, list[Any]]:
     """Convert a `Gst.TagList` to plain Python types.
 
-    Knows how to convert:
+    !!! warning "Deprecated since Mopidy 4.1"
 
-    - Dates
-    - Buffers
-    - Numbers
-    - Strings
-    - Booleans
-
-    Unknown types will be ignored and trace logged. Tag keys are all strings
-    defined as part of GStreamer's
-    [GstTagList](https://developer.gnome.org/gstreamer/stable/gstreamer-GstTagList.html).
+        Removed in Mopidy 5.0, with no public replacement.
 
     Args:
         taglist: A GStreamer taglist to be converted.
     """
-    result = collections.defaultdict(list)
-
-    for n in range(taglist.n_tags()):
-        tag = taglist.nth_tag_name(n)
-
-        for i in range(taglist.get_tag_size(tag)):
-            value = taglist.get_value_index(tag, i)
-
-            if isinstance(value, GLib.Date):
-                try:
-                    date = datetime.date(
-                        value.get_year(),
-                        value.get_month(),
-                        value.get_day(),
-                    )
-                    result[tag].append(date.isoformat())
-                except ValueError:
-                    logger.debug(
-                        "Ignoring dodgy date value: %d-%d-%d",
-                        value.get_year(),
-                        value.get_month(),
-                        value.get_day(),
-                    )
-            elif isinstance(value, Gst.DateTime):
-                result[tag].append(value.to_iso8601_string())
-            elif isinstance(value, bytes):
-                result[tag].append(value.decode(errors="replace"))
-            elif isinstance(value, str | bool | numbers.Number):
-                result[tag].append(value)
-            elif isinstance(value, Gst.Sample):
-                data = _extract_sample_data(value)
-                if data:
-                    result[tag].append(data)
-            else:
-                logger.log(
-                    logs.TRACE_LOG_LEVEL,
-                    "Ignoring unknown tag data: %r = %r",
-                    tag,
-                    value,
-                )
-
-    # TODO: dict(result) to not leak the defaultdict, or just use setdefault?
-    return result
+    return gst_tags.convert_taglist(taglist)
 
 
-def _extract_sample_data(sample: Gst.Sample) -> bytes | None:
-    buf = sample.get_buffer()
-    if not buf:
-        return None
-    return _extract_buffer_data(buf)
-
-
-# Fix for https://github.com/mopidy/mopidy/issues/1827
-# Using GstBuffer.extract_dup() is a memory leak in versions of PyGObject prior
-# to v3.36.0. As a workaround we use the GstMemory APIs instead.
-def _extract_buffer_data(buf: Gst.Buffer) -> bytes | None:
-    mem = buf.get_all_memory()
-    if not mem:
-        return None
-    success, info = mem.map(Gst.MapFlags.READ)
-    if not success:
-        return None
-    if isinstance(info.data, memoryview):  # noqa: SIM108
-        # We need to copy the data as the memoryview is released
-        # when we call mem.unmap()
-        data = bytes(info.data)
-    else:
-        # GStreamer Python bindings <= 1.16 return a copy of the
-        # data as bytes()
-        data = info.data
-    mem.unmap(info)
-    return data
-
-
-# TODO: split based on "stream" and "track" based conversion? i.e. handle data
-# from radios in it's own helper instead?
+@deprecated(
+    "mopidy.audio.tags.convert_tags_to_track() is deprecated since Mopidy 4.1 "
+    "and will be removed in Mopidy 5.0. Scanners build the track themselves: "
+    "read it off the mopidy.audio.ScanResult instead."
+)
 def convert_tags_to_track(
     tags: dict[str, Any],
     *,
@@ -134,95 +66,19 @@ def convert_tags_to_track(
 ) -> Track:
     """Convert our normalized tags to a track.
 
+    !!! warning "Deprecated since Mopidy 4.1"
+
+        Read the track off the [ScanResult][mopidy.audio.ScanResult] that
+        [Scanner.scan()][mopidy.audio.Scanner.scan] returns. Removed in
+        Mopidy 5.0.
+
     Raises:
         exceptions.ScannerError: If the tags can't be coerced into a valid
-            `Track`. Callers scanning multiple URIs should catch this per URI,
-            so that a single file with broken tags doesn't fail the entire scan
-            or lookup.
+            `Track`.
     """
-    album_kwargs = dict[str, Any]()
-    track_kwargs = dict[str, Any]()
-
-    track_kwargs["composers"] = _artists(tags, Gst.TAG_COMPOSER)
-    track_kwargs["performers"] = _artists(tags, Gst.TAG_PERFORMER)
-    track_kwargs["artists"] = _artists(
+    return gst_tags.convert_tags_to_track(
         tags,
-        Gst.TAG_ARTIST,
-        "musicbrainz-artistid",
-        "musicbrainz-sortname",
+        uri=uri,
+        length=length,
+        last_modified=last_modified,
     )
-    album_kwargs["artists"] = _artists(
-        tags,
-        Gst.TAG_ALBUM_ARTIST,
-        "musicbrainz-albumartistid",
-    )
-
-    track_kwargs["genre"] = "; ".join(tags.get(Gst.TAG_GENRE, []))
-    track_kwargs["name"] = "; ".join(tags.get(Gst.TAG_TITLE, []))
-    if not track_kwargs["name"]:
-        track_kwargs["name"] = "; ".join(tags.get(Gst.TAG_ORGANIZATION, []))
-
-    track_kwargs["comment"] = "; ".join(tags.get("comment", []))
-    if not track_kwargs["comment"]:
-        track_kwargs["comment"] = "; ".join(tags.get(Gst.TAG_LOCATION, []))
-    if not track_kwargs["comment"]:
-        track_kwargs["comment"] = "; ".join(tags.get(Gst.TAG_COPYRIGHT, []))
-
-    track_kwargs["track_no"] = tags.get(Gst.TAG_TRACK_NUMBER, [None])[0]
-    track_kwargs["disc_no"] = tags.get(Gst.TAG_ALBUM_VOLUME_NUMBER, [None])[0]
-    track_kwargs["bitrate"] = tags.get(Gst.TAG_BITRATE, [None])[0]
-    track_kwargs["musicbrainz_id"] = tags.get("musicbrainz-trackid", [None])[0]
-
-    album_kwargs["name"] = tags.get(Gst.TAG_ALBUM, [None])[0]
-    album_kwargs["num_tracks"] = tags.get(Gst.TAG_TRACK_COUNT, [None])[0]
-    album_kwargs["num_discs"] = tags.get(Gst.TAG_ALBUM_VOLUME_COUNT, [None])[0]
-    album_kwargs["musicbrainz_id"] = tags.get("musicbrainz-albumid", [None])[0]
-
-    album_kwargs["date"] = tags.get(Gst.TAG_DATE, [None])[0]
-    if not album_kwargs["date"]:
-        datetime = tags.get(Gst.TAG_DATE_TIME, [None])[0]
-        if datetime is not None:
-            album_kwargs["date"] = datetime.split("T")[0]
-    track_kwargs["date"] = album_kwargs["date"]
-
-    # Clear out any empty values we found
-    track_kwargs = {k: v for k, v in track_kwargs.items() if v}
-    album_kwargs = {k: v for k, v in album_kwargs.items() if v}
-
-    try:
-        # Only bother with album if we have a name to show.
-        if album_kwargs.get("name"):
-            track_kwargs["album"] = Album(**album_kwargs)
-
-        return Track(
-            **track_kwargs,
-            uri=uri,
-            length=length,
-            last_modified=last_modified,
-        )
-    except ValueError as exc:
-        msg = f"Invalid tags: {exc}"
-        raise exceptions.ScannerError(msg) from exc
-
-
-def _artists(
-    tags: dict[str, Any],
-    artist_name: str,
-    artist_id: str | None = None,
-    artist_sortname: str | None = None,
-) -> list[Artist] | None:
-    # Name missing, don't set artist
-    if not tags.get(artist_name):
-        return None
-
-    # One artist name and either id or sortname, include all available fields
-    if len(tags[artist_name]) == 1 and (artist_id in tags or artist_sortname in tags):
-        attrs = {"name": tags[artist_name][0]}
-        if artist_id in tags:
-            attrs["musicbrainz_id"] = tags[artist_id][0]
-        if artist_sortname in tags:
-            attrs["sortname"] = tags[artist_sortname][0]
-        return [Artist(**attrs)]
-
-    # Multiple artist, provide artists with name only to avoid ambiguity.
-    return [Artist(name=name) for name in tags[artist_name]]

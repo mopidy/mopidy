@@ -11,8 +11,8 @@ import pykka
 from mopidy import exceptions
 from mopidy._lib import logs, process
 from mopidy._lib.gi import GLib, Gst, GstBase, GstPbutils
-from mopidy.audio import tags as tags_lib
 from mopidy.audio._api import Audio
+from mopidy.audio._gst import tags as tags_lib
 from mopidy.audio._gst.mixer import GstSoftwareMixerAdapter
 from mopidy.audio._gst.pipeline import GstPipeline
 from mopidy.audio._gst.types import (
@@ -28,8 +28,8 @@ from mopidy.audio._gst.types import (
     GstTag,
     GstWarning,
 )
+from mopidy.audio._gst.utils import setup_proxy
 from mopidy.audio._listener import AudioListener
-from mopidy.audio._utils import setup_proxy
 from mopidy.types import DurationMs, PlaybackState
 
 if TYPE_CHECKING:
