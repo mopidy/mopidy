@@ -9,3 +9,4 @@ class FileConfig(TypedDict):
     show_dotfiles: bool
     follow_symlinks: bool
     metadata_timeout: int
+    skip_metadata: bool
