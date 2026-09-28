@@ -17,6 +17,27 @@ For older releases, see:
 - Deprecate `mopidy.__version__`. Mopidy no longer uses it itself. Use
   `importlib.metadata.version("mopidy")` instead.
 
+- Audio: Handle all GStreamer bus messages on the audio actor thread. Before,
+  the GLib main loop thread and the actor thread changed the audio state at the
+  same time, with no synchronization. The "Race condition happened" warning
+  from #1222 and #1430 is removed, because this race is gone. (!2305)
+
+- Audio: Stop startup at once if the configured `audio/output` cannot be
+  created. Before, Mopidy continued to build a pipeline with no output in it,
+  while it shut down. (!2307)
+
+- HTTP extension: Fix the debug log message for sent JSON-RPC responses. It was
+  never logged. (!2310)
+
+- Dev: Restructure the GStreamer code in the audio layer into smaller modules
+  with typed interfaces, and delete unused code. (!2303, !2304, !2306, !2307,
+  !2308)
+
+- Dev: Port the remaining `unittest` tests to pytest. (!2301)
+
+- Dev: Fail tests that hang for more than 60 seconds, and print the stack of
+  all threads, instead of letting CI hang. (!2302)
+
 ## v4.0.4 (2026-09-13)
 
 - Deps: Fix support for Cyclopts 3.12, the version in Debian stable. Cyclopts
