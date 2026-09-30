@@ -38,6 +38,11 @@ For older releases, see:
 - Dev: Fail tests that hang for more than 60 seconds, and print the stack of
   all threads, instead of letting CI hang. (!2302)
 
+- Packaging: Remove the desktop file. It started Mopidy in a terminal window
+  from the application menu, which is seldom useful for a server. The file was
+  added for the Ubuntu Sound Menu, which no longer exists, and Mopidy-MPRIS
+  stopped using it in 2018. (!2322)
+
 ## v4.0.4 (2026-09-13)
 
 - Deps: Fix support for Cyclopts 3.12, the version in Debian stable. Cyclopts
