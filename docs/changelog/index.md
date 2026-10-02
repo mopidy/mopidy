@@ -24,6 +24,10 @@ For older releases, see:
   images. Tags that are not valid are left out. Make a reader with
   [`Reader.create()`][mopidy.media.Reader.create].
 
+- File extension: Read the metadata of files with the
+  [`Reader`][mopidy.media.Reader]. If some tags of a file are not valid,
+  `lookup()` now keeps the other tags. Before, it gave no tags for the file.
+
 - Audio: Handle all GStreamer bus messages on the audio actor thread. Before,
   the GLib main loop thread and the actor thread changed the audio state at the
   same time, with no synchronization. The "Race condition happened" warning

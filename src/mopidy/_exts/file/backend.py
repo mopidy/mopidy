@@ -1,12 +1,13 @@
 import logging
-from typing import ClassVar
+from typing import ClassVar, override
 
 import pykka
 
 from mopidy import backend
 from mopidy.audio import AudioProxy
 from mopidy.config import Config
-from mopidy.types import UriScheme
+from mopidy.media import Reader
+from mopidy.types import DurationMs, UriScheme
 
 from . import library
 
@@ -18,6 +19,18 @@ class FileBackend(pykka.ThreadingActor, backend.Backend):
 
     def __init__(self, *, config: Config, audio: AudioProxy) -> None:
         super().__init__(config=config, audio=audio)
-        self.library = library.FileLibraryProvider(backend=self, config=config)
+        self._media_reader = Reader.create(
+            config=config,
+            timeout=DurationMs(config["file"]["metadata_timeout"]),
+        )
+        self.library = library.FileLibraryProvider(
+            backend=self,
+            config=config,
+            media_reader=self._media_reader,
+        )
         self.playback = backend.PlaybackProvider(audio=audio, backend=self)
         self.playlists = None
+
+    @override
+    def on_stop(self) -> None:
+        self._media_reader.close()

@@ -4,10 +4,10 @@ import pathlib
 from collections.abc import Generator
 from typing import TypedDict, cast, override
 
-from mopidy import backend, exceptions
+from mopidy import backend
 from mopidy import config as config_lib
 from mopidy._lib import paths
-from mopidy.audio import scan, tags
+from mopidy.media import MediaReadError, Reader
 from mopidy.models import Ref, Track
 from mopidy.types import Uri
 
@@ -28,7 +28,12 @@ class FileLibraryProvider(backend.LibraryProvider):
     # TODO: get_images that can pull from metadata and/or .folder.png etc?
     # TODO: handle playlists?
 
-    def __init__(self, backend: backend.Backend, config: config_lib.Config) -> None:
+    def __init__(
+        self,
+        backend: backend.Backend,
+        config: config_lib.Config,
+        media_reader: Reader,
+    ) -> None:
         super().__init__(backend)
 
         ext_config = cast(FileConfig, config[Extension.ext_name])
@@ -40,7 +45,7 @@ class FileLibraryProvider(backend.LibraryProvider):
         )
         self._follow_symlinks = ext_config["follow_symlinks"]
 
-        self._scanner = scan.Scanner(timeout=ext_config["metadata_timeout"])
+        self._media_reader = media_reader
 
         self.root_directory = self._get_root_directory()
 
@@ -103,13 +108,8 @@ class FileLibraryProvider(backend.LibraryProvider):
         local_path = paths.uri_to_path(uri)
 
         try:
-            result = self._scanner.scan(uri)
-            track = tags.convert_tags_to_track(
-                result.tags,
-                uri=uri,
-                length=result.duration,
-            )
-        except exceptions.ScannerError as e:
+            track = self._media_reader.read_media_info(uri).track
+        except MediaReadError as e:
             logger.warning("Failed looking up %s: %s", uri, e)
             track = Track(uri=uri)
 
