@@ -7,8 +7,7 @@ from typing import Any, NamedTuple, cast
 from mopidy import exceptions
 from mopidy._lib import logs
 from mopidy._lib.gi import Gst, GstPbutils
-from mopidy.audio import tags as tags_lib
-from mopidy.audio._utils import Signals, setup_proxy
+from mopidy._lib.gst import Signals, convert_taglist, setup_proxy
 from mopidy.config import ProxyConfig
 from mopidy.types import DurationMs
 
@@ -375,7 +374,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
         elif msg.type == Gst.MessageType.TAG:
             taglist = msg.parse_tag()
             # Note that this will only keep the last tag.
-            tags.update(tags_lib.convert_taglist(taglist))
+            tags.update(convert_taglist(taglist))
 
         timeout = timeout_ms - (int(time.time() * 1000) - start)
 

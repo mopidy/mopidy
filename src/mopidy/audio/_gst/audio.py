@@ -11,7 +11,7 @@ import pykka
 from mopidy import exceptions
 from mopidy._lib import logs, process
 from mopidy._lib.gi import GLib, Gst, GstBase, GstPbutils
-from mopidy.audio import tags as tags_lib
+from mopidy._lib.gst import repr_tags, setup_proxy
 from mopidy.audio._api import Audio
 from mopidy.audio._gst.mixer import GstSoftwareMixerAdapter
 from mopidy.audio._gst.pipeline import GstPipeline
@@ -29,7 +29,6 @@ from mopidy.audio._gst.types import (
     GstWarning,
 )
 from mopidy.audio._listener import AudioListener
-from mopidy.audio._utils import setup_proxy
 from mopidy.types import DurationMs, PlaybackState
 
 if TYPE_CHECKING:
@@ -266,7 +265,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
         gst_logger.debug("Got ASYNC_DONE bus message.")
 
     def _on_gst_tag(self, tags: dict[str, list[Any]]) -> None:
-        gst_logger.debug(f"Got TAG bus message: tags={tags_lib.repr_tags(tags)}")
+        gst_logger.debug(f"Got TAG bus message: tags={repr_tags(tags)}")
 
         # Postpone emitting tags until stream start.
         if self._pending_tags is not None:

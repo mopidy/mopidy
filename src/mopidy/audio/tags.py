@@ -1,126 +1,16 @@
-import collections
-import datetime
-import logging
-import numbers
 from typing import Any
 
 from mopidy import exceptions
-from mopidy._lib import logs
-from mopidy._lib.gi import GLib, Gst
+from mopidy._lib.gi import Gst
+from mopidy._lib.gst import convert_taglist, repr_tags
 from mopidy.models import Album, Artist, Track
 from mopidy.types import DurationMs, Uri
 
-logger = logging.getLogger(__name__)
-
-
-def repr_tags(tags: dict[str, list[Any]], max_bytes: int = 10) -> str:
-    """Returns a printable representation of a `Gst.TagList`.
-
-    Tag values of type bytes are truncated to the specified length to avoid
-    large amounts of output when logging.
-
-    Args:
-        tags: A converted taglist to be represented.
-        max_bytes: The maximum number of bytes to show for bytes tag values.
-    """
-    result = dict(tags)
-    for tag_values in result.values():
-        for i, val in enumerate(tag_values):
-            if isinstance(val, bytes) and len(val) > max_bytes:
-                tag_values[i] = val[:max_bytes] + b"..."
-    return repr(result)
-
-
-def convert_taglist(taglist: Gst.TagList) -> dict[str, list[Any]]:
-    """Convert a `Gst.TagList` to plain Python types.
-
-    Knows how to convert:
-
-    - Dates
-    - Buffers
-    - Numbers
-    - Strings
-    - Booleans
-
-    Unknown types will be ignored and trace logged. Tag keys are all strings
-    defined as part of GStreamer's
-    [GstTagList](https://developer.gnome.org/gstreamer/stable/gstreamer-GstTagList.html).
-
-    Args:
-        taglist: A GStreamer taglist to be converted.
-    """
-    result = collections.defaultdict(list)
-
-    for n in range(taglist.n_tags()):
-        tag = taglist.nth_tag_name(n)
-
-        for i in range(taglist.get_tag_size(tag)):
-            value = taglist.get_value_index(tag, i)
-
-            if isinstance(value, GLib.Date):
-                try:
-                    date = datetime.date(
-                        value.get_year(),
-                        value.get_month(),
-                        value.get_day(),
-                    )
-                    result[tag].append(date.isoformat())
-                except ValueError:
-                    logger.debug(
-                        "Ignoring dodgy date value: %d-%d-%d",
-                        value.get_year(),
-                        value.get_month(),
-                        value.get_day(),
-                    )
-            elif isinstance(value, Gst.DateTime):
-                result[tag].append(value.to_iso8601_string())
-            elif isinstance(value, bytes):
-                result[tag].append(value.decode(errors="replace"))
-            elif isinstance(value, str | bool | numbers.Number):
-                result[tag].append(value)
-            elif isinstance(value, Gst.Sample):
-                data = _extract_sample_data(value)
-                if data:
-                    result[tag].append(data)
-            else:
-                logger.log(
-                    logs.TRACE_LOG_LEVEL,
-                    "Ignoring unknown tag data: %r = %r",
-                    tag,
-                    value,
-                )
-
-    # TODO: dict(result) to not leak the defaultdict, or just use setdefault?
-    return result
-
-
-def _extract_sample_data(sample: Gst.Sample) -> bytes | None:
-    buf = sample.get_buffer()
-    if not buf:
-        return None
-    return _extract_buffer_data(buf)
-
-
-# Fix for https://github.com/mopidy/mopidy/issues/1827
-# Using GstBuffer.extract_dup() is a memory leak in versions of PyGObject prior
-# to v3.36.0. As a workaround we use the GstMemory APIs instead.
-def _extract_buffer_data(buf: Gst.Buffer) -> bytes | None:
-    mem = buf.get_all_memory()
-    if not mem:
-        return None
-    success, info = mem.map(Gst.MapFlags.READ)
-    if not success:
-        return None
-    if isinstance(info.data, memoryview):  # noqa: SIM108
-        # We need to copy the data as the memoryview is released
-        # when we call mem.unmap()
-        data = bytes(info.data)
-    else:
-        # GStreamer Python bindings <= 1.16 return a copy of the
-        # data as bytes()
-        data = info.data
-    mem.unmap(info)
-    return data
+__all__ = [
+    "convert_taglist",
+    "convert_tags_to_track",
+    "repr_tags",
+]
 
 
 # TODO: split based on "stream" and "track" based conversion? i.e. handle data

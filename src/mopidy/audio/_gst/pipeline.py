@@ -5,7 +5,12 @@ from typing import TYPE_CHECKING, cast
 
 from mopidy import exceptions
 from mopidy._lib.gi import GLib, Gst, GstPbutils
-from mopidy.audio import tags as tags_lib
+from mopidy._lib.gst import (
+    Signals,
+    clocktime_to_millisecond,
+    convert_taglist,
+    millisecond_to_clocktime,
+)
 from mopidy.audio._gst.types import (
     GstAsyncDone,
     GstBuffering,
@@ -19,11 +24,6 @@ from mopidy.audio._gst.types import (
     GstStreamStart,
     GstTag,
     GstWarning,
-)
-from mopidy.audio._utils import (
-    Signals,
-    clocktime_to_millisecond,
-    millisecond_to_clocktime,
 )
 from mopidy.types import DurationMs
 
@@ -265,7 +265,7 @@ class GstPipeline:
             case Gst.MessageType.STREAM_START:
                 return GstStreamStart()
             case Gst.MessageType.TAG:
-                return GstTag(tags_lib.convert_taglist(message.parse_tag()))
+                return GstTag(convert_taglist(message.parse_tag()))
             case Gst.MessageType.WARNING:
                 return GstWarning(*message.parse_warning())
             case _:
