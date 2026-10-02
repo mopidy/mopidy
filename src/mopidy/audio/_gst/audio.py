@@ -93,7 +93,8 @@ class GstAudio(Audio, pykka.ThreadingActor):
 
     @override
     def on_stop(self) -> None:
-        self._teardown_mixer()
+        if self.mixer:
+            self.mixer.teardown()
         if self._pipeline is not None:
             self._pipeline.teardown()
 
@@ -104,10 +105,6 @@ class GstAudio(Audio, pykka.ThreadingActor):
         jacksink = registry.find_feature("jackaudiosink", Gst.ElementFactory)
         if jacksink:
             jacksink.set_rank(Gst.Rank.SECONDARY)
-
-    def _teardown_mixer(self) -> None:
-        if self.mixer:
-            self.mixer.teardown()
 
     def _on_gst_about_to_finish(self, _element: Gst.Element) -> None:
         if self._thread == threading.current_thread():
