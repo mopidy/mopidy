@@ -111,6 +111,20 @@ class DummyAudio(audio.Audio, pykka.ThreadingActor):
 
         return self._uri not in self._bad_uris
 
+    def _stop_after_end_of_stream(self):
+        # Mirrors GstAudio, which takes the pipeline down to NULL after EOS.
+        # prepare_change() may already have cleared the URI, so this does not
+        # go through _change_state(), which ignores calls without a URI.
+        self._uri = None
+        old_state, self.state = self.state, PlaybackState.STOPPED
+        audio.AudioListener.send(
+            "state_changed",
+            old_state=old_state,
+            new_state=PlaybackState.STOPPED,
+            target_state=None,
+        )
+        audio.AudioListener.send("stream_changed", uri=None)
+
     def trigger_fake_playback_failure(self, uri):
         self._bad_uris.add(uri)
 
@@ -136,6 +150,7 @@ class DummyAudio(audio.Audio, pykka.ThreadingActor):
             if not self._uri or not self._about_to_finish_callback:
                 self._tags = {}
                 audio.AudioListener.send("reached_end_of_stream")
+                self._stop_after_end_of_stream()
             else:
                 audio.AudioListener.send("position_changed", position=0)
                 audio.AudioListener.send("stream_changed", uri=self._uri)
