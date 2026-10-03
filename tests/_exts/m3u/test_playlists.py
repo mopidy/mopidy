@@ -315,6 +315,22 @@ class TestM3UPlaylistsProvider:
         assert playlist.name == result.name
         assert filepath.resolve().as_uri() == result.tracks[0].uri
 
+    def test_playlist_with_pls_content(self):
+        path = self.playlists_dir / "test.m3u"
+        path.write_bytes(
+            b"[playlist]\n"
+            b"File1=test.mp3\n"
+            b"File2=http://example.com/stream\n"
+            b"Title2=Radio\n"
+        )
+
+        result = self.core.playlists.lookup("m3u:test.m3u")
+
+        assert result.tracks == (
+            Track(uri=(self.base_dir / "test.mp3").as_uri(), name="test"),
+            Track(uri="http://example.com/stream", name="Radio"),
+        )
+
     def test_playlist_sort_order(self):
         def check_order(playlists, names):
             assert names == [playlist.name for playlist in playlists]
