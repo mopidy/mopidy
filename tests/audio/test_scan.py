@@ -6,6 +6,11 @@ from mopidy.audio.scan import Scanner
 from tests import path_to_data_dir
 
 
+def make_scanner(**kwargs):
+    with pytest.deprecated_call(match=r"mopidy\.media\.Reader\.create\(\)"):
+        return Scanner(**kwargs)
+
+
 def find(path):
     dir_path = path_to_data_dir(path)
     if not dir_path.is_dir():
@@ -27,7 +32,7 @@ def errors():
 @pytest.fixture
 def scan(result, errors):
     def scan(paths):
-        scanner = Scanner()
+        scanner = make_scanner()
         for path in paths:
             uri = path_to_uri(path)
             try:
@@ -165,7 +170,7 @@ def test_scan_uses_the_default_timeout(mocker):
     process.return_value = ({}, None, False, None)
     uri = path_to_uri(path_to_data_dir("scanner/simple/song1.ogg"))
 
-    Scanner(timeout=4321).scan(uri)
+    make_scanner(timeout=4321).scan(uri)
 
     assert process.call_args.args[1] == 4321
 
@@ -175,7 +180,7 @@ def test_per_call_timeout_overrides_the_default(mocker):
     process.return_value = ({}, None, False, None)
     uri = path_to_uri(path_to_data_dir("scanner/simple/song1.ogg"))
 
-    Scanner(timeout=4321).scan(uri, timeout=1234)
+    make_scanner(timeout=4321).scan(uri, timeout=1234)
 
     assert process.call_args.args[1] == 1234
 

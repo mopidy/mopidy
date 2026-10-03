@@ -112,8 +112,11 @@ experiencing problems during local scanning, you can manually view track
 metadata as seen by Mopidy by running:
 
 ```console
-$ python3 -m mopidy.audio.scan path_to_your_file
+$ mopidy media info path_to_your_file
 ```
+
+The command shows the metadata after Mopidy converted it to a track. It does
+not show the raw GStreamer tags.
 
 It may be useful to compare that output against other music playback software or
 audio tagging tools. One such tool is GStreamer's own `gst-discoverer-1.0` which
@@ -129,6 +132,25 @@ find `gst-discoverer-1.0` is also unable to correctly read the metadata, but
 other software succeeds, then the problem is likely to be with GStreamer itself.
 In this situation you will likely find the behaviour is dependent on the version
 of GStreamer being used and/or the file format.
+
+## Radio streams
+
+If a radio station does not play, you can see which URI Mopidy finds to play
+for the station by running:
+
+```console
+$ mopidy -vv media playback-target url_of_the_station
+```
+
+The URL of a radio station is often a playlist document, such as a PLS or M3U
+file, with one or more stream URLs. Mopidy tries each stream URL until one
+plays. With `-vv`, the log shows why each URL failed.
+
+To see the entries of the playlist document, run:
+
+```console
+$ mopidy media playlist-entries url_of_the_station
+```
 
 ## Debugging deadlocks
 

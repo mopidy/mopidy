@@ -1,9 +1,12 @@
+from typing import Any
 from unittest import mock
 
 import pytest
+from pytest_mock import MockerFixture
 
 from mopidy._exts.stream import actor
 from mopidy._lib import paths
+from mopidy.media import MediaInfo, PlaybackTarget, Reader
 from mopidy.models import Track
 from tests import path_to_data_dir
 
@@ -60,3 +63,55 @@ def test_lookup_converts_uri_metadata_to_track(audio, config, track_uri):
     track = result[0]
     assert track.uri == track_uri
     assert track.length == 4406
+
+
+@pytest.fixture
+def reader(config: dict[str, Any], mocker: MockerFixture) -> mock.Mock:
+    config["stream"]["protocols"] = ["http"]
+    reader = mock.Mock(spec=Reader)
+    mocker.patch.object(Reader, "create", return_value=reader)
+    return reader
+
+
+def test_lookup_gives_metadata_of_playback_target_under_original_uri(
+    audio, config, reader
+):
+    reader.find_playback_target.return_value = PlaybackTarget(
+        uri="http://example.com/stream.mp3",
+        info=MediaInfo(
+            track=Track(uri="http://example.com/stream.mp3", name="a stream"),
+            playable=True,
+            seekable=False,
+        ),
+        entry=None,
+    )
+    backend = actor.StreamBackend(audio=audio, config=config)
+
+    result = backend.library.lookup("http://example.com/listen.m3u")
+
+    reader.find_playback_target.assert_called_once_with("http://example.com/listen.m3u")
+    assert result == [Track(uri="http://example.com/listen.m3u", name="a stream")]
+
+
+def test_lookup_of_unverified_playback_target_gives_track_with_only_uri(
+    audio, config, reader
+):
+    reader.find_playback_target.return_value = PlaybackTarget(
+        uri="http://example.com/stream.mp3", info=None, entry=None
+    )
+    backend = actor.StreamBackend(audio=audio, config=config)
+
+    result = backend.library.lookup("http://example.com/listen.m3u")
+
+    assert result == [Track(uri="http://example.com/listen.m3u")]
+
+
+def test_lookup_with_no_playback_target_gives_track_with_only_uri(
+    audio, config, reader
+):
+    reader.find_playback_target.return_value = None
+    backend = actor.StreamBackend(audio=audio, config=config)
+
+    result = backend.library.lookup("http://example.com/listen.m3u")
+
+    assert result == [Track(uri="http://example.com/listen.m3u")]
