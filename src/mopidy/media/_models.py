@@ -62,3 +62,25 @@ class PlaylistEntry(BaseModel):
             msg = "The track URI must be the first alternative."
             raise ValueError(msg)
         return self
+
+
+class PlaybackTarget(BaseModel):
+    """The URI to give to the playback engine, found from another URI."""
+
+    uri: Uri
+    """The URI to play."""
+
+    info: MediaInfo | None
+    """The media info of the URI.
+
+    `None` if the URI could not be read, but is not a playlist document. Then
+    the playback target is not verified, and the playback engine can still try
+    to play it.
+    """
+
+    entry: PlaylistEntry | None
+    """The playlist entry that the URI came from.
+
+    This is the entry in the last playlist document, or `None` if the first URI
+    was the playback target.
+    """

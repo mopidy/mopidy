@@ -82,6 +82,11 @@ def _parsers(media_type: str | None, uri: str | None) -> list[_Parser]:
     return [*dict.fromkeys([*hinted, *parsers]), _parse_uri_list]
 
 
+def is_playlist_media_type(media_type: str) -> bool:
+    """Tell if a media type is the media type of a playlist format."""
+    return "/" in media_type and media_type in _HINTS
+
+
 def _media_type_hint(media_type: str | None) -> str | None:
     if media_type is None:
         return None

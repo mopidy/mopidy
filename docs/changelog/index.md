@@ -37,6 +37,14 @@ For older releases, see:
   parses its playlist entries. The reader keeps an HTTP connection pool that
   uses the Mopidy proxy config.
 
+- Media: Add
+  [`Reader.find_playback_target()`][mopidy.media.Reader.find_playback_target],
+  which finds the URI to play from a URI that can be a playlist document,
+  nested to any depth. It tries the alternatives of each playlist entry, and
+  then the next entry. It reads the HTTP headers first, and does not read the
+  body of an audio stream. The [`PlaybackTarget`][mopidy.media.PlaybackTarget]
+  has the URI, its media info and the playlist entry that it came from.
+
 - File extension: Read the metadata of files with the
   [`Reader`][mopidy.media.Reader]. If some tags of a file are not valid,
   `lookup()` now keeps the other tags. Before, it gave no tags for the file.
