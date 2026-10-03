@@ -24,6 +24,13 @@ For older releases, see:
   images. Tags that are not valid are left out. Make a reader with
   [`Reader.create()`][mopidy.media.Reader.create].
 
+- Media: Add [`parse_playlist_entries()`][mopidy.media.parse_playlist_entries],
+  which parses the playlist entries of a playlist document from bytes, without
+  I/O. It reads M3U, PLS, XSPF, ASX, ASX reference and URI lists. The content
+  decides the format. Each [`PlaylistEntry`][mopidy.media.PlaylistEntry] has
+  the name and length from the playlist document, and all alternative URIs of
+  the entry. HLS and DASH documents give no entries.
+
 - File extension: Read the metadata of files with the
   [`Reader`][mopidy.media.Reader]. If some tags of a file are not valid,
   `lookup()` now keeps the other tags. Before, it gave no tags for the file.
