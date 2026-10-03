@@ -11,7 +11,7 @@ from typing import Annotated
 from cyclopts import App, Group, Parameter, Token
 from platformdirs import PlatformDirs
 
-from mopidy._app import config, deps, logs, process, server
+from mopidy._app import config, deps, logs, media, process, server
 from mopidy._app.config import ConfigLoader, ConfigManager, ConfigOverrides
 from mopidy._app.extensions import ExtensionManager, ExtensionStatus
 from mopidy._lib.version import get_version
@@ -229,6 +229,7 @@ app.command(
     name="deps",
     help="Display installed extensions and their dependencies.",
 )
+app.command(media.app)
 
 # Register extension commands
 if extensions := early_setup():
