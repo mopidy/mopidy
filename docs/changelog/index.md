@@ -45,6 +45,12 @@ For older releases, see:
   body of an audio stream. The [`PlaybackTarget`][mopidy.media.PlaybackTarget]
   has the URI, its media info and the playlist entry that it came from.
 
+- Commands: Add the `mopidy media` command group, with the subcommands
+  `info`, `playlist-entries` and `playback-target`. They show what the
+  [`Reader`][mopidy.media.Reader] reads from files and URIs, to debug missing
+  metadata and radio stations that do not play. See
+  [Built in commands](../reference/command.md#built-in-commands).
+
 - File extension: Read the metadata of files with the
   [`Reader`][mopidy.media.Reader]. If some tags of a file are not valid,
   `lookup()` now keeps the other tags. Before, it gave no tags for the file.
