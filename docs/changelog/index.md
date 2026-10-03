@@ -59,6 +59,10 @@ For older releases, see:
   callers do not convert GStreamer tags. The deprecated API will be removed in
   Mopidy 5.0.
 
+- Audio: Remove the `python3 -m mopidy.audio.scan` debug command. Use
+  `mopidy media info` instead. The new command shows the metadata as a track,
+  not the raw GStreamer tags. To see the raw tags, use `gst-discoverer-1.0`.
+
 - File extension: Read the metadata of files with the
   [`Reader`][mopidy.media.Reader]. If some tags of a file are not valid,
   `lookup()` now keeps the other tags. Before, it gave no tags for the file.

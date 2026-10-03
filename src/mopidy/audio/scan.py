@@ -4,14 +4,9 @@ Use [Reader.create()][mopidy.media.Reader.create] and
 [Reader.read_media_info()][mopidy.media.Reader.read_media_info] instead.
 """
 
-import logging
-from pathlib import Path
 from typing import Any, NamedTuple
 from warnings import deprecated
 
-from mopidy import exceptions
-from mopidy._lib import logs
-from mopidy._lib.gi import Gst
 from mopidy.config import ProxyConfig
 from mopidy.media._gst.pipeline import read_media_data
 from mopidy.types import DurationMs
@@ -81,32 +76,3 @@ class Scanner:
             data.mime,
             data.playable,
         )
-
-
-if __name__ == "__main__":
-    import sys
-
-    from mopidy._lib import paths
-
-    logging.basicConfig(
-        format="%(asctime)-15s %(levelname)s %(message)s",
-        level=logs.TRACE_LOG_LEVEL,
-    )
-
-    for uri in sys.argv[1:]:
-        if not Gst.uri_is_valid(uri):
-            uri = paths.path_to_uri(Path(uri).resolve())
-        try:
-            result = read_media_data(uri, timeout_ms=5000)
-            print(f"{'uri':<20}   {uri}")  # noqa: T201
-            for key in ("mime", "duration", "playable", "seekable"):
-                value = getattr(result, key)
-                print(f"{key:<20}   {value}")  # noqa: T201
-            print("tags")  # noqa: T201
-            for tag, value in result.tags.items():
-                line = f"{tag:<20}   {value}"
-                if len(line) > 77:
-                    line = line[:77] + "..."
-                print(line)  # noqa: T201
-        except exceptions.ScannerError as error:
-            print(f"{uri}: {error}")  # noqa: T201
