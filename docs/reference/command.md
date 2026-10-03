@@ -60,6 +60,23 @@ masked out. Config for disabled extensions are not included.
 
 Show dependencies, their versions and installation location.
 
+**`media`**
+
+Show what Mopidy reads from files and URIs, without playing them. Each
+argument is a file path or a URI. Each subcommand has a `--timeout` option, in
+milliseconds. The default is 5000.
+
+- **`media info`**: Show the media info of each file or URI: the metadata, if
+  the media decoded as audio, if the media allows seeking, and the size of the
+  embedded images.
+- **`media playlist-entries`**: Show the entries of each playlist document.
+- **`media playback-target`**: Show the URI to play for each file or URI, such
+  as the URL of a radio station. The timeout is the deadline for all reads for
+  one argument. Use `mopidy -vv media playback-target` to see why each URI
+  failed.
+
+The command exits with status 1 if it cannot read one or more of the arguments.
+
 ## Extension commands
 
 Additionally, extensions can provide extra commands. Run `mopidy --help`
