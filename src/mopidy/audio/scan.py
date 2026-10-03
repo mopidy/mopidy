@@ -1,6 +1,13 @@
+"""The deprecated scanner API.
+
+Use [Reader.create()][mopidy.media.Reader.create] and
+[Reader.read_media_info()][mopidy.media.Reader.read_media_info] instead.
+"""
+
 import logging
 from pathlib import Path
 from typing import Any, NamedTuple
+from warnings import deprecated
 
 from mopidy import exceptions
 from mopidy._lib import logs
@@ -19,9 +26,19 @@ class _Result(NamedTuple):
     playable: bool
 
 
-# TODO: replace with a scan(uri, timeout=1000, proxy_config=None)?
+@deprecated(
+    "mopidy.audio.scan.Scanner is deprecated since Mopidy 4.1, and will be "
+    "removed in Mopidy 5.0. Use mopidy.media.Reader.create() and "
+    "Reader.read_media_info() instead."
+)
 class Scanner:
     """Helper to get tags and other relevant info from URIs.
+
+    /// warning | Deprecated
+    Deprecated since Mopidy 4.1, and will be removed in Mopidy 5.0. Use
+    [Reader.create()][mopidy.media.Reader.create] and
+    [Reader.read_media_info()][mopidy.media.Reader.read_media_info] instead.
+    ///
 
     Args:
         timeout: Timeout for scanning a URI in milliseconds.
@@ -76,13 +93,13 @@ if __name__ == "__main__":
         level=logs.TRACE_LOG_LEVEL,
     )
 
-    scanner = Scanner(5000)
     for uri in sys.argv[1:]:
         if not Gst.uri_is_valid(uri):
             uri = paths.path_to_uri(Path(uri).resolve())
         try:
-            result = scanner.scan(uri)
-            for key in ("uri", "mime", "duration", "playable", "seekable"):
+            result = read_media_data(uri, timeout_ms=5000)
+            print(f"{'uri':<20}   {uri}")  # noqa: T201
+            for key in ("mime", "duration", "playable", "seekable"):
                 value = getattr(result, key)
                 print(f"{key:<20}   {value}")  # noqa: T201
             print("tags")  # noqa: T201
