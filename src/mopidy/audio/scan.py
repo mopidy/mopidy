@@ -1,4 +1,11 @@
+"""The deprecated scanner API.
+
+Use
+[MediaReader.read_media_info()][mopidy.media.MediaReader.read_media_info] instead.
+"""
+
 from typing import Any, NamedTuple
+from warnings import deprecated
 
 from mopidy.config import ProxyConfig
 from mopidy.media._gst.pipeline import read_media_data
@@ -14,9 +21,18 @@ class _Result(NamedTuple):
     playable: bool
 
 
-# TODO: replace with a scan(uri, timeout=1000, proxy_config=None)?
+@deprecated(
+    "mopidy.audio.scan.Scanner is deprecated since Mopidy 4.1, and will be "
+    "removed in Mopidy 5.0. Use mopidy.media.MediaReader.read_media_info() "
+    "instead."
+)
 class Scanner:
     """Helper to get tags and other relevant info from URIs.
+
+    /// warning | Deprecated
+    Deprecated since Mopidy 4.1, and will be removed in Mopidy 5.0. Use
+    [MediaReader.read_media_info()][mopidy.media.MediaReader.read_media_info] instead.
+    ///
 
     Args:
         timeout: Timeout for scanning a URI in milliseconds.
