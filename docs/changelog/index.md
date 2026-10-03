@@ -31,6 +31,12 @@ For older releases, see:
   the name and length from the playlist document, and all alternative URIs of
   the entry. HLS and DASH documents give no entries.
 
+- Media: Add
+  [`Reader.read_playlist_entries()`][mopidy.media.Reader.read_playlist_entries],
+  which fetches a playlist document from a `file`, `http` or `https` URI and
+  parses its playlist entries. The reader keeps an HTTP connection pool that
+  uses the Mopidy proxy config.
+
 - File extension: Read the metadata of files with the
   [`Reader`][mopidy.media.Reader]. If some tags of a file are not valid,
   `lookup()` now keeps the other tags. Before, it gave no tags for the file.

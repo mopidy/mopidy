@@ -1,11 +1,14 @@
 from collections.abc import Iterator
 
+import httpx
 import pytest
+from pytest_httpx import HTTPXMock
 
 from mopidy._lib.paths import path_to_uri
 from mopidy.config import Config
-from mopidy.media import MediaReadError, Reader
-from mopidy.types import DurationMs
+from mopidy.media import MediaReadError, PlaylistEntry, Reader
+from mopidy.models import Track
+from mopidy.types import DurationMs, Uri
 from tests import path_to_data_dir
 
 CONFIG = Config({"proxy": {}})
@@ -17,6 +20,35 @@ def reader() -> Iterator[Reader]:
         yield reader
 
 
+class FakeMediaInfoReader:
+    def __init__(self, results=None):
+        self.results = results or {}
+
+    def read_media_info(self, uri, *, timeout):
+        result = self.results.get(uri, MediaReadError(f"Cannot read {uri}"))
+        if isinstance(result, Exception):
+            raise result
+        return result
+
+
+@pytest.fixture
+def media_info_reader() -> FakeMediaInfoReader:
+    return FakeMediaInfoReader()
+
+
+@pytest.fixture
+def fake_reader(media_info_reader: FakeMediaInfoReader) -> Iterator[Reader]:
+    with Reader(
+        media_info_reader=media_info_reader,
+        timeout=DurationMs(1000),
+    ) as reader:
+        yield reader
+
+
+def entry(uri, name=None):
+    return PlaylistEntry(track=Track(uri=uri, name=name), alternatives=(uri,))
+
+
 def uri_of(name):
     return path_to_uri(path_to_data_dir(name))
 
@@ -26,6 +58,22 @@ def test_create_gives_a_reader_that_can_close():
 
     assert isinstance(reader, Reader)
     reader.close()
+
+
+def test_create_uses_the_proxy_config(httpx_mock: HTTPXMock):
+    config = Config({"proxy": {"hostname": "proxy.example.com", "port": 8080}})
+    httpx_mock.add_response(
+        url="http://example.com/radio.m3u",
+        proxy_url="http://proxy.example.com:8080/",
+        text="stream.mp3\n",
+    )
+
+    with Reader.create(config=config, timeout=DurationMs(1000)) as reader:
+        reader.read_playlist_entries(Uri("http://example.com/radio.m3u"))
+
+    request = httpx_mock.get_request()
+    assert request is not None
+    assert request.headers["user-agent"].startswith("Mopidy/")
 
 
 def test_reader_is_a_context_manager():
@@ -95,3 +143,72 @@ def test_read_media_info_raises_on_timeout():
         pytest.raises(MediaReadError, match="Timeout"),
     ):
         reader.read_media_info(uri_of("scanner/simple/song1.ogg"))
+
+
+def test_read_playlist_entries_over_http(fake_reader, httpx_mock: HTTPXMock):
+    httpx_mock.add_response(
+        url="http://example.com/radio.pls",
+        text="[playlist]\nFile1=http://example.com/stream\nTitle1=Radio\n",
+        headers={"content-type": "audio/x-scpls"},
+    )
+
+    entries = fake_reader.read_playlist_entries(Uri("http://example.com/radio.pls"))
+
+    assert entries == (entry("http://example.com/stream", name="Radio"),)
+
+
+def test_read_playlist_entries_joins_relative_entries_with_the_uri(
+    fake_reader, httpx_mock: HTTPXMock
+):
+    httpx_mock.add_response(url="http://example.com/a/radio.m3u", text="stream.mp3\n")
+
+    entries = fake_reader.read_playlist_entries(Uri("http://example.com/a/radio.m3u"))
+
+    assert entries == (entry("http://example.com/a/stream.mp3"),)
+
+
+def test_read_playlist_entries_of_file(fake_reader, tmp_path):
+    path = tmp_path / "radio.m3u"
+    path.write_text("#EXTM3U\n#EXTINF:-1,Radio\nhttp://example.com/stream\n")
+
+    entries = fake_reader.read_playlist_entries(path_to_uri(path))
+
+    assert entries == (entry("http://example.com/stream", name="Radio"),)
+
+
+def test_read_playlist_entries_of_missing_file_raises(fake_reader, tmp_path):
+    with pytest.raises(MediaReadError):
+        fake_reader.read_playlist_entries(path_to_uri(tmp_path / "missing.m3u"))
+
+
+def test_read_playlist_entries_of_other_scheme_raises(fake_reader):
+    with pytest.raises(MediaReadError, match="scheme 'rtsp'"):
+        fake_reader.read_playlist_entries(Uri("rtsp://example.com/radio.m3u"))
+
+
+def test_read_playlist_entries_raises_on_http_error_status(
+    fake_reader, httpx_mock: HTTPXMock
+):
+    httpx_mock.add_response(url="http://example.com/radio.m3u", status_code=404)
+
+    with pytest.raises(MediaReadError, match="HTTP 404"):
+        fake_reader.read_playlist_entries(Uri("http://example.com/radio.m3u"))
+
+
+def test_read_playlist_entries_raises_when_the_connection_fails(
+    fake_reader, httpx_mock: HTTPXMock
+):
+    httpx_mock.add_exception(httpx.ConnectError("Kaboom"))
+
+    with pytest.raises(MediaReadError, match="Kaboom"):
+        fake_reader.read_playlist_entries(Uri("http://example.com/radio.m3u"))
+
+
+def test_read_playlist_entries_raises_on_timeout(media_info_reader, httpx_mock):
+    httpx_mock.add_response(url="http://example.com/radio.m3u", text="stream.mp3\n")
+
+    with (
+        Reader(media_info_reader=media_info_reader, timeout=DurationMs(0)) as reader,
+        pytest.raises(MediaReadError, match="Timeout"),
+    ):
+        reader.read_playlist_entries(Uri("http://example.com/radio.m3u"))
