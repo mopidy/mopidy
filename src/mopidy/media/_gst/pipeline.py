@@ -56,9 +56,9 @@ def read_media_data(
 
     try:
         _start_pipeline(pipeline)
-        tags, mime, have_audio, duration = _process(pipeline, timeout_ms)
+        tags, mime, playable, duration = _process(pipeline, timeout_ms)
         seekable = _query_seekable(pipeline)
-        return GstMediaData(tags, duration, seekable, mime, have_audio)
+        return GstMediaData(tags, duration, seekable, mime, playable)
     finally:
         signals.clear()
         pipeline.set_state(Gst.State.NULL)
@@ -263,7 +263,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
     bus = pipeline.get_bus()
     tags = {}
     mime: str | None = None
-    have_audio = False
+    playable = False
     missing_message = None
     duration = None
 
@@ -301,9 +301,9 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
                 if caps is not None:
                     mime = _get_structure_name(caps)
                     if mime.startswith("text/") or mime == "application/xml":
-                        return tags, mime, have_audio, duration
+                        return tags, mime, playable, duration
             elif structure is not None and structure.get_name() == "have-audio":
-                have_audio = True
+                playable = True
 
         elif msg.type == Gst.MessageType.ERROR:
             error, _debug = msg.parse_error()
@@ -316,20 +316,20 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
                     and (mime := _get_structure_name(caps.get_structure(0)))
                 )
             ):
-                return tags, mime, have_audio, duration
+                return tags, mime, playable, duration
             raise exceptions.ScannerError(str(error))
 
         elif msg.type == Gst.MessageType.EOS:
-            return tags, mime, have_audio, duration
+            return tags, mime, playable, duration
 
         elif msg.type == Gst.MessageType.ASYNC_DONE:
             success, duration = _query_duration(pipeline)
             if tags and success:
-                return tags, mime, have_audio, duration
+                return tags, mime, playable, duration
 
             # Don't try workaround for non-seekable sources such as mmssrc:
             if not _query_seekable(pipeline):
-                return tags, mime, have_audio, duration
+                return tags, mime, playable, duration
 
             # Workaround for upstream bug which causes tags/duration to arrive
             # after pre-roll. We get around this by starting to play the track
@@ -338,7 +338,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
             logger.debug("Using workaround for duration missing before play.")
             result = pipeline.set_state(Gst.State.PLAYING)
             if result == Gst.StateChangeReturn.FAILURE:
-                return tags, mime, have_audio, duration
+                return tags, mime, playable, duration
 
         elif msg.type == Gst.MessageType.DURATION_CHANGED and tags:
             # VBR formats sometimes seem to not have a duration by the time we
@@ -346,7 +346,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
             success, duration = _query_duration(pipeline)
             pipeline.set_state(Gst.State.PAUSED)
             if success:
-                return tags, mime, have_audio, duration
+                return tags, mime, playable, duration
 
         elif msg.type == Gst.MessageType.TAG:
             taglist = msg.parse_tag()

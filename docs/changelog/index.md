@@ -17,6 +17,17 @@ For older releases, see:
 - Deprecate `mopidy.__version__`. Mopidy no longer uses it itself. Use
   `importlib.metadata.version("mopidy")` instead.
 
+- Media: Add the [`mopidy.media`][mopidy.media] package. A
+  [`Reader`][mopidy.media.Reader] reads the media info of a URI without playing
+  it. The media info has the metadata as a [`Track`][mopidy.models.Track], if
+  the media decoded as audio, if the media allows seeking, and the embedded
+  images. Tags that are not valid are left out. Make a reader with
+  [`Reader.create()`][mopidy.media.Reader.create].
+
+- File extension: Read the metadata of files with the
+  [`Reader`][mopidy.media.Reader]. If some tags of a file are not valid,
+  `lookup()` now keeps the other tags. Before, it gave no tags for the file.
+
 - Audio: Handle all GStreamer bus messages on the audio actor thread. Before,
   the GLib main loop thread and the actor thread changed the audio state at the
   same time, with no synchronization. The "Race condition happened" warning

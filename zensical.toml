@@ -78,6 +78,7 @@ nav = [
         ]},
         {"Audio" = [
             "reference/audio.md",
+            "reference/media.md",
             "reference/mixer.md",
         ]},
         {"Utilities" = [
