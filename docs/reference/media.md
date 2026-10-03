@@ -2,6 +2,8 @@
 
 The media API reads media without playing it. Use it to get the metadata of a
 URI as a [Track][mopidy.models.Track].
+It also parses the playlist entries of a playlist document with
+[parse_playlist_entries()][mopidy.media.parse_playlist_entries].
 
 Make one reader when your backend starts, and close it when your backend stops:
 
