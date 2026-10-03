@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import IO
 
 from mopidy._lib import paths
+from mopidy.media import parse_playlist_entries
 from mopidy.models import Playlist, Ref, Track
 from mopidy.types import Uri
 
@@ -52,27 +53,26 @@ def path_to_ref(path: Path) -> Ref:
 
 
 def load_items(
-    fp: IO[str],
+    data: bytes,
     basedir: Path,
+    encoding: str,
 ) -> list[Ref]:
-    refs = []
-    name = None
-    for line in filter(None, (line.strip() for line in fp)):
-        if line.startswith("#"):
-            if line.startswith("#EXTINF:"):
-                name = line.partition(",")[2]
-            continue
-        if not urllib.parse.urlsplit(line).scheme:
-            path = basedir / line
-            if not name:
-                name = name_from_path(path)
-            uri = path_to_uri(path, scheme="file")
-        else:
-            # TODO: ensure this is urlencoded
-            uri = Uri(line)  # do *not* extract name from (stream?) URI path
-        refs.append(Ref.track(uri=uri, name=name))
-        name = None
-    return refs
+    base_uri = path_to_uri(basedir.absolute(), scheme="file").rstrip("/") + "/"
+    entries = parse_playlist_entries(data, base_uri=base_uri, encoding=encoding)
+    return [
+        Ref.track(
+            uri=entry.track.uri,
+            name=entry.track.name or _name_from_uri(entry.track.uri),
+        )
+        for entry in entries
+    ]
+
+
+def _name_from_uri(uri: Uri) -> str | None:
+    # Do not get a name from the path of a stream URI.
+    if urllib.parse.urlsplit(uri).scheme != "file":
+        return None
+    return name_from_path(uri_to_path(uri))
 
 
 def dump_items(
