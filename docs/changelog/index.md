@@ -35,6 +35,14 @@ For older releases, see:
   [`Reader`][mopidy.media.Reader]. If some tags of a file are not valid,
   `lookup()` now keeps the other tags. Before, it gave no tags for the file.
 
+- M3U extension: Read playlists with
+  [`parse_playlist_entries()`][mopidy.media.parse_playlist_entries]. Thus, the
+  extension now also reads playlists with PLS, XSPF and ASX content. It still
+  writes only M3U. A `file` URI entry with no `#EXTINF` name now gets its name
+  from the file name, as a path entry did before. In a playlist with no
+  `#EXTM3U` header, a line is an entry only if it has a `/` or a file
+  extension.
+
 - Audio: Handle all GStreamer bus messages on the audio actor thread. Before,
   the GLib main loop thread and the actor thread changed the audio state at the
   same time, with no synchronization. The "Race condition happened" warning
