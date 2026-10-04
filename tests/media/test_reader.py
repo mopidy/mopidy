@@ -89,9 +89,8 @@ def test_read_media_info_of_unknown_scheme_raises(media_reader):
         media_reader.read_media_info("no-such-scheme:foo")
 
 
-def test_read_media_info_raises_on_timeout():
-    with (
-        MediaReader.create(config=CONFIG, timeout=DurationMs(0)) as media_reader,
-        pytest.raises(MediaReadError, match="Timeout"),
-    ):
-        media_reader.read_media_info(uri_of("scanner/simple/song1.ogg"))
+def test_read_media_info_raises_on_timeout(media_reader):
+    with pytest.raises(MediaReadError, match="Timeout"):
+        media_reader.read_media_info(
+            uri_of("scanner/simple/song1.ogg"), timeout=DurationMs(0)
+        )

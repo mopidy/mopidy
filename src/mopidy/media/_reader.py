@@ -45,7 +45,12 @@ class MediaReader:
             timeout=timeout,
         )
 
-    def read_media_info(self, uri: Uri) -> MediaInfo:
+    def read_media_info(
+        self,
+        uri: Uri,
+        *,
+        timeout: DurationMs | None = None,
+    ) -> MediaInfo:
         """Read the media info of one URI.
 
         Only the given URI is read. If the URI is a playlist document, the
@@ -53,11 +58,14 @@ class MediaReader:
 
         Args:
             uri: The URI to read.
+            timeout: The timeout. The default is the timeout of the reader.
 
         Raises:
             MediaReadError: If the URI cannot be read, or on a timeout.
         """
-        return self._media_info_reader.read_media_info(uri, timeout=self._timeout)
+        if timeout is None:
+            timeout = self._timeout
+        return self._media_info_reader.read_media_info(uri, timeout=timeout)
 
     def close(self) -> None:
         """Release the resources of the reader."""
