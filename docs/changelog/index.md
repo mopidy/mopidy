@@ -52,6 +52,18 @@ For older releases, see:
   missing metadata and radio stations that do not play. See [Built in
   commands](../reference/command.md#built-in-commands).
 
+- Audio: Deprecate `mopidy.audio.scan.Scanner`, and the tag helpers
+  `repr_tags()`, `convert_taglist()` and `convert_tags_to_track()` in
+  `mopidy.audio.tags`. Use
+  [`MediaReader.read_media_info()`][mopidy.media.MediaReader.read_media_info]
+  instead. The media info has the metadata as a [`Track`][mopidy.models.Track],
+  thus callers do not convert GStreamer tags. The deprecated API will be removed
+  in Mopidy 5.0.
+
+- Audio: Remove the `python3 -m mopidy.audio.scan` debug command. Use
+  `mopidy media info` instead. The new command shows the metadata as a track,
+  not the raw GStreamer tags. To see the raw tags, use `gst-discoverer-1.0`.
+
 - File extension: Read the metadata of files with the
   [`MediaReader`][mopidy.media.MediaReader]. If some tags of a file are not
   valid, `lookup()` now keeps the other tags. Before, it gave no tags for the

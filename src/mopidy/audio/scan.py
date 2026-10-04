@@ -1,10 +1,12 @@
-import logging
-from pathlib import Path
-from typing import Any, NamedTuple
+"""The deprecated scanner API.
 
-from mopidy import exceptions
-from mopidy._lib import logs
-from mopidy._lib.gi import Gst
+Use
+[MediaReader.read_media_info()][mopidy.media.MediaReader.read_media_info] instead.
+"""
+
+from typing import Any, NamedTuple
+from warnings import deprecated
+
 from mopidy.config import ProxyConfig
 from mopidy.media._gst.pipeline import read_media_data
 from mopidy.types import DurationMs
@@ -19,9 +21,18 @@ class _Result(NamedTuple):
     playable: bool
 
 
-# TODO: replace with a scan(uri, timeout=1000, proxy_config=None)?
+@deprecated(
+    "mopidy.audio.scan.Scanner is deprecated since Mopidy 4.1, and will be "
+    "removed in Mopidy 5.0. Use mopidy.media.MediaReader.read_media_info() "
+    "instead."
+)
 class Scanner:
     """Helper to get tags and other relevant info from URIs.
+
+    /// warning | Deprecated
+    Deprecated since Mopidy 4.1, and will be removed in Mopidy 5.0. Use
+    [MediaReader.read_media_info()][mopidy.media.MediaReader.read_media_info] instead.
+    ///
 
     Args:
         timeout: Timeout for scanning a URI in milliseconds.
@@ -64,32 +75,3 @@ class Scanner:
             data.mime,
             data.playable,
         )
-
-
-if __name__ == "__main__":
-    import sys
-
-    from mopidy._lib import paths
-
-    logging.basicConfig(
-        format="%(asctime)-15s %(levelname)s %(message)s",
-        level=logs.TRACE_LOG_LEVEL,
-    )
-
-    scanner = Scanner(5000)
-    for uri in sys.argv[1:]:
-        if not Gst.uri_is_valid(uri):
-            uri = paths.path_to_uri(Path(uri).resolve())
-        try:
-            result = scanner.scan(uri)
-            for key in ("uri", "mime", "duration", "playable", "seekable"):
-                value = getattr(result, key)
-                print(f"{key:<20}   {value}")  # noqa: T201
-            print("tags")  # noqa: T201
-            for tag, value in result.tags.items():
-                line = f"{tag:<20}   {value}"
-                if len(line) > 77:
-                    line = line[:77] + "..."
-                print(line)  # noqa: T201
-        except exceptions.ScannerError as error:
-            print(f"{uri}: {error}")  # noqa: T201
