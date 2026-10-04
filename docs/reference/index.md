@@ -40,7 +40,7 @@ Only APIs documented here are public and open for use by Mopidy extensions.
 
 - [Audio API](audio.md) — low-level audio playback control for backends.
 - [Media API](media.md) — reads the metadata of media without playing it.
-- [Audio mixer API](mixer.md) — the interface for building mixer extensions
+- [Mixer API](mixer.md) — the interface for building mixer extensions
   that control volume.
 
 ## Utilities
