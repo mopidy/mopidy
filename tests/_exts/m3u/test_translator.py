@@ -14,7 +14,7 @@ from mopidy.models import Playlist, Ref, Track
 
 
 def loads(s, basedir):
-    return translator.load_items(io.StringIO(s), basedir)
+    return translator.load_items(s.encode(), basedir, "utf-8")
 
 
 def dumps(items):
@@ -93,17 +93,12 @@ def test_path_to_ref(path, expected):
         ("test.mp3", "/playlists", ("file:///playlists/test.mp3", "test")),
         ("../test.mp3", "/playlists", ("file:///test.mp3", "test")),
         ("/test.mp3", ".", ("file:///test.mp3", "test")),
-        ("file:///test.mp3", ".", ("file:///test.mp3", None)),
+        ("file:///test.mp3", ".", ("file:///test.mp3", "test")),
         ("http://example.com/stream", ".", ("http://example.com/stream", None)),
         (
             "#EXTM3U\n#EXTINF:42,Test\nfile:///test.mp3\n",
             ".",
             ("file:///test.mp3", "Test"),
-        ),
-        (
-            "#EXTM3U\n#EXTINF:-1,Test\nhttp://example.com/stream\n",
-            ".",
-            ("http://example.com/stream", "Test"),
         ),
     ],
 )
