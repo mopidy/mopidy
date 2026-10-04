@@ -10,90 +10,106 @@ For older releases, see:
 
 ## v4.1.0 (UNRELEASED)
 
-- Extensions: Deprecate the `Extension.version` class attribute. Mopidy now gets
-  the version from the distribution that registers the extension's entry point,
-  and no longer reads the attribute.
+Mopidy 4.1 adds a media API, which reads media and playlist documents without
+playing them. The bundled file, stream and M3U extensions use it, and the new
+`mopidy media` commands show what it reads. The old scanner API is deprecated.
 
-- Deprecate `mopidy.__version__`. Mopidy no longer uses it itself. Use
-  `importlib.metadata.version("mopidy")` instead.
+### Media API
 
-- Media: Add the [`mopidy.media`][mopidy.media] package. A
-  [`MediaReader`][mopidy.media.MediaReader] reads the media info of a URI
-  without playing it. The media info has the metadata as a
+The new [`mopidy.media`][mopidy.media] package reads media without playing it.
+Backends use it to get the metadata of a URI, to read playlist documents, and to
+find the URI to play for a radio station. It gives the metadata as a
+[`Track`][mopidy.models.Track], so backends no longer have to convert GStreamer
+tags themselves.
+
+Make one [`MediaReader`][mopidy.media.MediaReader] with
+[`MediaReader.create()`][mopidy.media.MediaReader.create] when your backend
+starts, and close it when your backend stops. The [media API
+reference](../reference/media.md) has an example.
+
+- [`MediaReader.read_media_info()`][mopidy.media.MediaReader.read_media_info]
+  reads the media info of one URI: the metadata as a
   [`Track`][mopidy.models.Track], if the media decoded as audio, if the media
   allows seeking, and the embedded images. Tags that are not valid are left out.
-  Make a reader with [`MediaReader.create()`][mopidy.media.MediaReader.create].
+  (#2325, !2332)
 
-- Media: Add [`parse_playlist_entries()`][mopidy.media.parse_playlist_entries],
-  which parses the playlist entries of a playlist document from bytes, without
-  I/O. It reads M3U, PLS, XSPF, ASX, ASX reference and URI lists. The content
-  decides the format. Each [`PlaylistEntry`][mopidy.media.PlaylistEntry] has
-  the name and length from the playlist document, and all alternative URIs of
-  the entry. HLS and DASH documents give no entries.
-
-- Media:
-  [`MediaReader.read_playlist_entries()`][mopidy.media.MediaReader.read_playlist_entries]
+- [`MediaReader.read_playlist_entries()`][mopidy.media.MediaReader.read_playlist_entries]
   fetches a playlist document from a `file`, `http` or `https` URI and parses
   its playlist entries. The reader keeps an HTTP connection pool that uses the
-  Mopidy proxy config.
+  Mopidy proxy config. (#2329, !2334)
 
-- Media:
-  [`MediaReader.find_playback_target()`][mopidy.media.MediaReader.find_playback_target]
+- [`MediaReader.find_playback_target()`][mopidy.media.MediaReader.find_playback_target]
   finds the URI to play from a URI that can be a playlist document, nested to
   any depth. It tries the alternatives of each playlist entry, and then the next
-  entry. It stops the download at the first chunk that is not text, so it does
-  not read the body of an audio stream. The
+  entry. It stops the download at the first chunk that is not text, so it reads
+  only the start of an audio stream. The
   [`PlaybackTarget`][mopidy.media.PlaybackTarget] has the URI, its media info
-  and the playlist entry that it came from.
+  and the playlist entry that it came from. (#2329, !2334)
 
-- Commands: Add the `mopidy media` command group, with the subcommands `info`,
+- [`parse_playlist_entries()`][mopidy.media.parse_playlist_entries] parses the
+  playlist entries of a playlist document from bytes, without I/O. It reads M3U,
+  PLS, XSPF, ASX, ASX reference, and URI lists. The content decides the format.
+  Each [`PlaylistEntry`][mopidy.media.PlaylistEntry] has the name and length
+  from the playlist document, and all alternative URIs of the entry. HLS and
+  DASH documents give no entries, as they usually should be passed directly to
+  the playback engine. (#2327, !2333)
+
+#### Bundled extensions
+
+- File extension: Read the metadata of files with the new
+  [`MediaReader`][mopidy.media.MediaReader] API. If some tags of a file are not
+  valid, `lookup()` now keeps the other tags. Before, it gave no tags for the
+  file. (#2325, !2332)
+
+- Stream extension: Find the URI to play with
+  [`MediaReader.find_playback_target()`][mopidy.media.MediaReader.find_playback_target].
+  If the playlist of a radio station has more than one stream, the extension now
+  tries each stream until one plays as audio. Before, it tried only the first
+  stream. Playlists with the media type `audio/x-mpegurl` or `audio/x-scpls` are
+  now read as playlists, and HLS streams are no longer read as playlists.
+  (#2325, #2329, !2335)
+
+- Stream extension: The [`stream/timeout`](../ext/stream.md#streamtimeout)
+  config value is now the total time to find the URI to play. Before, the limit
+  for the total time was 1000 times too long. (#2329, !2335)
+
+- M3U extension: Read playlists with
+  [`parse_playlist_entries()`][mopidy.media.parse_playlist_entries]. A `file`
+  URI entry with no `#EXTINF` name now gets its name from the file name, as a
+  path entry did before. In a playlist with no `#EXTM3U` header, a line is
+  considered an entry only if it has a `/` or a file extension. (#2328, !2333)
+
+#### Debug commands
+
+- Add the `mopidy media` command group, with the subcommands `info`,
   `playlist-entries` and `playback-target`. They show what the
   [`MediaReader`][mopidy.media.MediaReader] reads from files and URIs, to debug
   missing metadata and radio stations that do not play. See [Built in
-  commands](../reference/command.md#built-in-commands).
+  commands](../reference/command.md#built-in-commands). (#2330, !2336)
 
-- Audio: Deprecate `mopidy.audio.scan.Scanner`, and the tag helpers
+- Remove the `python3 -m mopidy.audio.scan` debug command. Use
+  `mopidy media info` instead. The new command shows the metadata as a track,
+  not the raw GStreamer tags. To see the raw tags, use `gst-discoverer-1.0`.
+  (#2330, !2337)
+
+### Deprecations
+
+- Deprecate `mopidy.audio.scan.Scanner`, and the tag helpers
   `repr_tags()`, `convert_taglist()` and `convert_tags_to_track()` in
   `mopidy.audio.tags`. Use
   [`MediaReader.read_media_info()`][mopidy.media.MediaReader.read_media_info]
   instead. The media info has the metadata as a [`Track`][mopidy.models.Track],
   thus callers do not convert GStreamer tags. The deprecated API will be removed
-  in Mopidy 5.0.
+  in Mopidy 5.0. (#2326, !2337)
 
-- Audio: Remove the `python3 -m mopidy.audio.scan` debug command. Use
-  `mopidy media info` instead. The new command shows the metadata as a track,
-  not the raw GStreamer tags. To see the raw tags, use `gst-discoverer-1.0`.
+- Deprecate the `Extension.version` class attribute. Mopidy now gets the version
+  from the distribution that registers the extension's entry point, and no
+  longer reads the attribute. (!2298)
 
-- File extension: Read the metadata of files with the
-  [`MediaReader`][mopidy.media.MediaReader]. If some tags of a file are not
-  valid, `lookup()` now keeps the other tags. Before, it gave no tags for the
-  file.
+- Deprecate `mopidy.__version__`. Mopidy no longer uses it itself. Use
+  `importlib.metadata.version("mopidy")` instead. (!2298)
 
-- Stream extension: Find the URI to play with
-  [`MediaReader.find_playback_target()`][mopidy.media.MediaReader.find_playback_target].
-  Only media that decodes as audio is a stream now. Before, the extension also
-  accepted media with a media type that was not `text/*` or `application/*`.
-  Thus, content with the media type `audio/x-mpegurl` or `audio/x-scpls` is now
-  parsed as a playlist document. If an alternative or an entry of a playlist
-  document fails, the extension now tries the next one. Before, it tried only
-  the first entry. HLS streams are not parsed as playlist documents anymore.
-  Before, if the media info read of an HLS stream failed, the extension played
-  the first segment of the stream. The extension stops the download at the first
-  chunk that is not text, so it does not read the body of an audio stream.
-  `lookup()` still gives one track under the original URI. HTTP requests now
-  have the user agent of Mopidy, not of the stream extension.
-
-- Stream extension: The [`stream/timeout`](../ext/stream.md#streamtimeout)
-  config value is now the total time to find the URI to play. Before, the limit
-  for the total time was 1000 times too long.
-
-- M3U extension: Read playlists with
-  [`parse_playlist_entries()`][mopidy.media.parse_playlist_entries]. Thus, the
-  extension now also reads playlists with PLS, XSPF and ASX content. It still
-  writes only M3U. A `file` URI entry with no `#EXTINF` name now gets its name
-  from the file name, as a path entry did before. In a playlist with no
-  `#EXTM3U` header, a line is an entry only if it has a `/` or a file
-  extension.
+### Other changes
 
 - Audio: Handle all GStreamer bus messages on the audio actor thread. Before,
   the GLib main loop thread and the actor thread changed the audio state at the
@@ -107,9 +123,9 @@ For older releases, see:
 - HTTP extension: Fix the debug log message for sent JSON-RPC responses. It was
   never logged. (!2310)
 
-- Dev: Restructure the GStreamer code in the audio layer into smaller modules
-  with typed interfaces, and delete unused code. (!2303, !2304, !2306, !2307,
-  !2308)
+- Dev: Restructure the GStreamer code into smaller modules with typed
+  interfaces, split it into a playback side and a media side, and delete unused
+  code. (#2324, !2303, !2304, !2306, !2307, !2308, !2331)
 
 - Dev: Port the remaining `unittest` tests to pytest. (!2301)
 
