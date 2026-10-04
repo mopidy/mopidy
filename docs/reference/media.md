@@ -11,14 +11,14 @@ Make one reader when your backend starts, and close it when your backend stops:
 import pykka
 
 from mopidy import backend
-from mopidy.media import Reader
+from mopidy.media import MediaReader
 from mopidy.types import DurationMs
 
 
 class MyBackend(pykka.ThreadingActor, backend.Backend):
     def __init__(self, *, config, audio):
         super().__init__(config=config, audio=audio)
-        self.media_reader = Reader.create(config=config, timeout=DurationMs(5000))
+        self.media_reader = MediaReader.create(config=config, timeout=DurationMs(5000))
 
     def on_stop(self) -> None:
         self.media_reader.close()

@@ -4,7 +4,7 @@ import pytest
 
 from mopidy._lib.paths import path_to_uri
 from mopidy.config import Config
-from mopidy.media import MediaReadError, Reader
+from mopidy.media import MediaReader, MediaReadError
 from mopidy.types import DurationMs
 from tests import path_to_data_dir
 
@@ -12,9 +12,9 @@ CONFIG = Config({"proxy": {}})
 
 
 @pytest.fixture
-def reader() -> Iterator[Reader]:
-    with Reader.create(config=CONFIG, timeout=DurationMs(1000)) as reader:
-        yield reader
+def media_reader() -> Iterator[MediaReader]:
+    with MediaReader.create(config=CONFIG, timeout=DurationMs(1000)) as media_reader:
+        yield media_reader
 
 
 def uri_of(name):
@@ -22,15 +22,15 @@ def uri_of(name):
 
 
 def test_create_gives_a_reader_that_can_close():
-    reader = Reader.create(config=CONFIG, timeout=DurationMs(1000))
+    media_reader = MediaReader.create(config=CONFIG, timeout=DurationMs(1000))
 
-    assert isinstance(reader, Reader)
-    reader.close()
+    assert isinstance(media_reader, MediaReader)
+    media_reader.close()
 
 
 def test_reader_is_a_context_manager():
-    with Reader.create(config=CONFIG, timeout=DurationMs(1000)) as reader:
-        info = reader.read_media_info(uri_of("scanner/simple/song1.ogg"))
+    with MediaReader.create(config=CONFIG, timeout=DurationMs(1000)) as media_reader:
+        info = media_reader.read_media_info(uri_of("scanner/simple/song1.ogg"))
 
     assert info.playable is True
 
@@ -42,10 +42,10 @@ def test_reader_is_a_context_manager():
         ("scanner/simple/song1.ogg", 4704),
     ],
 )
-def test_read_media_info_of_audio_file(reader, name, length):
+def test_read_media_info_of_audio_file(media_reader, name, length):
     uri = uri_of(name)
 
-    info = reader.read_media_info(uri)
+    info = media_reader.read_media_info(uri)
 
     assert info.playable is True
     assert info.seekable is True
@@ -57,10 +57,10 @@ def test_read_media_info_of_audio_file(reader, name, length):
     assert [artist.name for artist in info.track.artists] == ["name"]
 
 
-def test_read_media_info_of_flac_file_with_embedded_image(reader):
+def test_read_media_info_of_flac_file_with_embedded_image(media_reader):
     uri = uri_of("scanner/embedded-image.flac")
 
-    info = reader.read_media_info(uri)
+    info = media_reader.read_media_info(uri)
 
     assert info.playable is True
     assert info.track.name == "embedded"
@@ -70,28 +70,28 @@ def test_read_media_info_of_flac_file_with_embedded_image(reader):
     ]
 
 
-def test_read_media_info_of_text_file_is_not_playable(reader):
+def test_read_media_info_of_text_file_is_not_playable(media_reader):
     try:
-        info = reader.read_media_info(uri_of("scanner/plain.txt"))
+        info = media_reader.read_media_info(uri_of("scanner/plain.txt"))
     except MediaReadError:
         return
 
     assert info.playable is False
 
 
-def test_read_media_info_of_missing_file_raises(reader):
+def test_read_media_info_of_missing_file_raises(media_reader):
     with pytest.raises(MediaReadError):
-        reader.read_media_info(uri_of("scanner/no-such-file.ogg"))
+        media_reader.read_media_info(uri_of("scanner/no-such-file.ogg"))
 
 
-def test_read_media_info_of_unknown_scheme_raises(reader):
+def test_read_media_info_of_unknown_scheme_raises(media_reader):
     with pytest.raises(MediaReadError):
-        reader.read_media_info("no-such-scheme:foo")
+        media_reader.read_media_info("no-such-scheme:foo")
 
 
 def test_read_media_info_raises_on_timeout():
     with (
-        Reader.create(config=CONFIG, timeout=DurationMs(0)) as reader,
+        MediaReader.create(config=CONFIG, timeout=DurationMs(0)) as media_reader,
         pytest.raises(MediaReadError, match="Timeout"),
     ):
-        reader.read_media_info(uri_of("scanner/simple/song1.ogg"))
+        media_reader.read_media_info(uri_of("scanner/simple/song1.ogg"))

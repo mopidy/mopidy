@@ -7,7 +7,7 @@ from typing import TypedDict, cast, override
 from mopidy import backend
 from mopidy import config as config_lib
 from mopidy._lib import paths
-from mopidy.media import MediaReadError, Reader
+from mopidy.media import MediaReader, MediaReadError
 from mopidy.models import Ref, Track
 from mopidy.types import Uri
 
@@ -32,7 +32,7 @@ class FileLibraryProvider(backend.LibraryProvider):
         self,
         backend: backend.Backend,
         config: config_lib.Config,
-        media_reader: Reader,
+        media_reader: MediaReader,
     ) -> None:
         super().__init__(backend)
 

@@ -13,10 +13,10 @@ if TYPE_CHECKING:
     from mopidy.types import DurationMs, Uri
 
 
-class Reader:
+class MediaReader:
     """Reads media without playing it.
 
-    Make a reader with [create()][mopidy.media.Reader.create]. The reader is
+    Make a reader with [create()][mopidy.media.MediaReader.create]. The reader is
     safe to call from many threads.
     """
 
@@ -33,7 +33,7 @@ class Reader:
     def create(cls, *, config: Config, timeout: DurationMs) -> Self:
         """Make a reader.
 
-        Keep the reader, and close it with [close()][mopidy.media.Reader.close]
+        Keep the reader, and close it with [close()][mopidy.media.MediaReader.close]
         when you do not need it anymore.
 
         Args:
