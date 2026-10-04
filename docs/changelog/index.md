@@ -18,11 +18,11 @@ For older releases, see:
   `importlib.metadata.version("mopidy")` instead.
 
 - Media: Add the [`mopidy.media`][mopidy.media] package. A
-  [`Reader`][mopidy.media.Reader] reads the media info of a URI without playing
-  it. The media info has the metadata as a [`Track`][mopidy.models.Track], if
-  the media decoded as audio, if the media allows seeking, and the embedded
-  images. Tags that are not valid are left out. Make a reader with
-  [`Reader.create()`][mopidy.media.Reader.create].
+  [`MediaReader`][mopidy.media.MediaReader] reads the media info of a URI
+  without playing it. The media info has the metadata as a
+  [`Track`][mopidy.models.Track], if the media decoded as audio, if the media
+  allows seeking, and the embedded images. Tags that are not valid are left out.
+  Make a reader with [`MediaReader.create()`][mopidy.media.MediaReader.create].
 
 - Media: Add [`parse_playlist_entries()`][mopidy.media.parse_playlist_entries],
   which parses the playlist entries of a playlist document from bytes, without
@@ -31,9 +31,25 @@ For older releases, see:
   the name and length from the playlist document, and all alternative URIs of
   the entry. HLS and DASH documents give no entries.
 
+- Media:
+  [`MediaReader.read_playlist_entries()`][mopidy.media.MediaReader.read_playlist_entries]
+  fetches a playlist document from a `file`, `http` or `https` URI and parses
+  its playlist entries. The reader keeps an HTTP connection pool that uses the
+  Mopidy proxy config.
+
+- Media:
+  [`MediaReader.find_playback_target()`][mopidy.media.MediaReader.find_playback_target]
+  finds the URI to play from a URI that can be a playlist document, nested to
+  any depth. It tries the alternatives of each playlist entry, and then the next
+  entry. It stops the download at the first chunk that is not text, so it does
+  not read the body of an audio stream. The
+  [`PlaybackTarget`][mopidy.media.PlaybackTarget] has the URI, its media info
+  and the playlist entry that it came from.
+
 - File extension: Read the metadata of files with the
-  [`Reader`][mopidy.media.Reader]. If some tags of a file are not valid,
-  `lookup()` now keeps the other tags. Before, it gave no tags for the file.
+  [`MediaReader`][mopidy.media.MediaReader]. If some tags of a file are not
+  valid, `lookup()` now keeps the other tags. Before, it gave no tags for the
+  file.
 
 - M3U extension: Read playlists with
   [`parse_playlist_entries()`][mopidy.media.parse_playlist_entries]. Thus, the

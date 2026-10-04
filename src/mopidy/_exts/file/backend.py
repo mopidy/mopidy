@@ -6,7 +6,7 @@ import pykka
 from mopidy import backend
 from mopidy.audio import AudioProxy
 from mopidy.config import Config
-from mopidy.media import Reader
+from mopidy.media import MediaReader
 from mopidy.types import DurationMs, UriScheme
 
 from . import library
@@ -19,7 +19,7 @@ class FileBackend(pykka.ThreadingActor, backend.Backend):
 
     def __init__(self, *, config: Config, audio: AudioProxy) -> None:
         super().__init__(config=config, audio=audio)
-        self._media_reader = Reader.create(
+        self._media_reader = MediaReader.create(
             config=config,
             timeout=DurationMs(config["file"]["metadata_timeout"]),
         )
