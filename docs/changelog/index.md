@@ -51,6 +51,24 @@ For older releases, see:
   valid, `lookup()` now keeps the other tags. Before, it gave no tags for the
   file.
 
+- Stream extension: Find the URI to play with
+  [`MediaReader.find_playback_target()`][mopidy.media.MediaReader.find_playback_target].
+  Only media that decodes as audio is a stream now. Before, the extension also
+  accepted media with a media type that was not `text/*` or `application/*`.
+  Thus, content with the media type `audio/x-mpegurl` or `audio/x-scpls` is now
+  parsed as a playlist document. If an alternative or an entry of a playlist
+  document fails, the extension now tries the next one. Before, it tried only
+  the first entry. HLS streams are not parsed as playlist documents anymore.
+  Before, if the media info read of an HLS stream failed, the extension played
+  the first segment of the stream. The extension stops the download at the first
+  chunk that is not text, so it does not read the body of an audio stream.
+  `lookup()` still gives one track under the original URI. HTTP requests now
+  have the user agent of Mopidy, not of the stream extension.
+
+- Stream extension: The [`stream/timeout`](../ext/stream.md#streamtimeout)
+  config value is now the total time to find the URI to play. Before, the limit
+  for the total time was 1000 times too long.
+
 - M3U extension: Read playlists with
   [`parse_playlist_entries()`][mopidy.media.parse_playlist_entries]. Thus, the
   extension now also reads playlists with PLS, XSPF and ASX content. It still

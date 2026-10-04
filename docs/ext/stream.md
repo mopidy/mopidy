@@ -46,7 +46,9 @@ separated by either comma or newline.
 
 ### stream/timeout
 
-Number of milliseconds before giving up looking up stream metadata.
+The maximum number of milliseconds to find the URI to play and its metadata.
+This is the total time for all playlist documents and streams that the
+extension reads for one URI.
 
 ### stream/metadata_blacklist
 
