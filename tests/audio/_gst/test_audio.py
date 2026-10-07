@@ -9,8 +9,9 @@ import pytest
 from mopidy import audio
 from mopidy._lib import paths
 from mopidy._lib.gi import Gst
+from mopidy.audio._gst.audio import _PostedEndOfStream
 from mopidy.audio._gst.pipeline import GstPipeline
-from mopidy.audio._gst.types import GstState
+from mopidy.audio._gst.types import GstEndOfStream, GstState
 from mopidy.types import PlaybackState
 from tests import dummy_audio, path_to_data_dir
 
@@ -28,18 +29,29 @@ class BaseTest:
     audio_class = audio.GstAudio
 
     def setup_method(self):
+        self.song_uri = paths.path_to_uri(path_to_data_dir("song1.wav"))
+        self.audio = self.start_audio("testoutput")
+
+    def start_audio(self, output):
         config = {
             "audio": {
                 "buffer_time": None,
                 "mixer": "foomixer",
                 "mixer_volume": None,
-                "output": "testoutput",
+                "output": output,
                 "visualizer": None,
             },
             "proxy": {"hostname": ""},
         }
-        self.song_uri = paths.path_to_uri(path_to_data_dir("song1.wav"))
-        self.audio = self.audio_class.start(config=config, mixer=None).proxy()
+        return self.audio_class.start(config=config, mixer=None).proxy()
+
+    def play_in_real_time(self):
+        # The unsynced "testoutput" sink plays a song as fast as it decodes,
+        # so it reaches EOS, and EOS stops the pipeline, before a test can
+        # pause, stop or seek it. Tests that act on a playing song use a
+        # synced sink instead. It plays in real time, 4.4 s per test song.
+        self.audio.actor_ref.stop()
+        self.audio = self.start_audio("fakesink sync=true")
 
     def teardown_method(self):
         pykka.ActorRegistry.stop_all()
@@ -168,7 +180,6 @@ class TestAudioEvent(BaseTest):
 
     # TODO: test without uri set, with bad uri and gapless...
     # TODO: playing->playing triggered by seek should be removed
-    # TODO: codify expected state after EOS
     # TODO: consider returning a future or a threading event?
 
     def test_state_change_stopped_to_playing_event(self):
@@ -232,6 +243,7 @@ class TestAudioEvent(BaseTest):
         )
 
     def test_state_change_playing_to_paused_event(self):
+        self.play_in_real_time()
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.start_playback()
@@ -249,6 +261,7 @@ class TestAudioEvent(BaseTest):
         )
 
     def test_state_change_playing_to_stopped_event(self):
+        self.play_in_real_time()
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.start_playback()
@@ -293,6 +306,7 @@ class TestAudioEvent(BaseTest):
         self.assert_event("stream_changed", uri=self.uris[1])
 
     def test_stream_changed_event_on_playing_to_paused(self):
+        self.play_in_real_time()
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.listener.clear_events()
@@ -361,6 +375,7 @@ class TestAudioEvent(BaseTest):
         self.assert_not_event("position_changed", position=0)
 
     def test_position_changed_on_seek_after_play(self):
+        self.play_in_real_time()
         self.audio.prepare_change()
         self.audio.set_uri(self.uris[0])
         self.audio.start_playback()
@@ -424,6 +439,26 @@ class TestAudioEvent(BaseTest):
 
         assert not self.audio.get_current_tags().get()
 
+    def test_state_change_playing_to_stopped_on_end_of_stream(self):
+        event = self.listener.wait("reached_end_of_stream").get()
+
+        self.audio.prepare_change()
+        self.audio.set_uri(self.uris[0])
+        self.audio.start_playback()
+        self.audio.testing_gst__wait_for_state_change().get()
+
+        self.possibly_trigger_fake_about_to_finish()
+        if not event.wait(timeout=1.0):
+            pytest.fail("End of stream not reached within deadline")
+
+        self.assert_event(
+            "state_changed",
+            old_state=PlaybackState.PLAYING,
+            new_state=PlaybackState.STOPPED,
+            target_state=None,
+        )
+        self.assert_event("stream_changed", uri=None)
+
     def test_gapless(self):
         uris = self.uris[1:]
         event = self.listener.wait("reached_end_of_stream").get()
@@ -450,11 +485,13 @@ class TestAudioEvent(BaseTest):
         self.assert_event("stream_changed", uri=self.uris[0])
         self.assert_event("stream_changed", uri=self.uris[1])
 
-        # Check that events counts check out.
+        # Check that events counts check out. The pipeline is stopped after
+        # EOS, which adds a state change to stopped and a stream change to None.
+        self.assert_event("stream_changed", uri=None)
         keys = [k for k, v in self.listener.get_events().get()]
-        assert keys.count("stream_changed") == 2
+        assert keys.count("stream_changed") == 3
         assert keys.count("position_changed") == 2
-        assert keys.count("state_changed") == 1
+        assert keys.count("state_changed") == 2
         assert keys.count("reached_end_of_stream") == 1
 
         # TODO: test tag states within gaples
@@ -652,6 +689,39 @@ def test_buffering_change_to_stopped_while_buffering(gst_audio, pipeline):
     gst_audio.stop_playback()
     pipeline.set_state.assert_called_with(GstState.NULL)
     assert not gst_audio._buffering
+
+
+def test_end_of_stream_stops_the_pipeline(gst_audio, pipeline):
+    gst_audio.start_playback()
+    pipeline.set_state.reset_mock()
+
+    gst_audio._on_gst_end_of_stream(gst_audio._commands)
+
+    pipeline.set_state.assert_called_once_with(GstState.NULL)
+    assert gst_audio._target_state == GstState.NULL
+
+
+def test_end_of_stream_that_predates_a_command_does_not_stop(gst_audio, pipeline):
+    gst_audio.start_playback()
+    commands_at_post = gst_audio._commands
+    gst_audio.pause_playback()
+    pipeline.set_state.reset_mock()
+
+    gst_audio._on_gst_end_of_stream(commands_at_post)
+
+    pipeline.set_state.assert_not_called()
+    assert gst_audio._target_state == GstState.PAUSED
+
+
+def test_end_of_stream_is_stamped_when_posted(gst_audio, pipeline):
+    gst_audio.start_playback()
+
+    with mock.patch.object(gst_audio.actor_ref, "tell") as tell:
+        gst_audio._on_gst_bus_message(GstEndOfStream())
+
+    tell.assert_called_once_with(
+        _PostedEndOfStream(commands_at_post=gst_audio._commands)
+    )
 
 
 def test_source_setup_not_live_mode(gst_audio, source):
