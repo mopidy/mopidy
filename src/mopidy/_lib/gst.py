@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import collections
-import datetime
+import datetime as dt
 import logging
 import numbers
 from collections.abc import Callable
@@ -125,7 +125,7 @@ def convert_taglist(taglist: Gst.TagList) -> dict[str, list[Any]]:
 
             if isinstance(value, GLib.Date):
                 try:
-                    date = datetime.date(
+                    date = dt.date(
                         value.get_year(),
                         value.get_month(),
                         value.get_day(),

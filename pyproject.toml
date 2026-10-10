@@ -63,8 +63,8 @@ docs = [
     "mkdocstrings-python >= 2.0.1",
     "zensical >= 0.0.33",
 ]
-rumdl = ["rumdl == 0.2.57"]
-ruff = ["ruff == 0.16.3"]
+rumdl = ["rumdl == 0.2.79"]
+ruff = ["ruff == 0.17.0"]
 tests = [
     "dirty-equals >= 0.9",
     "polyfactory >= 3.1",
@@ -77,7 +77,7 @@ tests = [
 typing = [
     "pygobject-stubs >= 2.14.0, != 2.15.0",
     "pyright == 1.1.414",
-    "ty == 0.0.83",
+    "ty == 0.0.86",
 ]
 
 
