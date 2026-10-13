@@ -8,7 +8,12 @@ from mopidy.media import MediaReaderError
 from mopidy.media._gst.pipeline import GstReaderPipeline
 from mopidy.media._gst.reader import GstMediaInfoReader, GstRead
 from mopidy.media._gst.types import (
+    GstAsyncDone,
+    GstDurationChanged,
+    GstEndOfStream,
     GstError,
+    GstHaveType,
+    GstMissingPlugin,
     GstTag,
 )
 from mopidy.types import DurationMs, Uri
@@ -67,6 +72,83 @@ def make_error():
         GLib.Error.new_literal(Gst.CoreError.quark(), "bad", Gst.CoreError.FAILED),
         "debug text",
     )
+
+
+def test_audio_stream_is_playable(read):
+    assert read._on_message(GstHaveType("audio/mpeg")) is False
+
+    assert read._result().info.playable is True
+
+
+def test_text_stream_ends_the_read(read):
+    assert read._on_message(GstHaveType("text/uri-list")) is True
+
+    result = read._result()
+    assert result.legacy_scanner_mime == "text/uri-list"
+    assert result.info.playable is False
+
+
+def test_end_of_stream_ends_the_read(read):
+    assert read._on_message(GstEndOfStream()) is True
+
+
+def test_error_raises_media_reader_error(read):
+    with pytest.raises(MediaReaderError, match="bad"):
+        read._on_message(make_error())
+
+
+def test_error_after_missing_plugin_ends_the_read_with_the_mime(read):
+    read._on_message(GstMissingPlugin("audio/x-unknown"))
+
+    assert read._on_message(make_error()) is True
+
+    result = read._result()
+    assert result.legacy_scanner_mime == "audio/x-unknown"
+    assert result.info.playable is False
+
+
+def test_async_done_with_tags_and_duration_ends_the_read(read, pipeline):
+    read._on_message(GstTag({"title": ["a title"]}))
+
+    assert read._on_message(GstAsyncDone()) is True
+
+    assert read._result().info.track.length == 4704
+    pipeline.set_state.assert_not_called()
+
+
+def test_async_done_without_tags_starts_playing(read, pipeline):
+    assert read._on_message(GstAsyncDone()) is False
+
+    pipeline.set_state.assert_called_once_with(Gst.State.PLAYING)
+
+
+def test_async_done_without_tags_ends_the_read_if_playing_fails(read, pipeline):
+    pipeline.set_state.return_value = False
+
+    assert read._on_message(GstAsyncDone()) is True
+
+
+def test_async_done_without_tags_ends_the_read_if_not_seekable(read, pipeline):
+    pipeline.query_seekable.return_value = False
+
+    assert read._on_message(GstAsyncDone()) is True
+
+    pipeline.set_state.assert_not_called()
+
+
+def test_duration_change_without_tags_is_ignored(read, pipeline):
+    assert read._on_message(GstDurationChanged()) is False
+
+    pipeline.query_duration.assert_not_called()
+
+
+def test_duration_change_with_tags_ends_the_read(read, pipeline):
+    read._on_message(GstTag({"title": ["a title"]}))
+
+    assert read._on_message(GstDurationChanged()) is True
+
+    assert read._result().info.track.length == 4704
+    pipeline.set_state.assert_called_once_with(Gst.State.PAUSED)
 
 
 def test_run_tears_down_the_pipeline_after_an_error(read, pipeline):
