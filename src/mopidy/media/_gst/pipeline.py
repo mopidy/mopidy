@@ -15,6 +15,16 @@ from mopidy._lib.gst import (
     to_gst_time,
 )
 from mopidy.media import MediaReaderError
+from mopidy.media._gst.types import (
+    GstAsyncDone,
+    GstBusMessage,
+    GstDurationChanged,
+    GstEndOfStream,
+    GstError,
+    GstHaveType,
+    GstMissingPlugin,
+    GstTag,
+)
 from mopidy.types import DurationMs
 
 if TYPE_CHECKING:
@@ -169,14 +179,54 @@ class GstReaderPipeline:
         result = self._pipeline.set_state(state)
         return result != Gst.StateChangeReturn.FAILURE
 
-    def pop_message(self, timeout: DurationMs) -> Gst.Message | None:
-        """Wait for the next bus message that the reader uses.
+    def pop_message(self, timeout: DurationMs) -> GstBusMessage | None:
+        """Wait for the next bus message and decode it.
 
-        Returns `None` if no message arrives before the timeout.
+        Returns `None` if no message arrives before the timeout, or if the
+        reader does not use the message.
         """
         if (bus := self._pipeline.get_bus()) is None:
             return None
-        return bus.timed_pop_filtered(to_gst_time(timeout), _MESSAGE_TYPES)
+        if (
+            message := bus.timed_pop_filtered(to_gst_time(timeout), _MESSAGE_TYPES)
+        ) is None:
+            return None
+        return self._decode_bus_message(message)
+
+    def _decode_bus_message(  # noqa: PLR0911
+        self,
+        message: Gst.Message,
+    ) -> GstBusMessage | None:
+        """Turn a bus message into one of our records, or drop it."""
+        structure = message.get_structure()
+
+        if logger.isEnabledFor(logs.TRACE_LOG_LEVEL) and structure is not None:
+            debug_text = structure.to_string()
+            if len(debug_text) > 77:
+                debug_text = debug_text[:77] + "..."
+            _trace("element %s: %s", message.src.get_name(), debug_text)
+
+        match message.type:
+            case Gst.MessageType.APPLICATION if (
+                structure is not None and _get_structure_name(structure) == "have-type"
+            ):
+                return GstHaveType(cast(str, structure.get_value("mime")))
+            case Gst.MessageType.ASYNC_DONE:
+                return GstAsyncDone()
+            case Gst.MessageType.DURATION_CHANGED:
+                return GstDurationChanged()
+            case Gst.MessageType.EOS:
+                return GstEndOfStream()
+            case Gst.MessageType.ERROR:
+                return GstError(*message.parse_error())
+            case Gst.MessageType.ELEMENT if GstPbutils.is_missing_plugin_message(
+                message
+            ):
+                return GstMissingPlugin(_missing_plugin_mime(structure))
+            case Gst.MessageType.TAG:
+                return GstTag(from_gst_taglist(message.parse_tag()))
+            case _:
+                return None
 
     def query_duration(self) -> tuple[bool, DurationMs | None]:
         """Get the duration of the media in milliseconds.
@@ -227,6 +277,12 @@ def _get_structure_name(struct: Gst.Structure) -> str:
             return _struct.get_name()
 
 
+def _missing_plugin_mime(structure: Gst.Structure | None) -> str | None:
+    if structure is None or (caps := structure.get_value("detail")) is None:
+        return None
+    return _get_structure_name(caps.get_structure(0))
+
+
 def _process(  # noqa: C901, PLR0911, PLR0912
     pipeline: GstReaderPipeline,
     timeout: DurationMs,
@@ -234,81 +290,59 @@ def _process(  # noqa: C901, PLR0911, PLR0912
     tags: GstTags = {}
     mime: str | None = None
     playable = False
-    missing_message = None
+    missing_plugin_mime: str | None = None
     duration = None
 
     remaining = timeout
     start = time.monotonic()
     while remaining > 0:
-        if (msg := pipeline.pop_message(remaining)) is None:
-            break
+        match pipeline.pop_message(remaining):
+            case GstMissingPlugin(plugin_mime):
+                missing_plugin_mime = plugin_mime
 
-        structure = msg.get_structure()
-
-        if logger.isEnabledFor(logs.TRACE_LOG_LEVEL) and structure is not None:
-            debug_text = structure.to_string()
-            if len(debug_text) > 77:
-                debug_text = debug_text[:77] + "..."
-            _trace("element %s: %s", msg.src.get_name(), debug_text)
-
-        if msg.type == Gst.MessageType.ELEMENT:
-            if GstPbutils.is_missing_plugin_message(msg):
-                missing_message = msg
-
-        elif msg.type == Gst.MessageType.APPLICATION:
-            if structure is not None and _get_structure_name(structure) == "have-type":
-                mime = cast(str, structure.get_value("mime"))
+            case GstHaveType(found_mime):
+                mime = found_mime
                 if mime.startswith("audio/"):
                     playable = True
                 if mime.startswith("text/") or mime == "application/xml":
                     return tags, mime, playable, duration
 
-        elif msg.type == Gst.MessageType.ERROR:
-            error, _debug = msg.parse_error()
-            if (
-                missing_message
-                and not mime
-                and (
-                    ((structure := missing_message.get_structure()) is not None)
-                    and ((caps := structure.get_value("detail")) is not None)
-                    and (mime := _get_structure_name(caps.get_structure(0)))
-                )
-            ):
-                return tags, mime, playable, duration
-            raise MediaReaderError(str(error))
+            case GstError(error, _debug):
+                if missing_plugin_mime and not mime:
+                    return tags, missing_plugin_mime, playable, duration
+                raise MediaReaderError(str(error))
 
-        elif msg.type == Gst.MessageType.EOS:
-            return tags, mime, playable, duration
-
-        elif msg.type == Gst.MessageType.ASYNC_DONE:
-            success, duration = pipeline.query_duration()
-            if tags and success:
+            case GstEndOfStream():
                 return tags, mime, playable, duration
 
-            # Don't try workaround for non-seekable sources such as mmssrc:
-            if not pipeline.query_seekable():
-                return tags, mime, playable, duration
+            case GstAsyncDone():
+                success, duration = pipeline.query_duration()
+                if tags and success:
+                    return tags, mime, playable, duration
 
-            # Workaround for upstream bug which causes tags/duration to arrive
-            # after pre-roll. We get around this by starting to play the track
-            # and then waiting for a duration change.
-            # https://bugzilla.gnome.org/show_bug.cgi?id=763553
-            logger.debug("Using workaround for duration missing before play.")
-            if not pipeline.set_state(Gst.State.PLAYING):
-                return tags, mime, playable, duration
+                # Don't try workaround for non-seekable sources such as mmssrc:
+                if not pipeline.query_seekable():
+                    return tags, mime, playable, duration
 
-        elif msg.type == Gst.MessageType.DURATION_CHANGED and tags:
-            # VBR formats sometimes seem to not have a duration by the time we
-            # go back to paused. So just try to get it right away.
-            success, duration = pipeline.query_duration()
-            pipeline.set_state(Gst.State.PAUSED)
-            if success:
-                return tags, mime, playable, duration
+                # Workaround for upstream bug which causes tags/duration to arrive
+                # after pre-roll. We get around this by starting to play the track
+                # and then waiting for a duration change.
+                # https://bugzilla.gnome.org/show_bug.cgi?id=763553
+                logger.debug("Using workaround for duration missing before play.")
+                if not pipeline.set_state(Gst.State.PLAYING):
+                    return tags, mime, playable, duration
 
-        elif msg.type == Gst.MessageType.TAG:
-            taglist = msg.parse_tag()
-            # Note that this will only keep the last tag.
-            tags.update(from_gst_taglist(taglist))
+            case GstDurationChanged() if tags:
+                # VBR formats sometimes seem to not have a duration by the time we
+                # go back to paused. So just try to get it right away.
+                success, duration = pipeline.query_duration()
+                pipeline.set_state(Gst.State.PAUSED)
+                if success:
+                    return tags, mime, playable, duration
+
+            case GstTag(new_tags):
+                # Note that this will only keep the last tag.
+                tags.update(new_tags)
 
         remaining = DurationMs(timeout - int((time.monotonic() - start) * 1000))
 
