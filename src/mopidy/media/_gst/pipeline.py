@@ -134,15 +134,9 @@ def _pad_added(
         raise MediaReaderError(msg)
 
     if pad_caps is not None and pad_caps.get_size() > 0:
-        struct = pad_caps.get_structure(0)
-
         have_type = Gst.Structure.new_empty("have-type")
-        have_type.set_value("caps", struct)
+        have_type.set_value("mime", _get_structure_name(pad_caps.get_structure(0)))
         element_bus.post(Gst.Message.new_application(element, have_type))
-
-        if _get_structure_name(struct).startswith("audio/"):
-            have_audio = Gst.Structure.new_empty("have-audio")
-            element_bus.post(Gst.Message.new_application(element, have_audio))
 
     if (fakesink := Gst.ElementFactory.make("fakesink")) is None:
         msg = "Failed to create GStreamer fakesink element."
@@ -196,7 +190,7 @@ def _get_structure_name(struct: Gst.Structure) -> str:
             return _struct.get_name()
 
 
-def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
+def _process(  # noqa: C901, PLR0911, PLR0912
     pipeline: Gst.Pipeline,
     timeout_ms: int,
 ) -> tuple[GstTags, str | None, bool, DurationMs | None]:
@@ -237,13 +231,11 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
 
         elif msg.type == Gst.MessageType.APPLICATION:
             if structure is not None and _get_structure_name(structure) == "have-type":
-                caps = cast(Gst.Structure | None, structure.get_value("caps"))
-                if caps is not None:
-                    mime = _get_structure_name(caps)
-                    if mime.startswith("text/") or mime == "application/xml":
-                        return tags, mime, playable, duration
-            elif structure is not None and structure.get_name() == "have-audio":
-                playable = True
+                mime = cast(str, structure.get_value("mime"))
+                if mime.startswith("audio/"):
+                    playable = True
+                if mime.startswith("text/") or mime == "application/xml":
+                    return tags, mime, playable, duration
 
         elif msg.type == Gst.MessageType.ERROR:
             error, _debug = msg.parse_error()
