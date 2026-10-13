@@ -1,4 +1,4 @@
-from mopidy.media._api import MediaReadError
+from mopidy.media._api import MediaReaderError
 from mopidy.media._models import (
     EmbeddedImage,
     MediaInfo,
@@ -11,8 +11,8 @@ from mopidy.media._reader import MediaReader
 __all__ = [
     "EmbeddedImage",
     "MediaInfo",
-    "MediaReadError",
     "MediaReader",
+    "MediaReaderError",
     "PlaybackTarget",
     "PlaylistEntry",
     "parse_playlist_entries",

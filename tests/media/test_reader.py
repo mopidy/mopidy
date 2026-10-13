@@ -9,7 +9,7 @@ from mopidy.config import Config
 from mopidy.media import (
     MediaInfo,
     MediaReader,
-    MediaReadError,
+    MediaReaderError,
     PlaybackTarget,
     PlaylistEntry,
 )
@@ -33,7 +33,7 @@ class FakeMediaInfoReader:
 
     def read_media_info(self, uri, *, timeout):
         self.uris.append(uri)
-        result = self.results.get(uri, MediaReadError(f"Cannot read {uri}"))
+        result = self.results.get(uri, MediaReaderError(f"Cannot read {uri}"))
         if isinstance(result, Exception):
             raise result
         return result
@@ -139,24 +139,24 @@ def test_read_media_info_of_flac_file_with_embedded_image(media_reader):
 def test_read_media_info_of_text_file_is_not_playable(media_reader):
     try:
         info = media_reader.read_media_info(uri_of("scanner/plain.txt"))
-    except MediaReadError:
+    except MediaReaderError:
         return
 
     assert info.playable is False
 
 
 def test_read_media_info_of_missing_file_raises(media_reader):
-    with pytest.raises(MediaReadError):
+    with pytest.raises(MediaReaderError):
         media_reader.read_media_info(uri_of("scanner/no-such-file.ogg"))
 
 
 def test_read_media_info_of_unknown_scheme_raises(media_reader):
-    with pytest.raises(MediaReadError):
+    with pytest.raises(MediaReaderError):
         media_reader.read_media_info("no-such-scheme:foo")
 
 
 def test_read_media_info_raises_on_timeout(media_reader):
-    with pytest.raises(MediaReadError, match="Timeout"):
+    with pytest.raises(MediaReaderError, match="Timeout"):
         media_reader.read_media_info(
             uri_of("scanner/simple/song1.ogg"), timeout=DurationMs(0)
         )
@@ -212,12 +212,12 @@ def test_read_playlist_entries_of_file(fake_media_reader, tmp_path):
 
 
 def test_read_playlist_entries_of_missing_file_raises(fake_media_reader, tmp_path):
-    with pytest.raises(MediaReadError):
+    with pytest.raises(MediaReaderError):
         fake_media_reader.read_playlist_entries(path_to_uri(tmp_path / "missing.m3u"))
 
 
 def test_read_playlist_entries_of_other_scheme_raises(fake_media_reader):
-    with pytest.raises(MediaReadError, match="scheme 'rtsp'"):
+    with pytest.raises(MediaReaderError, match="scheme 'rtsp'"):
         fake_media_reader.read_playlist_entries(Uri("rtsp://example.com/radio.m3u"))
 
 
@@ -226,7 +226,7 @@ def test_read_playlist_entries_raises_on_http_error_status(
 ):
     httpx_mock.add_response(url="http://example.com/radio.m3u", status_code=404)
 
-    with pytest.raises(MediaReadError, match="HTTP 404"):
+    with pytest.raises(MediaReaderError, match="HTTP 404"):
         fake_media_reader.read_playlist_entries(Uri("http://example.com/radio.m3u"))
 
 
@@ -235,7 +235,7 @@ def test_read_playlist_entries_raises_when_the_connection_fails(
 ):
     httpx_mock.add_exception(httpx.ConnectError("Kaboom"))
 
-    with pytest.raises(MediaReadError, match="Kaboom"):
+    with pytest.raises(MediaReaderError, match="Kaboom"):
         fake_media_reader.read_playlist_entries(Uri("http://example.com/radio.m3u"))
 
 
@@ -244,7 +244,7 @@ def test_read_playlist_entries_raises_on_timeout(
 ):
     httpx_mock.add_response(url="http://example.com/radio.m3u", text="stream.mp3\n")
 
-    with pytest.raises(MediaReadError, match="Timeout"):
+    with pytest.raises(MediaReaderError, match="Timeout"):
         fake_media_reader.read_playlist_entries(
             Uri("http://example.com/radio.m3u"), timeout=DurationMs(0)
         )
