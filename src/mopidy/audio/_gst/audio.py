@@ -14,7 +14,7 @@ from mopidy._lib.gi import GLib, Gst, GstBase, GstPbutils
 from mopidy._lib.gst import repr_tags, setup_proxy
 from mopidy.audio._api import Audio
 from mopidy.audio._gst.mixer import GstSoftwareMixerAdapter
-from mopidy.audio._gst.pipeline import GstPipeline
+from mopidy.audio._gst.pipeline import GstPlaybackPipeline
 from mopidy.audio._gst.types import (
     GstAsyncDone,
     GstBuffering,
@@ -65,7 +65,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
         self._pending_uri: str | None = None
         self._pending_tags: GstTags | None = None
 
-        self._pipeline: GstPipeline | None = None
+        self._pipeline: GstPlaybackPipeline | None = None
         self._about_to_finish_callback: Callable | None = None
         self._source_setup_callback: Callable | None = None
 
@@ -78,7 +78,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
         self._thread = threading.current_thread()
         try:
             self._setup_preferences()
-            self._pipeline = GstPipeline(
+            self._pipeline = GstPlaybackPipeline(
                 self._config,
                 on_bus_message=self._on_gst_bus_message,
                 on_position=self._on_gst_position,

@@ -104,7 +104,7 @@ def make_output_bin(output: str) -> Gst.Element:
     return output_bin
 
 
-class GstPipeline:
+class GstPlaybackPipeline:
     """The GStreamer element graph used for playback.
 
     This is the only code that touches the GStreamer elements. It knows
@@ -386,6 +386,5 @@ class GstPipeline:
             self._pad.remove_probe(self._event_handler_id)
         self._event_handler_id = None
 
-        self._signals.disconnect(self.playbin, "about-to-finish")
-        self._signals.disconnect(self.playbin, "source-setup")
+        self._signals.disconnect_all()
         self.playbin.set_state(Gst.State.NULL)

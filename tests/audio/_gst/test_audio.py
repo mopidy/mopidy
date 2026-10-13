@@ -9,7 +9,7 @@ import pytest
 from mopidy import audio
 from mopidy._lib import paths
 from mopidy._lib.gi import Gst
-from mopidy.audio._gst.pipeline import GstPipeline
+from mopidy.audio._gst.pipeline import GstPlaybackPipeline
 from mopidy.audio._gst.types import GstState
 from mopidy.types import PlaybackState
 from tests import dummy_audio, path_to_data_dir
@@ -528,7 +528,7 @@ def gst_audio():
 @pytest.fixture
 def pipeline(gst_audio):
     # The pipeline owns the elements, so inject a fake one.
-    gst_audio._pipeline = mock.Mock(spec=GstPipeline)
+    gst_audio._pipeline = mock.Mock(spec=GstPlaybackPipeline)
     return gst_audio._pipeline
 
 

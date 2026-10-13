@@ -168,23 +168,21 @@ def test_text_plain(scan, result, errors):
 
 
 def test_scan_uses_the_default_timeout(mocker):
-    process = mocker.patch("mopidy.media._gst.pipeline._process")
-    process.return_value = ({}, None, False, None)
+    gst_read = mocker.patch("mopidy.audio.scan.GstRead")
     uri = path_to_uri(path_to_data_dir("scanner/simple/song1.ogg"))
 
     make_scanner(timeout=4321).scan(uri)
 
-    assert process.call_args.args[1] == 4321
+    assert gst_read.call_args.kwargs["timeout"] == 4321
 
 
 def test_per_call_timeout_overrides_the_default(mocker):
-    process = mocker.patch("mopidy.media._gst.pipeline._process")
-    process.return_value = ({}, None, False, None)
+    gst_read = mocker.patch("mopidy.audio.scan.GstRead")
     uri = path_to_uri(path_to_data_dir("scanner/simple/song1.ogg"))
 
     make_scanner(timeout=4321).scan(uri, timeout=1234)
 
-    assert process.call_args.args[1] == 1234
+    assert gst_read.call_args.kwargs["timeout"] == 1234
 
 
 @pytest.mark.skip(reason="Not implemented")

@@ -1,33 +1,32 @@
 from __future__ import annotations
 
-import dataclasses
 import logging
-import time
 from typing import TYPE_CHECKING, Any, cast
 
 from mopidy._lib import logs
-from mopidy._lib.gi import Gst, GstPbutils
+from mopidy._lib.gi import GLib, Gst, GstPbutils
 from mopidy._lib.gst import (
     Signals,
     from_gst_taglist,
     from_gst_time,
     setup_proxy,
+    to_gst_time,
 )
 from mopidy.media import MediaReaderError
+from mopidy.media._gst.types import (
+    GstAsyncDone,
+    GstBusMessage,
+    GstDurationChanged,
+    GstEndOfStream,
+    GstError,
+    GstHaveType,
+    GstMissingPlugin,
+    GstTag,
+)
 
 if TYPE_CHECKING:
-    from mopidy._lib.gst import GstTags
     from mopidy.config import ProxyConfig
     from mopidy.types import DurationMs
-
-
-@dataclasses.dataclass(frozen=True)
-class GstMediaData:
-    tags: GstTags
-    duration: DurationMs | None
-    seekable: bool
-    mime: str | None
-    playable: bool
 
 
 logger = logging.getLogger(__name__)
@@ -37,57 +36,204 @@ def _trace(*args: Any, **kwargs: Any) -> None:
     logger.log(logs.TRACE_LOG_LEVEL, *args, **kwargs)
 
 
-def read_media_data(
-    uri: str,
-    *,
-    timeout_ms: int,
-    proxy_config: ProxyConfig | None = None,
-) -> GstMediaData:
-    pipeline, signals = _setup_pipeline(uri, proxy_config)
-
-    try:
-        _start_pipeline(pipeline)
-        tags, mime, playable, duration = _process(pipeline, timeout_ms)
-        seekable = _query_seekable(pipeline)
-        return GstMediaData(tags, duration, seekable, mime, playable)
-    finally:
-        signals.clear()
-        pipeline.set_state(Gst.State.NULL)
-        del pipeline
+_MESSAGE_TYPES = (
+    Gst.MessageType.ELEMENT
+    | Gst.MessageType.APPLICATION
+    | Gst.MessageType.ERROR
+    | Gst.MessageType.EOS
+    | Gst.MessageType.ASYNC_DONE
+    | Gst.MessageType.DURATION_CHANGED
+    | Gst.MessageType.TAG
+)
 
 
-# Turns out it's _much_ faster to just create a new pipeline for every as
-# decodebins and other elements don't seem to take well to being reused.
-def _setup_pipeline(
-    uri: str,
-    proxy_config: ProxyConfig | None = None,
-) -> tuple[Gst.Pipeline, Signals]:
-    src = Gst.Element.make_from_uri(Gst.URIType.SRC, uri)
-    if not src:
-        msg = f"GStreamer can not open: {uri}"
-        raise MediaReaderError(msg)
+class GstReaderPipeline:
+    """The GStreamer element graph used to read the media of one URI.
 
-    if proxy_config:
-        setup_proxy(src, proxy_config)
+    Make a new pipeline for each read. It is much faster than to reuse one, as
+    parsebin and other elements do not work well when reused.
+    """
 
-    signals = Signals()
+    def __init__(
+        self,
+        uri: str,
+        *,
+        proxy_config: ProxyConfig | None = None,
+    ) -> None:
+        self._signals = Signals()
+        self._pipeline = self._make_pipeline()
+        self._add_source(uri, proxy_config)
 
-    pipeline = Gst.ElementFactory.make("pipeline")
-    if pipeline is None:
-        msg = "Failed to create GStreamer pipeline element."
-        raise MediaReaderError(msg)
-    pipeline = cast(Gst.Pipeline, pipeline)
-    pipeline.add(src)
+    def _make_pipeline(self) -> Gst.Pipeline:
+        pipeline = Gst.ElementFactory.make("pipeline")
+        if pipeline is None:
+            msg = "Failed to create GStreamer pipeline element."
+            raise MediaReaderError(msg)
+        return cast(Gst.Pipeline, pipeline)
 
-    if static_src_pad := src.get_static_pad("src"):
-        _setup_parsebin(src, static_src_pad, pipeline, signals)
-    elif _has_dynamic_src_pad(src):
-        signals.connect(src, "pad-added", _setup_parsebin, pipeline, signals)
-    else:
-        msg = "No pads found in source element."
-        raise MediaReaderError(msg)
+    def _add_source(self, uri: str, proxy_config: ProxyConfig | None) -> None:
+        src = Gst.Element.make_from_uri(Gst.URIType.SRC, uri)
+        if not src:
+            msg = f"GStreamer can not open: {uri}"
+            raise MediaReaderError(msg)
 
-    return pipeline, signals
+        if proxy_config:
+            setup_proxy(src, proxy_config)
+
+        self._pipeline.add(src)
+
+        if static_src_pad := src.get_static_pad("src"):
+            self._add_parsebin(static_src_pad)
+        elif _has_dynamic_src_pad(src):
+            self._signals.connect(src, "pad-added", self._on_src_pad_added)
+        else:
+            msg = "No pads found in source element."
+            raise MediaReaderError(msg)
+
+    def _on_src_pad_added(self, src: Gst.Element, pad: Gst.Pad) -> None:
+        # Runs on a GStreamer thread, so errors go on the bus.
+        try:
+            self._add_parsebin(pad)
+        except MediaReaderError as exc:
+            _post_error(src, str(exc))
+
+    def _add_parsebin(self, pad: Gst.Pad) -> None:
+        if (parsebin := Gst.ElementFactory.make("parsebin")) is None:
+            msg = "Failed to create GStreamer parsebin element."
+            raise MediaReaderError(msg)
+
+        self._pipeline.add(parsebin)
+        parsebin.sync_state_with_parent()
+
+        if (sink_pad := parsebin.get_static_pad("sink")) is None:
+            msg = "Failed to get sink pad of GStreamer parsebin element."
+            raise MediaReaderError(msg)
+
+        pad.link(sink_pad)
+
+        self._signals.connect(parsebin, "pad-added", self._on_parsebin_pad_added)
+
+    def _on_parsebin_pad_added(self, parsebin: Gst.Element, pad: Gst.Pad) -> None:
+        # Runs on a GStreamer thread, so errors go on the bus.
+        pad_caps = pad.get_current_caps() or pad.query_caps()
+        if pad_caps is not None and pad_caps.get_size() > 0:
+            have_type = Gst.Structure.new_empty("have-type")
+            have_type.set_value("mime", _get_structure_name(pad_caps.get_structure(0)))
+            parsebin.post_message(Gst.Message.new_application(parsebin, have_type))
+
+        try:
+            self._add_fakesink(pad)
+        except MediaReaderError as exc:
+            _post_error(parsebin, str(exc))
+
+    def _add_fakesink(self, pad: Gst.Pad) -> None:
+        if (fakesink := Gst.ElementFactory.make("fakesink")) is None:
+            msg = "Failed to create GStreamer fakesink element."
+            raise MediaReaderError(msg)
+
+        fakesink.set_property("sync", False)
+
+        self._pipeline.add(fakesink)
+        fakesink.sync_state_with_parent()
+
+        if (fakesink_sink := fakesink.get_static_pad("sink")) is None:
+            msg = "Failed to get sink pad of GStreamer fakesink."
+            raise MediaReaderError(msg)
+
+        pad.link(fakesink_sink)
+
+    def start(self) -> None:
+        """Start the pipeline, so that it reads the media."""
+        result = self._pipeline.set_state(Gst.State.PAUSED)
+        if result == Gst.StateChangeReturn.NO_PREROLL:
+            self._pipeline.set_state(Gst.State.PLAYING)
+
+    def set_state(self, state: Gst.State) -> bool:
+        """Set the state of the pipeline.
+
+        Returns `True` if successful, else `False`.
+        """
+        result = self._pipeline.set_state(state)
+        return result != Gst.StateChangeReturn.FAILURE
+
+    def pop_message(self, timeout: DurationMs) -> GstBusMessage | None:
+        """Wait for the next bus message and decode it.
+
+        Returns `None` if no message arrives before the timeout, or if the
+        reader does not use the message.
+        """
+        if (bus := self._pipeline.get_bus()) is None:
+            return None
+        if (
+            message := bus.timed_pop_filtered(to_gst_time(timeout), _MESSAGE_TYPES)
+        ) is None:
+            return None
+        return self._decode_bus_message(message)
+
+    def _decode_bus_message(  # noqa: PLR0911
+        self,
+        message: Gst.Message,
+    ) -> GstBusMessage | None:
+        """Turn a bus message into one of our records, or drop it."""
+        structure = message.get_structure()
+
+        if logger.isEnabledFor(logs.TRACE_LOG_LEVEL) and structure is not None:
+            debug_text = structure.to_string()
+            if len(debug_text) > 77:
+                debug_text = debug_text[:77] + "..."
+            _trace("element %s: %s", message.src.get_name(), debug_text)
+
+        match message.type:
+            case Gst.MessageType.APPLICATION if (
+                structure is not None and _get_structure_name(structure) == "have-type"
+            ):
+                return GstHaveType(cast(str, structure.get_value("mime")))
+            case Gst.MessageType.ASYNC_DONE:
+                return GstAsyncDone()
+            case Gst.MessageType.DURATION_CHANGED:
+                return GstDurationChanged()
+            case Gst.MessageType.EOS:
+                return GstEndOfStream()
+            case Gst.MessageType.ERROR:
+                return GstError(*message.parse_error())
+            case Gst.MessageType.ELEMENT if GstPbutils.is_missing_plugin_message(
+                message
+            ):
+                return GstMissingPlugin(_missing_plugin_mime(structure))
+            case Gst.MessageType.TAG:
+                return GstTag(from_gst_taglist(message.parse_tag()))
+            case _:
+                return None
+
+    def query_duration(self) -> tuple[bool, DurationMs | None]:
+        """Get the duration of the media in milliseconds.
+
+        Returns if the query was successful, and the duration. The duration is
+        `None` if the query failed or if the media has no duration.
+        """
+        success, duration = self._pipeline.query_duration(Gst.Format.TIME)
+        if not success:
+            duration = None  # Make sure error case preserves None.
+        elif duration < 0:
+            duration = None  # Stream without duration.
+        else:
+            duration = from_gst_time(duration)
+        return success, duration
+
+    def query_seekable(self) -> bool:
+        """Check if the media allows seeking."""
+        query = Gst.Query.new_seeking(Gst.Format.TIME)
+        self._pipeline.query(query)
+        return query.parse_seeking()[1]
+
+    def teardown(self) -> None:
+        self._signals.disconnect_all()
+        self._pipeline.set_state(Gst.State.NULL)
+
+
+def _post_error(element: Gst.Element, text: str) -> None:
+    error = GLib.Error.new_literal(Gst.CoreError.quark(), text, Gst.CoreError.FAILED)
+    element.post_message(Gst.Message.new_error(element, error, ""))
 
 
 def _has_dynamic_src_pad(element: Gst.Element) -> bool:
@@ -98,89 +244,6 @@ def _has_dynamic_src_pad(element: Gst.Element) -> bool:
         ):
             return True
     return False
-
-
-def _setup_parsebin(
-    element: Gst.Element,  # noqa: ARG001
-    pad: Gst.Pad,
-    pipeline: Gst.Pipeline,
-    signals: Signals,
-) -> None:
-    if (parsebin := Gst.ElementFactory.make("parsebin")) is None:
-        msg = "Failed to create GStreamer parsebin element."
-        raise MediaReaderError(msg)
-
-    pipeline.add(parsebin)
-    parsebin.sync_state_with_parent()
-
-    if (sink_pad := parsebin.get_static_pad("sink")) is None:
-        msg = "Failed to get sink pad of GStreamer parsebin element."
-        raise MediaReaderError(msg)
-
-    pad.link(sink_pad)
-
-    signals.connect(parsebin, "pad-added", _pad_added, pipeline)
-
-
-def _pad_added(
-    element: Gst.Element,
-    pad: Gst.Pad,
-    pipeline: Gst.Pipeline,
-) -> None:
-    pad_caps = pad.get_current_caps() or pad.query_caps()
-
-    if (element_bus := element.get_bus()) is None:
-        msg = "Failed to get bus of GStreamer element."
-        raise MediaReaderError(msg)
-
-    if pad_caps is not None and pad_caps.get_size() > 0:
-        struct = pad_caps.get_structure(0)
-
-        have_type = Gst.Structure.new_empty("have-type")
-        have_type.set_value("caps", struct)
-        element_bus.post(Gst.Message.new_application(element, have_type))
-
-        if _get_structure_name(struct).startswith("audio/"):
-            have_audio = Gst.Structure.new_empty("have-audio")
-            element_bus.post(Gst.Message.new_application(element, have_audio))
-
-    if (fakesink := Gst.ElementFactory.make("fakesink")) is None:
-        msg = "Failed to create GStreamer fakesink element."
-        raise MediaReaderError(msg)
-
-    fakesink.set_property("sync", False)
-
-    pipeline.add(fakesink)
-    fakesink.sync_state_with_parent()
-
-    if (fakesink_sink := fakesink.get_static_pad("sink")) is None:
-        msg = "Failed to get sink pad of GStreamer fakesink."
-        raise MediaReaderError(msg)
-
-    pad.link(fakesink_sink)
-
-
-def _start_pipeline(pipeline: Gst.Pipeline) -> None:
-    result = pipeline.set_state(Gst.State.PAUSED)
-    if result == Gst.StateChangeReturn.NO_PREROLL:
-        pipeline.set_state(Gst.State.PLAYING)
-
-
-def _query_duration(pipeline: Gst.Pipeline) -> tuple[bool, DurationMs | None]:
-    success, duration = pipeline.query_duration(Gst.Format.TIME)
-    if not success:
-        duration = None  # Make sure error case preserves None.
-    elif duration < 0:
-        duration = None  # Stream without duration.
-    else:
-        duration = from_gst_time(duration)
-    return success, duration
-
-
-def _query_seekable(pipeline: Gst.Pipeline) -> bool:
-    query = Gst.Query.new_seeking(Gst.Format.TIME)
-    pipeline.query(query)
-    return query.parse_seeking()[1]
 
 
 def _get_structure_name(struct: Gst.Structure) -> str:
@@ -196,104 +259,7 @@ def _get_structure_name(struct: Gst.Structure) -> str:
             return _struct.get_name()
 
 
-def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
-    pipeline: Gst.Pipeline,
-    timeout_ms: int,
-) -> tuple[GstTags, str | None, bool, DurationMs | None]:
-    bus = pipeline.get_bus()
-    tags: GstTags = {}
-    mime: str | None = None
-    playable = False
-    missing_message = None
-    duration = None
-
-    types = (
-        Gst.MessageType.ELEMENT
-        | Gst.MessageType.APPLICATION
-        | Gst.MessageType.ERROR
-        | Gst.MessageType.EOS
-        | Gst.MessageType.ASYNC_DONE
-        | Gst.MessageType.DURATION_CHANGED
-        | Gst.MessageType.TAG
-    )
-
-    timeout = timeout_ms
-    start = time.monotonic()
-    while timeout > 0:
-        if (msg := bus.timed_pop_filtered(timeout * Gst.MSECOND, types)) is None:
-            break
-
-        structure = msg.get_structure()
-
-        if logger.isEnabledFor(logs.TRACE_LOG_LEVEL) and structure is not None:
-            debug_text = structure.to_string()
-            if len(debug_text) > 77:
-                debug_text = debug_text[:77] + "..."
-            _trace("element %s: %s", msg.src.get_name(), debug_text)
-
-        if msg.type == Gst.MessageType.ELEMENT:
-            if GstPbutils.is_missing_plugin_message(msg):
-                missing_message = msg
-
-        elif msg.type == Gst.MessageType.APPLICATION:
-            if structure is not None and _get_structure_name(structure) == "have-type":
-                caps = cast(Gst.Structure | None, structure.get_value("caps"))
-                if caps is not None:
-                    mime = _get_structure_name(caps)
-                    if mime.startswith("text/") or mime == "application/xml":
-                        return tags, mime, playable, duration
-            elif structure is not None and structure.get_name() == "have-audio":
-                playable = True
-
-        elif msg.type == Gst.MessageType.ERROR:
-            error, _debug = msg.parse_error()
-            if (
-                missing_message
-                and not mime
-                and (
-                    ((structure := missing_message.get_structure()) is not None)
-                    and ((caps := structure.get_value("detail")) is not None)
-                    and (mime := _get_structure_name(caps.get_structure(0)))
-                )
-            ):
-                return tags, mime, playable, duration
-            raise MediaReaderError(str(error))
-
-        elif msg.type == Gst.MessageType.EOS:
-            return tags, mime, playable, duration
-
-        elif msg.type == Gst.MessageType.ASYNC_DONE:
-            success, duration = _query_duration(pipeline)
-            if tags and success:
-                return tags, mime, playable, duration
-
-            # Don't try workaround for non-seekable sources such as mmssrc:
-            if not _query_seekable(pipeline):
-                return tags, mime, playable, duration
-
-            # Workaround for upstream bug which causes tags/duration to arrive
-            # after pre-roll. We get around this by starting to play the track
-            # and then waiting for a duration change.
-            # https://bugzilla.gnome.org/show_bug.cgi?id=763553
-            logger.debug("Using workaround for duration missing before play.")
-            result = pipeline.set_state(Gst.State.PLAYING)
-            if result == Gst.StateChangeReturn.FAILURE:
-                return tags, mime, playable, duration
-
-        elif msg.type == Gst.MessageType.DURATION_CHANGED and tags:
-            # VBR formats sometimes seem to not have a duration by the time we
-            # go back to paused. So just try to get it right away.
-            success, duration = _query_duration(pipeline)
-            pipeline.set_state(Gst.State.PAUSED)
-            if success:
-                return tags, mime, playable, duration
-
-        elif msg.type == Gst.MessageType.TAG:
-            taglist = msg.parse_tag()
-            # Note that this will only keep the last tag.
-            tags.update(from_gst_taglist(taglist))
-
-        timeout = timeout_ms - int((time.monotonic() - start) * 1000)
-
-    msg = f"Timeout after {timeout_ms:d}ms"
-    raise MediaReaderError(msg)
+def _missing_plugin_mime(structure: Gst.Structure | None) -> str | None:
+    if structure is None or (caps := structure.get_value("detail")) is None:
+        return None
+    return _get_structure_name(caps.get_structure(0))
