@@ -131,7 +131,7 @@ class GstRead:
             case GstMissingPlugin(mime):
                 self._missing_plugin_mime = mime
             case GstTag(tags):
-                # Note that this will only keep the last tag.
+                # A later tag message replaces the values of the tags it has.
                 self._tags.update(tags)
         return False
 
