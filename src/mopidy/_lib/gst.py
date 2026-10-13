@@ -28,76 +28,6 @@ def from_gst_time(gst_time: int) -> DurationMs:
     return DurationMs(gst_time // Gst.MSECOND)
 
 
-def setup_proxy(element: Gst.Element, config: ProxyConfig) -> None:
-    """Configure a GStreamer element with proxy settings.
-
-    Args:
-        element: Element to setup proxy in.
-        config: Proxy settings to use.
-    """
-    if not hasattr(element.props, "proxy") or not config.get("hostname"):
-        return
-
-    element.set_property("proxy", httpclient.format_proxy(config, auth=False))
-    element.set_property("proxy-id", config.get("username"))
-    element.set_property("proxy-pw", config.get("password"))
-
-
-class Signals:
-    """Helper for tracking gobject signal registrations."""
-
-    def __init__(self) -> None:
-        self._ids: dict[tuple[Gst.Element, str], int] = {}
-
-    def connect(
-        self,
-        element: Gst.Element,
-        event: str,
-        func: Callable,
-        *args: Any,
-    ) -> None:
-        """Connect a function + args to signal event on an element.
-
-        Each event may only be handled by one callback in this implementation.
-        """
-        if (element, event) in self._ids:
-            raise AssertionError
-        self._ids[(element, event)] = element.connect(event, func, *args)
-
-    def disconnect(self, element: Gst.Element, event: str) -> None:
-        """Disconnect whatever handler we have for an element+event pair.
-
-        Does nothing it the handler has already been removed.
-        """
-        signal_id = self._ids.pop((element, event), None)
-        if signal_id is not None:
-            element.disconnect(signal_id)
-
-    def clear(self) -> None:
-        """Clear all registered signal handlers."""
-        for element, event in list(self._ids):
-            element.disconnect(self._ids.pop((element, event)))
-
-
-def repr_tags(tags: dict[str, list[Any]], max_bytes: int = 10) -> str:
-    """Return a printable representation of tags from `from_gst_taglist()`.
-
-    Bytes values are cut to `max_bytes`, so that embedded images do not fill
-    the log.
-    """
-    return repr(
-        {
-            tag: [
-                value[:max_bytes] + b"..."
-                if isinstance(value, bytes) and len(value) > max_bytes
-                else value
-                for value in values
-            ]
-            for tag, values in tags.items()
-        }
-    )
-
-
 def from_gst_taglist(taglist: Gst.TagList) -> dict[str, list[Any]]:
     """Convert a `Gst.TagList` to plain Python types.
 
@@ -157,3 +87,68 @@ def from_gst_taglist(taglist: Gst.TagList) -> dict[str, list[Any]]:
                 )
 
     return dict(result)
+
+
+def repr_tags(tags: dict[str, list[Any]], max_bytes: int = 10) -> str:
+    """Return a printable representation of tags from `from_gst_taglist()`.
+
+    Bytes values are cut to `max_bytes`, so that embedded images do not fill
+    the log.
+    """
+    return repr(
+        {
+            tag: [
+                value[:max_bytes] + b"..."
+                if isinstance(value, bytes) and len(value) > max_bytes
+                else value
+                for value in values
+            ]
+            for tag, values in tags.items()
+        }
+    )
+
+
+def setup_proxy(element: Gst.Element, config: ProxyConfig) -> None:
+    """Configure a GStreamer element with proxy settings."""
+    if not hasattr(element.props, "proxy") or not config.get("hostname"):
+        return
+
+    element.set_property("proxy", httpclient.format_proxy(config, auth=False))
+    element.set_property("proxy-id", config.get("username"))
+    element.set_property("proxy-pw", config.get("password"))
+
+
+class Signals:
+    """Helper for tracking gobject signal registrations."""
+
+    def __init__(self) -> None:
+        self._ids: dict[tuple[Gst.Element, str], int] = {}
+
+    def connect(
+        self,
+        element: Gst.Element,
+        event: str,
+        func: Callable,
+        *args: Any,
+    ) -> None:
+        """Connect a function + args to signal event on an element.
+
+        Each event may only be handled by one callback in this implementation.
+        """
+        if (element, event) in self._ids:
+            raise AssertionError
+        self._ids[(element, event)] = element.connect(event, func, *args)
+
+    def disconnect(self, element: Gst.Element, event: str) -> None:
+        """Disconnect whatever handler we have for an element+event pair.
+
+        Does nothing it the handler has already been removed.
+        """
+        signal_id = self._ids.pop((element, event), None)
+        if signal_id is not None:
+            element.disconnect(signal_id)
+
+    def clear(self) -> None:
+        """Clear all registered signal handlers."""
+        for element, event in list(self._ids):
+            element.disconnect(self._ids.pop((element, event)))
