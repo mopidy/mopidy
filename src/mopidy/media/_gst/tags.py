@@ -1,15 +1,20 @@
-from typing import Any
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
 
 from mopidy._lib.gi import Gst
 from mopidy.media import MediaReaderError
 from mopidy.models import Album, Artist, Track
-from mopidy.types import DurationMs, Uri
+
+if TYPE_CHECKING:
+    from mopidy._lib.gst import GstTags
+    from mopidy.types import DurationMs, Uri
 
 
 # TODO: split based on "stream" and "track" based conversion? i.e. handle data
 # from radios in it's own helper instead?
 def convert_tags_to_track(
-    tags: dict[str, Any],
+    tags: GstTags,
     *,
     uri: Uri,
     length: DurationMs | None = None,
@@ -89,7 +94,7 @@ def convert_tags_to_track(
 
 
 def _artists(
-    tags: dict[str, Any],
+    tags: GstTags,
     artist_name: str,
     artist_id: str | None = None,
     artist_sortname: str | None = None,

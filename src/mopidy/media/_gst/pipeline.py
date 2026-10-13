@@ -7,17 +7,23 @@ from typing import TYPE_CHECKING, Any, cast
 
 from mopidy._lib import logs
 from mopidy._lib.gi import Gst, GstPbutils
-from mopidy._lib.gst import Signals, convert_taglist, setup_proxy
+from mopidy._lib.gst import (
+    Signals,
+    from_gst_taglist,
+    from_gst_time,
+    setup_proxy,
+)
 from mopidy.media import MediaReaderError
-from mopidy.types import DurationMs
 
 if TYPE_CHECKING:
+    from mopidy._lib.gst import GstTags
     from mopidy.config import ProxyConfig
+    from mopidy.types import DurationMs
 
 
 @dataclasses.dataclass(frozen=True)
 class GstMediaData:
-    tags: dict[str, Any]
+    tags: GstTags
     duration: DurationMs | None
     seekable: bool
     mime: str | None
@@ -167,7 +173,7 @@ def _query_duration(pipeline: Gst.Pipeline) -> tuple[bool, DurationMs | None]:
     elif duration < 0:
         duration = None  # Stream without duration.
     else:
-        duration = DurationMs(int(duration // Gst.MSECOND))
+        duration = from_gst_time(duration)
     return success, duration
 
 
@@ -193,9 +199,9 @@ def _get_structure_name(struct: Gst.Structure) -> str:
 def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
     pipeline: Gst.Pipeline,
     timeout_ms: int,
-) -> tuple[dict[str, Any], str | None, bool, DurationMs | None]:
+) -> tuple[GstTags, str | None, bool, DurationMs | None]:
     bus = pipeline.get_bus()
-    tags = {}
+    tags: GstTags = {}
     mime: str | None = None
     playable = False
     missing_message = None
@@ -285,7 +291,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
         elif msg.type == Gst.MessageType.TAG:
             taglist = msg.parse_tag()
             # Note that this will only keep the last tag.
-            tags.update(convert_taglist(taglist))
+            tags.update(from_gst_taglist(taglist))
 
         timeout = timeout_ms - int((time.monotonic() - start) * 1000)
 

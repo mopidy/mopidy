@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, override
+from typing import TYPE_CHECKING, override
 
 from mopidy._lib.gi import GLib, Gst
 from mopidy.media import EmbeddedImage, MediaInfo, MediaReaderError
@@ -10,6 +10,7 @@ from mopidy.media._gst.pipeline import read_media_data
 from mopidy.media._gst.tags import convert_tags_to_track
 
 if TYPE_CHECKING:
+    from mopidy._lib.gst import GstTags
     from mopidy.config import ProxyConfig
     from mopidy.models import Track
     from mopidy.types import DurationMs, Uri
@@ -42,7 +43,7 @@ class GstMediaInfoReader(MediaInfoReader):
 
 
 def _convert_valid_tags(
-    tags: dict[str, Any],
+    tags: GstTags,
     *,
     uri: Uri,
     length: DurationMs | None,
@@ -53,7 +54,7 @@ def _convert_valid_tags(
         pass
 
     # Add the tags one at a time, and keep each tag that still converts.
-    valid_tags: dict[str, Any] = {}
+    valid_tags: GstTags = {}
     for tag, values in tags.items():
         try:
             convert_tags_to_track({**valid_tags, tag: values}, uri=uri, length=length)
@@ -64,7 +65,7 @@ def _convert_valid_tags(
     return convert_tags_to_track(valid_tags, uri=uri, length=length)
 
 
-def _embedded_images(tags: dict[str, Any]) -> tuple[EmbeddedImage, ...]:
+def _embedded_images(tags: GstTags) -> tuple[EmbeddedImage, ...]:
     return tuple(
         EmbeddedImage(data=value)
         for tag in (Gst.TAG_IMAGE, Gst.TAG_PREVIEW_IMAGE)

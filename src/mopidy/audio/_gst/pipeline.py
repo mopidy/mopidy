@@ -7,9 +7,9 @@ from mopidy import exceptions
 from mopidy._lib.gi import GLib, Gst, GstPbutils
 from mopidy._lib.gst import (
     Signals,
-    clocktime_to_millisecond,
-    convert_taglist,
-    millisecond_to_clocktime,
+    from_gst_taglist,
+    from_gst_time,
+    to_gst_time,
 )
 from mopidy.audio._gst.types import (
     GstAsyncDone,
@@ -265,7 +265,7 @@ class GstPipeline:
             case Gst.MessageType.STREAM_START:
                 return GstStreamStart()
             case Gst.MessageType.TAG:
-                return GstTag(convert_taglist(message.parse_tag()))
+                return GstTag(from_gst_taglist(message.parse_tag()))
             case Gst.MessageType.WARNING:
                 return GstWarning(*message.parse_warning())
             case _:
@@ -308,7 +308,7 @@ class GstPipeline:
                 "position": segment.position,
             },
         )
-        return clocktime_to_millisecond(segment.position)
+        return from_gst_time(segment.position)
 
     def set_uri(self, uri: str, *, download: bool = False) -> None:
         """Set the URI to play, and the buffering flags to use for it."""
@@ -349,12 +349,12 @@ class GstPipeline:
             logger.debug("Position query failed")
             return DurationMs(0)
 
-        return clocktime_to_millisecond(position)
+        return from_gst_time(position)
 
     def seek(self, position: DurationMs) -> bool:
         """Seek to a position in milliseconds."""
         # TODO: double check seek flags in use.
-        gst_position = millisecond_to_clocktime(position)
+        gst_position = to_gst_time(position)
         gst_logger.debug("Sending flushing seek: position=%r", gst_position)
         # Send seek event to the queue not the playbin. The default behavior
         # for bins is to forward this event to all sinks, which results in
