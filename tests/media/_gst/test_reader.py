@@ -1,3 +1,5 @@
+import gc
+import weakref
 from unittest import mock
 
 import pytest
@@ -66,6 +68,18 @@ def test_error_in_a_gstreamer_callback_gives_media_reader_error(mocker):
 
     with pytest.raises(MediaReaderError, match="fakesink"):
         GstMediaInfoReader().read_media_info(uri, timeout=DurationMs(1000))
+
+
+def test_pipeline_is_freed_after_a_read():
+    uri = Uri(path_to_uri(path_to_data_dir("scanner/simple/song1.ogg")))
+    pipeline = GstReaderPipeline(uri)
+    pipeline_ref = weakref.ref(pipeline)
+
+    GstRead(uri, timeout=DurationMs(1000), pipeline=pipeline).run()
+    del pipeline
+    gc.collect()
+
+    assert pipeline_ref() is None
 
 
 @pytest.fixture
