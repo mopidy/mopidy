@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import dataclasses
 import logging
-import time
 from typing import TYPE_CHECKING, Any, cast
 
 from mopidy._lib import logs
@@ -25,20 +23,10 @@ from mopidy.media._gst.types import (
     GstMissingPlugin,
     GstTag,
 )
-from mopidy.types import DurationMs
 
 if TYPE_CHECKING:
-    from mopidy._lib.gst import GstTags
     from mopidy.config import ProxyConfig
-
-
-@dataclasses.dataclass(frozen=True)
-class GstMediaData:
-    tags: GstTags
-    duration: DurationMs | None
-    seekable: bool
-    mime: str | None
-    playable: bool
+    from mopidy.types import DurationMs
 
 
 logger = logging.getLogger(__name__)
@@ -46,23 +34,6 @@ logger = logging.getLogger(__name__)
 
 def _trace(*args: Any, **kwargs: Any) -> None:
     logger.log(logs.TRACE_LOG_LEVEL, *args, **kwargs)
-
-
-def read_media_data(
-    uri: str,
-    *,
-    timeout: DurationMs,
-    proxy_config: ProxyConfig | None = None,
-) -> GstMediaData:
-    pipeline = GstReaderPipeline(uri, proxy_config=proxy_config)
-
-    try:
-        pipeline.start()
-        tags, mime, playable, duration = _process(pipeline, timeout)
-        seekable = pipeline.query_seekable()
-        return GstMediaData(tags, duration, seekable, mime, playable)
-    finally:
-        pipeline.teardown()
 
 
 _MESSAGE_TYPES = (
@@ -281,70 +252,3 @@ def _missing_plugin_mime(structure: Gst.Structure | None) -> str | None:
     if structure is None or (caps := structure.get_value("detail")) is None:
         return None
     return _get_structure_name(caps.get_structure(0))
-
-
-def _process(  # noqa: C901, PLR0911, PLR0912
-    pipeline: GstReaderPipeline,
-    timeout: DurationMs,
-) -> tuple[GstTags, str | None, bool, DurationMs | None]:
-    tags: GstTags = {}
-    mime: str | None = None
-    playable = False
-    missing_plugin_mime: str | None = None
-    duration = None
-
-    remaining = timeout
-    start = time.monotonic()
-    while remaining > 0:
-        match pipeline.pop_message(remaining):
-            case GstMissingPlugin(plugin_mime):
-                missing_plugin_mime = plugin_mime
-
-            case GstHaveType(found_mime):
-                mime = found_mime
-                if mime.startswith("audio/"):
-                    playable = True
-                if mime.startswith("text/") or mime == "application/xml":
-                    return tags, mime, playable, duration
-
-            case GstError(error, _debug):
-                if missing_plugin_mime and not mime:
-                    return tags, missing_plugin_mime, playable, duration
-                raise MediaReaderError(str(error))
-
-            case GstEndOfStream():
-                return tags, mime, playable, duration
-
-            case GstAsyncDone():
-                success, duration = pipeline.query_duration()
-                if tags and success:
-                    return tags, mime, playable, duration
-
-                # Don't try workaround for non-seekable sources such as mmssrc:
-                if not pipeline.query_seekable():
-                    return tags, mime, playable, duration
-
-                # Workaround for upstream bug which causes tags/duration to arrive
-                # after pre-roll. We get around this by starting to play the track
-                # and then waiting for a duration change.
-                # https://bugzilla.gnome.org/show_bug.cgi?id=763553
-                logger.debug("Using workaround for duration missing before play.")
-                if not pipeline.set_state(Gst.State.PLAYING):
-                    return tags, mime, playable, duration
-
-            case GstDurationChanged() if tags:
-                # VBR formats sometimes seem to not have a duration by the time we
-                # go back to paused. So just try to get it right away.
-                success, duration = pipeline.query_duration()
-                pipeline.set_state(Gst.State.PAUSED)
-                if success:
-                    return tags, mime, playable, duration
-
-            case GstTag(new_tags):
-                # Note that this will only keep the last tag.
-                tags.update(new_tags)
-
-        remaining = DurationMs(timeout - int((time.monotonic() - start) * 1000))
-
-    msg = f"Timeout after {timeout:d}ms"
-    raise MediaReaderError(msg)

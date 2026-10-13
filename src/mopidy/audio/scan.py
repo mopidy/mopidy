@@ -10,8 +10,8 @@ from warnings import deprecated
 from mopidy import exceptions
 from mopidy.config import ProxyConfig
 from mopidy.media import MediaReaderError
-from mopidy.media._gst.pipeline import read_media_data
-from mopidy.types import DurationMs
+from mopidy.media._gst.reader import GstRead
+from mopidy.types import DurationMs, Uri
 
 
 class _Result(NamedTuple):
@@ -65,18 +65,18 @@ class Scanner:
             Named tuple: `uri`, `tags`, `duration`, `seekable`, `mime`, `playable`.
         """
         try:
-            data = read_media_data(
-                uri,
+            result = GstRead(
+                Uri(uri),
                 timeout=DurationMs(int(timeout or self._timeout_ms)),
                 proxy_config=self._proxy_config,
-            )
+            ).run()
         except MediaReaderError as exc:
             raise exceptions.ScannerError(str(exc)) from exc
         return _Result(
             uri,
-            data.tags,
-            data.duration,
-            data.seekable,
-            data.mime,
-            data.playable,
+            result.legacy_scanner_tags,
+            result.info.track.length,
+            result.info.seekable,
+            result.legacy_scanner_mime,
+            result.info.playable,
         )
