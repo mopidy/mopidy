@@ -32,7 +32,7 @@ class GstMediaInfoReader(MediaInfoReader):
                 timeout_ms=timeout,
                 proxy_config=self._proxy_config,
             )
-        except (exceptions.ScannerError, GLib.Error) as exc:
+        except GLib.Error as exc:
             raise MediaReaderError(str(exc)) from exc
         return MediaInfo(
             track=_convert_valid_tags(data.tags, uri=uri, length=data.duration),

@@ -9,6 +9,7 @@ from mopidy import exceptions
 from mopidy._lib import logs
 from mopidy._lib.gi import Gst, GstPbutils
 from mopidy._lib.gst import Signals, convert_taglist, setup_proxy
+from mopidy.media import MediaReaderError
 from mopidy.types import DurationMs
 
 if TYPE_CHECKING:
@@ -59,7 +60,7 @@ def _setup_pipeline(
     src = Gst.Element.make_from_uri(Gst.URIType.SRC, uri)
     if not src:
         msg = f"GStreamer can not open: {uri}"
-        raise exceptions.ScannerError(msg)
+        raise MediaReaderError(msg)
 
     if proxy_config:
         setup_proxy(src, proxy_config)
@@ -79,7 +80,7 @@ def _setup_pipeline(
         signals.connect(src, "pad-added", _setup_parsebin, pipeline, signals)
     else:
         msg = "No pads found in source element."
-        raise exceptions.ScannerError(msg)
+        raise MediaReaderError(msg)
 
     return pipeline, signals
 
@@ -251,7 +252,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
                 )
             ):
                 return tags, mime, playable, duration
-            raise exceptions.ScannerError(str(error))
+            raise MediaReaderError(str(error))
 
         elif msg.type == Gst.MessageType.EOS:
             return tags, mime, playable, duration
@@ -290,4 +291,4 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
         timeout = timeout_ms - (int(time.time() * 1000) - start)
 
     msg = f"Timeout after {timeout_ms:d}ms"
-    raise exceptions.ScannerError(msg)
+    raise MediaReaderError(msg)
