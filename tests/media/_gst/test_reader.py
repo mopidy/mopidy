@@ -53,6 +53,21 @@ def test_element_that_cannot_be_made_gives_media_reader_error(mocker):
         GstMediaInfoReader().read_media_info(uri, timeout=DurationMs(1000))
 
 
+def test_error_in_a_gstreamer_callback_gives_media_reader_error(mocker):
+    make = Gst.ElementFactory.make
+    mocker.patch.object(
+        Gst.ElementFactory,
+        "make",
+        side_effect=lambda name, *args: (
+            None if name == "fakesink" else make(name, *args)
+        ),
+    )
+    uri = Uri(path_to_uri(path_to_data_dir("scanner/simple/song1.ogg")))
+
+    with pytest.raises(MediaReaderError, match="fakesink"):
+        GstMediaInfoReader().read_media_info(uri, timeout=DurationMs(1000))
+
+
 @pytest.fixture
 def pipeline():
     pipeline = mock.Mock(spec=GstReaderPipeline)

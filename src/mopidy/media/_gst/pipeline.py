@@ -4,7 +4,7 @@ import logging
 from typing import TYPE_CHECKING, Any, cast
 
 from mopidy._lib import logs
-from mopidy._lib.gi import Gst, GstPbutils
+from mopidy._lib.gi import GLib, Gst, GstPbutils
 from mopidy._lib.gst import (
     Signals,
     from_gst_taglist,
@@ -90,8 +90,12 @@ class GstReaderPipeline:
             msg = "No pads found in source element."
             raise MediaReaderError(msg)
 
-    def _on_src_pad_added(self, _src: Gst.Element, pad: Gst.Pad) -> None:
-        self._add_parsebin(pad)
+    def _on_src_pad_added(self, src: Gst.Element, pad: Gst.Pad) -> None:
+        # Runs on a GStreamer thread, so errors go on the bus.
+        try:
+            self._add_parsebin(pad)
+        except MediaReaderError as exc:
+            _post_error(src, str(exc))
 
     def _add_parsebin(self, pad: Gst.Pad) -> None:
         if (parsebin := Gst.ElementFactory.make("parsebin")) is None:
@@ -110,17 +114,19 @@ class GstReaderPipeline:
         self._signals.connect(parsebin, "pad-added", self._on_parsebin_pad_added)
 
     def _on_parsebin_pad_added(self, parsebin: Gst.Element, pad: Gst.Pad) -> None:
+        # Runs on a GStreamer thread, so errors go on the bus.
         pad_caps = pad.get_current_caps() or pad.query_caps()
-
-        if (bus := parsebin.get_bus()) is None:
-            msg = "Failed to get bus of GStreamer element."
-            raise MediaReaderError(msg)
-
         if pad_caps is not None and pad_caps.get_size() > 0:
             have_type = Gst.Structure.new_empty("have-type")
             have_type.set_value("mime", _get_structure_name(pad_caps.get_structure(0)))
-            bus.post(Gst.Message.new_application(parsebin, have_type))
+            parsebin.post_message(Gst.Message.new_application(parsebin, have_type))
 
+        try:
+            self._add_fakesink(pad)
+        except MediaReaderError as exc:
+            _post_error(parsebin, str(exc))
+
+    def _add_fakesink(self, pad: Gst.Pad) -> None:
         if (fakesink := Gst.ElementFactory.make("fakesink")) is None:
             msg = "Failed to create GStreamer fakesink element."
             raise MediaReaderError(msg)
@@ -223,6 +229,11 @@ class GstReaderPipeline:
     def teardown(self) -> None:
         self._signals.clear()
         self._pipeline.set_state(Gst.State.NULL)
+
+
+def _post_error(element: Gst.Element, text: str) -> None:
+    error = GLib.Error.new_literal(Gst.CoreError.quark(), text, Gst.CoreError.FAILED)
+    element.post_message(Gst.Message.new_error(element, error, ""))
 
 
 def _has_dynamic_src_pad(element: Gst.Element) -> bool:
