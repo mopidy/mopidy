@@ -104,7 +104,7 @@ def make_output_bin(output: str) -> Gst.Element:
     return output_bin
 
 
-class GstPipeline:
+class GstPlaybackPipeline:
     """The GStreamer element graph used for playback.
 
     This is the only code that touches the GStreamer elements. It knows

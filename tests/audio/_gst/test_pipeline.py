@@ -7,7 +7,7 @@ from mopidy._lib.gi import GLib, Gst
 from mopidy.audio._gst import types
 from mopidy.audio._gst.pipeline import (
     GstOutputBin,
-    GstPipeline,
+    GstPlaybackPipeline,
     make_output_bin,
 )
 from mopidy.types import PlaybackState
@@ -21,7 +21,7 @@ def pipeline():
             "buffer_time": None,
         },
     }
-    pipeline = GstPipeline(
+    pipeline = GstPlaybackPipeline(
         config,
         on_bus_message=mock.Mock(),
         on_position=mock.Mock(),
