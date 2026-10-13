@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 import httpx
 
 from mopidy._lib.paths import uri_to_path
-from mopidy.media._api import MediaReadError
+from mopidy.media._api import MediaReaderError
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -51,7 +51,7 @@ def fetch_document(
         The document, or `None` if the content is not text.
 
     Raises:
-        MediaReadError: If the scheme is not supported, if the fetch fails,
+        MediaReaderError: If the scheme is not supported, if the fetch fails,
             or on a timeout.
     """
     match urllib.parse.urlsplit(uri).scheme:
@@ -68,7 +68,7 @@ def fetch_document(
             )
         case scheme:
             msg = f"Cannot fetch a playlist document with the scheme {scheme!r}"
-            raise MediaReadError(msg)
+            raise MediaReaderError(msg)
 
 
 def _fetch_file(
@@ -84,7 +84,7 @@ def _fetch_file(
             )
     except OSError as exc:
         msg = f"Cannot read {uri}: {exc}"
-        raise MediaReadError(msg) from exc
+        raise MediaReaderError(msg) from exc
     if data is None:
         return None
     return Document(data=data, uri=uri)
@@ -100,14 +100,14 @@ def _fetch_http(
         with http_client.stream("GET", uri, timeout=timeout / 1000) as response:
             if not response.is_success:
                 msg = f"Cannot fetch {uri}: HTTP {response.status_code}"
-                raise MediaReadError(msg)
+                raise MediaReaderError(msg)
             data = _read(
                 chunks=response.iter_bytes(_CHUNK_SIZE),
                 timeout=timeout,
             )
     except httpx.HTTPError as exc:
         msg = f"Cannot fetch {uri}: {exc}"
-        raise MediaReadError(msg) from exc
+        raise MediaReaderError(msg) from exc
     if data is None:
         return None
     return Document(
@@ -130,5 +130,5 @@ def _read(
         data += chunk
         if time.monotonic() > deadline:
             msg = "Timeout while fetching the playlist document"
-            raise MediaReadError(msg)
+            raise MediaReaderError(msg)
     return bytes(data)

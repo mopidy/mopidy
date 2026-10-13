@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from mopidy.types import DurationMs, Uri
 
 
-class MediaReadError(MopidyException):
+class MediaReaderError(MopidyException):
     """Raised when a URI cannot be read, or when a read times out."""
 
 
@@ -20,6 +20,6 @@ class MediaInfoReader(Protocol):
         """Read the media info of one URI.
 
         Raises:
-            MediaReadError: If the URI cannot be read, or on a timeout.
+            MediaReaderError: If the URI cannot be read, or on a timeout.
         """
         ...

@@ -7,7 +7,7 @@ from typing import TypedDict, cast, override
 from mopidy import backend
 from mopidy import config as config_lib
 from mopidy._lib import paths
-from mopidy.media import MediaReader, MediaReadError
+from mopidy.media import MediaReader, MediaReaderError
 from mopidy.models import Ref, Track
 from mopidy.types import Uri
 
@@ -109,7 +109,7 @@ class FileLibraryProvider(backend.LibraryProvider):
 
         try:
             track = self._media_reader.read_media_info(uri).track
-        except MediaReadError as e:
+        except MediaReaderError as e:
             logger.warning("Failed looking up %s: %s", uri, e)
             track = Track(uri=uri)
 

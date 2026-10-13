@@ -9,7 +9,7 @@ from rich.console import Console
 from mopidy._app import media
 from mopidy._lib.paths import path_to_uri
 from mopidy.config import Config
-from mopidy.media import MediaInfo, MediaReader, MediaReadError
+from mopidy.media import MediaInfo, MediaReader, MediaReaderError
 from mopidy.models import Track
 from mopidy.types import DurationMs
 from tests import path_to_data_dir
@@ -22,7 +22,7 @@ class FakeMediaInfoReader:
         self.results = results or {}
 
     def read_media_info(self, uri, *, timeout):
-        result = self.results.get(uri, MediaReadError(f"Cannot read {uri}"))
+        result = self.results.get(uri, MediaReaderError(f"Cannot read {uri}"))
         if isinstance(result, Exception):
             raise result
         return result
@@ -272,7 +272,7 @@ LONG_URI = "http://example.com/" + "a" * 100 + "/end"
 
 
 def test_info_does_not_truncate_errors(fake_media_reader, media_info_reader, console):
-    media_info_reader.results[LONG_URI] = MediaReadError("x" * 100 + " the end")
+    media_info_reader.results[LONG_URI] = MediaReaderError("x" * 100 + " the end")
 
     run(media.info, LONG_URI)
 

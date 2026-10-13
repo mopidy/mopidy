@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, override
 
 from mopidy import exceptions
 from mopidy._lib.gi import GLib, Gst
-from mopidy.media._api import MediaInfoReader, MediaReadError
+from mopidy.media._api import MediaInfoReader, MediaReaderError
 from mopidy.media._gst.pipeline import read_media_data
 from mopidy.media._gst.tags import convert_tags_to_track
 from mopidy.media._models import EmbeddedImage, MediaInfo
@@ -33,7 +33,7 @@ class GstMediaInfoReader(MediaInfoReader):
                 proxy_config=self._proxy_config,
             )
         except (exceptions.ScannerError, GLib.Error) as exc:
-            raise MediaReadError(str(exc)) from exc
+            raise MediaReaderError(str(exc)) from exc
         return MediaInfo(
             track=_convert_valid_tags(data.tags, uri=uri, length=data.duration),
             playable=data.playable,

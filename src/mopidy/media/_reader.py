@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Self
 import httpx
 
 from mopidy import httpclient
-from mopidy.media._api import MediaReadError
+from mopidy.media._api import MediaReaderError
 from mopidy.media._fetch import fetch_document
 from mopidy.media._gst.reader import GstMediaInfoReader
 from mopidy.media._models import PlaybackTarget
@@ -81,7 +81,7 @@ class MediaReader:
             timeout: The timeout. The default is the timeout of the reader.
 
         Raises:
-            MediaReadError: If the URI cannot be read, or on a timeout.
+            MediaReaderError: If the URI cannot be read, or on a timeout.
         """
         if timeout is None:
             timeout = self._timeout
@@ -111,7 +111,7 @@ class MediaReader:
             The playlist entries, in the order of the playlist document.
 
         Raises:
-            MediaReadError: If the scheme is not `file`, `http` or `https`, if
+            MediaReaderError: If the scheme is not `file`, `http` or `https`, if
                 the fetch fails, or on a timeout.
         """
         if timeout is None:
@@ -187,7 +187,7 @@ class MediaReader:
         fetch_failed = False
         try:
             entries = self.read_playlist_entries(uri, timeout=state.remaining())
-        except MediaReadError as exc:
+        except MediaReaderError as exc:
             logger.debug("Cannot read playlist document %s: %s", uri, exc)
             entries = ()
             fetch_failed = True
@@ -204,7 +204,7 @@ class MediaReader:
 
         try:
             info = self.read_media_info(uri, timeout=state.remaining())
-        except MediaReadError as exc:
+        except MediaReaderError as exc:
             logger.debug("Cannot read media info of %s: %s", uri, exc)
         else:
             if info.playable:

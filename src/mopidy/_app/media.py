@@ -14,7 +14,7 @@ from mopidy._lib.paths import path_to_uri
 from mopidy.config import Config
 from mopidy.media import (
     MediaReader,
-    MediaReadError,
+    MediaReaderError,
 )
 from mopidy.types import DurationMs, Uri
 
@@ -48,7 +48,7 @@ def info(*targets: Targets, timeout: Timeout = 5000) -> None:
             tree = ModelTree(Text(uri, overflow="fold"))
             try:
                 media_info = media_reader.read_media_info(uri)
-            except MediaReadError as exc:
+            except MediaReaderError as exc:
                 tree.add_leaf(
                     "error", str(exc), width=len("error"), wrap=True, style="red"
                 )
@@ -70,7 +70,7 @@ def playlist_entries(*targets: Targets, timeout: Timeout = 5000) -> None:
             tree = ModelTree(Text(uri, overflow="fold"))
             try:
                 playlist_entries = media_reader.read_playlist_entries(uri)
-            except MediaReadError as exc:
+            except MediaReaderError as exc:
                 tree.add_leaf(
                     "error", str(exc), width=len("error"), wrap=True, style="red"
                 )
