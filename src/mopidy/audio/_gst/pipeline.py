@@ -386,6 +386,5 @@ class GstPlaybackPipeline:
             self._pad.remove_probe(self._event_handler_id)
         self._event_handler_id = None
 
-        self._signals.disconnect(self.playbin, "about-to-finish")
-        self._signals.disconnect(self.playbin, "source-setup")
+        self._signals.disconnect_all()
         self.playbin.set_state(Gst.State.NULL)

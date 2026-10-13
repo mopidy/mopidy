@@ -123,36 +123,23 @@ def setup_proxy(element: Gst.Element, config: ProxyConfig) -> None:
 
 
 class Signals:
-    """Helper for tracking gobject signal registrations."""
+    """The signal handlers connected to GStreamer elements.
+
+    An element keeps a reference to each of its signal handlers. If a handler
+    is a bound method, the element keeps the method's object alive, and if the
+    object also keeps the element, Python's garbage collector cannot free
+    them. Disconnect all handlers when the elements are not needed anymore.
+    """
 
     def __init__(self) -> None:
-        self._ids: dict[tuple[Gst.Element, str], int] = {}
+        self._handlers: list[tuple[Gst.Element, int]] = []
 
-    def connect(
-        self,
-        element: Gst.Element,
-        event: str,
-        func: Callable,
-        *args: Any,
-    ) -> None:
-        """Connect a function + args to signal event on an element.
+    def connect(self, element: Gst.Element, signal: str, func: Callable) -> None:
+        """Connect a handler to a signal of an element."""
+        self._handlers.append((element, element.connect(signal, func)))
 
-        Each event may only be handled by one callback in this implementation.
-        """
-        if (element, event) in self._ids:
-            raise AssertionError
-        self._ids[(element, event)] = element.connect(event, func, *args)
-
-    def disconnect(self, element: Gst.Element, event: str) -> None:
-        """Disconnect whatever handler we have for an element+event pair.
-
-        Does nothing it the handler has already been removed.
-        """
-        signal_id = self._ids.pop((element, event), None)
-        if signal_id is not None:
-            element.disconnect(signal_id)
-
-    def clear(self) -> None:
-        """Clear all registered signal handlers."""
-        for element, event in list(self._ids):
-            element.disconnect(self._ids.pop((element, event)))
+    def disconnect_all(self) -> None:
+        """Disconnect all handlers."""
+        for element, handler_id in self._handlers:
+            element.disconnect(handler_id)
+        self._handlers.clear()

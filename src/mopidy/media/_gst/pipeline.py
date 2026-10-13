@@ -227,7 +227,7 @@ class GstReaderPipeline:
         return query.parse_seeking()[1]
 
     def teardown(self) -> None:
-        self._signals.clear()
+        self._signals.disconnect_all()
         self._pipeline.set_state(Gst.State.NULL)
 
 
