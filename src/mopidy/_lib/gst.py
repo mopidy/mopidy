@@ -157,8 +157,7 @@ def convert_taglist(taglist: Gst.TagList) -> dict[str, list[Any]]:
                     value,
                 )
 
-    # TODO: dict(result) to not leak the defaultdict, or just use setdefault?
-    return result
+    return dict(result)
 
 
 def _extract_sample_data(sample: Gst.Sample) -> bytes | None:

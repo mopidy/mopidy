@@ -105,7 +105,7 @@ def test_convert_taglist_date_tag_bad_value():
 
     result = convert_taglist(taglist)
 
-    assert len(result[Gst.TAG_DATE]) == 0
+    assert Gst.TAG_DATE not in result
 
 
 def test_convert_taglist_date_time_tag():
