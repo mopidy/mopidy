@@ -212,7 +212,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
     )
 
     timeout = timeout_ms
-    start = int(time.time() * 1000)
+    start = time.monotonic()
     while timeout > 0:
         if (msg := bus.timed_pop_filtered(timeout * Gst.MSECOND, types)) is None:
             break
@@ -287,7 +287,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
             # Note that this will only keep the last tag.
             tags.update(convert_taglist(taglist))
 
-        timeout = timeout_ms - (int(time.time() * 1000) - start)
+        timeout = timeout_ms - int((time.monotonic() - start) * 1000)
 
     msg = f"Timeout after {timeout_ms:d}ms"
     raise MediaReaderError(msg)
