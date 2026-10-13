@@ -7,12 +7,17 @@ from typing import TYPE_CHECKING, Any, cast
 
 from mopidy._lib import logs
 from mopidy._lib.gi import Gst, GstPbutils
-from mopidy._lib.gst import Signals, convert_taglist, setup_proxy
+from mopidy._lib.gst import (
+    Signals,
+    convert_taglist,
+    from_gst_time,
+    setup_proxy,
+)
 from mopidy.media import MediaReaderError
-from mopidy.types import DurationMs
 
 if TYPE_CHECKING:
     from mopidy.config import ProxyConfig
+    from mopidy.types import DurationMs
 
 
 @dataclasses.dataclass(frozen=True)
@@ -167,7 +172,7 @@ def _query_duration(pipeline: Gst.Pipeline) -> tuple[bool, DurationMs | None]:
     elif duration < 0:
         duration = None  # Stream without duration.
     else:
-        duration = DurationMs(int(duration // Gst.MSECOND))
+        duration = from_gst_time(duration)
     return success, duration
 
 

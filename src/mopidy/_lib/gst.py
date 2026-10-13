@@ -18,14 +18,14 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def millisecond_to_clocktime(value: DurationMs) -> int:
-    """Convert a millisecond time to internal GStreamer time."""
-    return value * Gst.MSECOND
+def to_gst_time(duration: DurationMs) -> int:
+    """Convert a duration to GStreamer time, which is in nanoseconds."""
+    return duration * Gst.MSECOND
 
 
-def clocktime_to_millisecond(value: int) -> DurationMs:
-    """Convert an internal GStreamer time to millisecond time."""
-    return DurationMs(value // Gst.MSECOND)
+def from_gst_time(gst_time: int) -> DurationMs:
+    """Convert GStreamer time, which is in nanoseconds, to a duration."""
+    return DurationMs(gst_time // Gst.MSECOND)
 
 
 def setup_proxy(element: Gst.Element, config: ProxyConfig) -> None:
