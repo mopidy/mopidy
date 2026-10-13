@@ -5,7 +5,6 @@ import logging
 import time
 from typing import TYPE_CHECKING, Any, cast
 
-from mopidy import exceptions
 from mopidy._lib import logs
 from mopidy._lib.gi import Gst, GstPbutils
 from mopidy._lib.gst import Signals, convert_taglist, setup_proxy
@@ -70,7 +69,7 @@ def _setup_pipeline(
     pipeline = Gst.ElementFactory.make("pipeline")
     if pipeline is None:
         msg = "Failed to create GStreamer pipeline element."
-        raise exceptions.AudioException(msg)
+        raise MediaReaderError(msg)
     pipeline = cast(Gst.Pipeline, pipeline)
     pipeline.add(src)
 
@@ -103,14 +102,14 @@ def _setup_parsebin(
 ) -> None:
     if (parsebin := Gst.ElementFactory.make("parsebin")) is None:
         msg = "Failed to create GStreamer parsebin element."
-        raise exceptions.AudioException(msg)
+        raise MediaReaderError(msg)
 
     pipeline.add(parsebin)
     parsebin.sync_state_with_parent()
 
     if (sink_pad := parsebin.get_static_pad("sink")) is None:
         msg = "Failed to get sink pad of GStreamer parsebin element."
-        raise exceptions.AudioException(msg)
+        raise MediaReaderError(msg)
 
     pad.link(sink_pad)
 
@@ -126,7 +125,7 @@ def _pad_added(
 
     if (element_bus := element.get_bus()) is None:
         msg = "Failed to get bus of GStreamer element."
-        raise exceptions.AudioException(msg)
+        raise MediaReaderError(msg)
 
     if pad_caps is not None and pad_caps.get_size() > 0:
         struct = pad_caps.get_structure(0)
@@ -141,7 +140,7 @@ def _pad_added(
 
     if (fakesink := Gst.ElementFactory.make("fakesink")) is None:
         msg = "Failed to create GStreamer fakesink element."
-        raise exceptions.AudioException(msg)
+        raise MediaReaderError(msg)
 
     fakesink.set_property("sync", False)
 
@@ -150,7 +149,7 @@ def _pad_added(
 
     if (fakesink_sink := fakesink.get_static_pad("sink")) is None:
         msg = "Failed to get sink pad of GStreamer fakesink."
-        raise exceptions.AudioException(msg)
+        raise MediaReaderError(msg)
 
     pad.link(fakesink_sink)
 
