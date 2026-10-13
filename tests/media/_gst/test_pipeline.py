@@ -2,6 +2,7 @@ import pytest
 
 from mopidy._lib.gi import GLib, Gst, GstPbutils
 from mopidy._lib.paths import path_to_uri
+from mopidy.media import MediaReaderError
 from mopidy.media._gst import types
 from mopidy.media._gst.pipeline import GstReaderPipeline
 from tests import path_to_data_dir
@@ -13,6 +14,11 @@ def pipeline():
     pipeline = GstReaderPipeline(uri)
     yield pipeline
     pipeline.teardown()
+
+
+def test_uri_scheme_without_a_source_element_gives_media_reader_error():
+    with pytest.raises(MediaReaderError, match="nosuchscheme"):
+        GstReaderPipeline("nosuchscheme:foo")
 
 
 @pytest.fixture

@@ -185,6 +185,11 @@ def test_per_call_timeout_overrides_the_default(mocker):
     assert gst_read.call_args.kwargs["timeout"] == 1234
 
 
+def test_uri_scheme_without_a_source_element_gives_scanner_error():
+    with pytest.raises(exceptions.ScannerError, match="nosuchscheme"):
+        make_scanner().scan("nosuchscheme:foo")
+
+
 @pytest.mark.skip(reason="Not implemented")
 def test_song_without_time_is_handeled():
     pass

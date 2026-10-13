@@ -39,14 +39,11 @@ class GstMediaInfoReader(MediaInfoReader):
 
     @override
     def read_media_info(self, uri: Uri, *, timeout: DurationMs) -> MediaInfo:
-        try:
-            result = GstRead(
-                uri,
-                timeout=timeout,
-                proxy_config=self._proxy_config,
-            ).run()
-        except GLib.Error as exc:
-            raise MediaReaderError(str(exc)) from exc
+        result = GstRead(
+            uri,
+            timeout=timeout,
+            proxy_config=self._proxy_config,
+        ).run()
         return result.info
 
 

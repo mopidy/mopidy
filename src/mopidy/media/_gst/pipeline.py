@@ -72,7 +72,10 @@ class GstReaderPipeline:
         return cast(Gst.Pipeline, pipeline)
 
     def _add_source(self, uri: Uri, proxy_config: ProxyConfig | None) -> None:
-        src = Gst.Element.make_from_uri(Gst.URIType.SRC, uri)
+        try:
+            src = Gst.Element.make_from_uri(Gst.URIType.SRC, uri)
+        except GLib.Error as exc:
+            raise MediaReaderError(str(exc)) from exc
         if not src:
             msg = f"GStreamer can not open: {uri}"
             raise MediaReaderError(msg)
