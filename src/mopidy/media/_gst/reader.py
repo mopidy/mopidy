@@ -29,7 +29,7 @@ class GstMediaInfoReader(MediaInfoReader):
         try:
             data = read_media_data(
                 uri,
-                timeout_ms=timeout,
+                timeout=timeout,
                 proxy_config=self._proxy_config,
             )
         except GLib.Error as exc:

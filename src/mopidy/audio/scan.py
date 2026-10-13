@@ -67,7 +67,7 @@ class Scanner:
         try:
             data = read_media_data(
                 uri,
-                timeout_ms=int(timeout or self._timeout_ms),
+                timeout=DurationMs(int(timeout or self._timeout_ms)),
                 proxy_config=self._proxy_config,
             )
         except MediaReaderError as exc:

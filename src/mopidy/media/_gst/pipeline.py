@@ -12,13 +12,14 @@ from mopidy._lib.gst import (
     from_gst_taglist,
     from_gst_time,
     setup_proxy,
+    to_gst_time,
 )
 from mopidy.media import MediaReaderError
+from mopidy.types import DurationMs
 
 if TYPE_CHECKING:
     from mopidy._lib.gst import GstTags
     from mopidy.config import ProxyConfig
-    from mopidy.types import DurationMs
 
 
 @dataclasses.dataclass(frozen=True)
@@ -40,14 +41,14 @@ def _trace(*args: Any, **kwargs: Any) -> None:
 def read_media_data(
     uri: str,
     *,
-    timeout_ms: int,
+    timeout: DurationMs,
     proxy_config: ProxyConfig | None = None,
 ) -> GstMediaData:
     pipeline = GstReaderPipeline(uri, proxy_config=proxy_config)
 
     try:
         pipeline.start()
-        tags, mime, playable, duration = _process(pipeline, timeout_ms)
+        tags, mime, playable, duration = _process(pipeline, timeout)
         seekable = pipeline.query_seekable()
         return GstMediaData(tags, duration, seekable, mime, playable)
     finally:
@@ -168,14 +169,14 @@ class GstReaderPipeline:
         result = self._pipeline.set_state(state)
         return result != Gst.StateChangeReturn.FAILURE
 
-    def pop_message(self, timeout_ms: int) -> Gst.Message | None:
+    def pop_message(self, timeout: DurationMs) -> Gst.Message | None:
         """Wait for the next bus message that the reader uses.
 
         Returns `None` if no message arrives before the timeout.
         """
         if (bus := self._pipeline.get_bus()) is None:
             return None
-        return bus.timed_pop_filtered(timeout_ms * Gst.MSECOND, _MESSAGE_TYPES)
+        return bus.timed_pop_filtered(to_gst_time(timeout), _MESSAGE_TYPES)
 
     def query_duration(self) -> tuple[bool, DurationMs | None]:
         """Get the duration of the media in milliseconds.
@@ -228,7 +229,7 @@ def _get_structure_name(struct: Gst.Structure) -> str:
 
 def _process(  # noqa: C901, PLR0911, PLR0912
     pipeline: GstReaderPipeline,
-    timeout_ms: int,
+    timeout: DurationMs,
 ) -> tuple[GstTags, str | None, bool, DurationMs | None]:
     tags: GstTags = {}
     mime: str | None = None
@@ -236,10 +237,10 @@ def _process(  # noqa: C901, PLR0911, PLR0912
     missing_message = None
     duration = None
 
-    timeout = timeout_ms
+    remaining = timeout
     start = time.monotonic()
-    while timeout > 0:
-        if (msg := pipeline.pop_message(timeout)) is None:
+    while remaining > 0:
+        if (msg := pipeline.pop_message(remaining)) is None:
             break
 
         structure = msg.get_structure()
@@ -309,7 +310,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912
             # Note that this will only keep the last tag.
             tags.update(from_gst_taglist(taglist))
 
-        timeout = timeout_ms - int((time.monotonic() - start) * 1000)
+        remaining = DurationMs(timeout - int((time.monotonic() - start) * 1000))
 
-    msg = f"Timeout after {timeout_ms:d}ms"
+    msg = f"Timeout after {timeout:d}ms"
     raise MediaReaderError(msg)
