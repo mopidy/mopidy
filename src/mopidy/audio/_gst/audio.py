@@ -265,7 +265,8 @@ class GstAudio(Audio, pykka.ThreadingActor):
         gst_logger.debug("Got ASYNC_DONE bus message.")
 
     def _on_gst_tag(self, tags: dict[str, list[Any]]) -> None:
-        gst_logger.debug(f"Got TAG bus message: tags={repr_tags(tags)}")
+        if gst_logger.isEnabledFor(logging.DEBUG):
+            gst_logger.debug("Got TAG bus message: tags=%s", repr_tags(tags))
 
         # Postpone emitting tags until stream start.
         if self._pending_tags is not None:

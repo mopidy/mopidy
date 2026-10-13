@@ -56,6 +56,14 @@ def test_repr_tags_max_bytes_two():
     assert result == "{'foo': [b'12...', b'56...', 'abcd', 67]}"
 
 
+def test_repr_tags_does_not_change_the_tags():
+    tags = {"image": [b"0123456789abcdef"]}
+
+    repr_tags(tags, 4)
+
+    assert tags == {"image": [b"0123456789abcdef"]}
+
+
 def make_taglist(tag, values):
     taglist = Gst.TagList.new_empty()
 

@@ -80,21 +80,22 @@ class Signals:
 
 
 def repr_tags(tags: dict[str, list[Any]], max_bytes: int = 10) -> str:
-    """Returns a printable representation of a `Gst.TagList`.
+    """Return a printable representation of tags from `convert_taglist()`.
 
-    Tag values of type bytes are truncated to the specified length to avoid
-    large amounts of output when logging.
-
-    Args:
-        tags: A converted taglist to be represented.
-        max_bytes: The maximum number of bytes to show for bytes tag values.
+    Bytes values are cut to `max_bytes`, so that embedded images do not fill
+    the log.
     """
-    result = dict(tags)
-    for tag_values in result.values():
-        for i, val in enumerate(tag_values):
-            if isinstance(val, bytes) and len(val) > max_bytes:
-                tag_values[i] = val[:max_bytes] + b"..."
-    return repr(result)
+    return repr(
+        {
+            tag: [
+                value[:max_bytes] + b"..."
+                if isinstance(value, bytes) and len(value) > max_bytes
+                else value
+                for value in values
+            ]
+            for tag, values in tags.items()
+        }
+    )
 
 
 def convert_taglist(taglist: Gst.TagList) -> dict[str, list[Any]]:
