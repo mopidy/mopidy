@@ -144,8 +144,9 @@ def from_gst_taglist(taglist: Gst.TagList) -> dict[str, list[Any]]:
             elif isinstance(value, str | bool | numbers.Number):
                 result[tag].append(value)
             elif isinstance(value, Gst.Sample):
-                data = _extract_sample_data(value)
-                if data:
+                if (buf := value.get_buffer()) and (
+                    data := buf.extract_dup(0, buf.get_size())
+                ):
                     result[tag].append(data)
             else:
                 logger.log(
@@ -156,10 +157,3 @@ def from_gst_taglist(taglist: Gst.TagList) -> dict[str, list[Any]]:
                 )
 
     return dict(result)
-
-
-def _extract_sample_data(sample: Gst.Sample) -> bytes | None:
-    buf = sample.get_buffer()
-    if not buf:
-        return None
-    return buf.extract_dup(0, buf.get_size())
