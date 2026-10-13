@@ -5,10 +5,10 @@ import logging
 import time
 from typing import TYPE_CHECKING, Any, cast
 
-from mopidy import exceptions
 from mopidy._lib import logs
 from mopidy._lib.gi import Gst, GstPbutils
 from mopidy._lib.gst import Signals, convert_taglist, setup_proxy
+from mopidy.media import MediaReaderError
 from mopidy.types import DurationMs
 
 if TYPE_CHECKING:
@@ -59,7 +59,7 @@ def _setup_pipeline(
     src = Gst.Element.make_from_uri(Gst.URIType.SRC, uri)
     if not src:
         msg = f"GStreamer can not open: {uri}"
-        raise exceptions.ScannerError(msg)
+        raise MediaReaderError(msg)
 
     if proxy_config:
         setup_proxy(src, proxy_config)
@@ -69,7 +69,7 @@ def _setup_pipeline(
     pipeline = Gst.ElementFactory.make("pipeline")
     if pipeline is None:
         msg = "Failed to create GStreamer pipeline element."
-        raise exceptions.AudioException(msg)
+        raise MediaReaderError(msg)
     pipeline = cast(Gst.Pipeline, pipeline)
     pipeline.add(src)
 
@@ -79,7 +79,7 @@ def _setup_pipeline(
         signals.connect(src, "pad-added", _setup_parsebin, pipeline, signals)
     else:
         msg = "No pads found in source element."
-        raise exceptions.ScannerError(msg)
+        raise MediaReaderError(msg)
 
     return pipeline, signals
 
@@ -102,14 +102,14 @@ def _setup_parsebin(
 ) -> None:
     if (parsebin := Gst.ElementFactory.make("parsebin")) is None:
         msg = "Failed to create GStreamer parsebin element."
-        raise exceptions.AudioException(msg)
+        raise MediaReaderError(msg)
 
     pipeline.add(parsebin)
     parsebin.sync_state_with_parent()
 
     if (sink_pad := parsebin.get_static_pad("sink")) is None:
         msg = "Failed to get sink pad of GStreamer parsebin element."
-        raise exceptions.AudioException(msg)
+        raise MediaReaderError(msg)
 
     pad.link(sink_pad)
 
@@ -125,7 +125,7 @@ def _pad_added(
 
     if (element_bus := element.get_bus()) is None:
         msg = "Failed to get bus of GStreamer element."
-        raise exceptions.AudioException(msg)
+        raise MediaReaderError(msg)
 
     if pad_caps is not None and pad_caps.get_size() > 0:
         struct = pad_caps.get_structure(0)
@@ -140,7 +140,7 @@ def _pad_added(
 
     if (fakesink := Gst.ElementFactory.make("fakesink")) is None:
         msg = "Failed to create GStreamer fakesink element."
-        raise exceptions.AudioException(msg)
+        raise MediaReaderError(msg)
 
     fakesink.set_property("sync", False)
 
@@ -149,7 +149,7 @@ def _pad_added(
 
     if (fakesink_sink := fakesink.get_static_pad("sink")) is None:
         msg = "Failed to get sink pad of GStreamer fakesink."
-        raise exceptions.AudioException(msg)
+        raise MediaReaderError(msg)
 
     pad.link(fakesink_sink)
 
@@ -212,7 +212,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
     )
 
     timeout = timeout_ms
-    start = int(time.time() * 1000)
+    start = time.monotonic()
     while timeout > 0:
         if (msg := bus.timed_pop_filtered(timeout * Gst.MSECOND, types)) is None:
             break
@@ -251,7 +251,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
                 )
             ):
                 return tags, mime, playable, duration
-            raise exceptions.ScannerError(str(error))
+            raise MediaReaderError(str(error))
 
         elif msg.type == Gst.MessageType.EOS:
             return tags, mime, playable, duration
@@ -287,7 +287,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
             # Note that this will only keep the last tag.
             tags.update(convert_taglist(taglist))
 
-        timeout = timeout_ms - (int(time.time() * 1000) - start)
+        timeout = timeout_ms - int((time.monotonic() - start) * 1000)
 
     msg = f"Timeout after {timeout_ms:d}ms"
-    raise exceptions.ScannerError(msg)
+    raise MediaReaderError(msg)

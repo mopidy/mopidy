@@ -7,7 +7,9 @@ Use
 from typing import Any, NamedTuple
 from warnings import deprecated
 
+from mopidy import exceptions
 from mopidy.config import ProxyConfig
+from mopidy.media import MediaReaderError
 from mopidy.media._gst.pipeline import read_media_data
 from mopidy.types import DurationMs
 
@@ -62,11 +64,14 @@ class Scanner:
         Returns:
             Named tuple: `uri`, `tags`, `duration`, `seekable`, `mime`, `playable`.
         """
-        data = read_media_data(
-            uri,
-            timeout_ms=int(timeout or self._timeout_ms),
-            proxy_config=self._proxy_config,
-        )
+        try:
+            data = read_media_data(
+                uri,
+                timeout_ms=int(timeout or self._timeout_ms),
+                proxy_config=self._proxy_config,
+            )
+        except MediaReaderError as exc:
+            raise exceptions.ScannerError(str(exc)) from exc
         return _Result(
             uri,
             data.tags,

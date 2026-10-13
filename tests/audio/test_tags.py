@@ -1,5 +1,6 @@
 import pytest
 
+from mopidy import exceptions
 from mopidy._lib.gi import Gst
 from mopidy.audio import tags
 from mopidy.models import Track
@@ -40,3 +41,14 @@ def test_convert_tags_to_track_takes_a_length_and_a_last_modified():
         length=DurationMs(4704),
         last_modified=1234,
     )
+
+
+def test_convert_tags_to_track_raises_scanner_error_on_invalid_tags():
+    with (
+        pytest.deprecated_call(match=DEPRECATION_MATCH),
+        pytest.raises(exceptions.ScannerError),
+    ):
+        tags.convert_tags_to_track(
+            {Gst.TAG_TRACK_NUMBER: [-1]},
+            uri=Uri("dummy:uri"),
+        )

@@ -9,8 +9,10 @@ images as bytes.
 from typing import Any
 from warnings import deprecated
 
+from mopidy import exceptions
 from mopidy._lib import gst
 from mopidy._lib.gi import Gst
+from mopidy.media import MediaReaderError
 from mopidy.media._gst import tags as media_tags
 from mopidy.models import Track
 from mopidy.types import DurationMs, Uri
@@ -80,9 +82,12 @@ def convert_tags_to_track(
         exceptions.ScannerError: If the tags can't be coerced into a valid
             `Track`.
     """
-    return media_tags.convert_tags_to_track(
-        tags,
-        uri=uri,
-        length=length,
-        last_modified=last_modified,
-    )
+    try:
+        return media_tags.convert_tags_to_track(
+            tags,
+            uri=uri,
+            length=length,
+            last_modified=last_modified,
+        )
+    except MediaReaderError as exc:
+        raise exceptions.ScannerError(str(exc)) from exc

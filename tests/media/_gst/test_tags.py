@@ -1,6 +1,6 @@
 import pytest
 
-from mopidy import exceptions
+from mopidy.media import MediaReaderError
 from mopidy.media._gst.tags import convert_tags_to_track
 from mopidy.models import Album, Artist, Track
 from mopidy.types import DurationMs, Uri
@@ -183,9 +183,11 @@ def test_convert_tags_to_track_year_month_datetime_instead_of_date(
     )
 
 
-def test_convert_tags_to_track_invalid_tags_raises_scanner_error(track_tags, track):
+def test_convert_tags_to_track_invalid_tags_raises_media_reader_error(
+    track_tags, track
+):
     track_tags["track-number"] = [-1]
-    with pytest.raises(exceptions.ScannerError):
+    with pytest.raises(MediaReaderError):
         convert_tags_to_track(
             track_tags,
             uri=Uri("dummy:track:test"),
