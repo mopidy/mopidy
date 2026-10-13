@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, override
 
-from mopidy import exceptions
 from mopidy._lib.gi import GLib, Gst
 from mopidy.media import EmbeddedImage, MediaInfo, MediaReaderError
 from mopidy.media._api import MediaInfoReader
@@ -50,7 +49,7 @@ def _convert_valid_tags(
 ) -> Track:
     try:
         return convert_tags_to_track(tags, uri=uri, length=length)
-    except exceptions.ScannerError:
+    except MediaReaderError:
         pass
 
     # Add the tags one at a time, and keep each tag that still converts.
@@ -58,7 +57,7 @@ def _convert_valid_tags(
     for tag, values in tags.items():
         try:
             convert_tags_to_track({**valid_tags, tag: values}, uri=uri, length=length)
-        except exceptions.ScannerError as exc:
+        except MediaReaderError as exc:
             logger.debug("Leaving out tag %r of %s: %s", tag, uri, exc)
         else:
             valid_tags[tag] = values

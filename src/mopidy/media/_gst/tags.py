@@ -1,7 +1,7 @@
 from typing import Any
 
-from mopidy import exceptions
 from mopidy._lib.gi import Gst
+from mopidy.media import MediaReaderError
 from mopidy.models import Album, Artist, Track
 from mopidy.types import DurationMs, Uri
 
@@ -18,7 +18,7 @@ def convert_tags_to_track(
     """Convert our normalized tags to a track.
 
     Raises:
-        exceptions.ScannerError: If the tags can't be coerced into a valid
+        MediaReaderError: If the tags can't be coerced into a valid
             `Track`. Callers scanning multiple URIs should catch this per URI,
             so that a single file with broken tags doesn't fail the entire scan
             or lookup.
@@ -85,7 +85,7 @@ def convert_tags_to_track(
         )
     except ValueError as exc:
         msg = f"Invalid tags: {exc}"
-        raise exceptions.ScannerError(msg) from exc
+        raise MediaReaderError(msg) from exc
 
 
 def _artists(
