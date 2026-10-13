@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING, Any, override
 
 from mopidy import exceptions
 from mopidy._lib.gi import GLib, Gst
-from mopidy.media._api import MediaInfoReader, MediaReaderError
+from mopidy.media import EmbeddedImage, MediaInfo, MediaReaderError
+from mopidy.media._api import MediaInfoReader
 from mopidy.media._gst.pipeline import read_media_data
 from mopidy.media._gst.tags import convert_tags_to_track
-from mopidy.media._models import EmbeddedImage, MediaInfo
 
 if TYPE_CHECKING:
     from mopidy.config import ProxyConfig
