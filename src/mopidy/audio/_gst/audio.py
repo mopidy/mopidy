@@ -33,6 +33,7 @@ from mopidy.types import DurationMs, PlaybackState
 
 if TYPE_CHECKING:
     from mopidy._exts.softwaremixer.mixer import SoftwareMixerProxy
+    from mopidy._lib.gst import GstTags
     from mopidy.config import Config
     from mopidy.mixer import MixerProxy
 
@@ -60,9 +61,9 @@ class GstAudio(Audio, pykka.ThreadingActor):
         self._target_state: GstState = GstState.NULL
         self._buffering: bool = False
         self._live_stream: bool = False
-        self._tags: dict[str, list[Any]] = {}
+        self._tags: GstTags = {}
         self._pending_uri: str | None = None
-        self._pending_tags: dict[str, list[Any]] | None = None
+        self._pending_tags: GstTags | None = None
 
         self._pipeline: GstPipeline | None = None
         self._about_to_finish_callback: Callable | None = None
@@ -264,7 +265,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
     def _on_gst_async_done(self) -> None:
         gst_logger.debug("Got ASYNC_DONE bus message.")
 
-    def _on_gst_tag(self, tags: dict[str, list[Any]]) -> None:
+    def _on_gst_tag(self, tags: GstTags) -> None:
         if gst_logger.isEnabledFor(logging.DEBUG):
             gst_logger.debug("Got TAG bus message: tags=%s", repr_tags(tags))
 

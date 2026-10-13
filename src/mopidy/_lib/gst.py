@@ -28,7 +28,11 @@ def from_gst_time(gst_time: int) -> DurationMs:
     return DurationMs(gst_time // Gst.MSECOND)
 
 
-def from_gst_taglist(taglist: Gst.TagList) -> dict[str, list[Any]]:
+type GstTags = dict[str, list[Any]]
+"""Tags converted to plain Python types, by tag name."""
+
+
+def from_gst_taglist(taglist: Gst.TagList) -> GstTags:
     """Convert a `Gst.TagList` to plain Python types.
 
     The keys are the GStreamer tag names, see
@@ -89,7 +93,7 @@ def from_gst_taglist(taglist: Gst.TagList) -> dict[str, list[Any]]:
     return dict(result)
 
 
-def repr_tags(tags: dict[str, list[Any]], max_bytes: int = 10) -> str:
+def repr_tags(tags: GstTags, max_bytes: int = 10) -> str:
     """Return a printable representation of tags from `from_gst_taglist()`.
 
     Bytes values are cut to `max_bytes`, so that embedded images do not fill

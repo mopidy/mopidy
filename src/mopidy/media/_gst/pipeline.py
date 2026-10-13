@@ -16,13 +16,14 @@ from mopidy._lib.gst import (
 from mopidy.media import MediaReaderError
 
 if TYPE_CHECKING:
+    from mopidy._lib.gst import GstTags
     from mopidy.config import ProxyConfig
     from mopidy.types import DurationMs
 
 
 @dataclasses.dataclass(frozen=True)
 class GstMediaData:
-    tags: dict[str, Any]
+    tags: GstTags
     duration: DurationMs | None
     seekable: bool
     mime: str | None
@@ -198,9 +199,9 @@ def _get_structure_name(struct: Gst.Structure) -> str:
 def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
     pipeline: Gst.Pipeline,
     timeout_ms: int,
-) -> tuple[dict[str, Any], str | None, bool, DurationMs | None]:
+) -> tuple[GstTags, str | None, bool, DurationMs | None]:
     bus = pipeline.get_bus()
-    tags = {}
+    tags: GstTags = {}
     mime: str | None = None
     playable = False
     missing_message = None
