@@ -7,7 +7,7 @@ from mopidy import exceptions
 from mopidy._lib.gi import GLib, Gst, GstPbutils
 from mopidy._lib.gst import (
     Signals,
-    convert_taglist,
+    from_gst_taglist,
     from_gst_time,
     to_gst_time,
 )
@@ -265,7 +265,7 @@ class GstPipeline:
             case Gst.MessageType.STREAM_START:
                 return GstStreamStart()
             case Gst.MessageType.TAG:
-                return GstTag(convert_taglist(message.parse_tag()))
+                return GstTag(from_gst_taglist(message.parse_tag()))
             case Gst.MessageType.WARNING:
                 return GstWarning(*message.parse_warning())
             case _:

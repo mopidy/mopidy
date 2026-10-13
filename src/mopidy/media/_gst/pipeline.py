@@ -9,7 +9,7 @@ from mopidy._lib import logs
 from mopidy._lib.gi import Gst, GstPbutils
 from mopidy._lib.gst import (
     Signals,
-    convert_taglist,
+    from_gst_taglist,
     from_gst_time,
     setup_proxy,
 )
@@ -290,7 +290,7 @@ def _process(  # noqa: C901, PLR0911, PLR0912, PLR0915
         elif msg.type == Gst.MessageType.TAG:
             taglist = msg.parse_tag()
             # Note that this will only keep the last tag.
-            tags.update(convert_taglist(taglist))
+            tags.update(from_gst_taglist(taglist))
 
         timeout = timeout_ms - int((time.monotonic() - start) * 1000)
 

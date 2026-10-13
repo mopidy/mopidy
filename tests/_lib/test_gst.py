@@ -1,5 +1,5 @@
 from mopidy._lib.gi import GLib, GObject, Gst
-from mopidy._lib.gst import convert_taglist, repr_tags, setup_proxy
+from mopidy._lib.gst import from_gst_taglist, repr_tags, setup_proxy
 
 PROXY_CONFIG = {
     "scheme": "https",
@@ -89,57 +89,57 @@ def make_taglist(tag, values):
     return taglist
 
 
-def test_convert_taglist_date_tag():
+def test_from_gst_taglist_date_tag():
     date = GLib.Date.new_dmy(7, 1, 2014)
     taglist = make_taglist(Gst.TAG_DATE, [date])
 
-    result = convert_taglist(taglist)
+    result = from_gst_taglist(taglist)
 
     assert isinstance(result[Gst.TAG_DATE][0], str)
     assert result[Gst.TAG_DATE][0] == "2014-01-07"
 
 
-def test_convert_taglist_date_tag_bad_value():
+def test_from_gst_taglist_date_tag_bad_value():
     date = GLib.Date.new_dmy(7, 1, 10000)
     taglist = make_taglist(Gst.TAG_DATE, [date])
 
-    result = convert_taglist(taglist)
+    result = from_gst_taglist(taglist)
 
     assert Gst.TAG_DATE not in result
 
 
-def test_convert_taglist_date_time_tag():
+def test_from_gst_taglist_date_time_tag():
     taglist = make_taglist(
         Gst.TAG_DATE_TIME,
         [Gst.DateTime.new_from_iso8601_string("2014-01-07 14:13:12")],
     )
 
-    result = convert_taglist(taglist)
+    result = from_gst_taglist(taglist)
 
     assert isinstance(result[Gst.TAG_DATE_TIME][0], str)
     assert result[Gst.TAG_DATE_TIME][0] == "2014-01-07T14:13:12Z"
 
 
-def test_convert_taglist_date_time_tag_partial():
+def test_from_gst_taglist_date_time_tag_partial():
     # GStreamer emits partial dates when the tag only has a year, or a year
     # and a month. Both must be accepted by the `date` field on our models.
     taglist = make_taglist(
         Gst.TAG_DATE_TIME,
         [Gst.DateTime.new_y(2014)],
     )
-    assert convert_taglist(taglist)[Gst.TAG_DATE_TIME] == ["2014"]
+    assert from_gst_taglist(taglist)[Gst.TAG_DATE_TIME] == ["2014"]
 
     taglist = make_taglist(
         Gst.TAG_DATE_TIME,
         [Gst.DateTime.new_ym(2014, 1)],
     )
-    assert convert_taglist(taglist)[Gst.TAG_DATE_TIME] == ["2014-01"]
+    assert from_gst_taglist(taglist)[Gst.TAG_DATE_TIME] == ["2014-01"]
 
 
-def test_convert_taglist_string_tag():
+def test_from_gst_taglist_string_tag():
     taglist = make_taglist(Gst.TAG_ARTIST, [b"ABBA", b"ACDC"])
 
-    result = convert_taglist(taglist)
+    result = from_gst_taglist(taglist)
 
     assert isinstance(result[Gst.TAG_ARTIST][0], str)
     assert result[Gst.TAG_ARTIST][0] == "ABBA"
@@ -147,7 +147,7 @@ def test_convert_taglist_string_tag():
     assert result[Gst.TAG_ARTIST][1] == "ACDC"
 
 
-def test_convert_taglist_sample_tag():
+def test_from_gst_taglist_sample_tag():
     # Image tags carry a Gst.Sample, which is unwrapped to the raw bytes.
     buf = Gst.Buffer.new_wrapped(b"fake image data")
     value = GObject.Value()
@@ -156,14 +156,14 @@ def test_convert_taglist_sample_tag():
     taglist = Gst.TagList.new_empty()
     taglist.add_value(Gst.TagMergeMode.APPEND, "image", value)
 
-    result = convert_taglist(taglist)
+    result = from_gst_taglist(taglist)
 
     assert result["image"] == [b"fake image data"]
 
 
-def test_convert_taglist_integer_tag():
+def test_from_gst_taglist_integer_tag():
     taglist = make_taglist(Gst.TAG_BITRATE, [17])
 
-    result = convert_taglist(taglist)
+    result = from_gst_taglist(taglist)
 
     assert result[Gst.TAG_BITRATE][0] == 17

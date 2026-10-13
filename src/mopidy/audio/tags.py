@@ -54,7 +54,7 @@ def convert_taglist(taglist: Gst.TagList) -> dict[str, list[Any]]:
     Args:
         taglist: A GStreamer taglist to be converted.
     """
-    return gst.convert_taglist(taglist)
+    return gst.from_gst_taglist(taglist)
 
 
 @deprecated(

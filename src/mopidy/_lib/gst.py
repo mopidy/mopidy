@@ -80,7 +80,7 @@ class Signals:
 
 
 def repr_tags(tags: dict[str, list[Any]], max_bytes: int = 10) -> str:
-    """Return a printable representation of tags from `convert_taglist()`.
+    """Return a printable representation of tags from `from_gst_taglist()`.
 
     Bytes values are cut to `max_bytes`, so that embedded images do not fill
     the log.
@@ -98,23 +98,21 @@ def repr_tags(tags: dict[str, list[Any]], max_bytes: int = 10) -> str:
     )
 
 
-def convert_taglist(taglist: Gst.TagList) -> dict[str, list[Any]]:
+def from_gst_taglist(taglist: Gst.TagList) -> dict[str, list[Any]]:
     """Convert a `Gst.TagList` to plain Python types.
 
-    Knows how to convert:
+    The keys are the GStreamer tag names, see
+    [GstTagList](https://gstreamer.freedesktop.org/documentation/gstreamer/gsttaglist.html).
+    Each value is a list, as a tag can have more than one value. The values
+    are converted like this:
 
-    - Dates
-    - Buffers
-    - Numbers
-    - Strings
-    - Booleans
+    - Dates and date-times become ISO 8601 strings.
+    - Samples, such as embedded images, become bytes.
+    - Bytes become strings.
+    - Strings, booleans, and numbers do not change.
 
-    Unknown types will be ignored and trace logged. Tag keys are all strings
-    defined as part of GStreamer's
-    [GstTagList](https://developer.gnome.org/gstreamer/stable/gstreamer-GstTagList.html).
-
-    Args:
-        taglist: A GStreamer taglist to be converted.
+    Dates that are not valid, and values of other types, are left out and
+    logged.
     """
     result = collections.defaultdict(list)
 
