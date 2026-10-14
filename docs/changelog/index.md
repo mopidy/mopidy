@@ -120,6 +120,15 @@ reference](../reference/media.md) has an example.
     previous custom `autoplug-select` callback that faked the same behavior on
     top of `decodebin`. (#2127, !2338)
 
+- Audio: Upgrade playback from using GStreamer's `playbin` element to using the
+  newer `playbin3` element.
+
+    `playbin` is in maintenance-only mode upstream, while `playbin3` is the
+    recommended playback element and is designed to reuse decoders across track
+    changes for lower CPU and memory use. All of Mopidy's existing signals,
+    properties, and bus messages are supported unchanged, so this should
+    hopefully be an uneventful upgrade. (#2127, !2256)
+
 - Audio: Handle all GStreamer bus messages on the audio actor thread. Before,
   the GLib main loop thread and the actor thread changed the audio state at the
   same time, with no synchronization. The "Race condition happened" warning
