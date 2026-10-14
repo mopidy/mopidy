@@ -81,6 +81,7 @@ def test_lookup_unwraps_uppercase_pls_extension(provider, tmp_path):
     assert len(tracks) == 1
     assert tracks[0].uri == "http://stream.example.com/listen.pls"
 
+
 def test_lookup_empty_pls_falls_back_to_scanner(provider, tmp_path):
     pls_file = tmp_path / "empty.pls"
     pls_file.write_text("")

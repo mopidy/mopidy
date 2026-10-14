@@ -6,9 +6,8 @@ from typing import TypedDict, cast, override
 
 from mopidy import backend
 from mopidy import config as config_lib
-from mopidy._exts.stream.parsers import parse_playlist
 from mopidy._lib import paths
-from mopidy.media import MediaReader, MediaReaderError
+from mopidy.media import MediaReader, MediaReaderError, parse_playlist_entries
 from mopidy.models import Ref, Track
 from mopidy.types import Uri
 
@@ -114,9 +113,9 @@ class FileLibraryProvider(backend.LibraryProvider):
                 data = None
 
             if data is not None:
-                uris = parse_playlist(data)
-                if uris:
-                    return [Track(uri=uris[0])]
+                entries = parse_playlist_entries(data, base_uri=uri, uri=uri)
+                if entries:
+                    return [entries[0].track]
 
         logger.debug("Looking up file URI: %s", uri)
 
