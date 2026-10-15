@@ -120,6 +120,10 @@ reference](../reference/media.md) has an example.
     previous custom `autoplug-select` callback that faked the same behavior on
     top of `decodebin`. (#2127, !2338)
 
+- Audio: The deprecated `mopidy.audio.scan.Scanner` now raises
+  [`ScannerError`][mopidy.exceptions.ScannerError] for a URI scheme that no
+  GStreamer element can open. Before, it raised `GLib.Error`.
+
 - Audio: Handle all GStreamer bus messages on the audio actor thread. Before,
   the GLib main loop thread and the actor thread changed the audio state at the
   same time, with no synchronization. The "Race condition happened" warning

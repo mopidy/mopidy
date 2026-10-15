@@ -28,7 +28,7 @@ class GstError:
     """An element failed in a way that stops the read."""
 
     error: GLib.Error
-    debug: str
+    debug: str | None
 
 
 @dataclasses.dataclass(frozen=True)

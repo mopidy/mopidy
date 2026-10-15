@@ -26,7 +26,7 @@ from mopidy.media._gst.types import (
 
 if TYPE_CHECKING:
     from mopidy.config import ProxyConfig
-    from mopidy.types import DurationMs
+    from mopidy.types import DurationMs, Uri
 
 
 logger = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ class GstReaderPipeline:
 
     def __init__(
         self,
-        uri: str,
+        uri: Uri,
         *,
         proxy_config: ProxyConfig | None = None,
     ) -> None:
@@ -71,8 +71,11 @@ class GstReaderPipeline:
             raise MediaReaderError(msg)
         return cast(Gst.Pipeline, pipeline)
 
-    def _add_source(self, uri: str, proxy_config: ProxyConfig | None) -> None:
-        src = Gst.Element.make_from_uri(Gst.URIType.SRC, uri)
+    def _add_source(self, uri: Uri, proxy_config: ProxyConfig | None) -> None:
+        try:
+            src = Gst.Element.make_from_uri(Gst.URIType.SRC, uri)
+        except GLib.Error as exc:
+            raise MediaReaderError(str(exc)) from exc
         if not src:
             msg = f"GStreamer can not open: {uri}"
             raise MediaReaderError(msg)

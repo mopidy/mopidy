@@ -39,14 +39,11 @@ class GstMediaInfoReader(MediaInfoReader):
 
     @override
     def read_media_info(self, uri: Uri, *, timeout: DurationMs) -> MediaInfo:
-        try:
-            result = GstRead(
-                uri,
-                timeout=timeout,
-                proxy_config=self._proxy_config,
-            ).run()
-        except GLib.Error as exc:
-            raise MediaReaderError(str(exc)) from exc
+        result = GstRead(
+            uri,
+            timeout=timeout,
+            proxy_config=self._proxy_config,
+        ).run()
         return result.info
 
 
@@ -131,7 +128,7 @@ class GstRead:
             case GstMissingPlugin(mime):
                 self._missing_plugin_mime = mime
             case GstTag(tags):
-                # Note that this will only keep the last tag.
+                # A later tag message replaces the values of the tags it has.
                 self._tags.update(tags)
         return False
 

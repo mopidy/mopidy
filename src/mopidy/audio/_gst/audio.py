@@ -251,14 +251,14 @@ class GstAudio(Audio, pykka.ThreadingActor):
         self._tags = {}
         AudioListener.send("reached_end_of_stream")
 
-    def _on_gst_error(self, error: GLib.Error, debug: str) -> None:
+    def _on_gst_error(self, error: GLib.Error, debug: str | None) -> None:
         gst_logger.error(f"GStreamer error: {error.message}")
         gst_logger.debug(f"Got ERROR bus message: error={error!r} debug={debug!r}")
 
         # TODO: is this needed?
         self.stop_playback()
 
-    def _on_gst_warning(self, error: GLib.Error, debug: str) -> None:
+    def _on_gst_warning(self, error: GLib.Error, debug: str | None) -> None:
         gst_logger.warning(f"GStreamer warning: {error.message}")
         gst_logger.debug(f"Got WARNING bus message: error={error!r} debug={debug!r}")
 
