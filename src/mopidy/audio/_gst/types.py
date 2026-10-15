@@ -79,7 +79,7 @@ class GstError:
     """An element failed in a way that stops playback."""
 
     error: GLib.Error
-    debug: str
+    debug: str | None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -119,7 +119,7 @@ class GstWarning:
     """An element reported a problem it could work around."""
 
     error: GLib.Error
-    debug: str
+    debug: str | None
 
 
 type GstBusMessage = (
