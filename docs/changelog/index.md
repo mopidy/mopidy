@@ -150,6 +150,15 @@ reference](../reference/media.md) has an example.
   added for the Ubuntu Sound Menu, which no longer exists, and Mopidy-MPRIS
   stopped using it in 2018. (!2322)
 
+## v4.0.5 (2026-10-16)
+
+- File extension: Reject `file://` URIs outside of `file/media_dirs` in
+  `lookup()`, as `browse()` already does. Any client of the HTTP JSON-RPC API,
+  which has no authentication, could find out if a file exists and if it is
+  audio, read the tags of any audio file that the Mopidy process can read, and
+  add the file to the tracklist. The raw file content was not exposed. (#2350,
+  !2349)
+
 ## v4.0.4 (2026-09-13)
 
 - Deps: Fix support for Cyclopts 3.12, the version in Debian stable. Cyclopts
