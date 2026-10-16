@@ -7,7 +7,7 @@ from mopidy import backend
 from mopidy.audio import AudioProxy
 from mopidy.config import Config
 from mopidy.media import MediaReader
-from mopidy.types import DurationMs, UriScheme
+from mopidy.types import DurationMs, Uri, UriScheme
 
 from . import library
 
@@ -28,9 +28,18 @@ class FileBackend(pykka.ThreadingActor, backend.Backend):
             config=config,
             media_reader=self._media_reader,
         )
-        self.playback = backend.PlaybackProvider(audio=audio, backend=self)
+        self.playback = FilePlaybackProvider(audio=audio, backend=self)
         self.playlists = None
 
     @override
     def on_stop(self) -> None:
         self._media_reader.close()
+
+
+class FilePlaybackProvider(backend.PlaybackProvider):
+    backend: FileBackend
+
+    @override
+    def translate_uri(self, uri: Uri) -> Uri | None:
+        target = self.backend._media_reader.find_playback_target(uri)
+        return target.uri if target else None
