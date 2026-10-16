@@ -11,8 +11,6 @@ if TYPE_CHECKING:
     from mopidy.types import DurationMs, Uri
 
 
-# TODO: split based on "stream" and "track" based conversion? i.e. handle data
-# from radios in it's own helper instead?
 def convert_tags_to_track(
     tags: GstTags,
     *,
