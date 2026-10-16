@@ -102,6 +102,14 @@ class FileLibraryProvider(backend.LibraryProvider):
         logger.debug("Looking up file URI: %s", uri)
         local_path = paths.uri_to_path(uri)
 
+        if not self._is_in_basedir(local_path):
+            logger.warning(
+                "Rejected attempt to look up path (%s) outside dirs defined "
+                "in file/media_dirs config.",
+                uri,
+            )
+            return []
+
         try:
             result = self._scanner.scan(uri)
             track = tags.convert_tags_to_track(
