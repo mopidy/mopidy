@@ -8,6 +8,9 @@ For large music collections and search functionality consider [mopidy-local](htt
 
 This backend handles URIs starting with `file:`.
 
+A playlist document, such as a PLS or M3U file, plays as the first entry in it
+that plays.
+
 This backend does not currently provide images.
 
 ## Configuration

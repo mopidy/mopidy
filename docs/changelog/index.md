@@ -61,6 +61,13 @@ reference](../reference/media.md) has an example.
   valid, `lookup()` now keeps the other tags. Before, it gave no tags for the
   file. (#2325, !2332)
 
+- File extension: Play playlist documents, such as PLS and M3U files with radio
+  streams, with
+  [`MediaReader.find_playback_target()`][mopidy.media.MediaReader.find_playback_target].
+  `lookup()` gives the metadata of the playback target, with the URI of the
+  playlist document. Before, playback of a playlist document failed with "This
+  appears to be a text file". (#1529, !2351)
+
 - Stream extension: Find the URI to play with
   [`MediaReader.find_playback_target()`][mopidy.media.MediaReader.find_playback_target].
   If the playlist of a radio station has more than one stream, the extension now
