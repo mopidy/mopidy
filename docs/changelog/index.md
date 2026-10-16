@@ -8,7 +8,7 @@ For older releases, see:
 [Changelog 1.x](1.x.md) ·
 [Changelog 0.x](0.x.md)
 
-## v4.0.5 (UNRELEASED)
+## v4.0.5 (2026-10-16)
 
 - File extension: Reject `file://` URIs outside of `file/media_dirs` in
   `lookup()`, as `browse()` already does. Any client of the HTTP JSON-RPC API,
