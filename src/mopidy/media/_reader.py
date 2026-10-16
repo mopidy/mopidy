@@ -112,7 +112,8 @@ class MediaReader:
 
         Raises:
             MediaReaderError: If the scheme is not `file`, `http` or `https`, if
-                the fetch fails, or on a timeout.
+                the fetch fails, if the document is larger than 10 MiB, or on a
+                timeout.
         """
         if timeout is None:
             timeout = self._timeout
