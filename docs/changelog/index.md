@@ -8,6 +8,15 @@ For older releases, see:
 [Changelog 1.x](1.x.md) ·
 [Changelog 0.x](0.x.md)
 
+## v4.0.5 (UNRELEASED)
+
+- File extension: Reject `file://` URIs outside of `file/media_dirs` in
+  `lookup()`, as `browse()` already does. Any client of the HTTP JSON-RPC API,
+  which has no authentication, could find out if a file exists and if it is
+  audio, read the tags of any audio file that the Mopidy process can read, and
+  add the file to the tracklist. The raw file content was not exposed. (#2350,
+  !2349)
+
 ## v4.0.4 (2026-09-13)
 
 - Deps: Fix support for Cyclopts 3.12, the version in Debian stable. Cyclopts
