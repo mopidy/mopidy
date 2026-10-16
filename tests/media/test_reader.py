@@ -250,6 +250,30 @@ def test_read_playlist_entries_raises_on_timeout(
         )
 
 
+def test_read_playlist_entries_raises_if_the_document_is_too_large(
+    fake_media_reader, httpx_mock: HTTPXMock, monkeypatch
+):
+    monkeypatch.setattr("mopidy.media._fetch._MAX_DOCUMENT_SIZE", 100)
+    httpx_mock.add_response(
+        url="http://example.com/radio.m3u",
+        text="stream.mp3\n" * 10,
+    )
+
+    with pytest.raises(MediaReaderError, match="larger than"):
+        fake_media_reader.read_playlist_entries(Uri("http://example.com/radio.m3u"))
+
+
+def test_read_playlist_entries_of_file_raises_if_the_document_is_too_large(
+    fake_media_reader, tmp_path, monkeypatch
+):
+    monkeypatch.setattr("mopidy.media._fetch._MAX_DOCUMENT_SIZE", 100)
+    path = tmp_path / "radio.m3u"
+    path.write_text("stream.mp3\n" * 10)
+
+    with pytest.raises(MediaReaderError, match="larger than"):
+        fake_media_reader.read_playlist_entries(path_to_uri(path))
+
+
 def test_find_playback_target_of_playable_uri(fake_media_reader, media_info_reader):
     media_info_reader.results["rtsp://example.com/stream"] = playable(
         "rtsp://example.com/stream"

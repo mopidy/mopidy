@@ -17,9 +17,13 @@ if TYPE_CHECKING:
     from mopidy.types import DurationMs
 
 _CHUNK_SIZE = 4096
+"""The number of bytes to read at a time, before each check of the content."""
 
-# Control characters that do not occur in text, but often occur in media.
+_MAX_DOCUMENT_SIZE = 10 * 1024 * 1024
+"""The maximum size of a playlist document, to keep memory usage bounded."""
+
 _BINARY_RE = re.compile(rb"[\x00-\x08\x0e-\x1f]")
+"""Control characters that do not occur in text, but often occur in media."""
 
 
 @dataclasses.dataclass(frozen=True)
@@ -52,7 +56,7 @@ def fetch_document(
 
     Raises:
         MediaReaderError: If the scheme is not supported, if the fetch fails,
-            or on a timeout.
+            if the document is too large, or on a timeout.
     """
     match urllib.parse.urlsplit(uri).scheme:
         case "file":
@@ -128,6 +132,9 @@ def _read(
         if _BINARY_RE.search(chunk):
             return None
         data += chunk
+        if len(data) > _MAX_DOCUMENT_SIZE:
+            msg = f"The playlist document is larger than {_MAX_DOCUMENT_SIZE} bytes"
+            raise MediaReaderError(msg)
         if time.monotonic() > deadline:
             msg = "Timeout while fetching the playlist document"
             raise MediaReaderError(msg)
