@@ -14,8 +14,7 @@ from mopidy.media._gst.types import (
     GstDurationChanged,
     GstEndOfStream,
     GstError,
-    GstHaveType,
-    GstMissingPlugin,
+    GstStreamFound,
     GstTag,
 )
 from mopidy.types import DurationMs, Uri
@@ -104,13 +103,15 @@ def make_error():
 
 
 def test_audio_stream_is_playable(read):
-    assert read._on_message(GstHaveType("audio/mpeg")) is False
+    assert read._on_message(GstStreamFound(mime="audio/mpeg", playable=True)) is False
 
     assert read._result().info.playable is True
 
 
 def test_text_stream_ends_the_read(read):
-    assert read._on_message(GstHaveType("text/uri-list")) is True
+    assert (
+        read._on_message(GstStreamFound(mime="text/uri-list", playable=False)) is True
+    )
 
     result = read._result()
     assert result.legacy_scanner_mime == "text/uri-list"
@@ -124,16 +125,6 @@ def test_end_of_stream_ends_the_read(read):
 def test_error_raises_media_reader_error(read):
     with pytest.raises(MediaReaderError, match="bad"):
         read._on_message(make_error())
-
-
-def test_error_after_missing_plugin_ends_the_read_with_the_mime(read):
-    read._on_message(GstMissingPlugin("audio/x-unknown"))
-
-    assert read._on_message(make_error()) is True
-
-    result = read._result()
-    assert result.legacy_scanner_mime == "audio/x-unknown"
-    assert result.info.playable is False
 
 
 def test_async_done_with_tags_and_duration_ends_the_read(read, pipeline):

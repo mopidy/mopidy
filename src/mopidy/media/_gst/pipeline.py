@@ -4,7 +4,7 @@ import logging
 from typing import TYPE_CHECKING, Any, cast
 
 from mopidy._lib import logs
-from mopidy._lib.gi import GLib, Gst, GstPbutils
+from mopidy._lib.gi import GLib, Gst
 from mopidy._lib.gst import (
     Signals,
     from_gst_taglist,
@@ -19,8 +19,7 @@ from mopidy.media._gst.types import (
     GstDurationChanged,
     GstEndOfStream,
     GstError,
-    GstHaveType,
-    GstMissingPlugin,
+    GstStreamFound,
     GstTag,
 )
 
@@ -37,8 +36,7 @@ def _trace(*args: Any, **kwargs: Any) -> None:
 
 
 _MESSAGE_TYPES = (
-    Gst.MessageType.ELEMENT
-    | Gst.MessageType.APPLICATION
+    Gst.MessageType.APPLICATION
     | Gst.MessageType.ERROR
     | Gst.MessageType.EOS
     | Gst.MessageType.ASYNC_DONE
@@ -120,9 +118,10 @@ class GstReaderPipeline:
         # Runs on a GStreamer thread, so errors go on the bus.
         pad_caps = pad.get_current_caps() or pad.query_caps()
         if pad_caps is not None and pad_caps.get_size() > 0:
-            have_type = Gst.Structure.new_empty("have-type")
-            have_type.set_value("mime", _get_structure_name(pad_caps.get_structure(0)))
-            parsebin.post_message(Gst.Message.new_application(parsebin, have_type))
+            structure = Gst.Structure.new_empty("mopidy-stream-found")
+            structure.set_value("mime", _get_structure_name(pad_caps.get_structure(0)))
+            structure.set_value("playable", _is_playable_audio(pad_caps))
+            parsebin.post_message(Gst.Message.new_application(parsebin, structure))
 
         try:
             self._add_fakesink(pad)
@@ -188,9 +187,13 @@ class GstReaderPipeline:
 
         match message.type:
             case Gst.MessageType.APPLICATION if (
-                structure is not None and _get_structure_name(structure) == "have-type"
+                structure is not None
+                and _get_structure_name(structure) == "mopidy-stream-found"
             ):
-                return GstHaveType(cast(str, structure.get_value("mime")))
+                return GstStreamFound(
+                    mime=cast(str, structure.get_value("mime")),
+                    playable=cast(bool, structure.get_value("playable")),
+                )
             case Gst.MessageType.ASYNC_DONE:
                 return GstAsyncDone()
             case Gst.MessageType.DURATION_CHANGED:
@@ -199,10 +202,6 @@ class GstReaderPipeline:
                 return GstEndOfStream()
             case Gst.MessageType.ERROR:
                 return GstError(*message.parse_error())
-            case Gst.MessageType.ELEMENT if GstPbutils.is_missing_plugin_message(
-                message
-            ):
-                return GstMissingPlugin(_missing_plugin_mime(structure))
             case Gst.MessageType.TAG:
                 return GstTag(from_gst_taglist(message.parse_tag()))
             case _:
@@ -249,6 +248,25 @@ def _has_dynamic_src_pad(element: Gst.Element) -> bool:
     return False
 
 
+def _is_playable_audio(caps: Gst.Caps) -> bool:
+    """Check if the stream is raw audio, or if an audio decoder accepts it.
+
+    The parsebin does not use decoders. If a demuxer or a decoder is missing,
+    the parsebin gives a pad with the caps that it could not use.
+    """
+    if _get_structure_name(caps.get_structure(0)) == "audio/x-raw":
+        return True
+    decoders = Gst.ElementFactory.list_get_elements(
+        Gst.ELEMENT_FACTORY_TYPE_DECODER | Gst.ELEMENT_FACTORY_TYPE_MEDIA_AUDIO,
+        Gst.Rank.MARGINAL,
+    )
+    return bool(
+        Gst.ElementFactory.list_filter(
+            decoders, caps, Gst.PadDirection.SINK, subsetonly=False
+        )
+    )
+
+
 def _get_structure_name(struct: Gst.Structure) -> str:
     # GStreamer 1.25.0 to 1.26.2 (inclusive) broke the accessing
     # `caps.get_structure(0).get_name()`, but allow wrapping the
@@ -260,9 +278,3 @@ def _get_structure_name(struct: Gst.Structure) -> str:
     except AttributeError:
         with struct as _struct:  # type: ignore[reportGeneralTypeIssues]
             return _struct.get_name()
-
-
-def _missing_plugin_mime(structure: Gst.Structure | None) -> str | None:
-    if structure is None or (caps := structure.get_value("detail")) is None:
-        return None
-    return _get_structure_name(caps.get_structure(0))

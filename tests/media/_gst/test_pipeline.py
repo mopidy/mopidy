@@ -1,6 +1,6 @@
 import pytest
 
-from mopidy._lib.gi import GLib, Gst, GstPbutils
+from mopidy._lib.gi import GLib, Gst
 from mopidy._lib.paths import path_to_uri
 from mopidy.media import MediaReaderError
 from mopidy.media._gst import types
@@ -26,12 +26,15 @@ def element():
     return Gst.ElementFactory.make("fakesink")
 
 
-def test_decode_bus_message_decodes_the_type_found_by_parsebin(pipeline, element):
-    structure = Gst.Structure.new_empty("have-type")
+def test_decode_bus_message_decodes_the_stream_found_by_parsebin(pipeline, element):
+    structure = Gst.Structure.new_empty("mopidy-stream-found")
     structure.set_value("mime", "audio/mpeg")
+    structure.set_value("playable", True)
     message = Gst.Message.new_application(element, structure)
 
-    assert pipeline._decode_bus_message(message) == types.GstHaveType("audio/mpeg")
+    assert pipeline._decode_bus_message(message) == types.GstStreamFound(
+        mime="audio/mpeg", playable=True
+    )
 
 
 def test_decode_bus_message_drops_other_application_messages(pipeline, element):
@@ -39,15 +42,6 @@ def test_decode_bus_message_drops_other_application_messages(pipeline, element):
     message = Gst.Message.new_application(element, structure)
 
     assert pipeline._decode_bus_message(message) is None
-
-
-def test_decode_bus_message_decodes_the_mime_of_a_missing_plugin(pipeline, element):
-    caps = Gst.Caps.from_string("audio/x-unknown")
-    message = GstPbutils.missing_decoder_message_new(element, caps)
-
-    assert pipeline._decode_bus_message(message) == types.GstMissingPlugin(
-        "audio/x-unknown"
-    )
 
 
 def test_decode_bus_message_decodes_an_error(pipeline, element):

@@ -32,21 +32,19 @@ class GstError:
 
 
 @dataclasses.dataclass(frozen=True)
-class GstHaveType:
-    """The parsebin found a stream of this mime type."""
+class GstStreamFound:
+    """The parsebin exposed a stream of this mime type.
 
-    mime: str
+    This is not a GStreamer message type. The reader posts it as an
+    application message from the parsebin `pad-added` handler, to move the
+    result from the streaming thread to the reader thread.
 
-
-@dataclasses.dataclass(frozen=True)
-class GstMissingPlugin:
-    """No installed element can handle the media.
-
-    The mime type is the type of the media that no element can handle, if the
-    message tells it.
+    `playable` is `True` if the stream is raw audio, or if an installed audio
+    decoder accepts it.
     """
 
-    mime: str | None
+    mime: str
+    playable: bool
 
 
 @dataclasses.dataclass(frozen=True)
@@ -64,7 +62,6 @@ type GstBusMessage = (
     | GstDurationChanged
     | GstEndOfStream
     | GstError
-    | GstHaveType
-    | GstMissingPlugin
+    | GstStreamFound
     | GstTag
 )

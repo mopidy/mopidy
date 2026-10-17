@@ -5,7 +5,7 @@ import logging
 import time
 from typing import TYPE_CHECKING, override
 
-from mopidy._lib.gi import GLib, Gst
+from mopidy._lib.gi import Gst
 from mopidy.media import EmbeddedImage, MediaInfo, MediaReaderError
 from mopidy.media._api import MediaInfoReader
 from mopidy.media._gst.pipeline import GstReaderPipeline
@@ -16,8 +16,7 @@ from mopidy.media._gst.types import (
     GstDurationChanged,
     GstEndOfStream,
     GstError,
-    GstHaveType,
-    GstMissingPlugin,
+    GstStreamFound,
     GstTag,
 )
 from mopidy.types import DurationMs
@@ -85,7 +84,6 @@ class GstRead:
         self._mime: str | None = None
         self._playable = False
         self._duration: DurationMs | None = None
-        self._missing_plugin_mime: str | None = None
 
     def run(self) -> GstReadResult:
         """Read the URI, until the read is done or until the timeout."""
@@ -122,11 +120,9 @@ class GstRead:
             case GstEndOfStream():
                 return True
             case GstError(error, _debug):
-                return self._on_gst_error(error)
-            case GstHaveType(mime):
-                return self._on_gst_have_type(mime)
-            case GstMissingPlugin(mime):
-                self._missing_plugin_mime = mime
+                raise MediaReaderError(str(error))
+            case GstStreamFound(mime, playable):
+                return self._on_gst_stream_found(mime=mime, playable=playable)
             case GstTag(tags):
                 # A later tag message replaces the values of the tags it has.
                 self._tags.update(tags)
@@ -158,15 +154,9 @@ class GstRead:
         self._pipeline.set_state(Gst.State.PAUSED)
         return success
 
-    def _on_gst_error(self, error: GLib.Error) -> bool:
-        if self._missing_plugin_mime and not self._mime:
-            self._mime = self._missing_plugin_mime
-            return True
-        raise MediaReaderError(str(error))
-
-    def _on_gst_have_type(self, mime: str) -> bool:
+    def _on_gst_stream_found(self, *, mime: str, playable: bool) -> bool:
         self._mime = mime
-        if mime.startswith("audio/"):
+        if playable:
             self._playable = True
         return mime.startswith("text/") or mime == "application/xml"
 
