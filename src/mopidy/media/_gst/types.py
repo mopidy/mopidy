@@ -38,9 +38,13 @@ class GstStreamFound:
     This is not a GStreamer message type. The reader posts it as an
     application message from the parsebin `pad-added` handler, to move the
     result from the streaming thread to the reader thread.
+
+    `playable` is `True` if the stream is raw audio, or if an installed audio
+    decoder accepts it.
     """
 
     mime: str
+    playable: bool
 
 
 @dataclasses.dataclass(frozen=True)

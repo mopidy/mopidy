@@ -4,6 +4,7 @@ import httpx
 import pytest
 from pytest_httpx import HTTPXMock
 
+from mopidy._lib.gi import Gst
 from mopidy._lib.paths import path_to_uri
 from mopidy.config import Config
 from mopidy.media import (
@@ -71,6 +72,22 @@ def uri_of(name):
     return path_to_uri(path_to_data_dir(name))
 
 
+@pytest.fixture
+def without_plugin_features():
+    """Give a function that hides GStreamer plugin features from autoplugging."""
+    ranks: dict[Gst.PluginFeature, int] = {}
+
+    def hide(*features: Gst.PluginFeature) -> None:
+        for feature in features:
+            ranks.setdefault(feature, feature.get_rank())
+            feature.set_rank(Gst.Rank.NONE)
+
+    yield hide
+
+    for feature, rank in ranks.items():
+        feature.set_rank(rank)
+
+
 def test_create_gives_a_reader_that_can_close():
     media_reader = MediaReader.create(config=CONFIG, timeout=DurationMs(1000))
 
@@ -134,6 +151,44 @@ def test_read_media_info_of_flac_file_with_embedded_image(media_reader):
     assert [image.data for image in info.images] == [
         path_to_data_dir("scanner/image/test.png").read_bytes()
     ]
+
+
+def test_read_media_info_without_a_demuxer_is_not_playable(
+    media_reader, without_plugin_features
+):
+    demuxer = Gst.ElementFactory.find("oggdemux")
+    assert demuxer is not None
+    without_plugin_features(demuxer)
+
+    info = media_reader.read_media_info(uri_of("scanner/simple/song1.ogg"))
+
+    assert info.playable is False
+
+
+def test_read_media_info_without_a_decoder_is_not_playable(
+    media_reader, without_plugin_features
+):
+    decoders = Gst.ElementFactory.list_filter(
+        Gst.ElementFactory.list_get_elements(
+            Gst.ELEMENT_FACTORY_TYPE_DECODER | Gst.ELEMENT_FACTORY_TYPE_MEDIA_AUDIO,
+            Gst.Rank.NONE,
+        ),
+        Gst.Caps.from_string("audio/x-vorbis"),
+        Gst.PadDirection.SINK,
+        subsetonly=False,
+    )
+    assert decoders
+    without_plugin_features(*decoders)
+
+    info = media_reader.read_media_info(uri_of("scanner/simple/song1.ogg"))
+
+    assert info.playable is False
+
+
+def test_read_media_info_of_raw_audio_is_playable(media_reader):
+    info = media_reader.read_media_info(uri_of("song1.wav"))
+
+    assert info.playable is True
 
 
 def test_read_media_info_of_text_file_is_not_playable(media_reader):

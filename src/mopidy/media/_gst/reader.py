@@ -123,8 +123,8 @@ class GstRead:
                 return True
             case GstError(error, _debug):
                 return self._on_gst_error(error)
-            case GstStreamFound(mime):
-                return self._on_gst_stream_found(mime)
+            case GstStreamFound(mime, playable):
+                return self._on_gst_stream_found(mime=mime, playable=playable)
             case GstMissingPlugin(mime):
                 self._missing_plugin_mime = mime
             case GstTag(tags):
@@ -164,9 +164,9 @@ class GstRead:
             return True
         raise MediaReaderError(str(error))
 
-    def _on_gst_stream_found(self, mime: str) -> bool:
+    def _on_gst_stream_found(self, *, mime: str, playable: bool) -> bool:
         self._mime = mime
-        if mime.startswith("audio/"):
+        if playable:
             self._playable = True
         return mime.startswith("text/") or mime == "application/xml"
 

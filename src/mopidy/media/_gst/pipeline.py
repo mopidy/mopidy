@@ -122,6 +122,7 @@ class GstReaderPipeline:
         if pad_caps is not None and pad_caps.get_size() > 0:
             structure = Gst.Structure.new_empty("mopidy-stream-found")
             structure.set_value("mime", _get_structure_name(pad_caps.get_structure(0)))
+            structure.set_value("playable", _is_playable_audio(pad_caps))
             parsebin.post_message(Gst.Message.new_application(parsebin, structure))
 
         try:
@@ -191,7 +192,10 @@ class GstReaderPipeline:
                 structure is not None
                 and _get_structure_name(structure) == "mopidy-stream-found"
             ):
-                return GstStreamFound(cast(str, structure.get_value("mime")))
+                return GstStreamFound(
+                    mime=cast(str, structure.get_value("mime")),
+                    playable=cast(bool, structure.get_value("playable")),
+                )
             case Gst.MessageType.ASYNC_DONE:
                 return GstAsyncDone()
             case Gst.MessageType.DURATION_CHANGED:
@@ -248,6 +252,25 @@ def _has_dynamic_src_pad(element: Gst.Element) -> bool:
         ):
             return True
     return False
+
+
+def _is_playable_audio(caps: Gst.Caps) -> bool:
+    """Check if the stream is raw audio, or if an audio decoder accepts it.
+
+    The parsebin does not use decoders. If a demuxer or a decoder is missing,
+    the parsebin gives a pad with the caps that it could not use.
+    """
+    if _get_structure_name(caps.get_structure(0)) == "audio/x-raw":
+        return True
+    decoders = Gst.ElementFactory.list_get_elements(
+        Gst.ELEMENT_FACTORY_TYPE_DECODER | Gst.ELEMENT_FACTORY_TYPE_MEDIA_AUDIO,
+        Gst.Rank.MARGINAL,
+    )
+    return bool(
+        Gst.ElementFactory.list_filter(
+            decoders, caps, Gst.PadDirection.SINK, subsetonly=False
+        )
+    )
 
 
 def _get_structure_name(struct: Gst.Structure) -> str:

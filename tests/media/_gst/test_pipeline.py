@@ -29,9 +29,12 @@ def element():
 def test_decode_bus_message_decodes_the_stream_found_by_parsebin(pipeline, element):
     structure = Gst.Structure.new_empty("mopidy-stream-found")
     structure.set_value("mime", "audio/mpeg")
+    structure.set_value("playable", True)
     message = Gst.Message.new_application(element, structure)
 
-    assert pipeline._decode_bus_message(message) == types.GstStreamFound("audio/mpeg")
+    assert pipeline._decode_bus_message(message) == types.GstStreamFound(
+        mime="audio/mpeg", playable=True
+    )
 
 
 def test_decode_bus_message_drops_other_application_messages(pipeline, element):

@@ -104,13 +104,15 @@ def make_error():
 
 
 def test_audio_stream_is_playable(read):
-    assert read._on_message(GstStreamFound("audio/mpeg")) is False
+    assert read._on_message(GstStreamFound(mime="audio/mpeg", playable=True)) is False
 
     assert read._result().info.playable is True
 
 
 def test_text_stream_ends_the_read(read):
-    assert read._on_message(GstStreamFound("text/uri-list")) is True
+    assert (
+        read._on_message(GstStreamFound(mime="text/uri-list", playable=False)) is True
+    )
 
     result = read._result()
     assert result.legacy_scanner_mime == "text/uri-list"
