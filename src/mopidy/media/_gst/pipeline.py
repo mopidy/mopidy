@@ -129,20 +129,29 @@ class GstReaderPipeline:
             _post_error(parsebin, str(exc))
 
     def _add_fakesink(self, pad: Gst.Pad) -> None:
+        # The parsebin has no queues. Without a queue, a demuxer feeds all
+        # sinks from one thread, and the first sink that prerolls blocks that
+        # thread. The other sinks then get no buffer, and preroll never ends.
+        if (queue := Gst.ElementFactory.make("queue")) is None:
+            msg = "Failed to create GStreamer queue element."
+            raise MediaReaderError(msg)
         if (fakesink := Gst.ElementFactory.make("fakesink")) is None:
             msg = "Failed to create GStreamer fakesink element."
             raise MediaReaderError(msg)
 
         fakesink.set_property("sync", False)
 
+        self._pipeline.add(queue)
         self._pipeline.add(fakesink)
+        queue.link(fakesink)
         fakesink.sync_state_with_parent()
+        queue.sync_state_with_parent()
 
-        if (fakesink_sink := fakesink.get_static_pad("sink")) is None:
-            msg = "Failed to get sink pad of GStreamer fakesink."
+        if (queue_sink := queue.get_static_pad("sink")) is None:
+            msg = "Failed to get sink pad of GStreamer queue."
             raise MediaReaderError(msg)
 
-        pad.link(fakesink_sink)
+        pad.link(queue_sink)
 
     def start(self) -> None:
         """Start the pipeline, so that it reads the media."""
