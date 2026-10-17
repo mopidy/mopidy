@@ -32,8 +32,13 @@ class GstError:
 
 
 @dataclasses.dataclass(frozen=True)
-class GstHaveType:
-    """The parsebin found a stream of this mime type."""
+class GstStreamFound:
+    """The parsebin exposed a stream of this mime type.
+
+    This is not a GStreamer message type. The reader posts it as an
+    application message from the parsebin `pad-added` handler, to move the
+    result from the streaming thread to the reader thread.
+    """
 
     mime: str
 
@@ -64,7 +69,7 @@ type GstBusMessage = (
     | GstDurationChanged
     | GstEndOfStream
     | GstError
-    | GstHaveType
     | GstMissingPlugin
+    | GstStreamFound
     | GstTag
 )

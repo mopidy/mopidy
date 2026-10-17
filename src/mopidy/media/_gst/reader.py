@@ -16,8 +16,8 @@ from mopidy.media._gst.types import (
     GstDurationChanged,
     GstEndOfStream,
     GstError,
-    GstHaveType,
     GstMissingPlugin,
+    GstStreamFound,
     GstTag,
 )
 from mopidy.types import DurationMs
@@ -123,8 +123,8 @@ class GstRead:
                 return True
             case GstError(error, _debug):
                 return self._on_gst_error(error)
-            case GstHaveType(mime):
-                return self._on_gst_have_type(mime)
+            case GstStreamFound(mime):
+                return self._on_gst_stream_found(mime)
             case GstMissingPlugin(mime):
                 self._missing_plugin_mime = mime
             case GstTag(tags):
@@ -164,7 +164,7 @@ class GstRead:
             return True
         raise MediaReaderError(str(error))
 
-    def _on_gst_have_type(self, mime: str) -> bool:
+    def _on_gst_stream_found(self, mime: str) -> bool:
         self._mime = mime
         if mime.startswith("audio/"):
             self._playable = True

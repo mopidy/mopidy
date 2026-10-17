@@ -14,8 +14,8 @@ from mopidy.media._gst.types import (
     GstDurationChanged,
     GstEndOfStream,
     GstError,
-    GstHaveType,
     GstMissingPlugin,
+    GstStreamFound,
     GstTag,
 )
 from mopidy.types import DurationMs, Uri
@@ -104,13 +104,13 @@ def make_error():
 
 
 def test_audio_stream_is_playable(read):
-    assert read._on_message(GstHaveType("audio/mpeg")) is False
+    assert read._on_message(GstStreamFound("audio/mpeg")) is False
 
     assert read._result().info.playable is True
 
 
 def test_text_stream_ends_the_read(read):
-    assert read._on_message(GstHaveType("text/uri-list")) is True
+    assert read._on_message(GstStreamFound("text/uri-list")) is True
 
     result = read._result()
     assert result.legacy_scanner_mime == "text/uri-list"

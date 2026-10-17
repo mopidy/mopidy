@@ -19,8 +19,8 @@ from mopidy.media._gst.types import (
     GstDurationChanged,
     GstEndOfStream,
     GstError,
-    GstHaveType,
     GstMissingPlugin,
+    GstStreamFound,
     GstTag,
 )
 
@@ -120,9 +120,9 @@ class GstReaderPipeline:
         # Runs on a GStreamer thread, so errors go on the bus.
         pad_caps = pad.get_current_caps() or pad.query_caps()
         if pad_caps is not None and pad_caps.get_size() > 0:
-            have_type = Gst.Structure.new_empty("have-type")
-            have_type.set_value("mime", _get_structure_name(pad_caps.get_structure(0)))
-            parsebin.post_message(Gst.Message.new_application(parsebin, have_type))
+            structure = Gst.Structure.new_empty("mopidy-stream-found")
+            structure.set_value("mime", _get_structure_name(pad_caps.get_structure(0)))
+            parsebin.post_message(Gst.Message.new_application(parsebin, structure))
 
         try:
             self._add_fakesink(pad)
@@ -188,9 +188,10 @@ class GstReaderPipeline:
 
         match message.type:
             case Gst.MessageType.APPLICATION if (
-                structure is not None and _get_structure_name(structure) == "have-type"
+                structure is not None
+                and _get_structure_name(structure) == "mopidy-stream-found"
             ):
-                return GstHaveType(cast(str, structure.get_value("mime")))
+                return GstStreamFound(cast(str, structure.get_value("mime")))
             case Gst.MessageType.ASYNC_DONE:
                 return GstAsyncDone()
             case Gst.MessageType.DURATION_CHANGED:

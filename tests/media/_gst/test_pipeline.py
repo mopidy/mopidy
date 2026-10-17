@@ -26,12 +26,12 @@ def element():
     return Gst.ElementFactory.make("fakesink")
 
 
-def test_decode_bus_message_decodes_the_type_found_by_parsebin(pipeline, element):
-    structure = Gst.Structure.new_empty("have-type")
+def test_decode_bus_message_decodes_the_stream_found_by_parsebin(pipeline, element):
+    structure = Gst.Structure.new_empty("mopidy-stream-found")
     structure.set_value("mime", "audio/mpeg")
     message = Gst.Message.new_application(element, structure)
 
-    assert pipeline._decode_bus_message(message) == types.GstHaveType("audio/mpeg")
+    assert pipeline._decode_bus_message(message) == types.GstStreamFound("audio/mpeg")
 
 
 def test_decode_bus_message_drops_other_application_messages(pipeline, element):
