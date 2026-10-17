@@ -4,7 +4,7 @@ import logging
 from typing import TYPE_CHECKING, Any, cast
 
 from mopidy._lib import logs
-from mopidy._lib.gi import GLib, Gst, GstPbutils
+from mopidy._lib.gi import GLib, Gst
 from mopidy._lib.gst import (
     Signals,
     from_gst_taglist,
@@ -19,7 +19,6 @@ from mopidy.media._gst.types import (
     GstDurationChanged,
     GstEndOfStream,
     GstError,
-    GstMissingPlugin,
     GstStreamFound,
     GstTag,
 )
@@ -37,8 +36,7 @@ def _trace(*args: Any, **kwargs: Any) -> None:
 
 
 _MESSAGE_TYPES = (
-    Gst.MessageType.ELEMENT
-    | Gst.MessageType.APPLICATION
+    Gst.MessageType.APPLICATION
     | Gst.MessageType.ERROR
     | Gst.MessageType.EOS
     | Gst.MessageType.ASYNC_DONE
@@ -204,10 +202,6 @@ class GstReaderPipeline:
                 return GstEndOfStream()
             case Gst.MessageType.ERROR:
                 return GstError(*message.parse_error())
-            case Gst.MessageType.ELEMENT if GstPbutils.is_missing_plugin_message(
-                message
-            ):
-                return GstMissingPlugin(_missing_plugin_mime(structure))
             case Gst.MessageType.TAG:
                 return GstTag(from_gst_taglist(message.parse_tag()))
             case _:
@@ -284,9 +278,3 @@ def _get_structure_name(struct: Gst.Structure) -> str:
     except AttributeError:
         with struct as _struct:  # type: ignore[reportGeneralTypeIssues]
             return _struct.get_name()
-
-
-def _missing_plugin_mime(structure: Gst.Structure | None) -> str | None:
-    if structure is None or (caps := structure.get_value("detail")) is None:
-        return None
-    return _get_structure_name(caps.get_structure(0))

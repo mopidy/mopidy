@@ -1,6 +1,6 @@
 import pytest
 
-from mopidy._lib.gi import GLib, Gst, GstPbutils
+from mopidy._lib.gi import GLib, Gst
 from mopidy._lib.paths import path_to_uri
 from mopidy.media import MediaReaderError
 from mopidy.media._gst import types
@@ -42,15 +42,6 @@ def test_decode_bus_message_drops_other_application_messages(pipeline, element):
     message = Gst.Message.new_application(element, structure)
 
     assert pipeline._decode_bus_message(message) is None
-
-
-def test_decode_bus_message_decodes_the_mime_of_a_missing_plugin(pipeline, element):
-    caps = Gst.Caps.from_string("audio/x-unknown")
-    message = GstPbutils.missing_decoder_message_new(element, caps)
-
-    assert pipeline._decode_bus_message(message) == types.GstMissingPlugin(
-        "audio/x-unknown"
-    )
 
 
 def test_decode_bus_message_decodes_an_error(pipeline, element):

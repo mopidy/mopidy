@@ -48,17 +48,6 @@ class GstStreamFound:
 
 
 @dataclasses.dataclass(frozen=True)
-class GstMissingPlugin:
-    """No installed element can handle the media.
-
-    The mime type is the type of the media that no element can handle, if the
-    message tells it.
-    """
-
-    mime: str | None
-
-
-@dataclasses.dataclass(frozen=True)
 class GstTag:
     """An element found metadata for the media.
 
@@ -73,7 +62,6 @@ type GstBusMessage = (
     | GstDurationChanged
     | GstEndOfStream
     | GstError
-    | GstMissingPlugin
     | GstStreamFound
     | GstTag
 )
