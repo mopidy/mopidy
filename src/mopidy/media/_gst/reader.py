@@ -141,10 +141,10 @@ class GstRead:
         if not self._pipeline.query_seekable():
             return True
 
-        # Workaround for upstream bug which causes tags/duration to arrive
-        # after pre-roll. We get around this by starting to play the track
-        # and then waiting for a duration change.
-        # https://bugzilla.gnome.org/show_bug.cgi?id=763553
+        # A VBR MP3 without a Xing or VBRI header has no duration at pre-roll.
+        # The parser can only estimate the duration from the frames that it
+        # parsed. To get the estimate, play the media and wait for a duration
+        # change.
         logger.debug("Using workaround for duration missing before play.")
         return not self._pipeline.set_state(Gst.State.PLAYING)
 
