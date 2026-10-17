@@ -140,6 +140,14 @@ def test_read_media_info_of_audio_file(media_reader, name, length):
     assert [artist.name for artist in info.track.artists] == ["name"]
 
 
+def test_read_media_info_of_file_with_audio_and_video(media_reader):
+    info = media_reader.read_media_info(uri_of("scanner/audio-and-video.ogg"))
+
+    assert info.playable is True
+    assert info.track.name == "trackname"
+    assert info.track.length == 1000
+
+
 def test_read_media_info_of_flac_file_with_embedded_image(media_reader):
     uri = uri_of("scanner/embedded-image.flac")
 
