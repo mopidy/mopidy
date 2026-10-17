@@ -30,9 +30,7 @@ from gi.repository import GLib, GObject, Gst, GstBase, GstPbutils
 try:
     # GLib 2.88 split Unix-specific APIs into a separate typelib
     gi.require_version("GLibUnix", "2.0")
-    from gi.repository import (
-        GLibUnix,  # pyright: ignore[reportAttributeAccessIssue]  # ty:ignore[unresolved-import]
-    )
+    from gi.repository import GLibUnix  # pyright: ignore[reportAttributeAccessIssue]
 
     _unix_signal_add = GLibUnix.signal_add
 except (ValueError, ImportError, AttributeError):
@@ -58,7 +56,7 @@ if Gst.version() < REQUIRED_GST_VERSION:
 def create_glib_loop() -> GLib.MainLoop:
     logger.debug("Creating GLib mainloop")
     loop = GLib.MainLoop()
-    _unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, _on_sigterm, loop)
+    _unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, _on_sigterm, loop)  # ty: ignore[invalid-argument-type]
     _use_glib_loop_for_dbus()
     return loop
 
