@@ -154,6 +154,13 @@ reference](../reference/media.md) has an example.
   set the playback state to playing when the new track started, and then back
   to paused, and sent the events for both state changes. (!2358)
 
+- Core: Remove the workaround for #232. Core no longer changes the playback
+  state to paused when a backend pauses the audio pipeline without a call to
+  core. No known backend does this. Before, if a client called
+  [`pause()`][mopidy.core.PlaybackController.pause] and
+  [`resume()`][mopidy.core.PlaybackController.resume] with no wait between
+  them, the playback state could stay paused while the audio played. (!2358)
+
 - Media: Upgrade the media reader pipeline from using the `typefind` and
   `decodebin` GStreamer elements to using `parsebin`.
 

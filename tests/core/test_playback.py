@@ -894,6 +894,21 @@ class TestCurrentAndPendingTlTrack(BaseTest):
         assert self.playback.get_current_tl_track() is None
 
 
+class TestPauseAndResume(BaseTest):
+    def test_pause_and_resume_before_pipeline_state_changes_ends_playing(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+
+        self.core.playback.pause()
+        self.core.playback.resume()
+        self.replay_events()
+
+        assert self.core.playback.get_state() == PlaybackState.PLAYING
+        assert self.audio.state.get() == PlaybackState.PLAYING
+
+
 @mock.patch.object(core.CoreListener, "send", spec=core.CoreListener.send)
 class TestEventEmission(BaseTest):
     maxDiff = None
