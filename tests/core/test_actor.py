@@ -4,7 +4,7 @@ import pykka
 import pytest
 
 from mopidy._lib.version import get_version
-from mopidy.core import Core, CoreListener
+from mopidy.core import Core
 from mopidy.core._state_storage import (
     CoreControllersState,
     HistoryState,
@@ -169,22 +169,6 @@ def test_backends_with_colliding_uri_schemes_fails(backend1, backend2):
 
 def test_version(core):
     assert core.get_version() == get_version()
-
-
-def test_state_changed(core, mocker):
-    listener_mock = mocker.patch(
-        "mopidy.core._playback.CoreListener", spec=CoreListener
-    )
-
-    core.state_changed(None, PlaybackState.PAUSED, None)
-
-    assert listener_mock.send.mock_calls == [
-        mock.call(
-            "playback_state_changed",
-            old_state="stopped",
-            new_state="paused",
-        ),
-    ]
 
 
 @pytest.fixture

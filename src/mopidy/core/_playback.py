@@ -36,21 +36,29 @@ class PlaybackController:
         backends: Backends,
         core: Core,
     ) -> None:
+        # Valid for the life of the controller.
         # TODO: these should be internal
         self.backends = backends
         self.core = core
         self._audio = audio
 
-        self._stream_title: str | None = None
+        # Valid from a playback command or a stream change until the next one.
         self._state = PlaybackState.STOPPED
-
         self._current_tl_track: TlTrack | None = None
-        self._pending_tl_track: TlTrack | None = None
+        self._stream_title: str | None = None
 
-        self._pending_position: DurationMs | None = None
+        # Valid from the start of a track change until the stream changes or
+        # ends.
+        self._pending_tl_track: TlTrack | None = None
+        self._pending_state: PlaybackState = PlaybackState.PLAYING
         self._last_position: DurationMs | None = None
         self._previous: bool = False
 
+        # Valid from a seek until the position changes.
+        self._pending_position: DurationMs | None = None
+
+        # Valid from the restore of the saved state at startup until the first
+        # track plays from the saved position, in the saved playback state.
         self._start_at_position: DurationMs | None = None
         self._start_paused: bool = False
 
@@ -192,6 +200,7 @@ class PlaybackController:
         # track from the tracklist.
         ended_tl_track = self._current_tl_track
         pending_tl_track, self._pending_tl_track = self._pending_tl_track, None
+        pending_state, self._pending_state = self._pending_state, PlaybackState.PLAYING
         if pending_tl_track:
             self._set_current_tl_track(pending_tl_track)
 
@@ -203,9 +212,14 @@ class PlaybackController:
 
         self._stream_title = None
         if pending_tl_track:
+            if self._pending_position is not None:
+                self._seek(self._pending_position)
+            paused = pending_state == PlaybackState.PAUSED
+            self._set_state(PlaybackState.PAUSED if paused else PlaybackState.PLAYING)
+            self._trigger_track_playback_started()
+            if paused:
+                self._trigger_track_playback_paused()
             if self._pending_position is None:
-                self._set_state(PlaybackState.PLAYING)
-                self._trigger_track_playback_started()
                 seek_ok = False
                 if self._start_at_position:
                     seek_ok = self.seek(self._start_at_position)
@@ -213,10 +227,6 @@ class PlaybackController:
                 if not seek_ok and self._start_paused:
                     self.pause()
                     self._start_paused = False
-            else:
-                self._seek(self._pending_position)
-                self._set_state(PlaybackState.PLAYING)
-                self._trigger_track_playback_started()
 
     def _on_position_changed(self, _position: int) -> None:
         if self._pending_position is not None:
@@ -284,6 +294,7 @@ class PlaybackController:
             )
             return False
         self._pending_tl_track = tl_track
+        self._pending_state = PlaybackState.PLAYING
         return True
 
     def _on_tracklist_change(self) -> None:
@@ -371,7 +382,8 @@ class PlaybackController:
         self._try_until_playable(
             pending=tl_track or current or self.core.tracklist.next_track(None),  # ty: ignore[deprecated]
             change=lambda candidate: (
-                candidate is None or self._change(candidate, PlaybackState.PLAYING)
+                candidate is None
+                or self._change(tl_track=candidate, state=PlaybackState.PLAYING)
             ),
             step=self.core.tracklist.next_track,  # ty: ignore[deprecated]
         )
@@ -443,7 +455,7 @@ class PlaybackController:
         # Make sure we switch back to previous track if we get a seek while we
         # have a pending track.
         if self._current_tl_track and self._pending_tl_track:
-            return self._change(self._current_tl_track, self.get_state())
+            return self._change(tl_track=self._current_tl_track, state=self.get_state())
 
         # TODO: Avoid returning False here when STOPPED (seek is deferred)?
         return self._seek(time_position)
@@ -466,17 +478,19 @@ class PlaybackController:
 
     def _change(  # noqa: PLR0911
         self,
-        pending_tl_track: TlTrack | None,
+        *,
+        tl_track: TlTrack | None,
         state: PlaybackState,
     ) -> bool:
-        self._pending_tl_track = pending_tl_track
+        self._pending_tl_track = tl_track
+        self._pending_state = state
 
-        if not pending_tl_track:
+        if not tl_track:
             self.stop()
             self._on_end_of_stream()  # pretend an EOS happened for cleanup
             return True
 
-        backend = self._get_backend(pending_tl_track)
+        backend = self._get_backend(tl_track)
         if not backend:
             return False
 
@@ -488,7 +502,7 @@ class PlaybackController:
         backend.playback.prepare_change()
 
         try:
-            if not backend.playback.change_track(pending_tl_track.track).get():
+            if not backend.playback.change_track(tl_track.track).get():
                 return False
         except Exception:
             logger.exception(
@@ -537,7 +551,7 @@ class PlaybackController:
         state = self.get_state()
         self._try_until_playable(
             pending=pending,
-            change=lambda tl_track: self._change(tl_track, state),
+            change=lambda tl_track: self._change(tl_track=tl_track, state=state),
             step=step,
         )
 

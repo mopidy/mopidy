@@ -12,7 +12,6 @@ from pykka.typing import ActorMemberMixin, proxy_method
 from mopidy import audio, backend, mixer
 from mopidy._lib import paths
 from mopidy._lib.version import get_version
-from mopidy.types import PlaybackState, UriScheme
 
 from ._history import HistoryController
 from ._library import LibraryController
@@ -26,7 +25,7 @@ from ._tracklist import TracklistController
 if TYPE_CHECKING:
     from mopidy.config import Config
     from mopidy.mixer import MixerProxy
-    from mopidy.types import Uri
+    from mopidy.types import Uri, UriScheme
 
     from ._history import HistoryControllerProxy
     from ._library import LibraryControllerProxy
@@ -124,30 +123,6 @@ class Core(
     @override
     def position_changed(self, position: int) -> None:
         self.playback._on_position_changed(position)
-
-    @override
-    def state_changed(
-        self,
-        old_state: PlaybackState,
-        new_state: PlaybackState,
-        target_state: PlaybackState | None,
-    ) -> None:
-        # NOTE: This is a temporary fix for issue #232 while we wait for a more
-        # permanent solution with the implementation of issue #234. When the
-        # Spotify play token is lost, the Spotify backend pauses audio
-        # playback, but mopidy.core doesn't know this, so we need to update
-        # mopidy.core's state to match the actual state in mopidy.audio. If we
-        # don't do this, clients will think that we're still playing.
-
-        # We ignore cases when target state is set as this is buffering
-        # updates (at least for now) and we need to get #234 fixed...
-        if (
-            new_state == PlaybackState.PAUSED
-            and not target_state
-            and self.playback.get_state() != PlaybackState.PAUSED
-        ):
-            self.playback._set_state(new_state)
-            self.playback._trigger_track_playback_paused()
 
     @override
     def playlists_loaded(self) -> None:
