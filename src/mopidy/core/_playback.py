@@ -36,21 +36,28 @@ class PlaybackController:
         backends: Backends,
         core: Core,
     ) -> None:
+        # Valid for the life of the controller.
         # TODO: these should be internal
         self.backends = backends
         self.core = core
         self._audio = audio
 
-        self._stream_title: str | None = None
+        # Valid from a playback command or a stream change until the next one.
         self._state = PlaybackState.STOPPED
-
         self._current_tl_track: TlTrack | None = None
-        self._pending_tl_track: TlTrack | None = None
+        self._stream_title: str | None = None
 
-        self._pending_position: DurationMs | None = None
+        # Valid from the start of a track change until the stream changes or
+        # ends.
+        self._pending_tl_track: TlTrack | None = None
         self._last_position: DurationMs | None = None
         self._previous: bool = False
 
+        # Valid from a seek until the position changes.
+        self._pending_position: DurationMs | None = None
+
+        # Valid from the restore of the saved state at startup until the first
+        # track plays from the saved position, in the saved playback state.
         self._start_at_position: DurationMs | None = None
         self._start_paused: bool = False
 
