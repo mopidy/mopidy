@@ -36,7 +36,8 @@ reference](../reference/media.md) has an example.
 - [`MediaReader.read_playlist_entries()`][mopidy.media.MediaReader.read_playlist_entries]
   fetches a playlist document from a `file`, `http` or `https` URI and parses
   its playlist entries. The reader keeps an HTTP connection pool that uses the
-  Mopidy proxy config. (#2329, !2334)
+  Mopidy proxy config. A playlist document larger than 10 MiB raises
+  [`MediaReaderError`][mopidy.media.MediaReaderError]. (#2329, !2334, !2348)
 
 - [`MediaReader.find_playback_target()`][mopidy.media.MediaReader.find_playback_target]
   finds the URI to play from a URI that can be a playlist document, nested to
@@ -61,7 +62,7 @@ reference](../reference/media.md) has an example.
     `uridecodebin3`. It demuxes and parses streams without ever plugging
     decoders, which is exactly what the media reader wants. This replaces the
     previous custom `autoplug-select` callback that faked the same behavior on
-    top of `decodebin`. (#2127, !2338)
+    top of `decodebin`. (#2127, !2338, !2352, !2353)
 
 #### Bundled extensions
 
@@ -152,6 +153,11 @@ reference](../reference/media.md) has an example.
   [`stop()`][mopidy.core.PlaybackController.stop] could not stop it.
   (#1590, !2356)
 
+- In consume mode, continue with the track after an unplayable track. Before,
+  core removed the unplayable track from the tracklist before it looked for the
+  next track, so playback continued from the first track in the tracklist. In
+  random mode, core also shuffled the full tracklist again. (!2357)
+
 - Keep playback paused when the track changes while paused, for example
   with [`next()`][mopidy.core.PlaybackController.next] or
   [`previous()`][mopidy.core.PlaybackController.previous]. Core sends the events
@@ -181,9 +187,15 @@ reference](../reference/media.md) has an example.
   created. Before, Mopidy continued to build a pipeline with no output in it,
   while it shut down. (!2307)
 
+- Keep all bytes of the embedded images in the current tags of the audio actor.
+  Before, a debug log message cut each bytes value in the tags to 10 bytes,
+  also when debug logging was off. Thus
+  [`get_current_tags()`][mopidy.audio.Audio.get_current_tags] gave images that
+  were not complete. (!2344)
+
 - The deprecated `mopidy.audio.scan.Scanner` now raises
   [`ScannerError`][mopidy.exceptions.ScannerError] for a URI scheme that no
-  GStreamer element can open. Before, it raised `GLib.Error`.
+  GStreamer element can open. Before, it raised `GLib.Error`. (!2347)
 
 ### Other changes
 
@@ -197,14 +209,17 @@ reference](../reference/media.md) has an example.
 
 ### Development process
 
-- Restructure the GStreamer code into smaller modules with typed
-  interfaces, split it into a playback side and a media side, and delete unused
-  code. (#2324, !2303, !2304, !2306, !2307, !2308, !2331)
+- Restructure the GStreamer code into smaller modules with typed interfaces,
+  split it into a playback side and a media side, give the media reader the
+  same structure as the playback pipeline, and delete unused code. (#2324,
+  !2303, !2304, !2306, !2307, !2308, !2331, !2341, !2343, !2344, !2345, !2347)
 
 - Port the remaining `unittest` tests to pytest. (!2301)
 
 - Fail tests that hang for more than 60 seconds, and print the stack of
   all threads, instead of letting CI hang. (!2302)
+
+- Run the linters and type checkers on Python 3.15 in CI. (!2339)
 
 ## v4.0.5 (2026-10-16)
 
