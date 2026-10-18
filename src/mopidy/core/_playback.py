@@ -173,12 +173,13 @@ class PlaybackController:
 
     def _on_end_of_stream(self) -> None:
         self._set_state(PlaybackState.STOPPED)
-        if self._current_tl_track:
-            self._trigger_track_playback_ended(
-                tl_track=self._current_tl_track,
-                time_position=self.get_time_position(),
-            )
+        ended_tl_track = self._current_tl_track
+        position = self.get_time_position()
         self._set_current_tl_track(None)
+        self._trigger_track_playback_ended(
+            tl_track=ended_tl_track,
+            time_position=position,
+        )
 
     def _on_stream_changed(self, _uri: Uri) -> None:
         if self._last_position is None:
@@ -187,17 +188,21 @@ class PlaybackController:
             # This code path handles the stop() case, uri should be none.
             position, self._last_position = self._last_position, None
 
+        # Set the new current track before consume mode removes the ended
+        # track from the tracklist.
+        ended_tl_track = self._current_tl_track
+        pending_tl_track, self._pending_tl_track = self._pending_tl_track, None
+        if pending_tl_track:
+            self._set_current_tl_track(pending_tl_track)
+
         if self._pending_position is None:
             self._trigger_track_playback_ended(
-                tl_track=self._current_tl_track,
+                tl_track=ended_tl_track,
                 time_position=position,
             )
 
         self._stream_title = None
-        if self._pending_tl_track:
-            self._set_current_tl_track(self._pending_tl_track)
-            self._pending_tl_track = None
-
+        if pending_tl_track:
             if self._pending_position is None:
                 self._set_state(PlaybackState.PLAYING)
                 self._trigger_track_playback_started()

@@ -485,6 +485,23 @@ class TestConsumeHandling(BaseTest):
 
         assert self.playback.get_state() == "stopped"
 
+    def test_tracklist_changed_in_consume_mode_sees_new_current_track(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+        current_tl_tracks = []
+
+        def send(event, **_kwargs):
+            if event == "tracklist_changed":
+                current_tl_tracks.append(self.core.playback.get_current_tl_track())
+
+        with mock.patch.object(core.CoreListener, "send", side_effect=send):
+            self.core.playback.next()
+            self.replay_events()
+
+        assert current_tl_tracks == [tl_tracks[1]]
+
 
 class TestCurrentAndPendingTlTrack(BaseTest):
     def test_get_current_tl_track_none(self):
