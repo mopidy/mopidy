@@ -37,6 +37,7 @@ class TracklistController:
         self._consume: bool = False
         self._random: bool = False
         self._shuffled: list[TlTrack] = []
+        self._unplayable: list[TlTrack] = []
         self._repeat: bool = False
         self._single: bool = False
 
@@ -618,10 +619,18 @@ class TracklistController:
             "Track is not playable: %s",
             tl_track.track.uri if tl_track else None,
         )
-        if self.get_consume() and tl_track is not None:
-            self.remove({"tlid": [tl_track.tlid]})
+        if tl_track is not None:
+            self._unplayable.append(tl_track)
         if self.get_random() and tl_track in self._shuffled:
             self._shuffled.remove(tl_track)
+
+    def _remove_unplayable(self) -> None:
+        """Internal method for [PlaybackController][mopidy.core.PlaybackController]."""
+        # Clear the list before remove(), because remove() can start a new
+        # track change loop that marks other tracks.
+        tl_tracks, self._unplayable = self._unplayable, []
+        if self.get_consume() and tl_tracks:
+            self.remove({"tlid": [tl_track.tlid for tl_track in tl_tracks]})
 
     def _mark_played(self, tl_track: TlTrack | None) -> bool:
         """Internal method for [PlaybackController][mopidy.core.PlaybackController]."""

@@ -570,6 +570,10 @@ class PlaybackController:
                 logger.info("No playable track in the list.")
                 break
 
+        # In consume mode, remove the unplayable tracks after the loop, so that
+        # step() can find the position of each unplayable track.
+        self.core.tracklist._remove_unplayable()
+
     def _trigger_track_playback_paused(self) -> None:
         logger.debug("Triggering track playback paused event")
         if self.get_current_tl_track() is None:
