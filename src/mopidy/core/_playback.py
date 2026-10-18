@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import urllib.parse
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from typing import TYPE_CHECKING
 from warnings import deprecated
 
@@ -290,22 +290,12 @@ class PlaybackController:
         The current playback state will be kept. If it was playing, playing
         will continue. If it was paused, it will still be paused, etc.
         """
-        state = self.get_state()
         current = self._pending_tl_track or self._current_tl_track
-        # avoid endless loop if 'repeat' is 'true' and no track is playable
-        # * 2 -> second run to get all playable track in a shuffled playlist
-        count = self.core.tracklist.get_length() * 2
-
-        while current:
-            pending = self.core.tracklist.next_track(current)  # ty: ignore[deprecated]
-            if self._change(pending, state):
-                break
-            self.core.tracklist._mark_unplayable(pending)
-            current = pending
-            count -= 1
-            if not count:
-                logger.info("No playable track in the list.")
-                break
+        if current:
+            self._change_to_playable(
+                pending=self.core.tracklist.next_track(current),  # ty: ignore[deprecated]
+                step=self.core.tracklist.next_track,  # ty: ignore[deprecated]
+            )
 
         # TODO: return result?
 
@@ -519,6 +509,33 @@ class PlaybackController:
 
         msg = f"Unknown playback state: {state}"
         raise CoreError(msg)
+
+    def _change_to_playable(
+        self,
+        *,
+        pending: TlTrack | None,
+        step: Callable[[TlTrack | None], TlTrack | None],
+    ) -> None:
+        """Change to the first playable track from `pending`.
+
+        The playback state does not change.
+
+        Args:
+            pending: The first track to try.
+            step: Gives the track to try after an unplayable track.
+        """
+        state = self.get_state()
+        # avoid endless loop if 'repeat' is 'true' and no track is playable
+        # * 2 -> second run to get all playable track in a shuffled playlist
+        count = self.core.tracklist.get_length() * 2
+
+        while not self._change(pending, state):
+            self.core.tracklist._mark_unplayable(pending)
+            pending = step(pending)
+            count -= 1
+            if not count:
+                logger.info("No playable track in the list.")
+                break
 
     def _trigger_track_playback_paused(self) -> None:
         logger.debug("Triggering track playback paused event")
