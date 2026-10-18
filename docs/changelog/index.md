@@ -116,6 +116,17 @@ reference](../reference/media.md) has an example.
 - Deprecate `mopidy.__version__`. Mopidy no longer uses it itself. Use
   `importlib.metadata.version("mopidy")` instead. (!2298)
 
+- Deprecate [`PlaybackController.set_state()`][mopidy.core.PlaybackController.set_state].
+  Use [`play()`][mopidy.core.PlaybackController.play],
+  [`pause()`][mopidy.core.PlaybackController.pause],
+  [`resume()`][mopidy.core.PlaybackController.resume], and
+  [`stop()`][mopidy.core.PlaybackController.stop] instead. The method now calls
+  the playback command that gives the new state, so that the playback state
+  and the audio pipeline do not differ. For example, `set_state("stopped")`
+  stops the pipeline and releases the output device. Before, it changed only
+  the playback state. Calls that do not match a playback command change
+  nothing. The method will be removed in Mopidy 5.0. (!2355)
+
 ### Other changes
 
 - Media: Upgrade the media reader pipeline from using the `typefind` and

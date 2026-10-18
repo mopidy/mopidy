@@ -146,7 +146,7 @@ class Core(
             and not target_state
             and self.playback.get_state() != PlaybackState.PAUSED
         ):
-            self.playback.set_state(new_state)
+            self.playback._set_state(new_state)
             self.playback._trigger_track_playback_paused()
 
     @override

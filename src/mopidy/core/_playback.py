@@ -4,6 +4,7 @@ import logging
 import urllib.parse
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
+from warnings import deprecated
 
 from pykka.messages import ProxyCall
 from pykka.typing import proxy_method
@@ -100,17 +101,41 @@ class PlaybackController:
         """Get The playback state."""
         return self._state
 
+    @deprecated("Use play(), pause(), resume(), or stop() instead")
     def set_state(self, new_state: PlaybackState) -> None:
-        """Set the playback state.
+        """Change the playback state with a playback command.
 
-        /// warning | Internal API
-        This method is only for use by Mopidy itself and extension's test suites
-        if it cannot be avoided.
-
-        Frontends and clients must use the [`play()`][play], [`pause()`][pause],
-        [`resume()`][resume], and [`stop()`][stop] methods to change the
-        playback state.
+        /// warning | Deprecated
+        This method is deprecated and will be removed in Mopidy 5.0. Use the
+        [`play()`][play], [`pause()`][pause], [`resume()`][resume], and
+        [`stop()`][stop] methods instead.
         ///
+
+        This method calls the playback command that gives `new_state`:
+
+        | `new_state` | Current playback state | Command |
+        | --- | --- | --- |
+        | `STOPPED` | any | [`stop()`][stop] |
+        | `PAUSED` | `PLAYING` | [`pause()`][pause] |
+        | `PLAYING` | `PAUSED` | [`resume()`][resume] |
+        | `PLAYING` | `STOPPED` | [`play()`][play] |
+
+        Other calls change nothing.
+        """
+        validation.check_choice(new_state, validation.PLAYBACK_STATES)
+
+        old_state = self.get_state()
+        if new_state == PlaybackState.STOPPED:
+            self.stop()
+        elif (old_state, new_state) == (PlaybackState.PLAYING, PlaybackState.PAUSED):
+            self.pause()
+        elif (old_state, new_state) == (PlaybackState.PAUSED, PlaybackState.PLAYING):
+            self.resume()
+        elif (old_state, new_state) == (PlaybackState.STOPPED, PlaybackState.PLAYING):
+            self.play()
+
+    def _set_state(self, new_state: PlaybackState) -> None:
+        """Set the playback state.
 
         This method only maintains core's playback state and emits
         `playback_state_changed` events. It has no effect on the underlying
@@ -147,7 +172,7 @@ class PlaybackController:
         return backend.playback.get_time_position().get()
 
     def _on_end_of_stream(self) -> None:
-        self.set_state(PlaybackState.STOPPED)
+        self._set_state(PlaybackState.STOPPED)
         if self._current_tl_track:
             self._trigger_track_playback_ended(self.get_time_position())
         self._set_current_tl_track(None)
@@ -168,7 +193,7 @@ class PlaybackController:
             self._pending_tl_track = None
 
             if self._pending_position is None:
-                self.set_state(PlaybackState.PLAYING)
+                self._set_state(PlaybackState.PLAYING)
                 self._trigger_track_playback_started()
                 seek_ok = False
                 if self._start_at_position:
@@ -179,7 +204,7 @@ class PlaybackController:
                     self._start_paused = False
             else:
                 self._seek(self._pending_position)
-                self.set_state(PlaybackState.PLAYING)
+                self._set_state(PlaybackState.PLAYING)
                 self._trigger_track_playback_started()
 
     def _on_position_changed(self, _position: int) -> None:
@@ -289,7 +314,7 @@ class PlaybackController:
         backend = self._get_backend(self.get_current_tl_track())
         # TODO: Wrap backend call in error handling.
         if not backend or backend.playback.pause().get():
-            self.set_state(PlaybackState.PAUSED)
+            self._set_state(PlaybackState.PAUSED)
             self._trigger_track_playback_paused()
 
     def play(
@@ -430,7 +455,7 @@ class PlaybackController:
         backend = self._get_backend(self.get_current_tl_track())
         # TODO: Wrap backend call in error handling.
         if backend and backend.playback.resume().get():
-            self.set_state(PlaybackState.PLAYING)
+            self._set_state(PlaybackState.PLAYING)
             # TODO: trigger via gst messages
             self._trigger_track_playback_resumed()
 
@@ -493,7 +518,7 @@ class PlaybackController:
             backend = self._get_backend(self.get_current_tl_track())
             # TODO: Wrap backend call in error handling.
             if not backend or backend.playback.stop().get():
-                self.set_state(PlaybackState.STOPPED)
+                self._set_state(PlaybackState.STOPPED)
 
     def _trigger_track_playback_paused(self) -> None:
         logger.debug("Triggering track playback paused event")
@@ -586,7 +611,7 @@ class PlaybackControllerProxy:
     get_current_tlid = proxy_method(PlaybackController.get_current_tlid)
     get_stream_title = proxy_method(PlaybackController.get_stream_title)
     get_state = proxy_method(PlaybackController.get_state)
-    set_state = proxy_method(PlaybackController.set_state)
+    set_state = proxy_method(PlaybackController.set_state)  # ty: ignore[deprecated]
     get_time_position = proxy_method(PlaybackController.get_time_position)
     next = proxy_method(PlaybackController.next)
     pause = proxy_method(PlaybackController.pause)
