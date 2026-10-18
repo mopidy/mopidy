@@ -290,12 +290,26 @@ class PlaybackController:
 
         Used by [TracklistController][mopidy.core.TracklistController].
         """
-        tl_tracks = self.core.tracklist.get_tl_tracks()
-        if not tl_tracks:
+        if not self.core.tracklist.get_tl_tracks():
             self.stop()
             self._set_current_tl_track(None)
-        elif self.get_current_tl_track() not in tl_tracks:
+
+    def _on_current_track_removed(self, *, next_tl_track: TlTrack | None) -> None:
+        """Tell the playback controller that the current track is removed.
+
+        Used by [TracklistController][mopidy.core.TracklistController] when
+        other tracks stay in the tracklist.
+
+        Args:
+            next_tl_track: The track to change to. `None` stops playback.
+        """
+        if self.get_state() == PlaybackState.STOPPED:
             self._set_current_tl_track(None)
+        else:
+            self._change_to_playable(
+                pending=next_tl_track,
+                step=self.core.tracklist.next_track,  # ty: ignore[deprecated]
+            )
 
     def next(self) -> None:
         """Change to the next track.

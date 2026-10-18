@@ -111,6 +111,9 @@ class DummyAudio(audio.Audio, pykka.ThreadingActor):
 
         return self._uri not in self._bad_uris
 
+    def get_uri(self):
+        return self._uri
+
     def trigger_fake_playback_failure(self, uri):
         self._bad_uris.add(uri)
 

@@ -544,6 +544,205 @@ class TestConsumeHandling(BaseTest):
 
         assert current_tl_tracks == [tl_tracks[1]]
 
+    def test_next_in_consume_mode_does_not_skip_a_track(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+
+        self.core.playback.next()
+        self.replay_events()
+
+        assert self.core.playback.get_current_tl_track() == tl_tracks[1]
+        assert self.core.tracklist.get_tl_tracks() == tl_tracks[1:]
+
+    def test_about_to_finish_in_consume_mode_does_not_skip_a_track(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+
+        self.trigger_about_to_finish()
+
+        assert self.core.playback.get_current_tl_track() == tl_tracks[1]
+        assert self.core.tracklist.get_tl_tracks() == tl_tracks[1:]
+
+
+class TestRemoveCurrentTrack(BaseTest):
+    def test_remove_playing_track_plays_next_track(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+
+        self.core.tracklist.remove({"tlid": [tl_tracks[0].tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_state() == PlaybackState.PLAYING
+        assert self.core.playback.get_current_tl_track() == tl_tracks[1]
+        assert self.audio.state.get() == PlaybackState.PLAYING
+        assert self.audio.get_uri().get() == tl_tracks[1].track.uri
+
+    def test_remove_paused_track_pauses_on_next_track(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+        self.core.playback.pause()
+        self.replay_events()
+
+        self.core.tracklist.remove({"tlid": [tl_tracks[0].tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_state() == PlaybackState.PAUSED
+        assert self.core.playback.get_current_tl_track() == tl_tracks[1]
+        assert self.audio.state.get() == PlaybackState.PAUSED
+        assert self.audio.get_uri().get() == tl_tracks[1].track.uri
+
+    def test_remove_current_and_next_track_plays_first_remaining_track(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+
+        self.core.tracklist.remove({"tlid": [tl_tracks[0].tlid, tl_tracks[1].tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_state() == PlaybackState.PLAYING
+        assert self.core.playback.get_current_tl_track() == tl_tracks[2]
+        assert self.audio.get_uri().get() == tl_tracks[2].track.uri
+
+    def test_remove_current_track_with_repeat_plays_first_remaining_track(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.tracklist.set_repeat(True)
+        self.core.playback.play(tl_tracks[2].tlid)
+        self.replay_events()
+
+        self.core.tracklist.remove({"tlid": [tl_tracks[2].tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_state() == PlaybackState.PLAYING
+        assert self.core.playback.get_current_tl_track() == tl_tracks[0]
+
+    @mock.patch("random.shuffle", mock.Mock())
+    def test_remove_current_track_with_random_plays_remaining_track(self):
+        # With no shuffle, track b comes first in random mode.
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.tracklist.set_random(True)
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+
+        self.core.tracklist.remove({"tlid": [tl_tracks[0].tlid, tl_tracks[1].tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_state() == PlaybackState.PLAYING
+        assert self.core.playback.get_current_tl_track() == tl_tracks[2]
+
+    def test_remove_current_and_queued_track_plays_first_remaining_track(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+        self.trigger_about_to_finish(replay_until="stream_changed")
+
+        self.core.tracklist.remove({"tlid": [tl_tracks[0].tlid, tl_tracks[1].tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_state() == PlaybackState.PLAYING
+        assert self.core.playback.get_current_tl_track() == tl_tracks[2]
+        assert self.audio.get_uri().get() == tl_tracks[2].track.uri
+
+    @mock.patch("random.shuffle", mock.Mock())
+    def test_remove_current_track_with_random_skips_removed_tracks(self):
+        # With no shuffle, the unplayable track comes first in random mode,
+        # then track b.
+        track = Track(uri="dummy:unplayable", length=1234)
+        with pytest.deprecated_call():
+            self.core.tracklist.add(tracks=[track], at_position=1)
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.tracklist.set_random(True)
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+
+        self.core.tracklist.remove({"tlid": [tl_tracks[0].tlid, tl_tracks[2].tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_state() == PlaybackState.PLAYING
+        assert self.core.playback.get_current_tl_track() == tl_tracks[3]
+
+    def test_remove_current_track_with_no_remaining_track_stops(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.playback.play(tl_tracks[2].tlid)
+        self.replay_events()
+
+        self.core.tracklist.remove({"tlid": [tl_tracks[2].tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_state() == PlaybackState.STOPPED
+        assert self.core.playback.get_current_tl_track() is None
+        assert self.audio.state.get() == PlaybackState.STOPPED
+
+    def test_remove_current_track_when_stopped_clears_current_track(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+        self.core.playback.stop()
+        self.replay_events()
+
+        self.core.tracklist.remove({"tlid": [tl_tracks[0].tlid]})
+        self.replay_events()
+
+        assert self.core.playback.get_state() == PlaybackState.STOPPED
+        assert self.core.playback.get_current_tl_track() is None
+        assert self.audio.get_uri().get() is None
+
+    def test_remove_playing_track_in_consume_mode_emits_events(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+
+        with mock.patch.object(core.CoreListener, "send") as send_mock:
+            self.core.tracklist.remove({"tlid": [tl_tracks[0].tlid]})
+            self.replay_events()
+
+        assert send_mock.mock_calls == [
+            mock.call("tracklist_changed"),
+            mock.call(
+                "track_playback_ended",
+                tl_track=tl_tracks[0],
+                time_position=mock.ANY,
+            ),
+            mock.call(
+                "playback_state_changed",
+                old_state=PlaybackState.PLAYING,
+                new_state=PlaybackState.PLAYING,
+            ),
+            mock.call("track_playback_started", tl_track=tl_tracks[1]),
+        ]
+
+    def test_remove_current_track_in_consume_mode_skips_unplayable_track(self):
+        # Make translate_uri return None.
+        track = Track(uri="dummy:unplayable", length=1234)
+        with pytest.deprecated_call():
+            self.core.tracklist.add(tracks=[track], at_position=1)
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+
+        with mock.patch.object(core.CoreListener, "send") as send_mock:
+            self.core.tracklist.remove({"tlid": [tl_tracks[0].tlid]})
+            self.replay_events()
+
+        assert self.core.playback.get_state() == PlaybackState.PLAYING
+        assert self.core.playback.get_current_tl_track() == tl_tracks[2]
+        assert self.core.tracklist.get_tl_tracks() == tl_tracks[2:]
+        assert (
+            mock.call(
+                "playback_state_changed",
+                old_state=mock.ANY,
+                new_state=PlaybackState.STOPPED,
+            )
+            not in send_mock.mock_calls
+        )
+
 
 class TestCurrentAndPendingTlTrack(BaseTest):
     def test_get_current_tl_track_none(self):
