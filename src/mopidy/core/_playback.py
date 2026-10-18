@@ -258,32 +258,33 @@ class PlaybackController:
             # handled.
             pass
 
-        pending = self.core.tracklist.eot_track(self._current_tl_track)  # ty: ignore[deprecated]
-        # If no track is playable, the loop can continue with no end, for
-        # example in repeat mode, so it stops after a limit. In random mode,
-        # the first round has only the tracks that did not play yet, so the
-        # limit is two rounds. Then the loop tries each track.
-        count = self.core.tracklist.get_length() * 2
+        self._try_until_playable(
+            pending=self.core.tracklist.eot_track(self._current_tl_track),  # ty: ignore[deprecated]
+            change=self._change_eot_track,
+            step=self.core.tracklist.eot_track,  # ty: ignore[deprecated]
+        )
 
-        while pending:
-            backend = self._get_backend(pending)
-            if backend:
-                try:
-                    if backend.playback.change_track(pending.track).get():
-                        self._pending_tl_track = pending
-                        break
-                except Exception:
-                    logger.exception(
-                        "%s backend caused an exception.",
-                        backend.actor_ref.actor_class.__name__,
-                    )
+    def _change_eot_track(self, tl_track: TlTrack | None) -> bool:
+        """Give the backend the track to play after the current track.
 
-            self.core.tracklist._mark_unplayable(pending)
-            pending = self.core.tracklist.eot_track(pending)  # ty: ignore[deprecated]
-            count -= 1
-            if not count:
-                logger.info("No playable track in the list.")
-                break
+        Returns `False` if the track is not playable.
+        """
+        if tl_track is None:
+            return True
+        backend = self._get_backend(tl_track)
+        if not backend:
+            return False
+        try:
+            if not backend.playback.change_track(tl_track.track).get():
+                return False
+        except Exception:
+            logger.exception(
+                "%s backend caused an exception.",
+                backend.actor_ref.actor_class.__name__,
+            )
+            return False
+        self._pending_tl_track = tl_track
+        return True
 
     def _on_tracklist_change(self) -> None:
         """Tell the playback controller that the current playlist has changed.
