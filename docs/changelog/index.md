@@ -54,6 +54,15 @@ reference](../reference/media.md) has an example.
   DASH documents give no entries, as they usually should be passed directly to
   the playback engine. (#2327, !2333)
 
+- Upgrade the media reader pipeline from using the `typefind` and
+  `decodebin` GStreamer elements to using `parsebin`.
+
+    `parsebin` is the modern parsing stage also used internally by
+    `uridecodebin3`. It demuxes and parses streams without ever plugging
+    decoders, which is exactly what the media reader wants. This replaces the
+    previous custom `autoplug-select` callback that faked the same behavior on
+    top of `decodebin`. (#2127, !2338)
+
 #### Bundled extensions
 
 - File extension: Read the metadata of files with the new
@@ -127,13 +136,13 @@ reference](../reference/media.md) has an example.
   the playback state. Calls that do not match a playback command change
   nothing. The method will be removed in Mopidy 5.0. (!2355)
 
-### Other changes
+### Core
 
-- Core: In single and repeat mode with consume mode on, play the next track
+- In single and repeat mode with consume mode on, play the next track
   when a track ends. Before, core played the same track again, but consume
   mode had removed it from the tracklist. (!2356)
 
-- Core: When the current track is removed from the tracklist, change to the
+- When the current track is removed from the tracklist, change to the
   track that [`next()`][mopidy.core.PlaybackController.next] gives, and skip
   the tracks that were removed in the same call. The playback state does not
   change: if playback was paused, it is paused on the new track, as with
@@ -143,7 +152,7 @@ reference](../reference/media.md) has an example.
   [`stop()`][mopidy.core.PlaybackController.stop] could not stop it.
   (#1590, !2356)
 
-- Core: Keep playback paused when the track changes while paused, for example
+- Keep playback paused when the track changes while paused, for example
   with [`next()`][mopidy.core.PlaybackController.next] or
   [`previous()`][mopidy.core.PlaybackController.previous]. Core sends the events
   `track_playback_ended` for the old track, `playback_state_changed` from paused
@@ -154,51 +163,48 @@ reference](../reference/media.md) has an example.
   set the playback state to playing when the new track started, and then back
   to paused, and sent the events for both state changes. (!2358)
 
-- Core: Remove the workaround for #232. Core no longer changes the playback
+- Remove the workaround for #232. Core no longer changes the playback
   state to paused when a backend pauses the audio pipeline without a call to
   core. No known backend does this. Before, if a client called
   [`pause()`][mopidy.core.PlaybackController.pause] and
   [`resume()`][mopidy.core.PlaybackController.resume] with no wait between
   them, the playback state could stay paused while the audio played. (!2358)
 
-- Media: Upgrade the media reader pipeline from using the `typefind` and
-  `decodebin` GStreamer elements to using `parsebin`.
+### Audio
 
-    `parsebin` is the modern parsing stage also used internally by
-    `uridecodebin3`. It demuxes and parses streams without ever plugging
-    decoders, which is exactly what the media reader wants. This replaces the
-    previous custom `autoplug-select` callback that faked the same behavior on
-    top of `decodebin`. (#2127, !2338)
-
-- Audio: The deprecated `mopidy.audio.scan.Scanner` now raises
-  [`ScannerError`][mopidy.exceptions.ScannerError] for a URI scheme that no
-  GStreamer element can open. Before, it raised `GLib.Error`.
-
-- Audio: Handle all GStreamer bus messages on the audio actor thread. Before,
+- Handle all GStreamer bus messages on the audio actor thread. Before,
   the GLib main loop thread and the actor thread changed the audio state at the
   same time, with no synchronization. The "Race condition happened" warning
   from #1222 and #1430 is removed, because this race is gone. (!2305)
 
-- Audio: Stop startup at once if the configured `audio/output` cannot be
+- Stop startup at once if the configured `audio/output` cannot be
   created. Before, Mopidy continued to build a pipeline with no output in it,
   while it shut down. (!2307)
 
+- The deprecated `mopidy.audio.scan.Scanner` now raises
+  [`ScannerError`][mopidy.exceptions.ScannerError] for a URI scheme that no
+  GStreamer element can open. Before, it raised `GLib.Error`.
+
+### Other changes
+
 - HTTP extension: Fix the debug log message for sent JSON-RPC responses. It was
   never logged. (!2310)
-
-- Dev: Restructure the GStreamer code into smaller modules with typed
-  interfaces, split it into a playback side and a media side, and delete unused
-  code. (#2324, !2303, !2304, !2306, !2307, !2308, !2331)
-
-- Dev: Port the remaining `unittest` tests to pytest. (!2301)
-
-- Dev: Fail tests that hang for more than 60 seconds, and print the stack of
-  all threads, instead of letting CI hang. (!2302)
 
 - Packaging: Remove the desktop file. It started Mopidy in a terminal window
   from the application menu, which is seldom useful for a server. The file was
   added for the Ubuntu Sound Menu, which no longer exists, and Mopidy-MPRIS
   stopped using it in 2018. (!2322)
+
+### Development process
+
+- Restructure the GStreamer code into smaller modules with typed
+  interfaces, split it into a playback side and a media side, and delete unused
+  code. (#2324, !2303, !2304, !2306, !2307, !2308, !2331)
+
+- Port the remaining `unittest` tests to pytest. (!2301)
+
+- Fail tests that hang for more than 60 seconds, and print the stack of
+  all threads, instead of letting CI hang. (!2302)
 
 ## v4.0.5 (2026-10-16)
 
