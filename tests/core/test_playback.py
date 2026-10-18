@@ -855,13 +855,13 @@ class TestUnplayableURI(BaseTest):
         assert self.core.playback.get_state() == PlaybackState.PAUSED
 
     def test_resume_does_nothing_if_track_is_unplayable(self):
-        self.core.playback.set_state(PlaybackState.PAUSED)
+        self.core.playback._set_state(PlaybackState.PAUSED)
         self.core.playback.resume()
 
         assert self.core.playback.get_state() == PlaybackState.PAUSED
 
     def test_stop_changes_state_even_if_track_is_unplayable(self):
-        self.core.playback.set_state(PlaybackState.PAUSED)
+        self.core.playback._set_state(PlaybackState.PAUSED)
         self.core.playback.stop()
 
         assert self.core.playback.get_state() == PlaybackState.STOPPED
@@ -872,10 +872,92 @@ class TestUnplayableURI(BaseTest):
         assert result == 0
 
     def test_seek_fails_for_unplayable_track(self):
-        self.core.playback.set_state(PlaybackState.PLAYING)
+        self.core.playback._set_state(PlaybackState.PLAYING)
         success = self.core.playback.seek(1000)
 
         assert not success
+
+
+class TestDeprecatedSetState(BaseTest):
+    def test_stopped_stops_playback(self):
+        self.core.playback.play()
+        self.replay_events()
+
+        with pytest.deprecated_call():
+            self.core.playback.set_state(PlaybackState.STOPPED)
+
+        assert self.core.playback.get_state() == PlaybackState.STOPPED
+        assert self.audio.state.get() == PlaybackState.STOPPED
+
+    def test_stopped_while_paused_stops_playback(self):
+        self.core.playback.play()
+        self.replay_events()
+        self.core.playback.pause()
+        self.replay_events()
+
+        with pytest.deprecated_call():
+            self.core.playback.set_state(PlaybackState.STOPPED)
+
+        assert self.core.playback.get_state() == PlaybackState.STOPPED
+        assert self.audio.state.get() == PlaybackState.STOPPED
+
+    def test_paused_while_playing_pauses_playback(self):
+        self.core.playback.play()
+        self.replay_events()
+
+        with pytest.deprecated_call():
+            self.core.playback.set_state(PlaybackState.PAUSED)
+
+        assert self.core.playback.get_state() == PlaybackState.PAUSED
+        assert self.audio.state.get() == PlaybackState.PAUSED
+
+    def test_playing_while_paused_resumes_playback(self):
+        self.core.playback.play()
+        self.replay_events()
+        self.core.playback.pause()
+        self.replay_events()
+        assert self.audio.state.get() == PlaybackState.PAUSED
+
+        with pytest.deprecated_call():
+            self.core.playback.set_state(PlaybackState.PLAYING)
+
+        assert self.core.playback.get_state() == PlaybackState.PLAYING
+        assert self.audio.state.get() == PlaybackState.PLAYING
+
+    def test_playing_while_stopped_starts_playback(self):
+        with pytest.deprecated_call():
+            self.core.playback.set_state(PlaybackState.PLAYING)
+        self.replay_events()
+
+        assert self.core.playback.get_state() == PlaybackState.PLAYING
+        assert self.core.playback.get_current_track() == self.tracks[0]
+        assert self.audio.state.get() == PlaybackState.PLAYING
+
+    @pytest.mark.parametrize(
+        ("old_state", "new_state"),
+        [
+            (PlaybackState.STOPPED, PlaybackState.PAUSED),
+            (PlaybackState.PAUSED, PlaybackState.PAUSED),
+            (PlaybackState.PLAYING, PlaybackState.PLAYING),
+        ],
+    )
+    def test_other_changes_do_nothing(self, old_state, new_state):
+        if old_state != PlaybackState.STOPPED:
+            self.core.playback.play()
+            self.replay_events()
+        if old_state == PlaybackState.PAUSED:
+            self.core.playback.pause()
+            self.replay_events()
+        assert self.audio.state.get() == old_state
+
+        with mock.patch.object(core.CoreListener, "send") as listener_send_mock:
+            with pytest.deprecated_call():
+                self.core.playback.set_state(new_state)
+            self.replay_events()
+
+        assert self.core.playback.get_state() == old_state
+        assert self.audio.state.get() == old_state
+        listener_send_mock.assert_not_called()
 
 
 class TestSeek(BaseTest):
