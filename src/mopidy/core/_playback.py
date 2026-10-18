@@ -378,7 +378,8 @@ class PlaybackController:
         self._try_until_playable(
             pending=tl_track or current or self.core.tracklist.next_track(None),  # ty: ignore[deprecated]
             change=lambda candidate: (
-                candidate is None or self._change(candidate, PlaybackState.PLAYING)
+                candidate is None
+                or self._change(tl_track=candidate, state=PlaybackState.PLAYING)
             ),
             step=self.core.tracklist.next_track,  # ty: ignore[deprecated]
         )
@@ -450,7 +451,7 @@ class PlaybackController:
         # Make sure we switch back to previous track if we get a seek while we
         # have a pending track.
         if self._current_tl_track and self._pending_tl_track:
-            return self._change(self._current_tl_track, self.get_state())
+            return self._change(tl_track=self._current_tl_track, state=self.get_state())
 
         # TODO: Avoid returning False here when STOPPED (seek is deferred)?
         return self._seek(time_position)
@@ -473,17 +474,18 @@ class PlaybackController:
 
     def _change(  # noqa: PLR0911
         self,
-        pending_tl_track: TlTrack | None,
+        *,
+        tl_track: TlTrack | None,
         state: PlaybackState,
     ) -> bool:
-        self._pending_tl_track = pending_tl_track
+        self._pending_tl_track = tl_track
 
-        if not pending_tl_track:
+        if not tl_track:
             self.stop()
             self._on_end_of_stream()  # pretend an EOS happened for cleanup
             return True
 
-        backend = self._get_backend(pending_tl_track)
+        backend = self._get_backend(tl_track)
         if not backend:
             return False
 
@@ -495,7 +497,7 @@ class PlaybackController:
         backend.playback.prepare_change()
 
         try:
-            if not backend.playback.change_track(pending_tl_track.track).get():
+            if not backend.playback.change_track(tl_track.track).get():
                 return False
         except Exception:
             logger.exception(
@@ -544,7 +546,7 @@ class PlaybackController:
         state = self.get_state()
         self._try_until_playable(
             pending=pending,
-            change=lambda tl_track: self._change(tl_track, state),
+            change=lambda tl_track: self._change(tl_track=tl_track, state=state),
             step=step,
         )
 
