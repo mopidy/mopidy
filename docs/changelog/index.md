@@ -143,6 +143,17 @@ reference](../reference/media.md) has an example.
   [`stop()`][mopidy.core.PlaybackController.stop] could not stop it.
   (#1590, !2356)
 
+- Core: Keep playback paused when the track changes while paused, for example
+  with [`next()`][mopidy.core.PlaybackController.next] or
+  [`previous()`][mopidy.core.PlaybackController.previous]. Core sends the events
+  `track_playback_ended` for the old track, `playback_state_changed` from paused
+  to paused, `track_playback_started` for the new track, and
+  `track_playback_paused` for the new track. A seek while paused, after core
+  queued the next track, goes back to the current track. Then core sends the
+  same events with no `track_playback_ended`, and then `seeked`. Before, core
+  set the playback state to playing when the new track started, and then back
+  to paused, and sent the events for both state changes. (!2358)
+
 - Media: Upgrade the media reader pipeline from using the `typefind` and
   `decodebin` GStreamer elements to using `parsebin`.
 

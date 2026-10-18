@@ -50,6 +50,7 @@ class PlaybackController:
         # Valid from the start of a track change until the stream changes or
         # ends.
         self._pending_tl_track: TlTrack | None = None
+        self._pending_state: PlaybackState = PlaybackState.PLAYING
         self._last_position: DurationMs | None = None
         self._previous: bool = False
 
@@ -199,6 +200,7 @@ class PlaybackController:
         # track from the tracklist.
         ended_tl_track = self._current_tl_track
         pending_tl_track, self._pending_tl_track = self._pending_tl_track, None
+        pending_state, self._pending_state = self._pending_state, PlaybackState.PLAYING
         if pending_tl_track:
             self._set_current_tl_track(pending_tl_track)
 
@@ -210,9 +212,14 @@ class PlaybackController:
 
         self._stream_title = None
         if pending_tl_track:
+            if self._pending_position is not None:
+                self._seek(self._pending_position)
+            paused = pending_state == PlaybackState.PAUSED
+            self._set_state(PlaybackState.PAUSED if paused else PlaybackState.PLAYING)
+            self._trigger_track_playback_started()
+            if paused:
+                self._trigger_track_playback_paused()
             if self._pending_position is None:
-                self._set_state(PlaybackState.PLAYING)
-                self._trigger_track_playback_started()
                 seek_ok = False
                 if self._start_at_position:
                     seek_ok = self.seek(self._start_at_position)
@@ -220,10 +227,6 @@ class PlaybackController:
                 if not seek_ok and self._start_paused:
                     self.pause()
                     self._start_paused = False
-            else:
-                self._seek(self._pending_position)
-                self._set_state(PlaybackState.PLAYING)
-                self._trigger_track_playback_started()
 
     def _on_position_changed(self, _position: int) -> None:
         if self._pending_position is not None:
@@ -291,6 +294,7 @@ class PlaybackController:
             )
             return False
         self._pending_tl_track = tl_track
+        self._pending_state = PlaybackState.PLAYING
         return True
 
     def _on_tracklist_change(self) -> None:
@@ -479,6 +483,7 @@ class PlaybackController:
         state: PlaybackState,
     ) -> bool:
         self._pending_tl_track = tl_track
+        self._pending_state = state
 
         if not tl_track:
             self.stop()
