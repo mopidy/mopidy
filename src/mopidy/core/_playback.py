@@ -248,8 +248,10 @@ class PlaybackController:
             pass
 
         pending = self.core.tracklist.eot_track(self._current_tl_track)  # ty: ignore[deprecated]
-        # avoid endless loop if 'repeat' is 'true' and no track is playable
-        # * 2 -> second run to get all playable track in a shuffled playlist
+        # If no track is playable, the loop can continue with no end, for
+        # example in repeat mode, so it stops after a limit. In random mode,
+        # the first round has only the tracks that did not play yet, so the
+        # limit is two rounds. Then the loop tries each track.
         count = self.core.tracklist.get_length() * 2
 
         while pending:
@@ -341,8 +343,10 @@ class PlaybackController:
 
         current = self._pending_tl_track or self._current_tl_track
         pending = tl_track or current or self.core.tracklist.next_track(None)  # ty: ignore[deprecated]
-        # avoid endless loop if 'repeat' is 'true' and no track is playable
-        # * 2 -> second run to get all playable track in a shuffled playlist
+        # If no track is playable, the loop can continue with no end, for
+        # example in repeat mode, so it stops after a limit. In random mode,
+        # the first round has only the tracks that did not play yet, so the
+        # limit is two rounds. Then the loop tries each track.
         count = self.core.tracklist.get_length() * 2
 
         while pending:
@@ -515,8 +519,10 @@ class PlaybackController:
             step: Gives the track to try after an unplayable track.
         """
         state = self.get_state()
-        # avoid endless loop if 'repeat' is 'true' and no track is playable
-        # * 2 -> second run to get all playable track in a shuffled playlist
+        # If no track is playable, the loop can continue with no end, for
+        # example in repeat mode, so it stops after a limit. In random mode,
+        # the first round has only the tracks that did not play yet, so the
+        # limit is two rounds. Then the loop tries each track.
         count = self.core.tracklist.get_length() * 2
 
         while not self._change(pending, state):
