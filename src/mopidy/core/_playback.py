@@ -174,7 +174,10 @@ class PlaybackController:
     def _on_end_of_stream(self) -> None:
         self._set_state(PlaybackState.STOPPED)
         if self._current_tl_track:
-            self._trigger_track_playback_ended(self.get_time_position())
+            self._trigger_track_playback_ended(
+                tl_track=self._current_tl_track,
+                time_position=self.get_time_position(),
+            )
         self._set_current_tl_track(None)
 
     def _on_stream_changed(self, _uri: Uri) -> None:
@@ -185,7 +188,10 @@ class PlaybackController:
             position, self._last_position = self._last_position, None
 
         if self._pending_position is None:
-            self._trigger_track_playback_ended(position)
+            self._trigger_track_playback_ended(
+                tl_track=self._current_tl_track,
+                time_position=position,
+            )
 
         self._stream_title = None
         if self._pending_tl_track:
@@ -565,22 +571,26 @@ class PlaybackController:
         self.core.history._add_track(tl_track.track)
         CoreListener.send("track_playback_started", tl_track=tl_track)
 
-    def _trigger_track_playback_ended(self, time_position_before_stop: int) -> None:
-        tl_track = self.get_current_tl_track()
+    def _trigger_track_playback_ended(
+        self,
+        *,
+        tl_track: TlTrack | None,
+        time_position: int,
+    ) -> None:
         if tl_track is None:
             return
 
         logger.debug("Triggering track playback ended event")
 
         if not self._previous:
-            self.core.tracklist._mark_played(self._current_tl_track)
+            self.core.tracklist._mark_played(tl_track)
         self._previous = False
 
         # TODO: Use the lowest of track duration and position.
         CoreListener.send(
             "track_playback_ended",
             tl_track=tl_track,
-            time_position=time_position_before_stop,
+            time_position=time_position,
         )
 
     def _trigger_playback_state_changed(
