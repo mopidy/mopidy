@@ -221,9 +221,10 @@ class TracklistController:
         """
         if tl_track is not None:
             validation.check_instance(tl_track, TlTrack)
-        if self.get_single() and self.get_repeat():
+        # Consume mode removes the track, so do not repeat it.
+        if self.get_single() and self.get_repeat() and not self.get_consume():
             return tl_track
-        if self.get_single():
+        if self.get_single() and not self.get_repeat():
             return None
 
         # Current difference between next and EOT handling is that EOT needs to

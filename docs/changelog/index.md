@@ -129,6 +129,10 @@ reference](../reference/media.md) has an example.
 
 ### Other changes
 
+- Core: In single and repeat mode with consume mode on, play the next track
+  when a track ends. Before, core played the same track again, but consume
+  mode had removed it from the tracklist. (!2356)
+
 - Media: Upgrade the media reader pipeline from using the `typefind` and
   `decodebin` GStreamer elements to using `parsebin`.
 

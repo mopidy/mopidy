@@ -485,6 +485,48 @@ class TestConsumeHandling(BaseTest):
 
         assert self.playback.get_state() == "stopped"
 
+    def test_about_to_finish_in_single_and_repeat_mode_repeats_track(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.tracklist.set_single(True)
+        self.core.tracklist.set_repeat(True)
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+
+        self.trigger_about_to_finish()
+
+        assert self.core.playback.get_current_tl_track() == tl_tracks[0]
+
+    def test_about_to_finish_in_single_repeat_and_consume_mode_plays_next_track(
+        self,
+    ):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.tracklist.set_single(True)
+        self.core.tracklist.set_repeat(True)
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+
+        with mock.patch.object(core.CoreListener, "send") as send_mock:
+            self.trigger_about_to_finish()
+
+        assert self.core.playback.get_state() == PlaybackState.PLAYING
+        assert self.core.playback.get_current_tl_track() == tl_tracks[1]
+        assert self.core.tracklist.get_tl_tracks() == tl_tracks[1:]
+        assert send_mock.mock_calls == [
+            mock.call("tracklist_changed"),
+            mock.call(
+                "track_playback_ended",
+                tl_track=tl_tracks[0],
+                time_position=mock.ANY,
+            ),
+            mock.call(
+                "playback_state_changed",
+                old_state=PlaybackState.PLAYING,
+                new_state=PlaybackState.PLAYING,
+            ),
+            mock.call("track_playback_started", tl_track=tl_tracks[1]),
+        ]
+
     def test_tracklist_changed_in_consume_mode_sees_new_current_track(self):
         tl_tracks = self.core.tracklist.get_tl_tracks()
         self.core.tracklist.set_consume(True)
