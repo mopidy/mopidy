@@ -258,32 +258,33 @@ class PlaybackController:
             # handled.
             pass
 
-        pending = self.core.tracklist.eot_track(self._current_tl_track)  # ty: ignore[deprecated]
-        # If no track is playable, the loop can continue with no end, for
-        # example in repeat mode, so it stops after a limit. In random mode,
-        # the first round has only the tracks that did not play yet, so the
-        # limit is two rounds. Then the loop tries each track.
-        count = self.core.tracklist.get_length() * 2
+        self._try_until_playable(
+            pending=self.core.tracklist.eot_track(self._current_tl_track),  # ty: ignore[deprecated]
+            change=self._change_eot_track,
+            step=self.core.tracklist.eot_track,  # ty: ignore[deprecated]
+        )
 
-        while pending:
-            backend = self._get_backend(pending)
-            if backend:
-                try:
-                    if backend.playback.change_track(pending.track).get():
-                        self._pending_tl_track = pending
-                        break
-                except Exception:
-                    logger.exception(
-                        "%s backend caused an exception.",
-                        backend.actor_ref.actor_class.__name__,
-                    )
+    def _change_eot_track(self, tl_track: TlTrack | None) -> bool:
+        """Give the backend the track to play after the current track.
 
-            self.core.tracklist._mark_unplayable(pending)
-            pending = self.core.tracklist.eot_track(pending)  # ty: ignore[deprecated]
-            count -= 1
-            if not count:
-                logger.info("No playable track in the list.")
-                break
+        Returns `False` if the track is not playable.
+        """
+        if tl_track is None:
+            return True
+        backend = self._get_backend(tl_track)
+        if not backend:
+            return False
+        try:
+            if not backend.playback.change_track(tl_track.track).get():
+                return False
+        except Exception:
+            logger.exception(
+                "%s backend caused an exception.",
+                backend.actor_ref.actor_class.__name__,
+            )
+            return False
+        self._pending_tl_track = tl_track
+        return True
 
     def _on_tracklist_change(self) -> None:
         """Tell the playback controller that the current playlist has changed.
@@ -367,23 +368,13 @@ class PlaybackController:
                 )
 
         current = self._pending_tl_track or self._current_tl_track
-        pending = tl_track or current or self.core.tracklist.next_track(None)  # ty: ignore[deprecated]
-        # If no track is playable, the loop can continue with no end, for
-        # example in repeat mode, so it stops after a limit. In random mode,
-        # the first round has only the tracks that did not play yet, so the
-        # limit is two rounds. Then the loop tries each track.
-        count = self.core.tracklist.get_length() * 2
-
-        while pending:
-            if self._change(pending, PlaybackState.PLAYING):
-                break
-            self.core.tracklist._mark_unplayable(pending)
-            current = pending
-            pending = self.core.tracklist.next_track(current)  # ty: ignore[deprecated]
-            count -= 1
-            if not count:
-                logger.info("No playable track in the list.")
-                break
+        self._try_until_playable(
+            pending=tl_track or current or self.core.tracklist.next_track(None),  # ty: ignore[deprecated]
+            change=lambda candidate: (
+                candidate is None or self._change(candidate, PlaybackState.PLAYING)
+            ),
+            step=self.core.tracklist.next_track,  # ty: ignore[deprecated]
+        )
 
     def previous(self) -> None:
         """Change to the previous track.
@@ -544,19 +535,44 @@ class PlaybackController:
             step: Gives the track to try after an unplayable track.
         """
         state = self.get_state()
+        self._try_until_playable(
+            pending=pending,
+            change=lambda tl_track: self._change(tl_track, state),
+            step=step,
+        )
+
+    def _try_until_playable(
+        self,
+        *,
+        pending: TlTrack | None,
+        change: Callable[[TlTrack | None], bool],
+        step: Callable[[TlTrack | None], TlTrack | None],
+    ) -> None:
+        """Call `change` with each track from `pending` until it returns `True`.
+
+        Args:
+            pending: The first track to try.
+            change: Changes to the given track. Returns `False` if the track
+                is not playable.
+            step: Gives the track to try after an unplayable track.
+        """
         # If no track is playable, the loop can continue with no end, for
         # example in repeat mode, so it stops after a limit. In random mode,
         # the first round has only the tracks that did not play yet, so the
         # limit is two rounds. Then the loop tries each track.
         count = self.core.tracklist.get_length() * 2
 
-        while not self._change(pending, state):
+        while not change(pending):
             self.core.tracklist._mark_unplayable(pending)
             pending = step(pending)
             count -= 1
             if not count:
                 logger.info("No playable track in the list.")
                 break
+
+        # In consume mode, remove the unplayable tracks after the loop, so that
+        # step() can find the position of each unplayable track.
+        self.core.tracklist._remove_unplayable()
 
     def _trigger_track_playback_paused(self) -> None:
         logger.debug("Triggering track playback paused event")

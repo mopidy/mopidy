@@ -461,6 +461,61 @@ class TestConsumeHandling(BaseTest):
 
         assert unplayable_tl_track not in self.core.tracklist.get_tl_tracks()
 
+    def test_next_in_consume_mode_skips_unplayable_track(self):
+        # Make translate_uri return None.
+        track = Track(uri="dummy:unplayable", length=1234)
+        with pytest.deprecated_call():
+            self.core.tracklist.add(tracks=[track], at_position=2)
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tl_tracks[1].tlid)
+        self.replay_events()
+
+        self.core.playback.next()
+        self.replay_events()
+
+        assert self.core.playback.get_current_tl_track() == tl_tracks[3]
+        assert tl_tracks[2] not in self.core.tracklist.get_tl_tracks()
+
+    def test_next_in_consume_mode_keeps_track_unplayable_before_consume(self):
+        # Make translate_uri return None.
+        track = Track(uri="dummy:unplayable", length=1234)
+        with pytest.deprecated_call():
+            self.core.tracklist.add(tracks=[track], at_position=1)
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+        self.core.playback.next()
+        self.replay_events()
+        self.core.tracklist.set_consume(True)
+
+        self.core.playback.next()
+        self.replay_events()
+
+        assert self.core.playback.get_current_tl_track() == tl_tracks[3]
+        assert tl_tracks[1] in self.core.tracklist.get_tl_tracks()
+
+    @mock.patch("random.shuffle", mock.Mock())
+    def test_next_in_consume_and_random_mode_skips_unplayable_track(self):
+        # With no shuffle, the unplayable track comes first in random mode
+        # after tracks a and b played, then track c.
+        track = Track(uri="dummy:unplayable", length=1234)
+        with pytest.deprecated_call():
+            self.core.tracklist.add(tracks=[track], at_position=2)
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.tracklist.set_random(True)
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+        self.core.playback.play(tl_tracks[1].tlid)
+        self.replay_events()
+        self.core.tracklist.set_consume(True)
+
+        self.core.playback.next()
+        self.replay_events()
+
+        assert self.core.playback.get_current_tl_track() == tl_tracks[3]
+        assert tl_tracks[2] not in self.core.tracklist.get_tl_tracks()
+
     def test_on_about_to_finish_in_consume_mode_removes_finished_track(self):
         tl_track = self.core.tracklist.get_tl_tracks()[0]
 
@@ -566,6 +621,57 @@ class TestConsumeHandling(BaseTest):
 
         assert self.core.playback.get_current_tl_track() == tl_tracks[1]
         assert self.core.tracklist.get_tl_tracks() == tl_tracks[1:]
+
+    def test_play_in_consume_mode_skips_unplayable_track(self):
+        # Make translate_uri return None.
+        track = Track(uri="dummy:unplayable", length=1234)
+        with pytest.deprecated_call():
+            self.core.tracklist.add(tracks=[track], at_position=2)
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.tracklist.set_consume(True)
+
+        self.core.playback.play(tl_tracks[2].tlid)
+        self.replay_events()
+
+        assert self.core.playback.get_current_tl_track() == tl_tracks[3]
+        assert tl_tracks[2] not in self.core.tracklist.get_tl_tracks()
+
+    def test_about_to_finish_in_consume_mode_skips_unplayable_track(self):
+        # Make translate_uri return None.
+        track = Track(uri="dummy:unplayable", length=1234)
+        with pytest.deprecated_call():
+            self.core.tracklist.add(tracks=[track], at_position=2)
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.tracklist.set_consume(True)
+        self.core.playback.play(tl_tracks[1].tlid)
+        self.replay_events()
+
+        self.trigger_about_to_finish()
+
+        assert self.core.playback.get_current_tl_track() == tl_tracks[3]
+        assert tl_tracks[2] not in self.core.tracklist.get_tl_tracks()
+
+    @mock.patch("random.shuffle", mock.Mock())
+    def test_about_to_finish_in_consume_and_random_mode_skips_unplayable_track(
+        self,
+    ):
+        # With no shuffle, the unplayable track comes first in random mode
+        # after tracks a and b played, then track c.
+        track = Track(uri="dummy:unplayable", length=1234)
+        with pytest.deprecated_call():
+            self.core.tracklist.add(tracks=[track], at_position=2)
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.tracklist.set_random(True)
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+        self.core.playback.play(tl_tracks[1].tlid)
+        self.replay_events()
+        self.core.tracklist.set_consume(True)
+
+        self.trigger_about_to_finish()
+
+        assert self.core.playback.get_current_tl_track() == tl_tracks[3]
+        assert tl_tracks[2] not in self.core.tracklist.get_tl_tracks()
 
 
 class TestRemoveCurrentTrack(BaseTest):
