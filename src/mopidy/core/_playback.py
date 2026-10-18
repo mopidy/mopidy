@@ -366,62 +366,6 @@ class PlaybackController:
                 logger.info("No playable track in the list.")
                 break
 
-    def _change(  # noqa: PLR0911
-        self,
-        pending_tl_track: TlTrack | None,
-        state: PlaybackState,
-    ) -> bool:
-        self._pending_tl_track = pending_tl_track
-
-        if not pending_tl_track:
-            self.stop()
-            self._on_end_of_stream()  # pretend an EOS happened for cleanup
-            return True
-
-        backend = self._get_backend(pending_tl_track)
-        if not backend:
-            return False
-
-        # This must happen before prepare_change gets called, otherwise the
-        # backend flushes the information of the track.
-        self._last_position = self.get_time_position()
-
-        # TODO: Wrap backend call in error handling.
-        backend.playback.prepare_change()
-
-        try:
-            if not backend.playback.change_track(pending_tl_track.track).get():
-                return False
-        except Exception:
-            logger.exception(
-                "%s backend caused an exception.",
-                backend.actor_ref.actor_class.__name__,
-            )
-            return False
-
-        # TODO: Wrap backend calls in error handling.
-        if state == PlaybackState.PLAYING:
-            try:
-                return backend.playback.play().get()
-            except TypeError:
-                # TODO: check by binding against underlying play method using
-                # inspect and otherwise re-raise?
-                logger.error(
-                    "%s needs to be updated to work with this version of Mopidy.",
-                    backend,
-                )
-                return False
-        elif state == PlaybackState.PAUSED:
-            return backend.playback.pause().get()
-        elif state == PlaybackState.STOPPED:
-            # TODO: emit some event now?
-            self._current_tl_track = self._pending_tl_track
-            self._pending_tl_track = None
-            return True
-
-        msg = f"Unknown playback state: {state}"
-        raise CoreError(msg)
-
     def previous(self) -> None:
         """Change to the previous track.
 
@@ -519,6 +463,62 @@ class PlaybackController:
             # TODO: Wrap backend call in error handling.
             if not backend or backend.playback.stop().get():
                 self._set_state(PlaybackState.STOPPED)
+
+    def _change(  # noqa: PLR0911
+        self,
+        pending_tl_track: TlTrack | None,
+        state: PlaybackState,
+    ) -> bool:
+        self._pending_tl_track = pending_tl_track
+
+        if not pending_tl_track:
+            self.stop()
+            self._on_end_of_stream()  # pretend an EOS happened for cleanup
+            return True
+
+        backend = self._get_backend(pending_tl_track)
+        if not backend:
+            return False
+
+        # This must happen before prepare_change gets called, otherwise the
+        # backend flushes the information of the track.
+        self._last_position = self.get_time_position()
+
+        # TODO: Wrap backend call in error handling.
+        backend.playback.prepare_change()
+
+        try:
+            if not backend.playback.change_track(pending_tl_track.track).get():
+                return False
+        except Exception:
+            logger.exception(
+                "%s backend caused an exception.",
+                backend.actor_ref.actor_class.__name__,
+            )
+            return False
+
+        # TODO: Wrap backend calls in error handling.
+        if state == PlaybackState.PLAYING:
+            try:
+                return backend.playback.play().get()
+            except TypeError:
+                # TODO: check by binding against underlying play method using
+                # inspect and otherwise re-raise?
+                logger.error(
+                    "%s needs to be updated to work with this version of Mopidy.",
+                    backend,
+                )
+                return False
+        elif state == PlaybackState.PAUSED:
+            return backend.playback.pause().get()
+        elif state == PlaybackState.STOPPED:
+            # TODO: emit some event now?
+            self._current_tl_track = self._pending_tl_track
+            self._pending_tl_track = None
+            return True
+
+        msg = f"Unknown playback state: {state}"
+        raise CoreError(msg)
 
     def _trigger_track_playback_paused(self) -> None:
         logger.debug("Triggering track playback paused event")
