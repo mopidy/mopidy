@@ -363,22 +363,12 @@ class PlaybackController:
         will continue. If it was paused, it will still be paused, etc.
         """
         self._previous = True
-        state = self.get_state()
         current = self._pending_tl_track or self._current_tl_track
-        # avoid endless loop if 'repeat' is 'true' and no track is playable
-        # * 2 -> second run to get all playable track in a shuffled playlist
-        count = self.core.tracklist.get_length() * 2
-
-        while current:
-            pending = self.core.tracklist.previous_track(current)  # ty: ignore[deprecated]
-            if self._change(pending, state):
-                break
-            self.core.tracklist._mark_unplayable(pending)
-            current = pending
-            count -= 1
-            if not count:
-                logger.info("No playable track in the list.")
-                break
+        if current:
+            self._change_to_playable(
+                pending=self.core.tracklist.previous_track(current),  # ty: ignore[deprecated]
+                step=self.core.tracklist.previous_track,  # ty: ignore[deprecated]
+            )
 
         # TODO: no return value?
 
