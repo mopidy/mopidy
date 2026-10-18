@@ -129,6 +129,20 @@ reference](../reference/media.md) has an example.
 
 ### Other changes
 
+- Core: In single and repeat mode with consume mode on, play the next track
+  when a track ends. Before, core played the same track again, but consume
+  mode had removed it from the tracklist. (!2356)
+
+- Core: When the current track is removed from the tracklist, change to the
+  track that [`next()`][mopidy.core.PlaybackController.next] gives, and skip
+  the tracks that were removed in the same call. The playback state does not
+  change: if playback was paused, it is paused on the new track, as with
+  `next()`. If no track remains, playback stops. Before, core cleared the
+  current track, but the removed track continued to play, and
+  [`pause()`][mopidy.core.PlaybackController.pause] and
+  [`stop()`][mopidy.core.PlaybackController.stop] could not stop it.
+  (#1590, !2356)
+
 - Media: Upgrade the media reader pipeline from using the `typefind` and
   `decodebin` GStreamer elements to using `parsebin`.
 
