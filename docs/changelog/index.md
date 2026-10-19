@@ -197,6 +197,11 @@ reference](../reference/media.md) has an example.
   [`ScannerError`][mopidy.exceptions.ScannerError] for a URI scheme that no
   GStreamer element can open. Before, it raised `GLib.Error`. (!2347)
 
+- Fix a `SystemError` from an `OverflowError` in the audio actor on 32-bit
+  platforms with PyGObject 3.50, the version in Debian 13. GStreamer's extended
+  bus message types, such as the `STREAM_COLLECTION` messages from HLS streams,
+  caused it. The audio actor now drops these messages. (#2030)
+
 ### Other changes
 
 - HTTP extension: Fix the debug log message for sent JSON-RPC responses. It was

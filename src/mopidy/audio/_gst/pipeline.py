@@ -223,7 +223,7 @@ class GstPlaybackPipeline:
 
         bus.set_sync_handler(sync_handler)
 
-    def _decode_bus_message(  # noqa: PLR0911
+    def _decode_bus_message(  # noqa: C901, PLR0911
         self,
         message: Gst.Message,
     ) -> GstBusMessage | None:
@@ -233,6 +233,17 @@ class GstPlaybackPipeline:
         methods only read the structure the message already carries, so they
         take no lock and cannot block that thread.
         """
+        # Extended message types have the `Gst.MessageType.EXTENDED` bit (2³¹)
+        # set. On 32-bit platforms with PyGObject < 3.51.0, comparing such a
+        # type with a `Gst.MessageType` member leaves an `OverflowError` set,
+        # and the next C call fails. We use none of these types, so we drop
+        # them with integer arithmetic only. PyGObject 3.51.0 (a pre-release)
+        # fixed this, and 3.52.0 is the first stable release with the fix.
+        # Remove this when the minimum PyGObject version is 3.52.0 or newer.
+        # See https://github.com/mopidy/mopidy/issues/2030.
+        if int(message.type) & int(Gst.MessageType.EXTENDED):
+            return None
+
         match message.type:
             case Gst.MessageType.ASYNC_DONE:
                 return GstAsyncDone()
