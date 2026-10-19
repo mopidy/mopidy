@@ -175,3 +175,9 @@ def test_gst_state_has_no_playback_state_between_tracks():
 def test_gst_state_converts_both_ways():
     assert types.GstState(Gst.State.PAUSED) is types.GstState.PAUSED
     assert types.GstState.PAUSED.value == Gst.State.PAUSED
+
+
+def test_decode_bus_message_drops_extended_message_types(pipeline):
+    message = Gst.Message.new_property_notify(pipeline.playbin, "foo", None)
+
+    assert pipeline._decode_bus_message(message) is None
