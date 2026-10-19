@@ -200,7 +200,7 @@ reference](../reference/media.md) has an example.
 - Fix a `SystemError` from an `OverflowError` in the audio actor on 32-bit
   platforms with PyGObject 3.50, the version in Debian 13. GStreamer's extended
   bus message types, such as the `STREAM_COLLECTION` messages from HLS streams,
-  caused it. The audio actor now drops these messages. (#2030)
+  caused it. The audio actor now drops these messages. (#2030, !2359)
 
 ### Other changes
 
