@@ -75,7 +75,7 @@ tests = [
     "pytest-repeat >= 0.9.3",
 ]
 typing = [
-    "pygobject-stubs >= 2.19.0",
+    "pygobject-stubs >= 2.20.0",
     "pyright == 1.1.414",
     "ty == 0.0.86",
 ]

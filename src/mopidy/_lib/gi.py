@@ -56,7 +56,7 @@ if Gst.version() < REQUIRED_GST_VERSION:
 def create_glib_loop() -> GLib.MainLoop:
     logger.debug("Creating GLib mainloop")
     loop = GLib.MainLoop()
-    _unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, _on_sigterm, loop)  # ty: ignore[invalid-argument-type]
+    _unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, _on_sigterm, loop)
     _use_glib_loop_for_dbus()
     return loop
 
