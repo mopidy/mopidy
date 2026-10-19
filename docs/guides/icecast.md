@@ -64,6 +64,11 @@ can use with the `gst-launch-1.0` command can be plugged into [`audio/output`](.
   this should mostly work as of Mopidy 2.0.1. For other extensions,
   [#866](https://github.com/mopidy/mopidy/issues/866) is the tracking issue.
 
+- **FLAC:** If the output encodes to FLAC with `flacenc`, Mopidy crashes when
+  it changes to the next track. This is a GStreamer bug, see
+  [gstreamer#1469](https://gitlab.freedesktop.org/gstreamer/gstreamer/-/work_items/1469).
+  Use MP3, Ogg Vorbis, or Opus (`opusenc`) instead.
+
 ## Fallback stream
 
 By using a *fallback stream* playing silence, you can somewhat mitigate the
