@@ -77,3 +77,95 @@ def test_translate_uri_ignores_unknown_scheme(provider, media_reader):
 
     assert result is None
     media_reader.find_playback_target.assert_not_called()
+
+
+def target(*, seekable: bool, length: int | None = None) -> PlaybackTarget:
+    return PlaybackTarget(
+        uri=STREAM_URI,
+        info=MediaInfo(
+            track=Track(uri=STREAM_URI, length=length),
+            playable=True,
+            seekable=seekable,
+        ),
+        entry=None,
+    )
+
+
+def test_is_live_if_target_is_not_seekable_and_has_no_length(provider, media_reader):
+    media_reader.find_playback_target.return_value = target(seekable=False)
+
+    uri = provider.translate_uri(PLAYLIST_URI)
+
+    assert provider.is_live(uri) is True
+
+
+def test_is_not_live_if_target_is_seekable(provider, media_reader):
+    media_reader.find_playback_target.return_value = target(seekable=True)
+
+    uri = provider.translate_uri(PLAYLIST_URI)
+
+    assert provider.is_live(uri) is False
+
+
+def test_is_not_live_if_target_has_a_length(provider, media_reader):
+    media_reader.find_playback_target.return_value = target(
+        seekable=False, length=180_000
+    )
+
+    uri = provider.translate_uri(PLAYLIST_URI)
+
+    assert provider.is_live(uri) is False
+
+
+def test_is_not_live_if_target_is_not_playable(provider, media_reader):
+    media_reader.find_playback_target.return_value = PlaybackTarget(
+        uri=STREAM_URI,
+        info=MediaInfo(track=Track(uri=STREAM_URI), playable=False, seekable=False),
+        entry=None,
+    )
+
+    uri = provider.translate_uri(PLAYLIST_URI)
+
+    assert provider.is_live(uri) is False
+
+
+def test_is_not_live_if_target_is_unverified(provider, media_reader):
+    media_reader.find_playback_target.return_value = PlaybackTarget(
+        uri=STREAM_URI, info=None, entry=None
+    )
+
+    uri = provider.translate_uri(PLAYLIST_URI)
+
+    assert provider.is_live(uri) is False
+
+
+def test_is_not_live_if_uri_matches_metadata_blacklist(config, media_reader):
+    config["stream"]["metadata_blacklist"] = [STREAM_URI]
+    provider = actor.StreamBackend(audio=mock.Mock(), config=config).playback
+
+    uri = provider.translate_uri(STREAM_URI)
+
+    assert provider.is_live(uri) is False
+    media_reader.find_playback_target.assert_not_called()
+
+
+def test_is_not_live_for_another_uri(provider, media_reader):
+    media_reader.find_playback_target.return_value = target(seekable=False)
+
+    provider.translate_uri(PLAYLIST_URI)
+
+    assert provider.is_live("http://example.com/other.mp3") is False
+
+
+def test_is_not_live_after_translating_another_uri(provider, media_reader):
+    media_reader.find_playback_target.return_value = target(seekable=False)
+    uri = provider.translate_uri(PLAYLIST_URI)
+    media_reader.find_playback_target.return_value = None
+
+    provider.translate_uri("http://example.com/gone.m3u")
+
+    assert provider.is_live(uri) is False
+
+
+def test_is_not_live_before_translate_uri(provider):
+    assert provider.is_live(STREAM_URI) is False

@@ -90,6 +90,11 @@ reference](../reference/media.md) has an example.
   config value is now the total time to find the URI to play. Before, the limit
   for the total time was 1000 times too long. (#2329, !2335)
 
+- Stream extension: Play a stream as a live stream if it cannot seek and has no
+  duration, such as most internet radio streams. GStreamer then does not pause
+  playback to fill its buffer. Before, playback of some radio streams stopped
+  for several seconds at random. (#1280, #1892, !2362)
+
 - M3U extension: Read playlists with
   [`parse_playlist_entries()`][mopidy.media.parse_playlist_entries]. A `file`
   URI entry with no `#EXTINF` name now gets its name from the file name, as a

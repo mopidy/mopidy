@@ -76,8 +76,12 @@ class StreamLibraryProvider(backend.LibraryProvider):
 class StreamPlaybackProvider(backend.PlaybackProvider):
     backend: StreamBackend
 
+    _live_uri: Uri | None = None
+
     @override
     def translate_uri(self, uri: Uri) -> Uri | None:
+        self._live_uri = None
+
         if urllib.parse.urlsplit(uri).scheme not in self.backend.uri_schemes:
             return None
 
@@ -86,4 +90,21 @@ class StreamPlaybackProvider(backend.PlaybackProvider):
             return uri
 
         target = self.backend._media_reader.find_playback_target(uri)
-        return target.uri if target else None
+        if target is None:
+            return None
+
+        # A radio stream cannot seek and has no duration.
+        info = target.info
+        if (
+            info is not None
+            and info.playable
+            and not info.seekable
+            and info.track.length is None
+        ):
+            self._live_uri = target.uri
+
+        return target.uri
+
+    @override
+    def is_live(self, uri: Uri) -> bool:
+        return uri == self._live_uri
