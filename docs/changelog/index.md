@@ -181,6 +181,9 @@ reference](../reference/media.md) has an example.
   [`resume()`][mopidy.core.PlaybackController.resume] with no wait between
   them, the playback state could stay paused while the audio played. (!2358)
 
+- Add `Notifier` so that extensions and backends can send
+  notifications to users. (#1011)
+
 ### Audio
 
 - Handle all GStreamer bus messages on the audio actor thread. Before,
