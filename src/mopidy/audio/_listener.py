@@ -91,3 +91,13 @@ class AudioListener(listener.Listener):
         Args:
             tags: The tags that have just been updated.
         """
+
+    def playback_error(self, error: str, debug: str) -> None:
+        """Called whenever an error prevents audio playback.
+
+        *MAY* be implemented by actor.
+
+        Args:
+            error: The error message reported by GStreamer.
+            debug: Additional debugging information reported by GStreamer.
+        """
