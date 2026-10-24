@@ -46,5 +46,6 @@ def test_listener_has_default_impl_for_position_changed(listener):
 def test_listener_has_default_impl_for_tags_changed(listener):
     listener.tags_changed([])
 
+
 def test_listener_has_default_impl_for_playback_error(listener):
     listener.playback_error("test error", "test debug")
