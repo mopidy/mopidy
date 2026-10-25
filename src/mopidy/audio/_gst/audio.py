@@ -255,6 +255,12 @@ class GstAudio(Audio, pykka.ThreadingActor):
         gst_logger.error(f"GStreamer error: {error.message}")
         gst_logger.debug(f"Got ERROR bus message: error={error!r} debug={debug!r}")
 
+        AudioListener.send(
+            "playback_error",
+            error=error.message,
+            debug=debug,
+        )
+
         # TODO: is this needed?
         self.stop_playback()
 
