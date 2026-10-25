@@ -7,8 +7,8 @@ import tornado.escape
 import tornado.web
 import tornado.wsgi
 
-import mopidy
 from mopidy._exts.http import actor, handlers
+from mopidy._lib.version import get_version
 
 
 def make_mopidy_app(**http_config):
@@ -25,7 +25,7 @@ def make_mopidy_app(**http_config):
     }
     core = mock.Mock()
     core.get_version = mock.MagicMock(name="get_version")
-    core.get_version.return_value = mopidy.__version__
+    core.get_version.return_value = get_version()
 
     testapps = [{"name": "testapp"}]
     teststatics = [{"name": "teststatic"}]
@@ -70,7 +70,7 @@ def test_mopidy_app_should_return_index(mopidy_server):
     assert "This web server is a part of the Mopidy music server." in body
     assert "testapp" in body
     assert "teststatic" in body
-    assert response.headers["X-Mopidy-Version"] == mopidy.__version__
+    assert response.headers["X-Mopidy-Version"] == get_version()
     assert response.headers["Cache-Control"] == "no-cache"
 
 
@@ -85,7 +85,7 @@ def test_mopidy_app_should_return_static_files(mopidy_server):
     response = mopidy_server.fetch("/mopidy/mopidy.css", method="GET")
 
     assert "html {" in response.body.decode()
-    assert response.headers["X-Mopidy-Version"] == mopidy.__version__
+    assert response.headers["X-Mopidy-Version"] == get_version()
     assert response.headers["Cache-Control"] == "no-cache"
 
 
@@ -163,7 +163,7 @@ def test_rpc_should_return_mopidy_version(mopidy_server):
     assert tornado.escape.json_decode(response.body) == {
         "jsonrpc": "2.0",
         "id": 1,
-        "result": mopidy.__version__,
+        "result": get_version(),
     }
 
 
@@ -272,7 +272,7 @@ def test_static_files_can_serve_static_files(static_files_server):
     response = static_files_server.fetch("/static/test_server.py", method="GET")
 
     assert response.code == 200
-    assert response.headers["X-Mopidy-Version"] == mopidy.__version__
+    assert response.headers["X-Mopidy-Version"] == get_version()
     assert response.headers["Cache-Control"] == "no-cache"
 
 
@@ -447,7 +447,7 @@ def test_invalid_default_app_should_redirect_to_clients_list(
 
     assert "testapp" in body
     assert "teststatic" in body
-    assert response.headers["X-Mopidy-Version"] == mopidy.__version__
+    assert response.headers["X-Mopidy-Version"] == get_version()
     assert response.headers["Cache-Control"] == "no-cache"
 
 

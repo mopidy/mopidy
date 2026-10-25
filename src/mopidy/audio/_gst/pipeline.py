@@ -5,7 +5,12 @@ from typing import TYPE_CHECKING, cast
 
 from mopidy import exceptions
 from mopidy._lib.gi import GLib, Gst, GstPbutils
-from mopidy.audio import tags as tags_lib
+from mopidy._lib.gst import (
+    Signals,
+    from_gst_taglist,
+    from_gst_time,
+    to_gst_time,
+)
 from mopidy.audio._gst.types import (
     GstAsyncDone,
     GstBuffering,
@@ -19,11 +24,6 @@ from mopidy.audio._gst.types import (
     GstStreamStart,
     GstTag,
     GstWarning,
-)
-from mopidy.audio._utils import (
-    Signals,
-    clocktime_to_millisecond,
-    millisecond_to_clocktime,
 )
 from mopidy.types import DurationMs
 
@@ -104,7 +104,7 @@ def make_output_bin(output: str) -> Gst.Element:
     return output_bin
 
 
-class GstPipeline:
+class GstPlaybackPipeline:
     """The GStreamer element graph used for playback.
 
     This is the only code that touches the GStreamer elements. It knows
@@ -223,7 +223,7 @@ class GstPipeline:
 
         bus.set_sync_handler(sync_handler)
 
-    def _decode_bus_message(  # noqa: PLR0911
+    def _decode_bus_message(  # noqa: C901, PLR0911
         self,
         message: Gst.Message,
     ) -> GstBusMessage | None:
@@ -233,6 +233,17 @@ class GstPipeline:
         methods only read the structure the message already carries, so they
         take no lock and cannot block that thread.
         """
+        # Extended message types have the `Gst.MessageType.EXTENDED` bit (2³¹)
+        # set. On 32-bit platforms with PyGObject < 3.51.0, comparing such a
+        # type with a `Gst.MessageType` member leaves an `OverflowError` set,
+        # and the next C call fails. We use none of these types, so we drop
+        # them with integer arithmetic only. PyGObject 3.51.0 (a pre-release)
+        # fixed this, and 3.52.0 is the first stable release with the fix.
+        # Remove this when the minimum PyGObject version is 3.52.0 or newer.
+        # See https://github.com/mopidy/mopidy/issues/2030.
+        if int(message.type) & int(Gst.MessageType.EXTENDED):
+            return None
+
         match message.type:
             case Gst.MessageType.ASYNC_DONE:
                 return GstAsyncDone()
@@ -265,7 +276,7 @@ class GstPipeline:
             case Gst.MessageType.STREAM_START:
                 return GstStreamStart()
             case Gst.MessageType.TAG:
-                return GstTag(tags_lib.convert_taglist(message.parse_tag()))
+                return GstTag(from_gst_taglist(message.parse_tag()))
             case Gst.MessageType.WARNING:
                 return GstWarning(*message.parse_warning())
             case _:
@@ -308,7 +319,7 @@ class GstPipeline:
                 "position": segment.position,
             },
         )
-        return clocktime_to_millisecond(segment.position)
+        return from_gst_time(segment.position)
 
     def set_uri(self, uri: str, *, download: bool = False) -> None:
         """Set the URI to play, and the buffering flags to use for it."""
@@ -349,12 +360,12 @@ class GstPipeline:
             logger.debug("Position query failed")
             return DurationMs(0)
 
-        return clocktime_to_millisecond(position)
+        return from_gst_time(position)
 
     def seek(self, position: DurationMs) -> bool:
         """Seek to a position in milliseconds."""
         # TODO: double check seek flags in use.
-        gst_position = millisecond_to_clocktime(position)
+        gst_position = to_gst_time(position)
         gst_logger.debug("Sending flushing seek: position=%r", gst_position)
         # Send seek event to the queue not the playbin. The default behavior
         # for bins is to forward this event to all sinks, which results in
@@ -386,6 +397,5 @@ class GstPipeline:
             self._pad.remove_probe(self._event_handler_id)
         self._event_handler_id = None
 
-        self._signals.disconnect(self.playbin, "about-to-finish")
-        self._signals.disconnect(self.playbin, "source-setup")
+        self._signals.disconnect_all()
         self.playbin.set_state(Gst.State.NULL)

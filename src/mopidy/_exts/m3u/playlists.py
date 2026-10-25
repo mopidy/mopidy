@@ -127,8 +127,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             logger.debug("Ignoring path outside playlist dir: %s", uri)
             return None
         try:
-            with self._open(path, "r") as fp:
-                items = translator.load_items(fp, self._base_dir)
+            items = self._load_items(path)
         except OSError as e:
             log_environment_error(f"Error reading playlist {uri!r}", e)
         else:
@@ -141,8 +140,7 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
             logger.debug("Ignoring path outside playlist dir: %s", uri)
             return None
         try:
-            with self._open(path, "r") as fp:
-                items = translator.load_items(fp, self._base_dir)
+            items = self._load_items(path)
             mtime = self._abspath(path).stat().st_mtime
         except OSError as e:
             log_environment_error(f"Error reading playlist {uri!r}", e)
@@ -186,17 +184,24 @@ class M3UPlaylistsProvider(backend.PlaylistsProvider):
         local_path = self._abspath(local_path)
         return paths.is_path_inside_base_dir(local_path, self._playlists_dir)
 
+    def _encoding(self, path: Path) -> str:
+        return "utf-8" if path.suffix == ".m3u8" else self._default_encoding
+
+    def _load_items(self, path: Path) -> list[Ref]:
+        with self._open(path, "rb") as fp:
+            data = fp.read()
+        return translator.load_items(data, self._base_dir, self._encoding(path))
+
     def _open(
         self,
         path: Path,
-        mode: str = "r",
+        mode: str,
     ) -> contextlib._GeneratorContextManager[IO[Any]] | IO[Any]:
-        encoding = "utf-8" if path.suffix == ".m3u8" else self._default_encoding
         if not path.is_absolute():
             path = self._abspath(path)
         if not self._is_in_basedir(path):
             msg = f"Path {path!r} is not inside playlist dir {self._playlists_dir!r}"
             raise BackendError(msg)
         if "w" in mode:
-            return replace(path, mode, encoding=encoding, errors="replace")
-        return path.open(mode, encoding=encoding, errors="replace")
+            return replace(path, mode, encoding=self._encoding(path), errors="replace")
+        return path.open(mode)

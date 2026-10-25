@@ -12,8 +12,8 @@ import tornado.ioloop
 import tornado.web
 import tornado.websocket
 
-import mopidy
 from mopidy import core
+from mopidy._lib.version import get_version
 
 from . import jsonrpc
 from .types import HttpConfig
@@ -192,7 +192,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
 
 def set_mopidy_headers(request_handler: tornado.web.RequestHandler) -> None:
     request_handler.set_header("Cache-Control", "no-cache")
-    request_handler.set_header("X-Mopidy-Version", mopidy.__version__.encode())
+    request_handler.set_header("X-Mopidy-Version", get_version().encode())
 
 
 def check_origin(

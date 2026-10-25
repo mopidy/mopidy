@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import dataclasses
 import enum
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from mopidy._lib.gi import Gst
 from mopidy.types import PlaybackState
 
 if TYPE_CHECKING:
     from mopidy._lib.gi import GLib
+    from mopidy._lib.gst import GstTags
 
 
 class GstPlayFlags(enum.IntFlag):
@@ -78,7 +79,7 @@ class GstError:
     """An element failed in a way that stops playback."""
 
     error: GLib.Error
-    debug: str
+    debug: str | None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -110,7 +111,7 @@ class GstTag:
     The tags are converted already, so this carries no GStreamer types.
     """
 
-    tags: dict[str, list[Any]]
+    tags: GstTags
 
 
 @dataclasses.dataclass(frozen=True)
@@ -118,7 +119,7 @@ class GstWarning:
     """An element reported a problem it could work around."""
 
     error: GLib.Error
-    debug: str
+    debug: str | None
 
 
 type GstBusMessage = (

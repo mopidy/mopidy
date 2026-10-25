@@ -14,6 +14,12 @@ In addition to playing streams, the extension also understands how to extract
 streams from a lot of playlist formats. This is convenient as most Internet
 radio stations links to playlists instead of directly to the radio streams.
 
+If a stream cannot seek and has no duration, the extension plays it as a live
+stream. This is true for most Internet radio streams. GStreamer then does not
+buffer the stream, which makes playback start faster and prevents pauses to
+fill the buffer. When you pause a live stream, the audio that the station sends
+during the pause is lost.
+
 If you're having trouble playing back a stream, see [Troubleshooting](../usage/troubleshooting.md)
 for how to check if you have all relevant GStreamer plugins installed.
 
@@ -46,7 +52,9 @@ separated by either comma or newline.
 
 ### stream/timeout
 
-Number of milliseconds before giving up looking up stream metadata.
+The maximum number of milliseconds to find the URI to play and its metadata.
+This is the total time for all playlist documents and streams that the
+extension reads for one URI.
 
 ### stream/metadata_blacklist
 

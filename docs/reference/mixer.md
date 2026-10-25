@@ -1,4 +1,4 @@
-# Audio mixer API
+# Mixer API
 
 ## Mixer implementations
 

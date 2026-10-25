@@ -6,6 +6,13 @@ from mopidy.audio.scan import Scanner
 from tests import path_to_data_dir
 
 
+def make_scanner(**kwargs):
+    with pytest.deprecated_call(
+        match=r"mopidy\.media\.MediaReader\.read_media_info\(\)"
+    ):
+        return Scanner(**kwargs)
+
+
 def find(path):
     dir_path = path_to_data_dir(path)
     if not dir_path.is_dir():
@@ -27,7 +34,7 @@ def errors():
 @pytest.fixture
 def scan(result, errors):
     def scan(paths):
-        scanner = Scanner()
+        scanner = make_scanner()
         for path in paths:
             uri = path_to_uri(path)
             try:
@@ -50,6 +57,13 @@ def check_if_missing_plugin(result):
         if not scan_result.playable and scan_result.mime == "audio/mpeg":
             msg = "Missing MP3 support?"
             pytest.skip(msg)
+
+
+def test_result_carries_the_scanned_uri(scan, result):
+    scan(find("scanner/simple"))
+
+    ogg = path_to_data_dir("scanner/simple/song1.ogg")
+    assert result[ogg].uri == path_to_uri(ogg)
 
 
 def test_tags_is_set(scan, result):
@@ -75,6 +89,15 @@ def test_duration_is_set(scan, result):
     mp3 = path_to_data_dir("scanner/simple/song1.mp3")
     assert result[mp3].duration == 4608
     assert result[ogg].duration == 4704
+
+
+def test_seekable_is_set(scan, result):
+    scan(find("scanner/simple"))
+
+    check_if_missing_plugin(result)
+
+    ogg = path_to_data_dir("scanner/simple/song1.ogg")
+    assert result[ogg].seekable is True
 
 
 def test_artist_is_set(scan, result):
@@ -142,6 +165,29 @@ def test_text_plain(scan, result, errors):
     path = path_to_data_dir("scanner/plain.txt")
     scan([path])
     assert path in errors or not result[path].playable
+
+
+def test_scan_uses_the_default_timeout(mocker):
+    gst_read = mocker.patch("mopidy.audio.scan.GstRead")
+    uri = path_to_uri(path_to_data_dir("scanner/simple/song1.ogg"))
+
+    make_scanner(timeout=4321).scan(uri)
+
+    assert gst_read.call_args.kwargs["timeout"] == 4321
+
+
+def test_per_call_timeout_overrides_the_default(mocker):
+    gst_read = mocker.patch("mopidy.audio.scan.GstRead")
+    uri = path_to_uri(path_to_data_dir("scanner/simple/song1.ogg"))
+
+    make_scanner(timeout=4321).scan(uri, timeout=1234)
+
+    assert gst_read.call_args.kwargs["timeout"] == 1234
+
+
+def test_uri_scheme_without_a_source_element_gives_scanner_error():
+    with pytest.raises(exceptions.ScannerError, match="nosuchscheme"):
+        make_scanner().scan("nosuchscheme:foo")
 
 
 @pytest.mark.skip(reason="Not implemented")

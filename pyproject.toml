@@ -63,8 +63,8 @@ docs = [
     "mkdocstrings-python >= 2.0.1",
     "zensical >= 0.0.33",
 ]
-rumdl = ["rumdl == 0.2.57"]
-ruff = ["ruff == 0.16.3"]
+rumdl = ["rumdl == 0.2.79"]
+ruff = ["ruff == 0.17.0"]
 tests = [
     "dirty-equals >= 0.9",
     "polyfactory >= 3.1",
@@ -75,9 +75,9 @@ tests = [
     "pytest-repeat >= 0.9.3",
 ]
 typing = [
-    "pygobject-stubs >= 2.14.0, != 2.15.0",
-    "pyright == 1.1.411",
-    "ty == 0.0.83",
+    "pygobject-stubs >= 2.20.0",
+    "pyright == 1.1.414",
+    "ty == 0.0.86",
 ]
 
 
@@ -225,12 +225,6 @@ commands = [
 [tool.tox.env."3.13-lowest"]
 base_python = ["python3.13"]
 uv_resolution = "lowest-direct"
-
-[tool.tox.env."3.15"]
-# Pydantic 2.13 pins pydantic-core 2.46, which has no cp315 wheels. The beta of
-# Pydantic 2.14 pins a pydantic-core version that has them.
-# TODO: Remove when Pydantic 2.14 is released.
-deps = ["pydantic >= 2.14.0b1"]
 
 [tool.tox.env.pyright]
 dependency_groups = ["typing"]

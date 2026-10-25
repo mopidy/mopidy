@@ -146,6 +146,22 @@ class TestM3UPlaylistsProvider:
             track_uri = track.uri.encode()
         assert [b"#EXTM3U", b"#EXTINF:-1,Test?", track_uri] == m3u
 
+    def test_latin1_playlist_contents_is_read_from_disk(self):
+        path = self.playlists_dir / "test.m3u"
+        path.write_bytes("#EXTM3U\n#EXTINF:-1,Blåbær\nfile:///a\n".encode("latin-1"))
+
+        result = self.core.playlists.lookup("m3u:test.m3u")
+
+        assert result.tracks == (Track(uri="file:///a", name="Blåbær"),)
+
+    def test_utf8_playlist_contents_is_read_from_m3u8_file(self):
+        path = self.playlists_dir / "test.m3u8"
+        path.write_bytes("#EXTM3U\n#EXTINF:-1,Blåbær\nfile:///a\n".encode())
+
+        result = self.core.playlists.lookup("m3u:test.m3u8")
+
+        assert result.tracks == (Track(uri="file:///a", name="Blåbær"),)
+
     def test_playlists_are_loaded_at_startup(self):
         track = Track(uri="dummy:track:path2")
         playlist = self.core.playlists.create("test")
@@ -314,6 +330,22 @@ class TestM3UPlaylistsProvider:
         assert result.uri == "m3u:test.m3u"
         assert playlist.name == result.name
         assert filepath.resolve().as_uri() == result.tracks[0].uri
+
+    def test_playlist_with_pls_content(self):
+        path = self.playlists_dir / "test.m3u"
+        path.write_bytes(
+            b"[playlist]\n"
+            b"File1=test.mp3\n"
+            b"File2=http://example.com/stream\n"
+            b"Title2=Radio\n"
+        )
+
+        result = self.core.playlists.lookup("m3u:test.m3u")
+
+        assert result.tracks == (
+            Track(uri=(self.base_dir / "test.mp3").as_uri(), name="test"),
+            Track(uri="http://example.com/stream", name="Radio"),
+        )
 
     def test_playlist_sort_order(self):
         def check_order(playlists, names):

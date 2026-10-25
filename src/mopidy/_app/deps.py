@@ -133,6 +133,7 @@ def gstreamer_info() -> str:
     elements_to_check = [
         # Core playback
         "uridecodebin",
+        "parsebin",
         #
         # External HTTP streams
         "souphttpsrc",

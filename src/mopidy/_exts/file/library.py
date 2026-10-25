@@ -4,10 +4,10 @@ import pathlib
 from collections.abc import Generator
 from typing import TypedDict, cast, override
 
-from mopidy import backend, exceptions
+from mopidy import backend
 from mopidy import config as config_lib
 from mopidy._lib import paths
-from mopidy.audio import scan, tags
+from mopidy.media import MediaReader
 from mopidy.models import Ref, Track
 from mopidy.types import Uri
 
@@ -28,7 +28,12 @@ class FileLibraryProvider(backend.LibraryProvider):
     # TODO: get_images that can pull from metadata and/or .folder.png etc?
     # TODO: handle playlists?
 
-    def __init__(self, backend: backend.Backend, config: config_lib.Config) -> None:
+    def __init__(
+        self,
+        backend: backend.Backend,
+        config: config_lib.Config,
+        media_reader: MediaReader,
+    ) -> None:
         super().__init__(backend)
 
         ext_config = cast(FileConfig, config[Extension.ext_name])
@@ -40,7 +45,7 @@ class FileLibraryProvider(backend.LibraryProvider):
         )
         self._follow_symlinks = ext_config["follow_symlinks"]
 
-        self._scanner = scan.Scanner(timeout=ext_config["metadata_timeout"])
+        self._media_reader = media_reader
 
         self.root_directory = self._get_root_directory()
 
@@ -102,15 +107,19 @@ class FileLibraryProvider(backend.LibraryProvider):
         logger.debug("Looking up file URI: %s", uri)
         local_path = paths.uri_to_path(uri)
 
-        try:
-            result = self._scanner.scan(uri)
-            track = tags.convert_tags_to_track(
-                result.tags,
-                uri=uri,
-                length=result.duration,
+        if not self._is_in_basedir(local_path):
+            logger.warning(
+                "Rejected attempt to look up path (%s) outside dirs defined "
+                "in file/media_dirs config.",
+                uri,
             )
-        except exceptions.ScannerError as e:
-            logger.warning("Failed looking up %s: %s", uri, e)
+            return []
+
+        target = self._media_reader.find_playback_target(uri)
+        if target and target.info:
+            track = target.info.track.replace(uri=uri)
+        else:
+            logger.warning("Failed looking up %s", uri)
             track = Track(uri=uri)
 
         if not track.name:

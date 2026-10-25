@@ -11,10 +11,10 @@ import pykka
 from mopidy import exceptions
 from mopidy._lib import logs, process
 from mopidy._lib.gi import GLib, Gst, GstBase, GstPbutils
-from mopidy.audio import tags as tags_lib
+from mopidy._lib.gst import repr_tags, setup_proxy
 from mopidy.audio._api import Audio
 from mopidy.audio._gst.mixer import GstSoftwareMixerAdapter
-from mopidy.audio._gst.pipeline import GstPipeline
+from mopidy.audio._gst.pipeline import GstPlaybackPipeline
 from mopidy.audio._gst.types import (
     GstAsyncDone,
     GstBuffering,
@@ -29,11 +29,11 @@ from mopidy.audio._gst.types import (
     GstWarning,
 )
 from mopidy.audio._listener import AudioListener
-from mopidy.audio._utils import setup_proxy
 from mopidy.types import DurationMs, PlaybackState
 
 if TYPE_CHECKING:
     from mopidy._exts.softwaremixer.mixer import SoftwareMixerProxy
+    from mopidy._lib.gst import GstTags
     from mopidy.config import Config
     from mopidy.mixer import MixerProxy
 
@@ -61,11 +61,11 @@ class GstAudio(Audio, pykka.ThreadingActor):
         self._target_state: GstState = GstState.NULL
         self._buffering: bool = False
         self._live_stream: bool = False
-        self._tags: dict[str, list[Any]] = {}
+        self._tags: GstTags = {}
         self._pending_uri: str | None = None
-        self._pending_tags: dict[str, list[Any]] | None = None
+        self._pending_tags: GstTags | None = None
 
-        self._pipeline: GstPipeline | None = None
+        self._pipeline: GstPlaybackPipeline | None = None
         self._about_to_finish_callback: Callable | None = None
         self._source_setup_callback: Callable | None = None
 
@@ -78,7 +78,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
         self._thread = threading.current_thread()
         try:
             self._setup_preferences()
-            self._pipeline = GstPipeline(
+            self._pipeline = GstPlaybackPipeline(
                 self._config,
                 on_bus_message=self._on_gst_bus_message,
                 on_position=self._on_gst_position,
@@ -93,7 +93,8 @@ class GstAudio(Audio, pykka.ThreadingActor):
 
     @override
     def on_stop(self) -> None:
-        self._teardown_mixer()
+        if self.mixer:
+            self.mixer.teardown()
         if self._pipeline is not None:
             self._pipeline.teardown()
 
@@ -104,10 +105,6 @@ class GstAudio(Audio, pykka.ThreadingActor):
         jacksink = registry.find_feature("jackaudiosink", Gst.ElementFactory)
         if jacksink:
             jacksink.set_rank(Gst.Rank.SECONDARY)
-
-    def _teardown_mixer(self) -> None:
-        if self.mixer:
-            self.mixer.teardown()
 
     def _on_gst_about_to_finish(self, _element: Gst.Element) -> None:
         if self._thread == threading.current_thread():
@@ -254,7 +251,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
         self._tags = {}
         AudioListener.send("reached_end_of_stream")
 
-    def _on_gst_error(self, error: GLib.Error, debug: str) -> None:
+    def _on_gst_error(self, error: GLib.Error, debug: str | None) -> None:
         gst_logger.error(f"GStreamer error: {error.message}")
         gst_logger.debug(f"Got ERROR bus message: error={error!r} debug={debug!r}")
 
@@ -267,15 +264,16 @@ class GstAudio(Audio, pykka.ThreadingActor):
         # TODO: is this needed?
         self.stop_playback()
 
-    def _on_gst_warning(self, error: GLib.Error, debug: str) -> None:
+    def _on_gst_warning(self, error: GLib.Error, debug: str | None) -> None:
         gst_logger.warning(f"GStreamer warning: {error.message}")
         gst_logger.debug(f"Got WARNING bus message: error={error!r} debug={debug!r}")
 
     def _on_gst_async_done(self) -> None:
         gst_logger.debug("Got ASYNC_DONE bus message.")
 
-    def _on_gst_tag(self, tags: dict[str, list[Any]]) -> None:
-        gst_logger.debug(f"Got TAG bus message: tags={tags_lib.repr_tags(tags)}")
+    def _on_gst_tag(self, tags: GstTags) -> None:
+        if gst_logger.isEnabledFor(logging.DEBUG):
+            gst_logger.debug("Got TAG bus message: tags=%s", repr_tags(tags))
 
         # Postpone emitting tags until stream start.
         if self._pending_tags is not None:

@@ -8,6 +8,238 @@ For older releases, see:
 [Changelog 1.x](1.x.md) ·
 [Changelog 0.x](0.x.md)
 
+## v4.1.0 (UNRELEASED)
+
+Mopidy 4.1 adds a media API, which reads media and playlist documents without
+playing them. The bundled file, stream and M3U extensions use it, and the new
+`mopidy media` commands show what it reads. The old scanner API is deprecated.
+
+### Media API
+
+The new [`mopidy.media`][mopidy.media] package reads media without playing it.
+Backends use it to get the metadata of a URI, to read playlist documents, and to
+find the URI to play for a radio station. It gives the metadata as a
+[`Track`][mopidy.models.Track], so backends no longer have to convert GStreamer
+tags themselves.
+
+Make one [`MediaReader`][mopidy.media.MediaReader] with
+[`MediaReader.create()`][mopidy.media.MediaReader.create] when your backend
+starts, and close it when your backend stops. The [media API
+reference](../reference/media.md) has an example.
+
+- [`MediaReader.read_media_info()`][mopidy.media.MediaReader.read_media_info]
+  reads the media info of one URI: the metadata as a
+  [`Track`][mopidy.models.Track], if the media decoded as audio, if the media
+  allows seeking, and the embedded images. Tags that are not valid are left out.
+  (#2325, !2332)
+
+- [`MediaReader.read_playlist_entries()`][mopidy.media.MediaReader.read_playlist_entries]
+  fetches a playlist document from a `file`, `http` or `https` URI and parses
+  its playlist entries. The reader keeps an HTTP connection pool that uses the
+  Mopidy proxy config. A playlist document larger than 10 MiB raises
+  [`MediaReaderError`][mopidy.media.MediaReaderError]. (#2329, !2334, !2348)
+
+- [`MediaReader.find_playback_target()`][mopidy.media.MediaReader.find_playback_target]
+  finds the URI to play from a URI that can be a playlist document, nested to
+  any depth. It tries the alternatives of each playlist entry, and then the next
+  entry. It stops the download at the first chunk that is not text, so it reads
+  only the start of an audio stream. The
+  [`PlaybackTarget`][mopidy.media.PlaybackTarget] has the URI, its media info
+  and the playlist entry that it came from. (#2329, !2334)
+
+- [`parse_playlist_entries()`][mopidy.media.parse_playlist_entries] parses the
+  playlist entries of a playlist document from bytes, without I/O. It reads M3U,
+  PLS, XSPF, ASX, ASX reference, and URI lists. The content decides the format.
+  Each [`PlaylistEntry`][mopidy.media.PlaylistEntry] has the name and length
+  from the playlist document, and all alternative URIs of the entry. HLS and
+  DASH documents give no entries, as they usually should be passed directly to
+  the playback engine. (#2327, !2333)
+
+- Upgrade the media reader pipeline from using the `typefind` and
+  `decodebin` GStreamer elements to using `parsebin`.
+
+    `parsebin` is the modern parsing stage also used internally by
+    `uridecodebin3`. It demuxes and parses streams without ever plugging
+    decoders, which is exactly what the media reader wants. This replaces the
+    previous custom `autoplug-select` callback that faked the same behavior on
+    top of `decodebin`. (#2127, !2338, !2352, !2353)
+
+#### Bundled extensions
+
+- File extension: Read the metadata of files with the new
+  [`MediaReader`][mopidy.media.MediaReader] API. If some tags of a file are not
+  valid, `lookup()` now keeps the other tags. Before, it gave no tags for the
+  file. (#2325, !2332)
+
+- File extension: Play playlist documents, such as PLS and M3U files with radio
+  streams, with
+  [`MediaReader.find_playback_target()`][mopidy.media.MediaReader.find_playback_target].
+  `lookup()` gives the metadata of the playback target, with the URI of the
+  playlist document. Before, playback of a playlist document failed with "This
+  appears to be a text file". (#1529, !2351)
+
+- Stream extension: Find the URI to play with
+  [`MediaReader.find_playback_target()`][mopidy.media.MediaReader.find_playback_target].
+  If the playlist of a radio station has more than one stream, the extension now
+  tries each stream until one plays as audio. Before, it tried only the first
+  stream. Playlists with the media type `audio/x-mpegurl` or `audio/x-scpls` are
+  now read as playlists, and HLS streams are no longer read as playlists.
+  (#2325, #2329, !2335)
+
+- Stream extension: The [`stream/timeout`](../ext/stream.md#streamtimeout)
+  config value is now the total time to find the URI to play. Before, the limit
+  for the total time was 1000 times too long. (#2329, !2335)
+
+- Stream extension: Play a stream as a live stream if it cannot seek and has no
+  duration, such as most internet radio streams. GStreamer then does not pause
+  playback to fill its buffer. Before, playback of some radio streams stopped
+  for several seconds at random. (#1280, #1892, !2362)
+
+- M3U extension: Read playlists with
+  [`parse_playlist_entries()`][mopidy.media.parse_playlist_entries]. A `file`
+  URI entry with no `#EXTINF` name now gets its name from the file name, as a
+  path entry did before. In a playlist with no `#EXTM3U` header, a line is
+  considered an entry only if it has a `/` or a file extension. (#2328, !2333)
+
+#### Debug commands
+
+- Add the `mopidy media` command group, with the subcommands `info`,
+  `playlist-entries` and `playback-target`. They show what the
+  [`MediaReader`][mopidy.media.MediaReader] reads from files and URIs, to debug
+  missing metadata and radio stations that do not play. See [Built in
+  commands](../reference/command.md#built-in-commands). (#2330, !2336)
+
+- Remove the `python3 -m mopidy.audio.scan` debug command. Use
+  `mopidy media info` instead. The new command shows the metadata as a track,
+  not the raw GStreamer tags. To see the raw tags, use `gst-discoverer-1.0`.
+  (#2330, !2337)
+
+### Deprecations
+
+- Deprecate `mopidy.audio.scan.Scanner`, and the tag helpers
+  `repr_tags()`, `convert_taglist()` and `convert_tags_to_track()` in
+  `mopidy.audio.tags`. Use
+  [`MediaReader.read_media_info()`][mopidy.media.MediaReader.read_media_info]
+  instead. The media info has the metadata as a [`Track`][mopidy.models.Track],
+  thus callers do not convert GStreamer tags. The deprecated API will be removed
+  in Mopidy 5.0. (#2326, !2337)
+
+- Deprecate the `Extension.version` class attribute. Mopidy now gets the version
+  from the distribution that registers the extension's entry point, and no
+  longer reads the attribute. (!2298)
+
+- Deprecate `mopidy.__version__`. Mopidy no longer uses it itself. Use
+  `importlib.metadata.version("mopidy")` instead. (!2298)
+
+- Deprecate [`PlaybackController.set_state()`][mopidy.core.PlaybackController.set_state].
+  Use [`play()`][mopidy.core.PlaybackController.play],
+  [`pause()`][mopidy.core.PlaybackController.pause],
+  [`resume()`][mopidy.core.PlaybackController.resume], and
+  [`stop()`][mopidy.core.PlaybackController.stop] instead. The method now calls
+  the playback command that gives the new state, so that the playback state
+  and the audio pipeline do not differ. For example, `set_state("stopped")`
+  stops the pipeline and releases the output device. Before, it changed only
+  the playback state. Calls that do not match a playback command change
+  nothing. The method will be removed in Mopidy 5.0. (!2355)
+
+### Core
+
+- In single and repeat mode with consume mode on, play the next track
+  when a track ends. Before, core played the same track again, but consume
+  mode had removed it from the tracklist. (!2356)
+
+- When the current track is removed from the tracklist, change to the
+  track that [`next()`][mopidy.core.PlaybackController.next] gives, and skip
+  the tracks that were removed in the same call. The playback state does not
+  change: if playback was paused, it is paused on the new track, as with
+  `next()`. If no track remains, playback stops. Before, core cleared the
+  current track, but the removed track continued to play, and
+  [`pause()`][mopidy.core.PlaybackController.pause] and
+  [`stop()`][mopidy.core.PlaybackController.stop] could not stop it.
+  (#1590, !2356)
+
+- In consume mode, continue with the track after an unplayable track. Before,
+  core removed the unplayable track from the tracklist before it looked for the
+  next track, so playback continued from the first track in the tracklist. In
+  random mode, core also shuffled the full tracklist again. (!2357)
+
+- Keep playback paused when the track changes while paused, for example
+  with [`next()`][mopidy.core.PlaybackController.next] or
+  [`previous()`][mopidy.core.PlaybackController.previous]. Core sends the events
+  `track_playback_ended` for the old track, `playback_state_changed` from paused
+  to paused, `track_playback_started` for the new track, and
+  `track_playback_paused` for the new track. A seek while paused, after core
+  queued the next track, goes back to the current track. Then core sends the
+  same events with no `track_playback_ended`, and then `seeked`. Before, core
+  set the playback state to playing when the new track started, and then back
+  to paused, and sent the events for both state changes. (!2358)
+
+- Remove the workaround for #232. Core no longer changes the playback
+  state to paused when a backend pauses the audio pipeline without a call to
+  core. No known backend does this. Before, if a client called
+  [`pause()`][mopidy.core.PlaybackController.pause] and
+  [`resume()`][mopidy.core.PlaybackController.resume] with no wait between
+  them, the playback state could stay paused while the audio played. (!2358)
+
+### Audio
+
+- Handle all GStreamer bus messages on the audio actor thread. Before,
+  the GLib main loop thread and the actor thread changed the audio state at the
+  same time, with no synchronization. The "Race condition happened" warning
+  from #1222 and #1430 is removed, because this race is gone. (!2305)
+
+- Stop startup at once if the configured `audio/output` cannot be
+  created. Before, Mopidy continued to build a pipeline with no output in it,
+  while it shut down. (!2307)
+
+- Keep all bytes of the embedded images in the current tags of the audio actor.
+  Before, a debug log message cut each bytes value in the tags to 10 bytes,
+  also when debug logging was off. Thus
+  [`get_current_tags()`][mopidy.audio.Audio.get_current_tags] gave images that
+  were not complete. (!2344)
+
+- The deprecated `mopidy.audio.scan.Scanner` now raises
+  [`ScannerError`][mopidy.exceptions.ScannerError] for a URI scheme that no
+  GStreamer element can open. Before, it raised `GLib.Error`. (!2347)
+
+- Fix a `SystemError` from an `OverflowError` in the audio actor on 32-bit
+  platforms with PyGObject 3.50, the version in Debian 13. GStreamer's extended
+  bus message types, such as the `STREAM_COLLECTION` messages from HLS streams,
+  caused it. The audio actor now drops these messages. (#2030, !2359)
+
+### Other changes
+
+- HTTP extension: Fix the debug log message for sent JSON-RPC responses. It was
+  never logged. (!2310)
+
+- Packaging: Remove the desktop file. It started Mopidy in a terminal window
+  from the application menu, which is seldom useful for a server. The file was
+  added for the Ubuntu Sound Menu, which no longer exists, and Mopidy-MPRIS
+  stopped using it in 2018. (!2322)
+
+### Development process
+
+- Restructure the GStreamer code into smaller modules with typed interfaces,
+  split it into a playback side and a media side, give the media reader the
+  same structure as the playback pipeline, and delete unused code. (#2324,
+  !2303, !2304, !2306, !2307, !2308, !2331, !2341, !2343, !2344, !2345, !2347)
+
+- Port the remaining `unittest` tests to pytest. (!2301)
+
+- Fail tests that hang for more than 60 seconds, and print the stack of
+  all threads, instead of letting CI hang. (!2302)
+
+- Run the linters and type checkers on Python 3.15 in CI. (!2339)
+
+## v4.0.5 (2026-10-16)
+
+- File extension: Reject `file://` URIs outside of `file/media_dirs` in
+  `lookup()`, as `browse()` already does. Any client of the HTTP JSON-RPC API,
+  which has no authentication, could find out if a file exists and if it is
+  audio, read the tags of any audio file that the Mopidy process can read, and
+  add the file to the tracklist. The raw file content was not exposed. (#2350,
+  !2349)
+
 ## v4.0.4 (2026-09-13)
 
 - Deps: Fix support for Cyclopts 3.12, the version in Debian stable. Cyclopts

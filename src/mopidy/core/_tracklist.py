@@ -37,6 +37,7 @@ class TracklistController:
         self._consume: bool = False
         self._random: bool = False
         self._shuffled: list[TlTrack] = []
+        self._unplayable: list[TlTrack] = []
         self._repeat: bool = False
         self._single: bool = False
 
@@ -221,9 +222,10 @@ class TracklistController:
         """
         if tl_track is not None:
             validation.check_instance(tl_track, TlTrack)
-        if self.get_single() and self.get_repeat():
+        # Consume mode removes the track, so do not repeat it.
+        if self.get_single() and self.get_repeat() and not self.get_consume():
             return tl_track
-        if self.get_single():
+        if self.get_single() and not self.get_repeat():
             return None
 
         # Current difference between next and EOT handling is that EOT needs to
@@ -519,11 +521,46 @@ class TracklistController:
             criteria: One or more rules to match by.
         """
         tl_tracks = self.filter(criteria)
+        current_tl_track = self.core.playback.get_current_tl_track()
+        current_removed = current_tl_track in tl_tracks
+        next_tl_track = None
+        if current_removed:
+            next_tl_track = self._next_remaining_track(
+                tl_track=current_tl_track,
+                removed=tl_tracks,
+            )
         for tl_track in tl_tracks:
             position = self._tl_tracks.index(tl_track)
             del self._tl_tracks[position]
+            if tl_track in self._shuffled:
+                self._shuffled.remove(tl_track)
+        # If the tracklist is empty, _increase_version() stops playback.
+        if current_removed and self._tl_tracks:
+            self.core.playback._on_current_track_removed(next_tl_track=next_tl_track)
         self._increase_version()
         return tl_tracks
+
+    def _next_remaining_track(
+        self,
+        *,
+        tl_track: TlTrack,
+        removed: list[TlTrack],
+    ) -> TlTrack | None:
+        """The track that `next()` changes to, if it skips the removed tracks.
+
+        Call this before the removed tracks leave the tracklist.
+        """
+        # In random mode, next_track() returns the first track in the shuffled
+        # list. Remove each removed track from the shuffled list, so that the
+        # loop gets a new track each time.
+        candidate: TlTrack | None = tl_track
+        for _ in range(len(self._tl_tracks) * 2):
+            candidate = self.next_track(candidate)  # ty: ignore[deprecated]
+            if candidate not in removed:
+                return candidate
+            if candidate in self._shuffled:
+                self._shuffled.remove(candidate)
+        return None
 
     def shuffle(self, start: int | None = None, end: int | None = None) -> None:
         """Shuffle the entire tracklist, or a slice.
@@ -582,14 +619,22 @@ class TracklistController:
             "Track is not playable: %s",
             tl_track.track.uri if tl_track else None,
         )
-        if self.get_consume() and tl_track is not None:
-            self.remove({"tlid": [tl_track.tlid]})
+        if tl_track is not None:
+            self._unplayable.append(tl_track)
         if self.get_random() and tl_track in self._shuffled:
             self._shuffled.remove(tl_track)
 
+    def _remove_unplayable(self) -> None:
+        """Internal method for [PlaybackController][mopidy.core.PlaybackController]."""
+        # Clear the list before remove(), because remove() can start a new
+        # track change loop that marks other tracks.
+        tl_tracks, self._unplayable = self._unplayable, []
+        if self.get_consume() and tl_tracks:
+            self.remove({"tlid": [tl_track.tlid for tl_track in tl_tracks]})
+
     def _mark_played(self, tl_track: TlTrack | None) -> bool:
         """Internal method for [PlaybackController][mopidy.core.PlaybackController]."""
-        if self.get_consume() and tl_track is not None:
+        if self.get_consume() and tl_track in self._tl_tracks:
             self.remove({"tlid": [tl_track.tlid]})
             return True
         return False

@@ -131,14 +131,17 @@ class ExtensionRecord:
             )
             return stopped_record
 
-        logger.debug("Loaded extension: %s %s", extension.dist_name, extension.version)
+        # The distribution that registers the entry point holds the version.
+        version = dist.version if (dist := entry_point.dist) else None
+
+        logger.debug("Loaded extension: %s %s", extension.dist_name, version)
         return ExtensionRecord(
             ext_name=entry_point.name,
             entry_point=entry_point,
             status=ExtensionStatus.ENABLED,
             extension=extension,
             dist_name=extension.dist_name,
-            version=extension.version,
+            version=version,
             config_schema=config_schema,
             config_defaults=config_defaults,
             command=command,
