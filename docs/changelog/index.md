@@ -217,6 +217,11 @@ reference](../reference/media.md) has an example.
   added for the Ubuntu Sound Menu, which no longer exists, and Mopidy-MPRIS
   stopped using it in 2018. (!2322)
 
+- Types: Stop the two `DeprecationWarning`s when `mopidy.types` is imported.
+  They came from the definitions of the deprecated `Date` and `Year` types, not
+  from their use. Creating a `Date` or a `Year` still gives a
+  `DeprecationWarning`. (!2369)
+
 ### Development process
 
 - Restructure the GStreamer code into smaller modules with typed interfaces,
