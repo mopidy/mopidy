@@ -204,7 +204,7 @@ class TracklistController:
         tl_track = self._get_eot_tl_track(
             reference=self.core.playback.get_current_tl_track()
         )
-        return getattr(tl_track, "tlid", None)
+        return tl_track.tlid if tl_track else None
 
     def _get_eot_tl_track(self, reference: TlTrack | None) -> TlTrack | None:
         # Consume mode removes the track, so do not repeat it.
@@ -232,7 +232,7 @@ class TracklistController:
         tl_track = self._get_next_tl_track(
             reference=self.core.playback.get_current_tl_track()
         )
-        return getattr(tl_track, "tlid", None)
+        return tl_track.tlid if tl_track else None
 
     def _get_next_tl_track(self, reference: TlTrack | None) -> TlTrack | None:
         if not self._tl_tracks:
@@ -280,7 +280,7 @@ class TracklistController:
         tl_track = self._get_previous_tl_track(
             reference=self.core.playback.get_current_tl_track()
         )
-        return getattr(tl_track, "tlid", None)
+        return tl_track.tlid if tl_track else None
 
     def _get_previous_tl_track(self, reference: TlTrack | None) -> TlTrack | None:
         if self.get_repeat() or self.get_consume() or self.get_random():

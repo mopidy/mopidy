@@ -99,7 +99,8 @@ class PlaybackController:
 
         Extracted from [get_current_tl_track][] for convenience.
         """
-        return getattr(self.get_current_tl_track(), "tlid", None)
+        tl_track = self.get_current_tl_track()
+        return tl_track.tlid if tl_track else None
 
     def get_stream_title(self) -> str | None:
         """Get the current stream title or `None`."""
