@@ -469,7 +469,7 @@ class TracklistController:
         current_removed = current_tl_track in tl_tracks
         next_tl_track = None
         if current_removed:
-            next_tl_track = self._next_remaining_track(
+            next_tl_track = self._get_next_remaining_tl_track(
                 tl_track=current_tl_track,
                 removed=tl_tracks,
             )
@@ -484,7 +484,7 @@ class TracklistController:
         self._increase_version()
         return tl_tracks
 
-    def _next_remaining_track(
+    def _get_next_remaining_tl_track(
         self,
         *,
         tl_track: TlTrack,
