@@ -99,7 +99,8 @@ class PlaybackController:
 
         Extracted from [get_current_tl_track][] for convenience.
         """
-        return getattr(self.get_current_tl_track(), "tlid", None)
+        tl_track = self.get_current_tl_track()
+        return tl_track.tlid if tl_track else None
 
     def get_stream_title(self) -> str | None:
         """Get the current stream title or `None`."""
@@ -269,9 +270,11 @@ class PlaybackController:
             pass
 
         self._try_until_playable(
-            pending=self.core.tracklist.eot_track(self._current_tl_track),  # ty: ignore[deprecated]
+            pending=self.core.tracklist._get_eot_tl_track(
+                reference=self._current_tl_track
+            ),
             change=self._change_eot_track,
-            step=self.core.tracklist.eot_track,  # ty: ignore[deprecated]
+            step=self.core.tracklist._get_eot_tl_track,
         )
 
     def _change_eot_track(self, tl_track: TlTrack | None) -> bool:
@@ -320,7 +323,7 @@ class PlaybackController:
         else:
             self._change_to_playable(
                 pending=next_tl_track,
-                step=self.core.tracklist.next_track,  # ty: ignore[deprecated]
+                step=self.core.tracklist._get_next_tl_track,
             )
 
     def next(self) -> None:
@@ -332,8 +335,8 @@ class PlaybackController:
         current = self._pending_tl_track or self._current_tl_track
         if current:
             self._change_to_playable(
-                pending=self.core.tracklist.next_track(current),  # ty: ignore[deprecated]
-                step=self.core.tracklist.next_track,  # ty: ignore[deprecated]
+                pending=self.core.tracklist._get_next_tl_track(reference=current),
+                step=self.core.tracklist._get_next_tl_track,
             )
 
         # TODO: return result?
@@ -380,12 +383,16 @@ class PlaybackController:
 
         current = self._pending_tl_track or self._current_tl_track
         self._try_until_playable(
-            pending=tl_track or current or self.core.tracklist.next_track(None),  # ty: ignore[deprecated]
+            pending=(
+                tl_track
+                or current
+                or self.core.tracklist._get_next_tl_track(reference=None)
+            ),
             change=lambda candidate: (
                 candidate is None
                 or self._change(tl_track=candidate, state=PlaybackState.PLAYING)
             ),
-            step=self.core.tracklist.next_track,  # ty: ignore[deprecated]
+            step=self.core.tracklist._get_next_tl_track,
         )
 
     def previous(self) -> None:
@@ -398,8 +405,8 @@ class PlaybackController:
         current = self._pending_tl_track or self._current_tl_track
         if current:
             self._change_to_playable(
-                pending=self.core.tracklist.previous_track(current),  # ty: ignore[deprecated]
-                step=self.core.tracklist.previous_track,  # ty: ignore[deprecated]
+                pending=self.core.tracklist._get_previous_tl_track(reference=current),
+                step=self.core.tracklist._get_previous_tl_track,
             )
 
         # TODO: no return value?

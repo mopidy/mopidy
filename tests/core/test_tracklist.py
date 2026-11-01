@@ -310,3 +310,47 @@ def test_save_load_state_load_invalid_type(mocked_core):
 
 def test_save_load_state_load_none(mocked_core):
     mocked_core.tracklist._load_state(None, None)
+
+
+def test_deprecated_eot_track_returns_track_of_get_eot_tlid(
+    mocked_core, index_tl_tracks
+):
+    mocked_core.playback.get_current_tl_track.return_value = index_tl_tracks[1]
+
+    with pytest.deprecated_call():
+        tl_track = mocked_core.tracklist.eot_track(index_tl_tracks[1])
+
+    assert tl_track is not None
+    assert tl_track.tlid == mocked_core.tracklist.get_eot_tlid()
+
+
+def test_deprecated_next_track_returns_track_of_get_next_tlid(
+    mocked_core, index_tl_tracks
+):
+    mocked_core.playback.get_current_tl_track.return_value = index_tl_tracks[1]
+
+    with pytest.deprecated_call():
+        tl_track = mocked_core.tracklist.next_track(index_tl_tracks[1])
+
+    assert tl_track is not None
+    assert tl_track.tlid == mocked_core.tracklist.get_next_tlid()
+
+
+def test_deprecated_previous_track_returns_track_of_get_previous_tlid(
+    mocked_core, index_tl_tracks
+):
+    mocked_core.playback.get_current_tl_track.return_value = index_tl_tracks[1]
+
+    with pytest.deprecated_call():
+        tl_track = mocked_core.tracklist.previous_track(index_tl_tracks[1])
+
+    assert tl_track is not None
+    assert tl_track.tlid == mocked_core.tracklist.get_previous_tlid()
+
+
+@pytest.mark.parametrize("method", ["eot_track", "next_track", "previous_track"])
+def test_deprecated_tracklist_method_rejects_argument_that_is_not_a_tl_track(
+    mocked_core, index_tl_tracks, method
+):
+    with pytest.deprecated_call(), pytest.raises(ValueError):
+        getattr(mocked_core.tracklist, method)("abc")
