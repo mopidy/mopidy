@@ -201,13 +201,22 @@ class TracklistController:
 
         Not necessarily the same TLID as returned by [get_next_tlid][].
         """
-        current_tl_track = self.core.playback.get_current_tl_track()
+        tl_track = self._get_eot_tl_track(
+            reference=self.core.playback.get_current_tl_track()
+        )
+        return getattr(tl_track, "tlid", None)
 
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=DeprecationWarning)
-            eot_tl_track = self.eot_track(current_tl_track)  # ty: ignore[deprecated]
+    def _get_eot_tl_track(self, reference: TlTrack | None) -> TlTrack | None:
+        # Consume mode removes the track, so do not repeat it.
+        if self.get_single() and self.get_repeat() and not self.get_consume():
+            return reference
+        if self.get_single() and not self.get_repeat():
+            return None
 
-        return getattr(eot_tl_track, "tlid", None)
+        # Current difference between next and EOT handling is that EOT needs to
+        # handle "single", with that out of the way the rest of the logic is
+        # shared.
+        return self._get_next_tl_track(reference=reference)
 
     @deprecated("Use core.tracklist.get_eot_tlid()")
     def eot_track(self, tl_track: TlTrack | None) -> TlTrack | None:
@@ -222,16 +231,7 @@ class TracklistController:
         """
         if tl_track is not None:
             validation.check_instance(tl_track, TlTrack)
-        # Consume mode removes the track, so do not repeat it.
-        if self.get_single() and self.get_repeat() and not self.get_consume():
-            return tl_track
-        if self.get_single() and not self.get_repeat():
-            return None
-
-        # Current difference between next and EOT handling is that EOT needs to
-        # handle "single", with that out of the way the rest of the logic is
-        # shared.
-        return self.next_track(tl_track)  # ty: ignore[deprecated]
+        return self._get_eot_tl_track(reference=tl_track)
 
     def get_next_tlid(self) -> TracklistId | None:
         """The TLID of the next track.
@@ -244,13 +244,43 @@ class TracklistController:
         enabled this should be a random track, all tracks should be played once
         before the tracklist repeats.
         """
-        current_tl_track = self.core.playback.get_current_tl_track()
+        tl_track = self._get_next_tl_track(
+            reference=self.core.playback.get_current_tl_track()
+        )
+        return getattr(tl_track, "tlid", None)
 
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=DeprecationWarning)
-            next_tl_track = self.next_track(current_tl_track)  # ty: ignore[deprecated]
+    def _get_next_tl_track(self, reference: TlTrack | None) -> TlTrack | None:
+        if not self._tl_tracks:
+            return None
 
-        return getattr(next_tl_track, "tlid", None)
+        if (
+            self.get_random()
+            and not self._shuffled
+            and (self.get_repeat() or not reference)
+        ):
+            logger.debug("Shuffling tracks")
+            self._shuffled = self._tl_tracks[:]
+            random.shuffle(self._shuffled)
+
+        if self.get_random():
+            if self._shuffled:
+                return self._shuffled[0]
+            return None
+
+        next_index = self.index(reference)
+        if next_index is None:
+            next_index = 0
+        else:
+            next_index += 1
+
+        if self.get_repeat():
+            if self.get_consume() and len(self._tl_tracks) == 1:
+                return None
+            next_index %= len(self._tl_tracks)
+        elif next_index >= len(self._tl_tracks):
+            return None
+
+        return self._tl_tracks[next_index]
 
     @deprecated("Use core.tracklist.get_next_tlid()")
     def next_track(self, tl_track: TlTrack | None) -> TlTrack | None:
@@ -270,38 +300,7 @@ class TracklistController:
         """
         if tl_track is not None:
             validation.check_instance(tl_track, TlTrack)
-
-        if not self._tl_tracks:
-            return None
-
-        if (
-            self.get_random()
-            and not self._shuffled
-            and (self.get_repeat() or not tl_track)
-        ):
-            logger.debug("Shuffling tracks")
-            self._shuffled = self._tl_tracks[:]
-            random.shuffle(self._shuffled)
-
-        if self.get_random():
-            if self._shuffled:
-                return self._shuffled[0]
-            return None
-
-        next_index = self.index(tl_track)
-        if next_index is None:
-            next_index = 0
-        else:
-            next_index += 1
-
-        if self.get_repeat():
-            if self.get_consume() and len(self._tl_tracks) == 1:
-                return None
-            next_index %= len(self._tl_tracks)
-        elif next_index >= len(self._tl_tracks):
-            return None
-
-        return self._tl_tracks[next_index]
+        return self._get_next_tl_track(reference=tl_track)
 
     def get_previous_tlid(self) -> TracklistId | None:
         """Returns the TLID of the previous track.
@@ -313,13 +312,23 @@ class TracklistController:
         random and/or consume is enabled it should return the current track
         instead.
         """
-        current_tl_track = self.core.playback.get_current_tl_track()
+        tl_track = self._get_previous_tl_track(
+            reference=self.core.playback.get_current_tl_track()
+        )
+        return getattr(tl_track, "tlid", None)
 
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=DeprecationWarning)
-            previous_tl_track = self.previous_track(current_tl_track)  # ty: ignore[deprecated]
+    def _get_previous_tl_track(self, reference: TlTrack | None) -> TlTrack | None:
+        if self.get_repeat() or self.get_consume() or self.get_random():
+            return reference
 
-        return getattr(previous_tl_track, "tlid", None)
+        position = self.index(reference)
+
+        if position in (None, 0):
+            return None
+
+        # Since we know we are not at zero we have to be somewhere in the range
+        # 1 - len(tracks) Thus 'position - 1' will always be within the list.
+        return self._tl_tracks[position - 1]
 
     @deprecated("Use core.tracklist.get_previous_tlid()")
     def previous_track(self, tl_track: TlTrack | None) -> TlTrack | None:
@@ -338,18 +347,7 @@ class TracklistController:
         """
         if tl_track is not None:
             validation.check_instance(tl_track, TlTrack)
-
-        if self.get_repeat() or self.get_consume() or self.get_random():
-            return tl_track
-
-        position = self.index(tl_track)
-
-        if position in (None, 0):
-            return None
-
-        # Since we know we are not at zero we have to be somewhere in the range
-        # 1 - len(tracks) Thus 'position - 1' will always be within the list.
-        return self._tl_tracks[position - 1]
+        return self._get_previous_tl_track(reference=tl_track)
 
     def add(  # noqa: C901
         self,
@@ -550,12 +548,12 @@ class TracklistController:
 
         Call this before the removed tracks leave the tracklist.
         """
-        # In random mode, next_track() returns the first track in the shuffled
-        # list. Remove each removed track from the shuffled list, so that the
-        # loop gets a new track each time.
+        # In random mode, _get_next_tl_track() returns the first track in the
+        # shuffled list. Remove each removed track from the shuffled list, so
+        # that the loop gets a new track each time.
         candidate: TlTrack | None = tl_track
         for _ in range(len(self._tl_tracks) * 2):
-            candidate = self.next_track(candidate)  # ty: ignore[deprecated]
+            candidate = self._get_next_tl_track(reference=candidate)
             if candidate not in removed:
                 return candidate
             if candidate in self._shuffled:
