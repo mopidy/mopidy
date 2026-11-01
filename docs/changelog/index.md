@@ -121,8 +121,10 @@ reference](../reference/media.md) has an example.
   `mopidy.audio.tags`. Use
   [`MediaReader.read_media_info()`][mopidy.media.MediaReader.read_media_info]
   instead. The media info has the metadata as a [`Track`][mopidy.models.Track],
-  thus callers do not convert GStreamer tags. The deprecated API will be removed
-  in Mopidy 5.0. (#2326, !2337)
+  thus callers do not convert GStreamer tags.
+  [`ScannerError`][mopidy.exceptions.ScannerError] is part of the deprecated
+  API. Catch [`MediaReaderError`][mopidy.media.MediaReaderError] instead. The
+  deprecated API will be removed in Mopidy 5.0. (#2326, !2337)
 
 - Deprecate the `Extension.version` class attribute. Mopidy now gets the version
   from the distribution that registers the extension's entry point, and no
