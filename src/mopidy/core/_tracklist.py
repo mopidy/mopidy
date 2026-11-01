@@ -552,12 +552,12 @@ class TracklistController:
         # TODO: validate slice?
         return self._tl_tracks[start:end]
 
-    def _mark_playing(self, tl_track: TlTrack) -> None:
+    def _mark_playing(self, *, tl_track: TlTrack) -> None:
         """Internal method for [PlaybackController][mopidy.core.PlaybackController]."""
         if self.get_random() and tl_track in self._shuffled:
             self._shuffled.remove(tl_track)
 
-    def _mark_unplayable(self, tl_track: TlTrack | None) -> None:
+    def _mark_unplayable(self, *, tl_track: TlTrack | None) -> None:
         """Internal method for [PlaybackController][mopidy.core.PlaybackController]."""
         logger.warning(
             "Track is not playable: %s",
@@ -576,7 +576,7 @@ class TracklistController:
         if self.get_consume() and tl_tracks:
             self.remove({"tlid": [tl_track.tlid for tl_track in tl_tracks]})
 
-    def _mark_played(self, tl_track: TlTrack | None) -> bool:
+    def _mark_played(self, *, tl_track: TlTrack | None) -> bool:
         """Internal method for [PlaybackController][mopidy.core.PlaybackController]."""
         if self.get_consume() and tl_track in self._tl_tracks:
             self.remove({"tlid": [tl_track.tlid]})
