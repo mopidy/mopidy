@@ -5,9 +5,12 @@ import pykka
 import pytest
 
 from mopidy import backend, core
-from mopidy.core._state_storage import PlaybackControllerState
-from mopidy.models import Track
-from mopidy.types import PlaybackState
+from mopidy.core._state_storage import (
+    PlaybackControllerState,
+    TracklistControllerState,
+)
+from mopidy.models import TlTrack, Track
+from mopidy.types import PlaybackState, TracklistId
 from tests import dummy_audio, dummy_backend
 
 
@@ -79,8 +82,7 @@ class BaseTest:
         # We don't have a core actor running, so call about to finish directly.
         self.audio.set_about_to_finish_callback(self.playback._on_about_to_finish)
 
-        with pytest.deprecated_call():
-            self.core.tracklist.add(self.tracks)
+        self.add_to_tracklist(*self.tracks)
 
         self.events = []
         self.patcher = mock.patch("mopidy.audio.AudioListener.send")
@@ -94,6 +96,18 @@ class BaseTest:
     def teardown_method(self):
         pykka.ActorRegistry.stop_all()
         self.patcher.stop()
+
+    def add_to_tracklist(
+        self, *tracks: Track, at_position: int | None = None
+    ) -> list[TlTrack]:
+        """Put tracks in the dummy library, and add them to the tracklist by URI."""
+        uris = [track.uri for track in tracks]
+        library = self.backend.library.dummy_library.get()
+        self.backend.library.dummy_library = [
+            *[track for track in library if track.uri not in uris],
+            *tracks,
+        ]
+        return self.core.tracklist.add(uris=uris, at_position=at_position)
 
     def replay_events(self, until=None):
         while self.events:
@@ -253,8 +267,7 @@ class TestNextHandling(BaseTest):
     def test_next_skips_over_change_track_error(self):
         # Trigger an exception in translate_uri.
         track = Track(uri="dummy:error", length=1234)
-        with pytest.deprecated_call():
-            self.core.tracklist.add(tracks=[track], at_position=1)
+        self.add_to_tracklist(track, at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -269,8 +282,7 @@ class TestNextHandling(BaseTest):
     def test_next_skips_over_change_track_unplayable(self):
         # Make translate_uri return None.
         track = Track(uri="dummy:unplayable", length=1234)
-        with pytest.deprecated_call():
-            self.core.tracklist.add(tracks=[track], at_position=1)
+        self.add_to_tracklist(track, at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -365,8 +377,7 @@ class TestPreviousHandling(BaseTest):
     def test_previous_skips_over_change_track_error(self):
         # Trigger an exception in translate_uri.
         track = Track(uri="dummy:error", length=1234)
-        with pytest.deprecated_call():
-            self.core.tracklist.add(tracks=[track], at_position=1)
+        self.add_to_tracklist(track, at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -381,8 +392,7 @@ class TestPreviousHandling(BaseTest):
     def test_previous_skips_over_change_track_unplayable(self):
         # Makes translate_uri return None.
         track = Track(uri="dummy:unplayable", length=1234)
-        with pytest.deprecated_call():
-            self.core.tracklist.add(tracks=[track], at_position=1)
+        self.add_to_tracklist(track, at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -407,8 +417,7 @@ class TestOnAboutToFinish(BaseTest):
     def test_on_about_to_finish_skips_over_change_track_error(self):
         # Trigger an exception in translate_uri.
         track = Track(uri="dummy:error", length=1234)
-        with pytest.deprecated_call():
-            self.core.tracklist.add(tracks=[track], at_position=1)
+        self.add_to_tracklist(track, at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -422,8 +431,7 @@ class TestOnAboutToFinish(BaseTest):
     def test_on_about_to_finish_skips_over_change_track_unplayable(self):
         # Makes translate_uri return None.
         track = Track(uri="dummy:unplayable", length=1234)
-        with pytest.deprecated_call():
-            self.core.tracklist.add(tracks=[track], at_position=1)
+        self.add_to_tracklist(track, at_position=1)
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
 
@@ -464,8 +472,7 @@ class TestConsumeHandling(BaseTest):
     def test_next_in_consume_mode_skips_unplayable_track(self):
         # Make translate_uri return None.
         track = Track(uri="dummy:unplayable", length=1234)
-        with pytest.deprecated_call():
-            self.core.tracklist.add(tracks=[track], at_position=2)
+        self.add_to_tracklist(track, at_position=2)
         tl_tracks = self.core.tracklist.get_tl_tracks()
         self.core.tracklist.set_consume(True)
         self.core.playback.play(tl_tracks[1].tlid)
@@ -480,8 +487,7 @@ class TestConsumeHandling(BaseTest):
     def test_next_in_consume_mode_keeps_track_unplayable_before_consume(self):
         # Make translate_uri return None.
         track = Track(uri="dummy:unplayable", length=1234)
-        with pytest.deprecated_call():
-            self.core.tracklist.add(tracks=[track], at_position=1)
+        self.add_to_tracklist(track, at_position=1)
         tl_tracks = self.core.tracklist.get_tl_tracks()
         self.core.playback.play(tl_tracks[0].tlid)
         self.replay_events()
@@ -500,8 +506,7 @@ class TestConsumeHandling(BaseTest):
         # With no shuffle, the unplayable track comes first in random mode
         # after tracks a and b played, then track c.
         track = Track(uri="dummy:unplayable", length=1234)
-        with pytest.deprecated_call():
-            self.core.tracklist.add(tracks=[track], at_position=2)
+        self.add_to_tracklist(track, at_position=2)
         tl_tracks = self.core.tracklist.get_tl_tracks()
         self.core.tracklist.set_random(True)
         self.core.playback.play(tl_tracks[0].tlid)
@@ -625,8 +630,7 @@ class TestConsumeHandling(BaseTest):
     def test_play_in_consume_mode_skips_unplayable_track(self):
         # Make translate_uri return None.
         track = Track(uri="dummy:unplayable", length=1234)
-        with pytest.deprecated_call():
-            self.core.tracklist.add(tracks=[track], at_position=2)
+        self.add_to_tracklist(track, at_position=2)
         tl_tracks = self.core.tracklist.get_tl_tracks()
         self.core.tracklist.set_consume(True)
 
@@ -639,8 +643,7 @@ class TestConsumeHandling(BaseTest):
     def test_about_to_finish_in_consume_mode_skips_unplayable_track(self):
         # Make translate_uri return None.
         track = Track(uri="dummy:unplayable", length=1234)
-        with pytest.deprecated_call():
-            self.core.tracklist.add(tracks=[track], at_position=2)
+        self.add_to_tracklist(track, at_position=2)
         tl_tracks = self.core.tracklist.get_tl_tracks()
         self.core.tracklist.set_consume(True)
         self.core.playback.play(tl_tracks[1].tlid)
@@ -658,8 +661,7 @@ class TestConsumeHandling(BaseTest):
         # With no shuffle, the unplayable track comes first in random mode
         # after tracks a and b played, then track c.
         track = Track(uri="dummy:unplayable", length=1234)
-        with pytest.deprecated_call():
-            self.core.tracklist.add(tracks=[track], at_position=2)
+        self.add_to_tracklist(track, at_position=2)
         tl_tracks = self.core.tracklist.get_tl_tracks()
         self.core.tracklist.set_random(True)
         self.core.playback.play(tl_tracks[0].tlid)
@@ -759,8 +761,7 @@ class TestRemoveCurrentTrack(BaseTest):
         # With no shuffle, the unplayable track comes first in random mode,
         # then track b.
         track = Track(uri="dummy:unplayable", length=1234)
-        with pytest.deprecated_call():
-            self.core.tracklist.add(tracks=[track], at_position=1)
+        self.add_to_tracklist(track, at_position=1)
         tl_tracks = self.core.tracklist.get_tl_tracks()
         self.core.tracklist.set_random(True)
         self.core.playback.play(tl_tracks[0].tlid)
@@ -826,8 +827,7 @@ class TestRemoveCurrentTrack(BaseTest):
     def test_remove_current_track_in_consume_mode_skips_unplayable_track(self):
         # Make translate_uri return None.
         track = Track(uri="dummy:unplayable", length=1234)
-        with pytest.deprecated_call():
-            self.core.tracklist.add(tracks=[track], at_position=1)
+        self.add_to_tracklist(track, at_position=1)
         tl_tracks = self.core.tracklist.get_tl_tracks()
         self.core.tracklist.set_consume(True)
         self.core.playback.play(tl_tracks[0].tlid)
@@ -1314,7 +1314,21 @@ class TestUnplayableURI(BaseTest):
 
     def setup_method(self, method):
         super().setup_method(method)
-        tl_tracks = self.core.tracklist.get_tl_tracks()
+
+        # No backend owns the first track, so a lookup by URI can not add it.
+        # Core can restore such a track from saved state, for example after
+        # the user removes a backend.
+        tl_tracks = tuple(
+            TlTrack(TracklistId(tlid), track)
+            for tlid, track in enumerate(self.tracks, start=1)
+        )
+        self.core.tracklist._load_state(
+            TracklistControllerState(
+                next_tlid=TracklistId(len(tl_tracks) + 1),
+                tl_tracks=tl_tracks,
+            ),
+            coverage=["tracklist"],
+        )
         self.core.playback._set_current_tl_track(tl_tracks[0])
 
     def test_play_skips_to_next_if_track_is_unplayable(self):
@@ -1448,8 +1462,7 @@ class TestSeek(BaseTest):
     def test_seek_fails_for_track_without_duration(self):
         track = self.tracks[0].replace(length=None)
         self.core.tracklist.clear()
-        with pytest.deprecated_call():
-            self.core.tracklist.add(tracks=[track])
+        self.add_to_tracklist(track)
 
         self.core.playback.play()
         self.replay_events()
@@ -1558,8 +1571,7 @@ class TestStream(BaseTest):
 class TestBug1871Regression(BaseTest):
     def test(self):
         track = Track(uri="dummy:d", length=1234, name="baz")
-        with pytest.deprecated_call():
-            self.core.tracklist.add(tracks=[track], at_position=1)
+        self.add_to_tracklist(track, at_position=1)
 
         self.core.playback.play()
         self.replay_events()
@@ -1600,8 +1612,15 @@ class TestBackendSelection:
             backends=[self.backend1, self.backend2],
         )
 
-        with pytest.deprecated_call():
-            self.tl_tracks = self.core.tracklist.add(tracks=self.tracks)
+        self.backend1.library.lookup_many.return_value.get.return_value = {
+            "dummy1:a": [self.tracks[0]],
+        }
+        self.backend2.library.lookup_many.return_value.get.return_value = {
+            "dummy2:a": [self.tracks[1]],
+        }
+        self.tl_tracks = self.core.tracklist.add(
+            uris=[track.uri for track in self.tracks]
+        )
 
     def trigger_stream_changed(self):
         pending = self.core.playback._pending_tl_track
@@ -1756,8 +1775,11 @@ class TestBug1177Regression:
         track2 = Track(uri="dummy:b", length=40000)
 
         c = core.Core(config, mixer=None, backends=[b])
-        with pytest.deprecated_call():
-            c.tracklist.add(tracks=[track1, track2])
+        b.library.lookup_many.return_value.get.return_value = {
+            "dummy:a": [track1],
+            "dummy:b": [track2],
+        }
+        c.tracklist.add(uris=[track1.uri, track2.uri])
 
         c.playback.play()
         b.playback.change_track.assert_called_once_with(track1)
@@ -1865,8 +1887,7 @@ class TestEndlessLoop(BaseTest):
 
     def test_play(self):
         self.core.tracklist.clear()
-        with pytest.deprecated_call():
-            self.core.tracklist.add(tracks=self.tracks_play)
+        self.add_to_tracklist(*self.tracks_play)
 
         self.backend.playback.reset_call_limit().get()
         self.core.tracklist.set_repeat(True)
@@ -1879,8 +1900,7 @@ class TestEndlessLoop(BaseTest):
 
     def test_next(self):
         self.core.tracklist.clear()
-        with pytest.deprecated_call():
-            self.core.tracklist.add(tracks=self.tracks_other)
+        self.add_to_tracklist(*self.tracks_other)
 
         self.backend.playback.reset_call_limit().get()
         self.core.tracklist.set_repeat(True)
@@ -1896,8 +1916,7 @@ class TestEndlessLoop(BaseTest):
 
     def test_previous(self):
         self.core.tracklist.clear()
-        with pytest.deprecated_call():
-            self.core.tracklist.add(tracks=self.tracks_other)
+        self.add_to_tracklist(*self.tracks_other)
 
         self.backend.playback.reset_call_limit().get()
         self.core.tracklist.set_repeat(True)
@@ -1913,8 +1932,7 @@ class TestEndlessLoop(BaseTest):
 
     def test_on_about_to_finish(self):
         self.core.tracklist.clear()
-        with pytest.deprecated_call():
-            self.core.tracklist.add(tracks=self.tracks_other)
+        self.add_to_tracklist(*self.tracks_other)
 
         self.backend.playback.reset_call_limit().get()
         self.core.tracklist.set_repeat(True)
