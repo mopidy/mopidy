@@ -130,8 +130,9 @@ reference](../reference/media.md) has an example.
   from the distribution that registers the extension's entry point, and no
   longer reads the attribute. (!2298)
 
-- Deprecate `mopidy.__version__`. Mopidy no longer uses it itself. Use
-  `importlib.metadata.version("mopidy")` instead. (!2298)
+- Deprecate `mopidy.__version__`. Mopidy no longer uses it itself, and reading
+  it gives a `DeprecationWarning`. Use `importlib.metadata.version("mopidy")`
+  instead. (!2298, !2376)
 
 - Deprecate [`PlaybackController.set_state()`][mopidy.core.PlaybackController.set_state].
   Use [`play()`][mopidy.core.PlaybackController.play],
