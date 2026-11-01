@@ -354,3 +354,18 @@ def test_deprecated_tracklist_method_rejects_argument_that_is_not_a_tl_track(
 ):
     with pytest.deprecated_call(), pytest.raises(ValueError):
         getattr(mocked_core.tracklist, method)("abc")
+
+
+def test_deprecated_add_with_tracks_adds_the_tracks(core, tl_tracks):
+    track = Track(uri="dummy1:d")
+
+    with pytest.deprecated_call():
+        added = core.tracklist.add(tracks=[track], at_position=1)
+
+    assert [tl_track.track for tl_track in added] == [track]
+    assert core.tracklist.get_tracks()[1] == track
+
+
+def test_deprecated_add_rejects_both_tracks_and_uris(core):
+    with pytest.raises(ValueError, match="Exactly one"):
+        core.tracklist.add(tracks=[Track(uri="dummy1:a")], uris=["dummy1:a"])
