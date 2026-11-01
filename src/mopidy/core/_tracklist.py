@@ -218,21 +218,6 @@ class TracklistController:
         # shared.
         return self._get_next_tl_track(reference=reference)
 
-    @deprecated("Use core.tracklist.get_eot_tlid()")
-    def eot_track(self, tl_track: TlTrack | None) -> TlTrack | None:
-        """The track that will be played after the given track.
-
-        Not necessarily the same track as [next_track][].
-
-        Deprecated: Use [get_eot_tlid][] instead.
-
-        Args:
-            tl_track: The reference track.
-        """
-        if tl_track is not None:
-            validation.check_instance(tl_track, TlTrack)
-        return self._get_eot_tl_track(reference=tl_track)
-
     def get_next_tlid(self) -> TracklistId | None:
         """The TLID of the next track.
 
@@ -282,26 +267,6 @@ class TracklistController:
 
         return self._tl_tracks[next_index]
 
-    @deprecated("Use core.tracklist.get_next_tlid()")
-    def next_track(self, tl_track: TlTrack | None) -> TlTrack | None:
-        """The track that will be played if calling next.
-
-        Calls [PlaybackController.next][mopidy.core.PlaybackController.next].
-
-        For normal playback this is the next track in the tracklist. If repeat
-        is enabled the next track can loop around the tracklist. When random is
-        enabled this should be a random track, all tracks should be played once
-        before the tracklist repeats.
-
-        Deprecated: Use [get_next_tlid][] instead.
-
-        Args:
-            tl_track: The reference track.
-        """
-        if tl_track is not None:
-            validation.check_instance(tl_track, TlTrack)
-        return self._get_next_tl_track(reference=tl_track)
-
     def get_previous_tlid(self) -> TracklistId | None:
         """Returns the TLID of the previous track.
 
@@ -329,25 +294,6 @@ class TracklistController:
         # Since we know we are not at zero we have to be somewhere in the range
         # 1 - len(tracks) Thus 'position - 1' will always be within the list.
         return self._tl_tracks[position - 1]
-
-    @deprecated("Use core.tracklist.get_previous_tlid()")
-    def previous_track(self, tl_track: TlTrack | None) -> TlTrack | None:
-        """Returns the track that will be played if calling previous.
-
-        Calls [PlaybackController.previous][mopidy.core.PlaybackController.previous].
-
-        For normal playback this is the previous track in the tracklist. If
-        random and/or consume is enabled it should return the current track
-        instead.
-
-        Deprecated: Use [get_previous_tlid][] instead.
-
-        Args:
-            tl_track: The reference track.
-        """
-        if tl_track is not None:
-            validation.check_instance(tl_track, TlTrack)
-        return self._get_previous_tl_track(reference=tl_track)
 
     def add(  # noqa: C901
         self,
@@ -677,6 +623,62 @@ class TracklistController:
                 self._tl_tracks = list(state.tl_tracks)
                 self._increase_version()
 
+    # Deprecated, remove in 5.0
+
+    @deprecated("Use core.tracklist.get_eot_tlid()")
+    def eot_track(self, tl_track: TlTrack | None) -> TlTrack | None:
+        """The track that will be played after the given track.
+
+        Not necessarily the same track as [next_track][].
+
+        Deprecated: Use [get_eot_tlid][] instead.
+
+        Args:
+            tl_track: The reference track.
+        """
+        if tl_track is not None:
+            validation.check_instance(tl_track, TlTrack)
+        return self._get_eot_tl_track(reference=tl_track)
+
+    @deprecated("Use core.tracklist.get_next_tlid()")
+    def next_track(self, tl_track: TlTrack | None) -> TlTrack | None:
+        """The track that will be played if calling next.
+
+        Calls [PlaybackController.next][mopidy.core.PlaybackController.next].
+
+        For normal playback this is the next track in the tracklist. If repeat
+        is enabled the next track can loop around the tracklist. When random is
+        enabled this should be a random track, all tracks should be played once
+        before the tracklist repeats.
+
+        Deprecated: Use [get_next_tlid][] instead.
+
+        Args:
+            tl_track: The reference track.
+        """
+        if tl_track is not None:
+            validation.check_instance(tl_track, TlTrack)
+        return self._get_next_tl_track(reference=tl_track)
+
+    @deprecated("Use core.tracklist.get_previous_tlid()")
+    def previous_track(self, tl_track: TlTrack | None) -> TlTrack | None:
+        """Returns the track that will be played if calling previous.
+
+        Calls [PlaybackController.previous][mopidy.core.PlaybackController.previous].
+
+        For normal playback this is the previous track in the tracklist. If
+        random and/or consume is enabled it should return the current track
+        instead.
+
+        Deprecated: Use [get_previous_tlid][] instead.
+
+        Args:
+            tl_track: The reference track.
+        """
+        if tl_track is not None:
+            validation.check_instance(tl_track, TlTrack)
+        return self._get_previous_tl_track(reference=tl_track)
+
 
 class TracklistControllerProxy:
     get_tl_tracks = proxy_method(TracklistController.get_tl_tracks)
@@ -693,11 +695,8 @@ class TracklistControllerProxy:
     set_single = proxy_method(TracklistController.set_single)
     index = proxy_method(TracklistController.index)
     get_eot_tlid = proxy_method(TracklistController.get_eot_tlid)
-    eot_track = proxy_method(TracklistController.eot_track)  # ty: ignore[deprecated]
     get_next_tlid = proxy_method(TracklistController.get_next_tlid)
-    next_track = proxy_method(TracklistController.next_track)  # ty: ignore[deprecated]
     get_previous_tlid = proxy_method(TracklistController.get_previous_tlid)
-    previous_track = proxy_method(TracklistController.previous_track)  # ty: ignore[deprecated]
     add = proxy_method(TracklistController.add)
     clear = proxy_method(TracklistController.clear)
     filter = proxy_method(TracklistController.filter)
@@ -705,3 +704,8 @@ class TracklistControllerProxy:
     remove = proxy_method(TracklistController.remove)
     shuffle = proxy_method(TracklistController.shuffle)
     slice = proxy_method(TracklistController.slice)
+
+    # Deprecated, remove in 5.0
+    eot_track = proxy_method(TracklistController.eot_track)  # ty: ignore[deprecated]
+    next_track = proxy_method(TracklistController.next_track)  # ty: ignore[deprecated]
+    previous_track = proxy_method(TracklistController.previous_track)  # ty: ignore[deprecated]
