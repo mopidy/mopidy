@@ -61,11 +61,6 @@ class TracklistController:
         """
         return self._version
 
-    def _increase_version(self) -> None:
-        self._version += 1
-        self.core.playback._on_tracklist_change()
-        self._trigger_tracklist_changed()
-
     def get_consume(self) -> bool:
         """Get consume mode.
 
@@ -162,6 +157,10 @@ class TracklistController:
         if self.get_single() != value:
             self._trigger_options_changed()
         self._single = value
+
+    def _trigger_options_changed(self) -> None:
+        logger.debug("Triggering options changed event")
+        CoreListener.send("options_changed")
 
     def index(
         self,
@@ -583,20 +582,6 @@ class TracklistController:
             return True
         return False
 
-    def _trigger_tracklist_changed(self) -> None:
-        if self.get_random():
-            self._shuffled = self._tl_tracks[:]
-            random.shuffle(self._shuffled)
-        else:
-            self._shuffled = []
-
-        logger.debug("Triggering event: tracklist_changed()")
-        CoreListener.send("tracklist_changed")
-
-    def _trigger_options_changed(self) -> None:
-        logger.debug("Triggering options changed event")
-        CoreListener.send("options_changed")
-
     def _save_state(self) -> TracklistControllerState:
         return TracklistControllerState(
             tl_tracks=tuple(self._tl_tracks),
@@ -622,6 +607,21 @@ class TracklistController:
                 self._next_tlid = max(TracklistId(state.next_tlid), self._next_tlid)
                 self._tl_tracks = list(state.tl_tracks)
                 self._increase_version()
+
+    def _increase_version(self) -> None:
+        self._version += 1
+        self.core.playback._on_tracklist_change()
+        self._trigger_tracklist_changed()
+
+    def _trigger_tracklist_changed(self) -> None:
+        if self.get_random():
+            self._shuffled = self._tl_tracks[:]
+            random.shuffle(self._shuffled)
+        else:
+            self._shuffled = []
+
+        logger.debug("Triggering event: tracklist_changed()")
+        CoreListener.send("tracklist_changed")
 
     # Deprecated, remove in 5.0
 
