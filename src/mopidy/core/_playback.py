@@ -608,7 +608,7 @@ class PlaybackController:
         if tl_track is None:
             return
         self.core.tracklist._mark_playing(tl_track=tl_track)
-        self.core.history._add_track(tl_track.track)
+        self.core.history._add_track(track=tl_track.track)
         CoreListener.send("track_playback_started", tl_track=tl_track)
 
     def _trigger_track_playback_ended(
