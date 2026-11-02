@@ -1323,7 +1323,7 @@ class TestUnplayableURI(BaseTest):
             for tlid, track in enumerate(self.tracks, start=1)
         )
         self.core.tracklist._load_state(
-            TracklistControllerState(
+            state=TracklistControllerState(
                 next_tlid=TracklistId(len(tl_tracks) + 1),
                 tl_tracks=tl_tracks,
             ),
@@ -1815,7 +1815,7 @@ class TestCorePlaybackSaveLoadState(BaseTest):
             time_position=0, state="playing", tlid=tl_tracks[2].tlid
         )
         coverage = ["play-last"]
-        self.core.playback._load_state(state, coverage)
+        self.core.playback._load_state(state=state, coverage=coverage)
         self.replay_events()
 
         assert self.core.playback.get_state() == "playing"
@@ -1832,7 +1832,7 @@ class TestCorePlaybackSaveLoadState(BaseTest):
             time_position=0, state="playing", tlid=tl_tracks[2].tlid
         )
         coverage = ["other"]
-        self.core.playback._load_state(state, coverage)
+        self.core.playback._load_state(state=state, coverage=coverage)
         self.replay_events()
 
         assert self.core.playback.get_state() == "stopped"
@@ -1840,10 +1840,10 @@ class TestCorePlaybackSaveLoadState(BaseTest):
 
     def test_load_invalid_type(self):
         with pytest.raises(TypeError):
-            self.core.playback._load_state(11, None)
+            self.core.playback._load_state(state=11, coverage=None)
 
     def test_load_none(self):
-        self.core.playback._load_state(None, None)
+        self.core.playback._load_state(state=None, coverage=None)
 
 
 class TestBug1352Regression(BaseTest):

@@ -594,6 +594,7 @@ class TracklistController:
 
     def _load_state(
         self,
+        *,
         state: TracklistControllerState,
         coverage: Iterable[str],
     ) -> None:

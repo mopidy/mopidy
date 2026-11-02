@@ -411,7 +411,7 @@ class PlaybackController:
         )
 
     def _load_state(
-        self, state: PlaybackControllerState, coverage: Iterable[str]
+        self, *, state: PlaybackControllerState, coverage: Iterable[str]
     ) -> None:
         if state and "play-last" in coverage and state.tlid is not None:
             if state.state == PlaybackState.PAUSED:
