@@ -55,11 +55,7 @@ def command() -> int:
 
     exit_status_code = 0
     try:
-        mixer = None
-        if mixer_class is not None:
-            mixer = start_mixer(config, mixer_class)
-        if mixer:
-            configure_mixer(config, mixer)
+        mixer = start_mixer(config, mixer_class)
         audio = start_audio(config, mixer)
         backends = start_backends(config, backend_classes, audio)
         core = start_core(config, mixer, backends, audio)
@@ -114,30 +110,31 @@ def get_mixer_class(
 
 def start_mixer(
     config: Config,
-    mixer_class: type[MixerActor],
+    mixer_class: type[MixerActor] | None,
 ) -> MixerProxy | None:
+    if mixer_class is None:
+        return None
+
     logger.info("Starting Mopidy mixer: %s", mixer_class.__name__)
+    mixer = None
     with actor_error_handling(mixer_class.__name__):
-        mixer = cast(MixerProxy, mixer_class.start(config=config).proxy())
+        proxy = cast(MixerProxy, mixer_class.start(config=config).proxy())
         try:
-            mixer.ping().get()
+            proxy.ping().get()
         except pykka.ActorDeadError as exc:
             logger.error("Actor died: %s", exc)
         else:
-            return mixer
-    return None
+            mixer = proxy
+    if mixer is None:
+        return None
 
-
-def configure_mixer(
-    config: Config,
-    mixer: MixerProxy,
-) -> None:
     volume = config["audio"]["mixer_volume"]
     if volume is not None:
         mixer.set_volume(Percentage(volume))
         logger.info("Mixer volume set to %d", volume)
     else:
         logger.debug("Mixer volume left unchanged")
+    return mixer
 
 
 def start_audio(
