@@ -3,7 +3,7 @@ from __future__ import annotations
 import contextlib
 import logging
 from collections.abc import Generator
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import pykka
 from pykka import ThreadingActor
@@ -14,13 +14,16 @@ from mopidy._app import process
 from mopidy._app.extensions import ExtensionManager, ExtensionStatus
 from mopidy._lib import gi, logs
 from mopidy._lib.process import exit_process
-from mopidy.audio import AudioProxy, GstAudio
+from mopidy.audio._start import start_audio_actor
 from mopidy.backend import BackendActor, BackendProxy
 from mopidy.config import Config
 from mopidy.core import Core, CoreProxy
 from mopidy.ext import Registry
 from mopidy.mixer import MixerActor, MixerProxy
 from mopidy.types import Percentage
+
+if TYPE_CHECKING:
+    from mopidy.audio import AudioProxy
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +50,7 @@ def command() -> int:
     mixer_class = get_mixer_class(config, mixer_classes)
     backend_classes = cast(list[type[BackendActor]], registry["backend"])
     frontend_classes = cast(list[type[ThreadingActor]], registry["frontend"])
+    audio = None
     core = None
 
     exit_status_code = 0
@@ -78,7 +82,7 @@ def command() -> int:
         stop_frontends(frontend_classes)
         stop_core(core)
         stop_backends(backend_classes)
-        stop_audio()
+        stop_audio(audio)
         if mixer_class is not None:
             stop_mixer(mixer_class)
         process.stop_remaining_actors()
@@ -142,7 +146,7 @@ def start_audio(
     mixer: MixerProxy | None,
 ) -> AudioProxy:
     logger.info("Starting Mopidy audio")
-    return cast(AudioProxy, GstAudio.start(config=config, mixer=mixer).proxy())
+    return start_audio_actor(config=config, mixer=mixer)
 
 
 def start_backends(
@@ -237,9 +241,11 @@ def stop_backends(backend_classes: list[type[BackendActor]]) -> None:
         process.stop_actors_by_class(backend_class)
 
 
-def stop_audio() -> None:
+def stop_audio(audio: AudioProxy | None) -> None:
+    if audio is None:
+        return
     logger.info("Stopping Mopidy audio")
-    process.stop_actors_by_class(GstAudio)
+    audio.actor_ref.stop()
 
 
 def stop_mixer(mixer_class: type[MixerActor]) -> None:
