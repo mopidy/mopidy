@@ -184,6 +184,13 @@ reference](../reference/media.md) has an example.
   [`resume()`][mopidy.core.PlaybackController.resume] with no wait between
   them, the playback state could stay paused while the audio played. (!2358)
 
+- Compare tracklist entries by TLID. This makes
+  [`remove()`][mopidy.core.TracklistController.remove] and other tracklist
+  operations faster on large tracklists. As a result,
+  [`index()`][mopidy.core.TracklistController.index] gives the position of a
+  [`TlTrack`][mopidy.models.TlTrack] if its TLID is in the tracklist, also if
+  its track is different. Before, `index()` gave `None` in this case. (!2383)
+
 ### Audio
 
 - Handle all GStreamer bus messages on the audio actor thread. Before,

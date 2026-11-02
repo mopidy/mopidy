@@ -158,8 +158,13 @@ def test_index_returns_index_of_track(mocked_core, index_tl_tracks):
 
 
 def test_index_returns_none_if_item_not_found(mocked_core, index_tl_tracks):
-    tl_track = TlTrack(TracklistId(1), TrackFactory.build())
+    tl_track = TlTrack(TracklistId(123), TrackFactory.build())
     assert mocked_core.tracklist.index(tl_track) is None
+
+
+def test_index_finds_track_by_tlid_if_track_differs(mocked_core, index_tl_tracks):
+    tl_track = TlTrack(index_tl_tracks[1].tlid, TrackFactory.build())
+    assert mocked_core.tracklist.index(tl_track) == 1
 
 
 def test_index_returns_none_if_called_with_none(mocked_core, index_tl_tracks):
