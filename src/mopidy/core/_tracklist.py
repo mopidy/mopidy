@@ -61,11 +61,6 @@ class TracklistController:
         """
         return self._version
 
-    def _increase_version(self) -> None:
-        self._version += 1
-        self.core.playback._on_tracklist_change()
-        self._trigger_tracklist_changed()
-
     def get_consume(self) -> bool:
         """Get consume mode.
 
@@ -162,6 +157,10 @@ class TracklistController:
         if self.get_single() != value:
             self._trigger_options_changed()
         self._single = value
+
+    def _trigger_options_changed(self) -> None:
+        logger.debug("Triggering options changed event")
+        CoreListener.send("options_changed")
 
     def index(
         self,
@@ -552,12 +551,12 @@ class TracklistController:
         # TODO: validate slice?
         return self._tl_tracks[start:end]
 
-    def _mark_playing(self, tl_track: TlTrack) -> None:
+    def _mark_playing(self, *, tl_track: TlTrack) -> None:
         """Internal method for [PlaybackController][mopidy.core.PlaybackController]."""
         if self.get_random() and tl_track in self._shuffled:
             self._shuffled.remove(tl_track)
 
-    def _mark_unplayable(self, tl_track: TlTrack | None) -> None:
+    def _mark_unplayable(self, *, tl_track: TlTrack | None) -> None:
         """Internal method for [PlaybackController][mopidy.core.PlaybackController]."""
         logger.warning(
             "Track is not playable: %s",
@@ -576,26 +575,12 @@ class TracklistController:
         if self.get_consume() and tl_tracks:
             self.remove({"tlid": [tl_track.tlid for tl_track in tl_tracks]})
 
-    def _mark_played(self, tl_track: TlTrack | None) -> bool:
+    def _mark_played(self, *, tl_track: TlTrack | None) -> bool:
         """Internal method for [PlaybackController][mopidy.core.PlaybackController]."""
         if self.get_consume() and tl_track in self._tl_tracks:
             self.remove({"tlid": [tl_track.tlid]})
             return True
         return False
-
-    def _trigger_tracklist_changed(self) -> None:
-        if self.get_random():
-            self._shuffled = self._tl_tracks[:]
-            random.shuffle(self._shuffled)
-        else:
-            self._shuffled = []
-
-        logger.debug("Triggering event: tracklist_changed()")
-        CoreListener.send("tracklist_changed")
-
-    def _trigger_options_changed(self) -> None:
-        logger.debug("Triggering options changed event")
-        CoreListener.send("options_changed")
 
     def _save_state(self) -> TracklistControllerState:
         return TracklistControllerState(
@@ -622,6 +607,21 @@ class TracklistController:
                 self._next_tlid = max(TracklistId(state.next_tlid), self._next_tlid)
                 self._tl_tracks = list(state.tl_tracks)
                 self._increase_version()
+
+    def _increase_version(self) -> None:
+        self._version += 1
+        self.core.playback._on_tracklist_change()
+        self._trigger_tracklist_changed()
+
+    def _trigger_tracklist_changed(self) -> None:
+        if self.get_random():
+            self._shuffled = self._tl_tracks[:]
+            random.shuffle(self._shuffled)
+        else:
+            self._shuffled = []
+
+        logger.debug("Triggering event: tracklist_changed()")
+        CoreListener.send("tracklist_changed")
 
     # Deprecated, remove in 5.0
 

@@ -584,7 +584,7 @@ class PlaybackController:
         count = self.core.tracklist.get_length() * 2
 
         while not change(pending):
-            self.core.tracklist._mark_unplayable(pending)
+            self.core.tracklist._mark_unplayable(tl_track=pending)
             pending = step(pending)
             count -= 1
             if not count:
@@ -623,7 +623,7 @@ class PlaybackController:
         tl_track = self.get_current_tl_track()
         if tl_track is None:
             return
-        self.core.tracklist._mark_playing(tl_track)
+        self.core.tracklist._mark_playing(tl_track=tl_track)
         self.core.history._add_track(tl_track.track)
         CoreListener.send("track_playback_started", tl_track=tl_track)
 
@@ -639,7 +639,7 @@ class PlaybackController:
         logger.debug("Triggering track playback ended event")
 
         if not self._previous:
-            self.core.tracklist._mark_played(tl_track)
+            self.core.tracklist._mark_played(tl_track=tl_track)
         self._previous = False
 
         # TODO: Use the lowest of track duration and position.
