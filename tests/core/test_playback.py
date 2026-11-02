@@ -1860,7 +1860,7 @@ class TestBug1352Regression(BaseTest):
         self.playback.play()
         self.replay_events()
 
-        self.core.history._add_track.assert_called_once_with(self.tracks[0])
+        self.core.history._add_track.assert_called_once_with(track=self.tracks[0])
         self.core.tracklist._mark_playing.assert_called_once_with(tl_track=tl_tracks[0])
         self.core.history._add_track.reset_mock()
         self.core.tracklist._mark_playing.reset_mock()
@@ -1869,7 +1869,7 @@ class TestBug1352Regression(BaseTest):
         self.playback.next()
         self.replay_events()
 
-        self.core.history._add_track.assert_called_once_with(self.tracks[1])
+        self.core.history._add_track.assert_called_once_with(track=self.tracks[1])
         self.core.tracklist._mark_playing.assert_called_once_with(tl_track=tl_tracks[1])
 
 

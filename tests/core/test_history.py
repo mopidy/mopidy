@@ -25,26 +25,26 @@ def tracks():
 
 
 def test_add_track(history, tracks):
-    history._add_track(tracks[0])
+    history._add_track(track=tracks[0])
     assert history.get_length() == 1
 
-    history._add_track(tracks[1])
+    history._add_track(track=tracks[1])
     assert history.get_length() == 2
 
-    history._add_track(tracks[2])
+    history._add_track(track=tracks[2])
     assert history.get_length() == 3
 
 
 def test_non_tracks_are_rejected(history):
     with pytest.raises(TypeError):
-        history._add_track(object())
+        history._add_track(track=object())
 
     assert history.get_length() == 0
 
 
 def test_history_entry_contents(history, tracks):
     track = tracks[0]
-    history._add_track(track)
+    history._add_track(track=track)
 
     result = history.get_history()
     (timestamp, ref) = result[0]
@@ -57,7 +57,7 @@ def test_history_entry_contents(history, tracks):
 
 
 def test_track_artist_no_name(history, tracks):
-    history._add_track(tracks[3])
+    history._add_track(track=tracks[3])
     assert history.get_length() == 1
 
 
@@ -76,8 +76,8 @@ def refs(state_tracks):
 
 
 def test_state_save(history, state_tracks, refs):
-    history._add_track(state_tracks[2])
-    history._add_track(state_tracks[1])
+    history._add_track(track=state_tracks[2])
+    history._add_track(track=state_tracks[1])
 
     value = history._save_state()
 
@@ -105,7 +105,7 @@ def test_state_load(history, state_tracks, refs):
     assert hist[2] == (56, refs[1])
 
     # after import, adding more tracks must be possible
-    history._add_track(state_tracks[1])
+    history._add_track(track=state_tracks[1])
     hist = history.get_history()
     assert len(hist) == 4
     assert hist[0][1] == refs[1]
