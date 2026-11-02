@@ -169,6 +169,9 @@ class TracklistController:
     ) -> int | None:
         """The position of the given track in the tracklist.
 
+        The TLID identifies the track. A *tl_track* with a TLID in the
+        tracklist gives a position, also if its track is different.
+
         If neither *tl_track* or *tlid* is given we return the index of
         the currently playing track.
 
@@ -185,13 +188,10 @@ class TracklistController:
             tl_track = self.core.playback.get_current_tl_track()
 
         if tl_track is not None:
-            try:
-                return self._tl_tracks.index(tl_track)
-            except ValueError:
-                pass
-        elif tlid is not None:
-            for i, tl_track in enumerate(self._tl_tracks):
-                if tl_track.tlid == tlid:
+            tlid = tl_track.tlid
+        if tlid is not None:
+            for i, candidate in enumerate(self._tl_tracks):
+                if candidate.tlid == tlid:
                     return i
         return None
 
@@ -251,7 +251,7 @@ class TracklistController:
                 return self._shuffled[0]
             return None
 
-        next_index = self.index(reference)
+        next_index = self.index(tlid=reference.tlid if reference else None)
         if next_index is None:
             next_index = 0
         else:
@@ -285,7 +285,7 @@ class TracklistController:
         if self.get_repeat() or self.get_consume() or self.get_random():
             return reference
 
-        position = self.index(reference)
+        position = self.index(tlid=reference.tlid if reference else None)
 
         if position in (None, 0):
             return None
@@ -464,17 +464,21 @@ class TracklistController:
             criteria: One or more rules to match by.
         """
         tl_tracks = self.filter(criteria)
+        removed_tlids = {tl_track.tlid for tl_track in tl_tracks}
         current_tl_track = self.core.playback.get_current_tl_track()
-        current_removed = current_tl_track in tl_tracks
+        current_removed = False
         next_tl_track = None
-        if current_removed:
+        if current_tl_track is not None and current_tl_track.tlid in removed_tlids:
+            current_removed = True
             next_tl_track = self._get_next_remaining_tl_track(
                 tl_track=current_tl_track,
-                removed=tl_tracks,
+                removed_tlids=removed_tlids,
             )
-        for tl_track in tl_tracks:
-            position = self._tl_tracks.index(tl_track)
-            del self._tl_tracks[position]
+        self._tl_tracks = [
+            tl_track
+            for tl_track in self._tl_tracks
+            if tl_track.tlid not in removed_tlids
+        ]
         self._remove_from_shuffled(tl_tracks=tl_tracks)
         # If the tracklist is empty, _increase_version() stops playback.
         if current_removed and self._tl_tracks:
@@ -486,7 +490,7 @@ class TracklistController:
         self,
         *,
         tl_track: TlTrack,
-        removed: list[TlTrack],
+        removed_tlids: set[TracklistId],
     ) -> TlTrack | None:
         """The track that `next()` changes to, if it skips the removed tracks.
 
@@ -498,15 +502,16 @@ class TracklistController:
         candidate: TlTrack | None = tl_track
         for _ in range(len(self._tl_tracks) * 2):
             candidate = self._get_next_tl_track(reference=candidate)
-            if candidate not in removed:
+            if candidate is None or candidate.tlid not in removed_tlids:
                 return candidate
             self._remove_from_shuffled(tl_tracks=[candidate])
         return None
 
     def _remove_from_shuffled(self, *, tl_tracks: Iterable[TlTrack]) -> None:
-        for tl_track in tl_tracks:
-            if tl_track in self._shuffled:
-                self._shuffled.remove(tl_track)
+        tlids = {tl_track.tlid for tl_track in tl_tracks}
+        self._shuffled = [
+            tl_track for tl_track in self._shuffled if tl_track.tlid not in tlids
+        ]
 
     def shuffle(self, start: int | None = None, end: int | None = None) -> None:
         """Shuffle the entire tracklist, or a slice.
@@ -580,7 +585,11 @@ class TracklistController:
 
     def _mark_played(self, *, tl_track: TlTrack | None) -> bool:
         """Internal method for [PlaybackController][mopidy.core.PlaybackController]."""
-        if self.get_consume() and tl_track in self._tl_tracks:
+        if (
+            self.get_consume()
+            and tl_track is not None
+            and self.index(tlid=tl_track.tlid) is not None
+        ):
             self.remove({"tlid": [tl_track.tlid]})
             return True
         return False
