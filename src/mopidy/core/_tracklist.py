@@ -475,8 +475,7 @@ class TracklistController:
         for tl_track in tl_tracks:
             position = self._tl_tracks.index(tl_track)
             del self._tl_tracks[position]
-            if tl_track in self._shuffled:
-                self._shuffled.remove(tl_track)
+        self._remove_from_shuffled(tl_tracks=tl_tracks)
         # If the tracklist is empty, _increase_version() stops playback.
         if current_removed and self._tl_tracks:
             self.core.playback._on_current_track_removed(next_tl_track=next_tl_track)
@@ -501,9 +500,13 @@ class TracklistController:
             candidate = self._get_next_tl_track(reference=candidate)
             if candidate not in removed:
                 return candidate
-            if candidate in self._shuffled:
-                self._shuffled.remove(candidate)
+            self._remove_from_shuffled(tl_tracks=[candidate])
         return None
+
+    def _remove_from_shuffled(self, *, tl_tracks: Iterable[TlTrack]) -> None:
+        for tl_track in tl_tracks:
+            if tl_track in self._shuffled:
+                self._shuffled.remove(tl_track)
 
     def shuffle(self, start: int | None = None, end: int | None = None) -> None:
         """Shuffle the entire tracklist, or a slice.
@@ -553,8 +556,8 @@ class TracklistController:
 
     def _mark_playing(self, *, tl_track: TlTrack) -> None:
         """Internal method for [PlaybackController][mopidy.core.PlaybackController]."""
-        if self.get_random() and tl_track in self._shuffled:
-            self._shuffled.remove(tl_track)
+        if self.get_random():
+            self._remove_from_shuffled(tl_tracks=[tl_track])
 
     def _mark_unplayable(self, *, tl_track: TlTrack | None) -> None:
         """Internal method for [PlaybackController][mopidy.core.PlaybackController]."""
@@ -564,8 +567,8 @@ class TracklistController:
         )
         if tl_track is not None:
             self._unplayable.append(tl_track)
-        if self.get_random() and tl_track in self._shuffled:
-            self._shuffled.remove(tl_track)
+            if self.get_random():
+                self._remove_from_shuffled(tl_tracks=[tl_track])
 
     def _remove_unplayable(self) -> None:
         """Internal method for [PlaybackController][mopidy.core.PlaybackController]."""
