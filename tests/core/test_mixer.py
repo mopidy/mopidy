@@ -210,7 +210,7 @@ def test_state_load(core_with_mixer_proxy):
     volume = 45
     target = MixerControllerState(volume=volume)
     coverage = ["mixer"]
-    core_with_mixer_proxy.mixer._load_state(target, coverage)
+    core_with_mixer_proxy.mixer._load_state(state=target, coverage=coverage)
     assert volume == core_with_mixer_proxy.mixer.get_volume()
 
 
@@ -219,7 +219,7 @@ def test_state_load_not_covered(core_with_mixer_proxy):
     core_with_mixer_proxy.mixer.set_mute(True)
     target = MixerControllerState(volume=56, mute=False)
     coverage = ["other"]
-    core_with_mixer_proxy.mixer._load_state(target, coverage)
+    core_with_mixer_proxy.mixer._load_state(state=target, coverage=coverage)
     assert core_with_mixer_proxy.mixer.get_volume() == 21
     assert core_with_mixer_proxy.mixer.get_mute() is True
 
@@ -229,7 +229,7 @@ def test_state_load_mute_on(core_with_mixer_proxy):
     assert core_with_mixer_proxy.mixer.get_mute() is False
     target = MixerControllerState(mute=True)
     coverage = ["mixer"]
-    core_with_mixer_proxy.mixer._load_state(target, coverage)
+    core_with_mixer_proxy.mixer._load_state(state=target, coverage=coverage)
     assert core_with_mixer_proxy.mixer.get_mute() is True
 
 
@@ -238,14 +238,14 @@ def test_state_load_mute_off(core_with_mixer_proxy):
     assert core_with_mixer_proxy.mixer.get_mute() is True
     target = MixerControllerState(mute=False)
     coverage = ["mixer"]
-    core_with_mixer_proxy.mixer._load_state(target, coverage)
+    core_with_mixer_proxy.mixer._load_state(state=target, coverage=coverage)
     assert core_with_mixer_proxy.mixer.get_mute() is False
 
 
 def test_state_load_invalid_type(core_with_mixer_proxy):
     with pytest.raises(TypeError):
-        core_with_mixer_proxy.mixer._load_state(11, None)
+        core_with_mixer_proxy.mixer._load_state(state=11, coverage=None)
 
 
 def test_state_load_none(core_with_mixer_proxy):
-    core_with_mixer_proxy.mixer._load_state(None, None)
+    core_with_mixer_proxy.mixer._load_state(state=None, coverage=None)

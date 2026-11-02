@@ -71,7 +71,7 @@ class HistoryController:
                 break
         return HistoryState(history=tuple(history_list))
 
-    def _load_state(self, state: HistoryState, coverage: Iterable[str]) -> None:
+    def _load_state(self, *, state: HistoryState, coverage: Iterable[str]) -> None:
         if state and "history" in coverage:
             self._history = [(h.timestamp, h.track) for h in state.history]
 

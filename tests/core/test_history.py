@@ -96,7 +96,7 @@ def test_state_load(history, state_tracks, refs):
         ],
     )
     coverage = ["history"]
-    history._load_state(state, coverage)
+    history._load_state(state=state, coverage=coverage)
 
     hist = history.get_history()
     assert len(hist) == 3
@@ -116,8 +116,8 @@ def test_state_load(history, state_tracks, refs):
 
 def test_state_load_invalid_type(history):
     with pytest.raises(TypeError):
-        history._load_state(11, None)
+        history._load_state(state=11, coverage=None)
 
 
 def test_state_load_none(history):
-    history._load_state(None, None)
+    history._load_state(state=None, coverage=None)

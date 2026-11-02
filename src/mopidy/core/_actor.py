@@ -175,7 +175,7 @@ class Core(
                     "history",
                 ]
             if coverage:
-                self._load_state(coverage)
+                self._load_state(coverage=coverage)
         except Exception as e:  # noqa: BLE001
             logger.warning("Restore state: Unexpected error: %s", str(e))
 
@@ -217,7 +217,7 @@ class Core(
         state.dump(state_file)
         logger.debug("Saving state done")
 
-    def _load_state(self, coverage: Iterable[str]) -> None:
+    def _load_state(self, *, coverage: Iterable[str]) -> None:
         """Restore state from disk.
 
         Load state from disk and restore it. Parameter `coverage`
@@ -245,11 +245,11 @@ class Core(
             logger.info("Failed to delete %s", state_file)
 
         if data is not None:
-            self.history._load_state(data.state.history, coverage)
-            self.tracklist._load_state(data.state.tracklist, coverage)
-            self.mixer._load_state(data.state.mixer, coverage)
+            self.history._load_state(state=data.state.history, coverage=coverage)
+            self.tracklist._load_state(state=data.state.tracklist, coverage=coverage)
+            self.mixer._load_state(state=data.state.mixer, coverage=coverage)
             # playback after tracklist
-            self.playback._load_state(data.state.playback, coverage)
+            self.playback._load_state(state=data.state.playback, coverage=coverage)
         logger.debug("Loading state done")
 
 

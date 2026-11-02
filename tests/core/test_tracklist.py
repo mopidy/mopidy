@@ -243,7 +243,7 @@ def test_save_load_state_load(mocked_core, tracks, state_tl_tracks):
         tl_tracks=state_tl_tracks,
     )
     coverage = ["mode", "tracklist"]
-    mocked_core.tracklist._load_state(target, coverage)
+    mocked_core.tracklist._load_state(state=target, coverage=coverage)
     assert mocked_core.tracklist.get_consume() is False
     assert mocked_core.tracklist.get_repeat() is True
     assert mocked_core.tracklist.get_single() is True
@@ -270,7 +270,7 @@ def test_save_load_state_load_mode_only(mocked_core, state_tl_tracks):
         tl_tracks=state_tl_tracks,
     )
     coverage = ["mode"]
-    mocked_core.tracklist._load_state(target, coverage)
+    mocked_core.tracklist._load_state(state=target, coverage=coverage)
     assert mocked_core.tracklist.get_consume() is False
     assert mocked_core.tracklist.get_repeat() is True
     assert mocked_core.tracklist.get_single() is True
@@ -292,7 +292,7 @@ def test_save_load_state_load_tracklist_only(mocked_core, state_tl_tracks):
         tl_tracks=state_tl_tracks,
     )
     coverage = ["tracklist"]
-    mocked_core.tracklist._load_state(target, coverage)
+    mocked_core.tracklist._load_state(state=target, coverage=coverage)
     assert mocked_core.tracklist.get_consume() is False
     assert mocked_core.tracklist.get_repeat() is False
     assert mocked_core.tracklist.get_single() is False
@@ -305,11 +305,11 @@ def test_save_load_state_load_tracklist_only(mocked_core, state_tl_tracks):
 
 def test_save_load_state_load_invalid_type(mocked_core):
     with pytest.raises(TypeError):
-        mocked_core.tracklist._load_state(11, None)
+        mocked_core.tracklist._load_state(state=11, coverage=None)
 
 
 def test_save_load_state_load_none(mocked_core):
-    mocked_core.tracklist._load_state(None, None)
+    mocked_core.tracklist._load_state(state=None, coverage=None)
 
 
 def test_deprecated_eot_track_returns_track_of_get_eot_tlid(
