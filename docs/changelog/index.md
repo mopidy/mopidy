@@ -193,6 +193,11 @@ reference](../reference/media.md) has an example.
 
 ### Audio
 
+- Remove `GstAudio` from `mopidy.audio`. It is the GStreamer implementation of
+  the [`Audio`][mopidy.audio.Audio] API, and is not part of the public API.
+  Use [`Audio`][mopidy.audio.Audio] and [`AudioProxy`][mopidy.audio.AudioProxy]
+  in type hints.
+
 - Handle all GStreamer bus messages on the audio actor thread. Before,
   the GLib main loop thread and the actor thread changed the audio state at the
   same time, with no synchronization. The "Race condition happened" warning
@@ -576,7 +581,7 @@ interface with the audio layer themselves.
 
 - The old audio actor has been split into a [`Audio`][mopidy.audio.Audio]
   interface with the API used by core and backends, and a
-  [`GstAudio`][mopidy.audio.GstAudio] implementation using GStreamer.
+  `GstAudio` implementation using GStreamer.
   The API is still very specific to GStreamer, but this split makes it a bit
   easier to mock out the audio layer in tests as it is clearer what is part of
   the required interface. (!2224)

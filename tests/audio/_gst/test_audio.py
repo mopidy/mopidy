@@ -9,6 +9,7 @@ import pytest
 from mopidy import audio
 from mopidy._lib import paths
 from mopidy._lib.gi import Gst
+from mopidy.audio._gst import GstAudio
 from mopidy.audio._gst.pipeline import GstPlaybackPipeline
 from mopidy.audio._gst.types import GstState
 from mopidy.types import PlaybackState
@@ -25,7 +26,7 @@ class BaseTest:
         paths.path_to_uri(path_to_data_dir("song2.wav")),
     ]
 
-    audio_class = audio.GstAudio
+    audio_class = GstAudio
 
     def setup_method(self):
         config = {
@@ -522,7 +523,7 @@ class TestAudioDummyEvent(DummyMixin, TestAudioEvent):
 @pytest.fixture
 def gst_audio():
     # Not started as an actor, so there is no real playbin.
-    return audio.GstAudio(config={"proxy": {}}, mixer=None)
+    return GstAudio(config={"proxy": {}}, mixer=None)
 
 
 @pytest.fixture
