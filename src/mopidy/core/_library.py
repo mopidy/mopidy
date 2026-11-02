@@ -53,27 +53,6 @@ class LibraryController:
         self.backends = backends
         self.core = core
 
-    def _get_backend(self, *, uri: Uri) -> BackendProxy | None:
-        uri_scheme = UriScheme(urllib.parse.urlparse(uri).scheme)
-        return self.backends.with_library.get(uri_scheme, None)
-
-    def _get_backends_to_uris(
-        self,
-        *,
-        uris: Iterable[Uri] | None,
-    ) -> dict[BackendProxy, list[Uri] | None]:
-        if not uris:
-            return dict.fromkeys(self.backends.with_library.values())
-
-        result: dict[BackendProxy, list[Uri] | None] = collections.defaultdict(list)
-        for uri in uris:
-            backend = self._get_backend(uri=uri)
-            if backend is not None:
-                lst = result[backend]
-                assert lst is not None
-                lst.append(uri)
-        return result
-
     def browse(self, uri: Uri | None) -> list[Ref]:
         """Browse directories and tracks at the given `uri`.
 
@@ -356,6 +335,27 @@ class LibraryController:
                 )
 
         return results
+
+    def _get_backends_to_uris(
+        self,
+        *,
+        uris: Iterable[Uri] | None,
+    ) -> dict[BackendProxy, list[Uri] | None]:
+        if not uris:
+            return dict.fromkeys(self.backends.with_library.values())
+
+        result: dict[BackendProxy, list[Uri] | None] = collections.defaultdict(list)
+        for uri in uris:
+            backend = self._get_backend(uri=uri)
+            if backend is not None:
+                lst = result[backend]
+                assert lst is not None
+                lst.append(uri)
+        return result
+
+    def _get_backend(self, *, uri: Uri) -> BackendProxy | None:
+        uri_scheme = UriScheme(urllib.parse.urlparse(uri).scheme)
+        return self.backends.with_library.get(uri_scheme, None)
 
 
 def _normalize_query(query: Query[SearchField]) -> Query[SearchField]:

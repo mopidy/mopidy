@@ -21,6 +21,18 @@ class HistoryController:
     def __init__(self) -> None:
         self._history: History = []
 
+    def get_length(self) -> int:
+        """Get the number of tracks in the history."""
+        return len(self._history)
+
+    def get_history(self) -> History:
+        """Get the track history.
+
+        Returns a list of two-tuples with timestamp and a reference to the track.
+        The timestamps are milliseconds since epoch.
+        """
+        return copy.copy(self._history)
+
     def _add_track(self, *, track: Track) -> None:
         """Add track to the playback history.
 
@@ -45,18 +57,6 @@ class HistoryController:
         name = " - ".join(name_parts)
         ref = Ref.track(uri=track.uri, name=name)
         self._history.insert(0, (timestamp, ref))
-
-    def get_length(self) -> int:
-        """Get the number of tracks in the history."""
-        return len(self._history)
-
-    def get_history(self) -> History:
-        """Get the track history.
-
-        Returns a list of two-tuples with timestamp and a reference to the track.
-        The timestamps are milliseconds since epoch.
-        """
-        return copy.copy(self._history)
 
     def _save_state(self) -> HistoryState:
         # 500 tracks a 3 minutes -> 24 hours history
