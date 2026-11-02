@@ -83,8 +83,7 @@ def command() -> int:
         stop_core(core)
         stop_backends(backend_classes)
         stop_audio(audio)
-        if mixer_class is not None:
-            stop_mixer(mixer_class)
+        stop_mixer(mixer_class)
         process.stop_remaining_actors()
     return exit_status_code
 
@@ -248,7 +247,9 @@ def stop_audio(audio: AudioProxy | None) -> None:
     audio.actor_ref.stop()
 
 
-def stop_mixer(mixer_class: type[MixerActor]) -> None:
+def stop_mixer(mixer_class: type[MixerActor] | None) -> None:
+    if mixer_class is None:
+        return
     logger.info("Stopping Mopidy mixer")
     process.stop_actors_by_class(mixer_class)
 
