@@ -65,7 +65,7 @@ class PlaybackController:
         if self._audio:
             self._audio.set_about_to_finish_callback(self._on_about_to_finish_callback)
 
-    def _get_backend(self, tl_track: TlTrack | None) -> BackendProxy | None:
+    def _get_backend(self, *, tl_track: TlTrack | None) -> BackendProxy | None:
         if tl_track is None:
             return None
         uri_scheme = UriScheme(urllib.parse.urlparse(tl_track.track.uri).scheme)
@@ -174,7 +174,7 @@ class PlaybackController:
         """Get time position in milliseconds."""
         if self._pending_position is not None:
             return self._pending_position
-        backend = self._get_backend(self.get_current_tl_track())
+        backend = self._get_backend(tl_track=self.get_current_tl_track())
         if not backend:
             return DurationMs(0)
         # TODO: Wrap backend call in error handling.
@@ -214,7 +214,7 @@ class PlaybackController:
         self._stream_title = None
         if pending_tl_track:
             if self._pending_position is not None:
-                self._seek(self._pending_position)
+                self._seek(time_position=self._pending_position)
             paused = pending_state == PlaybackState.PAUSED
             self._set_state(PlaybackState.PAUSED if paused else PlaybackState.PLAYING)
             self._trigger_track_playback_started()
@@ -231,7 +231,7 @@ class PlaybackController:
 
     def _on_position_changed(self, _position: int) -> None:
         if self._pending_position is not None:
-            self._trigger_seeked(self._pending_position)
+            self._trigger_seeked(time_position=self._pending_position)
             self._pending_position = None
             if self._start_paused:
                 self._start_paused = False
@@ -284,7 +284,7 @@ class PlaybackController:
         """
         if tl_track is None:
             return True
-        backend = self._get_backend(tl_track)
+        backend = self._get_backend(tl_track=tl_track)
         if not backend:
             return False
         try:
@@ -343,7 +343,7 @@ class PlaybackController:
 
     def pause(self) -> None:
         """Pause playback."""
-        backend = self._get_backend(self.get_current_tl_track())
+        backend = self._get_backend(tl_track=self.get_current_tl_track())
         # TODO: Wrap backend call in error handling.
         if not backend or backend.playback.pause().get():
             self._set_state(PlaybackState.PAUSED)
@@ -415,7 +415,7 @@ class PlaybackController:
         """If paused, resume playing the current track."""
         if self.get_state() != PlaybackState.PAUSED:
             return
-        backend = self._get_backend(self.get_current_tl_track())
+        backend = self._get_backend(tl_track=self.get_current_tl_track())
         # TODO: Wrap backend call in error handling.
         if backend and backend.playback.resume().get():
             self._set_state(PlaybackState.PLAYING)
@@ -465,10 +465,10 @@ class PlaybackController:
             return self._change(tl_track=self._current_tl_track, state=self.get_state())
 
         # TODO: Avoid returning False here when STOPPED (seek is deferred)?
-        return self._seek(time_position)
+        return self._seek(time_position=time_position)
 
-    def _seek(self, time_position: DurationMs) -> bool:
-        backend = self._get_backend(self.get_current_tl_track())
+    def _seek(self, *, time_position: DurationMs) -> bool:
+        backend = self._get_backend(tl_track=self.get_current_tl_track())
         if not backend:
             return False
         # TODO: Wrap backend call in error handling.
@@ -478,7 +478,7 @@ class PlaybackController:
         """Stop playing."""
         if self.get_state() != PlaybackState.STOPPED:
             self._last_position = self.get_time_position()
-            backend = self._get_backend(self.get_current_tl_track())
+            backend = self._get_backend(tl_track=self.get_current_tl_track())
             # TODO: Wrap backend call in error handling.
             if not backend or backend.playback.stop().get():
                 self._set_state(PlaybackState.STOPPED)
@@ -497,7 +497,7 @@ class PlaybackController:
             self._on_end_of_stream()  # pretend an EOS happened for cleanup
             return True
 
-        backend = self._get_backend(tl_track)
+        backend = self._get_backend(tl_track=tl_track)
         if not backend:
             return False
 
@@ -661,7 +661,7 @@ class PlaybackController:
             new_state=new_state,
         )
 
-    def _trigger_seeked(self, time_position: int) -> None:
+    def _trigger_seeked(self, *, time_position: int) -> None:
         # TODO: Trigger this from audio events?
         logger.debug("Triggering seeked event")
         CoreListener.send("seeked", time_position=time_position)
