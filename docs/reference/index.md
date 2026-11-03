@@ -19,6 +19,8 @@ Only APIs documented here are public and open for use by Mopidy extensions.
 
 - [Core API](core.md) — the main API used by frontends to control playback,
   manage the tracklist, and browse libraries.
+- [Notify API](notify.md) — the API used by backends and extensions to send
+  a notification to users about 3 levels: errors, warnings and info.
 - [Frontend API](frontend.md) — the interface for building frontends that
   react to playback events and control Mopidy.
 - [Backend API](backend.md) — the interface for building backends that provide
