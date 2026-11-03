@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import enum
+import warnings
 from collections.abc import Iterable
 from typing import Literal, NewType, TypeVar
 from warnings import deprecated
@@ -17,14 +18,19 @@ class DateOrYear(str):
     __slots__ = ()
 
 
-@deprecated("Use ReleaseDate instead")
-class Date(DateOrYear):  # ty: ignore[deprecated]
-    """Deprecated alias for [ReleaseDate][mopidy.types.ReleaseDate]."""
+# A subclass of a deprecated class gives a DeprecationWarning when the class is
+# defined. Ignore it here, so that an import of this module gives no warnings.
+# Creating an instance of Date or Year still gives a DeprecationWarning.
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", DeprecationWarning)
 
+    @deprecated("Use ReleaseDate instead")
+    class Date(DateOrYear):  # ty: ignore[deprecated]
+        """Deprecated alias for [ReleaseDate][mopidy.types.ReleaseDate]."""
 
-@deprecated("Use ReleaseDate instead")
-class Year(DateOrYear):  # ty: ignore[deprecated]
-    """Deprecated alias for [ReleaseDate][mopidy.types.ReleaseDate]."""
+    @deprecated("Use ReleaseDate instead")
+    class Year(DateOrYear):  # ty: ignore[deprecated]
+        """Deprecated alias for [ReleaseDate][mopidy.types.ReleaseDate]."""
 
 
 # Integer types

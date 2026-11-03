@@ -21,7 +21,19 @@ class HistoryController:
     def __init__(self) -> None:
         self._history: History = []
 
-    def _add_track(self, track: Track) -> None:
+    def get_length(self) -> int:
+        """Get the number of tracks in the history."""
+        return len(self._history)
+
+    def get_history(self) -> History:
+        """Get the track history.
+
+        Returns a list of two-tuples with timestamp and a reference to the track.
+        The timestamps are milliseconds since epoch.
+        """
+        return copy.copy(self._history)
+
+    def _add_track(self, *, track: Track) -> None:
         """Add track to the playback history.
 
         Internal method for [PlaybackController][mopidy.core.PlaybackController].
@@ -46,18 +58,6 @@ class HistoryController:
         ref = Ref.track(uri=track.uri, name=name)
         self._history.insert(0, (timestamp, ref))
 
-    def get_length(self) -> int:
-        """Get the number of tracks in the history."""
-        return len(self._history)
-
-    def get_history(self) -> History:
-        """Get the track history.
-
-        Returns a list of two-tuples with timestamp and a reference to the track.
-        The timestamps are milliseconds since epoch.
-        """
-        return copy.copy(self._history)
-
     def _save_state(self) -> HistoryState:
         # 500 tracks a 3 minutes -> 24 hours history
         count_max = 500
@@ -71,7 +71,7 @@ class HistoryController:
                 break
         return HistoryState(history=tuple(history_list))
 
-    def _load_state(self, state: HistoryState, coverage: Iterable[str]) -> None:
+    def _load_state(self, *, state: HistoryState, coverage: Iterable[str]) -> None:
         if state and "history" in coverage:
             self._history = [(h.timestamp, h.track) for h in state.history]
 

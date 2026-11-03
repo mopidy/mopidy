@@ -53,26 +53,6 @@ class LibraryController:
         self.backends = backends
         self.core = core
 
-    def _get_backend(self, uri: Uri) -> BackendProxy | None:
-        uri_scheme = UriScheme(urllib.parse.urlparse(uri).scheme)
-        return self.backends.with_library.get(uri_scheme, None)
-
-    def _get_backends_to_uris(
-        self,
-        uris: Iterable[Uri] | None,
-    ) -> dict[BackendProxy, list[Uri] | None]:
-        if not uris:
-            return dict.fromkeys(self.backends.with_library.values())
-
-        result: dict[BackendProxy, list[Uri] | None] = collections.defaultdict(list)
-        for uri in uris:
-            backend = self._get_backend(uri)
-            if backend is not None:
-                lst = result[backend]
-                assert lst is not None
-                lst.append(uri)
-        return result
-
     def browse(self, uri: Uri | None) -> list[Ref]:
         """Browse directories and tracks at the given `uri`.
 
@@ -112,7 +92,7 @@ class LibraryController:
         if not uri.strip():
             return []
         validation.check_uri(uri)
-        return self._browse(uri)
+        return self._browse(uri=uri)
 
     def _roots(self) -> list[Ref]:
         directories = set[Ref]()
@@ -126,7 +106,7 @@ class LibraryController:
                 directories.add(root)
         return sorted(directories, key=operator.attrgetter("name"))
 
-    def _browse(self, uri: Uri) -> list[Ref]:
+    def _browse(self, *, uri: Uri) -> list[Ref]:
         scheme = UriScheme(urllib.parse.urlparse(uri).scheme)
         backend = self.backends.with_library_browse.get(scheme)
 
@@ -207,7 +187,7 @@ class LibraryController:
 
         futures = {
             backend: backend.library.get_images(backend_uris)
-            for (backend, backend_uris) in self._get_backends_to_uris(uris).items()
+            for (backend, backend_uris) in self._get_backends_to_uris(uris=uris).items()
             if backend_uris
         }
 
@@ -238,7 +218,7 @@ class LibraryController:
 
         futures = {
             backend: backend.library.lookup_many(backend_uris)
-            for (backend, backend_uris) in self._get_backends_to_uris(uris).items()
+            for (backend, backend_uris) in self._get_backends_to_uris(uris=uris).items()
             if backend_uris
         }
         results = {u: [] for u in uris}
@@ -326,7 +306,7 @@ class LibraryController:
             return []
 
         futures = {}
-        for backend, backend_uris in self._get_backends_to_uris(uris).items():
+        for backend, backend_uris in self._get_backends_to_uris(uris=uris).items():
             futures[backend] = backend.library.search(
                 query=query,
                 uris=backend_uris,
@@ -355,6 +335,27 @@ class LibraryController:
                 )
 
         return results
+
+    def _get_backends_to_uris(
+        self,
+        *,
+        uris: Iterable[Uri] | None,
+    ) -> dict[BackendProxy, list[Uri] | None]:
+        if not uris:
+            return dict.fromkeys(self.backends.with_library.values())
+
+        result: dict[BackendProxy, list[Uri] | None] = collections.defaultdict(list)
+        for uri in uris:
+            backend = self._get_backend(uri=uri)
+            if backend is not None:
+                lst = result[backend]
+                assert lst is not None
+                lst.append(uri)
+        return result
+
+    def _get_backend(self, *, uri: Uri) -> BackendProxy | None:
+        uri_scheme = UriScheme(urllib.parse.urlparse(uri).scheme)
+        return self.backends.with_library.get(uri_scheme, None)
 
 
 def _normalize_query(query: Query[SearchField]) -> Query[SearchField]:

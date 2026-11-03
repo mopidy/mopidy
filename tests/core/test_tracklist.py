@@ -158,8 +158,13 @@ def test_index_returns_index_of_track(mocked_core, index_tl_tracks):
 
 
 def test_index_returns_none_if_item_not_found(mocked_core, index_tl_tracks):
-    tl_track = TlTrack(TracklistId(1), TrackFactory.build())
+    tl_track = TlTrack(TracklistId(123), TrackFactory.build())
     assert mocked_core.tracklist.index(tl_track) is None
+
+
+def test_index_finds_track_by_tlid_if_track_differs(mocked_core, index_tl_tracks):
+    tl_track = TlTrack(index_tl_tracks[1].tlid, TrackFactory.build())
+    assert mocked_core.tracklist.index(tl_track) == 1
 
 
 def test_index_returns_none_if_called_with_none(mocked_core, index_tl_tracks):
@@ -243,7 +248,7 @@ def test_save_load_state_load(mocked_core, tracks, state_tl_tracks):
         tl_tracks=state_tl_tracks,
     )
     coverage = ["mode", "tracklist"]
-    mocked_core.tracklist._load_state(target, coverage)
+    mocked_core.tracklist._load_state(state=target, coverage=coverage)
     assert mocked_core.tracklist.get_consume() is False
     assert mocked_core.tracklist.get_repeat() is True
     assert mocked_core.tracklist.get_single() is True
@@ -270,7 +275,7 @@ def test_save_load_state_load_mode_only(mocked_core, state_tl_tracks):
         tl_tracks=state_tl_tracks,
     )
     coverage = ["mode"]
-    mocked_core.tracklist._load_state(target, coverage)
+    mocked_core.tracklist._load_state(state=target, coverage=coverage)
     assert mocked_core.tracklist.get_consume() is False
     assert mocked_core.tracklist.get_repeat() is True
     assert mocked_core.tracklist.get_single() is True
@@ -292,7 +297,7 @@ def test_save_load_state_load_tracklist_only(mocked_core, state_tl_tracks):
         tl_tracks=state_tl_tracks,
     )
     coverage = ["tracklist"]
-    mocked_core.tracklist._load_state(target, coverage)
+    mocked_core.tracklist._load_state(state=target, coverage=coverage)
     assert mocked_core.tracklist.get_consume() is False
     assert mocked_core.tracklist.get_repeat() is False
     assert mocked_core.tracklist.get_single() is False
@@ -305,8 +310,67 @@ def test_save_load_state_load_tracklist_only(mocked_core, state_tl_tracks):
 
 def test_save_load_state_load_invalid_type(mocked_core):
     with pytest.raises(TypeError):
-        mocked_core.tracklist._load_state(11, None)
+        mocked_core.tracklist._load_state(state=11, coverage=None)
 
 
 def test_save_load_state_load_none(mocked_core):
-    mocked_core.tracklist._load_state(None, None)
+    mocked_core.tracklist._load_state(state=None, coverage=None)
+
+
+def test_deprecated_eot_track_returns_track_of_get_eot_tlid(
+    mocked_core, index_tl_tracks
+):
+    mocked_core.playback.get_current_tl_track.return_value = index_tl_tracks[1]
+
+    with pytest.deprecated_call():
+        tl_track = mocked_core.tracklist.eot_track(index_tl_tracks[1])
+
+    assert tl_track is not None
+    assert tl_track.tlid == mocked_core.tracklist.get_eot_tlid()
+
+
+def test_deprecated_next_track_returns_track_of_get_next_tlid(
+    mocked_core, index_tl_tracks
+):
+    mocked_core.playback.get_current_tl_track.return_value = index_tl_tracks[1]
+
+    with pytest.deprecated_call():
+        tl_track = mocked_core.tracklist.next_track(index_tl_tracks[1])
+
+    assert tl_track is not None
+    assert tl_track.tlid == mocked_core.tracklist.get_next_tlid()
+
+
+def test_deprecated_previous_track_returns_track_of_get_previous_tlid(
+    mocked_core, index_tl_tracks
+):
+    mocked_core.playback.get_current_tl_track.return_value = index_tl_tracks[1]
+
+    with pytest.deprecated_call():
+        tl_track = mocked_core.tracklist.previous_track(index_tl_tracks[1])
+
+    assert tl_track is not None
+    assert tl_track.tlid == mocked_core.tracklist.get_previous_tlid()
+
+
+@pytest.mark.parametrize("method", ["eot_track", "next_track", "previous_track"])
+def test_deprecated_tracklist_method_rejects_argument_that_is_not_a_tl_track(
+    mocked_core, index_tl_tracks, method
+):
+    with pytest.deprecated_call(), pytest.raises(ValueError):
+        getattr(mocked_core.tracklist, method)("abc")
+
+
+def test_deprecated_add_with_tracks_adds_the_tracks(core, tl_tracks):
+    track = Track(uri="dummy1:d")
+
+    with pytest.deprecated_call():
+        added = core.tracklist.add(tracks=[track], at_position=1)
+
+    assert [tl_track.track for tl_track in added] == [track]
+    assert core.tracklist.get_tracks()[1] == track
+
+
+def test_deprecated_add_rejects_both_tracks_and_uris(core):
+    with pytest.raises(ValueError, match="Exactly one"):
+        core.tracklist.add(tracks=[Track(uri="dummy1:a")], uris=["dummy1:a"])

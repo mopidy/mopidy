@@ -3,7 +3,7 @@ from __future__ import annotations
 import contextlib
 import logging
 from collections.abc import Generator
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import pykka
 from pykka import ThreadingActor
@@ -14,13 +14,16 @@ from mopidy._app import process
 from mopidy._app.extensions import ExtensionManager, ExtensionStatus
 from mopidy._lib import gi, logs
 from mopidy._lib.process import exit_process
-from mopidy.audio import AudioProxy, GstAudio
+from mopidy.audio._start import start_audio_actor
 from mopidy.backend import BackendActor, BackendProxy
 from mopidy.config import Config
 from mopidy.core import Core, CoreProxy
 from mopidy.ext import Registry
 from mopidy.mixer import MixerActor, MixerProxy
 from mopidy.types import Percentage
+
+if TYPE_CHECKING:
+    from mopidy.audio import AudioProxy
 
 logger = logging.getLogger(__name__)
 
@@ -47,15 +50,12 @@ def command() -> int:
     mixer_class = get_mixer_class(config, mixer_classes)
     backend_classes = cast(list[type[BackendActor]], registry["backend"])
     frontend_classes = cast(list[type[ThreadingActor]], registry["frontend"])
+    audio = None
     core = None
 
     exit_status_code = 0
     try:
-        mixer = None
-        if mixer_class is not None:
-            mixer = start_mixer(config, mixer_class)
-        if mixer:
-            configure_mixer(config, mixer)
+        mixer = start_mixer(config, mixer_class)
         audio = start_audio(config, mixer)
         backends = start_backends(config, backend_classes, audio)
         core = start_core(config, mixer, backends, audio)
@@ -78,9 +78,8 @@ def command() -> int:
         stop_frontends(frontend_classes)
         stop_core(core)
         stop_backends(backend_classes)
-        stop_audio()
-        if mixer_class is not None:
-            stop_mixer(mixer_class)
+        stop_audio(audio)
+        stop_mixer(mixer_class)
         process.stop_remaining_actors()
     return exit_status_code
 
@@ -111,30 +110,31 @@ def get_mixer_class(
 
 def start_mixer(
     config: Config,
-    mixer_class: type[MixerActor],
+    mixer_class: type[MixerActor] | None,
 ) -> MixerProxy | None:
+    if mixer_class is None:
+        return None
+
     logger.info("Starting Mopidy mixer: %s", mixer_class.__name__)
+    mixer = None
     with actor_error_handling(mixer_class.__name__):
-        mixer = cast(MixerProxy, mixer_class.start(config=config).proxy())
+        proxy = cast(MixerProxy, mixer_class.start(config=config).proxy())
         try:
-            mixer.ping().get()
+            proxy.ping().get()
         except pykka.ActorDeadError as exc:
             logger.error("Actor died: %s", exc)
         else:
-            return mixer
-    return None
+            mixer = proxy
+    if mixer is None:
+        return None
 
-
-def configure_mixer(
-    config: Config,
-    mixer: MixerProxy,
-) -> None:
     volume = config["audio"]["mixer_volume"]
     if volume is not None:
         mixer.set_volume(Percentage(volume))
         logger.info("Mixer volume set to %d", volume)
     else:
         logger.debug("Mixer volume left unchanged")
+    return mixer
 
 
 def start_audio(
@@ -142,7 +142,7 @@ def start_audio(
     mixer: MixerProxy | None,
 ) -> AudioProxy:
     logger.info("Starting Mopidy audio")
-    return cast(AudioProxy, GstAudio.start(config=config, mixer=mixer).proxy())
+    return start_audio_actor(config=config, mixer=mixer)
 
 
 def start_backends(
@@ -237,12 +237,16 @@ def stop_backends(backend_classes: list[type[BackendActor]]) -> None:
         process.stop_actors_by_class(backend_class)
 
 
-def stop_audio() -> None:
+def stop_audio(audio: AudioProxy | None) -> None:
+    if audio is None:
+        return
     logger.info("Stopping Mopidy audio")
-    process.stop_actors_by_class(GstAudio)
+    audio.actor_ref.stop()
 
 
-def stop_mixer(mixer_class: type[MixerActor]) -> None:
+def stop_mixer(mixer_class: type[MixerActor] | None) -> None:
+    if mixer_class is None:
+        return
     logger.info("Stopping Mopidy mixer")
     process.stop_actors_by_class(mixer_class)
 

@@ -121,15 +121,18 @@ reference](../reference/media.md) has an example.
   `mopidy.audio.tags`. Use
   [`MediaReader.read_media_info()`][mopidy.media.MediaReader.read_media_info]
   instead. The media info has the metadata as a [`Track`][mopidy.models.Track],
-  thus callers do not convert GStreamer tags. The deprecated API will be removed
-  in Mopidy 5.0. (#2326, !2337)
+  thus callers do not convert GStreamer tags.
+  [`ScannerError`][mopidy.exceptions.ScannerError] is part of the deprecated
+  API. Catch [`MediaReaderError`][mopidy.media.MediaReaderError] instead. The
+  deprecated API will be removed in Mopidy 5.0. (#2326, !2337)
 
 - Deprecate the `Extension.version` class attribute. Mopidy now gets the version
   from the distribution that registers the extension's entry point, and no
   longer reads the attribute. (!2298)
 
-- Deprecate `mopidy.__version__`. Mopidy no longer uses it itself. Use
-  `importlib.metadata.version("mopidy")` instead. (!2298)
+- Deprecate `mopidy.__version__`. Mopidy no longer uses it itself, and reading
+  it gives a `DeprecationWarning`. Use `importlib.metadata.version("mopidy")`
+  instead. (!2298, !2376)
 
 - Deprecate [`PlaybackController.set_state()`][mopidy.core.PlaybackController.set_state].
   Use [`play()`][mopidy.core.PlaybackController.play],
@@ -183,8 +186,20 @@ reference](../reference/media.md) has an example.
 
 - Add `Notifier` so that extensions and backends can send
   notifications to users. (#1011)
+  
+- Compare tracklist entries by TLID. This makes
+  [`remove()`][mopidy.core.TracklistController.remove] and other tracklist
+  operations faster on large tracklists. As a result,
+  [`index()`][mopidy.core.TracklistController.index] gives the position of a
+  [`TlTrack`][mopidy.models.TlTrack] if its TLID is in the tracklist, also if
+  its track is different. Before, `index()` gave `None` in this case. (!2383)
 
 ### Audio
+
+- Remove `GstAudio` from `mopidy.audio`. It is the GStreamer implementation of
+  the [`Audio`][mopidy.audio.Audio] API, and is not part of the public API.
+  Use [`Audio`][mopidy.audio.Audio] and [`AudioProxy`][mopidy.audio.AudioProxy]
+  in type hints.
 
 - Handle all GStreamer bus messages on the audio actor thread. Before,
   the GLib main loop thread and the actor thread changed the audio state at the
@@ -219,6 +234,11 @@ reference](../reference/media.md) has an example.
   from the application menu, which is seldom useful for a server. The file was
   added for the Ubuntu Sound Menu, which no longer exists, and Mopidy-MPRIS
   stopped using it in 2018. (!2322)
+
+- Types: Stop the two `DeprecationWarning`s when `mopidy.types` is imported.
+  They came from the definitions of the deprecated `Date` and `Year` types, not
+  from their use. Creating a `Date` or a `Year` still gives a
+  `DeprecationWarning`. (!2369)
 
 ### Development process
 
@@ -564,7 +584,7 @@ interface with the audio layer themselves.
 
 - The old audio actor has been split into a [`Audio`][mopidy.audio.Audio]
   interface with the API used by core and backends, and a
-  [`GstAudio`][mopidy.audio.GstAudio] implementation using GStreamer.
+  `GstAudio` implementation using GStreamer.
   The API is still very specific to GStreamer, but this split makes it a bit
   easier to mock out the audio layer in tests as it is clearer what is part of
   the required interface. (!2224)

@@ -120,7 +120,9 @@ class MixerController:
             mute=self.get_mute(),
         )
 
-    def _load_state(self, state: MixerControllerState, coverage: Iterable[str]) -> None:
+    def _load_state(
+        self, *, state: MixerControllerState, coverage: Iterable[str]
+    ) -> None:
         if state and "mixer" in coverage:
             if state.mute is not None:
                 self.set_mute(state.mute)
