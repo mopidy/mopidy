@@ -20,7 +20,8 @@ Only APIs documented here are public and open for use by Mopidy extensions.
 - [Core API](core.md) — the main API used by frontends to control playback,
   manage the tracklist, and browse libraries.
 - [Frontend API](frontend.md) — the interface for building frontends that
-  react to playback events and control Mopidy.
+  react to playback events and control Mopidy, and when to run one as a
+  separate program over the WebSocket API.
 - [Backend API](backend.md) — the interface for building backends that provide
   music libraries and playback.
 - [Extension API](ext.md) — how extensions register themselves and expose

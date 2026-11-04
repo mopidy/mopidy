@@ -17,6 +17,11 @@ for available Mopidy extensions. See
 [Extension development](../guides/extensiondev.md) for how to make a new
 extension.
 
+**external frontend**
+: A program outside the Mopidy process that uses the [Core API](core.md) over
+the [WebSocket API](http.md#websocket-api). See [Frontend
+API](frontend.md#external-frontends) for details.
+
 **frontend**
 : A part of Mopidy *using* the core API. Existing frontends include the MPD
 server, the MPRIS/D-Bus integration, the Last.fm scrobbler, and the
