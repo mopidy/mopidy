@@ -27,3 +27,21 @@ def test_track_playback_resumed_is_broadcasted(mocker: MockerFixture) -> None:
         "event": "track_playback_resumed",
         "foo": "bar",
     }
+
+
+def test_playback_error_is_broadcasted(mocker: MockerFixture) -> None:
+    broadcast = mocker.patch("mopidy._exts.http.handlers.WebSocketHandler.broadcast")
+    io_loop = mocker.Mock()
+
+    actor.on_event(
+        "playback_error",
+        io_loop,
+        error="Failed to decode audio",
+        debug="Unsupported audio format",
+    )
+
+    assert json.loads(broadcast.call_args[0][0]) == {
+        "event": "playback_error",
+        "error": "Failed to decode audio",
+        "debug": "Unsupported audio format",
+    }

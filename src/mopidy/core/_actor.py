@@ -117,6 +117,14 @@ class Core(
         self.playback._on_end_of_stream()
 
     @override
+    def playback_error(self, error: str, debug: str) -> None:
+        CoreListener.send(
+            "playback_error",
+            error=error,
+            debug=debug,
+        )
+
+    @override
     def stream_changed(self, uri: Uri) -> None:
         self.playback._on_stream_changed(uri)
 

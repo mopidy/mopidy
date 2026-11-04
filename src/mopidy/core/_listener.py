@@ -10,6 +10,7 @@ type CoreEvent = Literal[
     "track_playback_paused",
     "track_playback_resumed",
     "track_playback_started",
+    "playback_error",
     "track_playback_ended",
     "playback_state_changed",
     "tracklist_changed",
