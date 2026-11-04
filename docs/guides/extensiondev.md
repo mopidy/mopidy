@@ -214,6 +214,12 @@ class SoundspotFrontend(pykka.ThreadingActor, core.CoreListener):
     # Your frontend implementation
 ```
 
+If the code does not need to run inside Mopidy, consider making it a separate
+program that uses the [WebSocket
+API](../reference/http.md#websocket-api) instead. See [external
+frontends](../reference/frontend.md#external-frontends) for when that is a
+better fit.
+
 ## Example backend
 
 If you want to extend Mopidy to support new music and playlist sources, you
