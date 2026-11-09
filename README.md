@@ -36,3 +36,4 @@ users.
 ## License
 
 Mopidy is licensed under the [Apache License, Version 2.0](LICENSE).
+- [Needle](https://github.com/Yvsleyen00941/Needle) - Elegant native macOS Now Playing desktop client.
