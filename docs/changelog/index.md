@@ -190,7 +190,7 @@ reference](../reference/media.md) has an example.
   track played several times. A short first track ended playback, as the
   playback state was still stopped. In random mode, the short track could also
   come again. Core now keeps all tracks that audio has, until their streams
-  start, and picks the next track after the last of them. (#2388)
+  start, and picks the next track after the last of them. (#2388, !2389)
 
 - Compare tracklist entries by TLID. This makes
   [`remove()`][mopidy.core.TracklistController.remove] and other tracklist
