@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import logging
 import urllib.parse
 from collections.abc import Callable, Iterable
@@ -27,6 +28,20 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+@dataclasses.dataclass(frozen=True)
+class _PendingTrack:
+    """A track that audio has, and whose stream has not started yet."""
+
+    tl_track: TlTrack
+
+    # The playback state to change to when the stream starts.
+    state: PlaybackState
+
+    # If the stream follows the stream before it with no gap. Then the track
+    # before it plays to its end.
+    gapless: bool
+
+
 class PlaybackController:
     """Manages playback state and the currently playing track."""
 
@@ -48,9 +63,10 @@ class PlaybackController:
         self._stream_title: str | None = None
 
         # Valid from the start of a track change until the stream changes or
-        # ends.
-        self._pending_tl_track: TlTrack | None = None
-        self._pending_state: PlaybackState = PlaybackState.PLAYING
+        # ends. The pending tracks are in the order that their streams start
+        # in. A track can be shorter than the buffers of audio, so audio can
+        # ask for the next track before the stream of a pending track starts.
+        self._pending_tl_tracks: list[_PendingTrack] = []
         self._last_position: DurationMs | None = None
         self._previous: bool = False
 
@@ -113,7 +129,7 @@ class PlaybackController:
         The current playback state will be kept. If it was playing, playing
         will continue. If it was paused, it will still be paused, etc.
         """
-        current = self._pending_tl_track or self._current_tl_track
+        current = self._get_latest_tl_track()
         if current:
             self._change_to_playable(
                 pending=self.core.tracklist._get_next_tl_track(reference=current),
@@ -162,7 +178,7 @@ class PlaybackController:
                     tlid,
                 )
 
-        current = self._pending_tl_track or self._current_tl_track
+        current = self._get_latest_tl_track()
         self._try_until_playable(
             pending=(
                 tl_track
@@ -183,7 +199,7 @@ class PlaybackController:
         will continue. If it was paused, it will still be paused, etc.
         """
         self._previous = True
-        current = self._pending_tl_track or self._current_tl_track
+        current = self._get_latest_tl_track()
         if current:
             self._change_to_playable(
                 pending=self.core.tracklist._get_previous_tl_track(reference=current),
@@ -225,8 +241,10 @@ class PlaybackController:
             self.play()
 
         # We need to prefer the still playing track, but if nothing is playing
-        # we fall back to the pending one.
-        tl_track = self._current_tl_track or self._pending_tl_track
+        # we fall back to the pending one that starts first.
+        tl_track = self._current_tl_track or (
+            self._pending_tl_tracks[0].tl_track if self._pending_tl_tracks else None
+        )
         if tl_track is None or tl_track.track.length is None:
             return False
 
@@ -242,7 +260,7 @@ class PlaybackController:
 
         # Make sure we switch back to previous track if we get a seek while we
         # have a pending track.
-        if self._current_tl_track and self._pending_tl_track:
+        if self._current_tl_track and self._pending_tl_tracks:
             return self._change(tl_track=self._current_tl_track, state=self.get_state())
 
         # TODO: Avoid returning False here when STOPPED (seek is deferred)?
@@ -268,17 +286,15 @@ class PlaybackController:
         )
 
     def _on_stream_changed(self, _uri: Uri) -> None:
-        if self._last_position is None:
-            position = self.get_time_position()
-        else:
-            # This code path handles the stop() case, uri should be none.
-            position, self._last_position = self._last_position, None
+        # The stream of the first pending track has started.
+        pending = self._pending_tl_tracks.pop(0) if self._pending_tl_tracks else None
+        position = self._take_ended_position(pending)
 
         # Set the new current track before consume mode removes the ended
         # track from the tracklist.
         ended_tl_track = self._current_tl_track
-        pending_tl_track, self._pending_tl_track = self._pending_tl_track, None
-        pending_state, self._pending_state = self._pending_state, PlaybackState.PLAYING
+        pending_tl_track = pending.tl_track if pending else None
+        pending_state = pending.state if pending else PlaybackState.PLAYING
         if pending_tl_track:
             self._set_current_tl_track(pending_tl_track)
 
@@ -306,6 +322,24 @@ class PlaybackController:
                     self.pause()
                     self._start_paused = False
 
+    def _take_ended_position(self, pending: _PendingTrack | None) -> DurationMs:
+        """Get the position where the current track ended, at a stream change."""
+        if self._last_position is not None:
+            # A track change or a stop ended the track. This code path also
+            # handles the stop() case, where uri should be none.
+            position, self._last_position = self._last_position, None
+            return position
+        ended_tl_track = self._current_tl_track
+        if (
+            pending is not None
+            and pending.gapless
+            and ended_tl_track is not None
+            and ended_tl_track.track.length is not None
+        ):
+            # The track played to its end.
+            return DurationMs(ended_tl_track.track.length)
+        return self.get_time_position()
+
     def _on_position_changed(self, _position: int) -> None:
         if self._pending_position is not None:
             self._trigger_seeked(time_position=self._pending_position)
@@ -331,24 +365,26 @@ class PlaybackController:
         )
 
     def _on_about_to_finish(self) -> None:
-        if self._state == PlaybackState.STOPPED:
+        # If audio asks for the next track of a pending track, the playback
+        # state can still be stopped from before the pending track.
+        if self._state == PlaybackState.STOPPED and not self._pending_tl_tracks:
             return
 
-        # Unless overridden by other calls (e.g. next / previous / stop) this
-        # will be the last position recorded until the track gets reassigned.
-        if self._current_tl_track is not None:
-            if self._current_tl_track.track.length is not None:
-                self._last_position = DurationMs(self._current_tl_track.track.length)
-            else:
-                self._last_position = None
-        else:
-            # TODO: Check if case when track.length isn't populated needs to be
-            # handled.
-            pass
+        if not self._pending_tl_tracks:
+            # The current track plays to its end. A position that an earlier
+            # change or stop left behind does not apply to it.
+            self._last_position = None
+
+        # A track that is shorter than the buffers of audio needs its next
+        # track before its stream starts, so the next track is the one after
+        # the last pending track. In random mode, the pending tracks will
+        # play, so they must not be picked again.
+        for pending in self._pending_tl_tracks:
+            self.core.tracklist._mark_playing(tl_track=pending.tl_track)
 
         self._try_until_playable(
             pending=self.core.tracklist._get_eot_tl_track(
-                reference=self._current_tl_track
+                reference=self._get_latest_tl_track()
             ),
             change=self._change_eot_track,
             step=self.core.tracklist._get_eot_tl_track,
@@ -373,8 +409,9 @@ class PlaybackController:
                 backend.actor_ref.actor_class.__name__,
             )
             return False
-        self._pending_tl_track = tl_track
-        self._pending_state = PlaybackState.PLAYING
+        self._pending_tl_tracks.append(
+            _PendingTrack(tl_track, state=PlaybackState.PLAYING, gapless=True)
+        )
         return True
 
     def _on_tracklist_change(self) -> None:
@@ -419,6 +456,15 @@ class PlaybackController:
             if state.state in (PlaybackState.PLAYING, PlaybackState.PAUSED):
                 self._start_at_position = DurationMs(state.time_position)
                 self.play(tlid=TracklistId(state.tlid))
+
+    def _get_latest_tl_track(self) -> TlTrack | None:
+        """Get the track that core changed to last.
+
+        This is the last pending track, or else the current track.
+        """
+        if self._pending_tl_tracks:
+            return self._pending_tl_tracks[-1].tl_track
+        return self._current_tl_track
 
     def _set_current_tl_track(self, value: TlTrack | None) -> None:
         """Set the currently playing or selected track.
@@ -488,8 +534,10 @@ class PlaybackController:
         tl_track: TlTrack | None,
         state: PlaybackState,
     ) -> bool:
-        self._pending_tl_track = tl_track
-        self._pending_state = state
+        # A change of track replaces all streams in audio.
+        self._pending_tl_tracks = (
+            [_PendingTrack(tl_track, state=state, gapless=False)] if tl_track else []
+        )
 
         if not tl_track:
             self.stop()
@@ -533,8 +581,8 @@ class PlaybackController:
             return backend.playback.pause().get()
         elif state == PlaybackState.STOPPED:
             # TODO: emit some event now?
-            self._current_tl_track = self._pending_tl_track
-            self._pending_tl_track = None
+            self._current_tl_track = tl_track
+            self._pending_tl_tracks = []
             return True
 
         msg = f"Unknown playback state: {state}"

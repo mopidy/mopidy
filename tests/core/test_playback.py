@@ -59,6 +59,11 @@ class MyTestBackend(dummy_backend.DummyBackend):
         self.playback = MyTestPlaybackProvider(audio=audio, backend=self)
 
 
+def pending_tl_tracks(playback):
+    """The tracks that audio has, and whose streams have not started yet."""
+    return [pending.tl_track for pending in playback._pending_tl_tracks]
+
+
 class BaseTest:
     config: ClassVar[dict[str, dict[str, int]]] = {
         "core": {"max_tracklist_length": 10000},
@@ -203,7 +208,7 @@ class TestNextHandling(BaseTest):
         self.core.playback.next()
 
         tl_tracks = self.core.tracklist.get_tl_tracks()
-        assert self.core.playback._pending_tl_track == tl_tracks[1]
+        assert pending_tl_tracks(self.core.playback) == [tl_tracks[1]]
 
     def test_get_current_track_next(self):
         self.core.playback.play()
@@ -860,18 +865,18 @@ class TestCurrentAndPendingTlTrack(BaseTest):
     def test_pending_tl_track_is_none(self):
         self.core.playback.play()
         self.replay_events()
-        assert self.playback._pending_tl_track is None
+        assert pending_tl_tracks(self.playback) == []
 
     def test_pending_tl_track_after_about_to_finish(self):
         self.core.playback.play()
         self.replay_events()
 
         self.trigger_about_to_finish(replay_until="stream_changed")
-        assert self.playback._pending_tl_track.track.uri == "dummy:b"
+        assert [t.track.uri for t in pending_tl_tracks(self.playback)] == ["dummy:b"]
 
     def test_pending_tl_track_after_stream_changed(self):
         self.trigger_about_to_finish()
-        assert self.playback._pending_tl_track is None
+        assert pending_tl_tracks(self.playback) == []
 
     def test_current_tl_track_after_about_to_finish(self):
         self.core.playback.play()
@@ -1623,9 +1628,9 @@ class TestBackendSelection:
         )
 
     def trigger_stream_changed(self):
-        pending = self.core.playback._pending_tl_track
+        pending = pending_tl_tracks(self.core.playback)
         if pending:
-            self.core.stream_changed(uri=pending.track.uri)
+            self.core.stream_changed(uri=pending[0].track.uri)
         else:
             self.core.stream_changed(uri=None)
 
@@ -1944,3 +1949,163 @@ class TestEndlessLoop(BaseTest):
         self.trigger_about_to_finish()
 
         assert not self.backend.playback.is_call_limit_reached().get()
+
+
+class TestTracksShorterThanTheAudioBuffers(BaseTest):
+    """A track can be shorter than the buffers of audio.
+
+    Then audio asks for the next track when the stream of the track has not
+    started yet, before core has heard of the stream change.
+    """
+
+    tracks: ClassVar[list[Track]] = [
+        Track(uri="dummy:a", length=40000),
+        Track(uri="dummy:b", length=300),
+        Track(uri="dummy:c", length=500),
+        Track(uri="dummy:d", length=700),
+    ]
+
+    def trigger_about_to_finish_of_pending_stream(self):
+        """Lets audio ask for the next track, with no replay of earlier events."""
+        callback = self.audio.get_about_to_finish_callback().get()
+        callback()
+
+    def play_short_tracks(self):
+        """Plays track a, and then b, c and d, which are all short."""
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+        self.trigger_about_to_finish(replay_until="stream_changed")
+        self.trigger_about_to_finish_of_pending_stream()
+        self.trigger_about_to_finish_of_pending_stream()
+        return tl_tracks
+
+    @staticmethod
+    def sent(send, event):
+        return [call.kwargs for call in send.call_args_list if call.args[0] == event]
+
+    def uris_of_waiting_streams(self):
+        """The URIs of the stream changes that audio has sent, and core not seen."""
+        return [
+            kwargs["uri"] for event, kwargs in self.events if event == "stream_changed"
+        ]
+
+    def test_short_track_gets_the_track_after_it(self):
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+        self.trigger_about_to_finish(replay_until="stream_changed")
+
+        self.trigger_about_to_finish_of_pending_stream()
+
+        assert pending_tl_tracks(self.playback) == tl_tracks[1:3]
+        assert self.playback.get_current_tl_track() == tl_tracks[0]
+
+    def test_each_short_track_plays_once_in_order(self):
+        with mock.patch.object(core.CoreListener, "send") as send:
+            tl_tracks = self.play_short_tracks()
+            streams = self.uris_of_waiting_streams()
+            self.replay_events()
+
+        assert streams == ["dummy:b", "dummy:c", "dummy:d"]
+
+        started = [
+            kwargs["tl_track"] for kwargs in self.sent(send, "track_playback_started")
+        ]
+        assert started == tl_tracks
+        assert self.playback.get_current_tl_track() == tl_tracks[3]
+        assert self.playback.get_state() == PlaybackState.PLAYING
+        assert pending_tl_tracks(self.playback) == []
+
+    def test_each_short_track_ends_at_its_own_length(self):
+        with mock.patch.object(core.CoreListener, "send") as send:
+            tl_tracks = self.play_short_tracks()
+            self.replay_events()
+
+        ended = [
+            (kwargs["tl_track"], kwargs["time_position"])
+            for kwargs in self.sent(send, "track_playback_ended")
+        ]
+        assert ended == [
+            (tl_tracks[0], 40000),
+            (tl_tracks[1], 300),
+            (tl_tracks[2], 500),
+        ]
+
+    def test_short_first_track_gets_the_track_after_it(self):
+        # The playback state only changes when the stream starts, so it is
+        # still stopped when audio asks for the next track.
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.playback.play(tl_tracks[1].tlid)
+
+        self.trigger_about_to_finish_of_pending_stream()
+        self.replay_events()
+
+        assert self.playback.get_current_tl_track() == tl_tracks[2]
+        assert self.playback.get_state() == PlaybackState.PLAYING
+
+    def test_about_to_finish_while_stopped_with_no_pending_track_is_ignored(self):
+        self.trigger_about_to_finish_of_pending_stream()
+
+        assert pending_tl_tracks(self.playback) == []
+        assert self.playback.get_state() == PlaybackState.STOPPED
+
+    def test_short_track_does_not_come_again_in_random_mode(self):
+        self.core.tracklist.set_random(True)
+        self.core.playback.play()
+        self.replay_events()
+        self.trigger_about_to_finish(replay_until="stream_changed")
+        self.trigger_about_to_finish_of_pending_stream()
+        self.trigger_about_to_finish_of_pending_stream()
+
+        played = [
+            self.playback.get_current_tl_track(),
+            *pending_tl_tracks(self.playback),
+        ]
+        assert sorted(t.tlid for t in played) == sorted(
+            t.tlid for t in self.core.tracklist.get_tl_tracks()
+        )
+
+    def test_short_tracks_in_consume_mode(self):
+        self.core.tracklist.set_consume(True)
+        with mock.patch.object(core.CoreListener, "send") as send:
+            tl_tracks = self.play_short_tracks()
+            streams = self.uris_of_waiting_streams()
+            self.replay_events()
+
+        assert streams == ["dummy:b", "dummy:c", "dummy:d"]
+
+        started = [
+            kwargs["tl_track"] for kwargs in self.sent(send, "track_playback_started")
+        ]
+        assert started == tl_tracks
+        assert self.core.tracklist.get_tl_tracks() == [tl_tracks[3]]
+
+    def test_short_track_keeps_the_paused_state_of_its_change(self):
+        # About-to-finish while paused gives the next track, which must not take
+        # the playback state that the change gave the short track.
+        tl_tracks = self.core.tracklist.get_tl_tracks()
+        self.core.playback.play(tl_tracks[0].tlid)
+        self.replay_events()
+        self.core.playback.pause()
+        self.replay_events()
+        self.core.playback.next()
+
+        with mock.patch.object(core.CoreListener, "send") as send:
+            self.trigger_about_to_finish_of_pending_stream()
+            self.replay_events()
+
+        paused = [
+            kwargs["tl_track"] for kwargs in self.sent(send, "track_playback_paused")
+        ]
+        assert paused == [tl_tracks[1]]
+
+    def test_seek_with_pending_short_tracks_goes_back_to_the_current_track(self):
+        tl_tracks = self.play_short_tracks()
+
+        self.core.playback.seek(1000)
+        self.replay_events()
+
+        assert self.playback.get_current_tl_track() == tl_tracks[0]
+        assert self.playback.get_time_position() == 1000
+        assert pending_tl_tracks(self.playback) == []
