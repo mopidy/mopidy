@@ -184,6 +184,14 @@ reference](../reference/media.md) has an example.
   [`resume()`][mopidy.core.PlaybackController.resume] with no wait between
   them, the playback state could stay paused while the audio played. (!2358)
 
+- Play each track that is shorter than the audio buffers once, in order. Audio
+  asks for the next track of such a track before its stream starts. Before,
+  core then picked the next track of the track before it again, so the short
+  track played several times. A short first track ended playback, as the
+  playback state was still stopped. In random mode, the short track could also
+  come again. Core now keeps all tracks that audio has, until their streams
+  start, and picks the next track after the last of them. (#2388)
+
 - Compare tracklist entries by TLID. This makes
   [`remove()`][mopidy.core.TracklistController.remove] and other tracklist
   operations faster on large tracklists. As a result,
