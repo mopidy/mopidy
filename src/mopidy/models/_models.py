@@ -1,5 +1,7 @@
-from typing import Literal
+import base64
+from typing import Any, Literal
 
+from pydantic import field_serializer, field_validator
 from pydantic.fields import Field
 from pydantic.types import NonNegativeInt
 
@@ -24,6 +26,36 @@ class Image(BaseModel):
 
     height: NonNegativeInt | None = None
     """Height of the image in pixels."""
+
+
+class ImageData(BaseModel):
+    """The content of an image.
+
+    When serialized to JSON, `data` is encoded as a base64 string.
+    """
+
+    model: Literal["ImageData"] = Field(
+        default="ImageData",
+        repr=False,
+        alias="__model__",
+    )
+
+    data: bytes = Field(repr=False)
+    """The image file's bytes."""
+
+    mime_type: str | None = None
+    """The image's MIME type, e.g. `image/jpeg`, if known."""
+
+    @field_validator("data", mode="before")
+    @classmethod
+    def _decode_base64(cls, value: Any) -> Any:
+        if isinstance(value, str):
+            return base64.b64decode(value, validate=True)
+        return value
+
+    @field_serializer("data", when_used="json")
+    def _encode_base64(self, value: bytes) -> str:
+        return base64.b64encode(value).decode("ascii")
 
 
 class Artist(BaseModel):
