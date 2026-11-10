@@ -12,23 +12,35 @@ import tornado.ioloop
 import tornado.web
 import tornado.websocket
 
-from mopidy import core
+from mopidy import core, exceptions
 from mopidy._lib.version import get_version
+from mopidy.types import Uri
 
 from . import jsonrpc
 from .types import HttpConfig
 
 if TYPE_CHECKING:
-    from collections.abc import Awaitable
+    from collections.abc import Awaitable, Iterable
     from typing import ClassVar
 
     from mopidy.config import Config
     from mopidy.core import CoreProxy
+    from mopidy.models import Image
 
     from .types import HttpApp, HttpStatic, RequestRule
 
 
 logger = logging.getLogger(__name__)
+
+IMAGE_PATH = "/mopidy/image"
+"""The path of the image handler, in the Mopidy-HTTP app mounted at `/mopidy`."""
+
+_BROWSER_IMAGE_SCHEMES = {"", "http", "https", "data"}
+"""URI schemes of image URIs a browser can load without the image handler.
+
+The empty scheme is a path on this server, like the `/local/...` image URIs of
+Mopidy-Local.
+"""
 
 
 def make_mopidy_app_factory(
@@ -59,6 +71,11 @@ def make_mopidy_app_factory(
                     "allowed_origins": http_config["allowed_origins"],
                     "csrf_protection": http_config["csrf_protection"],
                 },
+            ),
+            (
+                r"/image",
+                ImageHandler,
+                {"core": core},
             ),
             (
                 r"/(.+)",
@@ -96,6 +113,10 @@ def make_jsonrpc_wrapper(core_actor: CoreProxy) -> jsonrpc.Wrapper:
     return jsonrpc.Wrapper(
         objects={
             "core.describe": inspector.describe,
+            "core.library.get_images": functools.partial(
+                get_browser_images,
+                core_actor,
+            ),
             "core.get_uri_schemes": core_actor.get_uri_schemes,
             "core.get_version": core_actor.get_version,
             "core.history": core_actor.history,
@@ -106,6 +127,67 @@ def make_jsonrpc_wrapper(core_actor: CoreProxy) -> jsonrpc.Wrapper:
             "core.tracklist": core_actor.tracklist,
         },
     )
+
+
+def get_browser_images(
+    core_actor: CoreProxy,
+    uris: Iterable[Uri],
+) -> dict[Uri, tuple[Image, ...]]:
+    """Get images with URIs that a browser can load.
+
+    Wraps [mopidy.core.LibraryController.get_images][] for JSON-RPC clients.
+    Image URIs that a browser can't load, like `file:` URIs, are replaced with
+    the URI of the image handler, which reads the image with
+    [mopidy.core.LibraryController.get_image_data][].
+    """
+    result = core_actor.library.get_images(uris).get()
+    return {
+        uri: tuple(_get_browser_image(uri, image) for image in images)
+        for uri, images in result.items()
+    }
+
+
+def _get_browser_image(uri: Uri, image: Image) -> Image:
+    scheme = urllib.parse.urlsplit(image.uri).scheme
+    if scheme in _BROWSER_IMAGE_SCHEMES:
+        return image
+    query = urllib.parse.urlencode({"uri": uri, "image_uri": image.uri})
+    return image.replace(uri=Uri(f"{IMAGE_PATH}?{query}"))
+
+
+class ImageHandler(tornado.web.RequestHandler):
+    """Serves the images that backends give from `get_image_data()`."""
+
+    def initialize(self, core: CoreProxy) -> None:
+        self.core = core
+
+    async def get(self) -> None:
+        uri = Uri(self.get_query_argument("uri"))
+        image_uri = self.get_query_argument("image_uri")
+
+        future = self.core.library.get_image_data(uri, image_uri)
+        try:
+            # Wait in a thread, so a slow image doesn't block other requests.
+            image_data = await tornado.ioloop.IOLoop.current().run_in_executor(
+                None,
+                future.get,
+            )
+        except exceptions.ValidationError as exc:
+            raise tornado.web.HTTPError(400, str(exc)) from exc
+        if image_data is None:
+            raise tornado.web.HTTPError(404)
+
+        mime_type = image_data.mime_type or ""
+        if not mime_type.startswith("image/"):
+            mime_type = "application/octet-stream"
+
+        set_mopidy_headers(self)
+        self.set_header("Cache-Control", "private, max-age=900")
+        self.set_header("Content-Type", mime_type)
+        # The data comes from the backend, so don't let a browser run it.
+        self.set_header("X-Content-Type-Options", "nosniff")
+        self.set_header("Content-Security-Policy", "default-src 'none'; sandbox")
+        self.write(image_data.data)
 
 
 def _send_broadcast(

@@ -191,6 +191,35 @@ reference](../reference/media.md) has an example.
   [`TlTrack`][mopidy.models.TlTrack] if its TLID is in the tracklist, also if
   its track is different. Before, `index()` gave `None` in this case. (!2383)
 
+- Add [`LibraryController.get_image_data()`][mopidy.core.LibraryController.get_image_data]
+  to get the byte content of an image. Pass a URI and one of the image URIs
+  that [`get_images()`][mopidy.core.LibraryController.get_images] gives for it.
+  [`ImageData`][mopidy.models.ImageData] model has the bytes
+  of the image and its MIME type. In JSON, such as with Mopidy-HTTP's JSON-RPC
+  API, the bytes are base64 encoded. Images larger than
+  [`MAX_IMAGE_SIZE`][mopidy.core.LibraryController.MAX_IMAGE_SIZE], 16 MiB, are
+  not returned.
+
+- Backends can implement
+  [`LibraryProvider.get_image_data()`][mopidy.backend.LibraryProvider.get_image_data]
+  to give the content of the images they give from
+  [`get_images()`][mopidy.backend.LibraryProvider.get_images].
+
+- File extension: Give the cover image files in the directory of a file or
+  directory from `get_images()`, and their content from `get_image_data()`.
+  The cover files are named `cover`, `folder`, `front` or `album`, in that
+  order of preference, with a `.jpg`, `.jpeg`, `.png`, `.webp`, `.gif` or
+  `.bmp` extension, in any case. Cover files are found also if
+  `file/excluded_file_extensions` hides them from browsing. Symlinks are
+  followed only if `file/follow_symlinks` is set, and only to files in
+  `file/media_dirs`.
+
+- HTTP extension: Serve the images of backends at `/mopidy/image`, with the
+  content from `get_image_data()`. With the JSON-RPC API, `get_images()` gives
+  image URIs a browser cannot load, such as `file:` URIs, as `/mopidy/image`
+  URIs. Image URIs with the `http`, `https` or `data` schemes, and paths on the
+  server like `/local/...`, are not changed.
+
 ### Audio
 
 - Remove `GstAudio` from `mopidy.audio`. It is the GStreamer implementation of
