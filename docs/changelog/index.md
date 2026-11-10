@@ -213,6 +213,13 @@ reference](../reference/media.md) has an example.
   `file/excluded_file_extensions` hides them from browsing. Symlinks are
   followed only if `file/follow_symlinks` is set, and only to files in
   `file/media_dirs`.
+
+- HTTP extension: Serve the images of backends at `/mopidy/image`, with the
+  content from `get_image_data()`. With the JSON-RPC API, `get_images()` gives
+  image URIs a browser cannot load, such as `file:` URIs, as `/mopidy/image`
+  URIs. Image URIs with the `http`, `https` or `data` schemes, and paths on the
+  server like `/local/...`, are not changed.
+
 ### Audio
 
 - Remove `GstAudio` from `mopidy.audio`. It is the GStreamer implementation of
