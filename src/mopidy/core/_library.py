@@ -7,13 +7,13 @@ import operator
 import urllib.parse
 import warnings
 from collections.abc import Generator, Iterable, Mapping
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from pykka.typing import proxy_method
 
 from mopidy import exceptions
 from mopidy.core import _validation as validation
-from mopidy.models import Image, Ref, SearchResult, Track
+from mopidy.models import Image, ImageData, Ref, SearchResult, Track
 from mopidy.types import DistinctField, Query, SearchField, Uri, UriScheme
 
 if TYPE_CHECKING:
@@ -48,6 +48,9 @@ def _backend_error_handling(
 
 class LibraryController:
     """Manages browsing and searching for music."""
+
+    MAX_IMAGE_SIZE: ClassVar[int] = 16 * 1024 * 1024
+    """The maximum size in bytes of an image returned by [get_image_data][]."""
 
     def __init__(self, backends: Backends, core: Core) -> None:
         self.backends = backends
@@ -204,6 +207,68 @@ class LibraryController:
                     validation.check_instances(images, Image)
                     results[uri] += tuple(images)
         return results
+
+    def get_image_data(self, uri: Uri, image_uri: str) -> ImageData | None:
+        """Get the content of one of the images for the given URI.
+
+        Use [get_images][] to find the images for a URI, pick one, and then
+        pass the same URI together with the chosen
+        [Image.uri][mopidy.models.Image.uri] to this method.
+
+        The image is only read if `image_uri` is one of the images that
+        [get_images][] returns for `uri`. The backend owning `uri` reads the
+        image.
+
+        Returns the image, or `None` if the image is unknown, the backend
+        can't read it, or it is larger than [MAX_IMAGE_SIZE][] bytes.
+
+        Args:
+            uri: The track, album, or other URI the image belongs to.
+            image_uri: The URI of the image, as returned by [get_images][].
+        """
+        validation.check_uri(uri)
+        if not isinstance(image_uri, str) or not image_uri:
+            msg = f"Expected a non-empty image URI, not {image_uri!r}"
+            raise exceptions.ValidationError(msg)
+
+        backend = self._get_backend(uri=uri)
+        if backend is None:
+            return None
+
+        # For safety, we MUST check that image_uri is owned by uri.
+        if image_uri not in self._get_image_uris(backend=backend, uri=uri):
+            logger.debug("Image %r is not an image of %r", image_uri, uri)
+            return None
+
+        with _backend_error_handling(backend):
+            result = backend.library.get_image_data(
+                uri,
+                image_uri,
+                max_size=self.MAX_IMAGE_SIZE,
+            ).get()
+            if result is None:
+                return None
+            validation.check_instance(result, ImageData)
+            if len(result.data) > self.MAX_IMAGE_SIZE:
+                msg = (
+                    f"Image {image_uri!r} is {len(result.data)} bytes, "
+                    f"which is more than {self.MAX_IMAGE_SIZE} bytes"
+                )
+                raise exceptions.ValidationError(msg)
+            return result
+
+        return None
+
+    def _get_image_uris(self, *, backend: BackendProxy, uri: Uri) -> set[str]:
+        with _backend_error_handling(backend):
+            result = backend.library.get_images([uri]).get()
+            if result is None:
+                return set()
+            validation.check_instance(result, Mapping)
+            images = result.get(uri) or []
+            validation.check_instances(images, Image)
+            return {image.uri for image in images}
+        return set()
 
     def lookup(self, uris: Iterable[Uri]) -> dict[Uri, list[Track]]:
         """Lookup the given URIs.
@@ -385,6 +450,7 @@ class LibraryControllerProxy:
     browse = proxy_method(LibraryController.browse)
     get_distinct = proxy_method(LibraryController.get_distinct)
     get_images = proxy_method(LibraryController.get_images)
+    get_image_data = proxy_method(LibraryController.get_image_data)
     lookup = proxy_method(LibraryController.lookup)
     refresh = proxy_method(LibraryController.refresh)
     search = proxy_method(LibraryController.search)

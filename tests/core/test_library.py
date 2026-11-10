@@ -2,10 +2,11 @@ from unittest import mock
 
 import pytest
 
+from mopidy import exceptions
 from mopidy.backend import LibraryProvider
 from mopidy.core import Core, _library
 from mopidy.core import _validation as validation
-from mopidy.models import Image, Ref, SearchResult, Track
+from mopidy.models import Image, ImageData, Ref, SearchResult, Track
 
 
 @pytest.fixture
@@ -787,3 +788,144 @@ def test_search_bad_backend_backend_returns_wrong_type(
     library.search.return_value.get.return_value = "abc"
     assert mock_backend_core.library.search(query={"any": ["foo"]}) == []
     logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
+
+
+IMAGE_DATA = ImageData(data=b"\x89PNG", mime_type="image/png")
+
+
+def test_get_image_data_routes_to_backend_owning_uri(core, library1, library2):
+    library1.get_images.return_value.get.return_value = {
+        "dummy1:track": [Image(uri="/local/abc.png")],
+    }
+    library1.get_image_data.return_value.get.return_value = IMAGE_DATA
+
+    result = core.library.get_image_data("dummy1:track", "/local/abc.png")
+
+    assert result == IMAGE_DATA
+    library1.get_images.assert_called_once_with(["dummy1:track"])
+    library1.get_image_data.assert_called_once_with(
+        "dummy1:track",
+        "/local/abc.png",
+        max_size=_library.LibraryController.MAX_IMAGE_SIZE,
+    )
+    library2.get_images.assert_not_called()
+    library2.get_image_data.assert_not_called()
+
+
+def test_get_image_data_returns_none_for_image_not_in_get_images(core, library1):
+    library1.get_images.return_value.get.return_value = {
+        "dummy1:track": [Image(uri="/local/abc.png")],
+    }
+
+    result = core.library.get_image_data("dummy1:track", "/local/../../etc/passwd")
+
+    assert result is None
+    library1.get_image_data.assert_not_called()
+
+
+def test_get_image_data_returns_none_for_image_of_another_uri(core, library1):
+    library1.get_images.return_value.get.return_value = {
+        "dummy1:other": [Image(uri="/local/abc.png")],
+    }
+
+    result = core.library.get_image_data("dummy1:track", "/local/abc.png")
+
+    assert result is None
+    library1.get_image_data.assert_not_called()
+
+
+def test_get_image_data_returns_none_for_unknown_uri(core, library1, library2):
+    assert core.library.get_image_data("dummy4:track", "/x.png") is None
+    library1.get_images.assert_not_called()
+    library2.get_images.assert_not_called()
+
+
+def test_get_image_data_returns_none_for_library_less_uri(core):
+    assert core.library.get_image_data("dummy3:track", "/x.png") is None
+
+
+def test_get_image_data_returns_none_if_backend_has_no_data(core, library1):
+    library1.get_images.return_value.get.return_value = {
+        "dummy1:track": [Image(uri="https://example.com/a.jpg")],
+    }
+    library1.get_image_data.return_value.get.return_value = None
+
+    assert (
+        core.library.get_image_data("dummy1:track", "https://example.com/a.jpg") is None
+    )
+
+
+@pytest.mark.parametrize("image_uri", ["", None, 123])
+def test_get_image_data_rejects_invalid_image_uri(core, image_uri):
+    with pytest.raises(exceptions.ValidationError):
+        core.library.get_image_data("dummy1:track", image_uri)
+
+
+def test_get_image_data_rejects_invalid_uri(core):
+    with pytest.raises(exceptions.ValidationError):
+        core.library.get_image_data("/no/scheme", "/x.png")
+
+
+@pytest.fixture
+def library_with_image(library):
+    library.get_images.return_value.get.return_value = {
+        "dummy:/1": [Image(uri="dummy:image")],
+    }
+    return library
+
+
+def test_get_image_data_bad_backend_get_images_raises_exception(
+    mock_backend_core, library_with_image, logger
+):
+    library_with_image.get_images.return_value.get.side_effect = Exception
+    assert mock_backend_core.library.get_image_data("dummy:/1", "dummy:image") is None
+    library_with_image.get_image_data.assert_not_called()
+    logger.exception.assert_called_with(mock.ANY, "DummyBackend")
+
+
+def test_get_image_data_bad_backend_get_images_returns_wrong_type(
+    mock_backend_core, library_with_image, logger
+):
+    library_with_image.get_images.return_value.get.return_value = {
+        "dummy:/1": ["dummy:image"],
+    }
+    assert mock_backend_core.library.get_image_data("dummy:/1", "dummy:image") is None
+    library_with_image.get_image_data.assert_not_called()
+    logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
+
+
+def test_get_image_data_bad_backend_raises_exception(
+    mock_backend_core, library_with_image, logger
+):
+    library_with_image.get_image_data.return_value.get.side_effect = Exception
+    assert mock_backend_core.library.get_image_data("dummy:/1", "dummy:image") is None
+    logger.exception.assert_called_with(mock.ANY, "DummyBackend")
+
+
+def test_get_image_data_bad_backend_returns_wrong_type(
+    mock_backend_core, library_with_image, logger
+):
+    library_with_image.get_image_data.return_value.get.return_value = b"abc"
+    assert mock_backend_core.library.get_image_data("dummy:/1", "dummy:image") is None
+    logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
+
+
+def test_get_image_data_bad_backend_returns_too_large_image(
+    mock_backend_core, library_with_image, logger
+):
+    library_with_image.get_image_data.return_value.get.return_value = ImageData(
+        data=b"x" * (_library.LibraryController.MAX_IMAGE_SIZE + 1),
+    )
+    assert mock_backend_core.library.get_image_data("dummy:/1", "dummy:image") is None
+    logger.error.assert_called_with(mock.ANY, "DummyBackend", mock.ANY)
+
+
+def test_get_image_data_accepts_image_of_max_size(
+    mock_backend_core, library_with_image
+):
+    image_data = ImageData(data=b"x" * _library.LibraryController.MAX_IMAGE_SIZE)
+    library_with_image.get_image_data.return_value.get.return_value = image_data
+    assert (
+        mock_backend_core.library.get_image_data("dummy:/1", "dummy:image")
+        == image_data
+    )

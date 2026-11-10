@@ -38,12 +38,20 @@ class DummyLibraryProvider(backend.LibraryProvider):
         self.dummy_browse_result = {}
         self.dummy_find_exact_result = SearchResult()
         self.dummy_search_result = SearchResult()
+        self.dummy_images = {}
+        self.dummy_image_data = {}
 
     def browse(self, path):
         return self.dummy_browse_result.get(path, [])
 
     def get_distinct(self, field, query=None):
         return self.dummy_get_distinct_result.get(field, set())
+
+    def get_images(self, uris):
+        return {uri: self.dummy_images[uri] for uri in uris if uri in self.dummy_images}
+
+    def get_image_data(self, uri, image_uri, max_size):
+        return self.dummy_image_data.get(image_uri)
 
     def lookup_many(self, uris):
         return {uri: [t for t in self.dummy_library if uri == t.uri] for uri in uris}

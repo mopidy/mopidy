@@ -191,6 +191,20 @@ reference](../reference/media.md) has an example.
   [`TlTrack`][mopidy.models.TlTrack] if its TLID is in the tracklist, also if
   its track is different. Before, `index()` gave `None` in this case. (!2383)
 
+- Add [`LibraryController.get_image_data()`][mopidy.core.LibraryController.get_image_data]
+  to get the byte content of an image. Pass a URI and one of the image URIs
+  that [`get_images()`][mopidy.core.LibraryController.get_images] gives for it.
+  [`ImageData`][mopidy.models.ImageData] model has the bytes
+  of the image and its MIME type. In JSON, such as with Mopidy-HTTP's JSON-RPC
+  API, the bytes are base64 encoded. Images larger than
+  [`MAX_IMAGE_SIZE`][mopidy.core.LibraryController.MAX_IMAGE_SIZE], 16 MiB, are
+  not returned.
+
+- Backends can implement
+  [`LibraryProvider.get_image_data()`][mopidy.backend.LibraryProvider.get_image_data]
+  to give the content of the images they give from
+  [`get_images()`][mopidy.backend.LibraryProvider.get_images].
+
 ### Audio
 
 - Remove `GstAudio` from `mopidy.audio`. It is the GStreamer implementation of
