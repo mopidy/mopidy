@@ -205,6 +205,14 @@ reference](../reference/media.md) has an example.
   to give the content of the images they give from
   [`get_images()`][mopidy.backend.LibraryProvider.get_images].
 
+- File extension: Give the cover image files in the directory of a file or
+  directory from `get_images()`, and their content from `get_image_data()`.
+  The cover files are named `cover`, `folder`, `front` or `album`, in that
+  order of preference, with a `.jpg`, `.jpeg`, `.png`, `.webp`, `.gif` or
+  `.bmp` extension, in any case. Cover files are found also if
+  `file/excluded_file_extensions` hides them from browsing. Symlinks are
+  followed only if `file/follow_symlinks` is set, and only to files in
+  `file/media_dirs`.
 ### Audio
 
 - Remove `GstAudio` from `mopidy.audio`. It is the GStreamer implementation of
