@@ -21,6 +21,13 @@ type CoreEvent = Literal[
     "mute_changed",
     "seeked",
     "stream_title_changed",
+    "notification",
+]
+
+type NotificationLevel = Literal[
+    "info",
+    "warning",
+    "error",
 ]
 
 # A union of all possible data types for the core events. This is used to create
@@ -200,4 +207,15 @@ class CoreListener(listener.Listener):
 
         Args:
             title: The new stream title.
+        """
+
+    def notification(self, source: str, level: NotificationLevel, message: str) -> None:
+        """Called when something asks to notify the user.
+
+        *MAY* be implemented by actor.
+
+        Args:
+            source: The name of the component sending the notification.
+            level: The severity of the notification: "info", "warning" or "error".
+            message: The text of the notification.
         """

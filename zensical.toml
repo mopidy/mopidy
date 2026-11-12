@@ -69,6 +69,7 @@ nav = [
             "reference/frontend.md",
             "reference/backend.md",
             "reference/ext.md",
+            "reference/notify.md",
             "reference/exceptions.md",
         ]},
         {"Web" = [
