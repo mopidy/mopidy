@@ -186,7 +186,7 @@ reference](../reference/media.md) has an example.
 
 - Add `Notifier` so that extensions and backends can send
   notifications to users. (#1011)
-  
+
 - Compare tracklist entries by TLID. This makes
   [`remove()`][mopidy.core.TracklistController.remove] and other tracklist
   operations faster on large tracklists. As a result,
