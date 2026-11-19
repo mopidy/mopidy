@@ -20,6 +20,7 @@ classDiagram
   class Artist
   class Directory
   class Image
+  class ImageData
   class Playlist
   class TlTrack
   class Track
