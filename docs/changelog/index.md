@@ -114,6 +114,24 @@ reference](../reference/media.md) has an example.
   not the raw GStreamer tags. To see the raw tags, use `gst-discoverer-1.0`.
   (#2330, !2337)
 
+### Notify API
+
+The new [`mopidy.notify`][mopidy.notify] module sends notifications to users,
+for example to tell the user that a login is no longer valid. Notifications are
+optional. Extensions that do not use them need no changes. (#1011, !2363,
+!2392)
+
+- To send notifications from an extension, make a
+  [`Notifier`][mopidy.notify.Notifier] with the `ext_name` of the extension as
+  the source. Then call `info()`, `warning()` or `error()`.
+
+- To show notifications to users, a frontend implements
+  [`CoreListener.notification()`][mopidy.core.CoreListener.notification].
+
+- To show notifications to users, an HTTP client listens for the
+  `notification` event on the WebSocket. The event has the fields `source`,
+  `level`, and `message`.
+
 ### Deprecations
 
 - Deprecate `mopidy.audio.scan.Scanner`, and the tag helpers
@@ -183,9 +201,6 @@ reference](../reference/media.md) has an example.
   [`pause()`][mopidy.core.PlaybackController.pause] and
   [`resume()`][mopidy.core.PlaybackController.resume] with no wait between
   them, the playback state could stay paused while the audio played. (!2358)
-
-- Add [`Notifier`][mopidy.notify.Notifier] so that extensions and backends can
-  send notifications to users. (#1011)
 
 - Compare tracklist entries by TLID. This makes
   [`remove()`][mopidy.core.TracklistController.remove] and other tracklist
