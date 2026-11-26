@@ -125,6 +125,10 @@ class Core(
         self.playback._on_position_changed(position)
 
     @override
+    def stream_error(self, error: str) -> None:
+        self.playback._on_stream_error(error)
+
+    @override
     def playlists_loaded(self) -> None:
         # Forward event from backend to frontends
         CoreListener.send("playlists_loaded")

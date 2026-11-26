@@ -91,3 +91,17 @@ class AudioListener(listener.Listener):
         Args:
             tags: The tags that have just been updated.
         """
+
+    def stream_error(self, error: str) -> None:
+        """Called whenever a GStreamer error stops the audio stream.
+
+        This is distinct from :meth:`state_changed` in that it carries the
+        reason playback stopped, so listeners can distinguish an unexpected
+        failure (e.g. a broken sink connection) from a normal stop and react
+        accordingly, such as by retrying playback.
+
+        *MAY* be implemented by actor.
+
+        Args:
+            error: The GStreamer error message.
+        """
