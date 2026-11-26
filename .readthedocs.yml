@@ -9,13 +9,17 @@ build:
     - libcairo2-dev
     - libgirepository-2.0-dev
   jobs:
-    post_create_environment:
-      - pip install uv
-    post_install:
-      - UV_PROJECT_ENVIRONMENT=$READTHEDOCS_VIRTUALENV_PATH uv sync --all-extras --group docs --link-mode copy
     build:
       html:
         - zensical build
     post_build:
       - mkdir -p $READTHEDOCS_OUTPUT/html/
       - cp -r site/* $READTHEDOCS_OUTPUT/html/
+
+python:
+  install:
+    - method: uv
+      command: sync
+      extras: all
+      groups:
+        - docs
