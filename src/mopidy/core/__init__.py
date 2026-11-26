@@ -1,7 +1,7 @@
 from ._actor import Core, CoreProxy
 from ._history import HistoryController, HistoryControllerProxy
 from ._library import LibraryController, LibraryControllerProxy
-from ._listener import CoreEvent, CoreEventData, CoreListener
+from ._listener import CoreEvent, CoreEventData, CoreListener, NotificationLevel
 from ._mixer import MixerController, MixerControllerProxy
 from ._playback import PlaybackController, PlaybackControllerProxy
 from ._playlists import PlaylistsController, PlaylistsControllerProxy
@@ -19,6 +19,7 @@ __all__ = [
     "LibraryControllerProxy",
     "MixerController",
     "MixerControllerProxy",
+    "NotificationLevel",
     "PlaybackController",
     "PlaybackControllerProxy",
     "PlaylistsController",
