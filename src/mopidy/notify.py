@@ -9,8 +9,19 @@ class Notifier:
     Make a notifier with source. Then call
     `info()`, `warning()` or `error()` to send a notification.
 
+    Use the [`ext_name`][mopidy.ext.Extension.ext_name] of your extension as the
+    source:
+
+    ```python
+    from mopidy.notify import Notifier
+
+    notifier = Notifier("soundspot")
+    notifier.error("Authentication lost")
+    ```
+
     Args:
-        source: The name of the component sending the notification.
+        source: The name of the component sending the notification, for
+            example `soundspot`.
 
     """
 
