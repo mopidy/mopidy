@@ -1,4 +1,5 @@
 import os
+import tempfile
 from pathlib import Path
 from unittest import mock
 
@@ -44,14 +45,20 @@ def test_data_dir_from_env(environ):
     assert paths.get_xdg_dirs()["XDG_DATA_DIR"] == Path("/foo/bar")
 
 
-def test_user_dirs(environ, tmpdir):
-    os.environ["XDG_CONFIG_HOME"] = str(tmpdir)
+def test_user_dirs(environ):
+    # platformdirs ignores user-dirs.dirs if another user owns one of its parent
+    # dirs. In CI, another user owns the checkout that has the pytest tmpdir.
+    with tempfile.TemporaryDirectory(dir="/tmp") as config_dir:
+        os.environ["XDG_CONFIG_HOME"] = config_dir
 
-    with (Path(tmpdir) / "user-dirs.dirs").open("wb") as fh:
-        fh.write(b"# Some comments\n")
-        fh.write(b'XDG_MUSIC_DIR="$HOME/Music2"\n')
+        user_dirs = Path(config_dir) / "user-dirs.dirs"
+        with user_dirs.open("wb") as fh:
+            fh.write(b"# Some comments\n")
+            fh.write(b'XDG_MUSIC_DIR="$HOME/Music2"\n')
+        # platformdirs also ignores the file if other users can write to it.
+        user_dirs.chmod(0o600)
 
-    result = paths.get_xdg_dirs()
+        result = paths.get_xdg_dirs()
 
     assert result["XDG_MUSIC_DIR"] == Path("~/Music2").expanduser()
     assert result["XDG_DOWNLOAD_DIR"] == Path("~/Downloads").expanduser()
