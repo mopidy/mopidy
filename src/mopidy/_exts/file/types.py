@@ -9,3 +9,5 @@ class FileConfig(TypedDict):
     show_dotfiles: bool
     follow_symlinks: bool
     metadata_timeout: int
+    cue_sheets: bool
+    cue_encodings: list[str]

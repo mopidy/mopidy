@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import dataclasses
 from typing import TYPE_CHECKING, cast
 
 from mopidy import exceptions
@@ -104,6 +105,14 @@ def make_output_bin(output: str) -> Gst.Element:
     return output_bin
 
 
+@dataclasses.dataclass(frozen=True)
+class _Segment:
+    """The part of the media to play, in milliseconds."""
+
+    start: DurationMs
+    end: DurationMs | None
+
+
 class GstPlaybackPipeline:
     """The GStreamer element graph used for playback.
 
@@ -136,6 +145,11 @@ class GstPlaybackPipeline:
         self._signals = Signals()
         self._event_handler_id: int | None = None
         self._pad: Gst.Pad | None = None
+        # The segment of the stream that plays, and the segment of the stream
+        # that is set up to play next. These differ between about-to-finish
+        # and the start of the next stream.
+        self._segment: _Segment | None = None
+        self._pending_segment: _Segment | None = None
 
         self.playbin = self._make_playbin(on_about_to_finish, on_source_setup)
         self._setup_message_handling(on_bus_message)
@@ -293,7 +307,8 @@ class GstPlaybackPipeline:
             if (event := pad_probe_info.get_event()) is None:
                 return Gst.PadProbeReturn.OK
             if event.type == Gst.EventType.SEGMENT:
-                on_position(self._decode_segment(event.parse_segment()))
+                position = self._decode_segment(event.parse_segment())
+                on_position(self._relative(position))
             return Gst.PadProbeReturn.OK
 
         if (pad := self.output_bin.get_static_pad("sink")) is None:
@@ -321,8 +336,30 @@ class GstPlaybackPipeline:
         )
         return from_gst_time(segment.position)
 
-    def set_uri(self, uri: str, *, download: bool = False) -> None:
-        """Set the URI to play, and the buffering flags to use for it."""
+    def _relative(self, position: DurationMs) -> DurationMs:
+        if self._segment is None:
+            return position
+        return DurationMs(max(position - self._segment.start, 0))
+
+    def set_uri(
+        self,
+        uri: str,
+        *,
+        download: bool = False,
+        start: DurationMs | None = None,
+        end: DurationMs | None = None,
+    ) -> None:
+        """Set the URI to play, and the buffering flags to use for it.
+
+        If `start` or `end` is given, only that part of the media plays. The
+        part starts to play when the stream has started, see
+        [start_segment()][mopidy.audio._gst.pipeline.GstPlaybackPipeline.start_segment].
+        """
+        self._pending_segment = (
+            _Segment(start=start or DurationMs(0), end=end)
+            if start or end is not None
+            else None
+        )
         flags = GstPlayFlags.AUDIO
         if download:
             flags |= GstPlayFlags.DOWNLOAD
@@ -360,10 +397,26 @@ class GstPlaybackPipeline:
             logger.debug("Position query failed")
             return DurationMs(0)
 
-        return from_gst_time(position)
+        return self._relative(from_gst_time(position))
+
+    def start_segment(self) -> None:
+        """Start to play the part of the media that was set with `set_uri()`.
+
+        Call this when the stream has started. It takes the segment for the
+        stream that started from the pending segment, and seeks to its start.
+        """
+        self._segment = self._pending_segment
+        if self._segment is not None:
+            self.seek(DurationMs(0))
 
     def seek(self, position: DurationMs) -> bool:
-        """Seek to a position in milliseconds."""
+        """Seek to a position in milliseconds.
+
+        If a segment plays, the position is relative to the start of the
+        segment, and playback still ends at the end of the segment.
+        """
+        if self._segment is not None:
+            return self._seek_segment(self._segment, position)
         # TODO: double check seek flags in use.
         gst_position = to_gst_time(position)
         gst_logger.debug("Sending flushing seek: position=%r", gst_position)
@@ -375,6 +428,27 @@ class GstPlaybackPipeline:
             Gst.Format.TIME,
             Gst.SeekFlags.FLUSH,
             gst_position,
+        )
+
+    def _seek_segment(self, segment: _Segment, position: DurationMs) -> bool:
+        gst_start = to_gst_time(DurationMs(segment.start + position))
+        if segment.end is None:
+            stop_type, gst_stop = Gst.SeekType.NONE, -1
+        else:
+            stop_type, gst_stop = Gst.SeekType.SET, to_gst_time(segment.end)
+        gst_logger.debug(
+            "Sending flushing seek: start=%r stop=%r", gst_start, gst_stop
+        )
+        # The seek is accurate, as the media is often cut in the middle of a
+        # frame group. A fast seek could move to the closest seek point.
+        return self.queue.seek(
+            1.0,
+            Gst.Format.TIME,
+            Gst.SeekFlags.FLUSH | Gst.SeekFlags.ACCURATE,
+            Gst.SeekType.SET,
+            gst_start,
+            stop_type,
+            gst_stop,
         )
 
     def debug_to_dot_file(self, file_name: str) -> None:

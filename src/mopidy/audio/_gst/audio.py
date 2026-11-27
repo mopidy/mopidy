@@ -305,6 +305,10 @@ class GstAudio(Audio, pykka.ThreadingActor):
 
     def _on_gst_stream_start(self) -> None:
         gst_logger.debug("Got STREAM_START bus message")
+        # Seek first, so that it is queued before any seek that core makes
+        # when it gets the stream_changed event.
+        if self._pipeline is not None:
+            self._pipeline.start_segment()
         uri = self._pending_uri
         logger.debug("Audio event: stream_changed(uri=%r)", uri)
         AudioListener.send("stream_changed", uri=uri)
@@ -327,6 +331,8 @@ class GstAudio(Audio, pykka.ThreadingActor):
         uri: str,
         live_stream: bool = False,
         download: bool = False,
+        start: DurationMs | None = None,
+        end: DurationMs | None = None,
     ) -> None:
         assert self._pipeline
 
@@ -343,7 +349,7 @@ class GstAudio(Audio, pykka.ThreadingActor):
         self._pending_uri = uri
         self._pending_tags = {}
         self._live_stream = live_stream
-        self._pipeline.set_uri(uri, download=download)
+        self._pipeline.set_uri(uri, download=download, start=start, end=end)
 
         if self.mixer is not None and current_volume is not None:
             self.mixer.set_volume(current_volume)

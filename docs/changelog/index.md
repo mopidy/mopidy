@@ -211,6 +211,12 @@ optional. Extensions that do not use them need no changes. (#1011, !2363,
 
 ### Audio
 
+- Add the `start` and `end` arguments to [`Audio.set_uri()`][mopidy.audio.Audio.set_uri],
+  to play only a part of the media. The positions of the audio, and the
+  position events, are then relative to `start`, and the end of the part is
+  an end of stream. Seeks inside the part are accurate. This is used to play the
+  tracks of CUE sheets.
+
 - Remove `GstAudio` from `mopidy.audio`. It is the GStreamer implementation of
   the [`Audio`][mopidy.audio.Audio] API, and is not part of the public API.
   Use [`Audio`][mopidy.audio.Audio] and [`AudioProxy`][mopidy.audio.AudioProxy]
@@ -241,6 +247,14 @@ optional. Extensions that do not use them need no changes. (#1011, !2363,
   caused it. The audio actor now drops these messages. (#2030, !2359)
 
 ### Other changes
+
+- File extension: Add support for CUE sheets. An album that is one audio file
+  with a `.cue` file now shows as an album with the tracks of the sheet, and
+  each track plays only its part of the file. See [CUE
+  sheets](../ext/file.md#cue-sheets). It handles sheets with many audio files,
+  audio files that were renamed or converted, and sheets in Unicode or in the
+  encodings of [`file/cue_encodings`](../ext/file.md#filecue_encodings). Turn
+  it off with [`file/cue_sheets`](../ext/file.md#filecue_sheets).
 
 - HTTP extension: Fix the debug log message for sent JSON-RPC responses. It was
   never logged. (!2310)

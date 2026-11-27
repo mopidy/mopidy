@@ -28,6 +28,8 @@ def config(media_dirs, follow_symlinks) -> Config:
                 "excluded_file_extensions": [".conf"],
                 "follow_symlinks": follow_symlinks,
                 "metadata_timeout": 1000,
+                "cue_sheets": True,
+                "cue_encodings": ["utf-8", "cp1252"],
             },
         }
     )
