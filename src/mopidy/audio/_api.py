@@ -32,6 +32,8 @@ class Audio:
         uri: str,
         live_stream: bool = False,
         download: bool = False,
+        start: DurationMs | None = None,
+        end: DurationMs | None = None,
     ) -> None:
         """Set URI of audio to be played.
 
@@ -42,6 +44,11 @@ class Audio:
             live_stream: Disables buffering, reducing latency for streams,
                 and discarding data when paused.
             download: Enables "download" buffering mode.
+            start: Play only the part of the media that starts here, in
+                milliseconds. Positions are then relative to this point. This
+                can be used to play one track of an album stored as one file.
+            end: Stop at this point in the media, in milliseconds. This is an
+                end of stream, like the end of the media.
         """
         raise NotImplementedError
 

@@ -12,6 +12,13 @@ from mopidy.models import Ref, Track
 from mopidy.types import Uri
 
 from . import Extension
+from .cue_library import (
+    CueAlbum,
+    CueLibrary,
+    is_cue_path,
+    make_track_uri,
+    split_cue_uri,
+)
 from .types import FileConfig
 
 logger = logging.getLogger(__name__)
@@ -46,6 +53,15 @@ class FileLibraryProvider(backend.LibraryProvider):
         self._follow_symlinks = ext_config["follow_symlinks"]
 
         self._media_reader = media_reader
+        self.cue_library = (
+            CueLibrary(
+                media_reader=media_reader,
+                encodings=ext_config["cue_encodings"],
+                is_allowed=self._is_cue_audio_file_allowed,
+            )
+            if ext_config["cue_sheets"]
+            else None
+        )
 
         self.root_directory = self._get_root_directory()
 
@@ -65,32 +81,30 @@ class FileLibraryProvider(backend.LibraryProvider):
                 uri,
             )
             return []
-        if paths.uri_to_path(uri).is_file():
+        if (
+            self.cue_library
+            and local_path.is_file()
+            and (cue_uri := split_cue_uri(uri))
+        ):
+            return self._browse_cue(cue_uri[0], local_path, cue_uri[1])
+        if local_path.is_file():
             logger.error("Rejected attempt to browse file (%s)", uri)
             return []
 
-        for dir_entry in local_path.iterdir():
-            child_path = dir_entry.resolve()
+        entries = list(self._visible_entries(local_path))
+
+        # A CUE sheet is shown as a directory with the tracks of the sheet, and
+        # the audio files that it describes are hidden.
+        albums, hidden = self._find_cue_albums([path for _, path in entries])
+
+        for dir_entry, child_path in entries:
             uri = paths.path_to_uri(child_path)
-
-            if not self._show_dotfiles and dir_entry.name.startswith("."):
+            if child_path in albums:
+                name = albums[child_path].sheet.title or dir_entry.stem
+                result.append(Ref.directory(name=name, uri=uri))
+            elif child_path in hidden:
                 continue
-
-            if (
-                self._excluded_file_extensions
-                and dir_entry.suffix.lower() in self._excluded_file_extensions
-            ):
-                continue
-
-            if dir_entry.is_symlink() and not self._follow_symlinks:
-                logger.debug("Ignoring symlink: %s", uri)
-                continue
-
-            if not self._is_in_basedir(child_path):
-                logger.debug("Ignoring symlink to outside base dir: %s", uri)
-                continue
-
-            if child_path.is_dir():
+            elif child_path.is_dir():
                 result.append(Ref.directory(name=dir_entry.name, uri=uri))
             elif child_path.is_file():
                 result.append(Ref.track(name=dir_entry.name, uri=uri))
@@ -115,6 +129,9 @@ class FileLibraryProvider(backend.LibraryProvider):
             )
             return []
 
+        if self.cue_library and local_path.is_file() and split_cue_uri(uri):
+            return self._lookup_cue(uri, local_path)
+
         target = self._media_reader.find_playback_target(uri)
         if target and target.info:
             track = target.info.track.replace(uri=uri)
@@ -128,6 +145,95 @@ class FileLibraryProvider(backend.LibraryProvider):
             )
 
         return [track]
+
+    def _visible_entries(
+        self, local_path: pathlib.Path
+    ) -> Generator[tuple[pathlib.Path, pathlib.Path]]:
+        """Get the entries of a directory that the config says to show.
+
+        Yields each entry, and the entry with symlinks resolved.
+        """
+        for dir_entry in local_path.iterdir():
+            child_path = dir_entry.resolve()
+            uri = paths.path_to_uri(child_path)
+
+            if not self._show_dotfiles and dir_entry.name.startswith("."):
+                continue
+
+            if (
+                self._excluded_file_extensions
+                and dir_entry.suffix.lower() in self._excluded_file_extensions
+            ):
+                continue
+
+            if dir_entry.is_symlink() and not self._follow_symlinks:
+                logger.debug("Ignoring symlink: %s", uri)
+                continue
+
+            if not self._is_in_basedir(child_path):
+                logger.debug("Ignoring symlink to outside base dir: %s", uri)
+                continue
+
+            yield dir_entry, child_path
+
+    def _find_cue_albums(
+        self, child_paths: list[pathlib.Path]
+    ) -> tuple[dict[pathlib.Path, CueAlbum], set[pathlib.Path]]:
+        """Find the usable CUE sheets, and the audio files that they describe."""
+        albums: dict[pathlib.Path, CueAlbum] = {}
+        hidden: set[pathlib.Path] = set()
+        if self.cue_library is None:
+            return albums, hidden
+        for child_path in child_paths:
+            if not (is_cue_path(child_path) and child_path.is_file()):
+                continue
+            if (album := self.cue_library.load(child_path)) is not None:
+                albums[child_path] = album
+                hidden |= album.audio_paths
+        return albums, hidden
+
+    def _browse_cue(
+        self,
+        sheet_uri: Uri,
+        local_path: pathlib.Path,
+        track_position: int | None,
+    ) -> list[Ref]:
+        assert self.cue_library
+        if track_position is not None:
+            logger.error("Rejected attempt to browse track (%s)", sheet_uri)
+            return []
+        album = self.cue_library.load(local_path)
+        if album is None:
+            return []
+        return [
+            Ref.track(
+                name=(
+                    f"{target.track.number:02d} - {target.track.title}"
+                    if target.track.title
+                    else f"Track {target.track.number:02d}"
+                ),
+                uri=make_track_uri(sheet_uri, target.position),
+            )
+            for target in album.targets
+        ]
+
+    def _lookup_cue(self, uri: Uri, local_path: pathlib.Path) -> list[Track]:
+        assert self.cue_library
+        sheet_uri, position = split_cue_uri(uri) or (uri, None)
+        album = self.cue_library.load(local_path)
+        if album is None:
+            logger.warning("Failed looking up %s", sheet_uri)
+            return []
+        tracks = self.cue_library.make_tracks(album, position)
+        if not tracks:
+            logger.warning("Failed looking up %s", uri)
+        return tracks
+
+    def _is_cue_audio_file_allowed(self, audio_path: pathlib.Path) -> bool:
+        """Check if a CUE sheet can use a file, which can be anywhere it names."""
+        if audio_path.is_symlink() and not self._follow_symlinks:
+            return False
+        return self._is_in_basedir(audio_path)
 
     def _get_root_directory(self) -> Ref | None:
         if not self._media_dirs:

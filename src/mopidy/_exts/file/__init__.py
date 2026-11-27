@@ -21,6 +21,8 @@ class Extension(ext.Extension):
         schema["show_dotfiles"] = config.Boolean(optional=True)
         schema["follow_symlinks"] = config.Boolean(optional=True)
         schema["metadata_timeout"] = config.Integer(optional=True)
+        schema["cue_sheets"] = config.Boolean(optional=True)
+        schema["cue_encodings"] = config.List(optional=True)
         return schema
 
     @override

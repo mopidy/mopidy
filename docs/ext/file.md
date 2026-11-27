@@ -13,6 +13,29 @@ that plays.
 
 This backend does not currently provide images.
 
+## CUE sheets
+
+An album that is stored as one audio file, with a CUE sheet that says where each
+track starts, is shown as an album. The sheet is shown as a directory with the
+tracks, the audio file it describes is hidden, and each track plays only its
+part of the file. Looking up the sheet gives all the tracks, with the titles,
+artists, genre and date of the sheet.
+
+- The tracks have URIs like `file:///music/Album.cue#3`, where the number is the
+  position of the track in the sheet.
+- A sheet can name many audio files, and the sheets and files can be in the same
+  directory in any number. The sheet is matched to its file by the name in the
+  sheet. If there is no such file, the match ignores the case, and the file
+  extension, as sheets often name the `.wav` that a `.flac` came from.
+- A sheet that cannot be used, such as a sheet that names a file that is missing, is
+  shown as a file, and its audio files are not hidden. The reason is logged.
+- A track ends where the next track in the same file starts. The silence in
+  front of a track (`INDEX 00`) is the end of the previous track.
+- The text in a CUE sheet is not always Unicode. See
+  [`file/cue_encodings`](#filecue_encodings).
+- Each track opens the audio file again and seeks to its start, so playing from
+  one track to the next in the same file is not guaranteed to be gapless.
+
 ## Configuration
 
 See [Configuration](../usage/config.md) for general help on configuring Mopidy.
@@ -37,6 +60,10 @@ excluded_file_extensions =
   .zip
 follow_symlinks = false
 metadata_timeout = 1000
+cue_sheets = true
+cue_encodings =
+  utf-8
+  cp1252
 ```
 
 ### file/enabled
@@ -70,3 +97,35 @@ be shown. Default is false.
 Number of milliseconds before giving up scanning a file and moving on to
 the next file. Reducing the value might speed up the directory listing,
 but can lead to some tracks not being shown.
+
+### file/cue_sheets
+
+Whether to show a CUE sheet as an album, with the tracks of the sheet.
+If it is off, the CUE sheet and the audio file are shown as files.
+Default is true.
+
+### file/cue_encodings
+
+The encodings to try, in order, for the text of a CUE sheet that is not
+Unicode. Values should be separated by either comma or newline. Use the names
+in the [Python list of standard
+encodings](https://docs.python.org/3/library/codecs.html#standard-encodings).
+
+A CUE sheet that starts with a byte order mark, or that is valid UTF-8, is
+always read as such. For the other sheets the first encoding that can read the
+whole sheet is used. There is no way to know which of the old encodings a sheet
+is in, and many of them can read any bytes. Put the encodings that you need in
+the order that gives the right text, and the one that reads anything last.
+For example, for sheets with Russian text use `cp1251`, for Japanese
+`shift_jis`, for Simplified Chinese `gbk`, for Traditional Chinese `big5` and
+for Korean `euc_kr`:
+
+```ini
+cue_encodings =
+  utf-8
+  shift_jis
+  cp1251
+  cp1252
+```
+
+Default is `utf-8` and `cp1252`.

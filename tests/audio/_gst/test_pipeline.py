@@ -181,3 +181,86 @@ def test_decode_bus_message_drops_extended_message_types(pipeline):
     message = Gst.Message.new_property_notify(pipeline.playbin, "foo", None)
 
     assert pipeline._decode_bus_message(message) is None
+
+
+def test_start_segment_seeks_to_the_start_and_end_of_the_segment(pipeline):
+    pipeline.queue = mock.Mock()
+    pipeline.set_uri("file:///tmp/foo.flac", start=2000, end=5000)
+
+    pipeline.start_segment()
+
+    pipeline.queue.seek.assert_called_once_with(
+        1.0,
+        Gst.Format.TIME,
+        Gst.SeekFlags.FLUSH | Gst.SeekFlags.ACCURATE,
+        Gst.SeekType.SET,
+        2000 * Gst.MSECOND,
+        Gst.SeekType.SET,
+        5000 * Gst.MSECOND,
+    )
+
+
+def test_start_segment_without_end_plays_to_the_end_of_the_media(pipeline):
+    pipeline.queue = mock.Mock()
+    pipeline.set_uri("file:///tmp/foo.flac", start=2000)
+
+    pipeline.start_segment()
+
+    pipeline.queue.seek.assert_called_once_with(
+        1.0,
+        Gst.Format.TIME,
+        Gst.SeekFlags.FLUSH | Gst.SeekFlags.ACCURATE,
+        Gst.SeekType.SET,
+        2000 * Gst.MSECOND,
+        Gst.SeekType.NONE,
+        -1,
+    )
+
+
+def test_seek_in_segment_is_relative_to_the_start_and_keeps_the_end(pipeline):
+    pipeline.queue = mock.Mock()
+    pipeline.set_uri("file:///tmp/foo.flac", start=2000, end=5000)
+    pipeline.start_segment()
+    pipeline.queue.reset_mock()
+
+    pipeline.seek(1000)
+
+    assert pipeline.queue.seek.call_args.args[4:] == (
+        3000 * Gst.MSECOND,
+        Gst.SeekType.SET,
+        5000 * Gst.MSECOND,
+    )
+
+
+def test_position_in_segment_is_relative_to_the_start(pipeline):
+    pipeline.queue = mock.Mock()
+    pipeline.set_uri("file:///tmp/foo.flac", start=2000, end=5000)
+    pipeline.start_segment()
+    pipeline.playbin = mock.Mock()
+    pipeline.playbin.query_position.return_value = (True, 2750 * Gst.MSECOND)
+
+    assert pipeline.get_position() == 750
+
+
+def test_start_segment_without_segment_does_not_seek(pipeline):
+    pipeline.queue = mock.Mock()
+    pipeline.set_uri("file:///tmp/foo.flac")
+
+    pipeline.start_segment()
+
+    pipeline.queue.seek.assert_not_called()
+
+
+def test_segment_is_forgotten_when_the_next_stream_has_none(pipeline):
+    pipeline.queue = mock.Mock()
+    pipeline.set_uri("file:///tmp/foo.flac", start=2000, end=5000)
+    pipeline.start_segment()
+    pipeline.set_uri("file:///tmp/bar.flac")
+    pipeline.start_segment()
+    pipeline.queue.reset_mock()
+
+    pipeline.seek(1000)
+
+    pipeline.queue.seek_simple.assert_called_once_with(
+        Gst.Format.TIME, Gst.SeekFlags.FLUSH, 1000 * Gst.MSECOND
+    )
