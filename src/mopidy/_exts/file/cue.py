@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import codecs
 import dataclasses
+import itertools
 import logging
 import pathlib
 import re
@@ -186,7 +187,7 @@ def parse(text: str) -> CueSheet:  # noqa: C901, PLR0912, PLR0915
             args = rest.split()
             track = None
             skip_track = True
-            if current_file is None or len(args) < 2 or not args[0].isdigit():  # noqa: PLR2004
+            if current_file is None or len(args) < 2 or not args[0].isdigit():
                 continue
             if args[1].upper() != "AUDIO":
                 continue
@@ -196,7 +197,7 @@ def parse(text: str) -> CueSheet:  # noqa: C901, PLR0912, PLR0915
             sheet.tracks.append(track)
         elif command == "INDEX":
             args = rest.split()
-            if skip_track or track is None or len(args) < 2:  # noqa: PLR2004
+            if skip_track or track is None or len(args) < 2:
                 continue
             if args[0].isdigit() and int(args[0]) == 1:
                 time = parse_time(args[1])
@@ -208,9 +209,8 @@ def parse(text: str) -> CueSheet:  # noqa: C901, PLR0912, PLR0915
             attribute = command.lower()
             if track is not None:
                 setattr(track, attribute, value)
-            elif not skip_track and not sheet.tracks:
-                if attribute != "songwriter":
-                    setattr(sheet, attribute, value)
+            elif not skip_track and not sheet.tracks and attribute != "songwriter":
+                setattr(sheet, attribute, value)
         elif command == "REM":
             key, _, value = rest.partition(" ")
             args = _arguments(value)
@@ -246,7 +246,7 @@ def parse(text: str) -> CueSheet:  # noqa: C901, PLR0912, PLR0915
 
 
 def _set_track_ends(tracks: list[CueTrack]) -> None:
-    for track, following in zip(tracks, tracks[1:], strict=False):
+    for track, following in itertools.pairwise(tracks):
         if following.file == track.file and following.start > track.start:
             track.end = following.start
 

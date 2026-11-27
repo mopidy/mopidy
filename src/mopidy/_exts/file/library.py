@@ -53,7 +53,7 @@ class FileLibraryProvider(backend.LibraryProvider):
         self._follow_symlinks = ext_config["follow_symlinks"]
 
         self._media_reader = media_reader
-        self._cue_library = (
+        self.cue_library = (
             CueLibrary(
                 media_reader=media_reader,
                 encodings=ext_config["cue_encodings"],
@@ -82,7 +82,7 @@ class FileLibraryProvider(backend.LibraryProvider):
             )
             return []
         if (
-            self._cue_library
+            self.cue_library
             and local_path.is_file()
             and (cue_uri := split_cue_uri(uri))
         ):
@@ -95,15 +95,7 @@ class FileLibraryProvider(backend.LibraryProvider):
 
         # A CUE sheet is shown as a directory with the tracks of the sheet, and
         # the audio files that it describes are hidden.
-        albums: dict[pathlib.Path, CueAlbum] = {}
-        hidden: set[pathlib.Path] = set()
-        if self._cue_library:
-            for dir_entry, child_path in entries:
-                if is_cue_path(child_path) and child_path.is_file():
-                    album = self._cue_library.load(child_path)
-                    if album is not None:
-                        albums[child_path] = album
-                        hidden |= album.audio_paths
+        albums, hidden = self._find_cue_albums([path for _, path in entries])
 
         for dir_entry, child_path in entries:
             uri = paths.path_to_uri(child_path)
@@ -137,7 +129,7 @@ class FileLibraryProvider(backend.LibraryProvider):
             )
             return []
 
-        if self._cue_library and local_path.is_file() and split_cue_uri(uri):
+        if self.cue_library and local_path.is_file() and split_cue_uri(uri):
             return self._lookup_cue(uri, local_path)
 
         target = self._media_reader.find_playback_target(uri)
@@ -184,17 +176,33 @@ class FileLibraryProvider(backend.LibraryProvider):
 
             yield dir_entry, child_path
 
+    def _find_cue_albums(
+        self, child_paths: list[pathlib.Path]
+    ) -> tuple[dict[pathlib.Path, CueAlbum], set[pathlib.Path]]:
+        """Find the usable CUE sheets, and the audio files that they describe."""
+        albums: dict[pathlib.Path, CueAlbum] = {}
+        hidden: set[pathlib.Path] = set()
+        if self.cue_library is None:
+            return albums, hidden
+        for child_path in child_paths:
+            if not (is_cue_path(child_path) and child_path.is_file()):
+                continue
+            if (album := self.cue_library.load(child_path)) is not None:
+                albums[child_path] = album
+                hidden |= album.audio_paths
+        return albums, hidden
+
     def _browse_cue(
         self,
         sheet_uri: Uri,
         local_path: pathlib.Path,
         track_position: int | None,
     ) -> list[Ref]:
-        assert self._cue_library
+        assert self.cue_library
         if track_position is not None:
             logger.error("Rejected attempt to browse track (%s)", sheet_uri)
             return []
-        album = self._cue_library.load(local_path)
+        album = self.cue_library.load(local_path)
         if album is None:
             return []
         return [
@@ -210,13 +218,13 @@ class FileLibraryProvider(backend.LibraryProvider):
         ]
 
     def _lookup_cue(self, uri: Uri, local_path: pathlib.Path) -> list[Track]:
-        assert self._cue_library
+        assert self.cue_library
         sheet_uri, position = split_cue_uri(uri) or (uri, None)
-        album = self._cue_library.load(local_path)
+        album = self.cue_library.load(local_path)
         if album is None:
             logger.warning("Failed looking up %s", sheet_uri)
             return []
-        tracks = self._cue_library.make_tracks(album, position)
+        tracks = self.cue_library.make_tracks(album, position)
         if not tracks:
             logger.warning("Failed looking up %s", uri)
         return tracks

@@ -4,8 +4,8 @@ from typing import ClassVar, override
 import pykka
 
 from mopidy import backend
-from mopidy.audio import AudioProxy
 from mopidy._lib import paths
+from mopidy.audio import AudioProxy
 from mopidy.config import Config
 from mopidy.media import MediaReader
 from mopidy.models import Track
@@ -26,11 +26,12 @@ class FileBackend(pykka.ThreadingActor, backend.Backend):
             config=config,
             timeout=DurationMs(config["file"]["metadata_timeout"]),
         )
-        self.library = library.FileLibraryProvider(
+        self.file_library = library.FileLibraryProvider(
             backend=self,
             config=config,
             media_reader=self._media_reader,
         )
+        self.library = self.file_library
         self.playback = FilePlaybackProvider(audio=audio, backend=self)
         self.playlists = None
 
@@ -77,10 +78,10 @@ class FilePlaybackProvider(backend.PlaybackProvider):
         return True
 
     def _is_cue_uri(self, uri: Uri) -> bool:
-        return self.backend.library._cue_library is not None and bool(
+        return self.backend.file_library.cue_library is not None and bool(
             split_cue_uri(uri)
         )
 
     def _find_cue_target(self, uri: Uri) -> CueTarget | None:
-        cue_library = self.backend.library._cue_library
+        cue_library = self.backend.file_library.cue_library
         return cue_library.find_target(uri) if cue_library else None

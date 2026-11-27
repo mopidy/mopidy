@@ -18,7 +18,17 @@ def follow_symlinks():
 
 
 @pytest.fixture
-def config(media_dirs, follow_symlinks) -> Config:
+def cue_sheets():
+    return True
+
+
+@pytest.fixture
+def cue_encodings():
+    return ["utf-8", "cp1252"]
+
+
+@pytest.fixture
+def config(media_dirs, follow_symlinks, cue_sheets, cue_encodings) -> Config:
     return Config(
         {
             "proxy": {},
@@ -28,8 +38,8 @@ def config(media_dirs, follow_symlinks) -> Config:
                 "excluded_file_extensions": [".conf"],
                 "follow_symlinks": follow_symlinks,
                 "metadata_timeout": 1000,
-                "cue_sheets": True,
-                "cue_encodings": ["utf-8", "cp1252"],
+                "cue_sheets": cue_sheets,
+                "cue_encodings": cue_encodings,
             },
         }
     )

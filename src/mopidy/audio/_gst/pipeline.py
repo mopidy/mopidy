@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import logging
 import dataclasses
+import logging
 from typing import TYPE_CHECKING, cast
 
 from mopidy import exceptions
@@ -436,9 +436,7 @@ class GstPlaybackPipeline:
             stop_type, gst_stop = Gst.SeekType.NONE, -1
         else:
             stop_type, gst_stop = Gst.SeekType.SET, to_gst_time(segment.end)
-        gst_logger.debug(
-            "Sending flushing seek: start=%r stop=%r", gst_start, gst_stop
-        )
+        gst_logger.debug("Sending flushing seek: start=%r stop=%r", gst_start, gst_stop)
         # The seek is accurate, as the media is often cut in the middle of a
         # frame group. A fast seek could move to the closest seek point.
         return self.queue.seek(

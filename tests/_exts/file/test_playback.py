@@ -63,18 +63,18 @@ def test_translate_uri_of_cue_track_is_the_audio_file(provider, cue_uri, tmp_pat
 
 
 @pytest.mark.parametrize(
-    ("position", "start", "end"),
-    [(1, 0, 1000), (2, 1000, 3000), (3, 3000, None)],
+    ("position", "part"),
+    [(1, (0, 1000)), (2, (1000, 3000)), (3, (3000, None))],
 )
 def test_change_track_to_cue_track_plays_part_of_the_file(
-    provider, cue_uri, tmp_path, position, start, end
+    provider, cue_uri, tmp_path, position, part
 ):
     track = Track(uri=f"{cue_uri}#{position}")
 
     assert provider.change_track(track)
 
     provider.audio.set_uri.assert_called_once_with(
-        paths.path_to_uri(tmp_path / "album.flac"), start=start, end=end
+        paths.path_to_uri(tmp_path / "album.flac"), start=part[0], end=part[1]
     )
 
 

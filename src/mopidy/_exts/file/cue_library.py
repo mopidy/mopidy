@@ -18,7 +18,7 @@ from collections.abc import Callable, Sequence
 from mopidy._lib import paths
 from mopidy.media import MediaReader, MediaReaderError
 from mopidy.models import Album, Artist, Track
-from mopidy.types import DurationMs, Uri
+from mopidy.types import DurationMs, ReleaseDate, Uri
 
 from . import cue
 
@@ -97,7 +97,9 @@ class CueLibrary:
         self._is_allowed = is_allowed
         self._lock = threading.Lock()
         self._albums: dict[pathlib.Path, tuple[tuple[int, int], CueAlbum | None]] = {}
-        self._lengths: dict[pathlib.Path, tuple[tuple[int, int], DurationMs | None]] = {}
+        self._lengths: dict[
+            pathlib.Path, tuple[tuple[int, int], DurationMs | None]
+        ] = {}
 
     def load(self, path: pathlib.Path) -> CueAlbum | None:
         """Read a CUE sheet.
@@ -177,7 +179,7 @@ class CueLibrary:
             name=sheet.title,
             artists=_artists(sheet.performer),
             num_tracks=len(sheet.tracks),
-            date=sheet.date,
+            date=_date(sheet.date),
         )
         tracks = []
         for target in album.targets:
@@ -194,7 +196,7 @@ class CueLibrary:
                     genre=cue_track.genre,
                     track_no=cue_track.number,
                     disc_no=cue_track.disc_no,
-                    date=cue_track.date,
+                    date=_date(cue_track.date),
                     length=self._length(target),
                     last_modified=album.last_modified,
                 )
@@ -230,6 +232,10 @@ class CueLibrary:
         with self._lock:
             self._lengths[path] = (key, length)
         return length
+
+
+def _date(value: str | None) -> ReleaseDate | None:
+    return ReleaseDate(value) if value else None
 
 
 def _artists(name: str | None) -> frozenset[Artist]:

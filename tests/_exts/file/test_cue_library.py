@@ -1,10 +1,8 @@
 import shutil
-from unittest import mock
 
 import pytest
 
 from mopidy._lib import paths
-from mopidy._exts.file import backend
 from mopidy.models import Ref
 from tests import path_to_data_dir
 
@@ -45,9 +43,8 @@ def cue_uri(album_dir):
 
 
 @pytest.fixture
-def config(config):
-    config["file"]["cue_encodings"] = ["utf-8", "cp1251"]
-    return config
+def cue_encodings():
+    return ["utf-8", "cp1251"]
 
 
 def test_browse_shows_cue_sheet_as_directory_and_hides_its_audio(
@@ -57,9 +54,7 @@ def test_browse_shows_cue_sheet_as_directory_and_hides_its_audio(
 
     assert result == [
         Ref.directory(name="Альбом", uri=cue_uri),
-        Ref.track(
-            name="other.flac", uri=paths.path_to_uri(album_dir / "other.flac")
-        ),
+        Ref.track(name="other.flac", uri=paths.path_to_uri(album_dir / "other.flac")),
     ]
 
 
@@ -101,10 +96,8 @@ def test_browse_does_not_hide_files_if_the_cue_sheet_names_a_missing_file(
     assert [ref.name for ref in result] == ["album.cue", "song.flac"]
 
 
-def test_browse_with_cue_sheets_off_shows_files(config, album_dir):
-    config["file"]["cue_sheets"] = False
-    provider = backend.FileBackend(audio=mock.Mock(), config=config).library
-
+@pytest.mark.parametrize("cue_sheets", [False])
+def test_browse_with_cue_sheets_off_shows_files(provider, album_dir):
     result = provider.browse(paths.path_to_uri(album_dir))
 
     assert [ref.name for ref in result] == ["album.cue", "album.flac", "other.flac"]
