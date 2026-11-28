@@ -12,6 +12,12 @@ def test_library_default_get_images_impl():
     assert library.get_images(["trackuri"]) == {}
 
 
+def test_library_default_get_image_data_impl():
+    library = backend.LibraryProvider(backend=None)
+
+    assert library.get_image_data("trackuri", "imageuri", max_size=1) is None
+
+
 def test_library_lookup_many_falls_back():
     library = backend.LibraryProvider(backend=None)
     library.lookup = mock.Mock()

@@ -9,7 +9,7 @@ import pykka
 from pykka.typing import proxy_field, proxy_method
 
 if TYPE_CHECKING:
-    from mopidy.models import Image, Ref, SearchResult, Track
+    from mopidy.models import Image, ImageData, Ref, SearchResult, Track
     from mopidy.types import DistinctField, Query, SearchField, Uri
 
     from ._backend import Backend
@@ -65,6 +65,35 @@ class LibraryProvider:
         """
         return {}
 
+    def get_image_data(
+        self,
+        uri: Uri,
+        image_uri: str,
+        max_size: int,
+    ) -> ImageData | None:
+        """See [mopidy.core.LibraryController.get_image_data][].
+
+        *MAY be implemented by subclass.*
+
+        Core only calls this with an `image_uri` that this backend's
+        [get_images][] returned for `uri`, so the backend doesn't have to
+        guard against arbitrary image URIs from clients.
+
+        Return the whole image, and set
+        [ImageData.mime_type][mopidy.models.ImageData.mime_type] if known.
+        Return `None` if the image can't be found or read, or if it is larger
+        than `max_size` bytes. Check the size before reading the image if
+        possible, so a large image is never read into memory.
+
+        Default implementation will simply return `None`.
+
+        Args:
+            uri: The track, album, or other URI the image belongs to.
+            image_uri: The URI of the image, as returned by [get_images][].
+            max_size: The maximum size of the image in bytes.
+        """
+        return None
+
     def lookup_many(self, uris: Iterable[Uri]) -> dict[Uri, list[Track]]:
         """See [mopidy.core.LibraryController.lookup][].
 
@@ -106,6 +135,7 @@ class LibraryProviderProxy:
     browse = proxy_method(LibraryProvider.browse)
     get_distinct = proxy_method(LibraryProvider.get_distinct)
     get_images = proxy_method(LibraryProvider.get_images)
+    get_image_data = proxy_method(LibraryProvider.get_image_data)
     lookup_many = proxy_method(LibraryProvider.lookup_many)
     lookup = proxy_method(LibraryProvider.lookup)
     refresh = proxy_method(LibraryProvider.refresh)
