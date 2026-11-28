@@ -1,6 +1,7 @@
 # Frontend API
 
-The following requirements applies to any frontend implementation:
+The following requirements apply to frontends that run inside the Mopidy
+process:
 
 - A frontend MAY do mostly whatever it wants to, including creating threads,
   opening TCP ports and exposing Mopidy for a group of clients.
@@ -35,6 +36,23 @@ The following requirements applies to any frontend implementation:
 - Any actor which is part of the frontend MAY implement the
   [mopidy.core.CoreListener][] interface to receive notification of the
   specified events.
+
+## External frontends
+
+A frontend that only needs the [Core API](core.md) can run as a separate
+program and talk to Mopidy over the [WebSocket
+API](http.md#websocket-api), which exposes the [Core API methods over
+JSON-RPC](http.md#json-rpc-20-messages). This is a good fit for code that needs
+special hardware access, such as GPIO, or raw memory, as it keeps that code out
+of the Mopidy process, where it would run with Mopidy's privileges.
+
+The WebSocket API speaks JSON-RPC 2.0, so an external frontend can be written
+in any language. See [Mopidy.js](js.md) for the JavaScript client library. For
+Python, [mopidyapi](https://github.com/AsbjornOlling/mopidyapi) is one community
+client library, but it is not maintained by the Mopidy project.
+
+The WebSocket API is provided by the bundled [mopidy-http](../ext/http.md)
+extension, which is enabled by default.
 
 ## Frontend implementations
 

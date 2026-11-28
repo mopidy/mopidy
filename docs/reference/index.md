@@ -22,7 +22,8 @@ Only APIs documented here are public and open for use by Mopidy extensions.
 - [Notify API](notify.md) — the API used by backends and extensions to send
   a notification to users about 3 levels: errors, warnings and info.
 - [Frontend API](frontend.md) — the interface for building frontends that
-  react to playback events and control Mopidy.
+  react to playback events and control Mopidy, and when to run one as a
+  separate program over the WebSocket API.
 - [Backend API](backend.md) — the interface for building backends that provide
   music libraries and playback.
 - [Extension API](ext.md) — how extensions register themselves and expose
