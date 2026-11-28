@@ -833,3 +833,30 @@ def test_inspector_can_describe_a_bunch_of_large_classes() -> None:
     assert [p.name for p in methods["core.tracklist.eot_track"].params] == [
         "tl_track",
     ]
+
+
+def test_core_library_get_image_data_returns_base64_data(
+    backend: pykka.ActorProxy[dummy_backend.DummyBackend],
+    core: CoreProxy,
+) -> None:
+    image_data = models.ImageData(data=bytes(range(256)), mime_type="image/png")
+    backend.library.dummy_images = {"dummy:a": [models.Image(uri="/local/a.png")]}
+    backend.library.dummy_image_data = {"/local/a.png": image_data}
+    wrapper = jsonrpc.Wrapper(objects={"core.library": core.library})
+
+    response = wrapper.handle_json(
+        json.dumps(
+            {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "core.library.get_image_data",
+                "params": {"uri": "dummy:a", "image_uri": "/local/a.png"},
+            }
+        )
+    )
+
+    assert response is not None
+    result = json.loads(response)["result"]
+    assert result["__model__"] == "ImageData"
+    assert result["mime_type"] == "image/png"
+    assert models.ImageData.model_validate(result) == image_data

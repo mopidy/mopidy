@@ -1,20 +1,37 @@
+import itertools
 import logging
+import mimetypes
 import os
 import pathlib
-from collections.abc import Generator
+import urllib.parse
+from collections.abc import Generator, Iterable
 from typing import TypedDict, cast, override
 
 from mopidy import backend
 from mopidy import config as config_lib
 from mopidy._lib import paths
 from mopidy.media import MediaReader
-from mopidy.models import Ref, Track
+from mopidy.models import Image, ImageData, Ref, Track
 from mopidy.types import Uri
 
 from . import Extension
 from .types import FileConfig
 
 logger = logging.getLogger(__name__)
+
+COVER_NAMES = ("cover", "folder", "front", "album")
+"""The names of cover image files, in order of preference."""
+
+COVER_EXTENSIONS = (".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp")
+"""The file extensions of cover image files, in order of preference."""
+
+_COVER_FILE_NAMES = {
+    f"{name}{ext}": priority
+    for priority, (name, ext) in enumerate(
+        itertools.product(COVER_NAMES, COVER_EXTENSIONS)
+    )
+}
+"""Lower case cover file names, mapped to their order of preference."""
 
 
 class MediaDir(TypedDict):
@@ -25,7 +42,7 @@ class MediaDir(TypedDict):
 class FileLibraryProvider(backend.LibraryProvider):
     """Library for browsing local files."""
 
-    # TODO: get_images that can pull from metadata and/or .folder.png etc?
+    # TODO: get_images that can pull from embedded metadata?
     # TODO: handle playlists?
 
     def __init__(
@@ -128,6 +145,76 @@ class FileLibraryProvider(backend.LibraryProvider):
             )
 
         return [track]
+
+    @override
+    def get_images(self, uris: Iterable[Uri]) -> dict[Uri, list[Image]]:
+        """Get the cover image files in the directory of each URI.
+
+        For a directory URI, the cover images are looked up in the directory
+        itself. For a file URI, they are looked up in the file's directory.
+        """
+        covers_by_dir: dict[pathlib.Path, list[Image]] = {}
+        result: dict[Uri, list[Image]] = {}
+        for uri in uris:
+            local_path = paths.uri_to_path(uri)
+            if not self._is_in_basedir(local_path):
+                continue
+            dir_path = local_path if local_path.is_dir() else local_path.parent
+            if dir_path not in covers_by_dir:
+                covers_by_dir[dir_path] = [
+                    Image(uri=paths.path_to_uri(path))
+                    for path in self._find_cover_files(dir_path)
+                ]
+            if covers_by_dir[dir_path]:
+                result[uri] = covers_by_dir[dir_path]
+        return result
+
+    @override
+    def get_image_data(
+        self,
+        uri: Uri,
+        image_uri: str,
+        max_size: int,
+    ) -> ImageData | None:
+        if urllib.parse.urlsplit(image_uri).scheme != "file":
+            return None
+        image_path = paths.uri_to_path(image_uri)
+        if not self._is_in_basedir(image_path):
+            logger.warning(
+                "Rejected attempt to read image (%s) outside dirs defined "
+                "in file/media_dirs config.",
+                image_uri,
+            )
+            return None
+        try:
+            if image_path.stat().st_size > max_size:
+                logger.warning("Image is too large to read: %s", image_uri)
+                return None
+            data = image_path.read_bytes()
+        except OSError as exc:
+            logger.warning("Failed reading image %s: %s", image_uri, exc)
+            return None
+        mime_type, _ = mimetypes.guess_type(image_path.name)
+        return ImageData(data=data, mime_type=mime_type)
+
+    def _find_cover_files(self, dir_path: pathlib.Path) -> list[pathlib.Path]:
+        try:
+            dir_entries = list(dir_path.iterdir())
+        except OSError as exc:
+            logger.debug("Failed looking for cover images in %s: %s", dir_path, exc)
+            return []
+        covers = [
+            dir_entry
+            for dir_entry in dir_entries
+            if dir_entry.name.lower() in _COVER_FILE_NAMES
+            and (self._follow_symlinks or not dir_entry.is_symlink())
+            and dir_entry.is_file()
+            and self._is_in_basedir(dir_entry.resolve())
+        ]
+        return sorted(
+            covers,
+            key=lambda path: (_COVER_FILE_NAMES[path.name.lower()], path.name),
+        )
 
     def _get_root_directory(self) -> Ref | None:
         if not self._media_dirs:

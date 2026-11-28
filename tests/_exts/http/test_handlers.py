@@ -1,3 +1,5 @@
+import json
+import urllib.parse
 from pathlib import Path
 from unittest import mock
 
@@ -6,8 +8,10 @@ import tornado.httpclient
 import tornado.web
 import tornado.websocket
 
+from mopidy import exceptions
 from mopidy._exts.http import handlers
 from mopidy._lib.version import get_version
+from mopidy.models import Image, ImageData
 
 
 @pytest.fixture
@@ -328,3 +332,170 @@ def test_check_origin_different_port_blocked(headers, allowed):
 def test_check_origin_extra_origin_allowed(headers, allowed):
     allowed.add("other:6680")
     assert handlers.check_origin("http://other:6680", headers, allowed)
+
+
+PNG = b"\x89PNG\r\n\x1a\npng"
+
+
+@pytest.fixture
+def image_core():
+    core = mock.Mock()
+    core.library.get_image_data.return_value.get.return_value = ImageData(
+        data=PNG,
+        mime_type="image/png",
+    )
+    return core
+
+
+@pytest.fixture
+def image_server(tornado_server, image_core):
+    app = tornado.web.Application(
+        [(r"/image", handlers.ImageHandler, {"core": image_core})],
+    )
+    return tornado_server(app)
+
+
+def image_path(uri, image_uri, path="/image"):
+    return f"{path}?" + urllib.parse.urlencode({"uri": uri, "image_uri": image_uri})
+
+
+def test_image_handler_serves_image(image_server, image_core):
+    response = image_server.fetch(image_path("file:///a.mp3", "file:///cover.png"))
+
+    assert response.code == 200
+    assert response.body == PNG
+    assert response.headers["Content-Type"] == "image/png"
+    assert response.headers["X-Content-Type-Options"] == "nosniff"
+    assert "sandbox" in response.headers["Content-Security-Policy"]
+    assert response.headers["Cache-Control"] == "private, max-age=900"
+    assert response.headers["X-Mopidy-Version"] == get_version()
+    assert "Etag" in response.headers
+    image_core.library.get_image_data.assert_called_once_with(
+        "file:///a.mp3",
+        "file:///cover.png",
+    )
+
+
+def test_image_handler_revalidates_with_etag(image_server):
+    path = image_path("file:///a.mp3", "file:///cover.png")
+    etag = image_server.fetch(path).headers["Etag"]
+
+    response = image_server.fetch(
+        path,
+        headers={"If-None-Match": etag},
+        raise_error=False,
+    )
+
+    assert response.code == 304
+
+
+def test_image_handler_returns_404_for_unknown_image(image_server, image_core):
+    image_core.library.get_image_data.return_value.get.return_value = None
+
+    response = image_server.fetch(
+        image_path("file:///a.mp3", "file:///etc/passwd"),
+        raise_error=False,
+    )
+
+    assert response.code == 404
+
+
+def test_image_handler_returns_400_for_invalid_uri(image_server, image_core):
+    image_core.library.get_image_data.return_value.get.side_effect = (
+        exceptions.ValidationError("bad uri")
+    )
+
+    response = image_server.fetch(image_path("no-scheme", "x"), raise_error=False)
+
+    assert response.code == 400
+
+
+def test_image_handler_returns_400_for_missing_arguments(image_server, image_core):
+    response = image_server.fetch("/image?uri=file:///a.mp3", raise_error=False)
+
+    assert response.code == 400
+    image_core.library.get_image_data.assert_not_called()
+
+
+@pytest.mark.parametrize("mime_type", [None, "text/html", "application/javascript"])
+def test_image_handler_does_not_serve_other_content_types(
+    image_server, image_core, mime_type
+):
+    image_core.library.get_image_data.return_value.get.return_value = ImageData(
+        data=b"<script>alert(1)</script>",
+        mime_type=mime_type,
+    )
+
+    response = image_server.fetch(image_path("file:///a.mp3", "file:///cover.png"))
+
+    assert response.headers["Content-Type"] == "application/octet-stream"
+
+
+def test_get_browser_images_rewrites_uris_a_browser_cannot_load():
+    core = mock.Mock()
+    core.library.get_images.return_value.get.return_value = {
+        "file:///a.mp3": (
+            Image(uri="file:///music/cover.jpg", width=500),
+            Image(uri="webdav:cover.png"),
+        ),
+    }
+
+    result = handlers.get_browser_images(core, ["file:///a.mp3"])
+
+    assert result == {
+        "file:///a.mp3": (
+            Image(
+                uri=image_path(
+                    "file:///a.mp3", "file:///music/cover.jpg", "/mopidy/image"
+                ),
+                width=500,
+            ),
+            Image(
+                uri=image_path("file:///a.mp3", "webdav:cover.png", "/mopidy/image"),
+            ),
+        ),
+    }
+    core.library.get_images.assert_called_once_with(["file:///a.mp3"])
+
+
+@pytest.mark.parametrize(
+    "image_uri",
+    [
+        "https://example.com/a.jpg",
+        "http://example.com/a.jpg",
+        "/local/abc.jpg",
+        "data:image/png;base64,iVBORw0KGgo=",
+    ],
+)
+def test_get_browser_images_keeps_uris_a_browser_can_load(image_uri):
+    core = mock.Mock()
+    core.library.get_images.return_value.get.return_value = {
+        "dummy:a": (Image(uri=image_uri),),
+    }
+
+    result = handlers.get_browser_images(core, ["dummy:a"])
+
+    assert result == {"dummy:a": (Image(uri=image_uri),)}
+
+
+def test_jsonrpc_get_images_returns_browser_images():
+    core = mock.Mock()
+    core.library.get_images.return_value.get.return_value = {
+        "file:///a.mp3": (Image(uri="file:///cover.jpg"),),
+    }
+    wrapper = handlers.make_jsonrpc_wrapper(core)
+
+    response = wrapper.handle_json(
+        json.dumps(
+            {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "core.library.get_images",
+                "params": {"uris": ["file:///a.mp3"]},
+            }
+        )
+    )
+
+    assert response is not None
+    [image] = json.loads(response)["result"]["file:///a.mp3"]
+    assert image["uri"].startswith("/mopidy/image?")
